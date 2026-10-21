@@ -110,6 +110,5 @@ colour-filter and blur pixel checks always run, and fail if it draws nothing).
 ## Conventions
 
 - Commit subjects are plain and imperative; an agent's commit ends with its own `Co-Authored-By:` trailer.
-- The ledger, the research and the guest bridge are in Russian (`docs/reference/swiftui/ledger.md`,
-  `docs/explanation/swiftui/research.md`, `docs/explanation/swiftui/guest-bridge.md`); the front README and this guide are
-  in English.
+- The docs are in English, the ledger included (`docs/reference/swiftui/ledger.md`): it is matched by the text of
+  `frameworks/SwiftUI/tools/coverage.lua`, so a change to one of its sentences is a change to the tool too.

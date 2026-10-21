@@ -1,74 +1,57 @@
 # SwiftUI
 
-Своя реализация SwiftUI для iOS 6 armv7 поверх UIKit шестой системы, часть revenant рядом с тулчейном и эмулятором.
+Our own SwiftUI for iOS 6 armv7, on top of the sixth system's UIKit. It is part of revenant, next to the toolchain and the emulator.
 
-**Это не SwiftUI Apple.** Ни строки кода Apple здесь нет и не будет: у настоящего SwiftUI нет исходников,
-он существует только как бинарник для arm64, и на iOS 6 он не переносится (разбор и цифры — в `research.md`).
+**This is not Apple's SwiftUI.** No line of Apple's code is here, and none will be: the real SwiftUI has no sources. It exists only as an arm64 binary, and it does not port to iOS 6 (the analysis and the figures are in `research.md`).
 
-**Модуль называется `SwiftUI`, а не SwiftUI, и это обязательно.** От имени модуля зависят манглы всех символов,
-которые приложение берёт у SwiftUI: с другим именем приложение не собралось бы без правки `import SwiftUI`
-и не связалось бы как гостевое для рекомпилятора. SwiftUI — имя проекта, каталога, целей и документов.
+**The module is called `SwiftUI`, not SwiftUI, and this is required.** The manglings of every symbol that an app takes from SwiftUI depend on the module's name. With another name, an app would not build without changing `import SwiftUI`, and it would not link as a guest for the recompiler. SwiftUI is the name of the project, its directory, its targets and its documents.
 
-Совместимость двух видов:
-- **по исходникам** — приложение на обычном синтаксисе SwiftUI компилируется против этого модуля без правок текста;
-- **по поверхности символов** для гостевой сборки рекомпилятора — модуль, собранный с библиотечной эволюцией,
-  удовлетворяет все 64 символа SwiftUI, которые берёт подопытное приложение Apple-сборки (`bridge.md`).
-  Раскладки внутренних типов и точки входа графа у нас свои.
+Compatibility comes in two kinds:
+- **by source**: an app written in ordinary SwiftUI syntax compiles against this module without changes to its text;
+- **by symbol surface** for the recompiler's guest build: the module, built with library evolution, satisfies all 64 SwiftUI symbols that the test app of Apple's build takes (`guest-bridge.md`). Our internal type layouts and our graph entry points are our own.
 
-## Состояние
+## Status
 
-Прототип. Достаточно для экрана со списком, навигацией, состоянием и наблюдаемой моделью;
-не достаточно для произвольного чужого кода.
+A prototype. It is enough for a screen with a list, navigation, state and an observed model. It is not enough for arbitrary code written by others.
 
-### Что поддержано, что игнорируется, чего нет
+### What is supported, what is ignored, what is missing
 
-Счёт ведётся скриптом `coverage.lua` по интерфейсам SwiftUI и SwiftUICore из SDK 26.2, которые перечисляет `../tools/apple-names.lua types` (1344 публичных типа и typealias). Список модификаторов `View` (311) остаётся ручным: он заведён при первом коммите и с интерфейса 16.4 не менялся.
-На сегодня: **664 типов** и **311 модификаторов**, из них **206 действуют**, 0 заглушки (пишут в журнал), 105 объявлены и игнорируются.
-Из того, что Apple объявляет доступным на iOS: **646 из 1208 типов** и **289 из 289 модификаторов**, из них **202 действуют**, 0 заглушки, 87 игнорируются
-(остальное в интерфейсе помечено `@available(iOS, unavailable)` — это macOS, tvOS и watchOS; список типов и список модификаторов строит `frameworks/SwiftUI/tools/apple-names.lua`, его `types` и `modifiers`).
+The count is kept by the script `coverage.lua`, over the SwiftUI and SwiftUICore interfaces of SDK 26.2 that `../tools/apple-names.lua types` lists (1344 public types and typealiases). The list of `View` modifiers (311) remains manual: it was started in the first commit and has not changed since the 16.4 interface.
+As of today: **664 types** and **311 modifiers**, of which **206 work**, 0 stubs (they write to the log), 105 declared and ignored.
+Of what Apple declares available on iOS: **646 of 1208 types** and **289 of 289 modifiers**, of which **202 work**, 0 stubs, 87 ignored.
+(The rest of the interface is marked `@available(iOS, unavailable)`, which means macOS, tvOS and watchOS. The list of types and the list of modifiers are built by `frameworks/SwiftUI/tools/apple-names.lua`, its `types` and `modifiers` commands.)
 
-**Что эти числа не говорят.** Счёт выше — по *именам* типов и модификаторов. По декларациям картина строже:
-типизированный разбор `swift-api-digester` (`frameworks/SwiftUI/tools/api-surface.lua`, колонки отчёта — `frameworks/SwiftUI/tools/api-diff.lua`)
-сравнивает интерфейс Apple SwiftUI для iOS 16.4 с нашим модулем по подписи каждой декларации и на 19.09 находит
-**из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `frameworks/SwiftUI/tests/data/api/not-applicable.txt`** (вызов, который
-компилируется у нас благодаря значениям параметров по умолчанию, отсутствующим не считается). Заметная часть первых —
-то, чему в iOS 6 нечему соответствовать (Widgets, документы, окна, `UIHostingConfiguration`, роторы доступности);
-остальное — работа, которая ещё не сделана: перегрузки вроде `Stepper`, `TextField` с `prompt:`/`axis:`, 48 ключей
-`EnvironmentValues`, 28 случаев `BlendMode` вместо наших семи, `Table` целиком. Этот список — рабочая очередь;
-закрытый перечень «нечему соответствовать» с причинами будет вестись рядом, и сборка будет падать, если
-отсутствующее не в нём и не в очереди.
+**What these numbers do not say.** The count above is by the *names* of types and modifiers. The declarations give a stricter picture. The typed analysis by `swift-api-digester` (`frameworks/SwiftUI/tools/api-surface.lua`; the report's columns are in `frameworks/SwiftUI/tools/api-diff.lua`) compares Apple's SwiftUI interface for iOS 16.4 with our module by the signature of each declaration. As of 19.09 it finds that **of 4740 Apple declarations, 3233 (68%) are called as in Apple, 314 (7%) exist but with another signature, 927 (20%) are missing and still to be written, and 266 (6%) are types that cannot exist on iOS 6 (scenes, widgets, documents, rotors, AttributedString…). The closed list with the reasons is `frameworks/SwiftUI/tests/data/api/not-applicable.txt`.** A call that compiles with us because of default parameter values is not counted as missing. A large part of the first group has nothing to match on iOS 6 (widgets, documents, windows, `UIHostingConfiguration`, accessibility rotors). The rest is work not yet done: overloads such as `Stepper`, `TextField` with `prompt:` and `axis:`, the 48 keys of `EnvironmentValues`, 28 cases of `BlendMode` instead of our seven, and `Table` as a whole. This list is the work queue. A closed list of "nothing to match" with reasons is kept next to it, and the build fails if a missing item is in neither that list nor the queue.
 
-**Действуют** (видны на экране и в тестах):
+**Works** (visible on screen and in the tests):
 
-| Область | Что есть |
+| Area | What is there |
 |---|---|
-| Описание | `View`, `ViewBuilder` (вариадический), `if`/`else`, `TupleView`, `Group`, `AnyView`, `EmptyView`, `ViewModifier`, `ModifiedContent` |
-| Состояние | `@State`, `@Binding`, `@ObservedObject`, `@StateObject`, `@EnvironmentObject`, `@Environment` по ключам, `@AppStorage`, `@FocusState`, `@GestureState`, `ObservableObject`/`@Published`; стандартные ключи окружения: `colorScheme`, `locale`, `calendar`, `timeZone`, `isEnabled`, `layoutDirection`, `sizeCategory`, `controlSize`, `horizontalSizeClass`, `displayScale`, `openURL`, `dismiss`, `editMode`, `font`, `multilineTextAlignment`, `dynamicTypeSize` (категория задаёт размер текста всего поддерева — шрифта заголовка строки, плашки, текста в поле и в `Canvas` тоже; берётся коэффициент из таблицы Dynamic Type для основного шрифта: 14, 15, 16, 17, 19, 21 и 23 пункта против 17, то есть 0.82…1.35. Таблица своя для каждого стиля текста, а здесь один коэффициент на все стили), `redactionReasons`, `isSearching`, `dynamicTypeSize` (категория задаёт размер текста всего поддерева — шрифта заголовка строки, плашки, текста в поле и в `Canvas` тоже; берётся коэффициент из таблицы Dynamic Type для основного шрифта: 14, 15, 16, 17, 19, 21 и 23 пункта против 17, то есть 0.82…1.35. Таблица Apple своя для каждого стиля текста, а здесь один коэффициент на все стили — в iOS 6 у шрифтов нет метрик, которые бы масштабировали подпись и заголовок по-разному) |
-| Представления | `Text` (шрифт, цвет, начертание, подчёркивание, зачёркивание, регистр, склейка `+`, даты), `Button`, `Toggle`, `TextField`, `SecureField`, `TextEditor`, `Slider`, `Stepper`, `ProgressView` (с подписью и текущим значением, по интервалу времени с `DefaultDateProgressLabel`), `Gauge`, `Picker` (сегменты), `DatePicker`, `MultiDatePicker` (сетка месяца на нашем `Grid`), `Menu`, `Link`, `ShareLink` (`UIActivityViewController`), `Label`, `GroupBox`, `ControlGroup`, `DisclosureGroup`, `Image` (с `resizable`, `aspectRatio`), `AsyncImage` (`NSURLConnection`), `Color`, `Divider`, `Spacer`, `ForEach` с идентичностью и по привязке (`ForEach($items)`, `List($items)`, `editActions:` удаляют и двигают через привязку), `TimelineView`, `Canvas` с настоящим `GraphicsContext` (градиентные заливки, текст и картинки через `resolve`, символы, `clip(options: .inverse)`, `clipToLayer`, `blendMode`, фильтр тени; размытие и цветовые фильтры CoreGraphics iOS 6 не умеет — пишут в журнал), `AttributeScopes.SwiftUIAttributes` и восемь его атрибутов (`font`, `foregroundColor`, `backgroundColor`, `strikethroughStyle`, `underlineStyle`, `kern`, `tracking`, `baselineOffset`): имена и типы значений как в интерфейсе 26.2, и ключ `NSAttributedString` этого релиза, под который атрибут пишется |
-| Фигуры | `Shape`, `Path`, `Rectangle`, `RoundedRectangle`, `Circle`, `Ellipse`, `Capsule`, `AnyShape`, `fill`/`stroke`/`strokeBorder` со `ShapeStyle` и полным `StrokeStyle` (пунктир, фаза, концы, стыки), заливка и обводка фигур градиентом, преобразования (`offset`, `scale`, `rotation`, `transform`), `inset(by:)`, `Gradient`, `LinearGradient`, `RadialGradient`, `EllipticalGradient`, `AngularGradient` (секторами — конического градиента в iOS 6 нет), `AnyGradient` и `Color.gradient`, `AnyShapeStyle`, иерархические стили `.primary`…`.quaternary`, `.selection`, `.tint`, `Material` (полупрозрачная заливка без размытия, пишет в журнал), `ShadowStyle` (`.drop` — тень слоя; `.inner` пишет в журнал) |
-| Раскладка | `VStack`, `HStack`, `ZStack`, `HStackLayout`, `VStackLayout`, `ZStackLayout` (и через `AnyLayout`), `LazyVStack`, `LazyHStack`, `LazyVGrid`, `LazyHGrid`, `Grid` и `GridRow` с выравниванием колонок по всем строкам, строками на всю ширину, `gridCellColumns`, `gridCellAnchor`, `gridCellUnsizedAxes`, `gridColumnAlignment`, `ScrollView`, `ScrollViewReader` со `scrollTo(id, anchor:)` в `ScrollView` и в `List`, `GeometryReader` с `frame(in:)` в `.local`, `.global` и именованном пространстве (`coordinateSpace(name:)`), `ViewThatFits`, `padding` по сторонам, полный `frame`, `fixedSize`, `layoutPriority`, `aspectRatio`, `alignmentGuide` и свои выравнивания через `AlignmentID`, `margins`, `baselineOffset`, протокол `Layout` со своими раскладками (`ProposedViewSize`, `LayoutSubviews`, `AnyLayout`, `LayoutValueKey` и `layoutValue`) |
-| Списки | `List` с выбором (`selection:` одной строки и множеством), `Table` (на iPhone — как у Apple: одна первая колонка списком; `TableColumn`, строители колонок и строк, `tableStyle`), `Form`, `Section` с заголовком и футером (`headerProminence(.increased)` — свой крупный заголовок секции), `listItemTint`, удаление и перемещение строк (`remove(atOffsets:)`, `move(fromOffsets:toOffset:)`), `deleteDisabled`, `moveDisabled`, `swipeActions` (одно действие — кнопка свайпа с его названием; несколько — кнопка «More» и `UIActionSheet` со всеми), `Button(role:)`, `EditButton`, `refreshable`, `searchable` (в списке — в шапке таблицы, у прочего содержимого — строка поиска над ним), `searchScopes` (кнопки области `UISearchBar`), `searchSuggestions` и `searchCompletion` (пока поле поиска активно, подсказки — своим списком поверх таблицы или вместо содержимого; строка с `searchCompletion` по нажатию подставляет текст), `isSearching` в окружении, `buttonStyle` с `PrimitiveButtonStyle` и `Button(configuration)`, фон и отступы строки, `listRowSeparator` и `listRowSeparatorTint` (строка, которая прячет разделитель или красит его, рисует линию сама — там, где `UITableView` рисует свою: точкой у нижнего края строки), кэш ячеек |
-| Навигация | `NavigationView`, `NavigationLink` (касанием вне списка тоже, `isActive`, `tag`/`selection`), `NavigationSplitView` (на iPhone — стек: выбор строки в `List(selection:)` открывает следующую колонку, возврат снимает выбор), `OutlineGroup` и `List(_:children:)`, `navigationTitle`, `navigationBarItems`, `toolbar`, `TabView` с `tabItem` и `badge`, `TabView` со стилем `.page` (листание `UIScrollView` и точки `UIPageControl`, `indexViewStyle`), `navigationBarHidden` |
-| Система | `onOpenURL` (делегат приложения передаёт URL обработчикам на экране), `statusBarHidden` и старое `statusBar(hidden:)` (`setStatusBarHidden`), `toolbarColorScheme` для панели навигации (`UIBarStyleBlack`; у `UITabBar` iOS 6 стиля нет — пишет в журнал), `submitLabel` (`returnKeyType`; `.continue` пишет в журнал — такой клавиши в iOS 6 нет), `submitScope(.block)` у поля на несколько строк (клавиша Return выполняет отправку, а не добавляет строку — `textView(_:shouldChangeTextIn:replacementText:)`), `badge` (у вкладки — `badgeValue`, у строки списка — плашка справа), `scrollContentBackground(.hidden)`, `redacted`/`unredacted`/`privacySensitive` (заглушки-плашки вместо текста и картинок), `help` (как подсказка доступности, как у Apple на iOS), старое написание `accessibility(label:hint:value:hidden:identifier:addTraits:removeTraits:)` |
-| Время | `TimelineView` по расписаниям Apple (`periodic`, `everyMinute`, `animation` с `minimumInterval` и `paused`, `explicit`) и свои `TimelineSchedule` через `entries(from:mode:)` |
-| Модальность | `.sheet` (в том числе `sheet(item:)`), `.fullScreenCover`, `.alert` (родной `UIAlertView`), `.actionSheet`, `.confirmationDialog`, `contextMenu`, `presentationMode`, `presentationBackground` (экран модального экрана красится тем цветом, а не белым, каким его красит система) |
-| Оформление | фон и накладка стилем (`.background(.ultraThinMaterial)`, `.background(.blue, in: Capsule())`, `.background(in:)` с `backgroundStyle`), `foregroundStyle` со `ShapeStyle`, `containerShape` для `ContainerRelativeShape`, `contentTransition` (смена текста наплывом `CATransition`), `projectionEffect` (`CATransform3D`), `compositingGroup` (растеризация слоя — так в iOS 6 получается групповая прозрачность), `buttonBorderShape` для `bordered`/`borderedProminent`, `grayscale`, `saturation`, `brightness`, `contrast`, `hueRotation`, `colorInvert`, `colorMultiply`, `luminanceToAlpha` и `blur` (Core Image поверх картинки, в которую нарисован вид; картинка кладётся поверх содержимого и касаний не перехватывает, так что отфильтрованная кнопка остаётся кнопкой), `opacity`, `cornerRadius`, `border`, `shadow`, `clipped`, `clipShape`, `offset`, `rotationEffect`, `scaleEffect`, `overlay`, `background` видом, `hidden`, `zIndex`, `drawingGroup`, `redacted` |
-| Жесты | Движок с типизированными событиями: `TapGesture`, `SpatialTapGesture`, `LongPressGesture` (нажатие с момента касания, а не через `minimumDuration`), `DragGesture` (с `minimumDistance` и `coordinateSpace`), `MagnificationGesture`, `RotationGesture`; `onChanged`, `onEnded`, `map`, `updating` с `@GestureState` (значение сбрасывается, когда жест кончился или отменён), `simultaneously`, `sequenced` (второй жест ждёт первого), `exclusively` (второй ждёт, пока не откажет первый), `AnyGesture`, жесты, собранные через `body`; `gesture`, `simultaneousGesture`, `highPriorityGesture` с `including:`; `onTapGesture`, `onLongPressGesture` с `onPressingChanged`; `contentShape` (форма, в которой жест принимает касание) |
-| Анимация | `Keyframes` и `KeyframeTrack` с `KeyframeTrackContent`, `KeyframesBuilder`, `CubicKeyframe`, `LinearKeyframe`, `SpringKeyframe`, `MoveKeyframe`, `KeyframeAnimator` и `PhaseAnimator` (вид показывает значение, которое ведёт по кадрам его трек, фаза живёт столько, сколько длится её анимация), `CustomAnimation` с `AnimationContext` и `AnimationState`, `Animation.custom` (`animate`, `velocity`, `shouldMerge`, `base`), `Transaction.addAnimationCompletion(criteria:_:)` (замыкание выполняется, когда анимация транзакции кончилась), `Animation` (`.linear`, `.easeIn`, `.easeOut`, `.easeInOut`, `.spring` — по `response:dampingFraction:`, по `duration:bounce:` и по `Spring`, `.interactiveSpring`, `.interpolatingSpring`, `.smooth`, `.snappy`, `.bouncy`, `timingCurve(_:duration:)` для `UnitCurve` и для четырёх точек, `delay`, `speed`, `repeatCount`, `repeatForever`, `logicallyComplete`), `Spring` (все четыре способа построить, `value`/`velocity`/`force`/`update` для `VectorArithmetic` и для `Animatable`, `settlingDuration`, `smooth`/`snappy`/`bouncy`), `UnitCurve` (кривые Безье и три круговые, `value`, `velocity`, `inverse`, `bezier(startControlPoint:endControlPoint:)`), `withAnimation`, `.animation` поверх `UIView.animate`, `repeatForever`, `repeatCount` (с `autoreverses`), `transition`, `matchedGeometryEffect` с `@Namespace` (новый вид едет из места старого); **данные `Animatable` интерполируются кадр за кадром** у своих `Shape` (`animatableData`), `GeometryEffect`, `ViewModifier & Animatable` и `Layout`; у встроенных — `trim`, углы `RoundedRectangle`, `offset`, `scale`, `rotation` фигур |
-| Геометрия | `Path` (`forEach`, `addLines`, `addRects`, `addRelativeArc`, `strokedPath`, `trimmedPath`), `Shape.trim`, `Shape.size`, `Shape.sizeThatFits` (круг берёт меньшую сторону), `GeometryEffect` (переход слоя по `ProjectionTransform`, начало координат в левом верхнем углу, как у Apple), `ProjectionTransform` (`concatenating`, `inverted`, `isAffine`) |
-| Анимация | `Animation`, `withAnimation`, `.animation` поверх `UIView.animate`, `transition`, `matchedGeometryEffect` с `@Namespace` (новый вид едет из места старого) |
-| Core Data | `@FetchRequest` и `SectionedFetchRequest` поверх `NSFetchedResultsController` (перечитывание при сохранении контекста, изменение предиката и сортировки через `$request`), `FetchedResults`, `SectionedFetchResults`, `\.managedObjectContext` |
-| Данные и события | `onAppear`, `onDisappear`, `onChange`, `onReceive`, `.id`, `tag`, `PreferenceKey` с `onPreferenceChange`, `transformPreference`, якоря (`Anchor`, `anchorPreference`, `transformAnchorPreference`, `GeometryProxy[anchor]`), `overlayPreferenceValue`/`backgroundPreferenceValue`, `@FocusState` с `.focused`, `Transaction`/`withTransaction`, `EquatableView` |
-| Своё | `DynamicProperty` (свои обёртки свойств с вложенными `@State` и `update()`), `PreviewProvider` (собирается, в приложении не исполняется — как у Apple) |
-| Мост к UIKit | `UIViewRepresentable`, `UIViewControllerRepresentable` с координатором и контекстом |
-| Стили | `ButtonStyle` и `ToggleStyle` с настоящим `makeBody`; у `ButtonStyle` живое `isPressed` в конфигурации, у примитивных стилей нажатие приходит аргументом `makeBody(configuration:pressed:)` (см. ниже) (готовые `automatic`, `plain`, `bordered`, `borderedProminent`, `switch`, `button`), `TextFieldStyle`, `ListStyle` (plain/grouped/insetGrouped), `PickerStyle` (сегменты, колесо `UIPickerView` с `defaultWheelPickerItemHeight`, меню `UIActionSheet`, `.navigationLink` — строка с текущим значением, открывающая список выбора, `.inline` — варианты строками с галочкой), `LabelStyle`, `ProgressViewStyle`, `MenuStyle`, `DisclosureGroupStyle`, `GroupBoxStyle`, `LabeledContentStyle`, `ControlGroupStyle` (в том числе `.menu`), `GaugeStyle` (линейный и круговой `accessoryCircular`), `FormStyle` — все со своими `makeBody` и конфигурацией, `navigationViewStyle` (на iPhone любой стиль — стек, как и у Apple), `datePickerStyle(.wheel)` |
-| Локализация | `LocalizedStringKey` ищет строку в бандле (`NSLocalizedString`), интерполяция подставляется как есть |
-| Доступность | `accessibilityAdjustableAction` и `accessibilityScrollAction` (`accessibilityIncrement`/`Decrement`/`accessibilityScroll` у своего вида-обёртки), `accessibilityActivationPoint`, `accessibilityLabel`, `Value`, `Hint`, `Identifier`, `AddTraits`, `RemoveTraits`, `Element`, `Hidden`, `Heading` через `UIAccessibility` |
-| Приложение | `App`, `Scene`, `WindowGroup`, `@main`, `UIHostingController` (с `sizingOptions`), живой `scenePhase` (`.active`/`.inactive`/`.background` от делегата приложения), `SceneStorage`, `Commands` и `.commands` (собираются; меню и клавиатурных команд в iOS 6 нет — пишет в журнал), `ToolbarContent` с `ToolbarContentBuilder` |
+| Description | `View`, `ViewBuilder` (variadic), `if`/`else`, `TupleView`, `Group`, `AnyView`, `EmptyView`, `ViewModifier`, `ModifiedContent` |
+| State | `@State`, `@Binding`, `@ObservedObject`, `@StateObject`, `@EnvironmentObject`, `@Environment` by key, `@AppStorage`, `@FocusState`, `@GestureState`, `ObservableObject`/`@Published`; the standard environment keys: `colorScheme`, `locale`, `calendar`, `timeZone`, `isEnabled`, `layoutDirection`, `sizeCategory`, `controlSize`, `horizontalSizeClass`, `displayScale`, `openURL`, `dismiss`, `editMode`, `font`, `multilineTextAlignment`, `dynamicTypeSize` (the category sets the text size of the whole subtree: the title font of a row, a badge, the text in a field and in `Canvas` too; the factor comes from the Dynamic Type table for the body font: 14, 15, 16, 17, 19, 21 and 23 points against 17, that is 0.82 to 1.35. Apple's table is its own for each text style, and here there is one factor for all styles, because on iOS 6 fonts have no metrics that scale a caption and a title differently), `redactionReasons`, `isSearching`, `dynamicTypeSize` (the same entry, with the explanation above) |
+| Views | `Text` (font, colour, weight, underline, strikethrough, case, the `+` concatenation, dates), `Button`, `Toggle`, `TextField`, `SecureField`, `TextEditor`, `Slider`, `Stepper`, `ProgressView` (with a label and a current value, over a time interval with `DefaultDateProgressLabel`), `Gauge`, `Picker` (segments), `DatePicker`, `MultiDatePicker` (a month grid on our `Grid`), `Menu`, `Link`, `ShareLink` (`UIActivityViewController`), `Label`, `GroupBox`, `ControlGroup`, `DisclosureGroup`, `Image` (with `resizable` and `aspectRatio`), `AsyncImage` (`NSURLConnection`), `Color`, `Divider`, `Spacer`, `ForEach` with identity and by binding (`ForEach($items)`, `List($items)`; `editActions:` delete and move through the binding), `TimelineView`, `Canvas` with a real `GraphicsContext` (gradient fills, text and images through `resolve`, symbols, `clip(options: .inverse)`, `clipToLayer`, `blendMode`, the shadow filter; iOS 6 CoreGraphics cannot blur or apply colour filters, and those write to the log), `AttributeScopes.SwiftUIAttributes` and its eight attributes (`font`, `foregroundColor`, `backgroundColor`, `strikethroughStyle`, `underlineStyle`, `kern`, `tracking`, `baselineOffset`): the names and value types as in the 26.2 interface, and the `NSAttributedString` key of that release that the attribute is written under |
+| Shapes | `Shape`, `Path`, `Rectangle`, `RoundedRectangle`, `Circle`, `Ellipse`, `Capsule`, `AnyShape`, `fill`, `stroke` and `strokeBorder` with `ShapeStyle` and the full `StrokeStyle` (dashes, phase, caps, joins); shape fills and strokes with a gradient; transforms (`offset`, `scale`, `rotation`, `transform`), `inset(by:)`, `Gradient`, `LinearGradient`, `RadialGradient`, `EllipticalGradient`, `AngularGradient` (as sectors: iOS 6 has no conic gradient), `AnyGradient` and `Color.gradient`, `AnyShapeStyle`, the hierarchical styles `.primary` through `.quaternary`, `.selection`, `.tint`, `Material` (a semi-transparent fill without blur; it writes to the log), `ShadowStyle` (`.drop` is the shadow of the layer; `.inner` writes to the log) |
+| Layout | `VStack`, `HStack`, `ZStack`, `HStackLayout`, `VStackLayout`, `ZStackLayout` (and through `AnyLayout`), `LazyVStack`, `LazyHStack`, `LazyVGrid`, `LazyHGrid`, `Grid` and `GridRow` with column alignment across all rows, full-width rows, `gridCellColumns`, `gridCellAnchor`, `gridCellUnsizedAxes`, `gridColumnAlignment`; `ScrollView`; `ScrollViewReader` with `scrollTo(id, anchor:)` in `ScrollView` and in `List`; `GeometryReader` with `frame(in:)` in `.local`, `.global` and a named space (`coordinateSpace(name:)`); `ViewThatFits`; `padding` by side; the full `frame`; `fixedSize`; `layoutPriority`; `aspectRatio`; `alignmentGuide` and our own alignments through `AlignmentID`; `margins`; `baselineOffset`; the `Layout` protocol with our own layouts (`ProposedViewSize`, `LayoutSubviews`, `AnyLayout`, `LayoutValueKey` and `layoutValue`) |
+| Lists | `List` with selection (`selection:` for one row and for a set), `Table` (on iPhone as in Apple: its first column only, as a list; `TableColumn`, column and row builders, `tableStyle`), `Form`, `Section` with a header and a footer (`headerProminence(.increased)`, our own large section header), `listItemTint`, deleting and moving rows (`remove(atOffsets:)`, `move(fromOffsets:toOffset:)`), `deleteDisabled`, `moveDisabled`, `swipeActions` (one action: a swipe button with its title; several: a "More" button and a `UIActionSheet` with all of them), `Button(role:)`, `EditButton`, `refreshable`, `searchable` (in a list it goes in the table's header; for other content it is a search bar above it), `searchScopes` (scope buttons of the `UISearchBar`), `searchSuggestions` and `searchCompletion` (while the search field is active, the suggestions are our own list over the table or in place of the content; a row with `searchCompletion` fills in its text when tapped), `isSearching` in the environment, `buttonStyle` with `PrimitiveButtonStyle` and `Button(configuration)`, row background and insets, `listRowSeparator` and `listRowSeparatorTint` (a row that hides its separator, or tints it, draws the line itself, where `UITableView` draws its own: as a dot at the row's bottom edge), a cell cache |
+| Navigation | `NavigationView`, `NavigationLink` (also when touched outside a list; `isActive`, `tag`/`selection`), `NavigationSplitView` (on iPhone it is a stack: choosing a row in `List(selection:)` opens the next column, and going back clears the selection), `OutlineGroup` and `List(_:children:)`, `navigationTitle`, `navigationBarItems`, `toolbar`, `TabView` with `tabItem` and `badge`, `TabView` with the `.page` style (paging through a `UIScrollView` with the dots of a `UIPageControl`; `indexViewStyle`), `navigationBarHidden` |
+| System | `onOpenURL` (the app delegate passes the URL to the handlers on screen), `statusBarHidden` and the older `statusBar(hidden:)` (`setStatusBarHidden`), `toolbarColorScheme` for the navigation bar (`UIBarStyleBlack`; `UITabBar` has no style in iOS 6, so that writes to the log), `submitLabel` (`returnKeyType`; `.continue` writes to the log, because iOS 6 has no such key), `submitScope(.block)` on a multi-line field (the Return key submits instead of adding a line; `textView(_:shouldChangeTextIn:replacementText:)`), `badge` (on a tab it is `badgeValue`; on a list row it is a badge on the right), `scrollContentBackground(.hidden)`, `redacted`, `unredacted` and `privacySensitive` (placeholder blocks in place of text and pictures), `help` (as an accessibility hint, as Apple does on iOS), and the older spelling `accessibility(label:hint:value:hidden:identifier:addTraits:removeTraits:)` |
+| Time | `TimelineView` with Apple's schedules (`periodic`, `everyMinute`, `animation` with `minimumInterval` and `paused`, `explicit`), and our own `TimelineSchedule` through `entries(from:mode:)` |
+| Modality | `.sheet` (including `sheet(item:)`), `.fullScreenCover`, `.alert` (a native `UIAlertView`), `.actionSheet`, `.confirmationDialog`, `contextMenu`, `presentationMode`, `presentationBackground` (the screen of a modal is painted in that colour, not the white the system paints it) |
+| Appearance | background and overlay by style (`.background(.ultraThinMaterial)`, `.background(.blue, in: Capsule())`, `.background(in:)` with `backgroundStyle`), `foregroundStyle` with `ShapeStyle`, `containerShape` for `ContainerRelativeShape`, `contentTransition` (a text change that slides in with a `CATransition`), `projectionEffect` (`CATransform3D`), `compositingGroup` (rasterising the layer; this is how group opacity comes out on iOS 6), `buttonBorderShape` for `bordered` and `borderedProminent`, `grayscale`, `saturation`, `brightness`, `contrast`, `hueRotation`, `colorInvert`, `colorMultiply`, `luminanceToAlpha` and `blur` (Core Image over the picture that the view is drawn into; the picture is laid over the content and does not take touches, so a filtered button stays a button), `opacity`, `cornerRadius`, `border`, `shadow`, `clipped`, `clipShape`, `offset`, `rotationEffect`, `scaleEffect`, `overlay`, `background` with a view, `hidden`, `zIndex`, `drawingGroup`, `redacted` |
+| Gestures | An engine with typed events: `TapGesture`, `SpatialTapGesture`, `LongPressGesture` (pressing from the moment of touch, not through `minimumDuration`), `DragGesture` (with `minimumDistance` and `coordinateSpace`), `MagnificationGesture`, `RotationGesture`; `onChanged`, `onEnded`, `map`, `updating` with `@GestureState` (the value resets when the gesture ends or is cancelled), `simultaneously`, `sequenced` (the second waits for the first), `exclusively` (the second waits until the first fails), `AnyGesture`, and gestures assembled in a `body`; `gesture`, `simultaneousGesture`, `highPriorityGesture` with `including:`; `onTapGesture`, `onLongPressGesture` with `onPressingChanged`; `contentShape` (the shape within which the gesture takes a touch) |
+| Animation | `Keyframes` and `KeyframeTrack` with `KeyframeTrackContent`, `KeyframesBuilder`, `CubicKeyframe`, `LinearKeyframe`, `SpringKeyframe`, `MoveKeyframe`, `KeyframeAnimator` and `PhaseAnimator` (the view shows the value that its track leads it through frame by frame; a phase lasts as long as its animation); `CustomAnimation` with `AnimationContext` and `AnimationState`; `Animation.custom` (`animate`, `velocity`, `shouldMerge`, `base`); `Transaction.addAnimationCompletion(criteria:_:)` (the closure runs when the transaction's animation has ended); `Animation` (`.linear`, `.easeIn`, `.easeOut`, `.easeInOut`, `.spring` by `response:dampingFraction:`, by `duration:bounce:`, and by `Spring`; `.interactiveSpring`, `.interpolatingSpring`, `.smooth`, `.snappy`, `.bouncy`; `timingCurve(_:duration:)` for a `UnitCurve` and for four points; `delay`, `speed`, `repeatCount`, `repeatForever`, `logicallyComplete`); `Spring` (all four ways to build one; `value`, `velocity`, `force` and `update` for `VectorArithmetic` and for `Animatable`; `settlingDuration`; `smooth`, `snappy`, `bouncy`); `UnitCurve` (Bézier curves and three circular ones; `value`, `velocity`, `inverse`, `bezier(startControlPoint:endControlPoint:)`); `withAnimation`; `.animation` over `UIView.animate`; `repeatForever`; `repeatCount` (with `autoreverses`); `transition`; `matchedGeometryEffect` with `@Namespace` (the new view travels from the place of the old one); **the data of `Animatable` is interpolated frame by frame** in our own `Shape`s (`animatableData`), `GeometryEffect`, `ViewModifier & Animatable` and `Layout`; in the built-in ones: `trim`, the corners of a `RoundedRectangle`, and `offset`, `scale` and `rotation` of shapes |
+| Geometry | `Path` (`forEach`, `addLines`, `addRects`, `addRelativeArc`, `strokedPath`, `trimmedPath`), `Shape.trim`, `Shape.size`, `Shape.sizeThatFits` (a circle takes the smaller side), `GeometryEffect` (a layer's move by a `ProjectionTransform`, with the origin at the top left, as in Apple), `ProjectionTransform` (`concatenating`, `inverted`, `isAffine`) |
+| Animation | `Animation`, `withAnimation`, `.animation` over `UIView.animate`, `transition`, `matchedGeometryEffect` with `@Namespace` (the new view travels from the place of the old one) |
+| Core Data | `@FetchRequest` and `SectionedFetchRequest` over `NSFetchedResultsController` (a re-read when the context is saved; changing the predicate and the sort through `$request`); `FetchedResults`, `SectionedFetchResults`, `\.managedObjectContext` |
+| Data and events | `onAppear`, `onDisappear`, `onChange`, `onReceive`, `.id`, `tag`, `PreferenceKey` with `onPreferenceChange`, `transformPreference`, anchors (`Anchor`, `anchorPreference`, `transformAnchorPreference`, `GeometryProxy[anchor]`), `overlayPreferenceValue` and `backgroundPreferenceValue`, `@FocusState` with `.focused`, `Transaction` and `withTransaction`, `EquatableView` |
+| Our own | `DynamicProperty` (our own property wrappers with nested `@State` and `update()`); `PreviewProvider` (it builds, and does not run in the app, as in Apple) |
+| Bridge to UIKit | `UIViewRepresentable`, `UIViewControllerRepresentable` with a coordinator and a context |
+| Styles | `ButtonStyle` and `ToggleStyle` with a real `makeBody`. A `ButtonStyle` has a live `isPressed` in its configuration; a primitive style gets the press as the argument `makeBody(configuration:pressed:)` (see below). The ready-made styles: `automatic`, `plain`, `bordered`, `borderedProminent`, `switch`, `button`. Also `TextFieldStyle`, `ListStyle` (plain, grouped, insetGrouped), `PickerStyle` (segments; the `UIPickerView` wheel with `defaultWheelPickerItemHeight`; a `UIActionSheet` menu; `.navigationLink`, a row with the current value that opens the list of choices; `.inline`, the choices as rows with a tick), `LabelStyle`, `ProgressViewStyle`, `MenuStyle`, `DisclosureGroupStyle`, `GroupBoxStyle`, `LabeledContentStyle`, `ControlGroupStyle` (including `.menu`), `GaugeStyle` (linear, and circular `accessoryCircular`), and `FormStyle`, all with their own `makeBody` and configuration; `navigationViewStyle` (on iPhone any style is a stack, as in Apple); `datePickerStyle(.wheel)` |
+| Localization | `LocalizedStringKey` looks the string up in the bundle (`NSLocalizedString`); the interpolation is substituted as it is |
+| Accessibility | `accessibilityAdjustableAction` and `accessibilityScrollAction` (`accessibilityIncrement`, `accessibilityDecrement` and `accessibilityScroll` on our own wrapper view); `accessibilityActivationPoint`, `accessibilityLabel`, `Value`, `Hint`, `Identifier`, `AddTraits`, `RemoveTraits`, `Element`, `Hidden`, `Heading`, through `UIAccessibility` |
+| App | `App`, `Scene`, `WindowGroup`, `@main`, `UIHostingController` (with `sizingOptions`), a live `scenePhase` (`.active`, `.inactive`, `.background`, from the app delegate), `SceneStorage`, `Commands` and `.commands` (they build; iOS 6 has no menus or keyboard commands, so they write to the log), `ToolbarContent` with `ToolbarContentBuilder` |
 
-**Объявлены и игнорируются** — то, чему на iOS 6 нечему соответствовать. При первом применении каждый
-печатает одну строку в журнал (`[SwiftUI] margins ignored on iOS 6: a margin takes the space around the view…`), список за прогон
-доступен в `_Unsupported.used` (группа SPI `Probe`: `@_spi(Probe) import SwiftUI`) и печатается тестами:
+**Declared and ignored**: the things that have nothing to match on iOS 6. On first use, each prints one line to the log (`[SwiftUI] margins ignored on iOS 6: a margin takes the space around the view…`). The list for a run is in `_Unsupported.used` (the SPI group `Probe`: `@_spi(Probe) import SwiftUI`), and the tests print it:
 `accessibilityActions`, `accessibilityChartDescriptor`, `accessibilityCustomContent`, `accessibilityIgnoresInvertColors`, `accessibilityInputLabels`,
 `accessibilityLabeledPair`, `accessibilityLinkedGroup`, `accessibilityQuickAction`, `accessibilityRespondsToUserInteraction`, `accessibilityRotor`,
 `accessibilityRotorEntry`, `accessibilityShowsLargeContentViewer`, `accessibilityTextContentType`, `blendMode`, `defaultFocus`,
@@ -87,441 +70,149 @@
 `speechSpellsOutCharacters`, `symbolRenderingMode`, `symbolVariant`, `textContentType`, `textSelection`, `toolbarRole`, `toolbarTitleMenu`,
 `touchBar`, `touchBarCustomizationLabel`, `touchBarItemPresence`, `touchBarItemPrincipal`, `userActivity`
 
-`accessibilityAction` (свои действия доступности появились в iOS 8; VoiceOver в iOS 6 делает двойное касание по самому виду), `Image(systemName:)` с именем вне набора (в iOS 6 нет SF Symbols; ~80 частых символов нарисованы встроенным набором `SymbolGlyphs`, для остальных имя ищется в бандле, затем рисуется квадрат со знаком вопроса), `swipeActions(edge: .leading)` (строка `UITableView` в iOS 6 свайпается только справа), `listRowSeparator(edges:)` и `listRowSeparatorTint(edges:)` (линия рисуется под строкой, а не над ней: таблица iOS 6 не рисует линии над строкой), `datePickerStyle(.compact)` и `datePickerStyle(.graphical)` (у `UIDatePicker` в iOS 6 есть только колесо).
+`accessibilityAction` (custom accessibility actions appeared in iOS 8; in iOS 6 VoiceOver double-taps the view itself). `Image(systemName:)` with a name outside the set (iOS 6 has no SF Symbols; about 80 common symbols are drawn by the built-in `SymbolGlyphs` set; for the rest the name is looked up in the bundle, and then a square with a question mark is drawn). `swipeActions(edge: .leading)` (a `UITableView` row in iOS 6 swipes only from the right). `listRowSeparator(edges:)` and `listRowSeparatorTint(edges:)` (the line is drawn under the row, not over it: the iOS 6 table does not draw a line above a row). `datePickerStyle(.compact)` and `datePickerStyle(.graphical)` (`UIDatePicker` in iOS 6 has only the wheel).
 
-Список закрытый: попасть в него может только то, чему на iOS 6 действительно нечему соответствовать,
-и только вместе со строкой причины. Проверяется сборкой (`coverage.lua --check`): если в исходниках появился
-игнорируемый API без описания в этом разделе или счёт упал ниже `coverage-baseline.json`, сборка падает.
+The list is closed. Only what has truly nothing to match on iOS 6 can be in it, and only together with a line of reasons. The build checks this (`coverage.lua --check`): if the sources gain an ignored API that has no description in this section, or the count falls below `coverage-baseline.json`, the build fails.
 
-**Сделаны частично** — работает основной случай, остаток пишет в журнал `unimplemented` и попадает в отчёт прогона:
-`navigationViewStyle(.columns)`, `NavigationSplitView`, `navigationSplitViewStyle`, `navigationSplitViewColumnWidth` и колонки `Table` на iPad (колонок `UISplitViewController` пока нет, показывается стек),
-`matchedGeometryEffect(isSource: false)` (не-источник не подстраивается под источник).
+**Partly done**: the main case works, and the rest writes `unimplemented` to the log and appears in the run's report:
+`navigationViewStyle(.columns)`, `NavigationSplitView`, `navigationSplitViewStyle`, `navigationSplitViewColumnWidth` and the columns of `Table` on iPad (there are no `UISplitViewController` columns yet, so a stack is shown), and `matchedGeometryEffect(isSource: false)` (a non-source does not adjust to the source).
 
-**Упрощены** — работают, но с расхождением, которого iOS 6 не позволяет избежать; каждое пишет строку в журнал и
-отчёт прогона при первом использовании: `Animation.spring` (и `interactiveSpring`, `interpolatingSpring`, `smooth`,
-`snappy`, `bouncy`: у `UIView` iOS 6 нет пружинной анимации, поэтому свойство `UIView` идёт по ближайшей из
-четырёх кривых времени; анимации самого движка, идущие кадр за кадром, считаются так же, как у Apple: `Animation.spring` и её именованные
-формы — лесенкой шагов в 1/300 с, где конец определяют три проверки, а `interpolatingSpring` — решением пружины, которое
-кончается там, где его кончает Core Animation; всё это сверено с macOS 27, `frameworks/SwiftUI/tests/host/springcmp.swift`), `ShadowStyle.inner` (внутренних теней в CoreAnimation нет — не рисуется),
-`Text.LineStyle.Pattern` (только сплошные подчёркивание и зачёркивание), `Font.leading` (вариантов интерлиньяжа у
-`UIFont` нет — используйте `lineSpacing`), `Font.Design.rounded` (скруглённого системного шрифта нет — обычный),
-`foregroundStyle(gradient)` у текста (текст одного цвета — первый цвет градиента), `submitLabel(.continue)`
-(клавиши Continue нет — показывается Return), `scrollDismissesKeyboard` (на iOS 6 прокрутка клавиатуру не прячет;
-с iOS 7 работает через `keyboardDismissMode`), `toolbarColorScheme(for: .tabBar)` (у `UITabBar` нет стиля панели),
-`TextField(axis: .vertical)` (поле iOS 6 однострочное — текст прокручивается вбок), `Button(role: .destructive)` в `alert` (у `UIAlertView` iOS 6 нет стиля разрушающей кнопки — она выглядит как остальные; в `confirmationDialog` она красная), `ToolbarItemPlacement.keyboard` (у клавиатуры iOS 6 нет своей панели — элемент не показывается), `underline(color:)` и `strikethrough(color:)` (линия под текстом iOS 6 цвета текста), `copyable` и `cuttable` (лист `UIActionSheet`, а не меню правки: меню правки в iOS 6 принадлежит текстовому полю, и у вида, который не поле, своего меню нет), `listRowSeparator(edges:)` и `listRowSeparatorTint(edges:)` (линия рисуется под строкой, а не над ней: таблица iOS 6 не рисует линии над строкой, и просьба только про верхний край — это то, что и так есть), `grayscale`, `saturation`, `brightness`, `contrast`, `hueRotation`, `colorInvert`, `colorMultiply`, `luminanceToAlpha` (Core Image поверх картинки, в которую нарисован вид: картинка делается, когда экран раскладывает содержимое, поэтому анимация внутри отфильтрованного вида не идёт кадр за кадром), `blur(radius:)` (размывается собственный вид, а не то, что за ним: живого размытия фона в iOS 6 нет; при `opaque: false` картинка закрывает содержимое, иначе сквозь мягкие края просвечивало бы неразмытое), `dynamicTypeSize(range)` (диапазон ограничивает размер, которым рисуется текст поддерева; категория размера, которую читает вид внутри, остаётся запрошенной), `exportableToServices` (окно iOS 6 отдаёт то, чему дано, но у него нет завершения, так что приложение не узнаёт, что делиться случилось — это iOS 8), `presentationBackground(style)` (экран красится одним цветом, поэтому стиль, который не цвет, не красит ничего), `contentShape(kind)` (в iOS 6 нет превью перетаскивания и меню, ни эффекта наведения), `accessibility(inputLabels:)` (метки ввода — для Voice Control, которого в iOS 6 нет), `accessibility(selectionIdentifier:)` (идентификаторы выбора — для роторов, которых в iOS 6 нет), `toolbar(_:for: .tabBar)` (панель вкладок iOS 6 не скрыть для одного экрана), `Text.baselineOffset` (у атрибутированного текста iOS 6 нет смещения базовой линии — текст остаётся на ней), `Image(variableValue:)` (переменные символы — это SF Symbols, которых в iOS 6 нет; картинка рисуется целиком), `Font.smallCaps` (у шрифтов iOS 6 нет капителей — текст остаётся как есть), `Menu(primaryAction:)` (меню в iOS 6 открывается касанием, основное действие не выполняется), `searchable(tokens:)` (у поля поиска iOS 6 нет токенов — они показываются рядом фишек над полем), `listRowBackground(view)` (у строки UITableView за ней цвет; вид, не являющийся цветом, не рисуется), `RoundedCornerStyle.continuous` (непрерывной кривой скругления у пути iOS 6 нет — рисуется круговое), `ShapeStyle.blendMode` (режимов наложения слоёв в CoreAnimation iOS 6 нет — стиль рисуется обычным), `ShareLink(subject:)` (окно «Поделиться» iOS 6 не принимает тему), `commands` у сцены (в iOS 6 нет ни строки меню,
-ни клавиатурных команд), `gesture(including:)` без `.subviews` (распознаватели iOS 6 нельзя выключить для всей
-иерархии — жесты подвидов остаются включёнными; без `.gesture` жест просто не подключается). Приоритет жестов
-устроен иначе, чем в SwiftUI: распознаватели предка и потомка срабатывают одновременно, а не «потомок побеждает»;
-`highPriorityGesture` заставляет распознаватели потомков ждать распознавателя предка, `simultaneousGesture` не
-отличается от `gesture`. `Layout.spacing` не читается родительским стеком: расстояния между видами задаёт
-сам стек. Анимация `Animatable`-данных идёт так же, как у Apple, и это сверено на macOS 27 (см. «Замеры»): пружины, кривые
-`UnitCurve` и `timingCurve`; `speed`, `delay`, `logicallyComplete`, `repeatCount` и `repeatForever` в любом порядке
-вызовов; кастомная анимация, на которую вызваны `speed` или `delay`, получает пересчитанное время, не отдаёт скорость
-и не сливается; смена цели, пока значение в пути, — вторая анимация-кривая или `interpolatingSpring` ведёт значение от того места,
-куда первая его ещё несёт, к новой цели; вторая `Animation.spring` начинается от текущего значения со скоростью
-предыдущей, если та тоже `Animation.spring`; без анимации первая идёт к своему концу, сдвинутому на разницу целей. Не сверено, и порт делает своё: пружина `Animation.spring`
-с `delay` или `speed`, которой меняют цель в пути (ни одно правило не легло на замеры в пределах сотой — она стартует
-от текущего значения без скорости); `repeatCount` дважды подряд (у Apple две пары повторов делят состояние и
-ответы путаются, у нас действует последний); `shouldMerge` кастомной анимации при смене цели в пути (движок его не зовёт). `coverage.lua --check` требует, чтобы каждая такая запись в коде была названа здесь.
+**Simplified**: they work, but with a divergence that iOS 6 does not let us avoid. Each writes a line to the log and to the run's report on first use. `Animation.spring` (and `interactiveSpring`, `interpolatingSpring`, `smooth`, `snappy`, `bouncy`: `UIView` in iOS 6 has no spring animation, so a `UIView` property follows the nearest of four time curves; the engine's own animations, which run frame by frame, are computed as Apple computes them: `Animation.spring` and its named forms as a staircase of 1/300 s steps, where the end is decided by three checks, and `interpolatingSpring` by a spring solution that ends where Core Animation ends it. All of this is checked against macOS 27: `frameworks/SwiftUI/tests/host/springcmp.swift`), `ShadowStyle.inner` (Core Animation has no inner shadows, so nothing is drawn), `Text.LineStyle.Pattern` (only solid underline and strikethrough), `Font.leading` (`UIFont` has no line-spacing variants; use `lineSpacing`), `Font.Design.rounded` (there is no rounded system font; the ordinary one is used), `foregroundStyle(gradient)` on text (text takes one colour: the gradient's first colour), `submitLabel(.continue)` (there is no Continue key; Return is shown), `scrollDismissesKeyboard` (on iOS 6 scrolling does not dismiss the keyboard; from iOS 7 it works through `keyboardDismissMode`), `toolbarColorScheme(for: .tabBar)` (`UITabBar` has no bar style), `TextField(axis: .vertical)` (an iOS 6 field is single-line; the text scrolls sideways), `Button(role: .destructive)` in an `alert` (`UIAlertView` in iOS 6 has no destructive button style, so it looks like the others; in a `confirmationDialog` it is red), `ToolbarItemPlacement.keyboard` (the iOS 6 keyboard has no bar of its own, so the item is not shown), `underline(color:)` and `strikethrough(color:)` (the line under text in iOS 6 has the text colour), `copyable` and `cuttable` (the sheet is a `UIActionSheet`, not the editing menu; in iOS 6 the editing menu belongs to the text field, and a view that is not a field has no menu of its own), `listRowSeparator(edges:)` and `listRowSeparatorTint(edges:)` (the line is drawn under the row, not over it: the iOS 6 table does not draw a line above a row, and the request for the top edge alone is what it already does), `grayscale`, `saturation`, `brightness`, `contrast`, `hueRotation`, `colorInvert`, `colorMultiply`, `luminanceToAlpha` (Core Image over the picture that the view is drawn into: the picture is made when the screen lays out the content, so an animation inside a filtered view does not run frame by frame), `blur(radius:)` (the view itself is blurred, not what is behind it: iOS 6 has no live background blur; with `opaque: false` the picture covers the content, otherwise the unblurred content would show through the soft edges), `dynamicTypeSize(range)` (the range limits the size at which the text of the subtree is drawn; the size category that a view inside reads stays the requested one), `exportableToServices` (the iOS 6 window hands over what it is given, but it has no completion, so the app does not learn whether the sharing happened; that is iOS 8), `presentationBackground(style)` (the screen is painted in one colour, so a style that is not a colour paints nothing), `contentShape(kind)` (iOS 6 has no drag preview or menu, and no hover effect), `accessibility(inputLabels:)` (input labels are for Voice Control, which iOS 6 does not have), `accessibility(selectionIdentifier:)` (selection identifiers are for rotors, which iOS 6 does not have), `toolbar(_:for: .tabBar)` (the iOS 6 tab bar cannot be hidden for one screen), `Text.baselineOffset` (attributed text in iOS 6 has no baseline offset, so the text stays on the baseline), `Image(variableValue:)` (variable symbols are SF Symbols, which iOS 6 does not have; the picture is drawn whole), `Font.smallCaps` (iOS 6 fonts have no small capitals, so the text stays as it is), `Menu(primaryAction:)` (the menu opens on a tap in iOS 6, and the primary action does not run), `searchable(tokens:)` (the iOS 6 search field has no tokens; they are shown as chips above the field), `listRowBackground(view)` (behind a `UITableView` row there is a colour; a view that is not a colour is not drawn), `RoundedCornerStyle.continuous` (iOS 6 paths have no continuous corner curve; a circular one is drawn), `ShapeStyle.blendMode` (iOS 6 CoreAnimation has no blend modes for layers, so the style is drawn normally), `ShareLink(subject:)` (the iOS 6 sharing sheet does not take a subject), `commands` on a scene (iOS 6 has neither a menu line nor keyboard commands), `gesture(including:)` without `.subviews` (iOS 6 recognisers cannot be switched off for a whole hierarchy; the gestures of the subviews stay on; without `.gesture` the gesture is simply not attached). Gesture priority is built differently from SwiftUI: the recognisers of an ancestor and a descendant fire at the same time, not "the descendant wins". `highPriorityGesture` makes the descendants' recognisers wait for the ancestor's recogniser, and `simultaneousGesture` is no different from `gesture`. `Layout.spacing` is not read by the parent stack: the stack sets the distances between views itself. The animation of `Animatable` data runs as in Apple, and this is checked on macOS 27 (see "Measurements"): springs, the `UnitCurve` and `timingCurve` curves; `speed`, `delay`, `logicallyComplete`, `repeatCount` and `repeatForever` in any order of calls; a custom animation that has `speed` or `delay` called on it gets its time recomputed, does not give up its speed, and does not merge; a change of target while the value is on its way is a second curve animation or an `interpolatingSpring` that leads the value from where the first is still carrying it to the new target; a second `Animation.spring` starts from the current value with the speed of the previous one, if that one is also an `Animation.spring`; without an animation, the first one goes to its own end, shifted by the difference of the targets. Not checked, and the port does its own thing: a `Animation.spring` with `delay` or `speed` whose target is changed on its way (no rule matched the measurements within a hundredth: it starts from the current value with no speed); `repeatCount` twice in a row (in Apple two pairs of repeats share the state and the answers get mixed up; with us the last one applies); `shouldMerge` of a custom animation when the target changes on its way (the engine does not call it). `coverage.lua --check` requires every such entry in the code to be named here.
 
-`GeometryProxy.containerCornerInsets` отдаёт нулевые отступы: на iOS 6 ни один контейнер не рисуется со скруглёнными углами, скруглять нечего. У `LayoutSubview` и `LayoutSubviews` `==` объявлены явно, а у `GridItem`, `GridItem.Size`, `ScrollPosition` и `ScrollDismissesKeyboardMode` — через синтез компилятора: в отличие от `@frozen` типов Apple, наш модуль не печатает выведенные равенства в своём интерфейсе, и `tools/api-diff.lua` видит их как `__derived_struct_equals`.
+`GeometryProxy.containerCornerInsets` returns zero insets: on iOS 6 no container is drawn with rounded corners, so there is nothing to round. `LayoutSubview` and `LayoutSubviews` declare `==` explicitly. `GridItem`, `GridItem.Size`, `ScrollPosition` and `ScrollDismissesKeyboardMode` get theirs from compiler synthesis: unlike Apple's `@frozen` types, our module does not print the inferred equalities in its interface, so `tools/api-diff.lua` sees them as `__derived_struct_equals`.
 
-`TabContent` повторяет объявление Apple 26.2 (`TabValue`, рекурсивное `Body`) без двух его внутренних членов: `_identifiedView` — внутренний член, который здесь никто не вызывает, а `_TabContentBodyAdaptor` существует только чтобы показать этот вызов; объявить их без потребителя было бы пустышкой. Инициализаторы `TabView` с `TabContent`-содержимым здесь не изолированы по `MainActor`, как у Apple: остальные инициализаторы `TabView` в модуле тоже не изолированы, иначе каждый вызов `TabView` требовал бы изолированного контекста.
+`TabContent` repeats Apple 26.2's declaration (`TabValue`, a recursive `Body`) without two of its internal members: `_identifiedView`, an internal member that nothing here calls, and `_TabContentBodyAdaptor`, which exists only to show that call. Declaring them with no consumer would be a placeholder. The `TabView` initialisers with `TabContent` content are not isolated to `MainActor` here, as they are in Apple: the other `TabView` initialisers in the module are not isolated either, or every call to `TabView` would need an isolated context.
 
-`TableColumnCustomization<Value>` приходит в `Table(of:columnCustomization:columns:rows:)` и хранится в том, что читает таблица: `i`-й столбец — это столбец строки `order[i]`, и скрыта именно та строка, которую назвали, потому что у столбца здесь нет собственного идентификатора, только заголовок. Движок действует на `.visibility`: таблица iOS 6 это её собственный `UITableView`, и у него нет ни перетаскивания столбцов, ни их ширины, которой распоряжается приложение, так что `.reorder` и `.resize` — значения, которые приложение передаёт, а показать их негде. `TableColumnCustomization<Value>` кодируется одним значением, а не двумя полями: на этом runtime у keyed-контейнера нет типа ключа, а идентификаторы столбцов — это `Value.ID`, и он `Codable` там, где `Codable` сам `Value.ID`.
+`TableColumnCustomization<Value>` is passed to `Table(of:columnCustomization:columns:rows:)` and is stored in what the table reads: the `i`-th column is the column of row `order[i]`, and the hidden column is exactly the one named, because a column here has no identifier of its own, only a header. The engine acts on `.visibility`. The table in iOS 6 is its own `UITableView`, and it has neither column reordering nor column widths that the app controls, so `.reorder` and `.resize` are values the app passes, and there is nowhere to show them. `TableColumnCustomization<Value>` is encoded as one value, not as two fields: on this runtime a keyed container has no key type, and the column identifiers are `Value.ID`, which is `Codable` exactly where `Codable` is `Value.ID`.
 
-`PresentationDetent.custom(_:)` и `maxDetentValue` — высота, которую вычисляет приложение, и наибольшая деталь, которую позволяет платформа; у модального экрана iOS 6 нет деталей, он всегда во весь экран, поэтому `PresentationDetent.Context.maximum` — это экран, и `PresentationDetent.height(in:)` у `CustomPresentationDetent` возвращает то, что вычислило приложение, из этого контекста.
+`PresentationDetent.custom(_:)` and `maxDetentValue` are the height that the app computes and the largest detent that the platform allows. A modal screen in iOS 6 has no detents: it is always full screen. So `PresentationDetent.Context.maximum` is the screen, and `PresentationDetent.height(in:)` on a `CustomPresentationDetent` returns what the app computed from that context.
 
-`ForEach(subviews:)` и `Group(subviews:)` берут детей через `subviewChildren(of:)`: так же, как движок читает детей везде, — через группу, за которую стоит обёртка, и через содержимое, которое обёртка оборачивает, пока не встретится то, что и есть содержимое. Расхождение с SwiftUI одно и оно названо здесь: свой `View`, чьё собственное `body` — это группа, здесь остаётся одним ребёнком, потому что у примитива нет тела, которое можно прочитать насквозь (его `body` — `Never` по построению), а в SwiftUI взяли бы детей группы.
+`ForEach(subviews:)` and `Group(subviews:)` take their children through `subviewChildren(of:)`, which reads children the way the engine reads them everywhere: through the group that a wrapper stands for, and through the content that the wrapper wraps, until it meets the thing that is the content. There is one difference from SwiftUI, and it is named here: our own `View` whose own `body` is a group stays one child, because a primitive has no body that can be read through (its `body` is `Never` by construction). SwiftUI would take the group's children.
 
-Значения окружения, которых у iOS 6 нет как настройки (`accessibilityReduceMotion`, `accessibilityReduceTransparency`, `accessibilityDifferentiateWithoutColor`, `accessibilityShowButtonShapes`, `accessibilitySwitchControlEnabled`, `accessibilityQuickActionsEnabled`, `accessibilityLargeContentViewerEnabled`, `isLuminanceReduced`, `supportsMultipleWindows`), читаются как «выключено»: человек не мог их включить. `dynamicTypeSize` всегда `.large`. `monospacedDigit()` ничего не меняет: цифры системного шрифта iOS 6 и так одной ширины.
+The environment values that iOS 6 does not have as settings (`accessibilityReduceMotion`, `accessibilityReduceTransparency`, `accessibilityDifferentiateWithoutColor`, `accessibilityShowButtonShapes`, `accessibilitySwitchControlEnabled`, `accessibilityQuickActionsEnabled`, `accessibilityLargeContentViewerEnabled`, `isLuminanceReduced`, `supportsMultipleWindows`) are read as "off": the person could not have turned them on. `dynamicTypeSize` is always `.large`. `monospacedDigit()` changes nothing: the digits of the iOS 6 system font already have one width.
 
-**Заглушек нет.** Последние четыре — доступность — сделаны на средствах iOS 6: `accessibilityRepresentation`
-(метка, значение и черты элемента берутся из представления — кнопки, переключателя, ползунка, степпера, текста),
-`accessibilityChildren` (вид становится `UIAccessibilityContainer`, дети раскладываются в его рамке и отдаются как
-`UIAccessibilityElement`), `accessibilitySortPriority` (корневой вид хоста — контейнер, который при заданных
-приоритетах упорядочивает элементы по приоритету, затем по положению на экране), `accessibilityFocused` (привязка
-переводит фокус VoiceOver уведомлением `UIAccessibilityLayoutChangedNotification` с элементом, а фокус VoiceOver
-пишет привязку через `accessibilityElementDidBecomeFocused`/`DidLoseFocus`). Имя каждой будущей заглушки счётчик
-читает из вызова; вызов, имени которого он прочесть не может, валит сборку — так заглушка не спрячется от счёта.
+**No stubs remain.** The last four, the accessibility ones, are done with iOS 6 facilities: `accessibilityRepresentation` (the label, value and traits of the element are taken from the view: a button, a switch, a slider, a stepper, or text), `accessibilityChildren` (the view becomes a `UIAccessibilityContainer`, and its children are laid out in its frame and handed out as `UIAccessibilityElement`s), `accessibilitySortPriority` (the host's root view is a container that, when priorities are set, orders the elements by priority and then by their position on screen), and `accessibilityFocused` (a binding moves VoiceOver's focus with the `UIAccessibilityLayoutChangedNotification` notification carrying the element, and VoiceOver's focus writes the binding through `accessibilityElementDidBecomeFocused` and `DidLoseFocus`). For every future stub, the counter reads its name from the call. A call whose name it cannot read fails the build, so a stub cannot hide from the count.
 
-**Нет вовсе** — таких API в модуле нет, приложение с ними не соберётся: лучше ошибка компиляции, чем тихо
-неправильный экран. Это `NavigationStack(path:)`
-(`NavigationStack` есть как стек без пути), и типы из списка `coverage.lua --missing`, не попавшие ни в одну из групп выше.
+**Missing altogether**: these APIs are not in the module, so an app that uses them will not build. That is better than a quietly wrong screen. This is `NavigationStack(path:)` (`NavigationStack` exists as a stack without a path), together with the types in the list of `coverage.lua --missing` that fall into none of the groups above.
 
-## Две сборки модуля
+## Two builds of the module
 
-- **Нативная** (приложение компилируется из исходников под armv7 iOS 6) — без библиотечной эволюции.
-- **Гостевая** (для конвейера рекомпилятора: модуль собирается под arm64 и переводится вместе с приложением) —
-  с `-enable-library-evolution`, иначе компилятор не выпускает method descriptors протоколов, которых
-  требует приложение, собранное против интерфейса Apple.
-  The guest-ABI check (removed, 2026-10-06) checked this build and did not check the release the port ships:
-  it compiled with /usr/bin/swiftc 6.4 for arm64-apple-ios14.0 against the iOS 16.4 SDK, whose Swift 5.9 stdlib has no
-  `RangeSet`, so it failed on `TextSelection` (`cannot find type 'RangeSet'`); the port ships armv7-apple-ios6.0 on the
-  swift-runtime package, whose stdlib has it. Measured: every installed swift-runtime (6.4.0, six store entries) holds
-  only `armv7-apple-ios.swiftmodule`; an arm64 library_evolution install (`xmake f -p iphoneos -a arm64`) fails in
-  revenant@libcxx ("the probe client does not import __ZdlPv"; the cause was not
-  diagnosed further, and the recipe is Revenant's). When an arm64 runtime
-  installs, rebuild the check against `-resource-dir <runtime>/lib/swift`, not the SDK's stdlib.
+- **Native**: the app is compiled from source for armv7 iOS 6, without library evolution.
+- **Guest**: for the recompiler's pipeline, the module is built for arm64 and translated together with the app, with `-enable-library-evolution`. Without it, the compiler does not emit the method descriptors of the protocols that an app built against Apple's interface requires.
+  The guest-ABI check (removed, 2026-10-06) checked this build and did not check the release the port ships. It compiled with `/usr/bin/swiftc` 6.4 for arm64-apple-ios14.0 against the iOS 16.4 SDK, whose Swift 5.9 standard library has no `RangeSet`, so it failed on `TextSelection` (`cannot find type 'RangeSet'`). The port ships armv7-apple-ios6.0 on the `swift-runtime` package, whose standard library has it. Measured: every installed `swift-runtime` (6.4.0, six store entries) holds only `armv7-apple-ios.swiftmodule`. An arm64 library-evolution install (`xmake f -p iphoneos -a arm64`) fails in `revenant@libcxx` ("the probe client does not import __ZdlPv"; the cause was not diagnosed further, and the recipe is Revenant's). When an arm64 runtime is installed, rebuild the check against `-resource-dir <runtime>/lib/swift`, not against the SDK's standard library.
 
-Из этого следуют требования к коду: модуль называется `SwiftUI`, имена и метки аргументов совпадают
-с Apple дословно, порядок требований протоколов — слот в слот (таблица в `bridge.md`),
-публичные классы хранят только свойства статически известного размера.
+What follows for the code: the module is called `SwiftUI`, the names and argument labels match Apple's word for word, the order of the protocol requirements matches slot for slot (the table in `guest-bridge.md`), and public classes store only properties of statically known size.
 
-## Устройство
+## Layout
 
-- `frameworks/SwiftUI/src/Core.swift` — протокол `View`, построитель, прозрачные контейнеры.
-- `frameworks/SwiftUI/src/Graph.swift` — дерево узлов, согласование, транзакции обновления, вписывание динамических свойств по смещениям полей из метаданных Swift.
-- `frameworks/SwiftUI/src/State.swift` — обёртки свойств и их хранилища в узлах.
-- `frameworks/SwiftUI/src/Layout.swift` — модель раскладки, стеки, `Spacer`, `padding`, `frame`.
-- `frameworks/SwiftUI/src/Views.swift` — примитивные представления поверх контролов UIKit.
-- `frameworks/SwiftUI/src/Modifiers.swift` — модификаторы как узлы и как изменение окружения.
-- `frameworks/SwiftUI/src/List.swift`, `Navigation.swift` — `UITableView` и `UINavigationController`.
-- `frameworks/SwiftUI/src/Presentation.swift` — лист и предупреждение, `frameworks/SwiftUI/src/Environment.swift` — ключи окружения.
-- `frameworks/SwiftUI/src/Hosting.swift` — контроллер-хост, `frameworks/SwiftUI/src/App.swift` — запуск приложения.
-- `frameworks/SwiftUI/src/Probe.swift` — служебный доступ для тестов (дерево, размеры строк, число вычислений `body`).
+- `frameworks/SwiftUI/src/Core.swift`: the `View` protocol, the builder, transparent containers.
+- `frameworks/SwiftUI/src/Graph.swift`: the node tree, matching, update transactions, and writing dynamic properties in at the field offsets taken from Swift's metadata.
+- `frameworks/SwiftUI/src/State.swift`: property wrappers and their storage in the nodes.
+- `frameworks/SwiftUI/src/Layout.swift`: the layout model, stacks, `Spacer`, `padding`, `frame`.
+- `frameworks/SwiftUI/src/Views.swift`: primitive views over the UIKit controls.
+- `frameworks/SwiftUI/src/Modifiers.swift`: modifiers, as nodes and as environment changes.
+- `frameworks/SwiftUI/src/List.swift` and `Navigation.swift`: `UITableView` and `UINavigationController`.
+- `frameworks/SwiftUI/src/Presentation.swift`: the sheet and the alert. `frameworks/SwiftUI/src/Environment.swift`: the environment keys.
+- `frameworks/SwiftUI/src/Hosting.swift`: the host controller. `frameworks/SwiftUI/src/App.swift`: launching the app.
+- `frameworks/SwiftUI/src/Probe.swift`: access for tests (the tree, row sizes, the number of `body` evaluations).
 
-## Сборка и проверка
+## Build and check
 
-Из корня revenant:
+From the root of revenant:
 
 ```
 ./xmakew f -P . -p iphoneos -a armv7 -y
-./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests   # модуль, демо, снимочный бандл, тесты движка (armv7, iOS 6)
-./xmakew test -P . SwiftUITypeChecks/*                                  # построители Table и TabContent принимают и отказывают, как у Apple
-./xmakew l frameworks/SwiftUI/tools/emulate.lua tests                   # модульные тесты движка в эмуляторе
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # снимочные тесты: деревья сценариев против frameworks/SwiftUI/tests/data/snapshots/
+./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests   # the module, the demo, the snapshot bundle, the engine's tests (armv7, iOS 6)
+./xmakew test -P . SwiftUITypeChecks/*                                  # the Table and TabContent builders accept and refuse, as Apple's do
+./xmakew l frameworks/SwiftUI/tools/emulate.lua tests                   # the engine's unit tests in the emulator
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # snapshot tests: the scenario trees against frameworks/SwiftUI/tests/data/snapshots/
 ```
 
-Сборка идёт против установки пакета `revenant@swift-runtime` 6.4.0, которую требует проект revenant, в общем
-хранилище xmake; флаги собирают правила тулчейна.
-Все модули и dylib — из одной установки: стандартная библиотека, конкурентность, оверлеи Foundation, UIKit,
-QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation и CoreData. Цель — `armv7-apple-ios6.0` с
-`-bundled-swift-runtime`, **проверка доступности включена**: любое API новее iOS 6 компилятор называет сам, а не
-падение на устройстве (так нашлись и исправлены `CGPathAddRoundedRect`, `component(_:from:)`,
-`keyboardDismissMode`, `contentSizeForViewInPopover`; `NSItemProvider`/`NSUserActivity` в подписях помечены iOS 8).
-Combine — цель `Combine` проекта revenant (`../../Combine`): исходники OpenCombine с патчами пакета `revenant@combine` 2026.10.19,
-собранные против того же рантайма; допуск таймера — за `#available`; цели этого каталога собираются с ним на том же рантайме. Тесты
-OpenCombine против этого модуля — цель `CombineTests` там же.
+The build goes against the installation of the package `revenant@swift-runtime` 6.4.0 that the revenant project requires, in xmake's shared store. The flags are set by the toolchain's rules.
+All the modules and dylibs come from one installation: the standard library, concurrency, the Foundation overlays, UIKit, QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation and CoreData. The target is `armv7-apple-ios6.0` with `-bundled-swift-runtime`, with **availability checking enabled**: any API newer than iOS 6 is named by the compiler itself, not by a crash on the device. That is how `CGPathAddRoundedRect`, `component(_:from:)`, `keyboardDismissMode` and `contentSizeForViewInPopover` were found and fixed. `NSItemProvider` and `NSUserActivity` in the signatures are marked iOS 8.
+Combine is the target `Combine` of the revenant project (`../../Combine`): the sources of OpenCombine with the patches of the package `revenant@combine` 2026.10.19, built against the same runtime. The timer tolerance is behind `#available`, and this directory's targets are built with it on the same runtime. The OpenCombine tests against this module are the target `CombineTests` there.
 
-## Замеры
+## Measurements
 
-- Модульные тесты движка: 338 проверок (раскладка, выравнивания, сетка, состояние, наблюдаемые объекты, окружение,
-  списки, их правка и выбор, секции, `ZStack`, `ScrollView`, идентичность в `ForEach`, стили, жесты и их формы,
-  пространства координат, переходы, `matchedGeometryEffect`, предпочтения и якоря, градиенты по пикселям,
-  `Canvas`, `@FetchRequest` с живым обновлением из Core Data, доступность), iLEmu iPhone4,1 iOS 6.1.3 и живой
-  iPad 2 (iOS 6.1.3) — все проходят.
-- Снимочные сценарии в приложении (iPod4,1 iOS 6.0): 16 деревьев, сверяются посимвольно с эталонами в
-  `frameworks/SwiftUI/tests/data/snapshots/`; эталон нового сценария записывается только после ручной проверки дерева.
-- Производительность (безоконный пробник `SwiftUIProbe`, живое железо iOS 6.1.3; вывод прогонов в дереве не хранится): простой экран —
-  полное обновление 1,6 мс на iPad 2 и 2,1 мс на iPhone 4S, первичная сборка и раскладка 6,5 мс. Глубокий экран —
-  шесть строк вложенных стеков глубины d — до кэша размеров рос в 7–8 раз на уровень (d=3: 1174 мс на обновление,
-  d=6 не дождались за 15 минут), с кэшем растёт линейно: d=1 — 14 мс, d=3 — 56 мс, d=6 — 139 мс (iPad 2). На iPhone 4S (те же сборка и сценарий, финальная версия): d=1 — 19 мс, d=3 — 78 мс, d=5 — 139 мс; обновление одной строки из шести — 4,9 / 15 / 25 мс. Кэш:
-  у каждого узла раскладки до 32 ответов «предложение → размер»; сбрасывается при обновлении узла, у его
-  вложенных узлов раскладки и у всех предков. Синхронизация подвидов (`mountContents()`) и применение кадра
-  (`place()`) дополнительно пропускаются для узла, чей кадр не изменился и который не был помечен грязным —
-  когда меняется только одна строка из шести, обновление на iPad 2 падает: d=1 — 3,4 мс, d=3 — 10 мс, d=5 — 18 мс.
-  Текст (внутри приложения, `tools/emulate.lua perf`; вне приложения на устройстве нет шрифтового сервера, процесс падает на
-  первом `Text`) идёт немного дороже цвета на глубоких экранах из-за измерения строк, но растёт так же линейно.
+- Engine unit tests: 338 checks (layout, alignments, grids, state, observed objects, the environment, lists, their editing and selection, sections, `ZStack`, `ScrollView`, identity in `ForEach`, styles, gestures and their forms, coordinate spaces, transitions, `matchedGeometryEffect`, preferences and anchors, gradients by pixel, `Canvas`, `@FetchRequest` with live updates from Core Data, accessibility), run in iLEmu on iPhone4,1 iOS 6.1.3 and on a live iPad 2 (iOS 6.1.3): all pass.
+- Snapshot scenarios in the app (iPod4,1 iOS 6.0): 16 trees, compared character by character with the references in `frameworks/SwiftUI/tests/data/snapshots/`. The reference for a new scenario is written only after the tree has been checked by hand.
+- Performance (the windowless probe `SwiftUIProbe`, on live iOS 6.1.3 hardware; the output of the runs is not kept in the tree). A simple screen: a full update takes 1.6 ms on an iPad 2 and 2.1 ms on an iPhone 4S, and the first build and layout take 6.5 ms. A deep screen: six rows of nested stacks of depth d. Before the size cache, the time grew 7 to 8 times per level (d=3: 1174 ms per update; d=6 was not finished in 15 minutes). With the cache it grows linearly: d=1 is 14 ms, d=3 is 56 ms, and d=6 is 139 ms (iPad 2). On an iPhone 4S (the same build and scenario, the final version): d=1 is 19 ms, d=3 is 78 ms, d=5 is 139 ms; updating one row of the six takes 4.9, 15 and 25 ms. The cache: each layout node keeps up to 32 answers "proposal to size". It is reset when the node is updated, when its nested layout nodes are, and when all its ancestors are. Synchronising the subviews (`mountContents()`) and applying the frame (`place()`) are also skipped for a node whose frame did not change and which was not marked dirty. When only one row of six changes, the update on an iPad 2 falls to: d=1 is 3.4 ms, d=3 is 10 ms, d=5 is 18 ms.
+  Text (inside the app, `tools/emulate.lua perf`; outside the app there is no font server on the device, and the process crashes on the first `Text`) costs a little more than colour on deep screens because of the measuring of strings, but it grows just as linearly.
 
-- `Spring` и `UnitCurve` сверены с фреймворком macOS 27 (`.agent-work/host/` — снимок замеров и хост-проверка): совпадают до девятого
-  знака `value`/`force`/`update` для всех четырёх способов построить пружину, все семь её свойств
-  (`response`, `dampingRatio`, `duration`, `bounce`, `mass`, `stiffness`, `damping`), значения и скорости трёх
-  круговых кривых, и `settlingDuration` во всех
-  формах: у колеблющейся пружины это огибающая размаха, ниже `epsilon` (логарифм, делённый на затухание), у остальных —
-  десятая доля секунды после последней десятой, где расстояние ещё не меньше `epsilon`; сетка у Apple 1013 десятых
-  (до 101,2 с), и если на последней пружина ещё снаружи, Apple отвечает «успокоилась сразу» (0) — граница найдена
-  делением отрезка по отклику и жёсткости (`frameworks/SwiftUI/tests/host/springcmp.swift`), а у критической интерполирующей пружины то же с 1012
-  десятыми. Расходятся в двух местах, и оба измерены:
-  Безье-кривые — на 5·10⁻⁷ (наш корень точнее: у Apple он одинарной точности, `0.399999619` против `0.4` —
-  это `Float`); `velocity` перезатухающей пружины (`dampingRatio > 1`)
-  — у Apple она не является производной его же `value` (при `dampingRatio` 1.25, `response` 1, t=0.1 Apple отвечает
-  2.867334, производная равна 1.867334), у нас — производная, иначе `update(value:velocity:target:deltaTime:)` врал бы.
-  Совпадают и края: `bounce` ниже −1 (у Apple и у нас `nan`), `bounce` выше 1 (пружина без затухания, время
-  установления бесконечно), `response` 0, `epsilon` 0, `allowOverDamping` (у Apple жёсткость перезатухающей пружины
-  пересчитывается так, чтобы отношение осталось заданным, — так же и у нас). `Spring.mass`, `Spring.stiffness` и
-  `Spring.damping` у нас только для чтения: у Apple их можно присвоить, но присваивание выбирает, из какой формы
-  пружина собрана, а её модель на это не отвечает. `Animation.spring()` без аргументов берёт `response` 0.5 — как в
-  SDK 26.2; в 16.4 было 0.55.
+- `Spring` and `UnitCurve` are checked against the macOS 27 framework (`.agent-work/host/`: a snapshot of the measurements and the host check). They agree to the ninth digit for `value`, `force` and `update`, for all four ways of building a spring; for all seven of its properties (`response`, `dampingRatio`, `duration`, `bounce`, `mass`, `stiffness`, `damping`); for the values and velocities of the three circular curves; and for `settlingDuration` in every form. For an oscillating spring that is the envelope of the swing, below `epsilon` (a logarithm divided by the damping). For the rest it is the tenth of a second after the last tenth at which the distance is still not less than `epsilon`. Apple's grid has 1013 tenths (up to 101.2 s). If the spring is still outside at the last one, Apple answers "settled at once" (0). The boundary was found by bisecting the interval on the response and the stiffness (`frameworks/SwiftUI/tests/host/springcmp.swift`). For the critical interpolating spring it is the same, with 1012 tenths. They differ in two places, and both are measured:
+  Bézier curves differ by 5·10⁻⁷ (our root is more exact: Apple's is single precision, `0.399999619` against `0.4`, which is a `Float`). The `velocity` of an overdamped spring (`dampingRatio > 1`) is not, in Apple, the derivative of its own `value`: with `dampingRatio` 1.25, `response` 1 and t=0.1, Apple answers 2.867334 and the derivative is 1.867334. With us it is the derivative, otherwise `update(value:velocity:target:deltaTime:)` would be wrong.
+  The edges agree too: `bounce` below −1 (`nan` in both), `bounce` above 1 (a spring without damping, whose settling time is infinite), `response` 0, `epsilon` 0, and `allowOverDamping` (in Apple the stiffness of an overdamped spring is recomputed so that the ratio stays the one set; the same is true with us). `Spring.mass`, `Spring.stiffness` and `Spring.damping` are read-only with us. In Apple they can be assigned, but the assignment chooses which form the spring was built from, and our model does not allow for that. `Animation.spring()` with no arguments takes `response` 0.5, as in SDK 26.2; in 16.4 it was 0.55.
 
-- `KeyframeAnimator` и `PhaseAnimator` считаются на тех же средствах, что и остальная анимация движка: `ValueAnimator`
-  ведёт значение кадр за кадром по развёрнутой дорожке (`_ResolvedKeyframes`) — каждый ключевой кадр идёт от значения перед
-  ним к своему по своей кривой, — а узел перестраивает содержимое на каждом кадре. Виртуальные часы пробника
-  (`_Probe.advanceAnimations`) ведут их так же, как и остальные анимации. `AnimationCompletionCriteria.removed` совпадает
-  с `.logicallyComplete`: в движке нет интерактивного увода, и вид, который убирают, заканчивает анимацию в тот же момент.
-- `EnvironmentValues` читает и хранит `tintColor`/`accentColor` (движок красит им строку состояния и кнопки меню),
-  `symbolRenderingMode`, `symbolVariants`, `textContentType` (у iOS 6 типов содержимого текста нет — остаётся nil),
-  `isFocused`, `isHoverEffectEnabled` (палец не может навести, поэтому всегда выключено), `listRowSpacing`,
-  `listSectionSpacing` и `description`. `Anchor.Source` умеет собирать массив якорей и якорь необязательного значения, а
-  `Anchor` сравнивается и хешируется по виду, на который указывает, и по значению, которое читает из единичного
-  прямоугольника. `verticalScrollIndicatorVisibility`, `horizontalScrollIndicatorVisibility`,
-  `verticalScrollBounceBehavior` и `horizontalScrollBounceBehavior` читает полоса прокрутки (`ScrollNode.update`):
-  видимость индикатора берётся из окружения, а `.automatic` оставляет решение флагу вида (`scrollIndicators(_:axes:)`);
-  отдача — `alwaysBounceVertical`/`alwaysBounceHorizontal` `UIScrollView`, `.automatic` оставляет её как есть.
-- `EnvironmentValues` несёт и остальные 78 ключей SDK 26.2: у каждого тип, какой объявляет интерфейс Apple, и
-  значение по умолчанию — снято с фреймворка macOS 27 (64 ключа читаются
-  публично; остальные берут значение из тел Apple's собственных расширений или то, что человек на iOS 6 включить
-  не мог). Ключ — это хранилище: значение читают виды и пишут модификаторы, независимо от того, читает ли его
-  сегодня хоть один вид. Значения, названные типами, которых у этого порта нет, объявлены рядом
-  (`EnvironmentValueTypes.swift`) по списку случаев из интерфейса Apple.
-  Не объявлены 18: `immersiveSpaceDisplacement` (тип `Spatial.Pose3D` — Spatial не фреймворк iOS),
-  `openImmersiveSpace` и `dismissImmersiveSpace` (immersive space — виvisionOS), `allowedDynamicRange`
-  (запас яркости выше SDR у экранов iOS 6 нет), `openWindow`, `pushWindow`, `dismissWindow`, `openSettings`,
-  `newDocument`, `openDocument` и `rename` (окон и документов в iOS 6 нет), `realHorizontalSizeClass` и
-  `realVerticalSizeClass` (классы размера Catalyst), `defaultWheelPickerItemHeight` (колесо выбора — watchOS),
-  `isSceneCaptured`, `fontResolutionContext` (`Font.Context` — тип SwiftUI iOS 18, вложенного `Context` у нашего
-  `Font` нет), `lineHeight` и `_lineHeightMultiple` (это свойства `AttributedString`, которого в этом заходе
-  ещё нет). Для них — `frameworks/SwiftUI/tests/data/api/not-applicable.txt` (16 строк); `lineHeight` и `_lineHeightMultiple` ждут `AttributedString`.
+- `KeyframeAnimator` and `PhaseAnimator` are computed with the same facilities as the rest of the engine's animation. `ValueAnimator` leads the value frame by frame along the unrolled track (`_ResolvedKeyframes`): each keyframe goes from the value before it to its own value on its own curve. The node rebuilds the content on every frame. The probe's virtual clock (`_Probe.advanceAnimations`) drives them the same way as the other animations. `AnimationCompletionCriteria.removed` matches `.logicallyComplete`: the engine has no interactive removal, and a view that is removed ends its animation at the same moment.
+- `EnvironmentValues` reads and stores `tintColor` and `accentColor` (the engine paints the status bar and menu buttons with them), `symbolRenderingMode`, `symbolVariants`, `textContentType` (iOS 6 has no text content types, so it stays nil), `isFocused`, `isHoverEffectEnabled` (a finger cannot hover, so it is always off), `listRowSpacing`, `listSectionSpacing` and `description`. `Anchor.Source` can collect an array of anchors and an anchor of an optional value. An `Anchor` is compared and hashed by the view it points at, and by the value it reads from the unit rectangle. `verticalScrollIndicatorVisibility`, `horizontalScrollIndicatorVisibility`, `verticalScrollBounceBehavior` and `horizontalScrollBounceBehavior` are read by the scroll bar (`ScrollNode.update`): the indicator's visibility comes from the environment, and `.automatic` leaves the decision to the view's flag (`scrollIndicators(_:axes:)`). The bounce is the `UIScrollView`'s `alwaysBounceVertical` and `alwaysBounceHorizontal`, and `.automatic` leaves them as they are.
+- `EnvironmentValues` also carries the other 78 keys of SDK 26.2. Each has the type that Apple's interface declares and the default value, taken from the macOS 27 framework (64 of the keys are readable publicly; the rest take their value from the bodies of Apple's own extensions, or from what a person on iOS 6 could not have turned on). A key is a storage: views read the value and modifiers write it, whether or not any view reads it today. Values named by types that this port does not have are declared next to them (`EnvironmentValueTypes.swift`), following the list of cases in Apple's interface.
+  18 are not declared: `immersiveSpaceDisplacement` (the type `Spatial.Pose3D`; Spatial is not an iOS framework), `openImmersiveSpace` and `dismissImmersiveSpace` (immersive spaces are visionOS), `allowedDynamicRange` (the headroom above SDR does not exist on iOS 6 screens), `openWindow`, `pushWindow`, `dismissWindow`, `openSettings`, `newDocument`, `openDocument` and `rename` (iOS 6 has no windows or documents), `realHorizontalSizeClass` and `realVerticalSizeClass` (the size classes of Catalyst), `defaultWheelPickerItemHeight` (the picker wheel is watchOS), `isSceneCaptured`, `fontResolutionContext` (`Font.Context` is an iOS 18 SwiftUI type, and our `Font` has no nested `Context`), `lineHeight` and `_lineHeightMultiple` (these are properties of `AttributedString`, which does not exist yet in this round). The list for them is `frameworks/SwiftUI/tests/data/api/not-applicable.txt` (16 lines); `lineHeight` and `_lineHeightMultiple` wait for `AttributedString`.
 
-- `TypesettingLanguage.contentAware` — внутренний: вверх по потоку он за `@_spi(Private)`, а у Apple в 16.4
-  и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
-  `explicit(_:)` и `==`).
-- `blur` и шесть цветовых фильтров получают измеренную формулировку: размытие в каноне этого порта есть
-  (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`), но это
-  `UIView`, а у модификатора SwiftUI нет вида, в который его положить; шесть фильтров ложатся на
-  `compositingFilter` слоя, который порт уже ставит, и пока им не рисуется.
-- `SymbolVariants` взят из OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`,
-  `Sources/OpenSwiftUICore/View/Image/SymbolVariants.swift`, коммит `efa1037`): вариант символа с его
-  флагами (`none`, `fill`, `slash`, `circle`, `square`, `rectangle`), их сочетаниями, `contains(_:)` и
-  модификатором `symbolVariant(_:)`, который пишет вариант в окружение. Наш прежний — заглушка из трёх
-  имён без вариантов. SF Symbols в iOS 6 нет, поэтому вариант пишется в окружение, а картинка ищется по
-  имени со суффиксом варианта тем же встроенным набором, что и раньше.
-- `ResolvedText` и дерево `Resolvable*` (решающие значения `Text`: `timer`, `date`, `relative`, `offset`,
-  `progress`, `currentDate`, интервал) в OpenSwiftUI тоже есть, но они опираются на `AttributeGraph` и
-  на `Environment` этого движка — переносить их к iOS 6 нечего, пока не будет решено, чем заменяется граф.
-  `ParagraphTypesetting` (насколько абзац сжимается, где переносится) — тоже, и он опирается на тот же граф.
+- `TypesettingLanguage.contentAware` is internal. Upstream it sits behind `@_spi(Private)`, and Apple's 16.4 and 26.2 have no such member at all (`SwiftUICore.swiftinterface:8758-8762`: only `automatic`, `explicit(_:)` and `==`).
+- `blur` and the six colour filters get the measured wording. The blur exists in this port's canon (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`), but that is a `UIView`, and the SwiftUI modifier has no view to put it into. The six filters go onto the layer's `compositingFilter`, which the port already sets, and nothing draws with them yet.
+- `SymbolVariants` is taken from OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`, `Sources/OpenSwiftUICore/View/Image/SymbolVariants.swift`, commit `efa1037`): a symbol variant with its flags (`none`, `fill`, `slash`, `circle`, `square`, `rectangle`), their combinations, `contains(_:)`, and the modifier `symbolVariant(_:)`, which writes the variant into the environment. Our earlier one was a stub of three names with no variants. SF Symbols do not exist in iOS 6, so the variant is written to the environment, and the picture is looked up by name with the variant's suffix, in the same built-in set as before.
+- `ResolvedText` and the tree of `Resolvable*` (the values that resolve `Text`: `timer`, `date`, `relative`, `offset`, `progress`, `currentDate`, the interval) are also in OpenSwiftUI, but they rest on `AttributeGraph` and on that engine's `Environment`. There is nothing to carry over to iOS 6 until it is decided what replaces the graph. `ParagraphTypesetting` (how far a paragraph shrinks, and where it wraps) is the same, and it rests on the same graph.
 
-- Настройки текста, которые добавил SDK 26.2. `TypesettingLanguage` и `Text.Scale` взяты из OpenSwiftUI
-  (MIT, `Sources/OpenSwiftUICore/View/Text/Typesetting/TypesettingLanguage.swift` и
-  `Sources/OpenSwiftUICore/View/Text/Text/Text+Scale.swift`, оба «Status: Complete», коммит `efa1037`):
-  `automatic`/`explicit(_:)`, `.default`/`.secondary` и `textScale` в окружении. Модификаторы объявлены и
-  на `Text`, и на `View` — как их и объявляет интерфейс 26.2: `typesettingLanguage` (одним шрифтом iOS 6
-  настройки нет), `textScale` и `textVariant` (вариантов размера и ширины у текста iOS 6 нет;
-  `textVariant` — над `TextVariantPreference`, с `FixedTextVariant` и `SizeDependentTextVariant`), плюс
-  `textScale(.secondary)` рисует строку размером меньшей надписи самого релиза: caption 1 против body,
-  12/17; `writingDirection(strategy:)` и
-  `multilineTextAlignment(strategy:)` с их тремя случаями — обе
-  стратегии пишут в журнал, обе названы там же. `writingDirection` и `multilineTextAlignment` —
-  имена этих двух модификаторов в журнале. И четыре речи
-  VoiceOver — `speechAlwaysIncludesPunctuation`, `speechSpellsOutCharacters`, `speechAdjustedPitch`,
-  `speechAnnouncementsQueued`. Сами четыре атрибута в каноне этого порта есть
-  (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа),
-  а VoiceOver iOS 6 не читает ни одного с атрибутированной строки —
-  каждый пишет в журнал именно с этим.
-  Эти четыре `Text`-перегрузки — то, что добавил 26.2; `View`-перегрузки были уже в 16.4.
-  `TypesettingLanguage` назван по идентификатору языка: в Foundation этой поры нет `Locale.Language`.
-- `PlainButtonStyle`, `BorderedButtonStyle`, `BorderedProminentButtonStyle`, `DefaultButtonStyle` и
-  `BorderlessButtonStyle` — это `PrimitiveButtonStyle`, а не `ButtonStyle`, как в обоих SDK, которые у нас
-  есть (в 16.4 и в 26.2 у `ButtonStyle` нет ни одного `where Self ==`-расширения, а эти шесть стилей объявлены
-  как `PrimitiveButtonStyle`); наши пять имён `ButtonStyle.plain` и подобных выдуманы и убраны.
+- The text settings that SDK 26.2 added. `TypesettingLanguage` and `Text.Scale` are taken from OpenSwiftUI (MIT, `Sources/OpenSwiftUICore/View/Text/Typesetting/TypesettingLanguage.swift` and `Sources/OpenSwiftUICore/View/Text/Text/Text+Scale.swift`, both marked "Status: Complete", commit `efa1037`): `automatic`, `explicit(_:)`, `.default` and `.secondary`, and `textScale` in the environment. The modifiers are declared on both `Text` and `View`, as the 26.2 interface declares them: `typesettingLanguage` (iOS 6 has no setting for it, with one font), `textScale` and `textVariant` (iOS 6 text has no size or width variants; `textVariant` sits over `TextVariantPreference`, with `FixedTextVariant` and `SizeDependentTextVariant`). Also, `textScale(.secondary)` draws the line at the size of the release's own caption: caption 1 against body, 12 against 17. `writingDirection(strategy:)` and `multilineTextAlignment(strategy:)` with their three cases: both strategies write to the log, and both are named there. `writingDirection` and `multilineTextAlignment` are the names of these two modifiers in the log. And four VoiceOver speech settings: `speechAlwaysIncludesPunctuation`, `speechSpellsOutCharacters`, `speechAdjustedPitch` and `speechAnnouncementsQueued`. The four attributes themselves are in this port's canon (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` and two neighbours), but iOS 6 VoiceOver reads none of them from an attributed string, so each one writes to the log with exactly that name.
+  These four `Text` overloads are what 26.2 added; the `View` overloads were already in 16.4.
+  `TypesettingLanguage` is named after the language identifier, because there is no `Locale.Language` in the Foundation of this period.
+- `PlainButtonStyle`, `BorderedButtonStyle`, `BorderedProminentButtonStyle`, `DefaultButtonStyle` and `BorderlessButtonStyle` are `PrimitiveButtonStyle`s, not `ButtonStyle`s, as in both SDKs we have (in 16.4 and in 26.2 `ButtonStyle` has no `where Self ==` extension at all, and these six styles are declared as `PrimitiveButtonStyle`). Our five names `ButtonStyle.plain` and the like were invented and have been removed.
 
-- `tools/` держит то, чем этот диапазон меряет свою полноту: `surface-rows.lua tree` читает, что объявляет
-  дерево, `surface-diff.lua gaps` говорит, чего из поверхности 26.2 в этом дереве нет.
-  Числа, которые этот диапазон приводил до сих пор, — **нижняя граница**: `count('{')` по строке ломался на
-  любой строке, где скобка стоит в строке или в комментарии, и с неё обход уходил на неверную глубину.
-  Теперь скобки считает `braces()`, который читает строку как Swift: `//`, `/* */`, `"…"`, многострочный
-  литерал и `#"…"#` скобку не несут, а блок-комментарий и многострочный литерал состояние переносят.
-  Семь контролей, которые это сторожили (`ours-check.lua`, удалён), включали тот, что требовал от `surface-rows.lua tree` самого: расширение
-  `Anchor.Source` в `TextModifiers.swift:168` даёт `bounds` и `rect`. Пересчёт после этого даёт те же 169
-  строк, и это тоже честно: `Anchor` остаётся шестнадцатью, потому что расходятся не обходы, а то, кому
-  принадлежит член, — `surface-26.2.tsv` относит член расширения `Anchor.Source` к `Anchor`, а `surface-rows.lua tree`
-  хранит последнюю компоненту имени. Это дефект второй инструменты, а не этого, и он назван ниже.
+- `tools/` holds what this round uses to measure its completeness: `surface-rows.lua tree` reads what the tree declares, and `surface-diff.lua gaps` says what of the 26.2 surface is missing from this tree.
+  The numbers this round has reported until now are a **lower bound**. `count('{')` on a line broke on any line where a brace is inside a string or a comment, and from there the walk went to the wrong depth. Now `braces()` counts the braces, and it reads the line as Swift does: `//`, `/* */`, `"…"`, a multi-line literal and `#"…"#` carry no brace, and a block comment and a multi-line literal carry their state over. Seven controls guarded this (`ours-check.lua`, removed). One of them required `surface-rows.lua tree` to agree with the extension of `Anchor.Source` in `TextModifiers.swift:168`, which gives `bounds` and `rect`. Recounting after that gives the same 169 rows, and that too is honest: `Anchor` stays at sixteen, because what differs is not the walks but which type owns a member. `surface-26.2.tsv` assigns a member of the extension of `Anchor.Source` to `Anchor`, while `surface-rows.lua tree` keeps the last component of the name. That is a defect of the second tool, not of this one, and it is named below.
 
-- Стили кнопки. `link` (синее подчёркнутое слово, как ссылка в `UITableViewCell` iOS 6) и `card`
-  (скруглённая кнопка релиза без градиентной заливки) есть и в 16.4, и в 26.2 — их не хватало у нас.
-  Добавляет 26.2:
-  `PrimitiveButtonStyle.glass` и `PrimitiveButtonStyle.glassProminent` (живого размытия в iOS 6 нет — кнопка
-  рисуется полупрозрачной, пишет в журнал), `PrimitiveButtonStyle.accessoryBar` и
-  `PrimitiveButtonStyle.accessoryBarAction` (панели над клавиатурой в iOS 6 нет — рисуется кнопка релиза, пишет в журнал),
-  `Glass` (толщина стекла — это то, чем заливается полупрозрачная заливка), `ButtonRole.confirm` и `.close`.
-- Нажатие кнопки. `PrimitiveButtonStyleConfiguration` такого члена не имеет ни в 16.4, ни в 26.2, и мы его
-  не добавляем; `@Environment(\.isPressed)` в стиле тоже не сработал бы — стиль попадает в замыкание, мимо
-  которого реконсилятор не проходит. Поэтому узел кнопки хранит тело примитивного стиля рядом с телом
-  `ButtonStyle`, обработчик нажатия работает на обоих путях (раньше он выходил по `styleBody != nil`, то
-  есть ровно на примитивном), а нажатие приходит стилю аргументом: наш собственный протокол
-  `PressedButtonStyle` и `makeBody(configuration:pressed:)` у встроенных стилей, при этом запись
-  `makeBody(configuration:)` — как у Apple — тоже компилируется и даёт то же тело. Проверка в тестах
-  движка нажимает `.plain` и читает дерево обратно: тело, нарисованное при нажатии, отличается от
-  нарисованного до, и совпадает с тем, что стиль просил (`opacity 0.4`).
-  `EnvironmentValues.isPressed` остаётся ключом с владельцем и без читателя в наших стилях: его читает
-  путь `ButtonStyleConfiguration`, который сам пишет его в окружение содержимого. Стиль, написанный
-  приложением, нажатия не увидит — на то и внутренний протокол; Apple даёт его через окружение, а
-  окружение стиля здесь не разрешается.
-- Стили `DatePicker` получили форму: `DatePickerStyle` требует `_body(configuration:)`, у конфигурации есть отметка,
-  выбор, границы и показываемые компоненты. `.field` рисует дату в рамке, как ячейка сгруппированной таблицы iOS 6,
-  а `.stepperField` — то же поле с двумя `UIStepper` по краям, которые идут по дате на сутки или на час.
-  Требование протокола — `makeBody(configuration:)`, как у Apple; `_body(configuration:)` есть, но по
-  умолчанию отдаёт `EmptyView`, и движок зовёт `makeBody`. Отметка показа везде на месте: над колесом у
-  `.wheel`, рядом с полем у `.field` и между полем и степперами у `.stepperField` (сценарий
-  `date-picker-styles`). `DatePickerStyle.compact` и `DatePickerStyle.graphical` пишут в журнал: `UIDatePicker` в iOS 6 умеет только колесо, поэтому колесо и остаётся.
+- Button styles. `link` (a blue underlined word, like a link in an iOS 6 `UITableViewCell`) and `card` (a rounded button of the release, without a gradient fill) are in both 16.4 and 26.2, and we lacked them. 26.2 adds: `PrimitiveButtonStyle.glass` and `PrimitiveButtonStyle.glassProminent` (iOS 6 has no live blur, so the button is drawn semi-transparent, and it writes to the log), `PrimitiveButtonStyle.accessoryBar` and `PrimitiveButtonStyle.accessoryBarAction` (iOS 6 has no bar above the keyboard, so a release button is drawn, and it writes to the log), `Glass` (the thickness of the glass is what fills the semi-transparent fill), and `ButtonRole.confirm` and `.close`.
+- Pressing a button. `PrimitiveButtonStyleConfiguration` has no such member in either 16.4 or 26.2, and we do not add one. `@Environment(\.isPressed)` in a style would not work either, because the style is passed into a closure, which the reconciler does not walk through. So the button node keeps the body of a primitive style next to the body of a `ButtonStyle`. The press handler works on both paths (before, it returned early when `styleBody != nil`, which is exactly the primitive case), and the press reaches the style as an argument: our own protocol `PressedButtonStyle`, and `makeBody(configuration:pressed:)` on the built-in styles. The form `makeBody(configuration:)`, as Apple has it, also compiles and gives the same body. The engine's test presses `.plain` and reads the tree back: the body drawn while pressed differs from the one drawn before, and matches what the style asked for (`opacity 0.4`).
+  `EnvironmentValues.isPressed` remains a key with an owner and no reader in our styles: the `ButtonStyleConfiguration` path reads it, and that path writes it into the content's environment itself. A style written by the app does not see the press, which is why the protocol is internal. Apple delivers it through the environment, and the environment of a style is not resolved here.
+- `DatePicker` styles have their shape: `DatePickerStyle` requires `_body(configuration:)`, and the configuration has a mark, a selection, the bounds and the components shown. `.field` draws the date in a box, like a cell of an iOS 6 grouped table, and `.stepperField` is the same field with two `UIStepper`s at its edges, which step the date by a day or an hour. The protocol requirement is `makeBody(configuration:)`, as in Apple. `_body(configuration:)` exists, but by default it gives `EmptyView`, and the engine calls `makeBody`. The mark of what is shown is in place everywhere: above the wheel for `.wheel`, beside the field for `.field`, and between the field and the steppers for `.stepperField` (the scenario `date-picker-styles`). `DatePickerStyle.compact` and `DatePickerStyle.graphical` write to the log: `UIDatePicker` in iOS 6 does only the wheel, so the wheel stays.
 
-- Обратная проверка поверхности, `tools/api-surface.lua` со `STRICT=1`, читает объединение интерфейсов
-  26.2 всех модулей, которые этот переэкспортирует, и печатает каждое наше публичное имя, которого там нет.
-  После этого захода в её списке 241 строка, и ни одна не выдумана этим заходом: 200 — из базовой ветки
-  (`_Probe` 34, `ColorMatrix` 16, `_DialogDescription` 6, `GestureEvent` 6, `ProjectionTransform` 6 и
-  прочие — до обоих заходов), а остальные 41 — из двух классов, которые ревью уже назвало артефактами
-  инструмента: 55 вложенных `typealias` вида `GlassButtonStyle.Configuration`, которые порт обязан
-  объявить, а интерфейс Apple их не расписывает, и 7 `Body`-свидетельств ассоциированных типов. Пятьдесят
-  восемь строк, которые добавил этот диапазон, убраны: четыре имени из ревью плюс хранилища ключевых
-  кадров. Интерфейсы 26.2 теперь читает `frameworks/SwiftUI/tests/surface` (surftool) — `SwiftParser` из swift-syntax
-  (Apache-2.0, подключён путём, ничего не вендорится) вместо регулярных выражений: 40 из 41 строки
-  артефактов уходят, остаётся 205, а добавляются четыре — `CGAffineTransform`, `CGPoint`, `CGRect` и
-  `CGSize`, которые выражения принимали за объявленные, хотя их нет ни в одном интерфейсе девяти
-  переэкспортируемых модулей. Счёт в обеих строках один и тот же — 0: `invented.txt` содержит только
-  выдуманные имена, а разрешённые уходят в stderr, так что и файл на пустом дереве пуст, и `STRICT=1` проверяет
-  ровно то, что напечатано.
+- The reverse check of the surface, `tools/api-surface.lua` with `STRICT=1`, reads the union of the 26.2 interfaces of all the modules that this one re-exports, and prints each of our public names that is not there. After this round the list has 241 lines, and none was invented by this round: 200 come from the base branch (`_Probe` 34, `ColorMatrix` 16, `_DialogDescription` 6, `GestureEvent` 6, `ProjectionTransform` 6, and others, from before both rounds), and the other 41 come from two classes that the review has already named as artefacts of the tool: 55 nested `typealias`es of the kind `GlassButtonStyle.Configuration`, which the port must declare while Apple's interface does not spell them out, and 7 `Body` witnesses of associated types. Fifty-eight lines that this round added were removed: four names from the review, plus the keyframe storage. The 26.2 interfaces are now read by `frameworks/SwiftUI/tests/surface` (surftool), which uses `SwiftParser` from swift-syntax (Apache-2.0, connected by path, nothing vendored), instead of regular expressions. 40 of the 41 artefact lines go away, leaving 205, and four are added: `CGAffineTransform`, `CGPoint`, `CGRect` and `CGSize`, which the expressions took for declared names although none of them is in any of the nine interfaces. The count is the same in both places — 0: `invented.txt` holds only invented names, and the allowed ones go to stderr, so the file on an empty tree is empty too, and `STRICT=1` checks exactly what is printed.
 
-- Атрибуты SwiftUI объявлены в той форме, в какой их объявляет интерфейс 26.2, но без конформленсов
-  `AttributeScope` и `AttributedStringKey`: `import Foundation` в iOS 6 не знает ни `AttributedString`, ни
-  `AttributeScope`, ни `AttributeScopes`, и объявить их в форме Apple нельзя вовсе — поэтому объявлено то, что релиз
-  может исполнить: атрибут, чьё имя и чей тип значения совпадают с Apple, и ключ `NSAttributedString`, под который он
-  пишется. Значение, дошедшее до нарисованной строки, здесь не проверяется: чтение такой строки требует создать шрифт,
-  а шрифт роняет headless-процесс на устройстве (измерено: SwiftUITests падает с `Trace/BPT trap` на первом же
-  создании `UIFont`), поэтому проверены имена, типы значений и соответствие ключу — по одному случаю на атрибут.
+- `RasterizationOptions` is nested, as in both SDKs: `_RendererConfiguration.RasterizationOptions` (`arm64e-apple-ios.swiftinterface:17490`, and the same in 26.2), with seven stored properties and `init()`. **No interface gives** default values for it, and it cannot be read on the host: the type is a member of an underscored struct and is not on macOS's public surface. **That was wrong:** an underscored name in Swift is public, and `frameworks/SwiftUI/tests/host/hostrenderer.swift` reads it. Measured on the macOS 27 framework: `colorMode` nonLinear, `rendersAsynchronously` false, `isOpaque` **true**, `drawsPlatformViews` **true**, `prefersDisplayCompositing` false, `maxDrawableCount` **3**, `rbColorMode` nil. The outer type is named as the SDK declares it, `_RendererConfiguration`, without a substitute. Of the seven, three reach the iOS 6 `CALayer`: whether to draw on the main thread, whether the layer is opaque, and the rasterisation scale. Each of these is something the iOS 6 `CALayer` has: asynchronous drawing and the rasterisation scale go to the layer, while `colorMode`, `rbColorMode`, `drawsPlatformViews`, `prefersDisplayCompositing`, `maxDrawableCount` and `isOpaque` are keys the layer does not have, so they stay on the port. `drawingGroup` collects these values and hands the layer the two that it has. `applied(to:)` itself is ours, and it is internal. There is no key in `EnvironmentValues`: `RasterizationOptions` is, for Apple, a parameter of the APIs that take it, and neither 16.4 nor 26.2 has such a key. The reverse check is what showed this, when the first version of the file declared one.
 
-- `TextSelection` — по форме 26.2 (`SwiftUI.swiftinterface:20146`): `Indices` с двумя случаями
-  `selection(Range<String.Index>)` и `multiSelection(RangeSet<String.Index>)`, `affinity`, три
-  инициализатора и `isInsertion`. `EnvironmentValues.textSelection` читает и пишет выбор, а узел
-  `TextEditor` отдаёт его своему `UITextView`: iOS 6 несёт ровно один выделенный диапазон, поэтому
-  набор диапазонов читается и записывается как самый нижний из них, и об этом сказано в коде.
-  `nsRange(in:)` и `init(nsRange:in:)` — наш мост к `UITextView`, внутренние: это не API 26.2. Замер —
-  в `docs/reference/swiftui/text-selection.md`: сам заголовок UIKit 26.2 говорит, что `selectedRange` — это весь
-  выбор начиная с iOS 2, а первый `NSArray` выделенных диапазонов — `selectedRanges` в iOS 26.0.
+- Widgets: `Widget`, `WidgetConfiguration` and `WidgetBundle` are three protocols, as in the 16.4 interface (`:19488`, `:12988`, `:11775`; all `@available(iOS 14.0, macOS 11.0, watchOS 9.0, *)` and `@available(tvOS, unavailable)`), plus `EmptyWidgetConfiguration` and two real builders, `WidgetConfigurationBuilder` and `WidgetBundleBuilder`, with the same six functions as Apple's. On iOS 6.1.3 there is no widget: the release has no system surface for one, so a widget is never shown here, just as in an app without a widget extension. We carry the protocols and the body, but not the surface. `WidgetConfigurationBuilder` does not exist in the interface at all (`grep -c 'struct WidgetConfigurationBuilder'` gives 0 in both 16.4 and 26.2), and neither `Widget.body` nor `WidgetConfiguration.body` carries a builder; only `WidgetBundle.body` carries `@WidgetBundleBuilder`. Our builder has exactly the six functions of the interface (`arm64e-apple-ios.swiftinterface:7114-7142`): `buildExpression`, `buildBlock()`, `buildBlock(_:)`, `buildOptional` in its two forms, and `buildLimitedAvailability`. The signature of the last is taken from the interface: `(_ widget: some Widget) -> any Widget & _LimitedAvailabilityWidgetMarker`. `_LimitedAvailabilityWidgetMarker` is public, because a public function cannot name an internal type. `WidgetBox`, `AnyWidget` and `AnyLimitedAvailabilityWidget` are ours and internal: an existential does not conform to `Widget` by itself.
 
-- `RasterizationOptions` — вложенный, как в обоих SDK: `_RendererConfiguration.RasterizationOptions`
-  (`arm64e-apple-ios.swiftinterface:17490` и в 26.2 то же), семь хранимых свойств и `init()`. Значений по
-  умолчанию **ни один интерфейс не даёт**, и на хосте его не прочитать: тип член underscored-структуры и на
-  публичной поверхности macOS его нет — **это было неверно**: подчёркнутое имя в Swift публичное, и
-  `frameworks/SwiftUI/tests/host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
-  `rendersAsynchronously` false, `isOpaque` **true**, `drawsPlatformViews` **true**,
-  `prefersDisplayCompositing` false, `maxDrawableCount` **3**, `rbColorMode` nil. Внешний тип назван так,
-  как его объявляет SDK, — `_RendererConfiguration`, без замены. В слой `CALayer` iOS 6 доходят три из семи:
-  рисовать ли в главном потоке, непрозрачен ли слой и масштаб растеризации.
-  Каждое из них — то, что у `CALayer` iOS 6 есть: асинхронная отрисовка и масштаб растеризации едут в слой,
-  а `colorMode`, `rbColorMode`, `drawsPlatformViews`, `prefersDisplayCompositing`, `maxDrawableCount` и
-  `isOpaque` — ключей, которых у слоя нет, и они остаются на порте. `drawingGroup` собирает эти значения
-  и отдаёт слою те два, что у него есть. Сам `applied(to:)` — наш, и он внутренний. Ключа в
-  `EnvironmentValues` нет: `RasterizationOptions` у Apple — параметр тех API, которые его берут, и ни в
-  16.4, ни в 26.2 такого ключа нет; обратная проверка это и показала, когда первая версия файла его
-  объявила.
+- `Window`, `OpenWindowAction` and `PresentedWindowContent`. `Window` is a scene, and Apple declares it only for macOS: four annotations on the type at `arm64e-apple-ios.swiftinterface:2740-2743`: `@available(macOS 13.0, *)`, `@available(iOS, unavailable)`, `@available(tvOS, unavailable)`, `@available(watchOS, unavailable)`. We carry it because the scene is the engine's root, on top of iOS 6's single `UIWindow`. `OpenWindowAction` is marked `@available(iOS 16.0, macOS 13.0, *)`, with `@available(tvOS, unavailable)` and `@available(watchOS, unavailable)` (the same file, `:8191-8197`), and none of its members is marked unavailable on iOS, while the `Window` it opens is macOS-only in the same file. That is the answer: on iOS there is one action and one window, so there is nothing to open, and the action writes to the log. `Window.presentedWindowContent(forPresented:)` returns a `PresentedWindowContent` with the same content, and it also writes to the log, because iOS 6 has no presented window. The generated interface carries no Apple documentation (it has no comments), so the reliance is on these annotations. The names in the log: `Window.presentedWindowContent(forPresented:)`, `OpenWindowAction(id:)` and `OpenWindowAction(value:)`. The last is there because iOS 6 does not pass a value to a window either.
 
-- Виджеты: `Widget`, `WidgetConfiguration` и `WidgetBundle` — три протокола, как в интерфейсе 16.4
-  (`:19488`, `:12988`, `:11775`, все `@available(iOS 14.0, macOS 11.0, watchOS 9.0, *)` и
-  `@available(tvOS, unavailable)`), плюс `EmptyWidgetConfiguration` и два настоящих сборщика —
-  `WidgetConfigurationBuilder` и `WidgetBundleBuilder` с теми же шестью функциями, что у Apple. На iOS
-  6.1.3 виджета нет: системной площадки для него у релиза нет, поэтому виджет здесь никогда не
-  показывается — ровно как в приложении без виджет-расширения; протоколы и тело мы носим, площадку — нет.
-  `WidgetConfigurationBuilder` в интерфейсе нет вовсе (`grep -c 'struct WidgetConfigurationBuilder'`
-  — 0 и в 16.4, и в 26.2), и ни `Widget.body`, ни `WidgetConfiguration.body` не несут сборщика — только
-  `WidgetBundle.body` несёт `@WidgetBundleBuilder`. Наш сборщик — ровно шесть функций интерфейса
-  (`arm64e-apple-ios.swiftinterface:7114-7142`): `buildExpression`, `buildBlock()`, `buildBlock(_:)`,
-  `buildOptional` в двух формах и `buildLimitedAvailability`; подпись последней взята из интерфейса —
-  `(_ widget: some Widget) -> any Widget & _LimitedAvailabilityWidgetMarker`, — и `_LimitedAvailabilityWidgetMarker`
-  публичен, потому что публичная функция не может назвать внутренний тип. `WidgetBox`, `AnyWidget` и
-  `AnyLimitedAvailabilityWidget` — наши и внутренние: existential не отвечает `Widget` сам по себе.
+- Two checks on the iPad 2 turned out not to be checks, but my assertions about what the API does not promise. `EnvironmentValues.tint` is a stored `var tint: UIColor?` with no default value, and four modifiers write it (`ListExtras.swift:461`, `MoreTypes.swift:134`, `TextExtras.swift:139`, `Toolbars.swift:253`), none of them at import. The check walked the tree and asked whether any background anywhere was not `.clear`, so it answered a different question. Now the view records what it read, and that is what is checked. `SymbolVariants.contains` is inclusion in a set (`flags.contains(other.flags) && (shape == other.shape || other.shape == nil)`, `SymbolVariants.swift:355`): the empty set is a subset of any set, so `fill.contains(.none)` is true, and Apple's is the same. The check read inclusion as identity. Now identity and inclusion are checked separately, with both sides of the equality written down.
 
-- `Window`, `OpenWindowAction` и `PresentedWindowContent`. `Window` — сцена, и Apple объявляет её только для
-  macOS: четыре аннотации на типе в `arm64e-apple-ios.swiftinterface:2740-2743` —
-  `@available(macOS 13.0, *)`, `@available(iOS, unavailable)`, `@available(tvOS, unavailable)`,
-  `@available(watchOS, unavailable)`. Носим потому, что сцена — это корень движка, поверх единственного
-  `UIWindow` iOS 6. `OpenWindowAction` помечен `@available(iOS 16.0, macOS 13.0, *)` с
-  `@available(tvOS, unavailable)`, `@available(watchOS, unavailable)` (там же, :8191-8197), и ни один его
-  член не помечен недоступным на iOS — а `Window`, который он открывает, macOS-only в том же файле. На этом
-  и стоит ответ: на iOS есть действие и одно окно, так что открывать нечего — действие пишет в журнал.
-  `Window.presentedWindowContent(forPresented:)` отдаёт `PresentedWindowContent` с тем же содержимым, и
-  тоже пишет в журнал, потому что предъявленного окна на iOS 6 нет. Документации Apple в
-  сгенерированном интерфейсе нет — комментариев он не несёт, — и опора здесь именно на эти аннотации.
-  Имена в журнале: `Window.presentedWindowContent(forPresented:)`, `OpenWindowAction(id:)` и
-  `OpenWindowAction(value:)` — последнее потому, что iOS 6 и не передаёт окну значение.
+- The check that "a widget bundle that unconditionally does not build" lies in `frameworks/SwiftUI/tests/typechecks/tables/`: an `if` without `#available` reaches the type check as `any Widget`, and an existential does not conform to `Widget`, so the build is refused. The 26.2 interface has no unavailable overload of `buildOptional` at all: `WidgetBundleBuilder` has two forms (`arm64e-apple-ios.swiftinterface:21949` and `:21970`), both available, and neither takes such an `if`. The unavailable item itself is `extension WidgetBundleBuilder : Sendable` (`:21942-21943`), and it is marked the same way as ours. **The mutant that tells them apart is the reverse of the one checked first:** not removing the overload, but adding `static func buildOptional(_ widget: (any Widget)?) -> some Widget`. With it the check compiles, and the earlier run of the tables (now the test `tables-negative-widget-bundle` of the target `SwiftUITypeChecks`) exited with 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot conform to 'Widget', got: it compiled`. Without it, the exit is 0 and the refusal stands. Both runs are described in `typechecks.md`. So the check guards exactly what the SDK's form guards, and it can turn red.
 
-- Две проверки на iPad 2 оказались не проверками, а моими утверждениями о том, чего API не обещает.
-  `EnvironmentValues.tint` — хранимое `var tint: UIColor?` без значения по умолчанию, и пишут его четыре
-  модификатора (`ListExtras.swift:461`, `MoreTypes.swift:134`, `TextExtras.swift:139`,
-  `Toolbars.swift:253`), ни один при импорте; проверка же обходила дерево и спрашивала, есть ли хоть где
-  фон не `.clear`, то есть отвечала на другой вопрос. Теперь вид записывает, что прочитал, и проверяется
-  оно. `SymbolVariants.contains` — включение в множество (`flags.contains(other.flags) && (shape == other.shape
-  || other.shape == nil)`, `SymbolVariants.swift:355`): пустое множество — подмножество любого, поэтому
-  `fill.contains(.none)` истинно, и так же оно и у Apple; проверка читала включение как тождество. Теперь
-  тождество и включение проверяются отдельно, обе стороны равенства записаны.
+- Ten types available on iOS that we **do not carry**, and the reason for each. Checked against the 26.2 interface (`iPhoneOS26.2.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64e-apple-ios.swiftinterface` and `…/WidgetKit.swiftmodule/…`), not by guesswork:
+  - `ContentOffset` (`:11480`): inside `extension SwiftUI._ScrollViewGestureProvider`, underscored;
+  - `Direction` (`:11595`): the interface itself writes it as `_PagingViewConfig.Direction`, also underscored;
+  - `Tree` (`:6541`): `Root: SwiftUICore._VariadicView_Root`, a constraint on an underscored type;
+  - `Cache` (`:18090`): inside `extension SwiftUI.GridLayout`, and the layout is handled by another band;
+  - `TypedPayloadError` (`:17049`): the interface writes it `Foundation.NSUserActivity.TypedPayloadError`, so it is a Foundation type, not a SwiftUI one;
+  - `Data` (`:11125`): `public typealias Data = Content.Data`, nested, not a name at module level;
+  - `UIHostingConfiguration` (`:10542`): public and on iOS, but `UIKit.UIContentConfiguration` exists only from iOS 14, and the port builds for iOS 6. It cannot answer a protocol the platform does not have;
+  - `SwiftUIAttributes` (`:7696`): the same with `Foundation.AttributeScope` (iOS 15);
+  - `AligningContentProviderLayout` (`:11541`): public, with no annotations, but it is a `Layout`, and layouts are handled by another band;
+  - `Property`: this is `_ViewDebug.Property`, a member of an underscored structure, that is, debug machinery (`SwiftUICore.swiftmodule/arm64e-apple-ios.swiftinterface:14901`, inside `public enum _ViewDebug`; the SwiftUI interface does not have it, only `SwiftUICore._ViewDebug.Data` at `:21897`, as a return type);
+  - `Renderer`: nested in `_RendererConfiguration` (`:14472`), and it **is carried** nested, in `Rasterizations.swift`, together with `RasterizationOptions` and `BackgroundTask`;
+  - `LimitedAvailabilityConfiguration` (`:9248`): **carried**, see above.
+  Of the fourteen carried, three are `Renderer`, `BackgroundTask` and `LimitedAvailabilityConfiguration`. `Property` in the list is the tenth not carried over.
 
-- Проверка на «виджет-бандл безусловно не собирается» лежит в `frameworks/SwiftUI/tests/typechecks/tables/`: `if` без
-  `#available` доходит до проверки типов как `any Widget`, а existential не отвечает `Widget`, и сборка
-  отказана. Недоступной перегрузки `buildOptional` в интерфейсе 26.2 нет вовсе: у `WidgetBundleBuilder` есть
-  две формы (`arm64e-apple-ios.swiftinterface:21949` и `:21970`), обе доступные, и ни одна не берёт такой
-  `if`. Сама недоступная — `extension WidgetBundleBuilder : Sendable` (`:21942-21943`), и она помечена так
-  же, как у нас. **Мутант, который различает, — обратный тому, что был проверен сначала:** не убирать
-  перегрузку, а добавить
-  `static func buildOptional(_ widget: (any Widget)?) -> some Widget`. С ней проверка компилируется, и
-  прежний прогон таблиц (теперь тест `tables-negative-widget-bundle` цели `SwiftUITypeChecks`) выходил с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
-  conform to 'Widget', got: it compiled`; без неё — выход 0 и отказ. Оба прогона описаны в
-  `typechecks.md`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
+- `KeyframeTrack` and `_ResolvedKeyframes` are the port's reading, not 26.2: in `SwiftUICore.swiftinterface:5542` `public struct _ResolvedKeyframes<Value> { }` is empty, and neither it nor `_ResolvedKeyframe` has any members (only `Sendable`). So the names that carry our track are ours: `keyframes`, `initialValue`, `initialVelocity`, `progress(at:)`, `duration`, `value(at:)` on `_ResolvedKeyframes` and `_ResolvedKeyframe`, `to`, `duration`, `timing`, `startVelocity` and `endVelocity` on `_ResolvedKeyframeTrackContent`, and `Timing`. They must be visible, because the track's check in the engine's tests reads them. The storage of the keyframes themselves (`CubicKeyframe.to`, `LinearKeyframe.to`, `SpringKeyframe.to`, `MoveKeyframe.to`, and their `duration`, `spring`, `startVelocity` and `endVelocity`) is internal: Apple declares only `init` and `_resolve` on a keyframe, and the type should have no extra public names. `GlassEffect` is ours and internal: the thickness of glass on iOS 6 is the alpha of the fill, not a property of `Glass`. `Glass` itself is now as in Apple: `regular`, `clear`, `identity`, `Equatable`, with no stored properties and no `init`.
 
-- Десять типов, доступных на iOS, которые мы **не носим**, и по какой причине каждая. Проверено по
-  интерфейсу 26.2 (`iPhoneOS26.2.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64e-apple-ios.swiftinterface`
-  и `…/WidgetKit.swiftmodule/…`), а не по догадке:
-  - `ContentOffset` (`:11480`) — внутри `extension SwiftUI._ScrollViewGestureProvider`, подчёркнутое;
-  - `Direction` (`:11595`) — сам интерфейс пишет его как `_PagingViewConfig.Direction`, тоже подчёркнутое;
-  - `Tree` (`:6541`) — `Root: SwiftUICore._VariadicView_Root`, ограничение на подчёркнутое;
-  - `Cache` (`:18090`) — внутри `extension SwiftUI.GridLayout`, а разметку ведёт другая полоса;
-  - `TypedPayloadError` (`:17049`) — интерфейс пишет его `Foundation.NSUserActivity.TypedPayloadError`,
-    то есть это тип Foundation, а не SwiftUI;
-  - `Data` (`:11125`) — `public typealias Data = Content.Data`, вложенный, а не имя уровня модуля;
-  - `UIHostingConfiguration` (`:10542`) — публичный и на iOS, но `UIKit.UIContentConfiguration` есть с
-    iOS 14, а порт собирает под iOS 6: отвечать протоколу, которого у платформы нет, нельзя;
-  - `SwiftUIAttributes` (`:7696`) — то же с `Foundation.AttributeScope` (iOS 15);
-  - `AligningContentProviderLayout` (`:11541`) — публичный, без аннотаций, но это `Layout`, а
-    раскладки ведёт другая полоса;
-  - `Property` — это `_ViewDebug.Property`, член подчёркнутой структуры, то есть отладочная машинерия
-    (`SwiftUICore.swiftmodule/arm64e-apple-ios.swiftinterface:14901`, внутри `public enum _ViewDebug`; в
-    интерфейсе SwiftUI его нет, там только `SwiftUICore._ViewDebug.Data` в `:21897` как тип возврата);
-  - `Renderer` — вложен в `_RendererConfiguration` (`:14472`) и **носится** вложенным, в
-    `Rasterizations.swift`, вместе с `RasterizationOptions` и `BackgroundTask`;
-  - `LimitedAvailabilityConfiguration` (`:9248`) — **носится**, см. выше.
-  Из четырнадцати носимых три: `Renderer`, `BackgroundTask`, `LimitedAvailabilityConfiguration`, и
-  `Property` в списке — десятый неперенесённый.
+- `Double` and `Float` conform to `Animatable` by themselves (`animatableData` is the type itself), as in Apple. Without this, a keyframe track cannot be built over a number.
 
-- Дорожка ключевых кадров — наше чтение, а не 26.2: в `SwiftUICore.swiftinterface:5542`
-  `public struct _ResolvedKeyframes<Value> { }` пуст, и членов нет ни у него, ни у `_ResolvedKeyframe`
-  (там только `Sendable`). Поэтому имена, которые несут нашу дорожку, — наши: `keyframes`,
-  `initialValue`, `initialVelocity`, `progress(at:)`, `duration`, `value(at:)` у `_ResolvedKeyframes`
-  и `_ResolvedKeyframe`, `to`/`duration`/`timing`/`startVelocity`/`endVelocity` у
-  `_ResolvedKeyframeTrackContent`, и `Timing`. Они и должны быть видны: их читает проверка дорожки в
-  тестах движка. Хранилища самих ключевых кадров (`CubicKeyframe.to`, `LinearKeyframe.to`,
-  `SpringKeyframe.to`, `MoveKeyframe.to` и их `duration`/`spring`/`startVelocity`/`endVelocity`)
-  внутренние — Apple объявляет у ключевого кадра только `init` и `_resolve`, и лишнего публичного
-  имени на типе Apple быть не должно. `GlassEffect` — наш, внутренний: толщина стекла на iOS 6 это
-  альфа заливки, а не свойство `Glass`. Сам `Glass` теперь как у Apple: `regular`, `clear`,
-  `identity`, `Equatable`, без хранимых свойств и без `init`.
+## How to build in the review working copy
 
-- `Double` и `Float` отвечают `Animatable` сами собой (`animatableData` — сам тип), как у Apple: без этого дорожку
-  ключевых кадров нельзя построить над числом.
-
-## Как собрать в рабочей копии ревью
-
-Пакеты берутся из общего хранилища xmake через проект revenant, поэтому рабочей копии ничего не нужно, кроме
-установки этих пакетов на машине (из корня revenant):
+The packages come from xmake's shared store through the revenant project, so the working copy needs nothing except that these packages are installed on the machine (from the root of revenant):
 
 ```
 ./xmakew f -P . -p iphoneos -a armv7 -y
 ```
 
-Эмулятор нужен только `tools/emulate.lua`, а не сборке; проект с `--emulate=y` он настраивает сам. Проверки
-таблиц и вкладок — тесты цели `SwiftUITypeChecks` — читают модуль, который собирает цель `SwiftUI`.
+Only `tools/emulate.lua` needs the emulator, not the build; a project with `--emulate=y` configures it itself. The checks of tables and tabs (the tests of the target `SwiftUITypeChecks`) read the module that the target `SwiftUI` builds.
 
-## Ограничения окружения
+## Limits of the environment
 
-- Приложение с интерфейсом запускается только установленным в `/Applications`; из временной папки
-  iOS 6 не отдаёт ему дисплей (`GSRegisterPurpleNamedPort`, ошибка 1100). Поэтому на устройстве гоняется
-  только безоконный пробник, а UI проверяется в эмуляторе.
-- `UIFont` в процессе без `UIApplication` на iOS 6 падает, поэтому консольные тесты не используют текст.
-- iLEmu на 6.1.3 не поднимает SpringBoard, UI-прогоны идут на iPod4,1 6.0.
+- An app with an interface launches only when it is installed in `/Applications`. From a temporary folder, iOS 6 does not give it a display (`GSRegisterPurpleNamedPort`, error 1100). So on the device only the windowless probe runs, and the UI is checked in the emulator.
+- `UIFont` in a process without `UIApplication` crashes on iOS 6, so the console tests do not use text.
+- iLEmu on 6.1.3 does not bring up SpringBoard, so the UI runs go to iPod4,1 on 6.0.
 
-## Наблюдения, которые ждут разбора
+## Observations waiting for analysis
 
-- **Кнопка остаётся полупрозрачной после касания.** `Button(action:) { Text("Tap me").frame(width: 280,
-  height: 120).background(Color.white) }` в `VStack` приложения на пакете `revenant@swiftui-uikit` (коммит 10f87e0),
-  запущенного `xmake emulate launch` на iPhone4,1 6.1.3 (эмулятор), после `tap 160 271` вызвала действие один раз
-  (`tapped 1`, текст и фон сменились), но и через секунду гостевого времени без изменений экрана кнопка
-  нарисована как нажатая: белый фон и надпись полупрозрачны. Снимки до и после касания —
-  `docs/reference/swiftui/device/button-before-tap-emulator.png`, `docs/reference/swiftui/device/button-after-tap-emulator.png`. На устройстве не
-  проверялось; не разобрано, остаётся ли подсветка после отпускания или так рисуется выключенная кнопка.
+- **The button stays semi-transparent after a touch.** `Button(action:) { Text("Tap me").frame(width: 280, height: 120).background(Color.white) }` in a `VStack` of an app on the package `revenant@swiftui-uikit` (commit 10f87e0), run with `xmake emulate launch` on an iPhone4,1 with 6.1.3 (the emulator). After `tap 160 271`, the action ran once (`tapped 1`, and the text and the background changed). But one second of guest time later, with no change on the screen, the button is drawn as pressed: the white background and the label are semi-transparent. Screenshots before and after the touch are `docs/reference/swiftui/device/button-before-tap-emulator.png` and `docs/reference/swiftui/device/button-after-tap-emulator.png`. Not checked on a device. Not yet established whether the highlight stays after release, or whether a disabled button is drawn that way.

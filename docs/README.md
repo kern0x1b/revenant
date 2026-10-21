@@ -75,7 +75,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Research](explanation/swiftui/research.md) | why Apple's SwiftUI cannot be ported |
 | [Features](reference/swiftui/features.md) | the areas of the API that are implemented |
 | [Completeness](reference/swiftui/completeness.md) | how much of Apple's interface is present, measured two ways |
-| [Ledger](reference/swiftui/ledger.md) | what is implemented, ignored, simplified or missing (in Russian) |
+| [Ledger](reference/swiftui/ledger.md) | what is implemented, ignored, simplified or missing |
 | [Surface](reference/swiftui/surface.md) | the interface walker and the surface files the gaps are read from |
 | [Host probes](reference/swiftui/host.md) | values measured from Apple's framework on the host |
 | [Builder typechecks](reference/swiftui/typechecks.md) | the snippets the Table and TabContent builders must accept or refuse |
