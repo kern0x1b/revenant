@@ -48,7 +48,15 @@ jobs:
 
       - name: Install the packages
         id: configure
-        run: ./xmakew f -P . -y
+        run: |
+          for attempt in 1 2 3; do
+            if ./xmakew f -P . -y; then
+              exit 0
+            fi
+            echo "::warning title=install::the packages did not install on attempt $attempt, which is often a download that a host refused; retrying"
+            sleep 60
+          done
+          exit 1
 
       - name: Run the tests
         id: tests
