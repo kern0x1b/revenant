@@ -30,11 +30,11 @@ function engine_source(given)
 end
 
 function patches()
-    return revenant("third_party", "webkit", "patches")
+    return revenant("packages", "w", "webkit", "patches")
 end
 
 function recipe()
-    return revenant("third_party", "webkit", "xmake.lua")
+    return revenant("packages", "w", "webkit", "xmake.lua")
 end
 
 function arguments(argv, flags)
