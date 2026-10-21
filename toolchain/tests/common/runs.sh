@@ -1,5 +1,5 @@
 runs_checkout=$1
-while [ ! -f "$runs_checkout/tests/light.lua" ]; do
+while [ ! -f "$runs_checkout/addon.lua" ]; do
     if [ "$runs_checkout" = / ]; then
         echo "runs.sh: no toolchain above $1" >&2
         exit 1

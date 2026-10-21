@@ -2,7 +2,7 @@ import("fixtures")
 
 local PROJECT = [[
 add_repositories("revenant %s")
-add_addons("revenant")
+add_addons("revenant %s")
 set_config("apple_minimum", "6.0")
 includes("@addon/revenant/apple-ios")
 set_allowedplats("iphoneos")
@@ -18,10 +18,10 @@ target("probe")
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
+    local copy, version = fixtures.repository(folder)
     local at = path.join(folder, "probe")
     os.mkdir(at)
-    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, root))
+    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, copy, version))
 
     local refused = fixtures.refusal(function () fixtures.build(at) end)
     if refused then
