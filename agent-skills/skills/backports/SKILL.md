@@ -55,9 +55,10 @@ package to require: it cannot depend on these targets through `revenant@...` yet
 
 ## 5. Read the build
 
-- `frameworks/Backports/tools/status.lua` prints `implemented X of Y` per framework after a build.
-- `frameworks/Backports/tools/exports.lua` checks every key of the objects against the built libraries,
-  and lists the keys no library exports (missing) and those two or more export (duplicated).
+- `frameworks/Backports/tools/exports.lua` reads the objects and the built libraries once, then writes
+  `build/generated/backports/exports.txt` (every public key no library exports is missing, every key two or more
+  libraries export is duplicated, and the methods count too) and `status.txt` (`implemented X of Y` per framework).
+  It fails when a public symbol is missing or duplicated.
 
 ## 6. What packaging needs
 
