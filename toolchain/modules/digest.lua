@@ -64,9 +64,6 @@ local RECIPES = {
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua",
                "packages/s/swift-runtime/patches/**.patch",
-               "frameworks/Backports/src/CloudKit/**", "frameworks/Backports/src/Network/**", "frameworks/Backports/src/RealityFoundation/**",
-               "frameworks/Backports/src/RealityKit/**", "frameworks/Backports/src/SceneKit/**", "frameworks/Backports/src/Spatial/**",
-               "frameworks/Backports/src/WeatherKit/**",
                "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
      inputs = {"packages/l/libcxx/xmake.lua", "packages/l/libcxx/patches/*.patch", "toolchain/modules/apple/shared_runtime.lua",
@@ -106,7 +103,25 @@ local RECIPES = {
                "toolchain/src/apple-compat/include/revenant/*.h"}},
     {folder = "packages/i/iphoneos-sdk", variable = "iphoneos_sdk_additions_digest",
      inputs = {"packages/i/iphoneos-sdk/xmake.lua", "toolchain/modules/apple/sdk.lua", "toolchain/modules/apple/sdkstubs.lua", "toolchain/src/iphoneos-sdk/usr/**",
-               "toolchain/src/iphoneos-sdk/arclite/*", "toolchain/src/iphoneos-sdk/blocks/*", "toolchain/src/iphoneos-sdk/markers/*"}}
+               "toolchain/src/iphoneos-sdk/arclite/*", "toolchain/src/iphoneos-sdk/blocks/*", "toolchain/src/iphoneos-sdk/markers/*"}},
+    {folder = "packages/r/realityfoundation", variable = "realityfoundation_sources_digest",
+     inputs = {"packages/r/realityfoundation/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityFoundation/*.swift"}},
+    {folder = "packages/r/realitykit", variable = "realitykit_sources_digest",
+     inputs = {"packages/r/realitykit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityKit/*.swift"}},
+    {folder = "packages/s/spatial", variable = "spatial_sources_digest",
+     inputs = {"packages/s/spatial/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/src/Spatial/*.swift.gyb"}},
+    {folder = "packages/c/cloudkit", variable = "cloudkit_sources_digest",
+     inputs = {"packages/c/cloudkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/CloudKit/*.swift"}},
+    {folder = "packages/w/weatherkit", variable = "weatherkit_sources_digest",
+     inputs = {"packages/w/weatherkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/WeatherKit/*.swift"}},
+    {folder = "packages/n/network", variable = "network_sources_digest",
+     inputs = {"packages/n/network/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/Network/*.swift", "frameworks/Backports/src/Network/seam/*"}}
 }
 
 function recipes()

@@ -282,11 +282,11 @@ jobs:
 
       - name: Build the Swift targets
         timeout-minutes: 20
-        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit CreateML MusicKit SwiftData 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit CreateML MusicKit SwiftData swiftRealityFoundation swiftRealityKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Install the Swift packages through their wrappers
         timeout-minutes: 20
-        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@widgetkit revenant@createml revenant@musickit revenant@swift-data revenant@swiftui 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@widgetkit revenant@createml revenant@musickit revenant@swift-data revenant@swiftui revenant@realityfoundation revenant@realitykit revenant@spatial revenant@cloudkit revenant@weatherkit revenant@network 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
         if: steps.store.outputs.cache-hit != 'true'

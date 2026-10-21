@@ -76,10 +76,10 @@ A package of our own code is allowed only as a **thin wrapper**: a recipe with n
 The layout check lists what is not converted, in `tools/layout.lua`:
 
 - `UNCONVERTED`: empty. Every recipe with no url is a thin wrapper of a component: `apple-compat`, the Swift backports, `swift-embedded` (its Swift module and Unicode tables are built by a target of `toolchain/src/swift-embedded`).
-- `REACHING`: `swift-runtime` only. Its install builds six Backports overlays (RealityFoundation, RealityKit, Spatial, CloudKit, WeatherKit, Network) from `frameworks/Backports` by a path, and those overlays are shared libraries built with the runtime's own resource dir. They become Backports targets built against the runtime, which needs the swift rule to build shared libraries; until then the entry stays. The other packages that reached into a component folder (`ggml`, `iphoneos-sdk`, `libcxx`, `swift-crypto`, `swift-system`) read it through the addon, or through a generated `port/digest.lua`, or their shim is a source of the component's own target.
+- `REACHING`: empty. The RealityFoundation, RealityKit, Spatial, CloudKit, WeatherKit and Network overlays are Swift targets of the Backports component, shared libraries built against the runtime with the runtime's own resource dir, and each has a thin wrapper package. The SceneKit apinotes merge the overlays need lives in `frameworks/Backports/tools/apinotes.lua`, and the Spatial templates are expanded by the component's target. The other packages that reached into a component folder (`ggml`, `iphoneos-sdk`, `libcxx`, `swift-crypto`, `swift-system`) read it through the addon, or through a generated `port/digest.lua`, or their shim is a source of the component's own target.
 
 A recipe that converts while still listed fails the check, and so does a listed recipe that no longer needs to be.
 
-The swift rule installs a static Swift target's `.swiftmodule` into `lib/swift/iphoneos`, so a wrapper of a Swift target hands its module to a consumer.
+The swift rule installs the `.swiftmodule` of a static or a shared Swift target into `lib/swift/iphoneos`, so a wrapper of a Swift target hands its module to a consumer.
 
 CI configures three things and no others: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Swift` component and builds and installs its seven targets through their wrappers. Nothing configures the whole iOS graph, so the `Combine` target is not built by CI yet.

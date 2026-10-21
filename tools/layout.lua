@@ -23,7 +23,7 @@ local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-
 
 local UNCONVERTED = {}
 
-local REACHING = {"swift-runtime"}
+local REACHING = {}
 
 local function set_of(list)
     local set = {}

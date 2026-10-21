@@ -40,6 +40,7 @@ The `frameworks/Backports` targets carry the Objective-C APIs later releases add
 | --- | --- |
 | `combine` | Combine on OpenCombine with the patches of this repository, one module named `Combine` |
 | `activitykit`, `appintents`, `appintents-macros`, `createml`, `matter`, `musickit`, `swift-crypto`, `swift-data`, `swift-system`, `tipkit`, `widgetkit` | the other frameworks of the repository |
+| `realityfoundation`, `realitykit`, `spatial`, `cloudkit`, `weatherkit`, `network` | the overlays of Apple's frameworks, one dylib and one Swift module each, built against `swift-runtime`; the first two overlay SceneKit and need iOS 8 or later |
 
 SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWebAuth` and the CallKit tweak `revenant-callkit-screen` are targets of their components, not packages: their sources are ours, and the components' `xmake.lua` files define them. See [the architecture](../../explanation/architecture.md).
 

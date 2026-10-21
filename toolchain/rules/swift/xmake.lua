@@ -213,7 +213,7 @@ rule("swift")
     end, {jobgraph = true, batch = true})
 
     after_install(function (target)
-        local moduledir = target:is_static() and target:data("swift.moduledir")
+        local moduledir = (target:is_static() or target:is_shared()) and target:data("swift.moduledir")
         if moduledir and os.isdir(moduledir) then
             local swiftdir = path.join(target:installdir(), "lib", "swift", "iphoneos")
             os.mkdir(swiftdir)

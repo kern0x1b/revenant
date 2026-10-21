@@ -3,10 +3,12 @@ if not is_plat("iphoneos") then
 end
 
 local SRC = path.directory(os.scriptdir())
+local TOOLS = path.join(SRC, "..", "tools")
 
 add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
 add_requires("revenant@libcxx", {alias = "libcxx"})
 add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
+add_requires("revenant@swift 6.4.0", {alias = "swift", host = true, system = false})
 
 local LOCALIZED_STRING = "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }"
 
@@ -173,3 +175,95 @@ target("SwiftData")
         add_flags(target, port_overlay(target))
     end)
     target_end()
+
+local function scenekit_flags(target)
+    local toolchain = target:toolchain("apple-ios")
+    toolchain:load()
+    local minimum = toolchain:config("deployment")
+    if tonumber(minimum:match("^(%d+)")) < 8 then
+        raise("target(%s) overlays SceneKit, and iOS %s has no SceneKit", target:name(), minimum)
+    end
+    local headers = path.join(toolchain:config("sdkdir"), "System", "Library", "Frameworks", "SceneKit.framework", "Headers")
+    local apinote = path.join(headers, "SceneKit.apinotes")
+    if not os.isfile(apinote) then
+        return {}
+    end
+    local folder = path.join(target:autogendir(), "scenekit")
+    os.mkdir(folder)
+    local overlay = import("apinotes", {rootdir = TOOLS, anonymous = true}).overlay(headers, apinote, folder)
+    return {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
+end
+
+local function expand_spatial(target)
+    local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
+    local source = path.join(target:pkg("swift"):installdir("share"), "swift-source")
+    local folder = path.join(target:autogendir(), "spatial")
+    os.mkdir(folder)
+    local defines = {CMAKE_SIZEOF_VOID_P = target:arch() == "arm64" and "8" or "4"}
+    local files = {}
+    for _, template in ipairs(os.files(path.join(SRC, "Spatial", "*.swift.gyb"))) do
+        local output = path.join(folder, (path.filename(template):gsub("%.gyb$", "")))
+        gyb.expand_to(template, output, {defines = defines, line_directive = "", paths = {path.join(source, "utils")}})
+        table.insert(files, output)
+    end
+    return files
+end
+
+local function overlay(name, folder, opt)
+    target(name)
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/swift")
+        set_optimize("fastest")
+        set_values("swift.module", name:sub(#"swift" + 1))
+        if opt.generate then
+            add_packages("swift")
+        end
+        if #table.wrap(opt.deps) > 0 then
+            add_deps(table.unpack(opt.deps))
+        end
+        if #table.wrap(opt.frameworks) > 0 then
+            add_frameworks(table.unpack(opt.frameworks))
+        end
+        if #table.wrap(opt.links) > 0 then
+            add_links(table.unpack(opt.links))
+        end
+        add_shflags("-Xlinker", "-install_name", "-Xlinker", "@rpath/" .. name .. ".dylib", {force = true})
+        on_load(function (target)
+            target:add("files", path.join(SRC, folder, "*.swift"))
+            if opt.generate then
+                target:add("files", table.unpack(opt.generate(target)))
+            end
+        end)
+        on_config(function (target)
+            local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
+                           "-Xfrontend", "-disable-implicit-string-processing-module-import"}
+            if not opt.concurrency then
+                table.join2(flags, {"-Xfrontend", "-disable-implicit-concurrency-module-import"})
+            end
+            table.join2(flags, table.wrap(opt.flags))
+            if opt.scenekit then
+                table.join2(flags, scenekit_flags(target))
+            end
+            add_flags(target, flags)
+        end)
+    target_end()
+end
+
+local FOUNDATION_LINKS = {"swiftDarwin", "swiftObjectiveC", "swiftDispatch", "swiftCoreFoundation", "swiftCoreGraphics", "swiftFoundation"}
+
+overlay("swiftRealityFoundation", "RealityFoundation", {concurrency = true, scenekit = true,
+    frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit"},
+    links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
+
+overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, deps = {"swiftRealityFoundation"},
+    frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit", "UIKit"},
+    links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
+
+overlay("swiftSpatial", "Spatial", {generate = expand_spatial})
+
+overlay("swiftCloudKit", "CloudKit", {})
+
+overlay("swiftWeatherKit", "WeatherKit", {})
+
+overlay("swiftNetwork", "Network", {flags = {"-Xfrontend", "-import-underlying-module", "-I", path.join(SRC, "Network", "seam")}})

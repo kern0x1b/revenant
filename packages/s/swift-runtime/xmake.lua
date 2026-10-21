@@ -10,11 +10,6 @@ package("swift-runtime")
     add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
     add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
-    local reality_libraries = {"swiftRealityFoundation", "swiftRealityKit"}
-    local function has_scenekit(minimum)
-        return tonumber(minimum:match("^(%d+)")) >= 8
-    end
-
     local renamed = {"clock_gettime", "clock_getres", "dispatch_get_global_queue", "memset_s", "os_system_version_get_current_version"}
 
     local sources = {
@@ -105,8 +100,7 @@ package("swift-runtime")
                            and os.isdir(path.join(path.absolute("build"), "core"))
                            and os.isdir(path.absolute("swift-source"))
         if stdlib_kept then
-            for _, scratch in ipairs({"overlay", "resources", "simd", "scenekit", "realityfoundation", "realitykit",
-                                      "spatial", "synchronization", "observation", "stringprocessing"}) do
+            for _, scratch in ipairs({"overlay", "resources", "simd", "synchronization", "observation", "stringprocessing"}) do
                 os.tryrm(path.join(path.absolute("build"), scratch))
             end
             print("swift-runtime: the standard library's build tree answers for these inputs and is kept")
@@ -485,271 +479,6 @@ package("swift-runtime")
         local simd_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-framework", "Foundation", "-framework", "CoreFoundation"}
         build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil, {backports = {}})
 
-        if has_scenekit(minimum) then
-            local scn_overlay = {}
-            local scn_headers = path.join(toolchain:config("sdkdir"), "System", "Library", "Frameworks", "SceneKit.framework", "Headers")
-            local scn_apinote = path.join(scn_headers, "SceneKit.apinotes")
-            local function merge_apinotes(source, target)
-                local function top_level_key(line)
-                    local stripped = line:gsub("%s+$", "")
-                    if line == "" or line:find("^[ \t#-]") or stripped == "---" or stripped:sub(-1) ~= ":" then
-                        return nil
-                    end
-                    return stripped:sub(1, -2)
-                end
-                local function sections(lines)
-                    local blocks = {}
-                    for index, line in ipairs(lines) do
-                        local name = top_level_key(line)
-                        if name ~= nil then
-                            table.insert(blocks, {name = name, index = index, body = {}})
-                        elseif #blocks > 0 then
-                            table.insert(blocks[#blocks].body, line)
-                        else
-                            table.insert(blocks, {body = {line}})
-                        end
-                    end
-                    return blocks
-                end
-                local function list_lines(body)
-                    local kept = {}
-                    for _, line in ipairs(body) do
-                        if line:find("^%s*$") or line:find("^%s*#") or line:find("^[ %-]") then
-                            table.insert(kept, line)
-                        end
-                    end
-                    return kept
-                end
-                local function merge(lines, key)
-                    local blocks = sections(lines)
-                    local folded = {}
-                    local seen = false
-                    for _, block in ipairs(blocks) do
-                        if block.name == key then
-                            if #list_lines(block.body) ~= #block.body then
-                                raise("refused: a line of the duplicated section %s is neither an entry nor nested under one", key)
-                            end
-                            if seen then
-                                for _, line in ipairs(list_lines(block.body)) do
-                                    table.insert(folded, line)
-                                end
-                            else
-                                seen = true
-                                folded = list_lines(block.body)
-                            end
-                        end
-                    end
-                    local result = {}
-                    seen = false
-                    for _, block in ipairs(blocks) do
-                        if block.name ~= key then
-                            if block.index ~= nil then
-                                table.insert(result, lines[block.index])
-                            end
-                            for _, line in ipairs(block.body) do
-                                table.insert(result, line)
-                            end
-                        elseif not seen then
-                            seen = true
-                            table.insert(result, lines[block.index])
-                            for _, line in ipairs(folded) do
-                                table.insert(result, line)
-                            end
-                        end
-                    end
-                    return result
-                end
-                local function count_entries(lines)
-                    local count = 0
-                    for _, line in ipairs(lines) do
-                        if line:sub(1, 7) == "- Name:" then
-                            count = count + 1
-                        end
-                    end
-                    return count
-                end
-                local function section_names(lines)
-                    local names = {}
-                    for _, block in ipairs(sections(lines)) do
-                        if block.name ~= nil and block.name ~= "" then
-                            table.insert(names, block.name)
-                        end
-                    end
-                    return names
-                end
-                local function as_set(list)
-                    local set, size = {}, 0
-                    for _, value in ipairs(list) do
-                        if not set[value] then
-                            set[value] = true
-                            size = size + 1
-                        end
-                    end
-                    return set, size
-                end
-                local function check_subset(lines, what)
-                    for index, line in ipairs(lines) do
-                        local shaped = line:find("^%s*$") or line:find("^%s*#") or line == "---"
-                            or line:find("^[%w_]+:$") or line:find("^[%w_]+: %S")
-                            or line:find("^%- [%w_]+:") or line:find("^ +%- [%w_]+:") or line:find("^ +[%w_]+:")
-                        if line:find("\t", 1, true) or not shaped then
-                            raise("refused: %s, line %d, is outside the apinotes subset the merge reads: %s", what, index, line)
-                        end
-                    end
-                end
-
-                local text = io.readfile(source):gsub("\r\n?", "\n")
-                local original = {}
-                local start = 1
-                while true do
-                    local stop = text:find("\n", start, true)
-                    if not stop then
-                        table.insert(original, text:sub(start))
-                        break
-                    end
-                    table.insert(original, text:sub(start, stop - 1))
-                    start = stop + 1
-                end
-                check_subset(original, "the input")
-                local keys = section_names(original)
-                local counts = {}
-                for _, key in ipairs(keys) do
-                    counts[key] = (counts[key] or 0) + 1
-                end
-                local duplicates = {}
-                local listed = {}
-                for _, key in ipairs(keys) do
-                    if counts[key] > 1 and not listed[key] then
-                        table.insert(duplicates, key)
-                        listed[key] = true
-                    end
-                end
-                if #duplicates == 0 then
-                    io.writefile(target, table.concat(original, "\n"))
-                    print(string.format("no duplicate top-level key in %s: it is written through", source))
-                    return
-                end
-
-                local entries_before = count_entries(original)
-                local merged = original
-                for _, key in ipairs(duplicates) do
-                    merged = merge(merged, key)
-                end
-                local entries_after = count_entries(merged)
-                if entries_after ~= entries_before then
-                    raise("refused: the merge changed the entry count, %d `- Name:` in and %d out", entries_before, entries_after)
-                end
-                local merged_keys = section_names(merged)
-                local key_set, key_count = as_set(keys)
-                local merged_set, merged_count = as_set(merged_keys)
-                if merged_count ~= key_count or merged_count ~= #merged_keys then
-                    raise("refused: the merge changed the sections, %d in and %d out", key_count, merged_count)
-                end
-                for key in pairs(merged_set) do
-                    if not key_set[key] then
-                        raise("refused: the merge changed the sections, %s is new", key)
-                    end
-                end
-                local removed = 0
-                for _, key in ipairs(duplicates) do
-                    removed = removed + counts[key] - 1
-                end
-                if #merged ~= #original - removed then
-                    raise("refused: the merge moved %d lines, expected %d", #merged, #original - removed)
-                end
-                check_subset(merged, "the merged file")
-                io.writefile(target, table.concat(merged, "\n"))
-                print(string.format("merged the duplicate top-level %s of %s: %d `- Name:` entries in and %d out, %d sections",
-                    table.concat(duplicates, ", "), source, entries_before, entries_after, merged_count))
-            end
-            if os.isfile(scn_apinote) then
-                local scn = path.absolute("scenekit")
-                os.mkdir(scn)
-                local merged = path.join(scn, "SceneKit.apinotes")
-                merge_apinotes(scn_apinote, merged)
-                local overlay = path.join(scn, "overlay.yaml")
-                local function quoted(text)
-                    return '"' .. text:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub("\n", "\\n") .. '"'
-                end
-                io.writefile(overlay, table.concat({
-                    '{"version":0,"case-sensitive":"false","roots":[{"type":"directory","name":', quoted(scn_headers),
-                    ',"contents":[{"type":"file","name":"SceneKit.apinotes","external-contents":', quoted(merged), '}]}]}'
-                }))
-                scn_overlay = {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
-            end
-
-            local reality = path.absolute("realityfoundation")
-            os.mkdir(reality)
-            local reality_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityFoundation", "*.swift"))) do
-                local output = path.join(reality, path.filename(file))
-                os.cp(file, output)
-                table.insert(reality_sources, output)
-            end
-            assert(#reality_sources > 0, "the RealityFoundation sources are missing from the package")
-            build_overlay("RealityFoundation", reality_sources,
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "SceneKit"}),
-                          nil, {backports = {}, concurrency = true, extra_flags = scn_overlay})
-
-            local realitykit = path.absolute("realitykit")
-            os.mkdir(realitykit)
-            local realitykit_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityKit", "*.swift"))) do
-                local output = path.join(realitykit, path.filename(file))
-                os.cp(file, output)
-                table.insert(realitykit_sources, output)
-            end
-            assert(#realitykit_sources > 0, "the RealityKit sources are missing from the package")
-            build_overlay("RealityKit", realitykit_sources,
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-lswiftRealityFoundation",
-                                                        "-framework", "QuartzCore", "-framework", "SceneKit", "-framework", "UIKit"}),
-                          nil, {backports = {}, concurrency = true, extra_flags = scn_overlay})
-        end
-
-        local spatial = path.absolute("spatial")
-        os.mkdir(spatial)
-        local spatial_sources = {}
-        for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Spatial", "*"))) do
-            local name = path.filename(file)
-            if name:endswith(".gyb") then
-                table.insert(spatial_sources, expand(file, path.join(spatial, (name:gsub("%.gyb$", "")))))
-            else
-                local output = path.join(spatial, name)
-                os.cp(file, output)
-                table.insert(spatial_sources, output)
-            end
-        end
-        assert(#spatial_sources > 0, "the Spatial sources are missing from the package")
-        build_overlay("Spatial", spatial_sources, {}, nil, {backports = {}})
-
-        for _, module in ipairs({"CloudKit", "WeatherKit"}) do
-            local dir = path.absolute(module:lower())
-            os.mkdir(dir)
-            local module_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", module, "*.swift"))) do
-                local output = path.join(dir, path.filename(file))
-                os.cp(file, output)
-                table.insert(module_sources, output)
-            end
-            assert(#module_sources > 0, "the " .. module .. " sources are missing from the package")
-            build_overlay(module, module_sources, {}, nil)
-        end
-
-        if package:config("backports") and not package:is_arch("arm64") then
-            local network = path.absolute("network")
-            os.mkdir(network)
-            local network_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "*.swift"))) do
-                local output = path.join(network, path.filename(file))
-                os.cp(file, output)
-                table.insert(network_sources, output)
-            end
-            assert(#network_sources > 0, "the Network sources are missing from the package")
-            local seam = path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "seam")
-            build_overlay("Network", network_sources, {}, nil, {backports = {"FoundationBackports"},
-                                                              extra_flags = {"-Xfrontend", "-import-underlying-module", "-I", seam}})
-        end
-
         local platform_dir = path.join(install, "iphoneos")
         os.mkdir(platform_dir)
         for _, built in ipairs(table.join(os.filedirs(path.join(install, "*.swiftmodule")), os.files(path.join(install, "*.dylib")),
@@ -852,13 +581,6 @@ package("swift-runtime")
         local toolchain = assert(package:toolchains(), "the runtime is built with the apple-ios toolchain")[1]
         toolchain:load()
 
-        for _, library in ipairs(reality_libraries) do
-            local expected = has_scenekit(toolchain:config("deployment"))
-            assert(os.isfile(path.join(libraries, "lib" .. library .. ".dylib")) == expected,
-                   "lib" .. library .. ".dylib is " .. (expected and "missing" or "installed") .. " at iOS " .. toolchain:config("deployment") ..
-                   ", where SceneKit " .. (expected and "is" or "is not") .. " in the release")
-        end
-
         local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
             imports = read.imports, exported = read.exported,
             minimum = toolchain:config("deployment"), backports = package:config("backports") and true or false})
@@ -868,15 +590,6 @@ package("swift-runtime")
         local placeable = import("@addon.revenant.apple.firmware", {anonymous = true}).source(package:arch(), toolchain:config("deployment"))
         dyld.check(placeable, table.join(installed, linked), package:installdir(),
                    {exempt = linked, runtime = installed, guards = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).guards()})
-
-        local idle = {}
-        for _, name in ipairs(import("@addon.revenant.apple.shared_runtime", {anonymous = true}).unbound_dependencies(
-                                  path.join(libraries, "libswiftSpatial.dylib"), package:arch())) do
-            if name:startswith("libswift") then
-                table.insert(idle, name)
-            end
-        end
-        assert(#idle == 0, "libswiftSpatial.dylib names " .. table.concat(idle, ", ") .. ", which none of its symbols is bound to")
 
         for _, entry in ipairs({"shims", "clang", "apinotes", "module.modulemap"}) do
             assert(os.exists(path.join(resources, entry)),
