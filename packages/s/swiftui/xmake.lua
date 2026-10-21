@@ -29,7 +29,7 @@ package("swiftui")
             "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
             "set_config(\"apple_sdk\", \"" .. package:config("apple_sdk") .. "\")",
             "includes(\"@addon/revenant/apple-ios\")",
-            "option(\"component\", {type = \"string\", default = \"\"})",
+            "option(\"component\", {type = \"string\", default = \"SwiftUI\"})",
             "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"})",
             "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})",
             "add_requires(\"revenant@combine\", {alias = \"combine\"})",
