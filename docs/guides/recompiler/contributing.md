@@ -42,7 +42,7 @@ Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by com
 
 ## The revenant addon
 
-- Check a toolchain version only in an `XMAKE_GLOBALDIR` of your own, the way `toolchain/tests/addon/store_test.lua`
+- Check a toolchain version only in an `XMAKE_GLOBALDIR` of your own, the way (a file of an earlier layout, not in the repository)
   does. On xmake 3.1.1 every addon install becomes the machine's `active` version, so an install into the shared store
   changes it for every project.
 - The payload under `~/.xmake/addons` is never edited by hand: no copying files into it, no `xmake addon --remove`.

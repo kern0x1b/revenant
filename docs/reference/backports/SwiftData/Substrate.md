@@ -1,7 +1,7 @@
 # What the port gives SwiftData, measured
 
 Every line here is the output of a command run on 2026-09-28 in
-`toolchain/.agent-work/worktrees/api-swiftdata`, against the packages as they are in the shared
+(a workflow file kept outside the repository), against the packages as they are in the shared
 store. The probe that reads them is `.agent-work/probe/` in the same worktree.
 
 The toolchain, resolved once: `revenant@swift 6.4.0` at
@@ -32,7 +32,7 @@ and `packages/s/swift-runtime/xmake.lua:149` hands the directory to a port as
 `-plugin-path`.
 
 **So `@Model`, `@Attribute`, `@Relationship`, `@Transient`, `@Unique`, `@Index` and `@ModelActor`
-can be implemented, not stubbed.** What is missing is one line: `rules/swift/xmake.lua` reads the
+can be implemented, not stubbed.** What is missing is one line: `toolchain/rules/swift/xmake.lua` reads the
 plugin path from the swift-runtime package alone (line 182), while it already collects every
 dependency's `REVENANT_SWIFT_MODULES` (lines 170-176). A `SwiftDataMacros` plugin therefore needs
 the same loop for a `REVENANT_SWIFT_PLUGINS` the package exports. Without it a port cannot load a
@@ -53,10 +53,10 @@ want_valuetransformer  FOUND
 ```
 
 They are not ours to add. The corpus assigns both to `swift-foundation`
-(`coordination/corpus/sdk-26.2-surface.tsv`, `via = swift-foundation`, `owner-registry =
+((a workflow file kept outside the repository), `via = swift-foundation`, `owner-registry =
 swift-foundation`, `registry = swiftlang/swift-foundation:Sources/FoundationEssentials/Predicate/
 Predicate.swift` and `.../FoundationInternationalization/String/SortDescriptor.swift`), and
-`packages/runtimes/swift-foundation` - the toolchain package that builds them, work in progress in
+(a file of an earlier layout, not in the repository) - the toolchain package that builds them, work in progress in
 `.agent-work/worktrees/api-foundation-swift` - is not in the shared store.
 
 Eight rows depend on those two types and are therefore not in this delivery:
@@ -86,9 +86,9 @@ in the runtime's port overlay, `REVENANT_SWIFT_PORT_HEADERS`):
 
 | name | mark still in the port's header | registry |
 | --- | --- | --- |
-| `NSEntityDescription.uniquenessConstraints` | `API_AVAILABLE(macosx(10.11),ios(9.0))` | `registry/CoreData/ios9.json`: `status: absent` |
-| `NSPersistentStoreDescription.cloudKitContainerOptions` | `API_AVAILABLE(macosx(10.15),ios(13.0),...)` | `registry/CoreData/ios13cloudkit.json`: `status: inert` |
-| `NSPersistentCloudKitContainerOptions.databaseScope` | `API_AVAILABLE(macosx(11.0),ios(14.0),...)` | `registry/CoreData/ios13cloudkit.json`: `status: absent` |
+| `NSEntityDescription.uniquenessConstraints` | `API_AVAILABLE(macosx(10.11),ios(9.0))` | (a workflow file kept outside the repository): `status: absent` |
+| `NSPersistentStoreDescription.cloudKitContainerOptions` | `API_AVAILABLE(macosx(10.15),ios(13.0),...)` | (a workflow file kept outside the repository): `status: inert` |
+| `NSPersistentCloudKitContainerOptions.databaseScope` | `API_AVAILABLE(macosx(11.0),ios(14.0),...)` | (a workflow file kept outside the repository): `status: absent` |
 
 Their own `reason` fields say why, and they are right: a uniqueness constraint the store of iOS 6
 cannot enforce would let in the duplicates the model forbids, and no release this port runs on has
@@ -132,7 +132,7 @@ runtime=29dd4454 deployment=6.1.3 OK
 ```
 
 The floor is the `Swift` module of the runtime itself, and it is a property of the runtime and of
-the Core Data backports under it: every entry of `registry/CoreData.json` and of
+the Core Data backports under it: every entry of (a workflow file kept outside the repository) and of
 `registry/CoreData/*.json` has `"minimum": "6.0"`, so there is no `CoreDataBackports` for a band
 below 6.0 and the runtime's Core Data overlay cannot be built for one. A module that imports Core
 Data - which is all of SwiftData - exists therefore for the 6.0 and 6.1.3 bands and not for 4.3.
@@ -238,6 +238,6 @@ and a token is that number per store — so the two are the same values read fro
 than Apple's own encoding. A program that only ever goes through this port's `ModelContext` cannot
 tell them apart; one that mixed the two would, and that is the divergence the facts name.
 
-The oracle for the history family (`.agent-work/probe/model/History.swift`) uses the **bare** name on
+The oracle for the history family ((a workflow file kept outside the repository)) uses the **bare** name on
 purpose: it resolves to whichever module is in scope, which is what lets one source be both Apple's
 program and the port's.

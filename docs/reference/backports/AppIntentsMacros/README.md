@@ -13,14 +13,14 @@ own expansion of them, and it is what the 19 macro rows in `revenant@appintents`
 (`AccessorMacro`, `PeerMacro`, `MemberAttributeMacro`, `MemberMacro`, `ExtensionMacro`,
 `FreestandingMacro`, `Macro`) and **no** `CompilerPlugin` — it sits behind `@_spi(PluginMessage)` in
 `SwiftCompilerPluginMessageHandling`, so a `-load-plugin-executable` cannot be written against it. The
-measurement is in the commit that found it, and `packages/a/appintents/facts/AppIntents/Macros.md`
+measurement is in the commit that found it, and (a file of an earlier layout, not in the repository)
 records what each macro's contract is, read off the framework's own `@attached` declarations.
 
 **What is written and what is not**, per macro, in `Sources/`:
 
 | macro | roles | state |
 | --- | --- | --- |
-| `ComputedProperty()` | peer + accessor | written, and both roles **typecheck** against the toolchain's own swift-syntax. The entry point and the expansion harness are **not** done: the rule that builds the plugin ships in the next addon release cut from main, and until it does `tests/Expansions.swift` **asserts nothing** -- it is a hand-written reference; the mutant that must turn it red is in [the tests guide](../../../../docs/guides/toolchain/tests.md) |
+| `ComputedProperty()` | peer + accessor | written, and both roles **typecheck** against the toolchain's own swift-syntax. The entry point and the expansion harness are **not** done: the rule that builds the plugin ships in the next addon release cut from main, and until it does (a file of an earlier layout, not in the repository) **asserts nothing** -- it is a hand-written reference; the mutant that must turn it red is in [the tests guide](../../toolchain/tests.md) |
 | `DeferredProperty()` | peer + accessor | not started |
 | `AppEntity<T>(schema:)`, `AppIntent<T>(schema:)`, `AppEnum<T>(schema:)` | memberAttribute + extension | not started |
 | `AssistantEntity/Enum/Intent<T>(schema:)` | memberAttribute + extension | not started |
@@ -28,7 +28,7 @@ records what each macro's contract is, read off the framework's own `@attached` 
 
 Apple's own plugin is **not** on this machine — the toolchain ships `libObservationMacros` and
 `libSwiftMacros` and nothing else — so the reference is the framework's interface declarations plus a
-hand-checked expansion, not a diff against Apple's output. `tests/Expansions.swift` says so in its own
+hand-checked expansion, not a diff against Apple's output. (a file of an earlier layout, not in the repository) says so in its own
 header, and says which two of its own errors are its own.
 
 ## Building it, and the store rule that a run of it has to know

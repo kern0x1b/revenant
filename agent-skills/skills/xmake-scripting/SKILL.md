@@ -47,7 +47,7 @@ rules' own script of that stage, and with it Revenant's placement, stripping and
 
 The target's `after_build` and the `app` rule's `after_build` run as one stage with no order
 between them. xmake orders rule scripts only through a rule's `add_orders`
-(`modules/private/utils/rule.lua`, `build_orders_in_jobgraph`). The rule deletes and rewrites
+((a file of an earlier layout, not in the repository), `build_orders_in_jobgraph`). The rule deletes and rewrites
 `<Name>.app` there (`v0.8.10:modules/apple/platform.lua:437-440`). A hook of yours that reads the
 bundle may see it half-written, and a file it adds is gone. Use the bundle after `xmake`
 returns, in a command of your own.
@@ -60,7 +60,7 @@ returns, in a command of your own.
   (`core/sandbox/modules/import/core/sandbox/module.lua:473-499`).
 - Your own modules: a `.lua` file with top-level functions; a name starting with `_` stays
   private, and a `main` function is called when the module itself is called. Put it beside
-  `xmake.lua` (e.g. `scripts/stamp.lua`) and `import("scripts.stamp")` from a hook. The directory
+  `xmake.lua` (e.g. (a file of an earlier layout, not in the repository)) and `import("scripts.stamp")` from a hook. The directory
   of the importing script is searched first.
 - Revenant's modules are imported with the `@addon.` prefix (`module.lua:519-524`). A project uses
   only those Revenant's README documents for it: `@addon.revenant.apple.cmake`, `.sources`,

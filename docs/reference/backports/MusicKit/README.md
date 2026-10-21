@@ -98,7 +98,7 @@ inverse are marked iOS 7 by this release's Swift Foundation overlay: the port's 
 headers, where the backports put their marks, and not the Swift overlay's own. So the table is
 `RevenantBase64URL`, with a decoder beside the encoder it inverts.
 
-`tests/backports/host/musickit/run.sh` is the end-to-end check: it mints a token from a key OpenSSL
+(a file of an earlier layout, not in the repository) is the end-to-end check: it mints a token from a key OpenSSL
 made and asks OpenSSL to verify the signature over the first two parts joined by a dot, which is what a
 JOSE verifier does. The last line it prints is `OpenSSL  : Verified OK`. Three mutations of the module
 turn it red — the two ways of getting the token's shape wrong, and a signing input one byte off — and

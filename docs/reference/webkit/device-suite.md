@@ -154,7 +154,7 @@ was working. This loads a canvas cleared to red and looks at the screen.
 ```
 
 It prints how much of the page area is red and exits non-zero when the answer is
-`absent`. The screenshot stays in `tests/device/sweep-shots/gl-present.png`.
+`absent`. The screenshot stays in (a workflow file kept outside the repository).
 
 ## conformance.lua — Khronos' suite, on the phone
 
@@ -212,7 +212,7 @@ is a secure context, and `revtouch` taps the button and then the sheet's Cancel.
 It prints what the page saw on load and after cancelling, and exits non-zero
 unless the promise rejects with `AbortError`, which is what the specification
 asks for when the sheet is dismissed. The screenshot of the open sheet stays in
-`tests/device/sweep-shots/share-sheet.png`.
+(a workflow file kept outside the repository).
 
 ## sweep.lua — the same engine against the web as it is served
 

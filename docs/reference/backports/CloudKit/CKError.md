@@ -1,6 +1,6 @@
 # CKError, measured
 
-What `files/CloudKit/CKError.swift` carries, what it was checked against, and where it differs from
+What (a file of an earlier layout, not in the repository) carries, what it was checked against, and where it differs from
 the host. Every number here was produced by the commands named in it, on 2026-10-16, from the
 `v-impl-swift-apps` worktree of the toolchain.
 
@@ -31,7 +31,7 @@ recipe does not name `files/CloudKit`, so the runtime digest is unchanged and no
 ## Measured against the host
 
 The oracle is the macOS host's CloudKit, the only one in this workspace that answers. The probe is
-`harness/CloudKit/main.swift`, built twice: `swiftc -O main.swift` against the host's CloudKit, and
+(a file of an earlier layout, not in the repository), built twice: `swiftc -O main.swift` against the host's CloudKit, and
 `swiftc -DOURS -O main.swift files/CloudKit/CKError.swift` against the file. The host is macOS 27
 (Swift 6.4, Xcode CLT), not iOS 26.2, so these are behaviour facts about the host, not about the
 device.

@@ -34,7 +34,7 @@ settings app writes. iOS 6.1.3 runs no such service and has no TipKit at all, so
   its own controller — which is the in-app popover the framework would have drawn;
 * `Tips.configure(_:)` records the app's own display frequency and container in the store.
 
-`facts/TipKit/Rendering.md`.
+`docs/reference/backports/TipKit/TipKit/Rendering.md`.
 
 ## The SwiftUI half
 
@@ -53,7 +53,7 @@ MIT, the repository's.
 `xmake` resolves these packages out of the shared `~/.xmake` store, and that store takes a
 **machine-wide** lock per package: a second `xmake` that reaches the same package waits, and prints
 `package(swift-runtime) is being accessed by other processes, please wait!` until the first is done.
-So every `xmake` command that touches the store goes through `coordination/heavy.sh`, one at a time,
+So every `xmake` command that touches the store goes through (a workflow file kept outside the repository), one at a time,
 or it hangs:
 
     coordination/heavy.sh xmake f -c -y      # resolve

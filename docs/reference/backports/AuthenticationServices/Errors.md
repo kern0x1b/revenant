@@ -1,6 +1,6 @@
 # AuthenticationServices error structs, measured
 
-What `files/AuthenticationServices/Errors.swift` carries, what it was checked against, and where it
+What (a file of an earlier layout, not in the repository) carries, what it was checked against, and where it
 differs from the host. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain, with
 the commands named below.
 
@@ -28,7 +28,7 @@ below confirms the host answers the same way: `CustomNSError`, `Hashable`, `Erro
 ## Domains and codes
 
 - Domains: `com.apple.AuthenticationServices.AuthorizationError` (`ASAuthorizationErrorDomain`,
-  the Backports `AuthenticationServices/ASConstants13_0.m`),
+  the Backports `frameworks/Backports/src/AuthenticationServices/ASConstants13_0.m`),
   `ASCredentialIdentityStoreErrorDomain` and `ASExtensionErrorDomain` (`ASConstants12_0.m`),
   `com.apple.AuthenticationServices.WebAuthenticationSession` (`ASWebAuthenticationSession.m`).
   The host reads the same four strings (below).
@@ -39,7 +39,7 @@ below confirms the host answers the same way: `CustomNSError`, `Hashable`, `Erro
 ## Measured against the host
 
 The oracle is the macOS host's AuthenticationServices (macOS 27, Swift 6.4). The probe is
-`harness/AuthenticationServices/errors/main.swift`, built twice:
+(a file of an earlier layout, not in the repository), built twice:
 
 - `swiftc -O main.swift` against the host's framework;
 - `swiftc -DOURS -O main.swift files/AuthenticationServices/Errors.swift` against the file.

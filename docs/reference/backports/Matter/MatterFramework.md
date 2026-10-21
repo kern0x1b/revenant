@@ -7,8 +7,8 @@ Nothing here is re-typed; the classes are the Matter SDK's classes, and their be
 
 ## The surface, and what the host's own framework says about it
 
-Measured with `tools/matter-host-diff.lua`, which reads the host's half from a **live process that loaded the
-framework** (`tests/backports/host/matter/run.sh`: `objc_copyClassList`, `class_copyMethodList`,
+Measured with (a file of an earlier layout, not in the repository), which reads the host's half from a **live process that loaded the
+framework** ((a file of an earlier layout, not in the repository): `objc_copyClassList`, `class_copyMethodList`,
 `class_copyPropertyList`, `class_copyProtocolList`, `protocol_copyMethodDescriptionList`, and the surface's function
 rows asked of the loaded image by `dlsym`) and the port's half from `libMatterBackports.dylib` with the same modules
 the gate's check reads a library with.
@@ -24,7 +24,7 @@ the gate's check reads a library with.
 Every class, every function, all but one property and 94% of the methods are in the framework this machine's own macOS
 carries. So the port's target is the framework rather than the surface, and a build of connectedhomeip's framework is a
 build of that surface. The 830 methods, 1 property and 5 protocols no host framework carries are named in
-`.agent-work/host/matter-host-diff.tsv`: they are rows of an SDK release whose framework is older than the SDK, and
+(a workflow file kept outside the repository): they are rows of an SDK release whose framework is older than the SDK, and
 they are what the port's own library is compared against row by row.
 
 **The two kinds the surface has and this comparison cannot have.** The 6531 constants are header-declared
@@ -43,7 +43,7 @@ this measurement came from; the members could not be had at all until the framew
 - **All 125 objects compile for `armv7-apple-ios6.1.3`**: the 100 `MTR*` Objective-C++ of the framework and the 23
   app-layer C++ files its own Xcode target carries, read out of that target's Sources phase and not guessed, plus the two
   generated Apple-spelling categories: 100 + 23 + 2 = 125. The
-  objects are in the package's own source tree; `tools/matter-framework.sh` builds and links them there in minutes
+  objects are in the package's own source tree; (a file of an earlier layout, not in the repository) builds and links them there in minutes
   instead of a whole package resolve.
 **The link succeeds** with `-Wl,-no_implicit_dylibs` (see the flag's reason below): `libMatterBackports.dylib`,
 45 110 492 bytes, `MH_MAGIC ARM V7`, 1506 exported `MTR*` classes, 24 777 exported symbols, 382 undefined, install
@@ -75,8 +75,8 @@ name `/usr/lib/revenant/org.revenant.backports/libMatterBackports.dylib`.
 
 ## What the port carries, measured against the SDK 26.2 surface and against the host
 
-`tools/matter-registry.lua` against the linked dylib: **16 461 of 24 647 rows carried**, in 299 registry files.
-`tools/matter-host-diff.lua` over the same corpus, the host's own framework read from a live process, and the port's
+(a file of an earlier layout, not in the repository) against the linked dylib: **16 461 of 24 647 rows carried**, in 299 registry files.
+(a file of an earlier layout, not in the repository) over the same corpus, the host's own framework read from a live process, and the port's
 library read from its exports and metadata:
 
 | kind | both | host only | port only | neither |
@@ -120,7 +120,7 @@ the library's own spelling first, because the class list `objc.lua` walks is not
 enumerations: they live in the importing program's own text and are not symbols a library can export, so the headers
 the package installs are their coverage. 5 protocols and 1 property are rows no framework of either kind carries.
 **650 methods are the port's real gap**, of which 48 are ones the host's framework does carry and this library does
-not — the rest are rows neither framework has. Every one is named in `.agent-work/host/matter-host-diff.tsv`.
+not — the rest are rows neither framework has. Every one is named in (a workflow file kept outside the repository).
 
 ## The 55 host-only methods: what they are, measured
 
@@ -166,7 +166,7 @@ is two things, and both are measurable:
   sha1 of each file in the build tree against the tag: `MTRDeviceController_Concrete.mm`, `MTRBaseDevice.mm`,
   `MTRCommissioningOperation.mm`, `MTRDevice_XPC.mm`, `MTRDeviceController_XPC.mm` and
   `MTRDeviceControllerDataStore.mm` are all **identical**. The recipe compiles the hundred sources unmodified - the
-  only files it adds are `packages/m/matter/Revenant/`, the Apple spellings - so every delegate call site upstream has, the
+  only files it adds are (a file of an earlier layout, not in the repository), the Apple spellings - so every delegate call site upstream has, the
   port has, at the same line of the same file. The call sites, in the framework's own `.mm` files: 26 mentions of
   `MTRDeviceControllerDelegate`, 25 of `MTROperationalCredentialsDelegate`, 10 each of `MTRCommissioningDelegate`,
   `MTRDeviceControllerStorageDelegate` and `MTROTAProviderDelegate`, 4 of `MTRDeviceAttestationDelegate`, over 49
@@ -189,7 +189,7 @@ implements*, and the port's job for them is the metadata and the call sites, bot
 `xmake l tools/x.lua <a> <b> <c> <d>` does deliver four positional strings, both as named parameters and through
 `{...}` - measured with a probe that printed them. What is not delivered is a script that *imports* `apple.objc` and then
 reads a large library inside `main`: it fails with `attempt to index a number value (local 'opt')` before its first
-statement in `main` runs, which is xmake's sandbox `opt` rather than anything in the arguments. `tools/matter-alias.lua`
+statement in `main` runs, which is xmake's sandbox `opt` rather than anything in the arguments. (a file of an earlier layout, not in the repository)
 is the script: the four paths arrive, the import returns a table, and the call after it does not. The rename rule and
 the emitter in it are sound; what is missing is the isolation of that failure, and until it is isolated the 48 forwards
 are not written.
@@ -212,14 +212,14 @@ property is answered by the host through a *category* or a protocol the class ad
 given row is a source question, and it is not answered yet.
 
 So: 48 methods and 372 properties are **missing methods**, not undeclared ones, and the fix is to implement them from
-upstream's sources, not to declare what is already there. `tools/matter-host-diff.lua` names every one of them in
-`.agent-work/host/matter-host-diff.tsv`.
+upstream's sources, not to declare what is already there. (a file of an earlier layout, not in the repository) names every one of them in
+(a workflow file kept outside the repository).
 
 ## Behaviour, held to the host
 
-`tests/backports/host/matter/pure.m` is one program with no device on the other end, written so it compiles against
+(a file of an earlier layout, not in the repository) is one program with no device on the other end, written so it compiles against
 the host's own `Matter.framework` and against `libMatterBackports.dylib` alike, printing one `name<TAB>answer` per
-line; `tools/matter-pure-diff.lua` reads the two files and names every line that differs. What it covers is the part of
+line; (a file of an earlier layout, not in the repository) reads the two files and names every line that differs. What it covers is the part of
 the three areas a program meets first that needs no device: the setup payload built from a passcode and a discriminator
 and read back, the manual-entry parser over the code the framework itself wrote out of that payload, the onboarding
 parser over its base38 form, a payload and a code that are not ones, the commissioning parameters' own defaults, and
@@ -288,7 +288,7 @@ of the framework's own xcconfig, which I had not read yet.
 - **64-bit atomics on 32-bit ARM.** `ClockBase::mLastTimestamp` is taken and replaced with 64-bit `__atomic_*`
   operations, and clang gives `uint64_t` four bytes of alignment on `armv7-apple-ios` - measured:
   `sizeof(struct { char c; uint64_t v; })` is 12 there, 16 on arm64. A doubleword atomic on ARM has to be eight-byte
-  aligned to be defined at all, so the member is aligned (`patches/clock-alignment.patch`) rather than the warning
+  aligned to be defined at all, so the member is aligned (`packages/m/matter/patches/clock-alignment.patch`) rather than the warning
   turned off.
 - **BLE advertisement connectability.** `BleConnectionDelegateImpl.mm` (pinned 3bcdd56b, lines 411-414) reads
   `CBAdvertisementDataIsConnectable` and returns when `[nil boolValue] == NO`, so an advertisement with no key is
@@ -297,12 +297,12 @@ of the framework's own xcconfig, which I had not read yet.
   TxPowerLevel; its exports have no `_CBAdvertisementDataIsConnectable`), so connectability is never reported there.
   The key's string on the releases that have it is `kCBAdvDataIsConnectable`, measured in the host's dyld shared cache
   (`dyld_shared_cache_arm64e.07`). The port answers for the datum the OS lacks: an absent key counts as connectable
-  (`patches/ble-connectable.patch`), since a commissionable device must be connectable; the pinned source cites no spec
+  (`packages/m/matter/patches/ble-connectable.patch`), since a commissionable device must be connectable; the pinned source cites no spec
   section for that, and the Matter core spec's BLE commissioning section has not been read in this tree. A connect that
   then fails is not reported by this file, which has no `didFailToConnectPeripheral`. The constant itself is not yet a
   CoreBluetooth backport: the key's weak import stays null on 6.1.3 until one exists (open, see the report).
   - Status (v-matter8, 2026-10-14): the constant is now carried by `libCoreBluetoothBackports.dylib` (the Backports
-    `corebluetooth`, `facts/CoreBluetooth/CBAdvertisementDataIsConnectable.md`), linked before `-framework CoreBluetooth`.
+    `corebluetooth`, (a file of an earlier layout, not in the repository)), linked before `-framework CoreBluetooth`.
     The import binds to the backport's string, `kCBAdvDataIsConnectable`, on 6.1.3 and is never null there. The absent-key
     branch of the patch now answers only for a release whose CoreBluetooth never sends the key (6.1.3 measured; the host
     sends it). Measured on the installed dylib (v-matter8): `nm -m` reads `(undefined) external _CBAdvertisementDataIsConnectable (from libCoreBluetoothBackports)`, and `xmake l packages/m/matter/tests/import_check.lua` answers "every non-weak import of the armv7 slices of 8 binaries resolves against 158520 exports", with no weak import it does not export.
@@ -317,14 +317,14 @@ of the framework's own xcconfig, which I had not read yet.
   of either. Measured on the installed dylib: `nm -gU` reports neither as a defined symbol.
 - **No Xcode, no pigweed.** GN's own `build/toolchain/custom` takes `target_cc`, `target_cxx` and `target_ar`, which
   bypasses `BUILDCONFIG.gn`'s os/cpu selection entirely; the compiler, the archiver and the flags are the toolchain's
-  own, the same values `modules/apple/cmake.lua` derives for a CMake build. `//build_overrides/pigweed_environment.gni`
+  own, the same values `toolchain/modules/apple/cmake.lua` derives for a CMake build. `//build_overrides/pigweed_environment.gni`
   is a file upstream's bootstrap step writes and its `.gitignore` lists; the install step writes it, empty of
   declarations, which is what it comes to for a build with no pigweed environment.
 
 ## Not carried, and why
 
 - The framework's own use of Network is its connection, and that is carried. The rest of Network - listeners, browsers,
-  groups, the protocol options, the connection's data calls - is not, and `facts/Network/NWConnection.md` names the
+  groups, the protocol options, the connection's data calls - is not, and (a file of an earlier layout, not in the repository) names the
   two honest gaps.
 - The framework's XPC surface (`MTRDeviceController+XPC`, `MTRDeviceOverXPC`) is carried as the framework writes it,
   over the release's own XPC, which iOS 6.1.3 has in the form it needs. Whether every XPC service of the current

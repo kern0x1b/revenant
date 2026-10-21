@@ -1,7 +1,7 @@
 # The UIKit Swift overlay: the surface's Swift constants and cases
 
 `UIKitSurfaceConstants.swift` declares the 28 types and 111 cases of
-`coordination/corpus/ledger/UIKit.tsv` whose `lang` is `swift` and whose `kind` is `constant` - the
+(a workflow file kept outside the repository) whose `lang` is `swift` and whose `kind` is `constant` - the
 part of the API push that is Swift-only, which no Objective-C file can answer.
 
 **Where it goes.** Appended to the overlay's own `stdlib/public/Darwin/UIKit/UIKit.swift`, the file
@@ -41,7 +41,7 @@ declares is a namespace of its own or a typealias onto a class the port's header
 the declaration's own and needs no mark. This one's four cases all take a `UITargetedPreview`, which the
 SDK's own UIKit marks `API_AVAILABLE(ios(13.0))` (`UIKit.framework/Headers/UIAccessibilityConstants.h`
 is the wrong place; it is `UITargetedPreview.h:17`, and the copy the port's headers keep reads
-`API_AVAILABLE(ios(6.1.3))` because `registry/UIKit/ios13menus.json` carries that class `implemented`
+`API_AVAILABLE(ios(6.1.3))` because (a workflow file kept outside the repository) carries that class `implemented`
 at `6.0`), so the enum carries the release the SDK 26.2 interface gives it, `@available(iOS 13.4, *)`,
 and `packages/s/swift-runtime/xmake.lua` lowers that mark where the UIKit backports are linked.
 
@@ -62,7 +62,7 @@ configuration where it has one.
 ## The rows that wait for their class
 
 These 25 rows spell their names through a class the port's registry carries as `absent`
-(`registry/UIKit/ios17-18.json`: `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
+((a workflow file kept outside the repository): `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
 and `UITextItem`), so the overlay cannot declare the name they ask for: the enclosing class is
 not there to nest a type in, and a typealias on a class that does not exist does not compile.
 They are registered `absent` for that reason until the UIKit bands carry those classes, and the
@@ -114,7 +114,7 @@ files: 86   total error lines: 0
 The headers that earlier reported `'UITargetedPreview' is only available in iOS 13.0 or newer` were
 made when the `swift-runtime` install this typecheck takes its resource directory from was built.
 A fresh build of the port's headers over this registry lowers it, because the registry carries it `implemented`
-(`registry/UIKit/ios13menus.json`), and the class's availability is the only thing that was left.
+((a workflow file kept outside the repository)), and the class's availability is the only thing that was left.
 
 The overlay: 38 enumerations, 86 case declarations, 5 typealiases, declared unconditionally - the
 Swift counterpart of the port's headers lowering the availability of the headers, and the reason a name the surface
@@ -123,7 +123,7 @@ spells at 6.1.3 can be named at 6.1.3.
 ## The rows that wait for their class
 
 These 25 rows spell their names through a class the port's registry carries as `absent`
-(`registry/UIKit/ios17-18.json`: `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
+((a workflow file kept outside the repository): `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
 and `UITextItem`), so the overlay cannot declare the name they ask for: the enclosing class is
 not there to nest a type in, and a typealias on a class that does not exist does not compile.
 They are registered `absent` for that reason until the UIKit bands carry those classes, and the
@@ -172,14 +172,14 @@ $ for f in /tmp/n86/*.swift; do packages/s/swift-runtime/facts/UIKit/tc.sh "$f" 
 
 688 is 86 files naming the same four `UIPointerEffect` cases. `UIAction` and `NSTextAttachment`
 already lower in the headers this typecheck reads; `UITargetedPreview` does not, and
-`registry/UIKit/ios13menus.json` carries it as `implemented` - the headers were made when the
+(a workflow file kept outside the repository) carries it as `implemented` - the headers were made when the
 `swift-runtime` install this typecheck takes its resource directory from was built, so a fresh build of
 the port's headers over this tree's registry lowers it. The count against those fresh port headers is what
 the re-measure is for, and it is queued.
 ## The rows that wait for their class
 
 These 25 rows spell their names through a class the port's registry carries as `absent`
-(`registry/UIKit/ios17-18.json`: `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
+((a workflow file kept outside the repository): `UITab`, `UITabSidebarItem`, `UITextFormattingViewController`
 and `UITextItem`), so the overlay cannot declare the name they ask for: the enclosing class is
 not there to nest a type in, and a typealias on a class that does not exist does not compile.
 They are registered `absent` for that reason until the UIKit bands carry those classes, and the
@@ -218,6 +218,6 @@ declaration is wrong.
 
 The remaining rows resolve once the port's headers lower the availability of the SDK classes the surface
 spells them through, which they do for a class the registry carries as `implemented` - `UIAction` and
-`UITargetedPreview` are, in `registry/UIKit/ios13menus.json`. The port's headers a typecheck reads
+`UITargetedPreview` are, in (a workflow file kept outside the repository). The port's headers a typecheck reads
 were made when a `swift-runtime` install was built, so a fresh build of the port's headers over this tree's
 registry is what the count below is measured against.

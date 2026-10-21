@@ -1,6 +1,6 @@
 # Audio.swift: deleted, and what brings it back
 
-`files/RealityFoundation/Audio.swift` was 468 lines carrying five public types - `AudioResource`,
+(a file of an earlier layout, not in the repository) was 468 lines carrying five public types - `AudioResource`,
 `AudioFileResource`, `AudioListener`, `AudioPlaybackController`, `AudioEngine` - and the enums and event types
 inside them. It is **not in this package any more**, and neither are the three registry rows that named its
 types (`AudioResource`, `AudioFileResource`, `AudioPlaybackController`, each `implemented` and each a
@@ -56,7 +56,7 @@ protocol as a whole is what the sources reach:
 
 `Audio.swift` writes `volume` and reaches nothing else the release lacks: with its two writes of that
 property taken out in a copy of the file, the other 17 files of the overlay compile at the port's release
-with 0 errors and 50 warnings (`probe-audio.sh`, `probe-audio/compile.txt`).
+with 0 errors and 50 warnings (`probe-audio.sh`, (a workflow file kept outside the repository)).
 
 ## Why nothing was marked away instead
 

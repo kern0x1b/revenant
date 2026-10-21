@@ -1,8 +1,8 @@
 # Date reading in TabularData: what is measured, and what is carried
 
 Source of every behaviour below: the host's own `TabularData` (macOS 27 SDK, Swift 6.4), run on the same
-cells. The parser is `files/TabularData/DateParsing.swift`, and the reader's use of it is in
-`files/TabularData/CSVReading.swift`. The comparison is `tests/backports/host/createml/csvdates.swift`: each
+cells. The parser is (a file of an earlier layout, not in the repository), and the reader's use of it is in
+(a file of an earlier layout, not in the repository). The comparison is (a file of an earlier layout, not in the repository): each
 cell is read inferred and forced, with and without a strategy, and both modules must agree on the column's
 kind, its values in seconds since 1970, and an error's text, row and column.
 

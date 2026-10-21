@@ -7,10 +7,10 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 
 | query | what it found | why it was not reused |
 | --- | --- | --- |
-| `gh search code "public protocol AppIntent language:swift"` | `littledivy/open-apple-intelligence` → `Sources/OpenAppIntentsAssistant/Core/AppIntentsCore.swift`; `Vercantez/openuikit` → `full/widgetkit/WidgetKitHostLookalikes.swift` | both are **host-side stand-ins that exist only where the framework is absent**: opencuikit's is `#if !canImport(AppIntents)` and declares `public protocol AppIntent: Sendable {}`; the other comments that "the real `AppIntent` requires `static var title` plus a `perform()`". Taking one would place a *missing* framework's rows behind an empty declaration, which is the one outcome the ledger cannot see. |
-| `gh search code "public protocol ActivityAttributes language:swift"` | `biagio-incardona/Castor`, `Vercantez/openuikit` → `full/activitykit/ActivityKit.swift` (`#if !canImport(AppIntents)`) | the same shape: an app's own lookalike, not a port of the framework's surface. |
+| `gh search code "public protocol AppIntent language:swift"` | `littledivy/open-apple-intelligence` → `Sources/OpenAppIntentsAssistant/Core/AppIntentsCore.swift`; `Vercantez/openuikit` → (a file of an earlier layout, not in the repository) | both are **host-side stand-ins that exist only where the framework is absent**: opencuikit's is `#if !canImport(AppIntents)` and declares `public protocol AppIntent: Sendable {}`; the other comments that "the real `AppIntent` requires `static var title` plus a `perform()`". Taking one would place a *missing* framework's rows behind an empty declaration, which is the one outcome the ledger cannot see. |
+| `gh search code "public protocol ActivityAttributes language:swift"` | `biagio-incardona/Castor`, `Vercantez/openuikit` → (a file of an earlier layout, not in the repository) (`#if !canImport(AppIntents)`) | the same shape: an app's own lookalike, not a port of the framework's surface. |
 | `gh search repos "swift backport framework shim iOS 6"` | nothing | — |
-| `coordination/corpus/ledger/AppIntents.tsv`, `ActivityKit.tsv` | every row carries `owner = "no upstream; a band"` and `needs = swift-module` | the ledger's own answer to the rule, and it says the same thing. |
+| (a workflow file kept outside the repository), `ActivityKit.tsv` | every row carries `owner = "no upstream; a band"` and `needs = swift-module` | the ledger's own answer to the rule, and it says the same thing. |
 | `git -C <worktree> diff --stat origin/main..HEAD` over `api-kits` and `api-swift-kits` | no file under any of the four package directories | no other band in the fleet has written any of them, so nothing of ours was duplicated. |
 
 **What *was* reused**, named so the line is not read as "wrote everything from nothing":
@@ -23,7 +23,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
   `EnvironmentValues` (`Graph.swift:8`), `EnvironmentKey` (`Environment.swift:4`). It is the source
   the **view rows are routed to** and the reason they are not declared here: it is compiled only into
   the SwiftUI targets of the revenant project, with no `revenant@swiftui` package to depend on, so a port cannot
-  build against it yet (`facts/WidgetKit/Providers.md` lists the rows; the ask is with the band).
+  build against it yet (`docs/reference/backports/WidgetKit/WidgetKit/Providers.md` lists the rows; the ask is with the band).
 * **`the deleted registry package registry/CoreSpotlight/ios9.json`** — the backports package's own
   registry entry, read by the AppIntents recipe through the runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). The
   `scriptdir()` defect that hid it was this delivery's; the registry itself is not ours.

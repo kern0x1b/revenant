@@ -4,7 +4,7 @@ The five rows this module adds to CoreSpotlight - `CSSearchableIndex.indexAppEnt
 `.deleteAppEntities(ofType:)`, `.deleteAppEntities(identifiedBy:ofType:)`,
 `CSSearchableItem.init(appEntity:)` and `.init(appEntity:priority:)`, plus
 `associateAppEntity(_:priority:)` on the item and its attribute set - are AppIntents' own extensions on
-the three classes the CoreSpotlight backports carry (`registry/CoreSpotlight/ios9.json`: all three
+the three classes the CoreSpotlight backports carry ((a workflow file kept outside the repository): all three
 `implemented`, with the store the port keeps under `/var/mobile/Library/Caches/org.revenant.corespotlight`
 and the bridge to the release's own `SPSpotlightManager`).
 
@@ -17,8 +17,8 @@ The SDK marks the three classes iOS 9, in the framework's own macros:
     @interface CSSearchableIndex : NSObject
 
 The port's headers lower that mark to the port's release as they do for every declaration the registry
-implements: the generator's rule (`tools/gen/target_availability.lua`) lowers it, and
-`tools/gen/cmd_headers.lua` renders the copies. AppIntents probes CoreSpotlight through them, by the
+implements: the generator's rule ((a file of an earlier layout, not in the repository)) lowers it, and
+(a file of an earlier layout, not in the repository) renders the copies. AppIntents probes CoreSpotlight through them, by the
 runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). Without that overlay, measured: a Swift file naming
 `CSSearchableIndex` at `armv7-apple-ios6.1.3` answers "'CSSearchableIndex' is only available in iOS 9.0
 or newer".

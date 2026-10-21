@@ -38,7 +38,7 @@ So:
 * the Dynamic Island's four regions, their positions, margins, keyline tint and URL are real values the
   app stores and its own surface draws - there is simply no cutout to draw them around.
 
-`facts/WidgetKit/Host.md`.
+`docs/reference/backports/WidgetKit/WidgetKit/Host.md`.
 
 ## What it needs from the port
 
@@ -56,7 +56,7 @@ MIT, the repository's.
 `xmake` resolves these packages out of the shared `~/.xmake` store, and that store takes a
 **machine-wide** lock per package: a second `xmake` that reaches the same package waits, and prints
 `package(swift-runtime) is being accessed by other processes, please wait!` until the first is done.
-So every `xmake` command that touches the store goes through `coordination/heavy.sh`, one at a time,
+So every `xmake` command that touches the store goes through (a workflow file kept outside the repository), one at a time,
 or it hangs:
 
     coordination/heavy.sh xmake f -c -y      # resolve

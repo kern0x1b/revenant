@@ -1,6 +1,6 @@
 # Wind.CompassDirection, measured
 
-What `files/WeatherKit/Wind.swift` carries of `Wind`, and what it was checked against. The numbers
+What (a file of an earlier layout, not in the repository) carries of `Wind`, and what it was checked against. The numbers
 come from the commands named here, run on 2026-10-17 from the `v-impl-swift-apps-r3` worktree.
 
 ## What is carried
@@ -18,7 +18,7 @@ own rows are open: `direction`, `speed`, `gust` and `compassDirection` (each a
 
 ## Measured against the host
 
-The oracle is the host's WeatherKit, read through `harness/WeatherKit/compass/main.swift`, built twice:
+The oracle is the host's WeatherKit, read through (a file of an earlier layout, not in the repository), built twice:
 `swiftc -O main.swift` against the host, and `swiftc -DOURS -O main.swift files/WeatherKit/Wind.swift`.
 
 - Host: macOS 27, Swift 6.4, locale en_US.

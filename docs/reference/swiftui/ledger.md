@@ -22,13 +22,13 @@
 
 ### Что поддержано, что игнорируется, чего нет
 
-Счёт ведётся скриптом `coverage.lua` по интерфейсам SwiftUI и SwiftUICore из SDK 26.2, которые перечисляет `../tools/apple-names.lua types` (1344 публичных типа и typealias). Список модификаторов `View` (311) остаётся ручным: он заведён при первом коммите и с интерфейса 16.4 не менялся.
+Счёт ведётся скриптом `coverage.lua` по интерфейсам SwiftUI и SwiftUICore из SDK 26.2, которые перечисляет `frameworks/SwiftUI/tools/apple-names.lua types` (1344 публичных типа и typealias). Список модификаторов `View` (311) остаётся ручным: он заведён при первом коммите и с интерфейса 16.4 не менялся.
 На сегодня: **664 типов** и **311 модификаторов**, из них **206 действуют**, 0 заглушки (пишут в журнал), 105 объявлены и игнорируются.
 Из того, что Apple объявляет доступным на iOS: **646 из 1208 типов** и **289 из 289 модификаторов**, из них **202 действуют**, 0 заглушки, 87 игнорируются
-(остальное в интерфейсе помечено `@available(iOS, unavailable)` — это macOS, tvOS и watchOS; список типов и список модификаторов строит `../tools/apple-names.lua`, его `types` и `modifiers`).
+(остальное в интерфейсе помечено `@available(iOS, unavailable)` — это macOS, tvOS и watchOS; список типов и список модификаторов строит `frameworks/SwiftUI/tools/apple-names.lua`, его `types` и `modifiers`).
 
 **Что эти числа не говорят.** Счёт выше — по *именам* типов и модификаторов. По декларациям картина строже:
-типизированный разбор `swift-api-digester` (`../tools/api-surface.lua`, колонки отчёта — `../tools/api-diff.lua`)
+типизированный разбор `swift-api-digester` (`frameworks/SwiftUI/tools/api-surface.lua`, колонки отчёта — `frameworks/SwiftUI/tools/api-diff.lua`)
 сравнивает интерфейс Apple SwiftUI для iOS 16.4 с нашим модулем по подписи каждой декларации и на 19.09 находит
 **из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `frameworks/SwiftUI/tests/data/api/not-applicable.txt`** (вызов, который
 компилируется у нас благодаря значениям параметров по умолчанию, отсутствующим не считается). Заметная часть первых —
@@ -155,7 +155,7 @@
 - **Гостевая** (для конвейера рекомпилятора: модуль собирается под arm64 и переводится вместе с приложением) —
   с `-enable-library-evolution`, иначе компилятор не выпускает method descriptors протоколов, которых
   требует приложение, собранное против интерфейса Apple.
-  `bridge/guest-abi-check.sh` (removed, 2026-10-06) checked this build and did not check the release the port ships:
+  (a file of an earlier layout, not in the repository) (removed, 2026-10-06) checked this build and did not check the release the port ships:
   it compiled with /usr/bin/swiftc 6.4 for arm64-apple-ios14.0 against the iOS 16.4 SDK, whose Swift 5.9 stdlib has no
   `RangeSet`, so it failed on `TextSelection` (`cannot find type 'RangeSet'`); the port ships armv7-apple-ios6.0 on the
   swift-runtime package, whose stdlib has it. Measured: every installed swift-runtime (6.4.0, six store entries) holds
@@ -259,7 +259,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   видимость индикатора берётся из окружения, а `.automatic` оставляет решение флагу вида (`scrollIndicators(_:axes:)`);
   отдача — `alwaysBounceVertical`/`alwaysBounceHorizontal` `UIScrollView`, `.automatic` оставляет её как есть.
 - `EnvironmentValues` несёт и остальные 78 ключей SDK 26.2: у каждого тип, какой объявляет интерфейс Apple, и
-  значение по умолчанию — снято с фреймворка macOS 27 (`.agent-work/host/envdefaults.txt`, 64 ключа читаются
+  значение по умолчанию — снято с фреймворка macOS 27 ((a workflow file kept outside the repository), 64 ключа читаются
   публично; остальные берут значение из тел Apple's собственных расширений или то, что человек на iOS 6 включить
   не мог). Ключ — это хранилище: значение читают виды и пишут модификаторы, независимо от того, читает ли его
   сегодня хоть один вид. Значения, названные типами, которых у этого порта нет, объявлены рядом
@@ -277,7 +277,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
   `explicit(_:)` и `==`).
 - `blur` и шесть цветовых фильтров получают измеренную формулировку: размытие в каноне этого порта есть
-  (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
+  (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; (a file of an earlier layout, not in the repository)), но это
   `UIView`, а у модификатора SwiftUI нет вида, в который его положить; шесть фильтров ложатся на
   `compositingFilter` слоя, который порт уже ставит, и пока им не рисуется.
 - `SymbolVariants` взят из OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`,
@@ -299,15 +299,15 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   настройки нет), `textScale` и `textVariant` (вариантов размера и ширины у текста iOS 6 нет;
   `textVariant` — над `TextVariantPreference`, с `FixedTextVariant` и `SizeDependentTextVariant`), плюс
   `textScale(.secondary)` рисует строку размером меньшей надписи самого релиза: caption 1 против body,
-  12/17 — из `docs/reference/backports/UIKit/UIFontTextStyles.md:18,20`; `writingDirection(strategy:)` и
+  12/17 — из (a file of an earlier layout, not in the repository); `writingDirection(strategy:)` и
   `multilineTextAlignment(strategy:)` с их тремя случаями — обе
   стратегии пишут в журнал, обе названы там же. `writingDirection` и `multilineTextAlignment` —
   имена этих двух модификаторов в журнале. И четыре речи
   VoiceOver — `speechAlwaysIncludesPunctuation`, `speechSpellsOutCharacters`, `speechAdjustedPitch`,
   `speechAnnouncementsQueued`. Сами четыре атрибута в каноне этого порта есть
-  (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
+  (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, (a workflow file kept outside the repository)),
   а VoiceOver iOS 6 не читает ни одного с атрибутированной строки —
-  `docs/reference/backports/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
+  (a file of an earlier layout, not in the repository); каждый пишет в журнал именно с этим.
   Эти четыре `Text`-перегрузки — то, что добавил 26.2; `View`-перегрузки были уже в 16.4.
   `TypesettingLanguage` назван по идентификатору языка: в Foundation этой поры нет `Locale.Language`.
 - `PlainButtonStyle`, `BorderedButtonStyle`, `BorderedProminentButtonStyle`, `DefaultButtonStyle` и
@@ -452,7 +452,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   же, как у нас. **Мутант, который различает, — обратный тому, что был проверен сначала:** не убирать
   перегрузку, а добавить
   `static func buildOptional(_ widget: (any Widget)?) -> some Widget`. С ней проверка компилируется, и
-  `tabletests/run.sh` (теперь тест `tables-negative-widget-bundle` цели `SwiftUITypeChecks`) выходил с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
+  (a file of an earlier layout, not in the repository) (теперь тест `tables-negative-widget-bundle` цели `SwiftUITypeChecks`) выходил с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
   conform to 'Widget', got: it compiled`; без неё — выход 0 и отказ. Оба прогона описаны в
   `typechecks.md`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
 

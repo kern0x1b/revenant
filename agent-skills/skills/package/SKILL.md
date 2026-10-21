@@ -56,7 +56,7 @@ xmake deb -y -v > .logs/deb.log 2>&1
 `-o DIR` writes the packages to DIR instead of the build directory; a target name as the last
 argument packages only the control file that target names.
 
-Check, in `.logs/deb.log`: a line `deb build/<Package>_<Version>_iphoneos-arm.deb`, and for an app
+Check, in (a workflow file kept outside the repository): a line `deb build/<Package>_<Version>_iphoneos-arm.deb`, and for an app
 with backports a line `deb build/org.revenant.backports_<release>+<digest>_iphoneos-arm.deb`
 before it; no `error:`, no `add -v for getting more warnings` (without `-v` xmake shows only the
 first warning). Selector warnings are the skills `build`'s and `backports`' concern: `xmake deb`

@@ -45,7 +45,7 @@ launch an app the way a user's tap does; what it can prove about an app is narro
    driver) and `revenant@emulator-guest` (the runner that starts your program in the guest).
 2. Configure again so they are installed: `xmake f -p iphoneos -a armv7 -y > .logs/config.log 2>&1`.
 
-Check: `xmake where emulator` prints an install folder; `.logs/config.log` has no `error:`.
+Check: `xmake where emulator` prints an install folder; (a workflow file kept outside the repository) has no `error:`.
 
 **Disk and time, first use of a device and release:** the root filesystem is downloaded from
 Apple's servers and unpacked into `~/.revenant/firmware/rootfs/<device>/<version>_<build>/` (about
@@ -112,7 +112,7 @@ with `error: <verdict> on <device> <version> (<build>) in …; the emulator log 
 
 `run` prints the command's own standard output and error before the verdict. The evidence stays in
 `~/.revenant/emulator/images.noindex/<project>-<hash>/<device>_<build>/run/`: `verdict.json`
-(`state`, `guest_seconds`, `host_seconds`, `scale`), `results/test.stdout`, `results/test.stderr`,
+(`state`, `guest_seconds`, `host_seconds`, `scale`), (a workflow file kept outside the repository), (a workflow file kept outside the repository),
 `results/reports/` (the guest's crash reports), `emulator.log` and `frame.png`. It is replaced by
 the next run of the same device and release: copy what you cite into the project's `.logs/`.
 
@@ -122,7 +122,7 @@ the next run of the same device and release: copy what you cite into the project
   `build/<device>_<build>.png`). Look at it; do not describe a frame you have not opened.
 - `xmake emulate -y -d … -r … debug /path` — starts the program as the guest's **first process**
   (nothing else boots), stops where it crashes and prints the signal, the frames named by the
-  images loaded and the registers; the report is `debug/debug.json` beside `run/`. Use it on a
+  images loaded and the registers; the report is (a workflow file kept outside the repository) beside `run/`. Use it on a
   `crash(...)` of a program that does not need the rest of the system.
 
 **Time scale.** The emulator is one to two orders of magnitude slower than the device, and the
@@ -190,7 +190,7 @@ version, build and scale) and the path of the copied `verdict.json`/frame. Then 
   (per-image lock); several projects may emulate at once, each boot takes one of the machine's
   slots (`min(cores/3, RAM/5 GB)`) and waits for a free one.
 - Results written with `NSLog` → they do reach what `run` prints, through standard error
-  (`results/test.stderr`, found by `log`; measured on iPhone 4S 6.1.3), but after the standard
+  ((a workflow file kept outside the repository), found by `log`; measured on iPhone 4S 6.1.3), but after the standard
   output and with a timestamp prefix; write the `ok`/`FAIL` lines with `printf` and
   `fflush(stdout)` so they stay in order and survive a crash.
 - Launching the app some other way (a hand-written LaunchDaemon for it, a launcher copied into the

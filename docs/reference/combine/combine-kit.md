@@ -1,7 +1,7 @@
 # The layer of our own, and what was measured
 
 This is the record of `revenant@combine` `2026.09.20`, when the package built a fork of
-OpenCombine and a layer of its own, `packages/c/combine/files/CombineKit`, closed the measured
+OpenCombine and a layer of its own, (a file of an earlier layout, not in the repository), closed the measured
 gap between that module and the Combine Apple's SDK 26.2 declares. The layer was compiled
 into the same module, so it saw the fork's internal helpers, and no vendored file was edited.
 From `2026.10.19` the package builds OpenCombine itself with the patches in
