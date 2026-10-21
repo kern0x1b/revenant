@@ -1,7 +1,7 @@
 # Clean-machine tests
 
 The skills are proven only by an agent that followed them from an empty directory. Each scenario
-under `agent-skills/tests/scenarios/<id>/` is a request, the user's answers to the interview, and the release, device,
+under `agent-skills/tests/data/scenarios/<id>/` is a request, the user's answers to the interview, and the release, device,
 architecture and language the run must end up with (`scenario.conf`). No scenario carries code, and
 no app they describe exists anywhere in this repository.
 
