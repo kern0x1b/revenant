@@ -42,8 +42,8 @@ local host = {plat = "macosx", arch = "arm64"}
 add_requires("dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
              configs = {test_emit_failure = has_config("emulator_dynarmic_test_emit_failure")}}))
 add_requires("boost 1.81.0", table.join(host, {alias = "boost"}))
-add_requires("revenant@openssl 4.0.2", table.join(host, {alias = "openssl"}))
-add_requires("revenant@libplist 2.7.0", table.join(host, {alias = "libplist"}))
+add_requires("revenant@openssl 4.0.2", {alias = "openssl"})
+add_requires("revenant@libplist 2.7.0", {alias = "libplist"})
 add_requires("libpng", "libjpeg-turbo", table.join(host, {system = false}))
 if has_config("emulator_vulkan") then
     add_requires("vulkan-headers 1.4.335+0", "vulkan-loader 1.4.335+0", table.join(host, {system = false}))

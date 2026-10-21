@@ -4,12 +4,12 @@ end
 
 local host = {plat = "macosx", arch = "arm64"}
 local llvm = "23.1.3"
-add_requires("revenant@llvm " .. llvm, table.join(host, {alias = "llvm", configs = {libraries = true}}))
+add_requires("revenant@llvm " .. llvm, {alias = "llvm", configs = {libraries = true}})
 add_requires("rellume 2026.09.10", table.join(host, {alias = "rellume", configs = {llvm = llvm}}))
 add_requires("blocksruntime 2017.10.27", table.join(host, {alias = "blocksruntime"}))
-add_requires("revenant@iphoneos-sdk 16.4", table.join(host, {alias = "iphoneos-sdk"}))
-add_requires("revenant@ld64 956.6", table.join(host, {alias = "ld64"}))
-add_requires("revenant@ldid", table.join(host, {alias = "ldid"}))
+add_requires("revenant@iphoneos-sdk 16.4", {alias = "iphoneos-sdk"})
+add_requires("revenant@ld64 956.6", {alias = "ld64"})
+add_requires("revenant@ldid", {alias = "ldid"})
 add_requireconfs("llvm.iphoneos-sdk", {override = true, version = "16.4"})
 add_requireconfs("rellume.llvm.iphoneos-sdk", {override = true, version = "16.4"})
 
