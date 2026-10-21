@@ -2,6 +2,7 @@
 .idea/
 .xmake/
 build/
+/.claude/worktrees/
 !/agent-skills/skills/build/
 xcuserdata/
 DerivedData/
