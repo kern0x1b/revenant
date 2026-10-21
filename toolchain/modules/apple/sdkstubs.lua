@@ -204,6 +204,9 @@ function add_symbols(text, wanted)
     local entries = {}
     for _, group in ipairs(wanted) do
         local archs = supported_archs(doc, group.archs)
+        if doc.format == "v3" and group.list ~= "symbols" then
+            archs = {}
+        end
         local tokens = {}
         for _, token in ipairs(group.tokens) do
             local already = true
@@ -333,8 +336,10 @@ function restore_armv7(text, held, older_parts)
         end
     end
     text = add_archs(text, slices)
-    text = add_clients(text)
-    text = add_section(text, older_parts, "parent-umbrella")
+    if not text:find("^%-%-%- !tapi%-tbd%-v3") then
+        text = add_clients(text)
+        text = add_section(text, older_parts, "parent-umbrella")
+    end
     return add_symbols(text, slice(held, slices))
 end
 
