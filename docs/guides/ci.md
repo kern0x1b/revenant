@@ -7,7 +7,8 @@
   repository's layout and comment checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
   `toolchain_packages/*`), the emulator's and the recompiler's host tests. It sets `REVENANT_PREBUILT=kern0x1b/revenant`
   and `REVENANT_PREBUILT_ONLY=1`, so LLVM and Swift come from their releases and a missing release is an error, not a
-  source build. The tests that need a device, an emulator image or firmware are not declared on CI; see
+  source build. It configures with `--emulator_vulkan=n`: the Vulkan renderer's SwiftShader is built from source, which
+  takes most of the job, and the tests do not use it. The option stays on for the emulator's own builds. The tests that need a device, an emulator image or firmware are not declared on CI; see
   [the tests reference](../reference/toolchain/tests.md).
 - `backports` selects the newest Xcode and sets `REVENANT_PREBUILT=kern0x1b/revenant`, so LLVM and Swift come from
   their releases and are never built in the job. It configures and builds the Backports component

@@ -8,8 +8,8 @@ reference says what runs where.
 
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
-| `toolchain_light` | 14 suites of `tests/addon/` that build nothing and need no package | the repository | always |
-| `toolchain_packages` | 20 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk`, `llvm` and `swift` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
+| `toolchain_light` | 13 suites of `tests/addon/` that build nothing and need no package | the repository | always |
+| `toolchain_packages` | 19 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk`, `llvm` and `swift` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
 | `toolchain_device` | `emulator_test` and `swift_test`: the emulator's queue, and the dyld libraries of a held firmware release | an emulator image, and the firmware held under `~/.revenant/dyld` | only with `./xmakew f -P . --tests=device` |
 
 The suites are the modules of `tests/addon/`, each one `failures(options)` that returns the failures it found. A test
@@ -19,8 +19,9 @@ prints each failure and fails. Run one target with `./xmakew test -P . 'toolchai
 `toolchain_device` is outside the default run by declaration: without `--tests=device` it is not in the project, so
 `xmake test` does not see it. `swift_test` reads the system libraries of a firmware release held under
 `~/.revenant/dyld`, and when they are not held it fails and names `xmake firmware --arch=<arch> fetch <release>`. Run
-on this machine, which holds them, it passes. `emulator_test` does not yet name its lack: on a host without an emulator
-image it fails with a nested xmake error.
+on this machine, which holds them, it passes. `emulator_test` runs its own xmake addon install and then a queue step that
+runs the xmake task `queue`; the heavy job pool removed that task, so the step fails and names it, and the other checks
+of the suite pass.
 
 The suites that run only for the iPhone OS platform (`SwiftUITypeChecks`, `CombineGenerated`, and the WebKit host
 tests behind `webkit_host_tests`) are declared by the platform, not by the default run; they belong to the components
