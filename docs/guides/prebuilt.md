@@ -1,7 +1,9 @@
 # Prebuilt packages
 
-Status: designed and prepared, not enabled. Nothing downloads a prebuilt package and nothing publishes one
-until the owner turns it on.
+Status: on in CI. The `checks`, `backports` and `swift` jobs of `.github/workflows/check.yml` set
+`REVENANT_PREBUILT=kern0x1b/revenant`, and the recipes wired to the module (below) take the package of their key from its
+release. Releases exist for `llvm`, `swift` and `ld64`. None exists yet for `libcxx` or `swift-runtime`, which the swift job
+requires by name, so that job stops at its configure until one is released.
 
 ## What it is for
 
@@ -37,10 +39,10 @@ With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module 
 Without `REVENANT_PREBUILT`, the module does nothing, and the recipes build exactly as before.
 
 With `REVENANT_PREBUILT_ONLY` naming the package (a comma list, or `1` for all), a missing release is an error instead: `fetch` raises and names the key, and
-nothing is built from source. The `checks` and `backports` jobs of `check.yml` set it, so a build there can never fall back to
-LLVM or Swift. It changes no key.
+nothing is built from source. The jobs of `check.yml` set it (the swift job also names `swift-runtime` and `libcxx`), so a
+build there can never fall back to LLVM, Swift or ld64. It changes no key.
 
-The `llvm`, `swift`, `swift-runtime` and `libcxx` recipes are wired. To wire another recipe, call
+The `llvm`, `swift`, `ld64`, `swift-runtime` and `libcxx` recipes are wired. To wire another recipe, call
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.
@@ -54,8 +56,8 @@ its recipe is wired. The prebuilt workflow configures the iOS Swift component be
 ## On CI
 
 `.github/workflows/prebuilt.yml` runs only when someone starts it (`workflow_dispatch`): there is no push,
-schedule or pull request trigger. It runs on `macos-15`, which is arm64, and builds one package per run
-(`llvm`, `llvm` with `libraries`, or `swift`):
+schedule or pull request trigger. It runs on `macos-26`, which is arm64, and builds one package per run, chosen by its
+`package` input: `llvm`, `llvm-libraries` (`llvm` with its `libraries` config), `swift`, `swift-runtime`, `libcxx` or `ld64`:
 
 1. `./xmakew` builds the pinned xmake.
 2. `./xmakew require -P . -y revenant@<package>` runs with `REVENANT_PREBUILT` set to the repository, so a
@@ -73,21 +75,18 @@ that archive would not work under another one.
 | The iPhoneOS SDK (`iphoneos-sdk`) | downloaded from the same GitHub releases as on a machine | works; the SDK itself is never put in an archive, since Apple's licence does not allow that |
 | Firmware and `~/.revenant/dyld` (`frameworks/Backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | the Backports targets, and `swift-runtime` with `backports`, are not built on CI |
 | The host Xcode or Command Line Tools | the runner's Xcode, not this machine's | not part of the key: an archive built with another host clang is used under the same key. LLVM and Swift do not link against the host's C++ library in a way a newer macOS breaks, but that is not verified |
-| Time and disk | a GitHub-hosted job ends after 6 hours, and the standard `macos-15` runner has 3 cores, 7 GB of memory and 14 GB of storage | not measured: Swift's ten source checkouts and its build are likely to need more than 14 GB and more than 6 hours on 3 cores, and then need a larger runner (`macos-15-xlarge`, paid) or a self-hosted one; LLVM with two targets may fit |
+| Time and disk | a GitHub-hosted job ends after 6 hours, and the runner has a fixed number of cores and a fixed disk | not measured on `macos-26`: Swift's ten source checkouts and its build may need more disk or time than a hosted runner has, and then need a larger runner or a self-hosted one; LLVM with two targets may fit |
 | `ccache` | empty on each run | a full build each time a key changes |
 | `~/.revenant/cache` | empty on each run | the pinned xmake and the store are built again on each run; `actions/cache` could keep them |
 
-## Turning it on
+## Releasing a package
 
-All of these are the owner's decisions:
+The owner releases a package by starting the workflow for it from the Actions tab, with its `package` input. Each run
+builds one key and makes its release. Every later run and machine that sets `REVENANT_PREBUILT` and has the same key
+downloads that release, so the key is never built twice. Wiring another recipe changes its key once (see "On a machine").
 
-1. Run the workflow once per package from the Actions tab and check the releases it makes.
-2. Set `REVENANT_PREBUILT=kern0x1b/revenant` in the environment of the machines that should use them.
-3. Wire more recipes, each at the cost of one rebuild.
-
-Unverified so far: a run of the workflow (it has never run), a real download from a release (only the
-missing release, and an archive already in the cache folder, were tested, with a small package), and
-which runner LLVM and Swift fit on.
+Verified: the workflow has run and released `llvm`, `swift` and `ld64`, and the checks job downloads them on each CI run.
+Not yet verified: a release of `libcxx` or `swift-runtime`, which the swift job waits for, and which runner LLVM and Swift fit on.
 
 ## The official LLVM release instead of the `libraries` build
 
