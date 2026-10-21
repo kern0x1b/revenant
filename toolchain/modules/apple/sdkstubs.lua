@@ -281,44 +281,50 @@ local function section(text, key)
     return at, text:find("\n%S", at + 1) or #text
 end
 
-function add_section(text, older, key)
+local function armv7_lines(older, key)
     local oat, oafter = section(older, key)
     if not oat then
-        return text
+        return {}
     end
     local body = older:sub(oat, oafter):match("^\n[^\n]*\n(.*)$") or ""
-    local blocks = {}
+    local kept, keep = {}, false
     for line in body:gmatch("[^\n]*\n") do
         if line:match("^  %- ") then
-            table.insert(blocks, {text = line, armv7 = line:find("armv7", 1, true) ~= nil})
-        elseif #blocks > 0 then
-            blocks[#blocks].text = blocks[#blocks].text .. line
+            keep = line:find("armv7", 1, true) ~= nil
+        end
+        if keep then
+            table.insert(kept, line)
         end
     end
+    return kept
+end
+
+function add_section(text, older_parts, key)
+    local at, after = section(text, key)
+    if at and text:sub(at, after):find("armv7", 1, true) then
+        return text
+    end
     local kept = {}
-    for _, block in ipairs(blocks) do
-        if block.armv7 then
-            table.insert(kept, block.text)
+    for _, older in ipairs(older_parts) do
+        kept = armv7_lines(older, key)
+        if #kept > 0 then
+            break
         end
     end
     if #kept == 0 then
         return text
     end
-    local at, after = section(text, key)
+    local extra = table.concat(kept)
     if at then
-        if text:sub(at, after):find("armv7", 1, true) then
-            return text
-        end
-        return text:sub(1, after) .. table.concat(kept) .. text:sub(after + 1)
+        return text:sub(1, after) .. extra .. text:sub(after + 1)
     end
     if text:sub(-1) ~= "\n" then
         text = text .. "\n"
     end
-    return text .. key .. ":\n" .. table.concat(kept)
+    return text .. key .. ":\n" .. extra
 end
 
-function restore_armv7(text, older, sections)
-    local held = read(older)
+function restore_armv7(text, held, older_parts)
     local slices = {}
     for _, arch in ipairs({"armv7", "armv7s"}) do
         if table.contains(held.archs, arch) then
@@ -327,7 +333,7 @@ function restore_armv7(text, older, sections)
     end
     text = add_archs(text, slices)
     text = add_clients(text)
-    text = add_section(text, sections, "parent-umbrella")
+    text = add_section(text, older_parts, "parent-umbrella")
     return add_symbols(text, slice(held, slices))
 end
 
