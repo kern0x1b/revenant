@@ -62,7 +62,10 @@ local RECIPES = {
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
-     inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}}
+     inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}},
+    {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
+     inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
+               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}}
 }
 
 function recipes()
@@ -72,7 +75,19 @@ end
 function sources(root, inputs)
     local digests = {}
     for _, input in ipairs(inputs) do
-        table.insert(digests, input .. "=" .. hash.strhash128(stripped(io.readfile(path.join(root, input)))))
+        local files = {path.join(root, input)}
+        if input:find("*", 1, true) then
+            files = os.files(path.join(root, input))
+            table.sort(files)
+        end
+        for _, file in ipairs(files) do
+            local text = io.readfile(file)
+            if file:endswith(".lua") then
+                text = stripped(text)
+            end
+            local name = input:find("*", 1, true) and path.relative(file, root) or input
+            table.insert(digests, name .. "=" .. hash.strhash128(text))
+        end
     end
     return hash.strhash128(table.concat(digests, ";"))
 end

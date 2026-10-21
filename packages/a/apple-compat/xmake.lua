@@ -4,33 +4,16 @@ package("apple-compat")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    local source = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    local digests = {}
-    local sources = table.join({path.join(os.scriptdir(), "xmake.lua")},
-                               os.files(path.join(source, "src", "*.c")), os.files(path.join(source, "src", "*.h")),
-                               os.files(path.join(source, "include", "revenant", "*.h")))
-    table.sort(sources)
-    for _, file in ipairs(sources) do
-        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
-    end
-    add_configs("sources", {description = "The digest of this recipe and the shims it compiles, so a changed shim or recipe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("sources", {description = "The digest of this recipe and the shims it compiles, so a changed shim or recipe is a different package.", default = apple_compat_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        import("core.base.semver")
-        local compat = import("apple.compat", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         local toolchain = assert(package:toolchains(), "apple-compat is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local symbols, process_wide = {}, {}
-        local shared = compat.process_wide()
-        for symbol, release in pairs(compat.provided("iOS")) do
-            if semver.compare(toolchain:config("deployment"), release) < 0 then
-                table.insert(shared[symbol] and process_wide or symbols, symbol)
-            end
-        end
-        table.sort(symbols)
-        table.sort(process_wide)
+        local compat = import("@addon.revenant.apple.compat", {anonymous = true})
+        local symbols, sharing = compat.needed(toolchain:config("deployment"))
         package:data_set("provided", symbols)
-        package:data_set("process_wide", process_wide)
+        package:data_set("process_wide", sharing)
         if #symbols > 0 then
             package:add("links", "apple-compat")
         end
@@ -39,40 +22,29 @@ package("apple-compat")
     on_install("iphoneos", function (package)
         local toolchain = package:toolchains()[1]
         toolchain:load()
-        local triple = package:arch() .. "-apple-ios"
-        local objects = {}
-        for _, symbol in ipairs(package:data("provided")) do
-            local object = path.absolute(symbol .. ".o")
-            os.vrunv(toolchain:tool("cc"), {"-target", triple, "-miphoneos-version-min=" .. toolchain:config("deployment"), "-isysroot", toolchain:config("sdkdir"), "-Os",
-                               "-fno-builtin", "-fvisibility=hidden", "-c", path.join(source, "src", symbol .. ".c"), "-o", object})
-            table.insert(objects, object)
-            local header = path.join(source, "include", "revenant", symbol .. ".h")
-            if os.isfile(header) then
-                os.vcp(header, path.join(package:installdir("include"), "revenant") .. "/")
-            end
+        local data = import("@addon.revenant.data", {anonymous = true})
+        import("core.package.addon")
+        local revenant = addon.addons()[addon.dirname("revenant")] or raise("apple-compat is built with the revenant addon's rules, and no revenant addon is installed")
+        local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
+        local project = path.absolute("compat")
+        os.mkdir(project)
+        io.writefile(path.join(project, "xmake.lua"), table.concat({
+            "add_repositories(\"revenant " .. root .. "\")",
+            "add_addons(\"revenant\")",
+            "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
+            "includes(\"@addon/revenant/apple-ios\")",
+            "option(\"component\", {type = \"string\", default = \"\"})",
+            "includes(\"" .. data.src("apple-compat") .. "\")",
+            "set_defaultplat(\"iphoneos\")",
+            "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")",
+            ""}, "\n"))
+        io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
+        if #(package:data("provided") or {}) > 0 then
+            os.vrunv(os.programfile(), {"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+            os.vrunv(os.programfile(), {"build", "-y", "apple-compat"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+            os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "apple-compat"}, {curdir = project})
         end
-        if #objects > 0 then
-            os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "libapple-compat.a")}, objects))
-        end
-        local module = path.join(package:installdir("include"), "RevenantCompat")
-        os.mkdir(module)
-        local lines = {"// Written by revenant@apple-compat: the shims this release needs, as one module a Swift file can import."}
-        for _, symbol in ipairs(package:data("provided")) do
-            if os.isfile(path.join(package:installdir("include"), "revenant", symbol .. ".h")) then
-                table.insert(lines, "#include <toolchain/" .. symbol .. ".h>")
-            end
-        end
-        io.writefile(path.join(module, "shims.h"), table.concat(lines, "\n") .. "\n")
-        io.writefile(path.join(module, "module.modulemap"), "module RevenantCompat {\n    header \"shims.h\"\n    export *\n}\n")
-        local process_wide = package:data("process_wide")
-        if #process_wide > 0 then
-            local folder = path.join(package:installdir("share"), "apple-compat", "process-wide")
-            os.vcp(path.join(source, "src", "*.h"), folder .. "/")
-            for _, symbol in ipairs(process_wide) do
-                os.vcp(path.join(source, "src", symbol .. ".c"), folder .. "/")
-            end
-        end
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
+        os.vcp(data.licence(), package:installdir("licenses"))
     end)
 
     on_test(function (package)

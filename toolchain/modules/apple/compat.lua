@@ -165,6 +165,20 @@ function provided(system)
     return found
 end
 
+function needed(deployment)
+    import("core.base.semver")
+    local shared = process_wide()
+    local symbols, sharing = {}, {}
+    for symbol, release in pairs(provided("iOS")) do
+        if semver.compare(deployment, release) < 0 then
+            table.insert(shared[symbol] and sharing or symbols, symbol)
+        end
+    end
+    table.sort(symbols)
+    table.sort(sharing)
+    return symbols, sharing
+end
+
 function force_includes(package, symbols)
     local folders = {}
     if package.fetch then
