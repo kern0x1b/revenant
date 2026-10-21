@@ -12,6 +12,8 @@
     NSArray<NSString *> *_validTypes;
 }
 
+@dynamic documentStorageURL;
+
 - (void)revenant_setDocumentPickerMode:(UIDocumentPickerMode)mode originalURL:(NSURL *)originalURL validTypes:(NSArray<NSString *> *)validTypes
 {
     _documentPickerMode = mode;

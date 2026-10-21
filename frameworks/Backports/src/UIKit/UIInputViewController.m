@@ -155,6 +155,8 @@ static NSString *revenant_nil_if_empty(NSString *text)
     BOOL _hasDictationKey;
 }
 
+@dynamic needsInputModeSwitchKey;
+
 - (void)loadView
 {
     self.view = [[UIInputView alloc] initWithFrame:CGRectZero inputViewStyle:UIInputViewStyleKeyboard];
