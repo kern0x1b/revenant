@@ -6,6 +6,7 @@ local SRC = path.directory(os.scriptdir())
 
 add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
 add_requires("revenant@libcxx", {alias = "libcxx"})
+add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
 
 local LOCALIZED_STRING = "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }"
 
@@ -108,3 +109,67 @@ target("WidgetKit")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
+
+local function port_overlay(target)
+    local ports = table.wrap((target:pkg("swift-runtime"):envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
+    if #ports == 0 then
+        return {}
+    end
+    return {"-vfsoverlay", table.concat(ports, path.envsep())}
+end
+
+local function createml(name, folder, deps, flags)
+    target(name)
+        set_kind("static")
+        set_default(false)
+        add_rules("@addon/revenant/swift")
+        if #deps > 0 then
+            add_deps(table.unpack(deps))
+        end
+        add_frameworks("Accelerate", "Foundation", "CoreFoundation")
+        set_optimize("fastest")
+        on_load(function (target)
+            target:add("files", path.join(SRC, folder, "*.swift"))
+        end)
+        on_config(function (target)
+            add_flags(target, table.join(port_overlay(target), flags or {}))
+        end)
+    target_end()
+end
+
+createml("TabularData", "TabularData", {}, {})
+createml("CoreML", "CoreML", {}, {"-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")})
+createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {})
+createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {})
+
+target("MusicKit")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_packages("micro-ecc")
+    add_frameworks("Foundation", "CoreGraphics")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "MusicKit", "*.swift"))
+        target:add("files", path.join(SRC, "MusicKit", "RevenantC.c"))
+        target:add("includedirs", path.join(SRC, "MusicKit", "include"), {public = true})
+        target:add("cflags", "-Os", "-fvisibility=hidden")
+    end)
+    on_config(function (target)
+        add_flags(target, {"-import-objc-header", path.join(SRC, "MusicKit", "include", "MusicKitC.h"), "-I", path.join(SRC, "MusicKit", "include")})
+    end)
+    target_end()
+
+target("SwiftData")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_frameworks("CoreData", "Foundation", "CoreFoundation")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "SwiftData", "*.swift"))
+    end)
+    on_config(function (target)
+        add_flags(target, port_overlay(target))
+    end)
+    target_end()
