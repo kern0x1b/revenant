@@ -71,8 +71,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Contributor guide](guides/swiftui/contributing.md) | the layout, the rules that matter, the test limits |
 | [On a phone](guides/swiftui/on-device.md) | the demo's screens, drawn on an iPhone 4S |
 | [How it works](explanation/swiftui/how-it-works.md) | why the module is built as it is, and its design |
-| [Guest bridge](explanation/swiftui/guest-bridge.md) | the sample app and the slot table of the guest build (in Russian) |
-| [Research](explanation/swiftui/research.md) | why Apple's SwiftUI cannot be ported (in Russian) |
+| [Guest bridge](explanation/swiftui/guest-bridge.md) | the sample app and the slot table of the guest build |
+| [Research](explanation/swiftui/research.md) | why Apple's SwiftUI cannot be ported |
 | [Features](reference/swiftui/features.md) | the areas of the API that are implemented |
 | [Completeness](reference/swiftui/completeness.md) | how much of Apple's interface is present, measured two ways |
 | [Ledger](reference/swiftui/ledger.md) | what is implemented, ignored, simplified or missing (in Russian) |
@@ -160,7 +160,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Build and translate](guides/recompiler/build-and-translate.md) | the commands, the guest libraries and what a bind names |
 | [Contributor guide](guides/recompiler/contributing.md) | the layout, the conventions, the devices |
 | [How it works](explanation/recompiler/how-it-works.md) | the pipeline, the status, the Swift runtime's classes, the scope |
-| [Research](explanation/recompiler/research.md) | the research behind it (in Russian) |
+| [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
 
 ## Agent skills

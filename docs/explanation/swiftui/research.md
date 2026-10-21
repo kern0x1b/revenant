@@ -1,283 +1,380 @@
-# SwiftUI и Combine на iOS 6 (armv7): исследование
+# SwiftUI and Combine on iOS 6 (armv7): research
 
-Дата: 2026-09-17. Пути в тексте — от корня репозитория.
-Всё, что помечено «проверено», запускалось на одной машине (macOS, эмулятор, iPhone 4S и iPad 2 на iOS 6.1.3). Сырые выводы анализа кэшей прошивок (`a/*`) в репозиторий не входят: они содержат списки символов из бинарников Apple.
-Оценки помечены отдельно.
+Date: 2026-09-17. Paths in the text are from the repository root.
+Everything marked "verified" was run on one machine (macOS, the emulator, an iPhone 4S and an iPad 2 on iOS 6.1.3).
+The raw output of the firmware-cache analysis (`a/*`) does not go into the repository: it contains symbol lists from
+Apple's binaries. Estimates are marked separately.
 
-## 1. Вердикт
+## 1. Verdict
 
-| Направление | Итог |
+| Direction | Outcome |
 |---|---|
-| A. Перенести настоящий SwiftUI Apple на iOS 6 armv7 | **Нереально.** Барьеры перечислены в разделе 2 по пунктам с цифрами; ни один не обходится разумной работой, а вместе они складываются в «портировать половину iOS 13–18». |
-| B1. OpenCombine как реализация Combine | **Работает уже сейчас.** Собран под armv7 iOS 6 на полном рантайме Swift 6.4; 1437 из 1453 его собственных тестов проходят на эмулированной iOS 6.1.3. |
-| B2. OpenSwiftUI как основа своей SwiftUI | **Не годится как основа**, годится как справочник об устройстве настоящей. Пакет требует iOS 18, работает только поверх Apple AttributeGraph или стороннего Compute, а Button/List/NavigationView/ScrollView в нём ещё не реализованы. |
-| C. Запуск готовых SwiftUI-приложений через рекомпилятор, но с нашей реализацией вместо фреймворка Apple | **Открыто, поверхность воспроизведена полностью** (раздел 2.3): приложение, собранное против интерфейса Apple, линкуется с нашей реализацией без неразрешённых символов. Работа не доказана, проба за рекомпилятором. |
-| B3. Своя реализация (SwiftUI) поверх UIKit iOS 6 | **Осуществимо, доказано прототипом.** 1465 строк Swift дают приложение на синтаксисе SwiftUI, которое собирается из исходников под armv7 и выглядит как родное приложение iOS 6 (скриншоты ниже). Движок графа проверен и на железе: 2,8 мс на полное обновление экрана на iPhone 4S. |
+| A. Port Apple's real SwiftUI to iOS 6 armv7 | **Not feasible.** The barriers are listed in section 2 with their numbers. None is passable with reasonable work, and together they add up to porting half of iOS 13 to 18. |
+| B1. OpenCombine as the Combine implementation | **Works now.** Built for armv7 iOS 6 on the full Swift 6.4 runtime; 1437 of its 1453 own tests pass on the emulated iOS 6.1.3. |
+| B2. OpenSwiftUI as the base of our own SwiftUI | **Not usable as a base; usable as a reference on how the real one is built.** The package requires iOS 18 and runs only on Apple's AttributeGraph or a third-party Compute, and Button, List, NavigationView and ScrollView are not implemented in it yet. |
+| C. Run ready-made SwiftUI apps through the recompiler, with our implementation in place of Apple's framework | **Open, but the surface is reproduced completely** (section 2.3): an app built against Apple's interface links against ours with no unresolved symbols. The work is not proven; the probe is behind the recompiler. |
+| B3. Our own SwiftUI implementation on top of iOS 6 UIKit | **Feasible, proven by a prototype.** 1465 lines of Swift give an app written in SwiftUI syntax that builds from source for armv7 and looks like a native iOS 6 app (screenshots below). The graph engine is also checked on hardware: 2.8 ms for a full screen update on an iPhone 4S. |
 
-Рекомендуемый первый шаг — раздел 8.
+The recommended first step is section 8.
 
-## 2. A. Настоящий SwiftUI Apple
+## 2. A. Apple's real SwiftUI
 
-### 2.1 Из чего он состоит (факты из кэшей прошивок, модуль тулчейна `apple.dyld`)
+### 2.1 What it consists of (facts from the firmware caches, the toolchain module `apple.dyld`)
 
-Проверено на локальных кэшах `~/.revenant/dyld` (скрипты `a/*.lua`, вывод `a/*.txt`).
+Verified on the local caches in `~/.revenant/dyld` (scripts `a/*.lua`, output `a/*.txt`).
 
-- **Среза armv7 у SwiftUI не было никогда.** Во всех 32-битных кэшах, вплоть до последнего 32-битного выпуска 10.3.4, образов `SwiftUI`/`Combine` нет; в 16.0 и 18.0 кэш только arm64e (26 кэшей). SwiftUI появился в iOS 13, а последняя система с armv7-срезом — 10.3.4; пересечения нет в принципе.
-- **Состав стека (iOS 18.0).** `SwiftUI` (18,8 МБ `__TEXT`) поверх `SwiftUICore` (11,4 МБ), `AttributeGraph` (0,3 МБ, движок графа зависимостей), `RenderBox` (1,3 МБ, отрисовка), `CoreUI`, `CoreSVG`, `SFSymbols`, `CoreMaterial`, `UIFoundation`, `UIKitCore`, `Combine`, `CoreText`, `QuartzCore`, плюс 40 Swift-оверлеев `/usr/lib/swift/*`. В 16.0 всё то же, но без выделенного SwiftUICore.
-- **Транзитивное замыкание зависимостей**: 546 образов, 616 МБ `__TEXT`. Из них в 6.1.3 отсутствуют **407 образов и 402 МБ** (для 16.0 — 444 образа, из них нет 312).
-- **Импорты.** SwiftUI + SwiftUICore импортируют 11 653 символа, из них **10 907 отсутствуют в 6.1.3** (`a/absent-*`). Даже если считать только «обычные» фреймворки: из UIKitCore 610 символов из 720 (`UIAlertController`, `UIAction`, `NSCollectionLayout*`, `UIAccessibilityCustomRotor`…), из CoreText 94 из 156 (приватные `CTFontDescriptorCreateWithTextStyleAndAttributes`, `CTFontGetLanguageAwareOutsets`…), из libobjc 45 из 72 (`objc_alloc`, `objc_opt_*`, `objc_release_x*` — регистровые входы ARC64), из QuartzCore 45 из 117.
-- **Metal обязателен.** `RenderBox` импортирует 32 символа Metal (`MTLCreateSystemDefaultDevice`, классы `MTLBinaryArchiveDescriptor`, `MTLCaptureManager`…). По итогам соседнего проекта драйвера Metal для SGX543 (A5) не существует ни в одной прошивке, и на GLES 2.0 он не выражается. Это отдельный самостоятельный блокер.
-- **Размер ABI.** SwiftUI экспортирует 17 534 символа, SwiftUICore — 33 260 (всего 50 794, из них Swift-символов 50 380), включая 2 648 дескрипторов номинальных типов и 390 дескрипторов протоколов. AttributeGraph — 722, Combine — 2 016.
+- **SwiftUI has never had an armv7 slice.** None of the 32-bit caches, up to the last 32-bit release 10.3.4, contains
+  the `SwiftUI` or `Combine` images. In 16.0 and 18.0 the cache is arm64e only (26 caches). SwiftUI appeared in iOS 13,
+  and the last system with an armv7 slice is 10.3.4, so there is no overlap in principle.
+- **The stack's makeup (iOS 18.0).** `SwiftUI` (18.8 MB `__TEXT`) on top of `SwiftUICore` (11.4 MB), `AttributeGraph`
+  (0.3 MB, the dependency-graph engine), `RenderBox` (1.3 MB, drawing), `CoreUI`, `CoreSVG`, `SFSymbols`,
+  `CoreMaterial`, `UIFoundation`, `UIKitCore`, `Combine`, `CoreText`, `QuartzCore`, plus 40 Swift overlays in
+  `/usr/lib/swift/*`. In 16.0 it is the same, without a separate SwiftUICore.
+- **The transitive closure of dependencies:** 546 images, 616 MB `__TEXT`. Of these, **407 images and 402 MB** are
+  missing from 6.1.3 (for 16.0, 444 images, of which 312 are missing).
+- **Imports.** SwiftUI and SwiftUICore import 11,653 symbols, of which **10,907 are missing from 6.1.3** (`a/absent-*`).
+  Even counting only the ordinary frameworks: 610 of 720 from UIKitCore (`UIAlertController`, `UIAction`,
+  `NSCollectionLayout*`, `UIAccessibilityCustomRotor`...), 94 of 156 from CoreText (private
+  `CTFontDescriptorCreateWithTextStyleAndAttributes`, `CTFontGetLanguageAwareOutsets`...), 45 of 72 from libobjc
+  (`objc_alloc`, `objc_opt_*`, `objc_release_x*`, the register entry points of ARC64), and 45 of 117 from QuartzCore.
+- **Metal is required.** `RenderBox` imports 32 Metal symbols (`MTLCreateSystemDefaultDevice`, the classes
+  `MTLBinaryArchiveDescriptor`, `MTLCaptureManager`...). A neighbouring project's Metal driver for the SGX543 (A5) does
+  not exist in any firmware, and Metal cannot be expressed on GLES 2.0. This is a separate, independent blocker.
+- **The size of the ABI.** SwiftUI exports 17,534 symbols and SwiftUICore 33,260 (50,794 in all, 50,380 of them Swift
+  symbols), including 2,648 nominal type descriptors and 390 protocol descriptors. AttributeGraph has 722 and Combine 2,016.
 
-### 2.2 Возможные пути и почему они закрыты
+### 2.2 Possible routes, and why they are closed
 
-1. **Бинарная трансляция arm64 → armv7 (рекомпилятор).** Проект рекомпилятора довёл до PASS уровни «C/ObjC-утилиты» и «UIKit-приложение на ObjC», но уровень Swift у неё **заблокирован объектной моделью**: гостевому Swift нужен 8-байтовый `isa`/`superclass` по тому же адресу, где хостовому objc4 нужен 4-байтовый, и одни и те же байты 4..7 должны быть одновременно старшей половиной гостевого isa и хостовым superclass. SwiftUI — это 50 тысяч Swift-символов и классы, наследующие UIViewController/UIView, то есть ровно самый заблокированный случай.
-2. **«Подсунуть» бинарники из прошивки.** Кроме объектной модели: 407 недостающих образов (402 МБ) против 512 МБ ОЗУ iPhone 4S; Metal; приватные дыld-SPI (`dyld_program_sdk_at_least`), которых в dyld iOS 6 нет; ObjC ABI iOS 13+ (регистровые `objc_release_x*`, теговые указатели, `objc_opt_*`); CoreText/UIFoundation другой эпохи.
-3. **Юридическая рамка.** Даже если бы это работало, тулчейн не распространяет бинарники Apple. Допустима только модель «пользователь берёт файлы из своей прошивки сам» (как Spire); прошивки качать можно. На вердикт это не влияет, потому что путь закрыт технически.
+1. **Binary translation from arm64 to armv7 (the recompiler).** The recompiler project brought the "C/ObjC utility" and
+   "UIKit app in ObjC" levels to PASS, but its Swift level is **blocked by the object model**: guest Swift needs an
+   8-byte `isa`/`superclass` at the same address where the host's objc4 needs a 4-byte one, and the same bytes 4..7 must
+   be at once the high half of the guest isa and the host superclass. SwiftUI is 50 thousand Swift symbols and classes
+   that inherit from UIViewController and UIView, which is exactly the most blocked case.
+2. **"Supplying" the binaries from a firmware.** Beyond the object model: 407 missing images (402 MB) against the 512 MB
+   of RAM in an iPhone 4S; Metal; private dyld SPI (`dyld_program_sdk_at_least`), which iOS 6's dyld does not have; the
+   iOS 13+ ObjC ABI (register `objc_release_x*`, tagged pointers, `objc_opt_*`); CoreText and UIFoundation from another era.
+3. **The legal framework.** Even if it worked, the toolchain does not distribute Apple's binaries. Only the model in which
+   "the user takes the files from their own firmware" is acceptable (as Spire does); downloading firmware is allowed. This
+   does not affect the verdict, because the route is closed technically.
 
-**Вывод по A: нереально.** Не «сложно», а невозможно без полной эмуляции 64-битной системы: нет среза, нет Metal, нет объектной модели, 400 МБ недостающих образов.
+**Conclusion on A: not feasible.** Not "hard", but impossible without full emulation of a 64-bit system: there is no
+slice, no Metal, no object model, and 400 MB of missing images.
 
-### 2.3 Чего требует от SwiftUI само приложение (замер, 2026-09-17)
+### 2.3 What the app itself requires from SwiftUI (measured, 2026-09-17)
 
-Вывод раздела 2.2 относится к переносу фреймворка Apple. Отдельный вопрос — что нужно приложению, и
-ответ другой. Подробности и команды: `bridge.md`.
+The verdict of section 2.2 concerns porting Apple's framework. The separate question is what an app needs, and the
+answer is different. Details and commands: `guest-bridge.md`.
 
-Подопытное приложение (`@main App`, `NavigationView`, `List`, `ForEach` по `Identifiable`, `NavigationLink`,
-`Toggle`, `Button`, `Text` с интерполяцией, `@State`, `@StateObject`, `@Published`, `navigationTitle`),
-собранное против `SwiftUI.swiftinterface` из SDK 16.4 под arm64, требует **127 символов**: 64 из SwiftUI,
-12 из Combine, 14 из stdlib, остальное C/ObjC. Из 64 символов SwiftUI 35 — функции и инициализаторы,
-29 — метаданные. Ни кода фреймворка, ни раскладок его типов в приложении нет: SwiftUI резилиентен,
-метадата типов приложения строится на исполнении, а весь граф идёт через три точки входа
-`View._makeView`, `_makeViewList`, `_viewListCount`. Типы `_ViewInputs`, `_GraphValue`, `_ViewOutputs`
-приложение не импортирует вовсе.
+The test app (`@main App`, `NavigationView`, `List`, `ForEach` over `Identifiable`, `NavigationLink`, `Toggle`, `Button`,
+`Text` with interpolation, `@State`, `@StateObject`, `@Published`, `navigationTitle`), built against `SwiftUI.swiftinterface`
+from SDK 16.4 for arm64, requires **127 symbols**: 64 from SwiftUI, 12 from Combine, 14 from the stdlib, and the rest C
+and ObjC. Of the 64 SwiftUI symbols, 35 are functions and initializers and 29 are metadata. There is neither framework
+code nor layouts of its types in the app: SwiftUI is resilient, the app's type metadata is built at run time, and the
+whole graph goes through three entry points, `View._makeView`, `_makeViewList` and `_viewListCount`. The app does not
+import the `_ViewInputs`, `_GraphValue` and `_ViewOutputs` types at all.
 
-Форма протоколов снята из кэшей прошивок и одинакова в iOS 16.0 и 18.0: `View` — 6 требований в порядке
-«доступ к соответствию `Body: View`, доступ к связанному типу `Body`, `_makeView`, `_makeViewList`,
-`_viewListCount` (все три с реализациями по умолчанию), геттер `body`»; `App` — 4 требования.
+The protocol shapes were taken from the firmware caches and are the same in iOS 16.0 and 18.0: `View` has 6 requirements,
+in the order "access to the conformance `Body: View`, access to the associated type `Body`, `_makeView`, `_makeViewList`,
+`_viewListCount` (all three with default implementations), the getter `body`"; `App` has 4 requirements.
 
-Наша реализация, собранная под arm64 тем же компилятором, покрывает эту поверхность: изначально совпало
-36 символов из 64, после выравнивания формы (`LocalizedStringKey`, точки входа `View`,
-`List<SelectionValue, Content>`, `ForEach` без ограничения `Content: View` на самом типе,
-`ObservedObject.Wrapper`, выравнивания структурами, построители структурами) — 58, а с
-`-enable-library-evolution` (без него компилятор не выпускает method descriptors) — **64 из 64**.
-Затем приложение было слинковано с нашей реализацией: неразрешённых символов SwiftUI ноль.
+Our implementation, built for arm64 with the same compiler, covers this surface: 36 of the 64 symbols matched at first;
+after aligning the shapes (`LocalizedStringKey`, the `View` entry points, `List<SelectionValue, Content>`, `ForEach`
+without the `Content: View` constraint on the type itself, `ObservedObject.Wrapper`, alignment and builders as structs),
+58; and with `-enable-library-evolution` (without it the compiler emits no method descriptors), **64 of 64**. The app was
+then linked against our implementation: zero unresolved SwiftUI symbols.
 
-Отсюда архитектура для рекомпилятора: гостевая сторона — приложение плюс наша SwiftUI, собранная под
-arm64, плюс гостевой libswiftCore, всё переводится его конвейером; хостовая сторона — 3–5 ObjC-шимов
-(хостовый `UIViewController`, источник данных таблицы, объект target-action) и его мосты к UIKit.
-Блокер объектной модели при этом не возникает: гостевые классы наследуют не классы Apple, а эти шимы,
-и такой случай у рекомпилятора уже отлажен на ObjC-приложении.
+That gives the architecture for the recompiler: the guest side is the app plus our SwiftUI built for arm64, plus the
+guest's libswiftCore, all translated by its pipeline; the host side is 3 to 5 ObjC shims (a host `UIViewController`, a
+table data source, a target-action object) and its bridges to UIKit. The object-model blocker does not arise in that
+case: guest classes inherit not from Apple's classes but from these shims, and the recompiler already handles that case
+in its ObjC app.
 
-Чего замер не доказывает: работу. Линковка проверяет имена и формы, а не поведение; запуска не было.
-Первый настоящий ответ даст проба рекомпилятора — это же приложение, переведённое в armv7, на экране.
+What the measurement does not prove: that the app works. Linking checks names and shapes, not behaviour; nothing was run.
+The first real answer comes from the recompiler's probe: this same app, translated to armv7, on the screen.
 
-## 3. B1. OpenCombine — проверено
+## 3. B1. OpenCombine: verified
 
-Источник: `OpenCombine/OpenCombine` (MIT, последний коммит 1c6f02c, 2023-10). Зависимостей нет, кроме маленького C++-хелпера.
+Source: `OpenCombine/OpenCombine` (MIT, last commit 1c6f02c, 2023-10). No dependencies except a small C++ helper.
 
-Собрано отдельным скриптом, которого больше нет (теперь это цель `Combine` в `frameworks/Combine`): Swift 6.4 (revenant@swift), `-target armv7-apple-ios7.0`, рантайм и оверлеи учебных сборок проекта Swift-оверлеев, линковка при iOS 6.0, install name `@executable_path`. Проверка импортов тулчейна против кэшей 6.0 и 6.1.3: **0 strong missing**.
+Built with a script that no longer exists (it is now the `Combine` target of `frameworks/Combine`): Swift 6.4
+(`revenant@swift`), `-target armv7-apple-ios7.0`, the runtime and overlays of the Swift overlay project's trial builds,
+linked for iOS 6.0, install name `@executable_path`. The toolchain's import check against the 6.0 and 6.1.3 caches gives
+**0 strong missing**.
 
-Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/Combine/tests/XCTest.swift`, а список тестов собирает `frameworks/Combine/tools/discover.lua` для цели `CombineTests`).
+Tests: 1453 upstream tests (`URLSessionTests.swift` is excluded, because it inherits from `NSURLSession`, which is
+iOS 7) run through our own XCTest shim (230 lines; now `frameworks/Combine/tests/XCTest.swift`, and the test list is
+collected by `frameworks/Combine/tools/discover.lua` for the `CombineTests` target).
 
-| где | тестов | прошло | упало | аварий |
+| where | tests | passed | failed | crashes |
 |---|---|---|---|---|
-| хост macOS arm64 | 1469 | 1464 | 5 | 0 |
+| host, macOS arm64 | 1469 | 1464 | 5 | 0 |
 | iLEmu, iPhone4,1, iOS 6.1.3 | 1453 | 1437 | 1 | 15 |
 
-Единственное падение на iOS 6 (`MapKeyPathTests.testMapKeyPathReflection`) воспроизводится и на хосте: тест сверяет текст рефлексии, изменившийся в новых Swift.
+The single failure on iOS 6 (`MapKeyPathTests.testMapKeyPathReflection`) reproduces on the host too: the test compares
+reflection text that changed in newer Swift.
 
-Аварии (по 1 на прогон, каждая пропускалась и прогон продолжался):
-- 7 × `DispatchQueueSchedulerTests` — trap в `SchedulerTimeType.Stride.magnitude`. Это `Int(_nanoseconds: Int64)`, а `Int` на armv7 32-битный. **У Apple ровно та же форма API**: в `Schedulers+DispatchQueue.swift` (Apache-2.0) `public var magnitude: Int` — само хранилище; в `Dispatch.swiftinterface` SDK 16.4 — `public typealias Magnitude = Swift.Int`. То есть на 32 битах и Apple Combine не представляет интервалы больше ±2,1 с. Упирается в `SignedNumeric.Magnitude`. Полезное для upstream исправление: хранить `Int64`, а публичный геттер сделать `Int(clamping:)`, тесты величин закрыть `#if` по разрядности. Это касается всех 32-битных платформ OpenCombine (wasm32, armv7 Linux/Android).
-- 1 × `DispatchQueue.async(group:qos:flags:)` и 1 × `DispatchQueue.concurrentPerform` — падение внутри libdispatch iOS 6 из Swift-оверлея (QoS — API iOS 8). Передано проекту Swift-оверлеев.
-- 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (путь JSONDecoder) — trap в оверлее. Передано проекту Swift-оверлеев.
-- 5 × `Timer.tolerance` → слабый `CFRunLoopTimerSetTolerance` (iOS 7) равен NULL. Передано проекту бэкпортов, **уже реализовано** ею (the backports, `NSTimer+Tolerance.m`); после влития прогон нужно повторить.
+Crashes (one per run; each was skipped and the run went on):
+- 7 × `DispatchQueueSchedulerTests`: a trap in `SchedulerTimeType.Stride.magnitude`. It is `Int(_nanoseconds: Int64)`, and
+  `Int` is 32-bit on armv7. **Apple has exactly the same API shape:** in `Schedulers+DispatchQueue.swift` (Apache-2.0)
+  `public var magnitude: Int` is the storage itself, and in `Dispatch.swiftinterface` of SDK 16.4
+  `public typealias Magnitude = Swift.Int`. So on 32-bit platforms Apple's Combine does not represent intervals larger
+  than ±2.1 s either. It comes from `SignedNumeric.Magnitude`. A useful upstream fix: store `Int64`, make the public getter
+  `Int(clamping:)`, and guard the magnitude tests with `#if` on the word size. This affects every 32-bit platform of
+  OpenCombine (wasm32, armv7 Linux and Android).
+- 1 × `DispatchQueue.async(group:qos:flags:)` and 1 × `DispatchQueue.concurrentPerform`: a crash inside iOS 6's libdispatch,
+  from the Swift overlay (QoS is an iOS 8 API). Passed to the Swift overlay project.
+- 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (the JSONDecoder path): a trap in the overlay. Passed to the Swift
+  overlay project.
+- 5 × `Timer.tolerance` → the weak `CFRunLoopTimerSetTolerance` (iOS 7) is NULL. Passed to the backports project, which
+  **already implements it** (`NSTimer+Tolerance.m` in the backports); the run must be repeated after it is merged.
 
-Нынешние результаты тех же тестов против Combine: `docs/reference/combine/test-results.md`.
+The current results of the same tests against Combine are in `docs/reference/combine/test-results.md`.
 
-## 4. B2. OpenSwiftUI и OpenAttributeGraph — состояние
+## 4. B2. OpenSwiftUI and OpenAttributeGraph: state
 
-Проверено чтением исходников (клоны `src/OpenSwiftUI` cc24a30 и `src/OpenAttributeGraph` 1d8e762, обе MIT).
+Verified by reading the sources (clones `src/OpenSwiftUI` cc24a30 and `src/OpenAttributeGraph` 1d8e762, both MIT).
 
-- **Платформа пакета — iOS 18** (`Package.swift:900-907`), публичный потолок доступности опускается до iOS 13 только макросами. Требуется swift-tools 6.3, swift-syntax, макросы.
-- **Движок графа берётся снаружи.** `OPENATTRIBUTESHIMS_*` выбирает Apple `AttributeGraph`, сторонний `Compute` или `DanceUIGraph`; свой `OpenAttributeGraph` — каркас: `OAGAttribute.cpp` содержит 29 TODO и возвращает `OAGAttributeNil` для создания/чтения/записи значений, `OAGCompareValues` возвращает false, слабые атрибуты — TODO. CI гоняет только вариант с Compute и вариант с Apple AG.
-- **Отрисовка.** Всё написано вокруг типов RenderBox (`ORBPath`, `ORBDisplayList`, `ORBLayer` — 27 файлов). Без RenderBox остаётся путь CALayer/`CGDrawingView`: цвета, изображения, `CAShapeLayer`-фигуры и текст через `NSStringDrawing` (с приватными SPI UIFoundation); `.drawing`-элементы (Canvas) на этом пути — no-op с комментарием TODO.
-- **Виджеты.** Есть стеки, `Spacer`, `Divider`, `GeometryReader`, `ForEach`, фигуры, `Image`, `Text`, `Toggle`, `ProgressView`, `Slider`, `@State/@Binding/@ObservedObject/@StateObject/@EnvironmentObject`, анимации, `UIHostingController`. **Нет** `ScrollView`, `List`, `NavigationStack/NavigationView/NavigationLink`, `TextField`, `LazyVStack`, `Grid`, `TabView`, `DragGesture`; `Button` — пустая заглушка (`Status: Empty`, `body` = `EmptyView`).
-- **Системные требования кода.** `UIScene` (64 использования), `_UIUpdateSequenceInsertItem` (iOS 17 SPI), `CAFrameRateRange` (iOS 15), `safeAreaInsets` (iOS 11), `os_unfair_lock` (iOS 10), `AttributedString` (473 использования, iOS 15), `dyld_program_sdk_at_least`, SF Symbols, 63 `@_silgen_name` в приватный CoreText. Для iOS 6 это переписывание слоя интеграции целиком.
-- **Что из него полезно.** Структура и имена внутренних механизмов настоящей SwiftUI (ViewGraph, DisplayList, DynamicProperty, Semantics), 61 UI-снимочный тест, документ `Docs/SwiftUICompatibilityGaps.md`. Как справочник — да; как база для iOS 6 — нет.
+- **The package's platform is iOS 18** (`Package.swift:900-907`); its public availability floor drops to iOS 13 only
+  through macros. It requires swift-tools 6.3, swift-syntax and macros.
+- **The graph engine is taken from outside.** `OPENATTRIBUTESHIMS_*` selects Apple's `AttributeGraph`, a third-party
+  `Compute`, or `DanceUIGraph`. Its own `OpenAttributeGraph` is a skeleton: `OAGAttribute.cpp` contains 29 TODOs and
+  returns `OAGAttributeNil` for creating, reading and writing values, `OAGCompareValues` returns false, and weak attributes
+  are TODOs. CI runs only the variant with Compute and the variant with Apple's AG.
+- **Drawing.** Everything is written around RenderBox types (`ORBPath`, `ORBDisplayList`, `ORBLayer`: 27 files). Without
+  RenderBox, what remains is the CALayer path, `CGDrawingView`: colours, images, `CAShapeLayer` shapes, and text through
+  `NSStringDrawing` (with private UIFoundation SPI). `.drawing` elements (Canvas) on this path are a no-op with a TODO comment.
+- **Widgets.** There are stacks, `Spacer`, `Divider`, `GeometryReader`, `ForEach`, shapes, `Image`, `Text`, `Toggle`,
+  `ProgressView`, `Slider`, `@State`, `@Binding`, `@ObservedObject`, `@StateObject`, `@EnvironmentObject`, animations,
+  `UIHostingController`. **Missing:** `ScrollView`, `List`, `NavigationStack`, `NavigationView`, `NavigationLink`,
+  `TextField`, `LazyVStack`, `Grid`, `TabView`, `DragGesture`; `Button` is an empty stub (`Status: Empty`, `body` = `EmptyView`).
+- **System requirements in the code.** `UIScene` (64 uses), `_UIUpdateSequenceInsertItem` (an iOS 17 SPI),
+  `CAFrameRateRange` (iOS 15), `safeAreaInsets` (iOS 11), `os_unfair_lock` (iOS 10), `AttributedString` (473 uses, iOS 15),
+  `dyld_program_sdk_at_least`, SF Symbols, and 63 `@_silgen_name` into private CoreText. For iOS 6, the integration layer
+  would have to be rewritten entirely.
+- **What is useful in it.** The structure and names of the real SwiftUI's internal mechanisms (ViewGraph, DisplayList,
+  DynamicProperty, Semantics), 61 UI snapshot tests, and the document `Docs/SwiftUICompatibilityGaps.md`. As a reference:
+  yes. As the base for iOS 6: no.
 
-## 5. B3. SwiftUI: архитектура и прототип
+## 5. B3. SwiftUI: architecture and prototype
 
-### 5.1 Архитектура
+### 5.1 Architecture
 
-Модуль называется **`SwiftUI`** — приложение компилируется из исходников, у которых вверху `import SwiftUI`, без изменений текста. Combine приходит из OpenCombine (`@_exported import OpenCombine`; при желании OpenCombine собирается с `-module-name Combine`).
+The module is called **`SwiftUI`**: an app is compiled from sources that start with `import SwiftUI`, without any change to
+the text. Combine comes from OpenCombine (`@_exported import OpenCombine`; OpenCombine can be built with
+`-module-name Combine` if wanted).
 
-Слои:
+Layers:
 
-1. **Описание** — `View`, `@ViewBuilder` (вариадический через параметрические пакеты Swift 6), `TupleView`, `Group`, `AnyView`, `Optional`/`_ConditionalContent` для `if`, `ForEach`.
-2. **Граф узлов** — дерево `Node`, зеркалящее дерево представлений: `CompositeNode` (пользовательский View, хранит состояние и вычисляет `body`), `GroupNode` (прозрачные контейнеры), `LayoutNode` (узлы, владеющие `UIView`), `ContainerNode`. Согласование — по позиции и динамическому типу: совпал тип — узел обновляется на месте, не совпал — пересоздаётся.
-3. **Динамические свойства** — `@State`, `@Binding`, `@ObservedObject`, `@StateObject`, `@EnvironmentObject`. Хранилище живёт в узле, а не в значении представления; при каждом вычислении `body` значения свойств вписываются в копию структуры по смещениям полей, полученным из метаданных Swift (`_forEachField`, SPI stdlib). Это тот же приём, что у Apple (DynamicPropertyCache) и у OpenSwiftUI.
-4. **Транзакции** — изменение состояния помечает узел грязным и планирует `DispatchQueue.main.async`; при сбросе узлы перерисовываются от корня к листьям, потомки уже перерисованных пропускаются, затем хосты пересобирают поддеревья `UIView` и просят перелейаут, а списки, внутри которых что-то изменилось, перезагружают строки.
-5. **Лейаут** — своя модель «предложение → размер → размещение», как в SwiftUI: у каждого узла `sizeThatFits(ProposedSize)` и `place(CGRect)`. Стек измеряет минимальные и максимальные размеры детей, сортирует по гибкости и раздаёт остаток наименее гибкому первым; `Spacer` — минимум 8 и бесконечная гибкость; `padding`/`frame` — узлы-обёртки.
-6. **Отображение на UIKit iOS 6** — `Text` → `UILabel`, `Button` → `UIButton(type: .roundedRect)` (тот самый скевоморфный вид), `Toggle` → `UISwitch`, `TextField` → `UITextField(.roundedRect)`, `Color` → `UIView`, `List` → `UITableView` + свой источник данных, `NavigationView` → `UINavigationController` как дочерний контроллер, `NavigationLink` → строка с «галкой» и `pushViewController`, `navigationTitle` → `navigationItem.title`, `App`/`WindowGroup`/`@main` → `UIApplicationMain` со своим делегатом, `UIHostingController<Content>` — как у Apple.
+1. **Description**: `View`, `@ViewBuilder` (variadic through parameter packs in Swift 6), `TupleView`, `Group`, `AnyView`,
+   `Optional` and `_ConditionalContent` for `if`, `ForEach`.
+2. **The node graph**: a tree of `Node`s that mirrors the tree of views: `CompositeNode` (a user View, which holds state and
+   computes `body`), `GroupNode` (transparent containers), `LayoutNode` (nodes that own a `UIView`), `ContainerNode`.
+   Matching is by position and dynamic type: if the type matches, the node is updated in place; if not, it is recreated.
+3. **Dynamic properties**: `@State`, `@Binding`, `@ObservedObject`, `@StateObject`, `@EnvironmentObject`. The storage lives
+   in the node, not in the view value; on each `body` computation the property values are written into a copy of the struct
+   at field offsets taken from Swift's metadata (`_forEachField`, a stdlib SPI). This is the same technique Apple uses
+   (DynamicPropertyCache) and OpenSwiftUI uses.
+4. **Transactions**: a state change marks the node dirty and schedules `DispatchQueue.main.async`. When it is flushed, nodes
+   are redrawn from the root to the leaves, descendants of already-redrawn nodes are skipped, then the hosts rebuild their
+   `UIView` subtrees and ask for relayout, and lists in which something changed reload their rows.
+5. **Layout**: our own model "proposal → size → placement", as in SwiftUI: each node has `sizeThatFits(ProposedSize)` and
+   `place(CGRect)`. A stack measures its children's minimum and maximum sizes, sorts them by flexibility and gives the
+   remainder to the least flexible first; `Spacer` has a minimum of 8 and infinite flexibility; `padding` and `frame` are
+   wrapper nodes.
+6. **Mapping to iOS 6 UIKit**: `Text` → `UILabel`, `Button` → `UIButton(type: .roundedRect)` (the same skeuomorphic look),
+   `Toggle` → `UISwitch`, `TextField` → `UITextField(.roundedRect)`, `Color` → `UIView`, `List` → `UITableView` with our own
+   data source, `NavigationView` → `UINavigationController` as a child controller, `NavigationLink` → a row with a
+   disclosure arrow and `pushViewController`, `navigationTitle` → `navigationItem.title`, `App`, `WindowGroup` and `@main`
+   → `UIApplicationMain` with our own delegate, and `UIHostingController<Content>` as in Apple's.
 
-### 5.2 Что уже сделано
+### 5.2 What is already done
 
-Модуль `frameworks/SwiftUI/src/` (проект SwiftUI; Swift-модуль по-прежнему называется `SwiftUI`) — около 14 000 строк.
-Полный перечень поддержанного, игнорируемого и отсутствующего ведётся в `ledger.md` и сверяется со сборкой
-(`coverage.lua --check`). Счёт на 19.09 по интерфейсу SwiftUI из SDK 16.4 — по той его части, которую Apple объявляет
-доступной на iOS (срез строит `tools/apple-names.lua modifiers`): **490 из 520 типов, 289 из 289 модификаторов `View`**, из них
-188 действуют, 101 объявлен и игнорируется (каждый пишет строку в журнал и в `/var/revenant/swiftui-ignored.txt`),
-заглушек `unimplemented` не осталось. По полному интерфейсу, вместе с macOS/tvOS/watchOS-частью: 503 из 592 типов.
-Список игнорируемых закрытый: туда попадает только то, чему в iOS 6 нечему соответствовать; всё, что упиралось в наш
-движок, переведено в рабочее или в заглушки.
+The module `frameworks/SwiftUI/src/` (the SwiftUI project; the Swift module is still called `SwiftUI`) is about 14,000
+lines. The full list of what is supported, ignored and missing is kept in `ledger.md`, and it is checked against the build
+(`coverage.lua --check`). The count as of 19.09, for the SwiftUI interface of SDK 16.4, over the part Apple declares
+available on iOS (the slice comes from `tools/apple-names.lua modifiers`): **490 of 520 types, 289 of 289 `View`
+modifiers**, of which 188 work, 101 are declared and ignored (each writes a line to the log and to
+`/var/revenant/swiftui-ignored.txt`), and no `unimplemented` stubs are left. Over the full interface, including the
+macOS, tvOS and watchOS part: 503 of 592 types. The list of ignored items is closed: only things with nothing to match on
+iOS 6 go there; everything that depended on our engine was turned into working code or stubs.
 
-Сборка идёт против пакета `revenant@swift-runtime` 6.4.0 (тулчейн, main 70c716c) — того же рантайма, что у остальных
-портов, — с целью `armv7-apple-ios6.0` и **включённой проверкой доступности**: так нашлись и исправлены места,
-которые прежняя сборка с `-disable-availability-checking` молча пропускала (`CGPathAddRoundedRect`, iOS 7, в
-скруглённых фигурах; `-[NSCalendar component:fromDate:]`, iOS 8). Core Data доступна через оверлей пакета:
-`@FetchRequest` работает поверх `NSFetchedResultsController`. Проверки: 260 модульных тестов движка в iLEmu iOS 6.1.3
-и на живом iPad 2 (6.1.3) и 16 снимочных сценариев в приложении (iPod4,1 iOS 6.0) — все проходят; при переезде на
-пакетный рантайм, и затем при добавлении гейтов `needsMount`/`needsLayout` в раскладке, все снимки совпали байт в
-байт. Гостевая сборка для рекомпилятора (arm64, библиотечная эволюция) удовлетворяет 64 из 64
-символов подопытного приложения Apple-сборки.
+The build goes against the package `revenant@swift-runtime` 6.4.0 (the toolchain, main 70c716c), the same runtime the other
+ports use, with the target `armv7-apple-ios6.0` and **availability checking enabled**. That found and fixed places the
+earlier build, with `-disable-availability-checking`, passed over silently (`CGPathAddRoundedRect`, iOS 7, in the rounded
+shapes; `-[NSCalendar component:fromDate:]`, iOS 8). Core Data is available through the package's overlay: `@FetchRequest`
+works on top of `NSFetchedResultsController`. Checks: 260 unit tests of the engine in iLEmu on iOS 6.1.3 and on a live iPad 2
+(6.1.3), and 16 snapshot scenarios in the app (iPod4,1 on iOS 6.0), all of which pass. When the runtime moved to the
+package, and again when the `needsMount` and `needsLayout` gates were added to the layout, all snapshots matched byte for
+byte. The guest build for the recompiler (arm64, library evolution) satisfies 64 of 64 symbols of the test app built
+against Apple's SDK.
 
-Движок инкрементальный: поддерево не перерисовывается, если значение представления не изменилось
-(побайтное сравнение, как `compareValues` у Apple) и окружение то же.
+The engine is incremental: a subtree is not redrawn if the view value has not changed (a byte-by-byte comparison, like
+`compareValues` in Apple's code) and the environment is the same.
 
-### 5.3 Проба: приложение
+### 5.3 Probe: the app
 
-`frameworks/SwiftUI/examples/showcase/DemoApp.swift` (177 строк) — приложение на обычном синтаксисе SwiftUI: `@main struct DemoApp: App`, `NavigationView` со `List`, карточка со `@State` (счётчик, переключатель, поле ввода), `@StateObject` модель с `@Published`, `@EnvironmentObject` в строках и на экране деталей, `ForEach` по `Identifiable`, условное представление, `NavigationLink` на экран деталей.
+`frameworks/SwiftUI/examples/showcase/DemoApp.swift` (177 lines) is an app in ordinary SwiftUI syntax: `@main struct
+DemoApp: App`, a `NavigationView` with a `List`, a card with `@State` (a counter, a switch, an input field), a `@StateObject`
+model with `@Published`, `@EnvironmentObject` in the rows and on the detail screen, `ForEach` over `Identifiable`, a
+conditional view, and a `NavigationLink` to the detail screen.
 
-Собирается целью `SwiftUIDemo` в `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`), проверка импортов тулчейна против 6.0 и 6.1.3 — 0 strong missing.
+It is built by the target `SwiftUIDemo` into `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`). The toolchain's import check
+against 6.0 and 6.1.3 gives 0 strong missing.
 
-Прогон в iLEmu (iPod4,1, iOS 6.0, запуск через SpringBoard, касания по сценарию, прогон `app10` тогдашнего `run-app.sh`):
+A run in iLEmu (iPod4,1, iOS 6.0, launched through SpringBoard, touches from a scenario, run `app10` of the `run-app.sh` of
+the time):
 
-| список | переключатель | детали | избранное |
+| list | switch | details | favourites |
 |---|---|---|---|
-| два касания «+» — состояние `@State` обновило текст | переключатель добавил условный красный текст, высота строки пересчиталась | переход по `NavigationLink`, заголовок из `navigationTitle`, кнопка «назад» | «Добавить в избранное» через `@EnvironmentObject` — звезда появилась в списке на предыдущем экране |
+| two taps on "+": the `@State` updated the text | the switch added a conditional red text, and the row height was recomputed | navigation through `NavigationLink`, the title from `navigationTitle`, the back button | "Add to favourites" through `@EnvironmentObject`: the star appeared in the list on the previous screen |
 
-Все элементы нарисованы родными контролами iOS 6: кнопки `roundedRect`, `UISwitch`, `UITextField`, синяя панель навигации, таблица со стрелками. То есть цель «современный SwiftUI-код выглядит как родное приложение iOS 6» на этом наборе достигнута.
+All elements were drawn with native iOS 6 controls: `roundedRect` buttons, `UISwitch`, `UITextField`, the blue navigation
+bar, and a table with disclosure arrows. So the goal "modern SwiftUI code looks like a native iOS 6 app" is met for this set.
 
-Порядок работы на устройстве проверить не удалось по правилам (приложение из `/var/tmp` не получает дисплей: `GSRegisterPurpleNamedPort`, ошибка 1100 — для UI-запуска приложение нужно установить в `/Applications`, чего правила устройства не разрешают).
+Running it on a device could not be verified under the rules: an app launched from `/var/tmp` does not get a display
+(`GSRegisterPurpleNamedPort`, error 1100). For a UI launch the app must be installed in `/Applications`, which the device
+rules do not allow.
 
-### 5.4 Проба: движок на железе
+### 5.4 Probe: the engine on hardware
 
-`frameworks/SwiftUI/tests/probe/main.swift` — безоконный пробник: строит дерево, меняет состояние через `@Published`, сбрасывает транзакции, печатает дерево `UIView` с рамками и замеряет время. Запущен на **iPhone 4S, iOS 6.1.3** (через модуль device тулчейна, файлы только в `/var/tmp`, после прогона удалены; вывод прогона в дереве не хранится):
+`frameworks/SwiftUI/tests/probe/main.swift` is a windowless probe: it builds a tree, changes state through `@Published`,
+flushes transactions, prints the `UIView` tree with frames, and times it. It ran on an **iPhone 4S, iOS 6.1.3** (through the
+device module of the toolchain, the files only in `/var/tmp`, deleted after the run; the output of the run is not kept in
+the tree):
 
-- дерево собралось, изменение `@Published` добавило новую строку `ForEach`, показало условный блок и изменило ширины — согласование и лейаут на железе работают;
-- **2,83 мс** на полное обновление экрана (200 обновлений за 0,566 с), худшее 3,71 мс;
-- **6,0 мс** на первичную сборку и лейаут экрана.
+- the tree was built, a change to `@Published` added a new `ForEach` row, showed a conditional block and changed widths:
+  matching and layout work on the hardware;
+- **2.83 ms** for a full screen update (200 updates in 0.566 s), worst case 3.71 ms;
+- **6.0 ms** for the first build and layout of the screen.
 
-То есть бюджет кадра 60 Гц (16,6 мс) на iPhone 4S держится с запасом даже при перерисовке всего экрана без инкрементальности.
+So the 60 Hz frame budget (16.6 ms) holds on an iPhone 4S with room to spare, even when the whole screen is redrawn without
+incrementality.
 
-Ограничение, найденное там же: `UIFont`/`GSFontCreateWithName` в процессе без UIApplication на iOS 6 падает (`_CFRuntimeSetCFMPresent`), поэтому безоконные пробы с текстом возможны только внутри приложения.
+A limit found at the same time: `UIFont`/`GSFontCreateWithName` crashes on iOS 6 in a process without a UIApplication
+(`_CFRuntimeSetCFMPresent`), so windowless probes with text are possible only inside an app.
 
-### 5.5 Ошибки, найденные и исправленные прототипом (полезно для будущей реализации)
+### 5.5 Bugs found and fixed by the prototype (useful for the future implementation)
 
-- Родительские связи узлов проставлялись только при обновлении, но не при первой сборке; из-за этого список не узнавал, что его строка изменилась, и условный элемент внутри строки не появлялся.
-- Стек раздавал детям остаток без учёта их минимальных размеров — текст в строке переносился раньше времени.
-- Сброс транзакций должен идти от родителей к потомкам, иначе повторно вычисляются уже пересозданные узлы.
+- Parent links of nodes were set only on update, not on the first build. Because of that a list did not learn that its
+  row had changed, and a conditional element inside a row did not appear.
+- A stack gave the remainder to its children without regard to their minimum sizes, so text in a row wrapped too early.
+- Transaction flushing must go from parents to children; otherwise nodes that were already recreated get recomputed.
 
-### Поправка к счёту покрытия (19.09)
+### Correction to the coverage count (19.09)
 
-Счёт «490 из 520 типов, 289 из 289 модификаторов» верен как счёт **имён** и таким и остаётся, но им нельзя мерить
-полноту. Типизированный разбор `swift-api-digester` (интерфейс Apple SwiftUI для iOS 16.4 против нашего модуля,
-`tools/api-surface.lua`) даёт то, чего счёт по именам не видит: **1402 декларации Apple отсутствуют и 321 есть с
-другой подписью** (вызовы, покрытые нашими значениями по умолчанию, не считаются). Причина слепоты счёта —
-сравнение по имени не различает перегрузки и принимает `Shading.linearGradient` за `ShapeStyle.linearGradient`.
-Тот же разбор и сценарии из реального кода нашли и три тихие неправды, которых имена не показывали: `.updating` у
-жеста не вызывал тело (жесты сверялись по типу замыкания через `Mirror`), `animatableData` у своих фигур, эффектов
-и раскладок нигде не читалась, а `GeometryEffect` был записан как «игнорируется» с неверной причиной
-(`CALayer.transform` есть с iOS 2). Все три исправлены; список остального — рабочая очередь (`gaps.txt`, который пишет `tools/api-surface.lua`).
+The count "490 of 520 types, 289 of 289 modifiers" is correct as a count of **names**, and it stays that way, but it cannot
+measure completeness. The typed comparison of `swift-api-digester` (Apple's SwiftUI interface for iOS 16.4 against our
+module, `tools/api-surface.lua`) shows what the name count cannot see: **1402 Apple declarations are missing and 321 are
+present with a different signature** (calls covered by our default values are not counted). The reason the name count is
+blind is that a comparison by name does not distinguish overloads, and accepts `Shading.linearGradient` as
+`ShapeStyle.linearGradient`. The same comparison and scenarios taken from real code also found three silent falsehoods that
+the names did not show: the `.updating` of a gesture did not call the body (gestures were matched by the closure's type
+through `Mirror`), `animatableData` of our own shapes, effects and layouts was read nowhere, and `GeometryEffect` was
+recorded as "ignored" with a wrong reason (`CALayer.transform` exists since iOS 2). All three are fixed. The rest of the list
+is the work queue (`gaps.txt`, which `tools/api-surface.lua` writes).
 
-### Приёмы из смежных систем (разбор 19.09)
+### Techniques from related systems (review of 19.09)
 
-Прочитаны исходники OpenSwiftUI (`DynamicPropertyCache`, `PropertyList`, `DynamicBody`), Tokamak (Fiber-реконсайлер,
-`Mutation`/`commit`), SwiftCrossUI (`ViewGraphNode`: кэш результатов раскладки, `bottomUpUpdate`); Flutter,
-Compose, React и Salsa — по документации. Что из этого берём, по убыванию пользы:
+The sources of OpenSwiftUI (`DynamicPropertyCache`, `PropertyList`, `DynamicBody`), Tokamak (the Fiber reconciler,
+`Mutation`/`commit`) and SwiftCrossUI (`ViewGraphNode`: a cache of layout results, `bottomUpUpdate`) were read; Flutter,
+Compose, React and Salsa were read from their documentation. What we take from them, in decreasing order of usefulness:
 
-| Приём → откуда | В SwiftUI | Состояние |
+| Technique → source | In SwiftUI | Status |
 | --- | --- | --- |
-| Идентичность ветки `if`/`else`, а не только типа → структурная идентичность SwiftUI, ключ группы Compose, `Widget.canUpdate` Flutter | `GroupNode` помнит ветку `_ConditionalContent` и при смене сбрасывает поддерево: у Apple `@State` двух веток разный | **сделано**, тест |
-| Ранняя отсечка: то же значение не инвалидирует → AttributeGraph, backdating в Salsa | `StateStorage` сравнивает старое и новое значение побайтно | **сделано**, тест |
-| Кэш «предложение → размер» в узле раскладки со сбросом вверх по родителям → SwiftCrossUI `resultCache`, Tokamak `propagateCacheInvalidation` | стек меряет детей трижды, то есть ~3^глубина измерений листа | **сделано**: на iPad 2 глубина 3 — 1174 → 56 мс на обновление, глубина 6 — 5,3 с → 139 мс; рост линейный. Нужно ≥ 32 записей: вложенные стеки чередуют оси, и предложения множатся; при 6 записях вытеснение возвращало экспоненту |
-| Кэш полей DynamicProperty на тип → OpenSwiftUI `DynamicPropertyCache` | `_forEachField` сейчас на каждом `render()` | дёшево, в очереди |
-| `Equatable`-путь сравнения видов → `EquatableView`, React `memo` | `viewsEqual` только побайтный, замыкание в виде ломает отсечку | дёшево, в очереди |
-| Флаг «изменилось» у свойств + учёт прочитанных ключей окружения → `_DynamicPropertyBuffer.update`, `PropertyList.Tracker`; пропуск без пересчёта родителя (Compose) | сейчас любое изменение окружения пересчитывает всё поддерево | архитектурно, после замера |
-| Раскладка снизу вверх с остановкой при неизменном размере → SwiftCrossUI, relayout boundary Flutter | **сделано частично**: `mount()` (синхронизация подвидов) и `place()` теперь пропускаются для узлов, чей размер и кадр не изменились — на iPad 2 обновление одной строки из шести на глубине 3 упало с 82 до 10 мс. Полная остановка распространения самого размера вверх (когда дочерний размер меняется, но родительский — нет) не сделана: сейчас `invalidateLayout()` помечает всех предков грязными сразу |
-| Окружение как неизменяемый список с общим хвостом → OpenSwiftUI `PropertyList` | ~55 полей копируются в каждый узел | крупная переделка, позже |
-| Отдельная фаза применения изменений к UIKit → Tokamak `Mutation` | `syncSubviews` сверяет подвиды за O(n²); к `.insert`/`.remove` естественно цепляются переходы | позже |
-| Своё `Observation` (`withObservationTracking`) → то, как OpenSwiftUI оборачивает `updateBody` | закрыло бы «нет вовсе» для `@Observable` | крупно; нужен проверенный плагин макросов |
+| Identity of an `if`/`else` branch, not only of its type → SwiftUI's structural identity, Compose's group key, Flutter's `Widget.canUpdate` | `GroupNode` remembers the `_ConditionalContent` branch, and when it changes it drops the subtree: in Apple, the `@State` of the two branches is different | **done**, tested |
+| Early cutoff: the same value does not invalidate → AttributeGraph, backdating in Salsa | `StateStorage` compares the old and the new value byte by byte | **done**, tested |
+| A "proposal → size" cache in the layout node, invalidated upward through the parents → SwiftCrossUI `resultCache`, Tokamak `propagateCacheInvalidation` | a stack measures its children three times, that is about 3^depth measurements of a leaf | **done**: on the iPad 2, depth 3 went from 1174 to 56 ms per update, depth 6 from 5.3 s to 139 ms; growth is linear. At least 32 entries are needed: nested stacks alternate axes, and the proposals multiply; with 6 entries, eviction brought the exponent back |
+| A cache of DynamicProperty fields per type → OpenSwiftUI `DynamicPropertyCache` | `_forEachField` runs on every `render()` now | cheap, queued |
+| An `Equatable` path for comparing views → `EquatableView`, React `memo` | `viewsEqual` is byte-wise only, and a closure in the view breaks the cutoff | cheap, queued |
+| A "changed" flag on properties plus tracking of the environment keys read → `_DynamicPropertyBuffer.update`, `PropertyList.Tracker`; skipping the parent's recomputation (Compose) | now any environment change recomputes the whole subtree | architectural, after a measurement |
+| Bottom-up layout that stops when the size is unchanged → SwiftCrossUI, Flutter's relayout boundary | **partly done**: `mount()` (syncing the subviews) and `place()` are now skipped for nodes whose size and frame did not change; on the iPad 2, updating one row of six at depth 3 fell from 82 to 10 ms. Stopping the propagation of the size itself upward (when a child's size changes but the parent's does not) is not done: now `invalidateLayout()` marks all ancestors dirty at once |
+| The environment as an immutable list with a shared tail → OpenSwiftUI `PropertyList` | about 55 fields are copied into each node | a large rework, later |
+| A separate phase applying changes to UIKit → Tokamak `Mutation` | `syncSubviews` matches the subviews in O(n²); transitions attach naturally to `.insert`/`.remove` | later |
+| Our own `Observation` (`withObservationTracking`) → how OpenSwiftUI wraps `updateBody` | would close "not at all" for `@Observable` | large; needs a proven macro plugin |
 
-На том же замере (iPad 2, шесть строк вложенных стеков глубины d, меняется только первая строка) пропуск
-`mountContents()`/`place()` для неизменных узлов дал: d=1 — 14 → 3,4 мс, d=3 — 82 → 10 мс, d=5 — 18 мс на
-обновление при 128 мс полной сборки экрана. Инструментирован и разбор по фазам (`render`/`mount`/`layout`)
-в `SwiftUIProbe`.
+On the same measurement (iPad 2, six rows of nested stacks of depth d, with only the first row changing), skipping
+`mountContents()` and `place()` for unchanged nodes gave: d=1, 14 → 3.4 ms; d=3, 82 → 10 ms; d=5, 18 ms per update against
+128 ms for a full screen build. The phase breakdown (`render`, `mount`, `layout`) is instrumented in `SwiftUIProbe`.
 
-Второй проход по тому же замеру (централизованный пропуск в `reconcile()`: узел, чьё представление побайтно
-не изменилось и окружение прежнее, вообще не получает `update()`; `GroupNode`, `ForEachNode` и обёртки
-`.padding()`/`.frame()`/`.background()` сбрасывают раскладку только при реальном изменении) сократил число
-вычислений размера на глубоком экране примерно на треть (iPad 2: d=3 — 2135 → 1354, d=5 — 3863 → 2501 за
-обновление), а простой экран — с 2,2 до 1,6 мс. Время обновления одной строки почти не изменилось (d=3 — 10–11
-мс): его определяет сама изменившаяся цепочка, а не соседние строки. Оставшиеся вызовы — законная работа по
-изменившейся ветке плюс один неустранимый: замыкание `content:` у `ForEach` каждый раз новое, поэтому
-охватывающий стек всегда «изменился» по побайтному сравнению.
+A second pass over the same measurement (a centralized skip in `reconcile()`: a node whose view did not change
+byte-for-byte and whose environment is the same does not get `update()` at all; `GroupNode`, `ForEachNode` and the
+`.padding()`, `.frame()` and `.background()` wrappers reset the layout only on a real change) cut the number of size
+computations on a deep screen by about a third (iPad 2: d=3, 2135 → 1354; d=5, 3863 → 2501 per update), and a plain screen
+went from 2.2 to 1.6 ms. The update time of one row barely changed (d=3, 10–11 ms): it is set by the changed chain itself,
+not by its neighbours. The remaining calls are the legitimate work of the changed branch, plus one that cannot be removed:
+the `content:` closure of `ForEach` is a new closure every time, so the enclosing stack always "changed" by a byte-wise comparison.
 
-Он же нашёл скрытую ошибку иерархии: обёртки `PaddingNodeM`/`FrameNodeM`/`BackgroundNodeM` усыновляли
-содержимое на себя (`adopt(...)`), а не на внутренний узел `inner`, который и держит кэш размера и признак
-раскладки. Поэтому обход вверх при `invalidateLayout()` пропускал `inner`: изменение под `.padding()` не
-сбрасывало кэш самого отступа. Раньше это скрывал безусловный сброс в `GroupNode.update()`; когда я сделал сброс
-условным, тест «глубокое изменение измеряется заново» упал — так и нашли. Теперь содержимое усыновляет `inner`,
-и два теста (глубокая цепочка и «коробка с отступом растёт вместе с содержимым») падают без исправления.
+The same pass found a hidden hierarchy bug: the wrappers `PaddingNodeM`, `FrameNodeM` and `BackgroundNodeM` adopted their
+content (`adopt(...)`) onto themselves, not onto the inner node `inner`, which holds the size cache and the layout flag.
+So the upward walk in `invalidateLayout()` skipped `inner`: a change under `.padding()` did not reset the cache of the padding
+itself. Before, an unconditional reset in `GroupNode.update()` hid this; when I made that reset conditional, the test
+"a deep change is measured again" failed, which is how the bug was found. Now the content is adopted by `inner`, and two tests
+(the deep chain, and "the box with padding grows with its content") fail without the fix.
 
-Замер глубокого экрана заодно нашёл ошибку планировщика: вложенный наблюдатель `ObservableObject`, чей
-вид побайтно не изменился, пропускался при обновлении, раз его предок уже перерисован, — а предок как раз
-пропускал равный вид. Теперь пропускаются только узлы, действительно перерисованные в этом проходе (тест есть).
+Measuring the deep screen also found a scheduler bug: a nested `ObservableObject` observer whose view had not changed
+byte-for-byte was skipped on update when its ancestor had already been redrawn, and the ancestor was exactly what skipped
+the equal view. Now only nodes that were really redrawn in this pass are skipped (there is a test).
 
-Не берём: порт OpenAttributeGraph (C++ с расчётом на 64-битные метаданные), двойное дерево Fiber и асинхронный
-пересчёт тела (UIKit iOS 6 — только главный поток, прерывать нечего), абстракцию рендерера (бэкенд один), slot table
-Compose (нужен плагин компилятора), полный diff виртуального дерева (у нас уже дерево с состоянием), общий движок
-зависимостей вроде Adapton (хватает пометок с ранней отсечкой).
+Not taken: a port of OpenAttributeGraph (C++ that relies on 64-bit metadata), the double Fiber tree and asynchronous body
+recomputation (UIKit on iOS 6 runs only on the main thread, so there is nothing to interrupt), a renderer abstraction (there
+is one backend), Compose's slot table (it needs a compiler plugin), a full diff of a virtual tree (we already have a tree with
+state), and a general dependency engine such as Adapton (marks with early cutoff are enough).
 
-## 6. Совместимость: по исходникам против ABI
+## 6. Compatibility: from the source versus the ABI
 
-**По исходникам (то, что делает прототип).** Достаточно совпадения имён и форм API. Ограничения только языковые: приложение должно компилироваться нашим Swift 6.4 (проверено: пакеты параметров, `some View`, result builders, property wrappers, макросы Observation — нет, `@Observable` не поддержан).
+**From the source (what the prototype does).** Matching names and API shapes is enough. The limits are only linguistic: an
+app must compile with our Swift 6.4 (verified: parameter packs, `some View`, result builders, property wrappers, macros;
+Observation macros are not — `@Observable` is not supported).
 
-**По ABI (запуск готовых бинарников SwiftUI-приложений через рекомпилятор).** Требуется двоичная совместимость с настоящей SwiftUI: 50 794 экспортируемых символа, 2 648 дескрипторов номинальных типов, 390 дескрипторов протоколов, плюс resilient-раскладки (library evolution: размеры и смещения полей приходят из метаданных, а не зашиты), witness tables, вся приватная часть, на которую ссылается код приложения. Кроме объёма, это упирается в тот же блокер объектной модели 64→32 из раздела 2.2: приложение, собранное для arm64, обращается к метаданным Swift 64-битной раскладки. **Оценка: нереально; отдельного смысла в этом направлении нет,** потому что перекомпиляция из исходников даёт тот же результат без ABI.
+**From the ABI (running ready-made SwiftUI app binaries through the recompiler).** It requires binary compatibility with the
+real SwiftUI: 50,794 exported symbols, 2,648 nominal type descriptors, 390 protocol descriptors, plus resilient layouts
+(library evolution: sizes and field offsets come from the metadata, not from the code), witness tables, and the whole private
+part that the app's code refers to. Beyond the size, it runs into the same 64-to-32-bit object-model blocker as in section 2.2:
+an app built for arm64 reaches Swift metadata with a 64-bit layout. **Estimate: not feasible; there is no point in this
+direction,** because recompiling from source gives the same result without the ABI.
 
-## 7. Оценки трудоёмкости (оценка, не проверено)
+## 7. Effort estimates (an estimate, not verified)
 
-Для своей реализации, поверх сделанного прототипа, одним исполнителем:
+For our own implementation, on top of the prototype, by one engineer:
 
-| Уровень | Что входит | Срок |
+| Level | What it includes | Time |
 |---|---|---|
-| Простые экраны | то, что уже есть, плюс `ScrollView`, `Image` из ресурсов, `Section`, `Alert`, `TabView`, `.sheet`, базовые жесты и анимации `withAnimation`, `onChange`, `@Environment`, переиспользование ячеек списка, стабильная идентичность в `ForEach` | 1–1,5 месяца |
-| Типичное приложение | `LazyVStack`/`Grid`, `Form`, `Picker`, `Stepper`, `Slider`, `ProgressView`, `TextEditor`, фокус, клавиатура, `NavigationLink(isActive:)`, программная навигация, `matchedGeometryEffect`-подобное, `AsyncImage`, `Canvas` через CoreGraphics, `Transaction`/`Animatable`, `PreferenceKey`, `GeometryReader`, локализация, RTL, iPad-раскладки, `UIViewRepresentable` | 3–5 месяцев |
-| Широкая совместимость по API | покрыть поверхность SwiftUI iOS 13–15 так, чтобы чужой код собирался без правок: ~1 100 типов и ~2 600 модификаторов, инкрементальный граф зависимостей вместо перерисовки поддерева, снимочные тесты | 1,5–3 года |
-| Совместимость по ABI | см. раздел 6 | не имеет смысла |
+| Simple screens | what exists now, plus `ScrollView`, `Image` from resources, `Section`, `Alert`, `TabView`, `.sheet`, basic gestures and `withAnimation` animations, `onChange`, `@Environment`, cell reuse in lists, stable identity in `ForEach` | 1 to 1.5 months |
+| A typical app | `LazyVStack`/`Grid`, `Form`, `Picker`, `Stepper`, `Slider`, `ProgressView`, `TextEditor`, focus, the keyboard, `NavigationLink(isActive:)`, programmatic navigation, something like `matchedGeometryEffect`, `AsyncImage`, `Canvas` through CoreGraphics, `Transaction`/`Animatable`, `PreferenceKey`, `GeometryReader`, localization, RTL, iPad layouts, `UIViewRepresentable` | 3 to 5 months |
+| Broad API compatibility | cover the SwiftUI surface of iOS 13 to 15 so that foreign code compiles without changes: about 1,100 types and about 2,600 modifiers, an incremental dependency graph instead of redrawing subtrees, snapshot tests | 1.5 to 3 years |
+| ABI compatibility | see section 6 | makes no sense |
 
-Для сравнения: сам прототип (полдня работы) закрыл «экран со списком, навигацией, состоянием и наблюдаемой моделью».
+For comparison: the prototype itself (half a day of work) covered "a screen with a list, navigation, state and an observed model".
 
-## 8. Рекомендуемый первый шаг
+## 8. The recommended first step
 
-1. **Закрепить OpenCombine как компонент тулчейна.** Он уже собирается и проходит тесты; нужен рецепт пакета (`revenant@opencombine`), прогон после влития бэкпорта `CFRunLoopTimerSetTolerance` и исправления оверлеев проекта Swift, и решение по upstream-PR про `Stride.magnitude` на 32 битах.
-2. **Продолжать SwiftUI от прототипа**, а не от OpenSwiftUI: перенести `swiftui-study/SwiftUI` в отдельный репозиторий/пакет, добавить снимочные тесты в iLEmu (эталонные PNG на каждый экран) и довести уровень «простые экраны».
-3. **Направление A закрыть**, к настоящему SwiftUI не возвращаться; из его разбора взять только карту устройства (AttributeGraph как движок графа, DisplayList как слой отрисовки) — она уже воспроизведена в архитектуре прототипа.
+1. **Pin OpenCombine as a toolchain component.** It already builds and passes its tests. It needs a package recipe
+   (`revenant@opencombine`), a run after the backport of `CFRunLoopTimerSetTolerance` and the Swift overlay fixes are merged,
+   and a decision on the upstream PR about `Stride.magnitude` on 32-bit.
+2. **Continue SwiftUI from the prototype**, not from OpenSwiftUI: move `swiftui-study/SwiftUI` into a separate repository or
+   package, add snapshot tests in iLEmu (a reference PNG for each screen), and bring the "simple screens" level to completion.
+3. **Close direction A**, and do not return to the real SwiftUI; from its analysis take only the map of the device
+   (AttributeGraph as the graph engine, DisplayList as the drawing layer), which the prototype's architecture already reproduces.
 
-## 9. Что не проверено
+## 9. What is not verified
 
-- Клавиатура и ввод текста в приложении (сценарий касаний не попал по полю).
-- Поведение на iPad 2 (ни эмулятор, ни устройство не гонялись).
-- Производительность прокрутки списка с большим числом строк (ячейки не переиспользуются).
-- Анимации, жесты кроме касания, `@Observable`/макросы Observation.
-- `xmake`-правило для тулчейна (исследование, интеграции не было).
-- iLEmu на 6.1.3 не поднимает SpringBoard (известный блокер backboardd), поэтому UI-прогоны шли на 6.0 (iPod4,1); на 6.1.3 гонялись только консольные пробы.
+- The keyboard and text input in the app (the touch scenario did not reach the field).
+- Behaviour on the iPad 2 (neither the emulator nor the device was run there).
+- The scrolling performance of a list with many rows (cells are not reused).
+- Animations, gestures other than touch, `@Observable` and the Observation macros.
+- An `xmake` rule for the toolchain (research; there was no integration).
+- iLEmu on 6.1.3 does not bring up SpringBoard (a known blocker in backboardd), so the UI runs were on 6.0 (iPod4,1); on 6.1.3 only console probes were run.
 
-## 10. Как воспроизвести
+## 10. How to reproduce
 
 ```
-./xmakew build -P . CombineTests                               # Combine + тесты OpenCombine под armv7
-./xmakew build -P . SwiftUI SwiftUIDemo SwiftUIProbe               # модуль SwiftUI + SwiftUIDemo.app + SwiftUIProbe
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots          # сценарии демо в эмуляторе, через SpringBoard
+./xmakew build -P . CombineTests                               # Combine and the OpenCombine tests under armv7
+./xmakew build -P . SwiftUI SwiftUIDemo SwiftUIProbe           # the SwiftUI module, SwiftUIDemo.app and SwiftUIProbe
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots      # the demo's scenarios in the emulator, through SpringBoard
+```
+
+The firmware analysis of section 2 used the scripts `a/*.lua`, which are not in the repository, as in this line:
+
+```
 xmake l a/closure.lua 18.0 6.1.3 /System/Library/Frameworks/SwiftUI.framework/SwiftUI
 ```
