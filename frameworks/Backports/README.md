@@ -22,7 +22,7 @@ Lists the iOS SDK members that the minimum deployment target lacks, emits a skel
 
 ## Implemented count
 
-The implemented members are the symbols of the objects that `src/<Framework>` compiles to, read from `build/.objs` with `nm` (classes, C functions, global variables) and `otool -ov` (methods, with their class or category and selector). A property counts when its getter is implemented. Swift members are never counted as implemented. The clang AST was the first source of these keys; reading it cost hours on each cold build.
+The implemented members are the symbols of the objects that `src/<Framework>` compiles to, read from `build/.objs` with `nm` (classes, C functions, global variables) and the same `nm` listing for methods (with their class or category and selector). A property counts when its getter is implemented. Swift members are never counted as implemented. The clang AST was the first source of these keys; reading it cost hours on each cold build.
 
 ## Commands
 
@@ -34,11 +34,13 @@ The implemented members are the symbols of the objects that `src/<Framework>` co
 
 ## Public symbols
 
-A key is public when the SDK both declares it and exports it: a class, C function, global or method declared in a framework's headers (from the clang AST, as the facts are), and for classes, functions and globals, also exported by a framework's `.tbd` (read with `toolchain/modules/apple/dyld.lua`, `sdk_owners`). Methods are public through the headers alone. A key that is not public is counted and does not fail the check, and each class that is not public is listed.
+A key is public when the SDK both declares it and exports it: a class, C function, global or method declared in a framework's headers (from the clang AST, as the facts are), and for classes, functions and globals, also exported by a framework's `.tbd` (`tools/public.lua` scans each framework's `.tbd` for the names the headers declare). Methods are public through the headers alone. A key that is not public is counted and does not fail the check, and each class that is not public is listed.
+
+`__NSConcreteUUID` is the one class the report lists as not public among the Foundation keys of the objects. The iOS 26.2 SDK's `Foundation.tbd` exports `_OBJC_CLASS_$___NSConcreteUUID`, but no Foundation header declares it, so it is not a declared symbol. The iOS 6.1.3 shared cache (read with `toolchain/modules/apple/dyld.lua`, `exported_by`) does not export it from Foundation, while it exports `NSUUID` and `NSTimer`; the class exists there only in Objective-C metadata, as a private class. An iOS 6 target never exported it, so the backport owes no export for it.
 
 Methods of a `Revenant<Name>` proxy count as methods of `Name` when the library also exports `_OBJC_CLASS_$_<Name>`: the alias makes the proxy the class at run time (`revenant_alias.h`).
 
-Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`binary_inventory`), which folds categories into their class, and from the objects with `otool -ov`, which names each `imp`.
+Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`binary_inventory`), which folds categories into their class, and from the objects with `nm`, which lists each method implementation as `-[Class sel]` or `+[Class sel]`. The objects are read once, in batches, for both reports.
 
 ## Limits
 
