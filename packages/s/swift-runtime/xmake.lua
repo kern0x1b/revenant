@@ -454,9 +454,10 @@ package("swift-runtime")
         end
 
         for _, library in ipairs({"Synchronization", "Observation", "StringProcessing"}) do
+            local core_include = path.absolute(path.join("build", "core", "include"))
             configure(library:lower(), path.join(source, "Runtimes", "Supplemental", library),
-                      {swiftflags = {"-resource-dir", resources}}, {
-                "-DSwiftCore_DIR=" .. path.join(package:installdir("lib"), "cmake", "SwiftCore"),
+                      {swiftflags = {"-resource-dir", resources, "-Xcc", "-I" .. core_include}, cxxflags = {"-I" .. core_include}}, {
+                "-DSwiftCore_DIR=" .. path.absolute(path.join("build", "core", "cmake", "SwiftCore")),
                 "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=YES", no_interface, gyb_command})
             offer(path.join(install, "*.swiftmodule"))
             offer(path.join(install, "iphoneos", "*.swiftmodule"))
