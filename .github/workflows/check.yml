@@ -28,15 +28,11 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
 
-      - name: Key the package store
-        id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-
       - uses: actions/cache/restore@v4
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/restore@v4
         id: ccache
@@ -60,7 +56,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always()

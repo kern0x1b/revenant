@@ -23,9 +23,12 @@ by a list of names.
 Four caches make a warm run quick:
 
 - the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`;
-- the package store `~/.revenant/cache/xmake-global`, which holds the iPhoneOS SDK and the linker. It is keyed by the
-  output of `./xmakew l tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. It
-  is restored by exact key and saved once, after the configure has succeeded, so a store is never saved half-made;
+- the package store `~/.revenant/cache/xmake-global`. The backports job keys it by the output of
+  `./xmakew l tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. The checks job
+  keys its own store by the files that decide what it installs: the xmake recipes of the packages, the third-party
+  packages the default tests build, `toolchain/modules/prebuilt.lua`, and the component files that declare requirements.
+  Each store is restored by exact key and saved once, after the configure has succeeded, so a store is never saved
+  half-made;
 - the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition;
 - the objects `build/.objs`, their depfiles `build/.deps` and the libraries `build/iphoneos`, keyed by the store key and
   by the hashes of `frameworks/Backports/**`, `toolchain/**`, `packages/**`, `addons/**`, `third_party/**`, `xmake.lua`
