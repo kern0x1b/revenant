@@ -21,6 +21,8 @@ jobs:
       REVENANT_PREBUILT_ONLY: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/cache/restore@v4
         id: xmake
@@ -49,7 +51,7 @@ jobs:
 
       - name: Run the tests
         id: tests
-        run: ./xmakew test -P .
+        run: ./xmakew test -P . --output-on-failure
 
       - name: Save the package store
         if: steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
