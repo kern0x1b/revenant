@@ -45,7 +45,7 @@ launch an app the way a user's tap does; what it can prove about an app is narro
    driver) and `revenant@emulator-guest` (the runner that starts your program in the guest).
 2. Configure again so they are installed: `xmake f -p iphoneos -a armv7 -y > .logs/config.log 2>&1`.
 
-Check: `xmake where emulator` prints an install folder; `.logs/config.log` has no `error:`.
+Check: `xmake where emulator` prints an install folder; the configure output has no `error:`.
 
 **Disk and time, first use of a device and release:** the root filesystem is downloaded from
 Apple's servers and unpacked into `~/.revenant/firmware/rootfs/<device>/<version>_<build>/` (about

@@ -60,7 +60,7 @@ returns, in a command of your own.
   (`core/sandbox/modules/import/core/sandbox/module.lua:473-499`).
 - Your own modules: a `.lua` file with top-level functions; a name starting with `_` stays
   private, and a `main` function is called when the module itself is called. Put it beside
-  `xmake.lua` (e.g. `scripts/stamp.lua`) and `import("scripts.stamp")` from a hook. The directory
+  `xmake.lua` (e.g. `stamp.lua`) and `import("stamp")` from a hook. The directory
   of the importing script is searched first.
 - Revenant's modules are imported with the `@addon.` prefix (`module.lua:519-524`). A project uses
   only those Revenant's README documents for it: `@addon.revenant.apple.cmake`, `.sources`,

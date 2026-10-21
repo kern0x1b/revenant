@@ -5,15 +5,14 @@ Three Swift modules, built for armv7 by `packages/c/createml/xmake.lua` against 
 
 | Module | Holds |
 | --- | --- |
-| `TabularData` | `DataFrame`, `ColumnID`, `Column`, `ColumnSlice`, `DiscontiguousColumnSlice`, `AnyColumn`, the CSV reader with `CSVType`, `CSVReadingOptions` and `CSVReadingError` (`facts/TabularData/CSVReading.md`), its date readings and the `ParseStrategy` a caller adds (`facts/TabularData/DateParsing.md`), and the CSV writer with `CSVWritingOptions` and `CSVWritingError` (`facts/TabularData/CSVWriting.md`) |
+| `TabularData` | `DataFrame`, `ColumnID`, `Column`, `ColumnSlice`, `DiscontiguousColumnSlice`, `AnyColumn`, the CSV reader with `CSVType`, `CSVReadingOptions` and `CSVReadingError` (`docs/reference/backports/CreateML/TabularData/CSVReading.md`), its date readings and the `ParseStrategy` a caller adds (`docs/reference/backports/CreateML/TabularData/DateParsing.md`), and the CSV writer with `CSVWritingOptions` and `CSVWritingError` (`docs/reference/backports/CreateML/TabularData/CSVWriting.md`) |
 | `CoreML` | the shaped-array overlay: `MLShapedArray`, `MLShapedArraySlice`, `MLShapedArrayScalar` |
 | `CreateMLComponents` | the estimator types, the kernel layer, and the arithmetic under them |
 | `CreateML` | `MLDataTable`, `MLDataColumn`, and the six tabular estimators |
 
 **A note on `TabularData`:** its columns carry the collection's members as *members* and do not
 conform to a collection — a user-defined collection conformance does not compile with the port's
-Swift 6.4 at all, measured on both compilers. `facts/TabularData/Columns.md` has the witness and
-`registry/TabularData/createml-tabular.json` records the divergence per member.
+Swift 6.4 at all, measured on both compilers.
 
 **What is not here yet**, and is absent rather than stubbed: the `DataFrame` JSON writers, the
 JSON readers, the `ColumnID` variants of the readers, the summaries

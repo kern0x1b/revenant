@@ -6,7 +6,7 @@ type `CloudKit.CKRecord`) and the CKRecord group, measured on 2026-10-17 from th
 
 ## The probe
 
-`.agent-work/runs/v-impl-swift-apps/ckrecord/probe.swift` (scratch, not committed):
+The probe, run as a scratch program:
 
     import CloudKit
     let r = CKRecord(recordType: "Note")

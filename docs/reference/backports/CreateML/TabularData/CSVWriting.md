@@ -1,8 +1,8 @@
 # CSV writing in TabularData: what is measured, and what is carried
 
 Source of every behaviour below: the host's own `TabularData` (macOS 27 SDK, Swift 6.4), run on the same
-frames. The writer is `files/TabularData/CSVWriting.swift`; the comparison is
-`tests/backports/host/createml/csvwriting.swift`, which builds each frame in both modules, writes it with each
+frames. The writer is `frameworks/Backports/src/TabularData/CSVWriting.swift`; the comparison is
+(no longer in the repository), which built each frame in both modules, writes it with each
 module's options, and fails on any difference in the bytes, or in the error's case, row, column, cell bytes
 and text. The declarations are the SDK's, as the spec rows give them
 (`the deleted registry package spec/TabularData/swift.tsv`).

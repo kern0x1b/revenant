@@ -128,7 +128,7 @@ carry a `WEBKIT_IOS6` guard on one side.
 own removals over 3222 commits, but five were load-bearing here - the 32-bit
 LLInt, the ARMv7 registers and macro assembler, two 32-bit JIT sources - and
 nothing in git said so, because this port had not touched them since the branch
-point. `scripts/carry-check.py` named all five in under a second. That is the
+point. `frameworks/WebKit/tools/carry-check.lua` named all five in under a second. That is the
 clearest argument for the manifest that exists.
 
 **Two build systems have to be carried, not merged.** Upstream removed the iOS
@@ -459,10 +459,9 @@ exists when the hook goes in, not only for the next one.
 Bringing the iPad onto the fixed engine turned up two ways a deploy can look
 like it worked and not be the thing under test.
 
-`scripts/layout-sys-frameworks.sh` took its build directory from
-`ENGINE_BUILD` and defaulted to `build-254-lto`, the fork build kept for
-comparison. `scripts/deploy-engine.py` does not set it, so every deploy that
-did not set it by hand staged and installed the fork. The default is now the
+The deploy of that time took its build directory from `ENGINE_BUILD`, which
+defaulted to `build-254-lto`, the fork build kept for comparison, so every deploy
+that did not set it by hand staged and installed the fork. The default is now the
 trunk build, the one being shipped. The size of the installed
 `JavaScriptCore` is the cheap check: the staged file and the file on the
 device have to match.
@@ -474,7 +473,7 @@ really was not installing it. `/usr/lib/rev-safari-compat.dylib` on the iPad
 was the September 10 01:34 build, 215456 bytes; the phone carries the 03:50
 one, 468464 bytes, which is the first that installs the bridge from the
 engine's window-object-cleared callback. The compat library is a separate
-artifact from the three frameworks and `scripts/deploy-engine.py` does not
+artifact from the three frameworks and the deploy does not
 carry it, so a device can sit arbitrarily far behind on it while its engine is
 current.
 

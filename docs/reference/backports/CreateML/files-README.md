@@ -19,10 +19,8 @@ would be a second copy of something that exists, and slower than the vector unit
 
 ## The protobuf codec
 
-`CoreML/Codec.swift` reads and writes Apple's `.mlmodel`, which is a protobuf (proto2, little-endian
-fixed fields). The schema is Apple's, under BSD-3-Clause, in `coremltools/mlmodel/format/*.proto`; the
-copies this package vendors are in `packages/c/createml/proto/` with their licence, pinned to a
-commit in that directory's README.
+`frameworks/Backports/src/CoreML/Codec.swift` reads and writes Apple's `.mlmodel`, which is a protobuf (proto2, little-endian
+fixed fields). The schema is Apple's, under BSD-3-Clause, in `coremltools/mlmodel/format/*.proto`; this package vendors no copy of them.
 
 The codec is not a generator and not a second declaration of the schema. It implements the wire format
 only: varints, the fixed 32- and 64-bit values, and the length-delimited submessages, with a reader that

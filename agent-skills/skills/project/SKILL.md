@@ -145,7 +145,7 @@ loads for a build), and what they mean:
 ## 7. Record it
 
 In `PROJECT.md` under `## Progress`, the project line: the target name, release and
-architectures, `plutil -lint` OK, the `xmake show` check, `.logs/configure.log`.
+architectures, `plutil -lint` OK, the `xmake show` check, the configure output.
 
 Then write the code (skill `objc` for Objective-C, `swift` for Swift), and build with the skill `build`.
 

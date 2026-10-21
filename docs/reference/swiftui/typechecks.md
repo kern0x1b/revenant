@@ -8,14 +8,14 @@ the target's autogen folder, `<name>.log`.
 
 | test | snippet | refused for |
 | --- | --- | --- |
-| `tables-positive` | `tables/positive.swift` | compiles: a table over a collection of rows, the row value reaching through `ForEach` and `Group` as the element's own type |
-| `tables-negative` | `tables/negative.swift` | `conform to 'TableRowContent'`: a `Text` is not table content |
-| `tables-negative-widget-bundle` | `tables/negative-widget-bundle.swift` | `could not be inferred`: a bare `if` in a widget bundle |
-| `tables-negative-widget-concrete` | `tables/negative-widget-concrete.swift` | `could not be inferred`: the same with a named widget type |
-| `tabs-positive` | `tabs/positive.swift` | compiles |
-| `tabs-negative` | `tabs/negative.swift` | `conform to specified type 'TabContent'` |
+| `tables-positive` | `frameworks/SwiftUI/tests/typechecks/tables/positive.swift` | compiles: a table over a collection of rows, the row value reaching through `ForEach` and `Group` as the element's own type |
+| `tables-negative` | `frameworks/SwiftUI/tests/typechecks/tables/negative.swift` | `conform to 'TableRowContent'`: a `Text` is not table content |
+| `tables-negative-widget-bundle` | `frameworks/SwiftUI/tests/typechecks/tables/negative-widget-bundle.swift` | `could not be inferred`: a bare `if` in a widget bundle |
+| `tables-negative-widget-concrete` | `frameworks/SwiftUI/tests/typechecks/tables/negative-widget-concrete.swift` | `could not be inferred`: the same with a named widget type |
+| `tabs-positive` | `frameworks/SwiftUI/tests/typechecks/tabs/positive.swift` | compiles |
+| `tabs-negative` | `frameworks/SwiftUI/tests/typechecks/tabs/negative.swift` | `conform to specified type 'TabContent'` |
 
-The two widget-bundle runs that guard the bundle were taken with the earlier `tabletests/run.sh` and are **run
+The two widget-bundle runs that guard the bundle were taken with the earlier table run and are **run
 output**, so they are not in this tree: the clean one (exit 0: the bare `if` in a bundle is refused, with a
 concrete widget type and with `any Widget`) and the mutant one (exit 1: the same two cases compile once an
 overload is added that takes what a bare `if` is).
