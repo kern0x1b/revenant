@@ -182,25 +182,21 @@ local function deployment_of(target)
     return toolchain:config("deployment"), toolchain
 end
 
-local function scenekit_flags(target)
-    local semver = import("core.base.semver")
+local function scenekit_flags(target, modules)
     local minimum, toolchain = deployment_of(target)
     local headers = path.join(toolchain:config("sdkdir"), "System", "Library", "Frameworks", "SceneKit.framework", "Headers")
     local apinote = path.join(headers, "SceneKit.apinotes")
-    if semver.compare(minimum, "8.0") < 0 or not os.isfile(apinote) then
+    if modules.semver.compare(minimum, "8.0") < 0 or not os.isfile(apinote) then
         return {}
     end
     local folder = path.join(target:autogendir(), "scenekit")
     os.mkdir(folder)
-    local overlay = import("apinotes", {rootdir = TOOLS, anonymous = true}).overlay(headers, apinote, folder)
+    local overlay = modules.apinotes.overlay(headers, apinote, folder)
     return {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
 end
 
-local function expand_spatial(target)
-    local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
+local function expand_spatial(target, gyb, folder)
     local source = path.join(target:pkg("swift"):installdir("share"), "swift-source")
-    local folder = path.join(target:autogendir(), "spatial")
-    os.mkdir(folder)
     local defines = {CMAKE_SIZEOF_VOID_P = target:arch() == "arm64" and "8" or "4"}
     local files = {}
     for _, template in ipairs(os.files(path.join(SRC, "Spatial", "*.swift.gyb"))) do
@@ -233,9 +229,6 @@ local function overlay(name, folder, opt)
         add_shflags("-Xlinker", "-install_name", "-Xlinker", "@rpath/" .. name .. ".dylib", {force = true})
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
-            if opt.generate then
-                target:add("files", table.unpack(opt.generate(target)))
-            end
         end)
         before_build(function (target)
             if opt.minimum then
@@ -247,6 +240,12 @@ local function overlay(name, folder, opt)
             end
         end)
         on_config(function (target)
+            if opt.generate then
+                local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
+                local folder = path.join(target:autogendir(), "spatial")
+                os.mkdir(folder)
+                target:add("files", table.unpack(opt.generate(target, gyb, folder)))
+            end
             local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
                            "-Xfrontend", "-disable-implicit-string-processing-module-import"}
             if not opt.concurrency then
@@ -254,7 +253,8 @@ local function overlay(name, folder, opt)
             end
             table.join2(flags, table.wrap(opt.flags))
             if opt.scenekit then
-                table.join2(flags, scenekit_flags(target))
+                table.join2(flags, scenekit_flags(target, {semver = import("core.base.semver"),
+                                                           apinotes = import("apinotes", {rootdir = TOOLS, anonymous = true})}))
             end
             add_flags(target, flags)
         end)
