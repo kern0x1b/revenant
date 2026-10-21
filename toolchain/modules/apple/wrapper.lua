@@ -9,7 +9,7 @@ function install(package, opt)
     local sdk = package:config("apple_sdk")
     local lines = {
         "add_repositories(\"revenant " .. opt.root .. "\")",
-        "add_addons(\"revenant\")",
+        "add_addons(\"revenant\", {sourcedir = \"" .. path.join(opt.root, "toolchain") .. "\"})",
         "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
         "set_config(\"apple_sdk\", \"" .. sdk .. "\")",
         "includes(\"@addon/revenant/apple-ios\")",
