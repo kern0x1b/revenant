@@ -10,7 +10,7 @@ local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {
     {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {}},
-    {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"micro-ecc"}, system = {}},
+    {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "AdServicesBackports", folder = "AdServices", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "AppClipBackports", folder = "AppClip", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -27,7 +27,7 @@ local LIBRARIES = {
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"micro-ecc"}, system = {}},
+    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
     {name = "CoreBluetoothBackports", folder = "CoreBluetooth", frameworks = {"Foundation"}, libraries = {}, archives = {}, system = {}},
     {name = "CompressionBackports", folder = "Compression", frameworks = {}, libraries = {}, archives = {"lzfse", "zlib", "lz4", "xz"}, system = {}},
@@ -35,7 +35,7 @@ local LIBRARIES = {
     {name = "SQLite3Backports", folder = "SQLite3", frameworks = {}, libraries = {"sqlite3"}, archives = {}, system = {}},
     {name = "SpriteKitBackports", folder = "SpriteKit", frameworks = {"Foundation", "CoreGraphics", "UIKit", "QuartzCore", "OpenGLES"}, libraries = {}, archives = {}, system = {}},
     {name = "AccelerateBackports", folder = "Accelerate", frameworks = {"Accelerate", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"suitesparse-ordering"}, system = {}},
-    {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "CoreFoundationBackports", "CoreMediaBackports"}, archives = {"revenant-coding"}, system = {}},
+    {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "CoreFoundationBackports", "CoreMediaBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AVFAudioBackports", folder = "AVFAudio", frameworks = {"AudioToolbox", "CoreAudio", "AVFoundation", "UIKit", "Foundation", "Accelerate", "QuartzCore"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "AVFoundationBackports"}, archives = {}, system = {}},
     {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
     {name = "LocalAuthenticationBackports", folder = "LocalAuthentication", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -83,8 +83,8 @@ local LIBRARIES = {
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"revenant-coding"}, system = {}},
-    {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"revenant-coding"}, system = {}},
+    {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
+    {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
     {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
@@ -106,12 +106,43 @@ if is_plat("iphoneos") then
     add_requires("revenant@monocypher 4.0.2", {alias = "monocypher"})
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
-    add_requires("revenant@revenant-coding", {alias = "revenant-coding"})
 
     local generator
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
+    local OURS = {RevenantCoding = true, RevenantCKWebAuth = true}
+    local CODING = path.join(SRC, "Intents", "coding")
+    local WEBAUTH = path.join(SRC, "CloudKit", "webauth")
+    local TWEAK = path.join(SRC, "CallKit", "tweak")
+
+    target("RevenantCoding")
+        set_kind("static")
+        add_rules("@addon/revenant/apple-ios")
+        set_optimize("smallest")
+        add_cflags("-Os", "-fvisibility=hidden")
+        add_mflags("-fobjc-arc")
+        add_files(path.join(CODING, "*.m"))
+        add_headerfiles(path.join(CODING, "*.h"))
+        add_includedirs(CODING, {public = true})
+
+    target("RevenantCKWebAuth")
+        set_kind("static")
+        add_rules("@addon/revenant/apple-ios")
+        set_optimize("smallest")
+        add_cflags("-Os", "-fvisibility=hidden", "-fno-strict-aliasing")
+        add_files(path.join(WEBAUTH, "RevenantCKWebAuth.c"))
+        add_headerfiles(path.join(WEBAUTH, "RevenantCKWebAuth.h"))
+        add_includedirs(WEBAUTH, {public = true})
+        add_packages("micro-ecc", {public = true})
+
+    target("revenant-callkit-screen")
+        set_default(false)
+        add_rules("@addon/revenant/tweak")
+        add_files(path.join(TWEAK, "RevenantCallScreenTweak.m"))
+        add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
+        set_values("tweak.filter", path.join(TWEAK, "springboard.plist"))
+        set_values("revenant.control", path.join(TWEAK, "control"))
 
     for _, library in ipairs(LIBRARIES) do
         target(library.name)
@@ -141,7 +172,11 @@ if is_plat("iphoneos") then
                 add_shflags("-Wl,-weak_framework," .. framework, {force = true})
             end
             for _, name in ipairs(library.archives) do
-                add_packages(name)
+                if OURS[name] then
+                    add_deps(name)
+                else
+                    add_packages(name)
+                end
             end
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
@@ -185,7 +220,7 @@ end
 if is_plat("iphoneos") then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua"})
+    backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
