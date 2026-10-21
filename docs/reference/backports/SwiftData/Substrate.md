@@ -146,7 +146,7 @@ hand reads unlowered headers and reports the backports' API as unavailable - whi
 happened here first, and the fix is to read the SDK out of the overlay:
 
 ```
-SDK=$(python3 -c 'import json,sys; o=json.load(open(sys.argv[1])); print(next(r["name"] for r in o["roots"] if r["name"].endswith("CoreData.framework/Headers"))[:-len("/System/Library/Frameworks/CoreData.framework/Headers")])' "$REVENANT_SWIFT_PORT_HEADERS")
+SDK=$(./xmakew l -P . -c 'local o = import("core.base.json").loadfile(os.getenv("REVENANT_SWIFT_PORT_HEADERS")); for _, r in ipairs(o.roots) do if r.name:endswith("CoreData.framework/Headers") then print(r.name:sub(1, #r.name - #"/System/Library/Frameworks/CoreData.framework/Headers")) break end end')
 ```
 
 A package's own build resolves the SDK from the toolchain, so a store whose SDK differs from the
