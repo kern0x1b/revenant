@@ -26,6 +26,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Rules, values and checks](reference/toolchain/rules.md) | the target rules and the values each one reads |
 | [Commands](reference/toolchain/commands.md) | the xmake commands and the environment |
 | [Packages](reference/toolchain/packages.md) | the packages and their versions |
+| [ld64](reference/toolchain/ld64.md) | the linker package: Apple's ld64 from cctools-port, its patches and why the port needs it |
 | [Tools](reference/toolchain/tools.md) | the developer tools |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
