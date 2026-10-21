@@ -5,7 +5,7 @@ description: Use when a task needs an emulated iOS device instead of a phone: bu
 
 # Emulator
 
-macOS arm64 hosts only. The name covers two things: the emulator program built from `emulator/`, and `xmake emulate`, which runs a port on the emulator that `packages/e/emulator/xmake.lua` pins. That package builds the pinned commit of the emulator from git, not the working tree, so a change to `emulator/` reaches `xmake emulate` only through a new pin.
+macOS arm64 hosts only. The name covers two things: the emulator program built from `emulator/`, and `xmake emulate`, which runs a port on the emulator that `packages/e/emulator/xmake.lua` pins. That package builds the emulator of the checkout it sits in: a project of its own that includes `emulator/`, whose `emulator` target it installs. The package's digest covers every file of `emulator/`, so a change there is a new package, and the next `xmake emulate` builds it.
 
 ## Build and boot the emulator
 
