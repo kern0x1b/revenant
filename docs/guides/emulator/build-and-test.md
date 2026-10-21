@@ -29,7 +29,7 @@ and `--emulator_dynarmic_test_emit_failure`, given to `./xmakew f`; `./xmakew f 
 in `tests/guest/dns-probe` is built when `--emulator_guest_rootfs` and `--emulator_armv6_ld` name a root filesystem and an
 ARMv6 linker. Boost is the 1.81.0 release and needs no compiler flag with Apple clang 21.
 
-Through the toolchain the build is the `emulator` package: `./xmakew emulate` builds and runs it.
+Through the toolchain the build is the `emulator` package, which builds the `emulator` target of this checkout in a project of its own, so `xmake emulate` runs the emulator of the tree; `xmake emulate` is the port's task, see [the emulator skill](../../../.agents/skills/emulator-session/SKILL.md).
 
 The program is `build/macosx/arm64/release/emulator`.
 
