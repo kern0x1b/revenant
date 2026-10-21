@@ -159,6 +159,6 @@ function main(command, ...)
     elseif command == "fresh" and arguments[1] then
         print(fresh(arguments[1]))
     else
-        raise("usage: xmake l modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | task | run [path ...] | fresh <name>")
+        raise("usage: ./xmakew l toolchain/modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | task | run [path ...] | fresh <name>")
     end
 end

@@ -185,6 +185,6 @@ function main(command, ...)
     elseif command == "test" then
         test_suite()
     else
-        raise("usage: xmake l tools/comments.lua check|strip [path ...] | verify [rev] | test")
+        raise("usage: ./xmakew l tools/comments.lua check|strip [path ...] | verify [rev] | test")
     end
 end

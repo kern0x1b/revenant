@@ -26,7 +26,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   Every component has the same shape, lowercase, and nothing else at its top:
 
   ```
-  xmake.lua    its targets and tests, included by the top xmake.lua (xmake test runs its tests)
+  xmake.lua    its targets and tests, included by the top xmake.lua (`./xmakew test` runs its tests)
   README.md    one screen: what it is, how to build, run and test it, links into docs/
   LICENSE      when the component ships its licence inside its own package
   src/         all of its code
@@ -78,4 +78,4 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
   naming what it lacks when that is missing.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
-  `xmake test` replaces it; for the emulator, the skill `emulator-session`).
+  ``./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

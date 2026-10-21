@@ -20,7 +20,7 @@ hardware the device does not have.
 - Clean room: the generator emits facts only (signatures, types, availability, relations). Behaviour is written
   as specs in our own words, from Apple's documentation and measurements, in `docs/reference/backports/`.
   Implementers read the specs, not the SDK. No text of Apple's headers is copied.
-- Each framework's tests are `.m` files. One driver, `xmake test`, runs them in parallel against the real macOS
+- Each framework's tests are `.m` files. One driver, `./xmakew test -P .`, runs them in parallel against the real macOS
   or Mac Catalyst framework, in ten minutes or less.
 
 ## Delivery
