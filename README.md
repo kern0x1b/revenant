@@ -71,8 +71,8 @@ Stock xmake does not know `sourcedir` in `add_addons` and would fetch and instal
 so revenant is always built with `./xmakew`.
 
 `REVENANT_REPO` names another checkout of revenant for the packages (a released tree whose packages are installed already).
-Revenant's recipes of the members (`revenant@combine`, `revenant@swiftui-uikit`, `revenant@swiftui`, `revenant@emulator`) are for
-applications outside revenant and keep their pinned commits. The one revenant requires itself is `revenant@combine` with
+Revenant's recipes of the members (`revenant@combine`, `revenant@swiftui-uikit`, `revenant@swiftui`) are for
+applications outside revenant and keep their pinned commits; `revenant@emulator` is the emulator of the checkout that uses it, with no pin. The one revenant requires itself is `revenant@combine` with
 `sources = true`: it installs the patched OpenCombine tree, and Combine's targets compile it.
 
 ## Publishing a member
