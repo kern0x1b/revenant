@@ -63,6 +63,8 @@ local RECIPES = {
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
      inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}},
+    {folder = "packages/s/swiftui", variable = "swiftui_sources_digest",
+     inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
     {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
                "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}}
