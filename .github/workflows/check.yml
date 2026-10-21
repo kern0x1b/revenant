@@ -28,6 +28,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Select Xcode 26.6 and show its clang
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+          xcode-select -p
+          xcrun --find clang
+          xcrun clang --version
+
       - uses: actions/cache/restore@v4
         id: xmake
         with:
@@ -88,11 +95,11 @@ jobs:
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
 
-      - name: Select the newest Xcode and show its clang
+      - name: Select Xcode 26.6 and show its clang
         run: |
-          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
-          sudo xcode-select -s "$xcode/Contents/Developer"
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
           xcode-select -p
+          xcrun --find clang
           xcrun clang --version
 
       - uses: actions/cache/restore@v4
@@ -253,11 +260,11 @@ jobs:
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
 
-      - name: Select the newest Xcode and show its clang
+      - name: Select Xcode 26.6 and show its clang
         run: |
-          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
-          sudo xcode-select -s "$xcode/Contents/Developer"
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
           xcode-select -p
+          xcrun --find clang
           xcrun clang --version
 
       - uses: actions/cache/restore@v4
