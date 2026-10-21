@@ -6,7 +6,7 @@
 - `checks` runs `./xmakew test -P .`: every test a host with the prebuilt packages can run, in parallel. That is the
   repository's layout and comment checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
   `toolchain_packages/*`), the emulator's and the recompiler's host tests. It sets `REVENANT_PREBUILT=kern0x1b/revenant`
-  and `REVENANT_PREBUILT_ONLY=1`, so LLVM and Swift come from their releases and a missing release is an error, not a
+  and `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`, so LLVM, Swift and ld64 come from their releases and a missing release is an error, not a
   source build. It configures with `--emulator_vulkan=n`: the Vulkan renderer's SwiftShader is built from source, which
   takes most of the job, and the tests do not use it. The option stays on for the emulator's own builds. The tests that need a device, an emulator image or firmware are not declared on CI; see
   [the tests reference](../reference/toolchain/tests.md).
@@ -41,7 +41,7 @@ generated file only when its text changed, so a restored skeleton keeps the mtim
 
 A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
-`REVENANT_PREBUILT_ONLY=1` makes a missing release an error instead of a source build.
+`REVENANT_PREBUILT_ONLY` names the packages whose missing release is an error instead of a source build; `1` names all of them.
 
 ## Fetching a branch's artifacts
 

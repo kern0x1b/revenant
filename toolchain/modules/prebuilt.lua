@@ -7,8 +7,17 @@ local function source()
     end
 end
 
-local function only()
-    return os.getenv("REVENANT_PREBUILT_ONLY") == "1"
+local function only(package)
+    local named = os.getenv("REVENANT_PREBUILT_ONLY") or ""
+    if named == "1" then
+        return true
+    end
+    for name in named:gmatch("[^,%s]+") do
+        if name == package:name() then
+            return true
+        end
+    end
+    return false
 end
 
 function wanted(package)
@@ -45,8 +54,8 @@ end
 function fetch(package)
     local repository = source()
     if not repository then
-        if only() then
-            raise("%s: REVENANT_PREBUILT_ONLY=1 needs REVENANT_PREBUILT, the repository whose release holds the prebuilt %s", package:name(), key(package))
+        if only(package) then
+            raise("%s: REVENANT_PREBUILT_ONLY needs REVENANT_PREBUILT, the repository whose release holds the prebuilt %s", package:name(), key(package))
         end
         return false
     end
@@ -66,8 +75,8 @@ function fetch(package)
     if not fetched then
         os.tryrm(partial)
         os.tryrm(listed)
-        if only() then
-            raise("%s: no release holds the prebuilt %s at %s, and REVENANT_PREBUILT_ONLY=1 forbids building it from source", package:name(), key(package), repository)
+        if only(package) then
+            raise("%s: no release holds the prebuilt %s at %s, and REVENANT_PREBUILT_ONLY forbids building it from source", package:name(), key(package), repository)
         end
         print("%s: no prebuilt %s at %s, building from source", package:name(), key(package), repository)
         return false
