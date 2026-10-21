@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Claude Haiku 5.5 <noreply@anthropic.com>
+Date: Wed, 21 Oct 2026 07:00:00 +0200
+Subject: [PATCH] Lock a package by its install directory
+
+Two instances of one package, such as ld64 and ld64#1, can install into
+one install directory, and each held a lock of its own: the lock was
+package.lock in the instance's cache folder, and the two folders differ.
+Their installs then ran at once into that directory. ld -v reported a
+malformed Mach-o file, and another instance's tar extraction and lipo
+move failed.
+
+The lock is now a file beside the install directory, <installdir>.lock,
+so the instance that comes second waits for the first one. It then reads
+the manifest the first one wrote, and does not install again.
+
+---
+ xmake/core/package/package.lua | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index eee2972..19326db 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -821,11 +821,15 @@ function _instance:use_external_includes()
+     return external
+ end
+ 
+--- get the filelock of the whole package directory
++-- get the filelock of the install directory: the instances of one package
++-- that install into the same directory share it, so one of them waits for
++-- the other instead of installing into the directory at the same time
+ function _instance:filelock()
+     local filelock = self._FILELOCK
+     if filelock == nil then
+-        filelock = io.openlock(path.join(self:cachedir(), "package.lock"))
++        local lockfile = self:installdir() .. ".lock"
++        os.mkdir(path.directory(lockfile))
++        filelock = io.openlock(lockfile)
+         if not filelock then
+             os.raise("cannot create filelock for package(%s)!", self:name())
+         end
+-- 
+2.54.0 (Apple Git-157)
+
