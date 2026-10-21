@@ -67,6 +67,12 @@ local RECIPES = {
      inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
     {folder = "packages/a/appintents", variable = "appintents_sources_digest",
      inputs = {"packages/a/appintents/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/AppIntents/*"}},
+    {folder = "packages/a/activitykit", variable = "activitykit_sources_digest",
+     inputs = {"packages/a/activitykit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/ActivityKit/*"}},
+    {folder = "packages/t/tipkit", variable = "tipkit_sources_digest",
+     inputs = {"packages/t/tipkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/TipKit/*"}},
+    {folder = "packages/w/widgetkit", variable = "widgetkit_sources_digest",
+     inputs = {"packages/w/widgetkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/WidgetKit/*"}},
     {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
                "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}}
