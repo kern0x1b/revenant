@@ -68,7 +68,7 @@ relinks the runtime, a few seconds.
 ## Checks
 
 - `./xmakew test 'recompiler_corpus/*'` runs the host part of every corpus check.
-- `./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_devtime` builds the corpus apps and the benchmark.
+- `./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime` builds the corpus apps and the benchmark.
 - `./xmakew l recompiler/tests/<name>/check.lua <out>` runs a check whole, including its device part where it has
   one (weakimport, classpair, swiftconformance).
 - `./xmakew test -P . 'recompiler_*/*'` builds the translator and runs the host checks of its corpus together.

@@ -10,7 +10,7 @@ From the revenant root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
 
 ```sh
 ./xmakew test 'recompiler_corpus/*'
-./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_devtime
+./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime
 ```
 
 `recompiler_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport,
@@ -220,6 +220,7 @@ compiled out. The control must crash with exit 139, and the normal build must no
 These build targets each translate an app to an `.app`, for a device or the emulator.
 
 - `recompiler_cxxinit` covers C++ static initialisers in an Objective-C++ app.
+- `recompiler_blockid` is a console program that passes Objective-C blocks across the guest boundary: a block stored in an `NSArray` and read back and invoked from the guest, its identity kept, a block used as a dictionary key, a block that survives the release of its array, and a block invoked from the host. It prints `PASS` or `FAIL`.
 - `recompiler_refrepro` is built with ARC, like OneBusAway, so ivar stores compile to `objc_storeStrong`. That is the
   release-of-old-ivar site that faulted.
 
