@@ -17,9 +17,12 @@ end
 
 local function add(state, row)
     local key = row.kind .. "\0" .. row.container .. "\0" .. row.name .. "\0" .. row.symbol
-    if state.seen[key] == nil then
-        state.seen[key] = true
+    local index = state.seen[key]
+    if index == nil then
         table.insert(state.rows, row)
+        state.seen[key] = #state.rows
+    elseif state.rows[index].intro == nil then
+        state.rows[index].intro = row.intro
     end
 end
 
