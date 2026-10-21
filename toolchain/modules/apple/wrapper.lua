@@ -6,7 +6,7 @@ function install(package, opt)
     local revenant = addon.addons()[addon.dirname("revenant")] or raise("%s is built with the revenant addon's rules, and no revenant addon is installed", package:name())
     local project = path.absolute(package:name())
     os.mkdir(project)
-    local sdk = assert(toolchain:config("sdk"), package:name() .. " is built with the iphoneos-sdk its toolchain names")
+    local sdk = package:config("apple_sdk")
     local lines = {
         "add_repositories(\"revenant " .. opt.root .. "\")",
         "add_addons(\"revenant\")",

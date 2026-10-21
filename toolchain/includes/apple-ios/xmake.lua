@@ -1,6 +1,7 @@
 local named = get_config("apple_sdk") or ""
 local mode = (get_config("component") or "") == "" and "16.4" or "26.2"
 local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or mode}
+add_requireconfs("*|apple-compat|appintents|activitykit|tipkit|widgetkit|createml|musickit|swift-data|swift-embedded|swiftui", {configs = {apple_sdk = sdk.version}})
 local ld64 = {name = "ld64", version = "956.6"}
 local ldid = {name = "ldid", version = "2.1.5-procursus7+23.gaf86971"}
 local llvm = {name = "llvm", version = "23.1.3"}
@@ -35,5 +36,5 @@ if minimum then
         table.insert(digests, file .. "=" .. hash.sha256(path.join(root, file)))
     end
     local toolchain = string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s,optimize=packages,flags=%s]", minimum, sdk.version, ld64.version, llvm.version, hash.strhash128(table.concat(digests, ";")))
-    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader|apple-compat|appintents|activitykit|tipkit|widgetkit|createml|musickit|swift-data|swift-embedded", {configs = {toolchains = toolchain}})
+    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader", {configs = {toolchains = toolchain}})
 end

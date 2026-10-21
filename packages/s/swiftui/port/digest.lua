@@ -1,1 +1,1 @@
-swiftui_sources_digest = "35b58498aa78a3977218593be2e9a41e"
+swiftui_sources_digest = "36f277e543f5e1e70601f4940d484ba5"

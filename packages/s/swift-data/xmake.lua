@@ -3,6 +3,7 @@ package("swift-data")
     set_description("SwiftData for the port's armv7 releases: Schema, ModelConfiguration, ModelContainer, ModelContext, FetchDescriptor and PersistentIdentifier over the device's own Core Data, built against the revenant@swift-runtime a port carries")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("recipe", {description = "The digest of this recipe and the SwiftData sources it builds, so a changed declaration is a different package.", default = swift_data_sources_digest, type = "string", readonly = true})
