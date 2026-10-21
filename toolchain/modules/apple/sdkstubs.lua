@@ -2,7 +2,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
 local FAMILY_UMBRELLA = "/usr/lib/libSystem.B.dylib"
 local FAMILY_FOLDER = "/usr/lib/system/"
-local LISTS = {"symbols", "weak-symbols", "thread-local-symbols"}
+local LISTS = {"symbols", "weak-symbols", "thread-local-symbols", "objc-classes", "objc-ivars", "objc-eh-types"}
 
 function documents(text)
     local found, current = {}, nil
