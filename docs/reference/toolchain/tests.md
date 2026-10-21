@@ -10,7 +10,7 @@ reference says what runs where.
 | --- | --- | --- | --- |
 | `toolchain_light` | 13 suites of `tests/addon/` that build nothing and need no package | the repository | always |
 | `toolchain_packages` | 16 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
-| `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
+| `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release; the recompiler's `classpair` and `ordinal` checks (`recompiler_device`), which read the iOS 6 dyld cache | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
 
 The suites are the modules of `tests/addon/`, each one `failures(options)` that returns the failures it found. A test
 prints each failure and fails. Run one target with `./xmakew test -P . 'toolchain_light/*'`, or one suite with

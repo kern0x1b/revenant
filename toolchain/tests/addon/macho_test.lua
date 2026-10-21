@@ -159,12 +159,12 @@ local function signing_failures(signing, folder, ldid)
     return found
 end
 
-local function encryption_failures(macho, folder, ld64)
+local function encryption_failures(macho, folder, ld64, sdk)
     local found = {}
     if macho.encrypted(path.join(folder, "liblocal.dylib")) then
         table.insert(found, "an ld64 link carries no LC_ENCRYPTION_INFO")
     end
-    fixtures.run(folder, "xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-Wno-incompatible-sysroot", "-nostdlib", "-L.",
+    fixtures.run(folder, "xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-Wno-incompatible-sysroot", "-nostdlib", "-L.",
                                    "-lSystem", "-dynamiclib", "-o", "libstamped.dylib", "local.c"})
     local stamped = macho.encrypted(path.join(folder, "libstamped.dylib"))
     local listed = fixtures.run(folder, "xcrun", {"otool", "-l", "libstamped.dylib"}):find("LC_ENCRYPTION_INFO", 1, true) ~= nil
@@ -252,7 +252,7 @@ function failures(opt)
     local made, arm, thumb = made_fixtures(folder, opt.ld64)
     local found = invariant_failures(macho, made, arm, thumb)
     table.join2(found, stripped_failures(macho, folder, opt.ld64))
-    table.join2(found, encryption_failures(macho, folder, opt.ld64))
+    table.join2(found, encryption_failures(macho, folder, opt.ld64, opt.sdk))
     table.join2(found, signing_failures(signing, folder, opt.ldid))
     table.join2(found, weak_import_failures(macho, compat, folder, opt.ld64))
     table.join2(found, input_minimum_failures(macho, folder))
