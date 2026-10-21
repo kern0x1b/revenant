@@ -1,3 +1,4 @@
+import("async.runjobs")
 import("fixtures")
 
 local IOS6 = {"-target", "armv7-apple-ios6.0", "-Wno-incompatible-sysroot"}
@@ -607,27 +608,33 @@ function failures(opt)
         local waits = sources_of(shims, {"__ulock_wait", "__ulock_wake"})
         local blocks = sources_of(shims, BLOCKS)
         local checks = {
-            function () return clock_failures(folder, shims) end,
-            function () return at_failures(folder, shims) end,
-            function () return renamed_failures(folder, shims, headers) end,
-            function () return linked_failures(folder, shims, headers) end,
-            function () return ulock_failures(folder, shims) end,
-            function () return lock_failures(folder, shims, locks, waits) end,
-            function () return shared_lock_failures(folder, locks, waits) end,
-            function () return later_failures(folder, shims, headers) end,
-            function () return submit_failures(folder, blocks, sources_of(shims, SUBMITS)) end,
-            function () return assert_failures(folder, sources_of(shims, ASSERTS), locks, waits) end,
-            function () return queue_failures(folder, sources_of(shims, QUEUES)) end,
-            function () return barrier_failures(folder, sources_of(shims, BARRIERS)) end,
-            function () return source_handler_failures(folder) end,
-            function () return system_failures(folder, shims) end,
-            function () return invert_failures(folder, shims) end,
-            function () return definition_failures(folder, shims, headers) end,
-            function () return late_failures(folder) end,
-            function () return caller_failures(folder, headers) end
+            function (scratch) return clock_failures(scratch, shims) end,
+            function (scratch) return at_failures(scratch, shims) end,
+            function (scratch) return renamed_failures(scratch, shims, headers) end,
+            function (scratch) return linked_failures(scratch, shims, headers) end,
+            function (scratch) return ulock_failures(scratch, shims) end,
+            function (scratch) return lock_failures(scratch, shims, locks, waits) end,
+            function (scratch) return shared_lock_failures(scratch, locks, waits) end,
+            function (scratch) return later_failures(scratch, shims, headers) end,
+            function (scratch) return submit_failures(scratch, blocks, sources_of(shims, SUBMITS)) end,
+            function (scratch) return assert_failures(scratch, sources_of(shims, ASSERTS), locks, waits) end,
+            function (scratch) return queue_failures(scratch, sources_of(shims, QUEUES)) end,
+            function (scratch) return barrier_failures(scratch, sources_of(shims, BARRIERS)) end,
+            function (scratch) return source_handler_failures(scratch) end,
+            function (scratch) return system_failures(scratch, shims) end,
+            function (scratch) return invert_failures(scratch, shims) end,
+            function (scratch) return definition_failures(scratch, shims, headers) end,
+            function (scratch) return late_failures(scratch) end,
+            function (scratch) return caller_failures(scratch, headers) end
         }
-        for _, check in ipairs(checks) do
-            table.join2(found, check())
+        local results = {}
+        runjobs("compat", function (index)
+            local scratch = path.join(folder, tostring(index))
+            os.mkdir(scratch)
+            results[index] = checks[index](scratch)
+        end, {total = #checks, comax = os.default_njob()})
+        for index = 1, #checks do
+            table.join2(found, results[index])
         end
     end
     os.tryrm(folder)
