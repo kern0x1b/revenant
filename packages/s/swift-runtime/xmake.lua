@@ -40,22 +40,7 @@ package("swift-runtime")
     end)
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
-    local digests = {"sources=" .. swift_runtime_sources_digest}
-    for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "**.patch"))) do
-        table.insert(digests, path.relative(patch, path.join(os.scriptdir(), "patches")) .. "=" .. hash.sha256(patch))
-    end
-    for _, held in ipairs({"CloudKit", "Network", "RealityFoundation", "RealityKit", "SceneKit", "Spatial", "WeatherKit"}) do
-        for _, file in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held, "**"))) do
-            table.insert(digests, path.relative(file, path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held)) .. "=" .. hash.sha256(file))
-        end
-    end
-    local folder = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
-        table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
-    end
-    table.sort(digests)
-    add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = swift_runtime_sources_digest, type = "string", readonly = true})
 
     add_configs("backports", {description = "Build the overlays for a port that links the frameworks/Backports libraries: API they implement is available from the port's release, in the overlays and in the port's own Swift. Blocked until the port headers are generated again; see the raise in on_install.", default = false, type = "boolean"})
 

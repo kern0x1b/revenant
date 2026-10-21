@@ -23,7 +23,7 @@ local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-
 
 local UNCONVERTED = {}
 
-local REACHING = {"ggml", "iphoneos-sdk", "libcxx", "swift-crypto", "swift-runtime", "swift-system"}
+local REACHING = {"swift-runtime"}
 
 local function set_of(list)
     local set = {}
