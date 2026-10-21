@@ -477,7 +477,10 @@ package("swift-runtime")
             end
         end
         io.writefile(path.join(simd, "simd.swift"), table.concat(simd_text, "\n") .. "\n")
-        local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", "*.patch"))
+        local simd_release = toolchain:config("sdkdir"):match("iPhoneOS([%d%.]+)%.sdk$")
+        assert(simd_release, "the SDK at " .. toolchain:config("sdkdir") .. " is not an iPhoneOS SDK the simd patches name")
+        local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", simd_release, "*.patch"))
+        assert(#simd_patches > 0, "the simd overlay has no patch for the iPhoneOS " .. simd_release .. " SDK; add patches/simd/" .. simd_release)
         table.sort(simd_patches)
         for _, patch in ipairs(simd_patches) do
             os.vrunv("patch", {"-p1", "-i", patch}, {curdir = simd})
