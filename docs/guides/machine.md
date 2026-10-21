@@ -49,7 +49,7 @@ changes exactly when those files do:
 
 | Package | Digest config | Made from |
 | --- | --- | --- |
-| `swift-runtime`, `libcxx` | `recipe` | `digest.lua`, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
+| `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
 | `swift-bootstrap` | `recipe` | the recipe, and the swift.org package by its sha256 |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
