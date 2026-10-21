@@ -236,3 +236,63 @@ jobs:
         with:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+  swift:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      REVENANT_PREBUILT: kern0x1b/revenant
+      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64,swift-runtime,libcxx"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
+      - name: Select the newest Xcode and show its clang
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcode-select -p
+          xcrun clang --version
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - name: Configure the Swift component
+        timeout-minutes: 20
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Build the Swift targets
+        timeout-minutes: 20
+        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit CreateML MusicKit SwiftData 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Install the Swift packages through their wrappers
+        timeout-minutes: 20
+        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@widgetkit revenant@createml revenant@musickit revenant@swift-data revenant@swiftui 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Save the package store
+        if: steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

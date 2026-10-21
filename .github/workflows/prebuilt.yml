@@ -10,6 +10,8 @@ on:
           - llvm
           - llvm-libraries
           - swift
+          - swift-runtime
+          - libcxx
           - ld64
         default: llvm
 
@@ -90,6 +92,8 @@ jobs:
             llvm) ./xmakew require -P . -y -v --extra="{system=false}" revenant@llvm ;;
             llvm-libraries) ./xmakew require -P . -y -v --extra="{system=false,configs={libraries=true}}" revenant@llvm ;;
             swift) ./xmakew require -P . -y -v --extra="{system=false}" revenant@swift ;;
+            swift-runtime) ./xmakew require -P . -y -v --extra="{system=false}" revenant@swift-runtime ;;
+            libcxx) ./xmakew require -P . -y -v --extra="{system=false}" revenant@libcxx ;;
             ld64) ./xmakew require -P . -y -v --extra="{system=false}" revenant@ld64 ;;
             *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
           esac
