@@ -82,6 +82,53 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [`TextSelection`](reference/swiftui/text-selection.md) | the one range the release can carry |
 | [Third-party](reference/swiftui/third-party.md) | the code this module is derived from, and its terms, and the trademarks |
 
+## Backports
+
+| Document | About |
+| --- | --- |
+| [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
+| [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
+| [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |
+| [ActivityKit: unplaced rows](reference/backports/ActivityKit/ActivityKit/Unplaced.md) | the 10 unplaced rows, and why none is a missing declaration |
+| [AppIntents](reference/backports/AppIntents/README.md) | the package `revenant@appintents` |
+| [AppIntents: comparators](reference/backports/AppIntents/AppIntents/Comparators.md) | the comparison operators, nine equalities that answered `true` for every pair |
+| [AppIntents: counts](reference/backports/AppIntents/AppIntents/Counts.md) | the counts, and the ledger they are measured against |
+| [AppIntents: foreground continuation](reference/backports/AppIntents/AppIntents/ForegroundContinuation.md) | the two rows of `ForegroundContinuableIntent`, and why they are not written yet |
+| [AppIntents: macros](reference/backports/AppIntents/AppIntents/Macros.md) | the macro rows, and why the expansion cannot be compared on this machine |
+| [AppIntents: next family](reference/backports/AppIntents/AppIntents/NextFamily.md) | the census, the pick and the order of the next family |
+| [AppIntents: open contracts](reference/backports/AppIntents/AppIntents/Open-contracts.md) | the open rows, and what each one needs |
+| [AppIntents: reuse](reference/backports/AppIntents/AppIntents/Reuse.md) | what AppIntents was compared against, and why |
+| [AppIntents: services](reference/backports/AppIntents/AppIntents/Services.md) | the seams where the system side of AppIntents is not on these releases |
+| [AppIntents: Spotlight](reference/backports/AppIntents/AppIntents/Spotlight.md) | the CoreSpotlight classes AppIntents extends |
+| [AppIntents: unplaced rows](reference/backports/AppIntents/AppIntents/Unplaced.md) | the 291 unplaced rows, grouped by type |
+| [AppIntentsMacros](reference/backports/AppIntentsMacros/README.md) | the package `revenant@appintents-macros` |
+| [AuthenticationServices: errors](reference/backports/AuthenticationServices/Errors.md) | the error structs, measured |
+| [CloudKit: CKError](reference/backports/CloudKit/CKError.md) | `CKError`, measured |
+| [CloudKit: CKRecord](reference/backports/CloudKit/CKRecord.md) | `CKRecord`, not yet visible to Swift on armv7 and iOS 6.1.3 |
+| [CreateML](reference/backports/CreateML/README.md) | CreateML and CreateMLComponents on the port's armv7 releases |
+| [CreateML: files README](reference/backports/CreateML/files-README.md) | a second copy of the CreateML overview, with the protobuf codec section; the two differ |
+| [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
+| [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
+| [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
+| [Matter](reference/backports/Matter/MatterFramework.md) | the Matter framework, iOS 12 to 26, on iOS 6 |
+| [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
+| [RealityFoundation: audio](reference/backports/RealityFoundation/Audio.md) | `Audio.swift`: deleted, and what brings it back |
+| [RealityFoundation: SceneKit](reference/backports/RealityFoundation/SceneKit.md) | RealityFoundation and RealityKit below iOS 8.0 |
+| [Spatial](reference/backports/Spatial/README.md) | what is built here, and what is measured |
+| [SwiftData](reference/backports/SwiftData/README.md) | the package `revenant@swift-data` |
+| [SwiftData: substrate](reference/backports/SwiftData/Substrate.md) | what the port gives SwiftData, measured |
+| [TipKit](reference/backports/TipKit/README.md) | the package `revenant@tipkit` |
+| [TipKit: rendering](reference/backports/TipKit/TipKit/Rendering.md) | the seam: the tip is drawn in the app |
+| [TipKit: reuse](reference/backports/TipKit/TipKit/Reuse.md) | what TipKit was compared against, and why |
+| [UIKit](reference/backports/UIKit/README.md) | the UIKit Swift overlay: the surface's Swift constants and cases |
+| [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
+| [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |
+| [WidgetKit](reference/backports/WidgetKit/README.md) | the package `revenant@widgetkit` |
+| [WidgetKit: values](reference/backports/WidgetKit/Values.md) | the value types, measured |
+| [WidgetKit: host](reference/backports/WidgetKit/WidgetKit/Host.md) | the seam: there is no widget host |
+| [WidgetKit: providers](reference/backports/WidgetKit/WidgetKit/Providers.md) | the two intent providers, and the spellings they do not share with the timeline provider |
+| [WidgetKit: reuse](reference/backports/WidgetKit/WidgetKit/Reuse.md) | what WidgetKit was compared against, and why |
+
 ## WebKit
 
 | Document | About |
