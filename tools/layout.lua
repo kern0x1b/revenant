@@ -21,7 +21,7 @@ local addon = {
 
 local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
 
-local UNCONVERTED = {"swift-embedded"}
+local UNCONVERTED = {}
 
 local REACHING = {"ggml", "iphoneos-sdk", "libcxx", "swift-crypto", "swift-runtime", "swift-system"}
 

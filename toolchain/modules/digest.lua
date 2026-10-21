@@ -84,7 +84,9 @@ local RECIPES = {
      inputs = {"packages/s/swift-data/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/SwiftData/*"}},
     {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
-               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}}
+               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}},
+    {folder = "packages/s/swift-embedded", variable = "swift_embedded_sources_digest",
+     inputs = {"packages/s/swift-embedded/xmake.lua", "toolchain/src/swift-embedded/xmake.lua", "toolchain/modules/apple/swift.lua"}}
 }
 
 function recipes()

@@ -4,6 +4,9 @@ package("swift-embedded")
     set_license("Apache-2.0 WITH Swift-exception")
     set_policy("package.strict_compatibility", true)
 
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("sources", {description = "The digest of this recipe, the component that builds the module and the Swift module builder, so a changed build is a different package.", default = swift_embedded_sources_digest, type = "string", readonly = true})
+
     add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
 
     on_load("iphoneos", function (package)
@@ -11,37 +14,10 @@ package("swift-embedded")
     end)
 
     on_install("iphoneos", function (package)
-        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
-        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
-        local sources = import("@addon.revenant.apple.sources", {anonymous = true})
-        local toolchain = cmake.toolchain(package)
-        local compiler = package:dep("swift")
-        local source = path.join(compiler:installdir("share"), "swift-source")
-        local swiftc = path.join(compiler:installdir("bin"), "swiftc")
-        package:setenv("SWIFT_EXEC", swiftc)
-
-        swift.build_module({
-            swiftc = swiftc,
-            source = source,
-            architecture = package:arch(),
-            deployment = toolchain:config("deployment"),
-            sdk = toolchain:config("sdkdir"),
-            output = path.join(package:installdir("lib"), "swift", "embedded"),
-            workdir = path.absolute("module")
-        })
-
-        local tables = swift.unicode_tables(source)
-        os.cp(path.join(tables.folder, "*.cpp"), "Unicode/")
-        io.writefile(path.join("generated", "swift", "Runtime", "CMakeConfig.h"), swift.runtime_config(compiler:version_str()))
-        os.vcp(path.join(source, "LICENSE.txt"), "LICENSE.txt")
-        sources.static(package, {
-            files = {"Unicode/*.cpp"},
-            includedirs = table.join({path.absolute("generated")}, tables.includedirs),
-            defines = tables.defines,
-            cxxflags = tables.cxxflags,
-            name = "swiftUnicodeDataTables",
-            licenses = {"LICENSE.txt"}
-        })
+        local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
+        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
+            includes = {path.join(root, "toolchain", "src", "swift-embedded")}, targets = {"swiftUnicodeDataTables"}})
+        package:setenv("SWIFT_EXEC", path.join(package:dep("swift"):installdir("bin"), "swiftc"))
     end)
 
     on_test(function (package)
