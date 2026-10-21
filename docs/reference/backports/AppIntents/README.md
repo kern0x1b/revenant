@@ -59,36 +59,20 @@ device without the service answers, with the surface still in place.
 
 MIT, the repository's. `LICENSE` is the one at the root of the repository, copied into the package.
 
-## Building it on its own, and the one-at-a-time rule
+## Building it on its own
 
-`xmake` resolves these packages out of the shared `~/.xmake` store, and that store takes a
-**machine-wide** lock per package: a second `xmake` that reaches the same package waits, and prints
-`package(swift-runtime) is being accessed by other processes, please wait!` until the first is done.
-So each `xmake` command that touches the store runs one at a time,
-or it hangs:
+The Backports build does not include this package; the `Swift` component does:
 
-    coordination/heavy.sh xmake f -c -y      # resolve
-    coordination/heavy.sh xmake -y            # build
+    ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y
+    ./xmakew require -P . -y revenant@appintents
 
-To build one of these Swift packages without a port, give `xmake` a project of its own, shaped as
-the gate's `resolve()` shapes one (`coordination/build-gate.lua:44-48`):
+`require` builds the package and the packages its recipe declares (here `revenant@swift-runtime`), so
+that one command is enough. The first run also builds swift-runtime and libcxx from source, because
+neither has a published prebuilt release yet; see [prebuilt packages](../../../guides/prebuilt.md).
+`revenant@activitykit`, `revenant@tipkit` and `revenant@widgetkit` are installed the same way, and each
+declares its own dependencies in its recipe.
 
-    set_project("gate-tipkit")
-    add_repositories("revenant <path to a checkout>")
-    add_addons("revenant v0.8.13")             -- the newest version the checkout's recipe names
-    set_config("apple_minimum", "6.1.3")
-    includes("@addon/revenant/apple-ios")
-    set_defaultplat("iphoneos")
-    set_defaultarchs("iphoneos|armv7")
-    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
-    add_requires("revenant@appintents", {alias = "appintents"})
-    add_requires("revenant@tipkit", {alias = "tipkit"})
-
-A **fresh directory name per attempt** matters: xmake keeps a repository search index under
-`~/.xmake/cache/quick_search`, and a directory name it has seen before is answered from that index
-rather than from the checkout, so a stale entry makes a package that is present look absent. The
-projects must be built through `heavy.sh` even to resolve, because resolution alone takes the lock.
-
-`revenant@activitykit`, `revenant@tipkit` and `revenant@widgetkit` are built the same way, each adding its
-own `add_requires("revenant@<name>", {alias = "<name>"})`; `activitykit` needs `revenant@appintents`
-first, `tipkit` needs `revenant@appintents`, and `widgetkit` needs both.
+If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,
+another build is using the same package store, `$XMAKE_GLOBALDIR` (default
+`~/.revenant/cache/xmake-global`). Wait for it to finish, or give this build its own store by setting
+`XMAKE_GLOBALDIR` to another folder.
