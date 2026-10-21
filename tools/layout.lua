@@ -2,13 +2,12 @@ local root = path.absolute(path.directory(os.scriptdir()))
 
 local layout = {
     top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSES", "REUSE.toml",
-           "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "packages", "addons", "emulator", "recompiler",
+           "xmake.lua", "xmakew", "tools", "docs", "toolchain", "packages", "addons", "emulator", "recompiler",
            "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
            ".gitignore"},
     component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "patches", "tests", "examples", "tools"},
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
-    third_party = {"xmake.lua", "patches"},
     agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"},
     addon = {"addon.lua", "includes", "modules", "plugins", "rules", "toolchains"}
 }
@@ -45,6 +44,22 @@ local function addon_fault(parts, first)
     end
 end
 
+local function patches_fault(parts)
+    if not parts[#parts]:endswith(".patch") then
+        return "patches/ holds .patch files only"
+    end
+end
+
+local function port_fault(parts)
+    local name = parts[#parts]
+    if #parts ~= 5 then
+        return "port/ holds files, not folders: the sources a package builds are in their component's src/"
+    elseif name == "project.lua" or name == "config.h" or name:endswith(".lua") or name:endswith(".exp") then
+        return nil
+    end
+    return "port/ holds build files only (project.lua, config.h, generated Lua and .exp lists): the sources a package builds are in their component's src/"
+end
+
 local function recipe_fault(parts)
     local kind = parts[1]
     if #parts < 3 then
@@ -58,10 +73,12 @@ local function recipe_fault(parts)
         return nil
     elseif #parts == 4 and parts[4] == "xmake.lua" then
         return nil
-    elseif #parts > 4 and (parts[4] == "port" or parts[4] == "patches") then
-        return nil
+    elseif #parts > 4 and parts[4] == "patches" then
+        return patches_fault(parts)
+    elseif #parts > 4 and parts[4] == "port" then
+        return port_fault(parts)
     end
-    return "packages/<letter>/<name> holds xmake.lua, port/ and patches/ only"
+    return "packages/<letter>/<name> holds xmake.lua, patches/ and port/ only"
 end
 
 function main()
@@ -124,8 +141,6 @@ function main()
             wrong(file, "a component holds only " .. table.concat(listed, ", "))
         elseif parts[1] == "docs" and not allowed.docs[parts[2]] then
             wrong(file, "docs/ holds only " .. table.concat(layout.docs, ", "))
-        elseif parts[1] == "third_party" and #parts > 2 and not allowed.third_party[parts[3]] then
-            wrong(file, "a third_party package holds only " .. table.concat(layout.third_party, ", "))
         end
     end
     for _, folder in ipairs(table.orderkeys(folders)) do
