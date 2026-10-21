@@ -85,6 +85,27 @@ jobs:
           if [ "$rc" -ne 0 ]; then cat "$probe/link.log"; fi
           exit "$rc"
 
+      - name: Configure the iOS project without requiring its packages
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift --require=n -y
+
+      - name: Restore the iOS 6.0 armv7 shared cache
+        id: dyld
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - name: Save the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
       - name: Build or fetch the package
         env:
           PACKAGE: ${{ inputs.package }}
