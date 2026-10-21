@@ -50,5 +50,12 @@ function from_objects(root)
     reader.each_output("otool", {"-ov"}, objects, function (object, line)
         method(keys, frameworks[object], line)
     end)
+    local total = 0
+    for _, set in pairs(keys) do
+        for _ in pairs(set) do
+            total = total + 1
+        end
+    end
+    assert(total > 0, "no member of a src/<Framework> object under " .. root)
     return keys
 end

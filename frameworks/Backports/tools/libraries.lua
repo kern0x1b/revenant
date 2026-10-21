@@ -38,5 +38,15 @@ function read(libdir)
             end
         end
     end
+    local symbols, methods = 0, 0
+    for _, library in ipairs(libraries) do
+        for _ in pairs(library.symbols) do
+            symbols = symbols + 1
+        end
+        for _ in pairs(library.methods) do
+            methods = methods + 1
+        end
+    end
+    assert(symbols > 0 and methods > 0, string.format("%d symbols and %d methods read from %s", symbols, methods, libdir))
     return libraries
 end

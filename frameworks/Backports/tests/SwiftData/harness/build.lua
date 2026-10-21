@@ -28,7 +28,7 @@ local function availability_flags(file)
 end
 
 local function undefined_count(dylib)
-    local _, text = os.iorunv("nm", {"-u", dylib})
+    local text = os.iorunv("nm", {"-u", dylib})
     return process.count(text, "")
 end
 
@@ -88,7 +88,7 @@ function main(release)
         end
         os.exit(1)
     end
-    local _, kind = os.iorunv("file", {"-b", object})
+    local kind = os.iorunv("file", {"-b", object})
     print(string.format("OBJECT  %s %d bytes  %s", path.filename(object), os.filesize(object), kind:trim()))
 
     status = process.run(os.programfile(), {"l", path.join(harness, "symbols.lua")}, {envs = {REVENANT_SWIFTDATA_OBJECT = object}})
@@ -109,14 +109,14 @@ function main(release)
                                                                          "-L", backports, "-lCoreDataBackports", object}),
                                    {stderr = path.join(out, "link.err")})
         if linked == 0 then
-            local _, listing = os.iorunv("nm", {"-g", dylib})
+            local listing = os.iorunv("nm", {"-g", dylib})
             local defined = process.count(listing, " T ") + process.count(listing, " S ") + process.count(listing, " B ")
             print(string.format("LINKED %s %d bytes", dylib, os.filesize(dylib)))
             print(string.format("SYMBOLS defined=%d undefined=%d", defined, undefined_count(dylib)))
             if defined < 50 then
                 print(string.format("LINK SUSPECT: a library with %d defined symbols did not take the module's code", defined))
             end
-            local _, otool = os.iorunv("otool", {"-L", dylib})
+            local otool = os.iorunv("otool", {"-L", dylib})
             for _, line in ipairs(process.lines(otool)) do
                 print("LC " .. line)
             end
