@@ -45,12 +45,13 @@ local function node_of(body, state)
     for word in string.gmatch(node.tail, "%a+") do
         node.flags[word] = true
     end
-    local pre = string.match((string.gsub(body, "<scratch space>", "SCRATCH")), "^[^'\"]*")
+    local normal = string.gsub(string.gsub(body, "<<([^<>]*)>:", "<%1:"), "<<([^<>]*)>>", "<%1>")
+    local pre = string.match(normal, "^[^'\"]*")
     local range_start, range_end = string.find(pre, "<[^<>]*>")
     node.invalid = string.find(pre, "invalid sloc", 1, true) ~= nil
     node.multiline = range_start ~= nil and string.find(string.sub(pre, range_start, range_end), ", line:", 1, true) ~= nil
-    local after = range_end and string.sub(pre, range_end + 1) or pre
-    local tokens = words(after)
+    local rest = string.gsub(pre, "^%S+%s+0x%x+", "")
+    local tokens = words((string.gsub(rest, "<[^<>]*>", " ")))
     if node.kind == "AvailabilityAttr" then
         node.platform = tokens[1]
         node.introduced = tokens[2]
