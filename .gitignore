@@ -8,6 +8,7 @@ xcuserdata/
 DerivedData/
 *.log
 *.swiftmodule
+!/frameworks/Backports/tests/data/**/*.swiftmodule/
 *.swiftdoc
 *.swiftsourceinfo
 *.abi.json
