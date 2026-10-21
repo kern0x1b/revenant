@@ -1,6 +1,6 @@
 package("network")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
-    set_description("The Network framework of iOS 12, as one Swift module and dylib a port writes `import Network` for, built against the revenant@swift-runtime a port carries, with the Network C seam its module imports")
+    set_description("The Network framework of iOS 12, as one Swift module and dylib a port writes `import Network` for, built against the revenant@swift-runtime a port carries, with the Network C seam its module imports; below iOS 12 the seam's Network types are not yet backported")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
@@ -12,7 +12,7 @@ package("network")
         local toolchain = assert(package:toolchains(), "network is built with the apple-ios toolchain")[1]
         toolchain:load()
         if tonumber(toolchain:config("deployment"):match("^(%d+)")) < 12 then
-            raise("network is the Network framework's overlay, which needs iOS 12, and this build targets iOS %s", toolchain:config("deployment"))
+            raise("network is not yet backported to iOS below 12, and this build targets iOS %s: see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         end
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("links", "swiftNetwork")

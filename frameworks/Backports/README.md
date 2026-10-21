@@ -45,3 +45,10 @@ Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`bi
 ## Limits
 
 Swift types, variables and protocols are counted but not stubbed. Protocol objects and `_OBJC_CLASS_$_` class symbols are not emitted, so an app that links an absent class does not link yet. C global variables are not stubbed. Subframeworks and enum constants are excluded. ObjC type encodings are empty.
+
+## Open gaps
+
+The Swift overlays below are built as targets of this component, and each builds only for an iOS its backport reaches. Below that release the build refuses, and the wrapper package refuses on load, with "not yet backported". None of these is a supported minimum: each closes when its backport makes it build at iOS 6.
+
+- `swiftRealityFoundation` and `swiftRealityKit` below iOS 8: they load SceneKit, and the SceneKit members they import (`SCNHitTestResult`, `-[SCNView hitTest:options:]`, `+[SCNNode nodeWithGeometry:]`) are not backported yet. RealityKit's UIKit part is open too. [RealityFoundation below iOS 8](../../docs/reference/backports/RealityFoundation/SceneKit.md) says what brings them back.
+- `swiftNetwork` below iOS 12: its C seam (`src/Network/seam`) declares `nw_interface_t` and the other `nw_*` types of the Network framework, which iOS 6 lacks. Those declarations need backports for iOS 6 before the overlay can compile there.

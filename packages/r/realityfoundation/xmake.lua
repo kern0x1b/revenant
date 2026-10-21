@@ -1,6 +1,6 @@
 package("realityfoundation")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
-    set_description("The RealityFoundation framework of iOS 13, as one Swift module and dylib a port writes `import RealityFoundation` for, built against the revenant@swift-runtime a port carries; it overlays SceneKit, so it needs an iOS that has SceneKit")
+    set_description("The RealityFoundation framework of iOS 13, as one Swift module and dylib a port writes `import RealityFoundation` for, built against the revenant@swift-runtime a port carries; its SceneKit part is not yet backported below iOS 8")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
@@ -12,7 +12,7 @@ package("realityfoundation")
         local toolchain = assert(package:toolchains(), "realityfoundation is built with the apple-ios toolchain")[1]
         toolchain:load()
         if tonumber(toolchain:config("deployment"):match("^(%d+)")) < 8 then
-            raise("realityfoundation overlays SceneKit, and iOS %s has no SceneKit", toolchain:config("deployment"))
+            raise("realityfoundation is not yet backported to iOS below 8, and this build targets iOS %s: its SceneKit part is open, see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         end
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("links", "swiftRealityFoundation")

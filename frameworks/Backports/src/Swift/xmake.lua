@@ -242,7 +242,7 @@ local function overlay(name, folder, opt)
                 local semver = import("core.base.semver")
                 local minimum = deployment_of(target)
                 if semver.compare(minimum, opt.minimum) < 0 then
-                    raise("%s needs iOS %s or newer, and this build targets iOS %s", name, opt.minimum, minimum)
+                    raise("%s is not yet backported to iOS below %s, and this build targets iOS %s: see the open gaps in frameworks/Backports/README.md", name, opt.minimum, minimum)
                 end
             end
         end)
