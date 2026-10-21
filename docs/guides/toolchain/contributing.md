@@ -24,14 +24,14 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 | `modules/apple/` | the Lua the rules and verbs run; `modules/gyb/` expands Swift's `.gyb` templates in Lua |
 | `packages/<letter>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
-| `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `common/`, `corpus/`, `emulate/`, `gen/`, `swiftui/` |
+| `tests/` | `xmake.lua`, the test targets of the toolchain; `addon/` the suites, `common/` what they share, `emulate/` and `swiftui/` the device fixtures |
 
-`./xmakew l tools/check.lua layout` from the repository root reports what is not yet in the repository's layout.
+`./xmakew test -P . repository/layout` from the repository root reports what is not yet in the repository's layout.
 
 ## Before handing a change over
 
-- `./xmakew l tools/check.lua toolchain` runs `tests/light.lua`, which runs the addon's tests.
-- `./xmakew l tools/check.lua layout` from the repository root.
+- `./xmakew test -P . 'toolchain_*/*'` runs the toolchain's tests; [the tests reference](../../reference/toolchain/tests.md) says which target needs what.
+- `./xmakew test -P . repository/layout` from the repository root.
 - The skill `emulator-session` for a run on the emulator.
 - A change that spans components is one series in the repository, one commit per component it touches.
 

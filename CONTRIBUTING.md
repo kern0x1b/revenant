@@ -7,6 +7,8 @@ lists every document.
 
 - **Commits:** plain imperative subject, one commit per member a change touches. Keep the
   `Co-Authored-By: Claude <noreply@anthropic.com>` trailer: we mark AI-built work, we do not hide it.
+- **Tests:** `./xmakew test -P .` runs every test a host with the prebuilt packages can run. [AGENTS.md](AGENTS.md)
+  says how the tests are declared, and which ones need a device.
 - **No personal data.** No device addresses, host names, credentials or absolute `/Users/<name>/…` paths in tracked
   files. Use `$HOME`, placeholders and the git-ignored `device.env` and `local.env`.
 - **No Apple code or assets.** A reimplemented framework is written from its public shape; nothing from Apple's

@@ -32,12 +32,18 @@ option("emulator_dynarmic_test_emit_failure")
     set_description("Compile Dynarmic's portable-emit fault injection, for tests")
 option_end()
 
+includes("tests/guest/dns-probe")
+
+if get_config("component") ~= "" or is_plat("iphoneos") then
+    return
+end
+
 local host = {plat = "macosx", arch = "arm64"}
 add_requires("dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
              configs = {test_emit_failure = has_config("emulator_dynarmic_test_emit_failure")}}))
 add_requires("boost 1.81.0", table.join(host, {alias = "boost"}))
-add_requires("revenant@openssl 4.0.2", table.join(host, {alias = "openssl"}))
-add_requires("revenant@libplist 2.7.0", table.join(host, {alias = "libplist"}))
+add_requires("revenant@openssl 4.0.2", {alias = "openssl"})
+add_requires("revenant@libplist 2.7.0", {alias = "libplist"})
 add_requires("libpng", "libjpeg-turbo", table.join(host, {system = false}))
 if has_config("emulator_vulkan") then
     add_requires("vulkan-headers 1.4.335+0", "vulkan-loader 1.4.335+0", table.join(host, {system = false}))
@@ -90,7 +96,7 @@ add_rules("emulator.module")
 
 includes("src/mach", "src/foundation", "src/device_state", "src/filesystem", "src/network", "src/storage",
          "src/telephony", "src/media", "src/bluetooth", "src/crypto", "src/graphics", "src/kernel", "src/debug",
-         "src/host", "src/runtime", "src/app", "src/glsl", "tests/guest/dns-probe")
+         "src/host", "src/runtime", "src/app", "src/glsl")
 
 target("emulator_block_profile_test")
     set_kind("binary")

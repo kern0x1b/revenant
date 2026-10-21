@@ -1,3 +1,7 @@
+if get_config("component") ~= "" then
+    return
+end
+
 if is_plat("iphoneos") then
     add_requires("revenant@combine", {alias = "combine", configs = {sources = true}})
 

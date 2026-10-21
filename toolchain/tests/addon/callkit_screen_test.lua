@@ -2,7 +2,7 @@ import("fixtures")
 
 local PROJECT = [[
 add_repositories("revenant %s")
-add_addons("revenant")
+add_addons("revenant %s")
 set_config("apple_minimum", "6.0")
 includes("@addon/revenant/apple-ios")
 set_allowedplats("iphoneos")
@@ -18,18 +18,19 @@ target("probe")
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
+    local copy, version = fixtures.repository(folder)
     local at = path.join(folder, "probe")
     os.mkdir(at)
-    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, root))
+    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, copy, version))
 
     local refused = fixtures.refusal(function () fixtures.build(at) end)
     if refused then
         table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own package repository, must build: " .. refused)
     else
-        local dylib = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
+        local store = path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake")
+        local dylib = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
                                           "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.dylib"))
-        local filter = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
+        local filter = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
                                            "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.plist"))
         if #dylib == 0 then
             table.insert(found, "the callkit-screen tweak built but its dylib is not under Library/MobileSubstrate/DynamicLibraries")

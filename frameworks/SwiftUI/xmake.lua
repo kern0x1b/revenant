@@ -3,6 +3,10 @@ option("swiftui_snapshot_only", {default = "", showmenu = true,
 option("swiftui_perf", {default = false, showmenu = true,
                         description = "Have the demo application run its timing scenarios after launch and quit."})
 
+if get_config("component") ~= "" then
+    return
+end
+
 if is_plat("iphoneos") then
     local function weak_import_waiver()
         add_values("revenant.waive.weak-imports",

@@ -39,7 +39,7 @@ function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
     local copy, version = fixtures.repository(folder)
-    local device = path.join(copy, "tests", "addon", "tweak")
+    local device = path.join(copy, "toolchain", "tests", "addon", "tweak")
 
     local at = tweak(folder, version, device)
     local refused = fixtures.refusal(function () fixtures.build(at) end)
