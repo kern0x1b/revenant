@@ -39,9 +39,9 @@ if get_config("component") ~= "" or is_plat("iphoneos") then
 end
 
 local host = {plat = "macosx", arch = "arm64"}
-add_requires("dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
+add_requires("revenant@dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
              configs = {test_emit_failure = has_config("emulator_dynarmic_test_emit_failure")}}))
-add_requires("boost 1.81.0", table.join(host, {alias = "boost"}))
+add_requires("revenant@boost 1.81.0", table.join(host, {alias = "boost"}))
 add_requires("revenant@openssl 4.0.2", {alias = "openssl"})
 add_requires("revenant@libplist 2.7.0", {alias = "libplist"})
 add_requires("libpng", "libjpeg-turbo", table.join(host, {system = false}))
