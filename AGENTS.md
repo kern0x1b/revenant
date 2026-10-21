@@ -78,4 +78,4 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
   naming what it lacks when that is missing.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
-  ``./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
+  `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
