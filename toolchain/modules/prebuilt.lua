@@ -11,6 +11,10 @@ local function only()
     return os.getenv("REVENANT_PREBUILT_ONLY") == "1"
 end
 
+function wanted(package)
+    return source() ~= nil
+end
+
 function key(package)
     local parts = {package:name(), package:version_str() or "latest", package:plat(), package:arch(), package:buildhash()}
     local deps = {}

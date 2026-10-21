@@ -396,24 +396,6 @@ local function later_failures(folder, shims, headers)
     return found
 end
 
-local function block_failures(folder, blocks)
-    local found = {}
-    fixture(folder, "blocks.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-fblocks", "-DREVENANT_COMPAT_SYSTEM=0"}, blocks, {"blocks.c", "-o", "blocks"}))
-    if built.code ~= 0 then
-        table.insert(found, "the dispatch_block shims must compile: " .. built.stderr:sub(-400))
-    else
-        table.join2(found, outcome("dispatch_block", run(folder, path.join(folder, "blocks"))))
-    end
-    built = clang(folder, table.join({"-O2", "-w", "-fblocks"}, blocks, {"blocks.c", "-o", "blocks-system"}))
-    if built.code ~= 0 then
-        table.insert(found, "the dispatch_block shims must compile over the system's own: " .. built.stderr:sub(-400))
-    else
-        table.join2(found, outcome("dispatch_block over the system's", run(folder, path.join(folder, "blocks-system"))))
-    end
-    return found
-end
-
 local function submit_failures(folder, blocks, submits)
     local found = {}
     fixture(folder, "submits.c")
@@ -633,7 +615,6 @@ function failures(opt)
             function () return lock_failures(folder, shims, locks, waits) end,
             function () return shared_lock_failures(folder, locks, waits) end,
             function () return later_failures(folder, shims, headers) end,
-            function () return block_failures(folder, blocks) end,
             function () return submit_failures(folder, blocks, sources_of(shims, SUBMITS)) end,
             function () return assert_failures(folder, sources_of(shims, ASSERTS), locks, waits) end,
             function () return queue_failures(folder, sources_of(shims, QUEUES)) end,

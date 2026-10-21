@@ -1,7 +1,7 @@
 package("xmake")
     set_kind("binary")
     set_homepage("https://xmake.io")
-    set_description("A cross-platform build utility based on Lua, with revenant's patches to its addon handling, a job count taken from a GNU make jobserver or XMAKE_MAX_JOBS, one build for two processes that reinstall the same package, and package locks waited for without stopping the other jobs")
+    set_description("A cross-platform build utility based on Lua, with revenant's patches to its addon handling, a job count taken from a GNU make jobserver or XMAKE_MAX_JOBS, one build for two processes that reinstall the same package, package locks waited for without stopping the other jobs, and a package locked by its install directory, so two instances of one package never install into it at once")
     set_license("Apache-2.0")
 
     add_urls("https://github.com/xmake-io/xmake.git")
@@ -18,7 +18,8 @@ package("xmake")
         {"0008-Take-the-job-count-from-a-jobserver-or-from-XMAKE_MA.patch", "bde5d35a476c49a7e3782485f4148a4ed86806a34bf2c4de95dd352658b0dc6d"},
         {"0009-Build-a-package-once-when-two-processes-reinstall-it.patch", "6672dfa17742337d83a5eb3a59018d4458a24d92bea6567568f58fecab2ae72f"},
         {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "5add9a04d3290347faafc247532505e34b156145496ed0671bcc06b3d12c34f0"},
-        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "083b6f89badad1771829937450f38a6a30ae3f6e1c2269a0d593212bdeda3f7a"}}) do
+        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "083b6f89badad1771829937450f38a6a30ae3f6e1c2269a0d593212bdeda3f7a"},
+        {"0012-Lock-a-package-by-its-install-directory.patch", "5331acb3411a8da76bd1d543ebc28206e01b03acadcc7566db46a9c52c0a125a"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 

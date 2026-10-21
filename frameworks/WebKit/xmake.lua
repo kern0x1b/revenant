@@ -1,7 +1,11 @@
-includes("src/engine", "src/device-tools")
-
 option("webkit_host_tests", {default = false, showmenu = true,
                              description = "Build ICU for this Mac and the WebKit port's host tests of its data, run with ./xmakew test -P . icu-sanity/* icu-locales/*."})
+
+if get_config("component") ~= "" then
+    return
+end
+
+includes("src/engine", "src/device-tools")
 
 local stubs = path.join(os.scriptdir(), "src", "compat", "stubs")
 local version = "0.1.0"
