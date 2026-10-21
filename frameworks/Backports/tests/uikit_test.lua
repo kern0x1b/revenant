@@ -84,6 +84,33 @@ local AREAS = {
             "-[UIScreen focusedView]", "-[UIScreen focusedItem]",
         },
     },
+    {
+        name = "iOS 9 touches, presses, documents, search containers and stack views",
+        sources = {"RevenantWeak.m", "NSAttributedString+Attachments9.m", "NSObject+AccessibilityAssistive9.m", "NSTextContainer+Getter9.m", "UIBarButtonItemGroup+Getter9.m",
+                   "UIStackView+Getter9.m", "UIEvent+Touches9.m", "UITouch+Force9.m", "UIGestureRecognizer+Presses9.m", "UIViewController+KeyCommands9.m",
+                   "UIApplication+KeyCommands.m", "UIApplicationShortcutIcon+SystemImage13.m", "UIStoryboardUnwindSegueSource.m", "UIViewController+Unwind9.m",
+                   "UISearchContainerViewController.m", "UIDocument+Progress9.m", "UIImage+RightToLeft9.m", "UIView+FocusState9.m", "UIWebView+Options9.m",
+                   "UILabel+Tightening9.m"},
+        members = {
+            "-[NSAttributedString containsAttachmentsInRange:]", "-[NSObject accessibilityAssistiveTechnologyFocusedIdentifiers]",
+            "-[NSTextContainer simpleRectangularTextContainer]", "-[UIBarButtonItemGroup displayingRepresentativeItem]",
+            "-[UIStackView baselineRelativeArrangement]", "-[UIStackView layoutMarginsRelativeArrangement]",
+            "-[UIEvent coalescedTouchesForTouch:]", "-[UIEvent predictedTouchesForTouch:]", "-[UITouch force]", "-[UITouch maximumPossibleForce]",
+            "-[UITouch preciseLocationInView:]", "-[UITouch precisePreviousLocationInView:]", "-[UITouch estimatedProperties]",
+            "-[UITouch estimatedPropertiesExpectingUpdates]", "-[UITouch estimationUpdateIndex]",
+            "-[UIGestureRecognizer ignorePress:forEvent:]", "-[UIGestureRecognizer pressesBegan:withEvent:]", "-[UIGestureRecognizer pressesChanged:withEvent:]",
+            "-[UIGestureRecognizer pressesEnded:withEvent:]", "-[UIGestureRecognizer pressesCancelled:withEvent:]",
+            "-[UIGestureRecognizer touchesEstimatedPropertiesUpdated:]", "-[UIResponder touchesEstimatedPropertiesUpdated:]",
+            "-[UIViewController addKeyCommand:]", "-[UIViewController removeKeyCommand:]", "+[UIApplicationShortcutIcon iconWithSystemImageName:]",
+            "@UIStoryboardUnwindSegueSource", "-[UIStoryboardUnwindSegueSource sourceViewController]", "-[UIStoryboardUnwindSegueSource unwindAction]",
+            "-[UIStoryboardUnwindSegueSource sender]", "-[UIViewController childViewControllerContainingSegueSource:]",
+            "-[UIViewController allowedChildViewControllersForUnwindingFromSource:]", "-[UIViewController unwindForSegue:towardsViewController:]",
+            "@UISearchContainerViewController", "-[UISearchContainerViewController initWithSearchController:]", "-[UISearchContainerViewController searchController]",
+            "-[UIDocument progress]", "-[UIImage flipsForRightToLeftLayoutDirection]", "-[UIImage imageFlippedForRightToLeftLayoutDirection]",
+            "-[UITableView remembersLastFocusedIndexPath]", "-[UICollectionView remembersLastFocusedIndexPath]", "-[UITableViewCell focusStyle]",
+            "-[UIWebView allowsLinkPreview]", "-[UIWebView allowsPictureInPictureMediaPlayback]", "-[UILabel allowsDefaultTighteningForTruncation]",
+        },
+    },
 }
 
 local function key_of(member)

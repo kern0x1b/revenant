@@ -14,6 +14,10 @@ enum {
     RevenantKeyDown = 10
 };
 
+@interface UIViewController (RevenantAddedKeyCommands)
+- (NSArray<UIKeyCommand *> *)revenant_addedKeyCommands;
+@end
+
 static long (*gs_type)(void *);
 static long (*gs_key_code)(void *);
 static long (*gs_flags)(void *);
@@ -77,7 +81,10 @@ static BOOL revenant_fire_key_command(NSString *input, NSInteger flags)
     for (id responder in chain) {
         if (![responder respondsToSelector:@selector(keyCommands)])
             continue;
-        for (UIKeyCommand *command in [responder keyCommands]) {
+        NSArray *commands = [responder keyCommands] ?: @[];
+        if ([responder respondsToSelector:@selector(revenant_addedKeyCommands)])
+            commands = [commands arrayByAddingObjectsFromArray:[responder revenant_addedKeyCommands]];
+        for (UIKeyCommand *command in commands) {
             if (revenant_command_matches(command, input, flags) && [responder canPerformAction:command.action withSender:command] && [application sendAction:command.action to:responder from:command forEvent:nil])
                 return YES;
         }
