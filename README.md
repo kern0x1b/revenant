@@ -40,6 +40,9 @@ a C compiler, and builds again when the recipe changes.
 | `tools/layout.lua` | `./xmakew l tools/layout.lua`: the layout of AGENTS.md, which `./xmakew test -P .` runs as `repository/layout` |
 | `tools/publish.lua` | `./xmakew l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
 
+The three layers (components, the package repository, the addon and toolchain), what each folder is, and how an app
+built outside this checkout gets our libraries: [docs/explanation/architecture.md](docs/explanation/architecture.md).
+
 Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a commit plus our arm64 backend as
 patches, `boost` the 1.81.0 release archive by its checksum, `xmake` the head of its dev branch after v3.1.2 plus our
 patches to its addon handling, among them `add_addons(<name>, {sourcedir = <folder>})`, and the module `Combine`
@@ -47,9 +50,9 @@ OpenCombine at a commit plus the patches of `revenant@combine`.
 
 ### The members for iOS
 
-`Combine` and `CombineHelpers`, `SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and
-typechecks are targets of the graph for iphoneos; Revenant's packages are third-party code to them (the Swift runtime,
-libc++, the backports, the SDK and the tools). They are built with `./xmakew f -p iphoneos -a armv7`. The option
+`SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and typechecks are targets of the graph for iphoneos,
+and Combine is the package `combine` they take; Revenant's other packages are third-party code to them (the Swift
+runtime, libc++, the SDK and the tools). The components' targets are described in [the architecture](docs/explanation/architecture.md). They are built with `./xmakew f -p iphoneos -a armv7`. The option
 `--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
 device and runs them there.
 
@@ -71,9 +74,9 @@ Stock xmake does not know `sourcedir` in `add_addons` and would fetch and instal
 so revenant is always built with `./xmakew`.
 
 `REVENANT_REPO` names another checkout of revenant for the packages (a released tree whose packages are installed already).
-Revenant's recipes of the members (`revenant@combine`, `revenant@swiftui-uikit`, `revenant@swiftui`) are for
-applications outside revenant and keep their pinned commits; `revenant@emulator` is the emulator of the checkout that uses it, with no pin. The one revenant requires itself is `revenant@combine` with
-`sources = true`: it installs the patched OpenCombine tree, and Combine's targets compile it.
+`revenant@combine` is the package of OpenCombine with our patches, the one member that is third-party code. The SwiftUI
+recipes are gone: they were pins of this repository, and SwiftUI is the target `SwiftUI` of its component. Combine's
+test targets take the upstream tree from the same package, in its `src/`.
 
 ## Publishing a member
 

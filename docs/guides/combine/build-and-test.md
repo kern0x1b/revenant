@@ -2,10 +2,10 @@
 
 ## Build
 
-Inside revenant, `frameworks/Combine/xmake.lua` requires `revenant@combine` with `sources = true`
-and makes two targets of the revenant project for iOS (`./xmakew f -P . -p iphoneos -a armv7` at
-the revenant top) from the installed tree: `Combine`, the one module, and `CombineHelpers`, the
-C++ helper it imports. A target of another member links it with `add_deps("Combine")`.
+Combine is the package `revenant@combine`, built once from the patched OpenCombine tree: the one module `Combine`
+and the C++ helper `CombineHelpers` it imports. Inside revenant, a target of another member takes it with
+`add_packages("combine")`, as `frameworks/SwiftUI` does, and the component `frameworks/Combine` takes the upstream
+tree from the same package for its tests.
 
 Outside revenant, the legacy-iOS (armv7) build is taken through the toolchain as a package
 dependency:

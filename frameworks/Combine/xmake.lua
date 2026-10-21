@@ -3,34 +3,11 @@ if get_config("component") ~= "" then
 end
 
 if is_plat("iphoneos") then
-    add_requires("revenant@combine", {alias = "combine", configs = {sources = true}})
+    add_requires("revenant@combine", {alias = "combine"})
 
     local function sources(target, ...)
         return path.join(target:pkg("combine"):installdir(), "src", ...)
     end
-
-    target("CombineHelpers")
-        set_kind("static")
-        add_rules("@addon/revenant/apple-ios")
-        add_packages("libcxx", "combine")
-        set_languages("c++17")
-        set_optimize("faster")
-        add_cxxflags("-include exception")
-        on_load(function (target)
-            target:add("files", sources(target, "CombineHelpers", "*.cpp"))
-            target:add("includedirs", sources(target, "CombineHelpers", "include"), {public = true})
-        end)
-
-    target("Combine")
-        set_kind("static")
-        add_rules("@addon/revenant/swift")
-        add_deps("CombineHelpers")
-        add_packages("combine")
-        set_optimize("fastest")
-        add_frameworks("Foundation", "CoreFoundation")
-        on_load(function (target)
-            target:add("files", sources(target, "Combine", "**.swift"))
-        end)
 
     target("CombineXCTest")
         set_kind("static")
@@ -45,7 +22,7 @@ if is_plat("iphoneos") then
     target("CombineTests")
         set_default(false)
         add_rules("@addon/revenant/daemon", "@addon/revenant/swift")
-        add_deps("Combine", "CombineXCTest")
+        add_deps("CombineXCTest")
         add_packages("combine")
         add_deps("UIKitBackports", "CoreDataBackports")
         add_frameworks("Foundation", "CoreFoundation")

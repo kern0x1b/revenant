@@ -43,7 +43,7 @@ if is_plat("iphoneos") then
     target("SwiftUI")
         set_kind("static")
         add_rules("@addon/revenant/swift")
-        add_deps("Combine")
+        add_packages("combine", {public = true})
         set_optimize("fastest")
         add_files("src/*.swift")
         add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings")

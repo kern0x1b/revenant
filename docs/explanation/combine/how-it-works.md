@@ -1,7 +1,7 @@
 # How it works
 
 Combine is not a fork. The code is OpenCombine's, pinned at one upstream commit; what is
-ours is the patch series in `frameworks/Combine/patches/`, applied by the `revenant@combine`
+ours is the patch series in `packages/c/combine/patches/`, applied by the `revenant@combine`
 recipe in `packages/c/combine/`, and the targets of this module that build
 the patched sources inside revenant.
 
