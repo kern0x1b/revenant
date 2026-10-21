@@ -1,5 +1,5 @@
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tests/run-batteries.lua [--batteries DIR] [BATTERY...]
-  runs the JavaScript batteries in tests/js under jsc on the phone, with the engine just built.
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tests/device/run-batteries.lua [--batteries DIR] [BATTERY...]
+  runs the JavaScript batteries in tests/device/js under jsc on the phone, with the engine just built.
   DIR is the batteries folder the webkit-engine package installs, holding jsc, its JavaScriptCore
   and the C++ runtime it was built against; by default it is the installed package's. Every file is
   compared with the phone's copy by content and pushed when it differs, so a battery never runs
@@ -54,8 +54,8 @@ local function push_if_changed(phone, localfile, destination, hashes)
 end
 
 function main(...)
-    local tree = import("tree", {rootdir = path.join(os.scriptdir(), "..", "tools", "lib"), anonymous = true})
-    local harness = import("harness", {rootdir = path.join(os.scriptdir(), "device"), anonymous = true})
+    local tree = import("tree", {rootdir = path.join(os.scriptdir(), "..", "..", "tools", "lib"), anonymous = true})
+    local harness = import("harness", {rootdir = os.scriptdir(), anonymous = true})
     local given, named = tree.arguments({...}, {batteries = "value", help = "switch"})
     if given.help then
         print(USAGE)

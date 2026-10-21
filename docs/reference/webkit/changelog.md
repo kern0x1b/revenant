@@ -101,21 +101,21 @@ Dates are the day the change was measured on the device, not the day it compiled
   its layers, because those are two schedulers here and the flush went first, so
   the layer was always shown before the frame existed; and the layer is given a
   `CGImage` over the surface rather than the surface itself, which this release's
-  CoreAnimation accepts and never draws. `tests/device/gl-present.sh` reads the
+  CoreAnimation accepts and never draws. (a file of an earlier layout, not in the repository) reads the
   colour off the screen. WebGL 2.0 stays out of reach: it needs OpenGL ES 3.0 and
-  this silicon is ES 2.0. See `docs/webgl.md`.
+  this silicon is ES 2.0. See (a file of an earlier layout, not in the repository).
 - **A WebGL context asked for without alpha.** `getContext("webgl", {alpha:false})`
   lost its context on creation: WebKit asks for `GL_RGB` as the surface's
   internal format and this backend accepted only BGRA and RGBA. It is served
   from the same BGRA surface now, with the alpha answered as opaque - swizzled
   away when sampling and cleared once in the surface itself - which is what the
   CGL backend does. Found by Khronos' conformance suite, which now runs on the
-  device through `tests/device/conformance.sh`: 2236 of its checks pass over the
+  device through (a file of an earlier layout, not in the repository): 2236 of its checks pass over the
   areas run so far. The two failures left are the driver's, and each has a probe
   that says so with no ANGLE and no WebKit in the way: this GPU does not sample
   non-power-of-two cube maps at all, and it ignores face culling when the colour
   attachment is a texture made from an IOSurface - which is what a canvas draws
-  into here. `docs/webgl.md` has both, and what conformant culling would cost.
+  into here. (a file of an earlier layout, not in the repository) has both, and what conformant culling would cost.
 - **WebGL that animates, rather than drawing one frame.** A page that redrew in
   `requestAnimationFrame` froze the web thread after its first frame - no timers,
   no callbacks, no crash. `CVOpenGLESTextureCache` requires a flush to let go of
@@ -125,7 +125,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   releases its texture and flushes the cache when the image is released. A
   spinning triangle runs at **29 fps at 64x64, 30 at 320x240 and 28 at 320x480** -
   the rate barely moves with the canvas, so what it costs is per frame, not per
-  pixel. `tests/device/gl-frame-rate.sh` is the check that would have caught the
+  pixel. (a file of an earlier layout, not in the repository) is the check that would have caught the
   freeze, which every single-frame check in the suite missed.
 - **Blank labels under the system activities in the share sheet.** The cause was
   the measurement, not the drawing: this port's `UIStringDrawing` answered a
@@ -146,7 +146,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   chrome client on this platform - the base class's empty one is never called.
   The sheet is presented on the main thread and the answer comes back on the web
   thread, which are two different threads in WebKitLegacy.
-  `tests/device/share-sheet.sh` taps the button and then Cancel and checks both.
+  (a file of an earlier layout, not in the repository) taps the button and then Cancel and checks both.
 - **A page console that can be turned on from Settings.** RevWebKit gains a
   Diagnostics switch that routes what a page logs - including its uncaught errors -
   to `/tmp/rev-safari-stderr.log` with file and line. Reading a site's JavaScript
@@ -159,7 +159,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   rejects with `NotAllowedError`, as the specification asks for without a paste
   gesture. Copy buttons work.
 - **A platform report card and a real-site sweep.** `tests/device/web-platform.html`
-  checks the APIs a page written this decade reaches for, and `tests/device/sweep.sh`
+  checks the APIs a page written this decade reaches for, and `tests/device/sweep.lua`
   loads real sites and reports whether each survived, painted, and what it held in
   memory. Both exist because the WebAssembly failure above was invisible to a suite
   that only checks numbers it produces itself.
@@ -170,7 +170,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   every server that negotiates image formats sent a picture that rendered as
   nothing: The Verge's lead image was an empty grey box and BBC News looked like a
   page without photographs. WebKit's own WebP decoder is built instead, reached
-  through `ScalableImageDecoder`, with `scripts/build-libwebp.sh` building the
+  through `ScalableImageDecoder`, with (a file of an earlier layout, not in the repository) building the
   decoder and demuxer for armv7. The other three are no longer claimed.
 - **A page's own favicon, instead of Google's copy of it.** The start page fetched
   every tile's icon from Google's favicon service by host, disclosing every
@@ -203,7 +203,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   `CTFontCreateWithGraphicsFont`, then that font's descriptor. `HAVE_WOFF_SUPPORT`
   claims the system parser reads WOFF, true from iOS 7 but not here, so WebKit's
   own converter is compiled back in for WOFF; WOFF2 needed the library, which
-  `scripts/build-woff2.sh` now builds for armv7 alongside the brotli decoder it
+  (a file of an earlier layout, not in the repository) now builds for armv7 alongside the brotli decoder it
   rests on.
 - **Scrolling inside a page.** Nothing in a page could be moved with a finger -
   not an overflow block, not the body of a cookie dialog, not a frame. Only the
@@ -355,7 +355,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   session. On this device that is the wrong side of the trade.
 
 ### Changed
-- **The device is checked with numbers now, not screenshots.** `tests/device/run.sh`
+- **The device is checked with numbers now, not screenshots.** (a file of an earlier layout, not in the repository)
   runs pages in the browser on the phone; each page computes its own verdicts and
   reports them, and the runner reads them out of the serving HTTP server's request
   log. A page that reports nothing counts as a failure. Memory is measured over
@@ -687,7 +687,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   `webFixedPositionContentDataLock`; a scroll tick landing in that gap
   combines a freshly-read layer offset with a stale constraint, producing a
   bar that is torn out of position for a frame. Diagnosed on both the live
-  site and a deterministic repro added to `tests/scrollbench.html`. A fix
+  site and a deterministic repro added to `tests/device/scrollbench.html`. A fix
   exists behind `/tmp/native-flush-race-fix` (holds the existing lock across
   the commit-to-republish window, no measured scroll-performance cost) but is
   not yet merged: the synthetic repro's hit rate under the fix (0.1%, 3 of
