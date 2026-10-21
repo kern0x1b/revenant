@@ -82,13 +82,18 @@ package("iphoneos-sdk")
                 return stubs.in_libsystem(install) or install == "/usr/lib/libobjc.A.dylib"
             end
 
-            local older_runtime = {}
+            local older_runtime, older_armv7, older_parts, capable = {}, {}, {}, {}
             for _, file in ipairs(os.files(path.join(older, "**.tbd"))) do
                 if not file:find("/DriverKit/", 1, true) then
                     for _, part in ipairs(stubs.documents(io.readfile(file))) do
                         local doc = stubs.read(part)
                         if is_runtime(doc.install) and not older_runtime[doc.install] then
                             older_runtime[doc.install] = doc
+                        end
+                        if table.contains(doc.archs, "armv7") then
+                            older_armv7[doc.install] = older_armv7[doc.install] or doc
+                            older_parts[doc.install] = older_parts[doc.install] or {}
+                            table.insert(older_parts[doc.install], part)
                         end
                     end
                 end
@@ -101,11 +106,15 @@ package("iphoneos-sdk")
                     local parts = stubs.documents(text)
                     for index, part in ipairs(parts) do
                         local install = stubs.install(part)
-                        if carried[install] or stubs.in_libsystem(install) then
+                        if carried[install] or stubs.in_libsystem(install) or older_armv7[install] then
                             local wanted = stubs.group(carried[install] or {})
                             local doc = stubs.read(part)
                             if stubs.in_libsystem(install) then
                                 table.join2(wanted, stubs.derived(doc, first, versions))
+                            end
+                            if older_armv7[install] then
+                                part = stubs.restore_armv7(part, older_armv7[install], older_parts[install])
+                                capable[install] = true
                             end
                             part = stubs.add_markers(part, wanted)
                             if older_runtime[install] then
@@ -121,6 +130,21 @@ package("iphoneos-sdk")
                 end
             end
             vprint("%d stubs of %s took markers from %s", changed, folder, older)
+
+            local folder_stubs = os.files(path.join(folder, "**.tbd"))
+            for _, stub in ipairs(folder_stubs) do
+                local text = not stub:find("/DriverKit/", 1, true) and io.readfile(stub)
+                if text and text:find("reexported-libraries:", 1, true) then
+                    local parts = stubs.documents(text)
+                    for index, part in ipairs(parts) do
+                        parts[index] = stubs.add_reexports(part, capable)
+                    end
+                    local rewritten = table.concat(parts)
+                    if rewritten ~= text then
+                        io.writefile(stub, rewritten)
+                    end
+                end
+            end
         end
 
         local extended = 0
