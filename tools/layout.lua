@@ -21,13 +21,12 @@ local addon = {
 
 local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
 
-local UNCONVERTED = {"activitykit", "appintents", "apple-compat", "createml", "emulator", "emulator-guest", "firmware-tools",
-                     "musickit", "swift-data", "swift-embedded", "tipkit", "widgetkit"}
+local UNCONVERTED = {"activitykit", "appintents", "apple-compat", "createml", "musickit", "swift-data", "swift-embedded",
+                     "tipkit", "widgetkit"}
 
-local REACHING = {"activitykit", "appintents", "apple-compat", "brotli", "combine", "createml", "emulator-guest",
-                  "firmware-tools", "ggml", "icu", "iphoneos-sdk", "ld64", "libcxx", "libpsl", "libwebp", "libxml2",
-                  "libxslt", "llvm", "matter", "musickit", "opencv", "openssl", "swift", "swift-crypto", "swift-data",
-                  "swift-embedded", "swift-runtime", "swift-syntax", "swift-system", "tipkit", "wasm3", "widgetkit", "woff2"}
+local REACHING = {"brotli", "combine", "ggml", "icu", "iphoneos-sdk", "ld64", "libcxx", "libpsl", "libwebp", "libxml2",
+                  "libxslt", "llvm", "matter", "opencv", "openssl", "swift", "swift-crypto", "swift-runtime", "swift-syntax",
+                  "swift-system", "wasm3", "woff2"}
 
 local function set_of(list)
     local set = {}
@@ -35,6 +34,10 @@ local function set_of(list)
         set[name] = true
     end
     return set
+end
+
+local function thin_wrapper(text)
+    return text:find('includes(\\"', 1, true) ~= nil and text:find('"install"', 1, true) ~= nil
 end
 
 local function reaches_into_component(text)
@@ -188,17 +191,22 @@ function main()
         else
             local name = path.filename(recipe)
             local text = io.readfile(path.join(root, recipe, "xmake.lua"))
-            local url = text:find("add_urls", 1, true) ~= nil
-            if not url and not unconverted[name] then
-                wrong(recipe, "has no url, so it builds our code: its component's xmake.lua defines the targets instead")
-            elseif url and unconverted[name] then
-                wrong(recipe, "has a url, so it is not listed in UNCONVERTED any more: remove it from the list")
-            end
-            local into = reaches_into_component(text)
-            if into and not reaching[name] then
-                wrong(recipe, "reaches into a component folder by a relative path: a component's sources are built through the build graph, not a path into its folder")
-            elseif reaching[name] and not into then
-                wrong(recipe, "no longer reaches into a component folder: remove it from REACHING")
+            if text:find("add_urls", 1, true) then
+                if unconverted[name] then
+                    wrong(recipe, "has a url, so it is not listed in UNCONVERTED any more: remove it from the list")
+                end
+                local into = reaches_into_component(text)
+                if into and not reaching[name] then
+                    wrong(recipe, "reaches into a component folder by a relative path: a component's sources are built through the build graph, not a path into its folder")
+                elseif reaching[name] and not into then
+                    wrong(recipe, "no longer reaches into a component folder: remove it from REACHING")
+                end
+            elseif thin_wrapper(text) then
+                if unconverted[name] then
+                    wrong(recipe, "is a thin wrapper of its component now: remove it from UNCONVERTED")
+                end
+            elseif not unconverted[name] then
+                wrong(recipe, "has no url and is not a thin wrapper: it generates a project that includes one component and installs its targets, and holds no sources of its own")
             end
         end
     end

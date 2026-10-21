@@ -269,6 +269,13 @@ package("iphoneos-sdk")
         os.vrunv("xcrun", table.join({"lipo", "-create"}, archives, {"-output", path.join(arc, "libarclite_iphoneos.a")}))
     end)
 
+    on_fetch(function (package)
+        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        if stubs.installed(package:installdir(), package:version_str()) then
+            return {}
+        end
+    end)
+
     on_test(function (package)
         local developer = path.join(package:installdir(), "Developer.app", "Contents", "Developer")
         local folder = path.join(developer, "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. package:version_str() .. ".sdk")

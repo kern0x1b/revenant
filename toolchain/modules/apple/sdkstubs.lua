@@ -44,6 +44,11 @@ local function architectures(list)
     return found
 end
 
+function installed(installdir, version)
+    local sdk = path.join(installdir, "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. version .. ".sdk")
+    return os.isfile(path.join(installdir, "manifest.txt")) and os.isfile(path.join(sdk, "SDKSettings.json"))
+end
+
 function read(text)
     local doc = {install = install(text), exports = {}}
     doc.format = text:find("^%-%-%- !tapi%-tbd%-v3") and "v3" or "v4"

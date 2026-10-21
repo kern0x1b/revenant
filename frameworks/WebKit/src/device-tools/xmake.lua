@@ -1,3 +1,5 @@
+local DIR = path.absolute(os.scriptdir())
+
 package("webkit-device-tools")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/WebKit")
     set_description("The probes the WebKit port measures the phone with, docs/reference/webkit/tools.md: revmem, revpid, revtouch and raise-memory-limit, built for the phone and signed with the entitlements each needs")
@@ -36,14 +38,14 @@ package("webkit-device-tools")
         os.mkdir(package:installdir("bin"))
         for _, tool in ipairs(TOOLS) do
             local frameworks = tool == "revtouch" and {"-framework", "IOKit", "-framework", "CoreFoundation"} or {}
-            os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(package:scriptdir(), tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
+            os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(DIR, tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
         end
         os.mkdir(package:installdir("licenses"))
-        os.vcp(path.join(package:scriptdir(), "..", "..", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(DIR, "..", "..", "LICENSE"), package:installdir("licenses"))
         local signing = import("@addon.revenant.apple.signing", {anonymous = true})
         local ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid")
         for _, tool in ipairs(TOOLS) do
-            local entitlements = path.join(package:scriptdir(), "entitlements", tool .. ".xml")
+            local entitlements = path.join(DIR, "entitlements", tool .. ".xml")
             signing.sign(ldid, path.join(package:installdir("bin"), tool), {entitlements = os.isfile(entitlements) and entitlements or nil})
         end
     end)

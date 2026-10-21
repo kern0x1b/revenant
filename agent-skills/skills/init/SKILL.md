@@ -69,7 +69,7 @@ something the stack cannot do, say what fails and where, and ask again.
    this pin `xmake deb` refuses the runtime a Swift app carries.
 7. **Interface** [6] — UIKit in code, or SwiftUI (Swift only). There are no nibs or storyboards: the
    interface is built in code. Before recommending SwiftUI, check whether the pinned toolchain provides
-   SwiftUI as a package (`revenant@swiftui-uikit`, skill `swiftui` §1); if it does not, say so and recommend
+   SwiftUI to an app outside the checkout (skill `swiftui` §1: at this checkout it does not); if it does not, say so and recommend
    UIKit.
 8. **Combine** [6] — only with Swift and its whole runtime; recommend it only when the app's data flow
    needs it, and say first what Combine lacks (skill `combine` §3).
