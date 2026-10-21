@@ -21,7 +21,7 @@ local addon = {
 
 local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
 
-local UNCONVERTED = {"activitykit", "appintents", "createml", "musickit", "swift-data", "swift-embedded", "tipkit", "widgetkit"}
+local UNCONVERTED = {"activitykit", "createml", "musickit", "swift-data", "swift-embedded", "tipkit", "widgetkit"}
 
 local REACHING = {"ggml", "iphoneos-sdk", "libcxx", "swift-crypto", "swift-runtime", "swift-system"}
 
@@ -34,6 +34,9 @@ local function set_of(list)
 end
 
 local function thin_wrapper(text)
+    if text:find('@addon.revenant.apple.wrapper', 1, true) then
+        return true
+    end
     return text:find('includes(\\"', 1, true) ~= nil and text:find('"install"', 1, true) ~= nil
 end
 

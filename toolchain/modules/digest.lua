@@ -65,6 +65,8 @@ local RECIPES = {
      inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}},
     {folder = "packages/s/swiftui", variable = "swiftui_sources_digest",
      inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
+    {folder = "packages/a/appintents", variable = "appintents_sources_digest",
+     inputs = {"packages/a/appintents/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/AppIntents/*"}},
     {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
                "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}}
