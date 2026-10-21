@@ -269,14 +269,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float3x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>) -> simd.simd_float3x2
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x2
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>) -> simd.simd_float3x2 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3 {
 +  return simd_transpose(x)
 +}
@@ -294,14 +295,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float4x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>, _ col3: Swift.SIMD2<Swift.Float>) -> simd.simd_float4x2
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x2
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>, _ col3: Swift.SIMD2<Swift.Float>) -> simd.simd_float4x2 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4 {
 +  return simd_transpose(x)
 +}
@@ -319,14 +321,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float2x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>) -> simd.simd_float2x3
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x3
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>) -> simd.simd_float2x3 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2 {
 +  return simd_transpose(x)
 +}
@@ -349,11 +352,12 @@
  @available(macOS 10.10, iOS 8.0, tvOS 10.0, watchOS 3.0, *)
  @available(swift, deprecated: 4, message: "Use the .inverse property instead.")
 -public func matrix_invert(_ x: simd.simd_float3x3) -> simd.simd_float3x3
+-@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
+-public func matrix_determinant(_ x: simd.simd_float3x3) -> Swift.Float
 +public func matrix_invert(_ x: simd.simd_float3x3) -> simd.simd_float3x3 {
 +  return simd_inverse(x)
 +}
- @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
--public func matrix_determinant(_ x: simd.simd_float3x3) -> Swift.Float
++@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
 +public func matrix_determinant(_ x: simd.simd_float3x3) -> Swift.Float {
 +  return (x.columns.0.x * (x.columns.1.y * x.columns.2.z - x.columns.1.z * x.columns.2.y) - x.columns.1.x * (x.columns.0.y * x.columns.2.z - x.columns.0.z * x.columns.2.y) + x.columns.2.x * (x.columns.0.y * x.columns.1.z - x.columns.0.z * x.columns.1.y))
 +}
@@ -436,14 +440,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float3x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>) -> simd.simd_float3x4
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>, _ row3: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x4
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>) -> simd.simd_float3x4 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>, _ row3: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3 {
 +  return simd_transpose(x)
 +}
@@ -477,15 +482,14 @@
  @available(swift, deprecated: 4, renamed: "simd_float4x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>, _ col3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>, _ row3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float4x4) -> simd.float4x4
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>, _ col3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>, _ row3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float4x4) -> simd.float4x4
 +public func matrix_transpose(_ x: simd.simd_float4x4) -> simd.float4x4 {
 +  return simd_transpose(x)
 +}
@@ -513,21 +517,21 @@
 +}
  @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
 -public func matrix_determinant(_ x: simd.simd_double2x2) -> Swift.Double
--@available(swift, deprecated: 4, renamed: "simd_double2x2")
--public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
--public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
 +public func matrix_determinant(_ x: simd.simd_double2x2) -> Swift.Double {
 +  return (x.columns.0.x * x.columns.1.y - x.columns.1.x * x.columns.0.y)
 +}
-+@available(swift, deprecated: 4, renamed: "simd_double2x2")
+ @available(swift, deprecated: 4, renamed: "simd_double2x2")
+-public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
+-public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2 {
 +  return simd_transpose(x)
 +}
@@ -545,15 +549,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double3x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>) -> simd.simd_double3x2
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>) -> simd.simd_double3x2 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3
 +public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3 {
 +  return simd_transpose(x)
 +}
@@ -571,15 +574,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double4x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>, _ col3: Swift.SIMD2<Swift.Double>) -> simd.simd_double4x2
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>, _ col3: Swift.SIMD2<Swift.Double>) -> simd.simd_double4x2 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4
 +public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4 {
 +  return simd_transpose(x)
 +}
@@ -597,15 +599,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double2x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>) -> simd.simd_double2x3
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x3
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>) -> simd.simd_double2x3 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2
 +public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2 {
 +  return simd_transpose(x)
 +}
@@ -639,15 +640,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double3x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>, _ col2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>, _ col2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3
 +public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3 {
 +  return simd_transpose(x)
 +}
@@ -735,7 +735,7 @@
  public typealias double4x4 = simd.simd_double4x4
  extension simd.simd_double4x4 {
    @_transparent public init(_ scalar: Swift.Double) {
-@@ -3279,19 +3541,33 @@
+@@ -3279,182 +3541,309 @@
    }
  }
  @available(swift, deprecated: 4, renamed: "simd_double4x4(diagonal:)")
@@ -746,12 +746,11 @@
  @available(macOS 10.10, iOS 8.0, tvOS 10.0, watchOS 3.0, *)
  @available(swift, deprecated: 4, message: "Use the .inverse property instead.")
 -public func matrix_invert(_ x: simd.simd_double4x4) -> simd.simd_double4x4
--@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
--public func matrix_determinant(_ x: simd.simd_double4x4) -> Swift.Double
 +public func matrix_invert(_ x: simd.simd_double4x4) -> simd.simd_double4x4 {
 +  return simd_inverse(x)
 +}
-+@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
+ @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
+-public func matrix_determinant(_ x: simd.simd_double4x4) -> Swift.Double
 +public func matrix_determinant(_ x: simd.simd_double4x4) -> Swift.Double {
 +  return (x.columns.0.x * (x.columns.1.y * (x.columns.2.z * x.columns.3.w - x.columns.2.w * x.columns.3.z) - x.columns.2.y * (x.columns.1.z * x.columns.3.w - x.columns.1.w * x.columns.3.z) + x.columns.3.y * (x.columns.1.z * x.columns.2.w - x.columns.1.w * x.columns.2.z)) - x.columns.1.x * (x.columns.0.y * (x.columns.2.z * x.columns.3.w - x.columns.2.w * x.columns.3.z) - x.columns.2.y * (x.columns.0.z * x.columns.3.w - x.columns.0.w * x.columns.3.z) + x.columns.3.y * (x.columns.0.z * x.columns.2.w - x.columns.0.w * x.columns.2.z)) + x.columns.2.x * (x.columns.0.y * (x.columns.1.z * x.columns.3.w - x.columns.1.w * x.columns.3.z) - x.columns.1.y * (x.columns.0.z * x.columns.3.w - x.columns.0.w * x.columns.3.z) + x.columns.3.y * (x.columns.0.z * x.columns.1.w - x.columns.0.w * x.columns.1.z)) - x.columns.3.x * (x.columns.0.y * (x.columns.1.z * x.columns.2.w - x.columns.1.w * x.columns.2.z) - x.columns.1.y * (x.columns.0.z * x.columns.2.w - x.columns.0.w * x.columns.2.z) + x.columns.2.y * (x.columns.0.z * x.columns.1.w - x.columns.0.w * x.columns.1.z)))
 +}
@@ -776,9 +775,56 @@
 +}
  @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
  @_transparent public func sincos(_ x: simd.simd_double2) -> (sin: simd.simd_double2, cos: simd.simd_double2) {
-     
-@@ -3321,10 +3597,6 @@
-   return __tg_cosh(x)
+-    
+-    var sinResult = simd_double2()
+-    var cosResult = simd_double2()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sin(x[i])
++    cosResult[i] = Darwin.cos(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_double2) -> (sin: simd.simd_double2, cos: simd.simd_double2) {
+-    
+-    var sinResult = simd_double2()
+-    var cosResult = simd_double2()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * x[i]
++    sinResult[i] = Darwin.sin(angle)
++    cosResult[i] = Darwin.cos(angle)
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cos(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_double2) -> simd.simd_double2 {
@@ -786,10 +832,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_double2) -> simd.simd_double2 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acos(x[i])
++  }
++  return result
  }
-@@ -3341,10 +3613,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sin(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_double2) -> simd.simd_double2 {
@@ -797,10 +872,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_double2) -> simd.simd_double2 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asin(x[i])
++  }
++  return result
  }
-@@ -3361,10 +3629,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tan(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_double2) -> simd.simd_double2 {
@@ -808,10 +912,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double2) -> simd.simd_double2 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan(x[i])
++  }
++  return result
  }
-@@ -3385,10 +3649,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_double2) -> simd.simd_double2 {
@@ -819,10 +961,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_double2) -> simd.simd_double2 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1(x[i])
++  }
++  return result
  }
-@@ -3501,10 +3761,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1p(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfc(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrt(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.pow(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypot(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_double2, _ y: simd.simd_double2, _ z: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fma(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.round(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmod(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainder(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_double2, _ y: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafter(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_double2) -> simd.simd_long2 {
+@@ -3474,167 +3863,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_double3) -> (sin: simd.simd_double3, cos: simd.simd_double3) {
+-    
+-    var sinResult = simd_double3()
+-    var cosResult = simd_double3()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sin(x[i])
++    cosResult[i] = Darwin.cos(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_double3) -> (sin: simd.simd_double3, cos: simd.simd_double3) {
+-    
+-    var sinResult = simd_double3()
+-    var cosResult = simd_double3()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * x[i]
++    sinResult[i] = Darwin.sin(angle)
++    cosResult[i] = Darwin.cos(angle)
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cos(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_double3) -> simd.simd_double3 {
@@ -830,10 +1175,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_double3) -> simd.simd_double3 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acos(x[i])
++  }
++  return result
  }
-@@ -3521,10 +3777,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sin(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_double3) -> simd.simd_double3 {
@@ -841,10 +1215,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_double3) -> simd.simd_double3 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asin(x[i])
++  }
++  return result
  }
-@@ -3541,10 +3793,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tan(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_double3) -> simd.simd_double3 {
@@ -852,10 +1255,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double3) -> simd.simd_double3 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan(x[i])
++  }
++  return result
  }
-@@ -3565,10 +3813,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_double3) -> simd.simd_double3 {
@@ -863,10 +1304,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_double3) -> simd.simd_double3 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1(x[i])
++  }
++  return result
  }
-@@ -3681,10 +3925,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1p(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfc(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrt(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.pow(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypot(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_double3, _ y: simd.simd_double3, _ z: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fma(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.round(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmod(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainder(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_double3, _ y: simd.simd_double3) -> simd.simd_double3 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafter(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_double3) -> simd.simd_long3 {
+@@ -3654,167 +4156,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_double4) -> (sin: simd.simd_double4, cos: simd.simd_double4) {
+-    
+-    var sinResult = simd_double4()
+-    var cosResult = simd_double4()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sin(x[i])
++    cosResult[i] = Darwin.cos(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_double4) -> (sin: simd.simd_double4, cos: simd.simd_double4) {
+-    
+-    var sinResult = simd_double4()
+-    var cosResult = simd_double4()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * x[i]
++    sinResult[i] = Darwin.sin(angle)
++    cosResult[i] = Darwin.cos(angle)
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cos(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_double4) -> simd.simd_double4 {
@@ -874,10 +1518,40 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_double4) -> simd.simd_double4 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
+-}
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acos(x[i])
++  }
++  return result
++}
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosh(x[i])
++  }
++  return result
  }
-@@ -3701,10 +3941,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sin(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_double4) -> simd.simd_double4 {
@@ -885,10 +1559,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_double4) -> simd.simd_double4 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asin(x[i])
++  }
++  return result
  }
-@@ -3721,10 +3957,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tan(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_double4) -> simd.simd_double4 {
@@ -896,21 +1599,262 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double4) -> simd.simd_double4 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan(x[i])
++  }
++  return result
  }
-@@ -3743,10 +3975,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp(x[i])
++  }
++  return result
+ }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func exp2(_ x: simd.simd_double4) -> simd.simd_double4 {
-   return __tg_exp2(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func exp10(_ x: simd.simd_double4) -> simd.simd_double4 {
--  return __tg_exp10(x)
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func exp10(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_exp10(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_double4) -> simd.simd_double4 {
-@@ -3861,10 +4089,6 @@
-   return __tg_cosh(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1p(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfc(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrt(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.pow(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypot(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_double4, _ y: simd.simd_double4, _ z: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fma(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.round(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmod(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainder(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_double4, _ y: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafter(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_double4) -> simd.simd_long4 {
+@@ -3834,167 +4449,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_double8) -> (sin: simd.simd_double8, cos: simd.simd_double8) {
+-    
+-    var sinResult = simd_double8()
+-    var cosResult = simd_double8()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sin(x[i])
++    cosResult[i] = Darwin.cos(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_double8) -> (sin: simd.simd_double8, cos: simd.simd_double8) {
+-    
+-    var sinResult = simd_double8()
+-    var cosResult = simd_double8()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * x[i]
++    sinResult[i] = Darwin.sin(angle)
++    cosResult[i] = Darwin.cos(angle)
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cos(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_double8) -> simd.simd_double8 {
@@ -918,10 +1862,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_double8) -> simd.simd_double8 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acos(x[i])
++  }
++  return result
  }
-@@ -3881,10 +4105,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sin(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_double8) -> simd.simd_double8 {
@@ -929,10 +1902,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_double8) -> simd.simd_double8 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asin(x[i])
++  }
++  return result
  }
-@@ -3901,10 +4121,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tan(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanh(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_double8) -> simd.simd_double8 {
@@ -940,10 +1942,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double8) -> simd.simd_double8 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan(x[i])
++  }
++  return result
  }
-@@ -3925,10 +4141,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanh(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_double8) -> simd.simd_double8 {
@@ -951,10 +1991,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_double8) -> simd.simd_double8 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1(x[i])
++  }
++  return result
  }
-@@ -4041,10 +4253,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1p(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgamma(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfc(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrt(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.pow(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypot(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_double8, _ y: simd.simd_double8, _ z: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fma(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.round(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmod(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainder(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_double8, _ y: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafter(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_double8) -> simd.simd_long8 {
+@@ -4014,167 +4742,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_float2) -> (sin: simd.simd_float2, cos: simd.simd_float2) {
+-    
+-    var sinResult = simd_float2()
+-    var cosResult = simd_float2()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sinf(x[i])
++    cosResult[i] = Darwin.cosf(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_float2) -> (sin: simd.simd_float2, cos: simd.simd_float2) {
+-    
+-    var sinResult = simd_float2()
+-    var cosResult = simd_float2()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * Double(x[i])
++    sinResult[i] = Float(Darwin.sin(angle))
++    cosResult[i] = Float(Darwin.cos(angle))
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.coshf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_float2) -> simd.simd_float2 {
@@ -962,21 +2205,79 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_float2) -> simd.simd_float2 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosf(x[i])
++  }
++  return result
  }
-@@ -4059,10 +4267,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acoshf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinf(x[i])
++  }
++  return result
+ }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func sinh(_ x: simd.simd_float2) -> simd.simd_float2 {
-   return __tg_sinh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func sinpi(_ x: simd.simd_float2) -> simd.simd_float2 {
--  return __tg_sinpi(x)
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func sinpi(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_sinpi(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_float2) -> simd.simd_float2 {
-@@ -4081,10 +4285,6 @@
-   return __tg_tanh(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float2) -> simd.simd_float2 {
@@ -984,10 +2285,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_float2) -> simd.simd_float2 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanf(x[i])
++  }
++  return result
  }
-@@ -4105,10 +4305,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2f(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2f(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_float2) -> simd.simd_float2 {
@@ -995,10 +2334,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_float2) -> simd.simd_float2 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1f(x[i])
++  }
++  return result
  }
-@@ -4221,10 +4417,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.logf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1pf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erff(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfcf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrtf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.powf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypotf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_float2, _ y: simd.simd_float2, _ z: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmaf(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.roundf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmodf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainderf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_float2, _ y: simd.simd_float2) -> simd.simd_float2 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafterf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_float2) -> simd.simd_int2 {
+@@ -4194,167 +5035,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_float3) -> (sin: simd.simd_float3, cos: simd.simd_float3) {
+-    
+-    var sinResult = simd_float3()
+-    var cosResult = simd_float3()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sinf(x[i])
++    cosResult[i] = Darwin.cosf(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_float3) -> (sin: simd.simd_float3, cos: simd.simd_float3) {
+-    
+-    var sinResult = simd_float3()
+-    var cosResult = simd_float3()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * Double(x[i])
++    sinResult[i] = Float(Darwin.sin(angle))
++    cosResult[i] = Float(Darwin.cos(angle))
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.coshf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_float3) -> simd.simd_float3 {
@@ -1006,10 +2548,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_float3) -> simd.simd_float3 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosf(x[i])
++  }
++  return result
  }
-@@ -4241,10 +4433,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acoshf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_float3) -> simd.simd_float3 {
@@ -1017,10 +2588,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_float3) -> simd.simd_float3 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinf(x[i])
++  }
++  return result
  }
-@@ -4261,10 +4449,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float3) -> simd.simd_float3 {
@@ -1028,10 +2628,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_float3) -> simd.simd_float3 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanf(x[i])
++  }
++  return result
  }
-@@ -4285,10 +4469,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2f(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2f(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_float3) -> simd.simd_float3 {
@@ -1039,10 +2677,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_float3) -> simd.simd_float3 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1f(x[i])
++  }
++  return result
  }
-@@ -4401,10 +4581,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.logf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1pf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erff(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfcf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrtf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.powf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypotf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_float3, _ y: simd.simd_float3, _ z: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmaf(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.roundf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmodf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainderf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_float3, _ y: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafterf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_float3) -> simd.simd_int3 {
+@@ -4374,167 +5328,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_float4) -> (sin: simd.simd_float4, cos: simd.simd_float4) {
+-    
+-    var sinResult = simd_float4()
+-    var cosResult = simd_float4()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sinf(x[i])
++    cosResult[i] = Darwin.cosf(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_float4) -> (sin: simd.simd_float4, cos: simd.simd_float4) {
+-    
+-    var sinResult = simd_float4()
+-    var cosResult = simd_float4()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * Double(x[i])
++    sinResult[i] = Float(Darwin.sin(angle))
++    cosResult[i] = Float(Darwin.cos(angle))
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.coshf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_float4) -> simd.simd_float4 {
@@ -1050,21 +2891,79 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_float4) -> simd.simd_float4 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosf(x[i])
++  }
++  return result
  }
-@@ -4419,10 +4595,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acoshf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinf(x[i])
++  }
++  return result
+ }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func sinh(_ x: simd.simd_float4) -> simd.simd_float4 {
-   return __tg_sinh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func sinpi(_ x: simd.simd_float4) -> simd.simd_float4 {
--  return __tg_sinpi(x)
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func sinpi(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_sinpi(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_float4) -> simd.simd_float4 {
-@@ -4441,10 +4613,6 @@
-   return __tg_tanh(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float4) -> simd.simd_float4 {
@@ -1072,10 +2971,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_float4) -> simd.simd_float4 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanf(x[i])
++  }
++  return result
  }
-@@ -4465,10 +4633,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2f(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2f(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_float4) -> simd.simd_float4 {
@@ -1083,21 +3020,253 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_float4) -> simd.simd_float4 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1f(x[i])
++  }
++  return result
  }
-@@ -4579,10 +4743,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.logf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1pf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erff(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfcf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrtf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.powf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypotf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_float4, _ y: simd.simd_float4, _ z: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmaf(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.roundf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmodf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainderf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_float4, _ y: simd.simd_float4) -> simd.simd_float4 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafterf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_float4) -> simd.simd_int4 {
+@@ -4554,167 +5621,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_float8) -> (sin: simd.simd_float8, cos: simd.simd_float8) {
+-    
+-    var sinResult = simd_float8()
+-    var cosResult = simd_float8()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sinf(x[i])
++    cosResult[i] = Darwin.cosf(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_float8) -> (sin: simd.simd_float8, cos: simd.simd_float8) {
+-    
+-    var sinResult = simd_float8()
+-    var cosResult = simd_float8()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * Double(x[i])
++    sinResult[i] = Float(Darwin.sin(angle))
++    cosResult[i] = Float(Darwin.cos(angle))
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosf(x[i])
++  }
++  return result
+ }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func cosh(_ x: simd.simd_float8) -> simd.simd_float8 {
-   return __tg_cosh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func cospi(_ x: simd.simd_float8) -> simd.simd_float8 {
--  return __tg_cospi(x)
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.coshf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func cospi(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_cospi(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_float8) -> simd.simd_float8 {
-@@ -4601,10 +4761,6 @@
-   return __tg_sinh(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acoshf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_float8) -> simd.simd_float8 {
@@ -1105,10 +3274,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_float8) -> simd.simd_float8 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinf(x[i])
++  }
++  return result
  }
-@@ -4621,10 +4777,6 @@
-   return __tg_tanh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tanh(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float8) -> simd.simd_float8 {
@@ -1116,10 +3314,48 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_float8) -> simd.simd_float8 {
-   return __tg_atan(x)
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanf(x[i])
++  }
++  return result
  }
-@@ -4645,10 +4797,6 @@
-   return __tg_exp2(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2f(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_exp2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2f(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func exp10(_ x: simd.simd_float8) -> simd.simd_float8 {
@@ -1127,10 +3363,213 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func expm1(_ x: simd.simd_float8) -> simd.simd_float8 {
-   return __tg_expm1(x)
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1f(x[i])
++  }
++  return result
  }
-@@ -4761,10 +4909,6 @@
-   return __tg_cosh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.logf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1pf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erff(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfcf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrtf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.powf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypotf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_float8, _ y: simd.simd_float8, _ z: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmaf(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.roundf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmodf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainderf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_float8, _ y: simd.simd_float8) -> simd.simd_float8 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafterf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_float8) -> simd.simd_int8 {
+@@ -4734,167 +5914,280 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincos(_ x: simd.simd_float16) -> (sin: simd.simd_float16, cos: simd.simd_float16) {
+-    
+-    var sinResult = simd_float16()
+-    var cosResult = simd_float16()
+-    
+-    __tg_sincos(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    sinResult[i] = Darwin.sinf(x[i])
++    cosResult[i] = Darwin.cosf(x[i])
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ @_transparent public func sincospi(_ x: simd.simd_float16) -> (sin: simd.simd_float16, cos: simd.simd_float16) {
+-    
+-    var sinResult = simd_float16()
+-    var cosResult = simd_float16()
+-    
+-    __tg_sincospi(x, &sinResult, &cosResult)
+-    
+-    return(sinResult, cosResult)
++  var sinResult = x
++  var cosResult = x
++  for i in x.indices {
++    let angle = Double.pi * Double(x[i])
++    sinResult[i] = Float(Darwin.sin(angle))
++    cosResult[i] = Float(Darwin.cos(angle))
++  }
++  return(sinResult, cosResult)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cos(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_cos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cosf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cosh(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_cosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.coshf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func cospi(_ x: simd.simd_float16) -> simd.simd_float16 {
@@ -1138,10 +3577,39 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func acos(_ x: simd.simd_float16) -> simd.simd_float16 {
-   return __tg_acos(x)
+-  return __tg_acos(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acosf(x[i])
++  }
++  return result
  }
-@@ -4781,10 +4925,6 @@
-   return __tg_sinh(x)
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func acosh(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_acosh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.acoshf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sin(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_sin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_sinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.sinhf(x[i])
++  }
++  return result
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_float16) -> simd.simd_float16 {
@@ -1149,31 +3617,249 @@
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func asin(_ x: simd.simd_float16) -> simd.simd_float16 {
-   return __tg_asin(x)
+-  return __tg_asin(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinf(x[i])
++  }
++  return result
  }
-@@ -4799,10 +4939,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asinh(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_asinh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.asinhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tan(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_tan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanf(x[i])
++  }
++  return result
+ }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func tanh(_ x: simd.simd_float16) -> simd.simd_float16 {
-   return __tg_tanh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-  return __tg_tanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float16) -> simd.simd_float16 {
 -  return __tg_tanpi(x)
- }
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func atan(_ x: simd.simd_float16) -> simd.simd_float16 {
-@@ -4825,10 +4961,6 @@
-   return __tg_exp2(x)
- }
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func exp10(_ x: simd.simd_float16) -> simd.simd_float16 {
--  return __tg_exp10(x)
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func expm1(_ x: simd.simd_float16) -> simd.simd_float16 {
-   return __tg_expm1(x)
+ @_transparent public func atan(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_atan(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanf(x[i])
++  }
++  return result
  }
-@@ -4930,7 +5062,11 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atanh(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_atanh(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atanhf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan2(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_atan2(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.atan2f(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_exp(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_exp2(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func exp10(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_exp10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.exp2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func expm1(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_expm1(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.expm1f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_log(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.logf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log2(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_log2(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log2f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log10(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_log10(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log10f(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func log1p(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_log1p(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.log1pf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func lgamma(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_lgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.lgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func tgamma(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_tgamma(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.tgammaf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erf(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_erf(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erff(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func erfc(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_erfc(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.erfcf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func cbrt(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_cbrt(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.cbrtf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func pow(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_pow(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.powf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func hypot(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_hypot(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.hypotf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fma(_ x: simd.simd_float16, _ y: simd.simd_float16, _ z: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_fma(x, y, z)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmaf(x[i], y[i], z[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func round(_ x: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_round(x)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.roundf(x[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func fmod(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_fmod(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.fmodf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func remainder(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_remainder(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.remainderf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func nextafter(_ x: simd.simd_float16, _ y: simd.simd_float16) -> simd.simd_float16 {
+-  return __tg_nextafter(x, y)
++  var result = x
++  for i in result.indices {
++    result[i] = Darwin.nextafterf(x[i], y[i])
++  }
++  return result
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func isfinite(_ x: simd.simd_float16) -> simd.simd_int16 {
+@@ -4930,7 +6223,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half2) -> simd.simd_half2 {
@@ -1186,7 +3872,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half2) -> simd.simd_half2 {
-@@ -4970,7 +5106,11 @@
+@@ -4970,7 +6267,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half3) -> simd.simd_half3 {
@@ -1199,7 +3885,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half3) -> simd.simd_half3 {
-@@ -5010,7 +5150,11 @@
+@@ -5010,7 +6311,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half4) -> simd.simd_half4 {
@@ -1212,7 +3898,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half4) -> simd.simd_half4 {
-@@ -5050,7 +5194,11 @@
+@@ -5050,7 +6355,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half8) -> simd.simd_half8 {
@@ -1225,7 +3911,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half8) -> simd.simd_half8 {
-@@ -5090,7 +5238,11 @@
+@@ -5090,7 +6399,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half16) -> simd.simd_half16 {
@@ -1238,7 +3924,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half16) -> simd.simd_half16 {
-@@ -5130,7 +5282,11 @@
+@@ -5130,7 +6443,11 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func sqrt(_ x: simd.simd_half32) -> simd.simd_half32 {
@@ -1251,7 +3937,7 @@
  }
  @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
  @_transparent public func abs(_ x: simd.simd_half32) -> simd.simd_half32 {
-@@ -5214,14 +5370,18 @@
+@@ -5214,14 +6531,18 @@
    }
  }
  extension simd.simd_float3x3 {
@@ -1273,7 +3959,7 @@
    }
  }
  extension simd.simd_quatf : Swift.Equatable {
-@@ -5231,9 +5391,15 @@
+@@ -5231,9 +6552,15 @@
  }
  @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
  extension simd.simd_quatf : Swift.Hashable {
@@ -1291,19 +3977,15 @@
    }
  }
  extension simd.simd_quatf : @unchecked Swift.Sendable {
-@@ -5281,11 +5447,27 @@
-   @_transparent public static func /= (lhs: inout simd.simd_quatf, rhs: Swift.Float) {
+@@ -5282,10 +6609,23 @@
      lhs = lhs / rhs
    }
-+}
-+// revenant: `log` names two functions here - the one the Darwin overlay generates from
-+// tgmath.swift and the one <math.h> declares - and a scalar argument cannot choose between them.
-+// The overlay's own __tg_log is unambiguous.
-+@inline(__always) internal func __revenant_natural_log(_ x: Double) -> Double {
-+  return __tg_log(SIMD2<Double>(x, 0)).x
  }
++@inline(__always) internal func __revenant_natural_log(_ x: Double) -> Double {
++  return Darwin.log(x)
++}
 +@inline(__always) internal func __revenant_natural_log(_ x: Float) -> Float {
-+  return __tg_log(SIMD2<Float>(x, 0)).x
++  return Darwin.logf(x)
 +}
  @_transparent public func dot(_ lhs: simd.simd_quatf, _ rhs: simd.simd_quatf) -> Swift.Float {
    return simd_dot(lhs, rhs)
@@ -1320,7 +4002,7 @@
  @_transparent public func exp(_ q: simd.simd_quatf) -> simd.simd_quatf {
    return __tg_exp(q)
  }
-@@ -5351,14 +5533,18 @@
+@@ -5351,14 +6691,18 @@
    }
  }
  extension simd.simd_double3x3 {
@@ -1342,7 +4024,7 @@
    }
  }
  extension simd.simd_quatd : Swift.Equatable {
-@@ -5368,9 +5554,15 @@
+@@ -5368,9 +6712,15 @@
  }
  @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
  extension simd.simd_quatd : Swift.Hashable {
@@ -1360,7 +4042,7 @@
    }
  }
  extension simd.simd_quatd : @unchecked Swift.Sendable {
-@@ -5422,7 +5614,14 @@
+@@ -5422,7 +6772,14 @@
  @_transparent public func dot(_ lhs: simd.simd_quatd, _ rhs: simd.simd_quatd) -> Swift.Double {
    return simd_dot(lhs, rhs)
  }
