@@ -119,7 +119,7 @@ there: `AsyncPublisher`, `AsyncPublisher.Iterator`, `AsyncThrowingPublisher` and
 
 ## The host differential
 
-`.agent-work/runs/combine/differential` in this branch is the same `Harness.swift`,
+The differential run of this branch, which is not kept in the repository, is the same `Harness.swift`,
 `Table.swift` and `main.swift` compiled twice, once against the host's own `Combine` and
 once against the module this port builds for the host, and the two runs compared line for
 line. 40 cases over the four groups the work is grouped by: the merge and combineLatest
@@ -196,7 +196,7 @@ schedulers, KVO) is measured on the device instead, because the host copy cannot
 
 ## The armv7 probe
 
-`.agent-work/runs/combine/port` is a port that writes `import Combine` and calls the layer's
+A port, not kept in the repository, writes `import Combine` and calls the layer's
 surface: the merge family, the combineLatest family, `collect(byTime:)` and
 `collect(_:options:)`, the equality and hashing, `Publishers.MapError`'s labelled
 initializer, and the `Optional` and `Result` publishers under Apple's own names. It is

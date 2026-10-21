@@ -2,7 +2,7 @@
 
 Every line here is the output of a command run on 2026-09-28 in
 a scratch worktree, against the packages as they are in the shared
-store. The probe that reads them is `.agent-work/probe/` in the same worktree.
+store. The probe that reads them ran in the same worktree and is not kept in the repository.
 
 The toolchain, resolved once: `revenant@swift 6.4.0` at
 `~/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
@@ -57,7 +57,7 @@ They are not ours to add. The corpus assigns both to `swift-foundation`
 swift-foundation`, `registry = swiftlang/swift-foundation:Sources/FoundationEssentials/Predicate/
 Predicate.swift` and `.../FoundationInternationalization/String/SortDescriptor.swift`), and
 the swift-foundation package - the toolchain package that builds them, work in progress in
-`.agent-work/worktrees/api-foundation-swift` - is not in the shared store.
+another worktree - is not in the shared store.
 
 Eight rows depend on those two types and are therefore not in this delivery:
 `FetchDescriptor.init(predicate:sortBy:)`, `FetchDescriptor.predicate`, `FetchDescriptor.sortBy`,

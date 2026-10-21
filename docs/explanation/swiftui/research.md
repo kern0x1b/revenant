@@ -2,7 +2,7 @@
 
 Date: 2026-09-17. Paths in the text are from the repository root.
 Everything marked "verified" was run on one machine (macOS, the emulator, an iPhone 4S and an iPad 2 on iOS 6.1.3).
-The raw output of the firmware-cache analysis (`a/*`) does not go into the repository: it contains symbol lists from
+The raw output of the firmware-cache analysis does not go into the repository: it contains symbol lists from
 Apple's binaries. Estimates are marked separately.
 
 ## 1. Verdict
@@ -21,7 +21,7 @@ The recommended first step is section 8.
 
 ### 2.1 What it consists of (facts from the firmware caches, the toolchain module `apple.dyld`)
 
-Verified on the local caches in `~/.revenant/dyld` (scripts `a/*.lua`, output `a/*.txt`).
+Verified on the local caches in `~/.revenant/dyld` (the analysis scripts and their output are not kept in the repository).
 
 - **SwiftUI has never had an armv7 slice.** None of the 32-bit caches, up to the last 32-bit release 10.3.4, contains
   the `SwiftUI` or `Combine` images. In 16.0 and 18.0 the cache is arm64e only (26 caches). SwiftUI appeared in iOS 13,
@@ -32,7 +32,7 @@ Verified on the local caches in `~/.revenant/dyld` (scripts `a/*.lua`, output `a
   `/usr/lib/swift/*`. In 16.0 it is the same, without a separate SwiftUICore.
 - **The transitive closure of dependencies:** 546 images, 616 MB `__TEXT`. Of these, **407 images and 402 MB** are
   missing from 6.1.3 (for 16.0, 444 images, of which 312 are missing).
-- **Imports.** SwiftUI and SwiftUICore import 11,653 symbols, of which **10,907 are missing from 6.1.3** (`a/absent-*`).
+- **Imports.** SwiftUI and SwiftUICore import 11,653 symbols, of which **10,907 are missing from 6.1.3**.
   Even counting only the ordinary frameworks: 610 of 720 from UIKitCore (`UIAlertController`, `UIAction`,
   `NSCollectionLayout*`, `UIAccessibilityCustomRotor`...), 94 of 156 from CoreText (private
   `CTFontDescriptorCreateWithTextStyleAndAttributes`, `CTFontGetLanguageAwareOutsets`...), 45 of 72 from libobjc
@@ -126,13 +126,13 @@ Crashes (one per run; each was skipped and the run went on):
 - 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (the JSONDecoder path): a trap in the overlay. Passed to the Swift
   overlay project.
 - 5 × `Timer.tolerance` → the weak `CFRunLoopTimerSetTolerance` (iOS 7) is NULL. Passed to the backports project, which
-  **already implements it** (`NSTimer+Tolerance.m` in the backports); the run must be repeated after it is merged.
+  **already implements it** (`frameworks/Backports/src/Foundation/NSTimer+Tolerance.m`); the run must be repeated after it is merged.
 
 The current results of the same tests against Combine are in `docs/reference/combine/test-results.md`.
 
 ## 4. B2. OpenSwiftUI and OpenAttributeGraph: state
 
-Verified by reading the sources (clones `src/OpenSwiftUI` cc24a30 and `src/OpenAttributeGraph` 1d8e762, both MIT).
+Verified by reading the sources (the upstream OpenSwiftUI at cc24a30 and OpenAttributeGraph at 1d8e762, both MIT).
 
 - **The package's platform is iOS 18** (`Package.swift:900-907`); its public availability floor drops to iOS 13 only
   through macros. It requires swift-tools 6.3, swift-syntax and macros.
@@ -152,7 +152,7 @@ Verified by reading the sources (clones `src/OpenSwiftUI` cc24a30 and `src/OpenA
   `dyld_program_sdk_at_least`, SF Symbols, and 63 `@_silgen_name` into private CoreText. For iOS 6, the integration layer
   would have to be rewritten entirely.
 - **What is useful in it.** The structure and names of the real SwiftUI's internal mechanisms (ViewGraph, DisplayList,
-  DynamicProperty, Semantics), 61 UI snapshot tests, and the document `Docs/SwiftUICompatibilityGaps.md`. As a reference:
+  DynamicProperty, Semantics), 61 UI snapshot tests, and OpenSwiftUI's document `Docs/SwiftUICompatibilityGaps.md`. As a reference:
   yes. As the base for iOS 6: no.
 
 ## 5. B3. SwiftUI: architecture and prototype
@@ -190,7 +190,7 @@ Layers:
 ### 5.2 What is already done
 
 The module `frameworks/SwiftUI/src/` (the SwiftUI project; the Swift module is still called `SwiftUI`) is about 14,000
-lines. The full list of what is supported, ignored and missing is kept in `ledger.md`, and it is checked against the build
+lines. The full list of what is supported, ignored and missing is kept in [the ledger](../../reference/swiftui/ledger.md), and it is checked against the build
 (`coverage.lua --check`). The count as of 19.09, for the SwiftUI interface of SDK 16.4, over the part Apple declares
 available on iOS (the slice comes from `tools/apple_names.lua modifiers`): **490 of 520 types, 289 of 289 `View`
 modifiers**, of which 188 work, 101 are declared and ignored (each writes a line to the log and to
@@ -221,7 +221,7 @@ conditional view, and a `NavigationLink` to the detail screen.
 It is built by the target `SwiftUIDemo` into `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`). The toolchain's import check
 against 6.0 and 6.1.3 gives 0 strong missing.
 
-A run in iLEmu (iPod4,1, iOS 6.0, launched through SpringBoard, touches from a scenario, run `app10` of the `run-app.sh` of
+A run in iLEmu (iPod4,1, iOS 6.0, launched through SpringBoard, touches from a scenario, run `app10` of the run script of
 the time):
 
 | list | switch | details | favourites |
@@ -271,7 +271,7 @@ blind is that a comparison by name does not distinguish overloads, and accepts `
 the names did not show: the `.updating` of a gesture did not call the body (gestures were matched by the closure's type
 through `Mirror`), `animatableData` of our own shapes, effects and layouts was read nowhere, and `GeometryEffect` was
 recorded as "ignored" with a wrong reason (`CALayer.transform` exists since iOS 2). All three are fixed. The rest of the list
-is the work queue (`gaps.txt`, which `tools/api_surface.lua` writes).
+is the work queue (the generated `gaps.txt`, which `tools/api_surface.lua` writes).
 
 ### Techniques from related systems (review of 19.09)
 
@@ -351,8 +351,7 @@ For comparison: the prototype itself (half a day of work) covered "a screen with
 1. **Pin OpenCombine as a toolchain component.** It already builds and passes its tests. It needs a package recipe
    (`revenant@opencombine`), a run after the backport of `CFRunLoopTimerSetTolerance` and the Swift overlay fixes are merged,
    and a decision on the upstream PR about `Stride.magnitude` on 32-bit.
-2. **Continue SwiftUI from the prototype**, not from OpenSwiftUI: move `swiftui-study/SwiftUI` into a separate repository or
-   package, add snapshot tests in iLEmu (a reference PNG for each screen), and bring the "simple screens" level to completion.
+2. **Continue SwiftUI from the prototype** in `frameworks/SwiftUI`, not from OpenSwiftUI: add snapshot tests in iLEmu (a reference PNG for each screen), and bring the "simple screens" level to completion.
 3. **Close direction A**, and do not return to the real SwiftUI; from its analysis take only the map of the device
    (AttributeGraph as the graph engine, DisplayList as the drawing layer), which the prototype's architecture already reproduces.
 
@@ -373,8 +372,4 @@ For comparison: the prototype itself (half a day of work) covered "a screen with
 ./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots      # the demo's scenarios in the emulator, through SpringBoard
 ```
 
-The firmware analysis of section 2 used the scripts `a/*.lua`, which are not in the repository, as in this line:
-
-```
-xmake l a/closure.lua 18.0 6.1.3 /System/Library/Frameworks/SwiftUI.framework/SwiftUI
-```
+The firmware analysis of section 2 was run with scripts that are not kept in the repository.
