@@ -18,7 +18,7 @@ when they were taken; `main` itself is `db4dd46b64dcaa4c636c8360b5485c18828140d8
 repository that can change.
 
 They are here because a `.mlmodel` is a protobuf over this schema, and a port that writes one has to
-write *this* schema, not a paraphrase of it. `Protobuf/Codec.swift` implements the **wire format**
+write *this* schema, not a paraphrase of it. `CoreML/Codec.swift` implements the **wire format**
 and nothing else; every field number the model messages use is read out of these files, and the ones
 the model writer emits are named after them.
 

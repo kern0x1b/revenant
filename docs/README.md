@@ -105,8 +105,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [AuthenticationServices: errors](reference/backports/AuthenticationServices/Errors.md) | the error structs, measured |
 | [CloudKit: CKError](reference/backports/CloudKit/CKError.md) | `CKError`, measured |
 | [CloudKit: CKRecord](reference/backports/CloudKit/CKRecord.md) | `CKRecord`, not yet visible to Swift on armv7 and iOS 6.1.3 |
-| [CreateML](reference/backports/CreateML/README.md) | CreateML and CreateMLComponents on the port's armv7 releases |
-| [CreateML: files README](reference/backports/CreateML/files-README.md) | a second copy of the CreateML overview, with the protobuf codec section; the two differ |
+| [CreateML](reference/backports/CreateML/README.md) | CreateML and CreateMLComponents on the port's armv7 releases: what is there, what is not, and the protobuf codec |
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
