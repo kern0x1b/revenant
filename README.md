@@ -1,16 +1,17 @@
 # revenant
 
 The platform for running current iOS software on old iOS releases (iOS 26.2 surface on iOS 6.1.3, iPhone 4S,
-armv7), in one repository. Every component has the same layout (`src/`, `tests/`, `examples/`, `tools/`, `patches/`,
-a one-screen `README.md`), all documentation is in `docs/`, and `AGENTS.md` at the top is the only agent file; the
-layout is spelled out there:
+armv7), in one repository. Every component has the same layout (`xmake.lua`, a one-screen `README.md`, and its `src/`,
+`include/`, `tests/`, `examples/` and `tools/` as it needs them), all documentation is in `docs/`, and `AGENTS.md` at the
+top is the only agent file; the layout is spelled out there:
 
 | Folder | What it is |
 | --- | --- |
-| `toolchain/` | legacy Apple platforms for xmake: toolchains, SDKs and packages, the backports, the gate |
+| `toolchain/` | the xmake addon `revenant`: the `apple-ios` toolchain, the rules and plugins that build an app, and the sources of the tools they use |
 | `emulator/` | Revenant's emulator: boots a firmware's own userland on macOS arm64 |
 | `frameworks/SwiftUI/` | SwiftUI for iOS 6, implemented on UIKit for armv7 (module `SwiftUI`) |
 | `frameworks/Combine/` | Combine down to iOS 6, armv7 (module `Combine`) |
+| `frameworks/Backports/` | newer Apple frameworks backported to iOS 6: Objective-C and Swift libraries, each built by its target |
 | `recompiler/` | static recompiler of arm64 iOS applications into armv7 binaries for iOS 6 |
 | `agent-skills/` | skills for coding agents that build modern apps for old iOS |
 | `frameworks/WebKit/` | a current WebKit built for armv7 (the engine is `packages/w/webkit`: upstream at a commit plus the port's patches) |
@@ -21,6 +22,21 @@ an Apple framework is named after that framework (`frameworks/SwiftUI`, `framewo
 
 Applications built on the platform (telegram-build, cydia, soundcloud-fix, kindle-sync-fix) are not members: they
 consume the toolchain as an xmake repository.
+
+## Build and test
+
+On macOS arm64 with Xcode 26.6 selected, as CI selects it (`.github/workflows/check.yml`):
+
+```
+REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64 ./xmakew f -P . -y --emulator_vulkan=n
+./xmakew test -P .
+```
+
+The two variables make the configure take LLVM, Swift and ld64 from their releases, as CI does. Without them the
+configure builds those packages from source, which takes hours. `./xmakew test -P .` runs every host test in about two
+minutes once the package store is warm;
+`./xmakew test -P . 'repository/*'` runs the layout and comment checks in seconds. The suites and what runs where:
+[the toolchain's tests](docs/reference/toolchain/tests.md); the prebuilt packages: [docs/guides/prebuilt.md](docs/guides/prebuilt.md).
 
 ## One xmake project
 
