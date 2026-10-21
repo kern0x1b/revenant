@@ -62,10 +62,13 @@ function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
 
+local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "skeleton.lua", "sdk.lua"}
+
 function generator_digest()
     local digests = {}
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "*.lua"))) do
-        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
+    for _, name in ipairs(GENERATOR) do
+        local file = path.join(os.scriptdir(), name)
+        table.insert(digests, name .. "=" .. hash.sha256(file))
     end
     table.sort(digests)
     return string.sub(hash.strhash128(table.concat(digests, ";")), 1, 16)

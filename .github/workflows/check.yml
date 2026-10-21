@@ -111,7 +111,7 @@ jobs:
         id: generated
         with:
           path: build/generated/backports
-          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
           restore-keys: |
             backports-generated-${{ runner.os }}-
 
@@ -145,6 +145,14 @@ jobs:
           ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
           echo "stage configure ends $(date -u +%H:%M:%S)"
 
+      - name: Extract the facts of every framework
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 10
+        run: |
+          echo "stage facts starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/generate.lua
+          echo "stage facts ends $(date -u +%H:%M:%S)"
+
       - name: Show the package logs when the configure failed
         if: failure() && steps.component.outputs.present == 'true'
         run: |
@@ -166,7 +174,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: build/generated/backports
-          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
 
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
@@ -194,29 +202,22 @@ jobs:
           path: build/iphoneos/armv7/release/lib*.dylib
           if-no-files-found: error
 
-      - name: Check every source key against the built libraries
+      - name: Check the exports and count the implemented members
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 4
+        timeout-minutes: 10
         run: |
           mkdir -p "$RUNNER_TEMP/report"
+          status=0
           echo "stage exports starts $(date -u +%H:%M:%S)"
-          ./xmakew l -P . frameworks/Backports/tools/exports.lua > "$RUNNER_TEMP/report/exports.txt" 2>&1
+          ./xmakew l -P . frameworks/Backports/tools/exports.lua > "$RUNNER_TEMP/report/run.txt" 2>&1 || status=$?
           echo "stage exports ends $(date -u +%H:%M:%S)"
-          cat "$RUNNER_TEMP/report/exports.txt" | head -40
-          cat "$RUNNER_TEMP/report/exports.txt" >> "$GITHUB_STEP_SUMMARY"
-          cp build/generated/backports/exports.txt "$RUNNER_TEMP/report/exports-detail.txt"
-
-      - name: Count the implemented members per framework
-        if: steps.component.outputs.present == 'true'
-        timeout-minutes: 6
-        run: |
-          mkdir -p "$RUNNER_TEMP/report"
-          echo "stage status starts $(date -u +%H:%M:%S)"
-          ./xmakew l -P . frameworks/Backports/tools/status.lua > "$RUNNER_TEMP/report/status.txt" 2>&1
-          echo "stage status ends $(date -u +%H:%M:%S)"
+          cat "$RUNNER_TEMP/report/run.txt"
+          cat "$RUNNER_TEMP/report/run.txt" >> "$GITHUB_STEP_SUMMARY"
+          cp build/generated/backports/exports.txt build/generated/backports/status.txt "$RUNNER_TEMP/report/"
           echo "Top 10 frameworks by implemented members:" >> "$GITHUB_STEP_SUMMARY"
-          grep -v '^total' "$RUNNER_TEMP/report/status.txt" | sort -k3,3nr | head -10 >> "$GITHUB_STEP_SUMMARY"
-          grep '^total' "$RUNNER_TEMP/report/status.txt" >> "$GITHUB_STEP_SUMMARY" || true
+          grep -v '^total' build/generated/backports/status.txt | sort -k3,3nr | head -10 >> "$GITHUB_STEP_SUMMARY"
+          grep '^total' build/generated/backports/status.txt >> "$GITHUB_STEP_SUMMARY" || true
+          exit "$status"
 
       - uses: actions/upload-artifact@v4
         if: always() && steps.component.outputs.present == 'true'
