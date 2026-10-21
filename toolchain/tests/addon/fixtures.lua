@@ -77,31 +77,42 @@ function refusal(action)
     return errors
 end
 
-function repository(folder)
-    local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
-    local copy = path.join(folder, "revenant")
-    os.mkdir(copy)
-    local sources = {{root, {}}, {path.directory(root), {"packages", "addons"}}}
-    for _, source in ipairs(sources) do
-        local listed = os.iorunv("git", table.join({"-C", source[1], "ls-files", "-c", "-o", "--exclude-standard", "--"}, source[2]))
-        for _, file in ipairs(listed:split("\n", {plain = true})) do
-            file = file:trim()
-            if file ~= "" and os.isfile(path.join(source[1], file)) then
-                os.mkdir(path.directory(path.join(copy, file)))
-                os.cp(path.join(source[1], file), path.join(copy, file))
-            end
+local function working_tree(source, paths, destination, prefix)
+    local listed = os.iorunv("git", table.join({"-C", source, "ls-files", "-c", "-o", "--exclude-standard", "--"}, paths))
+    for _, file in ipairs(listed:split("\n", {plain = true})) do
+        file = file:trim()
+        if file:startswith(prefix) and os.isfile(path.join(source, file)) then
+            local relative = file:sub(#prefix + 1)
+            os.mkdir(path.directory(path.join(destination, relative)))
+            os.cp(path.join(source, file), path.join(destination, relative))
         end
     end
+end
+
+local function commit(folder)
     for _, argv in ipairs({{"init", "-q", "-b", "main"}, {"add", "-A"},
                            {"-c", "user.name=revenant", "-c", "user.email=revenant@example.com", "commit", "-q", "-m", "the working tree"}}) do
-        os.vrunv("git", table.join({"-C", copy}, argv))
+        os.vrunv("git", table.join({"-C", folder}, argv))
     end
-    local head = os.iorunv("git", {"-C", copy, "rev-parse", "HEAD"}):trim()
+    return os.iorunv("git", {"-C", folder, "rev-parse", "HEAD"}):trim()
+end
+
+function repository(folder)
+    local toolchain = path.directory(path.directory(path.absolute(os.scriptdir())))
+    local top = path.directory(toolchain)
+    local copy = path.join(folder, "revenant")
+    local addon = path.join(folder, "revenant-addon")
+    os.mkdir(copy)
+    os.mkdir(addon)
+    working_tree(top, {"packages", "addons", "toolchain"}, copy, "")
+    working_tree(top, {"toolchain"}, addon, "toolchain/")
+    commit(copy)
+    local head = commit(addon)
     local version = "v0.0.0-" .. head:sub(1, 12)
-    os.vrunv("git", {"-C", copy, "tag", version})
+    os.vrunv("git", {"-C", addon, "tag", version})
 
     local recipe = path.join(copy, "addons", "r", "revenant", "xmake.lua")
-    local text = io.readfile(recipe):gsub('add_urls%("[^"]*"%)', 'add_urls("file://' .. path.join(copy, ".git") .. '")', 1)
+    local text = io.readfile(recipe):gsub('add_urls%("[^"]*"%)', 'add_urls("file://' .. path.join(addon, ".git") .. '")', 1)
     io.writefile(recipe, text .. string.format('    add_versions("%s", "%s")\n', version, head))
     return copy, version
 end

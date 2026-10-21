@@ -27,9 +27,10 @@ function failures(opt)
     if refused then
         table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own package repository, must build: " .. refused)
     else
-        local dylib = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
+        local store = path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake")
+        local dylib = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
                                           "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.dylib"))
-        local filter = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
+        local filter = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
                                            "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.plist"))
         if #dylib == 0 then
             table.insert(found, "the callkit-screen tweak built but its dylib is not under Library/MobileSubstrate/DynamicLibraries")
