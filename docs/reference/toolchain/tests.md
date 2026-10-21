@@ -10,7 +10,7 @@ reference says what runs where.
 | --- | --- | --- | --- |
 | `toolchain_light` | 13 suites of `tests/addon/` that build nothing and need no package | the repository | always |
 | `toolchain_packages` | 16 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
-| `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release; the recompiler's `classpair` and `ordinal` checks (`recompiler_device`), which read the iOS 6 dyld cache | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
+| `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release; the recompiler's `classpair` and `ordinal` checks (`recompiler_device`), which read the iOS 6 dyld cache; `compat_device_test`, the dispatch_block probes and the default global queue's class in `compat/device/`, which answer as iOS only on a device or an emulator | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
 
 The suites are the modules of `tests/addon/`, each one `failures(options)` that returns the failures it found. A test
 prints each failure and fails. Run one target with `./xmakew test -P . 'toolchain_light/*'`, or one suite with
@@ -22,6 +22,14 @@ prints each failure and fails. Run one target with `./xmakew test -P . 'toolchai
 on this machine, which holds them, it passes. `emulator_test` runs its own xmake addon install and then a queue step that
 runs the xmake task `queue`; the heavy job pool removed that task, so the step fails and names it, and the other checks
 of the suite pass.
+
+`macho_test` builds its encrypted armv7 image with the packaged ld64 and the packaged iPhone OS SDK, and adds the
+`LC_ENCRYPTION_INFO` command itself, in the header's padding, as the system linker of older Xcode versions writes it:
+the packaged ld64 writes no such command for armv7, and some Xcode linkers write none either. The reader and otool are
+checked against the image in the default run.
+
+The compat checks assert the values the SDK documents. Where the SDK says nothing fixed, or where only this host's
+libdispatch answers, the check is in the device group: `compat_device_test` and the probes in `compat/device/`.
 
 The suites that run only for the iPhone OS platform (`SwiftUITypeChecks`, `CombineGenerated`, and the WebKit host
 tests behind `webkit_host_tests`) are declared by the platform, not by the default run; they belong to the components
