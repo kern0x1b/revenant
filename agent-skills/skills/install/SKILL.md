@@ -135,7 +135,7 @@ does on a machine with nothing built:
 - downloads the iPhoneOS SDK from theos/sdks (about 230 MB installed) and builds ld64 (with
   Apple's libtapi), ldid, libplist and OpenSSL for the host, and cmake and ninja if needed;
 - **builds Revenant's LLVM/clang from source: about an hour**, the longest single step. There is
-  no binary cache; `xmake borrow llvm` only copies from another store already on this machine;
+  no binary cache;
 - for a Swift app, later: the Swift compiler from source, which builds its own copy of LLVM as
   well and so takes longer than the step above, plus a swift.org toolchain download for its
   bootstrap (about 1.1 GB installed).

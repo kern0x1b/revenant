@@ -111,7 +111,6 @@ Commands the revenant addon adds, and the skill for each:
 | `xmake emulate` (`install`, `run`, `debug`, `log`, `shot`) | `emulate`, `checks` |
 | `xmake device` (`install`, `uninstall`, `run`, `log`, …) | `device` |
 | `xmake where <package>` — the install folder of a package the project requires, by name or alias | `xmake-packages` |
-| `xmake borrow` | `install` |
 | `xmake check` — host-side scripts, not programs on iOS | `checks` |
 
 ## 6. Environment variables
