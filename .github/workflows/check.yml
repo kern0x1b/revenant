@@ -49,8 +49,6 @@ jobs:
       - name: Install the packages
         id: configure
         timeout-minutes: 30
-        env:
-          XMAKE_MAX_JOBS: "1"
         run: ./xmakew f -P . -y --emulator_vulkan=n
 
       - name: Run the tests
