@@ -113,6 +113,14 @@ jobs:
           ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
           echo "stage configure ends $(date -u +%H:%M:%S)"
 
+      - name: Extract the facts of every framework
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 10
+        run: |
+          echo "stage facts starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/generate.lua
+          echo "stage facts ends $(date -u +%H:%M:%S)"
+
       - name: Show the package logs when the configure failed
         if: failure() && steps.component.outputs.present == 'true'
         run: |
