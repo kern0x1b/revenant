@@ -6,6 +6,8 @@ static NSMutableDictionary *RevenantPendingState;
 static BOOL RevenantRestorationLoaded;
 static BOOL RevenantRestorationObserving;
 static BOOL RevenantRestorationFinishScheduled;
+static BOOL RevenantRestorationFinishDeferred;
+static NSInteger RevenantRestorationExtensions;
 
 static NSString *revenant_restoration_file(void)
 {
@@ -92,12 +94,27 @@ static void revenant_finish_restoring(void)
     RevenantRestorationFinishScheduled = YES;
     dispatch_async(dispatch_get_main_queue(), ^{
         RevenantRestorationFinishScheduled = NO;
+        if (RevenantRestorationExtensions > 0) {
+            RevenantRestorationFinishDeferred = YES;
+            return;
+        }
         for (id object in RevenantRestoredObjects.allObjects) {
             if ([object respondsToSelector:@selector(applicationFinishedRestoringState)])
                 [object applicationFinishedRestoringState];
         }
         [RevenantRestoredObjects removeAllObjects];
     });
+}
+
+void revenant_restoration_extend(NSInteger delta);
+
+void revenant_restoration_extend(NSInteger delta)
+{
+    RevenantRestorationExtensions = MAX(RevenantRestorationExtensions + delta, 0);
+    if (RevenantRestorationExtensions == 0 && RevenantRestorationFinishDeferred) {
+        RevenantRestorationFinishDeferred = NO;
+        revenant_finish_restoring();
+    }
 }
 
 static void revenant_observe_application(void)

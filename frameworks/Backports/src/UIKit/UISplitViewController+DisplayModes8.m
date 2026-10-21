@@ -43,6 +43,8 @@ RevenantSplitState *revenant_split_state(UISplitViewController *split)
         state->preferred = UISplitViewControllerDisplayModeAutomatic;
         state->notified = -1;
         state->fraction = state->minimum = state->maximum = UISplitViewControllerAutomaticDimension;
+        state->preferredWidth = state->supplementaryFraction = state->supplementaryWidth = UISplitViewControllerAutomaticDimension;
+        state->supplementaryMinimum = state->supplementaryMaximum = UISplitViewControllerAutomaticDimension;
         RevenantSplitProxy *proxy = [[RevenantSplitProxy alloc] init];
         proxy->split = split;
         state->proxy = proxy;
@@ -69,6 +71,11 @@ static CGFloat revenant_split_width(UISplitViewController *split)
 {
     RevenantSplitState *state = revenant_split_state(split);
     CGFloat total = split.isViewLoaded ? split.view.bounds.size.width : [UIScreen mainScreen].bounds.size.width;
+    if (state->preferredWidth != UISplitViewControllerAutomaticDimension) {
+        CGFloat floor = state->minimum != UISplitViewControllerAutomaticDimension ? state->minimum : 0;
+        CGFloat ceiling = state->maximum != UISplitViewControllerAutomaticDimension ? state->maximum : CGFLOAT_MAX;
+        return MIN(MAX(state->preferredWidth, floor), MAX(ceiling, floor));
+    }
     CGFloat base = (state->fraction != UISplitViewControllerAutomaticDimension ? state->fraction : RevenantSplitDefaultFraction) * total;
     CGFloat low = state->minimum != UISplitViewControllerAutomaticDimension ? state->minimum : RevenantSplitDefaultWidth;
     CGFloat high = state->maximum != UISplitViewControllerAutomaticDimension ? state->maximum : MAX(RevenantSplitDefaultWidth, low);
@@ -76,7 +83,7 @@ static CGFloat revenant_split_width(UISplitViewController *split)
     return MIN(MAX(base, low), high);
 }
 
-static void revenant_apply_width(UISplitViewController *split)
+void revenant_split_apply_width(UISplitViewController *split)
 {
     if (!revenant_split_on_phone() && [split respondsToSelector:@selector(setMasterColumnWidth:)])
         [split setMasterColumnWidth:revenant_split_width(split)];
@@ -148,7 +155,7 @@ static void revenant_update_button(UISplitViewController *split)
         return;
     UISplitViewControllerDisplayMode current = revenant_split_resolve(split);
     UISplitViewControllerDisplayMode target = revenant_split_target(split, current);
-    BOOL active = !revenant_split_collapsed(split) && target != current;
+    BOOL active = !revenant_split_collapsed(split) && target != current && state->visibility != UISplitViewControllerDisplayModeButtonVisibilityNever;
     button.enabled = active;
     button.image = active ? revenant_split_glyph(target == UISplitViewControllerDisplayModeSecondaryOnly) : nil;
     if (state->nativeButton) {
@@ -340,7 +347,7 @@ static void revenant_notify_mode(UISplitViewController *split, UISplitViewContro
 - (void)setPreferredPrimaryColumnWidthFraction:(CGFloat)fraction
 {
     revenant_split_state(self)->fraction = fraction;
-    revenant_apply_width(self);
+    revenant_split_apply_width(self);
 }
 
 - (CGFloat)minimumPrimaryColumnWidth
@@ -351,7 +358,7 @@ static void revenant_notify_mode(UISplitViewController *split, UISplitViewContro
 - (void)setMinimumPrimaryColumnWidth:(CGFloat)minimum
 {
     revenant_split_state(self)->minimum = minimum;
-    revenant_apply_width(self);
+    revenant_split_apply_width(self);
 }
 
 - (CGFloat)maximumPrimaryColumnWidth
@@ -362,7 +369,7 @@ static void revenant_notify_mode(UISplitViewController *split, UISplitViewContro
 - (void)setMaximumPrimaryColumnWidth:(CGFloat)maximum
 {
     revenant_split_state(self)->maximum = maximum;
-    revenant_apply_width(self);
+    revenant_split_apply_width(self);
 }
 
 - (CGFloat)primaryColumnWidth

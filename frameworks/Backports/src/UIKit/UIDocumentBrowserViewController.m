@@ -8,6 +8,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 
 #import "RevenantDocumentBrowserTypes.h"
+#import "RevenantUTType.h"
 #import "UIDocumentBrowserViewController.h"
 #import "UIDocumentBrowserTransitionController.h"
 
@@ -39,6 +40,28 @@
 @synthesize browserUserInterfaceStyle = _browserUserInterfaceStyle;
 @synthesize revenantAllowedContentTypes = _revenantAllowedContentTypes;
 @synthesize revenantDirectory = _revenantDirectory;
+@synthesize shouldShowFileExtensions = _shouldShowFileExtensions;
+@synthesize localizedCreateDocumentActionTitle = _localizedCreateDocumentActionTitle;
+@synthesize defaultDocumentAspectRatio = _defaultDocumentAspectRatio;
+
+- (instancetype)initForOpeningContentTypes:(NSArray<UTType *> *)allowedContentTypes
+{
+    NSMutableArray<NSString *> *identifiers = allowedContentTypes ? [NSMutableArray array] : nil;
+    for (UTType *type in allowedContentTypes)
+        [identifiers addObject:type.identifier];
+    return [self initForOpeningFilesWithContentTypes:identifiers];
+}
+
+- (NSArray<UTType *> *)contentTypesForRecentDocuments
+{
+    NSMutableArray<UTType *> *types = [NSMutableArray array];
+    for (NSString *identifier in _recentDocumentsContentTypes) {
+        UTType *type = [UTType typeWithIdentifier:identifier];
+        if (type)
+            [types addObject:type];
+    }
+    return types;
+}
 
 - (instancetype)initForOpeningFilesWithContentTypes:(NSArray<NSString *> *)allowedContentTypes
 {

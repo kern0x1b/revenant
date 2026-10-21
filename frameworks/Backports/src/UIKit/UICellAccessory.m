@@ -297,6 +297,21 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
         [path stroke];
         break;
     }
+    case 7: {
+        CGRect circle = CGRectInset(bounds, 2, 2);
+        UIBezierPath *ring = [UIBezierPath bezierPathWithOvalInRect:circle];
+        ring.lineWidth = 1.5;
+        [tint setStroke];
+        [ring stroke];
+        path.lineWidth = 2;
+        [path moveToPoint:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 1)];
+        [path addLineToPoint:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) + 5)];
+        [path moveToPoint:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 5)];
+        [path addLineToPoint:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 4.5)];
+        [tint setStroke];
+        [path stroke];
+        break;
+    }
     case 4: {
         path.lineWidth = 2;
         for (CGFloat y = 3; y <= bounds.size.height - 3; y += 4.5) {
@@ -1143,6 +1158,47 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 - (UIView *)revenant_makeView
 {
     return _customView;
+}
+
+@end
+
+@implementation UICellAccessoryDetail {
+@private
+    void (^_actionHandler)(void);
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    UICellAccessoryDetail *copy = [super copyWithZone:zone];
+    copy->_actionHandler = [_actionHandler copy];
+    return copy;
+}
+
+- (void (^)(void))actionHandler
+{
+    return _actionHandler;
+}
+
+- (void)setActionHandler:(void (^)(void))actionHandler
+{
+    _actionHandler = [actionHandler copy];
+}
+
+- (BOOL)isEqual:(id)object
+{
+    return [super isEqual:object] && _actionHandler == ((UICellAccessoryDetail *)object)->_actionHandler;
+}
+
+- (UIView *)revenant_makeView
+{
+    RevenantAccessoryView *view = [self revenant_baseViewOfKind:7 size:CGSizeMake(22, 22)];
+    view.revenant_handler = _actionHandler;
+    return view;
+}
+
+- (NSInteger)revenant_order
+{
+    return 2;
 }
 
 @end

@@ -176,6 +176,32 @@ local AREAS = {
             "-[UIWindowSceneGeometry interactivelyResizing]", "-[UIWindowSceneGeometry interfaceOrientationLocked]", 
         },
     },
+    {
+        name = "iOS 13 to 15 browser options, split view columns, text state and content size limits",
+        sources = {"RevenantWeak.m", "UIDocumentBrowserViewController.m", "UIFontDescriptor+Design13.m", "UIResponder+Menus13.m", "UIPrintPageRenderer+Quality14.m",
+                   "UIViewController+ContentScrollView15.m", "UITextInteractionState15.m", "UIKit15_0.m", "UIScene+Restoration15.m", "UIApplication+StateRestoration7.m",
+                   "UISplitViewController+Columns14.m", "UISplitViewController+DisplayModes8.m", "UISplitViewController+Collapse8.m", "UIView+TraitEnvironment.m",
+                   "UICellAccessory.m"},
+        members = {
+            "-[UIDocumentBrowserViewController initForOpeningContentTypes:]", "-[UIDocumentBrowserViewController contentTypesForRecentDocuments]",
+            "-[UIDocumentBrowserViewController shouldShowFileExtensions]", "-[UIDocumentBrowserViewController localizedCreateDocumentActionTitle]",
+            "-[UIDocumentBrowserViewController defaultDocumentAspectRatio]", "-[UIFontDescriptor fontDescriptorWithDesign:]",
+            "-[UIResponder buildMenuWithBuilder:]", "-[UIPrintPageRenderer currentRenderingQualityForRequestedRenderingQuality:]",
+            "-[UIViewController setContentScrollView:forEdge:]", "-[UIViewController contentScrollViewForEdge:]", "-[UITextField interactionState]",
+            "-[UITextView interactionState]", "-[UITableView allowsFocus]", "-[UITableView allowsFocusDuringEditing]", "-[UICollectionView allowsFocus]",
+            "-[UICollectionView allowsFocusDuringEditing]", "-[UIDatePicker roundsToMinuteInterval]", "-[UIPrintInteractionController showsPaperOrientation]",
+            "-[UIActivityViewController allowsProminentActivity]", "-[UIBarButtonItem changesSelectionAsPrimaryAction]", "-[UIWindow canBecomeKeyWindow]",
+            "-[UIWindowScene focusSystem]", "-[UIScene extendStateRestoration]", "-[UIScene completeStateRestoration]",
+            "-[UISplitViewController initWithStyle:]", "-[UISplitViewController style]", "-[UISplitViewController setViewController:forColumn:]",
+            "-[UISplitViewController viewControllerForColumn:]", "-[UISplitViewController hideColumn:]", "-[UISplitViewController showColumn:]",
+            "-[UISplitViewController preferredSplitBehavior]", "-[UISplitViewController splitBehavior]", "-[UISplitViewController showsSecondaryOnlyButton]",
+            "-[UISplitViewController displayModeButtonVisibility]", "-[UISplitViewController preferredPrimaryColumnWidth]",
+            "-[UISplitViewController preferredSupplementaryColumnWidthFraction]", "-[UISplitViewController preferredSupplementaryColumnWidth]",
+            "-[UISplitViewController minimumSupplementaryColumnWidth]", "-[UISplitViewController maximumSupplementaryColumnWidth]",
+            "-[UISplitViewController supplementaryColumnWidth]", "-[UIView minimumContentSizeCategory]", "-[UIView maximumContentSizeCategory]",
+            "@UICellAccessoryDetail", "-[UICellAccessoryDetail actionHandler]",
+        },
+    },
 }
 
 local function key_of(member)

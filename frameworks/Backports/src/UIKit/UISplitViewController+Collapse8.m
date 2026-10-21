@@ -35,7 +35,9 @@ static void revenant_phone_set(UISplitViewController *split, NSArray *controller
     UIViewController *primary = controllers.firstObject;
     UIViewController *secondary = controllers.count > 1 ? controllers[1] : nil;
     id delegate = state->appDelegate;
-    if (secondary) {
+    if (state->compact) {
+        primary = state->compact;
+    } else if (secondary) {
         if ([delegate respondsToSelector:@selector(primaryViewControllerForCollapsingSplitViewController:)])
             primary = [delegate primaryViewControllerForCollapsingSplitViewController:split] ?: primary;
         BOOL handled = [delegate respondsToSelector:@selector(splitViewController:collapseSecondaryViewController:ontoPrimaryViewController:)]
@@ -60,6 +62,18 @@ static UIViewController *revenant_column_of(UISplitViewController *split, id sen
             return controller;
     }
     return columns.firstObject;
+}
+
+NSArray<UIViewController *> *revenant_split_collapsed_content(UIViewController *primary)
+{
+    return [objc_getAssociatedObject(primary, &RevenantCollapsedSecondaryKey) objectForKey:@"content"];
+}
+
+void revenant_split_collapse_again(UISplitViewController *split)
+{
+    RevenantSplitState *state = revenant_split_state(split);
+    if (state->primary && state->secondary && !state->compact)
+        [state->primary collapseSecondaryViewController:state->secondary forSplitViewController:split];
 }
 
 @interface RevenantSplitCollapseInstaller : NSObject
@@ -162,10 +176,18 @@ static UIViewController *revenant_column_of(UISplitViewController *split, id sen
 {
     BOOL navigation = [secondaryViewController isKindOfClass:[UINavigationController class]];
     NSArray *content = navigation ? [(UINavigationController *)secondaryViewController viewControllers] : @[secondaryViewController];
-    if (navigation)
+    if (navigation && content.count)
         [(UINavigationController *)secondaryViewController setViewControllers:@[] animated:NO];
+    NSDictionary *held = objc_getAssociatedObject(self, &RevenantCollapsedSecondaryKey);
+    if (held && secondaryViewController == held[@"secondary"] && !content.count)
+        content = held[@"content"];
     objc_setAssociatedObject(self, &RevenantCollapsedSecondaryKey, @{@"secondary": secondaryViewController, @"content": content}, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self setViewControllers:[self.viewControllers arrayByAddingObjectsFromArray:content] animated:NO];
+    NSMutableArray *stack = [self.viewControllers mutableCopy];
+    for (UIViewController *controller in content) {
+        if (![stack containsObject:controller])
+            [stack addObject:controller];
+    }
+    [self setViewControllers:stack animated:NO];
 }
 
 - (UIViewController *)separateSecondaryViewControllerForSplitViewController:(UISplitViewController *)splitViewController

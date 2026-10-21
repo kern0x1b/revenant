@@ -1,17 +1,9 @@
-#import <UIKit/UIKit.h>
+#import "RevenantContentSize.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 static const NSUInteger RevenantCategoryCount = 12;
 static const NSUInteger RevenantLargeCategory = 3;
-
-static NSArray *revenant_ordered_categories(void)
-{
-    return @[UIContentSizeCategoryExtraSmall, UIContentSizeCategorySmall, UIContentSizeCategoryMedium, UIContentSizeCategoryLarge,
-             UIContentSizeCategoryExtraLarge, UIContentSizeCategoryExtraExtraLarge, UIContentSizeCategoryExtraExtraExtraLarge,
-             UIContentSizeCategoryAccessibilityMedium, UIContentSizeCategoryAccessibilityLarge, UIContentSizeCategoryAccessibilityExtraLarge,
-             UIContentSizeCategoryAccessibilityExtraExtraLarge, UIContentSizeCategoryAccessibilityExtraExtraExtraLarge];
-}
 
 static const CGFloat *revenant_style_sizes(UIFontTextStyle style)
 {
@@ -58,7 +50,7 @@ static const CGFloat *revenant_style_sizes(UIFontTextStyle style)
     const CGFloat *sizes = style ? revenant_style_sizes(style) : NULL;
     if (!sizes)
         return nil;
-    NSArray *categories = revenant_ordered_categories();
+    NSArray *categories = revenant_ordered_content_size_categories();
     NSUInteger index = [categories indexOfObject:traitCollection.preferredContentSizeCategory ?: @""];
     if (index == NSNotFound)
         index = [categories indexOfObject:[UIApplication sharedApplication].preferredContentSizeCategory];
