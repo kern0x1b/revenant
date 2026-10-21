@@ -121,7 +121,7 @@ package("swift-runtime")
             gyb.expand_to(template, output, {defines = gyb_defines, line_directive = "", paths = {path.join(source, "utils")}})
             return output
         end
-        local gyb_command = "-DGYB_COMMAND=" .. table.concat({os.programfile(), "l", path.join(modules, "gyb", "main.lua")}, ";")
+        local gyb_command = "-DGYB_COMMAND=" .. table.concat({os.programfile(), "l", import("@addon.revenant.data", {anonymous = true}).modules("gyb", "main.lua")}, ";")
         if not stdlib_kept then
             os.tryrm(source)
             os.vcp(path.join(compiler:installdir("share"), "swift-source"), source)
