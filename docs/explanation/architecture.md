@@ -76,7 +76,7 @@ A package of our own code is allowed only as a **thin wrapper**: a recipe with n
 The layout check lists what is not converted, in `tools/layout.lua`:
 
 - `UNCONVERTED`: empty. Every recipe with no url is a thin wrapper of a component: `apple-compat`, the Swift backports, `swift-embedded` (its Swift module and Unicode tables are built by a target of `toolchain/src/swift-embedded`).
-- `REACHING`: `ggml`, `iphoneos-sdk`, `libcxx`, `swift-crypto`, `swift-runtime` and `swift-system`. Each is a package with a url that still reaches into a component folder or into `toolchain/modules` by a path. They move to `@addon.revenant.<module>` imports, which moves their keys.
+- `REACHING`: `swift-runtime` only. Its install builds six Backports overlays (RealityFoundation, RealityKit, Spatial, CloudKit, WeatherKit, Network) from `frameworks/Backports` by a path, and those overlays are shared libraries built with the runtime's own resource dir. They become Backports targets built against the runtime, which needs the swift rule to build shared libraries; until then the entry stays. The other packages that reached into a component folder (`ggml`, `iphoneos-sdk`, `libcxx`, `swift-crypto`, `swift-system`) read it through the addon, or through a generated `port/digest.lua`, or their shim is a source of the component's own target.
 
 A recipe that converts while still listed fails the check, and so does a listed recipe that no longer needs to be.
 
