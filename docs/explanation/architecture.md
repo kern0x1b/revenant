@@ -80,4 +80,4 @@ These are not converted yet, and the layout check lists them by name in `tools/l
 - `swift-embedded`: builds the Embedded Swift standard library of the `swift` package; it is a toolchain input without a url.
 - Relative paths into `toolchain/modules` (and into `frameworks/`, in `ggml`): the recipes import the addon's modules by a path. `llvm`, `ld64` and `swift` cannot change, because their keys are computed from their own recipe files.
 
-Checked where the work was done: the default test run and both CI jobs passed on the branch with the Backports targets, and the Combine and SwiftUI change was checked by reading and by a syntax check, because the iOS configuration cannot resolve the SDK on the machine that made the change.
+The iOS configuration of the whole graph is not built by any CI job: the Backports job configures and builds the `Backports` component only, and the checks job configures the host. The `SwiftUI` and `Combine` targets are therefore not built by CI yet.
