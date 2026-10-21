@@ -30,7 +30,7 @@ jobs:
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
