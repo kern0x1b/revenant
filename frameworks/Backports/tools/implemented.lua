@@ -23,12 +23,10 @@ local function symbol(keys, framework, line)
 end
 
 local function method(keys, framework, line)
-    if line:match("^%s+imp%s") then
-        local sign, container, selector = line:match("([%+%-])%[(%S+) ([^%]]+)%]$")
-        if sign then
-            local class = container:match("^[^(]+")
-            add(keys, framework, (sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector)
-        end
+    local sign, container, selector = line:match("^%x+ %a ([%+%-])%[(%S+) ([^%]]+)%]$")
+    if sign then
+        local class = container:match("^[^(]+")
+        add(keys, framework, (sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector)
     end
 end
 
@@ -46,8 +44,6 @@ function from_objects(root)
     assert(#objects > 0, "no objects of a src/<Framework> folder under " .. root)
     reader.each_output("nm", {}, objects, function (object, line)
         symbol(keys, frameworks[object], line)
-    end)
-    reader.each_output("otool", {"-ov"}, objects, function (object, line)
         method(keys, frameworks[object], line)
     end)
     local total = 0
