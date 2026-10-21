@@ -69,15 +69,17 @@ Our code is a target of its component, and the component's `xmake.lua` defines i
 
 External code stays a package: `combine` (OpenCombine with our patches in `patches/`), `micro-ecc` (the upstream library, unmodified), and the rest of `packages/`.
 
+A package of our own code is allowed only as a **thin wrapper**: a recipe with no url, whose `on_install` generates a project that includes one component and installs that component's targets, and that holds no sources and no build logic of its own. `emulator`, `emulator-guest` and `firmware-tools` are wrappers of this kind, and the addon's rules and plugins take them by name, as they take any package. The layout check (`tools/layout.lua`) enforces it: a recipe with no url must be a wrapper or be listed in `UNCONVERTED`.
+
 ## Status
 
-These are not converted yet, and the layout check lists them by name in `tools/layout.lua`, in `UNCONVERTED` (a recipe with no url that builds our code) and `REACHING` (a recipe that reaches into a component by a path). Each list must shrink: a converted recipe that is still listed fails the check.
+The layout check lists what is not converted, in `tools/layout.lua`:
 
-- `emulator`, `emulator-guest`: the component has the targets; the `emulate` include and plugin still take the packages.
-- `firmware-tools`: a host tool that every app, daemon and tweak rule takes as a package.
-- `apple-compat`: its shims are a dependency of packages that are external (libc++, picotls, quicly, matter, swift-crypto). Converting it needs a way for those packages to take one of our targets at build time, which is not decided.
-- The Swift backports `activitykit`, `appintents`, `createml`, `musickit`, `swift-data`, `tipkit`, `widgetkit`: their sources are in `frameworks/Backports/src`, and they are still compiled by their recipes.
-- `swift-embedded`: builds the Embedded Swift standard library of the `swift` package; it is a toolchain input without a url.
-- Relative paths into `toolchain/modules` (and into `frameworks/`, in `ggml`): the recipes import the addon's modules by a path. `llvm`, `ld64` and `swift` cannot change, because their keys are computed from their own recipe files.
+- `UNCONVERTED`: recipes with no url that still build our code: `apple-compat`, the Swift backports `activitykit`, `appintents`, `createml`, `musickit`, `swift-data`, `tipkit`, `widgetkit`, and `swift-embedded`, which builds the Embedded Swift standard library of the `swift` package, a toolchain input without a url. `apple-compat` is needed by packages that are external (libc++, picotls, quicly, matter, swift-crypto) and by the Backports, so it has to become a wrapper whose outputs match what those packages read, not just a target.
+- `REACHING`: packages with a url that still reach into a component folder or into `toolchain/modules` by a path. They move to `@addon.revenant.<module>` imports. `llvm`, `ld64` and `swift` are among them, and their keys move with the change.
+
+Each list must shrink: a recipe that converts while still listed fails the check.
+
+A thin wrapper of a Swift target also needs the target's module to reach a consumer. The swift rule does not install its `.swiftmodule` yet, so `SwiftUI` and the Swift backports cannot be wrapped until it does.
 
 The iOS configuration of the whole graph is not built by any CI job: the Backports job configures and builds the `Backports` component only, and the checks job configures the host. The `SwiftUI` and `Combine` targets are therefore not built by CI yet.
