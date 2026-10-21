@@ -356,9 +356,12 @@ function main(...)
     end
     if want_stdin or #names == 0 then
         if not want_stdin and stdin_is_terminal() then
-            fail("first_rung.lua: give names as arguments, or on stdin")
+            fail(USAGE)
         end
         names_from_stdin(names)
+        if #names == 0 then
+            fail(USAGE)
+        end
     end
     lookup(names, timing)
 end

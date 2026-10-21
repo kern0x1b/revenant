@@ -1,6 +1,10 @@
 import("core.base.json")
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
+local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/api_diff.lua APPLE.json OURS.json [--type NAME] [--variants] [--not-applicable] [--conformances]
+  compares Apple's SwiftUI declarations, as swift-api-digester dumps them, with ours, and prints each one that is absent
+  from ours (with --variants, also those present with another signature); --type NAME restricts the report to one type.]]
+
 local function is_object(v)
     return type(v) == "table" and v[1] == nil
 end
@@ -133,6 +137,10 @@ function main(...)
         end)()
     end
 
+    if #args < 2 or wants("--help") then
+        print(USAGE)
+        return
+    end
     local apple = load(args[1])
     local ours = load(args[2])
     local ours_usr = {}
