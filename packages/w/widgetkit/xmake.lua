@@ -9,6 +9,9 @@ package("widgetkit")
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = widgetkit_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
+        local toolchain = assert(package:toolchains(), "widgetkit is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        raise("widgetkit is not yet backported to iOS %s: Values.swift and Timeline.swift both declare TimelineEntry and TimelineEntryRelevance; see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("deps", "revenant@appintents", {alias = "appintents"})
         package:add("links", "WidgetKit")

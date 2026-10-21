@@ -9,6 +9,9 @@ package("musickit")
     add_configs("recipe", {description = "The digest of this recipe and the sources it compiles, so a changed recipe or a changed source is a different module.", default = musickit_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
+        local toolchain = assert(package:toolchains(), "musickit is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        raise("musickit is not yet backported to iOS %s: Catalog.swift uses URLComponents, which needs iOS 7, and URLQueryItem, which needs iOS 8; see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("deps", "revenant@micro-ecc", {alias = "micro-ecc"})
         package:add("links", "MusicKit")

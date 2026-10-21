@@ -9,6 +9,9 @@ package("createml")
     add_configs("recipe", {description = "The digest of this recipe and the Swift sources it builds, so a changed declaration is a different package.", default = createml_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
+        local toolchain = assert(package:toolchains(), "createml is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        raise("createml is not yet backported to iOS %s: it needs CoreML, an open gap; see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         for _, library in ipairs({"TabularData", "CoreML", "CreateMLComponents", "CreateML"}) do
             package:add("links", library)

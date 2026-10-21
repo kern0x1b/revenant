@@ -9,6 +9,9 @@ package("swift-data")
     add_configs("recipe", {description = "The digest of this recipe and the SwiftData sources it builds, so a changed declaration is a different package.", default = swift_data_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
+        local toolchain = assert(package:toolchains(), "swift-data is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        raise("swift-data is not yet backported to iOS %s: DefaultStore.swift imports FoundationEssentials, which the iOS 6 SDK does not provide; see the open gaps in frameworks/Backports/README.md", toolchain:config("deployment"))
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("links", "SwiftData")
         package:add("frameworks", "CoreData", "Foundation", "CoreFoundation")
