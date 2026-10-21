@@ -79,7 +79,7 @@ jobs:
         id: generated
         with:
           path: build/generated/backports
-          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
           restore-keys: |
             backports-generated-${{ runner.os }}-
 
@@ -142,7 +142,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: build/generated/backports
-          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
 
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
