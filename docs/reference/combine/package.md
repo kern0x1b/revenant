@@ -11,7 +11,7 @@ beside the runtime and libcxx, and writes `import Combine`.
 | --- | --- |
 | Upstream | [OpenCombine](https://github.com/OpenCombine/OpenCombine), MIT — the reimplementation of Apple's Combine |
 | Pinned commit | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (OpenCombine's `HEAD`; its `0.14.0` tag is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`), version `2026.10.19` |
-| Our patches | `frameworks/Combine/patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, and what OpenCombine lacks and Apple declares (below) |
+| Our patches | `packages/c/combine/patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, and what OpenCombine lacks and Apple declares (below) |
 | The licence | the upstream's `LICENSE`, installed with the package under `licenses/LICENSE`: MIT License, Copyright (c) 2019 Sergej Jaskiewicz |
 | Our terms | the patches claim no new licence over Sergej Jaskiewicz's work, and the upstream's copyright and permission notice travel with the code unchanged |
 

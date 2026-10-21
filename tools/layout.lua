@@ -5,7 +5,7 @@ local layout = {
            "xmake.lua", "xmakew", "tools", "docs", "toolchain", "packages", "addons", "emulator", "recompiler",
            "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
            ".gitignore"},
-    component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "patches", "tests", "examples", "tools"},
+    component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "tests", "examples", "tools"},
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
     agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"},
@@ -18,6 +18,37 @@ local addon = {
     toolchains = {depth = 4, files = {"xmake.lua"}},
     includes = {depth = 4, files = {"xmake.lua"}}
 }
+
+local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
+
+local UNCONVERTED = {"activitykit", "appintents", "apple-compat", "createml", "emulator", "emulator-guest", "firmware-tools",
+                     "musickit", "swift-data", "swift-embedded", "tipkit", "widgetkit"}
+
+local REACHING = {"activitykit", "appintents", "apple-compat", "brotli", "combine", "createml", "emulator-guest",
+                  "firmware-tools", "ggml", "icu", "iphoneos-sdk", "ld64", "libcxx", "libpsl", "libwebp", "libxml2",
+                  "libxslt", "llvm", "matter", "musickit", "opencv", "openssl", "swift", "swift-crypto", "swift-data",
+                  "swift-embedded", "swift-runtime", "swift-syntax", "swift-system", "tipkit", "wasm3", "widgetkit", "woff2"}
+
+local function set_of(list)
+    local set = {}
+    for _, name in ipairs(list) do
+        set[name] = true
+    end
+    return set
+end
+
+local function reaches_into_component(text)
+    for line in text:gmatch("[^\n]+") do
+        if line:find('".."', 1, true) then
+            for _, component in ipairs(COMPONENTS) do
+                if line:find('"' .. component .. '"', 1, true) then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
 
 local function has(list, name)
     for _, entry in ipairs(list) do
@@ -150,9 +181,25 @@ function main()
             end
         end
     end
+    local unconverted, reaching = set_of(UNCONVERTED), set_of(REACHING)
     for _, recipe in ipairs(table.orderkeys(recipes)) do
         if not present[recipe .. "/xmake.lua"] then
             wrong(recipe, "has no xmake.lua")
+        else
+            local name = path.filename(recipe)
+            local text = io.readfile(path.join(root, recipe, "xmake.lua"))
+            local url = text:find("add_urls", 1, true) ~= nil
+            if not url and not unconverted[name] then
+                wrong(recipe, "has no url, so it builds our code: its component's xmake.lua defines the targets instead")
+            elseif url and unconverted[name] then
+                wrong(recipe, "has a url, so it is not listed in UNCONVERTED any more: remove it from the list")
+            end
+            local into = reaches_into_component(text)
+            if into and not reaching[name] then
+                wrong(recipe, "reaches into a component folder by a relative path: a component's sources are built through the build graph, not a path into its folder")
+            elseif reaching[name] and not into then
+                wrong(recipe, "no longer reaches into a component folder: remove it from REACHING")
+            end
         end
     end
     for _, line in ipairs(errors) do

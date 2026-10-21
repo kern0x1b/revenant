@@ -7,6 +7,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | Document | About |
 | --- | --- |
 | [What revenant is for](explanation/platform.md) | the platform, its first targets and its limits |
+| [Architecture](explanation/architecture.md) | the three layers, what each top-level folder is, and how an app built outside gets our libraries |
 | [Loading the backports](explanation/backports-loading.md) | how the backport libraries are loaded |
 | [Continuous checks](guides/ci.md) | what CI runs |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
