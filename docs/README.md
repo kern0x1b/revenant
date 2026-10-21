@@ -26,7 +26,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Commands](reference/toolchain/commands.md) | the xmake commands and the environment |
 | [Packages](reference/toolchain/packages.md) | the packages and their versions |
 | [Tools](reference/toolchain/tools.md) | the developer tools |
-| [Changelog](reference/toolchain/changelog.md) | what changed, release by release |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
@@ -44,7 +43,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
 | [Guest tests](reference/emulator/guest-tests.md) | the guest programs that check what only a running guest shows |
-| [Changelog](reference/emulator/changelog.md) | what changed, release by release |
+| [Graphics](reference/emulator/graphics.md) | the shader limits, the Vulkan driver path and the Core Image path |
 | [Third-party](reference/emulator/third-party.md) | what is bundled or linked, and under which license |
 | [Notice](reference/emulator/notice.md) | the notices to ship with a binary |
 
@@ -60,7 +59,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Package](reference/combine/package.md) | the package for the port's armv7 releases |
 | [The layer of our own, and what was measured](reference/combine/combine-kit.md) | the record of the package's own layer |
 | [Test results](reference/combine/test-results.md) | the upstream suite's results on iOS 6.1.3 and the known limits |
-| [Changelog](reference/combine/changelog.md) | what changed, release by release |
 | [Third-party notice](reference/combine/third-party.md) | OpenCombine's MIT notice, which covers the code this module is built from |
 
 ## SwiftUI
@@ -80,7 +78,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Host probes](reference/swiftui/host.md) | values measured from Apple's framework on the host |
 | [Builder typechecks](reference/swiftui/typechecks.md) | the snippets the Table and TabContent builders must accept or refuse |
 | [`TextSelection`](reference/swiftui/text-selection.md) | the one range the release can carry |
-| [Changelog](reference/swiftui/changelog.md) | what changed, release by release |
 | [Third-party](reference/swiftui/third-party.md) | the code this module is derived from, and its terms, and the trademarks |
 
 ## WebKit
@@ -97,7 +94,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Carrying a 64-bit JSValue on ARMv7](explanation/webkit/armv7-jit.md) | the value representation the 32-bit JIT carries |
 | [Keeping the engine current](explanation/webkit/core-update.md) | how the engine is updated |
 | [Engine configuration](explanation/webkit/engine-configuration.md) | why the engine is configured the way it is |
-| [History](explanation/webkit/history.md) | how this started |
 | [Features and the Settings pane](reference/webkit/features.md) | what works on the phone, and what the Settings pane writes |
 | [Compatibility](reference/webkit/compatibility.md) | what this OS does not have, probed on the device |
 | [Tests](reference/webkit/tests.md) | the host and device tests, and what each one covers |
@@ -105,7 +101,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Tools](reference/webkit/tools.md) | the probes, and what each one answers |
 | [SDK usage](reference/webkit/sdk-usage.md) | what this port reads from Apple's SDKs |
 | [Upstream](reference/webkit/upstream.md) | what belongs upstream, not here |
-| [Changelog](reference/webkit/changelog.md) | every change, dated by the day it was measured on the device |
+| [Measurements](reference/webkit/measurements.md) | what was measured on the phone, and the hypotheses the measurements refuted |
 | [Third-party](reference/webkit/third-party.md) | every dependency, its licence, and the screenshots' trademarks |
 
 ## Recompiler
@@ -117,7 +113,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [How it works](explanation/recompiler/how-it-works.md) | the pipeline, the status, the Swift runtime's classes, the scope |
 | [Research](explanation/recompiler/research.md) | the research behind it (in Russian) |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
-| [Changelog](reference/recompiler/changelog.md) | what changed |
 
 ## Agent skills
 

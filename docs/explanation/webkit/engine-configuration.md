@@ -36,6 +36,52 @@ well, and on a Mac it finds BrowserEngineCore, BrowserEngineKit and
 UniformTypeIdentifiers in the running system - paths that mean nothing to a
 linker targeting armv7, which then fails with "framework not found".
 
+## Prior art on the same device
+
+The iPhone 4S already had `org.webkit.LightweightBrowser` installed (armv7, `MinimumOSVersion` 4.3), with no source
+published. Its binaries answer the open design questions:
+
+- It is the Cocoa WebKitLegacy port, not WPE. Its Objective-C classes are the ordinary iOS WebKitLegacy classes with
+  a prefix (`LegacyIOSWebView`, `LegacyIOSWAKWindow`, `LegacyIOSWebEvent`, `LegacyIOSWAKScrollView`), so they cannot
+  collide with the system WebKit. It is the API `UIWebView` is built on.
+- The engine is recent. Its `WebCore` contains `view-transition`, `anchor-name`, `@scope`, `:has()`, `subgrid`,
+  `popover`, `corner-shape`, `sibling-index`, CSS `@function`, `progress()` and `text-box-trim`.
+- `libLegacyIOSRuntime.dylib` (31 MB) is a C++ runtime, not an API shim: 10,414 exports, 9,048 of them mangled C++,
+  with modern libc++ (`std::__1`), libc++abi and ICU 74, depending on nothing but `libSystem` and `libobjc`. iOS 6
+  ships a 2012 libc++ and an ICU far older than WebKit's minimum, so a current WebKit carries its own.
+- `LegacyIOSModernTLSURLProtocol` is an `NSURLProtocol` subclass that implements modern TLS, because CFNetwork on iOS 6
+  cannot negotiate with today's servers.
+
+Its system dependencies are all present in iOS 6: UIKit, CoreGraphics, QuartzCore, CoreFoundation, Foundation,
+CFNetwork, AVFoundation, CoreMedia, CoreAudio, AudioToolbox, Accelerate, IOKit, `libxml2`, `libsqlite3`, `libz`,
+`libAccessibility` and `libgcc_s.1`.
+
+## Build settings, and why
+
+- **`-fdwarf-exceptions`.** Clang defaults armv7 to setjmp/longjmp exceptions and emits references to
+  `__gxx_personality_sj0`. iOS ships only the DWARF personality, `__gxx_personality_v0`.
+- **ICU `--disable-renaming`.** WebKit defines `U_DISABLE_RENAMING=1` on Apple platforms, because Apple's
+  `libicucore` exports unsuffixed names. A stock ICU build exports `u_charDirection_74`, so it is built the same way.
+- **Headers from the current SDK, the runtime from the old one.** C++23 needs a libc++ newer than anything in the iOS
+  10.3 SDK, so the compile takes its headers from the current Xcode SDK with `-nostdinc++` and
+  `-isystem .../iPhoneOS26.5.sdk/usr/include/c++/v1`, and its C library and frameworks from the old SDK, with
+  `-target armv7-apple-ios6.0` and `-D_LIBCPP_DISABLE_AVAILABILITY`. Headers are enough to compile; the runtime is
+  bundled, as LightKit bundles its own.
+
+## Changes outside the engine's own guards
+
+Six upstream files carry changes that are not behind the port's guards, each because iOS 6 or the SDK lacks what the
+upstream code calls:
+
+- `Source/bmalloc/bmalloc/bmalloc.h`: `aligned_alloc` is C11 and arrived in iOS 11; `posix_memalign` has the same
+  contract for these callers.
+- `Source/JavaScriptCore/runtime/MachineContext.h`: restores the Darwin ARM32 register accessors (`__r[7]` as the frame
+  pointer), which were deleted along with the JIT.
+- `Source/WTF/wtf/PlatformHave.h`: the iOS SDK has no readline.
+- `Source/WTF/wtf/PlatformJSCOnly.cmake`: runs `mig` against the macOS SDK, because the iOS SDK ships no `mach/*.defs`.
+- `Source/WTF/wtf/darwin/OSLogPrintStream.mm`: `os_log` is iOS 10, so the stream writes to stderr.
+- `Source/cmake/WebKitMacros.cmake`: creates the destination directory before symlinking the forwarding headers.
+
 ## Features
 
 **Touch events.** This is a touch device and the sites it renders are written for

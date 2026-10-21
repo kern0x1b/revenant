@@ -33,7 +33,7 @@ the system frameworks go through bridges.
   hundred KB resident.
 - A second app, an xkcd reader that statically links Realm and a crash reporter, drove out several universal
   translator fixes: resilient lifting, floating-point data-symbol bridging and automatic long-call fallback for large
-  binaries. [The changelog](../../reference/recompiler/changelog.md) lists them.
+  binaries. They are described under [decisions in the translator](#decisions-in-the-translator).
 
 ## Classes the Swift runtime lays out
 
@@ -70,10 +70,35 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
 
+## Decisions in the translator
+
+- **Ivar layout never shrinks.** The translator never slides guest ivars down when the host superclass is smaller
+  than the arm64 one. The lifted code addresses ivars with arm64 offsets, so a shrunken instance leaves the last
+  ivar's 8-byte slot past the allocation, and memory is corrupted nondeterministically. OneBusAway found this.
+- **Floating-point data symbols** such as `NSFoundationVersionNumber` and `UIWindowLevelNormal` are bridged through
+  a copy of the guest's globals that is filled at startup, in the guest's float width.
+- **Large binaries are split, and the globals stay whole.** When the direct-call compile fails with "Relocation out
+  of range", the module is split so that ld64 can insert branch islands between the pieces. All globals (the
+  rehosted guest image and the Objective-C metadata) stay in one data object at their single-object layout, and only
+  the functions are distributed into code-only pieces, using `llvm-extract --delete`. The lifted code reaches guest
+  memory by absolute address and the metadata cross-references its own class objects. A global moved to another
+  piece leaves `__objc_classlist` pointing at the wrong class objects, and the image crashes inside objc's
+  `map_images`, before any handler is installed. Small apps take no long calls, no text relocations and no cost.
+- **C++ runtime.** `__cxa_atexit` is bridged: the guest's static destructor is recorded and run through the runtime,
+  not the host C++ runtime. `operator new`, `new[]`, `delete` and `delete[]` go to the host allocator. Exception
+  unwinding (`__gxx_personality_v0`, `__cxa_begin_catch`, `_Unwind_Resume`) stays a trap, which is hit only if an
+  exception propagates. `recompiler/tests/cxxinit` is the regression test: a global C++ object with a `std::string`,
+  a `std::vector` and a destructor.
+
 ## Scope and limits
 
 - Objective-C and C are supported. Swift is being brought up on a demo app, with `libswiftCore` lifted as a guest
-  image. It does not run to the end yet, and what a Swift program meets is measured one failure at a time.
+  image. It does not run to the end yet, and what a Swift program meets is measured one failure at a time. Swift
+  metadata is 64-bit only, so the Swift runtime needs a separate effort.
+- A very large translated binary (100 MB and more, such as the Realm-linked xkcd reader) links through the module
+  split above and loads on a real iOS 6 device. The bundled emulator's dyld faults on such an image; that is an
+  emulator limit, not a size or translation limit. An app that then references iOS 7+ system symbols, as xkcd does
+  through `NSURLSession`, stops at dyld symbol binding, which belongs to the backports.
 - iOS 7+ system APIs that the app calls must exist on the target. Ones that do not are reported, not stubbed; they
   belong to the backports.
 - Functions that cannot be lifted (hand-written assembly in crash reporters, for instance) become traps that fault only
