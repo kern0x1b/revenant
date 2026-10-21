@@ -124,6 +124,9 @@ if is_plat("iphoneos") then
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             add_syslinks("objc")
+            if #os.files(path.join(SRC, library.folder, "*.mm")) > 0 then
+                add_syslinks("c++")
+            end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
             for _, name in ipairs(library.libraries) do
