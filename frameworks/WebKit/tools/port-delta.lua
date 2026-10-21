@@ -2,7 +2,7 @@ import("core.base.json")
 import("net.http")
 
 local USAGE = [==[usage: ./xmakew l frameworks/WebKit/tools/port-delta.lua [--tree DIR] [--unguarded [AREA]] [--freshness]
-  how much the patch series in third_party/webkit/patches changes upstream WebKit: by area, by kind,
+  how much the patch series in packages/w/webkit/patches changes upstream WebKit: by area, by kind,
   and how much of it carries the WEBKIT_IOS6 guard in the patched tree (the installed webkit package's
   unless --tree names one). --unguarded lists the changed files under AREA (default Source) that carry
   no guard, largest first, LIMIT of them (default 40); --freshness asks GitHub how far upstream main
