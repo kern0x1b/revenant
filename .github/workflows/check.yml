@@ -147,12 +147,19 @@ jobs:
 
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 10
+        timeout-minutes: 30
         run: |
-          stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage build starts $(date -u +%H:%M:%S)"
-          ./xmakew build -P . 2>&1 | stamp
+          failed=""
+          for name in $(grep -oE 'name = "[A-Za-z0-9]+Backports"' frameworks/Backports/xmake.lua | sed -E 's/.*"([^"]+)"/\1/'); do
+            if ! ./xmakew build -P . "$name" > "$RUNNER_TEMP/$name.txt" 2>&1; then
+              failed="$failed $name"
+              sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/$name.txt" | grep -E -A4 "Undefined symbols|malformed|not found for|error: " | head -20
+            fi
+          done
+          echo "failed targets:$failed"
           echo "stage build ends $(date -u +%H:%M:%S)"
+          test -z "$failed"
 
       - uses: actions/cache/save@v4
         if: steps.component.outputs.present == 'true' && steps.objects.outputs.cache-hit != 'true'
