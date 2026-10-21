@@ -32,7 +32,7 @@ end
 
 local function is_loc(token)
     return token ~= nil and (string.find(token, "^line:") ~= nil or string.find(token, "^col:") ~= nil
-        or string.find(token, "^<scratch_space>:") ~= nil or string.find(token, "^/") ~= nil)
+        or string.find(token, "^/") ~= nil)
 end
 
 local function node_of(body, state)
@@ -45,12 +45,12 @@ local function node_of(body, state)
     for word in string.gmatch(node.tail, "%a+") do
         node.flags[word] = true
     end
-    local pre = string.match(body, "^[^'\"]*")
+    local pre = string.match((string.gsub(body, "<scratch space>", "SCRATCH")), "^[^'\"]*")
     local range_start, range_end = string.find(pre, "<[^<>]*>")
     node.invalid = string.find(pre, "invalid sloc", 1, true) ~= nil
     node.multiline = range_start ~= nil and string.find(string.sub(pre, range_start, range_end), ", line:", 1, true) ~= nil
     local after = range_end and string.sub(pre, range_end + 1) or pre
-    local tokens = words((string.gsub(after, "<scratch space>", "<scratch_space>")))
+    local tokens = words(after)
     if node.kind == "AvailabilityAttr" then
         node.platform = tokens[1]
         node.introduced = tokens[2]

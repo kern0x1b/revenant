@@ -18,8 +18,10 @@ function each_output(program, flags, files, handle)
         for _, file in ipairs(chunk) do
             known[file] = true
         end
+        local ok, text, _, errors = os.iorunv(program, table.join(flags, chunk))
+        assert(ok, string.format("%s failed on %d files: %s", program, #chunk, errors or "no reason given"))
         local current = #chunk == 1 and chunk[1] or nil
-        for line in os.iorunv(program, table.join(flags, chunk)):gmatch("[^\n]+") do
+        for line in text:gmatch("[^\n]+") do
             local header = line:match("^(.+):$")
             if header and known[header] then
                 current = header

@@ -41,7 +41,7 @@ function main(libdir, report)
     local state = generate.prepare()
     local keys = sources.from_objects()
     local libs = libraries.read(libdir)
-    local public, tbd_read, tbd_total = publics.build(state.frameworks, state.sdk)
+    local public, exported = publics.build(state.frameworks, state.sdk)
 
     local symbol_owners, symbol_kinds, method_owners = {}, {}, {}
     for _, library in ipairs(libs) do
@@ -58,6 +58,25 @@ function main(libdir, report)
             table.insert(method_owners[key], library.name)
         end
     end
+
+    local function proxied(container)
+        if container:startswith("Revenant") and symbol_owners["_OBJC_CLASS_$_" .. container:sub(9)] then
+            return container:sub(9)
+        end
+        return container
+    end
+    local normal = {}
+    for framework, set in pairs(keys) do
+        normal[framework] = {}
+        for key in pairs(set) do
+            local kind, container, name = key:match("^(.-)|(.-)|(.*)$")
+            if kind == "instance method" or kind == "class method" then
+                key = kind .. "|" .. proxied(container) .. "|" .. name
+            end
+            normal[framework][key] = true
+        end
+    end
+    keys = normal
 
     local duplicated = {}
     for _, kind in ipairs(KINDS) do
@@ -102,7 +121,7 @@ function main(libdir, report)
                 count.once = count.once + 1
             elseif #owners == 0 and is_public then
                 count.missing = count.missing + 1
-                table.insert(missing_lines, string.format("missing\t%s\t%s\t%s", framework, kind, name))
+                table.insert(missing_lines, string.format("missing\t%s\t%s", framework, key))
             elseif #owners == 0 then
                 count.internal = count.internal + 1
                 if kind == "class" then
@@ -112,7 +131,7 @@ function main(libdir, report)
         end
     end
 
-    local summary = {string.format("libraries %d, public frameworks %d of %d read from their .tbd", #libs, tbd_read, tbd_total)}
+    local summary = {string.format("libraries %d, symbols exported by the SDK's .tbd files %d", #libs, exported)}
     local total_missing, total_duplicated = 0, 0
     for _, kind in ipairs(KINDS) do
         local count = counts[kind]

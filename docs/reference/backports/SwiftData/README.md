@@ -71,7 +71,7 @@ eleventh appears.
 **the backports gate never builds it** - a green gate says nothing about it. Two things verify it,
 and they are different jobs:
 
-- the **armv7 build** is `packages/s/swift-data/harness/build.sh <release>`, which runs the flags
+- the **armv7 build** is `./xmakew l -P . frameworks/Backports/tests/SwiftData/harness/build.lua <release>`, which runs the flags
   `modules/apple/swift.lua runtime_flags` builds, compiles the whole module, hands the object to
   `harness/symbols.lua` for the counts, and links it against a built
   `libCoreDataBackports.dylib`. Where the toolchain, the runtime and swift-foundation's two modules

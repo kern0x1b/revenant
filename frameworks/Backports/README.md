@@ -28,15 +28,17 @@ The implemented members are the symbols of the objects that `src/<Framework>` co
 
 - `./xmakew l -P . frameworks/Backports/tools/generate.lua`: facts and skeleton, cached per module.
 - `./xmakew l -P . frameworks/Backports/tools/exports.lua [libdir] [report]`: after a build, reads the objects in `build/.objs` and the dylibs in `build/iphoneos/armv7/release` once each, checks every key of the objects against them, and writes `exports.txt` (per kind: implemented, exported once, missing, duplicated, not public; then the missing, duplicated and not public lines) and `status.txt` (`implemented X of Y` per framework) beside `report`. It fails when a public symbol or method is missing, or when two libraries export the same class, function, global or method.
-
-## Public symbols
-
-A key is public when the SDK declares it: a class, C function, global or method declared in a framework's headers (from the clang AST, as the facts are), or a symbol or class in the `exports:` list of the framework's `.tbd`. Methods are public only through the headers. A key that is not public is counted and does not fail the check, and each class that is not public is listed. `__NSConcreteUUID` is such a class when the SDK does not list it: `src/Foundation/NSUUID.m` declares it `visibility("hidden")`.
-
-Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`binary_inventory`), which folds categories into their class, and from the objects with `otool -ov`, which names each `imp`.
 - `./xmakew l -P . frameworks/Backports/tests/backports_test.lua`: fixture test.
 - `./xmakew f -P . -p iphoneos -a armv7 --component=Backports` then `./xmakew build -P . FoundationBackports`: one shared library per library of the former package, `lib<Name>.dylib` with its install name under `/usr/lib/revenant/org.revenant.backports`. Each compiles `src/<Framework>`, `src/attach.c` and the skeleton of its framework, which configure generates; `backports_min_ios` is the only minimum, with no bands. The component option configures only this component and what it needs, and the build reads the iOS 26.2 SDK, so the sources compile against the headers they are written for.
 - `REVENANT_GEN_SDK=<iPhoneOS SDK folder>` overrides the SDK the toolchain resolves.
+
+## Public symbols
+
+A key is public when the SDK both declares it and exports it: a class, C function, global or method declared in a framework's headers (from the clang AST, as the facts are), and for classes, functions and globals, also exported by a framework's `.tbd` (read with `toolchain/modules/apple/dyld.lua`, `sdk_owners`). Methods are public through the headers alone. A key that is not public is counted and does not fail the check, and each class that is not public is listed.
+
+Methods of a `Revenant<Name>` proxy count as methods of `Name` when the library also exports `_OBJC_CLASS_$_<Name>`: the alias makes the proxy the class at run time (`revenant_alias.h`).
+
+Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`binary_inventory`), which folds categories into their class, and from the objects with `otool -ov`, which names each `imp`.
 
 ## Limits
 

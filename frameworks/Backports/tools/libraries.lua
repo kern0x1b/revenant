@@ -24,13 +24,17 @@ function read(libdir)
     for _, file in ipairs(files) do
         local found = inventory.binary_inventory(file, "armv7")
         assert(found, "no armv7 Objective-C metadata in " .. file)
-        local methods = index[file].methods
+        local library = index[file]
         for name, class in pairs(found.classes) do
+            local owner = name
+            if name:startswith("Revenant") and library.symbols["_OBJC_CLASS_$_" .. name:sub(9)] then
+                owner = name:sub(9)
+            end
             for selector in pairs(class.instance) do
-                methods["instance method|" .. name .. "|" .. selector:sub(2)] = true
+                library.methods["instance method|" .. owner .. "|" .. selector:sub(2)] = true
             end
             for selector in pairs(class.class) do
-                methods["class method|" .. name .. "|" .. selector:sub(2)] = true
+                library.methods["class method|" .. owner .. "|" .. selector:sub(2)] = true
             end
         end
     end
