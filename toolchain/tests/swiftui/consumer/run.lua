@@ -69,9 +69,9 @@ local function consume(build)
     end
 
     local store = os.getenv("XMAKE_GLOBALDIR") or path.join(os.getenv("HOME"), ".xmake")
-    local library = os.files(path.join(store, "packages", "*", "swiftui", "**", "libRevenantSwiftUI.a"))[1]
+    local library = os.files(path.join(store, "packages", "*", "swiftui", "**", "libSwiftUI.a"))[1]
     if not library then
-        raise("consumer: revenant@swiftui installed no libRevenantSwiftUI.a under " .. store)
+        raise("consumer: revenant@swiftui installed no libSwiftUI.a under " .. store)
     end
     local module = path.join(path.directory(path.directory(library)), "lib", "swift", "iphoneos", "SwiftUI.swiftmodule")
     if not os.isfile(path.join(module, "armv7-apple-ios.swiftmodule")) then
