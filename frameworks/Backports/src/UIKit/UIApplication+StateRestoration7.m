@@ -67,7 +67,7 @@ static void revenant_save_registered(void)
 
 static void revenant_load_registered(void)
 {
-    if (RevenantRestorationLoaded)
+    if (RevenantRestorationLoaded || ![UIApplication sharedApplication].delegate)
         return;
     RevenantRestorationLoaded = YES;
     NSData *data = [NSData dataWithContentsOfFile:revenant_restoration_file()];

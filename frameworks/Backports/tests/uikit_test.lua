@@ -251,6 +251,30 @@ local AREAS = {
             "+[UIHoverLiftEffect effect]", "@UIHoverAutomaticEffect", "+[UIHoverAutomaticEffect effect]", "-[UIView hoverStyle]",
         },
     },
+    {
+        name = "iOS 16 and 17 data objects, paste control, scene activation requests and canvas feedback",
+        sources = {"UIKit17_0.m", "UIPasteControl.m", "UICanvasFeedbackGenerator.m", "UIPageControlProgress.m", "UIShape.m"},
+        members = {
+            "@UITextItem", "-[UITextItem contentType]", "-[UITextItem range]", "-[UITextItem link]", "-[UITextItem textAttachment]", "-[UITextItem tagIdentifier]",
+            "@UITextItemMenuPreview", "+[UITextItemMenuPreview defaultPreview]", "-[UITextItemMenuPreview initWithView:]", "@UITextItemMenuConfiguration",
+            "+[UITextItemMenuConfiguration configurationWithMenu:]", "+[UITextItemMenuConfiguration configurationWithPreview:menu:]", "@UIPencilHoverPose",
+            "-[UIPencilHoverPose location]", "-[UIPencilHoverPose zOffset]", "-[UIPencilHoverPose azimuthAngle]", "-[UIPencilHoverPose azimuthUnitVector]",
+            "-[UIPencilHoverPose altitudeAngle]", "-[UIPencilHoverPose rollAngle]", "@UIPencilInteractionTap", "-[UIPencilInteractionTap timestamp]",
+            "-[UIPencilInteractionTap hoverPose]", "@UIPencilInteractionSqueeze", "-[UIPencilInteractionSqueeze timestamp]", "-[UIPencilInteractionSqueeze phase]",
+            "-[UIPencilInteractionSqueeze hoverPose]", "@UISymbolEffectCompletionContext", "-[UISymbolEffectCompletionContext finished]",
+            "-[UISymbolEffectCompletionContext sender]", "-[UISymbolEffectCompletionContext effect]", "-[UISymbolEffectCompletionContext contentTransition]",
+            "@UIMenuDisplayPreferences", "-[UIMenuDisplayPreferences maximumNumberOfTitleLines]", "@UIWindowSceneStandardPlacement",
+            "+[UIWindowSceneStandardPlacement standardPlacement]", "@UIWindowSceneProminentPlacement", "+[UIWindowSceneProminentPlacement prominentPlacement]",
+            "@UISceneSessionActivationRequest", "+[UISceneSessionActivationRequest request]", "+[UISceneSessionActivationRequest requestWithRole:]",
+            "+[UISceneSessionActivationRequest requestWithSession:]", "-[UISceneSessionActivationRequest role]", "-[UISceneSessionActivationRequest session]",
+            "-[UISceneSessionActivationRequest userActivity]", "-[UISceneSessionActivationRequest options]",
+            "-[UIApplication activateSceneSessionForRequest:errorHandler:]", "-[UIPencilInteraction initWithDelegate:]", "-[UITouch rollAngle]",
+            "-[UIHoverGestureRecognizer rollAngle]", "-[UITextSelectionRect transform]", "-[UILabel preferredVibrancy]", "-[UITextView borderStyle]",
+            "@UIPasteControl", "-[UIPasteControl initWithConfiguration:]", "-[UIPasteControl configuration]", "-[UIPasteControl target]",
+            "@UICanvasFeedbackGenerator", "-[UICanvasFeedbackGenerator alignmentOccurredAtLocation:]", "-[UICanvasFeedbackGenerator pathCompletedAtLocation:]",
+            "-[UIPageControlProgress progressVisible]", "-[UIPageControlTimerProgress running]", "-[UIHoverStyle enabled]",
+        },
+    },
 }
 
 local function key_of(member)
