@@ -35,5 +35,5 @@ if minimum then
         table.insert(digests, file .. "=" .. hash.sha256(path.join(root, file)))
     end
     local toolchain = string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s,optimize=packages,flags=%s]", minimum, sdk.version, ld64.version, llvm.version, hash.strhash128(table.concat(digests, ";")))
-    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader", {configs = {toolchains = toolchain}})
+    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader|apple-compat|appintents|activitykit|tipkit|widgetkit|createml|musickit|swift-data|swift-embedded", {configs = {toolchains = toolchain}})
 end
