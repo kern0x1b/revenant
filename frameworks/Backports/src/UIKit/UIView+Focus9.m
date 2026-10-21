@@ -4,11 +4,6 @@
 
 @implementation UIView (RevenantFocus9)
 
-- (BOOL)isFocused
-{
-    return NO;
-}
-
 - (BOOL)focused
 {
     return self.isFocused;

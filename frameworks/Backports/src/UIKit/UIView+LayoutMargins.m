@@ -52,6 +52,14 @@ static void revenant_margins_changed(UIView *view)
         margins.bottom = MAX(margins.bottom, safe.bottom);
         margins.right = MAX(margins.right, safe.right);
     }
+    UIViewController *owner = [self.nextResponder isKindOfClass:[UIViewController class]] ? (UIViewController *)self.nextResponder : nil;
+    if (owner && owner.view == self && [owner respondsToSelector:@selector(systemMinimumLayoutMargins)] && owner.viewRespectsSystemMinimumLayoutMargins) {
+        NSDirectionalEdgeInsets minimum = owner.systemMinimumLayoutMargins;
+        margins.top = MAX(margins.top, minimum.top);
+        margins.left = MAX(margins.left, minimum.leading);
+        margins.bottom = MAX(margins.bottom, minimum.bottom);
+        margins.right = MAX(margins.right, minimum.trailing);
+    }
     return margins;
 }
 
