@@ -12,7 +12,7 @@ iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI]'s SwiftUI on the
 [toolchain] toolchain.
 
 There is no copy of the code here. `packages/c/combine/xmake.lua` pins
-OpenCombine at one commit and applies the series in `frameworks/Combine/patches/`; this
+OpenCombine at one commit and applies the series in `packages/c/combine/patches/`; this
 module holds the targets that build the patched tree inside revenant and run upstream's
 tests against it.
 
@@ -51,7 +51,7 @@ Consequences to respect:
 
 | Path | Holds |
 | --- | --- |
-| `xmake.lua` | `CombineHelpers` and `Combine` on the tree `revenant@combine` installs with `sources = true`; `CombineXCTest` and `CombineTests`, upstream's tests as a daemon; `CombineGenerated`, the gyb check |
+| `xmake.lua` | `CombineXCTest` and `CombineTests`, upstream's tests as a daemon, with the module from the package `revenant@combine` and its tree; `CombineGenerated`, the gyb check. The module and its C++ helper are built by the package, not by this component |
 | `patches/` | the series the recipe applies, one patch per file; their `sha256` digests are in the recipe |
 | `tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
 | `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/reference/combine/test-results.md`) |
@@ -76,7 +76,7 @@ Consequences to respect:
 ### Changing the code
 
 Work in a clone of OpenCombine at the pinned commit with the series applied
-(`git am frameworks/Combine/patches/*.patch`), commit, and regenerate the
+(`git am packages/c/combine/patches/*.patch`), commit, and regenerate the
 series with `git format-patch --zero-commit --no-renames` from the pinned
 commit. Put the new `sha256` of each file in the recipe's `patches` list. A
 change to a gyb template is followed by its expansion with Revenant's gyb, never

@@ -29,7 +29,6 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `apple-compat` | | the shims for what an old release lacks, linked hidden into each image that calls them |
 | `swift-runtime` | 6.4.0 | the Swift standard library, runtime, concurrency and overlays, built for the port's architecture and oldest release |
 | `swift-embedded` | | Embedded Swift's `Swift` module and the Unicode tables it calls |
-| `revenant-coding` | | the secure coding and copying the data classes of the backports share, as a static library with hidden symbols |
 
 `swift-runtime` takes the configs below. `shared` installs under absolute install names for a Debian package; `backports` and `backports_uikit` make the overlays see what the `frameworks/Backports` targets implement; `library_evolution` builds the resilient runtime and is a different package; `recipe` is the digest of the recipe and its changes.
 
@@ -40,9 +39,9 @@ The `frameworks/Backports` targets carry the Objective-C APIs later releases add
 | Package | What it is |
 | --- | --- |
 | `combine` | Combine on OpenCombine with the patches of this repository, one module named `Combine` |
-| `swiftui-uikit` | SwiftUI on the UIKit of iOS 6, one module named `SwiftUI`, built against `combine` and the runtime |
-| `swiftui` | the SwiftUI module and static library a port imports, with Apple's module name |
 | `activitykit`, `appintents`, `appintents-macros`, `createml`, `matter`, `musickit`, `swift-crypto`, `swift-data`, `swift-system`, `tipkit`, `widgetkit` | the other frameworks of the repository |
+
+SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWebAuth` and the CallKit tweak `revenant-callkit-screen` are targets of their components, not packages: their sources are ours, and the components' `xmake.lua` files define them. See [the architecture](../../explanation/architecture.md).
 
 ## Libraries and emulator
 
@@ -53,7 +52,6 @@ The `frameworks/Backports` targets carry the Objective-C APIs later releases add
 | `emulator-guest` | the guest programs, `revenant-runner` and `revenant-sblaunch` |
 | `firmware-tools` | `revenant-firmware`, which decrypts the FileVault root filesystems and the Apple Encrypted Archives of firmware |
 | `swiftshader` | the CPU Vulkan driver OpenGL ES is drawn through in the emulator |
-| `apple-callkit-screen` (`tweaks/`) | the MobileSubstrate tweak that raises the system call screen for the CallKit backport |
 
 ## Backports
 

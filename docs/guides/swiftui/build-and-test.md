@@ -3,9 +3,10 @@
 ## Requirements
 
 - macOS and the revenant checkout this folder is in, configured for iOS at its top (revenant's README, "One xmake
-  project"): the module is the `SwiftUI` target, Combine the `Combine` and `CombineHelpers` targets, and
-  `swift-runtime`, `libcxx`, the `frameworks/Backports` targets, the iOS SDK and the tools are packages the project requires. An app
-  outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
+  project"): the module is the `SwiftUI` target, Combine is the package `combine`, and
+  `swift-runtime`, `libcxx`, the iOS SDK and the tools are packages the project requires. The `frameworks/Backports`
+  targets are the project's own. An app outside revenant does not take SwiftUI from a recipe any more; see
+  [the architecture](../../explanation/architecture.md) for the packages `xmake package` writes for our targets.
 - To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate` drives once the project is
   configured with `--emulate=y`. `frameworks/SwiftUI/tools/emulate.lua` does that configure itself; use the emulator the way the
   repository's skill `emulator-session` says.

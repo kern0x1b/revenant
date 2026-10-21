@@ -9,32 +9,35 @@ set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
-add_requires("revenant@apple-callkit-screen", {alias = "callkit-screen"})
-target("probe")
-    set_kind("phony")
-    add_packages("callkit-screen")
+target("revenant-callkit-screen")
+    add_rules("@addon/revenant/tweak")
+    add_files("RevenantCallScreenTweak.m")
+    add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
+    set_values("tweak.filter", "springboard.plist")
+    set_values("revenant.control", "control")
 ]]
 
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
     local copy, version = fixtures.repository(folder)
+    local root = path.directory(path.directory(path.directory(path.absolute(os.scriptdir()))))
+    local tweak = path.join(root, "frameworks", "Backports", "src", "CallKit", "tweak")
     local at = path.join(folder, "probe")
     os.mkdir(at)
+    os.cp(path.join(tweak, "*"), at .. "/")
     io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, copy, version))
 
     local refused = fixtures.refusal(function () fixtures.build(at) end)
     if refused then
-        table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own package repository, must build: " .. refused)
+        table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own sources, must build: " .. refused)
     else
-        local store = path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake")
-        local dylib = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
-                                          "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.dylib"))
-        local filter = os.files(path.join(store, "packages", "a", "apple-callkit-screen", "**",
-                                           "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.plist"))
-        if #dylib == 0 then
+        local out = path.join(folder, "install")
+        os.vrunv(os.programfile(), {"install", "-y", "-o", out}, {curdir = at})
+        local layout = path.join(out, "Library", "MobileSubstrate", "DynamicLibraries")
+        if not os.isfile(path.join(layout, "revenant-callkit-screen.dylib")) then
             table.insert(found, "the callkit-screen tweak built but its dylib is not under Library/MobileSubstrate/DynamicLibraries")
-        elseif #filter == 0 then
+        elseif not os.isfile(path.join(layout, "revenant-callkit-screen.plist")) then
             table.insert(found, "the callkit-screen tweak built but did not carry its filter plist beside the dylib")
         end
     end

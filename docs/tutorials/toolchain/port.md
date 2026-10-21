@@ -89,13 +89,14 @@ A port that needs only the language core, with no runtime, requires `revenant@sw
 
 ### Combine and SwiftUI
 
-Combine is `revenant@combine`, and SwiftUI is `revenant@swiftui-uikit`. Both are built against the runtime and libcxx, so the port names them beside those:
+Combine is `revenant@combine`, the package of OpenCombine with our patches. It is built against the runtime and libcxx, so the port names it beside those:
 
     add_requires("revenant@combine", {alias = "combine"})
-    add_requires("revenant@swiftui-uikit", {alias = "swiftui"})
 
     target("example")
-        add_packages("combine", "swiftui", "swift-runtime", "libcxx")
+        add_packages("combine", "swift-runtime", "libcxx")
+
+SwiftUI is not a package of this repository: its recipes were pins of it, and the target `SwiftUI` of `frameworks/SwiftUI` is built inside the checkout. A port outside the checkout takes SwiftUI from the packages that `xmake package` writes for our targets, as [the architecture](../../explanation/architecture.md) describes; that route is not yet verified for iOS.
 
 A SwiftUI port takes the `backports` variant of the three packages. Combine's own weak import is answered by the `frameworks/Backports` targets, which the port then carries with `coredata = true` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
 
