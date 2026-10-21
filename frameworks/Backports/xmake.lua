@@ -203,6 +203,11 @@ if is_plat("iphoneos") then
                 end
             end)
     end
+
+    target("MLComputeBackports")
+        add_files(path.join(SRC, "MLCompute", "ggml", "ggml-libcxx.cpp"))
+        add_cxxflags("-std=c++17", "-fno-exceptions", "-fno-rtti", "-fvisibility=hidden", "-fvisibility-inlines-hidden")
+    target_end()
 end
 
 local function backports_tests(name, scripts)
