@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <spawn.h>
+#include <sys/qos.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -134,37 +135,39 @@ static _Atomic(unsigned) observed;
 static void *plain_thread(void *unused)
 {
     (void)unused;
-    unsigned int (*darwin)(void) = dlsym(RTLD_DEFAULT, "qos_class_self");
-    atomic_store(&observed, qos_class_self() == darwin() ? qos_class_self() : 0xdead);
+    atomic_store(&observed, qos_class_self());
     long priorities[] = {DISPATCH_QUEUE_PRIORITY_HIGH, DISPATCH_QUEUE_PRIORITY_DEFAULT, DISPATCH_QUEUE_PRIORITY_LOW,
                          DISPATCH_QUEUE_PRIORITY_BACKGROUND};
-    unsigned classes[] = {0x19, 0x15, 0x11, 0x09};
+    unsigned classes[] = {QOS_CLASS_USER_INITIATED, QOS_CLASS_DEFAULT, QOS_CLASS_UTILITY, QOS_CLASS_BACKGROUND};
     for (int index = 0; index < 4; index++) {
-        __block unsigned mine = 0, theirs = 0;
+        __block unsigned mine = 0;
         dispatch_semaphore_t finished = dispatch_semaphore_create(0);
         dispatch_async(dispatch_get_global_queue(priorities[index], 0), ^{
             mine = qos_class_self();
-            theirs = darwin();
             dispatch_semaphore_signal(finished);
         });
         dispatch_semaphore_wait(finished, DISPATCH_TIME_FOREVER);
         char what[160];
-        snprintf(what, sizeof what, "a worker of the global queue of priority %ld has class 0x%x as Darwin's (0x%x) says",
-                 priorities[index], classes[index], theirs);
-        expect(mine == classes[index] && theirs == classes[index], what);
+        snprintf(what, sizeof what, "a worker of the global queue of priority %ld has class 0x%x, the SDK's constant for it, not 0x%x",
+                 priorities[index], classes[index], mine);
+        expect(mine == classes[index], what);
     }
     return NULL;
 }
 
 static void classes(void)
 {
-    unsigned int (*darwin)(void) = dlsym(RTLD_DEFAULT, "qos_class_self");
-    expect(darwin && darwin != qos_class_self, "the test reaches Darwin's qos_class_self beside the shim");
-    expect(qos_class_self() == 0x21 && darwin() == 0x21, "the main thread is user-interactive, as Darwin says");
+    unsigned int main_class = qos_class_self();
+    char what[160];
+    snprintf(what, sizeof what, "the main thread is user-interactive, the SDK's QOS_CLASS_USER_INTERACTIVE (0x%x), not 0x%x",
+             QOS_CLASS_USER_INTERACTIVE, main_class);
+    expect(main_class == QOS_CLASS_USER_INTERACTIVE, what);
     pthread_t thread;
     pthread_create(&thread, NULL, plain_thread, NULL);
     pthread_join(thread, NULL);
-    expect(atomic_load(&observed) == 0x15, "a thread from pthread_create has the default class, as Darwin says");
+    snprintf(what, sizeof what, "a thread from pthread_create has the default class, the SDK's QOS_CLASS_DEFAULT (0x%x), not 0x%x",
+             QOS_CLASS_DEFAULT, atomic_load(&observed));
+    expect(atomic_load(&observed) == QOS_CLASS_DEFAULT, what);
 }
 
 static void resolutions(void)

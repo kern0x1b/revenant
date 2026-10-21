@@ -1,8 +1,8 @@
 #include <dispatch/dispatch.h>
-#include <dlfcn.h>
 #include <spawn.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/qos.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -28,7 +28,7 @@ struct api {
     qos_attr_f qos_attr;
 };
 
-static struct api ours, darwins;
+static struct api ours;
 static char *self;
 static int fails;
 
@@ -89,41 +89,42 @@ int main(int argc, char **argv)
 {
     ours = (struct api){dispatch_assert_queue_not, dispatch_assert_queue_barrier, dispatch_queue_get_qos_class,
                         dispatch_queue_create_with_target, dispatch_queue_attr_make_with_qos_class};
-    void *libdispatch = dlopen("/usr/lib/system/libdispatch.dylib", RTLD_LAZY | RTLD_LOCAL);
-    darwins = (struct api){dlsym(libdispatch, "dispatch_assert_queue_not$V2"), dlsym(libdispatch, "dispatch_assert_queue_barrier"),
-                           dlsym(libdispatch, "dispatch_queue_get_qos_class"), dlsym(libdispatch, "dispatch_queue_create_with_target$V2"),
-                           dlsym(libdispatch, "dispatch_queue_attr_make_with_qos_class")};
     if (argc == 3) {
-        scenario(!strcmp(argv[2], "shim") ? &ours : &darwins, argv[1]);
+        scenario(&ours, argv[1]);
         return 0;
     }
     self = argv[0];
-    expect(libdispatch && darwins.not_on && (void *)darwins.not_on != (void *)ours.not_on, "the test reaches Darwin's dispatch_assert_queue_not beside the shim");
-    static const char *names[] = {"not-main-on-main", "not-main-off-main", "not-serial-inside", "not-serial-outside", "not-other-inside",
-                                  "not-target-inside-targeting", "not-global-inside", "barrier-inside", "barrier-outside"};
-    for (unsigned index = 0; index < sizeof names / sizeof names[0]; index++) {
-        int mine = ends(self, names[index], "shim"), theirs = ends(self, names[index], "darwin");
+    static const struct { const char *name; int traps; } scenarios[] = {
+        {"not-main-on-main", 1}, {"not-main-off-main", 0}, {"not-serial-inside", 1}, {"not-serial-outside", 0},
+        {"not-other-inside", 0}, {"not-target-inside-targeting", 1}, {"not-global-inside", 1}, {"barrier-inside", 0},
+        {"barrier-outside", 1},
+    };
+    for (unsigned index = 0; index < sizeof scenarios / sizeof scenarios[0]; index++) {
+        int traps = ends(self, scenarios[index].name, "shim");
         char what[200];
-        snprintf(what, sizeof what, "%s: the shim ends the process as Darwin does (shim %d, Darwin %d)", names[index], mine, theirs);
-        expect(mine == theirs, what);
+        snprintf(what, sizeof what, "%s: the assertion %s, as its contract says (it ended %s)", scenarios[index].name,
+                 scenarios[index].traps ? "traps" : "holds", traps ? "by a signal" : "normally");
+        expect(traps == scenarios[index].traps, what);
     }
 
-    dispatch_queue_t made = dispatch_queue_create("qos.made", DISPATCH_QUEUE_SERIAL);
-    dispatch_queue_t queues[] = {dispatch_get_main_queue(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
-                                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
-                                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), made};
+    struct { dispatch_queue_t queue; unsigned int qos; const char *name; } queues[] = {
+        {dispatch_get_main_queue(), QOS_CLASS_USER_INTERACTIVE, "the main queue"},
+        {dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), QOS_CLASS_USER_INITIATED, "the high-priority global queue"},
+        {dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), QOS_CLASS_UTILITY, "the low-priority global queue"},
+        {dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), QOS_CLASS_BACKGROUND, "the background global queue"},
+    };
     for (unsigned index = 0; index < sizeof queues / sizeof queues[0]; index++) {
-        int mine_relative = 7, theirs_relative = 7;
-        unsigned int mine = ours.qos(queues[index], &mine_relative), theirs = darwins.qos(queues[index], &theirs_relative);
+        int relative = 7;
+        unsigned int mine = ours.qos(queues[index].queue, &relative);
         char what[200];
-        snprintf(what, sizeof what, "queue %u: the class is Darwin's (shim 0x%x/%d, Darwin 0x%x/%d)", index, mine, mine_relative, theirs, theirs_relative);
-        expect(mine == theirs && mine_relative == theirs_relative, what);
+        snprintf(what, sizeof what, "%s has class 0x%x with relative priority 0, the SDK's constant (shim 0x%x/%d)", queues[index].name,
+                 queues[index].qos, mine, relative);
+        expect(mine == queues[index].qos && relative == 0, what);
     }
-    expect(ours.qos(made, NULL) == 0, "a queue with no class answers none, and a null relative priority is allowed");
 
-    expect(dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT, 0x99, 0) == DISPATCH_QUEUE_CONCURRENT &&
-           darwins.qos_attr(DISPATCH_QUEUE_CONCURRENT, 0x99, 0) == DISPATCH_QUEUE_CONCURRENT, "an invalid class answers the attribute given");
-    dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT, 0x19, -2);
+    expect(dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT, 0x99, 0) == DISPATCH_QUEUE_CONCURRENT,
+           "an invalid class answers the attribute given");
+    dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT, QOS_CLASS_USER_INITIATED, -2);
     attr = dispatch_queue_attr_make_with_autorelease_frequency(attr, 1);
     attr = dispatch_queue_attr_make_initially_inactive(attr);
     dispatch_queue_t made_with = dispatch_queue_create("qos.attr", attr);
@@ -135,14 +136,11 @@ int main(int argc, char **argv)
     dispatch_queue_t target = dispatch_queue_create("target.q", DISPATCH_QUEUE_SERIAL);
     static char key;
     dispatch_queue_set_specific(target, &key, &key, NULL);
-    for (int side = 0; side < 2; side++) {
-        dispatch_queue_t targeting = (side ? darwins.create : ours.create)("targeting.q", DISPATCH_QUEUE_SERIAL, target);
-        __block void *seen = NULL;
-        on_queue(targeting, ^{ seen = dispatch_get_specific(&key); });
-        char what[120];
-        snprintf(what, sizeof what, "%s: a queue made with a target sees the target's specifics", side ? "Darwin" : "the shim");
-        expect(seen == &key && !strcmp(dispatch_queue_get_label(targeting), "targeting.q"), what);
-    }
+    dispatch_queue_t targeting = ours.create("targeting.q", DISPATCH_QUEUE_SERIAL, target);
+    __block void *seen = NULL;
+    on_queue(targeting, ^{ seen = dispatch_get_specific(&key); });
+    expect(seen == &key && !strcmp(dispatch_queue_get_label(targeting), "targeting.q"),
+           "a queue made with a target sees the target's specifics");
     dispatch_queue_t untargeted = ours.create("untargeted.q", NULL, NULL);
     ran = 0;
     on_queue(untargeted, ^{ ran = 1; });

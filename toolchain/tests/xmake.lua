@@ -17,7 +17,7 @@ local packaged = {"architectures_test", "atomics_test", "blocks_test", "carried_
                   "debian_test", "dyld_test", "gdb_test", "macho_test", "objc_test", "operators_test",
                   "shared_runtime_test", "tls_test", "toolchain_check_test", "weak_test"}
 
-local device = {"callkit_screen_test", "emulator_test", "port_test", "swift_test", "tweak_test"}
+local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "port_test", "swift_test", "tweak_test"}
 
 if get_config("tests") == "device" then
     add_requires("revenant@swift 6.4.0", {alias = "swift", system = false})
