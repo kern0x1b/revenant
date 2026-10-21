@@ -182,6 +182,8 @@ local FOUNDATION_TESTS = {
     metadata_query = {"NSMetadataQuery+Enumerate7.m"},
     text_checking = {"NSTextCheckingResult+Alternatives7.m"},
     expression = {"NSExpression+AllowEvaluation7.m"},
+    date_components = {"NSDateComponents+Component8.m"},
+    file_relationship = {"NSFileManager+Relationship8.m"},
 }
 
 if not is_plat("iphoneos") then
