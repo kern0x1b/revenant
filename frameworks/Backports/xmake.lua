@@ -165,21 +165,27 @@ if is_plat("iphoneos") then
     end
 end
 
-if not is_plat("iphoneos") then
-    target("backports")
+local function backports_tests(name, scripts)
+    target(name)
         set_kind("phony")
         set_default(false)
-        add_tests("generator", "uikit")
+        for suite in pairs(scripts) do
+            add_tests(suite)
+        end
         on_test(function (target, opt)
-            local scripts = {generator = "backports_test.lua", uikit = "uikit_test.lua"}
-            local ok = os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TESTS, scripts[path.filename(opt.name)])},
-                                {try = true, curdir = ROOT})
+            local ok = os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TESTS, scripts[path.filename(opt.name)])}, {try = true, curdir = ROOT})
             if ok ~= 0 then
                 opt.errors = path.filename(opt.name) .. " failed"
             end
             return ok == 0
         end)
     target_end()
+end
+
+if is_plat("iphoneos") then
+    backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
+else
+    backports_tests("backports", {generator = "backports_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
