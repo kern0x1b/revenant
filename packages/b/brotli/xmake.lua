@@ -10,7 +10,7 @@ package("brotli")
     add_links("brotlienc", "brotlidec", "brotlicommon")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         cmake.install(package, {"-DBROTLI_DISABLE_TESTS=ON", "-DBROTLI_BUILD_TOOLS=OFF", "-DBROTLI_BUNDLED_MODE=OFF"},
                       {licenses = "LICENSE", prune = {"lib/pkgconfig", "share", "bin"}})
     end)

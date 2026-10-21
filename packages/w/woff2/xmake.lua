@@ -7,19 +7,19 @@ package("woff2")
     add_urls("https://github.com/google/woff2.git")
     add_versions("2026.06.29", "fb9c3379f2605b10f3e8f1d9636664ab5576775c")
     add_deps("cmake", "ninja", {kind = "binary"})
-    add_deps("brotli")
+    add_deps("revenant@brotli")
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_links("woff2dec", "woff2common")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         local builddir = cmake.install(package, {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DCANONICAL_PREFIXES=ON"},
                                        {deps = true, targets = {"woff2common", "woff2dec"}, install = false})
         for _, library in ipairs({"woff2common", "woff2dec"}) do
             os.cp(path.join(builddir, "lib" .. library .. ".a"), package:installdir("lib") .. "/")
         end
         os.cp("include/woff2", package:installdir("include") .. "/")
-        import("apple.install", {rootdir = path.join(package:scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true}).finish(package, {licenses = "LICENSE"})
+        import("apple.install", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).finish(package, {licenses = "LICENSE"})
     end)
 
     on_test(function (package)

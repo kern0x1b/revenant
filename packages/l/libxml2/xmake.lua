@@ -7,13 +7,13 @@ package("libxml2")
     add_urls("https://gitlab.gnome.org/GNOME/libxml2.git")
     add_versions("v2.15.4", "96498992efa48d52b0e8b83058bd88dbdaf153c1")
     add_deps("cmake", "ninja", {kind = "binary"})
-    add_deps("icu")
+    add_deps("revenant@icu")
     add_links("xml2")
     add_includedirs("include", "include/libxml2")
     add_defines("LIBXML_STATIC")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         cmake.install(package, {"-DLIBXML2_WITH_PROGRAMS=OFF", "-DLIBXML2_WITH_TESTS=OFF", "-DLIBXML2_WITH_PYTHON=OFF",
                                 "-DLIBXML2_WITH_DOCS=OFF", "-DLIBXML2_WITH_ICU=ON", "-DLIBXML2_WITH_ICONV=OFF",
                                 "-DCMAKE_INSTALL_SYSCONFDIR=/etc"},
