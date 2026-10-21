@@ -154,7 +154,7 @@ jobs:
           for name in $(grep -oE 'name = "[A-Za-z0-9]+Backports"' frameworks/Backports/xmake.lua | sed -E 's/.*"([^"]+)"/\1/'); do
             if ! ./xmakew build -P . "$name" > "$RUNNER_TEMP/$name.txt" 2>&1; then
               failed="$failed $name"
-              sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/$name.txt" | grep -E -A4 "Undefined symbols|malformed|not found for|error: " | head -20
+              sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/$name.txt" | grep -E "^ +\"_|malformed|framework not found|library not found|not found for architecture|unknown key" | head -150
             fi
           done
           echo "failed targets:$failed"
