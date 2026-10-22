@@ -110,7 +110,7 @@ local function universe(state)
                         kind = "instance method", selector = setter, framework = framework.name, intro = intro, rank = rank})
                 end
             elseif row.kind == "Swift declaration" and SWIFT_TYPE_KINDS[row.signature] and row.container == ""
-                and not string.find(row.symbol, "^%$ss") then
+                and swift_module_of(row.symbol) == framework.name then
                 keep(u.swift_types, row.name, {framework = framework.name, intro = intro, rank = rank})
             end
         end
