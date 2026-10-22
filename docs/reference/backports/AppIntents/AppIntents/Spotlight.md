@@ -36,9 +36,6 @@ backports keep - the same plists, over the same files - for the identifiers of o
 hand them to `deleteSearchableItems`. With no CoreSpotlight backports there is no index and nothing
 is removed, which is what a delete of an index that holds nothing does.
 
-The two `NSUserActivity` rows (`widgetConfigurationIntent(of:)`, `appEntityIdentifier`) are behind
-`-DREVENANT_APPINTENTS_PORT_HEADERS`, which the package sets when the runtime it builds against carries port
-headers; none does since the runtime's `backports` config was removed, so the block is not compiled: `NSUserActivity` arrived in iOS 8 and the Foundation backports carry it, and
-the runtime is what hands the port's headers over. They place on such a runtime; with a runtime built
-without the backports there is no `NSUserActivity` on the release at all, and the rows read `missing`
-rather than being declared against a class that is not there.
+The `NSUserActivity.appEntityIdentifier` row is not behind a guard any more: it compiles against the iPhoneOS 26.2 SDK
+at deployment 6.0, with no port headers, in the `AppIntents` build. The `widgetConfigurationIntent(of:)` row was
+removed: its body reads `NSUserActivity.intent`, which the 26.2 SDK does not declare (see [the services](Services.md)).
