@@ -76,7 +76,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
-  naming what it lacks when that is missing.
+  naming what it lacks when that is missing. The host checks of `agent-skills/` are in the `repository` group: the
+  copied-text check and the credential-leak check, run on fixtures. Its `tests/check.lua` and `tests/run.lua` drive the
+  paid scenario harness and are not part of the run.
 - Lua files under `tools/` and `toolchain/modules/` are snake_case, as xmake's own module files are (`find_tool.lua`):
   `frameworks/SwiftUI/tools/api_surface.lua`, `toolchain/tools/cache_index/`. The names of the data a tool writes, such as
   `~/.revenant/cache-index`, are not file names, and keep their spelling.

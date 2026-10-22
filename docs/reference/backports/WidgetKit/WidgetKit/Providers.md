@@ -48,7 +48,7 @@ Three of these changed the design, not just the count:
 
 **The ledger cannot count nine of the ten.** `WidgetPushHandler.pushTokenDidChange(_:widgets:)` is
 now placed (245 rows placed, one more than before). The nine intent-provider rows stay in
-`WidgetKit-missing.tsv` because the digester prints **nothing** for either protocol — not the
+the run's `WidgetKit-missing.tsv` (a run file, not kept) because the digester prints **nothing** for either protocol — not the
 protocol row for `AppIntentTimelineProvider`, not its `Context` typealias, not a member — and
 `IntentTimelineProvider`'s own protocol row flipped *into* the missing list. The two protocols are the
 only ones in this module whose associated types and members name a type from another module
@@ -79,7 +79,7 @@ trapping. It still does not count as placed, because the digester prints it as `
 
 ## The five declarations review 2 removed, and why each is not there
 
-`2026-09-28-api-appintents-kits-2.md` found five `fatalError`s in this module and one fabricated
+An audit report, `2026-09-28-api-appintents-kits-2.md` (not kept in the repository), found five `fatalError`s in this module and one fabricated
 value. All six are gone (`grep -rn fatalError frameworks/Backports/src/{WidgetKit,TipKit,ActivityKit}` is
 empty), and the rows below are the cost, stated rather than hidden:
 
