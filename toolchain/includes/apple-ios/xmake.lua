@@ -1,6 +1,6 @@
+includes(path.join(os.scriptdir(), "..", "..", "modules", "apple", "sdk.lua"))
 local named = get_config("apple_sdk") or ""
-local apple_sdk = import("apple.sdk", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
-local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or apple_sdk.release_for(get_config("component"))}
+local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or apple_sdk_release(get_config("component"))}
 for _, name in ipairs({"apple-compat", "activitykit", "appintents", "cloudkit", "createml", "cryptokit", "musickit", "network", "realityfoundation", "realitykit", "spatial", "swift-data", "swift-embedded", "swiftui", "tipkit", "uniformtypeidentifiers", "weatherkit", "widgetkit"}) do
     add_requireconfs(name, {configs = {apple_sdk = sdk.version}})
     add_requireconfs("**." .. name, {configs = {apple_sdk = sdk.version}})
