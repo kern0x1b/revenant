@@ -64,13 +64,24 @@ local function project_file(project, repo, toolchain_lua)
     }, "\n"))
 end
 
+local function empty_repository(folder)
+    local main = path.join(folder, "main")
+    if not os.isdir(main) then
+        os.mkdir(main)
+        os.vrunv("git", {"init", "-q", main})
+        os.vrunv("git", {"-C", main, "symbolic-ref", "HEAD", "refs/heads/master"})
+        os.vrunv("git", {"-C", main, "-c", "user.name=revenant", "-c", "user.email=revenant@example.invalid", "commit", "-q", "--allow-empty", "-m", "empty"})
+    end
+    return main
+end
+
 local function resolve(label, folder, repo, toolchain_lua)
     local run = path.join(folder, label)
     local project, store = path.join(run, "project"), path.join(run, "store")
     os.mkdir(project)
     os.mkdir(store)
     project_file(project, repo, toolchain_lua)
-    local envs = {XMAKE_GLOBALDIR = store}
+    local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = empty_repository(folder)}
     local log = path.join(run, "resolve.log")
     local ok, code = try {function ()
         return true, os.execv(os.programfile(), {"f", "-c", "-y"}, {curdir = project, envs = envs, stdout = log, stderr = log, timeout = 60000, try = true})
