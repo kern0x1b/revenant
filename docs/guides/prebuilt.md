@@ -114,6 +114,3 @@ when the releases are rebuilt anyway. Until then the key stays as the release ha
   compares with the locale's collation. `xmakew` pins `LC_COLLATE` to `en_US.UTF-8` so that every machine hashes as the
   released keys did. The change is to sort those strings byte by byte, which removes the pin. The orders differ for
   some names, so the keys move, and the pin is removed in the same commit as the rebuild.
-- **The text of the swift-runtime overlay patch.** `packages/s/swift-runtime/patches/overlays/` holds a patch whose
-  description names `coordination/crutches.md`, a folder that no longer exists. Changing the text changes the patch's
-  `sha256`, which the swift-runtime recipe checks, and so the key. The text is corrected in the same rebuild.
