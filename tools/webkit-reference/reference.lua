@@ -75,13 +75,18 @@ local function parse(text)
             table.insert(edges, edge)
             local tokens = words(line:sub(7))
             local colon = nil
+            local explicit = true
             for index, token in ipairs(tokens) do
                 if token.kind == ":" then
                     colon = index
                     break
                 end
                 if token.kind == "word" then
-                    table.insert(edge.outputs, token.value)
+                    if explicit then
+                        table.insert(edge.outputs, token.value)
+                    end
+                else
+                    explicit = false
                 end
             end
             assert(colon, "ninja: a build line without a colon: " .. line)
