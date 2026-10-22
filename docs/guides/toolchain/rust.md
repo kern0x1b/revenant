@@ -53,6 +53,10 @@ Two messages are expected and are not suppressed:
 
 The explanation gives the measurement behind both.
 
+## Limits on this release
+
+The shims answer what iOS 6 can do safely, and a few std calls fail rather than race. `std::fs::remove_dir_all` recurses through descriptors and fails with `ENOTSUP`, since iOS 6 has no descriptor-relative system call. `std::fs::read_dir`, `copy`, `rename` and `hard_link` work through the paths they are given. The `std::os::darwin::fs` directories answer the sandbox's user domain only. The reasons are in [Rust on iOS 6](../../explanation/toolchain/rust.md).
+
 ## Changing the nightly
 
 The nightly is the package's `channel` config and its version. A new nightly needs a new `add_versions` key with the rustup-init checksum that the recipe pins, and the spec must still load under it: `toolchain_light/rust_test` and the package's own test run `rustc --print cfg` on the spec. A new nightly is a new version of `revenant@rust`, so a port that requires the old one keeps it.

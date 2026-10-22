@@ -1,3 +1,4 @@
+#include "at_plain.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -55,6 +56,9 @@ int revenant_openat(int directory, const char *path, int flags, ...)
 __attribute__((visibility("hidden")))
 int openat(int directory, const char *path, int flags, ...)
 {
+    if (revenant_at_refused(directory, path)) {
+        return -1;
+    }
     int mode = 0;
     if (flags & O_CREAT) {
         va_list arguments;

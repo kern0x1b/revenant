@@ -24,7 +24,7 @@ The `libcxx` recipe refuses a runtime that does not export these below the relea
 
 `apple-compat` holds what a current library calls and an old release does not have, as hidden definitions linked into each image that calls them. Where a header can rename the call, the shim has a renamed name (`clock_gettime`, `dispatch_get_global_queue`); where the compiler emits the call itself, the shim has the name the compiler uses. Nothing is force-included: a shim's header brings its system header with it, and a target names the calls it renames.
 
-Code that calls a system name directly, with no header in its way, gets the name itself. Rust's std is such code: it calls `openat`, `linkat` and `CCRandomGenerateBytes` by name from its own objects. So each of those shims is also defined under its plain name, hidden, and forwards to the renamed implementation where there is one. The Rust side is in [Rust on iOS 6](rust.md).
+Code that calls a system name directly, with no header in its way, gets the name itself. Rust's std is such code: it calls `openat`, `linkat` and `CCRandomGenerateBytes` by name from its own objects. So each of those shims is also defined under its plain name, hidden. A plain name answers the path it is given, and for a descriptor other than `AT_FDCWD` it answers `ENOTSUP`, since rebuilding a path from a descriptor is not race-safe on this release; the renamed names that C callers use keep the rebuilding. The Rust side is in [Rust on iOS 6](rust.md).
 
 `dispatch_get_global_queue` is in the list for a particular reason. Every release exports it, but before iOS 8 it took a priority and answers NULL for a class of service. A caller that hands it a class renames it, and the shim maps the class to the priority it stands for.
 

@@ -1,3 +1,4 @@
+#include "at_plain.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/param.h>
@@ -22,5 +23,8 @@ int revenant_fstatat(int directory, const char *path, struct stat *buffer, int f
 __attribute__((visibility("hidden")))
 int fstatat(int directory, const char *path, struct stat *buffer, int flags)
 {
+    if (revenant_at_refused(directory, path)) {
+        return -1;
+    }
     return revenant_fstatat(directory, path, buffer, flags);
 }

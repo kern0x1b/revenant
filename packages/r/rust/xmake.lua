@@ -33,7 +33,7 @@ package("rust")
         local host = os.arch() == "arm64" and "aarch64-apple-darwin" or "x86_64-apple-darwin"
         local bin = path.join(package:installdir("rustup"), "toolchains", package:config("channel") .. "-" .. host, "bin")
         os.vrunv(path.join(bin, "cargo"), {"--version"})
-        local spec = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "rust", "armv7-apple-ios6.json")
+        local spec = import("@addon.revenant.rust", {anonymous = true}).spec()
         local cfg = os.iorunv(path.join(bin, "rustc"), {"-Zunstable-options", "--print", "cfg", "--target", spec})
         assert(cfg:find('target_os="ios"', 1, true) and cfg:find('target_arch="arm"', 1, true), "the armv7 iOS 6 spec does not load under the pinned nightly")
     end)

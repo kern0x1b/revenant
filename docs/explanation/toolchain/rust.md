@@ -27,8 +27,8 @@ The measured program is a staticlib that uses `std::thread`, `HashMap` (random s
 | Symbol | First release | Shim |
 | --- | --- | --- |
 | `clock_gettime` | iOS 10.0 | the apple-compat shim, now also under its plain name |
-| `openat`, `fstatat`, `unlinkat`, `fdopendir` | iOS 8.0 | the apple-compat shims, now also under their plain names |
-| `linkat`, `mkdirat`, `renameat` | iOS 8.0 | new: the same descriptor-to-path resolution as `openat` |
+| `openat`, `fstatat`, `unlinkat`, `fdopendir` | iOS 8.0 | the apple-compat shims, now also under their plain names; a descriptor other than `AT_FDCWD` answers `ENOTSUP` |
+| `linkat`, `mkdirat`, `renameat` | iOS 8.0 | new: `AT_FDCWD` and absolute paths; a descriptor answers `ENOTSUP`, and `linkat` refuses a symbolic link unless `AT_SYMLINK_FOLLOW` |
 | `CCRandomGenerateBytes` | iOS 8.0 | new: `arc4random_buf`, which iOS 4.3 has |
 | `renamex_np` | iOS 10.0 | new: `rename` for no flags; `RENAME_EXCL` and the other flags answer `ENOTSUP` |
 | `fclonefileat` | iOS 10.0 | new: `ENOTSUP`, so std copies with `fcopyfile` |
@@ -36,7 +36,9 @@ The measured program is a staticlib that uses `std::thread`, `HashMap` (random s
 
 The first release was measured from the caches under `~/.revenant/dyld`: a symbol the 7.1.2 cache lacks and the 8.0 cache exports is an iOS 8 symbol, and the same for iOS 10 between 9.3.6 and 10.2.1. The SDK's availability macros agree for `sysdir_*` and `fclonefileat`.
 
-The shims keep to what the release can do. `renamex_np` with `RENAME_EXCL` is not atomic on iOS 6, so it answers `ENOTSUP`, which is the signal std's `rename_noreplace` uses to link and unlink instead. `fclonefileat` answers `ENOTSUP`, which std's `fs::copy` takes as the cue to use `fcopyfile`. The `sysdir` pair answers only the user domain, which is the only one std asks for, and it answers the documented paths (`~/Documents`, `~/Library/Caches`, and so on); a kind the user domain does not have answers nothing. A port that asks another domain gets no path, and that is the limit of the shim. The plain-name definitions are hidden, so an image exports no libc name it lacks, and each is linked only into images whose deployment target is below its release.
+The shims keep to what the release can do. iOS 6 has no descriptor-relative system call, so a shim that rebuilds a path from the descriptor (`F_GETPATH`) is not race-safe: a directory renamed or swapped for a symbolic link between the two steps is followed. Under their plain names, the descriptor-relative calls therefore answer `ENOTSUP` for any descriptor other than `AT_FDCWD`, and `fdopendir` always does; `AT_FDCWD` and absolute paths are exact. The renamed names that C callers reach through the headers keep their path rebuilding, and are not race-safe either. `remove_dir_all` of std recurses by descriptor and has no path-based fallback, so on this release it fails with `ENOTSUP` rather than racing. Fixing that is a decision for std or for a patched standard library, not for a shim. `linkat` without `AT_SYMLINK_FOLLOW` refuses a symbolic link, because `link()` on this release follows it and would make a different link.
+
+`renamex_np` with `RENAME_EXCL` is not atomic on iOS 6, so it answers `ENOTSUP`, which is the signal std's `rename_noreplace` uses to link and unlink instead. `fclonefileat` answers `ENOTSUP`, which std's `fs::copy` takes as the cue to use `fcopyfile`. The `sysdir` pair answers only the user domain, which is the only one std asks for, and it answers the documented paths (`~/Documents`, `~/Library/Caches`, and so on); a kind the user domain does not have answers nothing. A port that asks another domain gets no path, and that is the limit of the shim. The plain-name definitions are hidden, so an image exports no libc name it lacks, and each is linked only into images whose deployment target is below its release.
 
 The host test `toolchain/tests/addon/compat/named.c` runs the shims on the host and compares the answers with the documented behaviour; the same test run against the host's own libc fails in exactly the places the shims are meant to differ. The `named_failures` check in `compat_test` compiles each for armv7 iOS 6 and checks that it is a hidden definition that calls nothing by its own name.
 
