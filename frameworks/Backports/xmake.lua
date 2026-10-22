@@ -93,7 +93,7 @@ local LIBRARIES = {
     {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}, gap = {"LinkPresentation", "TelegramCore imports LinkPresentation and uses LPMetadataProvider, which have no iOS 6 backport"}},
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}, gap = {"Intents", "TelegramIntents needs INPerson, INPersonHandle and INSendMessageIntent, whose iOS 10 behavior is not backported"}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
-    {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
+    {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}, excluded = true},
     {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
@@ -167,6 +167,9 @@ if is_plat("iphoneos") then
         target(library.name)
             set_kind("shared")
             add_rules("@addon/revenant/apple-ios")
+            if library.gap or library.excluded then
+                set_default(false)
+            end
             if library.gap then
                 open_gap(table.unpack(library.gap))
             end
