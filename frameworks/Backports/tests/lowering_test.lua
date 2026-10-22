@@ -12,6 +12,13 @@ void revenantProbe(NSString *text, NSFileManager *files)
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
     (void)[text stringByRemovingPercentEncoding];
+    (void)[[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
+    (void)[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:1 toDate:[NSDate date] options:0];
+    (void)[[NSCalendar currentCalendar] isDateInToday:[NSDate date]];
+    NSDate *weekend = nil;
+    NSTimeInterval weekendInterval = 0;
+    (void)[[NSCalendar currentCalendar] rangeOfWeekendStartDate:&weekend interval:&weekendInterval containingDate:[NSDate date]];
+    (void)[[NSDateInterval alloc] initWithStartDate:[NSDate date] duration:1.0];
     (void)[WKWebView class];
     (void)MTLCreateSystemDefaultDevice();
 }

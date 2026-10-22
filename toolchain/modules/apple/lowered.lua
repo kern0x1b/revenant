@@ -1107,7 +1107,7 @@ end
 
 function swift_names(set)
     local names = {}
-    for _, members in pairs(set.classes) do
+    for class, members in pairs(set.classes) do
         for key in pairs(members) do
             local base = not key:sub(2):find("^init") and swift_base(key:sub(2))
             if base then
@@ -1117,6 +1117,10 @@ function swift_names(set)
             if init then
                 names[init] = true
             end
+        end
+        if class:startswith("NS") then
+            names["type " .. class] = true
+            names["type " .. class:sub(3)] = true
         end
     end
     return names
@@ -1135,6 +1139,11 @@ local function lowered_by(line, names, types)
     local target = line:match("public%s+typealias%s+[%a_][%w_]*%s*=%s*([%a_][%w_%.]*)")
     if target then
         return types[(target:gsub("%.", ""))]
+    end
+    local declared = line:match("^%s*public%s+struct%s+([%a_][%w_]*)") or line:match("^%s*public%s+class%s+([%a_][%w_]*)") or
+                     line:match("^%s*public%s+enum%s+([%a_][%w_]*)")
+    if declared then
+        return names["type " .. declared] or false
     end
     return false
 end
