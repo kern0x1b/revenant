@@ -39,7 +39,11 @@ local function words(text)
     local i, n = 1, #text
     while i <= n do
         local c = text:sub(i, i)
-        if c == "$" and i < n then
+        if c == "$" and text:sub(i + 1, i + 1) == "{" then
+            local close = text:find("}", i + 2, true)
+            word = (word or "") .. text:sub(i, close)
+            i = close + 1
+        elseif c == "$" and i < n then
             word = (word or "") .. text:sub(i + 1, i + 1)
             i = i + 2
         elseif c == " " then
@@ -68,7 +72,7 @@ local function words(text)
 end
 
 local function parse(text)
-    local edges, edge = {}, nil
+    local edges, variables, edge = {}, {}, nil
     for _, line in ipairs(logical_lines(text)) do
         if line:startswith("build ") then
             edge = {outputs = {}, inputs = {}, vars = {}}
@@ -103,11 +107,21 @@ local function parse(text)
         elseif edge and line:match("^%s+[%w_%-]+%s*=") then
             local key, value = line:match("^%s+([%w_%-]+)%s*=%s?(.*)$")
             edge.vars[key] = unescape(value)
+        elseif line:match("^[%w_%-]+%s*=") then
+            edge = nil
+            local key, value = line:match("^([%w_%-]+)%s*=%s?(.*)$")
+            variables[key] = unescape(value)
         elseif line:match("^%S") then
             edge = nil
         end
     end
-    return edges
+    return edges, variables
+end
+
+local function expand(text, variables)
+    return (text:gsub("%${([%w_%-]+)}", function (name)
+        return variables[name] or ("${" .. name .. "}")
+    end))
 end
 
 local function json_string(text)
@@ -172,38 +186,86 @@ local function plan(ninja, interpreter)
     return picked
 end
 
-local function run(build, ninja, real, placeholder, icu, stage, jobs, shim_log)
-    local text = io.readfile(ninja)
+local function execute(build, picked, variables)
+    local function resolve(name)
+        local full = expand(name, variables)
+        if path.is_absolute(full) then
+            return full
+        end
+        return path.join(build, full)
+    end
+    local made, pending = {}, {}
+    for _, edge in ipairs(picked) do
+        table.insert(pending, edge)
+    end
+    while #pending > 0 do
+        local remaining = {}
+        for _, edge in ipairs(pending) do
+            local ready = true
+            for _, input in ipairs(edge.inputs) do
+                local full = resolve(input)
+                if not made[full] and not os.isfile(full) then
+                    ready = false
+                    break
+                end
+            end
+            if ready then
+                for _, output in ipairs(edge.outputs) do
+                    os.mkdir(path.directory(resolve(output)))
+                end
+                os.vrunv("/bin/sh", {"-c", expand(edge.vars.COMMAND, variables)}, {curdir = build})
+                for _, output in ipairs(edge.outputs) do
+                    local full = resolve(output)
+                    assert(os.isfile(full), "reference: the command did not make " .. full)
+                    made[full] = true
+                end
+            else
+                table.insert(remaining, edge)
+            end
+        end
+        assert(#remaining < #pending, "reference: no command can run; its inputs are missing, first: " .. (function ()
+            for _, input in ipairs(pending[1].inputs) do
+                if not os.isfile(resolve(input)) then
+                    return resolve(input)
+                end
+            end
+            return "?"
+        end)())
+        pending = remaining
+    end
+    return made
+end
+
+local function run(build, real, placeholder, icu, stage, pyver, shim_log)
+    local commit = io.readfile(path.join(os.scriptdir(), "..", "..", "packages", "w", "webkit", "xmake.lua")):match('local commit = "(%x+)"')
+    assert(commit, "reference: no WebKit commit in the recipe")
+    local text = io.readfile(path.join(build, "build.ninja"))
     local rewritten = text:gsub(placeholder:gsub("%p", "%%%0"), (real:gsub("%%", "%%%%")))
-    local reference = path.join(build, "reference.ninja")
-    io.writefile(reference, rewritten)
-    local edges = parse(rewritten)
+    local edges, variables = parse(rewritten)
     local picked = selected(edges, real)
     assert(#picked > 0, "reference: no custom command runs " .. real)
-    local targets = {}
-    for _, edge in ipairs(picked) do
-        for _, output in ipairs(edge.outputs) do
-            table.insert(targets, output)
-        end
-    end
-    os.vrunv(jobs.ninja, table.join({"-f", reference, "-C", build, "-j", tostring(jobs.width)}, targets))
+    execute(build, picked, variables)
     local rows = {}
+    local count = 0
     for _, edge in ipairs(picked) do
         local inputs, outputs = {}, {}
         for _, input in ipairs(edge.inputs) do
-            local full = path.is_absolute(input) and input or path.join(build, input)
-            table.insert(inputs, string.format('{"path": %s, "sha256": %s}', json_string(input), json_string(digest(full))))
+            local full = expand(input, variables)
+            full = path.is_absolute(full) and full or path.join(build, full)
+            table.insert(inputs, string.format('{"path": %s, "sha256": %s}', json_string(full), json_string(digest(full))))
         end
         for _, output in ipairs(edge.outputs) do
-            local full = path.join(build, output)
-            assert(os.isfile(full), "reference: ninja left " .. output .. " unbuilt")
-            table.insert(outputs, string.format('{"path": %s, "sha256": %s}', json_string(output), json_string(digest(full))))
-            local target = path.join(stage, output)
+            local full = expand(output, variables)
+            full = path.is_absolute(full) and full or path.join(build, full)
+            local relative = path.relative(full, build)
+            table.insert(outputs, string.format('{"path": %s, "sha256": %s}', json_string(relative), json_string(digest(full))))
+            local target = path.join(stage, relative)
             os.mkdir(path.directory(target))
             os.cp(full, target)
+            count = count + 1
         end
         table.insert(rows, string.format('{"script": %s, "rule": %s, "command": %s, "inputs": %s, "outputs": %s}',
-            json_string(script_of(edge.vars.COMMAND, real)), json_string(edge.rule), json_string(edge.vars.COMMAND),
+            json_string(script_of(edge.vars.COMMAND, real)), json_string(edge.rule), json_string(expand(edge.vars.COMMAND, variables)),
             json_array(inputs, "    "), json_array(outputs, "    ")))
     end
     for _, file in ipairs(os.files(path.join(icu, "*"))) do
@@ -214,16 +276,15 @@ local function run(build, ninja, real, placeholder, icu, stage, jobs, shim_log)
     local shim = shim_log and os.isfile(shim_log) and io.readfile(shim_log) or ""
     local manifest = table.concat({
         "{",
-        '  "webkit_commit": ' .. json_string(jobs.commit) .. ",",
-        '  "python": ' .. json_string(jobs.python_version) .. ",",
+        '  "webkit_commit": ' .. json_string(commit:sub(1, 7)) .. ",",
+        '  "python": ' .. json_string(pyver) .. ",",
         '  "interpreter": ' .. json_string(real) .. ",",
         '  "configure_interpreter_calls": ' .. json_string(shim) .. ",",
         '  "edges": ' .. json_array(rows, "  ") .. ",",
-        '  "icu": ' .. json_string(icu),
-        "}"
-    }, "\n")
+        '  "icu": ' .. json_string(icu)
+    }, "\n") .. "\n}"
     io.writefile(path.join(stage, "manifest.json"), manifest .. "\n")
-    print("reference: %d generator edges, %d outputs, manifest written to %s", #picked, #targets, path.join(stage, "manifest.json"))
+    print("reference: %d generator edges, %d outputs, manifest written to %s", #picked, count, path.join(stage, "manifest.json"))
 end
 
 function main(command, ...)
@@ -231,12 +292,8 @@ function main(command, ...)
     if command == "plan" then
         plan(args[1], args[2])
     elseif command == "run" then
-        local commit = io.readfile(path.join(os.scriptdir(), "..", "..", "packages", "w", "webkit", "xmake.lua")):match('local commit = "(%x+)"')
-        assert(commit, "reference: no WebKit commit in the recipe")
-        run(args[1], path.join(args[1], "build.ninja"), args[2], args[3], args[4], args[5], {
-            ninja = args[6], width = tonumber(args[7]), commit = commit:sub(1, 7), python_version = args[8]
-        }, args[9])
+        run(args[1], args[2], args[3], args[4], args[5], args[6], args[7])
     else
-        raise("usage: reference.lua plan <build.ninja> <interpreter> | run <build> <real interpreter> <placeholder> <icu dir> <stage> <ninja> <jobs> <python version> [shim log]")
+        raise("usage: reference.lua plan <build.ninja> <interpreter> | run <build> <real interpreter> <placeholder> <icu dir> <stage> <python version> [shim log]")
     end
 end

@@ -76,17 +76,14 @@ jobs:
           set -euo pipefail
           build=$(find "$HOME/.revenant/cache/xmake-global" -path '*/webkit-engine/latest/build/build.ninja' -print -quit)
           test -n "$build" || { echo "no build.ninja of webkit-engine in the store"; exit 1; }
-          ninja=$(sed -n 's/^CMAKE_MAKE_PROGRAM:[A-Z]*=//p' "$(dirname "$build")/CMakeCache.txt")
-          test -x "$ninja" || { echo "CMAKE_MAKE_PROGRAM is not an executable: $ninja"; exit 1; }
           echo "build: $build"
-          echo "ninja: $ninja"
           py=$(command -v python3)
           pyver=$("$py" -c 'import sys; print(sys.version.split()[0])')
           commit=$(sed -n 's/^ *local commit = "\([0-9a-f]*\)".*/\1/p' packages/w/webkit/xmake.lua | cut -c1-7)
           stage="$RUNNER_TEMP/stage"
           rm -rf "$stage"
           mkdir -p "$stage"
-          ./xmakew l -P . tools/webkit-reference/reference.lua run "$(dirname "$build")" "$py" "$RUNNER_TEMP/shim/python3" "$RUNNER_TEMP/icu-out" "$stage" "$ninja" 4 "$pyver" "$RUNNER_TEMP/shim/calls.log"
+          ./xmakew l -P . tools/webkit-reference/reference.lua run "$(dirname "$build")" "$py" "$RUNNER_TEMP/shim/python3" "$RUNNER_TEMP/icu-out" "$stage" "$pyver" "$RUNNER_TEMP/shim/calls.log"
           tar -czf "$RUNNER_TEMP/webkit-generator-reference-$commit.tar.gz" -C "$stage" .
           tar -tzf "$RUNNER_TEMP/webkit-generator-reference-$commit.tar.gz" | wc -l
 
