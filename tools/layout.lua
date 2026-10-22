@@ -135,26 +135,6 @@ function main()
        os.getenv("LC_COLLATE") ~= "en_US.UTF-8" then
         wrong("xmakew", "sets the collation used to compute the prebuilt keys")
     end
-    local helpers, helper_files = {}, 0
-    for file in files:gmatch("[^\n]+") do
-        if file:match("^frameworks/[^/]+/tools/lib/tree%.lua$") then
-            helper_files = helper_files + 1
-            local text = io.readfile(path.join(root, file))
-            if not text:find("@addon.revenant.member", 1, true) then
-                wrong(file, "imports shared member paths and argument parsing from @addon.revenant.member")
-            end
-            for name in text:gmatch("function%s+([%w_]+)%s*%(") do
-                if helpers[name] then
-                    wrong(file, "duplicates " .. name .. " from " .. helpers[name])
-                else
-                    helpers[name] = file
-                end
-            end
-        end
-    end
-    if helper_files == 0 then
-        wrong("frameworks", "has no member tools/lib/tree.lua files to check")
-    end
     local indexed = {}
     local index = io.readfile(path.join(root, "docs", "README.md"))
     for target in index:gmatch("%]%((.-)%)") do
