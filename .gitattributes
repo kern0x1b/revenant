@@ -19,3 +19,4 @@ docs/** linguist-documentation
 
 frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
 frameworks/SwiftUI/src/TextSettings.swift comments=upstream
+toolchain/tests/addon/toolchain_check/apple-ios-before-on-check.lua comments=fixture

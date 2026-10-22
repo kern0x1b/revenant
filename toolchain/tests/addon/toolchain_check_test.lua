@@ -39,21 +39,12 @@ local function fake_repo(folder)
     return repo
 end
 
-local FIX_COMMIT = "14ff46c3"
-local BEFORE_FIX_COMMIT = "2a8af359963d9eb62daa52ca750833dfc2ed64ea"
+local BEFORE_ON_CHECK = path.join(os.scriptdir(), "toolchain_check", "apple-ios-before-on-check.lua")
 
-local function older_toolchain_file(folder, checkout)
-    local ok = try {function ()
-        os.iorunv("git", {"cat-file", "-e", BEFORE_FIX_COMMIT .. "^{commit}"}, {curdir = checkout})
-        return true
-    end}
-    assert(ok, "this checkout's history has no commit " .. BEFORE_FIX_COMMIT ..
-           " (named here as the parent of " .. FIX_COMMIT .. ", the toolchain(apple-ios) on_check fix) - " ..
-           "if that commit was rebased, update BEFORE_FIX_COMMIT in this test to its new parent's hash")
-    local text = os.iorunv("git", {"show", BEFORE_FIX_COMMIT .. ":toolchains/apple-ios/xmake.lua"}, {curdir = checkout})
+local function older_toolchain_file(folder)
     local file = path.join(folder, "apple-ios-before.lua")
-    io.writefile(file, text)
-    return file, BEFORE_FIX_COMMIT
+    os.cp(BEFORE_ON_CHECK, file)
+    return file
 end
 
 local function project_file(project, repo, toolchain_lua)
@@ -102,13 +93,13 @@ function failures(opt)
         table.insert(found, "the checkout's own toolchains/apple-ios/xmake.lua still answers toolchain(\"apple-ios\"): not found on a fresh install")
     end
 
-    local older_file, older_commit = older_toolchain_file(folder, checkout)
+    local older_file = older_toolchain_file(folder)
     local ok_old, not_found_old = resolve("old", folder, repo, older_file)
     if ok_old then
-        table.insert(found, "toolchains/apple-ios/xmake.lua as of " .. older_commit:sub(1, 10) .. " (pinned as the fix's own parent - see older_toolchain_file) was expected to fail the same fresh install the checkout's current one now passes - it did not, so this test's negative control does not reproduce the bug it exists to catch")
+        table.insert(found, "toolchain_check/apple-ios-before-on-check.lua (the apple-ios toolchain before its on_check fix) was expected to fail the same fresh install the checkout's current one now passes - it did not, so this test's negative control does not reproduce the bug it exists to catch")
     end
     if not ok_old and not not_found_old then
-        table.insert(found, "toolchains/apple-ios/xmake.lua as of " .. older_commit:sub(1, 10) .. " failed for a different reason than the one this test exists to name")
+        table.insert(found, "toolchain_check/apple-ios-before-on-check.lua failed for a different reason than the one this test exists to name")
     end
 
     os.tryrm(folder)
