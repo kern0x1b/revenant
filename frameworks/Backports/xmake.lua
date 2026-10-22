@@ -82,7 +82,6 @@ local LIBRARIES = {
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "QuartzCoreBackports", folder = "QuartzCore", frameworks = {"QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
@@ -263,7 +262,7 @@ local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
 }
 
-local function host_tests(folder, tests)
+local function host_tests(folder, tests, library)
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
         target(folder .. "Backports_" .. name .. "_test")
@@ -273,7 +272,7 @@ local function host_tests(folder, tests)
             set_default(false)
             add_files(path.join(TESTS, name .. "_test.m"))
             for _, source in ipairs(sources) do
-                add_files(path.join(SRC, folder, source))
+                add_files(path.join(SRC, library or folder, source))
             end
             add_includedirs(TESTS)
             add_mflags("-fobjc-arc")
@@ -287,5 +286,5 @@ end
 
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS)
-    host_tests("QuartzCore", QUARTZCORE_TESTS)
+    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit")
 end
