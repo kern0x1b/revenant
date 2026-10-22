@@ -74,3 +74,15 @@ path = "packages/d/dynarmic/patches/0001-Apply-the-emulator-s-dynarmic-arm64-bac
 precedence = "closest"
 SPDX-FileCopyrightText = ["2017 merryhime", "2026 kern0x1b"]
 SPDX-License-Identifier = "0BSD"
+
+[[annotations]]
+path = "frameworks/Backports/src/CoreML/proto/*.proto"
+precedence = "closest"
+SPDX-FileCopyrightText = "2017 Apple Inc."
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "frameworks/Backports/src/CoreML/proto/LICENSE.txt"
+precedence = "closest"
+SPDX-FileCopyrightText = "2020-2023 Apple Inc."
+SPDX-License-Identifier = "BSD-3-Clause"
