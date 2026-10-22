@@ -130,12 +130,52 @@ function main()
         table.insert(errors, file .. ": " .. why)
     end
     local files = os.iorunv("git", {"-C", root, "-c", "core.quotepath=false", "ls-files"})
+    local launcher = io.readfile(path.join(root, "xmakew"))
+    if not launcher:find("LC_COLLATE=en_US.UTF-8", 1, true) or not launcher:find("export LC_COLLATE", 1, true) or
+       os.getenv("LC_COLLATE") ~= "en_US.UTF-8" then
+        wrong("xmakew", "sets the collation used to compute the prebuilt keys")
+    end
+    local indexed = {}
+    local index = io.readfile(path.join(root, "docs", "README.md"))
+    for target in index:gmatch("%]%((.-)%)") do
+        local destination = target:match("^<([^>]+)>") or target:match("^(%S+)")
+        if destination and destination:endswith(".md") and not destination:match("^%a[%w+.-]*:") and not destination:match("^//") then
+            local resolved = path.normalize(path.join(root, "docs", destination))
+            indexed[path.relative(resolved, root)] = true
+        end
+    end
     local present = {}
     local folders = {}
     local recipes = {}
+    local uses = {}
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
+        if file:match("^frameworks/[^/]+/tools/lib/tree%.lua$") then
+            local text = io.readfile(path.join(root, file))
+            if not text:find('"@addon.revenant.member"', 1, true) then
+                wrong(file, "a member's tree helper binds the shared helpers from @addon.revenant.member, not its own copy")
+            end
+            if text:find("function arguments(", 1, true) and not text:find("return shared.arguments(", 1, true) then
+                wrong(file, "the argument parser is defined once, in toolchain/modules/member.lua; a member delegates to it")
+            end
+        end
+        if file:endswith(".md") then
+            local text = io.readfile(path.join(root, file))
+            for target in text:gmatch("%]%((.-)%)") do
+                local destination = target:match("^<([^>]+)>") or target:match("^(%S+)")
+                if destination and not destination:match("^%a[%w+.-]*:") and not destination:match("^//") then
+                    local relative = destination:match("^([^#]*)")
+                    local linked = relative ~= "" and path.normalize(path.join(root, path.directory(file), relative)) or path.join(root, file)
+                    if not os.isfile(linked) and not os.isdir(linked) then
+                        wrong(file, "broken local link: " .. destination)
+                    end
+                end
+            end
+            if parts[1] == "docs" and file ~= "docs/README.md" and not file:match("^docs/explanation/decisions/%d%d%d%d%-") and not indexed[file] then
+                wrong(file, "is missing from docs/README.md")
+            end
+        end
         if file:lower():find("telegram", 1, true) then
             wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-app-under-test.md")
         end
@@ -146,6 +186,20 @@ function main()
         end
         if file:endswith(".lua") and parts[1] ~= "toolchain" and io.readfile(path.join(root, file)):find(ADDON_PATH, 1, true) then
             wrong(file, "reaches the addon's modules by path: import them as @addon.revenant.<module>")
+        end
+        if file:endswith(".lua") then
+            for name in io.readfile(path.join(root, file)):gmatch("@addon%.revenant%.([%w_][%w_.]*)") do
+                local module = name:gsub("%.+$", "")
+                table.insert(uses, {file = file, module = module})
+            end
+        end
+        local handle = io.open(path.join(root, file), "rb")
+        if handle then
+            local head = handle:read(2)
+            handle:close()
+            if head == "#!" and file ~= "xmakew" and not file:match("/DEBIAN/[%w_-]+$") then
+                wrong(file, "is a script: the one entry point is ./xmakew, and only the Debian maintainer scripts run beside it (ADR 0003)")
+            end
         end
         local component
         if parts[1] == "frameworks" then
@@ -188,6 +242,12 @@ function main()
             wrong(file, "a component holds only " .. table.concat(listed, ", "))
         elseif parts[1] == "docs" and not allowed.docs[parts[2]] then
             wrong(file, "docs/ holds only " .. table.concat(layout.docs, ", "))
+        end
+    end
+    for _, use in ipairs(uses) do
+        local module = use.module:gsub("%.", "/")
+        if not present["toolchain/modules/" .. module .. ".lua"] then
+            wrong(use.file, "imports @addon.revenant." .. use.module .. ", which is no file in toolchain/modules")
         end
     end
     for _, folder in ipairs(table.orderkeys(folders)) do

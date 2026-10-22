@@ -15,7 +15,7 @@
 @implementation RevenantNWDataTransferReport
 @end
 
-@implementation RevenantNWEndpoint
+@implementation RevenantNWEndpointValue
 @end
 
 @implementation RevenantNWError

@@ -127,7 +127,7 @@ static RevenantNWBrowseResult *revenant_browser_result(RevenantNWBrowser *browse
             [interfaces addObject:(id)interface];
     }
     result->_interfaces = interfaces;
-    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
     endpoint->_type = nw_endpoint_type_bonjour_service;
     endpoint->_bonjourName = lookup->_name;
     endpoint->_bonjourType = lookup->_type;

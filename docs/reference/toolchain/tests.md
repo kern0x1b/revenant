@@ -8,18 +8,20 @@ reference says what runs where.
 
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
-| `toolchain_light` | 14 suites of `tests/addon/` that build nothing and need no package | the repository | always |
-| `toolchain_packages` | 16 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
-| `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release; the recompiler's `classpair` and `ordinal` checks (`recompiler_device`), which read the iOS 6 dyld cache; `compat_device_test`, the dispatch_block probes and the default global queue's class in `compat/device/`, which answer as iOS only on a device or an emulator | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
+| `toolchain_light` | 16 suites of `tests/addon/` that need no package builds | the repository | always |
+| `toolchain_packages` | 18 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
+| `toolchain_device` | six suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `port_test`, `swift_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs | only with `./xmakew f -P . --tests=device` |
+| `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |
+| `recompiler_device` | `classpair` and `ordinal` | the prebuilt packages and a claimed device | only with `./xmakew f -P . --tests=device` |
 
-The suites are the modules of `tests/addon/`, each one `failures(options)` that returns the failures it found. A test
+Each toolchain suite is a module of `tests/addon/` with `failures(options)`, which returns the failures it found. A test
 prints each failure and fails. Run one target with `./xmakew test -P . 'toolchain_light/*'`, or one suite with
 `./xmakew test -P . 'toolchain_light/descriptions_test'`.
 
-`toolchain_device` is outside the default run by declaration: without `--tests=device` it is not in the project, so
-`xmake test` does not see it. `swift_test` reads the system libraries of a firmware release held under
-`~/.revenant/dyld`, and when they are not held it fails and names `xmake firmware --arch=<arch> fetch <release>`. Run
-on this machine, which holds them, it passes. `emulator_test` runs its own xmake addon install and then a queue step that
+`toolchain_device` and `recompiler_device` are outside the default run by declaration: without `--tests=device` they
+are not in the project, so `./xmakew test -P .` does not see them. `swift_test` reads the system libraries of a firmware
+release held under `~/.revenant/dyld`, and when they are not held it fails and names
+`./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` runs its own xmake addon install and then a queue step that
 runs the xmake task `queue`; the heavy job pool removed that task, so the step fails and names it, and the other checks
 of the suite pass.
 

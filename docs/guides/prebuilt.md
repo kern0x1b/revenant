@@ -119,5 +119,5 @@ when the releases are rebuilt anyway. Until then the key stays as the release ha
   fails, because the linker cannot load the library for the bitcode objects it reads, so every LTO link fails. The
   recipe now installs `libLTO.dylib` in both configurations, and its key takes the iPhoneOS SDK's recipe digest too,
   since the iOS builtins are compiled against that SDK. Both changes are one llvm key move, and the released llvm key
-  is the one before them. Until that rebuild the reference configure strips the flag on its own branch only; the
-  engine build keeps `-flto=thin`.
+  is the one before them. Until that rebuild the engine's configure fails its compiler check, and nothing strips the
+  flag to work around it.

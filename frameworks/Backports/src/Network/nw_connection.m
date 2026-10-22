@@ -24,7 +24,7 @@ enum { nw_connection_state_setup = 0 };
 
 @interface RevenantNWConnection : NSObject <OS_nw_connection> {
 @public
-    RevenantNWEndpoint *_endpoint;
+    RevenantNWEndpointValue *_endpoint;
     RevenantNWParameters *_parameters;
     dispatch_queue_t _queue;
     dispatch_queue_t _connectQueue;
@@ -35,7 +35,7 @@ enum { nw_connection_state_setup = 0 };
     nw_connection_state_t _value;
     nw_path_t _currentPath;
     nw_path_monitor_t _monitor;
-    RevenantNWEndpoint *_currentEndpoint;
+    RevenantNWEndpointValue *_currentEndpoint;
     BOOL _started, _cancelled, _finished, _secure, _viable, _viableKnown, _connecting;
     int _socket;
     int _acceptedSocket;
@@ -121,7 +121,7 @@ static void revenant_handshake(RevenantNWConnection *connection);
 static void revenant_flush(RevenantNWConnection *connection);
 static void revenant_connect_finished(RevenantNWConnection *connection);
 static void revenant_install_sources(RevenantNWConnection *connection);
-static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpoint *endpoint);
+static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpointValue *endpoint);
 static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error);
 static void revenant_readable(RevenantNWConnection *connection);
 
@@ -201,7 +201,7 @@ static void revenant_apply_options(RevenantNWConnection *connection)
         setsockopt(handle, IPPROTO_IP, IP_DONTFRAG, &on, sizeof on);
     if (revenant_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false)) {
     }
-    RevenantNWEndpoint *local = parameters->_localEndpoint;
+    RevenantNWEndpointValue *local = parameters->_localEndpoint;
     if (local && local->_address.length) {
         struct sockaddr_storage address;
         memset(&address, 0, sizeof address);
@@ -706,7 +706,7 @@ BOOL RevenantNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void
         if (out_handle)
             *out_handle = connection->_socket;
         if (out_endpoint)
-            *(RevenantNWEndpoint * _Nonnull __unsafe_unretained *)out_endpoint = connection->_currentEndpoint;
+            *(RevenantNWEndpointValue * _Nonnull __unsafe_unretained *)out_endpoint = connection->_currentEndpoint;
         if (out_parameters)
             *(nw_parameters_t __unsafe_unretained *)out_parameters = connection->_parameters;
         connection->_socket = -1;
@@ -770,7 +770,7 @@ static void revenant_ready(RevenantNWConnection *connection)
     revenant_report_state(connection, nw_connection_state_ready, nil);
 }
 
-static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpoint *endpoint)
+static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpointValue *endpoint)
 {
     @synchronized(connection) {
         if (connection->_cancelled)
@@ -785,7 +785,7 @@ static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int
 static void revenant_open(RevenantNWConnection *connection)
 {
     RevenantNWConnection *self = connection;
-    RevenantNWEndpoint *endpoint = connection->_endpoint;
+    RevenantNWEndpointValue *endpoint = connection->_endpoint;
     RevenantNWParameters *parameters = connection->_parameters;
     connection->_isDatagram = revenant_is_datagram(parameters);
     connection->_secure = revenant_is_secure(parameters);
@@ -929,7 +929,7 @@ nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t par
     if (!endpoint || !parameters)
         return nil;
     RevenantNWConnection *connection = [[RevenantNWConnection alloc] init];
-    connection->_endpoint = (RevenantNWEndpoint *)endpoint;
+    connection->_endpoint = (RevenantNWEndpointValue *)endpoint;
     connection->_parameters = (RevenantNWParameters *)parameters;
     connection->_socket = -1;
     connection->_acceptedSocket = -1;
