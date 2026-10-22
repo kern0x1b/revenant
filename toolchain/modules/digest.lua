@@ -61,7 +61,7 @@ local RECIPES = {
     {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
      inputs = {"packages/s/swift-runtime/xmake.lua", "toolchain/modules/apple/shared_runtime.lua",
                "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/dyld.lua", "toolchain/modules/apple/lowered.lua",
-               "frameworks/Backports/src/**",
+               "frameworks/Backports/lowered-members.txt",
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua",
                "packages/s/swift-runtime/patches/**.patch",

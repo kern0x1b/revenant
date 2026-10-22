@@ -40,7 +40,8 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[text stringByRemovingPercentEncoding];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
-    (void)[[NSData alloc] initWithBase64EncodedString:@"" options:0];
+    NSDataBase64DecodingOptions decoding = NSDataBase64DecodingIgnoreUnknownCharacters;
+    (void)[[NSData alloc] initWithBase64EncodedString:@"" options:decoding];
     (void)[[WKWebViewConfiguration alloc] init];
     (void)[[CNPostalAddress alloc] init];
     (void)[[LAContext alloc] init];
@@ -144,4 +145,44 @@ function main()
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)
+    local typedefs = table.concat({
+        "typedef NS_OPTIONS(NSUInteger, SampleOptions) {",
+        "    SampleOne = 1UL << 0",
+        "} API_AVAILABLE(macos(10.9), ios(7.0));",
+        "typedef NS_OPTIONS(NSUInteger, SampleOther) {",
+        "    SampleTwo = 1UL << 0",
+        "} API_AVAILABLE(macos(10.9), ios(7.0));",
+        "API_AVAILABLE(ios(14.3))",
+        "typedef NS_ENUM(NSInteger, SampleLeading) {",
+        "    SampleLead = 0",
+        "};",
+        "typedef void (^SampleBlock)(void) API_AVAILABLE(ios(9.0));",
+        "@interface SampleReader : NSObject",
+        "- (void)readWithOptions:(SampleOptions)options block:(SampleBlock)block API_AVAILABLE(macos(10.9), ios(7.0));",
+        "@end",
+        "",
+    }, "\n")
+    local typed = lowered.lower_header(typedefs, {classes = {SampleReader = {["-readWithOptions:block:"] = true}}, functions = {}, globals = {}, protocols = {},
+                                                  types = {SampleOptions = true, SampleLeading = true, SampleBlock = true}})
+    assert(count(typed, "AVAILABLE") == 1 and typed:find("} ;\n", 1, true) and typed:find("} API_AVAILABLE(macos(10.9), ios(7.0));\n", 1, true),
+           "a typedef the backported signatures use lowers with them, and the one they do not use keeps its availability:\n" .. typed)
+    assert(not typed:find("API_AVAILABLE(ios(14.3))", 1, true) and not typed:find("API_AVAILABLE(ios(9.0))", 1, true),
+           "an availability written before a typedef, and on a block typedef, lowers with the typedef:\n" .. typed)
+    local base64 = table.concat({
+        "@available(macOS 10.9, iOS 7.0, *)",
+        "public typealias Base64DecodingOptions = NSData.Base64DecodingOptions",
+        "extension Data {",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public init?(base64Encoded base64String: __shared String, options: Data.Base64DecodingOptions = []) {",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public init?(base64Encoded base64Data: __shared Data, options: Data.Base64DecodingOptions = []) {",
+        "  }",
+        "}",
+        "",
+    }, "\n")
+    local base64_names = lowered.swift_names({classes = {NSData = {["-initWithBase64EncodedString:options:"] = true}}, functions = {}, globals = {}})
+    local base64_lowered = lowered.lower_swift_text(base64, base64_names, {NSDataBase64DecodingOptions = true})
+    assert(count(base64_lowered, "@available") == 1 and base64_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public init?(base64Encoded base64Data", 1, true),
+           "the Swift base64 initializer and the typealias of its options lower with the Objective-C member, and the Data overload keeps its availability:\n" .. base64_lowered)
 end
