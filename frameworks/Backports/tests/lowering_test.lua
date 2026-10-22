@@ -57,6 +57,9 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)scene.activityItemsConfigurationSource;
     (void)[[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[]];
     (void)AVAudioSessionPortBluetoothLE;
+    AVAssetWriter *writer = nil;
+    AVAssetWriterInput *input = nil;
+    [writer addInput:input];
     vImage_ARGBToYpCbCrMatrix matrix;
     vImage_YpCbCrPixelRange range = {0, 128, 255, 255, 255, 1, 255, 0};
     vImage_ARGBToYpCbCr info;
@@ -190,4 +193,26 @@ function main()
     local base64_lowered = lowered.lower_swift_text(base64, base64_names, {NSDataBase64DecodingOptions = true})
     assert(count(base64_lowered, "@available") == 1 and base64_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public init?(base64Encoded base64Data", 1, true),
            "the Swift base64 initializer and the typealias of its options lower with the Objective-C member, and the Data overload keeps its availability:\n" .. base64_lowered)
+    local released = {AVSampleWriter = {instance = {"addInput:", "count", "oldMethod:"}, ["class"] = {}},
+                      AVSampleLater = {instance = {}, ["class"] = {}}}
+    local device_sample = table.concat({
+        "API_AVAILABLE(ios(8.0))",
+        "@interface AVSampleLater : NSObject",
+        "@end",
+        "@interface AVSampleWriter : NSObject",
+        "- (void)addInput:(id)input API_AVAILABLE(macos(10.10), visionos(1.0), ios(8.0));",
+        "- (void)oldMethod:(id)x API_AVAILABLE(ios(4.1));",
+        "- (void)notOnDevice:(id)x API_AVAILABLE(ios(9.0));",
+        "@property (nonatomic, readonly) int count API_AVAILABLE(ios(8.0));",
+        "@end",
+        "",
+    }, "\n")
+    local device = lowered.device_members_in(device_sample, released, {})
+    assert(device.classes.AVSampleWriter and device.classes.AVSampleWriter["-addInput:"] and device.classes.AVSampleWriter["-count"]
+           and not device.classes.AVSampleWriter["-oldMethod:"] and not device.classes.AVSampleWriter["-notOnDevice:"],
+           "the release's members that the SDK annotates later are the device members, and only those:\n" .. tostring(device.classes.AVSampleWriter))
+    assert(device.classes.AVSampleLater, "a class the release implements and the SDK annotates later is a device class")
+    local device_lowered = lowered.lower_header(device_sample, device)
+    assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
+           "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
 end

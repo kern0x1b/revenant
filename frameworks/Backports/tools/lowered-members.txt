@@ -30979,6 +30979,7 @@ type HMHomeHubState
 type HMHomeManagerAuthorizationStatus
 type HMPresenceEventType
 type HMPresenceEventUserType
+type ICDownloadOption
 type ICScannerFunctionalUnitType
 type INMessageType
 type INPaymentMethodType
