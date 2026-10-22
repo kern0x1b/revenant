@@ -146,7 +146,18 @@ local function find_member(u, container, tag, selector)
     return nil
 end
 
-local function backed_index(keys, classes)
+local function declared_protocols()
+    local protocols = {}
+    local src = path.join(os.scriptdir(), "..", "src")
+    for _, file in ipairs(os.files(path.join(src, "**.m"))) do
+        for name in io.readfile(file):gmatch("\n@protocol%s+([%w_]+)%s*<") do
+            protocols[name] = true
+        end
+    end
+    return protocols
+end
+
+local function backed_index(keys, classes, protocols)
     local set, selectors, folders = {}, {}, {}
     for folder, list in pairs(keys) do
         folders[folder] = true
@@ -162,7 +173,7 @@ local function backed_index(keys, classes)
             end
         end
     end
-    return {keys = set, selectors = selectors, folders = folders}
+    return {keys = set, selectors = selectors, folders = folders, protocols = protocols}
 end
 
 local function cache_of(ios)
@@ -297,7 +308,7 @@ local function protocol_item(ctx, ledger, name, level, file)
         return add(ledger, key, known, file, level)
     end
     local item = new_item({kind = "protocol", container = "", name = name, framework = protocol.framework,
-        intro = protocol.intro, present = ctx.annotated(protocol.intro), backed = false,
+        intro = protocol.intro, present = ctx.annotated(protocol.intro), backed = ctx.backed.protocols[name] == true,
         component = ctx.component.protocols[name] == true, runtime = ctx.runtime.protocols[name] == true})
     return add(ledger, key, item, file, level)
 end
@@ -381,6 +392,41 @@ local function framework_item(ctx, ledger, name, level, file)
     return add(ledger, key, item, file, level)
 end
 
+local function settle_frameworks(ledger)
+    local members = {}
+    for _, key in ipairs(ledger.order) do
+        local item = ledger.items[key]
+        if item.kind ~= "framework" and item.framework then
+            members[item.framework] = members[item.framework] or {}
+            table.insert(members[item.framework], item)
+        end
+    end
+    for _, key in ipairs(ledger.order) do
+        local item = ledger.items[key]
+        local list = item.kind == "framework" and item.status == "missing" and members[item.name]
+        if list and #list > 0 then
+            local complete, all_present, provided = true, true, 0
+            for _, member in ipairs(list) do
+                if member.status == "missing" then
+                    complete = false
+                end
+                if member.status ~= "present" then
+                    all_present = false
+                end
+                if member.status == "backported" then
+                    provided = provided + 1
+                end
+            end
+            if complete and all_present then
+                item.present = true
+            elseif complete and provided > 0 then
+                item.backed = true
+            end
+            item.status, item.via = status_of(item)
+        end
+    end
+end
+
 local function compact_of(u, record, global_types)
     local hits, call_hits, member_hits, own = {}, {}, {}, {}
     for _, name in ipairs(record.declared_members) do
@@ -440,15 +486,22 @@ local function use_record(ctx, ledger, record)
     for _, selector in ipairs(record.selectors) do
         selector_item(ctx, ledger, selector, "syntax", file)
     end
+    local imported = {}
+    for _, name in ipairs(record.imports) do
+        imported[name] = true
+    end
     for _, word in ipairs(record.hits) do
         if not ctx.declared[word] then
-            if u.classes[word] then
+            local class = u.classes[word]
+            local swift = u.swift_types[word]
+            local swift_here = swift and imported[swift.framework] and class and not imported[class.framework]
+            if class and not swift_here then
                 class_item(ctx, ledger, word, "text", file)
             end
             if u.protocols[word] then
                 protocol_item(ctx, ledger, word, "text", file)
             end
-            if u.swift_types[word] and not u.classes[word] then
+            if swift and (not class or swift_here) then
                 swift_type_item(ctx, ledger, word, "text", file)
             end
             local symbol = u.symbols[word]
@@ -702,7 +755,7 @@ function main(...)
     local cache, source = cache_of(opt.ios)
     phase("cache " .. source)
     local keys = implemented.from_objects(opt.objects)
-    local backed = backed_index(keys, u.classes)
+    local backed = backed_index(keys, u.classes, declared_protocols())
     local folders = 0
     for _ in pairs(backed.folders) do
         folders = folders + 1
@@ -754,6 +807,7 @@ function main(...)
     for _, file in ipairs(product_files) do
         use_product(ctx, ledger, products.read(file))
     end
+    settle_frameworks(ledger)
     phase("classify")
 
     local by_level, by_status, by_via = {}, {}, {}

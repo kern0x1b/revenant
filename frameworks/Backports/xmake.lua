@@ -232,7 +232,7 @@ if is_plat("iphoneos") then
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
-                                  network = "network_test.lua"})
+                                  network = "network_test.lua", protocols = "protocols_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
@@ -263,7 +263,7 @@ local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
 }
 
-local function host_tests(folder, tests, library)
+local function host_tests(folder, tests, library, frameworks)
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
         target(folder .. "Backports_" .. name .. "_test")
@@ -278,7 +278,7 @@ local function host_tests(folder, tests, library)
             add_includedirs(TESTS)
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
-            add_frameworks("Foundation")
+            add_frameworks(table.unpack(frameworks or {"Foundation"}))
             add_tests("default")
             add_tests("negative", {runargs = {"--negative"}, should_fail = true})
         target_end()
@@ -288,4 +288,5 @@ end
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS)
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit")
+    host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
 end
