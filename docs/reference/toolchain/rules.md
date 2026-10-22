@@ -46,6 +46,8 @@ A package's `add_configs("revision", {default = "2", readonly = true})` is raise
 
 `apple.objc_bool` set to `bool` adds `-D__OBJC_BOOL_IS_BOOL=1` and `-Wno-macro-redefined` to the target's Objective-C and Objective-C++ flags, so `BOOL` is `_Bool`, as on arm64, the architecture the source was written for. On armv7 `BOOL` is `signed char`, and the two differ in two places. A one-bit signed bitfield, `BOOL on : 1`, stores YES as -1 under `signed char`, which changes the value read back; the flag removes that difference. And `@encode(BOOL)` is `c` under `signed char` and `B` under `_Bool`. Calls in both directions pass one byte that holds 0 or 1, so the flag changes no call, only the type encodings. Methods of a class compiled this way carry `B` in their encodings, so the KVC and `NSInvocation` paths that read those encodings on a BOOL property must be checked on iOS 6 before a port relies on them. `toolchain/tests/objc_bool/runtime_check.m` is that check, to run in the emulator with the flag set; it is not verified yet. The compile-time half, the bitfield under `-Werror` and the encoding in the IR, is `objc_bool_test`.
 
+The rule passes `-Wno-incompatible-sysroot` to armv6, armv7 and armv7s targets. Clang warns that the sysroot is for another target: measured against SDK 16.4 and SDK 26.2, every 32-bit target gets the warning and arm64 gets none. It is inherent to building armv7 against a current SDK, the design of this port, so it is silenced for those arches only.
+
 ## Settings of the project
 
 | Setting | Meaning |

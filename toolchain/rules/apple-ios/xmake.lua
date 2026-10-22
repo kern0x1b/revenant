@@ -51,6 +51,12 @@ rule("apple-ios")
             target:add("mflags", "-D__OBJC_BOOL_IS_BOOL=1", "-Wno-macro-redefined", {force = true})
             target:add("mxflags", "-D__OBJC_BOOL_IS_BOOL=1", "-Wno-macro-redefined", {force = true})
         end
+        if target:is_arch("armv6", "armv7", "armv7s") then
+            target:add("cxflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("mflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("mxflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("asflags", "-Wno-incompatible-sysroot", {force = true})
+        end
     end)
 
     after_config(function (target)
