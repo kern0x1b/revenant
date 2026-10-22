@@ -46,8 +46,8 @@ type, the getter `body`, and one static method with a default implementation.
 
 ## Reproducing it with our implementation
 
-`frameworks/SwiftUI/src/` is built for `arm64-apple-ios14.0` against the real SDK. `-D REV_SYSTEM_COMBINE` takes the
-system's Combine instead of ours. `-D REV_NO_FIELD_REFLECTION` stands in for `_forEachField`, which the prebuilt stdlib
+For this experiment `frameworks/SwiftUI/src/` was built for `arm64-apple-ios14.0` against the real SDK. `-DREV_SYSTEM_COMBINE` took the
+system's Combine instead of ours, and that flag is gone from the sources, which take our Combine now. `-D REV_NO_FIELD_REFLECTION` stands in for `_forEachField`, which the prebuilt stdlib
 does not have; the port has that SPI, because its runtime is built from source.
 
 | step | matched, of 64 |

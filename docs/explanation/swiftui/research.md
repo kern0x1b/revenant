@@ -96,13 +96,13 @@ The first real answer comes from the recompiler's probe: this same app, translat
 
 Source: `OpenCombine/OpenCombine` (MIT, last commit 1c6f02c, 2023-10). No dependencies except a small C++ helper.
 
-Built with a script that no longer exists (it is now the `Combine` target of `frameworks/Combine`): Swift 6.4
+Built with a script that no longer exists (the recipe of the package `revenant@combine` builds it now): Swift 6.4
 (`revenant@swift`), `-target armv7-apple-ios7.0`, the runtime and overlays of the Swift overlay project's trial builds,
 linked for iOS 6.0, install name `@executable_path`. The toolchain's import check against the 6.0 and 6.1.3 caches gives
 **0 strong missing**.
 
 Tests: 1453 upstream tests (`URLSessionTests.swift` is excluded, because it inherits from `NSURLSession`, which is
-iOS 7) run through our own XCTest shim (230 lines; now `frameworks/Combine/tests/XCTest.swift`, and the test list is
+iOS 7) run through our own XCTest shim (233 lines; now `frameworks/Combine/tests/XCTest.swift`, and the test list is
 collected by `frameworks/Combine/tools/discover.lua` for the `CombineTests` target).
 
 | where | tests | passed | failed | crashes |
@@ -160,8 +160,8 @@ Verified by reading the sources (the upstream OpenSwiftUI at cc24a30 and OpenAtt
 ### 5.1 Architecture
 
 The module is called **`SwiftUI`**: an app is compiled from sources that start with `import SwiftUI`, without any change to
-the text. Combine comes from OpenCombine (`@_exported import OpenCombine`; OpenCombine can be built with
-`-module-name Combine` if wanted).
+the text. Combine comes from the package `combine` (`@_exported import Combine` in `src/Core.swift`; OpenCombine, the
+upstream of that package, can be built with `-module-name Combine` if wanted).
 
 Layers:
 
@@ -189,21 +189,22 @@ Layers:
 
 ### 5.2 What is already done
 
-The module `frameworks/SwiftUI/src/` (the SwiftUI project; the Swift module is still called `SwiftUI`) is about 14,000
+The module `frameworks/SwiftUI/src/` (the SwiftUI project; the Swift module is still called `SwiftUI`) is about 24,000
 lines. The full list of what is supported, ignored and missing is kept in [the ledger](../../reference/swiftui/ledger.md), and it is checked against the build
-(`coverage.lua --check`). The count as of 19.09, for the SwiftUI interface of SDK 16.4, over the part Apple declares
-available on iOS (the slice comes from `tools/apple_names.lua modifiers`): **490 of 520 types, 289 of 289 `View`
-modifiers**, of which 188 work, 101 are declared and ignored (each writes a line to the log and to
+(`coverage.lua --check`). The count the ledger holds today, over the SwiftUI and SwiftUICore interfaces of SDK 26.2 and
+the part Apple declares available on iOS (the slice comes from `tools/apple_names.lua modifiers`): **646 of 1208 types,
+289 of 289 `View` modifiers**, of which 202 work, 87 are declared and ignored (each writes a line to the log and to
 `/var/revenant/swiftui-ignored.txt`), and no `unimplemented` stubs are left. Over the full interface, including the
-macOS, tvOS and watchOS part: 503 of 592 types. The list of ignored items is closed: only things with nothing to match on
-iOS 6 go there; everything that depended on our engine was turned into working code or stubs.
+macOS, tvOS and watchOS part: 664 types and 311 modifiers, of which 206 work. The list of ignored items is closed: only
+things with nothing to match on iOS 6 go there; everything that depended on our engine was turned into working code or
+stubs.
 
 The build goes against the package `revenant@swift-runtime` 6.4.0 (the toolchain, main 70c716c), the same runtime the other
 ports use, with the target `armv7-apple-ios6.0` and **availability checking enabled**. That found and fixed places the
 earlier build, with `-disable-availability-checking`, passed over silently (`CGPathAddRoundedRect`, iOS 7, in the rounded
 shapes; `-[NSCalendar component:fromDate:]`, iOS 8). Core Data is available through the package's overlay: `@FetchRequest`
-works on top of `NSFetchedResultsController`. Checks: 260 unit tests of the engine in iLEmu on iOS 6.1.3 and on a live iPad 2
-(6.1.3), and 16 snapshot scenarios in the app (iPod4,1 on iOS 6.0), all of which pass. When the runtime moved to the
+works on top of `NSFetchedResultsController`. Checks: 265 checks of the engine in iLEmu on iOS 6.1.3 and on a live iPad 2
+(6.1.3), and 38 snapshot scenarios in the app (iPod4,1 on iOS 6.0), all of which pass. When the runtime moved to the
 package, and again when the `needsMount` and `needsLayout` gates were added to the layout, all snapshots matched byte for
 byte. The guest build for the recompiler (arm64, library evolution) satisfies 64 of 64 symbols of the test app built
 against Apple's SDK.
@@ -213,7 +214,7 @@ The engine is incremental: a subtree is not redrawn if the view value has not ch
 
 ### 5.3 Probe: the app
 
-`frameworks/SwiftUI/examples/showcase/DemoApp.swift` (177 lines) is an app in ordinary SwiftUI syntax: `@main struct
+`frameworks/SwiftUI/examples/showcase/DemoApp.swift` (246 lines) is an app in ordinary SwiftUI syntax: `@main struct
 DemoApp: App`, a `NavigationView` with a `List`, a card with `@State` (a counter, a switch, an input field), a `@StateObject`
 model with `@Published`, `@EnvironmentObject` in the rows and on the detail screen, `ForEach` over `Identifiable`, a
 conditional view, and a `NavigationLink` to the detail screen.
@@ -260,12 +261,12 @@ A limit found at the same time: `UIFont`/`GSFontCreateWithName` crashes on iOS 6
 - A stack gave the remainder to its children without regard to their minimum sizes, so text in a row wrapped too early.
 - Transaction flushing must go from parents to children; otherwise nodes that were already recreated get recomputed.
 
-### Correction to the coverage count (19.09)
+### Correction to the coverage count
 
-The count "490 of 520 types, 289 of 289 modifiers" is correct as a count of **names**, and it stays that way, but it cannot
+The count "646 of 1208 types, 289 of 289 modifiers" is correct as a count of **names**, and it stays that way, but it cannot
 measure completeness. The typed comparison of `swift-api-digester` (Apple's SwiftUI interface for iOS 16.4 against our
-module, `tools/api_surface.lua`) shows what the name count cannot see: **1402 Apple declarations are missing and 321 are
-present with a different signature** (calls covered by our default values are not counted). The reason the name count is
+module, `tools/api_surface.lua`) shows what the name count cannot see: of 4740 Apple declarations, **927 are missing and 314
+are present with a different signature** (calls covered by our default values are not counted). The reason the name count is
 blind is that a comparison by name does not distinguish overloads, and accepts `Shading.linearGradient` as
 `ShapeStyle.linearGradient`. The same comparison and scenarios taken from real code also found three silent falsehoods that
 the names did not show: the `.updating` of a gesture did not call the body (gestures were matched by the closure's type
@@ -349,7 +350,7 @@ For comparison: the prototype itself (half a day of work) covered "a screen with
 ## 8. The recommended first step
 
 1. **Pin OpenCombine as a toolchain component.** It already builds and passes its tests. It needs a package recipe
-   (`revenant@opencombine`), a run after the backport of `CFRunLoopTimerSetTolerance` and the Swift overlay fixes are merged,
+   (`revenant@combine`), a run after the backport of `CFRunLoopTimerSetTolerance` and the Swift overlay fixes are merged,
    and a decision on the upstream PR about `Stride.magnitude` on 32-bit.
 2. **Continue SwiftUI from the prototype** in `frameworks/SwiftUI`, not from OpenSwiftUI: add snapshot tests in iLEmu (a reference PNG for each screen), and bring the "simple screens" level to completion.
 3. **Close direction A**, and do not return to the real SwiftUI; from its analysis take only the map of the device
