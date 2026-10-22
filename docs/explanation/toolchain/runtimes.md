@@ -26,7 +26,7 @@ The `libcxx` recipe refuses a runtime that does not export these below the relea
 
 `dispatch_get_global_queue` is in the list for a particular reason. Every release exports it, but before iOS 8 it took a priority and answers NULL for a class of service. A caller that hands it a class renames it, and the shim maps the class to the priority it stands for.
 
-`dispatch_block_create` and its family are a close copy of what libdispatch of iOS 8 does, since `DispatchWorkItem` is built on them. Two things are left out, and say so. A release has no classes of service and no vouchers, so the flags that name them are accepted and change nothing. `DISPATCH_BLOCK_BARRIER` is not honoured, because the release's `dispatch_async` cannot read a block's flags; a barrier block runs as an ordinary one.
+`dispatch_block_create` and its family are a close copy of what libdispatch of iOS 8 does, since `DispatchWorkItem` is built on them. Two things are left out, and say so. A release has no classes of service and no vouchers, so the flags that name them are accepted and change nothing. The release's `dispatch_async` cannot read a block's flags, so `DISPATCH_BLOCK_BARRIER` is honoured by `apple-compat`'s own `revenant_dispatch_async`, `_sync`, `_group_async`, `_group_notify`, `_after` and `_source_set_event_handler`, which submit such a block as a barrier, as libdispatch of iOS 10 does. A source's cancellation and registration handlers are set through the release's own calls, and run as ordinary blocks.
 
 ## Swift is built from source, for the port's release
 
