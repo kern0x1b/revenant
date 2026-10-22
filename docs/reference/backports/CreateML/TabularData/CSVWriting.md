@@ -1,10 +1,10 @@
 # CSV writing in TabularData: what is measured, and what is carried
 
 Source of every behaviour below: the host's own `TabularData` (macOS 27 SDK, Swift 6.4), run on the same
-frames. The writer is `frameworks/Backports/src/TabularData/CSVWriting.swift`; the comparison is
-(no longer in the repository), which built each frame in both modules, writes it with each
-module's options, and fails on any difference in the bytes, or in the error's case, row, column, cell bytes
-and text. The declarations are the SDK's, as the spec rows give them
+frames. The writer is `frameworks/Backports/src/TabularData/CSVWriting.swift`; the comparison that built
+each frame in both modules, wrote it with each module's options, and failed on any difference in the
+bytes, or in the error's case, row, column, cell bytes and text, is no longer in the repository. The
+declarations are the SDK's, as the spec rows give them
 (`the deleted registry package spec/TabularData/swift.tsv`).
 
 ## Carried
@@ -40,5 +40,6 @@ and text. The declarations are the SDK's, as the spec rows give them
   protocol. The port's are on `DataFrame` itself, so a caller written against the protocol does not compile.
 - The JSON writer (`jsonRepresentation(options:)`, `writeJSON(to:options:)`, `JSONWritingOptions`).
 - Device verification: none yet. The TabularData sources compile for `armv7-apple-ios6.1.3` with the port's
-  compiler, at the flags the package passes; the package's own xmake build has not run for this writer, and
-  no run on a device or in the emulator has been made.
+  compiler, at the flags the package passes; the package's own xmake build has not run, because
+  `revenant@createml` refuses on load while the CoreML overlay is an open gap, and no run on a device or
+  in the emulator has been made.
