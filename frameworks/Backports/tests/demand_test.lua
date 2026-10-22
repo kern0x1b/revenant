@@ -6,7 +6,7 @@ local function keys_of(list)
     for _, item in ipairs(list) do
         table.insert(out, item)
     end
-    table.sort(out)
+    table.sort(out, scanner.bytes_less)
     return out
 end
 

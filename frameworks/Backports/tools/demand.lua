@@ -81,6 +81,9 @@ end
 local function universe(state)
     local u = {classes = {}, protocols = {}, symbols = {}, members = {}, selectors = {}, swift_types = {},
         frameworks = {}}
+    table.sort(state.frameworks, function (a, b)
+        return scanner.bytes_less(a.name, b.name)
+    end)
     for _, framework in ipairs(state.frameworks) do
         local introduced = sdkfiles.framework_introduced(framework.rows)
         u.frameworks[framework.name] = true
@@ -116,7 +119,7 @@ local function universe(state)
     for key in pairs(u.members) do
         table.insert(keys, key)
     end
-    table.sort(keys)
+    table.sort(keys, scanner.bytes_less)
     for _, key in ipairs(keys) do
         local entry = u.members[key]
         u.selectors[entry.selector] = u.selectors[entry.selector] or {}
@@ -498,7 +501,7 @@ local function ranked(ledger, status)
         if a.file_count ~= b.file_count then
             return a.file_count > b.file_count
         end
-        return a.key < b.key
+        return scanner.bytes_less(a.key, b.key)
     end)
     return out
 end
@@ -516,7 +519,7 @@ local function write_report(opt, ctx, ledger, meta)
     for name in pairs(totals) do
         table.insert(frameworks, name)
     end
-    table.sort(frameworks)
+    table.sort(frameworks, scanner.bytes_less)
     local table_rows = {"framework\treferenced\tpresent\tbackported\tmissing\texact\tsyntax\ttext"}
     for _, name in ipairs(frameworks) do
         local row = totals[name]
@@ -543,7 +546,7 @@ local function write_report(opt, ctx, ledger, meta)
     for _, pair in ipairs(ledger.missing_pairs) do
         table.insert(pair_rows, pair.file .. "\t" .. pair.key)
     end
-    table.sort(pair_rows)
+    table.sort(pair_rows, scanner.bytes_less)
     io.writefile(path.join(opt.report, "missing_files.tsv"), table.concat(pair_rows, "\n") .. "\n")
 
     local candidates = {}
@@ -562,7 +565,7 @@ local function write_report(opt, ctx, ledger, meta)
         if a.file_count ~= b.file_count then
             return a.file_count > b.file_count
         end
-        return a.name < b.name
+        return scanner.bytes_less(a.name, b.name)
     end)
     local candidate_rows = {"name\tfiles\trefs\tstatus"}
     for _, candidate in ipairs(candidates) do
@@ -594,7 +597,7 @@ local function write_report(opt, ctx, ledger, meta)
     for kind in pairs(by_kind) do
         table.insert(kinds, kind)
     end
-    table.sort(kinds)
+    table.sort(kinds, scanner.bytes_less)
     for _, kind in ipairs(kinds) do
         say(string.format("  missing %-18s %d", kind, by_kind[kind]))
     end
@@ -645,7 +648,7 @@ local function source_files(roots, lists)
             end
         end
     end
-    table.sort(files)
+    table.sort(files, scanner.bytes_less)
     return files
 end
 

@@ -16,6 +16,20 @@ function language_of(file)
     return extension and LANGUAGES[extension:lower()] or nil
 end
 
+function bytes_less(a, b)
+    local index = 1
+    while true do
+        local x, y = a:byte(index), b:byte(index)
+        if x == nil or y == nil then
+            return x == nil and y ~= nil
+        end
+        if x ~= y then
+            return x < y
+        end
+        index = index + 1
+    end
+end
+
 local function string_end(text, stop)
     local quote = text:sub(stop, stop)
     local pattern = quote == "\"" and "[\\\"\n]" or "[\\'\n]"

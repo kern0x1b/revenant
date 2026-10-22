@@ -1,4 +1,5 @@
 local macho = import("apple.macho", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+local scanner = import("demand_scan", {rootdir = os.scriptdir(), anonymous = true})
 
 local ARCHIVE = "!<arch>\n"
 local MAGIC_LE = {[0xFEEDFACE] = true, [0xFEEDFACF] = true}
@@ -34,7 +35,7 @@ function files_under(path_)
             table.insert(found, file)
         end
     end
-    table.sort(found)
+    table.sort(found, scanner.bytes_less)
     return found
 end
 
