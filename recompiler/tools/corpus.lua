@@ -7,10 +7,6 @@ function setup(name, out)
     return e, out
 end
 
-function sorted(list)
-    return env.sorted(list)
-end
-
 function fail(format, ...)
     raise("FAIL: " .. format, ...)
 end

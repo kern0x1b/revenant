@@ -23,10 +23,5 @@ its business.
 
 ## Enforced by
 
-`repository/layout`: a `.lua` file outside `toolchain/` that contains `"toolchain", "modules"` fails. The check
-has no exception list.
-
-## Not enforced
-
-That an `@addon.revenant.<module>` names a module that exists. The import fails when the script or test runs,
-which is the check that counts.
+`repository/layout`: a `.lua` file outside `toolchain/` that contains `"toolchain", "modules"` fails, and so does an
+`@addon.revenant.<module>` that names no file in `toolchain/modules/`. The check has no exception list.

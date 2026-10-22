@@ -125,15 +125,14 @@ Moving the base is work in a scratch clone of WebKit, never in the package cache
 
 ```sh
 git clone --filter=blob:none https://github.com/WebKit/WebKit.git webkit && cd webkit
-git switch -c series <base commit from packages/w/webkit/xmake.lua>
+git switch -c series <new base commit>
 git am <revenant>/packages/w/webkit/patches/*.patch
-git rebase --onto <new base> <base commit> series    # with rerere.enabled, so a resolution replays
 git format-patch -N -o <revenant>/packages/w/webkit/patches <new base>..series
 ```
 
 In order, stopping at the first failure that matters:
 
-1. Rebase the series onto the new base, one patch at a time, so each conflict lands in
+1. Apply the series onto the new base, one patch at a time, so each conflict lands in
    the concern its patch is about.
 2. Re-export the series, and put the new base commit and every patch's sha256 in the
    recipe.

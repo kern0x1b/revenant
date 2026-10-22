@@ -16,8 +16,8 @@ choose a runner, so each job keeps its own `runs-on`.
   built in the job. It configures and builds the Backports component
   (`./xmakew f -P . -p iphoneos -a armv7 --component=Backports`, then `./xmakew build -P .`) and uploads
   `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`.
-- `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, swiftSpatial,
-  swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
+- `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, WidgetKit,
+  swiftSpatial, swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
   packages through their wrappers. It names `swift-runtime` and `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a
   missing release of either is an error.
 
