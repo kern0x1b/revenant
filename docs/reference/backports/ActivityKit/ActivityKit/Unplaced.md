@@ -2,7 +2,7 @@
 
 162 rows, **152 placed**, 10 missing, 0 wrong-kind, built for `armv7-apple-ios6.1.3` from the
 sources with the recipe's own flags. the digester's own dump
-(`activitykit-dump.json`) sorts the ten three ways:
+(`activitykit-dump.json`, a run file not kept in the repository) sorts the ten three ways:
 
 | rows | which | what they are |
 | --- | --- | --- |
