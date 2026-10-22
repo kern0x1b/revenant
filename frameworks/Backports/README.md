@@ -62,7 +62,6 @@ The large members still open, with a design note for each, are in `docs/explanat
 These framework targets fail before building on iOS 6 while Telegram's demanded API is missing:
 
 - `BackgroundTasksBackports`: `BGContinuedProcessingTask` and `BGContinuedProcessingTaskRequest` are iOS 26 APIs.
-- `DeviceCheckBackports`: the app imports `DeviceCheck`, which is absent on iOS 6.1.3.
 - `VisionKitBackports`: the document scanner needs `VNDocumentCameraViewController`, `VNDocumentCameraScan` and `VNDocumentCameraViewControllerDelegate`.
 - `StoreKitBackports`: Telegram calls `AppStore.showManageSubscriptions(in:)`, which is not backported.
 - `AuthenticationServicesBackports`: Telegram's authorization flows need `ASAuthorizationController`, its delegate and presentation protocols, `ASAuthorizationAppleIDButton`, the passkey provider, assertion and registration types, and `ASCredentialUpdater`.
