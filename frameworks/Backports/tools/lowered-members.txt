@@ -31004,6 +31004,7 @@ type CGBitmapInfo
 type CGImageByteOrderInfo
 type CGImagePixelFormatInfo
 type CGPDFTagType
+type CIRAWFilterOption
 type CKAccountStatus
 type CKApplicationPermissions
 type CKDatabaseScope
@@ -31164,6 +31165,7 @@ type LACompanionType
 type LACredentialType
 type LAPolicy
 type MDLDataPrecision
+type MIDIReadBlock
 type MKAddressFilterOption
 type MKAddressRepresentationsContextStyle
 type MKAnnotationViewCollisionMode
@@ -31481,6 +31483,7 @@ type UIGraphicsImageRendererFormatRange
 type UIGraphicsPDFDrawingActions
 type UIImageDynamicRange
 type UIImageOrientation
+type UIImagePickerControllerImageURLExportPreset
 type UIImageRenderingMode
 type UIImageSymbolColorRenderingMode
 type UIImageSymbolScale

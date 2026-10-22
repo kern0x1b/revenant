@@ -62,6 +62,7 @@ class NSMutableAttributedString
 class NSMutableOrderedSet
 class NSMutableParagraphStyle
 class NSObject
+class NSOperation
 class NSOrderedSet
 class NSParagraphStyle
 class NSProcessInfo
@@ -116,6 +117,7 @@ member AVCaptureDevice -exposureDuration
 member AVCaptureDevice -formats
 member AVCaptureDevice -setActiveFormat:
 member AVCaptureDevice -setExposureDuration:
+member AVCaptureFileOutput -isRecordingPaused
 member AVCaptureFileOutput -pauseRecording
 member AVCaptureFileOutput -resumeRecording
 member AVCaptureSession -addConnection:
@@ -127,6 +129,7 @@ member AVPlayerLayer -videoRect
 member AVSampleBufferDisplayLayer -enqueueSampleBuffer:
 member AVSampleBufferDisplayLayer -flush
 member AVSampleBufferDisplayLayer -flushAndRemoveImage
+member AVSampleBufferDisplayLayer -isReadyForMoreMediaData
 member AVSampleBufferDisplayLayer -requestMediaDataWhenReadyOnQueue:usingBlock:
 member AVSampleBufferDisplayLayer -stopRequestingMediaData
 member AVURLAsset -assetCache
@@ -138,6 +141,9 @@ member GKAchievement -setPlayer:
 member ICCameraDevice -contentCatalogPercentCompleted
 member ICCameraDevice -contents
 member ICCameraDevice -filesOfType:
+member ICCameraDevice -isAccessRestrictedAppleDevice
+member ICCameraDevice -isEjectable
+member ICCameraDevice -isLocked
 member ICCameraDevice -mediaFiles
 member ICCameraDevice -requestDeleteFiles:
 member ICCameraDevice -requestDownloadFile:options:downloadDelegate:didDownloadSelector:contextInfo:
@@ -154,6 +160,7 @@ member ICCameraItem -creationDate
 member ICCameraItem -device
 member ICCameraItem -flushMetadataCache
 member ICCameraItem -flushThumbnailCache
+member ICCameraItem -isLocked
 member ICCameraItem -metadata
 member ICCameraItem -modificationDate
 member ICCameraItem -name
@@ -255,12 +262,14 @@ member NSObject -accessibilityActivate
 member NSObject -accessibilityCustomActions
 member NSObject -accessibilityZoomInAtPoint:
 member NSObject -accessibilityZoomOutAtPoint:
+member NSOperation -isAsynchronous
 member NSParagraphStyle -defaultTabInterval
 member NSParagraphStyle -tabStops
 member NSParagraphStyle -textLists
 member NSTextAttachment -image
 member NSTextAttachment -initWithData:ofType:
 member NSTextAttachment -setImage:
+member NSTextContainer -isSimpleRectangularTextContainer
 member NSTextContainer -layoutManager
 member NSTextContainer -maximumNumberOfLines
 member NSTextContainer -replaceLayoutManager:
