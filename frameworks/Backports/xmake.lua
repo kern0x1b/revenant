@@ -264,6 +264,10 @@ local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
 }
 
+local CORETEXT_TESTS = {
+    open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
+}
+
 local function host_tests(folder, tests, library, frameworks)
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
@@ -290,4 +294,5 @@ if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS)
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit")
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
 end
