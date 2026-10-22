@@ -283,6 +283,27 @@ jobs:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
+      - name: Install the firmware tools through the Backports configuration
+        timeout-minutes: 20
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/save@v4
+        if: steps.dyld.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
       - name: Configure the Swift component
         timeout-minutes: 20
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
