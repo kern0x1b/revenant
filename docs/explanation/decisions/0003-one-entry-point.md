@@ -23,8 +23,8 @@ built outside this checkout use the xmake executable installed for that applicat
 
 ## Enforced by
 
-`repository/layout`: no tracked file ends in `.sh`, and none is named `Makefile`. The `postinst` hook has no
-extension, so the check does not see it; it is named here instead.
+`repository/layout`: no tracked file ends in `.sh`, none is named `Makefile`, and no tracked file starts with `#!`
+except `xmakew` and the Debian maintainer scripts under `DEBIAN/`, which dpkg runs.
 
 ## Not enforced
 

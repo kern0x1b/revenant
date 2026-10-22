@@ -147,6 +147,7 @@ function main()
     local present = {}
     local folders = {}
     local recipes = {}
+    local uses = {}
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
@@ -176,6 +177,20 @@ function main()
         end
         if file:endswith(".lua") and parts[1] ~= "toolchain" and io.readfile(path.join(root, file)):find(ADDON_PATH, 1, true) then
             wrong(file, "reaches the addon's modules by path: import them as @addon.revenant.<module>")
+        end
+        if file:endswith(".lua") then
+            for name in io.readfile(path.join(root, file)):gmatch("@addon%.revenant%.([%w_][%w_.]*)") do
+                local module = name:gsub("%.+$", "")
+                table.insert(uses, {file = file, module = module})
+            end
+        end
+        local handle = io.open(path.join(root, file), "rb")
+        if handle then
+            local head = handle:read(2)
+            handle:close()
+            if head == "#!" and file ~= "xmakew" and not file:match("/DEBIAN/[%w_-]+$") then
+                wrong(file, "is a script: the one entry point is ./xmakew, and only the Debian maintainer scripts run beside it (ADR 0003)")
+            end
         end
         local component
         if parts[1] == "frameworks" then
@@ -218,6 +233,12 @@ function main()
             wrong(file, "a component holds only " .. table.concat(listed, ", "))
         elseif parts[1] == "docs" and not allowed.docs[parts[2]] then
             wrong(file, "docs/ holds only " .. table.concat(layout.docs, ", "))
+        end
+    end
+    for _, use in ipairs(uses) do
+        local module = use.module:gsub("%.", "/")
+        if not present["toolchain/modules/" .. module .. ".lua"] then
+            wrong(use.file, "imports @addon.revenant." .. use.module .. ", which is no file in toolchain/modules")
         end
     end
     for _, folder in ipairs(table.orderkeys(folders)) do
