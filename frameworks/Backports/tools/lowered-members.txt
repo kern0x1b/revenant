@@ -239,7 +239,6 @@ class CAAnimation
 class CADisplayLink
 class CALayer
 class CAMetalLayer
-class CASpringAnimation
 class CIAztecCodeDescriptor
 class CIBarcodeDescriptor
 class CIColor
@@ -1617,6 +1616,7 @@ class RevenantBarAppearanceInstaller
 class RevenantBarrierGate
 class RevenantBase14Widths
 class RevenantButtonTint
+class RevenantCASpringAnimation
 class RevenantCKCredentials
 class RevenantCKLocatedCoordinate
 class RevenantCKOPScheduler
@@ -3232,6 +3232,7 @@ function VTHDRPerFrameMetadataGenerationSessionCreate
 function VTHDRPerFrameMetadataGenerationSessionGetTypeID
 function _MXSignpostMetricsSnapshot
 function __attribute__
+function _asm__
 function _attribute__
 function _os_log_create
 function _os_log_debug_impl
@@ -4261,6 +4262,10 @@ function revenant_split_resolve
 function revenant_split_state
 function revenant_spring_frequency
 function revenant_spring_interpolate
+function revenant_spring_keyframes
+function revenant_spring_offset
+function revenant_spring_perceptual
+function revenant_spring_position
 function revenant_spring_progress
 function revenant_spring_settling
 function revenant_status_bar_overlap
@@ -9964,9 +9969,6 @@ member CAMetalLayer -setPixelFormat:
 member CAMetalLayer -setPresentsWithTransaction:
 member CAMetalLayer -setWantsExtendedDynamicRangeContent:
 member CAMetalLayer -wantsExtendedDynamicRangeContent
-member CASpringAnimation -initialVelocity
-member CASpringAnimation -setInitialVelocity:
-member CASpringAnimation -settlingDuration
 member CIAztecCodeDescriptor +descriptorWithPayload:isCompact:layerCount:dataCodewordCount:
 member CIAztecCodeDescriptor -copyWithZone:
 member CIAztecCodeDescriptor -encodeWithCoder:
@@ -21382,6 +21384,24 @@ member RevenantBarrierGate -revenant_wait
 member RevenantBase14Widths +descentForFaceNamed:
 member RevenantBase14Widths +widthForCode:inFaceNamed:
 member RevenantButtonTint +load
+member RevenantCASpringAnimation +alloc
+member RevenantCASpringAnimation +allocWithZone:
+member RevenantCASpringAnimation +class
+member RevenantCASpringAnimation +instancesRespondToSelector:
+member RevenantCASpringAnimation +isSubclassOfClass:
+member RevenantCASpringAnimation +superclass
+member RevenantCASpringAnimation +supportsSecureCoding
+member RevenantCASpringAnimation -bounce
+member RevenantCASpringAnimation -copyWithZone:
+member RevenantCASpringAnimation -encodeWithCoder:
+member RevenantCASpringAnimation -init
+member RevenantCASpringAnimation -initWithCoder:
+member RevenantCASpringAnimation -initWithPerceptualDuration:bounce:
+member RevenantCASpringAnimation -perceptualDuration
+member RevenantCASpringAnimation -revenant_parameters
+member RevenantCASpringAnimation -runActionForKey:object:arguments:
+member RevenantCASpringAnimation -settlingDuration
+member RevenantCASpringAnimation -superclass
 member RevenantCKCredentials +shared
 member RevenantCKCredentials -keysForContainer:
 member RevenantCKCredentials -provisionedKeyForContainer:
@@ -29664,6 +29684,7 @@ protocol AVPlayerViewControllerDelegate
 protocol AVQueuedSampleBufferRendering
 protocol AVSpeechSynthesizerDelegate
 protocol AXMathExpressionProvider
+protocol CAAction
 protocol CAAnimationDelegate
 protocol CALayerDelegate
 protocol CAMetalDrawable
@@ -29959,6 +29980,7 @@ protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didPauseSpeechUtt
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didStartSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:willSpeakRangeOfSpeechString:utterance:
 protocol_member AXMathExpressionProvider -accessibilityMathExpression
+protocol_member CAAction -runActionForKey:object:arguments:
 protocol_member CAAnimationDelegate -animationDidStart:
 protocol_member CAAnimationDelegate -animationDidStop:finished:
 protocol_member CALayerDelegate -actionForLayer:forKey:
@@ -30811,6 +30833,7 @@ type CAGradientLayerType
 type CALayerContentsFormat
 type CALayerCornerCurve
 type CATransform3D
+type CGBitmapInfo
 type CGImageByteOrderInfo
 type CGImagePixelFormatInfo
 type CGPDFTagType
@@ -30833,6 +30856,10 @@ type CMAltitudeHandler
 type CMAudioFormatDescriptionRef
 type CMAuthorizationStatus
 type CMBlockBufferRef
+type CMBufferQueueRef
+type CMBufferQueueTriggerToken
+type CMBufferRef
+type CMBufferValidationHandler
 type CMClockRef
 type CMFormatDescriptionRef
 type CMMetadataFormatDescriptionRef
@@ -31009,12 +31036,26 @@ type MLMultiArrayDataType
 type MLMultiArrayShapeConstraintType
 type MLTaskState
 type MLUpdateProgressEvent
+type MPSAliasingStrategy
+type MPSAlphaType
+type MPSCNNConvolutionFlags
+type MPSCNNLossType
+type MPSCNNNeuronType
+type MPSCNNReductionType
+type MPSDataLayout
+type MPSDataType
 type MPSGraphDeviceType
 type MPSGraphExecutionStage
 type MPSGraphOptions
 type MPSGraphPaddingMode
 type MPSGraphTensorDataDictionary
 type MPSGraphTensorShapedTypeDictionary
+type MPSImageEdgeMode
+type MPSImageFeatureChannelFormat
+type MPSNNPaddingMethod
+type MPSNNRegularizationType
+type MPSRNNSequenceDirection
+type MPSStateResourceType
 type MTKTextureLoaderArrayCallback
 type MTL4CopySparseBufferMappingOperation
 type MTL4CopySparseTextureMappingOperation
@@ -31397,6 +31438,7 @@ type VNHumanHandPoseObservationJointsGroupName
 type VTCompressionOutputHandler
 type VTCompressionSessionOptionFlags
 type VTDecompressionMultiImageCapableOutputHandler
+type VTDecompressionOutputCallbackRecord
 type VTDecompressionOutputHandler
 type VTFrameRateConversionConfigurationQualityPrioritization
 type VTFrameRateConversionConfigurationRevision
@@ -31424,3 +31466,9 @@ type WKWebExtensionMatchPatternOptions
 type WKWebExtensionPermission
 type WKWebExtensionWindowState
 type WKWebExtensionWindowType
+type nw_error_domain_t
+type nw_parameters_expired_dns_behavior_t
+type nw_path_unsatisfied_reason_t
+type tls_protocol_version_t
+type vImageARGBType
+type vImageYpCbCrType

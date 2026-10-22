@@ -27,6 +27,7 @@ local ACCEPTANCE = [=[
 #import <AVFoundation/AVFoundation.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <Metal/Metal.h>
+#import <Accelerate/Accelerate.h>
 
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
@@ -56,6 +57,10 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)scene.activityItemsConfigurationSource;
     (void)[[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[]];
     (void)AVAudioSessionPortBluetoothLE;
+    vImage_ARGBToYpCbCrMatrix matrix;
+    vImage_YpCbCrPixelRange range = {0, 128, 255, 255, 255, 1, 255, 0};
+    vImage_ARGBToYpCbCr info;
+    (void)vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix, &range, &info, kvImageARGB8888, kvImage420Yp8_Cb8_Cr8, 0);
 }
 ]=]
 

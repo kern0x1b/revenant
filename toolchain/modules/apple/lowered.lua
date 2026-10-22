@@ -285,6 +285,11 @@ local function declared_name(declaration)
     return bare:match("([%a_][%w_]*)%s*;%s*$")
 end
 
+local NOT_TYPE_NAMES = {typedef = true, void = true, id = true, int = true, char = true, long = true, short = true,
+    float = true, double = true, unsigned = true, signed = true, const = true, struct = true, enum = true, union = true,
+    bool = true, endif = true, int8_t = true, int16_t = true, int32_t = true, int64_t = true, uint8_t = true,
+    uint16_t = true, uint32_t = true, uint64_t = true}
+
 local function typedef_declarations(text)
     local found, position = {}, 1
     while true do
@@ -293,13 +298,16 @@ local function typedef_declarations(text)
             return found
         end
         local stop = statement_close(text, start)
-        local statement = text:sub(start, stop)
+        local statement = (text:sub(start, stop):gsub("\n%s*#[^\n]*", "\n"))
         local body = (statement:gsub("%b{}", ""))
         local name = body:match("%(%^%s*([%a_][%w_]*)%s*%)") or declared_name(without_availability(body))
+        if name and (NOT_TYPE_NAMES[name] or name:find("^__")) then
+            name = nil
+        end
         local lead = statement_start(text, start, true) or start
         local words = {}
-        for word in statement:gmatch("%f[%w_]([%u][%w_]*)") do
-            words[word] = true
+        for word in statement:gmatch("%f[%w_]([%a_][%w_]*)") do
+            words["$" .. word] = true
         end
         table.insert(found, {start = lead, stop = stop, name = name, annotated = #availability(text:sub(lead, stop)) > 0, words = words})
         position = stop + 1
@@ -475,8 +483,8 @@ local function lowering_of(text, implemented)
     local merged = merged_ranges(ranges)
     local uses = {}
     for _, range in ipairs(merged) do
-        for word in text:sub(range.start, range.stop):gmatch("%f[%w_]([%u][%w_]*)") do
-            uses[word] = true
+        for word in text:sub(range.start, range.stop):gmatch("%f[%w_]([%a_][%w_]*)") do
+            uses["$" .. word] = true
         end
     end
     return apply_ranges(text, merged), uses
@@ -766,9 +774,17 @@ function read_members(file)
     return parse(io.readfile(file or members_file()))
 end
 
+local function frameworks_in(folder, found)
+    for _, framework in ipairs(os.dirs(path.join(folder, "*.framework"))) do
+        table.insert(found, framework)
+        frameworks_in(path.join(framework, "Frameworks"), found)
+    end
+    return found
+end
+
 local function framework_headers(sdk)
     local files = {}
-    for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
+    for _, framework in ipairs(frameworks_in(path.join(sdk, "System", "Library", "Frameworks"), {})) do
         for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
             table.insert(files, file)
         end
@@ -788,12 +804,18 @@ end
 
 local function lowered_types(sdk, set)
     local changed = member_headers(sdk)
-    local declared, uses = {}, {}
+    local declared, queue, queued = {}, {}, {}
+    local function enqueue(name)
+        if not queued["$" .. name] then
+            queued["$" .. name] = true
+            table.insert(queue, name)
+        end
+    end
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local _, used = lowering_of(text, set)
-        for name in pairs(used) do
-            uses[name] = true
+        for key in pairs(used) do
+            enqueue(key:sub(2))
         end
         for _, declaration in ipairs(typedef_declarations(text)) do
             if declaration.name then
@@ -802,10 +824,7 @@ local function lowered_types(sdk, set)
             end
         end
     end
-    local types, visited, queue = {}, {}, {}
-    for name in pairs(uses) do
-        table.insert(queue, name)
-    end
+    local types, visited = {}, {}
     while #queue > 0 do
         local name = table.remove(queue)
         if declared[name] and not visited[name] then
@@ -814,8 +833,8 @@ local function lowered_types(sdk, set)
                 if declaration.annotated then
                     types[name] = true
                 end
-                for word in pairs(declaration.words) do
-                    table.insert(queue, word)
+                for key in pairs(declaration.words) do
+                    enqueue(key:sub(2))
                 end
             end
         end
