@@ -37,9 +37,14 @@ Files a tweak, daemon or app names with `add_installfiles` go into its package a
 | `emulate.timing` | `strict`: the run refuses any time scale but 1 |
 | `apple.architectures` | `add_values` the slices an application is packaged for |
 | `apple.compat` | calls renamed to the `apple-compat` shims, for example `clock_gettime` |
+| `apple.objc_bool` | `bool`: compile the target's Objective-C and Objective-C++ with `BOOL` as `bool`, as on arm64; see the apple-ios section |
 | `package.librarydeps.strict_compatibility` | set in a port, so packages depending on a rebuilt package are rebuilt too |
 
 A package's `add_configs("revision", {default = "2", readonly = true})` is raised by hand when its script changes in a way the hash cannot see.
+
+## The apple-ios rule
+
+`apple.objc_bool` set to `bool` adds `-D__OBJC_BOOL_IS_BOOL=1` and `-Wno-macro-redefined` to the target's Objective-C and Objective-C++ flags, so `BOOL` is `_Bool`, as on arm64, the architecture the source was written for. On armv7 `BOOL` is `signed char`, and the two differ in two places. A one-bit signed bitfield, `BOOL on : 1`, stores YES as -1 under `signed char`, which changes the value read back; the flag removes that difference. And `@encode(BOOL)` is `c` under `signed char` and `B` under `_Bool`. Calls in both directions pass one byte that holds 0 or 1, so the flag changes no call, only the type encodings. Methods of a class compiled this way carry `B` in their encodings, so the KVC and `NSInvocation` paths that read those encodings on a BOOL property must be checked on iOS 6 before a port relies on them. `toolchain/tests/objc_bool/runtime_check.m` is that check, to run in the emulator with the flag set; it is not verified yet. The compile-time half, the bitfield under `-Werror` and the encoding in the IR, is `objc_bool_test`.
 
 ## Settings of the project
 
