@@ -28,7 +28,7 @@ package("icu")
 
         local function make(dir, targets)
             parallel.hold(nil, function (width)
-                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir})
+                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir, envs = {ac_cv_prog_PYTHON = ""}})
             end)
         end
 
@@ -105,8 +105,8 @@ package("icu")
 
         local configure = path.absolute(path.join("source", "configure"))
         local archive = path.absolute(path.join("source", "data", "in", "icudt" .. package:version():major() .. "l.dat"))
-        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras", "ac_cv_prog_PYTHON="}
-        local base = {SOURCE_DATE_EPOCH = "0"}
+        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras"}
+        local base = {ac_cv_prog_PYTHON = "", SOURCE_DATE_EPOCH = "0"}
         local host = path.absolute("build-host")
         os.mkdir(host)
         local hostenvs = table.join(base, {CC = "cc", CXX = "c++"})
