@@ -7,7 +7,7 @@ const char *revenant_encoding(void) { return @encode(BOOL); }
 int revenant_bit(void) { struct Flags f; f.on = YES; return f.on; }
 ]]
 
-local FLAGS = {"-D__OBJC_BOOL_IS_BOOL=1", "-Wno-macro-redefined"}
+local FLAGS = {"-U__OBJC_BOOL_IS_BOOL", "-D__OBJC_BOOL_IS_BOOL=1"}
 
 function failures(opt)
     local found = {}

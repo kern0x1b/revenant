@@ -48,8 +48,8 @@ rule("apple-ios")
             if objc_bool ~= "bool" then
                 raise("target(%s) names apple.objc_bool %s: the only value is bool, the Objective-C BOOL of arm64", target:name(), objc_bool)
             end
-            target:add("mflags", "-D__OBJC_BOOL_IS_BOOL=1", "-Wno-macro-redefined", {force = true})
-            target:add("mxflags", "-D__OBJC_BOOL_IS_BOOL=1", "-Wno-macro-redefined", {force = true})
+            target:add("mflags", "-U__OBJC_BOOL_IS_BOOL", "-D__OBJC_BOOL_IS_BOOL=1", {force = true})
+            target:add("mxflags", "-U__OBJC_BOOL_IS_BOOL", "-D__OBJC_BOOL_IS_BOOL=1", {force = true})
         end
         if target:is_arch("armv6", "armv7", "armv7s") then
             target:add("cxflags", "-Wno-incompatible-sysroot", {force = true})
