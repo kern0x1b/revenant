@@ -81,7 +81,15 @@ ARRIVED = {
     os_signpost_enabled = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"},
     os_signpost_id_generate = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"},
     os_signpost_id_make_with_pointer = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"},
-    _os_signpost_emit_with_name_impl = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"}
+    _os_signpost_emit_with_name_impl = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"},
+    linkat = {iOS = "8.0"},
+    mkdirat = {iOS = "8.0"},
+    renameat = {iOS = "8.0"},
+    CCRandomGenerateBytes = {iOS = "8.0"},
+    renamex_np = {iOS = "10.0"},
+    fclonefileat = {iOS = "10.0"},
+    sysdir_start_search_path_enumeration = {iOS = "10.0"},
+    sysdir_get_next_search_path_enumeration = {iOS = "10.0"}
 }
 
 PROCESS_WIDE = {
