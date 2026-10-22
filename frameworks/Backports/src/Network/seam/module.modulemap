@@ -1,4 +1,0 @@
-module RevenantNetworkSeam {
-    header "revenant_network_seam.h"
-    export *
-}

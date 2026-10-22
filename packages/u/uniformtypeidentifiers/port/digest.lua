@@ -1,0 +1,1 @@
+uniformtypeidentifiers_sources_digest = "db74c3e1d0a977a43244e824ade5c345"

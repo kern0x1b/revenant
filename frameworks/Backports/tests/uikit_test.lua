@@ -275,6 +275,18 @@ local AREAS = {
             "-[UIPageControlProgress progressVisible]", "-[UIPageControlTimerProgress running]", "-[UIHoverStyle enabled]",
         },
     },
+    {
+        name = "user notifications: the notification center over local notifications",
+        sources = {"UNUserNotificationCenter.m"},
+        members = {
+            "@UNUserNotificationCenter", "+[UNUserNotificationCenter currentNotificationCenter]", "-[UNUserNotificationCenter delegate]",
+            "-[UNUserNotificationCenter setDelegate:]", "-[UNUserNotificationCenter requestAuthorizationWithOptions:completionHandler:]",
+            "-[UNUserNotificationCenter getNotificationSettingsWithCompletionHandler:]", "-[UNUserNotificationCenter addNotificationRequest:withCompletionHandler:]",
+            "-[UNUserNotificationCenter setNotificationCategories:]", "-[UNUserNotificationCenter getNotificationCategoriesWithCompletionHandler:]",
+            "-[UNUserNotificationCenter getPendingNotificationRequestsWithCompletionHandler:]",
+            "-[UNUserNotificationCenter removePendingNotificationRequestsWithIdentifiers:]", "-[UNUserNotificationCenter removeAllPendingNotificationRequests]",
+        },
+    },
 }
 
 local function key_of(member)

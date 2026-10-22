@@ -292,4 +292,8 @@ overlay("swiftCloudKit", "CloudKit", {})
 
 overlay("swiftWeatherKit", "WeatherKit", {})
 
-overlay("swiftNetwork", "Network", {minimum = "12.0", flags = {"-Xfrontend", "-import-underlying-module", "-I", path.join(SRC, "Network", "seam")}})
+overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {"MobileCoreServices"}})
+
+overlay("swiftCryptoKit", "CryptoKit", {})
+
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration"}})
