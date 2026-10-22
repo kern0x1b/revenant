@@ -1,0 +1,23 @@
+local backports = path.absolute(path.join(os.scriptdir(), ".."))
+local src = path.join(backports, "src", "Network")
+local fixture = path.join(backports, "tests", "Network", "main.swift")
+local out = path.join(backports, "..", "..", "build", "tests", "Network")
+
+local function swiftc(args)
+    os.vrunv("xcrun", table.join({"swiftc", "-O"}, args))
+end
+
+function main()
+    os.mkdir(out)
+    local host = path.join(out, "host")
+    local backport = path.join(out, "backport")
+    swiftc({fixture, "-o", host})
+    swiftc({"-D", "REVENANT_BACKPORT", path.join(src, "IPv4Address.swift"), path.join(src, "IPv6Address.swift"),
+            path.join(src, "NWEndpoint.swift"), path.join(src, "NWInterface.swift"), path.join(src, "NWError.swift"),
+            path.join(src, "NWPathMonitor.swift"), path.join(src, "NWConnection.swift"), fixture, "-o", backport})
+    os.execv(host, {}, {stdout = host .. ".out"})
+    os.execv(backport, {}, {stdout = backport .. ".out"})
+    local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
+    assert(#expected > 0, "the host Network program printed nothing")
+    assert(expected == got, "the backport Network differs from the host in " .. out)
+end

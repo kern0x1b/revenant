@@ -231,7 +231,8 @@ if is_plat("iphoneos") then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
-                                  uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua"})
+                                  uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
+                                  network = "network_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,

@@ -1,4 +1,4 @@
-@_implementationOnly import RevenantNetworkSeam
+import Foundation
 
 public struct NWInterface: Hashable, CustomDebugStringConvertible {
     public enum InterfaceType: Hashable {
@@ -9,40 +9,29 @@ public struct NWInterface: Hashable, CustomDebugStringConvertible {
         case loopback
     }
 
-    internal let interface: nw_interface_t
-
-    internal init(_ interface: nw_interface_t) {
-        self.interface = interface
-    }
+    public let name: String
+    public let index: Int
 
     internal init?(named name: String) {
-        guard let interface = name.withCString({ revenant_interface_named($0) }) else {
+        let index = Int(if_nametoindex(name))
+        guard index != 0 else {
             return nil
         }
-        self.init(interface)
-    }
-
-    public var name: String {
-        String(cString: nw_interface_get_name(interface))
-    }
-
-    public var index: Int {
-        Int(nw_interface_get_index(interface))
+        self.name = name
+        self.index = index
     }
 
     public var type: InterfaceType {
-        switch nw_interface_get_type(interface) {
-        case nw_interface_type_wifi:
-            return .wifi
-        case nw_interface_type_cellular:
-            return .cellular
-        case nw_interface_type_wired:
-            return .wiredEthernet
-        case nw_interface_type_loopback:
+        if name.hasPrefix("lo") {
             return .loopback
-        default:
-            return .other
         }
+        if name.hasPrefix("pdp_ip") {
+            return .cellular
+        }
+        if name.hasPrefix("en") {
+            return .wifi
+        }
+        return .other
     }
 
     public var debugDescription: String {

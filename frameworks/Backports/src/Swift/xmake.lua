@@ -296,4 +296,4 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {minimum = "12.0", flags = {"-Xfrontend", "-import-underlying-module", "-I", path.join(SRC, "Network", "seam")}})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration"}})
