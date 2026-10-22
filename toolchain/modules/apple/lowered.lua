@@ -82,6 +82,8 @@ local function scan_source(file, found)
             if name then
                 found.functions[name] = true
             end
+        elseif not container and line:match("const%s+[%a_][%w_]*%s*=") then
+            found.globals[line:match("const%s+([%a_][%w_]*)%s*=")] = true
         end
         if pending and (pending:find("{", 1, true) or pending:find(";", 1, true)) then
             local selector = selector_of(pending)
@@ -96,7 +98,7 @@ end
 local function implemented_in(src)
     local folders = {}
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
-        local found = {classes = {}, functions = {}}
+        local found = {classes = {}, functions = {}, globals = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 scan_source(file, found)
@@ -142,7 +144,7 @@ local function directive_end(text, at)
     return stop
 end
 
-local function statement_start(text, at)
+local function statement_start(text, at, quiet)
     local low = math.max(1, at - WINDOW)
     local window = text:sub(low, at - 1)
     local best = nil
@@ -173,6 +175,9 @@ local function statement_start(text, at)
         return best
     end
     if low > 1 then
+        if quiet then
+            return nil
+        end
         raise("no statement boundary within %d bytes before offset %d of a header", WINDOW, at)
     end
     return 1
@@ -237,6 +242,10 @@ local function property_name(declaration)
 end
 
 local function lowering_of(text, implemented)
+    local words = {}
+    for word in text:gmatch("[%a_][%w_]*") do
+        words[word] = true
+    end
     local ranges = {}
     local function lower(start, stop)
         if stop >= start then
@@ -247,8 +256,9 @@ local function lowering_of(text, implemented)
         local members = implemented.classes[class]
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
-            if not text:match("^%s*%(", stop + 1) then
-                lower(statement_start(text, position), text:find("\n", stop, true) or #text)
+            local first = statement_start(text, position, true)
+            if first and not text:match("^%s*%(", stop + 1) then
+                lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -291,11 +301,30 @@ local function lowering_of(text, implemented)
             end
         end
     end
+    for name in pairs(implemented.globals or {}) do
+        local position = words[name] and 1 or #text + 1
+        while true do
+            local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
+            if not start then
+                break
+            end
+            local first = statement_start(text, start, true)
+            if first then
+                local last = statement_end(text, stop)
+                local segment = text:sub(first, last)
+                if not segment:find("\n%s*#") and not segment:find("{", 1, true) then
+                    lower(first, last)
+                end
+            end
+            position = stop + 1
+        end
+    end
     for position, word in text:gmatch("()([%a_][%w_]*)%s*%(") do
         if implemented.functions[word] and not in_directive(text, position) then
-            local start, stop = statement_start(text, position), statement_end(text, position)
-            local segment = text:sub(start, stop)
-            if not segment:find("\n%s*#") and not segment:find("{", 1, true) then
+            local start = statement_start(text, position, true)
+            local stop = statement_end(text, position)
+            local segment = start and text:sub(start, stop) or ""
+            if start and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
                 lower(start, stop)
             end
         end
@@ -326,6 +355,25 @@ function lower_header(text, implemented)
     return lowering_of(text, implemented)
 end
 
+local function union_of(folders)
+    local union = {classes = {}, functions = {}, globals = {}}
+    for _, found in pairs(folders) do
+        for class, members in pairs(found.classes) do
+            union.classes[class] = union.classes[class] or {}
+            for member in pairs(members) do
+                union.classes[class][member] = true
+            end
+        end
+        for name in pairs(found.functions) do
+            union.functions[name] = true
+        end
+        for name in pairs(found.globals) do
+            union.globals[name] = true
+        end
+    end
+    return union
+end
+
 local built = {}
 
 function overlay(sdk, out, src)
@@ -344,15 +392,13 @@ function build_overlay(sdk, out, src)
         local file = path.join(directory_of(sdk, header), header.file)
         changed[file] = replaced(changed[file] or io.readfile(file), header, "the iPhoneOS SDK at " .. sdk .. " in " .. header.file, entry.member)
     end
-    for folder, implemented in pairs(implemented_in(src)) do
-        local dir = path.join(sdk, "System", "Library", "Frameworks", folder .. ".framework", "Headers")
-        if os.isdir(dir) then
-            for _, file in ipairs(os.files(path.join(dir, "*.h"))) do
-                local text = changed[file] or io.readfile(file)
-                local lowered = lowering_of(text, implemented)
-                if lowered ~= text then
-                    changed[file] = lowered
-                end
+    local union = union_of(implemented_in(src))
+    for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
+        for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, union)
+            if lowered ~= text then
+                changed[file] = lowered
             end
         end
     end

@@ -17,6 +17,33 @@ void revenantProbe(NSString *text, NSFileManager *files)
 }
 ]=]
 
+local ACCEPTANCE = [=[
+#import <Foundation/Foundation.h>
+#import <WebKit/WebKit.h>
+#import <Contacts/Contacts.h>
+#import <UIKit/UIKit.h>
+#import <LocalAuthentication/LocalAuthentication.h>
+#import <CoreLocation/CoreLocation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+
+void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
+{
+    (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
+    (void)[text stringByRemovingPercentEncoding];
+    (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
+    (void)[[NSData alloc] initWithBase64EncodedString:@"" options:0];
+    (void)[[WKWebViewConfiguration alloc] init];
+    (void)[[CNPostalAddress alloc] init];
+    (void)[[LAContext alloc] init];
+    (void)[UIGraphicsImageRenderer class];
+    (void)[manager allowsBackgroundLocationUpdates];
+    (void)UIApplicationUserDidTakeScreenshotNotification;
+    (void)[[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[]];
+    (void)AVAudioSessionPortBluetoothLE;
+}
+]=]
+
 local UNIMPLEMENTED = [=[
 #import <Foundation/Foundation.h>
 
@@ -50,6 +77,11 @@ function main()
     io.writefile(implemented, IMPLEMENTED)
     local ok, text = compiles(sdk, vfs, implemented, path.join(probes, "implemented.log"))
     assert(ok, "the lowered SDK headers do not compile the implemented members at iOS 6.0:\n" .. text)
+
+    local acceptance = path.join(probes, "acceptance.m")
+    io.writefile(acceptance, ACCEPTANCE)
+    local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
+    assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
 
     local unimplemented = path.join(probes, "unimplemented.m")
     io.writefile(unimplemented, UNIMPLEMENTED)
