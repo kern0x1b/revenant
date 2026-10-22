@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     revenant_check(revenant_get(storage, task).count == 0, "a configuration that sets no cookies gets nothing", @"got cookies");
     revenant_configuration.HTTPShouldSetCookies = YES;
     NSDate *cut = [NSDate date];
-    usleep(300000);
+    usleep(1100000);
     [storage setCookie:revenant_cookie(@"late", @"example.com")];
     usleep(300000);
     revenant_remove_since(storage, cut);
