@@ -1086,7 +1086,7 @@ static int parse_stream(const uint8_t *data, size_t length, int version, Buffer 
                     return 0;
                 buffer_append(out, &alphanumeric_chars[value], 1);
             }
-            if (fnc1) {
+            if (fnc1 && out->length > start) {
                 char *text = out->bytes;
                 size_t write = start;
                 for (size_t read = start; read < out->length; read++) {
