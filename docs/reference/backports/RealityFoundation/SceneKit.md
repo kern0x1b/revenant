@@ -1,6 +1,6 @@
 # RealityFoundation and RealityKit below iOS 8.0
 
-Both overlays are not yet backported below iOS 8.0. The build refuses a lower minimum, rather than link an image that loads a framework the release lacks; the open gap is listed in [the Backports README](../../../../frameworks/Backports/README.md).
+Both overlays are not yet backported below iOS 8.0. Their packages refuse on load at a lower deployment target, rather than link an image that loads a framework the release lacks; the open gap is listed in [the Backports README](../../../../frameworks/Backports/README.md).
 
 ## What was measured
 

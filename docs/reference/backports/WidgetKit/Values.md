@@ -111,7 +111,7 @@ the interpolation prints the case name. The probe now prints 26 lines, identical
 
 Toolchain: revenant@swift 6.4.0. SDK: iPhoneOS16.4 from the `iphoneos-sdk` 16.4 package. Runtime
 resource: the same run-folder farm as the AuthenticationServices error group, over the installed
-swift-runtime 6.4.0 variant named in the CKError facts.
+swift-runtime 6.4.0 variant named in [CKError](../CloudKit/CKError.md).
 
 - Typecheck: `swiftc -target armv7-apple-ios6.1.3 -sdk <iPhoneOS16.4.sdk> -resource-dir <farm>
   -vfsoverlay <variant>/share/lift/vfs.yaml -parse-as-library -typecheck files/WidgetKit/Values.swift`
@@ -121,8 +121,8 @@ swift-runtime 6.4.0 variant named in the CKError facts.
 
 ## Against the generated skeleton
 
-`swiftcode` rendered WidgetKit's skeleton (395 declarations, `tools/gen.lua swiftcode`, 26.2 SDK). The file
-was checked against it:
+The skeleton was rendered by the tree's `swiftcode` renderer at the time (`tools/gen.lua swiftcode`,
+since removed, 395 declarations, 26.2 SDK). The file was checked against it:
 
 - Conformances: the skeleton gives `WidgetFamily` Int, CustomDebugStringConvertible,
   CustomStringConvertible, Equatable, Hashable, RawRepresentable and Sendable; `WidgetRenderingMode`
@@ -144,5 +144,6 @@ was checked against it:
 
 - The object was not linked and not run on an armv7 image, the emulator or a 4S.
 - The accessory raw values against an iOS 26.2 runtime (see above).
-- The recipe does not name `files/WidgetKit`. Wiring waits for the swift-runtime install, which is
-  blocked on the lift's measured set.
+- The package does not build this file today: `revenant@widgetkit` refuses on load because `Values.swift`
+  and `Timeline.swift` both declare `TimelineEntry`, `TimelineEntryRelevance` and `Timeline`. The file
+  compiles on its own, as measured above.

@@ -76,7 +76,7 @@ a string column.
 ## The offsets the port refuses (measured, and not reproduced)
 
 The host's default parser reads these, and the port returns nil. They are listed here with the host's
-answer, and tests/backports/host/createml/csvdates.swift prints each one as a KNOWN gap every run.
+answer; the differential that printed each one as a KNOWN gap is no longer in the repository.
 
 | cell (the zone part after `03:04:05`) | host reads as |
 | --- | --- |

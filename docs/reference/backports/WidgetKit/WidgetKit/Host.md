@@ -14,7 +14,7 @@ What the module does about it:
 
 | the framework's call | this module's answer |
 | --- | --- |
-| the system draws the widget | the app's own surface draws it. `Widget.Body` is the port's view type, and the configuration's `body` is what the app's surface shows |
+| the system draws the widget | the app's own surface draws it. `Widget.Body` is a `WidgetBody`, and its `BodyType` is what the app's surface reads and shows |
 | `WidgetCenter.reloadTimelines(ofKind:)` / `reloadAllTimelines()` | the port's own redraw: `RevenantWidgetRegistry.shared.redraw(kind)` and `.redrawControl(kind)`, the handlers the app installs for its in-app widget and control surfaces |
 | `WidgetCenter.currentConfigurations()` / `getCurrentConfigurations(_:)` | the configurations the app registered in `RevenantWidgetRegistry`, in the order it registered them; `WidgetInfo.widgetConfigurationIntent(of:)` reads the intent back out of the same record |
 | `WidgetCenter.invalidateConfigurationRecommendations()` / `invalidateRelevance(ofKind:)` | the registry forgets what it cached, which is what the system does; with nothing cached it is a no-op that changes nothing |

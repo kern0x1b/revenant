@@ -15,7 +15,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 * **`revenant@swift-runtime`** — the port's own Swift runtime, a package, declared as every recipe's
   dependency. Nothing in the four modules reimplements it.
 * **SwiftUI's `SwiftUI`** — the SwiftUI band, `frameworks/SwiftUI`
-  (`Sources/`) in revenant: `View` with its `body` requirement (`Core.swift:7-13`), `Text`
+  (`src/`) in revenant: `View` with its `body` requirement (`Core.swift:7-13`), `Text`
   (`Views.swift`), `ShapeStyle`, `Edge`, `Binding`, `PresentationBackgroundInteraction`,
   `EnvironmentValues` (`Graph.swift:8`), `EnvironmentKey` (`Environment.swift:4`). It is the source
   the **view rows are routed to** and the reason they are not declared here: it is compiled only into
@@ -29,7 +29,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 
 **Not reused, and worth naming because it is the obvious candidate:** `swift-foundation`. The
 `AttributedString`, `Measurement` and `Calendar.RecurrenceRule` rows are gated on it
-(`Sources/AppIntents/Gated.swift`, and the recipe's probes, which measure rather than assume). This
+(`frameworks/Backports/src/AppIntents/Gated.swift`, and the recipe's probes, which measure rather than assume). This
 delivery carries the *conformances* AppIntents adds to those types and takes the types themselves from
 the runtime, which is the Foundation band's to carry; a second copy of `Measurement` here would be a
 second copy of something that exists (the workspace contract: no second copy of what exists).
