@@ -225,6 +225,17 @@ local function merged_ranges(ranges)
     return merged
 end
 
+local function property_name(declaration)
+    local text = declaration:gsub("%b()", "")
+    local name = nil
+    for word in text:gmatch("[%a_][%w_]*") do
+        if word ~= "property" and not word:match("^[%u%d_]+$") then
+            name = word
+        end
+    end
+    return name
+end
+
 local function lowering_of(text, implemented)
     local ranges = {}
     local function lower(start, stop)
@@ -250,6 +261,28 @@ local function lowering_of(text, implemented)
                 local declaration = text:sub(mark + 1, declared_end)
                 local selector = selector_of(declaration)
                 if selector and members[declaration:match("^([%-%+])") .. selector] then
+                    for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
+                        lower(piece[1], piece[2])
+                    end
+                end
+                at = mark + 1
+            end
+        end
+    end
+    for position, class in text:gmatch("()@interface%s+([%w_]+)") do
+        local members = implemented.classes[class]
+        if members then
+            local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
+            local block_end = text:find("@end", stop, true) or #text
+            local at = stop
+            while true do
+                local mark = text:find("\n@property", at, true)
+                if not mark or mark > block_end then
+                    break
+                end
+                local declared_end = statement_end(text, mark + 1)
+                local name = property_name(text:sub(mark + 1, declared_end))
+                if name and (members["-" .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end

@@ -11,6 +11,7 @@ void revenantProbe(NSString *text, NSFileManager *files)
     (void)[[NSData alloc] initWithBase64EncodedString:@"" options:0];
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
+    (void)[text stringByRemovingPercentEncoding];
     (void)[WKWebView class];
     (void)MTLCreateSystemDefaultDevice();
 }
@@ -65,6 +66,13 @@ function main()
         "@end",
         "MTL_EXTERN id <MTLDevice> __nullable MTLCreateSystemDefaultDevice(void) API_AVAILABLE(macos(10.11), ios(8.0));",
     }, "\n")
+    local property = table.concat({
+        "@interface NSString (RevenantTest)",
+        "@property (nullable, readonly, copy) NSString *stringByRemovingPercentEncoding API_AVAILABLE(macos(10.9), ios(7.0));",
+        "@end",
+    }, "\n")
+    local lowered_property = lowered.lower_header(property, {classes = {NSString = {["-stringByRemovingPercentEncoding"] = true}}, functions = {}})
+    assert(count(lowered_property, "AVAILABLE") == 0, "an implemented property kept its availability:\n" .. lowered_property)
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)

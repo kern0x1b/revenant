@@ -150,7 +150,7 @@ local function declared_protocols()
     local protocols = {}
     local src = path.join(os.scriptdir(), "..", "src")
     for _, file in ipairs(os.files(path.join(src, "**.m"))) do
-        for name in io.readfile(file):gmatch("\n@protocol%s+([%w_]+)%s*<") do
+        for name in io.readfile(file):gmatch("\n@protocol%s+([%w_]+)[%s<]") do
             protocols[name] = true
         end
     end
