@@ -262,13 +262,14 @@ local FOUNDATION_TESTS = {
 
 local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
+    spring_animation = {"RevenantSpringSolver.m", "RevenantSpringKeyframes.m", "CASpringAnimation.m"},
 }
 
 local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
 }
 
-local function host_tests(folder, tests, library, frameworks)
+local function host_tests(folder, tests, library, frameworks, defines)
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
         target(folder .. "Backports_" .. name .. "_test")
@@ -284,6 +285,9 @@ local function host_tests(folder, tests, library, frameworks)
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
+            for _, define in ipairs(defines or {}) do
+                add_defines(define)
+            end
             add_tests("default")
             add_tests("negative", {runargs = {"--negative"}, should_fail = true})
         target_end()
@@ -292,7 +296,7 @@ end
 
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS)
-    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit")
+    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"}, {"REVENANT_HOST_BUILD"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
 end

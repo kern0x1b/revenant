@@ -24,6 +24,9 @@ local CALLED = {
 
 local LINKED = {"__sincos_stret", "__sincosf_stret", "__strlcpy_chk", "__strlcat_chk"}
 
+local NAMED = {"clock_gettime", "openat", "fstatat", "unlinkat", "fdopendir", "linkat", "mkdirat", "renameat", "renamex_np",
+               "fclonefileat", "CCRandomGenerateBytes", "sysdir_start_search_path_enumeration", "sysdir_get_next_search_path_enumeration"}
+
 local LATER = {"memset_s", "__progname", "arc4random_buf", "voucher_copy", "voucher_adopt", "qos_class_self", "clock_getres",
                "dispatch_get_global_queue", "dispatch_activate", "dispatch_assert_queue$V2"}
 
@@ -297,6 +300,35 @@ local function sources_of(shims, symbols)
         table.insert(sources, path.join(shims, symbol .. ".c"))
     end
     return sources
+end
+
+local function named_failures(folder, shims)
+    local found = {}
+    fixture(folder, "named.c")
+    os.mkdir(path.join(folder, "named-root"))
+    local built = clang(folder, table.join({"-O2", "-w"}, sources_of(shims, NAMED), {"named.c", "-o", "named"}))
+    if built.code ~= 0 then
+        table.insert(found, "the plain-name shims must compile and link on the host: " .. built.stderr:sub(-400))
+    else
+        table.join2(found, outcome("plain-name shims", run(folder, path.join(folder, "named"), {path.join(folder, "named-root")})))
+    end
+    for _, symbol in ipairs(NAMED) do
+        local object = "iphone-" .. symbol .. ".o"
+        local shim = clang(folder, table.join(IOS6, {"-Os", "-c", path.join(shims, symbol .. ".c"), "-o", object}))
+        if shim.code ~= 0 then
+            table.insert(found, string.format("the %s shim must compile for armv7 on iOS 6: %s", symbol, shim.stderr:sub(-300)))
+        else
+            local line = ending(tool(folder, "nm", {"-m", object}), " _" .. symbol)
+            if not line:find("private external", 1, true) then
+                table.insert(found, string.format("%s must be a hidden definition, so no image exports a libc name the release lacks: %s",
+                                                  symbol, line))
+            end
+            if contains(words(tool(folder, "nm", {"-u", object})), "_" .. symbol) then
+                table.insert(found, symbol .. " compiled for iOS 6 must not call itself")
+            end
+        end
+    end
+    return found
 end
 
 local function lock_failures(folder, shims, locks, waits)
@@ -612,6 +644,7 @@ function failures(opt)
             function (scratch) return at_failures(scratch, shims) end,
             function (scratch) return renamed_failures(scratch, shims, headers) end,
             function (scratch) return linked_failures(scratch, shims, headers) end,
+            function (scratch) return named_failures(scratch, shims) end,
             function (scratch) return ulock_failures(scratch, shims) end,
             function (scratch) return lock_failures(scratch, shims, locks, waits) end,
             function (scratch) return shared_lock_failures(scratch, locks, waits) end,
