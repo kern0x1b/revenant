@@ -16,7 +16,7 @@ nw_endpoint_t nw_endpoint_create_url(const char *url)
     uint16_t port = separator ? revenant_nw_url_port(url) : 0;
     if (!port)
         port = revenant_nw_default_port_for_scheme(url);
-    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
     endpoint->_type = nw_endpoint_type_url;
     endpoint->_url = @(url);
     endpoint->_hostname = (__bridge_transfer NSString *)host;
@@ -26,7 +26,7 @@ nw_endpoint_t nw_endpoint_create_url(const char *url)
 
 const char *nw_endpoint_get_url(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_url)
         return NULL;
     return value->_url.UTF8String;

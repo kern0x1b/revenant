@@ -12,8 +12,8 @@
 
 @interface RevenantNWGroupMessage : NSObject {
 @public
-    RevenantNWEndpoint *_remote;
-    RevenantNWEndpoint *_local;
+    RevenantNWEndpointValue *_remote;
+    RevenantNWEndpointValue *_local;
     nw_path_t _path;
     RevenantNWProtocolMetadata *_ip;
     RevenantNWProtocolMetadata *_udp;
@@ -32,7 +32,7 @@
     nw_connection_group_state_changed_handler_t _state;
     nw_connection_group_receive_handler_t _receive;
     nw_connection_group_state_t _value;
-    RevenantNWEndpoint *_local;
+    RevenantNWEndpointValue *_local;
     NSMutableArray *_members;
     nw_path_monitor_t _monitor;
     nw_path_t _path;
@@ -73,7 +73,7 @@ static RevenantNWError *revenant_group_error(int code)
     return error;
 }
 
-static struct sockaddr_storage revenant_group_address(RevenantNWEndpoint *endpoint, socklen_t *out_length)
+static struct sockaddr_storage revenant_group_address(RevenantNWEndpointValue *endpoint, socklen_t *out_length)
 {
     struct sockaddr_storage address;
     memset(&address, 0, sizeof address);
@@ -96,7 +96,7 @@ static NSArray *revenant_group_members(RevenantNWConnectionGroup *group)
     if (group->_descriptor->_multicastGroup)
         [endpoints addObject:group->_descriptor->_multicastGroup];
     [endpoints addObjectsFromArray:group->_descriptor->_endpoints];
-    for (RevenantNWEndpoint *endpoint in endpoints) {
+    for (RevenantNWEndpointValue *endpoint in endpoints) {
         socklen_t length = 0;
         struct sockaddr_storage address = revenant_group_address(endpoint, &length);
         if (length)
@@ -251,7 +251,7 @@ static void revenant_group_open(RevenantNWConnectionGroup *group)
     memset(&bound, 0, sizeof bound);
     bound_length = sizeof bound;
     if (getsockname(handle, (struct sockaddr *)&bound, &bound_length) == 0) {
-        RevenantNWEndpoint *local = [[RevenantNWEndpoint alloc] init];
+        RevenantNWEndpointValue *local = [[RevenantNWEndpointValue alloc] init];
         local->_type = nw_endpoint_type_address;
         local->_address = (__bridge_transfer NSData *)
             revenant_nw_sockaddr_data((struct sockaddr *)&bound, bound_length);
@@ -310,21 +310,21 @@ static void revenant_group_read(RevenantNWConnectionGroup *group)
             return;
         }
         socklen_t from_length = from.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
-        RevenantNWEndpoint *remote = [[RevenantNWEndpoint alloc] init];
+        RevenantNWEndpointValue *remote = [[RevenantNWEndpointValue alloc] init];
         remote->_type = nw_endpoint_type_address;
         remote->_address = (__bridge_transfer NSData *)revenant_nw_sockaddr_data((struct sockaddr *)&from, from_length);
         char text[INET6_ADDRSTRLEN + 4] = {0};
         if (revenant_nw_sockaddr_text((struct sockaddr *)&from, text, sizeof text))
             remote->_hostname = @(text);
         remote->_port = [NSString stringWithFormat:@"%u", revenant_nw_sockaddr_port((struct sockaddr *)&from)];
-        RevenantNWEndpoint *local = nil;
+        RevenantNWEndpointValue *local = nil;
         BOOL ours = NO;
         for (struct cmsghdr *header = (struct cmsghdr *)control; header && CMSG_FIRSTHDR(&message);
              header = CMSG_NXTHDR(&message, header)) {
             if (header->cmsg_level != IPPROTO_IP || header->cmsg_type != IP_PKTINFO)
                 continue;
             struct in_pktinfo *info = (struct in_pktinfo *)CMSG_DATA(header);
-            local = [[RevenantNWEndpoint alloc] init];
+            local = [[RevenantNWEndpointValue alloc] init];
             local->_type = nw_endpoint_type_address;
             struct sockaddr_in destination;
             memset(&destination, 0, sizeof destination);
@@ -580,7 +580,7 @@ void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data
     NSMutableArray *targets = [NSMutableArray array];
     if (endpoint) {
         socklen_t length = 0;
-        struct sockaddr_storage address = revenant_group_address((RevenantNWEndpoint *)endpoint, &length);
+        struct sockaddr_storage address = revenant_group_address((RevenantNWEndpointValue *)endpoint, &length);
         if (length)
             [targets addObject:[NSData dataWithBytes:&address length:length]];
     } else {

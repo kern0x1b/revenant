@@ -14,8 +14,8 @@ nw_relay_hop_t nw_relay_hop_create(nw_endpoint_t http3_relay_endpoint, nw_endpoi
     if (!http3_relay_endpoint && !http2_relay_endpoint)
         return NULL;
     RevenantNWRelayHop *hop = [[RevenantNWRelayHop alloc] init];
-    hop->_http3 = (RevenantNWEndpoint *)http3_relay_endpoint;
-    hop->_http2 = (RevenantNWEndpoint *)http2_relay_endpoint;
+    hop->_http3 = (RevenantNWEndpointValue *)http3_relay_endpoint;
+    hop->_http2 = (RevenantNWEndpointValue *)http2_relay_endpoint;
     hop->_tls = (RevenantNWProtocolOptions *)relay_tls_options;
     hop->_headerNames = [NSMutableArray array];
     hop->_headerValues = [NSMutableArray array];
@@ -45,7 +45,7 @@ nw_proxy_config_t nw_proxy_config_create_http_connect(nw_endpoint_t proxy_endpoi
     if (!proxy_endpoint)
         return NULL;
     RevenantNWProxyConfig *config = revenant_proxy_config(@"http_connect");
-    config->_endpoint = (RevenantNWEndpoint *)proxy_endpoint;
+    config->_endpoint = (RevenantNWEndpointValue *)proxy_endpoint;
     config->_tls = (RevenantNWProtocolOptions *)proxy_tls_options;
     return config;
 }
@@ -55,7 +55,7 @@ nw_proxy_config_t nw_proxy_config_create_socksv5(nw_endpoint_t proxy_endpoint)
     if (!proxy_endpoint)
         return NULL;
     RevenantNWProxyConfig *config = revenant_proxy_config(@"socksv5");
-    config->_endpoint = (RevenantNWEndpoint *)proxy_endpoint;
+    config->_endpoint = (RevenantNWEndpointValue *)proxy_endpoint;
     return config;
 }
 

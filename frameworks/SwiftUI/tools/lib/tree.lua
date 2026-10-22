@@ -1,9 +1,11 @@
+local shared = import("@addon.revenant.member", {anonymous = true})
+
 function root(...)
-    return path.join(path.normalize(path.absolute(path.join(os.scriptdir(), "..", ".."))), ...)
+    return shared.root(os.scriptdir(), ...)
 end
 
 function revenant(...)
-    return path.join(path.normalize(path.join(root(), "..", "..")), ...)
+    return shared.checkout(root(), ...)
 end
 
 function sources()

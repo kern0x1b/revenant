@@ -216,6 +216,8 @@ function arguments(ctx)
     for _, option in ipairs(options(ctx)) do
         table.insert(argv, "-D" .. option[1] .. "=" .. option[2])
     end
+    local python = assert(find_tool("python3"), "the engine's build runs WebKit's own generators, which need python3 on the build machine")
+    table.insert(argv, "-DPython_EXECUTABLE=" .. python.program)
     return argv
 end
 
@@ -259,7 +261,7 @@ function context(package, build)
         return assert(package:dep(name), package:name() .. " has no dependency " .. name):installdir()
     end
     local function config(name)
-        local found = os.dirs(path.join(dir(name), "lib", "cmake", name .. "-*"))
+        local found = os.dirs(path.join(dir(name), "lib", "cmake", name .. "*"))
         return assert(found[1], name .. " installed no CMake package configuration under lib/cmake")
     end
     local source = path.join(dir("webkit"), "src")
