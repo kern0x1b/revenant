@@ -59,7 +59,7 @@ Partly backported. Each of these builds, and the part it does not cover is missi
 
 The large members still open, with a design note for each, are in `docs/explanation/backports-open-members.md`.
 
-These framework targets fail when selected for building on iOS 6 while Telegram's demanded API is missing. They are excluded from the default build; `IntentsUIBackports` is also excluded because it depends on the open `IntentsBackports` target:
+These framework targets fail before building on iOS 6 while Telegram's demanded API is missing:
 
 - `BackgroundTasksBackports`: `BGContinuedProcessingTask` and `BGContinuedProcessingTaskRequest` are iOS 26 APIs.
 - `DeviceCheckBackports`: the app imports `DeviceCheck`, which is absent on iOS 6.1.3.
