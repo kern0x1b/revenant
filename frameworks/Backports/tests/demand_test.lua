@@ -55,6 +55,23 @@ function main()
     expect("c imports", keys_of(c.imports), {"UIKit"})
     expect("c subscripts are not messages", {tostring(#c.messages)}, {"0"})
 
+    local cast = scanner.scan(path.join(data, "sample_cast.m"))
+    expect("forward declarations and categories declare nothing", keys_of(cast.declared), {"Row"})
+    expect("typed local variable", {tostring(cast.var_types.other)}, {"Row"})
+    expect("typed variable names", keys_of(cast.var_names), {"other"})
+    expect("import directives are not code", {tostring(has(cast.words, "NSInputStream"))}, {"false"})
+    expect("import directives still import", keys_of(cast.imports), {"LegacyComponents"})
+    expect("own methods", keys_of(cast.method_declarations), {"contentSize", "layout", "setValue:animated:"})
+    local casted = {}
+    for _, message in ipairs(cast.messages) do
+        table.insert(casted, tostring(message.class) .. " " .. tostring(message.own) .. " " .. message.selector)
+    end
+    expect("cast and self messages", casted, {"nil true contentSize", "nil true setValue:animated:",
+        "nil false setNeedsDisplay", "Row false type", "UIView false setTag:"})
+
+    local enum = scanner.scan(path.join(data, "sample_enum.swift"))
+    expect("enum case with values is declared", keys_of(enum.declared), {"System", "Transition"})
+
     local swift = scanner.scan(path.join(data, "sample.swift"))
     expect("swift language", {swift.language}, {"swift"})
     expect("swift imports", keys_of(swift.imports), {"Foundation", "UIKit"})

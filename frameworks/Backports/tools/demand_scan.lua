@@ -8,7 +8,7 @@ local LANGUAGES = {swift = SWIFT, m = OBJC, mm = OBJC, h = OBJC, c = C, cc = C, 
 local CLOSE = {["["] = "]", ["("] = ")", ["{"] = "}"}
 local CLOSERS = {["]"] = true, [")"] = true, ["}"] = true}
 local MESSAGE_AFTER = {["return"] = true, ["case"] = true, ["else"] = true, ["do"] = true, ["throw"] = true}
-local TYPE_KEYWORDS = {class = true, struct = true, enum = true, protocol = true, typealias = true, actor = true}
+local TYPE_KEYWORDS = {class = true, struct = true, enum = true, protocol = true, actor = true}
 local OBJC_DECLARATIONS = {interface = true, implementation = true, protocol = true}
 
 function language_of(file)
@@ -183,27 +183,53 @@ local function starts_message(tok, open)
     return mark ~= "]" and mark ~= "@" and not mark:find("%d")
 end
 
+local function cast_class(tok, open)
+    local close = close_of(tok, open)
+    if not close then
+        return nil
+    end
+    for at = open + 1, close - 2 do
+        if tok.kind[at] == "w" and tok.value[at]:find("^%u") and is_punct(tok, at + 1, "*") and is_punct(tok, at + 2, ")") then
+            return tok.value[at]
+        end
+    end
+    return nil
+end
+
 local function message_at(tok, open)
     local close = close_of(tok, open)
     if not close then
         return nil
     end
-    local first, class, class_method = open + 1, nil, false
+    local first, class, class_method, own, receiver = open + 1, nil, false, false, nil
     if is_punct(tok, first, "[") then
         class = inferred_class(tok, first)
         first = skip_group(tok, first, close)
     elseif is_punct(tok, first, "(") then
+        class = cast_class(tok, first)
         first = skip_group(tok, first, close)
     elseif tok.kind[first] == "w" then
         local after = first + 1
-        if is_punct(tok, after, ".") then
-            while is_punct(tok, after, ".") and tok.kind[after + 1] == "w" do
-                after = after + 2
+        if is_punct(tok, after, ".") or (is_punct(tok, after, "-") and is_punct(tok, after + 1, ">")) then
+            receiver = tok.value[first]
+            while true do
+                if is_punct(tok, after, ".") and tok.kind[after + 1] == "w" then
+                    receiver = tok.value[after + 1]
+                    after = after + 2
+                elseif is_punct(tok, after, "-") and is_punct(tok, after + 1, ">") and tok.kind[after + 2] == "w" then
+                    receiver = tok.value[after + 2]
+                    after = after + 3
+                else
+                    break
+                end
             end
             first = after
         else
+            own = tok.value[first] == "self"
             if tok.kind[after] == "w" and tok.value[first]:find("^%u") then
                 class, class_method = tok.value[first], true
+            elseif tok.kind[after] == "w" then
+                receiver = tok.value[first]
             end
             first = after
         end
@@ -212,7 +238,7 @@ local function message_at(tok, open)
     if not selector then
         return nil
     end
-    return {selector = selector, class = class, class_method = class_method}
+    return {selector = selector, class = class, class_method = class_method, own = own, receiver = receiver}
 end
 
 local function selector_literal(tok, at)
@@ -232,6 +258,32 @@ local function unique(list, seen, name)
         seen[name] = true
         table.insert(list, name)
     end
+end
+
+local function declared_selector(tok, at)
+    if not (is_punct(tok, at + 1, "(") and close_of(tok, at + 1)) then
+        return nil
+    end
+    local first = close_of(tok, at + 1) + 1
+    if tok.kind[first] ~= "w" then
+        return nil
+    end
+    if is_punct(tok, first + 1, ";") or is_punct(tok, first + 1, "{") then
+        return tok.value[first]
+    end
+    local parts, at_part = {}, first
+    while tok.kind[at_part] == "w" and is_punct(tok, at_part + 1, ":") do
+        table.insert(parts, tok.value[at_part] .. ":")
+        local type_end = skip_group(tok, at_part + 2, tok.count)
+        if tok.kind[type_end] ~= "w" then
+            break
+        end
+        at_part = type_end + 1
+    end
+    if #parts == 0 then
+        return nil
+    end
+    return table.concat(parts)
 end
 
 local function imports_of(stripped)
@@ -260,16 +312,10 @@ local function declarations(tok, declared, members)
     for at = 1, tok.count do
         if is_punct(tok, at, "@") and tok.kind[at + 1] == "w" then
             local keyword = tok.value[at + 1]
-            if OBJC_DECLARATIONS[keyword] and tok.kind[at + 2] == "w" then
-                unique(declared, declared_seen, tok.value[at + 2])
-            elseif keyword == "class" then
-                local stop = at + 2
-                while stop <= tok.count and not is_punct(tok, stop, ";") do
-                    if tok.kind[stop] == "w" then
-                        unique(declared, declared_seen, tok.value[stop])
-                    end
-                    stop = stop + 1
-                end
+            local name_at = at + 2
+            if OBJC_DECLARATIONS[keyword] and tok.kind[name_at] == "w" and not is_punct(tok, name_at + 1, "(")
+                and not is_punct(tok, name_at + 1, ";") then
+                unique(declared, declared_seen, tok.value[name_at])
             elseif keyword == "property" then
                 local stop, depth, last = at + 2, 0, nil
                 while stop <= tok.count and not (depth == 0 and is_punct(tok, stop, ";")) do
@@ -289,24 +335,51 @@ local function declarations(tok, declared, members)
         elseif tok.kind[at] == "w" then
             local word = tok.value[at]
             local imported = at > 1 and tok.kind[at - 1] == "w" and tok.value[at - 1] == "import"
-            if TYPE_KEYWORDS[word] and tok.kind[at + 1] == "w" and not imported then
+            if TYPE_KEYWORDS[word] and tok.kind[at + 1] == "w" and not imported and not is_punct(tok, at - 1, "@") then
                 unique(declared, declared_seen, tok.value[at + 1])
             elseif (word == "func" or word == "var" or word == "let") and tok.kind[at + 1] == "w" then
                 unique(members, members_seen, tok.value[at + 1])
+            elseif word == "case" and tok.kind[at + 1] == "w" and is_punct(tok, at + 2, "(") then
+                unique(declared, declared_seen, tok.value[at + 1])
             end
         end
     end
 end
 
+local TERMINATORS = {[";"] = true, ["="] = true, [")"] = true, [","] = true, ["]"] = true, ["{"] = true}
+local BEFORE_TYPE = {[";"] = true, ["{"] = true, ["("] = true, [","] = true, [")"] = true, ["}"] = true, ["<"] = true,
+    [">"] = true}
+
+local function spaces(text)
+    return string.rep(" ", #text)
+end
+
+local function blank_directives(text)
+    return (text:gsub("#%s*import[^\n]*", spaces):gsub("#%s*include[^\n]*", spaces))
+end
+
 function scan(file)
     local language = language_of(file)
     local stripped = strip(io.readfile(file), language)
-    local tok = tokenize(stripped)
+    local tok = tokenize(blank_directives(stripped))
     local record = {file = file, language = language, imports = imports_of(stripped), messages = {}, selectors = {},
-        words = {}, calls = {}, members = {}, declared = {}, declared_members = {}}
-    local seen = {words = {}, calls = {}, members = {}}
+        words = {}, calls = {}, members = {}, declared = {}, declared_members = {}, method_declarations = {},
+        var_types = {}, var_names = {}}
+    local seen = {words = {}, calls = {}, members = {}, methods = {}, vars = {}}
     declarations(tok, record.declared, record.declared_members)
     for at = 1, tok.count do
+        if language == OBJC and (is_punct(tok, at, "-") or is_punct(tok, at, "+")) then
+            local declared = declared_selector(tok, at)
+            if declared then
+                unique(record.method_declarations, seen.methods, declared)
+            end
+        end
+        if language == OBJC and tok.kind[at] == "w" and tok.value[at]:find("^%u") and is_punct(tok, at + 1, "*")
+            and tok.kind[at + 2] == "w" and tok.kind[at + 3] == "p" and TERMINATORS[tok.value[at + 3]]
+            and (tok.kind[at - 1] == "w" or (tok.kind[at - 1] == "p" and BEFORE_TYPE[tok.value[at - 1]])) then
+            unique(record.var_names, seen.vars, tok.value[at + 2])
+            record.var_types[tok.value[at + 2]] = tok.value[at]
+        end
         if tok.kind[at] == "w" then
             local word = tok.value[at]
             if is_punct(tok, at - 1, ".") then
