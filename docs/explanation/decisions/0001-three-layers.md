@@ -13,11 +13,13 @@ a rule for which is which, a fix to an upstream lands in our tree, or our code i
 revenant has three layers, and every top-level folder belongs to exactly one:
 
 - **Components** are our code. Each is a folder with its own `xmake.lua`: `emulator/`, `recompiler/`,
-  `frameworks/<Framework>`, `agent-skills/`, and the `src/` of `toolchain/`.
+  `frameworks/<Framework>`, and the `src/` of `toolchain/`. `agent-skills/` is a component of another
+  shape: it holds skills and their tests, and no target of its own.
 - **The package repository** (`packages/`, `addons/`) holds external code: an upstream by url and version,
   our patches, and the build glue of an upstream with no build files. See 0002.
 - **The addon** is `toolchain/`, the xmake addon `revenant`: the `apple-ios` toolchain, the rules, and the
-  plugins. Stock xmake installs it from the checkout.
+  plugins. Stock xmake installs it from the package repository, `addons/r/revenant`, at a pinned commit;
+  inside the checkout `./xmakew` takes it from `toolchain/` itself.
 
 ## Consequences
 
