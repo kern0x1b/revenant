@@ -18,7 +18,7 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `ld64` | 956.6 | the linker, from cctools-port with libtapi; reads `LLVM_PREFIX` |
 | `ldid` | 2.1.5-procursus7+23.gaf86971 | the signer. Signing runs the binary of this package, never one found on `PATH` |
 | `libplist` | | the plist library `ldid` and the emulator use |
-| `iphoneos-sdk` | 16.4 (26.2 with `apple_sdk`) | the iOS SDK from theos/sdks, laid out as Xcode lays it out, with the `crt1` and `libgcc_s` files of iPhone OS 2 to iOS 6 and the library stubs of older releases |
+| `iphoneos-sdk` | 26.2 (16.4 with `apple_sdk`) | the iOS SDK from theos/sdks, laid out as Xcode lays it out, with the `crt1` and `libgcc_s` files of iPhone OS 2 to iOS 6 and the library stubs of older releases |
 | `gn` | | the GN meta-build tool, a host tool for a package whose upstream builds with GN |
 
 ## Runtimes

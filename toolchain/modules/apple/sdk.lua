@@ -5,10 +5,7 @@ function developer(installdir)
     return path.join(installdir, "Developer.app", "Contents", "Developer")
 end
 
-function apple_sdk_release(component)
-    if (component or "") == "" then
-        return "16.4"
-    end
+function apple_sdk_release()
     return "26.2"
 end
 

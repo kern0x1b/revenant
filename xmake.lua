@@ -7,7 +7,7 @@ set_defaultmode("release")
 option("component", {type = "string", default = "", showmenu = true,
                      description = "Configure only this component and what it needs, for example Backports; empty configures every component."})
 option("apple_sdk", {type = "string", default = "", showmenu = true,
-                     description = "The iPhoneOS SDK version, 16.4 or 26.2; empty takes 16.4 for the whole graph and 26.2 for a component."})
+                     description = "The iPhoneOS SDK version, 16.4 or 26.2; empty takes 26.2, the one SDK every configure uses."})
 
 local component = get_config("component")
 local whole = component == ""
