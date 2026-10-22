@@ -28,6 +28,8 @@ local MEMBERS = {
     },
 }
 
+local MODULE_DIR = os.scriptdir()
+
 local BOUNDARIES = {";", "*/", "}", "@end"}
 local WINDOW = 8192
 
@@ -258,9 +260,16 @@ local function property_name(declaration)
 end
 
 local function lowering_of(text, implemented)
-    local words = {}
-    for word in text:gmatch("[%a_][%w_]*") do
+    local words, hits = {}, {}
+    local globals, functions = implemented.globals or {}, implemented.functions or {}
+    for position, word in text:gmatch("()([%a_][%w_]*)") do
         words[word] = true
+        if globals[word] then
+            table.insert(hits, {position = position, word = word, kind = "global"})
+        end
+        if functions[word] then
+            table.insert(hits, {position = position, word = word, kind = "function"})
+        end
     end
     local ranges = {}
     local function lower(start, stop)
@@ -364,13 +373,9 @@ local function lowering_of(text, implemented)
             position = block_end + 1
         end
     end
-    for name in pairs(implemented.globals or {}) do
-        local position = words[name] and 1 or #text + 1
-        while true do
-            local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
-            if not start then
-                break
-            end
+    for _, hit in ipairs(hits) do
+        if hit.kind == "global" then
+            local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
             if first then
                 local last = statement_end(text, stop)
@@ -379,13 +384,9 @@ local function lowering_of(text, implemented)
                     lower(first, last)
                 end
             end
-            position = stop + 1
-        end
-    end
-    for position, word in text:gmatch("()([%a_][%w_]*)%s*%(") do
-        if implemented.functions[word] and not in_directive(text, position) then
-            local start = statement_start(text, position, true)
-            local stop = statement_end(text, position)
+        elseif text:find("^%s*%(", hit.position + #hit.word) and not in_directive(text, hit.position) then
+            local start = statement_start(text, hit.position, true)
+            local stop = statement_end(text, hit.position)
             local segment = start and text:sub(start, stop) or ""
             if start and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
                 lower(start, stop)
@@ -457,18 +458,68 @@ local function corpus_of(src)
     return corpora[src]
 end
 
-local function used_in(corpus, selector)
+local function usage_index(corpus, keyed, unary)
+    local index, sets, count = {}, {}, 0
+    for statement in corpus:gmatch("[^;]+") do
+        local bracket = statement:find("[", 1, true) or statement:find("@selector", 1, true) or statement:find(".", 1, true)
+        local found = nil
+        for token in statement:gmatch("[%a_][%w_]*:?") do
+            local hit
+            if token:sub(-1) == ":" then
+                hit = keyed[token]
+            else
+                hit = bracket and unary[token]
+            end
+            if hit then
+                found = found or {}
+                found[token] = true
+            end
+        end
+        if found then
+            count = count + 1
+            sets[count] = found
+            for token in pairs(found) do
+                index[token] = index[token] or {}
+                table.insert(index[token], count)
+            end
+        end
+    end
+    return {index = index, sets = sets}
+end
+
+local function usage_of(usage, selector)
+    local parts = {}
     if selector:find(":", 1, true) then
-        local parts = {}
         for part in selector:gmatch("[%w_]+:") do
             table.insert(parts, part)
         end
-        if #parts == 0 or not corpus:find(parts[1], 1, true) then
+    else
+        parts[1] = selector
+    end
+    local rarest = nil
+    for _, part in ipairs(parts) do
+        local ids = usage.index[part]
+        if not ids then
             return false
         end
-        return corpus:find(table.concat(parts, "[^;]-"), 1) ~= nil
+        if not rarest or #ids < #usage.index[rarest] then
+            rarest = part
+        end
     end
-    return corpus:find("%f[%w_]" .. selector .. "%f[^%w_]") ~= nil
+    for _, id in ipairs(usage.index[rarest]) do
+        local set = usage.sets[id]
+        local all = true
+        for _, part in ipairs(parts) do
+            if not set[part] then
+                all = false
+                break
+            end
+        end
+        if all then
+            return true
+        end
+    end
+    return false
 end
 
 local function method_keys(block)
@@ -493,10 +544,13 @@ local function protocol_blocks(sdk, names)
     for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
         for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
             local text = io.readfile(file)
-            for position, name in text:gmatch("()@protocol%s+([%w_]+)[%s<]") do
-                if names[name] and not blocks[name] then
+            local position = text:find("@protocol", 1, true)
+            while position do
+                local name = text:match("^@protocol%s+([%w_]+)[%s<]", position)
+                if name and names[name] and not blocks[name] then
                     blocks[name] = text:sub(position, text:find("@end", position, true) or #text)
                 end
+                position = text:find("@protocol", position + 1, true)
             end
         end
     end
@@ -531,11 +585,33 @@ function protocol_status(src, sdk, folders)
         candidates[name] = true
     end
     local blocks = protocol_blocks(sdk, candidates)
+    local methods, keyed, unary = {}, {}, {}
+    for name in pairs(candidates) do
+        methods[name] = blocks[name] and method_keys(blocks[name]) or {}
+        for _, method in ipairs(methods[name]) do
+            if method.selector:find(":", 1, true) then
+                for part in method.selector:gmatch("[%w_]+:") do
+                    keyed[part] = true
+                end
+            else
+                unary[method.selector] = true
+            end
+        end
+    end
+    local usage = usage_index(corpus, keyed, unary)
+    local implemented_any = {}
+    for _, found in pairs(folders) do
+        for _, class_members in pairs(found.classes) do
+            for key in pairs(class_members) do
+                implemented_any[key:sub(2)] = true
+            end
+        end
+    end
     local status = {backed = {}, uncalled = {}, members = {}}
     for name in pairs(candidates) do
         local members, used = {}, false
-        for _, method in ipairs(blocks[name] and method_keys(blocks[name]) or {}) do
-            if used_in(corpus, method.selector) then
+        for _, method in ipairs(methods[name]) do
+            if implemented_any[method.selector] or usage_of(usage, method.selector) then
                 members[method.key] = true
                 used = true
             end
@@ -552,13 +628,35 @@ end
 
 local built = {}
 
+local function input_digest(sdk, src)
+    local parts = {sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua"))}
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        for _, pattern in ipairs({"**.m", "**.mm", "**.h", "**.c"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                table.insert(parts, file)
+                table.insert(parts, io.readfile(file))
+            end
+        end
+    end
+    return hash.strhash128(table.concat(parts, "\0"))
+end
+
 function overlay(sdk, out, src)
     src = src or path.join(os.projectdir(), "frameworks", "Backports", "src")
     local key = table.concat({sdk, out, src}, "|")
-    if not built[key] then
-        built[key] = build_overlay(sdk, out, src)
+    if built[key] then
+        return built[key]
     end
-    return built[key]
+    os.mkdir(out)
+    local stamp = path.join(out, "input.digest")
+    local digest = input_digest(sdk, src)
+    local vfs = path.join(out, "vfs.yaml")
+    if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
+        vfs = build_overlay(sdk, out, src)
+        io.writefile(stamp, digest)
+    end
+    built[key] = vfs
+    return vfs
 end
 
 function build_overlay(sdk, out, src)
@@ -598,6 +696,7 @@ function build_overlay(sdk, out, src)
     byteorder.sort(dirs)
     local entries = {}
     for _, dir in ipairs(dirs) do
+        byteorder.sort(roots[dir])
         table.insert(entries, string.format([[    {"name": "%s", "type": "directory", "contents": [%s]}]], dir, table.concat(roots[dir], ", ")))
     end
     local vfs = path.join(out, "vfs.yaml")

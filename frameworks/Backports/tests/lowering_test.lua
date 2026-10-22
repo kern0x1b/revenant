@@ -47,6 +47,12 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)[UIGraphicsImageRenderer class];
     (void)[manager allowsBackgroundLocationUpdates];
     (void)UIApplicationUserDidTakeScreenshotNotification;
+    NSSet<UIScene *> *scenes = [[UIApplication sharedApplication] connectedScenes];
+    (void)scenes;
+    (void)[UIWindowScene class];
+    (void)[UIStatusBarManager class];
+    UIWindowScene *scene = nil;
+    (void)scene.activityItemsConfigurationSource;
     (void)[[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[]];
     (void)AVAudioSessionPortBluetoothLE;
 }
