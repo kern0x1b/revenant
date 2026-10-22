@@ -25,7 +25,12 @@ Speed and memory are part of correctness for everything this repository writes o
   dead-stripping, Swift's optimisation mode) and are not inherited from a default made for other hardware.
 - The compiler is ours to improve. An optimisation the A5 needs and LLVM or Swift lacks is a patch on the `llvm` or
   `swift` package, upstreamable and tested like any other patch.
-- Memory counts as speed: a working set that pushes an app out of 512 MB is a performance defect.
+- Memory counts as speed: a working set that pushes an app out of 512 MB is a performance defect. Backports answer
+  memory warnings by giving back what can be made again, as iOS does.
+- The bar is an app that runs well, not one that starts: smooth scrolling and animation, no stalls on the main
+  thread, no crashes, inside the memory the device has, and looking as its authors designed it.
+- The app's own source is never touched. The levers are the Backports libraries and runtimes the app links, and the
+  toolchain that builds it: its compiler, its optimisation settings and the link of the app with our libraries.
 
 ## Consequences
 
