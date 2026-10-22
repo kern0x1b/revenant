@@ -9,7 +9,7 @@
 @implementation SCNView
 {
     EAGLContext *_context;
-    RevenantSCNRenderer *_renderer;
+    RevenantSCNRenderEngine *_renderer;
     GLuint _framebuffer, _colorBuffer, _depthBuffer;
     GLint _drawableWidth, _drawableHeight;
     CADisplayLink *_displayLink;
@@ -74,7 +74,7 @@
     }
     [self revenantDeleteFramebuffer];
     _context = context;
-    _renderer = context ? [[RevenantSCNRenderer alloc] initWithContext:context] : nil;
+    _renderer = context ? [[RevenantSCNRenderEngine alloc] initWithContext:context] : nil;
 }
 
 - (void)revenantDeleteFramebuffer
@@ -277,7 +277,7 @@
 - (void)setScene:(SCNScene *)scene
 {
     _scene = scene;
-    _pointOfView = scene ? [RevenantSCNRenderer defaultPointOfViewInScene:scene] : nil;
+    _pointOfView = scene ? [RevenantSCNRenderEngine defaultPointOfViewInScene:scene] : nil;
     [self revenantUpdateDisplayLink];
 }
 

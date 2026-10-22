@@ -1,4 +1,5 @@
 local generate = import("generate", {rootdir = os.scriptdir(), anonymous = true})
+local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 local sources = import("implemented", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("libraries", {rootdir = os.scriptdir(), anonymous = true})
 local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
@@ -156,7 +157,8 @@ local function reachable(row, symbol_owners, method_owners)
     elseif row.kind == "C function" or row.kind == "global variable" then
         return symbol_owners["_" .. row.name] ~= nil
     elseif row.kind == "Swift declaration" then
-        return symbol_owners["_" .. row.symbol] ~= nil
+        local kind, symbol = skeleton.swift_stub(row)
+        return kind ~= nil and symbol_owners["_" .. symbol] ~= nil
     elseif generate.inherited_init(row) then
         return true
     end

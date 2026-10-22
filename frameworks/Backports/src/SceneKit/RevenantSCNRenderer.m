@@ -459,7 +459,7 @@ typedef struct {
     float spot[2];
 } RevenantSCNLightState;
 
-@interface RevenantSCNProgram : NSObject
+@interface RevenantSCNShaderProgram : NSObject
 {
 @public
     GLuint _program;
@@ -471,7 +471,7 @@ typedef struct {
 }
 @end
 
-@implementation RevenantSCNProgram
+@implementation RevenantSCNShaderProgram
 @end
 
 static GLuint RevenantSCNCompile(GLenum kind, NSString *source)
@@ -518,13 +518,13 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
     return projection;
 }
 
-@implementation RevenantSCNRenderer
+@implementation RevenantSCNRenderEngine
 {
     EAGLContext *_context;
     NSMapTable<SCNGeometry *, RevenantSCNMesh *> *_meshes;
     NSMapTable<id, RevenantSCNTexture *> *_textures[2];
     int _linearTextures;
-    NSMutableDictionary<NSString *, RevenantSCNProgram *> *_programs;
+    NSMutableDictionary<NSString *, RevenantSCNShaderProgram *> *_programs;
     NSMutableDictionary<NSString *, id> *_resolvedPaths;
     NSMutableSet<NSString *> *_failedPrograms;
     NSUInteger _frame;
@@ -562,7 +562,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
                 glDeleteTextures(1, &name);
             }
         }
-        for (RevenantSCNProgram *program in _programs.allValues) {
+        for (RevenantSCNShaderProgram *program in _programs.allValues) {
             glDeleteProgram(program->_program);
         }
     }
@@ -758,7 +758,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
 
 #pragma mark Shaders
 
-- (RevenantSCNProgram *)programForModel:(RevenantSCNModel)model textured:(unsigned)textured bordered:(unsigned)bordered lockedAmbient:(BOOL)lockedAmbient lights:(const RevenantSCNLightState *)lights count:(int)count mesh:(RevenantSCNMesh *)mesh
+- (RevenantSCNShaderProgram *)programForModel:(RevenantSCNModel)model textured:(unsigned)textured bordered:(unsigned)bordered lockedAmbient:(BOOL)lockedAmbient lights:(const RevenantSCNLightState *)lights count:(int)count mesh:(RevenantSCNMesh *)mesh
 {
     BOOL hasNormal = mesh->_attributes[RevenantSCNAttributeNormal].present;
     BOOL hasColor = mesh->_attributes[RevenantSCNAttributeColor].present;
@@ -767,7 +767,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
     for (int i = 0; i < count; i++) {
         [key appendFormat:@"%d", lights[i].type];
     }
-    RevenantSCNProgram *program = _programs[key];
+    RevenantSCNShaderProgram *program = _programs[key];
     if (program) {
         return program;
     }
@@ -945,7 +945,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
         [_failedPrograms addObject:key];
         return nil;
     }
-    program = [RevenantSCNProgram new];
+    program = [RevenantSCNShaderProgram new];
     program->_program = handle;
     program->_modelViewProjection = glGetUniformLocation(handle, "u_modelViewProjection");
     program->_model = glGetUniformLocation(handle, "u_model");
@@ -1268,7 +1268,7 @@ static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
             }
         }
         BOOL lockedAmbient = !physical && material.locksAmbientWithDiffuse;
-        RevenantSCNProgram *program = [self programForModel:model textured:textured bordered:bordered lockedAmbient:lockedAmbient lights:lights count:lightCount mesh:mesh];
+        RevenantSCNShaderProgram *program = [self programForModel:model textured:textured bordered:bordered lockedAmbient:lockedAmbient lights:lights count:lightCount mesh:mesh];
         if (program == nil) {
             continue;
         }

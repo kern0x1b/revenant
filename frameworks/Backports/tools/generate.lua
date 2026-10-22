@@ -145,10 +145,10 @@ function implemented_classes()
             names[name] = true
         end
     end
-    local helpers = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm", "--include=*.h",
-        "^@(interface|implementation) Revenant[A-Za-z0-9_]*", sdkfiles.src_root()})
-    for line in helpers:gmatch("[^\n]+") do
-        local name = string.match(line, "^@%a+ Revenant([%w_]+)")
+    local runtime = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "objc_runtime_name\\(\"[A-Za-z_][A-Za-z0-9_]*\"\\)", sdkfiles.src_root()})
+    for line in runtime:gmatch("[^\n]+") do
+        local name = string.match(line, "\"([%w_]+)\"")
         if name then
             names[name] = true
         end
