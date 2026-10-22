@@ -9,6 +9,7 @@ typedef struct {
     float corners[4][2];
     int version;
     int level;
+    int mirrored;
 } RevenantQRResult;
 
 typedef int (*RevenantQRConverter)(int eci, const uint8_t *bytes, size_t length, char **out, size_t *outLength);

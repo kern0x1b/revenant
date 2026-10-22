@@ -1276,7 +1276,7 @@ static int decode_grid(const Grid *grid, int mirror, Buffer *out, int *versionOu
     return ok;
 }
 
-static int sample_and_decode(const Grid *image, const Transform *transform, int dimension, int mirrorFirst, Buffer *out, int *versionOut, int *levelOut)
+static int sample_and_decode(const Grid *image, const Transform *transform, int dimension, int mirrorFirst, Buffer *out, int *versionOut, int *levelOut, int *mirroredOut)
 {
     Grid sampled = grid_make(dimension, dimension);
     for (int y = 0; y < dimension; y++) {
@@ -1290,10 +1290,12 @@ static int sample_and_decode(const Grid *image, const Transform *transform, int 
         }
     }
     int ok = decode_grid(&sampled, mirrorFirst, out, versionOut, levelOut);
+    *mirroredOut = mirrorFirst;
     if (!ok) {
         free(out->bytes);
         *out = (Buffer){0};
         ok = decode_grid(&sampled, !mirrorFirst, out, versionOut, levelOut);
+        *mirroredOut = !mirrorFirst;
     }
     grid_free(&sampled);
     return ok;
@@ -1350,8 +1352,8 @@ static int try_triple(const Grid *image, Pattern topLeft, Pattern topRight, Patt
     if (!solve_transform(source, target, &transform))
         return 0;
     Buffer out = {0};
-    int decodedVersion = 0, level = 0;
-    if (!sample_and_decode(image, &transform, dimension, 0, &out, &decodedVersion, &level)) {
+    int decodedVersion = 0, level = 0, mirrored = 0;
+    if (!sample_and_decode(image, &transform, dimension, 0, &out, &decodedVersion, &level, &mirrored)) {
         free(out.bytes);
         return 0;
     }
@@ -1359,6 +1361,7 @@ static int try_triple(const Grid *image, Pattern topLeft, Pattern topRight, Patt
     result->length = out.length;
     result->version = decodedVersion;
     result->level = level;
+    result->mirrored = mirrored;
     double corners[4][2] = {{0, 0}, {dimension, 0}, {dimension, dimension}, {0, dimension}};
     for (int index = 0; index < 4; index++) {
         double x = 0, y = 0;
