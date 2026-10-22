@@ -3,7 +3,7 @@ package("apple-compat")
     set_description("What a current library calls and an old Apple system does not have, provided as hidden definitions linked into the image that calls them")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the shims it compiles, so a changed shim or recipe is a different package.", default = apple_compat_sources_digest, type = "string", readonly = true})

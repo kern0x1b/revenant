@@ -13,10 +13,12 @@ function main()
     local backport = path.join(out, "backport")
     swiftc({fixture, "-o", host})
     swiftc({"-module-name", "CryptoKit", "-D", "REVENANT_BACKPORT", path.join(src, "Digests.swift"), path.join(src, "Authentication.swift"),
-            path.join(src, "AESGCM.swift"), fixture, "-o", backport})
+            path.join(src, "AESGCM.swift"), path.join(src, "KeyDerivation.swift"), fixture, "-o", backport})
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host CryptoKit program printed nothing")
+    assert(expected:find("hkdf rfc5869 1 true", 1, true), "the host HKDF misses RFC 5869 test case 1")
+    assert(expected:find("hkdf rfc5869 3 true", 1, true), "the host HKDF misses RFC 5869 test case 3")
     assert(expected == got, "the backport CryptoKit differs from the host in " .. out)
 end
