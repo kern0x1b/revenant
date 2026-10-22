@@ -22,7 +22,7 @@ package("webkit-engine")
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
 
     on_install("iphoneos", function (package)
-        import("engine", {rootdir = path.join(package:scriptdir(), "..", "modules"), anonymous = true}).install(package)
+        import("engine", {rootdir = path.join(member, "src", "modules"), anonymous = true}).install(package)
     end)
 
     on_test(function (package)
