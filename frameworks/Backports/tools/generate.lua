@@ -137,6 +137,14 @@ function implemented_classes()
             names[name] = true
         end
     end
+    local macros = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "[A-Z][A-Z0-9_]*\\([[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[,)]", sdkfiles.src_root()})
+    for line in macros:gmatch("[^\n]+") do
+        local name = string.match(line, "%(%s*([%w_]+)")
+        if name then
+            names[name] = true
+        end
+    end
     return names
 end
 
