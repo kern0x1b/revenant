@@ -325,6 +325,7 @@ package("swift-runtime")
             for _, patch in ipairs(overlay_patches) do
                 os.vrunv("patch", {"-p1", "-i", patch}, {curdir = overlays})
             end
+            import("@addon.revenant.apple.lowered", {anonymous = true}).swift_overlays(overlays)
 
             local installed_shims = path.join(install, "shims")
             local shim_modules = path.join(installed_shims, "module.modulemap")
