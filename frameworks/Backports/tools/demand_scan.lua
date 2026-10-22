@@ -355,7 +355,7 @@ local function spaces(text)
 end
 
 local function blank_directives(text)
-    return (text:gsub("#%s*import[^\n]*", spaces):gsub("#%s*include[^\n]*", spaces))
+    return (text:gsub("#%s*include[^\n]*", spaces):gsub("%f[%w_]import%f[^%w_][^\n]*", spaces))
 end
 
 function scan(file)
