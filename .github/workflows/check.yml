@@ -168,6 +168,13 @@ jobs:
       - name: Run the Backports tests
         timeout-minutes: 10
         run: ./xmakew test -P . "backports_uikit/*" --output-on-failure
+      - name: Link the probe app against the Backports libraries
+        timeout-minutes: 10
+        run: |
+          mkdir -p "$RUNNER_TEMP/report"
+          ./xmakew build -P . BackportsProbe
+          ./xmakew l -P . frameworks/Backports/tools/probe.lua build/iphoneos/armv7/release/BackportsProbe 2>&1 | tee "$RUNNER_TEMP/report/probe.txt"
+          cat "$RUNNER_TEMP/report/probe.txt" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check the exports and count the implemented members
         timeout-minutes: 10
