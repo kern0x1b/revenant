@@ -100,10 +100,12 @@ local function objc_top(state, top)
     elseif top.kind == "FunctionDecl" and top.name and not top.flags.static and not top.flags.inline and not top.implicit
         and not string.find(top.name, "^__builtin") then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a C function whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
-        add(state, {kind = "C function", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro})
+        add(state, {kind = "C function", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro,
+            flags = ast.has_unavailable(top) and "unavailable" or ""})
     elseif top.kind == "VarDecl" and top.name and top.flags.extern then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a global whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
-        add(state, {kind = "global variable", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro})
+        add(state, {kind = "global variable", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro,
+            flags = ast.has_unavailable(top) and "unavailable" or ""})
     elseif top.kind == "EnumDecl" then
         for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
             if child.name then
