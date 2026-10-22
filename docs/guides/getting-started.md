@@ -11,7 +11,7 @@ Swift component, which CI's `swift` job builds, is not part of these steps.
 - An Apple silicon Mac with the Command Line Tools: `xcode-select --install`. CI selects Xcode 26.6
   (`.github/workflows/check.yml`); the run this guide was checked on used the Command Line Tools.
 - Network access to github.com, for the clone, the package sources and the prebuilt releases.
-- Disk space: the verification run's package store and build folders took about 6 GB after the steps below.
+- Disk space: the verification run's package store and build folders took between 4 and 6 GB across two runs of the steps below.
 
 ## 1. Clone
 
@@ -55,7 +55,8 @@ To see the cheap checks first, which take seconds:
 The first command selects the Backports component, which `frameworks/Backports/xmake.lua` defines. The second
 reads the facts of every framework and writes the generated sources under `build/generated/backports`. The third
 builds the libraries. They land in `build/iphoneos/armv7/release/`, one `lib<Name>Backports.dylib` per framework, for
-example `libFoundationBackports.dylib`. The build took about twelve minutes on the verification machine.
+example `libFoundationBackports.dylib`. The build took about ten minutes on the re-run of the merged branch, which
+also checked the exports report.
 
 This reconfigures the checkout, so step 3 has to be run again before the tests. [The Backports overview](../../frameworks/Backports/README.md)
 lists what each library provides.
