@@ -6,9 +6,16 @@
 #import <sys/socket.h>
 #import <unistd.h>
 
-static NSString *revenant_fixture_path(void)
+static NSString *revenant_fixture_html(void)
 {
-    return [[[NSString stringWithUTF8String:__FILE__] stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"page.html"];
+    return @"<!DOCTYPE html><html><head><meta charset='utf-8'><title> Fixture &amp; Title </title>"
+           @"<meta name='description' content='Plain description'>"
+           @"<meta property='og:title' content='Open &quot;Graph&quot; title'>"
+           @"<meta property='og:description' content='OG summary &#x41;'>"
+           @"<meta property='og:url' content='https://example.com/canonical'>"
+           @"<meta property='og:video' content='https://example.com/clip.mp4'>"
+           @"<meta name='twitter:image' content='https://example.com/image.png'>"
+           @"<link rel='apple-touch-icon' href='/touch.png'></head><body>Fixture body</body></html>";
 }
 
 static NSData *revenant_served_page;
@@ -37,7 +44,7 @@ static void *revenant_serve(void *context)
 
 static NSURL *revenant_start_server(void)
 {
-    revenant_served_page = [NSData dataWithContentsOfFile:revenant_fixture_path()];
+    revenant_served_page = [revenant_fixture_html() dataUsingEncoding:NSUTF8StringEncoding];
     int listener = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in address;
     memset(&address, 0, sizeof address);
