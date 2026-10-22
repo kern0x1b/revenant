@@ -1,7 +1,7 @@
 local tools = path.absolute(path.join(os.scriptdir(), "..", "tools"))
 local implemented = import("implemented", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
-local workspace = import("workspace", {rootdir = path.absolute(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")), anonymous = true})
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local AREAS = {
     {
