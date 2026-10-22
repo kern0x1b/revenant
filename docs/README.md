@@ -22,6 +22,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Write a port](tutorials/toolchain/port.md) | a tutorial: an xmake project from an empty directory to a `.deb` |
 | [Checks and waivers](guides/toolchain/checks.md) | the checks a port runs, the waivers it states, and the release's libraries |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
+| [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
 | [Working on the toolchain](guides/toolchain/contributing.md) | the contributor guide |
 | [The toolchain's tests](reference/toolchain/tests.md) | the suites, and what runs where |
@@ -33,6 +34,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
+| [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
 
 ## Emulator
 

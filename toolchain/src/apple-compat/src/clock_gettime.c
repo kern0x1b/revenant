@@ -90,3 +90,9 @@ int revenant_clock_gettime(clockid_t which, struct timespec *now)
     }
     return 0;
 }
+
+__attribute__((visibility("hidden")))
+int clock_gettime(clockid_t which, struct timespec *now)
+{
+    return revenant_clock_gettime(which, now);
+}
