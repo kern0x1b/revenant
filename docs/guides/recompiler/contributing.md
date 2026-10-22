@@ -44,7 +44,8 @@ Rellume, farmdec and BlocksRuntime are packages of the package repository, pinne
 
 - Check a toolchain version only in an `XMAKE_GLOBALDIR` of your own. On xmake 3.1.1 every addon install becomes the machine's `active` version, so an install into the shared store
   changes it for every project.
-- The payload under `~/.xmake/addons` is never edited by hand: no copying files into it, no `xmake addon --remove`.
+- The payload under `~/.revenant/cache/xmake-global/.xmake/addons` is never edited by hand: no copying files into it,
+  no `xmake addon --remove`.
 
 ## Devices and the emulator
 

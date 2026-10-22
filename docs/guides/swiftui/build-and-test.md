@@ -11,7 +11,7 @@
   configured with `--emulate=y`. `frameworks/SwiftUI/tools/emulate.lua` does that configure itself; use the emulator the way the
   repository's skill `emulator-session` says.
 - To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device` (skill
-  `device`).
+  `device-session`).
 
 Run output (logs, pictures, API dumps, the copy of Apple's framework) goes under `$HOME/.revenant/cache/<task>/swiftui/`,
 never into the tree; `toolchain/modules/workspace.lua` names the task and the iOS 26.2 SDK the tools read.
