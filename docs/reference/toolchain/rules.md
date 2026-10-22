@@ -53,7 +53,7 @@ The rule passes `-Wno-incompatible-sysroot` to armv6, armv7 and armv7s targets. 
 | Setting | Meaning |
 | --- | --- |
 | `apple_minimum` | the oldest release the port runs on, for example `6.0`. A release the architecture cannot run is refused, naming the architectures that can. |
-| `apple_sdk` | the SDK version. The default is 16.4; `26.2` is also available. |
+| `apple_sdk` | the SDK version. The default is 26.2, the one SDK every configure uses; `16.4` is also available. |
 
 ## Checks on every linked binary
 

@@ -55,7 +55,7 @@ Embedded Swift is the subset of the language without a runtime library of its ow
 
 ### The templates are expanded in Lua
 
-The runtime's `.gyb` templates, and Embedded Swift's module and Combine's, are expanded by `modules/gyb`, a port of Swift's `gyb.py` to Lua, because no Python runs in the build. An interpreter covers the Python its code blocks use, down to float formatting, arbitrary-precision integers and the Mersenne Twister of `random.Random`. A construct it does not implement raises an error rather than being guessed at.
+The runtime's `.gyb` templates, and Embedded Swift's module and Combine's, are expanded by `modules/gyb`, a port of Swift's `gyb.py` to Lua that predates [0013](../decisions/0013-upstream-builds-keep-their-python.md) and stays while it is correct and tested. An interpreter covers the Python its code blocks use, down to float formatting, arbitrary-precision integers and the Mersenne Twister of `random.Random`. A construct it does not implement raises an error rather than being guessed at.
 
 ## Backports: the newest behaviour, and absence where it is unsafe
 
