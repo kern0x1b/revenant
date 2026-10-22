@@ -76,8 +76,8 @@ jobs:
           set -euo pipefail
           build=$(find "$HOME/.revenant/cache/xmake-global" -path '*/webkit-engine/latest/build/build.ninja' -print -quit)
           test -n "$build" || { echo "no build.ninja of webkit-engine in the store"; exit 1; }
-          ninja=$(find "$HOME/.revenant/cache/xmake-global" -path '*/packages/n/ninja/*' -name ninja -type f -print -quit)
-          test -n "$ninja" || { echo "no ninja in the store"; exit 1; }
+          ninja=$(sed -n 's/^CMAKE_MAKE_PROGRAM:[A-Z]*=//p' "$(dirname "$build")/CMakeCache.txt")
+          test -x "$ninja" || { echo "CMAKE_MAKE_PROGRAM is not an executable: $ninja"; exit 1; }
           echo "build: $build"
           echo "ninja: $ninja"
           py=$(command -v python3)
