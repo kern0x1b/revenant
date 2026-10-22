@@ -114,3 +114,8 @@ when the releases are rebuilt anyway. Until then the key stays as the release ha
   compares with the locale's collation. `xmakew` pins `LC_COLLATE` to `en_US.UTF-8` so that every machine hashes as the
   released keys did. The change is to sort those strings byte by byte, which removes the pin. The orders differ for
   some names, so the keys move, and the pin is removed in the same commit as the rebuild.
+- **The llvm package has no libLTO.** Neither llvm configuration installs `libLTO.dylib`: the default installs clang
+  alone, and the `libraries` configuration's distribution components do not list LTO. A link with `-flto=thin` then
+  fails, because the linker cannot load the library for the bitcode objects it reads, so every LTO link fails. The
+  change is to install `libLTO.dylib` with llvm and keep `-flto=thin` in the engine. Until that rebuild the reference
+  configure strips the flag on its own branch only; the engine build keeps it.

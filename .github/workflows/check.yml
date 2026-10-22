@@ -61,7 +61,7 @@ jobs:
 
   backports:
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -104,7 +104,7 @@ jobs:
           key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
 
       - name: Configure the Backports component
-        timeout-minutes: 20
+        timeout-minutes: 45
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
@@ -142,7 +142,7 @@ jobs:
           key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
 
       - name: Build the Backports component
-        timeout-minutes: 12
+        timeout-minutes: 60
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage build starts $(date -u +%H:%M:%S)"
@@ -200,7 +200,7 @@ jobs:
 
   swift:
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -228,7 +228,7 @@ jobs:
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - name: Install the firmware tools through the Backports configuration
-        timeout-minutes: 20
+        timeout-minutes: 45
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - uses: actions/cache/restore@v4

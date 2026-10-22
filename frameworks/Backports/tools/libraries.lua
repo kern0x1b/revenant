@@ -5,8 +5,13 @@ local function objc()
 end
 
 function read(libdir)
-    local files = os.files(path.join(libdir, "lib*.dylib"))
-    assert(#files > 0, "no lib*.dylib in " .. libdir)
+    local files = {}
+    for _, file in ipairs(os.files(path.join(libdir, "lib*.dylib"))) do
+        if file:endswith("Backports.dylib") then
+            table.insert(files, file)
+        end
+    end
+    assert(#files > 0, "no lib*Backports.dylib in " .. libdir)
     local libraries, index = {}, {}
     for _, file in ipairs(files) do
         local library = {name = path.filename(file), symbols = {}, methods = {}}

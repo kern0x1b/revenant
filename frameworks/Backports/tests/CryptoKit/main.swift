@@ -122,3 +122,19 @@ do {
     print("short tag error \(error)")
 }
 print("errors equal \(CryptoKitError.authenticationFailure == CryptoKitError.authenticationFailure) \(CryptoKitError.incorrectKeySize == CryptoKitError.incorrectParameterSize)")
+
+let hkdfKey = SymmetricKey(data: pattern(22, 41))
+let hkdfSalt = pattern(13, 42)
+let hkdfInfo = pattern(10, 43)
+print("hkdf extract \(hex(HKDF<SHA256>.extract(inputKeyMaterial: hkdfKey, salt: hkdfSalt)))")
+for length in [1, 31, 32, 33, 64, 100, 255] {
+    let derived = HKDF<SHA256>.deriveKey(inputKeyMaterial: hkdfKey, salt: hkdfSalt, info: hkdfInfo, outputByteCount: length)
+    print("hkdf \(length) \(hex(derived.withUnsafeBytes { Array($0) }))")
+}
+let rfcKey = SymmetricKey(data: Data(repeating: 0x0b, count: 22))
+let rfcSalt = Data((0...12).map { UInt8($0) })
+let rfcInfo = Data((0xf0...0xf9).map { UInt8($0) })
+let rfcOne = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, salt: rfcSalt, info: rfcInfo, outputByteCount: 42)
+print("hkdf rfc5869 1 \(hex(rfcOne.withUnsafeBytes { Array($0) }) == "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865")")
+let rfcThree = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, outputByteCount: 42)
+print("hkdf rfc5869 3 \(hex(rfcThree.withUnsafeBytes { Array($0) }) == "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8")")
