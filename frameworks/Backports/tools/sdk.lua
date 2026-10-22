@@ -8,6 +8,10 @@ function workspace()
     return import("@addon.revenant.workspace", {anonymous = true})
 end
 
+function src_root()
+    return path.join(root(), "frameworks", "Backports", "src")
+end
+
 function sdk_folder()
     return workspace().sdk()
 end
@@ -58,6 +62,18 @@ function umbrella_header(sdk, name)
     return nil
 end
 
+function umbrella_import(sdk, name)
+    local header = umbrella_header(sdk, name)
+    if header == nil then
+        return nil
+    end
+    local headers = path.join(frameworks_dir(sdk), name .. ".framework", "Headers") .. "/"
+    if string.sub(header, 1, #headers) == headers then
+        return "#import <" .. name .. "/" .. string.sub(header, #headers + 1) .. ">"
+    end
+    return '#import "' .. header .. '"'
+end
+
 function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
@@ -98,7 +114,8 @@ function write_rows(file, module, rows)
     local lines = {}
     for _, row in ipairs(rows) do
         table.insert(lines, table.concat({clean_field(module), clean_field(row.kind), clean_field(row.container),
-            clean_field(row.name), clean_field(row.symbol), clean_field(row.signature), row.intro and tostring(row.intro) or ""}, "\t"))
+            clean_field(row.name), clean_field(row.symbol), clean_field(row.signature), row.intro and tostring(row.intro) or "",
+            clean_field(row.flags)}, "\t"))
     end
     local temp = file .. ".part"
     io.writefile(temp, table.concat(lines, "\n") .. (#lines > 0 and "\n" or ""))
@@ -111,11 +128,11 @@ function read_rows(file)
         return nil
     end
     for line in io.lines(file) do
-        local module, kind, container, name, symbol, signature, intro = string.match(line,
-            "^([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)$")
+        local module, kind, container, name, symbol, signature, intro, flags = string.match(line,
+            "^([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)$")
         assert(module, "a malformed facts row in " .. file .. ": " .. line)
         table.insert(rows, {module = module, kind = kind, container = container, name = name, symbol = symbol,
-            signature = signature, intro = tonumber(intro)})
+            signature = signature, intro = tonumber(intro), flags = flags})
     end
     return rows
 end

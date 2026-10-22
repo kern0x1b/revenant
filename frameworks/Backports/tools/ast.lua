@@ -50,7 +50,7 @@ local function node_of(body, state)
     local range_start, range_end = string.find(pre, "<[^<>]*>")
     node.invalid = string.find(pre, "invalid sloc", 1, true) ~= nil
     node.multiline = range_start ~= nil and string.find(string.sub(pre, range_start, range_end), ", line:", 1, true) ~= nil
-    local rest = string.gsub(pre, "^%S+%s+0x%x+", "")
+    local rest = string.gsub(string.gsub(pre, "^%S+%s+0x%x+", ""), "prev 0x%x+", "")
     local tokens = words((string.gsub(rest, "<[^<>]*>", " ")))
     if node.kind == "AvailabilityAttr" then
         node.platform = tokens[1]
@@ -125,6 +125,15 @@ function ios_intro(node)
         end
     end
     return nil
+end
+
+function ios_unavailable(node)
+    for _, child in ipairs(node.children) do
+        if child.kind == "AvailabilityAttr" and child.platform == "ios" and child.unavailable then
+            return true
+        end
+    end
+    return false
 end
 
 function children_of(node, kind)

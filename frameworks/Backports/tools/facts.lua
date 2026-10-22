@@ -67,18 +67,21 @@ end
 local function objc_top(state, top)
     local intro = ast.ios_intro(top)
     if top.kind == "ObjCInterfaceDecl" and top.name and defined(top) then
+        assert(string.find(top.name, "^[%a_][%w_]*$"), "a class whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
         local super = ast.children_of(top, "super")[1]
         add(state, {kind = "class", container = "", name = top.name, symbol = "_OBJC_CLASS_$_" .. top.name,
-            signature = super and super.type or "", intro = intro})
+            signature = super and super.type or "", intro = intro, flags = ast.ios_unavailable(top) and "unavailable" or ""})
         members(state, top.name, top, intro)
     elseif top.kind == "ObjCCategoryDecl" then
         local interface = ast.children_of(top, "ObjCInterface")[1]
         if interface and interface.type then
+            assert(string.find(interface.type, "^[%a_][%w_]*$"), "a category whose class is not an identifier, '" .. interface.type .. "', in: " .. top.body)
             members(state, interface.type, top, intro)
         end
     elseif top.kind == "ObjCProtocolDecl" and top.name and defined(top) then
+        assert(string.find(top.name, "^[%a_][%w_]*$"), "a protocol whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
         add(state, {kind = "protocol", container = "", name = top.name, symbol = "_OBJC_PROTOCOL_$_" .. top.name,
-            signature = "", intro = intro})
+            signature = "", intro = intro, flags = #ast.children_of(top, "ObjCNonRuntimeProtocolAttr") > 0 and "nonruntime" or ""})
     elseif top.kind == "FunctionDecl" and top.name and not top.flags.static and not top.flags.inline and not top.implicit
         and not string.find(top.name, "^__builtin") then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a C function whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)

@@ -118,12 +118,26 @@ local function ready(sdk, version, logs, names)
     return cache
 end
 
-local function frameworks_of(cache, names)
+local function frameworks_of(cache, names, sdk)
     local out = {}
     for _, name in ipairs(names) do
-        table.insert(out, {name = name, rows = sdkfiles.read_rows(path.join(cache, name .. ".tsv")) or {}})
+        table.insert(out, {name = name, import = sdkfiles.umbrella_import(sdk, name), rows = sdkfiles.read_rows(path.join(cache, name .. ".tsv")) or {}})
     end
     return out
+end
+
+function implemented_classes()
+    local names = {}
+    local text = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "^(@implementation [A-Za-z_][A-Za-z0-9_]*([^(A-Za-z0-9_]|$)|REVENANT_ALIAS(_OF)?\\([A-Za-z_][A-Za-z0-9_]*)", sdkfiles.src_root()})
+    for line in text:gmatch("[^\n]+") do
+        local name = string.match(line, "^@implementation ([%w_]+)") or string.match(line, "^REVENANT_ALIAS_OF%(([%w_]+)")
+            or string.match(line, "^REVENANT_ALIAS%(([%w_]+)")
+        if name then
+            names[name] = true
+        end
+    end
+    return names
 end
 
 function key_of(row)
@@ -157,7 +171,7 @@ function prepare(only)
         version = version,
         logs = logs,
         minimum = minimum(),
-        frameworks = frameworks_of(cache, names),
+        frameworks = frameworks_of(cache, names, sdk),
     }
 end
 
@@ -165,9 +179,9 @@ function skeleton_for(name)
     local state = prepare({name})
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
+        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework)})
     end
-    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
+    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
 end
 
 function in_scope_rows(state, framework)
@@ -185,6 +199,8 @@ function is_implemented(implemented, framework, row)
     local keys = implemented[framework.name] or {}
     if row.kind == "property" then
         return keys["instance method|" .. row.container .. "|" .. row.name] == true
+    elseif row.kind == "Swift declaration" then
+        return keys["swift symbol||" .. row.symbol] == true
     end
     return keys[key_of(row)] == true
 end
@@ -197,10 +213,10 @@ function main(...)
     local state = prepare()
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
+        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework)})
     end
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
-    print(string.format("skeleton: %d ObjC methods, %d C functions, %d Swift symbols under %s", totals.objc, totals.c, totals.swift,
-        path.join(sdkfiles.build_root(), "skeleton")))
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
+    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals, %d C functions, %d Swift symbols under %s",
+        totals.objc, totals.classes, totals.protocols, totals.globals, totals.c, totals.swift, path.join(sdkfiles.build_root(), "skeleton")))
 end

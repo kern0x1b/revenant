@@ -280,6 +280,15 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             return #failures == 0
         end)
     target_end()
+    target("BackportsProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(os.scriptdir(), "tests", "probe", "probe.m"))
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_deps("HealthKitBackports")
+        add_syslinks("objc")
+        add_frameworks("Foundation")
 end
 
 option("air2cpu", {default = false, showmenu = true,
