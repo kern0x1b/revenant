@@ -86,6 +86,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 
 | Document | About |
 | --- | --- |
+| [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |
