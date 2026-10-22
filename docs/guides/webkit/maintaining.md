@@ -160,8 +160,9 @@ branch is allowed to be red for as long as it takes — that is what it is for.
 
 How far the series is from upstream today can be measured without moving it: applying
 each patch in turn to a tree of the current `main`, with `git apply --3way`, counts the
-files each patch would conflict in. Against `main` of 2026-10-19 the series of 26 patches
-conflicts in 261 files, in 19 of the patches; WebCore above the platform layer (patch 11,
+files each patch would conflict in. Against `main` of 2026-10-19 the series of 26 patches,
+measured before its configure-without-Python patch was dropped, conflicts in 261 files, in
+19 of the patches; WebCore above the platform layer (patch 11,
 86 files) and the WebKit1 API iOS links (patch 22, 48 files) are half of it.
 
 Nothing that moves the base may push on its own: a series nobody has read is not a
@@ -211,8 +212,9 @@ this repository. The base commit is the one thing fetched from upstream.
    one subject at a time. Done as the patch series: the fork's 176 commits and its
    merge of the 2.54 branch, grouped into 24 patches that applied to upstream
    `c70a794b03` give the fork's tree exactly; then this port's own comments were
-   taken out of them and two build patches added, configure without Python and
-   keeping the configured compiler.
+   taken out of them and one build patch added, keeping the configured compiler. The
+   build runs WebKit's own Python generators as WebKit ships them, through the
+   `Python_EXECUTABLE` the engine passes to CMake.
 4. **32-bit JSC coverage on the host.** The container, the build, the suites.
 5. **The integration branch against `main`**, to measure the real cost and to
    host the 64-bit JSValue work.

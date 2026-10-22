@@ -1,1 +1,1 @@
-iphoneos_sdk_additions_digest = "e84fac967d24d351a54d9e661ae30044"
+iphoneos_sdk_additions_digest = "2d78cc4851be282ae4c4889b29c8ff8f"

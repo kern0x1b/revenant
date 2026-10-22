@@ -1,7 +1,7 @@
 # Keeping the engine current
 
 The engine is upstream WebKit at one commit of `main`, `c70a794b0341` of 2026-09-14,
-with this port as a series of 26 patches in `packages/w/webkit/patches`. It was a
+with this port as a series of 25 patches in `packages/w/webkit/patches`. It was a
 graft until 2026-09-11 - a snapshot with no shared ancestry, updated by applying
 other people's diffs - then a fork whose `main` carried the port as commits until
 2026-10-20, when those commits became the series; [maintaining.md](../../guides/webkit/maintaining.md)
