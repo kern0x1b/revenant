@@ -28,7 +28,7 @@ package("icu")
 
         local function make(dir, targets)
             parallel.hold(nil, function (width)
-                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir, envs = {ac_cv_prog_PYTHON = ""}})
+                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir})
             end)
         end
 
@@ -54,7 +54,7 @@ package("icu")
                 if items[index] then
                     os.mkdir(path.join(work, "in", tree))
                     os.vrunv(icupkg, {"-x", index, "-d", path.join(work, "in"), archive})
-                    local text = os.iorunv(path.join(bin, "derb"), {"-c", "-e", "UTF-8", "-s", path.join(work, "in", tree), "res_index.res"})
+                    local text = os.iorunv(path.join(bin, "derb"), {"-c", "-s", path.join(work, "in", tree), "res_index.res"})
                     local indexed, lines = {}, {}
                     for _, line in ipairs(text:split("\n", {strict = true})) do
                         local key = line:match("^%s*([%w_]+)%s*{%s*\"\"%s*}%s*$")
@@ -105,8 +105,8 @@ package("icu")
 
         local configure = path.absolute(path.join("source", "configure"))
         local archive = path.absolute(path.join("source", "data", "in", "icudt" .. package:version():major() .. "l.dat"))
-        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras"}
-        local base = {ac_cv_prog_PYTHON = "", SOURCE_DATE_EPOCH = "0"}
+        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras", "ac_cv_prog_PYTHON="}
+        local base = {SOURCE_DATE_EPOCH = "0"}
         local host = path.absolute("build-host")
         os.mkdir(host)
         local hostenvs = table.join(base, {CC = "cc", CXX = "c++"})
@@ -117,7 +117,9 @@ package("icu")
         os.vrunv("sh", table.join({configure}, options, package:is_plat("macosx") and {"--prefix=" .. package:installdir()} or {}),
                  {curdir = host, envs = hostenvs})
         make(host)
-        trim(path.join(host, "bin"), archive)
+        if not os.getenv("REVENANT_ICU_NO_TRIM") then
+            trim(path.join(host, "bin"), archive)
+        end
         if package:is_plat("macosx") then
             make(path.join(host, "data"), {"clean"})
             make(host)
@@ -156,7 +158,7 @@ package("icu")
             make(cross, {"install"})
         end
         import("@addon.revenant.apple.install", {anonymous = true}).finish(package, {
-            licenses = "LICENSE", prune = {"lib/pkgconfig", "lib/icu", "share", "bin", "sbin"}})
+            licenses = "LICENSE", prune = {"lib/icu", "share", "bin", "sbin"}})
     end)
 
     on_test(function (package)

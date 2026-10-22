@@ -157,6 +157,18 @@ function flags(ctx)
     local shflags = {"-flto=thin", "-Wl,-compatibility_version,1.0.0", "-Wl,-current_version,1.0.0",
                      "-L" .. path.join(ctx.libxslt, "lib"), "-L" .. path.join(ctx.woff2, "lib"),
                      library(ctx.brotli, "brotlidec"), library(ctx.brotli, "brotlicommon")}
+    if os.getenv("REVENANT_REFERENCE_NO_LTO") then
+        local function without_lto(list)
+            local kept = {}
+            for _, flag in ipairs(list) do
+                if flag ~= "-flto=thin" then
+                    table.insert(kept, flag)
+                end
+            end
+            return kept
+        end
+        cflags, shflags = without_lto(cflags), without_lto(shflags)
+    end
     return {cflags = cflags, cxxflags = cxxflags, shflags = shflags, ldflags = {library(ctx.libpsl, "psl")}}
 end
 
@@ -262,7 +274,7 @@ function context(package, build)
         return assert(package:dep(name), package:name() .. " has no dependency " .. name):installdir()
     end
     local function config(name)
-        local found = os.dirs(path.join(dir(name), "lib", "cmake", name .. "-*"))
+        local found = os.dirs(path.join(dir(name), "lib", "cmake", name .. "*"))
         return assert(found[1], name .. " installed no CMake package configuration under lib/cmake")
     end
     local source = path.join(dir("webkit"), "src")

@@ -16,6 +16,10 @@ package("libxml2")
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         cmake.install(package, {"-DLIBXML2_WITH_PROGRAMS=OFF", "-DLIBXML2_WITH_TESTS=OFF", "-DLIBXML2_WITH_PYTHON=OFF",
                                 "-DLIBXML2_WITH_DOCS=OFF", "-DLIBXML2_WITH_ICU=ON", "-DLIBXML2_WITH_ICONV=OFF",
+                                "-DICU_INCLUDE_DIR=" .. path.join(package:dep("icu"):installdir(), "include"),
+                                "-DICU_UC_LIBRARY=" .. path.join(package:dep("icu"):installdir(), "lib", "libicuuc.a"),
+                                "-DICU_I18N_LIBRARY=" .. path.join(package:dep("icu"):installdir(), "lib", "libicui18n.a"),
+                                "-DICU_DATA_LIBRARY=" .. path.join(package:dep("icu"):installdir(), "lib", "libicudata.a"),
                                 "-DCMAKE_INSTALL_SYSCONFDIR=/etc"},
                       {cflags = {"-fvisibility=hidden"}, licenses = "Copyright", prune = {"lib/pkgconfig", "share", "bin"}})
     end)
