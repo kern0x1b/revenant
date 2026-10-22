@@ -24,40 +24,6 @@ function wanted(package)
     return source() ~= nil
 end
 
-function hashed(package)
-    local str = package:plat() .. package:arch()
-    local label = package:label()
-    if label then
-        str = str .. label
-    end
-    local items = {}
-    for name, setting in pairs(package:_configs_for_buildhash() or {}) do
-        table.insert(items, name .. "=" .. (type(setting) == "table" and string.serialize(setting, {strip = true, indent = false, orderkeys = true}) or tostring(setting)))
-    end
-    table.sort(items)
-    local configs = string.serialize(items, true):gsub("\"", "")
-    str = str .. configs
-    local sourcehashes = {}
-    for _, url in ipairs(package:urls() or {}) do
-        local sourcehash = package:sourcehash(package:url_alias(url))
-        if sourcehash then
-            sourcehashes[sourcehash] = true
-        end
-    end
-    local hashs = table.orderkeys(sourcehashes)
-    if #hashs > 0 then
-        table.sort(hashs)
-        str = str .. "_" .. table.concat(hashs, "_")
-    end
-    local toolchains = package:_config_for_buildhash("toolchains")
-    if toolchains then
-        toolchains = table.copy(table.wrap(toolchains))
-        table.sort(toolchains)
-        str = str .. "_" .. table.concat(toolchains, "_")
-    end
-    return str
-end
-
 function key(package)
     local parts = {package:name(), package:version_str() or "latest", package:plat(), package:arch(), package:buildhash()}
     local deps = {}
@@ -81,9 +47,6 @@ function key(package)
         print("prebuilt-trace %s urls=%s label=%s", package:name(), table.concat(urls, " ; "), tostring(package:label()))
         print("prebuilt-trace %s deps=%s", package:name(), table.concat(deps, " | "))
         print("prebuilt-trace %s key=%s", package:name(), value)
-        local text = hashed(package)
-        print("prebuilt-trace %s hashed=%s", package:name(), text)
-        print("prebuilt-trace %s full=%s cached=%s", package:name(), hash.uuid4(text):replace("-", "", {plain = true}):lower(), package:buildhash())
     end
     return value
 end
