@@ -1,5 +1,6 @@
 rule("apple-ios")
     on_load(function (target)
+        import("@self.binding").mark(target)
         import("core.project.project")
         local toplevel = try { function () return os.iorunv("git", {"-C", os.workingdir(), "rev-parse", "--show-toplevel"}):trim() end }
         if toplevel and path.absolute(toplevel) ~= path.absolute(os.projectdir()) and path.absolute(toplevel):startswith(path.absolute(os.projectdir()) .. "/") then
