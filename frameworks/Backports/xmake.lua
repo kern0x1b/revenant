@@ -90,7 +90,7 @@ local LIBRARIES = {
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports"}, archives = {}, system = {}, gap = {"Network", "Telegram needs NWProtocolTCP.Options, the NWListener Swift type, NWProtocolFramer and NWProtocolFramerImplementation; these Swift overlays are not implemented"}},
-    {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}, gap = {"LinkPresentation", "TelegramCore imports LinkPresentation and uses LPMetadataProvider, which have no iOS 6 backport"}},
+    {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
@@ -311,4 +311,5 @@ if not is_plat("iphoneos") then
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"}, {"REVENANT_HOST_BUILD"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
-    host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {"REVENANT_HOST_BUILD"})end
+    host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {"REVENANT_HOST_BUILD"})
+    host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {"REVENANT_HOST_BUILD"})end
