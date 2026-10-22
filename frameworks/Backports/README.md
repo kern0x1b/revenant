@@ -59,6 +59,27 @@ Partly backported. Each of these builds, and the part it does not cover is missi
 
 The large members still open, with a design note for each, are in `docs/explanation/backports-open-members.md`.
 
+These framework targets fail before building on iOS 6 while Telegram's demanded API is missing:
+
+- `BackgroundTasksBackports`: `BGContinuedProcessingTask` and `BGContinuedProcessingTaskRequest` are iOS 26 APIs.
+- `DeviceCheckBackports`: the app imports `DeviceCheck`, which is absent on iOS 6.1.3.
+- `VisionKitBackports`: the document scanner needs `VNDocumentCameraViewController`, `VNDocumentCameraScan` and `VNDocumentCameraViewControllerDelegate`.
+- `StoreKitBackports`: Telegram calls `AppStore.showManageSubscriptions(in:)`, which is not backported.
+- `AuthenticationServicesBackports`: Telegram's authorization flows need `ASAuthorizationController`, its delegate and presentation protocols, `ASAuthorizationAppleIDButton`, the passkey provider, assertion and registration types, and `ASCredentialUpdater`.
+- `NetworkBackports`: Telegram needs the Swift `NWProtocolTCP.Options`, `NWListener`, `NWProtocolFramer` and `NWProtocolFramerImplementation` overlays. `NWConnection`, `NWEndpoint` and `NWParameters` are implemented.
+- `LinkPresentationBackports`: TelegramCore imports `LinkPresentation` and uses `LPMetadataProvider`.
+- `WebKitBackports`: BrowserUI needs `WKSnapshotConfiguration`, `WKContextMenuElementInfo`, `WKDownloadDelegate`, `WKURLSchemeHandler` and `WKURLSchemeTask`.
+- `IntentsBackports`: TelegramIntents needs `INPerson`, `INPersonHandle` and `INSendMessageIntent`.
+
+`WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
+
+## Lowering gaps
+
+These demand-map references are SDK declarations whose availability lowering belongs to `toolchain/modules/apple/lowered.lua`:
+
+- `Accelerate.kvImage420Yp8_Cb8_Cr8` and `Accelerate.kvImageARGB8888` are enum values used by TelegramVoip's `OngoingCallContext.swift`.
+- `Foundation.PresentationIntent` is the Swift overlay type used by BrowserUI's `BrowserMarkdown.swift`; the Objective-C `NSPresentationIntent` implementation is already in `src/Foundation/NSPresentationIntent15.m`.
+
 The Swift overlays below are built as targets of this component, and each builds only for an iOS its backport reaches. Below that release the build refuses, and the wrapper package refuses on load, with "not yet backported". None of these is a supported minimum: each closes when its backport makes it build at iOS 6.
 
 - `swiftRealityFoundation` and `swiftRealityKit` below iOS 8: they load SceneKit, and the SceneKit members they import (`SCNHitTestResult`, `-[SCNView hitTest:options:]`, `+[SCNNode nodeWithGeometry:]`) are not backported yet. RealityKit's UIKit part is open too. [RealityFoundation below iOS 8](../../docs/reference/backports/RealityFoundation/SceneKit.md) says what brings them back.
