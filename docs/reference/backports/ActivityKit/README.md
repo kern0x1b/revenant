@@ -38,7 +38,7 @@ sound, the dismissal policy, and the errors' domain, codes and sentences. `docs/
 `AlertConfiguration`'s `title` and `body` are `Foundation.LocalizedStringResource`. Where the runtime's
 Foundation has the type, the module uses the platform's; where it does not - it is the swift-5.4.3
 overlay, which predates it - the `revenant@appintents` package carries it and this one takes it from
-there. The recipe measures which with a probe and prints it at every install.
+there. The Swift target measures which with a probe each time it configures the module.
 
 ## Licence
 
@@ -53,7 +53,7 @@ The Backports build does not include this package; the `Swift` component does:
 
 `require` builds the package and the packages its recipe declares (here `revenant@swift-runtime` and
 `revenant@appintents`), so that one command is enough. The first run also builds swift-runtime and
-libcxx from source, because neither has a published prebuilt release yet; see
+libcxx from source unless it takes their prebuilt releases; see
 [prebuilt packages](../../../guides/prebuilt.md).
 
 If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,

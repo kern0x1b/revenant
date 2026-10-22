@@ -9,20 +9,20 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
   [run the tests](../../reference/toolchain/tests.md).
 - The facts: [rules and values](../../reference/toolchain/rules.md), [commands](../../reference/toolchain/commands.md),
   [packages](../../reference/toolchain/packages.md), [tools](../../reference/toolchain/tools.md).
-- Skills in the top `.agents/skills/`: `emulator` drives `xmake emulate`, `device` reaches a phone. The xmake reference skills come from the `xmake-skills` plugin pinned in
+- Skills in the top `.agents/skills/`: `emulator-session` drives `xmake emulate`, `device-session` reaches a phone. The xmake reference skills come from the `xmake-skills` plugin pinned in
   `.claude/settings.json`, never from a copy in this repository.
 
 ## Layout
 
 | Path | Holds |
 | --- | --- |
-| `addon.lua`, `addons/r/revenant/xmake.lua` | the addon `revenant`, and the package that installs it for `add_addons` |
+| `addon.lua`, `../addons/r/revenant/xmake.lua` | the addon `revenant`, and the package that installs it for `add_addons` |
 | `toolchains/apple-ios/` | the `apple-ios` toolchain: the compilers, SDK and flags every target gets |
 | `rules/` | the target rules: `app`, `apple-ios`, `check`, `daemon`, `library`, `macro`, `swift`, `tweak` |
 | `includes/apple-ios/`, `includes/emulate/` | what a port includes: `@addon/revenant/apple-ios` and `@addon/revenant/emulate` |
 | `plugins/` | the verbs: `check`, `compile-commands`, `deb`, `device`, `emulate`, `firmware`, `where` |
 | `modules/apple/` | the Lua the rules and verbs run; `modules/gyb/` expands Swift's `.gyb` templates in Lua |
-| `packages/<letter>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
+| `packages/<letter>/<name>/` | package definitions, under the first letter of the name; [the packages reference](../../reference/toolchain/packages.md) groups them by role |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
 | `tests/` | `xmake.lua`, the test targets of the toolchain; `addon/` the suites, `common/` what they share, `emulate/` and `swiftui/` the device fixtures |
 
@@ -89,8 +89,8 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   `set_values("revenant.libraries", "<the alias add_requires gave the package>")`. Reason: `verify_placed` in
   `modules/apple/platform.lua` takes the plain, weak-linked path while `revenant.libraries` is empty, and that path
   does not recognise the backport dylib as build-provided. Related: `@addon/revenant/*` resolves to a version-pinned
-  copy under `~/.xmake/addons/revenant/<version>/`, not to the working tree, so an uncommitted edit under `modules/`
-  reaches a build only once it is committed.
+  copy under `~/.revenant/cache/xmake-global/.xmake/addons/revenant/<version>/`, not to the working tree, so an
+  uncommitted edit under `modules/` reaches a build only once it is committed.
 
 - **`+load` in a backport.** Wrong: expecting `+load` to see a method that the library's categories add, or replacing
   a release method with no same-selector category beside the replacement. Right: decide on the release alone, and
@@ -124,7 +124,8 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   returns. Every object is written, nothing is printed, and the process stays alive, whatever `isolate` says.
 
 - **A working copy installed as the addon.** Wrong: a scratch project with `add_addons("revenant")` whose
-  `add_repositories` points at a worktree or clone, run against the shared `~/.xmake`. Right: test a package or a module
+  `add_repositories` points at a worktree or clone, run against the shared store
+  `~/.revenant/cache/xmake-global`. Right: test a package or a module
   with a `XMAKE_GLOBALDIR` of its own. Reason: on xmake 3.1.1 every addon install
   becomes the machine's active version, and every new project then locks that copy instead of the version it declares.
 

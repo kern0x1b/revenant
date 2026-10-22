@@ -14,7 +14,7 @@ package("swift-crypto")
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
         package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftCrypto")
@@ -73,15 +73,11 @@ package("swift-crypto")
                  import("@addon.revenant.data", {anonymous = true}).src("apple-compat", "src", "objc_allocWithZone.c"),
                  "-o", path.join(objects, "objc_allocWithZone.o")}))
 
-        local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
-        local overlay = #port_headers > 0 and {"-vfsoverlay", table.concat(port_headers, path.envsep())} or {}
-
         local swiftflags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "SourceWarningControl",
                             "-enable-upcoming-feature", "MemberImportVisibility", "-D", "CRYPTO_IN_SWIFTPM", "-swift-version", "6",
                             "-package-name", "swift-crypto", "-parse-as-library", "-Onone", "-wmo", "-c",
                             "-I", path.join(bssl, "include"), "-I", path.join(kcp, "include"),
                             "-I", path.join(sources, "CXKCPShims", "include"), "-I", compat:installdir("include")}
-        table.join2(swiftflags, overlay)
         local swiftmods = path.join(objects, "swiftmodules")
         os.mkdir(swiftmods)
         local swiftargv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
@@ -124,7 +120,6 @@ package("swift-crypto")
         end
         local asn1flags = {"-enable-upcoming-feature", "MemberImportVisibility", "-enable-upcoming-feature", "ExistentialAny",
                            "-package-name", "swift-asn1", "-swift-version", "6"}
-        table.join2(asn1flags, overlay)
         local asn1argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                               module = "SwiftASN1"})
         table.join2(asn1argv, asn1flags, {"-c", "-module-name", "SwiftASN1", "-emit-module", "-emit-module-path",

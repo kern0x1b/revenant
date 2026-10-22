@@ -60,7 +60,7 @@ end
 local RECIPES = {
     {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
      inputs = {"packages/s/swift-runtime/xmake.lua", "toolchain/modules/apple/shared_runtime.lua",
-               "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/dyld.lua",
+               "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/dyld.lua", "toolchain/modules/apple/lowered.lua",
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua",
                "packages/s/swift-runtime/patches/**.patch",
@@ -112,7 +112,7 @@ local RECIPES = {
                "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityKit/*.swift"}},
     {folder = "packages/s/spatial", variable = "spatial_sources_digest",
      inputs = {"packages/s/spatial/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
-               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/src/Spatial/*.swift.gyb"}},
+               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/tools/spatial_float.lua"}},
     {folder = "packages/c/cloudkit", variable = "cloudkit_sources_digest",
      inputs = {"packages/c/cloudkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
                "frameworks/Backports/src/CloudKit/*.swift"}},

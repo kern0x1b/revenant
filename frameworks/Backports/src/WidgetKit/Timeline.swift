@@ -1,52 +1,5 @@
 import Foundation
 
-public protocol TimelineEntry {
-    var date: Date { get }
-    var relevance: TimelineEntryRelevance? { get }
-}
-
-extension TimelineEntry {
-    public var relevance: TimelineEntryRelevance? { return nil }
-}
-
-public struct TimelineEntryRelevance: Codable, Hashable {
-    public let score: Double
-    public let duration: TimeInterval
-
-    public init(score: Double, duration: TimeInterval) {
-        self.score = score < 0 ? 0 : (score > 1 ? 1 : score)
-        self.duration = duration
-    }
-}
-
-public struct TimelineReloadPolicy: Equatable {
-    public static var never: TimelineReloadPolicy { return TimelineReloadPolicy(.never) }
-    public static var atEnd: TimelineReloadPolicy { return TimelineReloadPolicy(.atEnd) }
-    public static func after(_ date: TimeInterval) -> TimelineReloadPolicy { return TimelineReloadPolicy(.after(date)) }
-
-    enum Kind: Equatable {
-        case never
-        case atEnd
-        case after(TimeInterval)
-    }
-
-    let kind: Kind
-
-    private init(_ kind: Kind) {
-        self.kind = kind
-    }
-}
-
-public struct Timeline<EntryType> where EntryType: TimelineEntry {
-    public let entries: [EntryType]
-    public let policy: TimelineReloadPolicy
-
-    public init(entries: [EntryType], policy: TimelineReloadPolicy) {
-        self.entries = entries
-        self.policy = policy
-    }
-}
-
 public struct TimelineProviderContext {
     public let family: WidgetFamily
     public let isPreview: Bool
@@ -93,51 +46,6 @@ public struct CGSizeLike: Equatable, Sendable {
     }
 }
 
-public enum WidgetFamily: String, Hashable, Sendable, CustomStringConvertible {
-    case systemSmall
-    case systemMedium
-    case systemLarge
-    case systemExtraLarge
-    case systemExtraLargePortrait
-    case accessoryCircular
-    case accessoryCorner
-    case accessoryInline
-    case accessoryRectangular
-
-    public var description: String { return rawValue }
-
-    public var debugDescription: String { return "WidgetFamily(\(rawValue))" }
-}
-
-public struct WidgetLocation: Sendable, Hashable {
-    private let name: String
-
-    private init(_ name: String) {
-        self.name = name
-    }
-
-    public static var homeScreen: WidgetLocation { return WidgetLocation("homeScreen") }
-    public static var lockScreen: WidgetLocation { return WidgetLocation("lockScreen") }
-    public static var smartStack: WidgetLocation { return WidgetLocation("smartStack") }
-    public static var controlCenter: WidgetLocation { return WidgetLocation("controlCenter") }
-    public static var standBy: WidgetLocation { return WidgetLocation("standBy") }
-    public static var carPlay: WidgetLocation { return WidgetLocation("carPlay") }
-    public static var watchFace: WidgetLocation { return WidgetLocation("watchFace") }
-    public static var iPhoneWidgetsOnMac: WidgetLocation { return WidgetLocation("iPhoneWidgetsOnMac") }
-}
-
-public enum WidgetMountingStyle: Sendable, Hashable {
-    case elevated
-    case recessed
-}
-
-public enum WidgetAccentedRenderingMode: Hashable {
-    case fullColor
-    case accented
-    case accentedDesaturated
-    case desaturated
-}
-
 public struct SupportedActivityFamiliesEnvironmentKey {
     public typealias Value = Set<ActivityFamily>
     public static var defaultValue: Value { return [ActivityFamily.small, .medium] }
@@ -148,19 +56,6 @@ public enum ActivityFamily: String, Equatable, CustomStringConvertible {
     case medium
 
     public var description: String { return rawValue }
-}
-
-public enum WidgetRenderingMode: Equatable, CustomStringConvertible {
-    case fullColor
-    case accented
-    case vibrant
-
-    public var description: String { return String(describing: self) }
-}
-
-public enum LevelOfDetail: Equatable {
-    case simplified
-    case `default`
 }
 
 public struct WidgetRelevanceGroup: Hashable, Sendable {

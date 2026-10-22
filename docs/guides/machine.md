@@ -51,7 +51,7 @@ changes exactly when those files do:
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
-| `swift-bootstrap` | `recipe` | the recipe, and the swift.org package by its sha256 |
+| `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
 A change to documentation rebuilds nothing. `./xmakew l tools/keys.lua [package ...]` prints each large

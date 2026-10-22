@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-revenant's `.agents/skills/` (webkit, device); this guide is
+revenant's `.agents/skills/` (webkit, device-session); this guide is
 the map.
 
 ## What this is

@@ -152,12 +152,10 @@ ignored; those keep their `#available`. Which API to take and its status is the 
 The requires, from the rule and the recipe at the pin (`rules/swift/xmake.lua:75,88`,
 `revenant-repo-0.8.10:packages/s/swift-runtime/xmake.lua:81-105`):
 
-- `add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})`;
-  an application may add `backports_uikit = true`, which links UIKit's overlay against
-  libUIKitBackports (`backports_uikit` without `backports` is refused);
-- `add_deps("CoreDataBackports")`,
-  with `uikit = true` when the runtime has `backports_uikit` (and whatever the skill `backports`
-  asks for the API you call), and `add_deps("FoundationBackports")` in the target.
+- `add_requires("revenant@swift-runtime", {alias = "swift-runtime"})`: the runtime has no `backports` config,
+  and the overlays see the SDK's headers lowered by the toolchain;
+- `add_deps("CoreDataBackports")` and `add_deps("FoundationBackports")` in the target, and whatever the
+  skill `backports` asks for the API you call.
 
 The rule refuses the build when the program does not carry the backports the runtime links, and
 names the missing config: a lowered call finds its implementation only where that library is

@@ -18,7 +18,7 @@ and the architectures. Which architecture runs which releases is the skill `proj
 
 | Part | Package |
 | --- | --- |
-| compiler | `revenant@llvm` 23.1.1: clang built from source, with Revenant's patches for emulated thread-locals and atomic library calls |
+| compiler | `revenant@llvm` 23.1.3 in the checkout, 23.1.2 at the 0.8.10 pin: clang built from source, with Revenant's patches for emulated thread-locals and atomic library calls |
 | linker | `revenant@ld64` 956.6: Apple's ld64 from cctools-port, the linker that still inserts branch islands for armv7 |
 | SDK | `revenant@iphoneos-sdk` 16.4, with the startup objects (`crt1.o`, `crt1.3.1.o`, `dylib1.o`, `bundle1.o`), `libgcc_s.1.tbd`, the blocks runtime and arclite added for old releases |
 | signing | `revenant@ldid` |
@@ -29,7 +29,7 @@ or `/usr/local/opt/llvm/bin`, and without it stops with `ld64 links libLTO, and 
 finds it through llvm-config; install a full LLVM, such as brew install llvm`. The skill `install`
 puts it in place.
 
-How to know it worked: `xmake show -t <Name>` prints the compiler as `…/packages/l/llvm/23.1.1/
+How to know it worked: `xmake show -t <Name>` prints the compiler as `…/packages/l/llvm/<version>/
 <hash>/bin/clang`, and its `linkflags` carry `-fuse-ld=…/packages/l/ld64/956.6/<hash>/bin/ld`.
 
 ## 2. Architecture and lowest release

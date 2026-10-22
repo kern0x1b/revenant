@@ -45,7 +45,7 @@ dropped. A device behaves the same.
 `/etc/launchd.conf` is still read at boot on 6.1.3, and its `bsexec` subcommand starts a program without a job
 plist:
 
-    bsexec .. /usr/local/libexec/revenant-runner SECONDS PROGRAM [ARGS...]
+    bsexec .. /usr/libexec/revenant-runner --job /private/var/revenant/job
 
 The runner starts at about 4 s and writes its verdict. The toolchain's emulator module installs its runner as a
 LaunchDaemon, which has this problem on 6.1.x; that change waits for the same `launchd.conf` check on 5.x, 4.x and

@@ -6,7 +6,7 @@ and sets the prebuilt variables through the composite action `.github/actions/re
 choose a runner, so each job keeps its own `runs-on`.
 
 - `checks` runs `./xmakew test -P .`: every test a host with the prebuilt packages can run, in parallel. That is the
-  repository's layout and comment checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
+  repository's layout, comment, copied-text and credential checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
   `toolchain_packages/*`), the emulator's and the recompiler's host tests. It sets `REVENANT_PREBUILT=kern0x1b/revenant`
   and `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`, so LLVM, Swift and ld64 come from their releases and a missing release is an error, not a
   source build. It configures with `--emulator_vulkan=n`: the Vulkan renderer's SwiftShader is built from source, which
@@ -17,8 +17,9 @@ choose a runner, so each job keeps its own `runs-on`.
   (`./xmakew f -P . -p iphoneos -a armv7 --component=Backports`, then `./xmakew build -P .`) and uploads
   `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`.
 - `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, swiftSpatial,
-  swiftCloudKit, swiftWeatherKit) and installs the Swift packages through their wrappers. It names `swift-runtime` and
-  `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a missing release of either is an error.
+  swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
+  packages through their wrappers. It names `swift-runtime` and `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a
+  missing release of either is an error.
 
 The checks run on macOS, not Linux: the suites compile with the Mac's clang and the emulator is a macOS program. Every
 test in the default run must pass, so the `checks` job is red when one of them fails, and no test is skipped in CI
@@ -33,7 +34,9 @@ Four caches make a warm run quick:
   packages the default tests build, `toolchain/modules/prebuilt.lua`, and the component files that declare requirements.
   Each store is restored by exact key and saved once, after the configure has succeeded, so a store is never saved
   half-made;
-- the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition;
+- the generated skeleton `build/generated/backports`, keyed by the store key and the hashes of the five
+  `frameworks/Backports/tools/` files that write it (`ast`, `facts`, `generate`, `skeleton`, `sdk`), and saved on the
+  same condition;
 - the objects `build/.objs`, their depfiles `build/.deps`, the libraries `build/iphoneos` and the source manifest
   `build/backports-sources.txt`. The key has two parts: the store key and the hashes of `toolchain/**`, `packages/**`,
   `addons/**`, `xmake.lua`, `xmakew` and `frameworks/Backports/xmake.lua`, which must match exactly; and the hash of
@@ -49,10 +52,10 @@ xmake recompiles those sources and, through their depfiles, the objects that inc
 takes no fixed mtime, because it restores only the package store, which holds no `build/` objects: nothing it restores
 is compared with a source's mtime.
 
-The backports job's build step has a 15-minute limit. A cold build of the component took 8 min 58 s and 7 min 42 s on two
-recent runs of main and of another branch, and a run hit the earlier 12-minute limit at 12 min 13 s, after a cold package
-configure. The limit leaves room for that variance above the cold floor of about 9 minutes; a warm objects restore builds
-only the sources that changed.
+The backports job's build step has a 60-minute limit and its configure step a 45-minute one. A cold build of the
+component took 8 min 58 s and 7 min 42 s on two recent runs, and one hit 12 min 13 s after a cold package configure;
+the limits cover a cold package store and a cold build, and a warm objects restore builds only the sources that
+changed.
 
 A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
@@ -67,5 +70,5 @@ run=$(gh run list --workflow check.yml --branch <branch> --limit 1 --json databa
 gh run download "$run" --name backports-libraries --dir "$HOME/.revenant/cache/ci/$run"
 ```
 
-The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job built
-the component, so a branch without the option has none.
+The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job reached
+the upload, so a run that stopped earlier has none.

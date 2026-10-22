@@ -21,6 +21,7 @@ A minimal `xmake.lua` for a tweak:
     add_addons("revenant latest")
     set_config("apple_minimum", "6.0")
     includes("@addon/revenant/apple-ios")
+    on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
@@ -35,6 +36,8 @@ A minimal `xmake.lua` for a tweak:
 `add_addons("revenant latest")` takes the newest release tag of the repository; pin a tag once one exists, so that a new release is an explicit change. Commit the `xmake-requires.lock` and `xmake-addons.lock` the build writes. A checkout nested inside another project, such as a worktree under the main checkout, builds with `xmake -P .`.
 
 `apple_minimum` is the oldest release the port runs on. The toolchain refuses a release the architecture cannot run, and names the architectures that can: a port that asks for 2.0 on armv7 is told to build armv6.
+
+The toolchain binds a target through the revenant rule it names, so an iphoneos target that names none would build without the revenant toolchain. The `on_config` line in the example makes that a configuration error: it names each iphoneos target that no revenant rule binds, and the configure fails until each one names a rule. Keep it in the project's main `xmake.lua`; xmake runs `on_config` only there, not from an included file.
 
 Pick the target kind to match what the program is: a MobileSubstrate dylib (`tweak`), an executable in `/usr/libexec` (`daemon`), an application bundle (`app`), or a shared library an application bundles (`library`). The values each one reads are in the reference.
 
@@ -59,7 +62,9 @@ An application that runs on more than one architecture names them:
         add_values("apple.architectures", "armv7", "arm64")
         set_values("app.plist-file", "packaging/Info.plist")
 
-`xmake deb` builds each slice for the release its architecture first runs, merges the bundles with `lipo`, and checks the merged binaries. Every other file has to be the same in every slice, so pin `MinimumOSVersion` in the plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
+`xmake deb` builds each slice for the release its architecture first runs, merges the bundles itself (every file
+but a `.plist` has to be the same in every slice), and checks the merged binaries. Pin `MinimumOSVersion` in the
+plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
 
 ## Frameworks and runtimes
 
@@ -71,7 +76,7 @@ A port takes a package by its name and an alias, adds it to the target, and name
         add_rules("@addon/revenant/app")
         add_deps("FoundationBackports")
 
-The `configs` choose which backport libraries are built; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
+The Backport libraries are the component's own targets, and the package a program depends on for them is written by `./xmakew deb`; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
 
 ### Swift
 
@@ -98,7 +103,7 @@ Combine is `revenant@combine`, the package of OpenCombine with our patches. It i
 
 SwiftUI is not a package of this repository: its recipes were pins of it, and the target `SwiftUI` of `frameworks/SwiftUI` is built inside the checkout. A port outside the checkout takes SwiftUI from the packages that `xmake package` writes for our targets, as [the architecture](../../explanation/architecture.md) describes; that route is not yet verified for iOS.
 
-A SwiftUI port takes the `backports` variant of the three packages. Combine's own weak import is answered by the `frameworks/Backports` targets, which the port then carries with `coredata = true` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
+A SwiftUI port takes the three packages as they are: the runtime has no `backports` variant. Combine's own weak import is answered by the `frameworks/Backports` targets, which the port links by `add_deps` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
 
 ## Next
 

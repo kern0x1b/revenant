@@ -29,7 +29,7 @@ if is_plat("iphoneos") then
         includes("@addon/revenant/emulate")
     end
     if whole then
-        add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
         add_requires("revenant@libcxx", {alias = "libcxx"})
     end
     add_requires("revenant@apple-compat", {alias = "apple-compat"})
@@ -37,6 +37,7 @@ end
 
 includes("frameworks/Backports")
 includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
+on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
 if whole then
     target("repository")

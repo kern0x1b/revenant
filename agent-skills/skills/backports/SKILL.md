@@ -62,9 +62,10 @@ package to require: it cannot depend on these targets through `revenant@...` yet
 
 ## 6. What packaging needs
 
-The one `.deb` of the repository that installs the libraries under `/usr/lib/revenant/` is not written
-yet. A target that links a Backports library cannot be packaged: `platform.lua` refuses it and names
-the target, so nothing is shipped that would fail on the device. The design and what is measured are in
+`./xmakew deb -P .` writes one package for the Backports libraries, `org.revenant.backports`, holding every
+library of the build under `/usr/lib/revenant/org.revenant.backports/`. A target that links one of them depends on
+that package in its own control file, so an application needs nothing else installed. The decision is
+`docs/explanation/decisions/0012-one-backports-package.md`; what is measured on a device is in
 [the backports loading note](../../../docs/explanation/backports-loading.md).
 
 ## Traps

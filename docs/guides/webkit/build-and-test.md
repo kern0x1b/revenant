@@ -155,7 +155,7 @@ second one in the same process is a crash waiting to happen.
 
 ## 5. Onto the device
 
-Copy `device.env.example` to `device.env` at the top of the revenant checkout and fill in the
+Copy `frameworks/WebKit/tests/data/device.env.example` to `device.env` at the top of the revenant checkout and fill in the
 address; neither is in the repository.
 
 ```sh

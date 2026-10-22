@@ -17,96 +17,18 @@ package("icu")
 
     on_install("iphoneos", "macosx", function (package)
         local parallel = import("@addon.revenant.parallel", {anonymous = true})
-        local trees = {"", "curr/", "lang/", "region/", "zone/", "unit/", "coll/", "brkitr/", "rbnf/"}
-        local dropped = {"rbnf/", "translit/"}
-        local languages = {"af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "cs", "cy", "da", "de", "el", "en", "es", "et", "eu", "fa", "fi", "fil", "fr", "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "ka", "kk", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mr", "ms", "my", "nb", "ne", "nl", "nn", "no", "pa", "pl", "pt", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tl", "tr", "uk", "ur", "uz", "vi", "zh"}
-        local unindexed = {ja_JP_TRADITIONAL = true, th_TH_TRADITIONAL = true, de_ = true, de__PHONEBOOK = true, es_ = true, es__TRADITIONAL = true}
-
-        local function language(name)
-            return name:match("^([^_]*)")
-        end
-
+        local icu_data = import("@addon.revenant.icu_data", {anonymous = true})
         local function make(dir, targets)
             parallel.hold(nil, function (width)
-                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir, envs = {ac_cv_prog_PYTHON = ""}})
+                os.vrunv("make", table.join({"-j" .. width}, targets or {}), {curdir = dir})
             end)
         end
 
-        local function trim(bin, archive)
-            local keep, kept = {root = true}, 0
-            for _, name in ipairs(languages) do
-                keep[name] = true
-                kept = kept + 1
-            end
-            local icupkg = path.join(bin, "icupkg")
-            local work = path.absolute("data-trim")
-            os.tryrm(work)
-            local items = {}
-            for _, line in ipairs(os.iorunv(icupkg, {"-l", archive}):split("\n")) do
-                local item = line:trim():gsub("^icudt%d+[lbe]/", "")
-                if item ~= "" then
-                    items[item] = true
-                end
-            end
-            local removed, added = {}, {}
-            for _, tree in ipairs(trees) do
-                local index = tree .. "res_index.res"
-                if items[index] then
-                    os.mkdir(path.join(work, "in", tree))
-                    os.vrunv(icupkg, {"-x", index, "-d", path.join(work, "in"), archive})
-                    local text = os.iorunv(path.join(bin, "derb"), {"-c", "-e", "UTF-8", "-s", path.join(work, "in", tree), "res_index.res"})
-                    local indexed, lines = {}, {}
-                    for _, line in ipairs(text:split("\n", {strict = true})) do
-                        local key = line:match("^%s*([%w_]+)%s*{%s*\"\"%s*}%s*$")
-                        if key then
-                            indexed[key] = true
-                        end
-                        if not key or keep[language(key)] then
-                            table.insert(lines, line)
-                        end
-                    end
-                    local count = 0
-                    for item in pairs(items) do
-                        local stem = item:startswith(tree) and item:sub(#tree + 1):match("^([^/]+)%.res$")
-                        if stem and (indexed[stem] or unindexed[stem]) and not keep[language(stem)] then
-                            table.insert(removed, item)
-                            count = count + 1
-                        end
-                    end
-                    if count > 0 then
-                        local source = path.join(work, "txt", tree)
-                        io.writefile(path.join(source, "res_index.txt"), table.concat(lines, "\n") .. "\n")
-                        os.mkdir(path.join(work, "out", tree))
-                        os.vrunv(path.join(bin, "genrb"), {"-k", "-e", "UTF-8", "-s", source, "-d", path.join(work, "out", tree), "res_index.txt"})
-                        table.insert(added, index)
-                    end
-                end
-            end
-            for item in pairs(items) do
-                for _, prefix in ipairs(dropped) do
-                    if item:startswith(prefix) then
-                        table.insert(removed, item)
-                    end
-                end
-            end
-            removed = table.unique(removed)
-            table.sort(removed)
-            io.writefile(path.join(work, "removed.txt"), table.concat(removed, "\n") .. "\n")
-            local argv = {"-r", path.join(work, "removed.txt")}
-            if #added > 0 then
-                io.writefile(path.join(work, "added.txt"), table.concat(added, "\n") .. "\n")
-                table.join2(argv, {"-a", path.join(work, "added.txt"), "-s", path.join(work, "out")})
-            end
-            local trimmed = path.join(work, path.filename(archive))
-            os.vrunv(icupkg, table.join(argv, {archive, trimmed}))
-            os.cp(trimmed, archive)
-            print("icu data: %d languages kept, %d items removed, %d indexes rewritten, without %s", kept, #removed, #added, table.concat(dropped, " "))
-        end
 
         local configure = path.absolute(path.join("source", "configure"))
         local archive = path.absolute(path.join("source", "data", "in", "icudt" .. package:version():major() .. "l.dat"))
-        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras"}
-        local base = {ac_cv_prog_PYTHON = "", SOURCE_DATE_EPOCH = "0"}
+        local options = {"--enable-static", "--disable-shared", "--disable-tests", "--disable-samples", "--disable-extras", "ac_cv_prog_PYTHON="}
+        local base = {SOURCE_DATE_EPOCH = "0"}
         local host = path.absolute("build-host")
         os.mkdir(host)
         local hostenvs = table.join(base, {CC = "cc", CXX = "c++"})
@@ -117,7 +39,7 @@ package("icu")
         os.vrunv("sh", table.join({configure}, options, package:is_plat("macosx") and {"--prefix=" .. package:installdir()} or {}),
                  {curdir = host, envs = hostenvs})
         make(host)
-        trim(path.join(host, "bin"), archive)
+        icu_data.trim(path.join(host, "bin"), archive)
         if package:is_plat("macosx") then
             make(path.join(host, "data"), {"clean"})
             make(host)
@@ -156,7 +78,7 @@ package("icu")
             make(cross, {"install"})
         end
         import("@addon.revenant.apple.install", {anonymous = true}).finish(package, {
-            licenses = "LICENSE", prune = {"lib/pkgconfig", "lib/icu", "share", "bin", "sbin"}})
+            licenses = "LICENSE", prune = {"lib/icu", "share", "bin", "sbin"}})
     end)
 
     on_test(function (package)

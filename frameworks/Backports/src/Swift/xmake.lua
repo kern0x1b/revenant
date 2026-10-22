@@ -42,12 +42,7 @@ target("AppIntents")
     end)
     on_config(function (target)
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
-        local flags, overlays = {}, {}
-        local ports = table.wrap((target:pkg("swift-runtime"):envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
-        if ports then
-            table.insert(flags, "-DREVENANT_APPINTENTS_PORT_HEADERS")
-            overlays = {"-Xcc", "-ivfsoverlay", "-Xcc", ports}
-        end
+        local flags = {}
         if swift.probe(target, LOCALIZED_STRING) then
             table.insert(flags, "-DREVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING")
         end
@@ -56,10 +51,9 @@ target("AppIntents")
                 table.insert(flags, "-D" .. probe.flag)
             end
         end
-        if swift.probe(target, CORESPOTLIGHT, {flags = overlays}) then
+        if swift.probe(target, CORESPOTLIGHT) then
             table.insert(flags, "-DREVENANT_APPINTENTS_CORESPOTLIGHT")
         end
-        table.join2(flags, overlays)
         add_flags(target, flags)
     end)
 
@@ -119,15 +113,6 @@ target("WidgetKit")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
-    open_gap("WidgetKit", "Values.swift and Timeline.swift both declare TimelineEntry and TimelineEntryRelevance, with Float and Double scores")
-
-local function port_overlay(target)
-    local ports = table.wrap((target:pkg("swift-runtime"):envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
-    if #ports == 0 then
-        return {}
-    end
-    return {"-vfsoverlay", table.concat(ports, path.envsep())}
-end
 
 local function createml(name, folder, deps, flags, gap)
     target(name)
@@ -143,7 +128,7 @@ local function createml(name, folder, deps, flags, gap)
             target:add("files", path.join(SRC, folder, "*.swift"))
         end)
         on_config(function (target)
-            add_flags(target, table.join(port_overlay(target), flags or {}))
+            add_flags(target, flags or {})
         end)
         if gap then
             open_gap(name, gap)
@@ -185,9 +170,6 @@ target("SwiftData")
     on_load(function (target)
         target:add("files", path.join(SRC, "SwiftData", "*.swift"))
     end)
-    on_config(function (target)
-        add_flags(target, port_overlay(target))
-    end)
     open_gap("SwiftData", "DefaultStore.swift imports FoundationEssentials, which the iOS 6 SDK does not provide")
     target_end()
 
@@ -210,16 +192,8 @@ local function scenekit_flags(target, modules)
     return {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
 end
 
-local function expand_spatial(target, gyb, folder)
-    local source = path.join(target:pkg("swift"):installdir("share"), "swift-source")
-    local defines = {CMAKE_SIZEOF_VOID_P = target:arch() == "arm64" and "8" or "4"}
-    local files = {}
-    for _, template in ipairs(os.files(path.join(SRC, "Spatial", "*.swift.gyb"))) do
-        local output = path.join(folder, (path.filename(template):gsub("%.gyb$", "")))
-        gyb.expand_to(template, output, {defines = defines, line_directive = "", paths = {path.join(source, "utils")}})
-        table.insert(files, output)
-    end
-    return files
+local function generate_spatial(spatial, folder)
+    return spatial.generate(path.join(SRC, "Spatial"), folder)
 end
 
 local function overlay(name, folder, opt)
@@ -256,10 +230,9 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.generate then
-                local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
                 local folder = path.join(target:autogendir(), "spatial")
                 os.mkdir(folder)
-                target:add("files", table.unpack(opt.generate(target, gyb, folder)))
+                target:add("files", table.unpack(opt.generate(import("spatial_float", {rootdir = TOOLS, anonymous = true}), folder)))
             end
             local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
                            "-Xfrontend", "-disable-implicit-string-processing-module-import"}
@@ -286,7 +259,7 @@ overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, m
     frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit", "UIKit"},
     links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
 
-overlay("swiftSpatial", "Spatial", {generate = expand_spatial})
+overlay("swiftSpatial", "Spatial", {generate = generate_spatial})
 
 overlay("swiftCloudKit", "CloudKit", {})
 

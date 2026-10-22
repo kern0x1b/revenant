@@ -1,22 +1,24 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "CryptoKit")
 local fixture = path.join(backports, "tests", "CryptoKit", "main.swift")
-local out = path.join(backports, "..", "..", "build", "tests", "CryptoKit")
 
 local function swiftc(args)
     os.vrunv("xcrun", table.join({"swiftc", "-O"}, args))
 end
 
 function main()
-    os.mkdir(out)
+    local out = workspace.run("backports-tests", "CryptoKit")
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     swiftc({fixture, "-o", host})
     swiftc({"-module-name", "CryptoKit", "-D", "REVENANT_BACKPORT", path.join(src, "Digests.swift"), path.join(src, "Authentication.swift"),
-            path.join(src, "AESGCM.swift"), fixture, "-o", backport})
+            path.join(src, "AESGCM.swift"), path.join(src, "KeyDerivation.swift"), fixture, "-o", backport})
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host CryptoKit program printed nothing")
+    assert(expected:find("hkdf rfc5869 1 true", 1, true), "the host HKDF misses RFC 5869 test case 1")
+    assert(expected:find("hkdf rfc5869 3 true", 1, true), "the host HKDF misses RFC 5869 test case 3")
     assert(expected == got, "the backport CryptoKit differs from the host in " .. out)
 end

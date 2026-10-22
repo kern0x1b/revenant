@@ -11,10 +11,10 @@ structs and their `Code` containers, 80 rows in all.
 
 | Type | Rows | Carried |
 | --- | --- | --- |
-| `ASAuthorizationError` (struct, `_nsError`, `init(_nsError:)`, `errorDomain`, 11 static constants, `Code`) | 15 + 15 `Code` | all |
-| `ASCredentialIdentityStoreError` (3 constants, `Code`) | 7 + 7 | all |
-| `ASExtensionError` (5 constants, `Code`) | 9 + 9 | all |
-| `ASWebAuthenticationSessionError` (3 constants, `Code`) | 7 + 7 | all |
+| `ASAuthorizationError` (struct, `_nsError`, `init(_nsError:)`, `errorDomain`, 11 static constants, `Code`) | 15 + 16 `Code` (its case rows and `rawValue`, `init(rawValue:)`, `RawValue`, `_ErrorType`) | all |
+| `ASCredentialIdentityStoreError` (3 constants, `Code`) | 7 + 8 | all |
+| `ASExtensionError` (5 constants, `Code`) | 9 + 10 | all |
+| `ASWebAuthenticationSessionError` (3 constants, `Code`) | 7 + 8 | all |
 
 The check was by name: each row's name was searched for in the file. 64 rows are named in the file
 verbatim. The other 16 are the `init(_nsError:)` of each struct (written out) and the `init(rawValue:)`,
@@ -73,7 +73,7 @@ description is the case name.
   outside the enum's cases (for example `ASExtensionError.Code(rawValue: 2)`).
 - Which one a device shows is not measured: the iOS 26.2 SDK is not on the host to ask. The file
   follows the SDK's declared shape, because a program compiled against that SDK uses cases and
-  `switch` on them. The same divergence was measured for CloudKit's `CKError.Code` (facts/CloudKit/CKError.md),
+  `switch` on them. The same divergence was measured for CloudKit's `CKError.Code` ([CKError measured](../CloudKit/CKError.md)),
   so the two stay consistent.
 - The probe prints every line, so a change on either side shows as a diff.
 

@@ -54,23 +54,6 @@ rule("swift")
                 raise("swift-runtime at %s names no build of itself; reinstall it", package:installdir())
             end
             target:add("ldflags", "-Wl,-u,_" .. mark, {force = true})
-            local port_headers = table.wrap((package:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
-            if port_headers then
-                local linked = {}
-                for _, dependency in ipairs(target:orderdeps()) do
-                    linked[dependency:name()] = true
-                end
-                if not linked.FoundationBackports then
-                    raise("target(%s) compiles against swift-runtime built with the backports, and does not link them: add_deps(\"FoundationBackports\")", target:name())
-                end
-                local libraries = {coredata = "CoreDataBackports", uikit = "UIKitBackports"}
-                for _, config in ipairs(table.wrap((package:envs() or {}).REVENANT_SWIFT_RUNTIME_BACKPORTS)[1]:split(",")) do
-                    if not linked[libraries[config]] then
-                        raise("target(%s) compiles against swift-runtime built with the %s backports, and does not link %s: add_deps(\"%s\")", target:name(), config, libraries[config], libraries[config])
-                    end
-                end
-                target:add("values", "swift.flags", "-vfsoverlay", port_headers)
-            end
         end
     end)
 

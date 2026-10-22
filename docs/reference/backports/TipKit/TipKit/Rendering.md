@@ -43,7 +43,7 @@ the module name is normalised. What it changed:
    `.displayCountExceeded` once `MaxDisplayCount` is reached, `.displayDurationExceeded` once
    `MaxDisplayDuration` has passed. A tip that has merely been *shown* is `.available`, which the old
    code got wrong (it reported `.invalidated` for any shown tip, with nothing to explain it).
-2. **`TipKitError` exists** (`Sources/TipKit/Errors.swift`, the ten rows the ledger listed as
+2. **`TipKitError` exists** (`frameworks/Backports/src/TipKit/Errors.swift`, the ten rows the ledger listed as
    missing). Its `description` and `errorDescription` are the case's own name, which is what Apple's
    own `TipKit` returns — measured, not guessed (`the differential's output, **not kept** (37 of 37, 2026-09-28)`, the `error.`
    rows). The `~=` operator the interface declares is there, so a port may catch a case by name.
@@ -70,8 +70,8 @@ the other side (`input.value` is how many, `input.op` is which way) and the key 
 `RevenantDonationCompare` — which already compares numerically — answers it. That is what moved
 TipKit from 245 to **247 of 321 placed**.
 
-**What the remaining 73 rows are** (
-classifier (the row classifier, since removed), run against the digester's own dump):
+**What the remaining 73 rows are** (the row classifier, since removed, run against the digester's own
+dump):
 
 | how the digester prints it | rows | whose work it is |
 | --- | --- | --- |

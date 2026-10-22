@@ -61,7 +61,7 @@ Consequences to respect:
 
 ## 3. How to build, and how to check
 
-- `./xmakew build -P . Combine` at the revenant top (configured with
+- `./xmakew require -P . -y revenant@combine` at the revenant top (configured with
   `./xmakew f -P . -p iphoneos -a armv7`) builds the module;
   `./xmakew build -P . CombineTests` the tests. Configured with `--emulate=y` as
   well, `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 install` and

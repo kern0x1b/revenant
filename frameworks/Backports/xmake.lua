@@ -233,7 +233,7 @@ if is_plat("iphoneos") then
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
-                                  network = "network_test.lua"})
+                                  network = "network_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -343,38 +343,32 @@ local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
 }
 
-local AVFOUNDATION_TESTS = {
-    qr_decoder = {"RevenantQRCode.c"},
-}
-
-local HOST_TESTS = {
-    {framework = "Foundation", tests = FOUNDATION_TESTS, frameworks = {"Foundation"}, syslinks = {"sqlite3"}},
-    {framework = "AVFoundation", tests = AVFOUNDATION_TESTS, frameworks = {"Foundation", "CoreImage", "CoreGraphics"}, syslinks = {}},
-    {framework = "QuartzCore", library = "UIKit", tests = QUARTZCORE_TESTS, frameworks = {"Foundation"}, syslinks = {"sqlite3"}},
-}
-
-if not is_plat("iphoneos") then
-    for _, group in ipairs(HOST_TESTS) do
-        local TESTS = path.join(os.scriptdir(), "tests", group.framework)
-        for name, sources in pairs(group.tests) do
-            target(group.framework .. "Backports_" .. name .. "_test")
-                set_kind("binary")
-                set_plat("macosx")
-                set_arch("arm64")
-                set_default(false)
-                add_files(path.join(TESTS, name .. "_test.m"))
-                for _, source in ipairs(sources) do
-                    add_files(path.join(SRC, group.library or group.framework, source))
-                end
-                add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, group.library or group.framework))
-                add_mflags("-fobjc-arc")
-                add_ldflags("-fobjc-arc")
-                add_frameworks(table.unpack(group.frameworks))
-                add_syslinks(table.unpack(group.syslinks))
-                add_tests("default")
-                add_tests("negative", {runargs = {"--negative"}, should_fail = true})
-            target_end()
-        end
+local function host_tests(folder, tests, library, frameworks, syslinks)
+    local TESTS = path.join(os.scriptdir(), "tests", folder)
+    for name, sources in pairs(tests) do
+        target(folder .. "Backports_" .. name .. "_test")
+            set_kind("binary")
+            set_plat("macosx")
+            set_arch("arm64")
+            set_default(false)
+            add_files(path.join(TESTS, name .. "_test.m"))
+            for _, source in ipairs(sources) do
+                add_files(path.join(SRC, library or folder, source))
+            end
+            add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, library or folder))
+            add_mflags("-fobjc-arc")
+            add_ldflags("-fobjc-arc")
+            add_frameworks(table.unpack(frameworks or {"Foundation"}))
+            add_syslinks(table.unpack(syslinks or {}))
+            add_tests("default")
+            add_tests("negative", {runargs = {"--negative"}, should_fail = true})
+        target_end()
     end
 end
 
+if not is_plat("iphoneos") then
+    host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {"sqlite3"})
+    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
+    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", nil, {"sqlite3"})
+    host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+end
