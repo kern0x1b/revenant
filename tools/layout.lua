@@ -144,6 +144,9 @@ function main()
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
+        if file:lower():find("telegram", 1, true) then
+            wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-telegram-test.md")
+        end
         if file:endswith(".py") then
             wrong(file, "Lua only: the repository has no Python")
         elseif file:endswith(".sh") or parts[#parts] == "Makefile" then
