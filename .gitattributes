@@ -19,3 +19,5 @@ docs/** linguist-documentation
 
 frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
 frameworks/SwiftUI/src/TextSettings.swift comments=upstream
+frameworks/Backports/tests/data/demand/sample.m comments=fixture
+frameworks/Backports/tests/data/demand/sample.swift comments=fixture
