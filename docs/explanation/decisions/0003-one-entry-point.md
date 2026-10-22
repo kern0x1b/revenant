@@ -9,14 +9,15 @@ runner. Each of those, run by hand, is a way to build against the wrong xmake or
 
 ## Decision
 
-Every build, test and tool runs through `./xmakew`, the launcher that builds the pinned and patched xmake of
-`packages/x/xmake` on first use, sets `XMAKE_GLOBALDIR` to the cache, and takes the addon from `toolchain/`.
-Tools run as `./xmakew l <script>`; tests run as `./xmakew test -P .`.
+Every build, test and tool run against this checkout goes through `./xmakew`, the launcher that builds the pinned
+and patched xmake of `packages/x/xmake` on first use, sets `XMAKE_GLOBALDIR` to the cache, and takes the addon from
+`toolchain/`. Tools run as `./xmakew l <script>`; tests run as `./xmakew test -P .`. Examples for applications
+built outside this checkout use the xmake executable installed for that application.
 
 ## Consequences
 
 - No shell script, Makefile or other launcher is added beside `xmakew`. A new tool is a Lua script run by `./xmakew l`.
-- Documentation gives commands in the `./xmakew` form only.
+- Commands that operate on this checkout use the `./xmakew` form. Consumer-project examples use the project's xmake.
 - `frameworks/WebKit/src/packaging/DEBIAN/postinst` is the one file that runs outside xmake: it is a hook of the
   `.deb` format, run by the package installer on a device, not by us.
 
@@ -27,4 +28,5 @@ extension, so the check does not see it; it is named here instead.
 
 ## Not enforced
 
-That the docs use `./xmakew` throughout. Nothing checks the prose.
+That a command example is labeled with the correct project context. The distinction is described in each guide, but
+no check parses the prose.
