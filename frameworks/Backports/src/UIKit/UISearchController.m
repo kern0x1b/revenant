@@ -113,7 +113,7 @@ static char revenant_placeholder_key;
     _hidesNavigationBarDuringPresentation = YES;
     _automaticallyShowsCancelButton = YES;
     _automaticallyShowsSearchResultsController = YES;
-    _scopeBarActivation = UISearchControllerScopeBarActivationManual;
+    _scopeBarActivation = UISearchControllerScopeBarActivationAutomatic;
     _searchBar = [[RevenantSearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
     _searchBar.placeholder = NSLocalizedStringFromTableInBundle(@"Search", @"Localizable", [NSBundle bundleForClass:[UIView class]], nil);
     [_searchBar revenant_attachController:self];
@@ -150,6 +150,7 @@ static char revenant_placeholder_key;
 - (void)setScopeBarActivation:(UISearchControllerScopeBarActivation)activation
 {
     _scopeBarActivation = activation;
+    [self revenant_updateVisibility];
 }
 
 - (BOOL)ignoresSearchSuggestionsForSearchBarPlacementStacked
@@ -278,6 +279,8 @@ static char revenant_placeholder_key;
 - (void)revenant_updateVisibility
 {
     _resultsContainer.hidden = _automaticallyShowsSearchResultsController ? _searchBar.text.length == 0 : !_showsSearchResultsController;
+    if (_scopeBarActivation != UISearchControllerScopeBarActivationManual)
+        _searchBar.showsScopeBar = self.isActive && _searchBar.scopeButtonTitles.count >= 2;
 }
 
 - (BOOL)automaticallyShowsCancelButton
