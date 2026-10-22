@@ -22,8 +22,8 @@ of iOS 9 and later.
 | `AppIntent.requestChoice(between:dialog:)` | `IntentChoiceRequest.handler`; with no handler the first option | the handler's own answer |
 | `OpenURLIntent.perform()` | `RevenantURL.open(_:)` hands the URL to `RevenantURL.handler` | the handler's own answer |
 | `SetFocusFilterIntent.current` | `nil`: these releases have no focus filters, which is the framework's own answer for a device without them | `nil` |
-| `CSSearchableIndex.indexAppEntities(_:priority:)` and its two deletes | not in the module: the rows are AppIntents' own extensions on the three CoreSpotlight classes, which the port's headers are what make visible to Swift. The classes themselves are carried by the CoreSpotlight backports, and the AppIntents side of that seam is left for the round that brings the port's headers to CoreSpotlight | - |
-| `NSUserActivity.widgetConfigurationIntent(of:)` and `.appEntityIdentifier` | not in the module: the same seam, for UIKit's iOS 17 `widgetConfigurationIntent` | - |
+| `CSSearchableIndex.indexAppEntities(_:priority:)` and its two deletes | in the module: the extensions in `Spotlight.swift` hand entries to `indexSearchableItems` on the classes the CoreSpotlight backports carry, and `Spotlight.md` says what each one reads and writes | the port's own index, read back by the port's search |
+| `NSUserActivity.widgetConfigurationIntent(of:)` and `.appEntityIdentifier` | in the module when the runtime carries the port's headers (`-DREVENANT_APPINTENTS_PORT_HEADERS`); `widgetConfigurationIntent(of:)` also needs `-DREVENANT_APPINTENTS_NSUSERACTIVITY_INTENT`, which no target sets, so it is declared and never compiled | the activity's own intent, or the identifier the entry stored |
 | `_ViewBridgeLoader.loadBridge()` | the SDK's protocol requirement; no conformer is carried, since the framework's own bridge is a SwiftUI loader and these releases have no SwiftUI | none: the requirement is declared and nothing answers it |
 | `SnippetIntent.reload()` | the snippet's own call; the view behind it is the app's | - |
 

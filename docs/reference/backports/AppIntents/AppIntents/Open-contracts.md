@@ -69,7 +69,7 @@ repeat the old total.
 ## 4. Rows that are another band's — 16 rows
 
 `String.IntentInputOptions.CapitalizationType.==(a:b:)`, `Measurement` ×4, `Calendar` ×4,
-`AttributedString` ×4: the Foundation Swift r2 types, gated in `Sources/AppIntents/Gated.swift` behind
+`AttributedString` ×4: the Foundation Swift r2 types, gated in `frameworks/Backports/src/AppIntents/Gated.swift` behind
 `REVENANT_APPINTENTS_ATTRIBUTED_STRING`, `REVENANT_APPINTENTS_MEASUREMENT` and
 `REVENANT_APPINTENTS_RECURRENCE_RULE`, each measured by a probe in `xmake.lua:118-133` and not assumed.
 The probe is what says `'Measurement' is only available in iOS 10.0 or newer` on this release, so the
