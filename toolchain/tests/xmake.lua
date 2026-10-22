@@ -10,7 +10,7 @@ add_requires("revenant@iphoneos-sdk 16.4", {alias = "iphoneos-sdk"})
 add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 
 local light = {"assets_extract_test", "binding_test", "checkout_test", "compat_test", "descriptions_test", "digest_test", "firmware_test",
-               "data_test", "locale_order_test", "lock_test", "sdk_store_test", "sdkstubs_test", "swift_rule_test", "workspace_test"}
+               "data_test", "locale_order_test", "lock_test", "rust_test", "sdk_store_test", "sdkstubs_test", "swift_rule_test", "workspace_test"}
 
 local packaged = {"architectures_test", "atomics_test", "blocks_test", "carried_test", "checks_test", "device_test",
                   "debian_test", "dyld_test", "gdb_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
