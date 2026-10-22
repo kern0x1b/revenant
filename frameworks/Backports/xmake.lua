@@ -362,7 +362,7 @@ if not is_plat("iphoneos") then
                 for _, source in ipairs(sources) do
                     add_files(path.join(SRC, group.library or group.framework, source))
                 end
-                add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"))
+                add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, group.library or group.framework))
                 add_mflags("-fobjc-arc")
                 add_ldflags("-fobjc-arc")
                 add_frameworks(table.unpack(group.frameworks))
