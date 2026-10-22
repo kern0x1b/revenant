@@ -66,9 +66,14 @@ Inside the project a target depends on a library with `add_deps`. The configure 
 
 ### Packaging
 
-The one `.deb` of the repository that installs these libraries on a device is not written yet. A target that
-links a Backports library is refused at packaging, and an application outside this repository has no package
-to require. The design and what is measured are in [the backports loading note](../../explanation/backports-loading.md).
+`./xmakew deb -P .` writes one package for them, `org.revenant.backports_<version>_iphoneos-arm.deb`: every Backports
+library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` and nothing
+else. It is signed with the `ldid` of an application of the project. Its version is the addon's release and a hash of
+the libraries and their dependencies, and its `Depends` names, at their exact versions, the shared packages (the Swift
+runtime, libc++) that its libraries name. A target that links a Backports library depends on the package in its own
+`Depends`, so an application built here or outside this repository requires that one package. The decision is
+[0012](../../explanation/decisions/0012-one-backports-package.md); what is measured on a device is in
+[the backports loading note](../../explanation/backports-loading.md).
 
 ## Swift runtime notes
 

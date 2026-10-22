@@ -57,6 +57,8 @@ add_packages("swiftui")
 
 `<checkout>` supplies the external packages the outside project also needs (the Swift runtime, libc++, the SDK), and `<dir>` supplies the packages generated from our targets. The mechanism was checked on a host library: a package generated with `./xmakew package -P . -o <dir>` was built and run by a separate project that named `<dir>` as its repository. The iOS route is not yet checked; see the status below.
 
+The Backports libraries come as one package, `org.revenant.backports`, which `./xmakew deb -P .` writes; see [decision 0012](decisions/0012-one-backports-package.md).
+
 Why packages and not a copy of our sources: a package names one target and its links, so an outside project takes exactly what the target builds, and the same target serves the checkout and every outside project.
 
 ## What is a target and what is a package now
@@ -84,4 +86,4 @@ A recipe that converts while still listed fails the check, and so does a listed 
 
 The swift rule installs the `.swiftmodule` of a static or a shared Swift target into `lib/swift/iphoneos`, so a wrapper of a Swift target hands its module to a consumer.
 
-CI configures three things and no others: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Swift` component and builds and installs its seven targets through their wrappers. Nothing configures the whole iOS graph, so the `Combine` target is not built by CI yet.
+CI configures three things and no others: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Swift` component and builds and installs its seven targets through their wrappers. The whole iOS graph does not configure yet: `swift-runtime` and `libcxx` have no release for the keys these recipes have now, so a configure would build them from source. `docs/guides/prebuilt.md` says which releases are missing. Until they exist, nothing configures the whole graph, so the `Combine` target is not built by CI yet.

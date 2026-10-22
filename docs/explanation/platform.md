@@ -25,9 +25,11 @@ hardware the device does not have.
 
 ## Delivery
 
-One `.deb` for the whole repository, installed once through Cydia. It holds the backports, the frameworks this
-repository writes (SwiftUI, Combine, WebKit, and so on) and the Swift runtime. After it is installed, any
-application works as on a newer iOS. That includes applications this toolchain did not build.
+The backports are one `.deb`, `org.revenant.backports`, written by `./xmakew deb -P .` from every Backports library of
+the build, and installed once through Cydia. The Swift runtime and libc++ are packages of their own, which it depends
+on; each framework this repository writes (SwiftUI, Combine, WebKit) is packaged by its own control file. The aim is
+that after the backports package is installed, any application works as on a newer iOS, including applications this
+toolchain did not build. That is not yet measured on a device.
 
 - An application built by today's Xcode is arm64 only, and these devices are 32-bit ARM. Such a binary runs
   there through the recompiler, which binds its imports to the backports libraries when it translates it.
