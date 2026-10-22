@@ -1,93 +1,27 @@
 package("tipkit")
-    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
-    set_description("The TipKit framework of iOS 17, as one Swift module a port writes `import TipKit` for, built against the revenant@swift-runtime a port carries: the tips, the rules that decide which one is shown, the events the app donates, the datastore, and the popover the tip is drawn in. The rules, the display count, the donations and the datastore are the app's own and are real; the presentation is the system's own service, which these releases do not run, so the tip is drawn in the app by the TipUI views this module declares. facts/TipKit/Rendering.md")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
+    set_description("The TipKit framework, as one Swift module a port writes `import TipKit` for, built against the revenant@swift-runtime a port carries")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
 
-    local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "TipKit", "**.swift")))
-    table.sort(inputs)
-    for _, file in ipairs(inputs) do
-        table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
-    end
-    add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
-
-    add_configs("shared", {description = "Compile against a shared swift-runtime and its packaged libc++, for a port that requires them so.", default = false, type = "boolean"})
-    add_configs("backports", {description = "Compile against the swift-runtime built with the backports, for a port that requires it so.", default = false, type = "boolean"})
-    add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports, for an application.", default = false, type = "boolean"})
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = tipkit_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
-                    backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "revenant@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
-                    backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
+        package:add("deps", "revenant@appintents", {alias = "appintents"})
         package:add("links", "TipKit")
         package:add("frameworks", "Foundation", "CoreFoundation")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
-        local toolchain = assert(package:toolchains(), "TipKit is built with the apple-ios toolchain")[1]
-        toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "TipKit is compiled against revenant@swift-runtime")
-        local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
-        local minimum = toolchain:config("deployment")
-        local triple = package:arch() .. "-apple-ios" .. minimum
-        local sdk = toolchain:config("sdkdir")
-        local swiftdir = path.join(package:installdir("lib"), "swift", "iphoneos")
-        local objects = path.absolute("objects")
-        local probe_dir = path.absolute("probe")
-        os.mkdir(objects)
-        os.mkdir(swiftdir)
-        os.mkdir(probe_dir)
+        local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
+        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
+            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"TipKit"}, modules = true})
+    end)
 
-        local platform_resource = path.join(probe_dir, "localized.swift")
-        io.writefile(platform_resource, "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }")
-        local has = try {function ()
-            os.vrunv(swiftc, table.join(swift.runtime_flags({
-                architecture = package:arch(), deployment = minimum, sdk = sdk,
-                resources = path.join(runtime:installdir(), "lib", "swift"),
-                plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-                module = "RevenantTipKitProbe", optimize = "none", prefix_map = os.curdir() .. "=/tipkit"}),
-                {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", platform_resource}))
-            return true
-        end}
-        os.tryrm(platform_resource)
-        local defs, module_paths = {}, {}
-        if has then
-            table.insert(defs, "-DREVENANT_PLATFORM_LOCALIZED_STRING")
-            print("%s: this runtime's Foundation has LocalizedStringResource, the module uses the platform's", package:name())
-        else
-            local appintents = package:dep("appintents")
-            table.insert(defs, "-DREVENANT_CARRIES_LOCALIZED_STRING")
-            table.insert(module_paths, "-I")
-            table.insert(module_paths, path.join(appintents:installdir("lib"), "swift", "iphoneos"))
-            print("%s: this runtime's Foundation has no LocalizedStringResource, the module takes the one revenant@appintents carries",
-                  package:name())
-        end
-
-        local module = path.join(swiftdir, "TipKit.swiftmodule")
-        os.mkdir(module)
-        local sources_tipkit = os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "TipKit", "**.swift"))
-        if #sources_tipkit == 0 then
-            raise("%s compiles frameworks/Backports/src/TipKit/**.swift, which matches no file", package:name())
-        end
-
-        local argv = table.join(swift.runtime_flags({
-            architecture = package:arch(), deployment = minimum, sdk = sdk,
-            resources = path.join(runtime:installdir(), "lib", "swift"),
-            plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-            module = "TipKit", optimize = "fastest", prefix_map = os.curdir() .. "=/tipkit"}),
-            defs, module_paths, {"-I", swiftdir, "-emit-module", "-emit-module-path",
-             path.join(module, package:arch() .. "-apple-ios.swiftmodule"), "-c"},
-            sources_tipkit, {"-o", path.join(objects, "TipKit.o")})
-        os.vrunv(swiftc, argv)
-        os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libTipKit.a"),
-                 path.join(objects, "TipKit.o")})
-
-        os.tryrm(probe_dir)
-        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
-        os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
-        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "TipKit", "README.md"), path.join(package:installdir("share")))
+    on_test(function (package)
+        assert(os.isfile(path.join(package:installdir("lib"), "libTipKit.a")))
+        assert(os.isdir(path.join(package:installdir("lib"), "swift", "iphoneos", "TipKit.swiftmodule")))
     end)

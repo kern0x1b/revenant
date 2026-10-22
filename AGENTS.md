@@ -73,7 +73,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
   `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
-  run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=1`), in parallel, and each component's tests are
+  run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
   naming what it lacks when that is missing.

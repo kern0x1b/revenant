@@ -8,12 +8,6 @@ package("swift-runtime")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
 
     add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
-    add_deps("revenant@apple-compat", {alias = "apple-compat"})
-
-    local reality_libraries = {"swiftRealityFoundation", "swiftRealityKit"}
-    local function has_scenekit(minimum)
-        return tonumber(minimum:match("^(%d+)")) >= 8
-    end
 
     local renamed = {"clock_gettime", "clock_getres", "dispatch_get_global_queue", "memset_s", "os_system_version_get_current_version"}
 
@@ -35,27 +29,15 @@ package("swift-runtime")
     }
 
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        if not package:config("shared") and import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
+            return
+        end
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, sources)
     end)
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
-    local digests = {"sources=" .. swift_runtime_sources_digest}
-    for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "**.patch"))) do
-        table.insert(digests, path.relative(patch, path.join(os.scriptdir(), "patches")) .. "=" .. hash.sha256(patch))
-    end
-    for _, held in ipairs({"CloudKit", "Network", "RealityFoundation", "RealityKit", "SceneKit", "Spatial", "WeatherKit"}) do
-        for _, file in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held, "**"))) do
-            table.insert(digests, path.relative(file, path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held)) .. "=" .. hash.sha256(file))
-        end
-    end
-    local folder = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
-        table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
-    end
-    table.sort(digests)
-    add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = swift_runtime_sources_digest, type = "string", readonly = true})
 
     add_configs("backports", {description = "Build the overlays for a port that links the frameworks/Backports libraries: API they implement is available from the port's release, in the overlays and in the port's own Swift. Blocked until the port headers are generated again; see the raise in on_install.", default = false, type = "boolean"})
 
@@ -66,13 +48,15 @@ package("swift-runtime")
     add_configs("shared", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which the programs built against this runtime depend on instead of carrying the libraries: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
+        local sdk = assert(package:toolchains(), "swift-runtime is built with the apple-ios toolchain")[1]:config("sdk")
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat", configs = {apple_sdk = sdk}})
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         if package:config("backports_uikit") and not package:config("backports") then
             raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
         end
         package:add("links", "swiftCore")
         if package:config("shared") then
-            local runtime = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 package:add("linkdirs", path.join("share", "root", "usr", "lib", "revenant", runtime.package_name(kind, package:buildhash())))
             end
@@ -83,11 +67,10 @@ package("swift-runtime")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
-        local gyb = import("gyb.template", {rootdir = modules, anonymous = true})
-        local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
-        local compat = import("apple.compat", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
+        local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+        local compat = import("@addon.revenant.apple.compat", {anonymous = true})
         local compiler = assert(package:dep("swift"), "the runtime is built with revenant@swift")
         local libcxx = assert(package:dep("libcxx"), "the runtime links the C++ runtime of revenant@libcxx")
         local shims = assert(package:dep("apple-compat"), "the runtime takes what the release lacks from revenant@apple-compat")
@@ -99,7 +82,10 @@ package("swift-runtime")
         package:setenv("SWIFT_EXEC", swiftc)
         package:setenv("SWIFT_PLUGIN_PATH", path.join(compiler:installdir("lib"), "swift", "host", "plugins"))
         package:setenv("REVENANT_SWIFT_RUNTIME_MARK", package:data("mark"))
-        local parallel = import("parallel", {rootdir = modules, anonymous = true})
+        if not package:config("shared") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
+            return
+        end
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil
         local phase = marked and os.mclock() or 0
@@ -121,8 +107,7 @@ package("swift-runtime")
                            and os.isdir(path.join(path.absolute("build"), "core"))
                            and os.isdir(path.absolute("swift-source"))
         if stdlib_kept then
-            for _, scratch in ipairs({"overlay", "resources", "simd", "scenekit", "realityfoundation", "realitykit",
-                                      "spatial", "synchronization", "observation", "stringprocessing"}) do
+            for _, scratch in ipairs({"overlay", "resources", "simd", "synchronization", "observation", "stringprocessing"}) do
                 os.tryrm(path.join(path.absolute("build"), scratch))
             end
             print("swift-runtime: the standard library's build tree answers for these inputs and is kept")
@@ -137,7 +122,7 @@ package("swift-runtime")
             gyb.expand_to(template, output, {defines = gyb_defines, line_directive = "", paths = {path.join(source, "utils")}})
             return output
         end
-        local gyb_command = "-DGYB_COMMAND=" .. table.concat({os.programfile(), "l", path.join(modules, "gyb", "main.lua")}, ";")
+        local gyb_command = "-DGYB_COMMAND=" .. table.concat({os.programfile(), "l", import("@addon.revenant.data", {anonymous = true}).modules("gyb", "main.lua")}, ";")
         if not stdlib_kept then
             os.tryrm(source)
             os.vcp(path.join(compiler:installdir("share"), "swift-source"), source)
@@ -469,9 +454,10 @@ package("swift-runtime")
         end
 
         for _, library in ipairs({"Synchronization", "Observation", "StringProcessing"}) do
+            local core_include = path.absolute(path.join("build", "core", "include"))
             configure(library:lower(), path.join(source, "Runtimes", "Supplemental", library),
-                      {swiftflags = {"-resource-dir", resources}}, {
-                "-DSwiftCore_DIR=" .. path.join(package:installdir("lib"), "cmake", "SwiftCore"),
+                      {swiftflags = {"-resource-dir", resources, "-Xcc", "-I" .. core_include}, cxxflags = {"-I" .. core_include}}, {
+                "-DSwiftCore_DIR=" .. path.absolute(path.join("build", "core", "cmake", "SwiftCore")),
                 "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=YES", no_interface, gyb_command})
             offer(path.join(install, "*.swiftmodule"))
             offer(path.join(install, "iphoneos", "*.swiftmodule"))
@@ -493,278 +479,16 @@ package("swift-runtime")
             end
         end
         io.writefile(path.join(simd, "simd.swift"), table.concat(simd_text, "\n") .. "\n")
-        local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", "*.patch"))
+        local simd_release = toolchain:config("sdkdir"):match("iPhoneOS([%d%.]+)%.sdk$")
+        assert(simd_release, "the SDK at " .. toolchain:config("sdkdir") .. " is not an iPhoneOS SDK the simd patches name")
+        local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", simd_release, "*.patch"))
+        assert(#simd_patches > 0, "the simd overlay has no patch for the iPhoneOS " .. simd_release .. " SDK; add patches/simd/" .. simd_release)
         table.sort(simd_patches)
         for _, patch in ipairs(simd_patches) do
             os.vrunv("patch", {"-p1", "-i", patch}, {curdir = simd})
         end
         local simd_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-framework", "Foundation", "-framework", "CoreFoundation"}
         build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil, {backports = {}})
-
-        if has_scenekit(minimum) then
-            local scn_overlay = {}
-            local scn_headers = path.join(toolchain:config("sdkdir"), "System", "Library", "Frameworks", "SceneKit.framework", "Headers")
-            local scn_apinote = path.join(scn_headers, "SceneKit.apinotes")
-            local function merge_apinotes(source, target)
-                local function top_level_key(line)
-                    local stripped = line:gsub("%s+$", "")
-                    if line == "" or line:find("^[ \t#-]") or stripped == "---" or stripped:sub(-1) ~= ":" then
-                        return nil
-                    end
-                    return stripped:sub(1, -2)
-                end
-                local function sections(lines)
-                    local blocks = {}
-                    for index, line in ipairs(lines) do
-                        local name = top_level_key(line)
-                        if name ~= nil then
-                            table.insert(blocks, {name = name, index = index, body = {}})
-                        elseif #blocks > 0 then
-                            table.insert(blocks[#blocks].body, line)
-                        else
-                            table.insert(blocks, {body = {line}})
-                        end
-                    end
-                    return blocks
-                end
-                local function list_lines(body)
-                    local kept = {}
-                    for _, line in ipairs(body) do
-                        if line:find("^%s*$") or line:find("^%s*#") or line:find("^[ %-]") then
-                            table.insert(kept, line)
-                        end
-                    end
-                    return kept
-                end
-                local function merge(lines, key)
-                    local blocks = sections(lines)
-                    local folded = {}
-                    local seen = false
-                    for _, block in ipairs(blocks) do
-                        if block.name == key then
-                            if #list_lines(block.body) ~= #block.body then
-                                raise("refused: a line of the duplicated section %s is neither an entry nor nested under one", key)
-                            end
-                            if seen then
-                                for _, line in ipairs(list_lines(block.body)) do
-                                    table.insert(folded, line)
-                                end
-                            else
-                                seen = true
-                                folded = list_lines(block.body)
-                            end
-                        end
-                    end
-                    local result = {}
-                    seen = false
-                    for _, block in ipairs(blocks) do
-                        if block.name ~= key then
-                            if block.index ~= nil then
-                                table.insert(result, lines[block.index])
-                            end
-                            for _, line in ipairs(block.body) do
-                                table.insert(result, line)
-                            end
-                        elseif not seen then
-                            seen = true
-                            table.insert(result, lines[block.index])
-                            for _, line in ipairs(folded) do
-                                table.insert(result, line)
-                            end
-                        end
-                    end
-                    return result
-                end
-                local function count_entries(lines)
-                    local count = 0
-                    for _, line in ipairs(lines) do
-                        if line:sub(1, 7) == "- Name:" then
-                            count = count + 1
-                        end
-                    end
-                    return count
-                end
-                local function section_names(lines)
-                    local names = {}
-                    for _, block in ipairs(sections(lines)) do
-                        if block.name ~= nil and block.name ~= "" then
-                            table.insert(names, block.name)
-                        end
-                    end
-                    return names
-                end
-                local function as_set(list)
-                    local set, size = {}, 0
-                    for _, value in ipairs(list) do
-                        if not set[value] then
-                            set[value] = true
-                            size = size + 1
-                        end
-                    end
-                    return set, size
-                end
-                local function check_subset(lines, what)
-                    for index, line in ipairs(lines) do
-                        local shaped = line:find("^%s*$") or line:find("^%s*#") or line == "---"
-                            or line:find("^[%w_]+:$") or line:find("^[%w_]+: %S")
-                            or line:find("^%- [%w_]+:") or line:find("^ +%- [%w_]+:") or line:find("^ +[%w_]+:")
-                        if line:find("\t", 1, true) or not shaped then
-                            raise("refused: %s, line %d, is outside the apinotes subset the merge reads: %s", what, index, line)
-                        end
-                    end
-                end
-
-                local text = io.readfile(source):gsub("\r\n?", "\n")
-                local original = {}
-                local start = 1
-                while true do
-                    local stop = text:find("\n", start, true)
-                    if not stop then
-                        table.insert(original, text:sub(start))
-                        break
-                    end
-                    table.insert(original, text:sub(start, stop - 1))
-                    start = stop + 1
-                end
-                check_subset(original, "the input")
-                local keys = section_names(original)
-                local counts = {}
-                for _, key in ipairs(keys) do
-                    counts[key] = (counts[key] or 0) + 1
-                end
-                local duplicates = {}
-                local listed = {}
-                for _, key in ipairs(keys) do
-                    if counts[key] > 1 and not listed[key] then
-                        table.insert(duplicates, key)
-                        listed[key] = true
-                    end
-                end
-                if #duplicates == 0 then
-                    io.writefile(target, table.concat(original, "\n"))
-                    print(string.format("no duplicate top-level key in %s: it is written through", source))
-                    return
-                end
-
-                local entries_before = count_entries(original)
-                local merged = original
-                for _, key in ipairs(duplicates) do
-                    merged = merge(merged, key)
-                end
-                local entries_after = count_entries(merged)
-                if entries_after ~= entries_before then
-                    raise("refused: the merge changed the entry count, %d `- Name:` in and %d out", entries_before, entries_after)
-                end
-                local merged_keys = section_names(merged)
-                local key_set, key_count = as_set(keys)
-                local merged_set, merged_count = as_set(merged_keys)
-                if merged_count ~= key_count or merged_count ~= #merged_keys then
-                    raise("refused: the merge changed the sections, %d in and %d out", key_count, merged_count)
-                end
-                for key in pairs(merged_set) do
-                    if not key_set[key] then
-                        raise("refused: the merge changed the sections, %s is new", key)
-                    end
-                end
-                local removed = 0
-                for _, key in ipairs(duplicates) do
-                    removed = removed + counts[key] - 1
-                end
-                if #merged ~= #original - removed then
-                    raise("refused: the merge moved %d lines, expected %d", #merged, #original - removed)
-                end
-                check_subset(merged, "the merged file")
-                io.writefile(target, table.concat(merged, "\n"))
-                print(string.format("merged the duplicate top-level %s of %s: %d `- Name:` entries in and %d out, %d sections",
-                    table.concat(duplicates, ", "), source, entries_before, entries_after, merged_count))
-            end
-            if os.isfile(scn_apinote) then
-                local scn = path.absolute("scenekit")
-                os.mkdir(scn)
-                local merged = path.join(scn, "SceneKit.apinotes")
-                merge_apinotes(scn_apinote, merged)
-                local overlay = path.join(scn, "overlay.yaml")
-                local function quoted(text)
-                    return '"' .. text:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub("\n", "\\n") .. '"'
-                end
-                io.writefile(overlay, table.concat({
-                    '{"version":0,"case-sensitive":"false","roots":[{"type":"directory","name":', quoted(scn_headers),
-                    ',"contents":[{"type":"file","name":"SceneKit.apinotes","external-contents":', quoted(merged), '}]}]}'
-                }))
-                scn_overlay = {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
-            end
-
-            local reality = path.absolute("realityfoundation")
-            os.mkdir(reality)
-            local reality_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityFoundation", "*.swift"))) do
-                local output = path.join(reality, path.filename(file))
-                os.cp(file, output)
-                table.insert(reality_sources, output)
-            end
-            assert(#reality_sources > 0, "the RealityFoundation sources are missing from the package")
-            build_overlay("RealityFoundation", reality_sources,
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "SceneKit"}),
-                          nil, {backports = {}, concurrency = true, extra_flags = scn_overlay})
-
-            local realitykit = path.absolute("realitykit")
-            os.mkdir(realitykit)
-            local realitykit_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityKit", "*.swift"))) do
-                local output = path.join(realitykit, path.filename(file))
-                os.cp(file, output)
-                table.insert(realitykit_sources, output)
-            end
-            assert(#realitykit_sources > 0, "the RealityKit sources are missing from the package")
-            build_overlay("RealityKit", realitykit_sources,
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-lswiftRealityFoundation",
-                                                        "-framework", "QuartzCore", "-framework", "SceneKit", "-framework", "UIKit"}),
-                          nil, {backports = {}, concurrency = true, extra_flags = scn_overlay})
-        end
-
-        local spatial = path.absolute("spatial")
-        os.mkdir(spatial)
-        local spatial_sources = {}
-        for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Spatial", "*"))) do
-            local name = path.filename(file)
-            if name:endswith(".gyb") then
-                table.insert(spatial_sources, expand(file, path.join(spatial, (name:gsub("%.gyb$", "")))))
-            else
-                local output = path.join(spatial, name)
-                os.cp(file, output)
-                table.insert(spatial_sources, output)
-            end
-        end
-        assert(#spatial_sources > 0, "the Spatial sources are missing from the package")
-        build_overlay("Spatial", spatial_sources, {}, nil, {backports = {}})
-
-        for _, module in ipairs({"CloudKit", "WeatherKit"}) do
-            local dir = path.absolute(module:lower())
-            os.mkdir(dir)
-            local module_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", module, "*.swift"))) do
-                local output = path.join(dir, path.filename(file))
-                os.cp(file, output)
-                table.insert(module_sources, output)
-            end
-            assert(#module_sources > 0, "the " .. module .. " sources are missing from the package")
-            build_overlay(module, module_sources, {}, nil)
-        end
-
-        if package:config("backports") and not package:is_arch("arm64") then
-            local network = path.absolute("network")
-            os.mkdir(network)
-            local network_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "*.swift"))) do
-                local output = path.join(network, path.filename(file))
-                os.cp(file, output)
-                table.insert(network_sources, output)
-            end
-            assert(#network_sources > 0, "the Network sources are missing from the package")
-            local seam = path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "seam")
-            build_overlay("Network", network_sources, {}, nil, {backports = {"FoundationBackports"},
-                                                              extra_flags = {"-Xfrontend", "-import-underlying-module", "-I", seam}})
-        end
 
         local platform_dir = path.join(install, "iphoneos")
         os.mkdir(platform_dir)
@@ -780,7 +504,7 @@ package("swift-runtime")
         os.vcp(path.join(path.absolute("platform"), "LICENSE.txt"), package:installdir("licenses") .. "/")
         timed("install:layout")
         if package:config("shared") then
-            local runtime = import("apple.shared_runtime", {rootdir = modules, anonymous = true})
+            local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name, ui = runtime.package_name("swift-runtime", package:buildhash()), runtime.package_name("swift-runtime-ui", package:buildhash())
             local version = runtime.package_version(package:buildhash())
             local libraries, ui_libraries = {}, {}
@@ -805,6 +529,9 @@ package("swift-runtime")
             package:setenv("REVENANT_SHARED_PACKAGE", name .. "=" .. cxx .. ";" .. ui .. "=" .. name)
             timed("package")
         end
+        if not package:config("shared") then
+            import("@addon.revenant.prebuilt", {anonymous = true}).pack(package)
+        end
         if marked then
             print("swift-runtime: where the install went, every phase in the order it ran:")
             local total = 0
@@ -816,14 +543,18 @@ package("swift-runtime")
         end
     end)
 
+    on_install("macosx", function (package)
+        raise("%s is the Swift runtime of iOS, so configure the project for iOS before requiring it: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift", package:name())
+    end)
+
     on_test(function (package)
-        local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
         local install = path.join(resources, "iphoneos")
         local libraries = install
         local installed = {}
         if package:config("shared") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             libraries = path.join(package:installdir("share"), "root", shared.folder_of(shared.package_name("swift-runtime", package:buildhash())))
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 assert(os.isfile(path.join(package:installdir("share"), "shared-packages", shared.package_name(kind, package:buildhash()) .. ".json")),
@@ -846,7 +577,6 @@ package("swift-runtime")
             assert(os.isdir(path.join(install, module .. ".swiftmodule")) or os.isfile(path.join(install, module .. ".swiftmodule")),
                    "the runtime has no " .. module .. " module")
         end
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local linked = {}
         for _, alias in ipairs({"libcxx"}) do
             local dep = package:dep(alias)
@@ -854,7 +584,7 @@ package("swift-runtime")
                 table.join2(linked, os.files(path.join(dep:installdir("lib"), "*.dylib")))
             end
         end
-        local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
+        local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
         local read = dyld.image_imports(installed, linked, package:arch())
         local found = {}
         for _, library in ipairs(table.orderkeys(read.imports)) do
@@ -869,31 +599,15 @@ package("swift-runtime")
         local toolchain = assert(package:toolchains(), "the runtime is built with the apple-ios toolchain")[1]
         toolchain:load()
 
-        for _, library in ipairs(reality_libraries) do
-            local expected = has_scenekit(toolchain:config("deployment"))
-            assert(os.isfile(path.join(libraries, "lib" .. library .. ".dylib")) == expected,
-                   "lib" .. library .. ".dylib is " .. (expected and "missing" or "installed") .. " at iOS " .. toolchain:config("deployment") ..
-                   ", where SceneKit " .. (expected and "is" or "is not") .. " in the release")
-        end
-
-        local differs = import("apple.runtime_guards", {rootdir = modules, anonymous = true}).compare(found, {
+        local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
             imports = read.imports, exported = read.exported,
             minimum = toolchain:config("deployment"), backports = package:config("backports") and true or false})
         assert(#differs == 0, "the runtime's imports and its guard table differ at " .. toolchain:config("deployment") ..
                (package:config("backports") and " with the backports" or "") .. ":\n  " .. table.concat(differs, "\n  "))
 
-        local placeable = import("apple.firmware", {rootdir = modules, anonymous = true}).source(package:arch(), toolchain:config("deployment"))
+        local placeable = import("@addon.revenant.apple.firmware", {anonymous = true}).source(package:arch(), toolchain:config("deployment"))
         dyld.check(placeable, table.join(installed, linked), package:installdir(),
-                   {exempt = linked, runtime = installed, guards = import("apple.runtime_guards", {rootdir = modules, anonymous = true}).guards()})
-
-        local idle = {}
-        for _, name in ipairs(import("apple.shared_runtime", {rootdir = modules, anonymous = true}).unbound_dependencies(
-                                  path.join(libraries, "libswiftSpatial.dylib"), package:arch())) do
-            if name:startswith("libswift") then
-                table.insert(idle, name)
-            end
-        end
-        assert(#idle == 0, "libswiftSpatial.dylib names " .. table.concat(idle, ", ") .. ", which none of its symbols is bound to")
+                   {exempt = linked, runtime = installed, guards = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).guards()})
 
         for _, entry in ipairs({"shims", "clang", "apinotes", "module.modulemap"}) do
             assert(os.exists(path.join(resources, entry)),

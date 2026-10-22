@@ -12,14 +12,14 @@ package("woff2")
     add_links("woff2dec", "woff2common")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local builddir = cmake.install(package, {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DCANONICAL_PREFIXES=ON"},
                                        {deps = true, targets = {"woff2common", "woff2dec"}, install = false})
         for _, library in ipairs({"woff2common", "woff2dec"}) do
             os.cp(path.join(builddir, "lib" .. library .. ".a"), package:installdir("lib") .. "/")
         end
         os.cp("include/woff2", package:installdir("include") .. "/")
-        import("apple.install", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).finish(package, {licenses = "LICENSE"})
+        import("@addon.revenant.apple.install", {anonymous = true}).finish(package, {licenses = "LICENSE"})
     end)
 
     on_test(function (package)

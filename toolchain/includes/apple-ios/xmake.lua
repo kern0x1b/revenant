@@ -1,6 +1,10 @@
 local named = get_config("apple_sdk") or ""
 local mode = (get_config("component") or "") == "" and "16.4" or "26.2"
 local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or mode}
+for _, name in ipairs({"apple-compat", "activitykit", "appintents", "cloudkit", "createml", "musickit", "spatial", "swift-data", "swift-embedded", "swiftui", "tipkit", "weatherkit", "widgetkit"}) do
+    add_requireconfs(name, {configs = {apple_sdk = sdk.version}})
+    add_requireconfs("**." .. name, {configs = {apple_sdk = sdk.version}})
+end
 local ld64 = {name = "ld64", version = "956.6"}
 local ldid = {name = "ldid", version = "2.1.5-procursus7+23.gaf86971"}
 local llvm = {name = "llvm", version = "23.1.3"}

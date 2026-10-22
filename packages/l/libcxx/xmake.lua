@@ -6,21 +6,10 @@ package("libcxx")
 
     add_urls("https://github.com/llvm/llvm-project.git")
     add_versions("23.1.1", "6dfe1677ab8dffbc6ec13d53a1e0215d75147689")
-    add_deps("revenant@apple-compat", {alias = "apple-compat"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
-    local digests = {"sources=" .. libcxx_sources_digest}
-    for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
-        table.insert(digests, path.filename(patch) .. "=" .. hash.sha256(patch))
-    end
-    local folder = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
-        table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
-    end
-    table.sort(digests)
-    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe, the patches it applies and the apple-compat shims it links, so a changed flag, patch or shim is a different runtime.", default = libcxx_sources_digest, type = "string", readonly = true})
 
     add_configs("shared", {description = "The runtime is always the shared pair an application bundles.", default = true, type = "boolean", readonly = true})
     add_configs("operators", {description = "operator new and delete are ordinary definitions in libc++abi, so no image binds them weakly and dyld never coalesces them with another C++ runtime in the process.", default = "not-weak", type = "string", readonly = true})
@@ -35,8 +24,15 @@ package("libcxx")
     add_ldflags("-nostdlib++")
     add_shflags("-nostdlib++")
 
+    on_load("iphoneos", function (package)
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
+    end)
+
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        if not package:config("packaged") and import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
+            return
+        end
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
                                          sparse = {"/*", "!/*/", "/libcxx/", "/libcxxabi/", "/libunwind/", "/runtimes/", "/cmake/",
@@ -46,9 +42,11 @@ package("libcxx")
 
     on_install("iphoneos", function (package)
         import("core.base.semver")
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
-        local macho = import("apple.macho", {rootdir = modules, anonymous = true})
+        if not package:config("packaged") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
+            return
+        end
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+        local macho = import("@addon.revenant.apple.macho", {anonymous = true})
         for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch"}) do
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end
@@ -123,7 +121,7 @@ package("libcxx")
         for _, name in ipairs(process_wide) do
             wanted[name] = true
         end
-        local compat_module = import("apple.compat", {rootdir = modules, anonymous = true})
+        local compat_module = import("@addon.revenant.apple.compat", {anonymous = true})
         for _, name in ipairs(table.orderkeys(compat_module.process_wide())) do
             local found = exported:find(" T _" .. name .. "\n", 1, true)
             if wanted[name] and not found then
@@ -186,7 +184,7 @@ package("libcxx")
         end
         os.cp("libcxx/LICENSE.TXT", package:installdir("licenses") .. "/")
         if package:config("packaged") then
-            local shared = import("apple.shared_runtime", {rootdir = modules, anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
             local held = {{source = path.join(library, "libc++.1.0.dylib"), leaf = "libc++.1.dylib"},
                           {source = path.join(library, "libc++abi.1.0.dylib"), leaf = "libc++abi.1.dylib"}}
@@ -194,7 +192,7 @@ package("libcxx")
             for _, entry in ipairs(held) do
                 identities[entry.source] = shared.folder_of(name) .. "/" .. entry.leaf
             end
-            import("apple.bundle", {rootdir = modules, anonymous = true}).retarget(table.keys(identities), identities,
+            import("@addon.revenant.apple.bundle", {anonymous = true}).retarget(table.keys(identities), identities,
                                                                                     {home = shared.folder_of(name) .. "/"})
             shared.stage({packages = {{name = name, version = shared.package_version(package:buildhash()),
                                        title = "C++ runtime " .. package:buildhash():sub(1, 8),
@@ -204,13 +202,20 @@ package("libcxx")
                           metadata = path.join(package:installdir("share"), "shared-packages"), strip = {"-x"}})
             package:setenv("REVENANT_SHARED_PACKAGE", name)
         end
+        if not package:config("packaged") then
+            import("@addon.revenant.prebuilt", {anonymous = true}).pack(package)
+        end
+    end)
+
+    on_install("macosx", function (package)
+        raise("%s is the C++ runtime of iOS, so configure the project for iOS before requiring it: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift", package:name())
     end)
 
     on_test(function (package)
         assert(os.isfile(path.join(package:installdir("lib"), "libc++.1.0.dylib")))
         assert(os.isfile(path.join(package:installdir("include", "c++", "v1"), "vector")))
         if package:config("packaged") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
             assert(os.isfile(path.join(package:installdir("share"), "shared-packages", name .. ".json")), "the packaged libc++ left no description of its package")
             local identity = os.iorunv("xcrun", {"otool", "-D", path.join(package:installdir("lib"), "libc++.1.0.dylib")})

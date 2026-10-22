@@ -20,10 +20,10 @@ package("llvm")
     add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different compiler.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_download(function (package, opt)
-        if import("prebuilt", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).fetch(package) then
+        if import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
             return
         end
-        local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
                                          sparse = {"/*", "!/*/", "/cmake/", "/third-party/", "/libc/", "!/libc/test/",
@@ -33,7 +33,7 @@ package("llvm")
     end)
 
     on_install("@macosx", function (package)
-        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
         if prebuilt.install(package) then
             return
         end
@@ -41,7 +41,7 @@ package("llvm")
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end
         local major = package:version():major()
-        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
 
         local compiler = path.absolute("build-clang")
         os.tryrm(compiler)

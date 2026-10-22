@@ -17,14 +17,14 @@ public struct OpenURLIntent: SystemIntent, URLRepresentableIntent {
 
     public init() {
         self._url = OpenURLIntent.makeURLParameter()
-        self.url = RevenantURL.placeholder
         self.urlRepresentation = IntentURLRepresentation(RevenantURL.placeholder)
+        self.url = RevenantURL.placeholder
     }
 
     public init(_ url: URL) {
         self._url = OpenURLIntent.makeURLParameter()
-        self.url = url
         self.urlRepresentation = IntentURLRepresentation(url)
+        self.url = url
     }
 
     public init(urlRepresentable: URLRepresentableEntity) {

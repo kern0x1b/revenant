@@ -7,24 +7,9 @@ package("swift-system")
     add_urls("https://github.com/apple/swift-system/archive/refs/tags/$(version).tar.gz")
     add_versions("1.8.1", "5610bea8f1f390895137247e7e6aa6bf89a6cd108d75d3368aba5da3f06f0d7a")
 
-    local digests = {}
-    local inputs = {os.scriptdir() .. "/xmake.lua"}
-    for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/*.patch")) do
-        table.insert(inputs, patch)
-    end
-    local compat = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
-        table.insert(inputs, path.join(compat, "src", name .. ".c"))
-    end
-    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
-        table.insert(inputs, file)
-    end
-    table.sort(inputs)
-    for _, file in ipairs(inputs) do
-        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
-    end
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
-                            default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+                            default = swift_system_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
@@ -35,12 +20,11 @@ package("swift-system")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
-        local compat = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
+        local compat = import("@addon.revenant.data", {anonymous = true}).src("apple-compat")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -101,8 +85,7 @@ package("swift-system")
     end)
 
     on_test(function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
+        local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
@@ -116,7 +99,7 @@ package("swift-system")
         end
         local found = {["libswiftSystem.dylib"] = table.orderkeys(names)}
         local minimum = toolchain:config("deployment")
-        local differs = import("apple.runtime_guards", {rootdir = modules, anonymous = true}).compare(found, {
+        local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
             imports = read.imports, exported = read.exported, minimum = minimum, backports = true, exact = true})
         assert(#differs == 0, "libswiftSystem.dylib's weak imports and its guard rows differ at " .. minimum .. " with the backports:\n  " .. table.concat(differs, "\n  "))
     end)

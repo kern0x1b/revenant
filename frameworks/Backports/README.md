@@ -45,3 +45,16 @@ Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`bi
 ## Limits
 
 Swift types, variables and protocols are counted but not stubbed. Protocol objects and `_OBJC_CLASS_$_` class symbols are not emitted, so an app that links an absent class does not link yet. C global variables are not stubbed. Subframeworks and enum constants are excluded. ObjC type encodings are empty.
+
+## Open gaps
+
+The Swift overlays below are built as targets of this component, and each builds only for an iOS its backport reaches. Below that release the build refuses, and the wrapper package refuses on load, with "not yet backported". None of these is a supported minimum: each closes when its backport makes it build at iOS 6.
+
+- `swiftRealityFoundation` and `swiftRealityKit` below iOS 8: they load SceneKit, and the SceneKit members they import (`SCNHitTestResult`, `-[SCNView hitTest:options:]`, `+[SCNNode nodeWithGeometry:]`) are not backported yet. RealityKit's UIKit part is open too. [RealityFoundation below iOS 8](../../docs/reference/backports/RealityFoundation/SceneKit.md) says what brings them back.
+- `swiftNetwork` below iOS 12: its C seam (`src/Network/seam`) declares `nw_interface_t` and the other `nw_*` types of the Network framework, which iOS 6 lacks. Those declarations need backports for iOS 6 before the overlay can compile there.
+- `WidgetKit` (wrapper `revenant@widgetkit`): `src/WidgetKit/Values.swift` and `src/WidgetKit/Timeline.swift` both declare `TimelineEntry` and `TimelineEntryRelevance` (with a `Float` score in `Values.swift` and a `Double` score in `Timeline.swift`), so the module fails with "'TimelineEntryRelevance' is ambiguous for type lookup" and "invalid redeclaration". Its build refuses with "not yet backported" before it compiles.
+- `MusicKit` (wrapper `revenant@musickit`): `src/MusicKit/Catalog.swift` uses `URLComponents`, which the iOS 6 SDK declares for iOS 7 and later ("only available in iOS 7.0 or newer"), and `URLQueryItem` with `queryItems`, which need iOS 8. Its build refuses with "not yet backported" before it compiles.
+- `SwiftData` (wrapper `revenant@swift-data`): `src/SwiftData/DefaultStore.swift` imports `FoundationEssentials`, which the iOS 6 SDK does not provide ("no such module 'FoundationEssentials'"). Its build refuses with "not yet backported" before it compiles.
+- `CreateML` (wrapper `revenant@createml`): `src/CoreML/ShapedArray.swift` names `MLMultiArrayDataType`, which the SDK's CoreML declares for iOS 11 and later only ("cannot find type 'MLMultiArrayDataType' in scope"). The `CoreML` target refuses with "not yet backported", and so do `CreateMLComponents` and `CreateML`, which need it.
+
+None of the four is built or required by the swift job, and their wrappers refuse on load with the same message.

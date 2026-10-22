@@ -211,3 +211,12 @@ rule("swift")
             end, {files = sourcebatch.sourcefiles, dependfile = objectfile .. ".d", values = table.join(argv, codegen), changed = target:is_rebuilt()})
         end)
     end, {jobgraph = true, batch = true})
+
+    after_install(function (target)
+        local moduledir = (target:is_static() or target:is_shared()) and target:data("swift.moduledir")
+        if moduledir and os.isdir(moduledir) then
+            local swiftdir = path.join(target:installdir(), "lib", "swift", "iphoneos")
+            os.mkdir(swiftdir)
+            os.vcp(path.join(moduledir, "*"), swiftdir .. "/")
+        end
+    end)

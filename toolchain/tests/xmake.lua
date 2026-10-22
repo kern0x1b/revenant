@@ -10,7 +10,7 @@ add_requires("revenant@iphoneos-sdk 16.4", {alias = "iphoneos-sdk"})
 add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 
 local light = {"assets_extract_test", "checkout_test", "compat_test", "descriptions_test", "digest_test", "firmware_test",
-               "locale_order_test", "lock_test", "sdk_store_test", "sdkstubs_test", "swift_rule_test", "workspace_test"}
+               "data_test", "locale_order_test", "lock_test", "sdk_store_test", "sdkstubs_test", "swift_rule_test", "workspace_test"}
 
 local packaged = {"architectures_test", "atomics_test", "blocks_test", "carried_test", "checks_test", "device_test",
                   "debian_test", "dyld_test", "gdb_test", "macho_test", "objc_test", "operators_test",
@@ -23,7 +23,7 @@ if get_config("tests") == "device" then
 end
 
 local install_hints = {
-    ["iphoneos-sdk"] = "install it with ./xmakew l -P . toolchain/modules/workspace.lua sdk-package 16.4 --install",
+    ["iphoneos-sdk"] = "configure the project with ./xmakew f -P . first, which installs it",
 }
 
 local function suites(name, list, packages, group)

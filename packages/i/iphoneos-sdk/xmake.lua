@@ -20,19 +20,12 @@ package("iphoneos-sdk")
 
     add_configs("layout", {description = "The SDK sits in the package at Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS<version>.sdk, where clang's driver finds the toolchain's libarclite and CMake's iOS platform files the SDK name.", default = "developer-folder", type = "string", readonly = true})
 
-    local additions = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "iphoneos-sdk")
-    local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules", "apple", "sdkstubs.lua")},
-                              os.files(path.join(additions, "usr", "**")), os.files(path.join(additions, "arclite", "*")),
-                              os.files(path.join(additions, "blocks", "*")), os.files(path.join(additions, "markers", "*")))
-    table.sort(inputs)
-    for _, file in ipairs(inputs) do
-        table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
-    end
-    add_configs("additions", {description = "The digest of this recipe and the files it adds to the SDK, so a changed addition is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("additions", {description = "The digest of this recipe and the files it adds to the SDK, so a changed addition is a different package.", default = iphoneos_sdk_additions_digest, type = "string", readonly = true})
 
     on_install("@macosx", function (package)
         import("core.base.json")
+        local additions = import("@addon.revenant.data", {anonymous = true}).src("iphoneos-sdk")
         if not os.isfile("SDKSettings.json") then
             local roots = os.dirs(path.join(os.curdir(), "iPhoneOS*.sdk"))
             if #roots ~= 1 then
@@ -45,13 +38,14 @@ package("iphoneos-sdk")
         if settings.CanonicalName ~= wanted then
             raise("the archive describes itself as %s, not %s", tostring(settings.CanonicalName), wanted)
         end
-        local developer = path.join(package:installdir(), "Developer.app", "Contents", "Developer")
-        local folder = path.join(developer, "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. package:version_str() .. ".sdk")
+        local sdk = import("@addon.revenant.apple.sdk", {anonymous = true})
+        local developer = sdk.developer(package:installdir())
+        local folder = sdk.folder(package:installdir(), package:version_str())
         os.mkdir(folder)
         os.vcp("*", folder .. "/")
         local libraries = path.join(folder, "usr", "lib")
 
-        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local stubs = import("@addon.revenant.apple.sdkstubs", {anonymous = true})
         local markers = package:resourcedir("markers")
         if markers then
             local older = os.isfile(path.join(markers, "SDKSettings.json")) and markers or assert(os.dirs(path.join(markers, "iPhoneOS*.sdk"))[1], "the older SDK's archive holds no SDK")
@@ -270,15 +264,16 @@ package("iphoneos-sdk")
     end)
 
     on_fetch(function (package)
-        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local stubs = import("@addon.revenant.apple.sdkstubs", {anonymous = true})
         if stubs.installed(package:installdir(), package:version_str()) then
             return {}
         end
     end)
 
     on_test(function (package)
-        local developer = path.join(package:installdir(), "Developer.app", "Contents", "Developer")
-        local folder = path.join(developer, "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. package:version_str() .. ".sdk")
+        local sdk = import("@addon.revenant.apple.sdk", {anonymous = true})
+        local developer = sdk.developer(package:installdir())
+        local folder = sdk.folder(package:installdir(), package:version_str())
         assert(os.isfile(path.join(developer, "Toolchains", "XcodeDefault.xctoolchain", "usr", "lib", "arc", "libarclite_iphoneos.a")))
         assert(os.isfile(path.join(folder, "usr", "include", "simd", "base.h")))
         for _, name in ipairs({"crt1.o", "crt1.3.1.o", "dylib1.o", "bundle1.o", "libgcc_s.1.tbd", "libBlocksRuntime.a"}) do

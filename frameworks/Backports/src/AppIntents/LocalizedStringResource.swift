@@ -1,3 +1,4 @@
+#if !REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
 import Foundation
 
 public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringResourceConvertible, @unchecked Sendable {
@@ -174,3 +175,4 @@ enum RevenantLookup {
         return found == "" ? nil : found
     }
 }
+#endif

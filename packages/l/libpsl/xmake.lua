@@ -19,7 +19,7 @@ target_compile_definitions(psl PRIVATE ENABLE_BUILTIN HAVE_NL_LANGINFO BUILDING_
 install(TARGETS psl ARCHIVE DESTINATION lib)
 install(FILES ${PSL_SOURCE}/include/libpsl.h DESTINATION include)
 ]])
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         cmake.install(package, {"-DPSL_SOURCE=" .. os.curdir(), "-DPSL_VERSION=" .. package:version_str()},
                       {sourcedir = "build-revenant", licenses = "COPYING"})
     end)

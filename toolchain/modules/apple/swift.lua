@@ -186,3 +186,26 @@ function codegen_flags(opt)
     local levels = {none = "-O0", smallest = "-Os"}
     return {opt.optimize and (levels[opt.optimize] or "-O2") or "-O0", "-x", "ir"}
 end
+
+function probe(target, body, opt)
+    opt = opt or {}
+    local toolchain = target:toolchain("apple-ios")
+    toolchain:load()
+    local runtime = target:pkg("swift-runtime")
+    local swiftc = table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1]
+    local folder = path.join(target:autogendir(), "probes")
+    os.mkdir(folder)
+    local source = path.join(folder, hash.strhash128(body) .. ".swift")
+    io.writefile(source, body)
+    local passed = try {function ()
+        os.vrunv(swiftc, table.join(runtime_flags({
+            architecture = target:arch(), deployment = toolchain:config("deployment"), sdk = toolchain:config("sdkdir"),
+            resources = path.join(runtime:installdir(), "lib", "swift"),
+            plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
+            module = "RevenantProbe", optimize = "none", prefix_map = os.projectdir() .. "=/port"}),
+            table.wrap(opt.flags), {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", source}))
+        return true
+    end}
+    os.tryrm(source)
+    return passed == true
+end

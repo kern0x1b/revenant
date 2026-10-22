@@ -43,7 +43,7 @@ package("opencv")
         table.insert(configure, "-DCMAKE_INSTALL_PREFIX=" .. package:installdir())
         os.iorunv(table.join(configure, {"-S", os.curdir(), "-B", build}))
 
-        import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).hold(5, function (width)
+        import("@addon.revenant.parallel", {anonymous = true}).hold(5, function (width)
             os.iorunv({"cmake", "--build", build, "--target", "install", "--parallel", tostring(width)})
         end)
 

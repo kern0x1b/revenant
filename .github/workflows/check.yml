@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 defaults:
   run:
     shell: bash --noprofile --norc -eo pipefail {0}
@@ -18,11 +22,18 @@ jobs:
     timeout-minutes: 60
     env:
       REVENANT_PREBUILT: kern0x1b/revenant
-      REVENANT_PREBUILT_ONLY: "1"
+      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Select Xcode 26.6 and show its clang
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+          xcode-select -p
+          xcrun --find clang
+          xcrun clang --version
 
       - uses: actions/cache/restore@v4
         id: xmake
@@ -77,18 +88,18 @@ jobs:
     timeout-minutes: 30
     env:
       REVENANT_PREBUILT: kern0x1b/revenant
-      REVENANT_PREBUILT_ONLY: "1"
+      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64"
     steps:
       - uses: actions/checkout@v4
 
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
 
-      - name: Select the newest Xcode and show its clang
+      - name: Select Xcode 26.6 and show its clang
         run: |
-          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
-          sudo xcode-select -s "$xcode/Contents/Developer"
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
           xcode-select -p
+          xcrun --find clang
           xcrun clang --version
 
       - uses: actions/cache/restore@v4
@@ -230,6 +241,87 @@ jobs:
           name: backports-report
           path: ${{ runner.temp }}/report
           if-no-files-found: warn
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+  swift:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      REVENANT_PREBUILT: kern0x1b/revenant
+      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64,swift-runtime,libcxx"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
+      - name: Select Xcode 26.6 and show its clang
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+          xcode-select -p
+          xcrun --find clang
+          xcrun clang --version
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - name: Install the firmware tools through the Backports configuration
+        timeout-minutes: 20
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/save@v4
+        if: steps.dyld.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Configure the Swift component
+        timeout-minutes: 20
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Build the Swift targets
+        timeout-minutes: 20
+        run: ./xmakew build -P . AppIntents ActivityKit TipKit swiftSpatial swiftCloudKit swiftWeatherKit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Install the Swift packages through their wrappers
+        timeout-minutes: 20
+        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Save the package store
+        if: steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'

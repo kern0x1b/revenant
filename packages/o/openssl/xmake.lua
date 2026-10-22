@@ -32,7 +32,7 @@ package("openssl")
             end
         end
         os.vrunv("./Configure", options, {envs = envs})
-        import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).hold(nil, function (width)
+        import("@addon.revenant.parallel", {anonymous = true}).hold(nil, function (width)
             os.vrunv("make", {"-j" .. width, "build_libs"}, {envs = envs})
         end)
         os.cp("libcrypto.a", package:installdir("lib"))

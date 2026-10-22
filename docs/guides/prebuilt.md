@@ -36,16 +36,20 @@ With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module 
 
 Without `REVENANT_PREBUILT`, the module does nothing, and the recipes build exactly as before.
 
-With `REVENANT_PREBUILT_ONLY=1` as well, a missing release is an error instead: `fetch` raises and names the key, and
+With `REVENANT_PREBUILT_ONLY` naming the package (a comma list, or `1` for all), a missing release is an error instead: `fetch` raises and names the key, and
 nothing is built from source. The `checks` and `backports` jobs of `check.yml` set it, so a build there can never fall back to
 LLVM or Swift. It changes no key.
 
-The `llvm` and `swift` recipes are wired. To wire another recipe, call `prebuilt.fetch(package)` at the
-top of its `on_download`, `prebuilt.install(package)` at the top of its `on_install`, and
-`prebuilt.pack(package)` at its end. Doing that changes the recipe, and so the key, once.
-the Backports targets, `swift-runtime` and `libcxx` are not wired yet: `swift-runtime` sets environment
-variables and data in `on_install` that an early return would skip, and wiring the Backports rebuilds it
-and everything that depends on it.
+The `llvm`, `swift`, `swift-runtime` and `libcxx` recipes are wired. To wire another recipe, call
+`prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
+`prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
+early return would skip them. Doing that changes the recipe, and so the key, once.
+The `shared` configs of `swift-runtime` and `libcxx` are not wired: they stage packages that an early return would
+skip, so those builds come from source. The Backports targets are not packages, so they are not affected.
+
+A recipe is archived only when it calls `prebuilt.pack`, so a job that builds one has nothing to release unless
+its recipe is wired. The prebuilt workflow configures the iOS Swift component before it requires `swift-runtime` or
+`libcxx`, so the released key is the one the swift job looks up.
 
 ## On CI
 

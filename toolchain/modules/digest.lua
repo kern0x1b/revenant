@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 local function long_bracket(source, at)
     return source:match("^%[(=*)%[", at)
 end
@@ -60,9 +62,66 @@ local RECIPES = {
      inputs = {"packages/s/swift-runtime/xmake.lua", "toolchain/modules/apple/shared_runtime.lua",
                "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/dyld.lua",
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
-               "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua"}},
+               "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua",
+               "packages/s/swift-runtime/patches/**.patch",
+               "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
-     inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}}
+     inputs = {"packages/l/libcxx/xmake.lua", "packages/l/libcxx/patches/*.patch", "toolchain/modules/apple/shared_runtime.lua",
+               "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
+    {folder = "packages/s/swiftui", variable = "swiftui_sources_digest",
+     inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
+    {folder = "packages/a/appintents", variable = "appintents_sources_digest",
+     inputs = {"packages/a/appintents/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/AppIntents/*"}},
+    {folder = "packages/a/activitykit", variable = "activitykit_sources_digest",
+     inputs = {"packages/a/activitykit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/ActivityKit/*"}},
+    {folder = "packages/t/tipkit", variable = "tipkit_sources_digest",
+     inputs = {"packages/t/tipkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/TipKit/*"}},
+    {folder = "packages/w/widgetkit", variable = "widgetkit_sources_digest",
+     inputs = {"packages/w/widgetkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/WidgetKit/*"}},
+    {folder = "packages/c/createml", variable = "createml_sources_digest",
+     inputs = {"packages/c/createml/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/TabularData/*",
+               "frameworks/Backports/src/CoreML/*.swift", "frameworks/Backports/src/CoreML/RevenantCoreML.h",
+               "frameworks/Backports/src/CreateMLComponents/*", "frameworks/Backports/src/CreateML/*"}},
+    {folder = "packages/m/musickit", variable = "musickit_sources_digest",
+     inputs = {"packages/m/musickit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/MusicKit/*",
+               "frameworks/Backports/src/MusicKit/include/*"}},
+    {folder = "packages/s/swift-data", variable = "swift_data_sources_digest",
+     inputs = {"packages/s/swift-data/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/SwiftData/*"}},
+    {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
+     inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
+               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}},
+    {folder = "packages/s/swift-embedded", variable = "swift_embedded_sources_digest",
+     inputs = {"packages/s/swift-embedded/xmake.lua", "toolchain/src/swift-embedded/xmake.lua", "toolchain/modules/apple/swift.lua", "toolchain/modules/apple/wrapper.lua"}},
+    {folder = "packages/s/swift-crypto", variable = "swift_crypto_sources_digest",
+     inputs = {"packages/s/swift-crypto/xmake.lua", "packages/s/swift-crypto/patches/*.patch", "packages/s/swift-crypto/patches/swift-asn1/*.patch",
+               "toolchain/src/apple-compat/src/memset_s.c", "toolchain/src/apple-compat/src/objc_opt_self.c",
+               "toolchain/src/apple-compat/src/objc_allocWithZone.c", "toolchain/src/apple-compat/include/revenant/*.h"}},
+    {folder = "packages/s/swift-system", variable = "swift_system_sources_digest",
+     inputs = {"packages/s/swift-system/xmake.lua", "packages/s/swift-system/patches/*.patch",
+               "toolchain/src/apple-compat/src/openat.c", "toolchain/src/apple-compat/src/unlinkat.c",
+               "toolchain/src/apple-compat/src/fdopendir.c", "toolchain/src/apple-compat/src/fstatat.c",
+               "toolchain/src/apple-compat/include/revenant/*.h"}},
+    {folder = "packages/i/iphoneos-sdk", variable = "iphoneos_sdk_additions_digest",
+     inputs = {"packages/i/iphoneos-sdk/xmake.lua", "toolchain/modules/apple/sdk.lua", "toolchain/modules/apple/sdkstubs.lua", "toolchain/src/iphoneos-sdk/usr/**",
+               "toolchain/src/iphoneos-sdk/arclite/*", "toolchain/src/iphoneos-sdk/blocks/*", "toolchain/src/iphoneos-sdk/markers/*"}},
+    {folder = "packages/r/realityfoundation", variable = "realityfoundation_sources_digest",
+     inputs = {"packages/r/realityfoundation/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityFoundation/*.swift"}},
+    {folder = "packages/r/realitykit", variable = "realitykit_sources_digest",
+     inputs = {"packages/r/realitykit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityKit/*.swift"}},
+    {folder = "packages/s/spatial", variable = "spatial_sources_digest",
+     inputs = {"packages/s/spatial/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/src/Spatial/*.swift.gyb"}},
+    {folder = "packages/c/cloudkit", variable = "cloudkit_sources_digest",
+     inputs = {"packages/c/cloudkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/CloudKit/*.swift"}},
+    {folder = "packages/w/weatherkit", variable = "weatherkit_sources_digest",
+     inputs = {"packages/w/weatherkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/WeatherKit/*.swift"}},
+    {folder = "packages/n/network", variable = "network_sources_digest",
+     inputs = {"packages/n/network/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+               "frameworks/Backports/src/Network/*.swift", "frameworks/Backports/src/Network/seam/*"}}
 }
 
 function recipes()
@@ -72,7 +131,19 @@ end
 function sources(root, inputs)
     local digests = {}
     for _, input in ipairs(inputs) do
-        table.insert(digests, input .. "=" .. hash.strhash128(stripped(io.readfile(path.join(root, input)))))
+        local files = {path.join(root, input)}
+        if input:find("*", 1, true) then
+            files = os.files(path.join(root, input))
+            byteorder.sort(files)
+        end
+        for _, file in ipairs(files) do
+            local text = io.readfile(file)
+            if file:endswith(".lua") then
+                text = stripped(text)
+            end
+            local name = input:find("*", 1, true) and path.relative(file, root) or input
+            table.insert(digests, name .. "=" .. hash.strhash128(text))
+        end
     end
     return hash.strhash128(table.concat(digests, ";"))
 end

@@ -7,8 +7,17 @@ local function source()
     end
 end
 
-local function only()
-    return os.getenv("REVENANT_PREBUILT_ONLY") == "1"
+local function only(package)
+    local named = os.getenv("REVENANT_PREBUILT_ONLY") or ""
+    if named == "1" then
+        return true
+    end
+    for name in named:gmatch("[^,%s]+") do
+        if name == package:name() then
+            return true
+        end
+    end
+    return false
 end
 
 function wanted(package)
@@ -22,7 +31,24 @@ function key(package)
         table.insert(deps, dep:name() .. "=" .. dep:buildhash())
     end
     byteorder.sort(deps)
-    return hash.strhash128(table.concat(table.join(parts, deps), ";"))
+    local value = hash.strhash128(table.concat(table.join(parts, deps), ";"))
+    if os.getenv("REVENANT_PREBUILT_TRACE") then
+        local configs = {}
+        for name, setting in pairs(package:_configs_for_buildhash() or {}) do
+            table.insert(configs, name .. "=" .. (type(setting) == "table" and string.serialize(setting, {strip = true, indent = false}) or tostring(setting)))
+        end
+        byteorder.sort(configs)
+        local urls = {}
+        for _, url in ipairs(package:urls() or {}) do
+            table.insert(urls, url .. "@" .. tostring(package:sourcehash(package:url_alias(url))))
+        end
+        print("prebuilt-trace %s parts=%s", package:name(), table.concat(parts, " | "))
+        print("prebuilt-trace %s configs=%s", package:name(), table.concat(configs, " ; "))
+        print("prebuilt-trace %s urls=%s label=%s", package:name(), table.concat(urls, " ; "), tostring(package:label()))
+        print("prebuilt-trace %s deps=%s", package:name(), table.concat(deps, " | "))
+        print("prebuilt-trace %s key=%s", package:name(), value)
+    end
+    return value
 end
 
 function tag(package)
@@ -45,8 +71,8 @@ end
 function fetch(package)
     local repository = source()
     if not repository then
-        if only() then
-            raise("%s: REVENANT_PREBUILT_ONLY=1 needs REVENANT_PREBUILT, the repository whose release holds the prebuilt %s", package:name(), key(package))
+        if only(package) then
+            raise("%s: REVENANT_PREBUILT_ONLY needs REVENANT_PREBUILT, the repository whose release holds the prebuilt %s", package:name(), key(package))
         end
         return false
     end
@@ -66,8 +92,8 @@ function fetch(package)
     if not fetched then
         os.tryrm(partial)
         os.tryrm(listed)
-        if only() then
-            raise("%s: no release holds the prebuilt %s at %s, and REVENANT_PREBUILT_ONLY=1 forbids building it from source", package:name(), key(package), repository)
+        if only(package) then
+            raise("%s: no release holds the prebuilt %s at %s, and REVENANT_PREBUILT_ONLY forbids building it from source", package:name(), key(package), repository)
         end
         print("%s: no prebuilt %s at %s, building from source", package:name(), key(package), repository)
         return false

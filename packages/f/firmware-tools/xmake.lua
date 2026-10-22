@@ -21,12 +21,12 @@ package("firmware-tools")
             "add_rules(\"mode.release\", \"mode.debug\")",
             "set_defaultmode(\"release\")",
             "option(\"component\", {type = \"string\", default = \"\"})",
-            "includes(\"" .. path.join(root, "toolchain", "src", "firmware-tools") .. "\")",
+            "includes(\"" .. import("@addon.revenant.data", {anonymous = true}).src("firmware-tools") .. "\")",
             ""}, "\n"))
         os.vrunv(os.programfile(), {"f", "-p", "macosx", "-a", "arm64", "-m", "release", "-y"}, {curdir = project})
         os.vrunv(os.programfile(), {"build", "-y", "revenant-firmware"}, {curdir = project})
         os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "revenant-firmware"}, {curdir = project})
-        os.vcp(path.join(root, "toolchain", "LICENSE"), package:installdir("licenses"))
+        os.vcp(import("@addon.revenant.data", {anonymous = true}).licence(), package:installdir("licenses"))
     end)
 
     on_test(function (package)

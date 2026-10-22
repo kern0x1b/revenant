@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
+
 ARRIVED = {
     __bswapdi2 = {iOS = "3.0"},
     __bswapsi2 = {iOS = "3.0"},
@@ -163,6 +165,20 @@ function provided(system)
         found[symbol] = releases[system]
     end
     return found
+end
+
+function needed(deployment)
+    import("core.base.semver")
+    local shared = process_wide()
+    local symbols, sharing = {}, {}
+    for symbol, release in pairs(provided("iOS")) do
+        if semver.compare(deployment, release) < 0 then
+            table.insert(shared[symbol] and sharing or symbols, symbol)
+        end
+    end
+    byteorder.sort(symbols)
+    byteorder.sort(sharing)
+    return symbols, sharing
 end
 
 function force_includes(package, symbols)
