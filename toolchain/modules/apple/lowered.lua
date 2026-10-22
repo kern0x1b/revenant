@@ -329,19 +329,37 @@ local function lowering_of(text, implemented)
             if first then
                 lower(first, text:find("\n", stop, true) or #text)
             end
-            for _, mark_pattern in ipairs({"\n[%-%+]%s*%(", "\n@property"}) do
-                local at = stop
-                while true do
-                    local mark = text:find(mark_pattern, at)
-                    if not mark or mark > block_end then
-                        break
-                    end
-                    local declared_end = statement_end(text, mark + 1)
+            local members = (implemented.protocol_members or {})[name] or {}
+            local at = stop
+            while true do
+                local mark = text:find("\n[%-%+]%s*%(", at)
+                if not mark or mark > block_end then
+                    break
+                end
+                local declared_end = statement_end(text, mark + 1)
+                local declaration = text:sub(mark + 1, declared_end)
+                local selector = selector_of(declaration)
+                if selector and members[declaration:match("^([%-%+])") .. selector] then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
-                    at = mark + 1
                 end
+                at = mark + 1
+            end
+            at = stop
+            while true do
+                local mark = text:find("\n@property", at, true)
+                if not mark or mark > block_end then
+                    break
+                end
+                local declared_end = statement_end(text, mark + 1)
+                local property = property_name(text:sub(mark + 1, declared_end))
+                if property and members["-" .. property] then
+                    for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
+                        lower(piece[1], piece[2])
+                    end
+                end
+                at = mark + 1
             end
             position = block_end + 1
         end
@@ -422,6 +440,116 @@ local function union_of(folders)
     return union
 end
 
+local corpora = {}
+
+local function corpus_of(src)
+    if not corpora[src] then
+        local parts = {}
+        for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+            for _, pattern in ipairs({"**.m", "**.mm", "**.h", "**.c"}) do
+                for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                    table.insert(parts, io.readfile(file))
+                end
+            end
+        end
+        corpora[src] = table.concat(parts, "\n")
+    end
+    return corpora[src]
+end
+
+local function used_in(corpus, selector)
+    if selector:find(":", 1, true) then
+        local parts = {}
+        for part in selector:gmatch("[%w_]+:") do
+            table.insert(parts, part)
+        end
+        if #parts == 0 or not corpus:find(parts[1], 1, true) then
+            return false
+        end
+        return corpus:find(table.concat(parts, "[^;]-"), 1) ~= nil
+    end
+    return corpus:find("%f[%w_]" .. selector .. "%f[^%w_]") ~= nil
+end
+
+local function method_keys(block)
+    local keys, at = {}, 1
+    while true do
+        local mark = block:find("\n[%-%+]%s*%(", at)
+        if not mark then
+            return keys
+        end
+        local _, stop = block:find(";", mark + 1, true)
+        local declaration = block:sub(mark + 1, stop or #block)
+        local selector = selector_of(declaration)
+        if selector then
+            table.insert(keys, {key = declaration:match("^([%-%+])") .. selector, selector = selector})
+        end
+        at = mark + 1
+    end
+end
+
+local function protocol_blocks(sdk, names)
+    local blocks = {}
+    for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
+        for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
+            local text = io.readfile(file)
+            for position, name in text:gmatch("()@protocol%s+([%w_]+)[%s<]") do
+                if names[name] and not blocks[name] then
+                    blocks[name] = text:sub(position, text:find("@end", position, true) or #text)
+                end
+            end
+        end
+    end
+    return blocks
+end
+
+function protocol_status(src, sdk, folders)
+    folders = folders or implemented_in(src)
+    local adopted = {}
+    for _, found in pairs(folders) do
+        for name in pairs(found.protocols) do
+            adopted[name] = true
+        end
+    end
+    local corpus = corpus_of(src)
+    local typed = {}
+    for name in corpus:gmatch("id%s*<%s*([%w_]+)%s*>") do
+        typed[name] = true
+    end
+    local defined = {}
+    for name in corpus:gmatch("\n@protocol%s+([%w_]+)[%s<]") do
+        defined[name] = true
+    end
+    local candidates = {}
+    for name in pairs(adopted) do
+        candidates[name] = true
+    end
+    for name in pairs(typed) do
+        candidates[name] = true
+    end
+    for name in pairs(defined) do
+        candidates[name] = true
+    end
+    local blocks = protocol_blocks(sdk, candidates)
+    local status = {backed = {}, uncalled = {}, members = {}}
+    for name in pairs(candidates) do
+        local members, used = {}, false
+        for _, method in ipairs(blocks[name] and method_keys(blocks[name]) or {}) do
+            if used_in(corpus, method.selector) then
+                members[method.key] = true
+                used = true
+            end
+        end
+        status.members[name] = members
+        if adopted[name] or defined[name] or used then
+            status.backed[name] = true
+        elseif typed[name] and blocks[name] then
+            status.uncalled[name] = true
+        end
+    end
+    return status
+end
+
 local built = {}
 
 function overlay(sdk, out, src)
@@ -440,7 +568,11 @@ function build_overlay(sdk, out, src)
         local file = path.join(directory_of(sdk, header), header.file)
         changed[file] = replaced(changed[file] or io.readfile(file), header, "the iPhoneOS SDK at " .. sdk .. " in " .. header.file, entry.member)
     end
-    local union = union_of(implemented_in(src))
+    local folders = implemented_in(src)
+    local union = union_of(folders)
+    local status = protocol_status(src, sdk, folders)
+    union.protocols = status.backed
+    union.protocol_members = status.members
     for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
         for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
             local text = changed[file] or io.readfile(file)

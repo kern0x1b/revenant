@@ -146,26 +146,6 @@ local function find_member(u, container, tag, selector)
     return nil
 end
 
-local function declared_protocols()
-    local protocols = {}
-    local src = path.join(os.scriptdir(), "..", "src")
-    for _, file in ipairs(os.files(path.join(src, "**.m"))) do
-        for name in io.readfile(file):gmatch("\n@protocol%s+([%w_]+)[%s<]") do
-            protocols[name] = true
-        end
-    end
-    for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
-        for _, file in ipairs(os.files(path.join(src, pattern))) do
-            for list in io.readfile(file):gmatch("\n@interface%s+[%w_]+[^<\n]*<([^>\n]+)>") do
-                for name in list:gmatch("[%w_]+") do
-                    protocols[name] = true
-                end
-            end
-        end
-    end
-    return protocols
-end
-
 local function backed_index(keys, classes, protocols)
     local set, selectors, folders = {}, {}, {}
     for folder, list in pairs(keys) do
@@ -764,7 +744,15 @@ function main(...)
     local cache, source = cache_of(opt.ios)
     phase("cache " .. source)
     local keys = implemented.from_objects(opt.objects)
-    local backed = backed_index(keys, u.classes, declared_protocols())
+    local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
+    local status = lowered.protocol_status(path.join(os.scriptdir(), "..", "src"), sdkfiles.sdk_folder())
+    local uncalled = {}
+    for name in pairs(status.uncalled) do
+        table.insert(uncalled, name)
+    end
+    table.sort(uncalled)
+    io.writefile(path.join(opt.report, "protocols-uncalled.txt"), table.concat(uncalled, "\n") .. "\n")
+    local backed = backed_index(keys, u.classes, status.backed)
     local folders = 0
     for _ in pairs(backed.folders) do
         folders = folders + 1

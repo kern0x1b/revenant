@@ -30,6 +30,10 @@ local ACCEPTANCE = [=[
 
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
+    WKWebView *web = [[WKWebView alloc] initWithFrame:CGRectZero];
+    web.navigationDelegate = nil;
+    id<WKNavigationDelegate> navigation = web.navigationDelegate;
+    (void)navigation;
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     (void)[device newCommandQueue];
     (void)[device newBufferWithLength:16 options:0];
