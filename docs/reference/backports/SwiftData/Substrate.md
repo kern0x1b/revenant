@@ -5,9 +5,9 @@ a scratch worktree, against the packages as they are in the shared
 store. The probe that reads them ran in the same worktree and is not kept in the repository.
 
 The toolchain, resolved once: `revenant@swift 6.4.0` at
-`~/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
+`~/.revenant/cache/xmake-global/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
 (swift-6.4-RELEASE)`), and `revenant@swift-runtime 6.4.0` at
-`~/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
+`~/.revenant/cache/xmake-global/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
 (`configs.backports = true`, `REVENANT_SWIFT_RUNTIME_BACKPORTS = "coredata"`).
 
 ## Macro plugins can be built on this toolchain
@@ -25,19 +25,19 @@ libSwiftMacros.dylib
 `SwiftLibraryPluginProvider`, `SwiftIfConfig`, `SwiftWarningControl`, `SwiftRefactor` - a host
 module each, with its dylib.
 
-`packages/s/swift/xmake.lua:124-129` is what builds them (`SWIFT_BUILD_SWIFT_SYNTAX=ON`, the
-`swift-syntax-lib` install component, and the `SwiftMacros`/`ObservationMacros` ninja targets),
-and `packages/s/swift-runtime/xmake.lua:149` hands the directory to a port as
-`SWIFT_PLUGIN_PATH`, which `rules/swift/xmake.lua:182` passes to every port compile as
-`-plugin-path`.
+`packages/s/swift/xmake.lua:108` turns on `SWIFT_BUILD_SWIFT_SYNTAX`, the install component list carries
+`swift-syntax-lib`, and the ninja invocation builds the `SwiftMacros` and `ObservationMacros` targets.
+`packages/s/swift-runtime/xmake.lua:83` hands the directory to a port as `SWIFT_PLUGIN_PATH`, and
+`toolchain/rules/swift/xmake.lua:148-149` passes each dependency's `REVENANT_SWIFT_PLUGINS` folders to
+every port compile as `-plugin-path`, beside the `REVENANT_SWIFT_MODULES` its `-I` loop already read.
 
 **So `@Model`, `@Attribute`, `@Relationship`, `@Transient`, `@Unique`, `@Index` and `@ModelActor`
-can be implemented, not stubbed.** What is missing is one line: `toolchain/rules/swift/xmake.lua` reads the
-plugin path from the swift-runtime package alone (line 182), while it already collects every
-dependency's `REVENANT_SWIFT_MODULES` (lines 170-176). A `SwiftDataMacros` plugin therefore needs
-the same loop for a `REVENANT_SWIFT_PLUGINS` the package exports. Without it a port cannot load a
-plugin of ours, and installing the plugin into the compiler's own directory would be a write
-outside our package, where two builds of it would fight over one file name.
+can be implemented, not stubbed.** The loader is in place: `toolchain/rules/swift/xmake.lua` collects
+every dependency's `REVENANT_SWIFT_MODULES` (lines 145-146) and `REVENANT_SWIFT_PLUGINS` (lines
+148-149), so a `SwiftDataMacros` package that exports `REVENANT_SWIFT_PLUGINS` is found by a port that
+uses it. What is missing is the package itself: the host plugin, built with swift-syntax, in a package
+of ours. Installing it into the compiler's own directory would be a write outside our package, where
+two builds of it would fight over one file name.
 
 ## `Foundation.Predicate` and `Foundation.SortDescriptor` are not on the port yet
 
@@ -132,8 +132,8 @@ runtime=29dd4454 deployment=6.1.3 OK
 ```
 
 The floor is the `Swift` module of the runtime itself, and it is a property of the runtime and of
-the Core Data backports under it: every entry of the Core Data registry, since removed, and of
-`registry/CoreData/*.json` has `"minimum": "6.0"`, so there is no `CoreDataBackports` for a band
+the Core Data backports under it: every entry of the Core Data registry, since removed, had
+`"minimum": "6.0"`, so there is no `CoreDataBackports` for a band
 below 6.0 and the runtime's Core Data overlay cannot be built for one. A module that imports Core
 Data - which is all of SwiftData - exists therefore for the 6.0 and 6.1.3 bands and not for 4.3.
 Moving that floor is the Core Data band's call, not this package's.
