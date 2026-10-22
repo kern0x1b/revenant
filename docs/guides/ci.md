@@ -34,15 +34,25 @@ Four caches make a warm run quick:
   Each store is restored by exact key and saved once, after the configure has succeeded, so a store is never saved
   half-made;
 - the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition;
-- the objects `build/.objs`, their depfiles `build/.deps` and the libraries `build/iphoneos`, keyed by the store key and
-  by the hashes of `frameworks/Backports/**`, `toolchain/**`, `packages/**`, `addons/**`, `xmake.lua`
-  and `xmakew`, saved once the
-  build has succeeded.
+- the objects `build/.objs`, their depfiles `build/.deps`, the libraries `build/iphoneos` and the source manifest
+  `build/backports-sources.txt`. The key has two parts: the store key and the hashes of `toolchain/**`, `packages/**`,
+  `addons/**`, `xmake.lua`, `xmakew` and `frameworks/Backports/xmake.lua`, which must match exactly; and the hash of
+  `frameworks/Backports/**`. When only the second part differs, the job restores the newest objects with the same first
+  part. The manifest holds the git blob hash of every file under `frameworks/Backports` and of every generated
+  skeleton file, and it is written once the build has succeeded and saved with the objects.
 
 xmake recompiles a source whose mtime is newer than its depfile, and a restored cache has older depfiles than a fresh
 checkout has sources. So the job first gives every tracked file one fixed mtime, and the skeleton writer rewrites a
-generated file only when its text changed, so a restored skeleton keeps the mtime its objects were built against. The `checks` job takes no fixed mtime, because it
-restores only the package store, which holds no `build/` objects: nothing it restores is compared with a source's mtime.
+generated file only when its text changed, so a restored skeleton keeps the mtime its objects were built against. After
+the facts step, on a restored manifest, the backports job touches every file whose hash differs from the manifest, so
+xmake recompiles those sources and, through their depfiles, the objects that include a changed header. The `checks` job
+takes no fixed mtime, because it restores only the package store, which holds no `build/` objects: nothing it restores
+is compared with a source's mtime.
+
+The backports job's build step has a 15-minute limit. A cold build of the component took 8 min 58 s and 7 min 42 s on two
+recent runs of main and of another branch, and a run hit the earlier 12-minute limit at 12 min 13 s, after a cold package
+configure. The limit leaves room for that variance above the cold floor of about 9 minutes; a warm objects restore builds
+only the sources that changed.
 
 A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
