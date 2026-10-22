@@ -10,7 +10,7 @@ package("matter")
     add_patches("v1.6.1.0", "patches/ble-connectable.patch", "67f3d5e8bac9fc8fe0e2a256db4efe93dcb5cfa72d95c809e384966220972b19")
 
     add_deps("revenant@apple-compat", {alias = "apple-compat"})
-    add_deps("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+    add_deps("revenant@swift-runtime", {alias = "swift-runtime"})
     add_deps("revenant@ld64", {alias = "ld64"})
     add_deps("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})
     add_deps("gn 20211117", {alias = "gn"})
@@ -25,18 +25,6 @@ package("matter")
     }
     local cpus = {armv7 = "arm", armv7s = "arm", arm64 = "arm64"}
 
-    local function port_headers(package)
-        local runtime = package:dep("swift-runtime")
-        if not runtime then
-            return {}
-        end
-        local overlay = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
-        if not overlay then
-            raise("revenant@swift-runtime at %s names no port headers; it was built without the backports, reinstall it", runtime:installdir())
-        end
-        return {"-ivfsoverlay", overlay}
-    end
-
     on_install("iphoneos", function (package)
         local toolchain = import("@addon.revenant.apple.cmake", {anonymous = true}).toolchain(package)
         local sdk = assert(toolchain:config("sdkdir"), "the apple-ios toolchain names no SDK")
@@ -46,7 +34,7 @@ package("matter")
         local flags = table.join({"-target", package:arch() .. "-apple-ios", "-miphoneos-version-min=" .. minimum, "-isysroot", sdk},
                                  toolchain:config("linker_version") and {"-mlinker-version=" .. toolchain:config("linker_version")} or {})
         local compiled = table.join(flags, toolchain:config("emulated_tls") and {"-femulated-tls"} or {},
-                                    {"-Wno-incompatible-sysroot"}, port_headers(package))
+                                    {"-Wno-incompatible-sysroot"})
 
         for _, name in ipairs(table.orderkeys(submodules)) do
             os.vrunv("git", {"submodule", "update", "--init", "--depth", "1", name})

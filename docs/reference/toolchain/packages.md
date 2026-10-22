@@ -30,7 +30,7 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `swift-runtime` | 6.4.0 | the Swift standard library, runtime, concurrency and overlays, built for the port's architecture and oldest release |
 | `swift-embedded` | | Embedded Swift's `Swift` module and the Unicode tables it calls |
 
-`swift-runtime` takes the configs below. `shared` installs under absolute install names for a Debian package; `backports` and `backports_uikit` make the overlays see what the `frameworks/Backports` targets implement, but `backports` is blocked for now: its port headers came from a generator that is gone, so the recipe refuses it and says so; `library_evolution` builds the resilient runtime and is a different package; `recipe` is the digest of the recipe and its changes.
+`swift-runtime` takes the configs below. `shared` installs under absolute install names for a Debian package; `library_evolution` builds the resilient runtime and is a different package; `recipe` is the digest of the recipe and its changes. There is no `backports` config: the overlays see the SDK's headers lowered by the `apple-ios` toolchain (`modules/apple/lowered.lua`), so a program that uses a Backports API links the library by `add_deps` against the plain runtime.
 
 ## Frameworks
 
@@ -66,9 +66,14 @@ Inside the project a target depends on a library with `add_deps`. The configure 
 
 ### Packaging
 
-The one `.deb` of the repository that installs these libraries on a device is not written yet. A target that
-links a Backports library is refused at packaging, and an application outside this repository has no package
-to require. The design and what is measured are in [the backports loading note](../../explanation/backports-loading.md).
+`./xmakew deb -P .` writes one package for them, `org.revenant.backports_<version>_iphoneos-arm.deb`: every Backports
+library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` and nothing
+else. It is signed with the `ldid` of an application of the project. Its version is the addon's release and a hash of
+the libraries and their dependencies, and its `Depends` names, at their exact versions, the shared packages (the Swift
+runtime, libc++) that its libraries name. A target that links a Backports library depends on the package in its own
+`Depends`, so an application built here or outside this repository requires that one package. The decision is
+[0012](../../explanation/decisions/0012-one-backports-package.md); what is measured on a device is in
+[the backports loading note](../../explanation/backports-loading.md).
 
 ## Swift runtime notes
 

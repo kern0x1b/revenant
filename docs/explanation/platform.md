@@ -24,12 +24,13 @@ hardware the device does not have.
 
 ## Delivery
 
-The delivery is a Debian package per control file, installed through Cydia. The aim is one package for the whole
-repository, holding the backports, the frameworks this repository writes (SwiftUI, Combine, WebKit, and so on) and
-the Swift runtime, so that after it is installed any application works as on a newer iOS. That includes applications
-this toolchain did not build. That package is not written yet: a target that links a Backports library cannot be
-packaged, and `platform.lua` refuses it and names the target. What exists today is the WebKit port
-(`space.kern0x1b.rev`), the SwiftUI showcase (`space.kern0x1b.swiftui`), the CallKit tweak and the test packages.
+The delivery is a Debian package per control file, installed through Cydia. The backports are one of them:
+`org.revenant.backports`, written by `./xmakew deb -P .` from every Backports library of the build, which a target that
+links one of them requires. The Swift runtime and libc++ are packages of their own, which it depends on. What exists
+today is the WebKit port (`space.kern0x1b.rev`), the SwiftUI showcase (`space.kern0x1b.swiftui`), the CallKit tweak
+and the test packages. The aim is that after the backports package is installed, any application works as on a newer
+iOS, including applications this toolchain did not build. That is not yet measured on a device, and the package has
+not yet been run end to end on a real build.
 
 - An application built by today's Xcode is arm64 only, and these devices are 32-bit ARM. Such a binary runs
   there through the recompiler, which binds its imports to the backports libraries when it translates it.
