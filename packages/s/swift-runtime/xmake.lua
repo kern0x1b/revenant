@@ -360,6 +360,8 @@ package("swift-runtime")
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"})
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
+            local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
+            local lowered_headers = import("@addon.revenant.apple.lowered", {anonymous = true}).overlay(toolchain:config("sdkdir"), path.absolute("lowered"))
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
@@ -384,12 +386,13 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"})),
+                "UUID.swift"}), {presentation_intent}),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}, foundation_objects,
                           {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
-                                          "-enable-experimental-feature", "BuiltinModule"}})
+                                          "-enable-experimental-feature", "BuiltinModule",
+                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers}})
 
             local function generated_from(folder, name)
                 return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))

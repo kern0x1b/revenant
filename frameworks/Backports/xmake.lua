@@ -234,7 +234,8 @@ else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
                                   network = "network_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
-                                  members = "lowered_members_test.lua", device = "device_members_test.lua"})
+                                  members = "lowered_members_test.lua", device = "device_members_test.lua",
+                                  presentation = "presentation_intent_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
