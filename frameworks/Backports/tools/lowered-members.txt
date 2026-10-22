@@ -1355,7 +1355,9 @@ class NSFileCoordinator
 class NSFileHandle
 class NSFileManager
 class NSFileProviderManager
+class NSFileVersion
 class NSHTTPCookie
+class NSHTTPCookieStorage
 class NSHTTPURLResponse
 class NSISO8601DateFormatter
 class NSIndexPath
@@ -1363,6 +1365,8 @@ class NSInflectionRule
 class NSInflectionRuleExplicit
 class NSItemProvider
 class NSJSONSerialization
+class NSKeyValueSharedObservers
+class NSKeyValueSharedObserversSnapshot
 class NSKeyedArchiver
 class NSKeyedUnarchiver
 class NSLayoutAnchor
@@ -1375,11 +1379,13 @@ class NSLengthFormatter
 class NSLinguisticTagger
 class NSListFormatter
 class NSLocale
+class NSLocalizedNumberFormatRule
 class NSManagedObject
 class NSManagedObjectContext
 class NSMapTable
 class NSMassFormatter
 class NSMeasurement
+class NSMeasurementFormatter
 class NSMergePolicy
 class NSMetadataQuery
 class NSMorphology
@@ -1626,6 +1632,7 @@ class RevenantCKRequest
 class RevenantCKTransport
 class RevenantCMTagCollection
 class RevenantCMTaggedBufferGroup
+class RevenantCalendarDayMonitor
 class RevenantCallAudio
 class RevenantCallBroker
 class RevenantCallScreen
@@ -1690,6 +1697,7 @@ class RevenantFileLocationsController
 class RevenantFlashActiveWait
 class RevenantFlowModel
 class RevenantFontDescriptorInstaller
+class RevenantFormattingContextInstaller
 class RevenantGCTables
 class RevenantGKEdgePair
 class RevenantGKEntry
@@ -1719,6 +1727,7 @@ class RevenantKeyboardDismissTracker
 class RevenantKeyboardLocalInstaller
 class RevenantKeyframe
 class RevenantLAObject
+class RevenantLargeContentView
 class RevenantLayoutGuideView
 class RevenantLayoutInvalidation
 class RevenantLayoutManager7
@@ -1800,7 +1809,7 @@ class RevenantNWConnection
 class RevenantNWConnectionGroup
 class RevenantNWContentContext
 class RevenantNWDataTransferReport
-class RevenantNWEndpoint
+class RevenantNWEndpointValue
 class RevenantNWError
 class RevenantNWEstablishmentReport
 class RevenantNWFramer
@@ -1809,8 +1818,8 @@ class RevenantNWGroupMessage
 class RevenantNWInterface
 class RevenantNWListener
 class RevenantNWParameters
-class RevenantNWPath
 class RevenantNWPathMonitor
+class RevenantNWPathValue
 class RevenantNWPrivacyContext
 class RevenantNWProtocolDefinition
 class RevenantNWProtocolMetadata
@@ -1868,11 +1877,13 @@ class RevenantProgressFrame
 class RevenantProgressLink
 class RevenantProgressObserver
 class RevenantProgressPatch
+class RevenantProgressSubscriber
 class RevenantProviderItem
 class RevenantPushBridge
 class RevenantQueueState
 class RevenantReceiptInstaller
 class RevenantReferenceViewWatch
+class RevenantRefreshHost
 class RevenantRegionMonitor
 class RevenantRegistration
 class RevenantRemoteCommandTarget
@@ -1889,8 +1900,8 @@ class RevenantSCNArchivedData
 class RevenantSCNCoding
 class RevenantSCNDraw
 class RevenantSCNMesh
-class RevenantSCNProgram
-class RevenantSCNRenderer
+class RevenantSCNRenderEngine
+class RevenantSCNShaderProgram
 class RevenantSCNTexture
 class RevenantSKWeakReference
 class RevenantSafariPage
@@ -1922,6 +1933,8 @@ class RevenantSegmentTrigger
 class RevenantSegmentedHooks
 class RevenantSelectionWatcher
 class RevenantSessionGuidance
+class RevenantSharedObservation
+class RevenantSharedObserversReaper
 class RevenantSheetAnimator
 class RevenantSheetDetentContext
 class RevenantSheetGrabber
@@ -2336,6 +2349,7 @@ class UIPrinterDestination
 class UIPrinterPickerController
 class UIProgressView
 class UIPushBehavior
+class UIRefreshControl
 class UIRegion
 class UIResolvedShape
 class UIResponder
@@ -3871,7 +3885,9 @@ function revenant_bn_mont_sub
 function revenant_bn_sub
 function revenant_bn_to_bytes
 function revenant_bn_to_bytes_be
+function revenant_cache_remove_since
 function revenant_calendar_components
+function revenant_calendar_day_check
 function revenant_calendar_for_components
 function revenant_calendar_given_units
 function revenant_calendar_nanosecond
@@ -3893,6 +3909,7 @@ function revenant_cubic_timing_function
 function revenant_cubic_timing_function_class
 function revenant_current_context
 function revenant_custom_transition
+function revenant_date_context
 function revenant_decode_top_level
 function revenant_decode_trait_extras
 function revenant_default_duration
@@ -3910,6 +3927,7 @@ function revenant_edge_pop_animator
 function revenant_edge_pop_interactor
 function revenant_elided_text
 function revenant_encode_trait_extras
+function revenant_ephemeral_cookie_storage
 function revenant_feedback_motor_present
 function revenant_feedback_play
 function revenant_field_allows_copying
@@ -3934,6 +3952,7 @@ function revenant_flag_get
 function revenant_flag_set
 function revenant_font
 function revenant_glyph_script
+function revenant_group_cookie_storage
 function revenant_hap_ed25519_keypair
 function revenant_hap_ed25519_keypair_from_seed
 function revenant_hap_ed25519_sign
@@ -4023,8 +4042,17 @@ function revenant_lzma_compress
 function revenant_lzma_decompress
 function revenant_medium_body_font
 function revenant_medium_font
+function revenant_menu_attributes
 function revenant_menu_attributes_text
+function revenant_menu_button_title
+function revenant_menu_collect_deferred
+function revenant_menu_destructive
+function revenant_menu_flatten
+function revenant_menu_has_content
+function revenant_menu_leaf
+function revenant_menu_state
 function revenant_merge_trait_extras
+function revenant_metadata_urls
 function revenant_ml_activate
 function revenant_ml_activation_kind
 function revenant_ml_apply_binary
@@ -4220,6 +4248,9 @@ function revenant_presentation_present
 function revenant_prewarmingToken
 function revenant_property_list_read
 function revenant_property_list_write
+function revenant_qr_decode
+function revenant_qr_result_free
+function revenant_qr_set_converter
 function revenant_quality_of_service
 function revenant_read_trait_value
 function revenant_reciprocal_converter
@@ -4228,8 +4259,10 @@ function revenant_refresh_bars_showing
 function revenant_register_trait_definition
 function revenant_register_trait_kind
 function revenant_registered_models
+function revenant_request_header_bytes
 function revenant_request_update
 function revenant_resource_value
+function revenant_response_header_bytes
 function revenant_restoration_extend
 function revenant_safe_area_insets
 function revenant_same
@@ -4278,6 +4311,9 @@ function revenant_system_colour
 function revenant_tag_carries
 function revenant_tag_equal
 function revenant_tag_is_less
+function revenant_task_configuration
+function revenant_task_progress_apply
+function revenant_task_progress_create
 function revenant_text
 function revenant_text_content_type
 function revenant_track_bar
@@ -4296,6 +4332,7 @@ function revenant_trait_style
 function revenant_trait_summary
 function revenant_trait_value
 function revenant_trait_value_text
+function revenant_trash_item
 function revenant_unit_chosen
 function revenant_unit_factor
 function revenant_unit_food_name
@@ -6819,6 +6856,7 @@ global NSBinaryStoreInsecureDecodingCompatibilityOption
 global NSBinaryStoreSecureDecodingClasses
 global NSBundleResourceRequestLoadingPriorityUrgent
 global NSBundleResourceRequestLowDiskSpaceNotification
+global NSCalendarDayChangedNotification
 global NSCalendarIdentifierBangla
 global NSCalendarIdentifierDangi
 global NSCalendarIdentifierGujarati
@@ -6871,7 +6909,9 @@ global NSItemProviderErrorDomain
 global NSItemProviderPreferredImageSizeKey
 global NSKeyedArchiveRootObjectKey
 global NSLanguageIdentifierAttributeName
+global NSListItemDelimiterAttributeName
 global NSLocalizedFailureErrorKey
+global NSLocalizedNumberFormatAttributeName
 global NSMarkdownSourcePositionAttributeName
 global NSMetadataItemContentTypeKey
 global NSMetadataItemContentTypeTreeKey
@@ -6898,6 +6938,8 @@ global NSMetadataUbiquitousSharedItemPermissionsReadOnly
 global NSMetadataUbiquitousSharedItemPermissionsReadWrite
 global NSMetadataUbiquitousSharedItemRoleOwner
 global NSMetadataUbiquitousSharedItemRoleParticipant
+global NSMorphologyAttributeName
+global NSMultipleUnderlyingErrorsKey
 global NSObliquenessAttributeName
 global NSPaperMarginDocumentAttribute
 global NSPaperSizeDocumentAttribute
@@ -7002,6 +7044,7 @@ global NSURLIsSparseKey
 global NSURLMayHaveExtendedAttributesKey
 global NSURLMayShareFileContentKey
 global NSURLSessionDownloadTaskResumeData
+global NSURLSessionUploadTaskResumeData
 global NSURLThumbnailDictionaryKey
 global NSURLUbiquitousItemContainerDisplayNameKey
 global NSURLUbiquitousItemDownloadRequestedKey
@@ -7010,6 +7053,7 @@ global NSURLUbiquitousItemDownloadingStatusCurrent
 global NSURLUbiquitousItemDownloadingStatusDownloaded
 global NSURLUbiquitousItemDownloadingStatusKey
 global NSURLUbiquitousItemDownloadingStatusNotDownloaded
+global NSURLUbiquitousItemIsExcludedFromSyncKey
 global NSURLUbiquitousItemIsSharedKey
 global NSURLUbiquitousItemIsSyncPausedKey
 global NSURLUbiquitousItemSupportedSyncControlsKey
@@ -18130,13 +18174,17 @@ member NSAsynchronousFetchRequest -setEstimatedResultCount:
 member NSAsynchronousFetchResult -fetchRequest
 member NSAsynchronousFetchResult -finalResult
 member NSAttributedString +localizedAttributedStringWithFormat:
+member NSAttributedString +localizedAttributedStringWithFormat:context:
 member NSAttributedString +localizedAttributedStringWithFormat:options:
+member NSAttributedString +localizedAttributedStringWithFormat:options:context:
 member NSAttributedString -attributedStringByInflectingString
 member NSAttributedString -containsAttachmentsInRange:
 member NSAttributedString -initWithContentsOfMarkdownFileAtURL:options:baseURL:error:
 member NSAttributedString -initWithFileURL:options:documentAttributes:error:
 member NSAttributedString -initWithFormat:options:locale:
 member NSAttributedString -initWithFormat:options:locale:arguments:
+member NSAttributedString -initWithFormat:options:locale:context:
+member NSAttributedString -initWithFormat:options:locale:context:arguments:
 member NSAttributedString -initWithMarkdown:options:baseURL:error:
 member NSAttributedString -initWithMarkdownString:options:baseURL:error:
 member NSAttributedStringMarkdownParsingOptions -copyWithZone:
@@ -18200,6 +18248,7 @@ member NSBatchUpdateResult -result
 member NSBatchUpdateResult -resultType
 member NSBundle -appStoreReceiptURL
 member NSBundle -localizedAttributedStringForKey:value:table:
+member NSBundle -localizedStringForKey:value:table:localizations:
 member NSBundle -preservationPriorityForTag:
 member NSBundle -setPreservationPriority:forTags:
 member NSBundleResourceRequest +supportsSecureCoding
@@ -18217,6 +18266,8 @@ member NSBundleResourceRequest -revenant_unresolvableTags
 member NSBundleResourceRequest -setLoadingPriority:
 member NSBundleResourceRequest -tags
 member NSByteCountFormatter +stringFromMeasurement:countStyle:
+member NSByteCountFormatter -formattingContext
+member NSByteCountFormatter -setFormattingContext:
 member NSByteCountFormatter -stringFromMeasurement:
 member NSCalendar +calendarWithIdentifier:
 member NSCalendar -compareDate:toDate:toUnitGranularity:
@@ -18240,6 +18291,8 @@ member NSCalendar -isDateInTomorrow:
 member NSCalendar -isDateInWeekend:
 member NSCalendar -isDateInYesterday:
 member NSCalendar -nextDateAfterDate:matchingComponents:options:
+member NSCalendar -nextDateAfterDate:matchingHour:minute:second:options:
+member NSCalendar -nextDateAfterDate:matchingUnit:value:options:
 member NSCalendar -nextWeekendStartDate:interval:options:afterDate:
 member NSCalendar -rangeOfWeekendStartDate:interval:containingDate:
 member NSCalendar -startOfDayForDate:
@@ -18251,6 +18304,8 @@ member NSCharacterSet +URLQueryAllowedCharacterSet
 member NSCharacterSet +URLUserAllowedCharacterSet
 member NSCoder -decodeArrayOfObjectsOfClass:forKey:
 member NSCoder -decodeArrayOfObjectsOfClasses:forKey:
+member NSCoder -decodeBytesForKey:minimumLength:
+member NSCoder -decodeBytesWithMinimumLength:
 member NSCoder -decodeCGVectorForKey:
 member NSCoder -decodeDictionaryWithKeysOfClass:objectsOfClass:forKey:
 member NSCoder -decodeDictionaryWithKeysOfClasses:objectsOfClasses:forKey:
@@ -18509,8 +18564,12 @@ member NSDate +dateWithSRAbsoluteTime:
 member NSDate +now
 member NSDate -initWithSRAbsoluteTime:
 member NSDate -srAbsoluteTime
+member NSDateComponents -dayOfYear
+member NSDateComponents -isRepeatedDay
 member NSDateComponents -isValidDate
 member NSDateComponents -isValidDateInCalendar:
+member NSDateComponents -setDayOfYear:
+member NSDateComponents -setRepeatedDay:
 member NSDateComponents -setValue:forComponent:
 member NSDateComponents -valueForComponent:
 member NSDateComponentsFormatter +localizedStringFromDateComponents:unitsStyle:
@@ -18554,6 +18613,8 @@ member NSDateComponentsFormatter -stringFromDateComponents:
 member NSDateComponentsFormatter -stringFromTimeInterval:
 member NSDateComponentsFormatter -unitsStyle
 member NSDateComponentsFormatter -zeroFormattingBehavior
+member NSDateFormatter -formattingContext
+member NSDateFormatter -setFormattingContext:
 member NSDateFormatter -setLocalizedDateFormatFromTemplate:
 member NSDateInterval +supportsSecureCoding
 member NSDateInterval -compare:
@@ -18738,8 +18799,12 @@ member NSError -localizedFailureReason
 member NSError -localizedRecoveryOptions
 member NSError -localizedRecoverySuggestion
 member NSError -recoveryAttempter
+member NSError -underlyingErrors
+member NSExpression +expressionForAnyKey
 member NSExpression +expressionForConditional:trueExpression:falseExpression:
 member NSExpression -allowEvaluation
+member NSExpression -falseExpression
+member NSExpression -trueExpression
 member NSExtensionContext -cancelRequestWithError:
 member NSExtensionContext -completeRequestReturningItems:completionHandler:
 member NSExtensionContext -completeRequestWithBroadcastURL:broadcastConfiguration:setupInfo:
@@ -18829,6 +18894,7 @@ member NSFileManager -containerURLForSecurityApplicationGroupIdentifier:
 member NSFileManager -getRelationship:ofDirectory:inDomain:toItemAtURL:error:
 member NSFileManager -getRelationship:ofDirectoryAtURL:toItemAtURL:error:
 member NSFileManager -temporaryDirectory
+member NSFileManager -trashItemAtURL:resultingItemURL:error:
 member NSFileProviderManager +addDomain:completionHandler:
 member NSFileProviderManager +defaultManager
 member NSFileProviderManager +getDomainsWithCompletionHandler:
@@ -18857,10 +18923,18 @@ member NSFileProviderManager -signalEnumeratorForContainerItemIdentifier:complet
 member NSFileProviderManager -signalErrorResolved:completionHandler:
 member NSFileProviderManager -stateDirectoryURLWithError:
 member NSFileProviderManager -temporaryDirectoryURLWithError:
+member NSFileVersion +getNonlocalVersionsOfItemAtURL:completionHandler:
+member NSFileVersion -hasLocalContents
+member NSFileVersion -hasThumbnail
+member NSFileVersion -originatorNameComponents
 member NSHTTPCookie +revenant_cookieWithProperties:original:
 member NSHTTPCookie +revenant_cookiesWithHeaderFields:forURL:original:
 member NSHTTPCookie -revenant_properties:
 member NSHTTPCookie -sameSitePolicy
+member NSHTTPCookieStorage +sharedCookieStorageForGroupContainerIdentifier:
+member NSHTTPCookieStorage -getCookiesForTask:completionHandler:
+member NSHTTPCookieStorage -removeCookiesSinceDate:
+member NSHTTPCookieStorage -storeCookies:forTask:
 member NSHTTPURLResponse -valueForHTTPHeaderField:
 member NSISO8601DateFormatter +stringFromDate:timeZone:formatOptions:
 member NSISO8601DateFormatter +supportsSecureCoding
@@ -18943,6 +19017,13 @@ member NSJSONSerialization +JSONObjectWithStream:options:error:
 member NSJSONSerialization +dataWithJSONObject:options:error:
 member NSJSONSerialization +isValidJSONObject:
 member NSJSONSerialization +writeJSONObject:toStream:options:error:
+member NSKeyValueSharedObservers -addObserver:forKeyPath:options:context:
+member NSKeyValueSharedObservers -addSharedObserver:forKey:options:context:
+member NSKeyValueSharedObservers -initWithObservableClass:
+member NSKeyValueSharedObservers -snapshot
+member NSKeyValueSharedObserversSnapshot -initWithRevenantObservableClass:observations:
+member NSKeyValueSharedObserversSnapshot -revenant_observableClass
+member NSKeyValueSharedObserversSnapshot -revenant_observations
 member NSKeyedArchiver +archivedDataWithRootObject:requiringSecureCoding:error:
 member NSKeyedArchiver -encodedData
 member NSKeyedArchiver -initRequiringSecureCoding:
@@ -19062,6 +19143,13 @@ member NSLocale -regionCode
 member NSLocale -scriptCode
 member NSLocale -usesMetricSystem
 member NSLocale -variantCode
+member NSLocalizedNumberFormatRule +automatic
+member NSLocalizedNumberFormatRule +supportsSecureCoding
+member NSLocalizedNumberFormatRule -copyWithZone:
+member NSLocalizedNumberFormatRule -encodeWithCoder:
+member NSLocalizedNumberFormatRule -hash
+member NSLocalizedNumberFormatRule -initWithCoder:
+member NSLocalizedNumberFormatRule -isEqual:
 member NSManagedObject +entity
 member NSManagedObject +fetchRequest
 member NSManagedObject -initWithContext:
@@ -19107,6 +19195,26 @@ member NSMeasurement -measurementByConvertingToUnit:
 member NSMeasurement -measurementBySubtractingMeasurement:
 member NSMeasurement -revenant_combineWith:sign:verb:
 member NSMeasurement -unit
+member NSMeasurementFormatter +supportsSecureCoding
+member NSMeasurementFormatter -copyWithZone:
+member NSMeasurementFormatter -encodeWithCoder:
+member NSMeasurementFormatter -getObjectValue:forString:errorDescription:
+member NSMeasurementFormatter -init
+member NSMeasurementFormatter -initWithCoder:
+member NSMeasurementFormatter -locale
+member NSMeasurementFormatter -numberFormatter
+member NSMeasurementFormatter -revenant_displayed:
+member NSMeasurementFormatter -revenant_preferredUnitFor:system:
+member NSMeasurementFormatter -revenant_scaled:within:
+member NSMeasurementFormatter -setLocale:
+member NSMeasurementFormatter -setNumberFormatter:
+member NSMeasurementFormatter -setUnitOptions:
+member NSMeasurementFormatter -setUnitStyle:
+member NSMeasurementFormatter -stringForObjectValue:
+member NSMeasurementFormatter -stringFromMeasurement:
+member NSMeasurementFormatter -stringFromUnit:
+member NSMeasurementFormatter -unitOptions
+member NSMeasurementFormatter -unitStyle
 member NSMergePolicy +errorMergePolicy
 member NSMergePolicy +mergeByPropertyObjectTrumpMergePolicy
 member NSMergePolicy +mergeByPropertyStoreTrumpMergePolicy
@@ -19114,6 +19222,10 @@ member NSMergePolicy +overwriteMergePolicy
 member NSMergePolicy +rollbackMergePolicy
 member NSMetadataQuery -enumerateResultsUsingBlock:
 member NSMetadataQuery -enumerateResultsWithOptions:usingBlock:
+member NSMetadataQuery -operationQueue
+member NSMetadataQuery -searchItems
+member NSMetadataQuery -setOperationQueue:
+member NSMetadataQuery -setSearchItems:
 member NSMorphology +userMorphology
 member NSMorphology -copyWithZone:
 member NSMorphology -customPronounForLanguage:
@@ -19316,6 +19428,7 @@ member NSObject -setAutomationElements:
 member NSObject -setAutomationElementsBlock:
 member NSObject -setConversationContext:
 member NSObject -setIsAccessibilityElementBlock:
+member NSObject -setSharedObservers:
 member NSObject -splitViewController:didHideColumn:
 member NSObject -splitViewController:didShowColumn:
 member NSObject -textField:editMenuForCharactersInRanges:suggestedActions:
@@ -19546,12 +19659,15 @@ member NSProcessInfo -isiOSAppOnMac
 member NSProcessInfo -isiOSAppOnVision
 member NSProcessInfo -operatingSystemVersion
 member NSProcessInfo -performActivityWithOptions:reason:usingBlock:
+member NSProcessInfo -performExpiringActivityWithReason:usingBlock:
 member NSProcessInfo -thermalState
+member NSProgress +addSubscriberForFileURL:withPublishingHandler:
 member NSProgress +currentProgress
 member NSProgress +discreteProgressWithTotalUnitCount:
 member NSProgress +keyPathsForValuesAffectingFractionCompleted
 member NSProgress +progressWithTotalUnitCount:
 member NSProgress +progressWithTotalUnitCount:parent:pendingUnitCount:
+member NSProgress +removeSubscriber:
 member NSProgress +revenant_setTopFrame:
 member NSProgress +revenant_topFrame
 member NSProgress -addChild:withPendingUnitCount:
@@ -19579,6 +19695,7 @@ member NSProgress -localizedDescription
 member NSProgress -pause
 member NSProgress -pausingHandler
 member NSProgress -performAsCurrentWithPendingUnitCount:usingBlock:
+member NSProgress -publish
 member NSProgress -resignCurrent
 member NSProgress -resume
 member NSProgress -resumingHandler
@@ -19603,6 +19720,7 @@ member NSProgress -setTotalUnitCount:
 member NSProgress -setUserInfoObject:forKey:
 member NSProgress -throughput
 member NSProgress -totalUnitCount
+member NSProgress -unpublish
 member NSProgress -userInfo
 member NSQueryGenerationToken +currentQueryGenerationToken
 member NSQueryGenerationToken +supportsSecureCoding
@@ -19673,6 +19791,7 @@ member NSString -stringByAppendingPathComponent:conformingToType:
 member NSString -stringByAppendingPathExtensionForType:
 member NSString -stringByApplyingTransform:reverse:
 member NSString -stringByRemovingPercentEncoding
+member NSString -variantFittingPresentationWidth:
 member NSString -writableTypeIdentifiersForItemProvider
 member NSTermOfAddress +currentUser
 member NSTermOfAddress +feminine
@@ -19846,6 +19965,7 @@ member NSTimer +timerWithTimeInterval:repeats:block:
 member NSTimer -initWithFireDate:interval:repeats:block:
 member NSTimer -setTolerance:
 member NSTimer -tolerance
+member NSURL +URLByResolvingAliasFileAtURL:options:error:
 member NSURL +URLWithDataRepresentation:relativeToURL:
 member NSURL +URLWithString:encodingInvalidCharacters:
 member NSURL +absoluteURLWithDataRepresentation:relativeToURL:
@@ -19881,6 +20001,7 @@ member NSURL -writableTypeIdentifiersForItemProvider
 member NSURLCache -getCachedResponseForDataTask:completionHandler:
 member NSURLCache -initWithMemoryCapacity:diskCapacity:directoryURL:
 member NSURLCache -removeCachedResponseForDataTask:
+member NSURLCache -removeCachedResponsesSinceDate:
 member NSURLCache -storeCachedResponse:forDataTask:
 member NSURLComponents +componentsWithString:
 member NSURLComponents +componentsWithString:encodingInvalidCharacters:
@@ -20062,6 +20183,7 @@ member NSURLSessionTask -init
 member NSURLSessionTask -originalRequest
 member NSURLSessionTask -prefersIncrementalDelivery
 member NSURLSessionTask -priority
+member NSURLSessionTask -progress
 member NSURLSessionTask -response
 member NSURLSessionTask -resume
 member NSURLSessionTask -revenant_resetTaskDelegate
@@ -20084,8 +20206,10 @@ member NSURLSessionTaskTransactionMetrics -connectEndDate
 member NSURLSessionTaskTransactionMetrics -connectStartDate
 member NSURLSessionTaskTransactionMetrics -countOfRequestBodyBytesBeforeEncoding
 member NSURLSessionTaskTransactionMetrics -countOfRequestBodyBytesSent
+member NSURLSessionTaskTransactionMetrics -countOfRequestHeaderBytesSent
 member NSURLSessionTaskTransactionMetrics -countOfResponseBodyBytesAfterDecoding
 member NSURLSessionTaskTransactionMetrics -countOfResponseBodyBytesReceived
+member NSURLSessionTaskTransactionMetrics -countOfResponseHeaderBytesReceived
 member NSURLSessionTaskTransactionMetrics -domainLookupEndDate
 member NSURLSessionTaskTransactionMetrics -domainLookupStartDate
 member NSURLSessionTaskTransactionMetrics -domainResolutionProtocol
@@ -21452,6 +21576,12 @@ member RevenantCMTaggedBufferGroup -revenant_matchesForTags:count:
 member RevenantCMTaggedBufferGroup -revenant_tagCount
 member RevenantCMTaggedBufferGroup -revenant_tagOffsetAtIndex:
 member RevenantCMTaggedBufferGroup -revenant_tags
+member RevenantCalendarDayMonitor -checkAtDate:
+member RevenantCalendarDayMonitor -nextMidnightAfter:
+member RevenantCalendarDayMonitor -schedule:
+member RevenantCalendarDayMonitor -start
+member RevenantCalendarDayMonitor -timeChanged:
+member RevenantCalendarDayMonitor -timerFired:
 member RevenantCallAudio +shared
 member RevenantCallAudio -callConnectedFor:
 member RevenantCallAudio -callEndedFor:
@@ -21732,7 +21862,10 @@ member RevenantEphemeralCookieStorage -cookies
 member RevenantEphemeralCookieStorage -cookiesForURL:
 member RevenantEphemeralCookieStorage -deleteCookie:
 member RevenantEphemeralCookieStorage -description
+member RevenantEphemeralCookieStorage -revenant_notify
+member RevenantEphemeralCookieStorage -revenant_reload
 member RevenantEphemeralCookieStorage -revenant_removeExpired
+member RevenantEphemeralCookieStorage -revenant_save
 member RevenantEphemeralCookieStorage -setCookie:
 member RevenantEphemeralCookieStorage -setCookieAcceptPolicy:
 member RevenantEphemeralCookieStorage -setCookies:forURL:mainDocumentURL:
@@ -21764,6 +21897,7 @@ member RevenantFileLocationsController -viewDidLoad
 member RevenantFlashActiveWait -finish
 member RevenantFlashActiveWait -observeValueForKeyPath:ofObject:change:context:
 member RevenantFontDescriptorInstaller +load
+member RevenantFormattingContextInstaller +load
 member RevenantGCTables +extendedSpecs
 member RevenantGCTables +keyboardSpecs
 member RevenantGCTables +microSpecs
@@ -21896,6 +22030,8 @@ member RevenantKeyCommandInstaller +load
 member RevenantKeyboardDismissTracker -pan:
 member RevenantKeyboardLocalInstaller +load
 member RevenantLAObject -dealloc
+member RevenantLargeContentView -initWithItem:
+member RevenantLargeContentView -layoutSubviews
 member RevenantLayoutGuideView -revenant_guide
 member RevenantLayoutInvalidation +load
 member RevenantLayoutManager7 +load
@@ -22779,6 +22915,19 @@ member RevenantReceiptInstaller +load
 member RevenantReferenceViewWatch -dealloc
 member RevenantReferenceViewWatch -initWithView:
 member RevenantReferenceViewWatch -observeValueForKeyPath:ofObject:change:context:
+member RevenantRefreshHost +setControl:forScrollView:
+member RevenantRefreshHost -attach
+member RevenantRefreshHost -beginRefreshingSendingAction:
+member RevenantRefreshHost -dealloc
+member RevenantRefreshHost -detach
+member RevenantRefreshHost -drawRect:
+member RevenantRefreshHost -endRefreshing
+member RevenantRefreshHost -initWithScrollView:control:
+member RevenantRefreshHost -isRefreshing
+member RevenantRefreshHost -layoutSubviews
+member RevenantRefreshHost -observeValueForKeyPath:ofObject:change:context:
+member RevenantRefreshHost -pull
+member RevenantRefreshHost -revenant_pan:
 member RevenantRegionMonitor +revenant_sharedMonitor
 member RevenantRegionMonitor -init
 member RevenantRegionMonitor -locationManager:didEnterRegion:
@@ -22842,23 +22991,23 @@ member RevenantSCNCoding +markFound:forKey:onObject:
 member RevenantSCNCoding +popSourceURL
 member RevenantSCNCoding +pushSourceURL:
 member RevenantSCNCoding +wasFound:onObject:
-member RevenantSCNRenderer +defaultPointOfViewInScene:
-member RevenantSCNRenderer -applySampling:
-member RevenantSCNRenderer -dealloc
-member RevenantSCNRenderer -deleteMesh:
-member RevenantSCNRenderer -drawItem:viewProjection:cameraPosition:coatView:lights:
-member RevenantSCNRenderer -initWithContext:
-member RevenantSCNRenderer -linearTextures
-member RevenantSCNRenderer -materialBlends:
-member RevenantSCNRenderer -meshFor:
-member RevenantSCNRenderer -pathForContents:
-member RevenantSCNRenderer -programForModel:textured:bordered:lockedAmbient:lights:count:mesh:
-member RevenantSCNRenderer -projectPoint:
-member RevenantSCNRenderer -purgeUnused
-member RevenantSCNRenderer -renderScene:pointOfView:width:height:
-member RevenantSCNRenderer -surveyScene:
-member RevenantSCNRenderer -textureFor:sRGB:hasAlpha:
-member RevenantSCNRenderer -unprojectPoint:
+member RevenantSCNRenderEngine +defaultPointOfViewInScene:
+member RevenantSCNRenderEngine -applySampling:
+member RevenantSCNRenderEngine -dealloc
+member RevenantSCNRenderEngine -deleteMesh:
+member RevenantSCNRenderEngine -drawItem:viewProjection:cameraPosition:coatView:lights:
+member RevenantSCNRenderEngine -initWithContext:
+member RevenantSCNRenderEngine -linearTextures
+member RevenantSCNRenderEngine -materialBlends:
+member RevenantSCNRenderEngine -meshFor:
+member RevenantSCNRenderEngine -pathForContents:
+member RevenantSCNRenderEngine -programForModel:textured:bordered:lockedAmbient:lights:count:mesh:
+member RevenantSCNRenderEngine -projectPoint:
+member RevenantSCNRenderEngine -purgeUnused
+member RevenantSCNRenderEngine -renderScene:pointOfView:width:height:
+member RevenantSCNRenderEngine -surveyScene:
+member RevenantSCNRenderEngine -textureFor:sRGB:hasAlpha:
+member RevenantSCNRenderEngine -unprojectPoint:
 member RevenantSafariPage -dealloc
 member RevenantSafariPage -initWithURL:
 member RevenantSafariPage -initialURL
@@ -22983,6 +23132,8 @@ member RevenantSegmentedHooks +load
 member RevenantSelectionWatcher +began:
 member RevenantSelectionWatcher +ended:
 member RevenantSelectionWatcher +load
+member RevenantSharedObserversReaper -dealloc
+member RevenantSharedObserversReaper -revenant_unregister
 member RevenantSheetAnimator -animateTransition:
 member RevenantSheetAnimator -transitionDuration:
 member RevenantSheetDetentContext -_containerBounds
@@ -26220,6 +26371,10 @@ member UILargeContentViewerInteraction -didMoveToView:
 member UILargeContentViewerInteraction -gestureRecognizerForExclusionRelationship
 member UILargeContentViewerInteraction -init
 member UILargeContentViewerInteraction -initWithDelegate:
+member UILargeContentViewerInteraction -itemAtPoint:
+member UILargeContentViewerInteraction -revenant_hide
+member UILargeContentViewerInteraction -revenant_longPress:
+member UILargeContentViewerInteraction -revenant_show:
 member UILargeContentViewerInteraction -view
 member UILargeContentViewerInteraction -willMoveToView:
 member UILayoutGuide -_rememberDependentConstraint:
@@ -27059,6 +27214,11 @@ member UIPushBehavior -setMagnitude:
 member UIPushBehavior -setPushDirection:
 member UIPushBehavior -setTargetOffsetFromCenter:forItem:
 member UIPushBehavior -targetOffsetFromCenterForItem:
+member UIRefreshControl +load
+member UIRefreshControl -revenant_beginRefreshing
+member UIRefreshControl -revenant_endRefreshing
+member UIRefreshControl -revenant_host
+member UIRefreshControl -revenant_isRefreshing
 member UIRegion +infiniteRegion
 member UIRegion -containsPoint:
 member UIRegion -copyWithZone:
@@ -27235,6 +27395,7 @@ member UIScribbleInteraction -isHandlingWriting
 member UIScribbleInteraction -view
 member UIScribbleInteraction -willMoveToView:
 member UIScrollEdgeEffect -hidden
+member UIScrollView +load
 member UIScrollView -accessibilityAttributedScrollStatusForScrollView:
 member UIScrollView -adjustedContentInset
 member UIScrollView -adjustedContentInsetDidChange
@@ -27252,6 +27413,7 @@ member UIScrollView -keyboardDismissMode
 member UIScrollView -leftEdgeEffect
 member UIScrollView -refreshControl
 member UIScrollView -revenant_makeGuide:
+member UIScrollView -revenant_setContentInset:
 member UIScrollView -revenant_updateLayoutGuides
 member UIScrollView -rightEdgeEffect
 member UIScrollView -scrollAnimating
@@ -29819,6 +29981,7 @@ protocol RevenantMPSNDArrayAxisKernel
 protocol RevenantOverlayView
 protocol RevenantPhotosChange
 protocol RevenantSCNAnimatable
+protocol RevenantTaskControl
 protocol RevenantVoiceServicesListing
 protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
@@ -29872,6 +30035,7 @@ protocol UIFontPickerViewControllerDelegate
 protocol UIGestureRecognizerDelegate
 protocol UIImagePickerControllerDelegate
 protocol UIInteraction
+protocol UILargeContentViewerInteractionDelegate
 protocol UILayoutSupport
 protocol UIMenuBuilder
 protocol UIMutableTraits
@@ -30541,6 +30705,9 @@ protocol_member UIImagePickerControllerDelegate -imagePickerController:didFinish
 protocol_member UIImagePickerControllerDelegate -imagePickerControllerDidCancel:
 protocol_member UIInteraction -didMoveToView:
 protocol_member UIInteraction -willMoveToView:
+protocol_member UILargeContentViewerInteractionDelegate -largeContentViewerInteraction:didEndOnItem:atPoint:
+protocol_member UILargeContentViewerInteractionDelegate -largeContentViewerInteraction:itemAtPoint:
+protocol_member UILargeContentViewerInteractionDelegate -viewControllerForLargeContentViewerInteraction:
 protocol_member UIMenuBuilder -insertElements:afterActionForIdentifier:
 protocol_member UIMenuBuilder -insertElements:afterCommandForAction:propertyList:
 protocol_member UIMenuBuilder -insertElements:afterMenuForIdentifier:
@@ -31142,6 +31309,7 @@ type NSLengthFormatterUnit
 type NSLineBreakMode
 type NSLineBreakStrategy
 type NSMassFormatterUnit
+type NSMeasurementFormatterUnitOptions
 type NSOrderedCollectionDifferenceCalculationOptions
 type NSPersistentHistoryChangeType
 type NSPersistentHistoryResultType
@@ -31172,6 +31340,7 @@ type NSTextSelectionNavigationModifier
 type NSTextSelectionNavigationWritingDirection
 type NSTextStorageEditActions
 type NSTextTabOptionKey
+type NSURLBookmarkResolutionOptions
 type NSURLErrorNetworkUnavailableReason
 type NSURLRelationship
 type NSURLRequestAttribution
