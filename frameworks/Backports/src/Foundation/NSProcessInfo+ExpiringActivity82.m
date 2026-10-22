@@ -40,7 +40,7 @@ static const NSUInteger RevenantInvalidTask = (NSUInteger)-1;
             task = started;
         }
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         BOOL expiredFirst;
         @synchronized (lock) {
             expiredFirst = finished;
