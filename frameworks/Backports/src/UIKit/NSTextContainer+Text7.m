@@ -5,14 +5,9 @@ static const void *ExclusionKey = &ExclusionKey;
 static const void *WidthTracksKey = &WidthTracksKey;
 static const void *HeightTracksKey = &HeightTracksKey;
 static const void *BreakModeKey = &BreakModeKey;
-static const void *LineFragmentPaddingKey = &LineFragmentPaddingKey;
-static const void *MaximumNumberOfLinesKey = &MaximumNumberOfLinesKey;
 
 @interface NSTextContainer (RevenantNative)
 - (NSUInteger)maximumNumberOfLines;
-- (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines;
-- (CGFloat)lineFragmentPadding;
-- (void)setLineFragmentPadding:(CGFloat)lineFragmentPadding;
 - (instancetype)initWithContainerSize:(CGSize)size;
 - (CGSize)containerSize;
 - (void)setContainerSize:(CGSize)size;
@@ -105,26 +100,6 @@ static BOOL is_simple(NSTextContainer *self, SEL selector)
 - (CGRect)lineFragmentRectForProposedRect:(CGRect)proposed atIndex:(NSUInteger)index writingDirection:(NSWritingDirection)direction remainingRect:(CGRect *)remaining
 {
     return [self lineFragmentRectForProposedRect:proposed sweepDirection:direction == NSWritingDirectionRightToLeft ? 0 : 1 movementDirection:3 remainingRect:remaining];
-}
-
-- (NSUInteger)maximumNumberOfLines
-{
-    return [objc_getAssociatedObject(self, MaximumNumberOfLinesKey) unsignedIntegerValue];
-}
-
-- (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
-{
-    objc_setAssociatedObject(self, MaximumNumberOfLinesKey, @(maximumNumberOfLines), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (CGFloat)lineFragmentPadding
-{
-    return [objc_getAssociatedObject(self, LineFragmentPaddingKey) floatValue];
-}
-
-- (void)setLineFragmentPadding:(CGFloat)lineFragmentPadding
-{
-    objc_setAssociatedObject(self, LineFragmentPaddingKey, @(lineFragmentPadding), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
