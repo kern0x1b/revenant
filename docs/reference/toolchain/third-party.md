@@ -29,6 +29,17 @@ carried into the program that ships to the device.
 | [zlib](https://github.com/madler/zlib) — the raw deflate codec behind `COMPRESSION_ZLIB` in the Compression backport, unmodified, built as `libzcodec.a` so the system `libz` is not linked | `v1.3.2` (`da607da739fa6047df13e66a2af6b8bec7c2a498`) | Zlib; the licence is installed with the package under `licenses/LICENSE` | `packages/z/zlib` |
 | [LZ4](https://github.com/lz4/lz4) — the block codec behind `COMPRESSION_LZ4_RAW` and the blocks of `COMPRESSION_LZ4` in the Compression backport, `lib/` only, unmodified, built with its symbols hidden | `v1.9.2` (`fdf2ef5809ca875c454510610764d9125ef2ebbd`) | BSD-2-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lz4` |
 | [xz](https://github.com/tukaani-project/xz) — the liblzma subset behind `COMPRESSION_LZMA` in the Compression backport (the LZMA1 and LZMA2 coders, the xz container, the CRC32, CRC64 and SHA-256 checks), unmodified sources, built with its symbols hidden and a configuration header of this repository (`packages/x/xz/port/config.h`, derived from the upstream's `dos/config.h`) | `v5.8.4` (`d3e650e63c110e830fd5391e7f8b45df0b91d3da`) | 0BSD; the licence is installed with the package under `licenses/COPYING.0BSD` | `packages/x/xz` |
+| [mozjpeg](https://github.com/mozilla/mozjpeg) — the JPEG encoder Telegram writes its photos with, as static `libjpeg` and `libturbojpeg`, built for armv7 | `61e03cc6b25ea506085dce1ee93ddd1f4b6588e6` (master, 4.1.4 plus 22 commits: the snapshot Telegram's tree holds, every file identical) | BSD-3-Clause | `packages/m/mozjpeg` |
+| [libvpx](https://github.com/webmproject/libvpx) — the VP8 and VP9 codec, as static `libvpx`, built for armv7 with `--disable-neon-asm` (see below) | `e7bfd8b6c230a6824e7fd1efa2378a7322986128` (master, 1.13.0 plus 435 commits: the snapshot Telegram's tree holds, every file identical bar its `.git` file) | BSD-3-Clause | `packages/v/vpx` |
+
+The two pins are the snapshots Telegram's tree holds, found by comparing every file's content against upstream history:
+neither is a release tag. Two builds differ from upstream's defaults. mozjpeg's own `GNUInstallDirs` resolves a relative
+`CMAKE_INSTALL_LIBDIR` against the source tree, so the recipe passes an absolute one, or the archives land in the source
+directory. libvpx's configure assembles its ARM `.asm` files with Apple's bare `as`, which records iOS 5.0 whatever the
+target says, and its `--as` takes only yasm or nasm; so the package builds with `--disable-neon-asm`, which uses the NEON
+intrinsics variants of those functions. That changes the code path, not the result as libvpx's tests check it, but it has
+not been run on a device or against libvpx's test vectors here. The configure also picks its C and C++ compilers through
+`xcrun`, so the C objects come from the Xcode clang with revenant's SDK and the 6.0 target flags, not from revenant's llvm.
 
 ## The compiler, linker, signer and SDK
 

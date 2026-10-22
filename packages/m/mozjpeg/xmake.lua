@@ -10,8 +10,6 @@ package("mozjpeg")
 
     on_install("iphoneos", function (package)
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
-        -- mozjpeg's own GNUInstallDirs resolves a relative LIBDIR against the source tree, so the archives
-        -- would land in the source directory; the absolute path given here is the later -D and wins
         local configs = {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DPNG_SUPPORTED=FALSE", "-DENABLE_SHARED=FALSE",
                          "-DWITH_JPEG8=1", "-DBUILD=10000", "-DCMAKE_INSTALL_LIBDIR=" .. path.join(package:installdir(), "lib")}
         cmake.install(package, configs, {licenses = "LICENSE.md", prune = {"lib/pkgconfig", "lib/cmake", "share", "bin"}})
