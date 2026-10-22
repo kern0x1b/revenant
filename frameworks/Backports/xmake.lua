@@ -14,7 +14,7 @@ local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {
-    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {}},
+    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "AdServicesBackports", folder = "AdServices", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -318,6 +318,10 @@ local FOUNDATION_TESTS = {
     shared_observers = {"NSKeyValueSharedObservers18.m"},
     progress_publish = {"NSProgress+Publish7.m"},
     measurement_formatter = {"NSMeasurementFormatter.m", "RevenantMeasurementData.m", "RevenantUnitFormat.m"},
+    attributed_format_context = {"NSAttributedStringLocalizedFormat15.m", "NSAttributedStringKeys15.m"},
+    url_cache_since = {"NSURLCache+Since8.m"},
+    formatting_context = {"NSFormattingContext8.m"},
+    file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
 }
 
 local QUARTZCORE_TESTS = {
@@ -340,6 +344,7 @@ local function host_tests(folder, tests, library)
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
             add_frameworks("Foundation")
+            add_syslinks("sqlite3")
             add_tests("default")
             add_tests("negative", {runargs = {"--negative"}, should_fail = true})
         target_end()
