@@ -22,6 +22,7 @@ prints the key of each package, which is how a key is checked.
 - A change to a recipe's inputs moves its key; the old release stays where it is.
 - A release is made by `.github/workflows/prebuilt.yml`, with the `package` input, on `macos-26`.
 - Keys in use are listed in `docs/guides/prebuilt.md`; a package with no release is said so there.
+- The keys depend on the collation `./xmakew` sets; see [0010](0010-collation-of-xmake.md).
 
 ## Enforced by
 

@@ -15,3 +15,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0007](0007-prebuilt-packages.md) | Prebuilt packages, and the keys that name them | `digest_test` (the digest files only) |
 | [0008](0008-backports-loud-stubs.md) | Backports live in `frameworks/Backports`; a gap is a loud stub | the build (`open_gap` raises) |
 | [0009](0009-app-under-test.md) | The Telegram test is read-only source plus an overlay outside the repository | `repository/layout` (no tracked path names it) |
+| [0010](0010-collation-of-xmake.md) | xmake sorts with the collation `./xmakew` sets (`en_US.UTF-8`) | none yet (see the record) |
