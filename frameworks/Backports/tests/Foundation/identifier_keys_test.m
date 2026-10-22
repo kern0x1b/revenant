@@ -7,6 +7,7 @@ int main(int argc, char **argv)
     revenant_expect_string("the localized number format attribute name", NSLocalizedNumberFormatAttributeName, @"NSLocalizedNumberFormat");
     revenant_expect_string("the list item delimiter attribute name", NSListItemDelimiterAttributeName, @"NSListItemDelimiter");
     revenant_expect_string("the excluded from sync key", NSURLUbiquitousItemIsExcludedFromSyncKey, @"NSURLUbiquitousItemIsExcludedFromSyncKey");
+    revenant_expect_string("the upload resume data key", NSURLSessionUploadTaskResumeData, @"NSURLSessionUploadTaskResumeData");
     NSLocalizedNumberFormatRule *automatic = [NSLocalizedNumberFormatRule automatic];
     revenant_check(automatic != nil && automatic == [NSLocalizedNumberFormatRule automatic], "the automatic rule is one shared object", @"not shared");
     revenant_check([automatic isEqual:[automatic copy]], "a copy equals the rule", @"not equal");

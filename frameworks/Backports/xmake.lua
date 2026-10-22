@@ -305,7 +305,7 @@ local FOUNDATION_TESTS = {
     validated_format = {"NSString+ValidatedFormat.m"},
     file_relationship = {"NSFileManager+Relationship8.m"},
     underlying_errors = {"NSError+UnderlyingErrors14.m"},
-    identifier_keys = {"NSAttributedStringKeys15.m", "NSAttributedStringKeys26.m", "NSLocalizedNumberFormatRule18.m", "NSURLUbiquitousKeys145.m"},
+    identifier_keys = {"NSAttributedStringKeys15.m", "NSAttributedStringKeys26.m", "NSLocalizedNumberFormatRule18.m", "NSURLUbiquitousKeys145.m", "FoundationIdentifiers17.m"},
     expression_members = {"NSExpression+AnyKey7.m", "NSExpression+ConditionalMembers9.m", "NSExpression+Conditional.m"},
     calendar_next_date = {"NSCalendar+NextDate8.m", "NSCalendar+Components.m", "NSDateComponents+Component8.m", "RevenantCalendarUnits.m"},
     calendar_day_changed = {"NSCalendarDayChanged8.m"},
@@ -322,6 +322,8 @@ local FOUNDATION_TESTS = {
     url_cache_since = {"NSURLCache+Since8.m"},
     formatting_context = {"NSFormattingContext8.m"},
     file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
+    header_bytes = {"RevenantHeaderBytes.m"},
+    metadata_items = {"NSMetadataQuery+Items7.m"},
 }
 
 local QUARTZCORE_TESTS = {
