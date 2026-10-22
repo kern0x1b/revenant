@@ -10,25 +10,23 @@ breaks silently, because the path is not checked by anything.
 
 ## Decision
 
-Inside a project (an `xmake.lua`, a rule, a package recipe), the addon's modules are imported as
-`import("@addon.revenant.<module>")`. Code inside `toolchain/` imports its own modules by `rootdir`, which is
+Outside `toolchain/`, the addon's modules are imported as `import("@addon.revenant.<module>")`: from a project
+file (an `xmake.lua`, a rule, a package recipe), and from a script or test that `./xmakew` runs, since the
+project loads the addon for them too. Code inside `toolchain/` imports its own modules by `rootdir`, which is
 its business.
-
-A `./xmakew l` script or a test that is not inside a project cannot always load the addon, so a few of them
-reach `toolchain/modules` by path. They are listed in `BY_PATH` in `tools/layout.lua` as debt. Each listed file
-still has to contain the path, so the list cannot go stale.
 
 ## Consequences
 
-- A new component or package imports the addon through `@addon.revenant`, with no path to the addon's folder.
-- The five files in `BY_PATH` move to `@addon.revenant` when the script can load the addon; then they leave the list.
+- No component, package or test names the addon's folder. A module that moves is found by xmake, or it fails
+  the import, not a path that silently points at nothing.
+- A file that wants an addon module imports it through `@addon.revenant`; there is no list of exceptions.
 
 ## Enforced by
 
-`repository/layout`: a `.lua` file outside `toolchain/` that contains `"toolchain", "modules"` fails, unless it is
-in `BY_PATH`. A listed file that no longer contains it also fails.
+`repository/layout`: a `.lua` file outside `toolchain/` that contains `"toolchain", "modules"` fails. The check
+has no exception list.
 
 ## Not enforced
 
-That an `@addon.revenant.<module>` names a module that exists. The import fails when the project loads, which is
-the test that counts.
+That an `@addon.revenant.<module>` names a module that exists. The import fails when the script or test runs,
+which is the check that counts.

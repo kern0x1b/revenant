@@ -25,14 +25,6 @@ local UNCONVERTED = {}
 
 local ADDON_PATH = '"toolchain", "' .. "modules" .. '"'
 
-local BY_PATH = {
-    ["frameworks/Backports/tests/backports_test.lua"] = true,
-    ["frameworks/Backports/tests/uikit_test.lua"] = true,
-    ["frameworks/Backports/tools/libraries.lua"] = true,
-    ["frameworks/Backports/tools/sdk.lua"] = true,
-    ["frameworks/WebKit/tests/device/harness.lua"] = true
-}
-
 local REACHING = {}
 
 local function set_of(list)
@@ -152,8 +144,7 @@ function main()
         elseif file:endswith(".sh") or parts[#parts] == "Makefile" then
             wrong(file, "one entry point, ./xmakew: no shell scripts or Makefiles")
         end
-        if file:endswith(".lua") and parts[1] ~= "toolchain" and not BY_PATH[file]
-            and io.readfile(path.join(root, file)):find(ADDON_PATH, 1, true) then
+        if file:endswith(".lua") and parts[1] ~= "toolchain" and io.readfile(path.join(root, file)):find(ADDON_PATH, 1, true) then
             wrong(file, "reaches the addon's modules by path: import them as @addon.revenant.<module>")
         end
         local component
@@ -230,11 +221,6 @@ function main()
             elseif not unconverted[name] then
                 wrong(recipe, "has no url and is not a thin wrapper: it generates a project that includes one component and installs its targets, and holds no sources of its own")
             end
-        end
-    end
-    for _, file in ipairs(table.orderkeys(BY_PATH)) do
-        if not present[file] or not io.readfile(path.join(root, file)):find(ADDON_PATH, 1, true) then
-            wrong(file, "no longer reaches the addon's modules by path: remove it from BY_PATH")
         end
     end
     for _, line in ipairs(errors) do

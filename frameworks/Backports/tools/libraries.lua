@@ -1,8 +1,7 @@
 local reader = import("reader", {rootdir = os.scriptdir(), anonymous = true})
 
 local function objc()
-    local modules = path.join(path.absolute(path.join(os.scriptdir(), "..", "..", "..")), "toolchain", "modules")
-    return import("apple.objc", {rootdir = modules, anonymous = true})
+    return import("@addon.revenant.apple.objc", {anonymous = true})
 end
 
 function read(libdir)

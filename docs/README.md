@@ -103,7 +103,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [AppIntents: services](reference/backports/AppIntents/AppIntents/Services.md) | the seams where the system side of AppIntents is not on these releases |
 | [AppIntents: Spotlight](reference/backports/AppIntents/AppIntents/Spotlight.md) | the CoreSpotlight classes AppIntents extends |
 | [AppIntents: unplaced rows](reference/backports/AppIntents/AppIntents/Unplaced.md) | the 291 unplaced rows, grouped by type |
-| [AppIntentsMacros](reference/backports/AppIntentsMacros/README.md) | the package `revenant@appintents-macros` |
+| [AppIntentsMacros](reference/backports/AppIntentsMacros/README.md) | the macro plugins of AppIntents and TipKit; the package that would ship them, `revenant@appintents-macros`, does not exist yet |
 | [AuthenticationServices: errors](reference/backports/AuthenticationServices/Errors.md) | the error structs, measured |
 | [CloudKit: CKError](reference/backports/CloudKit/CKError.md) | `CKError`, measured |
 | [CloudKit: CKRecord](reference/backports/CloudKit/CKRecord.md) | `CKRecord`, not yet visible to Swift on armv7 and iOS 6.1.3 |

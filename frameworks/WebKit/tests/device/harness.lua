@@ -14,7 +14,7 @@ function folder()
 end
 
 function shots()
-    return import("workspace", {rootdir = path.join(revenant, "toolchain", "modules"), anonymous = true}).run("webkit-shots")
+    return import("@addon.revenant.workspace", {anonymous = true}).run("webkit-shots")
 end
 
 function run_token()

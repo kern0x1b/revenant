@@ -5,7 +5,7 @@ function root()
 end
 
 function workspace()
-    return import("workspace", {rootdir = path.join(root(), "toolchain", "modules"), anonymous = true})
+    return import("@addon.revenant.workspace", {anonymous = true})
 end
 
 function sdk_folder()

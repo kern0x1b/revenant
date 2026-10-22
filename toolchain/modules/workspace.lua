@@ -119,28 +119,21 @@ function package_of(requirement, install)
     return result
 end
 
-function sdk_package(version, opt)
-    opt = opt or {}
+function sdk_package(version)
     local key = "package " .. version
-    if resolved[key] and not opt.install then
+    if resolved[key] then
         return resolved[key]
     end
-    local requirement = "iphoneos-sdk " .. version
-    local installdir = package_of(requirement, opt.install)
-    if not os.isfile(path.join(sdk_in(installdir, version), "SDKSettings.json")) then
-        os.tryrm(installdir)
-        installdir = package_of(requirement, true)
-    end
+    local installdir = package_of("iphoneos-sdk " .. version, true)
     local folder = sdk_in(installdir, version)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iphoneos-sdk install is incomplete even after installing it again: %s has no SDKSettings.json", folder)
+        raise("workspace: the iphoneos-sdk install is incomplete even after xmake installed it: %s has no SDKSettings.json", folder)
     end
     resolved[key] = folder
     return folder
 end
 
-function sdk(opt)
-    opt = opt or {}
+function sdk()
     local named = os.getenv(SDK_VARIABLE)
     if named and named ~= "" then
         if not os.isfile(path.join(named, "SDKSettings.json")) then
@@ -148,15 +141,15 @@ function sdk(opt)
         end
         return path.absolute(named)
     end
-    return sdk_package(SDK_VERSION, {install = opt.install})
+    return sdk_package(SDK_VERSION)
 end
 
 function main(command, ...)
     local arguments = {...}
     if command == "sdk" then
-        print(sdk({install = arguments[1] == "--install"}))
+        print(sdk())
     elseif command == "sdk-package" and arguments[1] then
-        print(sdk_package(arguments[1], {install = arguments[2] == "--install"}))
+        print(sdk_package(arguments[1]))
     elseif command == "corpus" then
         print(corpus(table.unpack(arguments)))
     elseif command == "task" then
@@ -166,6 +159,6 @@ function main(command, ...)
     elseif command == "fresh" and arguments[1] then
         print(fresh(arguments[1]))
     else
-        raise("usage: ./xmakew l toolchain/modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | task | run [path ...] | fresh <name>")
+        raise("usage: ./xmakew l toolchain/modules/workspace.lua sdk | sdk-package <version> | corpus [path ...] | task | run [path ...] | fresh <name>")
     end
 end

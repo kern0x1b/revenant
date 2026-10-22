@@ -4,7 +4,7 @@ local ast = import("ast", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
 local generate = import("generate", {rootdir = tools, anonymous = true})
 local implemented = import("implemented", {rootdir = tools, anonymous = true})
-local workspace = import("workspace", {rootdir = path.absolute(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")), anonymous = true})
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local VERSION = "26.2"
 
