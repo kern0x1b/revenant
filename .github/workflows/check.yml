@@ -198,6 +198,89 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
+  package:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
+      - uses: ./.github/actions/revenant-setup
+        with:
+          prebuilt-only: "llvm,swift,ld64,swift-runtime,libcxx"
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Key the Backports objects as the backports job keys them
+        id: objects_keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/restore@v4
+        id: objects
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.objects_keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - name: Configure the SwiftUI component
+        timeout-minutes: 45
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUI -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Build the demo and package it with its platform package
+        timeout-minutes: 60
+        run: ./xmakew deb -P . SwiftUIDemo 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Check the demo's Depends and the platform package's file list
+        run: ./xmakew l -P . toolchain/tools/deb_check.lua build space.kern0x1b.swiftui org.revenant.backports
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swiftui-packages
+          path: build/*.deb
+          if-no-files-found: error
+
+      - name: Save the package store
+        if: steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
   swift:
     runs-on: macos-26
     timeout-minutes: 60
