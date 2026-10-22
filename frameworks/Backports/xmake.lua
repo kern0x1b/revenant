@@ -236,6 +236,52 @@ else
                                   network = "network_test.lua"})
 end
 
+option("backports_libs", {type = "string", default = "", showmenu = true,
+    description = "A folder of the Backports libraries (lib*Backports.dylib) that the runtime test app links and installs, for example the unpacked backports-libraries artifact of CI; empty uses the libraries this build makes."})
+
+local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
+local RUNTIME_LIBS = get_config("backports_libs")
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+
+if is_plat("iphoneos") and get_config("tests") == "device" then
+    add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
+
+    target("backports_runtime_app")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
+        add_includedirs(path.join(RUNTIME, "app"))
+        add_mflags("-fobjc-arc")
+        if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
+            add_linkdirs(RUNTIME_LIBS)
+            add_links(table.unpack(RUNTIME_LINKS))
+        else
+            add_deps("FoundationBackports", "UIKitBackports")
+        end
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
+        add_syslinks("objc")
+    target_end()
+
+    target("backports_runtime")
+        set_kind("phony")
+        set_default(false)
+        set_group("device")
+        add_deps("backports_runtime_app")
+        add_packages("emulator-guest")
+        add_tests("foundation_url_components")
+        add_tests("loader_class_backport")
+        on_test(function (target, opt)
+            local case = path.filename(opt.name)
+            local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
+            for _, failure in ipairs(failures) do
+                cprint("${red}%s: %s", case, failure)
+            end
+            return #failures == 0
+        end)
+    target_end()
+end
+
 option("air2cpu", {default = false, showmenu = true,
     description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
