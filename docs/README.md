@@ -117,6 +117,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [RealityFoundation: audio](reference/backports/RealityFoundation/Audio.md) | `Audio.swift`: deleted, and what brings it back |
 | [RealityFoundation: SceneKit](reference/backports/RealityFoundation/SceneKit.md) | RealityFoundation and RealityKit below iOS 8.0 |
 | [Spatial](reference/backports/Spatial/README.md) | what is built here, and what is measured |
+| [Spatial: sources](reference/backports/Spatial/Sources.md) | the files, the Float twin generated from the Double text, and the reasons behind the matrix and geometry code |
 | [SwiftData](reference/backports/SwiftData/README.md) | the package `revenant@swift-data` |
 | [SwiftData: substrate](reference/backports/SwiftData/Substrate.md) | what the port gives SwiftData, measured |
 | [TipKit](reference/backports/TipKit/README.md) | the package `revenant@tipkit` |
