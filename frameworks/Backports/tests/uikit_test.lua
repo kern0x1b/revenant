@@ -287,6 +287,18 @@ local AREAS = {
             "-[UNUserNotificationCenter removePendingNotificationRequestsWithIdentifiers:]", "-[UNUserNotificationCenter removeAllPendingNotificationRequests]",
         },
     },
+    {
+        name = "iOS 13 large content viewer: the interaction and the item properties of views",
+        sources = {"UILargeContentViewer.m"},
+        members = {
+            "@UILargeContentViewerInteraction", "-[UILargeContentViewerInteraction initWithDelegate:]", "-[UILargeContentViewerInteraction delegate]",
+            "-[UILargeContentViewerInteraction gestureRecognizerForExclusionRelationship]", "+[UILargeContentViewerInteraction isEnabled]",
+            "-[UILargeContentViewerInteraction view]", "-[UIView showsLargeContentViewer]", "-[UIView setShowsLargeContentViewer:]",
+            "-[UIView largeContentTitle]", "-[UIView setLargeContentTitle:]", "-[UIView largeContentImage]", "-[UIView setLargeContentImage:]",
+            "-[UIView scalesLargeContentImage]", "-[UIView setScalesLargeContentImage:]", "-[UIView largeContentImageInsets]",
+            "-[UIView setLargeContentImageInsets:]",
+        },
+    },
 }
 
 local function key_of(member)
