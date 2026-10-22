@@ -18,3 +18,9 @@ int revenant_unlinkat(int directory, const char *path, int flags)
     }
     return (flags & AT_REMOVEDIR) ? rmdir(resolved) : unlink(resolved);
 }
+
+__attribute__((visibility("hidden")))
+int unlinkat(int directory, const char *path, int flags)
+{
+    return revenant_unlinkat(directory, path, flags);
+}

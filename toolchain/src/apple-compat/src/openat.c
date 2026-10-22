@@ -51,3 +51,16 @@ int revenant_openat(int directory, const char *path, int flags, ...)
     }
     return open(resolved, flags, mode);
 }
+
+__attribute__((visibility("hidden")))
+int openat(int directory, const char *path, int flags, ...)
+{
+    int mode = 0;
+    if (flags & O_CREAT) {
+        va_list arguments;
+        va_start(arguments, flags);
+        mode = va_arg(arguments, int);
+        va_end(arguments);
+    }
+    return revenant_openat(directory, path, flags, mode);
+}

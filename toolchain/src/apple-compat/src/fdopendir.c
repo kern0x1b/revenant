@@ -16,3 +16,9 @@ DIR *revenant_fdopendir(int descriptor)
     }
     return directory;
 }
+
+__attribute__((visibility("hidden")))
+DIR *fdopendir(int descriptor)
+{
+    return revenant_fdopendir(descriptor);
+}

@@ -18,3 +18,9 @@ int revenant_fstatat(int directory, const char *path, struct stat *buffer, int f
     }
     return (flags & AT_SYMLINK_NOFOLLOW) ? lstat(resolved, buffer) : stat(resolved, buffer);
 }
+
+__attribute__((visibility("hidden")))
+int fstatat(int directory, const char *path, struct stat *buffer, int flags)
+{
+    return revenant_fstatat(directory, path, buffer, flags);
+}
