@@ -304,6 +304,8 @@ local FOUNDATION_TESTS = {
     calendar_identifiers = {"NSCalendarIdentifiers8.m"},
     validated_format = {"NSString+ValidatedFormat.m"},
     file_relationship = {"NSFileManager+Relationship8.m"},
+    underlying_errors = {"NSError+UnderlyingErrors14.m"},
+    identifier_keys = {"NSAttributedStringKeys15.m", "NSAttributedStringKeys26.m", "NSLocalizedNumberFormatRule18.m", "NSURLUbiquitousKeys145.m"},
 }
 
 local QUARTZCORE_TESTS = {
