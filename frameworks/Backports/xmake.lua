@@ -306,6 +306,10 @@ local FOUNDATION_TESTS = {
     file_relationship = {"NSFileManager+Relationship8.m"},
     underlying_errors = {"NSError+UnderlyingErrors14.m"},
     identifier_keys = {"NSAttributedStringKeys15.m", "NSAttributedStringKeys26.m", "NSLocalizedNumberFormatRule18.m", "NSURLUbiquitousKeys145.m"},
+    expression_members = {"NSExpression+AnyKey7.m", "NSExpression+ConditionalMembers9.m", "NSExpression+Conditional.m"},
+    calendar_next_date = {"NSCalendar+NextDate8.m", "NSCalendar+Components.m", "NSDateComponents+Component8.m", "RevenantCalendarUnits.m"},
+    calendar_day_changed = {"NSCalendarDayChanged8.m"},
+    expiring_activity = {"NSProcessInfo+ExpiringActivity82.m"},
 }
 
 local QUARTZCORE_TESTS = {
