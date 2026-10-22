@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
 
-extern char revenant_probe_swift_type __asm__("$s9HealthKit23HKSampleQueryDescriptorVMa");
+extern char revenant_probe_swift_type __asm__("_$s9HealthKit23HKSampleQueryDescriptorVMa");
 
 int main(int argc, char *argv[])
 {
