@@ -1,6 +1,6 @@
 ---
 name: emulate
-description: Check the app on an emulated old iPhone, iPod touch or iPad with Revenant's `xmake emulate` (the emulator) — add the emulator to the project, install the app's .deb and its dependencies into the image of the chosen device and iOS release, run a program in it and read the verdict (pass, fail, crash, timeout, boot-blocked), its output, log and last frame. Says which devices and releases boot, what a verdict proves, and what cannot be checked yet (an app launched through SpringBoard). Use after a green build, for the "check in the emulator" step, or when asked to run the app in the emulator, on iOS 3 to 6, on an iPhone 3GS, 4, 4S.
+description: Check the app on an emulated old iPhone, iPod touch or iPad with Revenant's `xmake emulate` (the emulator) — add the emulator to the project, install the app's .deb and its dependencies into the image of the chosen device and iOS release, run a program in it and read the verdict (pass, fail, crash, timeout, boot-blocked), its output, log and last frame, or launch the app itself through SpringBoard and send it taps. Says which devices and releases boot, what a verdict proves, and what the emulator cannot show. Use after a green build, for the "check in the emulator" step, or when asked to run the app in the emulator, on iOS 3 to 6, on an iPhone 3GS, 4, 4S.
 ---
 
 # Check in the emulator
@@ -11,8 +11,9 @@ image and runs one program in it under a deadline. The outcome is a **verdict** 
 disk. Read `PROJECT.md` first: `## Target` names the devices and the releases to check. Each pair
 checked here gets a line in `## Progress`.
 
-**Read "Checking an app" (§5) before promising the user anything.** Today the emulator cannot
-launch an app the way a user's tap does; what it can prove about an app is narrower than "it runs".
+**Read "Checking an app" (§5) before promising the user anything.** The emulator launches an
+application through SpringBoard (`xmake emulate launch`), so what it proves is what that launch
+shows: the app came up, drew, and took the taps you sent.
 
 ## 1. What the emulator covers
 
@@ -24,8 +25,8 @@ launch an app the way a user's tap does; what it can prove about an app is narro
   to iOS 7, with gaps among the point releases (3.1.x, 4.1 and 4.3.1 to 4.3.5 among them), and
   none from 8.0 on — iOS 8 and 9 cannot be emulated. A release without a kernel is refused with the
   list of kernels the emulator has.
-- **What boots:** the emulator's README says it boots firmware from iPhone OS 3.0 through iOS 6.1.3 in
-  Revenant's acceptance runs; iOS 7 is declared and has never been booted. Not every device and
+- **What boots:** firmware from iPhone OS 3.0 through iOS 6.1.3 boots in Revenant's acceptance
+  runs; iOS 7 is declared and has never been booted. Not every device and
   release pair inside that range has been booted: until one has on this machine, tell the user the
   check may not be possible. A pair that does not boot fails at its first `install` (§3), before
   any run.
@@ -66,10 +67,10 @@ xmake emulate -y -d iPhone4,1 -r 6.1.3 install > .logs/emulate-install-iPhone4,1
 
 `install` runs `xmake deb` first (the whole packaging of skill `package`: build, stage, sign,
 imports refused rather than warned), then clones the golden image and unpacks the data of **every
-.deb that step wrote** — the app's and, for an app that uses the backports, the
-`org.revenant.backports` package — and runs each package's `preinst` and `postinst` against
-the image the way dpkg does (`DPKG_ROOT`). The backports' `postinst` links the libraries built for
-the image's own release and refuses a release outside its bands. What `xmake deb` refuses is not
+.deb that step wrote** — the app's — and runs each package's `preinst` and `postinst` against
+the image the way dpkg does (`DPKG_ROOT`). An application that links the Backports libraries cannot
+be packaged at all yet: the one package that installs those libraries is not written, so the
+packaging stops and names the target. What `xmake deb` refuses is not
 installed: at this pin a Swift program that carries its runtime stops `xmake emulate install` with
 `error: these imports are not exported by the device's iOS:` (measured; skill `swift` §7).
 
@@ -134,33 +135,39 @@ scale; `guest_seconds` is the program's own clock.
 
 ## 5. Checking an app
 
-**Current state (revenant 0.8.10 and main): the emulator cannot launch an app through SpringBoard.**
-`run` starts a program from launchd, not from a tap on the home screen. An app's executable
-started that way does not go through SpringBoard's launch, so `application:didFinishLaunching…`
-is never reached and the app never draws; `frame.png` shows SpringBoard, not the app. There is no
-command to tap, to launch by bundle identifier or to take a frame of the app.
+**`xmake emulate launch` starts the app the way a tap on the home screen does.** SpringBoard
+launches it, so `application:didFinishLaunching…` is reached and the app draws. The command takes
+the bundle identifier and the steps to send after it:
 
-What can be checked today, and how to word it in `## Progress`:
+```
+xmake emulate -y -d iPhone4,1 -r 6.1.3 launch space.kern0x1b.example.demo until-exit > .logs/emulate-launch-iPhone4,1-6.1.3.log 2>&1
+```
 
-- **The package installs on that release:** `install` succeeded — the app's `.deb` and its
-  dependencies unpacked, their maintainer scripts (the backports' band choice among them) accepted
-  the release. Record the `installed … into <device> <version>` lines.
-- **The imports resolve on that release:** already proven statically by the build and by
-  `xmake deb` (skill `build`), against that release's own libraries. That is stronger evidence than
-  an emulator run for "every symbol the app calls exists".
-- **The app's logic runs on that release:** put the logic that does not need `UIApplication` (the
-  model, parsing, persistence, the backported Foundation classes the app relies on) into a test
-  stand — a small `@addon/revenant/daemon` target in the same project that exercises it, prints each
-  result and exits with the number of failures (skill `checks`). `run` that program: `pass` is real
-  evidence on that device and release.
+The steps are `tap X Y`, `drag X1 Y1 X2 Y2` (in points), `home` and `until-exit`. Each step is sent
+after the screen has settled, and the run takes a snapshot of each state: `app-0.png` is the app as
+it came up, `app-1.png` the state after the first step, and so on. The app's own output is in
+`results/app.stdout` and `results/app.stderr`, beside the snapshots in the run's folder (§4). The
+run ends with `launched <bundle> as pid <pid> on <device> <version> (<build>) ... N snapshot(s)`.
 
-What cannot be checked here today: that the app launches from SpringBoard, draws its screens,
-responds to taps and gestures, lays out on the device's screen, or survives backgrounding. Say so
-to the user in these words, and check those on a real device (skill `device`) when the user has
-one. Never write "the app runs in the emulator" in `## Progress`; write what was run and its
-verdict.
+What a launch proves, and how to word it in `## Progress`:
 
-This section changes when the toolchain gains an app launch for the emulator.
+- **The application came up through SpringBoard.** The launch named the bundle, SpringBoard took
+  it, and the app reached `application:didFinishLaunching…`. The snapshot is the evidence: open it
+  before describing it.
+- **The taps reached it.** A step `tap X Y` was sent and the next snapshot shows what changed.
+- **The application survived until it ended.** With `until-exit`, the verdict says `held`, and
+  whether the app ended on its own (`exited`) or the run's budget ran out first (`deadline`).
+
+What the launch does not show: the keyboard and the text input, the multitasking and the
+backgrounding, the camera, the GPS and the cellular radio. Say so in these words, and check those
+on a real device (skill `device`) when the user has one. Never write "the app runs in the
+emulator" in `## Progress`; write what was launched, what was sent and what the snapshots show.
+
+A launch is not a device: the emulator draws in software, has no camera, no GPS and no cellular
+radio, and its clock is slower than the phone's (§4).
+
+A program that is not an application is run with `run` (§4), and that is the right command for a
+probe: `run` starts the program from launchd, as root, with a deadline.
 
 ## 6. Record
 
@@ -178,7 +185,8 @@ version, build and scale) and the path of the copied `verdict.json`/frame. Then 
   architecture, often not the one `PROJECT.md` names; always pass both.
 - Reading `fail(spawn error 2)` as an app bug → the path is not in the image; `install` first, and
   pass the guest path of a probe (`/usr/libexec/<name>`), not a host path. Never the app's own
-  executable: started by the runner it never becomes an application (§5).
+  executable: started by the runner it never becomes an application (§5); `launch` is the command
+  for that.
 - `kAudioSession…` errors, silent sounds → no audio server runs for `run` (§1); record audio as
   unchecked, not as the app's fault.
 - A run with `--scale 1` "to be realistic" → the guest's watchdogs expire (SpringBoard is lost to
@@ -194,5 +202,5 @@ version, build and scale) and the path of the copied `verdict.json`/frame. Then 
   output and with a timestamp prefix; write the `ok`/`FAIL` lines with `printf` and
   `fflush(stdout)` so they stay in order and survive a crash.
 - Launching the app some other way (a hand-written LaunchDaemon for it, a launcher copied into the
-  image, an edited image) → not a check of the app as a user starts it, and not a native path; the
-  launch through SpringBoard is a limit of the emulator today (§5). Say so.
+  image, an edited image) → not a check of the app as a user starts it; `launch` is the native
+  path, because SpringBoard itself launches the app (§5). Say so.
