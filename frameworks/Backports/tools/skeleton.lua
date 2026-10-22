@@ -61,13 +61,8 @@ local function setter(name)
     return "set" .. string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2) .. ":"
 end
 
-local function objc_model(rows, implemented)
-    local classes, methods, seen, unavailable = {}, {}, {}, {}
-    for _, row in ipairs(rows) do
-        if row.kind == "class" and row.flags == "unavailable" then
-            unavailable[row.name] = true
-        end
-    end
+local function objc_model(rows, implemented, unavailable)
+    local classes, methods, seen = {}, {}, {}
     local function method(container, selector, class_method, label)
         local key = container .. "|" .. selector .. "|" .. (class_method and "+" or "-")
         if seen[key] == nil then
@@ -159,7 +154,7 @@ function write(skeleton, frameworks, implemented)
     local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, c = 0, swift = 0}
     for _, framework in ipairs(frameworks) do
         local functions, swift, protocols, globals = {}, {}, {}, {}
-        local classes, methods = objc_model(framework.rows, implemented)
+        local classes, methods = objc_model(framework.rows, implemented, framework.unavailable)
         for _, row in ipairs(framework.rows) do
             if row.kind == "C function" then
                 table.insert(functions, {symbol = row.symbol, label = framework.name .. "." .. row.name})

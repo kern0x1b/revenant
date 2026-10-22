@@ -187,7 +187,8 @@ function skeleton_for(name)
     local state = prepare({name})
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework)})
+        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework),
+            unavailable = unavailable_classes(framework.rows)})
     end
     return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
 end
@@ -201,6 +202,16 @@ function in_scope_rows(state, framework)
         end
     end
     return kept
+end
+
+function unavailable_classes(rows)
+    local names = {}
+    for _, row in ipairs(rows) do
+        if row.kind == "class" and has_flag(row, "unavailable") then
+            names[row.name] = true
+        end
+    end
+    return names
 end
 
 function has_flag(row, flag)
@@ -245,7 +256,8 @@ function main(...)
     local state = prepare()
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework)})
+        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework),
+            unavailable = unavailable_classes(framework.rows)})
     end
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
     local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
