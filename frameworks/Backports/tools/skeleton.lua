@@ -53,7 +53,9 @@ void revenant_backports_fail(const char *name)
 static void revenant_missing_unrecognized(id self, SEL selector, SEL unrecognized)
 {
     const char *name = NULL;
-    object_getInstanceVariable(self, "name", (void **)&name);
+    Ivar ivar = class_getInstanceVariable(object_getClass(self), "name");
+    if (ivar)
+        name = *(const char **)((char *)(__bridge void *)self + ivar_getOffset(ivar));
     revenant_backports_fail(name);
 }
 
@@ -74,7 +76,8 @@ void revenant_backports_global(void *storage, const char *encoding, const char *
     if (encoding[0] != '@' || *(void **)storage != NULL)
         return;
     id value = [[revenant_missing_class() alloc] init];
-    object_setInstanceVariable(value, "name", (void *)name);
+    Ivar ivar = class_getInstanceVariable(object_getClass(value), "name");
+    *(const char **)((char *)(__bridge void *)value + ivar_getOffset(ivar)) = name;
     *(void **)storage = (__bridge_retained void *)value;
 }
 
