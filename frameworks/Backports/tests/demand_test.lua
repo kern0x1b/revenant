@@ -82,4 +82,10 @@ function main()
     expect("swift import statements still import", keys_of(swift.imports), {"Foundation", "UIKit"})
     expect("swift messages", {tostring(#swift.messages)}, {"0"})
     expect("swift comments do not import", {tostring(has(swift.imports, "Fake"))}, {"false"})
+
+    local directives = scanner.scan(path.join(data, "sample_directives.m"))
+    expect("the app declares its methods", keys_of(directives.method_declarations), {"copy:", "shade"})
+    expect("pragma and warning text is not code", {tostring(has(directives.words, "Handle")),
+        tostring(has(directives.words, "Platform"))}, {"false", "false"})
+    expect("a call on the app's own method is a message", {tostring(#directives.messages >= 1)}, {"true"})
 end
