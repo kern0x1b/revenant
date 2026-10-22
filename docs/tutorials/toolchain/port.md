@@ -62,7 +62,9 @@ An application that runs on more than one architecture names them:
         add_values("apple.architectures", "armv7", "arm64")
         set_values("app.plist-file", "packaging/Info.plist")
 
-`xmake deb` builds each slice for the release its architecture first runs, merges the bundles with `lipo`, and checks the merged binaries. Every other file has to be the same in every slice, so pin `MinimumOSVersion` in the plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
+`xmake deb` builds each slice for the release its architecture first runs, merges the bundles itself (every file
+but a `.plist` has to be the same in every slice), and checks the merged binaries. Pin `MinimumOSVersion` in the
+plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
 
 ## Frameworks and runtimes
 

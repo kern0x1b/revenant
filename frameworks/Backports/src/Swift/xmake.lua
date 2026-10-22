@@ -193,16 +193,8 @@ local function scenekit_flags(target, modules)
     return {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
 end
 
-local function expand_spatial(target, gyb, folder)
-    local source = path.join(target:pkg("swift"):installdir("share"), "swift-source")
-    local defines = {CMAKE_SIZEOF_VOID_P = target:arch() == "arm64" and "8" or "4"}
-    local files = {}
-    for _, template in ipairs(os.files(path.join(SRC, "Spatial", "*.swift.gyb"))) do
-        local output = path.join(folder, (path.filename(template):gsub("%.gyb$", "")))
-        gyb.expand_to(template, output, {defines = defines, line_directive = "", paths = {path.join(source, "utils")}})
-        table.insert(files, output)
-    end
-    return files
+local function generate_spatial(spatial, folder)
+    return spatial.generate(path.join(SRC, "Spatial"), folder)
 end
 
 local function overlay(name, folder, opt)
@@ -239,10 +231,9 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.generate then
-                local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
                 local folder = path.join(target:autogendir(), "spatial")
                 os.mkdir(folder)
-                target:add("files", table.unpack(opt.generate(target, gyb, folder)))
+                target:add("files", table.unpack(opt.generate(import("spatial_float", {rootdir = TOOLS, anonymous = true}), folder)))
             end
             local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
                            "-Xfrontend", "-disable-implicit-string-processing-module-import"}
@@ -269,7 +260,7 @@ overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, m
     frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit", "UIKit"},
     links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
 
-overlay("swiftSpatial", "Spatial", {generate = expand_spatial})
+overlay("swiftSpatial", "Spatial", {generate = generate_spatial})
 
 overlay("swiftCloudKit", "CloudKit", {})
 

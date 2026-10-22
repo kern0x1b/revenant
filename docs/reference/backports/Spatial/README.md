@@ -2,9 +2,9 @@
 
 `frameworks/Backports/src/Spatial` is the source of the `Spatial` module `xmake.lua` builds
 into `libswiftSpatial.dylib`, for a release that has no Swift module of its own: the SDK carries
-Spatial for arm64 only, and every release this runtime targets is armv7. The five templates are
-gyb's, and each writes both scalars, because every type has a `Float` twin that differs only in the
-scalar.
+Spatial for arm64 only, and every release this runtime targets is armv7. The five files that hold a
+scalar-dependent family are written once, for `Double`; the `Float` twin of each is generated at configure time
+from its Double text, as [the sources](Sources.md) describe.
 
 ## The build, and what it was measured with
 

@@ -68,7 +68,7 @@ OpenCombine at a commit plus the patches of `revenant@combine`.
 
 `SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and typechecks are targets of the graph for iphoneos,
 and Combine is the package `combine` they take; Revenant's other packages are third-party code to them (the Swift
-runtime, libc++, the SDK and the tools). The components' targets are described in [the architecture](docs/explanation/architecture.md). They are built with `./xmakew f -p iphoneos -a armv7`, and the whole graph configures once `swift-runtime` and `libcxx` have releases for their keys ([prebuilt packages](docs/guides/prebuilt.md)); until then the configure of the whole graph builds them from source. The option
+runtime, libc++, the SDK and the tools). The components' targets are described in [the architecture](docs/explanation/architecture.md). They are built with `./xmakew f -p iphoneos -a armv7`. The whole iOS graph does not configure today: the top `xmake.lua` requires `swift-runtime` and `libcxx`, which have no release for the keys these recipes have now, so a configure would build them from source ([prebuilt packages](docs/guides/prebuilt.md)). Until those releases exist, configure one component at a time (`--component=Backports`, `--component=Swift`); see [the packages reference](docs/reference/toolchain/packages.md). The option
 `--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
 device and runs them there.
 

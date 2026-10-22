@@ -1,6 +1,6 @@
 ---
 name: swiftui
-description: SwiftUI for an old iOS app with the toolchain at the 0.8.10 pin — why Apple's SwiftUI cannot serve (iOS 13, arm64 only in the SDK), that SwiftUI, a separate reimplementation of the SwiftUI API on the UIKit of iOS 6, has no toolchain package at 0.8.10 (no revenant@swiftui-uikit), how to check a later pin for one, what to tell the user and recommend instead (UIKit in Swift, with Combine if the data flow wants it), and what not to do in its place. Use during the interview when the user asks for SwiftUI, at the code step when PROJECT.md says SwiftUI, when import SwiftUI finds no module, or when someone asks whether a SwiftUI app can run on iOS 6.
+description: SwiftUI for an old iOS app with the toolchain at the 0.8.10 pin — why Apple's SwiftUI cannot serve (iOS 13, arm64 only in the SDK), that SwiftUI, a separate reimplementation of the SwiftUI API on the UIKit of iOS 6, has no toolchain package at 0.8.10 (no revenant@swiftui), how to check a later pin for one, what to tell the user and recommend instead (UIKit in Swift, with Combine if the data flow wants it), and what not to do in its place. Use during the interview when the user asks for SwiftUI, at the code step when PROJECT.md says SwiftUI, when import SwiftUI finds no module, or when someone asks whether a SwiftUI app can run on iOS 6.
 ---
 
 # SwiftUI on old iOS
@@ -26,10 +26,11 @@ import finds for armv7 declares no view. Measured at the pin: the bare import bu
 `struct Probe: View { var body: some View { Text("x") } }` stops with
 `error: cannot find type 'View' in scope` and `error: cannot find 'Text' in scope`.
 
-**In the checkout, not as a package.** SwiftUI is the target `SwiftUI` of `frameworks/SwiftUI`, which takes
-Combine from the package `combine`. The package repository has no `swiftui` package yet: a thin wrapper needs the
-swift rule to install the target's module, which it does not do. So an app outside the checkout cannot take SwiftUI
-from this toolchain, and the answer to the user is to say so. See `docs/explanation/architecture.md`.
+**In the checkout, and as a package.** SwiftUI is the target `SwiftUI` of `frameworks/SwiftUI`, which takes
+Combine from the package `combine`. The package repository has a thin wrapper for it, `revenant@swiftui`, which
+builds that target and installs its static library and its module, so a port outside the checkout can take
+SwiftUI by name. What is not there yet is the whole iOS route: the port's own package and the backports
+libraries it needs are not written. See `docs/explanation/architecture.md`.
 
 When the project pins a later toolchain, check whether that tag names a SwiftUI package before you answer the user,
 in its `packages/s/` folder, and say what the tag contains.
@@ -44,8 +45,8 @@ anything to the user.
 - **A SwiftUI app cannot be built with this stack at this pin.** SwiftUI's folder in revenant
   (`frameworks/SwiftUI`) builds only as targets of revenant's own xmake project, for
   `armv7-apple-ios`, iOS 6.0, and its demo and tests run in revenant's emulator from that
-  checkout. That is not a path for an app: nothing there is a package a project can require, and
-  those targets are not an interface anyone supports.
+  checkout. At the pin nothing there is a package a project can require, and those targets are not
+  an interface anyone supports.
 - Do not copy SwiftUI's sources into the project, compile them as a target of your own, or write a
   small imitation of SwiftUI views over UIKit. Each is a second, unsupported SwiftUI the user would
   have to maintain, and none of it is what they asked for.

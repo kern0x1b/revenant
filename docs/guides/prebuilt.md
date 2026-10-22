@@ -2,8 +2,8 @@
 
 Status: on in CI. The `checks`, `backports` and `swift` jobs of `.github/workflows/check.yml` set
 `REVENANT_PREBUILT=kern0x1b/revenant`, and the recipes wired to the module (below) take the package of their key from its
-release. Releases exist for `llvm`, `swift` and `ld64`. None exists yet for `libcxx` or `swift-runtime`, which the swift job
-requires by name, so that job stops at its configure until one is released.
+release. Releases exist for `llvm`, `swift`, `ld64`, `libcxx` and `swift-runtime`, including the ones the swift job
+requires by name.
 
 ## What it is for
 
@@ -46,8 +46,8 @@ The `llvm`, `swift`, `ld64`, `swift-runtime` and `libcxx` recipes are wired. To 
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.
-The `shared` configs of `swift-runtime` and `libcxx` are not wired: they stage packages that an early return would
-skip, so those builds come from source. The Backports targets are not packages, so they are not affected.
+The `shared` config of `swift-runtime` and the `packaged` config of `libcxx` are not wired: they stage packages that
+an early return would skip, so those builds come from source. The Backports targets are not packages, so they are not affected.
 
 A recipe is archived only when it calls `prebuilt.pack`, so a job that builds one has nothing to release unless
 its recipe is wired. The prebuilt workflow configures the iOS Swift component before it requires `swift-runtime` or
@@ -84,8 +84,8 @@ The owner releases a package by starting the workflow for it from the Actions ta
 builds one key and makes its release. Every later run and machine that sets `REVENANT_PREBUILT` and has the same key
 downloads that release, so the key is never built twice. Wiring another recipe changes its key once (see "On a machine").
 
-Verified: the workflow has run and released `llvm`, `swift` and `ld64`, and the checks job downloads them on each CI run.
-Not yet verified: a release of `libcxx` or `swift-runtime`, which the swift job waits for, and which runner LLVM and Swift fit on.
+Verified: the workflow has run and released `llvm`, `swift`, `ld64`, `libcxx` and `swift-runtime`, and the checks job downloads them on each CI run.
+Not yet verified: which runner LLVM and Swift fit on.
 
 ## The official LLVM release instead of the `libraries` build
 

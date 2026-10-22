@@ -48,7 +48,12 @@ end
 
 function run(...)
     local folder = path.join(cache(), task(), ...)
-    os.mkdir(folder)
+    if not os.isdir(folder) then
+        try { function () os.mkdir(folder) end }
+        if not os.isdir(folder) then
+            raise("workspace: cannot create %s", folder)
+        end
+    end
     return folder
 end
 
