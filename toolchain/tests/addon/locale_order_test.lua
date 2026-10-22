@@ -5,6 +5,7 @@ local LOCALES = {
 }
 
 local NOT_STRINGS = {
+    ["modules/apple/lowered.lua|table.sort(ranges, function (a, b)"] = "numbers",
     ["modules/emulator.lua|table.sort(held, function (a, b) return a.address < b.address end)"] = "addresses",
     ["modules/emulator.lua|table.sort(named, function (a, b) return a.address < b.address end)"] = "addresses",
     ["modules/packaging.lua|table.sort(merged, function (a, b) return a ~= executable and b == executable end)"] = "booleans",
