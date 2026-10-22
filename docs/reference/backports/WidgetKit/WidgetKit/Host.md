@@ -21,7 +21,7 @@ What the module does about it:
 | `WidgetCenter.currentPushInfo` | `nil` until a caller installs a token, because only the system's host mints one for a widget |
 | the recommendations the system shows for a widget it does not have | `AppIntentRecommendation` and `IntentRecommendation` are the app's own values, offered to the app's own surface |
 | the Dynamic Island | the four regions, their positions, their margins, the keyline tint and the URL are real stored values; there is no cutout on these devices to draw them around |
-| `AccessoryWidgetBackground`, `ControlWidgetButton`, `ControlWidgetToggle` and their labels | declared with the framework's own shape; what draws is the app's own view, and the accessory background's `body` stops with a message rather than pretending to be a view |
+| `AccessoryWidgetBackground`, `ControlWidgetButton`, `ControlWidgetToggle` and their labels | declared with the framework's own shape; what draws is the app's own view. `AccessoryWidgetBackground` conforms to `WidgetBody` with `BodyType = Never`: this release has no type for the background the framework would draw, and no `body` that traps |
 
 What is the app's own and is real: the timeline, its entries, the reload policy, the relevance, the
 provider context (family, preview flag, size, variants), the configurations with their kinds, intents and
