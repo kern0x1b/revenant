@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Availability.h>
+
 struct dispatch_source_type_s;
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +38,7 @@ typedef struct { uint64_t value[2]; } CMTag;
 #define WEBKIT_IOS6_TASK_ID_TOKEN
 typedef mach_port_t task_id_token_t;
 #endif
-#if defined(__OBJC__)
+#if defined(__OBJC__) && __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #define UIUserInterfaceIdiomVision ((UIUserInterfaceIdiom)6)
 #endif
 
@@ -80,7 +82,7 @@ private:
 };
 #endif
 
-#if defined(__OBJC__)
+#if defined(__OBJC__) && __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #ifndef AXCustomContentImportanceHigh
 #define AXCustomContentImportanceHigh 1
 #endif
@@ -134,6 +136,7 @@ typedef NSString *NSTextListMarkerFormat;
 #endif
 
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #ifndef kAudioChannelLayoutTag_Ogg_3_0
 #define kAudioChannelLayoutTag_Ogg_3_0 kAudioChannelLayoutTag_AC3_3_0
 #endif
@@ -197,6 +200,8 @@ typedef NSString *NSTextListMarkerFormat;
 #endif
 #ifndef kCGColorSpaceLinearDisplayP3
 #define kCGColorSpaceLinearDisplayP3 kCGColorSpaceLinearSRGB
+#endif
+
 #endif
 
 #include <Security/SecTrust.h>
