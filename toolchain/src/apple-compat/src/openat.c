@@ -1,3 +1,4 @@
+#include "at_plain.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -50,4 +51,20 @@ int revenant_openat(int directory, const char *path, int flags, ...)
         return -1;
     }
     return open(resolved, flags, mode);
+}
+
+__attribute__((visibility("hidden")))
+int openat(int directory, const char *path, int flags, ...)
+{
+    if (revenant_at_refused(directory, path)) {
+        return -1;
+    }
+    int mode = 0;
+    if (flags & O_CREAT) {
+        va_list arguments;
+        va_start(arguments, flags);
+        mode = va_arg(arguments, int);
+        va_end(arguments);
+    }
+    return revenant_openat(directory, path, flags, mode);
 }

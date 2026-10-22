@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/param.h>
 #include <unistd.h>
@@ -15,4 +16,11 @@ DIR *revenant_fdopendir(int descriptor)
         close(descriptor);
     }
     return directory;
+}
+
+__attribute__((visibility("hidden")))
+DIR *fdopendir(int descriptor)
+{
+    errno = ENOTSUP;
+    return NULL;
 }
