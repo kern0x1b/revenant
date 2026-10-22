@@ -136,6 +136,15 @@ function main()
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
+        if file:match("^frameworks/[^/]+/tools/lib/tree%.lua$") then
+            local text = io.readfile(path.join(root, file))
+            if not text:find('"@addon.revenant.member"', 1, true) then
+                wrong(file, "a member's tree helper binds the shared helpers from @addon.revenant.member, not its own copy")
+            end
+            if text:find("function arguments(", 1, true) and not text:find("return shared.arguments(", 1, true) then
+                wrong(file, "the argument parser is defined once, in toolchain/modules/member.lua; a member delegates to it")
+            end
+        end
         if file:lower():find("telegram", 1, true) then
             wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-app-under-test.md")
         end
