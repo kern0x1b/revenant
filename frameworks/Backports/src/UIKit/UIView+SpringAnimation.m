@@ -146,10 +146,11 @@ static double revenant_view_spring_position(double time, void *context)
             CAAnimation *animation = [layer animationForKey:key];
             if (![animation isKindOfClass:[CABasicAnimation class]] || [existing containsObject:animation])
                 continue;
-            if (!animation.fromValue || fabs(animation.duration - duration) > duration * revenant_spring_duration_tolerance)
+            CABasicAnimation *basic = (CABasicAnimation *)animation;
+            if (!basic.fromValue || fabs(basic.duration - duration) > duration * revenant_spring_duration_tolerance)
                 continue;
             RevenantViewSpringContext context = {omega, dampingRatio, velocity};
-            CAKeyframeAnimation *keyframes = revenant_spring_keyframes((CABasicAnimation *)animation, layer, animation.duration, revenant_view_spring_position, &context, YES);
+            CAKeyframeAnimation *keyframes = revenant_spring_keyframes(basic, layer, basic.duration, revenant_view_spring_position, &context, YES);
             if (keyframes) {
                 keyframes.beginTime = delay > 0 ? [layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay : 0;
                 [replacements addObject:[NSArray arrayWithObjects:layer, key, keyframes, nil]];
