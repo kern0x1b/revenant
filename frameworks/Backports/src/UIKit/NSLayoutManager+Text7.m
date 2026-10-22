@@ -11,6 +11,16 @@
 - (void)getGlyphsInRange:(NSRange)range glyphs:(unsigned short *)glyphs characterIndexes:(NSUInteger *)characterIndexes glyphInscriptions:(NSUInteger *)inscriptions elasticBits:(BOOL *)elastic bidiLevels:(unsigned char *)levels;
 - (void)textStorage:(NSTextStorage *)storage edited:(NSUInteger)mask range:(NSRange)range changeInLength:(NSInteger)delta invalidatedRange:(NSRange)invalidated;
 - (void)insertGlyphs:(const unsigned int *)glyphs length:(NSUInteger)length forStartingGlyphAtIndex:(NSUInteger)glyphIndex characterIndex:(NSUInteger)characterIndex;
+- (NSUInteger)numberOfGlyphs;
+- (NSUInteger)characterIndexForGlyphAtIndex:(NSUInteger)index;
+- (NSUInteger)glyphIndexForCharacterAtIndex:(NSUInteger)index;
+- (NSTextContainer *)textContainerForGlyphAtIndex:(NSUInteger)index effectiveRange:(NSRangePointer)effectiveRange;
+- (CGRect)usedRectForTextContainer:(NSTextContainer *)container;
+- (void)drawBackgroundForGlyphRange:(NSRange)glyphRange atPoint:(CGPoint)point;
+- (void)drawGlyphsForGlyphRange:(NSRange)glyphRange atPoint:(CGPoint)point;
+- (NSInteger)markerForItemNumber:(NSInteger)itemNumber;
+- (NSInteger)startingItemNumber;
+- (void)setStartingItemNumber:(NSInteger)startingItemNumber;
 @end
 
 static const void *GlyphPropertyOverridesKey = &GlyphPropertyOverridesKey;
@@ -152,6 +162,64 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
 - (void)processEditingForTextStorage:(NSTextStorage *)textStorage edited:(NSTextStorageEditActions)editMask range:(NSRange)newCharRange changeInLength:(NSInteger)delta invalidatedRange:(NSRange)invalidatedCharRange
 {
     [self textStorage:textStorage edited:editMask range:newCharRange changeInLength:delta invalidatedRange:invalidatedCharRange];
+}
+
+- (NSUInteger)numberOfGlyphs
+{
+    return [self.textStorage.string length];
+}
+
+- (NSUInteger)characterIndexForGlyphAtIndex:(NSUInteger)index
+{
+    if (index >= [self numberOfGlyphs])
+        return NSNotFound;
+    return index;
+}
+
+- (NSUInteger)glyphIndexForCharacterAtIndex:(NSUInteger)index
+{
+    if (index >= [self numberOfGlyphs])
+        return NSNotFound;
+    return index;
+}
+
+- (NSTextContainer *)textContainerForGlyphAtIndex:(NSUInteger)index effectiveRange:(NSRangePointer)effectiveRange
+{
+    if (index >= [self numberOfGlyphs]) {
+        if (effectiveRange)
+            *effectiveRange = NSMakeRange(NSNotFound, 0);
+        return nil;
+    }
+    if (effectiveRange)
+        *effectiveRange = NSMakeRange(index, 1);
+    return [self.textContainers firstObject];
+}
+
+- (CGRect)usedRectForTextContainer:(NSTextContainer *)container
+{
+    return CGRectMake(0, 0, [container size].width, [container size].height);
+}
+
+- (void)drawBackgroundForGlyphRange:(NSRange)glyphRange atPoint:(CGPoint)point
+{
+}
+
+- (void)drawGlyphsForGlyphRange:(NSRange)glyphRange atPoint:(CGPoint)point
+{
+}
+
+- (NSInteger)markerForItemNumber:(NSInteger)itemNumber
+{
+    return 0;
+}
+
+- (NSInteger)startingItemNumber
+{
+    return 1;
+}
+
+- (void)setStartingItemNumber:(NSInteger)startingItemNumber
+{
 }
 
 @end
