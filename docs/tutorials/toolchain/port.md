@@ -21,6 +21,7 @@ A minimal `xmake.lua` for a tweak:
     add_addons("revenant latest")
     set_config("apple_minimum", "6.0")
     includes("@addon/revenant/apple-ios")
+    on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
@@ -35,6 +36,8 @@ A minimal `xmake.lua` for a tweak:
 `add_addons("revenant latest")` takes the newest release tag of the repository; pin a tag once one exists, so that a new release is an explicit change. Commit the `xmake-requires.lock` and `xmake-addons.lock` the build writes. A checkout nested inside another project, such as a worktree under the main checkout, builds with `xmake -P .`.
 
 `apple_minimum` is the oldest release the port runs on. The toolchain refuses a release the architecture cannot run, and names the architectures that can: a port that asks for 2.0 on armv7 is told to build armv6.
+
+The toolchain binds a target through the revenant rule it names, so an iphoneos target that names none would build without the revenant toolchain. The `on_config` line in the example makes that a configuration error: it names each iphoneos target that no revenant rule binds, and the configure fails until each one names a rule. Keep it in the project's main `xmake.lua`; xmake runs `on_config` only there, not from an included file.
 
 Pick the target kind to match what the program is: a MobileSubstrate dylib (`tweak`), an executable in `/usr/libexec` (`daemon`), an application bundle (`app`), or a shared library an application bundles (`library`). The values each one reads are in the reference.
 
