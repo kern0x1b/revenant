@@ -78,6 +78,14 @@ The app links three Rust archives, each through a Bazel `rust_static_library` in
 
 Every one of those symbols is already in apple-compat, so the crates needed no new shim. The weak symbols the probes list are `___isOSVersionAtLeast` and `___isPlatformVersionAtLeast`, the compiler-rt availability checks, which the programs define in their own text rather than import. Nothing has run on iOS 6: the programs link and pass the import check, which is the static part of the claim.
 
+## Thread-locals and other OS-dependent parts
+
+The 10.0 floor could make LLVM emit native thread-locals, which iOS 6's dyld cannot load. The three Telegram archives and the probes built from them were checked: none has a `__thread_vars`, `__thread_data` or `__thread_bss` section, and none imports `__tlv_bootstrap` or `_tlv_bootstrap`. The spec already has `has-thread-local` false, and std's `thread_local!` resolves to `sys::thread_local::key::unix`, which uses pthread keys. So the spec needed no change.
+
+The sections in the archives and probes are the ordinary ones: `__text`, `__const`, `__cstring`, the literal pools, the lazy and non-lazy pointer tables, `__data`, `__bss`, `__common`, `__stub_helper` and `__picsymbolstub4`. None of them depends on the OS.
+
+The undefined symbols that need an OS above 6.0 are the table's entries: the 13 above and `__sincosf_stret` in tlottie, each provided by apple-compat. `___chkstk_darwin`, the `os_unfair_lock` family and the `__ulock` calls are not imported. The weak symbols are the compiler-rt availability checks described above.
+
 ## Packaging
 
 The rule and package are `@addon/revenant/rust` and `revenant@rust`. The rule builds the crate with the package's cargo, through `REVENANT_RUST_BIN` and `REVENANT_RUST_CARGO_HOME`, which the package exports, and it takes C flags and the deployment target from the apple-ios toolchain, so cargo's build scripts compile for the device with the same clang. The crate's sources are tracked through a stamp of their hashes, because xmake's own Rust language support tries to find `rustc` on the path for `.rs` files. The package's test runs `rustc --print cfg` on the spec under the pinned nightly.
