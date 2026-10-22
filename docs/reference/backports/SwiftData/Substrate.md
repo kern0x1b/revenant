@@ -140,14 +140,10 @@ Moving that floor is the Core Data band's call, not this package's.
 
 ## The overlay is keyed by the exact SDK path
 
-The port's headers are a VFS overlay keyed on the SDK's full path, and there are sixteen installs
-of `iphoneos-sdk/16.4` (one per the package's `additions` digest). A probe that picks an SDK by
-hand reads unlowered headers and reports the backports' API as unavailable - which is exactly what
-happened here first, and the fix is to read the SDK out of the overlay:
-
-```
-SDK=$(./xmakew l -P . -c 'local o = import("core.base.json").loadfile(os.getenv("REVENANT_SWIFT_PORT_HEADERS")); for _, r in ipairs(o.roots) do if r.name:endswith("CoreData.framework/Headers") then print(r.name:sub(1, #r.name - #"/System/Library/Frameworks/CoreData.framework/Headers")) break end end')
-```
+The port's headers were a VFS overlay keyed on the SDK's full path, and there were sixteen installs
+of `iphoneos-sdk/16.4` (one per the package's `additions` digest). A probe that picked an SDK by
+hand read unlowered headers and reported the backports' API as unavailable. The overlay went with
+the port headers, and no command reads it now.
 
 A package's own build resolves the SDK from the toolchain, so a store whose SDK differs from the
 runtime's would compile the module against unlowered headers; `on_test` should assert the
