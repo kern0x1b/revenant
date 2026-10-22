@@ -112,7 +112,7 @@ local RECIPES = {
                "frameworks/Backports/tools/apinotes.lua", "frameworks/Backports/src/RealityKit/*.swift"}},
     {folder = "packages/s/spatial", variable = "spatial_sources_digest",
      inputs = {"packages/s/spatial/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
-               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/src/Spatial/*.swift.gyb"}},
+               "frameworks/Backports/src/Spatial/*.swift", "frameworks/Backports/tools/spatial_float.lua"}},
     {folder = "packages/c/cloudkit", variable = "cloudkit_sources_digest",
      inputs = {"packages/c/cloudkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
                "frameworks/Backports/src/CloudKit/*.swift"}},

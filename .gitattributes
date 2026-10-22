@@ -14,7 +14,6 @@
 
 *.lock linguist-generated
 **/GENERATED-* linguist-generated=true
-*.swift.gyb linguist-language=Swift
 docs/** linguist-documentation
 
 frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
