@@ -71,6 +71,8 @@ External code stays a package: `combine` (OpenCombine with our patches in `patch
 
 A package of our own code is allowed only as a **thin wrapper**: a recipe with no url, whose `on_install` generates a project that includes one component and installs that component's targets, and that holds no sources and no build logic of its own. `emulator`, `emulator-guest` and `firmware-tools` are wrappers of this kind, and the addon's rules and plugins take them by name, as they take any package. The layout check (`tools/layout.lua`) enforces it: a recipe with no url must be a wrapper or be listed in `UNCONVERTED`.
 
+The rules behind this layout are short records, each with the check that enforces it: [the decisions](decisions/README.md).
+
 ## Status
 
 The layout check lists what is not converted, in `tools/layout.lua`:

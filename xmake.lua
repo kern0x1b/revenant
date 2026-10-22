@@ -46,8 +46,32 @@ if whole then
         add_tests("comments_check")
         add_tests("comments_test")
         add_tests("copied_text")
+        add_tests("credentials")
         on_test(function (target, opt)
             local root = os.projectdir()
+            if path.filename(opt.name) == "credentials" then
+                local data = path.join(root, "agent-skills", "tests", "data", "credentials")
+                local script = path.join(root, "agent-skills", "tests", "credentials.lua")
+                local login = path.join(data, "login.json")
+                local function run(...)
+                    return os.iorunv(os.programfile(), table.join({"l", "-P", root, script}, {...}), {curdir = root}):trim()
+                end
+                local errors = {}
+                if not run("leaked", login, path.join(data, "leaky")):find("transcript.txt", 1, true) then
+                    table.insert(errors, "a transcript that holds the access token must be reported as leaked")
+                end
+                if run("leaked", login, path.join(data, "clean")) ~= "" then
+                    table.insert(errors, "a transcript with no token must not be reported")
+                end
+                if (tonumber(run("left", login)) or 0) <= 0 then
+                    table.insert(errors, "the fixture's token must have time left")
+                end
+                if #errors > 0 then
+                    opt.errors = table.concat(errors, "; ")
+                    return false
+                end
+                return true
+            end
             if path.filename(opt.name) == "copied_text" then
                 local data = path.join(root, "agent-skills", "tests", "data", "copied_text")
                 local script = path.join(root, "agent-skills", "tests", "copied_text.lua")

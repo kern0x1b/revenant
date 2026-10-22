@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Claude Haiku 5.5" <noreply@anthropic.com>
+Date: Thu, 22 Oct 2026 05:01:45 +0200
+Subject: [PATCH] A query for an install folder creates no folder
+
+installdir() created the folder of a package every time it was called
+without readonly, and xmake calls it that way while it registers the
+requirements of a project and while it reports them with --info. So a
+configure left an empty folder for each build hash it asked about, and
+the next query took that folder for an install. Only a call with a
+subdirectory creates the folder now. The install action creates the
+install folder itself once it has cleared it, so the install scripts
+still find it.
+
+Self-review: clean
+Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+---
+ xmake/core/package/package.lua                                | 2 +-
+ xmake/modules/private/action/require/impl/actions/install.lua | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 682cafce4..a4499b861 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -987,7 +987,7 @@ function _instance:installdir(...)
+     if opt and opt.readonly then
+         return dir
+     end
+-    if not os.isdir(dir)then
++    if #dirs > 0 and not os.isdir(dir) then
+         os.mkdir(dir)
+     end
+     return dir
+diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
+index 3a6d2af51..c2fd45ef7 100644
+--- a/xmake/modules/private/action/require/impl/actions/install.lua
++++ b/xmake/modules/private/action/require/impl/actions/install.lua
+@@ -567,6 +567,7 @@ function main(package)
+ 
+                     -- clear install directory
+                     _clear_installdir(package)
++                    os.mkdir(package:installdir())
+ 
+                     -- download package resources
+                     download_resources(package)
+-- 
+2.54.0 (Apple Git-157)
+
