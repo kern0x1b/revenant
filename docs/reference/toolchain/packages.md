@@ -30,7 +30,7 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `swift-runtime` | 6.4.0 | the Swift standard library, runtime, concurrency and overlays, built for the port's architecture and oldest release |
 | `swift-embedded` | | Embedded Swift's `Swift` module and the Unicode tables it calls |
 
-`swift-runtime` takes the configs below. `shared` installs under absolute install names for a Debian package; `backports` and `backports_uikit` make the overlays see what the `frameworks/Backports` targets implement; `library_evolution` builds the resilient runtime and is a different package; `recipe` is the digest of the recipe and its changes.
+`swift-runtime` takes the configs below. `shared` installs under absolute install names for a Debian package; `library_evolution` builds the resilient runtime and is a different package; `recipe` is the digest of the recipe and its changes. There is no `backports` config: the overlays see the SDK's headers lowered by the `apple-ios` toolchain (`modules/apple/lowered.lua`), so a program that uses a Backports API links the library by `add_deps` against the plain runtime.
 
 ## Frameworks
 

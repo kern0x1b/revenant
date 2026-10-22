@@ -26,8 +26,6 @@ package("combine")
     end
 
     add_configs("shared", {description = "Compile against a shared swift-runtime and its packaged libc++, for a port that requires them so.", default = false, type = "boolean"})
-    add_configs("backports", {description = "Compile against the swift-runtime built with the backports, for a port that requires it so.", default = false, type = "boolean"})
-    add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports.", default = false, type = "boolean"})
     add_configs("sources", {description = "Install only the patched sources, laid out as the one module (src/Combine, src/CombineHelpers) beside the upstream tests (src/Tests) and the gyb header (src/utils), for a project that compiles them itself.", default = false, type = "boolean"})
     add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed recipe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
@@ -37,8 +35,7 @@ package("combine")
         if package:config("sources") then
             return
         end
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
-                    backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil}})
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         for _, library in ipairs(libraries) do
             package:add("links", library)

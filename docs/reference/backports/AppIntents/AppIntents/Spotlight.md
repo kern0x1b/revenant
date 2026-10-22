@@ -17,8 +17,8 @@ The SDK marks the three classes iOS 9, in the framework's own macros:
     @interface CSSearchableIndex : NSObject
 
 The port's headers lower that mark to the port's release as they do for every declaration the registry
-implements: the generator lowers it, and renders the copies. AppIntents probes CoreSpotlight through them, by the
-runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). Without that overlay, measured: a Swift file naming
+implements: the generator lowers it, and renders the copies. AppIntents probed CoreSpotlight through them, by the
+runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`, which no build sets since the port headers were removed). Without that overlay, measured: a Swift file naming
 `CSSearchableIndex` at `armv7-apple-ios6.1.3` answers "'CSSearchableIndex' is only available in iOS 9.0
 or newer".
 
@@ -37,8 +37,8 @@ hand them to `deleteSearchableItems`. With no CoreSpotlight backports there is n
 is removed, which is what a delete of an index that holds nothing does.
 
 The two `NSUserActivity` rows (`widgetConfigurationIntent(of:)`, `appEntityIdentifier`) are behind
-`-DREVENANT_APPINTENTS_PORT_HEADERS`, which the package sets when the runtime it builds against was
-built with the backports: `NSUserActivity` arrived in iOS 8 and the Foundation backports carry it, and
+`-DREVENANT_APPINTENTS_PORT_HEADERS`, which the package sets when the runtime it builds against carries port
+headers; none does since the runtime's `backports` config was removed, so the block is not compiled: `NSUserActivity` arrived in iOS 8 and the Foundation backports carry it, and
 the runtime is what hands the port's headers over. They place on such a runtime; with a runtime built
 without the backports there is no `NSUserActivity` on the release at all, and the rows read `missing`
 rather than being declared against a class that is not there.

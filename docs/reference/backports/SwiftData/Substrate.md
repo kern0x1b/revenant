@@ -8,7 +8,7 @@ The toolchain, resolved once: `revenant@swift 6.4.0` at
 `~/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
 (swift-6.4-RELEASE)`), and `revenant@swift-runtime 6.4.0` at
 `~/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
-(`configs.backports = true`, `REVENANT_SWIFT_RUNTIME_BACKPORTS = "coredata"`).
+(then `configs.backports = true` and `REVENANT_SWIFT_RUNTIME_BACKPORTS = "coredata"`; both were removed, and the runtime is plain, see [backports-loading](../../../explanation/backports-loading.md)).
 
 ## Macro plugins can be built on this toolchain
 
@@ -82,7 +82,7 @@ all callable from Swift at that release: `NSPersistentStoreDescription`,
 `NSManagedObjectID.uriRepresentation`, `NSManagedObjectID.isTemporaryID`, `undoManager`.
 
 Three that the registry does **not** carry, read out of the port's headers (the CoreData framework's headers
-in the runtime's port overlay, `REVENANT_SWIFT_PORT_HEADERS`):
+in the runtime's port overlay, `REVENANT_SWIFT_PORT_HEADERS`, which no build sets since the port headers were removed; the record of what they held):
 
 | name | mark still in the port's header | registry |
 | --- | --- | --- |
