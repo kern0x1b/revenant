@@ -40,7 +40,7 @@ difference is stated rather than papered over:** Apple's expansion of `#AppEntit
 whatever `AppIntentsMacros.AppEntityMacros` produces, and no copy of it is on this machine to diff
 against. The gate for claiming a macro is done is therefore: the expansion this port produces
 matches the interface's declared attachments exactly, and the hand-checked expansion of a small
-example is in `.agent-work/` beside the plugin.
+example was checked by hand and is not kept in the repository.
 
 **The loader is in place.** `415a119e "Let a port expand a macro plugin its dependencies ship"` is
 cherry-picked here (`-x`, so both series carry the same commit): `rules/swift/xmake.lua:182` adds each

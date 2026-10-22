@@ -1,4 +1,4 @@
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/required-encodings.lua [--tree DIR]
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/required_encodings.lua [--tree DIR]
   writes tests/host/required-encodings.txt from the ICU codec table of the patched WebKit tree,
   Source/WebCore/PAL/pal/text/TextCodecICU.cpp; the tree is the installed webkit package's unless
   --tree names one. Run it after moving the series to a newer upstream.]]

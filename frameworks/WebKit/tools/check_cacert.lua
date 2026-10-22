@@ -3,7 +3,7 @@ import("net.http")
 local EXPECTED = "f66dff1bdf8f96060b8177976f8b7d9254bc89bc4db933d769f7384d28480bc9"
 local UPSTREAM = "https://curl.se/ca/cacert.pem"
 
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/check-cacert.lua [--upstream]
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/check_cacert.lua [--upstream]
   verifies that examples/webview-host/cacert.pem, the trust store the standalone application carries, is the reviewed
   bundle; --upstream also compares it with what curl.se serves today.]]
 
@@ -16,7 +16,7 @@ function main(...)
     end
     local bundle = tree.member("examples", "webview-host", "cacert.pem")
     if not os.isfile(bundle) then
-        raise("check-cacert: cannot read %s", bundle)
+        raise("check_cacert: cannot read %s", bundle)
     end
     local actual = hash.sha256(bundle)
     if actual ~= EXPECTED then
@@ -37,6 +37,6 @@ function main(...)
         print("A trust store changes only after somebody reads the change:")
         print("  1. diff the two files and see which authorities moved")
         print("  2. replace examples/webview-host/cacert.pem")
-        print("  3. put the new hash in EXPECTED in tools/check-cacert.lua, in the same commit")
+        print("  3. put the new hash in EXPECTED in tools/check_cacert.lua, in the same commit")
     end
 end

@@ -45,8 +45,21 @@ if whole then
         add_tests("layout")
         add_tests("comments_check")
         add_tests("comments_test")
+        add_tests("copied_text")
         on_test(function (target, opt)
             local root = os.projectdir()
+            if path.filename(opt.name) == "copied_text" then
+                local data = path.join(root, "agent-skills", "tests", "data", "copied_text")
+                local script = path.join(root, "agent-skills", "tests", "copied_text.lua")
+                local function report(project)
+                    return os.iorunv(os.programfile(), {"l", "-P", root, script, path.join(data, "plugin"), path.join(data, project)}, {curdir = root})
+                end
+                if not report("copies"):find("repeats", 1, true) or report("clean"):find("repeats", 1, true) then
+                    opt.errors = "copied_text must report the copied fixture and not the clean one"
+                    return false
+                end
+                return true
+            end
             local commands = {layout = {path.join(root, "tools", "layout.lua")},
                               comments_check = {path.join(root, "tools", "comments.lua"), "check"},
                               comments_test = {path.join(root, "tools", "comments.lua"), "test"}}

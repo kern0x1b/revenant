@@ -26,5 +26,5 @@ they are not 26.2 API.
 There is no device measurement here: `tools/emulate.lua tests` and `tools/emulate.lua snapshots` both need the
 emulator, which was not on this machine. What is measured is the SDK's own
 availability annotation, quoted above, and the port's own header for the 6.1.3 toolchain
-(the copy `tools/api-surface.lua prepare` makes, the interface of iOS 16.4), which likewise has no multi-range selection on
+(the copy `tools/api_surface.lua prepare` makes, the interface of iOS 16.4), which likewise has no multi-range selection on
 `UITextView`.

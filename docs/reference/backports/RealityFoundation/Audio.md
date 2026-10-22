@@ -43,8 +43,8 @@ The compile, at `armv7-apple-ios6.1.3` over this tree, says it twice and names n
     Audio.swift:178:49: error: 'volume' is only available in iOS 8.0 or newer
     Audio.swift:419:16: error: 'volume' is only available in iOS 8.0 or newer
 
-One probe per member, at `armv7-apple-ios6.1.3` with this build's own port headers
-(`probe-members.sh`, `probe-members-lift.txt`), which is what says that this one property and not the
+One probe per member, at `armv7-apple-ios6.1.3` with this build's own port headers. The probe script is
+not kept in the tree; its results are below, and they are what says that this one property and not the
 protocol as a whole is what the sources reach:
 
     volume               exit 1  error: 'volume' is only available in iOS 8.0 or newer

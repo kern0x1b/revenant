@@ -21,7 +21,6 @@ rule("apple-ios")
             versions[name] = required:requirestr():match("%s(%S+)$")
         end
         target:set("toolchains", string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s]", minimum, versions["iphoneos-sdk"], versions.ld64, versions.llvm))
-        target:set("policy", "build.ccache", false)
         if not target:get("strip") then
             target:data_set("revenant.strip.unset", true)
         end

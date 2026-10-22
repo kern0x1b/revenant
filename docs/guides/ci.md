@@ -1,7 +1,9 @@
 # Continuous checks
 
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. Its two jobs run in parallel, both on `macos-26`:
+`gh workflow run check.yml --ref <branch>`. Its three jobs run in parallel, all on `macos-26`. Each selects Xcode 26.6
+and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
+choose a runner, so each job keeps its own `runs-on`.
 
 - `checks` runs `./xmakew test -P .`: every test a host with the prebuilt packages can run, in parallel. That is the
   repository's layout and comment checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
@@ -10,11 +12,13 @@
   source build. It configures with `--emulator_vulkan=n`: the Vulkan renderer's SwiftShader is built from source, which
   takes most of the job, and the tests do not use it. The option stays on for the emulator's own builds. The tests that need a device, an emulator image or firmware are not declared on CI; see
   [the tests reference](../reference/toolchain/tests.md).
-- `backports` selects the newest Xcode and sets `REVENANT_PREBUILT=kern0x1b/revenant`, so LLVM and Swift come from
-  their releases and are never built in the job. It configures and builds the Backports component
+- `backports` sets `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`, so LLVM and Swift come from their releases and are never
+  built in the job. It configures and builds the Backports component
   (`./xmakew f -P . -p iphoneos -a armv7 --component=Backports`, then `./xmakew build -P .`) and uploads
-  `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`. A branch without the `component`
-  option skips both steps, and the job summary says so.
+  `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`.
+- `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, swiftSpatial,
+  swiftCloudKit, swiftWeatherKit) and installs the Swift packages through their wrappers. It names `swift-runtime` and
+  `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a missing release of either is an error.
 
 The checks run on macOS, not Linux: the suites compile with the Mac's clang and the emulator is a macOS program. Every
 test in the default run must pass, so the `checks` job is red when one of them fails, and no test is skipped in CI
@@ -37,7 +41,8 @@ Four caches make a warm run quick:
 
 xmake recompiles a source whose mtime is newer than its depfile, and a restored cache has older depfiles than a fresh
 checkout has sources. So the job first gives every tracked file one fixed mtime, and the skeleton writer rewrites a
-generated file only when its text changed, so a restored skeleton keeps the mtime its objects were built against.
+generated file only when its text changed, so a restored skeleton keeps the mtime its objects were built against. The `checks` job takes no fixed mtime, because it
+restores only the package store, which holds no `build/` objects: nothing it restores is compared with a source's mtime.
 
 A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and

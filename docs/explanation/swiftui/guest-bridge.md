@@ -1,95 +1,94 @@
-# Поверхность SwiftUI в приложении и её воспроизведение
+# The SwiftUI surface an app needs, and how to reproduce it
 
-Вопрос: что именно приложение, собранное против настоящего SwiftUI, требует от фреймворка, и можно ли
-выдать ему то же самое нашей реализацией. Ответ проверен сборкой и линковкой, не рассуждением.
+Question: what exactly does an app built against the real SwiftUI require from the framework, and can our implementation
+hand it the same thing? The answer is checked by building and linking, not by reasoning.
 
-## Подопытное приложение
+## The test app
 
-`app.swift` — обычное SwiftUI-приложение: `@main App`, `WindowGroup`, `NavigationView`, `List`, `ForEach`
-по `Identifiable`, `NavigationLink`, `Toggle`, `Button`, `Text` со строковой интерполяцией, `@State`,
-`@StateObject`, `ObservableObject` с `@Published`, `navigationTitle`.
+`app.swift` is an ordinary SwiftUI app: `@main App`, `WindowGroup`, `NavigationView`, `List`, `ForEach` over
+`Identifiable`, `NavigationLink`, `Toggle`, `Button`, `Text` with string interpolation, `@State`, `@StateObject`,
+`ObservableObject` with `@Published`, `navigationTitle`.
 
-Сборка: `swiftc -target arm64-apple-ios14.0 -sdk <SDK 16.4> -F fw -O -wmo -parse-as-library`, где `app.swift` — это
+Build: `swiftc -target arm64-apple-ios14.0 -sdk <SDK 16.4> -F fw -O -wmo -parse-as-library`, where `app.swift` is
 `frameworks/SwiftUI/tests/data/api/app.swift`.
-`fw/SwiftUI.framework` — локальная копия фреймворка из SDK, которую делает `tools/api-surface.lua prepare` в папке прогона, с правкой одной строки `swiftinterface`
-(`os_log` со строковой интерполяцией не пересобирается компилятором 6.4). Копия нужна только чтобы
-скомпилировать подопытное приложение на этой машине; ничего из Apple не распространяется.
+`fw/SwiftUI.framework` is a local copy of the framework from the SDK, which `tools/api_surface.lua prepare` makes in the
+run's folder, with one line of `swiftinterface` changed (`os_log` with string interpolation does not rebuild with the
+6.4 compiler). The copy is needed only to compile the test app on this machine; nothing from Apple is distributed.
 
-## Что оказалось
+## What turned out
 
-Приложение требует **127 символов**: 64 из SwiftUI, 12 из Combine, 14 из stdlib, остальное — C/ObjC.
+The app requires **127 symbols**: 64 from SwiftUI, 12 from Combine, 14 from the stdlib, and the rest C and ObjC.
 
-Из 64 символов SwiftUI: 35 функций/инициализаторов/аксессоров и 29 записей метаданных
-(13 дескрипторов номинальных типов, 6 method descriptor, 3 дескриптора протоколов,
-4 associated type descriptor, 2 witness table, 1 аксессор метадаты).
+Of the 64 SwiftUI symbols, 35 are functions, initializers and accessors, and 29 are metadata records (13 nominal type
+descriptors, 6 method descriptors, 3 protocol descriptors, 4 associated type descriptors, 2 witness tables, 1 metadata
+accessor).
 
-Ни раскладки типов, ни кода фреймворка в приложении нет: SwiftUI резилиентен, поэтому приложение
-строит метадату своих типов во время работы через value witness фреймворка, а весь граф и отрисовка
-идут через три точки входа — `View._makeView`, `View._makeViewList`, `View._viewListCount`.
-Символов `_ViewInputs`/`_GraphValue`/`_ViewOutputs` приложение не импортирует вовсе: эти типы для него
-непрозрачны, он только передаёт их дальше.
+The app contains neither a type layout nor the framework's code. SwiftUI is resilient, so the app builds the metadata of
+its own types at run time through the framework's value witnesses, and the whole graph and drawing go through three
+entry points: `View._makeView`, `View._makeViewList` and `View._viewListCount`. The app does not import the
+`_ViewInputs`, `_GraphValue` or `_ViewOutputs` symbols at all: those types are opaque to it, and it only passes them on.
 
-## Форма протоколов (из кэша прошивки)
+## The protocol shapes (from the firmware cache)
 
-`View` в iOS 16.0 и 18.0 одинаков — 6 требований в таком порядке:
+`View` is the same in iOS 16.0 and 18.0: six requirements, in this order.
 
-| слот | требование |
+| slot | requirement |
 |---|---|
-| 0 | доступ к сопутствующему соответствию `Body: View` |
-| 1 | доступ к связанному типу `Body` |
-| 2 | `static _makeView(view: _GraphValue<Self>, inputs: _ViewInputs) -> _ViewOutputs` (с реализацией по умолчанию) |
-| 3 | `static _makeViewList(view: _GraphValue<Self>, inputs: _ViewListInputs) -> _ViewListOutputs` (с реализацией) |
-| 4 | `static _viewListCount(inputs: _ViewListCountInputs) -> Int?` (с реализацией) |
-| 5 | геттер `body` |
+| 0 | access to the associated conformance `Body: View` |
+| 1 | access to the associated type `Body` |
+| 2 | `static _makeView(view: _GraphValue<Self>, inputs: _ViewInputs) -> _ViewOutputs` (with a default implementation) |
+| 3 | `static _makeViewList(view: _GraphValue<Self>, inputs: _ViewListInputs) -> _ViewListOutputs` (with an implementation) |
+| 4 | `static _viewListCount(inputs: _ViewListCountInputs) -> Int?` (with an implementation) |
+| 5 | the getter `body` |
 
-`App`: соответствие, связанный тип, геттер `body`, `init()`. `Scene`: соответствие, связанный тип,
-геттер `body`, один статический метод с реализацией по умолчанию.
+`App`: the conformance, the associated type, the getter `body`, and `init()`. `Scene`: the conformance, the associated
+type, the getter `body`, and one static method with a default implementation.
 
-## Воспроизведение нашей реализацией
+## Reproducing it with our implementation
 
-`frameworks/SwiftUI/src/` собран под `arm64-apple-ios14.0` против настоящего SDK
-(`-D REV_SYSTEM_COMBINE` — вместо Combine берётся системный Combine, `-D REV_NO_FIELD_REFLECTION` —
-на месте `_forEachField`, которого нет в prebuilt stdlib, заглушка; в порте этот SPI есть, потому что
-рантайм собирается из исходников).
+`frameworks/SwiftUI/src/` is built for `arm64-apple-ios14.0` against the real SDK. `-D REV_SYSTEM_COMBINE` takes the
+system's Combine instead of ours. `-D REV_NO_FIELD_REFLECTION` stands in for `_forEachField`, which the prebuilt stdlib
+does not have; the port has that SPI, because its runtime is built from source.
 
-| шаг | совпало из 64 |
+| step | matched, of 64 |
 |---|---|
-| как было написано изначально | 36 |
-| после выравнивания формы (`LocalizedStringKey`, точки входа `View`, `List<SelectionValue, Content>`, `ForEach` без ограничения `Content: View` на типе, `ObservedObject.Wrapper`, выравнивания структурами, построители структурами) | 58 |
-| плюс `-enable-library-evolution` (без него компилятор не выпускает method descriptors) | **64** |
+| as first written | 36 |
+| after aligning the shapes (`LocalizedStringKey`, the `View` entry points, `List<SelectionValue, Content>`, `ForEach` without the `Content: View` constraint on the type, `ObservedObject.Wrapper`, alignment and builders as structs) | 58 |
+| plus `-enable-library-evolution` (without it the compiler emits no method descriptors) | **64** |
 
-Затем приложение слинковано с нашей реализацией:
+Then the app is linked against our implementation:
 
 ```
 swiftc -target arm64-apple-ios14.0 -sdk $SDK -o demo-arm64 app-nc.o arm64/SwiftUI-evo-nc.o \
   -framework UIKit -framework Foundation -framework Combine
 ```
 
-Линковка прошла, неразрешённых символов SwiftUI — **ноль**.
+The link succeeds, and **zero** SwiftUI symbols are unresolved.
 
-## Что это значит и чего не значит
+## What this means, and what it does not
 
-Значит: приложению не нужен код Apple, ему нужен интерфейс, и этот интерфейс воспроизводим целиком.
-Для конвейера рекомпилятора это снимает необходимость трогать `SwiftUI.framework` вообще: гостевая
-сторона собирается как «приложение + наша SwiftUI (arm64) + гостевой libswiftCore».
+It means that the app does not need Apple's code. It needs the interface, and that interface can be reproduced in full.
+For the recompiler pipeline it removes the need to touch `SwiftUI.framework` at all: the guest side is built as "the
+app, our SwiftUI (arm64) and the guest's libswiftCore".
 
-Не значит: что оно работает. Линковка проверяет имена и формы, а не поведение. Семантика `_makeView`
-у нас своя (наш движок строит узлы сам и эти точки входа не использует), совпадение раскладок
-резилиентных типов на исполнении не проверялось, запуска не было. Первый настоящий ответ даст проба
-рекомпилятора: это же приложение, переведённое в armv7, на экране эмулятора.
+It does not mean that the app works. Linking checks names and shapes, not behaviour. Our `_makeView` semantics are our
+own (our engine builds the nodes itself and does not use these entry points). The match of resilient type layouts has
+not been checked at run time, and nothing has been run. The first real answer comes from the recompiler's probe: this
+same app, translated to armv7, on the emulator's screen.
 
-## Требования к нашей реализации, которые отсюда следуют
+## Requirements that follow for our implementation
 
-1. Модуль обязан называться `SwiftUI` — от этого зависят манглы.
-2. Для гостевой сборки модуль собирается с `-enable-library-evolution`.
-3. Имена и метки аргументов должны совпадать с Apple дословно, включая `LocalizedStringKey`,
-   число параметров обобщённых типов и то, на каком уровне стоят ограничения (`ForEach` объявлен без
-   `Content: View`, ограничение добавляется в расширении с соответствием `View`).
-4. Порядок требований протоколов должен совпадать слот в слот (таблица выше).
+1. The module must be named `SwiftUI`, because the manglings depend on it.
+2. For the guest build, the module is built with `-enable-library-evolution`.
+3. Names and argument labels must match Apple's word for word, including `LocalizedStringKey`, the number of generic
+   parameters of the generic types, and the level at which each constraint sits. `ForEach` is declared without
+   `Content: View`, and the constraint is added in an extension with the `View` conformance.
+4. The order of the protocol requirements must match slot for slot (the table above).
 
-## Команды
+## Commands
 
-Скрипты, которые снимают формы протоколов и таблицу слотов из кэша прошивки, были исследовательскими и в репозиторий не вошли; остальная команда повторяется так:
+The scripts that extracted the protocol shapes and the slot table from the firmware cache were exploratory, and they did
+not go into the repository. The rest of the command is repeated here:
 
 ```
 nm -u app.o | sort > undef.txt

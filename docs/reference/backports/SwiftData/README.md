@@ -61,7 +61,7 @@ The link is **not** finished, and for one reason only. The 433 undefined symbols
 | **433** | |
 
 The **11** swift-foundation ones are 8 + 3: `Predicate`, `SortDescriptor`, `Date`, `UUID`. They are
-swift-foundation's, and f25214c6's run output is its typecheck-only `check.sh` path, so
+swift-foundation's, and f25214c6's run typechecked the module without linking it, so
 `lib_FoundationEssentials.dylib` does not exist anywhere. Every other import of this module resolves
 against the runtime and the Core Data backports. The ten are named one by one in
 `frameworks/Backports/tests/SwiftData/harness/symbols.lua`, and `on_test` fails when one of them stops being undefined or when an
@@ -93,8 +93,8 @@ And the build is against swift-runtime `29dd4454` (recipe digest `875c24e4...`),
 at `4d2e24e7` produces `0ccce571...` - the digest 4d2e24e7 regenerated for the backports' UIKit
 7-12 and CarPlay series, which are `backports.lua` changes and so can move the port's headers. The newest
 `backports=true` swift-runtime in the store is from 04:34 today, built against the older digest.
-**This build has to be re-measured against the runtime this tree produces, and that is a gate-sized
-job, not a band-sized one.**
+**This build has to be re-measured against the runtime this tree produces, and that is a long
+job, not a quick one.**
 
 Wired to the store, and the two places are where the wiring is: `DefaultStore` conforms to
 `HistoryProviding` and holds `fetchHistory` and `deleteHistory` at
@@ -103,7 +103,6 @@ the descriptor to the store at `files/SwiftData/ModelContext.swift:318`. What is
 `@Model`'s expansion: the seven macro names are declared and the module builds without any plugin, but
 a program that writes `@Model` needs `SwiftDataMacros`.
 
-The differential so far is one case, and it is measured on both sides: `.agent-work/probe/model/
-MissingValue.swift` is compiled against Apple's SwiftData on the host and typechecked against this
+The differential so far is one case, and it is measured on both sides: a probe model, `MissingValue.swift`, that is not kept in the repository is compiled against Apple's SwiftData on the host and typechecked against this
 module for armv7, and the host's answer to a value the schema requires and the row does not hold
 is a trap with those words - see `docs/reference/backports/SwiftData/Substrate.md`.

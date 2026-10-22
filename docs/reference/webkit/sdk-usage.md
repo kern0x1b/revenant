@@ -55,12 +55,12 @@ three for the linker:
 
     export CC_PRINT_HEADERS=1 CC_PRINT_HEADERS_FILE=<scratch>/headers.txt
     export LD_TRACE_DYLIBS=1 LD_TRACE_ARCHIVES=1 LD_TRACE_FILE=<scratch>/links.txt
-    # rebuild what is being measured, with ccache out of the way
+    # rebuild what is being measured, from an empty build directory
 
 The lists here were written from those logs by the toolchain's `sdk-usage` script, which
 has been removed from the toolchain and has no successor yet: measuring again
 means turning the two logs into SDK-relative paths, and for the engine reading its
-includes from ninja's dependency log, because ccache replays a compile without running
-the compiler and a cached compile logs nothing. The linker is always really run, so link traces
+includes from ninja's dependency log, because a compile that a cache replays runs no
+compiler and logs nothing; the engine's build has no such cache, but a launcher added later would be one. The linker is always really run, so link traces
 need no special care: everything armv7, the tweak dylibs included, links through
 the `ld64` package with `-B` from the profile.

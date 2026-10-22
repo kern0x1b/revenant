@@ -1,242 +1,242 @@
-# Перекомпиляция arm64-приложений iOS в armv7 для iOS 6: исследование и прототип
+# Recompiling arm64 iOS apps to armv7 for iOS 6: research and prototype
 
-Дата: 2026-09-17. Всё, что помечено «проверено», запускалось. Всё, что помечено «оценка», — рассуждение или экстраполяция.
-Юридическая граница соблюдена:
-- арм64-входы — только свои сборки из своих исходников;
-- Swift-рантайм взят из официального тулчейна swift.org 6.4 (Apache-2.0);
-- системные библиотеки из кэшей прошивки использовались только для локального замера покрытия и удалены.
+Date: 2026-09-17. Everything marked "verified" was run. Everything marked "estimate" is reasoning or extrapolation.
+The legal boundary was kept:
+- the arm64 inputs are only our own builds, from our own sources;
+- the Swift runtime comes from the official swift.org 6.4 toolchain (Apache-2.0);
+- system libraries from the firmware caches were used only for a local coverage measurement, and then deleted.
 
 
-## Общие фиксы трансляции (ядро направления)
-Не привязаны к конкретному приложению — нужны любому арм64→armv7 ObjC/ARC-приложению:
-1. Токен ARC возврата значения: objc_autoreleaseReturnValue/objc_retainAutoreleasedReturnValue переведены на «медленный» путь (обычные retain/autorelease), т.к. TLS-хендшейк быстрого пути портится хостовым ObjC в мостах → возвращаемые объекты становились nil.
-2. Раскладка ivar гостевых подклассов фреймворковых классов: пересчёт смещений/instanceStart/instanceSize под размер хостового суперкласса (вариант A), 8-байтные слоты сохранены. Ключ: за исходное смещение каждого ivar берётся значение из arm64 offset-переменной (ivar.offset_value, читается анализатором из образа), НЕ 0 — иначе `offset = 0 + shift` схлопывает все ivar'ы класса в одно (для подкласса NSObject shift=−4 → чтение self−4, isa попадает в старшую половину id, objc_release ловит narrowing fault). Проверка сборки: ни один xl_ivar_fixup не должен иметь нулевое guest_offset у ненулевого ivar.
-3. Единый __objc_classlist: гостевые и host-объектные списки классов сводятся в одну секцию (обход краха ld64 fixClassAliases + чтобы рантайм регистрировал классы приложения).
-4. Аргументы Protocol*: переводятся по имени через objc_getProperty→objc_getProtocol (conformsToProtocol: и т.п.).
-5. nil-терминированные вариадик-конструкторы коллекций (dictionaryWithObjectsAndKeys:/arrayWithObjects:/initWithObjects:/setWithObjects:): перехват в objc_msgSend по стеку arm64.
-6. @synchronized и прочий objc-рантайм: полный набор заголовков в мостах (objc_sync_enter и др.).
-7. weak-import классов, отсутствующих на устройстве (напр. UIAlertController за version-check): dyld связывает с 0, как в оригинале.
-8. Блоки хост→гость: хостовый блок оборачивает гостевой; _Block_copy/_Block_release, _Block_use_RR.
-9. Счётные массивы объектов (objects/count), out-параметры, структуры по значению, колбэки — маршалинг из заголовков SDK.
-10. Таблицы переходов (jump tables) — восстановление целей; патч декодера farmdec (ubfx/uxtw). Покрыты все формы, которые эмитит clang: байтовая (`ldrb`), полусловная (`ldrh`, шаг 2) и знаковословная (`ldrsw`, шаг 4, смещения относительно базы таблицы, в т.ч. ОТРИЦАТЕЛЬНЫЕ). Три системных фикса в JumpTables (xlate.cpp): (а) FindIndex принимает GEP с любым размером элемента (InstCombine канонизирует масштабированный доступ в `getelementptr [2 x i8]/[4 x i8]`), Evaluate считает адрес по реальному шагу элемента через DataLayout, а не как байтовое смещение; (б) индекс берётся из самого операнда GEP (после `sub w8,w0,#min`), а не из «сырого» значения до вычитания — иначе LVI не ограничивает его и лишние «цели» за концом таблицы усекают основную функцию; (в) домен таблицы ограничивается фактическим охранным условием блока (Guards обходит условные переходы-предшественники; Evaluate расширен ICmp/Select), т.к. InstCombine прячет диапазон-проверку в `xor(icmp eq, icmp ugt)`, непрозрачный для LVI. Проверено: OneBusAway — 195 целей, 0 отказов; ранее терявшаяся ветка MessagePack-пакера (коллекция, смещение −0x544) восстановлена.
-11. ARC-копирование гостевых блоков (objc_retainBlock): маршрутизируется в ГОСТЕВОЙ _Block_copy, а не в хостовый. Гостевой блок несёт arm64 Block_layout (8-байтные isa/invoke/descriptor, 8-байтный size в дескрипторе); хостовый Block-рантайм прочитал бы size по armv7-смещению → _Block_copy делает memmove на мусорную длину → SIGSEGV в системном memmove. Аналогично любые ARC/Block-операции над гостевыми блоками остаются на гостевой стороне.
-12. Гостевой стек: 1 МБ на поток (было 8 МБ). На 512-МБ 4S ~9 потоков × 8 МБ = ~70 МБ гостевых стеков на процесс → нехватка памяти/фриз устройства. 1 МБ соответствует стеку главного потока arm64 iOS.
-13. Диагностика на устройстве без ReportCrash: обработчик SIGSEGV/SIGBUS/SIGILL/SIGABRT/SIGTRAP в runtime пишет нативный контекст (pc/регистры) + гостевую fp-цепочку в /private/var/revenant/xlate-crash.log, затем ре-raise. На устройстве ReportCrash не запущен, iLEmu-слайд усложняет символизацию — этот дамп даёт гостевые кадры напрямую.
-16. Размер протокола в overrides: ObjCOverrides переписывает гостевой protocol_t на месте и раньше ЖЁСТКО занимал 96 байт. Реальный гостевой protocol_t короче, если нет опциональных хвостовых полей (его размер — в поле `size` по смещению 64; напр. OBAProgressIndicatorSource = 0x50 = 80). Занимая 96 вместо 80, override затирал следующие за протоколом данные в __data — в OBA это были указатели-константы на NSString-ключи словаря → приложение грузило мусорный ключ (0x28) → краш в xl_object_in. Системно для любого протокола < 96 байт, за которым идут живые данные. Фикс: читаем гостевой размер (objc.cpp protocol.size = U32(addr+64)), override занимает ровно его (host-структура протокола паддится до этого размера). Также xl_object_in теперь не падает молча на суб-__PAGEZERO целом в слоте объекта, а печатает гостевой backtrace (диагностика). Это довело OneBusAway до ВИДИМОГО РАБОЧЕГО ЭКРАНА в эмуляторе (главный экран с navbar/таб-баром/UIAlertView, без крашей).
-15. Анонимные структуры из ObjC-кодировок типов (CLLocationCoordinate2D / MKCoordinateRegion → `{?={?=dd}{?=dd}}` и т.п.): раньше EncodedType требовал имя структуры из SDK и падал на `?` → метод получал IMP-заглушку `xl_unsupported_imp` → dispatch «no bridge». Это системный класс: любой аксессор/метод со структурным свойством по значению (setCoordinate:/coordinate/setMostRecentRegion:/resultsInRegion: — 58 методов в OBA). Фикс: xlgen синтезирует RecordDecl прямо из кодировки (SynthesizeRecord, поля f0..fN, кэш по кодировке в обоих ASTContext), эмитит C-определения структур в guest.m/host.m, и штатный побайтовый мост структур (Mirror/Leaves) конвертирует раскладку между arm64 и armv7. Итог: unsupported 263→205, аксессоры структурных свойств поднимаются и диспетчеризуются. Проверено запуском (эмулятор): краш `-[… setMostRecentRegion:]` исчез, поднято +27 функций.
-14. Методы с явным va_list (`initWithFormat:arguments:` и т.п.): гостевой arm64 va_list нельзя передавать хостовому armv7-методу напрямую. На arm64 Apple ВСЕ вариадик-аргументы лежат на стеке, а va_list — простой указатель на непрерывные 8-байтовые слоты (в отличие от AAPCS64 с регистровыми save-area); хостовый armv7 va_list — тоже указатель, но на 4-байтовые слоты. Раньше generic-мост отдавал сырой гостевой указатель → метод читал мусор (напр. байты строки как указатель) → краш. Теперь `initWithFormat:arguments:` идёт через ручной мост (xlgen manual-map → xl_manual_init_with_format_arguments), который переразбирает формат из гостевого va_list как из плоского массива 8-байтовых слотов (xl_format_marshal_valist) и строит строку на хосте. Диагностика краша: гостевой backtrace iLEmu (`[control] thread … frames=…`), кадры 0x0000xxxx-0x005cxxxx — хостовый код (рантайм+мосты+поднятый код), 0x3xxxxxxx — общий кэш (слайд=0), 0x10xxxxxx — гостевые данные; символизация по modules/apple/dyld.lua.
+## General translation fixes (the core of the direction)
+Not tied to a particular app: any arm64-to-armv7 ObjC/ARC app needs them.
+1. The ARC token for a returned value: `objc_autoreleaseReturnValue` and `objc_retainAutoreleasedReturnValue` were moved to the "slow" path (plain retain and autorelease), because the TLS handshake of the fast path was corrupted by host ObjC inside the bridges, so returned objects became nil.
+2. The ivar layout of guest subclasses of framework classes: offsets, `instanceStart` and `instanceSize` are recomputed for the size of the host superclass (variant A), and the 8-byte slots are kept. The key: the original offset of each ivar is taken from the arm64 offset variable (`ivar.offset_value`, read by the analyser from the image), NOT 0. Otherwise `offset = 0 + shift` collapses all the class's ivars into one. For a subclass of NSObject, shift is -4, so the read goes to self-4, `isa` lands in the high half of `id`, and `objc_release` catches a narrowing fault. Build check: no `xl_ivar_fixup` may have a zero `guest_offset` for a non-zero ivar.
+3. One `__objc_classlist`: the guest and the host-object class lists are merged into one section. This avoids a crash in ld64's `fixClassAliases`, and it lets the runtime register the app's classes.
+4. `Protocol *` arguments are translated by name, through `objc_getProperty` and `objc_getProtocol` (`conformsToProtocol:` and similar).
+5. Nil-terminated variadic collection constructors (`dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:`) are intercepted in `objc_msgSend`, using the arm64 stack.
+6. `@synchronized` and the rest of the ObjC runtime: the full set of headers in the bridges (`objc_sync_enter` and others).
+7. Classes that are missing on the device (for example `UIAlertController`, behind a version check) are weak-imported: dyld binds them to 0, as in the original.
+8. Host-to-guest blocks: a host block wraps the guest block; `_Block_copy`, `_Block_release`, `_Block_use_RR`.
+9. Counted arrays of objects (objects and count), out-parameters, structs by value, callbacks: marshalling from the SDK headers.
+10. Jump tables: recovery of their targets, and a patch to the `farmdec` decoder (`ubfx`, `uxtw`). Every form clang emits is covered: byte (`ldrb`), half-word (`ldrh`, step 2), and signed word (`ldrsw`, step 4, offsets relative to the table's base, including NEGATIVE ones). Three system fixes in JumpTables (`recompiler/src/xlate/xlate.cpp`): (a) `FindIndex` accepts a GEP of any element size (InstCombine canonicalises scaled accesses into `getelementptr [2 x i8]` or `[4 x i8]`), and `Evaluate` computes the address with the element's real step through DataLayout, not as a byte offset; (b) the index is taken from the GEP operand itself (after `sub w8,w0,#min`), not from the raw value before the subtraction. Otherwise LVI does not bound it, and extra "targets" past the end of the table truncate the main function; (c) the table's domain is bounded by the block's actual guard condition (Guards walks the conditional predecessor branches, and Evaluate is extended with ICmp and Select), because InstCombine hides the range check in `xor(icmp eq, icmp ugt)`, which is opaque to LVI. Verified: OneBusAway has 195 targets and 0 failures; a branch of the MessagePack packer (a collection, at offset -0x544) that had been lost is recovered.
+11. ARC copies of guest blocks (`objc_retainBlock`) are routed to the GUEST `_Block_copy`, not the host's. A guest block carries the arm64 `Block_layout` (8-byte isa, invoke and descriptor, an 8-byte size in the descriptor). The host Block runtime would read the size at the armv7 offset, so `_Block_copy` would memmove a garbage length, and SIGSEGV in the system's memmove. Likewise, any ARC or Block operation on guest blocks stays on the guest side.
+12. The guest stack: 1 MB per thread (it was 8 MB). On a 512 MB 4S, about 9 threads at 8 MB is roughly 70 MB of guest stacks per process, which means a memory shortage and a device freeze. 1 MB matches the main thread's stack on arm64 iOS.
+13. Diagnostics on the device without ReportCrash: the SIGSEGV, SIGBUS, SIGILL, SIGABRT and SIGTRAP handler in the runtime writes the native context (pc and registers) and the guest fp chain to `/private/var/revenant/xlate-crash.log`, and then re-raises. ReportCrash does not run on the device, and the iLEmu slide makes symbolication hard, so this dump gives the guest frames directly.
+16. The size of a protocol in the overrides: `ObjCOverrides` rewrote the guest `protocol_t` in place and always took 96 bytes. A real guest `protocol_t` is shorter when it has no optional tail fields. Its size is in the `size` field at offset 64; for example, `OBAProgressIndicatorSource` is 0x50 = 80. By taking 96 instead of 80, the override overwrote the data that followed the protocol in `__data`. In OBA that was the constant pointers to the NSString keys of a dictionary, so the app loaded a garbage key (0x28), and it crashed in `xl_object_in`. This is systematic for any protocol under 96 bytes that has live data after it. The fix: read the guest size (`recompiler/src/xlate/objc.cpp`, `protocol.size = U32(addr+64)`), and the override takes exactly that size (the host's protocol structure is padded up to it). Also, `xl_object_in` no longer fails silently on a sub-`__PAGEZERO` integer in an object slot; it prints a guest backtrace (diagnostics). This brought OneBusAway to a VISIBLE WORKING SCREEN in the emulator (the main screen with a navigation bar, a tab bar and a UIAlertView, without crashes).
+15. Anonymous structs from the ObjC type encodings (`CLLocationCoordinate2D` and `MKCoordinateRegion` become `{?={?=dd}{?=dd}}` and similar). Before, `EncodedType` required a struct name from the SDK, and it failed on `?`. The method then got an IMP stub, `xl_unsupported_imp`, and the dispatch reported "no bridge". This is a systematic class: any accessor or method with a struct property by value (`setCoordinate:`, `coordinate`, `setMostRecentRegion:`, `resultsInRegion:`: 58 methods in OBA). The fix: xlgen synthesises the RecordDecl straight from the encoding (`SynthesizeRecord`, fields f0 to fN, cached by encoding in both ASTContexts), emits C struct definitions into the guest and host sources that xlgen generates, and the standard byte-wise struct bridge (Mirror and Leaves) converts the layout between arm64 and armv7. The result: unsupported went from 263 to 205, and the struct-property accessors come up and dispatch. Verified by a run in the emulator: the crash in `-[… setMostRecentRegion:]` is gone, and 27 more functions come up.
+14. Methods with an explicit `va_list` (`initWithFormat:arguments:` and similar): the guest arm64 `va_list` cannot be passed directly to a host armv7 method. On arm64, Apple puts ALL variadic arguments on the stack, and a `va_list` is a plain pointer to contiguous 8-byte slots (unlike AAPCS64, which has a register save area). The host armv7 `va_list` is also a pointer, but to 4-byte slots. The generic bridge used to pass the raw guest pointer, so the method read garbage (for example the bytes of a string taken as a pointer), and crashed. Now `initWithFormat:arguments:` goes through a manual bridge (xlgen's manual map, `xl_manual_init_with_format_arguments`), which re-parses the format from the guest `va_list` as a flat array of 8-byte slots (`xl_format_marshal_valist`), and builds the string on the host. Diagnosing such a crash: the iLEmu guest backtrace (`[control] thread … frames=…`). Frames 0x0000xxxx to 0x005cxxxx are host code (the runtime, the bridges and the code that was brought up); 0x3xxxxxxx is the shared cache (slide=0); 0x10xxxxxx is guest data. Symbolicate with `toolchain/modules/apple/dyld.lua`.
 
-## Мост блоков гость↔хост (вариант A+, реализовано)
-Проблема: гостевой блок несёт arm64-раскладку (isa@0/8, flags@8, invoke@16, descriptor@24), хостовый — armv7 (isa@0/4, flags@4, invoke@12, descriptor@16). Ни удержание (счётчик inline во flags на разных смещениях), ни вызов (invoke по фикс-смещению без сообщения) не переносятся на едином плоском объекте. Решение A+ (согласовано с сессией-архитектором): ДВА представления с канонической двусторонней идентичностью и связанным единым счётчиком.
-- Идентичность: таблица guest_block→host_wrapper (CFDictionary); один и тот же гостевой блок всегда даёт ту же обёртку (сравнение указателей, блок-ключом, повторные пересечения); host→guest разворачивает обёртку в тот же гостевой блок.
-- Счётчик один: обёртка держит ровно одну гостевую ссылку весь срок; retain/release/autorelease/retainBlock и ARC-RVO гостевого блока маршрутизируются через хостовый счётчик обёртки; при обнулении dispose делает гостевой _Block_release.
-- Вызов: хост зовёт invoke обёртки → трамплин по сигнатуре блока (тип-кодировка из дескриптора; t0..t4 для целых/указательных аргументов; неподдерживаемая сигнатура → явный fault); гость зовёт свой блок напрямую.
-- Граница: xlgen помечает объект-указатели (Value.is_object); ScalarToHost→xl_object_in (оборачивает гостевые блоки), ScalarToGuest→xl_object_out (разворачивает обёртки) — покрывает аргументы, элементы counted-массивов, возвраты, поля структур. Безопасно: расходится только для блоков/обёрток. Плюс путь получателя-блока в xl_h_objc_msgSend.
-Проверено на реальном 4S: приложение прошло блок-краши (удержание блока в NSArray, ARC-RVO блока) и ушло вглубь инициализации. Открытый хвост: (1) хост-вызов забоксенного блока из контейнера (enumerateObjectsUsingBlock:) — ребро полноты в корпус-тесте tests/blockid.m; (2) текущий фронтир OneBusAway — nil-элемент objects[1] в счётном массиве пути -[TFLogManager log:] (TestFlight), захвачен в /private/var/revenant/xlate-exception.log.
+## The guest-host block bridge (variant A+, implemented)
+The problem: a guest block has the arm64 layout (isa at 0 and 8, flags at 8, invoke at 16, descriptor at 24), and a host block has the armv7 layout (isa at 0 and 4, flags at 4, invoke at 12, descriptor at 16). Neither retention (a counter inline in `flags`, at different offsets) nor a call (invoke at a fixed offset, without a message) carries over to one flat object. Solution A+ (agreed with the architect session): TWO representations with a canonical two-way identity and one linked counter.
+- Identity: a table from guest_block to host_wrapper (a `CFDictionary`). The same guest block always gives the same wrapper (pointer comparison, with the block as the key, for repeated crossings). Host to guest unwraps the wrapper to the same guest block.
+- One counter: the wrapper holds exactly one guest reference for its whole life. `retain`, `release`, `autorelease`, `retainBlock` and the ARC return-value optimisation of a guest block are routed through the wrapper's host counter. When it reaches zero, dispose makes the guest `_Block_release`.
+- The call: the host calls the wrapper's invoke, which goes through a trampoline for the block's signature (the type encoding comes from the descriptor; `t0` to `t4` for integer and pointer arguments; an unsupported signature gives an explicit fault). The guest calls its own block directly.
+- The boundary: `xlgen` marks object pointers (`Value.is_object`). `ScalarToHost` goes to `xl_object_in` (which wraps guest blocks), and `ScalarToGuest` goes to `xl_object_out` (which unwraps the wrappers). This covers arguments, the elements of counted arrays, returns and struct fields. It is safe: the behaviour differs only for blocks and wrappers. Plus the block-receiver path in `xl_h_objc_msgSend`.
+Verified on a real 4S: the app got past the block crashes (retaining a block in an NSArray, and the ARC return-value optimisation of a block) and went deep into initialisation. Open tail: (1) a host call of a boxed block from a container (`enumerateObjectsUsingBlock:`), an edge of completeness in the corpus test `recompiler/tests/blockid/blockid.m`; (2) the current frontier of OneBusAway: a nil element `objects[1]` in the counted array of the path of `-[TFLogManager log:]` (TestFlight), captured in `/private/var/revenant/xlate-exception.log`.
 
-## 1. Вердикт
+## 1. Verdict
 
-| Уровень | Итог | Основание |
+| Level | Outcome | Basis |
 |---|---|---|
-| A. Простые ObjC/C-утилиты | **Осуществимо, доказано** | `bench` (C) и `fnd` (Foundation) оттранслированы из arm64 и запущены на эмулированной iOS 6.0. Код выхода 0, stdout совпал с эталоном побитно. |
-| B. UIKit-приложения на ObjC | **Осуществимо, доказано на своём приложении** | UIDemo работает на iOS 6.0: навигация, таблица, push, `drawRect:` с CoreGraphics, NSTimer, блочная анимация с completion, weak-делегат, протоколы, касания. Падений нет, кадры корректны. |
-| C. Swift-приложения | **В этой архитектуре заблокировано** | Проблема в объектной модели, а не в инструкциях (раздел 7). |
-| D. Широкий класс App Store | **Нет** | Swift (C) плюс минимальные версии iOS 13–16, то есть отсутствующие в iOS 6 API. Плюс исключения через транслированные кадры, расширения, JIT. |
+| A. Simple ObjC and C utilities | **Feasible, proven** | `bench` (C) and `fnd` (Foundation) were translated from arm64 and run on the emulated iOS 6.0. Exit code 0, and stdout matched the reference byte for byte. |
+| B. UIKit apps in ObjC | **Feasible, proven on our own app** | UIDemo works on iOS 6.0: navigation, a table, a push, `drawRect:` with CoreGraphics, NSTimer, a block animation with a completion, a weak delegate, protocols, touches. No crashes, and the frames are correct. |
+| C. Swift apps | **Blocked in this architecture** | The problem is the object model, not the instructions (section 7). |
+| D. The broad App Store class | **No** | Swift (C) plus minimum iOS versions of 13 to 16, that is, APIs absent from iOS 6. Plus exceptions through translated frames, extensions and JIT. |
 
-Архитектура, которая работает, — вариант (c) из постановки:
-1. Код приложения поднимается из arm64 в LLVM IR с полной 64-битной семантикой регистров и памяти.
-2. Гостевой код живёт в 32-битном адресном пространстве хоста, **гостевой адрес = хостовый адрес**. Трансляция адресов бесплатна: `inttoptr` из i64 в 32-битный указатель, адресная арифметика LLVM сама сужается до 32 бит.
-3. Системные фреймворки остаются родными 32-битными.
-4. Граница проходит через мосты, **сгенерированные из заголовков SDK**. Один SDK разбирается clang'ом дважды, как arm64 и как armv7.
-5. ObjC-метаданные приложения переписываются на месте в 32-битный формат objc4.
+The architecture that works is variant (c) of the statement of the problem:
+1. The app's code is lifted from arm64 into LLVM IR, with full 64-bit register and memory semantics.
+2. The guest code lives in the host's 32-bit address space, and **guest address = host address**. Address translation is free: `inttoptr` from i64 to a 32-bit pointer, and LLVM's address arithmetic narrows itself to 32 bits.
+3. The system frameworks stay native 32-bit ones.
+4. The boundary runs through bridges **generated from the SDK headers**. One SDK is parsed by clang twice, as arm64 and as armv7.
+5. The app's ObjC metadata is rewritten in place into the 32-bit objc4 format.
 
-Биткод как путь не существует. Сужение указателей при подъёме (вариант a) без типов некорректно.
+A bitcode route does not exist. Narrowing pointers during the lift (variant a) without types is incorrect.
 
-## 2. Что проверено запуском (iPhone3,1, iOS 6.0 10A403, эмулятор iLEmu)
+## 2. What was verified by running (iPhone3,1, iOS 6.0 10A403, the iLEmu emulator)
 
-| Тест | Результат | Детали |
+| Test | Result | Details |
 |---|---|---|
-| bench (C: crc32, qsort с колбэком, связный список, double-матрица, snprintf/printf) | **PASS** | Код выхода 0, stdout = эталон. |
-| fnd (класс со свойствами/ivars, категория, блоки, for-in, NSMutableDictionary, dispatch_sync, NSLog, CGRect по значению) | **PASS** | Прогон `xlate-fnd-171501`: stdout = эталон, строка NSLog верна. |
-| blockid (мост блоков A+: блок в NSArray, чтение+вызов из гостя, идентичность, блок-ключ словаря, переживание освобождения массива, вызов из хоста enumerateObjectsUsingBlock:) | **PASS** | `recompiler/tests/blockid/blockid.m`; прогон `blkid8`: stderr `blockid: PASS (failures=0)`. |
-| UIDemo (UIKit) | **PASS** | Все отметки: `launched`, `selected 7`, `detail-appeared Row 7`, `animation-finished 1`, `ticks 10 Row 7`; 1346 перерисовок за ~2 мин. Касания `tap 160 16`, `tap 100 86` доставлены в гостевой `touchesEnded:` и через weak-делегата (CGPoint по значению) дошли обратно. Фон `groupTableViewBackgroundColor` на кадре чёрный; причина не разбиралась. |
+| bench (C: crc32, qsort with a callback, a linked list, a double matrix, snprintf and printf) | **PASS** | Exit code 0, stdout equal to the reference. |
+| fnd (a class with properties and ivars, a category, blocks, for-in, NSMutableDictionary, dispatch_sync, NSLog, a CGRect by value) | **PASS** | Run `xlate-fnd-171501`: stdout equal to the reference, and the NSLog line is correct. |
+| blockid (the A+ block bridge: a block in an NSArray, read and call from the guest, identity, a block as a dictionary key, surviving the release of the array, a host call of `enumerateObjectsUsingBlock:`) | **PASS** | `recompiler/tests/blockid/blockid.m`; run `blkid8`: stderr `blockid: PASS (failures=0)`. |
+| UIDemo (UIKit) | **PASS** | All the marks: `launched`, `selected 7`, `detail-appeared Row 7`, `animation-finished 1`, `ticks 10 Row 7`; 1346 redraws in about 2 minutes. The touches `tap 160 16` and `tap 100 86` were delivered to the guest `touchesEnded:` and came back through the weak delegate (a CGPoint by value). The `groupTableViewBackgroundColor` background is black on the frame; the cause was not investigated. |
 
-Импорты всех трёх бинарников проверены `dyld.missing_imports` тулчейна против `~/.revenant/dyld/6.0`: 0 отсутствующих из 155 738 экспортов.
-Селекторы тестов проверены против `selectors_armv7.txt` iOS 6.0: все присутствуют. Значит, тесты проверяют трансляцию, а не бэкпорты.
+The imports of all three binaries were checked with the toolchain's `dyld.missing_imports` against `~/.revenant/dyld/6.0`: 0 missing out of 155,738 exports.
+The test selectors were checked against the iOS 6.0 selector list, which is not kept in the repository: all are present. So the tests check the translation, not the backports.
 
-## 3. Лифтеры: состояние и замер
+## 3. Lifters: state and measurement
 
-Сводка по публичным данным (детали и ссылки — в ответе владельцу):
-- **remill** (активен, v6.0.1): семантика AArch64 неполная, CFG не восстанавливает. На LLVM 23 не собирался без патча `remill-llvm23-fp16.patch`. xlate remill не использует, поэтому при переходе зависимостей на пакеты xmake ни пакета, ни патча для него нет: патч остался в истории git, в `deps/patches/`.
-- **McSema**: в архиве. **anvill**: заброшен.
-- **rev.ng**: поддерживает AArch64 и Mach-O, но линковка перекомпилированного кода жёстко x86-64 Linux, AArch64 в QA не запускается.
-- **RetDec**: IR не перекомпилируем.
-- **mctoll**: AArch64 не поддерживает.
-- **Lasagne**: работает в обратную сторону (x86-64 → Arm64), 1,51× к нативу.
-- **Rellume**/**Instrew** (активны, LLVM 21–23): лифтер под качество перекомпилированного кода.
-- **Готового транслятора LP64 → ILP32 нет ни у кого.** QEMU в 10.0 убрал 64-битных гостей на 32-битных хостах.
+Summary from public sources (details and links are in the reply to the owner):
+- **remill** (active, v6.0.1): its AArch64 semantics are incomplete, and it does not recover the CFG. It did not build on LLVM 23 without the patch `remill-llvm23-fp16.patch`. xlate does not use remill, so when the dependencies move to xmake packages there is neither a package nor a patch for it: the patch remains in the git history.
+- **McSema**: archived. **anvill**: abandoned.
+- **rev.ng**: supports AArch64 and Mach-O, but linking the recompiled code is hard-wired to x86-64 Linux, and AArch64 does not run in its QA.
+- **RetDec**: its IR cannot be recompiled.
+- **mctoll**: does not support AArch64.
+- **Lasagne**: works in the opposite direction (x86-64 to Arm64), 1.51× native.
+- **Rellume** and **Instrew** (active, LLVM 21 to 23): lifters aimed at the quality of the recompiled code.
+- **No ready LP64-to-ILP32 translator exists anywhere.** QEMU 10.0 dropped 64-bit guests on 32-bit hosts.
 
-Покрытие инструкций на реальном коде (проверено, `coverage/`):
+Instruction coverage on real code (verified; the measurement is not kept in the repository):
 
-| Корпус | remill (родные семантики) | Rellume |
+| Corpus | remill (native semantics) | Rellume |
 |---|---|---|
-| bench (374 инстр.) | 30 не поднято (NEON `ushr/umull/xtn/fmla`, `stp d9,d8` pre-index, `scvtf`) | 0 |
+| bench (374 instructions) | 30 not lifted (NEON `ushr`, `umull`, `xtn`, `fmla`; `stp d9,d8` pre-index; `scvtf`) | 0 |
 | fnd (494) | 6 | 0 |
-| libsqlite3 из кэша iOS 10 arm64 (~270 тыс.) | 227 реальных | 5 (`brk`, `clrex`) |
-| libswiftCore arm64, swift.org 6.4 (964 тыс.) | — | ~430 реальных (`clrex` 155, half-float `fcvt` ~270) |
+| libsqlite3 from the iOS 10 arm64 cache (about 270 thousand) | 227 real | 5 (`brk`, `clrex`) |
+| libswiftCore arm64, swift.org 6.4 (964 thousand) | not measured | about 430 real (`clrex` 155, half-float `fcvt` about 270) |
 
-- У remill декодер описывает 1 160 форм, извлечение операндов — 443, семантика — 680 ISEL.
-- Вариант remill на SLEIGH (Ghidra) падает на верификации IR.
-- **Выбран Rellume.**
-- В старых arm64-бинарниках (iOS 10) таблицы переходов лежат прямо в `__text`. Для Rellume это данные, не код; но косвенные переходы внутри функции прототип пока не поддерживает (раздел 8).
+- remill's decoder describes 1,160 forms, operand extraction 443, and semantics 680 ISEL.
+- The remill variant on SLEIGH (Ghidra) fails the IR verification.
+- **Rellume was chosen.**
+- In old arm64 binaries (iOS 10), the jump tables sit directly in `__text`. For Rellume they are data, not code, but the prototype does not yet support indirect jumps inside a function (section 8).
 
-## 4. Модель данных: варианты
+## 4. The data model: the variants
 
-**(a) Сузить указатели при подъёме.** В машинном коде смещения полей, размеры `malloc`, шаги по массивам, выравнивания и константы `sizeof` уже вычислены. Типов нет.
-- Сужение корректно только при полной типовой реконструкции, а это на практике нерешаемо: указатели в данных, `memcpy` размеров, хэши указателей, union.
-- Даже биткод содержит LP64-факты. В эксперименте `bitcode/util-arm64.ll`:
+**(a) Narrow the pointers during the lift.** In machine code, field offsets, `malloc` sizes, array strides, alignments and `sizeof` constants are already computed. There are no types.
+- Narrowing is correct only with a full type reconstruction, and in practice that cannot be solved: pointers in data, `memcpy` of sizes, pointer hashes, unions.
+- Even bitcode contains LP64 facts. In an experiment that is not kept in the repository:
   - `class_ro_t {instanceStart 8, instanceSize 24}`;
   - `method_list entsize 24`, `ivar entsize 32`, `prop entsize 16`;
-  - `%struct.Entry = {ptr, i64, double}` при `malloc(i64 72)`;
-  - `CGFloat = double`, `NSInteger = i64`, ABI возврата CGRect уже опущен.
+  - `%struct.Entry = {ptr, i64, double}` with `malloc(i64 72)`;
+  - `CGFloat = double`, `NSInteger = i64`, and the CGRect return ABI is already lowered.
 
-**(b) 64-битное адресное пространство гостя с программной трансляцией адресов.** Не нужно. Гостевые образы размещаются по 32-битным адресам (на `0x10000000`), а все остальные адреса (malloc, стеки) приходят от хоста и тоже меньше 4 ГБ. Трансляция адреса — это отбрасывание нулевой старшей половины, 0 инструкций.
+**(b) A 64-bit guest address space with software address translation.** Not needed. The guest images are placed at 32-bit addresses (at `0x10000000`), and all the other addresses (malloc, stacks) come from the host and are also under 4 GB. Address translation is then dropping the zero high half: 0 instructions.
 
-**(c) Гибрид, реализован.** Цена по разделу 6. Стык с системой: 64-битные слоты гостя и 32-битные значения хоста согласуются конвертерами. Правила в прототипе:
-- **Скаляры.** Расширение/сужение с проверкой переполнения. Сторожевые значения переносятся: `NSNotFound`, `LONG_MAX` и т. п. отображаются в свои гостевые/хостовые эквиваленты. При реальном переполнении — явная авария с диагностикой.
-- **Структуры по значению.** Зеркала гостевой раскладки и почленное преобразование: CGRect из double в float и обратно.
-- **Указатели на скаляр/объект (out-параметры).** Копирование в хостовый временный слот и обратно.
-- **Указатели на структуры.** Копирование туда и, если не const, обратно.
-- **Массивы с параметром-счётчиком** (`objects/count`, `argv/argc`). Поэлементно, с NULL-терминатором.
-- **Функции-колбэки.** Пулы статических трамплинов по сигнатуре; таблица целей заполняется во время работы, W^X не нарушается.
-- **Блоки.** Хостовый блок оборачивает гостевой. Держатель вызывает гостевой `_Block_copy`/`_Block_release` из переведённого BlocksRuntime (compiler-rt). Гостевые блоки ретейнят захваченные объекты через `_Block_use_RR`.
-- **printf/NSLog/`stringWithFormat:`.** Формат разбирается и переписывается (`%ld` → `%lld`), va_list пересобирается по раскладке iOS armv7.
-- **Слабые ссылки.** Адрес гостевого слота передаётся напрямую, потому что рантайм запоминает адрес. Это корректно: little-endian и старшая половина всегда 0.
-- **Fast enumeration.** Ручной маршалер: хостовое состояние живёт внутри `extra[]` гостевого, элементы копируются в 8-байтовый буфер.
+**(c) A hybrid, implemented.** The price is in section 6. At the boundary with the system, the guest's 64-bit slots and the host's 32-bit values are reconciled by converters. The rules in the prototype:
+- **Scalars.** Extension and narrowing with an overflow check. Sentinel values carry over: `NSNotFound`, `LONG_MAX` and similar map to their guest and host equivalents. On a real overflow, an explicit fault with diagnostics.
+- **Structs by value.** Mirrors of the guest layout, and a field-by-field conversion: CGRect from double to float and back.
+- **Pointers to a scalar or an object (out-parameters).** Copied into a host temporary slot and back.
+- **Pointers to structs.** Copied there and, unless const, back.
+- **Arrays with a count parameter** (`objects` and `count`, `argv` and `argc`). Element by element, with a NULL terminator.
+- **Callback functions.** Pools of static trampolines by signature. The table of targets is filled in at run time, so W^X is not violated.
+- **Blocks.** A host block wraps the guest block. The holder calls the guest `_Block_copy` and `_Block_release` from the translated BlocksRuntime (compiler-rt). Guest blocks retain the objects they capture through `_Block_use_RR`.
+- **printf, NSLog and `stringWithFormat:`.** The format is parsed and rewritten (`%ld` becomes `%lld`), and the `va_list` is rebuilt for the iOS armv7 layout.
+- **Weak references.** The guest slot's address is passed directly, because the runtime records the address. This is correct: little-endian, and the high half is always 0.
+- **Fast enumeration.** A hand-written marshaller: the host state lives inside the guest's `extra[]`, and the elements are copied into an 8-byte buffer.
 
-Объём мостов для всего API (проверено, `xlgen --survey-out`, SDK 16.4, UIKit + Foundation + CoreGraphics + QuartzCore и включённое):
+The size of the bridges for the whole API (verified, `xlgen --survey-out`, SDK 16.4, with UIKit, Foundation, CoreGraphics and QuartzCore, and their inclusion):
 
-| | Всего | Напрямую | Автоматически с преобразованием | Форматные | Прочие variadic | Нужны ручные правила |
+| | Total | Direct | Automatic with conversion | Format | Other variadic | Need manual rules |
 |---|---|---|---|---|---|---|
-| C-функции | 2 746 | 1 874 (68%) | 515 (19%) | 6 | 15 | 332 (12%) |
-| ObjC-методы | 12 271 | 10 547 (86%) | 1 562 (13%) | 13 | 24 | 125 (1%) |
+| C functions | 2,746 | 1,874 (68%) | 515 (19%) | 6 | 15 | 332 (12%) |
+| ObjC methods | 12,271 | 10,547 (86%) | 1,562 (13%) | 13 | 24 | 125 (1%) |
 
-- Преобразования в ObjC-методах: 960 структур по значению, 402 блока, 228 out-указателей.
-- Ручные правила в ObjC: 70 возвращают блок, 47 указывают на данные другой раскладки.
-- Ручные правила в C в основном — указатели на структуры (`usr/include` 177, CoreGraphics 61, CoreFoundation 57).
-- Отдельный риск — 20 из 186 инлайн-функций заголовков читают поля структур другой раскладки. Классический пример — `putc`/`getc`-макросы на `FILE`.
-- Эвристика заголовков не гарантирует семантику. Пример найден на деле: `char **argv` в `UIApplicationMain` сначала классифицировался как одиночный out-слот. Правила по именам параметров и ручные исключения нужны всегда.
+- Conversions in ObjC methods: 960 structs by value, 402 blocks, 228 out-pointers.
+- Manual rules in ObjC: 70 return a block, and 47 point at data of another layout.
+- Manual rules in C are mostly pointers to structs (`usr/include` 177, CoreGraphics 61, CoreFoundation 57).
+- A separate risk: 20 of the 186 inline functions in the headers read struct fields of another layout. The classic example is the `putc` and `getc` macros on `FILE`.
+- The header heuristic does not guarantee the semantics. An example found in practice: `char **argv` in `UIApplicationMain` was first classified as a single out-slot. Rules by parameter name, and manual exceptions, are always needed.
 
-## 5. Биткод (проверено, `bitcode/`)
+## 5. Bitcode (verified; the experiment is not kept in the repository)
 
-1. Apple clang 21 с `-fembed-bitcode` ещё кладёт `__LLVM,__bitcode` в `.o`.
-2. Apple ld-27037 пишет «-bitcode_bundle is no longer supported and will be ignored». В исполняемом файле биткода нет. В IPA из App Store его нет тоже: Xcode 14 объявил биткод устаревшим, стор его вырезает (внешний источник).
-3. Свой arm64-биткод, перенацеленный на armv7:
-   - компилируется только после удаления атрибутов `apple-a7`;
-   - ld64 956.6 падает с assert в `CFStringSection::targetContent`, так как LP64-раскладка `__cfstring` 24 байта вместо 16.
-4. Apple на watchOS переводила armv7k → arm64_32 через биткод именно потому, что arm64_32 — ILP32 с согласованным ABI. Путь LP64 → ILP32 Apple не делала (внешний источник: RFC LLVM 2019).
+1. Apple clang 21 with `-fembed-bitcode` still puts `__LLVM,__bitcode` into the `.o`.
+2. Apple ld-27037 prints "-bitcode_bundle is no longer supported and will be ignored". The executable has no bitcode. The IPA from the App Store does not have it either: Xcode 14 declared bitcode deprecated, and the store strips it (external source).
+3. Our own arm64 bitcode, retargeted to armv7:
+   - it compiles only after the `apple-a7` attributes are removed;
+   - ld64 956.6 fails with an assert in `CFStringSection::targetContent`, because the LP64 layout of `__cfstring` is 24 bytes instead of 16.
+4. Apple translated armv7k to arm64_32 through bitcode on watchOS precisely because arm64_32 is ILP32 with a consistent ABI. Apple did not take the LP64-to-ILP32 path (external source: the LLVM RFC of 2019).
 
-## 6. Производительность
+## 6. Performance
 
-**Стенд** (проверено, `tests/perf/`). Одинаковые рабочие нагрузки, нативный armv7 против arm64 → xlate → armv7. Число исполненных инструкций в Unicorn (модель Cortex-A9), результаты побитно равны.
+**The bench** (verified, `tests/perf/`). The same workloads, native armv7 against arm64 through xlate to armv7. The number of instructions executed in Unicorn (a Cortex-A9 model), and the results are byte-for-byte equal.
 
-| Ядро | Нативно | Натив с 64-битным `long` | Трансляция | Трансляция / натив |
+| Kernel | Native | Native with a 64-bit `long` | Translated | Translated / native |
 |---|---|---|---|---|
-| crc32 | 591 385 | 1,00× | 723 718 | **1,22×** |
-| sha256 | 3,78 млн | 1,00× | 5,30 млн | **1,40×** |
-| fnv64 (u64) | 589 846 | 1,00× | 786 547 | **1,33×** |
-| sort (рекурсия, `long`) | 3,30 млн | 2,38× | 11,2 млн | **3,39×** |
-| list (указатели, `long`) | 2,94 млн | 1,26× | 10,0 млн | **3,41×** |
-| geometry (double, структуры) | 1,48 млн | 1,01× | 5,31 млн | **3,59×** |
-| matrix (double) | 1,63 млн | 1,00× | 3,28 млн | **2,01×** |
-| text (разбор строки) | 1,48 млн | 1,00× | 2,98 млн | **2,02×** |
+| crc32 | 591,385 | 1.00× | 723,718 | **1.22×** |
+| sha256 | 3.78 M | 1.00× | 5.30 M | **1.40×** |
+| fnv64 (u64) | 589,846 | 1.00× | 786,547 | **1.33×** |
+| sort (recursion, `long`) | 3.30 M | 2.38× | 11.2 M | **3.39×** |
+| list (pointers, `long`) | 2.94 M | 1.26× | 10.0 M | **3.41×** |
+| geometry (double, structs) | 1.48 M | 1.01× | 5.31 M | **3.59×** |
+| matrix (double) | 1.63 M | 1.00× | 3.28 M | **2.01×** |
+| text (string parsing) | 1.48 M | 1.00× | 2.98 M | **2.02×** |
 
-- **Оценка:** на A4/A5 гостевой код будет в 1,2–3,6 раза медленнее нативной armv7-перекомпиляции того же исходника. Часть этого — цена самой модели LP64, которую нельзя убрать без сужения: на сортировке 2,38× из 3,39×.
-- Такты CPU не мерились. Реального устройства не было, скорость эмулятора не показательна.
-- В UI-приложении основное время тратится в родных 32-битных фреймворках (отрисовка, UIKit). Для UI-кода **оценка** терпимая, для вычислительного — заметная.
-- **Размер кода** растёт в 8–9 раз: bench — 4,9 КБ гостевого кода (с шимами) → 44 КБ; UIDemo — 13,5 КБ → 108 КБ. Причины: сброс/перезагрузка State вокруг вызовов, проверка `PC == адрес возврата` после каждого вызова, 64-битная арифметика парами `adds/adc`.
-- **Резервы (оценка):**
-  - не перезагружать callee-saved регистры после вызовов с соблюдением ABI;
-  - восстанавливать прототипы функций и уходить от State к SSA;
-  - NEON-семантику отображать на NEON Cortex-A8/A9;
-  - снять проверку PC для доверенных функций;
-  - для колбэков — прямые вызовы вместо `xl_invoke`.
+- **Estimate:** on the A4 and A5, guest code will be 1.2 to 3.6 times slower than a native armv7 recompilation of the same source. Part of this is the cost of the LP64 model itself, which cannot be removed without narrowing: on the sort, 2.38× of the 3.39×.
+- CPU cycles were not measured. There was no real device, and the emulator's speed is not representative.
+- In a UI app, most of the time is spent in the native 32-bit frameworks (drawing, UIKit). For UI code the **estimate** is tolerable; for compute code it is noticeable.
+- **Code size** grows by 8 to 9 times: bench, 4.9 KB of guest code (with the shims) becomes 44 KB; UIDemo, 13.5 KB becomes 108 KB. The causes: saving and reloading State around calls, a `PC == return address` check after every call, and 64-bit arithmetic in `adds`/`adc` pairs.
+- **Reserves (estimate):**
+  - do not reload the callee-saved registers after calls, while keeping the ABI;
+  - recover the function prototypes, and move from State to SSA;
+  - map the NEON semantics onto the NEON of the Cortex-A8 and A9;
+  - remove the PC check for trusted functions;
+  - for callbacks, direct calls instead of `xl_invoke`.
 
-## 7. Swift (уровень C)
+## 7. Swift (level C)
 
-**Проверено на своём `swift/demo.swift`**, собранном тулчейном swift.org 6.4 под arm64-apple-ios12.
-- Метод класса вызывается через vtable прямо в коде приложения: `ldr x8,[x20]` (isa, 8 байт) → `ldr x8,[x8,#0x60]` (64-битное смещение в метаданных) → `blr x8`.
-- Класс `Shape` одновременно лежит в `__objc_classlist` с суперклассом `_TtCs12_SwiftObject`.
-- Хостовому 32-битному objc4 нужен `class_t` по адресу isa: `isa`(4) `superclass`(4) `cache`(4) `vtable`(4) `data`(4). Гостевому Swift-коду по тому же адресу нужны 8-байтовые isa/superclass/…
-- Байты 4..7 должны быть одновременно хостовым superclass и старшей половиной гостевого isa. Это невыполнимо.
-- Для Swift-подклассов UIKit (UIViewController, UIView) объект обязан быть хостовым. Отдельный гостевой рантайм ObjC означает гостевой UIKit, то есть полную эмуляцию системы — вариант, отвергнутый по скорости.
-- Возможный обход — пары объект/прокси между двумя рантаймами в духе PyObjC. **Оценка:** годы работы и неустранимые утечки семантики: identity, KVO, ivars суперкласса.
-- Инструкции не мешают: libswiftCore поднимается на 99,96%. Чистый Swift без ObjC-объектов на границе технически транслируем, но ценности для iOS-приложений почти не несёт.
+**Verified on our own demo program, which is not kept in the repository**, built with the swift.org 6.4 toolchain for arm64-apple-ios12.
+- A class method is called through the vtable directly in the app's code: `ldr x8,[x20]` (isa, 8 bytes), then `ldr x8,[x8,#0x60]` (a 64-bit offset in the metadata), then `blr x8`.
+- The class `Shape` is in `__objc_classlist` at the same time, with the superclass `_TtCs12_SwiftObject`.
+- The host's 32-bit objc4 needs a `class_t` at the isa address: `isa` (4), `superclass` (4), `cache` (4), `vtable` (4), `data` (4). The guest Swift code needs 8-byte isa, superclass and so on at the same address.
+- Bytes 4 to 7 must be at once the host superclass and the high half of the guest isa. That cannot be satisfied.
+- For Swift subclasses of UIKit (UIViewController, UIView), the object must be a host object. A separate guest ObjC runtime implies a guest UIKit, that is, full emulation of the system, which is the variant rejected for speed.
+- A possible workaround is object/proxy pairs between two runtimes, in the style of PyObjC. **Estimate:** years of work, and unfixable losses of semantics: identity, KVO, the superclass's ivars.
+- The instructions are not the obstacle: libswiftCore comes up at 99.96%. Pure Swift with no ObjC objects at the boundary is technically translatable, but it carries almost no value for iOS apps.
 
-## 8. Архитектура «IPA → 32 бит» для тулчейна
+## 8. The "IPA to 32 bit" architecture for the toolchain
 
-Этапы. Что реализовано в прототипе — отмечено; A — делается автоматически, Р — нужна ручная работа.
+The stages. What is implemented in the prototype is marked; A means automatic, and P means manual work is needed.
 
-1. **Распаковка IPA**, поиск исполняемого файла и встроенных фреймворков. Фреймворки становятся дополнительными гостевыми образами одного процесса. Реализовано: `tools/ipa.lua`. A.
-2. **Разбор Mach-O.** Сегменты, LC_FUNCTION_STARTS, `__stubs`/`__objc_stubs`, bind/rebase/chained fixups, экспорты, `__mod_init_func`. Реализовано (LLVM Object). A.
-3. **Разбор ObjC-метаданных.** Классы, метаклассы, категории, протоколы, ivars, свойства, CFString, selrefs → манифест. Реализовано. A.
-4. **Подъём кода** (Rellume), девиртуализация прямых вызовов и заглушек. Реализовано. A.
-   - Косвенные переходы внутри функции (jump tables): восстановление таблиц реализовано для всех форм clang (байт/полуслово/знаковое слово, вкл. отрицательные смещения), с ограничением домена по охранному условию. A.
-   - Не сделано: исключения C++/ObjC через гостевые кадры, `setjmp/longjmp`, атомарность эксклюзивных инструкций (`LDXR/STXR` сейчас неатомарны), FPSR-флаги.
-   - Известный лимит (отдельный фронтир, не сейчас): патологически большая одиночная функция (~288 КБ) роняет rellume/LLVM ассертом `isa<> used on a null pointer` (Casting.h) на подъёме. Предсуществующий, к восстановлению jump-tables отношения не имеет — воспроизводится на такой же по объёму функции без switch. В реальных приложениях функций такого размера нет.
-5. **Данные.** Гостевые сегменты по фиксированным адресам через `-segaddr` (non-PIE), rebase в константы, bind в хостовые символы или гостевые копии. Переписывание на месте `class_t`/`protocol_t`/CFString отдельными атомами, адреса проверяются после линковки. Реализовано. A.
-6. **Мосты API.** `xlgen`: 68–86% напрямую, 13–19% автоматически с преобразованием. Правила по именам параметров. Ручные маршалеры: fast enumeration, weak, форматные методы и функции. Таблица новых входов objc (`objc_alloc` и т. п.). Р — для 12% C и 1% ObjC плюс семантические исключения.
-7. **Недостающие в iOS 6 API.** Отдельная ось, работа сессии бэкпортов. Трансляция не заменяет бэкпорты. Р.
-8. **Сборка:** clang 23 → armv7, ld64 956.6 (`-no_pie -no_objc_category_merging`), проверка импортов тулчейна, `ldid`, Info.plist (`MinimumOSVersion 6.0`, `armv7`), упаковка IPA. Реализовано. A.
+1. **Unpacking the IPA**, and finding the executable and the embedded frameworks. The frameworks become additional guest images of one process. Implemented: `tools/ipa.lua`. A.
+2. **Parsing Mach-O.** Segments, `LC_FUNCTION_STARTS`, `__stubs` and `__objc_stubs`, bind, rebase and chained fixups, exports, `__mod_init_func`. Implemented (LLVM Object). A.
+3. **Parsing the ObjC metadata.** Classes, metaclasses, categories, protocols, ivars, properties, CFString, selrefs, into a manifest. Implemented. A.
+4. **Lifting the code** (Rellume), devirtualising the direct calls and the stubs. Implemented. A.
+   - Indirect jumps inside a function (jump tables): recovery of the tables is implemented for every clang form (byte, half-word, signed word, including negative offsets), with the domain bounded by the guard condition. A.
+   - Not done: C++ and ObjC exceptions through guest frames, `setjmp` and `longjmp`, atomicity of the exclusive instructions (`LDXR` and `STXR` are currently not atomic), and the FPSR flags.
+   - A known limit (a separate frontier, not now): a pathologically large single function (about 288 KB) makes rellume or LLVM assert `isa<> used on a null pointer` (`Casting.h`) during the lift. It predates this work and has nothing to do with the jump-table recovery: it reproduces on a function of the same size without a switch. Real apps have no functions of that size.
+5. **Data.** Guest segments at fixed addresses through `-segaddr` (non-PIE), rebase to constants, and bind to host symbols or guest copies. The `class_t`, `protocol_t` and CFString are rewritten in place, as separate atoms, and the addresses are checked after linking. Implemented. A.
+6. **API bridges.** `xlgen`: 68 to 86% direct, 13 to 19% automatic with conversion. Rules by parameter name. Manual marshallers for fast enumeration, weak references, and the format methods and functions. A table of the new ObjC entry points (`objc_alloc` and similar). P, for 12% of C and 1% of ObjC, plus the semantic exceptions.
+7. **APIs that are missing in iOS 6.** A separate axis, the work of the backports session. Translation does not replace the backports. P.
+8. **The build:** clang 23 to armv7, ld64 956.6 (`-no_pie -no_objc_category_merging`), the toolchain's import check, `ldid`, Info.plist (`MinimumOSVersion 6.0`, `armv7`), and IPA packaging. Implemented. A.
 
-Трудоёмкость (оценка):
+Effort (estimate):
 
-| Уровень | Сейчас | До уверенной работы |
+| Level | Now | To confident work |
 |---|---|---|
-| A | Работает на своих тестах | 2–4 недели: исключения, jump tables, атомарность, прогон на десятке открытых утилит |
-| B | Работает на своём UIKit-приложении | 2–4 месяца: полный проход `xlgen` по UIKit/Foundation/CG/QuartzCore с ручными правилами для ~460 деклараций, блоки из хоста в гостя (completion-хендлеры в гостевых методах), обработка исключений, NSInvocation/forwarding, KVO на гостевых классах, производительность, реальные открытые приложения |
-| C | Заблокирован объектной моделью | Годы, без гарантии; практичнее перекомпиляция исходников Swift |
-| D | Нет | Нереалистично: не хватает Swift и API iOS 13+ |
+| A | Works on its own tests | 2 to 4 weeks: exceptions, jump tables, atomicity, a run on a dozen open utilities |
+| B | Works on our own UIKit app | 2 to 4 months: a full pass of `xlgen` over UIKit, Foundation, CG and QuartzCore with manual rules for about 460 declarations; blocks from host to guest (completion handlers in guest methods); exception handling; NSInvocation and forwarding; KVO on guest classes; performance; real open apps |
+| C | Blocked by the object model | Years, with no guarantee; recompiling the source is more practical for Swift |
+| D | No | Not realistic: Swift and the iOS 13+ APIs are missing |
 
-## 9. План первых шагов
+## 9. A plan for the first steps
 
-1. **Реальные открытые ObjC-приложения** (UIKit без storyboard или собранные с ibtool) — через `tools/ipa.lua`, на эмуляторе и на iPhone 4. Цель — найти следующие классы проблем.
-2. **Такты на устройстве.** Замерить на iPhone 4/4S `tests/perf/`-ядра и UIDemo, откалибровать модель из раздела 6.
-3. **Исключения** через гостевые кадры (гостевой раскрутчик по `__unwind_info` плюс `longjmp` по хостовым кадрам) и **jump tables**.
-4. **Прогнать `xlgen` по всему UIKit/Foundation**, превратить 332 + 125 ручных случаев в таблицу правил (аннотации в духе FEX thunkgen). Для хост → гость — блоки/колбэки в гостевых методах.
-5. **Оптимизации:** callee-saved без перезагрузки, снятие проверки PC, NEON.
-6. **Интеграция в тулчейн:** xmake-правило `iphoneos.recompile` поверх `xlate`/`xlgen`, пакеты rellume/BlocksRuntime, проверка импортов и селекторов, стыковка с пакетами бэкпортов.
-7. **По Swift** — только перекомпиляция из исходников (сессия Swift). Бинарную трансляцию Swift не продолжать.
+1. **Real open ObjC apps** (UIKit without a storyboard, or built with `ibtool`), through `tools/ipa.lua`, on the emulator and on an iPhone 4. The goal is to find the next classes of problem.
+2. **Cycles on the device.** Measure the `tests/perf/` kernels and UIDemo on an iPhone 4 or 4S, and calibrate the model of section 6.
+3. **Exceptions** through guest frames (a guest unwinder driven by `__unwind_info`, plus `longjmp` over host frames), and **jump tables**.
+4. **Run `xlgen` over all of UIKit and Foundation**, and turn the 332 plus 125 manual cases into a table of rules (annotations in the style of FEX thunkgen). For host to guest, the blocks and callbacks in guest methods.
+5. **Optimisations:** callee-saved registers without reloading, removing the PC check, NEON.
+6. **Integration into the toolchain:** an xmake rule `iphoneos.recompile` on top of `xlate` and `xlgen`, the rellume and BlocksRuntime packages, the import and selector checks, and integration with the backports packages.
+7. **For Swift**: only recompilation from source (the Swift session). Do not continue binary translation of Swift.
 
-## 10. Первая настоящая цель: OneBusAway 2.3.2 (обновление 2026-09-17 вечер)
+## 10. The first real target: OneBusAway 2.3.2 (update of 2026-09-17, evening)
 
-Вход — официальный arm64-IPA авторов (Apache-2.0, min iOS 6, без Swift), через `tools/ipa.lua`. Проверено запуском на эмулированной iOS 6.0 (iPhone3,1).
+The input is the authors' official arm64 IPA (Apache-2.0, minimum iOS 6, no Swift), through `tools/ipa.lua`. Verified by a run on the emulated iOS 6.0 (iPhone3,1).
 
-Состояние: транслируется (4685 функций), линкуется, dyld грузит, SpringBoard спавнит, ObjC-рантайм регистрирует классы приложения, создаётся делегат `OBAApplicationDelegate`, приложение инициализируется, ставит таймеры и сетевые kevent — затем SIGSEGV ~2.4 с после старта внутри системной инициализации UIApplication (чтение строки по плохому указателю; маршалинг-ошибка одного из мостов).
+State: it translates (4685 functions), links, dyld loads it, SpringBoard spawns it, the ObjC runtime registers the app's classes, the delegate `OBAApplicationDelegate` is created, the app initialises, sets up timers and network kevents, and then SIGSEGVs about 2.4 s after the start, inside the system's UIApplication initialisation (reading a string through a bad pointer: a marshalling error in one of the bridges).
 
-Доведено по дороге (всё в `recompile`, коммитов в тулчейн нет):
-- восстановление таблиц переходов (символьная оценка + LazyValueInfo, неподвижная точка);
-- патч декодера farmdec: 64-битный `ubfx`/отсутствующий `uxtw`;
-- гостевые копии data-констант: скаляры, структуры (`CGRectZero`), CF-структуры колбэков (указатели сужаются, хост зовёт их хостом);
-- мосты блоков хост→гость (обёртка гостевого блока хостовым; `_Block_copy/_Block_release`, `_Block_use_RR`);
-- запуск гостевых `__mod_init_func` на старте;
-- weak-import классов, которых нет на устройстве (`UIAlertController` за version-check) → dyld связывает с 0, как в оригинале;
-- обход краха ld64 956.6 в objc-проходе `fixClassAliases`: все objc-списки (и гостевые, и из host-объектов) сводятся в секцию `__xlcls`/`__xlcat`/`__xlproto` до линковки, ld их не оптимизирует, после линковки имена секций возвращаются к `__objc_*` (единый `__objc_classlist`, иначе рантайм регистрирует только одну секцию и классы приложения не находятся);
-- data-символы и импортируемые функции эмитируются с asm-псевдонимом, чтобы не конфликтовать с декларациями/inline из SDK (`_dispatch_once`, `NSPOSIXErrorDomain` и т.п.);
-- полный набор objc-рантайм заголовков в мостах (`objc_sync_enter` для @synchronized и пр.).
+Done on the way (all in the recompiler's working tree; nothing was committed to the toolchain):
+- recovery of the jump tables (symbolic evaluation plus LazyValueInfo, a fixed point);
+- a patch to the `farmdec` decoder: the 64-bit `ubfx`, and the missing `uxtw`;
+- guest copies of data constants: scalars, structs (`CGRectZero`), and the CF structs of callbacks (the pointers narrow, and the host calls them from the host);
+- host-to-guest block bridges (the host wrapper of a guest block; `_Block_copy`, `_Block_release`, `_Block_use_RR`);
+- running the guest's `__mod_init_func` at start-up;
+- weak import of classes that are not on the device (`UIAlertController` behind a version check): dyld binds them to 0, as in the original;
+- a workaround for a crash of ld64 956.6 in the ObjC pass `fixClassAliases`: all ObjC lists (the guest ones and those from host objects) are merged into the section `__xlcls`, `__xlcat` or `__xlproto` before linking. ld does not optimise them, and after linking the section names return to `__objc_*` (one `__objc_classlist`; otherwise the runtime registers only one section, and the app's classes are not found);
+- data symbols and imported functions are emitted with an asm alias, so that they do not conflict with the declarations and inlines of the SDK (`_dispatch_once`, `NSPOSIXErrorDomain` and similar);
+- the full set of ObjC runtime headers in the bridges (`objc_sync_enter` for `@synchronized` and similar).
 
-Следующие шаги по OneBusAway: (1) отладка корректности мостов на пути инициализации UIApplication (символизация сбойного вызова, проверка типов возврата селекторов/структур); (2) раскрутка исключений через транслированные кадры (нужна отдельным приложениям; здесь пока не блокирует, но потребуется). Устройство 4S доступно (claim/release, sblaunch в /usr/bin), скриншот на железе — через самоотрисовку `renderInContext` в PNG (совет сессии бэкпортов).
+Next steps for OneBusAway: (1) debug the correctness of the bridges on the path of the UIApplication initialisation (symbolicate the failing call, check the return types of the selectors and structs); (2) unwinding exceptions through translated frames (needed by other apps; it does not block here yet, but it will be). The 4S device is available (claim and release, `sblaunch` in `/usr/bin`). A screenshot on the hardware goes through self-drawing with `renderInContext` into a PNG (advice from the backports session).
 
-### Обновление (позже 2026-09-17): OneBusAway доходит до ~150 с инициализации
-Добавлены мосты: перевод `Protocol *` аргументов по имени (`objc_getProtocol`) — чинит `conformsToProtocol:`; nil-терминированные вариадик-конструкторы коллекций (`dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:`), перехватываемые прямо в `xl_h_objc_msgSend`, где стек вызывающего цел (Apple arm64: varargs на стеке). Диагностический режим `XL_COLLECT` (недостающий мост не роняет процесс, а логируется и возвращает nil) собирает все пробелы за один прогон.
-Состояние: приложение инициализируется 90–150 с (сотни мостовых вызовов, регистрация классов, сеть). Остаток упирается в подсистему Google Analytics приложения (`GAIUsageTracker trackTarget:action:` с получателем-словарём, `GAIDataStore performBlockAndWait:withError:`) — симптом более глубокой ошибки маршалинга значения в GA, отдельный узел; в режиме XL_COLLECT дальше срабатывает watchdog SpringBoard (SIGKILL). Следующий заход — точечная отладка этого пути (класс-рефы/возврат +sharedInstance) и раскрутка исключений.
+### Update (later on 2026-09-17): OneBusAway reaches about 150 s of initialisation
+Bridges were added: translation of `Protocol *` arguments by name (`objc_getProtocol`), which fixes `conformsToProtocol:`; nil-terminated variadic collection constructors (`dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:`), intercepted directly in `xl_h_objc_msgSend`, where the caller's stack is intact (Apple arm64: varargs are on the stack). A diagnostic mode, `XL_COLLECT` (a missing bridge does not kill the process; it is logged and returns nil), collects every gap in one run.
+State: the app initialises in 90 to 150 s (hundreds of bridged calls, class registration, networking). What remains runs into the app's Google Analytics subsystem (`GAIUsageTracker trackTarget:action:` with a dictionary receiver, and `GAIDataStore performBlockAndWait:withError:`). That is a symptom of a deeper value-marshalling error in GA, and a separate node. In the `XL_COLLECT` mode, the SpringBoard watchdog then fires (SIGKILL). The next attempt is focused debugging of this path (class references and the return of `+sharedInstance`) and unwinding exceptions.
 
-### Обновление: реальный 4S и системный фикс ARC
-- WebKit: на устройстве транслированное приложение — обычный нативный armv7, JIT только в эмуляторе, поэтому сторожевой таймер там не сработает от скорости. Путь к экрану — железо.
-- Правила цели вынесены из кода в файл рядом с бинарником (`targets/OneBusAway.rules`, копируется в бандл как `xlate.rules`): `neutralize-class`/`neutralize-selector` (костыль конкретной цели — отключение Google Analytics, чей маршалинг не разобран; гостевая сеть всё равно изолирована) и `screenshot <сек> <путь>` (самоотрисовка `UIGetScreenImage` в PNG, т.к. штатного скриншота на устройстве без инъекций нет). Факт: переменные окружения от SpringBoard к приложению НЕ доходят — настройки цели только через файл.
-- Первый прогон на 4S (claim/release, sblaunch): приложение стартовало и бросило `NSInvalidArgumentException -[__NSPlaceholderArray initWithObjects:count:]: nil из objects[1]`. Корень — общий и системный: OneBusAway на ARC, а оптимизация возврата значения ARC (`objc_autoreleaseReturnValue`/`objc_retainAutoreleasedReturnValue`) использует TLS-хендшейк, который ломается, когда между парой вызовов выполняется хостовый ObjC в мостах, — возвращаемые объекты становились nil ниже по коду (и словарь в GA, и nil в NSArray — симптомы этого). Исправлено: эти функции переведены на «медленный» путь (обычные retain/autorelease), хендшейк больше не портится. Это фикс для практически всех современных ARC-приложений.
-- После фикса (эмулятор): исключения с nil ушли, приложение идёт дальше (~99 с) и падает уже в другом месте — SIGSEGV в системном фреймворке (следующий узел). Подтверждение на 4S — по освобождении устройства.
+### Update: a real 4S, and a systemic ARC fix
+- WebKit: on the device, a translated app is an ordinary native armv7 app, with JIT only in the emulator, so the watchdog cannot fire there from speed. The path to the screen goes through the hardware.
+- The target's rules were moved out of the code into a file next to the binary (a rules file next to the binary, copied into the bundle as `xlate.rules`): `neutralize-class` and `neutralize-selector` (a crutch for this target, which turns off Google Analytics, whose marshalling is not yet understood; the guest network is isolated anyway), and `screenshot <sec> <path>` (self-drawing with `UIGetScreenImage` into a PNG, because the device has no standard screenshot without injection). Fact: the environment variables from SpringBoard do NOT reach the app, so the target's settings go through a file only.
+- The first run on the 4S (claim, release, `sblaunch`): the app started and threw `NSInvalidArgumentException -[__NSPlaceholderArray initWithObjects:count:]: nil from objects[1]`. The root is general and systemic: OneBusAway uses ARC, and the ARC optimisation of a returned value (`objc_autoreleaseReturnValue` and `objc_retainAutoreleasedReturnValue`) uses a TLS handshake, which breaks when host ObjC runs in the bridges between the pair of calls. Returned objects then became nil further down the code (the dictionary in GA, and the nil in the NSArray, are symptoms of this). Fixed: these functions were moved to the "slow" path (plain retain and autorelease), and the handshake is no longer corrupted. This is a fix for practically every modern ARC app.
+- After the fix (in the emulator): the exceptions with nil are gone, and the app goes further (about 99 s) and then crashes elsewhere: a SIGSEGV in a system framework (the next node). Confirmation on the 4S is pending the device being free.
 
-### Вариант A: согласование раскладки ivar гостевых подклассов (реализовано)
-Гостевой подкласс фреймворкового класса несёт арм64-раскладку ivar (8-байтные слоты, instanceStart под арм64-суперкласс). Хостовый ObjC-рантайм на armv7 сдвигает ivar подкласса под свой размер суперкласса — и при рассогласовании instanceStart смещения уходили в мусор (краш objc_getProperty). Фикс (xlate эмитирует таблицу раскладок, рантайм чинит до реализации/идемпотентно от ОРИГИНАЛЬНЫХ гостевых значений): shift = class_getInstanceSize(хостового суперкласса) − арм64 instanceStart; каждому собственному ivar: offset = оригинал + shift; class_ro.instanceStart = размер хостового суперкласса; instanceSize += shift. Цепочка гость→гость→хост — по зависимостям, без двойного применения. 8-байтные слоты гостя сохраняются (нет неоднозначности NSInteger/int64); зазора в объекте нет (собственные ivar кладутся сразу за хостовым суперклассом), overhead = 4 байта на каждый указательный/NSInteger собственный ivar подкласса (напр. OBABookmarksViewController: 3 таких ivar → ~12 байт на объект сверх хост-упакованного). Проверено: краш objc_getProperty на OneBusAway устранён, приложение проходит дальше.
-Следующий узел (общий): `objc_release` получает 64-битное значение с указателем в СТАРШЕЙ половине (0x10111fb8<<32) — указатель id попал не в ту половину 8-байтного слота; разбирается.
+### Variant A: reconciling the ivar layout of guest subclasses (implemented)
+A guest subclass of a framework class carries the arm64 layout of its ivars (8-byte slots, `instanceStart` for the arm64 superclass). The host ObjC runtime on armv7 shifts the subclass's ivars for its own superclass size. When the `instanceStart` values disagree, the offsets go to garbage (a crash in `objc_getProperty`). The fix: xlate emits a table of layouts, and the runtime repairs it before implementation, idempotently, from the ORIGINAL guest values. shift = `class_getInstanceSize` of the host superclass minus the arm64 `instanceStart`. For each of the class's own ivars: offset = original + shift. `class_ro.instanceStart` = the size of the host superclass, and `instanceSize += shift`. A guest-to-guest-to-host chain goes by dependency, with no double application. The guest's 8-byte slots are kept (there is no NSInteger or int64 ambiguity). There is no gap in the object: the subclass's own ivars are placed right after the host superclass. The overhead is 4 bytes for every pointer or NSInteger ivar of the subclass (for example `OBABookmarksViewController` has 3 such ivars, about 12 bytes per object beyond the host packing). Verified: the crash in `objc_getProperty` on OneBusAway is gone, and the app goes further.
+The next node (common to all): `objc_release` gets a 64-bit value with the pointer in the HIGH half (0x10111fb8<<32). The `id` pointer landed in the wrong half of an 8-byte slot. Under investigation.

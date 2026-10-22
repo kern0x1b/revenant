@@ -83,7 +83,7 @@ function main(...)
     local surface_path = path.join(tree.run("api"), "apple-26-surface.tsv")
     if not os.isfile(surface_path) then
         io.stderr:write("# ERROR no Apple surface: " .. surface_path .. " is missing\n")
-        io.stderr:write("# run tools/api-surface.lua apple first; the gate does not fall back to its own parse\n")
+        io.stderr:write("# run tools/api_surface.lua apple first; the gate does not fall back to its own parse\n")
         os.exit(2)
     end
 

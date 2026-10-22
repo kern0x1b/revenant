@@ -1,4 +1,4 @@
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/carry-audit.lua REFERENCE [--tree DIR] [PATH ...]
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/carry_audit.lua REFERENCE [--tree DIR] [PATH ...]
   lists the sources whose port markers thinned out against REFERENCE, another WebKit tree carrying the
   port - the webkit package before the series was moved to a newer base, or a checkout of the old fork.
   The tree audited is the installed webkit package's unless --tree names one. A file with fewer markers

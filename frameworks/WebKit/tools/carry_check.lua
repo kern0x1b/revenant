@@ -1,4 +1,4 @@
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/carry-check.lua [--tree DIR] [--paths] [MANIFEST]
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/carry_check.lua [--tree DIR] [--paths] [MANIFEST]
   checks that the patched WebKit tree still holds what this port depends on, against
   carry-manifest.txt or MANIFEST; the tree is the installed webkit package's unless --tree names one.
   --paths prints the engine paths the manifest reads and checks nothing.]]

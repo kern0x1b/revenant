@@ -10,7 +10,6 @@ Everything a build can make again lives under `~/.revenant/cache`:
 | --- | --- | --- |
 | `xmake/<key>` | the pinned and patched xmake, one folder per pin and patch set | `xmakew` |
 | `xmake-global/.xmake` | the package store (`packages`), the package sources and build folders (`cache`), the repositories | xmake, through `XMAKE_GLOBALDIR`, which `xmakew` sets |
-| `ccache` | the compiler cache | `xmakew` points `CCACHE_DIR` at it |
 | `<task>` | scratch of one task, deleted when the task ends | the task |
 
 ## The data that is not a cache
@@ -23,7 +22,7 @@ Everything under `~/.revenant` that is not `cache` is data, and no clean touches
 | `firmware` | `toolchain/modules/apple/firmware.lua` and the `firmware` plugin | the firmware catalog, the root file systems, a download that resumes |
 | `emulator` | the emulator's image commands | golden images that took a first boot to make |
 | `devices` | `toolchain/modules/device.lua` | which run holds which device |
-| `cache-index` | `toolchain/tools/cache-index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
+| `cache-index` | `toolchain/tools/cache_index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
 | `corpus` | the corpus tools | data read from applications and devices; `REVENANT_CORPUS_ROOT` names another place |
 
 A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only time.
@@ -36,8 +35,8 @@ A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only 
 
 | Level | Removes | Keeps |
 | --- | --- | --- |
-| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders | the package store, ccache, the xmake binaries |
-| `--packages` | the same and the package store | ccache, the xmake binaries |
+| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders, an old `ccache` folder | the package store, the xmake binaries |
+| `--packages` | the same and the package store | the xmake binaries |
 | `--all` | everything under `~/.revenant/cache`; the xmake binaries are built again on the next `./xmakew` | nothing |
 
 Only ignored and untracked build folders are removed: `git check-ignore` decides.
@@ -50,7 +49,7 @@ changes exactly when those files do:
 
 | Package | Digest config | Made from |
 | --- | --- | --- |
-| `swift-runtime`, `libcxx` | `recipe` | `digest.lua`, which `toolchain/tools/recipe-digests.lua` writes from the recipe and the modules it runs |
+| `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
 | `swift-bootstrap` | `recipe` | the recipe, and the swift.org package by its sha256 |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |

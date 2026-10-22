@@ -45,7 +45,7 @@ end
         local written = io.readfile(path.join(root, recipe.folder, "port", "digest.lua"))
         local expected = digest.digest_file(recipe, digest.sources(root, recipe.inputs))
         if written ~= expected then
-            table.insert(found, string.format("%s/digest.lua is not what the sources give; run ./xmakew l toolchain/tools/recipe-digests.lua", recipe.folder))
+            table.insert(found, string.format("%s/digest.lua is not what the sources give; run ./xmakew l toolchain/tools/recipe_digests.lua", recipe.folder))
         end
     end
     return found

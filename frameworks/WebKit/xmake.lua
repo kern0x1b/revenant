@@ -123,5 +123,5 @@ end
 
 target("webkit-cacert")
     add_rules("@addon/revenant/check")
-    set_values("check.command", "./xmakew", "l", "frameworks/WebKit/tools/check-cacert.lua")
-    set_values("check.files", "frameworks/WebKit/examples/webview-host/cacert.pem", "frameworks/WebKit/tools/check-cacert.lua")
+    set_values("check.command", "./xmakew", "l", "frameworks/WebKit/tools/check_cacert.lua")
+    set_values("check.files", "frameworks/WebKit/examples/webview-host/cacert.pem", "frameworks/WebKit/tools/check_cacert.lua")
