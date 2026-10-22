@@ -2,7 +2,7 @@
 
 Two numbers, and they measure different things.
 
-- **By name:** 504 of Apple's 592 public types and every one of the 311 `View` modifier names are present; each API
+- **By name:** 664 of Apple's 1344 public types and every one of the 311 `View` modifier names are present; each API
   that iOS 6 cannot honour is *declared*, writes a line to a journal when used, and is listed with its reason. Nothing
   is a silent no-op — the build fails if an ignored or simplified API is not named in the ledger.
 - **By declaration:** comparing Apple's SwiftUI interface for iOS 16.4 with this module signature by signature

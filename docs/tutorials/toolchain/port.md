@@ -62,7 +62,9 @@ An application that runs on more than one architecture names them:
         add_values("apple.architectures", "armv7", "arm64")
         set_values("app.plist-file", "packaging/Info.plist")
 
-`xmake deb` builds each slice for the release its architecture first runs, merges the bundles with `lipo`, and checks the merged binaries. Every other file has to be the same in every slice, so pin `MinimumOSVersion` in the plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
+`xmake deb` builds each slice for the release its architecture first runs, merges the bundles itself (every file
+but a `.plist` has to be the same in every slice), and checks the merged binaries. Pin `MinimumOSVersion` in the
+plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
 
 ## Frameworks and runtimes
 
@@ -101,7 +103,10 @@ Combine is `revenant@combine`, the package of OpenCombine with our patches. It i
 
 SwiftUI is not a package of this repository: its recipes were pins of it, and the target `SwiftUI` of `frameworks/SwiftUI` is built inside the checkout. A port outside the checkout takes SwiftUI from the packages that `xmake package` writes for our targets, as [the architecture](../../explanation/architecture.md) describes; that route is not yet verified for iOS.
 
-A SwiftUI port takes the `backports` variant of the three packages. Combine's own weak import is answered by the `frameworks/Backports` targets, which the port then carries with `coredata = true` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
+A SwiftUI port takes the `backports` variant of the three packages, and the runtime refuses that variant today:
+its port headers came from a generator that is gone, so the recipe raises on the config and says why. Combine's own
+weak import is answered by the `frameworks/Backports` targets, which the port then carries with `add_deps`. The
+runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
 
 ## Next
 

@@ -130,7 +130,7 @@ From the root of revenant:
 
 The build goes against the installation of the package `revenant@swift-runtime` 6.4.0 that the revenant project requires, in xmake's shared store. The flags are set by the toolchain's rules.
 All the modules and dylibs come from one installation: the standard library, concurrency, the Foundation overlays, UIKit, QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation and CoreData. The target is `armv7-apple-ios6.0` with `-bundled-swift-runtime`, with **availability checking enabled**: any API newer than iOS 6 is named by the compiler itself, not by a crash on the device. That is how `CGPathAddRoundedRect`, `component(_:from:)`, `keyboardDismissMode` and `contentSizeForViewInPopover` were found and fixed. `NSItemProvider` and `NSUserActivity` in the signatures are marked iOS 8.
-Combine is the target `Combine` of the revenant project (`frameworks/Combine`): the sources of OpenCombine with the patches of the package `revenant@combine` 2026.10.19, built against the same runtime. The timer tolerance is behind `#available`, and this directory's targets are built with it on the same runtime. The OpenCombine tests against this module are the target `CombineTests` there.
+Combine is the package `combine` of the revenant project (`revenant@combine` 2026.10.19): the sources of OpenCombine with our patches, built against the same runtime. The timer tolerance is behind `#available`, and this directory's targets are built with it on the same runtime. The OpenCombine tests against this module are the target `CombineTests` of `frameworks/Combine`.
 
 ## Measurements
 

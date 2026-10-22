@@ -117,8 +117,8 @@ sips -z 114 114 icon-large.png --out resources/Icon@2x.png
 ```
 
 How to know it worked: `file resources/*.png` names each as `PNG image data, W x H`. Whether
-SpringBoard shows the icon is only seen on a device: the emulator cannot launch an app through
-SpringBoard yet (skill `emulate`).
+SpringBoard shows the icon is seen on a device, or in the emulator when the app is launched
+through SpringBoard (skill `emulate`).
 
 ## 6. Configure and look at the target
 

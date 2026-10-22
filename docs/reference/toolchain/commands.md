@@ -7,7 +7,7 @@ The xmake verbs the toolchain adds, their options and defaults, the verdicts and
 | Command | What it does |
 | --- | --- |
 | `xmake` | Builds. Every binary is checked as it links. |
-| `xmake deb` | Stages the package, strips, signs, and writes `build/<Package>_<Version>_<Architecture>.deb`. A target with several `apple.architectures` is built for each slice and the bundles are merged with `lipo`. |
+| `xmake deb` | Stages the package, strips, signs, and writes `build/<Package>_<Version>_<Architecture>.deb`. A target with several `apple.architectures` is built for each slice and the bundles are merged by the toolchain: the Mach-O binaries are merged into one fat file, and every file but a `.plist` has to be the same in every slice. |
 | `xmake where PACKAGE` | Prints the folder a required package is installed in. |
 | `xmake compile-commands [-o FILE] [TARGETS]` | Writes `compile_commands.json` for the named targets. |
 | `xmake check [--staged \| --changed] [NAMES]` | Runs the project's checks. `--staged` and `--changed` limit them to the staged or changed files. |

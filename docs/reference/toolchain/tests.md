@@ -8,7 +8,7 @@ reference says what runs where.
 
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
-| `toolchain_light` | 13 suites of `tests/addon/` that build nothing and need no package | the repository | always |
+| `toolchain_light` | 14 suites of `tests/addon/` that build nothing and need no package | the repository | always |
 | `toolchain_packages` | 16 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
 | `toolchain_device` | `callkit_screen_test`, `port_test` and `tweak_test`, which build against the iOS 6 libraries of a firmware release; `emulator_test`, which runs the emulator's queue; `swift_test`, which also needs the `swift` package and the dyld libraries of a held release; the recompiler's `classpair` and `ordinal` checks (`recompiler_device`), which read the iOS 6 dyld cache; `compat_device_test`, the dispatch_block probes and the default global queue's class in `compat/device/`, which answer as iOS only on a device or an emulator | the firmware catalog and the firmware held under `~/.revenant/dyld`, an emulator image | only with `./xmakew f -P . --tests=device` |
 

@@ -80,17 +80,18 @@ dpkg-deb -c build/<Package>_<Version>_iphoneos-arm.deb
 - `Version:` equal to the project's version, and `Installed-Size:` present;
 - `Depends:` your own entries, then, for an app with backports,
   `org.revenant.backports (>= <release>+<digest>)` — the exact version of the backports `.deb`
-  written beside it — and, for a Swift app that shares its runtime, the runtime's packages.
+  written beside it — and, for a Swift app that shares its runtime, the runtime's packages. An app
+  that links the Backports libraries has no package at all today: the one that installs them is
+  not written, so the packaging stops and names the target.
 
 In `-c`, check: `./Applications/<Name>.app/` with `<Name>` (the executable), `Info.plist` and the
 app's resources; nothing under `/usr/lib/revenant/org.revenant.backports/` (the backports are
 **not** in the app's package; they come in their own); no source, no build artefact, nothing of
 Apple's.
 
-Inspect the backports package the same way when there is one: `Package: org.revenant.backports`,
-`Architecture: iphoneos-arm`, its libraries under `./usr/lib/revenant/org.revenant.backports/bands/`.
-Its `postinst` links the band of the device's own release when it is installed, and refuses a
-release outside the bands it carries.
+There is no backports package to inspect yet: the one that would install the libraries under
+`/usr/lib/revenant/org.revenant.backports/` is not written, and the bands it used to carry are
+gone — the backports are one library per framework, built for one release.
 
 ## 4. What travels together
 

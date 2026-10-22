@@ -1,6 +1,6 @@
 ---
 name: checks
-description: Prove that the app's code does what it should on the chosen iOS release by running small programs of your own — probes (a command-line program, no UIKit) in the emulator and on the device, and test stands (a second small app) on the user's device — each built through the toolchain with -fobjc-arc, printing ok/FAIL lines with printf and fflush, with a negative control that shows the check can fail. Use after the skill build, beside the skill emulate, whenever an API newer than the lowest release, a backport, a guard with respondsToSelector: or #available, threading or persistence needs evidence, or when the user asks to test, verify or check the app.
+description: Prove that the app's code does what it should on the chosen iOS release by running small programs of your own — probes (a command-line program, no UIKit) in the emulator and on the device, and test stands (a second small app) launched in the emulator or run on the user's device — each built through the toolchain with -fobjc-arc, printing ok/FAIL lines with printf and fflush, with a negative control that shows the check can fail. Use after the skill build, beside the skill emulate, whenever an API newer than the lowest release, a backport, a guard with respondsToSelector: or #available, threading or persistence needs evidence, or when the user asks to test, verify or check the app.
 ---
 
 # Probes and test stands
@@ -16,10 +16,9 @@ shapes:
   of non-UI APIs, the availability guards.
 - a **test stand** — a second, small application (Revenant's `app` rule) for what needs a running
   `UIApplication`: views, controllers, layout, gestures, text. A UIKit object made outside an
-  application can trap. With revenant 0.8.10 the emulator cannot launch an app through SpringBoard
-  (its `run` starts the executable directly, and it never reaches
-  `application:didFinishLaunchingWithOptions:`), so a test stand runs on the user's device only
-  (skill `device`); without a device, say that the UI is unchecked.
+  application can trap. A test stand is an application, so the emulator can launch it through
+  SpringBoard (`xmake emulate launch`, skill `emulate`); it needs the device for what the
+  emulator does not have (the keyboard, the camera, the GPS, the cellular radio).
 
 Read `PROJECT.md` first: `apple_minimum`, the releases and devices to check, the backports, and what
 the app does. Write the checks, not the app's features, in these targets: the check calls the app's
@@ -180,7 +179,9 @@ does not boot) is written down as unchecked, with the reason.
   from documentation, a newer system or the real server.
 - `skip` counted as `ok` → where the emulator does not answer (audio has no server there; location
   and motion are unchecked), the check needs the device.
-- A UIKit check in the emulator → the app never reaches `didFinishLaunching` there with revenant
-  0.8.10; run it as a test stand on the device, or record it as unchecked.
+- A UIKit check in the emulator → a program started by `run` never reaches `didFinishLaunching`,
+  because the runner starts it from launchd, not from a tap; launch the app itself with
+  `xmake emulate launch` (skill `emulate`) when the check needs the UI, or run the test stand on
+  the device, or record it as unchecked.
 - `xmake check` taken for this → it runs the host-side scripts a project declares with Revenant's
   `check` rule (lint, pre-commit), not programs on iOS.
