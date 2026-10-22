@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 local MARK = "revenant.apple-ios"
 
 function mark(target)
@@ -13,7 +15,7 @@ function check(targets)
         end
     end
     if #unbound > 0 then
-        table.sort(unbound)
+        byteorder.sort(unbound)
         raise("%s builds for iphoneos without the revenant apple-ios toolchain: add_rules(\"@addon/revenant/apple-ios\") to each, or a revenant rule that depends on it", table.concat(unbound, ", "))
     end
 end
