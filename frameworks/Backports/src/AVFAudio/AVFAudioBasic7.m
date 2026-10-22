@@ -1,21 +1,10 @@
 #import <AVFAudio/AVFAudio.h>
 #import <objc/runtime.h>
 
-static const char revenant_speaking_key;
 static const char revenant_input_muted_key;
 static const char revenant_sandbox_safe_key;
 
 @implementation AVSpeechSynthesizer (RevenantBasic7)
-
-- (BOOL)isSpeaking
-{
-    return [objc_getAssociatedObject(self, &revenant_speaking_key) boolValue];
-}
-
-- (void)setSpeaking:(BOOL)speaking
-{
-    objc_setAssociatedObject(self, &revenant_speaking_key, @(speaking), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (BOOL)prefersAssistiveTechnologySettings
 {
@@ -94,11 +83,3 @@ static const char revenant_sandbox_safe_key;
 
 @end
 
-@implementation AVAudioFormat (RevenantBasic7)
-
-- (BOOL)isInterleaved
-{
-    return YES;
-}
-
-@end
