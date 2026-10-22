@@ -12,7 +12,7 @@ package("dav1d")
 
     on_install("iphoneos", function (package)
         import("package.tools.meson").install(package, {"-Denable_tools=false", "-Denable_tests=false",
-            "-Denable_examples=false", "-Denable_asm=false"})
+            "-Denable_examples=false"})
         import("@addon.revenant.apple.install", {anonymous = true}).finish(package, {
             licenses = "COPYING", prune = {"lib/pkgconfig", "share", "bin"}})
     end)

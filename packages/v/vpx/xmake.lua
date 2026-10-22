@@ -27,15 +27,17 @@ package("vpx")
         }
         local build = path.absolute("build-vpx")
         os.mkdir(build)
-        local options = {"--target=armv7-darwin-gcc", "--prefix=" .. package:installdir(), "--disable-neon-asm", "--disable-docs", "--disable-examples",
+        local options = {"--target=armv7-darwin-gcc", "--prefix=" .. package:installdir(), "--disable-docs", "--disable-examples",
                          "--disable-postproc", "--disable-webm-io", "--disable-vp9-highbitdepth", "--disable-vp9-postproc",
                          "--disable-vp9-temporal-denoising", "--disable-unit-tests", "--enable-realtime-only",
                          "--enable-multi-res-encoding", "--size-limit=8192x8192"}
         os.vrunv(path.absolute("configure"), options, {curdir = build, envs = envs})
+        local overrides = {"CC=" .. chosen:tool("cc"), "CXX=" .. chosen:tool("cxx"), "AS=" .. chosen:tool("cc"),
+            "ASFLAGS=" .. table.concat(table.join({"-c"}, target, {"-I./", "-I" .. path.absolute(".") .. "/"}), " ")}
         parallel.hold(nil, function (width)
-            os.vrunv("make", {"-j" .. width}, {curdir = build})
+            os.vrunv("make", table.join({"-j" .. width}, overrides), {curdir = build})
         end)
-        os.vrunv("make", {"install"}, {curdir = build})
+        os.vrunv("make", table.join({"install"}, overrides), {curdir = build})
         for _, header in ipairs({"vpx_config.h", "vpx_version.h"}) do
             os.cp(path.join(build, header), package:installdir("include", "vpx"))
         end
