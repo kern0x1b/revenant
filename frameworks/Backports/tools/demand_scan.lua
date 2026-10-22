@@ -1,8 +1,9 @@
 local SWIFT = "swift"
 local OBJC = "objc"
+local C = "c"
 
-local LANGUAGES = {swift = SWIFT, m = OBJC, mm = OBJC, h = OBJC, hh = OBJC, hpp = OBJC, hxx = OBJC, inl = OBJC,
-    ipp = OBJC, c = OBJC, cc = OBJC, cpp = OBJC, cxx = OBJC}
+local LANGUAGES = {swift = SWIFT, m = OBJC, mm = OBJC, h = OBJC, c = C, cc = C, cpp = C, cxx = C, hh = C, hpp = C,
+    hxx = C, inl = C, ipp = C}
 
 local CLOSE = {["["] = "]", ["("] = ")", ["{"] = "}"}
 local CLOSERS = {["]"] = true, [")"] = true, ["}"] = true}
@@ -212,36 +213,46 @@ local function selector_literal(tok, at)
     return selector_from(tok, at + 3, close)
 end
 
-local function imports_of(stripped, imports)
+local function unique(list, seen, name)
+    if not seen[name] then
+        seen[name] = true
+        table.insert(list, name)
+    end
+end
+
+local function imports_of(stripped)
+    local list, seen = {}, {}
     for name in stripped:gmatch("#%s*import%s*<([%w_]+)/") do
-        imports[name] = true
+        unique(list, seen, name)
     end
     for name in stripped:gmatch("#%s*include%s*<([%w_]+)/") do
-        imports[name] = true
+        unique(list, seen, name)
     end
     for name in stripped:gmatch("@import%s+([%w_]+)") do
-        imports[name] = true
+        unique(list, seen, name)
     end
     for line in stripped:gmatch("[^\n]+") do
         local name = line:match("^%s*@?testable%s+import%s+([%w_]+)") or line:match("^%s*import%s+%a+%s+([%w_]+)")
             or line:match("^%s*import%s+([%w_]+)")
         if name then
-            imports[name] = true
+            unique(list, seen, name)
         end
     end
+    return list
 end
 
 local function declarations(tok, declared, members)
+    local declared_seen, members_seen = {}, {}
     for at = 1, tok.count do
         if is_punct(tok, at, "@") and tok.kind[at + 1] == "w" then
             local keyword = tok.value[at + 1]
             if OBJC_DECLARATIONS[keyword] and tok.kind[at + 2] == "w" then
-                declared[tok.value[at + 2]] = true
+                unique(declared, declared_seen, tok.value[at + 2])
             elseif keyword == "class" then
                 local stop = at + 2
                 while stop <= tok.count and not is_punct(tok, stop, ";") do
                     if tok.kind[stop] == "w" then
-                        declared[tok.value[stop]] = true
+                        unique(declared, declared_seen, tok.value[stop])
                     end
                     stop = stop + 1
                 end
@@ -258,16 +269,16 @@ local function declarations(tok, declared, members)
                     stop = stop + 1
                 end
                 if last then
-                    members[last] = true
+                    unique(members, members_seen, last)
                 end
             end
         elseif tok.kind[at] == "w" then
             local word = tok.value[at]
             local imported = at > 1 and tok.kind[at - 1] == "w" and tok.value[at - 1] == "import"
             if TYPE_KEYWORDS[word] and tok.kind[at + 1] == "w" and not imported then
-                declared[tok.value[at + 1]] = true
+                unique(declared, declared_seen, tok.value[at + 1])
             elseif (word == "func" or word == "var" or word == "let") and tok.kind[at + 1] == "w" then
-                members[tok.value[at + 1]] = true
+                unique(members, members_seen, tok.value[at + 1])
             end
         end
     end
@@ -277,19 +288,20 @@ function scan(file)
     local language = language_of(file)
     local stripped = strip(io.readfile(file), language)
     local tok = tokenize(stripped)
-    local record = {file = file, language = language, imports = {}, messages = {}, selectors = {}, words = {},
-        calls = {}, members = {}, declared = {}, declared_members = {}}
-    imports_of(stripped, record.imports)
+    local record = {file = file, language = language, imports = imports_of(stripped), messages = {}, selectors = {},
+        words = {}, calls = {}, members = {}, declared = {}, declared_members = {}}
+    local seen = {words = {}, calls = {}, members = {}}
     declarations(tok, record.declared, record.declared_members)
     for at = 1, tok.count do
         if tok.kind[at] == "w" then
             local word = tok.value[at]
-            record.words[word] = true
-            if is_punct(tok, at + 1, "(") then
-                record.calls[word] = true
-            end
             if is_punct(tok, at - 1, ".") then
-                record.members[word] = true
+                unique(record.members, seen.members, word)
+            else
+                unique(record.words, seen.words, word)
+                if is_punct(tok, at + 1, "(") then
+                    unique(record.calls, seen.calls, word)
+                end
             end
         elseif language == OBJC and is_punct(tok, at, "[") and starts_message(tok, at) then
             local message = message_at(tok, at)
