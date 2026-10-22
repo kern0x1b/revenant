@@ -24,7 +24,7 @@
 }
 @end
 
-@implementation RevenantNWPath {
+@implementation RevenantNWPathValue {
 @public
     nw_path_status_t _status;
     BOOL _expensive, _ipv4, _ipv6, _dns;
@@ -151,9 +151,9 @@ REVENANT_SEAM nw_interface_t revenant_interface_named(const char *name)
     return (nw_interface_t)revenant_interface(name, type);
 }
 
-static RevenantNWPath *revenant_path(SCNetworkReachabilityRef reachability, RevenantNWPathMonitor *monitor)
+static RevenantNWPathValue *revenant_path(SCNetworkReachabilityRef reachability, RevenantNWPathMonitor *monitor)
 {
-    RevenantNWPath *path = [[RevenantNWPath alloc] init];
+    RevenantNWPathValue *path = [[RevenantNWPathValue alloc] init];
     SCNetworkReachabilityFlags flags = 0;
     SCNetworkReachabilityGetFlags(reachability, &flags);
     BOOL reachable = (flags & kSCNetworkReachabilityFlagsReachable) != 0;
@@ -239,7 +239,7 @@ static void revenant_deliver(RevenantNWPathMonitor *monitor, int generation, BOO
 {
     if (monitor->_cancelled || generation != monitor->_generation || !monitor->_reachability)
         return;
-    RevenantNWPath *path = revenant_path(monitor->_reachability, monitor);
+    RevenantNWPathValue *path = revenant_path(monitor->_reachability, monitor);
     if (!always && monitor->_last && nw_path_is_equal(monitor->_last, path))
         return;
     monitor->_last = path;
@@ -271,7 +271,7 @@ void nw_path_monitor_start(nw_path_monitor_t handle)
             SCNetworkReachabilitySetDispatchQueue(monitor->_reachability, monitor->_queue);
         }
         monitor->_started = YES;
-        RevenantNWPath *initial = revenant_path(monitor->_reachability, monitor);
+        RevenantNWPathValue *initial = revenant_path(monitor->_reachability, monitor);
         dispatch_async(monitor->_queue, ^{
             if (generation != monitor->_generation)
                 return;
@@ -306,12 +306,12 @@ void nw_path_monitor_cancel(nw_path_monitor_t handle)
 
 nw_path_status_t nw_path_get_status(nw_path_t path)
 {
-    return ((RevenantNWPath *)path)->_status;
+    return ((RevenantNWPathValue *)path)->_status;
 }
 
 void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_block_t enumerate_block)
 {
-    for (RevenantNWInterface *interface in ((RevenantNWPath *)path)->_interfaces) {
+    for (RevenantNWInterface *interface in ((RevenantNWPathValue *)path)->_interfaces) {
         if (!enumerate_block(interface))
             break;
     }
@@ -319,7 +319,7 @@ void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_b
 
 bool nw_path_is_equal(nw_path_t first, nw_path_t second)
 {
-    RevenantNWPath *a = (RevenantNWPath *)first, *b = (RevenantNWPath *)second;
+    RevenantNWPathValue *a = (RevenantNWPathValue *)first, *b = (RevenantNWPathValue *)second;
     if (a == b)
         return true;
     if (!a || !b || a->_status != b->_status || a->_expensive != b->_expensive || a->_ipv4 != b->_ipv4 || a->_ipv6 != b->_ipv6 || a->_dns != b->_dns || a->_interfaces.count != b->_interfaces.count)
@@ -333,27 +333,27 @@ bool nw_path_is_equal(nw_path_t first, nw_path_t second)
 
 bool nw_path_is_expensive(nw_path_t path)
 {
-    return ((RevenantNWPath *)path)->_expensive;
+    return ((RevenantNWPathValue *)path)->_expensive;
 }
 
 bool nw_path_has_ipv4(nw_path_t path)
 {
-    return ((RevenantNWPath *)path)->_ipv4;
+    return ((RevenantNWPathValue *)path)->_ipv4;
 }
 
 bool nw_path_has_ipv6(nw_path_t path)
 {
-    return ((RevenantNWPath *)path)->_ipv6;
+    return ((RevenantNWPathValue *)path)->_ipv6;
 }
 
 bool nw_path_has_dns(nw_path_t path)
 {
-    return ((RevenantNWPath *)path)->_dns;
+    return ((RevenantNWPathValue *)path)->_dns;
 }
 
 bool nw_path_uses_interface_type(nw_path_t path, nw_interface_type_t interface_type)
 {
-    for (RevenantNWInterface *interface in ((RevenantNWPath *)path)->_interfaces) {
+    for (RevenantNWInterface *interface in ((RevenantNWPathValue *)path)->_interfaces) {
         if (interface->_type == interface_type)
             return true;
     }

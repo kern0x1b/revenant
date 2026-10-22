@@ -418,45 +418,6 @@ function binary_inventory(binary, architecture)
     return found
 end
 
-function binary_categories(binary, architecture)
-    local source, image = file_source(binary, architecture)
-    if not source then
-        return nil
-    end
-    local read = reader(source)
-    local found = {}
-    for _, category in ipairs(table.join(section_entries(read, image, "__objc_catlist"), section_entries(read, image, "__port_catlist"))) do
-        local class = read.pointer(category + read.size)
-        table.insert(found, {name = read.string(read.pointer(category)), class = class ~= 0 and class_data(read, class).name or nil,
-                             bound = source.bound[category + read.size],
-                             instance = method_names(read, read.pointer(category + 2 * read.size)),
-                             class_methods = method_names(read, read.pointer(category + 3 * read.size))})
-    end
-    return found
-end
-
-function binary_aliases(binary, architecture)
-    local source, image = file_source(binary, architecture)
-    if not source then
-        return nil
-    end
-    local read = reader(source)
-    local found = {}
-    for _, section in ipairs(image.sections) do
-        if section.segment == "__DATA" and section.name == "__port_alias" then
-            for index = 0, section.size // (2 * read.size) - 1 do
-                local entry = section.addr + index * 2 * read.size
-                local proxy = class_data(read, read.pointer(entry)).name
-                local name = read.string(read.pointer(entry + read.size))
-                if proxy and name then
-                    found[proxy] = name
-                end
-            end
-        end
-    end
-    return found
-end
-
 local READER_KEY
 local function reader_key()
     if not READER_KEY then

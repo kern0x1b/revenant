@@ -1,4 +1,5 @@
 #import "RevenantURLSessionMetrics.h"
+#import "RevenantHeaderBytes.h"
 #include <SystemConfiguration/SystemConfiguration.h>
 #import <objc/runtime.h>
 
@@ -72,6 +73,17 @@ static int64_t revenant_count(NSDictionary *counts, NSString *key)
 - (NSNumber *)remotePort { return objc_getAssociatedObject(self, &RevenantTransactionSocketKey)[@"remotePort"]; }
 - (id)negotiatedTLSProtocolVersion { return objc_getAssociatedObject(self, &RevenantTransactionSocketKey)[@"tls"]; }
 - (id)negotiatedTLSCipherSuite { return objc_getAssociatedObject(self, &RevenantTransactionSocketKey)[@"cipher"]; }
+
+- (int64_t)countOfRequestHeaderBytesSent
+{
+    return self.resourceFetchType == NSURLSessionTaskMetricsResourceFetchTypeNetworkLoad && self.request.URL ? revenant_request_header_bytes(self.request) : 0;
+}
+
+- (int64_t)countOfResponseHeaderBytesReceived
+{
+    NSURLResponse *response = self.response;
+    return self.resourceFetchType == NSURLSessionTaskMetricsResourceFetchTypeNetworkLoad && [response isKindOfClass:[NSHTTPURLResponse class]] ? revenant_response_header_bytes((NSHTTPURLResponse *)response) : 0;
+}
 
 - (int64_t)countOfRequestBodyBytesSent { return revenant_count(objc_getAssociatedObject(self, &RevenantTransactionCountsKey), @"sent"); }
 - (int64_t)countOfRequestBodyBytesBeforeEncoding { return revenant_count(objc_getAssociatedObject(self, &RevenantTransactionCountsKey), @"before"); }

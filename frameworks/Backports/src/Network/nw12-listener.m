@@ -19,9 +19,9 @@
 @public
     nw_parameters_t _parameters;
     nw_endpoint_t _endpoint;
-    RevenantNWEndpoint *_localEndpoint;
+    RevenantNWEndpointValue *_localEndpoint;
     RevenantNWAdvertiseDescriptor *_advertise;
-    RevenantNWEndpoint *_advertisedEndpoint;
+    RevenantNWEndpointValue *_advertisedEndpoint;
     dispatch_queue_t _queue;
     nw_listener_state_changed_handler_t _state;
     nw_listener_new_connection_handler_t _newConnection;
@@ -157,7 +157,7 @@ static void revenant_listener_advertise(RevenantNWListener *listener)
     NSString *name = descriptor->_bonjourName.length ? descriptor->_bonjourName : @"";
     NSString *type = descriptor->_bonjourType ?: @"";
     NSString *domain = descriptor->_bonjourDomain.length ? descriptor->_bonjourDomain : @"local.";
-    RevenantNWEndpoint *published = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *published = [[RevenantNWEndpointValue alloc] init];
     published->_type = nw_endpoint_type_bonjour_service;
     published->_bonjourName = name;
     published->_bonjourType = type;
@@ -193,7 +193,7 @@ static void revenant_listener_open(RevenantNWListener *listener)
     RevenantNWParameters *parameters = (RevenantNWParameters *)listener->_parameters;
     listener->_secure = revenant_listener_is_secure(listener->_parameters);
     uint16_t port = 0;
-    RevenantNWEndpoint *local = parameters->_localEndpoint;
+    RevenantNWEndpointValue *local = parameters->_localEndpoint;
     if (local && local->_port.length)
         port = (uint16_t)atoi(local->_port.UTF8String);
 
@@ -235,7 +235,7 @@ static void revenant_listener_open(RevenantNWListener *listener)
         revenant_nw_sockaddr_text((const struct sockaddr *)&bound, text, sizeof text);
         revenant_nw_sockaddr_port((const struct sockaddr *)&bound);
         if (getsockname(handle, (struct sockaddr *)&bound, &length) == 0) {
-            RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+            RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
             endpoint->_type = nw_endpoint_type_address;
             endpoint->_address = (__bridge_transfer NSData *)
                 revenant_nw_sockaddr_data((const struct sockaddr *)&bound, (socklen_t)length);
@@ -277,7 +277,7 @@ nw_listener_t nw_listener_create_with_port(const char *port, nw_parameters_t par
     if (!listener)
         return NULL;
     RevenantNWParameters *value = (RevenantNWParameters *)parameters;
-    RevenantNWEndpoint *local = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *local = [[RevenantNWEndpointValue alloc] init];
     local->_type = nw_endpoint_type_address;
     local->_port = @(port);
     value->_localEndpoint = local;
@@ -289,7 +289,7 @@ nw_listener_t nw_listener_create_with_connection(nw_connection_t connection, nw_
     if (!connection)
         return NULL;
     int handle = -1;
-    RevenantNWEndpoint *remote = NULL;
+    RevenantNWEndpointValue *remote = NULL;
     nw_parameters_t connection_parameters = NULL;
     (void)remote;
     if (!RevenantNWConnectionTakeSocket(connection, &handle, &remote, &connection_parameters))

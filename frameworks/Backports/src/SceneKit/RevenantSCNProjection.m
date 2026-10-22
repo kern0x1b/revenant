@@ -50,7 +50,7 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
     return SCNVector3Make(world[0] / world[3], world[1] / world[3], world[2] / world[3]);
 }
 
-@implementation RevenantSCNRenderer (RevenantSCNProjection)
+@implementation RevenantSCNRenderEngine (RevenantSCNProjection)
 
 - (SCNVector3)projectPoint:(SCNVector3)point
 {

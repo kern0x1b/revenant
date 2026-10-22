@@ -14,7 +14,7 @@ local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {
-    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {}},
+    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "AdServicesBackports", folder = "AdServices", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -60,7 +60,7 @@ local LIBRARIES = {
     {name = "CoreMIDIBackports", folder = "CoreMIDI", frameworks = {"CoreMIDI", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CallKitBackports", folder = "CallKit", frameworks = {"CoreTelephony", "AVFoundation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ContactsBackports", folder = "Contacts", frameworks = {"AddressBook", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports", "CoreFoundationBackports"}, archives = {}, system = {}},
-    {name = "HomeKitBackports", folder = "HomeKit", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"monocypher"}, system = {}},
+    {name = "HomeKitBackports", folder = "HomeKit", frameworks = {"CoreLocation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"monocypher"}, system = {}},
     {name = "CoreSpotlightBackports", folder = "CoreSpotlight", frameworks = {"CoreSpotlight", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PushKitBackports", folder = "PushKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "JavaScriptCoreBackports", folder = "JavaScriptCore", frameworks = {"JavaScriptCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -78,9 +78,9 @@ local LIBRARIES = {
     {name = "PassKitBackports", folder = "PassKit", frameworks = {"PassKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMediaBackports", folder = "CoreMedia", frameworks = {"CoreMedia", "CoreVideo", "AudioToolbox", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "CoreVideoBackports"}, archives = {}, system = {}},
     {name = "CoreFoundationBackports", folder = "CoreFoundation", frameworks = {"CoreFoundation", "Foundation"}, libraries = {}, archives = {}, system = {}},
-    {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -91,7 +91,7 @@ local LIBRARIES = {
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
-    {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
+    {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "SpriteKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
     {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
@@ -236,6 +236,65 @@ else
                                   network = "network_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua"})
 end
 
+option("backports_libs", {type = "string", default = "", showmenu = true,
+    description = "A folder of the Backports libraries (lib*Backports.dylib) that the runtime test app links and installs, for example the unpacked backports-libraries artifact of CI; empty uses the libraries this build makes."})
+
+local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
+local RUNTIME_LIBS = get_config("backports_libs")
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+
+if is_plat("iphoneos") and get_config("tests") == "device" then
+    add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
+
+    target("backports_runtime_app")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
+        add_includedirs(path.join(RUNTIME, "app"))
+        add_mflags("-fobjc-arc")
+        if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
+            add_linkdirs(RUNTIME_LIBS)
+            add_links(table.unpack(RUNTIME_LINKS))
+        else
+            add_deps("FoundationBackports", "UIKitBackports")
+        end
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
+        add_syslinks("objc")
+    target_end()
+
+    target("backports_runtime")
+        set_kind("phony")
+        set_default(false)
+        set_group("device")
+        add_deps("backports_runtime_app")
+        add_packages("emulator-guest")
+        add_tests("foundation_url_components")
+        add_tests("loader_class_backport")
+        on_test(function (target, opt)
+            local case = path.filename(opt.name)
+            local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
+            for _, failure in ipairs(failures) do
+                cprint("${red}%s: %s", case, failure)
+            end
+            return #failures == 0
+        end)
+    target_end()
+end
+
+if is_plat("iphoneos") then
+    target("BackportsProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(os.scriptdir(), "tests", "probe", "probe.m"))
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_deps("HealthKitBackports")
+        add_syslinks("objc")
+        add_frameworks("Foundation")
+    target_end()
+end
+
 option("air2cpu", {default = false, showmenu = true,
     description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
@@ -258,6 +317,26 @@ local FOUNDATION_TESTS = {
     calendar_identifiers = {"NSCalendarIdentifiers8.m"},
     validated_format = {"NSString+ValidatedFormat.m"},
     file_relationship = {"NSFileManager+Relationship8.m"},
+    underlying_errors = {"NSError+UnderlyingErrors14.m"},
+    identifier_keys = {"NSAttributedStringKeys15.m", "NSAttributedStringKeys26.m", "NSLocalizedNumberFormatRule18.m", "NSURLUbiquitousKeys145.m", "FoundationIdentifiers17.m"},
+    expression_members = {"NSExpression+AnyKey7.m", "NSExpression+ConditionalMembers9.m", "NSExpression+Conditional.m"},
+    calendar_next_date = {"NSCalendar+NextDate8.m", "NSCalendar+Components.m", "NSDateComponents+Component8.m", "RevenantCalendarUnits.m"},
+    calendar_day_changed = {"NSCalendarDayChanged8.m"},
+    expiring_activity = {"NSProcessInfo+ExpiringActivity82.m"},
+    coder_minimum_length = {"NSCoder+MinimumLength184.m"},
+    bundle_localizations = {"NSBundle+Localizations184.m"},
+    date_components_day = {"NSDateComponents+DayOfYear18.m", "NSDateComponents+RepeatedDay26.m", "NSDateComponents+Component8.m", "NSCalendar+Components.m", "RevenantCalendarUnits.m"},
+    task_progress = {"RevenantTaskProgress.m"},
+    cookie_storage = {"RevenantCookieStorage.m", "NSHTTPCookieStorage+Task8.m"},
+    shared_observers = {"NSKeyValueSharedObservers18.m"},
+    progress_publish = {"NSProgress+Publish7.m"},
+    measurement_formatter = {"NSMeasurementFormatter.m", "RevenantMeasurementData.m", "RevenantUnitFormat.m"},
+    attributed_format_context = {"NSAttributedStringLocalizedFormat15.m", "NSAttributedStringKeys15.m"},
+    url_cache_since = {"NSURLCache+Since8.m"},
+    formatting_context = {"NSFormattingContext8.m"},
+    file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
+    header_bytes = {"RevenantHeaderBytes.m"},
+    metadata_items = {"NSMetadataQuery+Items7.m"},
 }
 
 local QUARTZCORE_TESTS = {
@@ -269,7 +348,8 @@ local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
 }
 
-local function host_tests(folder, tests, library, frameworks, defines)
+local function host_tests(folder, tests, library, frameworks, options)
+    options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
         target(folder .. "Backports_" .. name .. "_test")
@@ -281,11 +361,12 @@ local function host_tests(folder, tests, library, frameworks, defines)
             for _, source in ipairs(sources) do
                 add_files(path.join(SRC, library or folder, source))
             end
-            add_includedirs(TESTS)
+            add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, library or folder))
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
-            for _, define in ipairs(defines or {}) do
+            add_syslinks(table.unpack(options.syslinks or {}))
+            for _, define in ipairs(options.defines or {}) do
                 add_defines(define)
             end
             add_tests("default")
@@ -295,8 +376,10 @@ local function host_tests(folder, tests, library, frameworks, defines)
 end
 
 if not is_plat("iphoneos") then
-    host_tests("Foundation", FOUNDATION_TESTS)
-    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"}, {"REVENANT_HOST_BUILD"})
+    host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
+    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
+    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
+               {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
 end

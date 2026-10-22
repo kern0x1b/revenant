@@ -118,12 +118,60 @@ local function ready(sdk, version, logs, names)
     return cache
 end
 
-local function frameworks_of(cache, names)
+local function frameworks_of(cache, names, sdk)
     local out = {}
     for _, name in ipairs(names) do
-        table.insert(out, {name = name, rows = sdkfiles.read_rows(path.join(cache, name .. ".tsv")) or {}})
+        table.insert(out, {name = name, import = sdkfiles.umbrella_import(sdk, name), rows = sdkfiles.read_rows(path.join(cache, name .. ".tsv")) or {}})
     end
     return out
+end
+
+local implemented_cache = nil
+
+function implemented_names()
+    if implemented_cache then
+        return implemented_cache
+    end
+    local names = {}
+    local text = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "^(@implementation [A-Za-z_][A-Za-z0-9_]*([^(A-Za-z0-9_]|$)|REVENANT_ALIAS(_OF)?\\([A-Za-z_][A-Za-z0-9_]*)", sdkfiles.src_root()})
+    for line in text:gmatch("[^\n]+") do
+        local name = string.match(line, "^@implementation ([%w_]+)") or string.match(line, "^REVENANT_ALIAS_OF%(([%w_]+)")
+            or string.match(line, "^REVENANT_ALIAS%(([%w_]+)")
+        if name then
+            names[name] = true
+        end
+    end
+    local macros = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "[A-Z][A-Z0-9_]*\\([[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[,)]", sdkfiles.src_root()})
+    for line in macros:gmatch("[^\n]+") do
+        local name = string.match(line, "%(%s*([%w_]+)")
+        if name then
+            names[name] = true
+        end
+    end
+    local runtime = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
+        "objc_runtime_name\\(\"[A-Za-z_][A-Za-z0-9_]*\"\\)", sdkfiles.src_root()})
+    for line in runtime:gmatch("[^\n]+") do
+        local name = string.match(line, "\"([%w_]+)\"")
+        if name then
+            names[name] = true
+        end
+    end
+    local constants = os.iorunv("/usr/bin/grep", {"-rhE", "--include=*.m", "--include=*.mm", "--include=*.c",
+        "^[A-Za-z_].*=", sdkfiles.src_root()})
+    for line in constants:gmatch("[^\n]+") do
+        local left = string.match(line, "^([^=]*)=")
+        if left and string.find(left, "%f[%w_]const%f[^%w_]") and not string.find(left, "(", 1, true)
+            and not string.find(left, "^static") and not string.find(left, "^extern") then
+            local name = string.match(left, "([%a_][%w_]*)%s*$")
+            if name then
+                names[name] = true
+            end
+        end
+    end
+    implemented_cache = names
+    return names
 end
 
 function key_of(row)
@@ -157,36 +205,150 @@ function prepare(only)
         version = version,
         logs = logs,
         minimum = minimum(),
-        frameworks = frameworks_of(cache, names),
+        frameworks = frameworks_of(cache, names, sdk),
     }
 end
 
+local everything_state = nil
+
+function everything()
+    everything_state = everything_state or prepare()
+    return everything_state
+end
+
 function skeleton_for(name)
-    local state = prepare({name})
-    local pending = {}
-    for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
+    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending_of(everything(), {name}), implemented_names())
+end
+
+function declared_intros(state)
+    if state.declared == nil then
+        local lowest = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(framework.rows) do
+                if row.kind == "class" and row.intro ~= nil and (lowest[row.name] == nil or row.intro < lowest[row.name]) then
+                    lowest[row.name] = row.intro
+                end
+            end
+        end
+        state.declared = lowest
     end
-    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
+    return state.declared
 end
 
 function in_scope_rows(state, framework)
     local intro = sdkfiles.framework_introduced(framework.rows)
+    local declared = declared_intros(state)
     local kept = {}
     for _, row in ipairs(framework.rows) do
-        if sdkfiles.in_scope(row, state.minimum, intro) then
+        local scoped = row
+        if row.kind == "class" and row.intro == nil and declared[row.name] ~= nil then
+            scoped = {intro = declared[row.name]}
+        end
+        if sdkfiles.in_scope(scoped, state.minimum, intro) and not has_flag(row, "unavailable") then
             table.insert(kept, row)
         end
     end
     return kept
 end
 
+local function single_owned(row)
+    return row.kind == "class" or row.kind == "global variable"
+end
+
+local folders_cache = nil
+
+function library_folders()
+    if folders_cache == nil then
+        folders_cache = {}
+        local text = io.readfile(path.join(sdkfiles.root(), "frameworks", "Backports", "xmake.lua"))
+        for folder in string.gmatch(text, 'folder = "([%w_]+)"') do
+            folders_cache[folder] = true
+        end
+    end
+    return folders_cache
+end
+
+function owners_of(state)
+    if state.owners == nil then
+        local folders = library_folders()
+        local owners = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(in_scope_rows(state, framework)) do
+                if single_owned(row) then
+                    local key = row.kind .. "|" .. row.name
+                    local score = (folders[framework.name] and 2 or 0) + (row.intro ~= nil and 1 or 0)
+                    if owners[key] == nil or score > owners[key].score then
+                        owners[key] = {framework = framework.name, score = score}
+                    end
+                end
+            end
+        end
+        state.owners = owners
+    end
+    return state.owners
+end
+
+function pending_of(state, only)
+    local owners = owners_of(state)
+    local pending = {}
+    for _, framework in ipairs(state.frameworks) do
+        if only == nil or table.contains(only, framework.name) then
+            local rows = {}
+            for _, row in ipairs(in_scope_rows(state, framework)) do
+                local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
+                if not single_owned(row) or (owner and owner.framework == framework.name) then
+                    table.insert(rows, row)
+                end
+            end
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows,
+                unavailable = unavailable_classes(framework.rows)})
+        end
+    end
+    return pending
+end
+
+function unavailable_classes(rows)
+    local names = {}
+    for _, row in ipairs(rows) do
+        if row.kind == "class" and has_flag(row, "unavailable") then
+            names[row.name] = true
+        end
+    end
+    return names
+end
+
+function has_flag(row, flag)
+    return string.find(" " .. (row.flags or "") .. " ", " " .. flag .. " ", 1, true) ~= nil
+end
+
+function method_key(row)
+    if row.kind == "property" then
+        local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+        return (has_flag(row, "class") and "class method" or "instance method") .. "|" .. row.container .. "|" .. getter
+    end
+    return row.kind .. "|" .. row.container .. "|" .. row.name
+end
+
+function inherited_init(row)
+    return row.kind == "instance method" and row.name == "init"
+end
+
 function is_implemented(implemented, framework, row)
     local keys = implemented[framework.name] or {}
-    if row.kind == "property" then
-        return keys["instance method|" .. row.container .. "|" .. row.name] == true
+    if row.kind == "Swift declaration" then
+        return keys["swift symbol||" .. row.symbol] == true
+    elseif row.kind == "class" or row.kind == "C function" or row.kind == "global variable" then
+        return keys[key_of(row)] == true
     end
-    return keys[key_of(row)] == true
+    if inherited_init(row) or keys[method_key(row)] == true then
+        return true
+    end
+    local proxy = row.kind .. "|Revenant" .. row.container .. "|" .. row.name
+    if row.kind == "property" then
+        proxy = (has_flag(row, "class") and "class method" or "instance method") .. "|Revenant" .. row.container .. "|"
+            .. (string.match(row.flags or "", "getter:(%S+)") or row.name)
+    end
+    return keys[proxy] == true
 end
 
 function main(...)
@@ -194,13 +356,9 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local state = prepare()
-    local pending = {}
-    for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
-    end
+    local pending = pending_of(everything())
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
-    print(string.format("skeleton: %d ObjC methods, %d C functions, %d Swift symbols under %s", totals.objc, totals.c, totals.swift,
-        path.join(sdkfiles.build_root(), "skeleton")))
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names())
+    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals, %d C functions, %d Swift symbols under %s",
+        totals.objc, totals.classes, totals.protocols, totals.globals, totals.c, totals.swift, path.join(sdkfiles.build_root(), "skeleton")))
 end

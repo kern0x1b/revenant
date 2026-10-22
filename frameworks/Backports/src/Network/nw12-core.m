@@ -62,7 +62,7 @@ nw_endpoint_t nw_endpoint_create_host(const char *hostname, const char *port)
 {
     if (!hostname)
         return NULL;
-    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
     uint16_t number = 0;
     if (!revenant_nw_resolve_port(port, &number))
         return NULL;
@@ -85,7 +85,7 @@ nw_endpoint_t nw_endpoint_create_address(const struct sockaddr *address)
     socklen_t length = revenant_nw_sockaddr_length(address);
     if (!length)
         return NULL;
-    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
     endpoint->_type = nw_endpoint_type_address;
     endpoint->_address = (__bridge_transfer NSData *)revenant_nw_sockaddr_data(address, length);
     char text[INET6_ADDRSTRLEN + 4] = {0};
@@ -100,7 +100,7 @@ nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *t
 {
     if (!name || !*name || !type || !*type || !domain || !*domain)
         return NULL;
-    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
+    RevenantNWEndpointValue *endpoint = [[RevenantNWEndpointValue alloc] init];
     endpoint->_type = nw_endpoint_type_bonjour_service;
     endpoint->_bonjourName = @(name);
     endpoint->_bonjourType = @(type);
@@ -111,12 +111,12 @@ nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *t
 
 nw_endpoint_type_t nw_endpoint_get_type(nw_endpoint_t endpoint)
 {
-    return endpoint ? ((RevenantNWEndpoint *)endpoint)->_type : nw_endpoint_type_invalid;
+    return endpoint ? ((RevenantNWEndpointValue *)endpoint)->_type : nw_endpoint_type_invalid;
 }
 
 const char *nw_endpoint_get_hostname(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || (value->_type != nw_endpoint_type_host && value->_type != nw_endpoint_type_address &&
                    value->_type != nw_endpoint_type_url))
         return NULL;
@@ -125,7 +125,7 @@ const char *nw_endpoint_get_hostname(nw_endpoint_t endpoint)
 
 uint16_t nw_endpoint_get_port(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_port.length)
         return 0;
     long number = strtol(value->_port.UTF8String, NULL, 10);
@@ -136,7 +136,7 @@ uint16_t nw_endpoint_get_port(nw_endpoint_t endpoint)
 
 const struct sockaddr *nw_endpoint_get_address(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_address)
         return NULL;
     return (const struct sockaddr *)value->_address.bytes;
@@ -144,7 +144,7 @@ const struct sockaddr *nw_endpoint_get_address(nw_endpoint_t endpoint)
 
 const char *nw_endpoint_get_bonjour_service_name(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
         return NULL;
     return value->_bonjourName.UTF8String;
@@ -152,7 +152,7 @@ const char *nw_endpoint_get_bonjour_service_name(nw_endpoint_t endpoint)
 
 const char *nw_endpoint_get_bonjour_service_type(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
         return NULL;
     return value->_bonjourType.UTF8String;
@@ -160,7 +160,7 @@ const char *nw_endpoint_get_bonjour_service_type(nw_endpoint_t endpoint)
 
 const char *nw_endpoint_get_bonjour_service_domain(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
         return NULL;
     return value->_bonjourDomain.UTF8String;
@@ -168,7 +168,7 @@ const char *nw_endpoint_get_bonjour_service_domain(nw_endpoint_t endpoint)
 
 char *nw_endpoint_copy_address_string(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value)
         return NULL;
     const struct sockaddr *address = (const struct sockaddr *)value->_address.bytes;
@@ -182,7 +182,7 @@ char *nw_endpoint_copy_address_string(nw_endpoint_t endpoint)
 
 char *nw_endpoint_copy_port_string(nw_endpoint_t endpoint)
 {
-    RevenantNWEndpoint *value = (RevenantNWEndpoint *)endpoint;
+    RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_port.length)
         return NULL;
     return revenant_nw_copy_cstring(value->_port.UTF8String);

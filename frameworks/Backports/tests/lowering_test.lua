@@ -97,9 +97,10 @@ function main()
     local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
     assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
 
+    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), path.join(os.scriptdir(), "data", "src"))
     local unimplemented = path.join(probes, "unimplemented.m")
     io.writefile(unimplemented, UNIMPLEMENTED)
-    local refused, refusal = compiles(sdk, vfs, unimplemented, path.join(probes, "unimplemented.log"))
+    local refused, refusal = compiles(sdk, fixture, unimplemented, path.join(probes, "unimplemented.log"))
     assert(not refused and refusal:find("is only available on iOS 8.0 or newer", 1, true),
            "a member that Backports does not implement must keep its iOS 8 availability:\n" .. refusal)
 
