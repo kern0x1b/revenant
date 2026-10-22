@@ -11,10 +11,10 @@ local ARCHITECTURE = "armv7"
 local RANK = {exact = 1, syntax = 2, text = 3}
 local SWIFT_TYPE_KINDS = {Class = true, Struct = true, Enum = true, Protocol = true}
 local USAGE = "usage: ./xmakew l -P . frameworks/Backports/tools/demand.lua --report DIR [--source DIR]..."
-    .. " [--files LIST]... [--product PATH]... [--objects DIR] [--ios 6.1.3]"
+    .. " [--files LIST]... [--product PATH]... [--runtime PATH]... [--component PATH]... [--objects DIR] [--ios 6.1.3]"
 
 local function parse(args)
-    local opt = {sources = {}, products = {}, lists = {}, ios = TARGET}
+    local opt = {sources = {}, products = {}, lists = {}, runtime = {}, components = {}, ios = TARGET}
     local at = 1
     while at <= #args do
         local flag, value = args[at], args[at + 1]
@@ -27,6 +27,10 @@ local function parse(args)
             table.insert(opt.lists, value)
         elseif flag == "--product" then
             table.insert(opt.products, value)
+        elseif flag == "--runtime" then
+            table.insert(opt.runtime, value)
+        elseif flag == "--component" then
+            table.insert(opt.components, value)
         elseif flag == "--report" then
             opt.report = value
         elseif flag == "--objects" then
@@ -198,15 +202,19 @@ end
 
 local function status_of(item)
     if item.present then
-        return "present"
+        return "present", "iOS 6.1.3"
     elseif item.backed then
-        return "backported"
+        return "backported", "Backports"
+    elseif item.component then
+        return "backported", "component"
+    elseif item.runtime then
+        return "runtime", "runtime"
     end
-    return "missing"
+    return "missing", ""
 end
 
 local function new_item(fields)
-    fields.status = status_of(fields)
+    fields.status, fields.via = status_of(fields)
     fields.files = {}
     fields.file_count = 0
     fields.count = 0
@@ -251,7 +259,8 @@ local function class_item(ctx, ledger, name, level, file)
         ledger.contradictions = ledger.contradictions + 1
     end
     local item = new_item({kind = "class", container = "", name = name, framework = class.framework, intro = class.intro,
-        present = present, backed = ctx.backed.keys[key] == true and not present})
+        present = present, backed = ctx.backed.keys[key] == true, component = ctx.component.classes[name] == true,
+        runtime = ctx.runtime.classes[name] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -272,7 +281,8 @@ local function symbol_item(ctx, ledger, name, level, file)
         present = ctx.exported("_" .. name)
     end
     local item = new_item({kind = symbol.kind, container = "", name = name, framework = symbol.framework,
-        intro = symbol.intro, present = present, backed = ctx.backed.keys[key] == true and not present})
+        intro = symbol.intro, present = present, backed = ctx.backed.keys[key] == true,
+        component = ctx.component.symbols[name] == true, runtime = ctx.runtime.symbols[name] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -287,7 +297,8 @@ local function protocol_item(ctx, ledger, name, level, file)
         return add(ledger, key, known, file, level)
     end
     local item = new_item({kind = "protocol", container = "", name = name, framework = protocol.framework,
-        intro = protocol.intro, present = ctx.annotated(protocol.intro), backed = false})
+        intro = protocol.intro, present = ctx.annotated(protocol.intro), backed = false,
+        component = ctx.component.protocols[name] == true, runtime = ctx.runtime.protocols[name] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -303,8 +314,10 @@ local function swift_type_item(ctx, ledger, name, level, file)
     end
     local bridge = "NS" .. name
     local bridged = ctx.u.classes[bridge] ~= nil and ctx.class_present(bridge)
+    local provided = swift.framework .. "." .. name
     local item = new_item({kind = "swift type", container = "", name = name, framework = swift.framework,
-        intro = swift.intro, present = ctx.annotated(swift.intro), backed = false, bridge = bridged and bridge or ""})
+        intro = swift.intro, present = ctx.annotated(swift.intro), backed = false, bridge = bridged and bridge or "",
+        component = ctx.component.swift_types[provided] == true, runtime = ctx.runtime.swift_types[provided] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -322,9 +335,8 @@ local function member_item(ctx, ledger, container, class_method, selector, level
         ledger.unannotated = ledger.unannotated + 1
     end
     local item = new_item({kind = entry.kind, container = entry.container, name = selector, framework = entry.framework,
-        intro = entry.intro, present = ctx.member_present(entry), backed = ctx.backed.keys[key] == true})
-    item.backed = item.backed and not item.present
-    item.status = status_of(item)
+        intro = entry.intro, present = ctx.member_present(entry), backed = ctx.backed.keys[key] == true,
+        component = ctx.component.classes[entry.container] == true, runtime = ctx.runtime.classes[entry.container] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -353,8 +365,6 @@ local function selector_item(ctx, ledger, selector, level, file)
     end
     local item = new_item({kind = "selector", container = "", name = selector, framework = framework, intro = lowest,
         present = present, backed = ctx.backed.selectors[selector] == true})
-    item.backed = item.backed and not item.present
-    item.status = status_of(item)
     return add(ledger, key, item, file, level)
 end
 
@@ -366,13 +376,12 @@ local function framework_item(ctx, ledger, name, level, file)
     end
     local present = ctx.cache.libraries["/System/Library/Frameworks/" .. name .. ".framework/" .. name] ~= nil
     local item = new_item({kind = "framework", container = "", name = name, framework = name, present = present,
-        backed = ctx.backed.folders[name] == true})
-    item.backed = item.backed and not item.present
-    item.status = status_of(item)
+        backed = ctx.backed.folders[name] == true, component = ctx.component.modules[name] == true,
+        runtime = ctx.runtime.modules[name] == true})
     return add(ledger, key, item, file, level)
 end
 
-local function compact_of(u, record)
+local function compact_of(u, record, global_types)
     local hits, call_hits, member_hits, own = {}, {}, {}, {}
     for _, name in ipairs(record.declared_members) do
         own[name] = true
@@ -393,7 +402,23 @@ local function compact_of(u, record)
             table.insert(member_hits, word)
         end
     end
-    return {file = record.file, imports = record.imports, messages = record.messages, selectors = record.selectors,
+    local methods = {}
+    for _, name in ipairs(record.method_declarations) do
+        methods[name] = true
+    end
+    local messages = {}
+    for _, message in ipairs(record.messages) do
+        if not (message.own and methods[message.selector]) then
+            if message.class == nil and message.receiver and not message.own then
+                local typed = record.var_types[message.receiver] or global_types[message.receiver] or nil
+                if typed then
+                    message = {selector = message.selector, class = typed, class_method = false, own = false}
+                end
+            end
+            table.insert(messages, message)
+        end
+    end
+    return {file = record.file, imports = record.imports, messages = messages, selectors = record.selectors,
         hits = hits, call_hits = call_hits, member_hits = member_hits}
 end
 
@@ -479,8 +504,8 @@ local function framework_totals(ctx, ledger)
     for _, key in ipairs(ledger.order) do
         local item = ledger.items[key]
         local name = item.framework or "(none)"
-        totals[name] = totals[name] or {referenced = 0, present = 0, backported = 0, missing = 0, exact = 0, syntax = 0,
-            text = 0}
+        totals[name] = totals[name] or {referenced = 0, present = 0, backported = 0, runtime = 0, missing = 0, exact = 0,
+            syntax = 0, text = 0}
         local row = totals[name]
         row.referenced = row.referenced + 1
         row[item.status] = row[item.status] + 1
@@ -507,9 +532,9 @@ local function ranked(ledger, status)
 end
 
 local function row_of(item)
-    return string.format("%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s", item.key, item.framework or "",
+    return string.format("%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s", item.key, item.framework or "",
         item.intro and tostring(item.intro) or "", item.status, item.level, item.kind, item.file_count, item.count,
-        item.bridge or "")
+        item.bridge or "", item.via)
 end
 
 local function write_report(opt, ctx, ledger, meta)
@@ -520,15 +545,15 @@ local function write_report(opt, ctx, ledger, meta)
         table.insert(frameworks, name)
     end
     table.sort(frameworks, scanner.bytes_less)
-    local table_rows = {"framework\treferenced\tpresent\tbackported\tmissing\texact\tsyntax\ttext"}
+    local table_rows = {"framework\treferenced\tpresent\tbackported\truntime\tmissing\texact\tsyntax\ttext"}
     for _, name in ipairs(frameworks) do
         local row = totals[name]
-        table.insert(table_rows, string.format("%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d", name, row.referenced, row.present,
-            row.backported, row.missing, row.exact, row.syntax, row.text))
+        table.insert(table_rows, string.format("%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d", name, row.referenced, row.present,
+            row.backported, row.runtime, row.missing, row.exact, row.syntax, row.text))
     end
     io.writefile(path.join(opt.report, "frameworks.tsv"), table.concat(table_rows, "\n") .. "\n")
 
-    local header = "key\tframework\tintro\tstatus\tlevel\tkind\tfiles\trefs\tbridge"
+    local header = "key\tframework\tintro\tstatus\tlevel\tkind\tfiles\trefs\tbridge\tvia"
     local items = {header}
     for _, key in ipairs(ledger.order) do
         table.insert(items, row_of(ledger.items[key]))
@@ -548,6 +573,15 @@ local function write_report(opt, ctx, ledger, meta)
     end
     table.sort(pair_rows, scanner.bytes_less)
     io.writefile(path.join(opt.report, "missing_files.tsv"), table.concat(pair_rows, "\n") .. "\n")
+
+    local item_file_rows = {}
+    for _, key in ipairs(ledger.order) do
+        for file in pairs(ledger.items[key].files) do
+            table.insert(item_file_rows, key .. "\t" .. file)
+        end
+    end
+    table.sort(item_file_rows, scanner.bytes_less)
+    io.writefile(path.join(opt.report, "item_files.tsv"), table.concat(item_file_rows, "\n") .. "\n")
 
     local candidates = {}
     for _, candidate in ipairs(ledger.candidate_order) do
@@ -587,7 +621,9 @@ local function write_report(opt, ctx, ledger, meta)
     say(string.format("referenced items: %d (exact %d, syntax %d, text %d)", #ledger.order, by_level.exact or 0,
         by_level.syntax or 0, by_level.text or 0))
     say(string.format("present on iOS %s: %d", opt.ios, by_status.present or 0))
-    say(string.format("backported and not present on iOS %s: %d", opt.ios, by_status.backported or 0))
+    say(string.format("backported and not present on iOS %s: %d (Backports objects %d, revenant components %d)", opt.ios,
+        by_status.backported or 0, meta.by_via.Backports or 0, meta.by_via.component or 0))
+    say(string.format("provided by the revenant Swift runtime and not on iOS %s: %d", opt.ios, by_status.runtime or 0))
     say(string.format("missing: %d", by_status.missing or 0))
     local by_kind = {}
     for _, item in ipairs(missing) do
@@ -614,11 +650,11 @@ local function write_report(opt, ctx, ledger, meta)
     say(string.format("classes annotated after iOS %s that the cache exports: %d", opt.ios, ledger.contradictions))
     say(string.format("member-name candidates (text only, not counted): %d", #candidates))
     say("")
-    say("framework referenced present backported missing exact syntax text")
+    say("framework referenced present backported runtime missing exact syntax text")
     for _, name in ipairs(frameworks) do
         local row = totals[name]
-        say(string.format("  %-28s %5d %5d %5d %5d %5d %5d %5d", name, row.referenced, row.present, row.backported,
-            row.missing, row.exact, row.syntax, row.text))
+        say(string.format("  %-28s %5d %5d %5d %5d %5d %5d %5d %5d", name, row.referenced, row.present, row.backported,
+            row.runtime, row.missing, row.exact, row.syntax, row.text))
     end
     say("")
     say("top 50 missing, by files that use them")
@@ -674,13 +710,28 @@ function main(...)
     phase("backported objects")
 
     local files = source_files(opt.sources, opt.lists)
-    local compact, declared = {}, {}
+    local records, declared = {}, {}
     for _, file in ipairs(files) do
         local record = scanner.scan(file)
         for _, name in ipairs(record.declared) do
             declared[name] = true
         end
-        table.insert(compact, compact_of(u, record))
+        table.insert(records, record)
+    end
+    local global_types = {}
+    for _, record in ipairs(records) do
+        for _, name in ipairs(record.var_names) do
+            local type = record.var_types[name]
+            if global_types[name] == nil then
+                global_types[name] = type
+            elseif global_types[name] ~= type then
+                global_types[name] = false
+            end
+        end
+    end
+    local compact = {}
+    for _, record in ipairs(records) do
+        table.insert(compact, compact_of(u, record, global_types))
     end
     phase("scan " .. #files .. " files")
 
@@ -692,7 +743,8 @@ function main(...)
     end
 
     local ctx = {u = u, cache = cache, target = ast.version_of(opt.ios), backed = backed,
-        declared = declared, source = source, sdk = state.sdk, sdk_version = state.version}
+        declared = declared, source = source, sdk = state.sdk, sdk_version = state.version,
+        runtime = products.provider(opt.runtime), component = products.provider(opt.components)}
     presence(ctx)
     local ledger = {items = {}, order = {}, missing_pairs = {}, candidates = {}, candidate_order = {}, unmatched = {},
         unmatched_count = 0, outside = 0, contradictions = 0, unannotated = 0, refs = 0}
@@ -704,13 +756,16 @@ function main(...)
     end
     phase("classify")
 
-    local by_level, by_status = {}, {}
+    local by_level, by_status, by_via = {}, {}, {}
     for _, key in ipairs(ledger.order) do
         local item = ledger.items[key]
         by_level[item.level] = (by_level[item.level] or 0) + 1
         by_status[item.status] = (by_status[item.status] or 0) + 1
+        if item.via ~= "" then
+            by_via[item.via] = (by_via[item.via] or 0) + 1
+        end
     end
     write_report(opt, ctx, ledger, {folders = folders, files = #files, products = #product_files, by_level = by_level,
-        by_status = by_status, unmatched = ledger.unmatched_count})
+        by_status = by_status, by_via = by_via, unmatched = ledger.unmatched_count})
     phase("report " .. opt.report)
 end

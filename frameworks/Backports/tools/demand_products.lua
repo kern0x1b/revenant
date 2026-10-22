@@ -97,3 +97,57 @@ function read(file)
     end
     return {file = file, undefined = undefined_of(file), selectors = selectors}
 end
+
+local function defined_of(file)
+    local names, seen = {}, {}
+    for line in os.iorunv("nm", {"-gU", file}):gmatch("[^\n]+") do
+        local name = line:match("^%x+ %a (%S+)$")
+        if name then
+            unique(names, seen, name)
+        end
+    end
+    return names
+end
+
+local function library_module(file)
+    local base = path.filename(file):match("^lib(.+)%.%w+$")
+    if base and base:sub(1, 5) == "swift" then
+        base = base:sub(6)
+    end
+    return base
+end
+
+function provider(paths)
+    local index = {classes = {}, protocols = {}, symbols = {}, swift_types = {}, modules = {}}
+    for _, path_ in ipairs(paths) do
+        for _, file in ipairs(files_under(path_)) do
+            local owner = library_module(file)
+            if owner then
+                index.modules[owner] = true
+            end
+            for _, name in ipairs(defined_of(file)) do
+                local class = name:match("^_OBJC_CLASS_%$_(.+)$")
+                local protocol = name:match("^_OBJC_PROTOCOL_%$_(.+)$")
+                local length, rest = name:match("^_%$s(%d+)(.*)$")
+                if class then
+                    index.classes[class] = true
+                elseif protocol then
+                    index.protocols[protocol] = true
+                elseif length then
+                    local module = rest:sub(1, tonumber(length))
+                    local type_length, after = rest:sub(tonumber(length) + 1):match("^(%d+)(.*)$")
+                    if type_length and module == owner then
+                        local type_name = after:sub(1, tonumber(type_length))
+                        local kind = after:sub(tonumber(type_length) + 1, tonumber(type_length) + 1)
+                        if kind == "V" or kind == "C" or kind == "O" or kind == "P" then
+                            index.swift_types[module .. "." .. type_name] = true
+                        end
+                    end
+                elseif name:sub(1, 1) == "_" and not name:find("^_OBJC") and not name:find("^_%$") then
+                    index.symbols[name:sub(2)] = true
+                end
+            end
+        end
+    end
+    return index
+end
