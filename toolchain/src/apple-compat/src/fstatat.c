@@ -1,3 +1,4 @@
+#include "at_plain.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/param.h>
@@ -17,4 +18,13 @@ int revenant_fstatat(int directory, const char *path, struct stat *buffer, int f
         return -1;
     }
     return (flags & AT_SYMLINK_NOFOLLOW) ? lstat(resolved, buffer) : stat(resolved, buffer);
+}
+
+__attribute__((visibility("hidden")))
+int fstatat(int directory, const char *path, struct stat *buffer, int flags)
+{
+    if (revenant_at_refused(directory, path)) {
+        return -1;
+    }
+    return revenant_fstatat(directory, path, buffer, flags);
 }

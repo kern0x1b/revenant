@@ -44,6 +44,7 @@ the linker, signer and SDK stubs do not.
 | ldid | 2.1.5-procursus7+23.gaf86971 | AGPL-3.0-or-later (build-time signer; linked into nothing that ships) | `packages/l/ldid` |
 | iPhone OS SDK (opt-in, `apple_sdk`) | 16.4 | Apple SDK license terms (from [`theos/sdks`](https://github.com/theos/sdks)) | `packages/i/iphoneos-sdk` |
 | iPhone OS SDK (default) | 26.2 | Apple SDK license terms (from [`xybp888/iOS-SDKs`](https://github.com/xybp888/iOS-SDKs)) | `packages/i/iphoneos-sdk` |
+| Rust toolchain: rustc, cargo, the standard library and its `rust-src`, from the nightly `nightly-2026-10-22`; installed by rustup 1.29.2, whose installer is pinned by checksum | nightly-2026-10-22 (rustc 1.101.0-nightly) | Apache-2.0 OR MIT | `packages/r/rust` |
 
 ## The emulator, the signer, and their libraries
 

@@ -1,0 +1,18 @@
+rule("rust")
+    add_deps("@self/apple-ios")
+    set_extensions(".toml")
+
+    on_load(function (target)
+        import("@self.rust")
+        target:set("kind", "static")
+        target:set("basename", rust.library_name(target))
+        target:add("packages", "rust")
+        target:add("links", rust.library_name(target), {public = true})
+        target:add("linkdirs", target:targetdir(), {public = true})
+        target:add("files", rust.stamp(target))
+    end)
+
+    on_build(function (target)
+        import("@self.rust")
+        rust.build(target)
+    end)
