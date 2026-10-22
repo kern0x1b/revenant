@@ -50,7 +50,7 @@ conformance that wants another specification names its own beside it.
 in it -- 0 errors, `object 2056252 bytes`, through a device compile run alone (**now `packages/a/appintents/xmake.lua`'s own flags**; the script that ran it is not kept),
 and the digester's dump of that build has the member. Against the **80-row** corpus ledger the
 module goes from 13 placed to **14**, and `AppEntity.defaultResolverSpecification` is no longer in
-`AppIntents-missing.tsv`; the four rows that carry that name and are still there belong to other
+the run's `AppIntents-missing.tsv` (a run file, not kept); the four rows that carry that name and are still there belong to other
 owners: `AppEnum` (the `Self: AppEnum` overload, `:427-430`), and `AttributedString`,
 `Calendar.RecurrenceRule` and `Measurement` (the Foundation Swift r2 types, gated at this release).
 

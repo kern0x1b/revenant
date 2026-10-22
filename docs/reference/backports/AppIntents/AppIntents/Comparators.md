@@ -27,7 +27,7 @@ key however many values it holds.
 **Measured two ways.** The call sites are in `the comparator probe, **now `frameworks/Backports/tests/AppIntents/probe-comparators.swift`**`: twelve
 questions — does an operator equal itself, does it equal its neighbour, does a tile colour equal
 itself and its next — which **typecheck against Apple's AppIntents** on the host (0 errors, and
-`apple-comparators.txt` has Apple's twelve answers) **and against this module** for
+`apple-comparators.txt`, a run file not kept in the repository, has Apple's twelve answers) **and against this module** for
 `armv7-apple-ios6.1.3` (0 errors). The port's *answers* cannot be measured on this machine: the
 module does not build for the host (53 errors, the same wall as ActivityKit's and WidgetKit's
 differentials) and there is no iOS runtime here, so the behaviour half of this family needs an
