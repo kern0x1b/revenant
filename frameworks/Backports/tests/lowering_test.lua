@@ -113,7 +113,7 @@ function main()
     local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
     assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
 
-    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), path.join(os.scriptdir(), "data", "src"))
+    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), lowered.members_of(path.join(os.scriptdir(), "data", "src"), sdk))
     local unimplemented = path.join(probes, "unimplemented.m")
     io.writefile(unimplemented, UNIMPLEMENTED)
     local refused, refusal = compiles(sdk, fixture, unimplemented, path.join(probes, "unimplemented.log"))
