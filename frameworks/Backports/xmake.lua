@@ -82,6 +82,7 @@ local LIBRARIES = {
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
+    {name = "QuartzCoreBackports", folder = "QuartzCore", frameworks = {"QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
@@ -230,7 +231,8 @@ end
 if is_plat("iphoneos") then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua"})
+    backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+                                  uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
@@ -257,17 +259,21 @@ local FOUNDATION_TESTS = {
     file_relationship = {"NSFileManager+Relationship8.m"},
 }
 
-if not is_plat("iphoneos") then
-    local TESTS = path.join(os.scriptdir(), "tests", "Foundation")
-    for name, sources in pairs(FOUNDATION_TESTS) do
-        target("FoundationBackports_" .. name .. "_test")
+local QUARTZCORE_TESTS = {
+    protocols = {"QuartzCoreProtocols10.m"},
+}
+
+local function host_tests(folder, tests)
+    local TESTS = path.join(os.scriptdir(), "tests", folder)
+    for name, sources in pairs(tests) do
+        target(folder .. "Backports_" .. name .. "_test")
             set_kind("binary")
             set_plat("macosx")
             set_arch("arm64")
             set_default(false)
             add_files(path.join(TESTS, name .. "_test.m"))
             for _, source in ipairs(sources) do
-                add_files(path.join(SRC, "Foundation", source))
+                add_files(path.join(SRC, folder, source))
             end
             add_includedirs(TESTS)
             add_mflags("-fobjc-arc")
@@ -277,4 +283,9 @@ if not is_plat("iphoneos") then
             add_tests("negative", {runargs = {"--negative"}, should_fail = true})
         target_end()
     end
+end
+
+if not is_plat("iphoneos") then
+    host_tests("Foundation", FOUNDATION_TESTS)
+    host_tests("QuartzCore", QUARTZCORE_TESTS)
 end

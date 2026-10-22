@@ -45,3 +45,9 @@
 - (void)homeManager:(HMHomeManager *)manager didRemoveHome:(HMHome *)home;
 - (void)homeManager:(HMHomeManager *)manager didReceiveAddAccessoryRequest:(HMAddAccessoryRequest *)request API_DEPRECATED("No longer supported", ios(13.0, 15.0)) API_UNAVAILABLE(ios, macos, watchos, tvos, macCatalyst) NS_SWIFT_NAME(homeManager(_:didReceiveAddAccessoryRequest:));
 @end
+
+__attribute__((used)) static void revenantEmitProtocols(void)
+{
+    (void)@protocol(HMHomeDelegate);
+    (void)@protocol(HMHomeManagerDelegate);
+}

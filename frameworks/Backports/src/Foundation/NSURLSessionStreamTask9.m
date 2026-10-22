@@ -22,6 +22,11 @@
 - (void)URLSession:(NSURLSession *)session writeClosedForStreamTask:(NSURLSessionStreamTask *)streamTask;
 @end
 
+__attribute__((used)) static void revenantEmitProtocols(void)
+{
+    (void)@protocol(NSURLSessionStreamDelegate);
+}
+
 static char RevenantStreamTaskStateKey;
 
 static void revenant_socket_name(int descriptor, BOOL local, NSString **address, NSNumber **port)

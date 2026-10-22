@@ -44,9 +44,18 @@ Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`bi
 
 ## Limits
 
-Swift types, variables and protocols are counted but not stubbed. Protocol objects and `_OBJC_CLASS_$_` class symbols are not emitted, so an app that links an absent class does not link yet. C global variables are not stubbed. Subframeworks and enum constants are excluded. ObjC type encodings are empty.
+Swift types, variables and protocols are counted but not stubbed. The skeleton emits no protocol objects: a protocol that `src/` defines is registered at load only when its file uses it, because clang emits a protocol's metadata only in a translation unit that references it. So each such file ends with `revenantEmitProtocols`, which takes `@protocol` of every protocol the file defines (`QuartzCore/QuartzCoreProtocols10.m`, `HomeKit/HMHomeDelegateProtocols8_0.m`, `Foundation/NSURLSessionStreamTask9.m`). The object files carry the metadata and `tests/QuartzCore/protocols_test.m` checks it on the host; it has not been run on a device. `_OBJC_CLASS_$_` class symbols are not emitted either, so an app that links an absent class does not link yet. C global variables are not stubbed. Subframeworks and enum constants are excluded. ObjC type encodings are empty.
 
 ## Open gaps
+
+Partly backported. Each of these builds, and the part it does not cover is missing from the module, so a program that uses it fails to compile against the backport rather than running with a fake:
+
+- `UniformTypeIdentifiers` (`swiftUniformTypeIdentifiers`, wrapper `revenant@uniformtypeidentifiers`): `UTType` with its 140 standard constants, conformance, supertypes, tags, extension and MIME lookups, and the `URL` helpers. Missing: the `NSItemProvider` extension (an iOS 8 class), bridging to `UTTypeReference` (an iOS 14 Objective-C class) and `URLResourceValues.contentType`. The standard types are a table generated from the macOS 27 UTI database, with English descriptions. `JSONEncoder` writes the identifier as a string, where the SDK writes an object with an internal index, so the bytes differ; decoding accepts both. `tests/UniformTypeIdentifiers/main.swift` compares 2,439 lines of output with the host.
+- `CryptoKit` (`swiftCryptoKit`, wrapper `revenant@cryptokit`): `SHA256`, `SHA384`, `SHA512` and their digests, `HMAC`, `SymmetricKey` and `AES.GCM`. The AES block is CommonCrypto ECB; CTR and GHASH are software, because the iOS 6 CTR mode is not verified. Missing: `SHA3`, `Insecure`, `ChaChaPoly`, `HKDF`, `Curve25519`, `P256`, `P384`, `P521`, HPKE, Secure Enclave and key wrapping. `tests/CryptoKit/main.swift` compares 377 lines of output with the host, including the error cases.
+- `NaturalLanguage` (`NLLanguageRecognizer`, `NLTokenizer` and the `NLLanguage` constants in `src/Foundation`): the dominant language and the tokens match the host on `tests/NaturalLanguage/main.m`. `languageHypothesesWithMaximum:` and its probabilities are word-count shares, not Apple's model, and that test does not compare them.
+- `UserNotifications` (`src/UIKit/UNUserNotificationCenter.m`): the center delivers over `UILocalNotification`. `tests/uikit_test.lua` checks its members.
+
+The large members still open, with a design note for each, are in `docs/explanation/backports-open-members.md`.
 
 The Swift overlays below are built as targets of this component, and each builds only for an iOS its backport reaches. Below that release the build refuses, and the wrapper package refuses on load, with "not yet backported". None of these is a supported minimum: each closes when its backport makes it build at iOS 6.
 
