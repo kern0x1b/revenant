@@ -95,13 +95,29 @@ local function scan_source(file, found)
     end
 end
 
+local function scan_adoption(file, found)
+    for line in io.readfile(file):gmatch("[^\n]*") do
+        local list = line:match("^@interface%s+[%w_]+[^<]*<([^>]+)>")
+        if list then
+            for name in list:gmatch("[%w_]+") do
+                found.protocols[name] = true
+            end
+        end
+    end
+end
+
 local function implemented_in(src)
     local folders = {}
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
-        local found = {classes = {}, functions = {}, globals = {}}
+        local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 scan_source(file, found)
+            end
+        end
+        for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                scan_adoption(file, found)
             end
         end
         folders[path.filename(folder)] = found
@@ -301,6 +317,35 @@ local function lowering_of(text, implemented)
             end
         end
     end
+    for name in pairs(implemented.protocols or {}) do
+        local position = words[name] and 1 or #text + 1
+        while true do
+            local start, stop = text:find("@protocol%s+" .. name .. "[%s<]", position)
+            if not start then
+                break
+            end
+            local block_end = text:find("@end", stop, true) or #text
+            local first = statement_start(text, start, true)
+            if first then
+                lower(first, text:find("\n", stop, true) or #text)
+            end
+            for _, mark_pattern in ipairs({"\n[%-%+]%s*%(", "\n@property"}) do
+                local at = stop
+                while true do
+                    local mark = text:find(mark_pattern, at)
+                    if not mark or mark > block_end then
+                        break
+                    end
+                    local declared_end = statement_end(text, mark + 1)
+                    for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
+                        lower(piece[1], piece[2])
+                    end
+                    at = mark + 1
+                end
+            end
+            position = block_end + 1
+        end
+    end
     for name in pairs(implemented.globals or {}) do
         local position = words[name] and 1 or #text + 1
         while true do
@@ -356,8 +401,11 @@ function lower_header(text, implemented)
 end
 
 local function union_of(folders)
-    local union = {classes = {}, functions = {}, globals = {}}
+    local union = {classes = {}, functions = {}, globals = {}, protocols = {}}
     for _, found in pairs(folders) do
+        for name in pairs(found.protocols) do
+            union.protocols[name] = true
+        end
         for class, members in pairs(found.classes) do
             union.classes[class] = union.classes[class] or {}
             for member in pairs(members) do

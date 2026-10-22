@@ -154,6 +154,15 @@ local function declared_protocols()
             protocols[name] = true
         end
     end
+    for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
+        for _, file in ipairs(os.files(path.join(src, pattern))) do
+            for list in io.readfile(file):gmatch("\n@interface%s+[%w_]+[^<\n]*<([^>\n]+)>") do
+                for name in list:gmatch("[%w_]+") do
+                    protocols[name] = true
+                end
+            end
+        end
+    end
     return protocols
 end
 

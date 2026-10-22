@@ -26,9 +26,13 @@ local ACCEPTANCE = [=[
 #import <CoreLocation/CoreLocation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+#import <Metal/Metal.h>
 
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    (void)[device newCommandQueue];
+    (void)[device newBufferWithLength:16 options:0];
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[text stringByRemovingPercentEncoding];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
