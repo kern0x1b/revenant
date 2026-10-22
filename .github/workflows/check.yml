@@ -101,7 +101,10 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+            build/backports-sources.txt
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
+          restore-keys: |
+            backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-
 
       - name: Configure the Backports component
         timeout-minutes: 20
@@ -117,6 +120,23 @@ jobs:
           echo "stage facts starts $(date -u +%H:%M:%S)"
           ./xmakew l -P . frameworks/Backports/tools/generate.lua
           echo "stage facts ends $(date -u +%H:%M:%S)"
+
+      - name: Touch the Backports sources that changed since the cached objects were built
+        run: |
+          manifest=build/backports-sources.txt
+          if [ ! -f "$manifest" ]; then
+            echo "The cache has no source manifest, so every object is built"
+            exit 0
+          fi
+          sources() {
+            { git ls-files -- frameworks/Backports; find build/generated/backports/skeleton -type f 2>/dev/null || true; } | LC_ALL=C sort > "$RUNNER_TEMP/backports-names.txt"
+            xargs git hash-object < "$RUNNER_TEMP/backports-names.txt" | paste - "$RUNNER_TEMP/backports-names.txt" | LC_ALL=C sort
+          }
+          sources > "$RUNNER_TEMP/backports-sources.txt"
+          LC_ALL=C comm -13 "$manifest" "$RUNNER_TEMP/backports-sources.txt" | cut -f2 | while IFS= read -r path; do
+            echo "changed since the cache: $path"
+            touch "$path"
+          done
 
       - name: Show the package logs when the configure failed
         if: failure()
@@ -149,6 +169,14 @@ jobs:
           ./xmakew build -P . 2>&1 | stamp
           echo "stage build ends $(date -u +%H:%M:%S)"
 
+      - name: Record the Backports sources the objects are built from
+        run: |
+          sources() {
+            { git ls-files -- frameworks/Backports; find build/generated/backports/skeleton -type f 2>/dev/null || true; } | LC_ALL=C sort > "$RUNNER_TEMP/backports-names.txt"
+            xargs git hash-object < "$RUNNER_TEMP/backports-names.txt" | paste - "$RUNNER_TEMP/backports-names.txt" | LC_ALL=C sort
+          }
+          sources > build/backports-sources.txt
+
       - uses: actions/cache/save@v4
         if: steps.objects.outputs.cache-hit != 'true'
         with:
@@ -156,7 +184,8 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+            build/backports-sources.txt
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - name: Upload the Backports libraries
         uses: actions/upload-artifact@v4
