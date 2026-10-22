@@ -145,7 +145,7 @@ function main()
         present[file] = true
         local parts = path.split(file)
         if file:lower():find("telegram", 1, true) then
-            wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-telegram-test.md")
+            wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-app-under-test.md")
         end
         if file:endswith(".py") then
             wrong(file, "Lua only: the repository has no Python")
