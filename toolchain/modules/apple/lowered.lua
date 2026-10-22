@@ -696,7 +696,7 @@ end
 local built = {}
 
 function members_file()
-    return path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "lowered-members.txt"))
+    return path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "tools", "lowered-members.txt"))
 end
 
 local MEMBERS_HEADER = table.concat({
