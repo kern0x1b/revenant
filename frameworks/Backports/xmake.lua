@@ -341,9 +341,11 @@ local FOUNDATION_TESTS = {
 
 local QUARTZCORE_TESTS = {
     protocols = {"QuartzCoreProtocols10.m"},
+    spring_animation = {"RevenantSpringSolver.m", "RevenantSpringKeyframes.m", "CASpringAnimation.m"},
 }
 
-local function host_tests(folder, tests, library, frameworks, syslinks)
+local function host_tests(folder, tests, library, frameworks, options)
+    options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
     for name, sources in pairs(tests) do
         target(folder .. "Backports_" .. name .. "_test")
@@ -359,7 +361,10 @@ local function host_tests(folder, tests, library, frameworks, syslinks)
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
-            add_syslinks(table.unpack(syslinks or {}))
+            add_syslinks(table.unpack(options.syslinks or {}))
+            for _, define in ipairs(options.defines or {}) do
+                add_defines(define)
+            end
             add_tests("default")
             add_tests("negative", {runargs = {"--negative"}, should_fail = true})
         target_end()
@@ -367,8 +372,9 @@ local function host_tests(folder, tests, library, frameworks, syslinks)
 end
 
 if not is_plat("iphoneos") then
-    host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {"sqlite3"})
+    host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
-    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", nil, {"sqlite3"})
+    host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
+               {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
 end
