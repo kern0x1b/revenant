@@ -345,6 +345,21 @@ local function apply_ranges(text, merged)
     return text
 end
 
+local function constant_end(text, at)
+    local depth = 0
+    for position = at, #text do
+        local char = text:sub(position, position)
+        if char == "(" then
+            depth = depth + 1
+        elseif char == ")" then
+            depth = depth - 1
+        elseif depth == 0 and (char == "," or char == ";" or char == "}") then
+            return position - 1
+        end
+    end
+    return #text
+end
+
 local function lowering_of(text, implemented)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -467,11 +482,14 @@ local function lowering_of(text, implemented)
         if hit.kind == "global" then
             local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
-            if first then
-                local last = statement_end(text, stop)
-                local segment = text:sub(first, last)
-                if not segment:find("\n%s*#") and not segment:find("{", 1, true) then
-                    lower(first, last)
+            local last = first and statement_end(text, stop)
+            local segment = first and text:sub(first, last) or ""
+            if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
+                lower(first, last)
+            elseif text:match("^%s*API_AVAILABLE%(", stop + 1) or text:match("^%s*=", stop + 1) then
+                local ending = constant_end(text, start)
+                if not text:sub(start, ending):find("\n%s*#") then
+                    lower(start, ending)
                 end
             end
         elseif text:find("^%s*%(", hit.position + #hit.word) and not in_directive(text, hit.position) then
@@ -854,9 +872,29 @@ local function lowered_types(sdk, set)
     return types
 end
 
+local function identifiers_in(src)
+    local used = {}
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                for word in io.readfile(file):gmatch("[%a_][%w_]*") do
+                    used[word] = true
+                end
+            end
+        end
+    end
+    return used
+end
+
 function members_of(src, sdk)
     local folders = implemented_in(src)
     local set = union_of(folders)
+    local used = identifiers_in(src)
+    for name in pairs(later_constants(sdk)) do
+        if used[name] then
+            set.globals[name] = true
+        end
+    end
     local status = protocol_status(src, sdk, folders)
     set.protocols = status.backed
     set.protocol_members = {}
@@ -932,6 +970,21 @@ local function ios_later(text)
         major, minor = tonumber(found_major), tonumber(found_minor) or 0
     end
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
+end
+
+function later_constants(sdk)
+    local found = {}
+    for _, file in ipairs(framework_headers(sdk)) do
+        for line in io.readfile(file):gmatch("[^\n]*") do
+            if line:find("API_AVAILABLE", 1, true) and ios_later(line) then
+                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+API_AVAILABLE")
+                if name and (line:find("=", 1, true) or line:find("const", 1, true)) then
+                    found[name] = true
+                end
+            end
+        end
+    end
+    return found
 end
 
 local function released_keys(released, class, cache)
@@ -1193,7 +1246,7 @@ function lower_swift_text(text, names, types)
         elseif pending and lowered_by(line, names, types, scope) then
             kept[pending] = false
             pending = nil
-        elseif not line:match("^%s*@available%(") then
+        elseif not (line:match("^%s*@available%(") or line:match("^%s*///") or line:match("^%s*//") or line:match("^%s*@[%w_]+") or line:match("^%s*$")) then
             pending = nil
         end
         table.insert(kept, line)
