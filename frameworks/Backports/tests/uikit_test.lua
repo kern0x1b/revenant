@@ -299,6 +299,54 @@ local AREAS = {
             "-[UIView setLargeContentImageInsets:]",
         },
     },
+    {
+        name = "iOS 13 and 14 button role, switch title and segmented control tint",
+        sources = {"UIButton+Actions14.m", "UISwitch+Style14.m", "UISegmentedControl+SelectedTint13.m"},
+        members = {
+            "-[UIButton role]", "-[UIButton setRole:]", "-[UISwitch title]", "-[UISwitch setTitle:]", "-[UISwitch preferredStyle]",
+            "-[UISegmentedControl selectedSegmentTintColor]", "-[UISegmentedControl setSelectedSegmentTintColor:]",
+        },
+    },
+    {
+        name = "iOS 11, 13 and 14 scroll indicator insets, pasteboard detection, split view background and search scope bar",
+        sources = {"UIScrollView+IndicatorInsets13.m", "UIPasteboard+Detection14.m", "UISplitViewController+Background13.m", "UISearchController+ScopeBar.m"},
+        members = {
+            "-[UIScrollView automaticallyAdjustsScrollIndicatorInsets]", "-[UIScrollView setAutomaticallyAdjustsScrollIndicatorInsets:]",
+            "-[UIPasteboard detectPatternsForPatterns:completionHandler:]", "-[UIPasteboard detectPatternsForPatterns:inItemSet:completionHandler:]",
+            "-[UIPasteboard detectValuesForPatterns:completionHandler:]", "-[UIPasteboard detectValuesForPatterns:inItemSet:completionHandler:]",
+            "-[UISplitViewController primaryBackgroundStyle]", "-[UISplitViewController setPrimaryBackgroundStyle:]",
+            "-[UISearchController automaticallyShowsScopeBar]", "-[UISearchController setAutomaticallyShowsScopeBar:]",
+        },
+    },
+    {
+        name = "iOS 16 edit menu interaction",
+        sources = {"UIEditMenuInteraction.m", "RevenantMenuElements.m"},
+        members = {
+            "@UIEditMenuInteraction", "-[UIEditMenuInteraction initWithDelegate:]", "-[UIEditMenuInteraction delegate]", "-[UIEditMenuInteraction view]",
+            "-[UIEditMenuInteraction presentEditMenuWithConfiguration:]", "-[UIEditMenuInteraction dismissMenu]", "-[UIEditMenuInteraction reloadVisibleMenu]",
+            "-[UIEditMenuInteraction updateVisibleMenuPositionAnimated:]", "-[UIEditMenuInteraction locationInView:]",
+        },
+    },
+    {
+        name = "iOS 13 font picker: the configuration and the picker",
+        sources = {"UIFontPickerViewController.m"},
+        members = {
+            "@UIFontPickerViewController", "@UIFontPickerViewControllerConfiguration", "-[UIFontPickerViewControllerConfiguration includeFaces]",
+            "-[UIFontPickerViewControllerConfiguration setIncludeFaces:]", "-[UIFontPickerViewControllerConfiguration displayUsingSystemFont]",
+            "-[UIFontPickerViewControllerConfiguration filteredTraits]", "-[UIFontPickerViewControllerConfiguration filteredLanguagesPredicate]",
+            "+[UIFontPickerViewControllerConfiguration filterPredicateForFilteredLanguages:]", "-[UIFontPickerViewController initWithConfiguration:]",
+            "-[UIFontPickerViewController configuration]", "-[UIFontPickerViewController delegate]", "-[UIFontPickerViewController setDelegate:]",
+            "-[UIFontPickerViewController selectedFontDescriptor]", "-[UIFontPickerViewController setSelectedFontDescriptor:]",
+        },
+    },
+    {
+        name = "iOS 14 color well",
+        sources = {"UIColorWell.m"},
+        members = {
+            "@UIColorWell", "-[UIColorWell initWithFrame:]", "-[UIColorWell selectedColor]", "-[UIColorWell setSelectedColor:]",
+            "-[UIColorWell supportsAlpha]", "-[UIColorWell setSupportsAlpha:]", "-[UIColorWell title]", "-[UIColorWell setTitle:]",
+        },
+    },
 }
 
 local function key_of(member)
