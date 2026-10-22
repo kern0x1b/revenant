@@ -8,7 +8,7 @@ An iPhone 4 runs roughly 20 times as many instructions per second as we emulate.
 emulation of one instruction, it is how much work is repeated:
 
 1. **Translations are per process.** Each `CpuExecutionPool` builds its own `ExecutionContext`
-   (`src/foundation/cpu.cpp:3319`), so the dyld shared cache - the same read-only code at the same
+   (`src/foundation/cpu.cpp:3357`), so the dyld shared cache - the same read-only code at the same
    guest addresses in every process - is translated again for each of the 45 processes a boot starts.
    That is most of the 2.4 million blocks. The fork already has the machinery a shared slab needs: it
    refuses to share unless the runtime state it must not bake in is linked
