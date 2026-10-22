@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+LC_COLLATE=en_US.UTF-8
+export LC_COLLATE
+
 root=$(cd "$(dirname "$0")" && pwd)
 package=$root/packages/x/xmake
 recipe=$package/xmake.lua
