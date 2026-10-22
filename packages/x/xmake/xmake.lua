@@ -20,7 +20,8 @@ package("xmake")
         {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "5add9a04d3290347faafc247532505e34b156145496ed0671bcc06b3d12c34f0"},
         {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "083b6f89badad1771829937450f38a6a30ae3f6e1c2269a0d593212bdeda3f7a"},
         {"0012-Lock-a-package-by-its-install-directory.patch", "5331acb3411a8da76bd1d543ebc28206e01b03acadcc7566db46a9c52c0a125a"},
-        {"0013-An-install-folder-without-manifest.txt-is-not-installed.patch", "37779e9abfcefb1592d79138ea64347695761fa1592cb04f4bfd5a3418801859"}}) do
+        {"0013-An-install-folder-without-manifest.txt-is-not-installed.patch", "37779e9abfcefb1592d79138ea64347695761fa1592cb04f4bfd5a3418801859"},
+        {"0014-A-query-for-an-install-folder-creates-no-folder.patch", "c17c3b2c45dcbc834c8ebca4be6135b6d594b77728827fb8ffe02465c5b532da"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
