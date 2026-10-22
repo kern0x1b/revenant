@@ -119,7 +119,6 @@ target("WidgetKit")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
-    open_gap("WidgetKit", "Values.swift and Timeline.swift both declare TimelineEntry and TimelineEntryRelevance, with Float and Double scores")
 
 local function port_overlay(target)
     local ports = table.wrap((target:pkg("swift-runtime"):envs() or {}).REVENANT_SWIFT_PORT_HEADERS)

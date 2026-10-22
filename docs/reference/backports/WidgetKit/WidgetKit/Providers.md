@@ -92,8 +92,9 @@ empty), and the rows below are the cost, stated rather than hidden:
 
 `ActivityViewContextPlaceholder.context(for:)` keeps its row and no longer traps: a context needs an
 `Attributes` instance and a `ContentState` instance, this release has neither, so the answer is
-optional and is none. WidgetKit is **240 of 340** placed, 100 missing, and the five rows above are
-why.
+optional and is none. `AccessoryWidgetBackground` is declared and conforms to `WidgetBody` with
+`BodyType = Never`, the framework's `View` conformance with no type here for the background it draws.
+WidgetKit is **240 of 340** placed, 100 missing, and the five rows above are why.
 
 `ControlWidgetButton` and `ControlWidgetToggle` keep the constructors that take the app's own label
 (`init(action:label:)`, and the `actionLabel:`/`valueLabel:` forms), which trap nowhere and need

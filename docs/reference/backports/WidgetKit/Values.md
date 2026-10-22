@@ -3,6 +3,12 @@
 What `frameworks/Backports/src/WidgetKit/Values.swift` carries, what it was checked against, and where each value comes
 from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain.
 
+`Timeline.swift` carried a second, older copy of all ten types below: a `Double` score, a `String` raw
+`WidgetFamily`, and enum-valued rendering, accent, detail and mounting types. It no longer does. The
+ten are declared once, here, in the 26.2 interface's shape: the `Float` score, the `duration` default,
+`Timeline`'s `let` members and the two static `let` policies. `Timeline.swift` keeps the provider
+context, the relevance types, the activity family, and the texture and push values.
+
 ## What is carried
 
 Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containers below) and
@@ -10,7 +16,7 @@ Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containe
 
 | Type | Rows | Source of the shape |
 | --- | --- | --- |
-| `TimelineEntryRelevance` (score, duration, Codable, Hashable) | 9 | swift.tsv |
+| `TimelineEntryRelevance` (score: `Float`, duration with a default of 0, Codable, Hashable) | 9 | swift.tsv |
 | `TimelineEntry` (date, relevance with a nil default) | 4 | swift.tsv |
 | `Timeline<EntryType>` (entries, policy, init) | 4 | swift.tsv |
 | `TimelineReloadPolicy` (atEnd, never, after(_:), ==) | 5 | swift.tsv |
@@ -25,9 +31,9 @@ Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containe
 the explicit initialisers and `after(_:)`, and the members the conformances synthesise (`==`,
 `hash(into:)`, `hashValue`, `init(from:)`, `encode(to:)`, `init(rawValue:)`, `rawValue`, `RawValue`).
 
-Not carried: `WidgetRelevance`, `WidgetRelevanceAttribute`, `WidgetRelevanceGroup`, `WidgetInfo`,
-`TimelineProvider` and the other protocols that name AppIntents or Intents types. They belong to the
-AppIntents and Intents groups, not to this file.
+Not carried here: `WidgetRelevance`, `WidgetRelevanceAttribute`, `WidgetRelevanceGroup`, `WidgetInfo`,
+`TimelineProvider` and the other protocols that name AppIntents or Intents types. They belong to
+`Timeline.swift` and the AppIntents and Intents groups, not to this file.
 
 ## WidgetFamily raw values
 
