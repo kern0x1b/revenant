@@ -248,7 +248,7 @@ local function ours()
     return types, mods, ignored, pending_only
 end
 
-local INVENTED_GENERATOR = "tools/api-surface.lua"
+local INVENTED_GENERATOR = "tools/api_surface.lua"
 
 local function invented_file()
     return path.join(tree.run("api"), "invented.txt")
@@ -267,12 +267,12 @@ local function invented_count()
     return n
 end
 
-local SCORE = "%*%*(%d+) типов%*%* и %*%*(%d+) модификаторов%*%*, из них %*%*(%d+) действуют%*%*, (%d+) заглушки %(пишут в журнал%), (%d+) объявлены"
-local IOS_SCORE = "Из того, что Apple объявляет доступным на iOS: %*%*(%d+) из (%d+) типов%*%* и %*%*(%d+) из (%d+) модификаторов%*%*, из них %*%*(%d+) действуют%*%*, (%d+) заглушки, (%d+) игнорируются"
-local SCORE_TEXT = "**{types} типов** и **{mods} модификаторов**, из них **{working} действуют**, {pending} заглушки (пишут в журнал), {ignored} объявлены"
-local IOS_SCORE_TEXT = "Из того, что Apple объявляет доступным на iOS: **{ios_types} из {ios_apple_types} типов** и **{ios_mods} из {ios_apple_mods} модификаторов**, из них **{ios_working} действуют**, {ios_pending} заглушки, {ios_ignored} игнорируются"
-local INVENTED_SCORE = "(Счёт в обеих строках один и тот же — )(%d+):"
-local INVENTED_SCORE_ONE = "Счёт в обеих строках один и тот же — (%d+):"
+local SCORE = "%*%*(%d+) types%*%* and %*%*(%d+) modifiers%*%*, of which %*%*(%d+) work%*%*, (%d+) stubs %(they write to the log%), (%d+) declared"
+local IOS_SCORE = "Of what Apple declares available on iOS: %*%*(%d+) of (%d+) types%*%* and %*%*(%d+) of (%d+) modifiers%*%*, of which %*%*(%d+) work%*%*, (%d+) stubs, (%d+) ignored"
+local SCORE_TEXT = "**{types} types** and **{mods} modifiers**, of which **{working} work**, {pending} stubs (they write to the log), {ignored} declared"
+local IOS_SCORE_TEXT = "Of what Apple declares available on iOS: **{ios_types} of {ios_apple_types} types** and **{ios_mods} of {ios_apple_mods} modifiers**, of which **{ios_working} work**, {ios_pending} stubs, {ios_ignored} ignored"
+local INVENTED_SCORE = "(The count is the same in both places — )(%d+):"
+local INVENTED_SCORE_ONE = "The count is the same in both places — (%d+):"
 
 local NUMBER_KEYS = {"apple_types", "types", "apple_mods", "mods", "working", "pending", "ignored",
     "ios_apple_types", "ios_types", "ios_apple_mods", "ios_mods", "ios_working", "ios_pending", "ios_ignored"}
@@ -391,14 +391,14 @@ function main(...)
         end)
         local actual = invented_count()
         if actual == nil then
-            print(invented_file() .. " нет: счёт выдуманных имён в docs/reference/swiftui/ledger.md не записан, его пишет " .. INVENTED_GENERATOR)
+            print(invented_file() .. " is missing: the invented-name count was not written to docs/reference/swiftui/ledger.md; " .. INVENTED_GENERATOR .. " writes it")
         else
             readme = string.gsub(readme, INVENTED_SCORE, function(head)
                 return head .. actual .. ":"
             end)
         end
         io.writefile(readme_path, readme)
-        print("записано: " .. dict_repr(n))
+        print("written: " .. dict_repr(n))
         return 0
     end
 
@@ -408,15 +408,15 @@ function main(...)
             local baseline = json.decode(io.readfile(baseline_path))
             for _, key in ipairs({"types", "mods", "working"}) do
                 if n[key] < baseline[key] then
-                    problems[#problems + 1] = key .. ": было " .. string.format("%d", baseline[key]) .. ", стало " .. n[key]
-                        .. " — покрытие упало"
+                    problems[#problems + 1] = key .. ": was " .. string.format("%d", baseline[key]) .. ", now " .. n[key]
+                        .. " — coverage fell"
                 end
             end
         end
         local readme = io.readfile(readme_path)
         local ios = {string.match(readme, IOS_SCORE)}
         if #ios == 0 then
-            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не содержит строки со счётом для iOS"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md has no line with the iOS count"
         else
             local actual = {}
             for i, key in ipairs({"ios_types", "ios_apple_types", "ios_mods", "ios_apple_mods", "ios_working", "ios_pending", "ios_ignored"}) do
@@ -429,13 +429,13 @@ function main(...)
                 end
             end
             if not same then
-                problems[#problems + 1] = "docs/reference/swiftui/ledger.md для iOS говорит (" .. text.join(", ", ios) .. "), на деле ("
-                    .. text.join(", ", actual) .. ") — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+                problems[#problems + 1] = "docs/reference/swiftui/ledger.md says for iOS (" .. text.join(", ", ios) .. "), in fact ("
+                    .. text.join(", ", actual) .. ") — update docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
             end
         end
         local stated = {string.match(readme, SCORE)}
         if #stated == 0 then
-            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не содержит строки со счётом"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md has no line with the count"
         else
             local actual = {n.types, n.mods, n.working, n.pending, n.ignored}
             local same = true
@@ -445,13 +445,13 @@ function main(...)
                 end
             end
             if not same then
-                problems[#problems + 1] = "docs/reference/swiftui/ledger.md говорит (" .. text.join(", ", stated) .. "), на деле ("
-                    .. text.join(", ", actual) .. ") — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+                problems[#problems + 1] = "docs/reference/swiftui/ledger.md says (" .. text.join(", ", stated) .. "), in fact ("
+                    .. text.join(", ", actual) .. ") — update docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
             end
         end
         for _, name in ipairs(sets.sorted_keys(parts.ignored)) do
             if not string.find(readme, "`" .. name .. "`", 1, true) then
-                problems[#problems + 1] = "игнорируемый API " .. name .. " не описан в docs/reference/swiftui/ledger.md"
+                problems[#problems + 1] = "ignored API " .. name .. " is not described in docs/reference/swiftui/ledger.md"
             end
         end
         local said = string.match(readme, INVENTED_SCORE_ONE)
@@ -459,40 +459,40 @@ function main(...)
         local actual = invented_count()
         if has_arg("--before-build") then
         elseif actual == nil then
-            problems[#problems + 1] = invented_file() .. " нет, и без него счёт выдуманных имён не проверить: его пишет "
-                .. INVENTED_GENERATOR .. ", запустите его и обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+            problems[#problems + 1] = invented_file() .. " is missing, and without it the invented-name count cannot be checked: "
+                .. INVENTED_GENERATOR .. " writes it; run it and update docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
         elseif said == nil then
-            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не называет счёт выдуманных имён (" .. invented_file() .. ")"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md does not name the invented-name count (" .. invented_file() .. ")"
         elseif said ~= actual then
-            problems[#problems + 1] = "docs/reference/swiftui/ledger.md говорит " .. said .. " выдуманных имён, " .. invented_file() .. " содержит "
-                .. actual .. " — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md says " .. said .. " invented names, " .. invented_file() .. " holds "
+                .. actual .. " — update docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
         end
         local counted, partial, unreadable = stub_calls()
         for _, call in ipairs(unreadable) do
-            problems[#problems + 1] = call[1] .. ": " .. call[2] .. " — счётчик не может прочесть имя (нужна строка из одного идентификатора)"
+            problems[#problems + 1] = call[1] .. ": " .. call[2] .. " — the counter cannot read the name (it needs a string of one identifier)"
         end
         for _, entry in ipairs(partial) do
             local kind, name, where = entry[1], entry[2], entry[3]
             if not string.find(readme, "`" .. name, 1, true) then
                 local word = kind == "pendingNote" and "unimplemented" or "ignored"
-                problems[#problems + 1] = where .. ": частичный " .. word .. " «" .. name .. "» не назван в docs/reference/swiftui/ledger.md"
+                problems[#problems + 1] = where .. ": partial " .. word .. " \"" .. name .. "\" is not named in docs/reference/swiftui/ledger.md"
             end
         end
         if #problems > 0 then
-            print("coverage: проверка не прошла")
+            print("coverage: the check failed")
             for _, problem in ipairs(problems) do
                 print(" - " .. problem)
             end
             os.exit(1)
         end
-        print("coverage: типы " .. n.types .. "/" .. n.apple_types .. ", модификаторы " .. n.mods .. "/" .. n.apple_mods
-            .. " (действуют " .. n.working .. ", заглушки " .. n.pending .. ", игнорируются " .. n.ignored .. ") — docs/reference/swiftui/ledger.md сходится")
+        print("coverage: types " .. n.types .. "/" .. n.apple_types .. ", modifiers " .. n.mods .. "/" .. n.apple_mods
+            .. " (working " .. n.working .. ", stubs " .. n.pending .. ", ignored " .. n.ignored .. ") — docs/reference/swiftui/ledger.md agrees")
         return 0
     end
 
-    print("типы:         " .. n.types .. " из " .. n.apple_types)
-    print("модификаторы: " .. n.mods .. " из " .. n.apple_mods .. " (действуют " .. n.working .. ", заглушки " .. n.pending
-        .. ", объявлены и игнорируются " .. n.ignored .. ")")
+    print("types:        " .. n.types .. " of " .. n.apple_types)
+    print("modifiers:    " .. n.mods .. " of " .. n.apple_mods .. " (working " .. n.working .. ", stubs " .. n.pending
+        .. ", declared and ignored " .. n.ignored .. ")")
     if has_arg("--pending") then
         print("  " .. text.join(", ", parts.stubs))
     end
@@ -514,9 +514,9 @@ function main(...)
                 missing_mods[#missing_mods + 1] = name
             end
         end
-        print("\nне покрыто (типы):")
+        print("\nnot covered (types):")
         print("  " .. text.join(", ", missing_types))
-        print("\nне покрыто (модификаторы):")
+        print("\nnot covered (modifiers):")
         print("  " .. text.join(", ", missing_mods))
     end
     return 0

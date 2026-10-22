@@ -74,7 +74,7 @@ function failures(opt)
     end
     local revenant = path.directory(path.absolute(opt.modules))
     local workspace = import("workspace", {rootdir = opt.modules, anonymous = true})
-    local tool = import("assets-extract", {rootdir = path.join(revenant, "tools", "assets-extract"), anonymous = true}).tool()
+    local tool = import("assets_extract", {rootdir = path.join(revenant, "tools", "assets_extract"), anonymous = true}).tool()
     local folder = workspace.fresh("assets-extract-test")
     check(run(tool, folder, {}) == 64, "no arguments is a bad command line")
     local not_catalogue = path.join(folder, "Assets.car")

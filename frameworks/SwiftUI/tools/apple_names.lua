@@ -219,7 +219,7 @@ local function types(...)
         end
         return text.join(" ", shown) .. (#list > 20 and " ..." or "")
     end
-    print("apple-names types: " .. sdk)
+    print("apple_names types: " .. sdk)
     table.sort(module_order)
     for _, module in ipairs(module_order) do
         print("  " .. module .. ": " .. sets.count_of(per_module[module]) .. " types")
@@ -278,7 +278,7 @@ end
 local function modifiers()
     local interfaces = os.files(path.join(tree.run("fw"), "SwiftUI.framework", "Modules", "SwiftUI.swiftmodule", "*.swiftinterface"))
     if #interfaces == 0 then
-        raise("no SwiftUI interface under %s: run ./xmakew l frameworks/SwiftUI/tools/api-surface.lua prepare first", tree.run("fw"))
+        raise("no SwiftUI interface under %s: run ./xmakew l frameworks/SwiftUI/tools/api_surface.lua prepare first", tree.run("fw"))
     end
     table.sort(interfaces)
     local src = io.readfile(interfaces[1])
@@ -322,9 +322,9 @@ local function modifiers()
     print(string.format("modifiers: %d -> %d usable on iOS", mod_count, #sets.sorted_keys(usable_mods)))
 end
 
-local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/apple-names.lua [types [SDK] | modifiers]
+local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/apple_names.lua [types [SDK] | modifiers]
   types      the type names of SwiftUI and SwiftUICore in the iOS 26.2 SDK, and those usable on iOS, into tests/data/api
-  modifiers  the View modifiers of the copied SwiftUI interface (api-surface.lua prepare) usable on iOS, into tests/data/api
+  modifiers  the View modifiers of the copied SwiftUI interface (api_surface.lua prepare) usable on iOS, into tests/data/api
   (none)     both]]
 
 function main(action, ...)

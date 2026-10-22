@@ -1,4 +1,4 @@
-local STORES = {"xmake", "xmake-global", "ccache"}
+local STORES = {"xmake", "xmake-global"}
 local OUTPUTS = {".xmake", "build"}
 
 local function home()
@@ -82,7 +82,7 @@ local function kept(name, level)
         return false
     end
     if level == "packages" then
-        return name == "xmake" or name == "ccache"
+        return name == "xmake"
     end
     return table.contains(STORES, name)
 end
@@ -140,7 +140,7 @@ function main(...)
         end
     end
     print("%s %s; kept %s", dry and "would free" or "freed", human(total),
-          level == "all" and "nothing under " .. cache() or table.concat(level == "packages" and {"xmake", "ccache"} or STORES, ", "))
+          level == "all" and "nothing under " .. cache() or table.concat(level == "packages" and {"xmake"} or STORES, ", "))
     local data = {}
     for _, entry in ipairs(os.filedirs(path.join(revenant(), "*"))) do
         if path.filename(entry) ~= "cache" then

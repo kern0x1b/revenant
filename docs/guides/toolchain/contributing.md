@@ -112,14 +112,12 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   exports a band's release already has is left out of that band, so the call is an undefined symbol in later bands
   only. A one-band build links and passes; only the all-band build shows it.
 
-- **The compiler cache.** Wrong: reading a hit rate as proof that the output is the same. Right: `./xmakew` exports
-  `CCACHE_DIR`, `CCACHE_NOHASHDIR` (1 by default) and `CCACHE_MAXSIZE`, and the proof is that the cached objects match
-  a `CCACHE_DISABLE=1` build. Reason: with `CCACHE_NOHASHDIR`, a source is named the same way from every worktree, so
-  they share one cache; with `hash_dir = true` each worktree's directory enters the key, every band builds alone with a
-  cache that only misses, and nothing fails. `CCACHE_DISABLE`, set to anything including empty, turns the cache off.
-  `CCACHE` names a program, checked before it is used, so a stale one costs the cache and not the build. The key ignores
-  the spelling of a path and the object does not, so a relative and an absolute spelling of one file can store two
-  objects under one key.
+- **The object cache is off.** The apple-ios rule leaves xmake's `build.ccache` at its default, off, so every target
+  compiles from scratch. Turned on with `set_policy("build.ccache", true)` in a project, the cache keeps its objects in
+  that checkout's `build/.build_cache`, keyed by each source's preprocessed text and its flags, so every compile
+  preprocesses its source first, and a cold build pays for it. No CI job keeps that folder, so a CI build pays the cost
+  and gets no hits. Wrong: reading a hit as proof that the object is the same. Right: compare the objects of a cached
+  build with those of a build from an empty `build/.build_cache`.
 
 - **A job runner started inside a job.** Wrong: `async.runjobs`, or anything else on xmake's scheduler, called from a
   `package:on_install` or from a function that one calls. Right: compile one unit at a time when `scheduler.co_count() > 1`. Reason: a runner started inside a runner never

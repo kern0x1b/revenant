@@ -247,7 +247,7 @@ local function diff(...)
         end
     end
     if #args ~= 2 then
-        io.stderr:write("usage: ./xmakew l frameworks/SwiftUI/tools/surface-diff.lua diff [--allow-empty-new] OLD.tsv NEW.tsv   (three columns each: owner/kind/name)\n")
+        io.stderr:write("usage: ./xmakew l frameworks/SwiftUI/tools/surface_diff.lua diff [--allow-empty-new] OLD.tsv NEW.tsv   (three columns each: owner/kind/name)\n")
         os.exit(2)
     end
     local old_rows, old_error = read(args[1], false)
@@ -444,7 +444,7 @@ local function gaps(...)
     io.stderr:write(string.format("# the negative case is kept: %d row(s) of %s\n", kept, negative_name))
 end
 
-local USAGE = "usage: ./xmakew l frameworks/SwiftUI/tools/surface-diff.lua diff [--allow-empty-new] OLD.tsv NEW.tsv | gaps [OURS.tsv [SURFACE.tsv [NEGATIVE]]]"
+local USAGE = "usage: ./xmakew l frameworks/SwiftUI/tools/surface_diff.lua diff [--allow-empty-new] OLD.tsv NEW.tsv | gaps [OURS.tsv [SURFACE.tsv [NEGATIVE]]]"
 
 function main(action, ...)
     if action == "diff" then

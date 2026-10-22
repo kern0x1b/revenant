@@ -2527,7 +2527,7 @@ check(Animation.spring(Spring(response: 0.25, dampingRatio: 0.7)) != Animation.s
 check(Animation.spring(Spring(response: 0.1, dampingRatio: 0.5)) == Animation.spring(response: 0.1, dampingFraction: 0.5), "while numbers that come back as they went in are the same animation")
 check(Animation.spring(Spring(response: 0.5, dampingRatio: 1)) == Animation.spring(response: 0.5, dampingFraction: 1), "a critical spring does")
 check(Animation.spring(Spring(response: 0.5, dampingRatio: 1.25)) == Animation.spring(response: 0.5, dampingFraction: 1.25), "and an over-damped one")
-check(Animation.spring(Spring(response: 0.5, dampingRatio: 1.25)) == Animation.spring(duration: 0.5, bounce: -0.2), "and is the animation of its bounce (macOS 27, `.agent-work/runs/11-bounce/a.swift`)")
+check(Animation.spring(Spring(response: 0.5, dampingRatio: 1.25)) == Animation.spring(duration: 0.5, bounce: -0.2), "and is the animation of its bounce (macOS 27, see `frameworks/SwiftUI/tests/host/springcmp.swift`)")
 check(Animation.spring(pairedSpring, blendDuration: 0.1) != Animation.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.1), "the blend does not change that")
 check(Animation.spring(Spring(response: 0.1, dampingRatio: 0.5), blendDuration: 0.1) == Animation.spring(response: 0.1, dampingFraction: 0.5, blendDuration: 0.1), "or this")
 check(Animation.smooth == Animation.spring(Spring.smooth), "the smooth animation is that of the smooth spring")

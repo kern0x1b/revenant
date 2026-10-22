@@ -59,11 +59,11 @@ Closed against it, each one a measured difference:
 | the Float half's pi | `Float.pi` | the Double's, so the Float's arithmetic left the Float |
 
 Three values do not agree with the host, and the coordinator ruled on 2026-10-04 that they are
-**named, measured divergences** rather than a widened tolerance. `check.lua` carries them in
-`DIVERGENCES`, each with the host's value, the port's value and the reason, and then compares both
-columns **exactly** against what the run produced - so a difference anywhere else still fails, and
-one of the three moving in either column fails too. No tolerance is widened anywhere, and the
-green suite is what lets the mutation control run at all:
+**named, measured divergences** rather than a widened tolerance. The comparison that carried them
+kept a `DIVERGENCES` list, each with the host's value, the port's value and the reason, and matched
+both columns **exactly** against what the run produced, so a difference anywhere else failed, and one
+of the three moving in either column failed too. That comparison is not in this tree, so nothing here
+enforces the table; it is the record of the run. No tolerance was widened anywhere:
 
 ```
 values: 943, agree: 940, named divergences: 3, differ: 0, largest relative difference: 4.76667e-07
@@ -83,7 +83,7 @@ moved by a unit in the last place exits 1.
 
 ## What of Apple's surface this module does not carry
 
-Measured by the two compiles in `run.sh`, not by this file: the coordinate-space family
+Measured by two compiles of the module against the host's interface, not by this file (the harness that ran them is not in this tree): the coordinate-space family
 (`CoordinateSpace3D`, `CoordinateSpaceValue3D`, `WorldReferenceCoordinateSpace`), `swingTwist`,
 `slerp`, `spline`, `changeBasis(from:to:)`, `Point3D.unapplying(_: ScaledPose3D)`,
 `ProjectiveTransformable3DFloat.applying`, the C-level `__SPEulerAngleOrder.pitchYawRoll`, and the

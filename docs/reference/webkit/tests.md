@@ -14,7 +14,7 @@ phone ships. With `webkit_host_tests` on, configuring for this Mac requires the
 and `icu-sanity` and `icu-locales` are targets whose `add_tests` run them; the first
 run builds ICU once and every later run reuses it.
 
-The encoding list is not maintained by hand. `tools/required-encodings.lua` reads
+The encoding list is not maintained by hand. `tools/required_encodings.lua` reads
 it out of `TextCodecICU.cpp`, so it tracks the engine: everything else is
 decoded by WebKit itself (`TextCodecCJK`, `TextCodecSingleByte`,
 `TextCodecLatin1`, `TextCodecUTF8`) and needs nothing from ICU. Re-run it

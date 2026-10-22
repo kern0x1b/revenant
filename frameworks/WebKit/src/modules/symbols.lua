@@ -4,7 +4,7 @@ local pin = path.join(os.scriptdir(), "..", "..", "tests", "data", "carry-symbol
 
 local header = [[
 # Symbols this port's frameworks depend on and provide, as of the last
-# build known to load on the device. tools/symbol-check.lua compares a
+# build known to load on the device. tools/symbol_check.lua compares a
 # fresh build against this, and so does every build of the engine.
 #
 # undefined <framework> <symbol>  something iOS 6 must already have.
@@ -89,7 +89,7 @@ end
 function verify(build)
     local new_imports, lost_classes = compare(build)
     if #new_imports > 0 or #lost_classes > 0 then
-        raise("the frameworks' symbols changed against carry-symbols.txt: %d new undefined symbols iOS 6 may not have (%s), %d Objective-C classes no longer exported (%s); check each against the device, then ./xmakew l frameworks/WebKit/tools/symbol-check.lua --pin BUILD",
+        raise("the frameworks' symbols changed against carry-symbols.txt: %d new undefined symbols iOS 6 may not have (%s), %d Objective-C classes no longer exported (%s); check each against the device, then ./xmakew l frameworks/WebKit/tools/symbol_check.lua --pin BUILD",
               #new_imports, table.concat(table.slice(new_imports, 1, 5), ", "), #lost_classes, table.concat(table.slice(lost_classes, 1, 5), ", "))
     end
 end

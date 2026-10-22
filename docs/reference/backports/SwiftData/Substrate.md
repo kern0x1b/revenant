@@ -2,7 +2,7 @@
 
 Every line here is the output of a command run on 2026-09-28 in
 a scratch worktree, against the packages as they are in the shared
-store. The probe that reads them is `.agent-work/probe/` in the same worktree.
+store. The probe that reads them ran in the same worktree and is not kept in the repository.
 
 The toolchain, resolved once: `revenant@swift 6.4.0` at
 `~/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
@@ -57,7 +57,7 @@ They are not ours to add. The corpus assigns both to `swift-foundation`
 swift-foundation`, `registry = swiftlang/swift-foundation:Sources/FoundationEssentials/Predicate/
 Predicate.swift` and `.../FoundationInternationalization/String/SortDescriptor.swift`), and
 the swift-foundation package - the toolchain package that builds them, work in progress in
-`.agent-work/worktrees/api-foundation-swift` - is not in the shared store.
+another worktree - is not in the shared store.
 
 Eight rows depend on those two types and are therefore not in this delivery:
 `FetchDescriptor.init(predicate:sortBy:)`, `FetchDescriptor.predicate`, `FetchDescriptor.sortBy`,
@@ -146,7 +146,7 @@ hand reads unlowered headers and reports the backports' API as unavailable - whi
 happened here first, and the fix is to read the SDK out of the overlay:
 
 ```
-SDK=$(python3 -c 'import json,sys; o=json.load(open(sys.argv[1])); print(next(r["name"] for r in o["roots"] if r["name"].endswith("CoreData.framework/Headers"))[:-len("/System/Library/Frameworks/CoreData.framework/Headers")])' "$REVENANT_SWIFT_PORT_HEADERS")
+SDK=$(./xmakew l -P . -c 'local o = import("core.base.json").loadfile(os.getenv("REVENANT_SWIFT_PORT_HEADERS")); for _, r in ipairs(o.roots) do if r.name:endswith("CoreData.framework/Headers") then print(r.name:sub(1, #r.name - #"/System/Library/Frameworks/CoreData.framework/Headers")) break end end')
 ```
 
 A package's own build resolves the SDK from the toolchain, so a store whose SDK differs from the
@@ -199,7 +199,7 @@ bytes: **2786 defined, 425 undefined**. Of the undefined, 118 are the Swift stan
 62 the Swift runtime's (both in `libswiftCore`, which a program links), 39 are objc classes and C
 symbols the frameworks carry, 6 are `Observation`'s, 3 the port's own `Foundation` overlay — and
 **exactly 10** are swift-foundation's, which is `lib_FoundationEssentials.dylib`, which does not
-exist because f25214c6's run output is its typecheck-only `check.sh` path:
+exist, because f25214c6's run typechecked the module without linking it:
 
 ```
 _$s20FoundationEssentials9PredicateV8evaluateySbxxQpKF   ModelContext.fetch

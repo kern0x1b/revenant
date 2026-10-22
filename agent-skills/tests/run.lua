@@ -64,7 +64,7 @@ function main(...)
     end
     if chosen.scenarios[1] == "all" then
         chosen.scenarios = {}
-        for _, folder in ipairs(os.dirs(path.join(tests, "scenarios", "*"))) do
+        for _, folder in ipairs(os.dirs(path.join(tests, "data", "scenarios", "*"))) do
             table.insert(chosen.scenarios, path.filename(folder))
         end
         table.sort(chosen.scenarios)
@@ -114,7 +114,7 @@ function main(...)
     try {
         function ()
             for _, id in ipairs(chosen.scenarios) do
-                local scenario = path.join(tests, "scenarios", id)
+                local scenario = path.join(tests, "data", "scenarios", id)
                 if not os.isfile(path.join(scenario, "request.md")) then
                     io.stderr:write("no scenario " .. id .. "\n")
                     status = 1

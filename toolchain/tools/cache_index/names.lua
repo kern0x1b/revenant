@@ -5,7 +5,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 local WANTED = {__objc_methname = true, __objc_classname = true, __objc_methtype = true, __cstring = true}
 
 function main(source, architecture)
-    assert(source, "usage: ./xmakew l toolchain/tools/cache-index/names.lua SOURCE [ARCHITECTURE]")
+    assert(source, "usage: ./xmakew l toolchain/tools/cache_index/names.lua SOURCE [ARCHITECTURE]")
 
     local CONTROL = "[%z\1-\31\127]"
 

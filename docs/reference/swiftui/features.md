@@ -3,7 +3,7 @@
 A retained node tree over UIKit views, with a reconciler, a layout engine of its own and a scheduler that re-renders
 only what changed. The areas below are exercised by tests and by rendered scenarios; the full ledger — what is
 implemented, what is deliberately ignored and why, what is simplified — is in [`ledger.md`](ledger.md)
-(in Russian) and is checked by the build.
+and is checked by the build.
 
 | Area | What there is |
 | --- | --- |

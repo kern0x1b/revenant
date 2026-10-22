@@ -45,8 +45,8 @@ loud:
 For (2) the answer is a declarative manifest, checked before anything is built:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/carry-check.lua [--tree DIR]   # reads carry-manifest.txt, fails with a list
-./xmakew l frameworks/WebKit/tools/carry-check.lua --paths        # the engine paths it reads, for a sparse checkout
+./xmakew l frameworks/WebKit/tools/carry_check.lua [--tree DIR]   # reads carry-manifest.txt, fails with a list
+./xmakew l frameworks/WebKit/tools/carry_check.lua --paths        # the engine paths it reads, for a sparse checkout
 ```
 
 Every engine build runs the same check on the patched tree before it compiles anything.
@@ -88,7 +88,7 @@ merge quietly take away from us".
 It is a question, not a verdict. Each new undefined symbol is looked up against
 what iOS 6 has, and there are only two outcomes: either the system has it - the
 engine loads, the suite passes, and the pin is regenerated with
-`tools/symbol-check.lua --pin` so the new baseline is one the device has
+`tools/symbol_check.lua --pin` so the new baseline is one the device has
 verified - or it does not, and something has to provide it.
 
 The first time this ran in anger, on 2026-09-11, it was the second case: an
@@ -137,8 +137,8 @@ In order, stopping at the first failure that matters:
    the concern its patch is about.
 2. Re-export the series, and put the new base commit and every patch's sha256 in the
    recipe.
-3. `tools/carry-check.lua` on the rebased tree — before a single file is compiled.
-4. `tools/port-delta.lua` and `tools/carry-audit.lua` against the old tree — the delta,
+3. `tools/carry_check.lua` on the rebased tree — before a single file is compiled.
+4. `tools/port_delta.lua` and `tools/carry_audit.lua` against the old tree — the delta,
    the guard census, and the files whose port markers thinned out in the move.
 5. The armv7 build, `./xmakew -P .`, which runs the carry check, the export check, the
    compat audit and the symbol check against the pin itself.

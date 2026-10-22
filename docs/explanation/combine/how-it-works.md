@@ -7,7 +7,7 @@ the patched sources inside revenant.
 
 The recipe fetches OpenCombine at its pinned commit and applies the patches in order. The
 patches carry only content edits. Putting the three upstream modules together is the build's
-work: the recipe installs the patched sources as one tree, `src/Combine` holding
+work: the recipe installs the patched sources as one tree in the package's install folder (the paths below are inside it), `src/Combine` holding
 `Sources/OpenCombine` with `OpenCombineDispatch` under `Schedulers/` and `OpenCombineFoundation`
 under `Foundation/` (less the helper files the core already has under the same name),
 `src/CombineHelpers` holding the C++ helper `COpenCombineHelpers`, `src/Tests` holding
