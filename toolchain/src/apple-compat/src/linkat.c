@@ -40,10 +40,10 @@ int linkat(int source_directory, const char *source, int target_directory, const
         errno = EINVAL;
         return -1;
     }
-    int directory;
-    if (revenant_at_pair(source_directory, source, target_directory, target, &directory) == -1) {
+    struct revenant_at_pair pair;
+    if (revenant_at_pair(source_directory, source, target_directory, target, &pair) == -1) {
         return -1;
     }
-    struct revenant_link_request request = {source, target, (flags & AT_SYMLINK_FOLLOW) != 0};
-    return revenant_at_within(directory, revenant_link_operation, &request);
+    struct revenant_link_request request = {pair.first, pair.second, (flags & AT_SYMLINK_FOLLOW) != 0};
+    return revenant_at_within(pair.directory, revenant_link_operation, &request);
 }

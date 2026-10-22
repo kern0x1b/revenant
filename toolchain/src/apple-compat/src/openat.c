@@ -1,16 +1,10 @@
 #include "at_within.h"
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#define REVENANT_AT_ANY (-100)
-
-__attribute__((weak, visibility("default")))
-pthread_mutex_t revenant_at_directory_lock = PTHREAD_MUTEX_INITIALIZER;
 
 __attribute__((visibility("hidden")))
 int revenant_at_within(int directory, revenant_at_operation operation, void *context)
@@ -18,50 +12,63 @@ int revenant_at_within(int directory, revenant_at_operation operation, void *con
     if (directory == AT_FDCWD) {
         return operation(context);
     }
-    pthread_mutex_lock(&revenant_at_directory_lock);
-    int saved = open(".", O_RDONLY);
-    if (saved == -1) {
-        int failure = errno;
-        pthread_mutex_unlock(&revenant_at_directory_lock);
-        errno = failure;
-        return -1;
-    }
-    if (fchdir(directory) == -1) {
-        int failure = errno;
-        close(saved);
-        pthread_mutex_unlock(&revenant_at_directory_lock);
-        errno = failure;
+    if (__pthread_fchdir(directory) == -1) {
         return -1;
     }
     int result = operation(context);
     int failure = errno;
-    if (fchdir(saved) == -1) {
-        fprintf(stderr, "apple-compat: the working directory could not be restored after an *at call\n");
+    if (__pthread_fchdir(-1) == -1) {
+        fprintf(stderr, "apple-compat: the thread's working directory could not be restored after an *at call\n");
         abort();
     }
-    close(saved);
-    pthread_mutex_unlock(&revenant_at_directory_lock);
     errno = failure;
     return result;
 }
 
-__attribute__((visibility("hidden")))
-int revenant_at_pair(int first_directory, const char *first, int second_directory, const char *second, int *directory)
+static int revenant_absolute(int directory, const char *name, char *buffer)
 {
-    int first_pinned = first[0] == '/' ? REVENANT_AT_ANY : first_directory;
-    int second_pinned = second[0] == '/' ? REVENANT_AT_ANY : second_directory;
-    if (first_pinned == REVENANT_AT_ANY) {
-        first_pinned = second_pinned;
-    }
-    if (second_pinned == REVENANT_AT_ANY) {
-        second_pinned = first_pinned;
-    }
-    if (first_pinned != second_pinned) {
-        errno = ENOTSUP;
+    char base[MAXPATHLEN];
+    if (directory == AT_FDCWD) {
+        if (getcwd(base, sizeof base) == NULL) {
+            return -1;
+        }
+    } else if (fcntl(directory, F_GETPATH, base) == -1) {
         return -1;
     }
-    *directory = first_pinned == REVENANT_AT_ANY ? AT_FDCWD : first_pinned;
+    if (snprintf(buffer, MAXPATHLEN, "%s/%s", base, name) >= MAXPATHLEN) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
     return 0;
+}
+
+static int revenant_name_in(int directory, int pinned, const char *name, const char **out, char *buffer)
+{
+    if (name[0] == '/' || directory == pinned) {
+        *out = name;
+        return 0;
+    }
+    if (revenant_absolute(directory, name, buffer) == -1) {
+        return -1;
+    }
+    *out = buffer;
+    return 0;
+}
+
+__attribute__((visibility("hidden")))
+int revenant_at_pair(int first_directory, const char *first, int second_directory, const char *second, struct revenant_at_pair *pair)
+{
+    int pinned = AT_FDCWD;
+    if (first[0] != '/' && first_directory != AT_FDCWD) {
+        pinned = first_directory;
+    } else if (second[0] != '/' && second_directory != AT_FDCWD) {
+        pinned = second_directory;
+    }
+    pair->directory = pinned;
+    if (revenant_name_in(first_directory, pinned, first, &pair->first, pair->first_path) == -1) {
+        return -1;
+    }
+    return revenant_name_in(second_directory, pinned, second, &pair->second, pair->second_path);
 }
 
 struct revenant_open_request {

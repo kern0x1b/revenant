@@ -17,10 +17,10 @@ static int revenant_rename_operation(void *context)
 __attribute__((visibility("hidden")))
 int renameat(int from_directory, const char *from, int to_directory, const char *to)
 {
-    int directory;
-    if (revenant_at_pair(from_directory, from, to_directory, to, &directory) == -1) {
+    struct revenant_at_pair pair;
+    if (revenant_at_pair(from_directory, from, to_directory, to, &pair) == -1) {
         return -1;
     }
-    struct revenant_rename_request request = {from, to};
-    return revenant_at_within(directory, revenant_rename_operation, &request);
+    struct revenant_rename_request request = {pair.first, pair.second};
+    return revenant_at_within(pair.directory, revenant_rename_operation, &request);
 }

@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -14,6 +15,7 @@ int revenant_unlinkat(int directory, const char *path, int flags);
 
 static char target[1024], decoy[1024], parked[1024];
 static volatile int running = 1;
+static ino_t cwd_inode;
 
 static void join(char *out, const char *root, const char *name)
 {
@@ -42,6 +44,19 @@ static void *swap(void *argument)
     return NULL;
 }
 
+static void *relative(void *argument)
+{
+    (void)argument;
+    intptr_t wrong = 0;
+    for (int round = 0; round < ROUNDS; round++) {
+        struct stat seen;
+        if (stat("cwd-marker", &seen) != 0 || seen.st_ino != cwd_inode) {
+            wrong++;
+        }
+    }
+    return (void *)wrong;
+}
+
 static int exists(const char *path)
 {
     struct stat info;
@@ -55,6 +70,10 @@ int main(int argc, char **argv)
         return 2;
     }
     const char *root = argv[1];
+    if (chdir(root) != 0) {
+        printf("FAIL  the race test could not enter its scratch folder\n");
+        return 2;
+    }
     join(target, root, "target");
     join(decoy, root, "decoy");
     join(parked, root, "parked");
@@ -64,23 +83,24 @@ int main(int argc, char **argv)
     snprintf(leftover_target, sizeof leftover_target, "%s/scratch", target);
     snprintf(leftover_decoy, sizeof leftover_decoy, "%s/scratch", decoy);
     if (mkdir(target, 0700) != 0 || mkdir(decoy, 0700) != 0 || make_file(marker, "original") != 0 ||
-        make_file(decoy_marker, "decoy") != 0) {
+        make_file(decoy_marker, "decoy") != 0 || make_file("cwd-marker", "cwd") != 0) {
         printf("FAIL  the race test could not make its folders\n");
         return 2;
     }
-    struct stat original;
-    if (stat(marker, &original) != 0) {
-        printf("FAIL  the race test could not read its marker\n");
+    struct stat original, cwd;
+    if (stat(marker, &original) != 0 || stat("cwd-marker", &cwd) != 0) {
+        printf("FAIL  the race test could not read its markers\n");
         return 2;
     }
+    cwd_inode = cwd.st_ino;
     int directory = open(target, O_RDONLY);
     if (directory < 0) {
         printf("FAIL  the race test could not open its folder\n");
         return 2;
     }
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, swap, NULL) != 0) {
-        printf("FAIL  the race test could not start the renamer\n");
+    pthread_t swapper, relative_thread;
+    if (pthread_create(&swapper, NULL, swap, NULL) != 0 || pthread_create(&relative_thread, NULL, relative, NULL) != 0) {
+        printf("FAIL  the race test could not start its threads\n");
         return 2;
     }
     int wrong_file = 0, wrong_stat = 0, failed_calls = 0;
@@ -111,8 +131,10 @@ int main(int argc, char **argv)
             failed_calls++;
         }
     }
+    void *relative_result = NULL;
+    pthread_join(relative_thread, &relative_result);
     running = 0;
-    pthread_join(thread, NULL);
+    pthread_join(swapper, NULL);
     close(directory);
     int fails = 0;
     if (wrong_file != 0) {
@@ -133,6 +155,10 @@ int main(int argc, char **argv)
     }
     if (!exists(decoy_marker) && !exists(marker)) {
         printf("FAIL  both folders' markers were lost\n");
+        fails++;
+    }
+    if ((intptr_t)relative_result != 0) {
+        printf("FAIL  a relative path in another thread left the process working directory %d times\n", (int)(intptr_t)relative_result);
         fails++;
     }
     return fails != 0;

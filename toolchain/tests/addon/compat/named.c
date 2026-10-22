@@ -91,14 +91,32 @@ int main(int argc, char **argv)
     expect(stat(file, &original) == 0 && stat("follow", &followed) == 0 && original.st_ino == followed.st_ino,
            "the link AT_SYMLINK_FOLLOW made must be a name for the file the symbolic link names");
     errno = 0;
-    expect(linkat(dir, file, AT_FDCWD, "fromdir", 0) == -1 && errno == ENOTSUP,
-           "linkat between a descriptor and the working directory must report ENOTSUP, since one call cannot pin both");
+    expect(mkdirat(AT_FDCWD, "sub", 0700) == 0, "the cross-folder checks need a folder to hold a descriptor");
+    int sub = open("sub", O_RDONLY | O_DIRECTORY);
+    expect(sub >= 0, "the folder the cross-folder checks use must open");
+    int inner = openat(AT_FDCWD, "sub/inner", O_CREAT | O_WRONLY, 0600);
+    if (inner >= 0) {
+        close(inner);
+    }
+    expect(linkat(sub, "inner", AT_FDCWD, "outer", 0) == 0 && exists("outer") && exists("sub/inner"),
+           "linkat from a descriptor's folder to the working directory must link the name across folders");
+    expect(renameat(sub, "inner", AT_FDCWD, "moved-out") == 0 && exists("moved-out") && !exists("sub/inner"),
+           "renameat from a descriptor's folder to the working directory must move the name out");
+    expect(renameat(AT_FDCWD, "moved-out", sub, "back") == 0 && exists("sub/back") && !exists("moved-out"),
+           "renameat from the working directory into a descriptor's folder must move the name in");
+    expect(renameat(dir, "outer", sub, "outer-in-sub") == 0 && exists("sub/outer-in-sub") && !exists("outer"),
+           "renameat between two descriptors' folders must move the name, with the second folder's path rebuilt");
+    expect(unlinkat(sub, "back", 0) == 0 && unlinkat(sub, "outer-in-sub", 0) == 0 && !exists("sub/back") && !exists("sub/outer-in-sub"),
+           "unlinkat against a descriptor must remove the names the cross-folder calls left in its folder");
+    close(sub);
+    expect(unlinkat(dir, "sub", AT_REMOVEDIR) == 0 && !exists("sub"), "the emptied cross-folder folder must remove");
 
     expect(renameat(AT_FDCWD, alias, AT_FDCWD, moved) == 0 && !exists(alias) && exists(moved),
            "renameat must move a name against the working directory");
-    errno = 0;
-    expect(renameat(dir, moved, AT_FDCWD, alias) == -1 && errno == ENOTSUP && exists(moved),
-           "renameat between a descriptor and the working directory must report ENOTSUP and leave the name where it was");
+    expect(renameat(dir, moved, AT_FDCWD, alias) == 0 && exists(alias) && !exists(moved),
+           "renameat from a descriptor to the working directory must move the name");
+    expect(renameat(AT_FDCWD, alias, dir, moved) == 0 && exists(moved) && !exists(alias),
+           "renameat from the working directory into a descriptor must move the name back");
     expect(renameat(dir, moved, dir, "moved-again") == 0 && exists("moved-again") && !exists(moved) &&
            renameat(dir, "moved-again", dir, moved) == 0 && exists(moved),
            "renameat within one descriptor must rename the name inside it and back");
