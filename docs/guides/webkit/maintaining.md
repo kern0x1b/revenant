@@ -212,8 +212,9 @@ this repository. The base commit is the one thing fetched from upstream.
    one subject at a time. Done as the patch series: the fork's 176 commits and its
    merge of the 2.54 branch, grouped into 24 patches that applied to upstream
    `c70a794b03` give the fork's tree exactly; then this port's own comments were
-   taken out of them and two build patches added, configure without Python and
-   keeping the configured compiler.
+   taken out of them and two build patches added: configure without running Python
+   (the generators that still need it run WebKit's own scripts, through the
+   `Python_EXECUTABLE` the engine passes), and keeping the configured compiler.
 4. **32-bit JSC coverage on the host.** The container, the build, the suites.
 5. **The integration branch against `main`**, to measure the real cost and to
    host the 64-bit JSValue work.

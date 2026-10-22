@@ -27,9 +27,6 @@ package("webkit-engine")
     end)
 
     on_test(function (package)
-        if os.getenv("REVENANT_ENGINE_CONFIGURE_ONLY") then
-            return
-        end
         if package:config("variant") == "prefixed" then
             for _, framework in ipairs({"JavaScriptCore", "WebCore", "WebKitLegacy"}) do
                 assert(os.isfile(path.join(package:installdir("bundle"), "Frameworks", framework .. ".framework", framework)), framework .. " is not in the bundle")

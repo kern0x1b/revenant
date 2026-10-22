@@ -1,6 +1,6 @@
 # 0005: Lua only, no Python
 
-Status: accepted
+Status: accepted; its build-step rule is superseded by [0013](0013-upstream-builds-keep-their-python.md)
 
 ## Context
 

@@ -157,18 +157,6 @@ function flags(ctx)
     local shflags = {"-flto=thin", "-Wl,-compatibility_version,1.0.0", "-Wl,-current_version,1.0.0",
                      "-L" .. path.join(ctx.libxslt, "lib"), "-L" .. path.join(ctx.woff2, "lib"),
                      library(ctx.brotli, "brotlidec"), library(ctx.brotli, "brotlicommon")}
-    if os.getenv("REVENANT_REFERENCE_NO_LTO") then
-        local function without_lto(list)
-            local kept = {}
-            for _, flag in ipairs(list) do
-                if flag ~= "-flto=thin" then
-                    table.insert(kept, flag)
-                end
-            end
-            return kept
-        end
-        cflags, shflags = without_lto(cflags), without_lto(shflags)
-    end
     return {cflags = cflags, cxxflags = cxxflags, shflags = shflags, ldflags = {library(ctx.libpsl, "psl")}}
 end
 
@@ -228,9 +216,8 @@ function arguments(ctx)
     for _, option in ipairs(options(ctx)) do
         table.insert(argv, "-D" .. option[1] .. "=" .. option[2])
     end
-    if os.getenv("REVENANT_WEBKIT_PYTHON") then
-        table.insert(argv, "-DPython_EXECUTABLE=" .. os.getenv("REVENANT_WEBKIT_PYTHON"))
-    end
+    local python = assert(find_tool("python3"), "the engine's build runs WebKit's own generators, which need python3 on the build machine")
+    table.insert(argv, "-DPython_EXECUTABLE=" .. python.program)
     return argv
 end
 
@@ -530,10 +517,6 @@ function install(package)
     table.join2(argv, arguments(ctx))
     os.vrunv(cmake_program(), argv, {envs = environment})
     verify_configured(ctx)
-    if os.getenv("REVENANT_ENGINE_CONFIGURE_ONLY") then
-        print("configured only: " .. build)
-        return
-    end
     build_with(package, build, nil, environment)
     verify_exports(ctx)
     verify_compat(ctx)
