@@ -4,7 +4,7 @@ local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
 local scanner = import("demand_scan", {rootdir = os.scriptdir(), anonymous = true})
 local products = import("demand_products", {rootdir = os.scriptdir(), anonymous = true})
-local dyld = import("apple.dyld", {rootdir = path.join(sdkfiles.root(), "toolchain", "modules"), anonymous = true})
+local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
 
 local TARGET = "6.1.3"
 local ARCHITECTURE = "armv7"

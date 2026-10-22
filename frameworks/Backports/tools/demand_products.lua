@@ -1,4 +1,4 @@
-local macho = import("apple.macho", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+local macho = import("@addon.revenant.apple.macho", {anonymous = true})
 local scanner = import("demand_scan", {rootdir = os.scriptdir(), anonymous = true})
 
 local ARCHIVE = "!<arch>\n"
