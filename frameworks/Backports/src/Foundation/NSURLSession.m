@@ -1,5 +1,6 @@
 #import "RevenantURLSessionMetrics.h"
 #import "RevenantTaskDelegate15.h"
+#import "RevenantTaskProgress.h"
 #import "RevenantNetworkAccess.h"
 #include <limits.h>
 #include <arpa/inet.h>
@@ -99,6 +100,7 @@ typedef NS_ENUM(NSInteger, RevenantTaskBody) {
     NSString *_lastModified;
     BOOL _resumeInvalid;
     NSData *_producedResumeData;
+    NSProgress *_progress;
 
     NSMutableArray *_metricsTransactions;
     NSDate *_metricsStart;
@@ -445,6 +447,7 @@ static void revenant_task_finish(NSURLSessionTask *task, NSError *error);
 static void revenant_task_stop_watching(NSURLSessionTask *task);
 static void revenant_task_load(NSURLSessionTask *task, NSURLRequest *request);
 static void revenant_task_flush_input(NSURLSessionTask *task);
+static void revenant_task_update_progress(NSURLSessionTask *task, BOOL complete);
 
 static void revenant_loader_stop(RevenantURLSessionLoader *loader)
 {
@@ -752,6 +755,8 @@ static void revenant_task_finish(NSURLSessionTask *task, NSError *error)
     revenant_loader_stop(loader);
     [task->_deferredInput removeAllObjects];
     revenant_task_release_slot(task);
+    if (!error)
+        revenant_task_update_progress(task, YES);
     if (revenant_is_download(task)) {
         revenant_download_close(task);
         if (error) {
@@ -936,6 +941,7 @@ static void revenant_download_response(NSURLSessionTask *task, NSURLResponse *re
             task->_countOfBytesReceived = offset;
             task->_countOfBytesExpectedToReceive = total;
         }
+        revenant_task_update_progress(task, NO);
         if (!task->_downloadHandler && revenant_delegate_responds(session, task, @selector(URLSession:downloadTask:didResumeAtOffset:expectedTotalBytes:))) {
             revenant_session_deliver(session, ^{
                 id delegate = revenant_task_delegate(session, task, @selector(URLSession:downloadTask:didResumeAtOffset:expectedTotalBytes:));
@@ -965,6 +971,7 @@ static void revenant_task_response(NSURLSessionTask *task, NSURLResponse *respon
         task->_response = [response copy];
         task->_countOfBytesExpectedToReceive = response.expectedContentLength;
     }
+    revenant_task_update_progress(task, NO);
     revenant_metrics_response(task, response);
     revenant_store_cookies(task, response);
     if (revenant_is_download(task)) {
@@ -992,6 +999,22 @@ static void revenant_task_response(NSURLSessionTask *task, NSURLResponse *respon
     });
 }
 
+static void revenant_task_update_progress(NSURLSessionTask *task, BOOL complete)
+{
+    NSProgress *progress;
+    int64_t sent, received, expectedToSend, expectedToReceive;
+    @synchronized (task) {
+        progress = task->_progress;
+        if (!progress)
+            return;
+        sent = task->_countOfBytesSent;
+        received = task->_countOfBytesReceived;
+        expectedToSend = task->_countOfBytesExpectedToSend;
+        expectedToReceive = task->_countOfBytesExpectedToReceive;
+    }
+    revenant_task_progress_apply(progress, sent, received, expectedToSend, expectedToReceive, complete);
+}
+
 static void revenant_task_data(NSURLSessionTask *task, NSData *data)
 {
     NSURLSession *session = task->_session;
@@ -1002,6 +1025,7 @@ static void revenant_task_data(NSURLSessionTask *task, NSData *data)
         received = task->_countOfBytesReceived;
         expected = task->_countOfBytesExpectedToReceive;
     }
+    revenant_task_update_progress(task, NO);
     if (revenant_is_download(task)) {
         @try {
             [task->_file writeData:data];
@@ -1052,6 +1076,7 @@ static void revenant_task_sent(NSURLSessionTask *task, int64_t written, int64_t 
             task->_countOfBytesExpectedToSend = expectedByConnection;
         expected = task->_countOfBytesExpectedToSend;
     }
+    revenant_task_update_progress(task, NO);
     if (!revenant_delegate_responds(session, task, @selector(URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:)))
         return;
     revenant_session_deliver(session, ^{
@@ -1580,6 +1605,7 @@ static void revenant_task_start(NSURLSessionTask *task)
     @synchronized (task) {
         task->_countOfBytesExpectedToSend = revenant_expected_body_length(task, request);
     }
+    revenant_task_update_progress(task, NO);
     void (^enqueue)(void) = ^{
         if (task->_body == RevenantTaskBodyStream) {
             revenant_task_request_body_stream(task, ^{
@@ -2117,6 +2143,13 @@ static NSURLSessionDownloadTask *revenant_resumed_download_task(NSURLSession *se
 
 @end
 
+NSURLSessionConfiguration *revenant_task_configuration(NSURLSessionTask *task);
+
+NSURLSessionConfiguration *revenant_task_configuration(NSURLSessionTask *task)
+{
+    return task->_session->_configuration;
+}
+
 @implementation NSURLSessionTask
 
 @dynamic delegate;
@@ -2219,6 +2252,18 @@ static NSURLSessionDownloadTask *revenant_resumed_download_task(NSURLSession *se
     @synchronized (self) {
         return _response;
     }
+}
+
+- (NSProgress *)progress
+{
+    NSProgress *progress;
+    @synchronized (self) {
+        if (!_progress)
+            _progress = revenant_task_progress_create(self);
+        progress = _progress;
+    }
+    revenant_task_update_progress(self, NO);
+    return progress;
 }
 
 - (int64_t)countOfBytesReceived

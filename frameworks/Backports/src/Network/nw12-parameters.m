@@ -149,7 +149,7 @@ void nw_parameters_set_local_endpoint(nw_parameters_t parameters, nw_endpoint_t 
 {
     RevenantNWParameters *value = (RevenantNWParameters *)parameters;
     if (value)
-        value->_localEndpoint = (RevenantNWEndpoint *)local_endpoint;
+        value->_localEndpoint = (RevenantNWEndpointValue *)local_endpoint;
 }
 
 bool nw_parameters_get_prohibit_expensive(nw_parameters_t parameters)

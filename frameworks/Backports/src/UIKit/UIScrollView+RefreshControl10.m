@@ -1,4 +1,4 @@
-#import "RevenantMenus.h"
+#import "RevenantRefreshHost.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
@@ -25,10 +25,12 @@ static UITableViewController *revenant_table_controller(UIScrollView *scrollView
 {
     objc_setAssociatedObject(self, &RevenantRefreshControlKey, refreshControl, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     UITableViewController *controller = revenant_table_controller(self);
-    if (controller)
+    if (controller) {
+        [RevenantRefreshHost setControl:nil forScrollView:self];
         controller.refreshControl = refreshControl;
-    else if (refreshControl)
-        revenant_menus_say_once(@"scroll-refresh", @"UIScrollView.refreshControl: the iOS 6 refresh control is driven by a UITableViewController, so a control on a scroll view that no table view controller owns is kept and read back and is not shown");
+    } else {
+        [RevenantRefreshHost setControl:refreshControl forScrollView:self];
+    }
 }
 
 @end

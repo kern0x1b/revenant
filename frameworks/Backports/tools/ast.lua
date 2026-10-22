@@ -127,6 +127,24 @@ function ios_intro(node)
     return nil
 end
 
+function has_unavailable(node)
+    for _, child in ipairs(node.children) do
+        if child.kind == "UnavailableAttr" or (child.kind == "AvailabilityAttr" and child.platform == "ios" and child.unavailable) then
+            return true
+        end
+    end
+    return false
+end
+
+function getter_of(node)
+    for _, child in ipairs(node.children) do
+        if child.kind == "getter" then
+            return child.type
+        end
+    end
+    return nil
+end
+
 function children_of(node, kind)
     local out = {}
     for _, child in ipairs(node.children) do

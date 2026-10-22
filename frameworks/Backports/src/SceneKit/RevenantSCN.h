@@ -45,7 +45,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
 SCNVector3 RevenantSCNProjectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
 SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
 
-@interface RevenantSCNRenderer : NSObject
+@interface RevenantSCNRenderEngine : NSObject
 - (instancetype)initWithContext:(EAGLContext *)context;
 @property (nonatomic, strong) SCNNode *lastRenderPointOfView;
 @property (nonatomic, assign) int lastRenderWidth;

@@ -2,7 +2,7 @@
 
 nw_group_descriptor_t nw_group_descriptor_create_multiplex(nw_endpoint_t remote_endpoint)
 {
-    RevenantNWEndpoint *remote = (RevenantNWEndpoint *)remote_endpoint;
+    RevenantNWEndpointValue *remote = (RevenantNWEndpointValue *)remote_endpoint;
     if (!remote)
         return NULL;
     RevenantNWGroupDescriptor *descriptor = [[RevenantNWGroupDescriptor alloc] init];

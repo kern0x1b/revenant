@@ -31,9 +31,25 @@ NSInteger revenant_calendar_quarter(NSCalendar *calendar, NSDate *date)
     return month == NSDateComponentUndefined ? NSDateComponentUndefined : (month - 1) / 3 + 1;
 }
 
+static BOOL revenant_calendar_repeated_day(NSCalendar *calendar, NSDate *date)
+{
+    NSTimeZone *zone = calendar.timeZone;
+    NSDate *transition = [zone nextDaylightSavingTimeTransitionAfterDate:[date dateByAddingTimeInterval:-10800]];
+    if (!transition || [transition compare:date] == NSOrderedDescending)
+        return NO;
+    NSDate *before = [transition dateByAddingTimeInterval:-1];
+    NSInteger change = [zone secondsFromGMTForDate:transition] - [zone secondsFromGMTForDate:before];
+    return change < 0 && [date timeIntervalSinceDate:transition] < -change;
+}
+
 NSDateComponents *revenant_calendar_components(NSCalendar *calendar, NSCalendarUnit units, NSDate *date)
 {
-    NSDateComponents *components = [calendar components:units & ~NSCalendarUnitNanosecond fromDate:date];
+    NSCalendarUnit derived = NSCalendarUnitDayOfYear | NSCalendarUnitIsRepeatedDay;
+    NSDateComponents *components = [calendar components:units & ~(NSCalendarUnitNanosecond | derived) fromDate:date];
+    if (units & NSCalendarUnitDayOfYear)
+        components.dayOfYear = (NSInteger)[calendar ordinalityOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitYear forDate:date];
+    if (units & NSCalendarUnitIsRepeatedDay)
+        components.repeatedDay = revenant_calendar_repeated_day(calendar, date);
     if (units & NSCalendarUnitNanosecond)
         components.nanosecond = revenant_calendar_nanosecond(date);
     if ((units & NSCalendarUnitQuarter) && components.quarter <= 0)
@@ -72,6 +88,10 @@ NSInteger revenant_calendar_value(NSDateComponents *components, NSCalendarUnit u
         return components.yearForWeekOfYear;
     case NSCalendarUnitNanosecond:
         return components.nanosecond;
+    case NSCalendarUnitDayOfYear:
+        return components.dayOfYear;
+    case NSCalendarUnitIsRepeatedDay:
+        return components.repeatedDay ? 1 : 0;
     default:
         return NSDateComponentUndefined;
     }
@@ -122,6 +142,12 @@ BOOL revenant_calendar_set_value(NSDateComponents *components, NSCalendarUnit un
     case NSCalendarUnitNanosecond:
         components.nanosecond = value;
         return YES;
+    case NSCalendarUnitDayOfYear:
+        components.dayOfYear = value;
+        return YES;
+    case NSCalendarUnitIsRepeatedDay:
+        components.repeatedDay = value != 0;
+        return YES;
     default:
         return NO;
     }
@@ -132,7 +158,7 @@ NSCalendarUnit revenant_calendar_given_units(NSDateComponents *components)
     NSCalendarUnit given = 0;
     NSCalendarUnit candidates[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond,
                                    NSCalendarUnitWeekday, NSCalendarUnitWeekdayOrdinal, NSCalendarUnitQuarter, NSCalendarUnitWeekOfMonth, NSCalendarUnitWeekOfYear,
-                                   NSCalendarUnitYearForWeekOfYear, NSCalendarUnitNanosecond};
+                                   NSCalendarUnitYearForWeekOfYear, NSCalendarUnitNanosecond, NSCalendarUnitDayOfYear};
     for (size_t index = 0; index < sizeof candidates / sizeof *candidates; index++) {
         if (revenant_calendar_value(components, candidates[index]) != NSDateComponentUndefined)
             given |= candidates[index];

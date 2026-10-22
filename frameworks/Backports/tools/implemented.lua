@@ -12,6 +12,8 @@ local function symbol(keys, framework, line)
         local class = name:match("^_OBJC_CLASS_%$_(.+)$")
         if class and (letter == "S" or letter == "D") then
             add(keys, framework, "class||" .. class)
+        elseif name:find("^_%$s") and letter ~= "U" then
+            add(keys, framework, "swift symbol||" .. name:sub(2))
         elseif not name:find("^_OBJC") then
             if letter == "T" then
                 add(keys, framework, "C function||" .. name:sub(2))
@@ -28,6 +30,19 @@ local function method(keys, framework, line)
         local class = container:match("^[^(]+")
         add(keys, framework, (sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector)
     end
+end
+
+function defined_protocols()
+    local names = {}
+    local text = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm", "--include=*.h",
+        "^@protocol [A-Za-z_][A-Za-z0-9_]*[^;]*$", sdkfiles.src_root()})
+    for line in text:gmatch("[^\n]+") do
+        local name = string.match(line, "^@protocol ([%w_]+)")
+        if name then
+            names[name] = true
+        end
+    end
+    return names
 end
 
 function from_objects(root)
