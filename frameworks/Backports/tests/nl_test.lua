@@ -1,14 +1,14 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local foundation = path.join(backports, "src", "Foundation")
 local fixture = path.join(backports, "tests", "NaturalLanguage", "main.m")
-local out = path.join(backports, "..", "..", "build", "tests", "NaturalLanguage")
 
 local function clang(args)
     os.vrunv("xcrun", table.join({"clang", "-fobjc-arc", "-target", "arm64-apple-macos13", "-isysroot", os.iorunv("xcrun", {"--sdk", "macosx", "--show-sdk-path"}):trim()}, args))
 end
 
 function main()
-    os.mkdir(out)
+    local out = workspace.run("backports-tests", "NaturalLanguage")
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     clang({"-o", host, fixture, "-framework", "Foundation", "-framework", "NaturalLanguage"})

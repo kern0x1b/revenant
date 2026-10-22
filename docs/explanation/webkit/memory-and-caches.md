@@ -187,9 +187,10 @@ ungraded VM pressure source (`dispatch_source_create` returns nothing rather tha
 graded one is iOS 8, so nothing ever reached the handler.
 
 The signal this kernel does export is `kern.memorystatus_level`, the system-wide free-memory
-percentage jetsam itself decides on; `LegacyTileCache` already sizes its tile budget from the same
-sysctl. `MemoryPressureHandler::install()` now polls it on `s_minimumHoldOffTime` and grades it by
-the bands `LegacyTileCache` uses: below 15% critical, below 30% a warning.
+percentage jetsam itself decides on. `MemoryPressureHandler::install()` now polls it on
+`s_minimumHoldOffTime` and grades it: below 8 is critical, below 12 a warning. The footprint counts
+too, against a 320 MB budget of the process: 90% of it is critical, three quarters a warning.
+`LegacyTileCache` reads the status the handler grades, so the tiles follow the same bands.
 
 Both `WTF::memoryFootprint()` and `WTF::memoryStatus()` were reading `phys_footprint` out of
 `task_vm_info`, which this kernel answers at revision 0 — the field is never written and the

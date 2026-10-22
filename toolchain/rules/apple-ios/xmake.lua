@@ -43,6 +43,20 @@ rule("apple-ios")
             target:add("cxflags", flags, {force = true})
             target:add("mxflags", flags, {force = true})
         end
+        local objc_bool = table.wrap(target:values("apple.objc_bool"))[1]
+        if objc_bool then
+            if objc_bool ~= "bool" then
+                raise("target(%s) names apple.objc_bool %s: the only value is bool, the Objective-C BOOL of arm64", target:name(), objc_bool)
+            end
+            target:add("mflags", "-U__OBJC_BOOL_IS_BOOL", "-D__OBJC_BOOL_IS_BOOL=1", {force = true})
+            target:add("mxflags", "-U__OBJC_BOOL_IS_BOOL", "-D__OBJC_BOOL_IS_BOOL=1", {force = true})
+        end
+        if target:is_arch("armv6", "armv7", "armv7s") then
+            target:add("cxflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("mflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("mxflags", "-Wno-incompatible-sysroot", {force = true})
+            target:add("asflags", "-Wno-incompatible-sysroot", {force = true})
+        end
     end)
 
     after_config(function (target)

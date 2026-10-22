@@ -13,8 +13,9 @@ From the revenant root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
 ./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime
 ```
 
-`recompiler_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport,
-classpair and lse. Their output goes to the target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The three
+`recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
+int128, weakimport and lse; `classpair` and `ordinal` are the device group's. Their output goes to the
+target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
 A check that also has a device part is run by hand, with the output folder as its argument:
@@ -25,7 +26,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l recompiler/tests/swiftconformance/check.lua <out>
 ```
 
-These need a claimed device (the skill `device-session`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
+These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 

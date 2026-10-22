@@ -1,4 +1,5 @@
 import("core.base.option")
+import("core.project.config")
 import("core.project.project")
 import("macho")
 import("compat")
@@ -9,6 +10,7 @@ import("signing")
 import("bundle")
 import("runtime_guards")
 import("shared_runtime", {alias = "staged"})
+import("backports_package")
 
 function waivers(target)
     local waived = {}
@@ -152,7 +154,7 @@ end
 
 local SHARED = {"swift-runtime", "libcxx"}
 
-function shared_runtime(target)
+function shared_packages(target)
     local all, identities, libraries = {}, {}, {}
     for _, alias in ipairs(SHARED) do
         local package = target:pkg(alias)
@@ -171,6 +173,11 @@ function shared_runtime(target)
                                version = described.version, needs = needs ~= "" and needs or nil, held = held})
         end
     end
+    return all, identities, libraries
+end
+
+function shared_runtime(target)
+    local all, identities, libraries = shared_packages(target)
     if #all == 0 then
         return nil
     end
@@ -211,11 +218,30 @@ function provided_libraries(target)
     return table.join(backport_libraries(target), shared and shared.libraries or {})
 end
 
-function backport_package(target)
-    if #backport_targets(target) > 0 then
-        raise("target(%s) links the Backports libraries, and no package installs them yet: the one .deb of the repository is not written, so the application cannot be packaged with them", target:name())
+function backport_libraries()
+    local found = {}
+    for _, target in ipairs(project.ordertargets()) do
+        if target:name():endswith("Backports") and target:is_shared() and target:is_plat("iphoneos") then
+            table.insert(found, target)
+        end
     end
-    return nil
+    return found
+end
+
+function backports_deb(signer)
+    if not signer:pkg("ldid") then
+        raise("target(%s) signs the Backports package, and carries no ldid to sign it with: add_packages(\"ldid\") to it, or a rule that adds it", signer:name())
+    end
+    local all, identities = shared_packages(signer)
+    return backports_package.ensure({targets = backport_libraries(), ldid = ldid(signer), packages = all, provided = identities,
+                                     builddir = path.join(config.builddir(), ".revenant", "backports")})
+end
+
+function backport_package(target)
+    if #backport_targets(target) == 0 then
+        return nil
+    end
+    return backports_deb(target)
 end
 
 function report_selectors(source, binaries, architecture, folder, provided)

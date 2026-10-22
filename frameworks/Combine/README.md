@@ -10,7 +10,6 @@ From the top of revenant:
 
 ```bash
 ./xmakew f -P . -p iphoneos -a armv7
-./xmakew build -P . Combine
 ./xmakew build -P . CombineTests
 ./xmakew test -P . CombineGenerated
 ```

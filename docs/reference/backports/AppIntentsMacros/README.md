@@ -9,7 +9,7 @@ as host executables a device compile loads with `-load-plugin-executable`.
 
 The framework expands these with its own compiler plugin, which is on the framework's own releases and
 not on these, so a port that writes `@AppEntity(schema:)` has no expansion. The planned package would be the
-port's own expansion of them; the 19 macro rows in `revenant@appintents` and the three in `revenant@tipkit`
+port's own expansion of them; the sixteen macro rows in `revenant@appintents` and the three in `revenant@tipkit`
 are waiting for it.
 
 **Built against `revenant@swift-syntax`**, the Apache-2.0 upstream at the tag that matches the fleet's
@@ -20,11 +20,11 @@ are waiting for it.
 measurement is in the commit that found it, and this page
 records what each macro's contract is, read off the framework's own `@attached` declarations.
 
-**What is written and what is not**, per macro, in `Sources/`:
+**What is written and what is not**, per macro, in `frameworks/Backports/src/AppIntentsMacros/`:
 
 | macro | roles | state |
 | --- | --- | --- |
-| `ComputedProperty()` | peer + accessor | written, and both roles **typecheck** against the toolchain's own swift-syntax. The entry point and the expansion harness are **not** done: the rule that builds the plugin ships in the next addon release cut from main, and until it does **asserts nothing** -- it is a hand-written reference; the mutant that must turn it red is in [the tests guide](../../toolchain/tests.md) |
+| `ComputedProperty()` | peer + accessor | written, and both roles **typecheck** against the toolchain's own swift-syntax. The entry point and the expansion harness are **not** done: the rule that builds a plugin is `toolchain/rules/macro` in this tree, and until the package exists the entry point **asserts nothing** -- it is a hand-written reference; the mutant that must turn it red is in [the tests guide](../../toolchain/tests.md) |
 | `DeferredProperty()` | peer + accessor | not started |
 | `AppEntity<T>(schema:)`, `AppIntent<T>(schema:)`, `AppEnum<T>(schema:)` | memberAttribute + extension | not started |
 | `AssistantEntity/Enum/Intent<T>(schema:)` | memberAttribute + extension | not started |
@@ -40,7 +40,7 @@ hand-checked expansion, not a diff against Apple's output.
 `@addon/revenant/macro`, not `rules/swift`: a plugin is compiled for the machine running the compiler
 and loaded with `-load-plugin-executable`, so it is neither a port target nor a device binary.
 
-**Use the shared `~/.xmake` store.** A run of mine set a private `XMAKE_GLOBALDIR` and the project
+**Use the shared store, `~/.revenant/cache/xmake-global`.** A run of mine set a private `XMAKE_GLOBALDIR` and the project
 then re-resolved the whole chain *from the network* into an empty store — the log of that run:
 
 ```

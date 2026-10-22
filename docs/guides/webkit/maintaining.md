@@ -69,7 +69,7 @@ What it asserts about a merged tree:
   entries that name the files above.
 - **The symbol surface**, in `carry-symbols.txt` and checked by
   `src/modules/symbols.lua` as a step of every engine build: every symbol the three
-  frameworks leave undefined - 6486 of them - and every Objective-C class they
+  frameworks leave undefined - 6109 of them - and every Objective-C class they
   export by name. A *new* undefined symbol is the important one: it means an
   upstream change reached for API this system may not have, and dyld kills the
   process at load with no crash log. A lost exported class is the same death

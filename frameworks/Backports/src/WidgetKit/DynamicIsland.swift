@@ -136,9 +136,10 @@ public struct ActivityViewContextPlaceholder {
     }
 }
 
-public struct AccessoryWidgetBackground {
-    public typealias Body = Never
-
+public struct AccessoryWidgetBackground: WidgetBody, Sendable {
     public init() {}
+}
 
+extension AccessoryWidgetBackground {
+    public typealias BodyType = Never
 }

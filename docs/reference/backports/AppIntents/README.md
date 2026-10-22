@@ -45,7 +45,7 @@ port's Foundation is the swift-5.4.3 overlay and predates the type, and AppInten
 written in terms of it. 
 
 `AttributedString`, `Measurement` and `Calendar.RecurrenceRule` are conformed to only when the runtime
-this package is built against has them, which the install measures with a probe and prints. Where a
+this package is built against has them, which the install measures with a probe. Where a
 type is missing the rows are left out of the module, and the ledger reads them as `missing` - the
 truth - instead of the module claiming them.
 
@@ -67,10 +67,12 @@ The Backports build does not include this package; the `Swift` component does:
     ./xmakew require -P . -y revenant@appintents
 
 `require` builds the package and the packages its recipe declares (here `revenant@swift-runtime`), so
-that one command is enough. The first run also builds swift-runtime and libcxx from source, because
-neither has a published prebuilt release yet; see [prebuilt packages](../../../guides/prebuilt.md).
-`revenant@activitykit`, `revenant@tipkit` and `revenant@widgetkit` are installed the same way, and each
-declares its own dependencies in its recipe.
+that one command is enough. The first run also builds swift-runtime and libcxx from source unless it
+takes their prebuilt releases; see [prebuilt packages](../../../guides/prebuilt.md).
+`revenant@activitykit` and `revenant@tipkit` are installed the same way, and each declares its own
+dependencies in its recipe. `revenant@widgetkit` is not: its package refuses on load, because
+`Values.swift` and `Timeline.swift` both declare `TimelineEntry` and `TimelineEntryRelevance` (see
+[the WidgetKit reference](../WidgetKit/README.md)).
 
 If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,
 another build is using the same package store, `$XMAKE_GLOBALDIR` (default

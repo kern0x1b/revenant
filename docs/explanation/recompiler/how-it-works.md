@@ -47,8 +47,8 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
 `src/runtime/swift_classes.m`.
 
 - A shadow is made when the Swift runtime hands a class over, through the calls the bridge provides because iOS 6
-  lacks them (`objc_readClassPair`, `_objc_realizeClassFromSwift`, `objc_setHook_lazyClassNamer`,
-  `objc_setHook_getImageName`; `src/runtime/bridge-provides.txt`). It is made at start-up for a class the compiler listed in
+  lacks them (`_objc_readClassPair`, `__objc_realizeClassFromSwift`, `_objc_setHook_lazyClassNamer`,
+  `_objc_setHook_getImageName`; `src/runtime/bridge-provides.txt`). It is made at start-up for a class the compiler listed in
   `__objc_classlist` (a device registers those when it loads the image, so a lookup by name finds them), and the first
   time a message or a call reaches a class the compiler laid out statically and listed only in `__objc_clsrolist`,
   which is when a device realizes it.

@@ -37,11 +37,10 @@ add_packages("combine")
   folders (`REVENANT_SWIFT_MODULES`) of the packages the target uses and no others (`:161-167`), and
   Combine names its folders there (recipe `:81`). Without `add_packages("combine")` the compile is not
   given the `Combine` module.
-- **The same configs as the runtime.** The recipe has `shared`, `backports` and `backports_uikit`
-  (`:13-15`) and asks for its `swift-runtime` with those values (`:27-29`), and for a packaged
-  libcxx when `shared` is set. Give Combine exactly the values the project gives `swift-runtime`,
-  e.g. with the backports config:
-  `add_requires("revenant@combine", {alias = "combine", configs = {backports = true}})`.
+- **The same configs as the runtime.** The recipe has `shared` and asks for its `swift-runtime` with
+  that value, and for a packaged libcxx when `shared` is set. Give Combine exactly the values the project
+  gives `swift-runtime`, e.g. `add_requires("revenant@combine", {alias = "combine", configs = {shared = true}})`
+  when the runtime is shared.
   A Combine built against another runtime build puts two in the program, and the target is refused
   with `target(<Name>) links 2 builds of swift-runtime at once: …`
   (`v0.8.10:modules/apple/platform.lua:288-314`, called from `rules/swift/xmake.lua:43`).

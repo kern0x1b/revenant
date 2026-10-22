@@ -39,10 +39,6 @@ package("swift-runtime")
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = swift_runtime_sources_digest, type = "string", readonly = true})
 
-    add_configs("backports", {description = "Build the overlays for a port that links the frameworks/Backports libraries: API they implement is available from the port's release, in the overlays and in the port's own Swift. Blocked until the port headers are generated again; see the raise in on_install.", default = false, type = "boolean"})
-
-    add_configs("backports_uikit", {description = "With backports: link the overlay of UIKit against UIKitBackports, for an application that links that target.", default = false, type = "boolean"})
-
     add_configs("library_evolution", {description = "Build the standard library, the runtime and concurrency with library evolution, for programs compiled by an SDK's Swift that bind to its resilient symbols. Writes no .swiftinterface, and an arm64 install stops after Darwin (the SDK has the other overlays); another build of its own, named by its own mark.", default = false, type = "boolean"})
 
     add_configs("shared", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which the programs built against this runtime depend on instead of carrying the libraries: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
@@ -51,9 +47,6 @@ package("swift-runtime")
         local sdk = assert(package:toolchains(), "swift-runtime is built with the apple-ios toolchain")[1]:config("sdk")
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat", configs = {apple_sdk = sdk}})
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
-        if package:config("backports_uikit") and not package:config("backports") then
-            raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
-        end
         package:add("links", "swiftCore")
         if package:config("shared") then
             local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
@@ -278,12 +271,6 @@ package("swift-runtime")
         offer(path.join(install, "libswiftDarwin.dylib"))
         timed("darwin")
 
-        local port_headers, carried = {}, {}
-
-        if package:config("backports") then
-            raise("swift-runtime's backports config is blocked: its port headers came from tools/gen, which is deleted, and the Backports libraries are project targets that a package cannot depend on")
-        end
-
         local foundation_links = {}
 
         local function build_overlay(name, overlay_sources, links, objects, opt)
@@ -294,15 +281,9 @@ package("swift-runtime")
                                       "-Xfrontend", "-disable-implicit-string-processing-module-import"}, use_ld,
                                      opt and opt.extra_flags or {},
                                      (opt and opt.concurrency) and {} or {"-Xfrontend", "-disable-implicit-concurrency-module-import"},
-                                     runtime_flags, swift.availability(source),
-                                     (opt and opt.backports) and port_headers or {})
+                                     runtime_flags, swift.availability(source))
             local object = path.join(generated, name .. ".o")
             local linked = {}
-            for _, library in ipairs(opt and opt.backports or {}) do
-                if carried[library] then
-                    table.insert(linked, carried[library])
-                end
-            end
             for _, link in ipairs(links) do
                 local library = link:match("^%-l(swift.+)$")
                 table.insert(linked, library and path.join(install, "lib" .. library .. ".dylib") or link)
@@ -348,25 +329,6 @@ package("swift-runtime")
             table.sort(uikit_patches)
             for _, patch in ipairs(uikit_patches) do
                 os.vrunv("patch", {"-p1", "-i", patch}, {curdir = uikit})
-            end
-            if package:config("backports_uikit") then
-                local file = path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift")
-                local text = io.readfile(file)
-                local function lowered(block)
-                    return (block:gsub("@available%(iOS 11%.0", "@available(iOS " .. minimum))
-                end
-                local count
-                text, count = text:gsub("(extension UIFont%.TextStyle {.-\n})", lowered)
-                assert(count == 1, "UIKit.swift has no extension of UIFont.TextStyle")
-                text, count = text:gsub("(extension UIContentSizeCategory {.-\n}\n)", function (block)
-                    return (block:gsub("@available%(iOS 11%.0", "@available(iOS 7.0"))
-                end)
-                assert(count == 1, "UIKit.swift has no extension of UIContentSizeCategory")
-                text, count = text:gsub("(@available%(iOS 13%.4, %*%)\npublic enum UIPointerEffect {)", function (block)
-                    return block:gsub("@available%(iOS 13%.4, %*%)", "@available(iOS " .. minimum .. ", *)", 1)
-                end)
-                assert(count == 1, "UIKit.swift declares no UIPointerEffect marked iOS 13.4")
-                io.writefile(file, text)
             end
             os.vcp(path.join(uikit, "stdlib", "public", "SwiftShims", "UIKitOverlayShims.h"), installed_shims .. "/")
             if not io.readfile(shim_modules):find("_SwiftUIKitOverlayShims", 1, true) then
@@ -425,7 +387,7 @@ package("swift-runtime")
                 "UUID.swift"})),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}, foundation_objects,
-                          {concurrency = true, backports = {"FoundationBackports"},
+                          {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
                                           "-enable-experimental-feature", "BuiltinModule"}})
 
@@ -442,16 +404,14 @@ package("swift-runtime")
                      "-o", initializers}, objc_linker))
             build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
                                     generated_from("UIKit", "UIKit_FoundationExtensions.swift")},
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
-                          {backports = package:config("backports_uikit") and {"UIKitBackports", "FoundationBackports"} or nil})
+                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers})
 
             local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
             local conformances = path.join(generated, "CoreData.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(coredata, "CoreData.mm"), "-o", conformances}, objc_linker))
             build_overlay("CoreData", {path.join(coredata, "CocoaError.swift"), path.join(coredata, "NSManagedObjectContext.swift")},
-                          table.join(foundation_links, {"-framework", "CoreData"}), {conformances},
-                          {backports = {"FoundationBackports", "CoreDataBackports"}})
+                          table.join(foundation_links, {"-framework", "CoreData"}), {conformances})
         end
 
         for _, library in ipairs({"Synchronization", "Observation", "StringProcessing"}) do
@@ -489,7 +449,7 @@ package("swift-runtime")
             os.vrunv("patch", {"-p1", "-i", patch}, {curdir = simd})
         end
         local simd_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-framework", "Foundation", "-framework", "CoreFoundation"}
-        build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil, {backports = {}})
+        build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil)
 
         local platform_dir = path.join(install, "iphoneos")
         os.mkdir(platform_dir)
@@ -602,9 +562,9 @@ package("swift-runtime")
 
         local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
             imports = read.imports, exported = read.exported,
-            minimum = toolchain:config("deployment"), backports = package:config("backports") and true or false})
+            minimum = toolchain:config("deployment")})
         assert(#differs == 0, "the runtime's imports and its guard table differ at " .. toolchain:config("deployment") ..
-               (package:config("backports") and " with the backports" or "") .. ":\n  " .. table.concat(differs, "\n  "))
+               ":\n  " .. table.concat(differs, "\n  "))
 
         local placeable = import("@addon.revenant.apple.firmware", {anonymous = true}).source(package:arch(), toolchain:config("deployment"))
         dyld.check(placeable, table.join(installed, linked), package:installdir(),
