@@ -19,3 +19,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0011](0011-shared-member-helpers.md) | One set of path and argument helpers for a member's tools | `repository/layout` (a member's `tree.lua` binds the shared module) |
 | [0012](0012-one-backports-package.md) | One package for every Backports library, depending on the shared packages it names | `toolchain_packages/backports_package_test` |
 | [0013](0013-upstream-builds-keep-their-python.md) | An upstream's own build keeps its own tooling; ours is Lua | `repository/layout` (no tracked `.py` or shell files) |
+| [0014](0014-performance-is-a-requirement.md) | Speed and memory on the A5 are part of correctness; claims are measurements | not enforced (a benchmark group is the check it needs) |
