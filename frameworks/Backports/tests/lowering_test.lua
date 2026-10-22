@@ -19,6 +19,10 @@ void revenantProbe(NSString *text, NSFileManager *files)
     NSTimeInterval weekendInterval = 0;
     (void)[[NSCalendar currentCalendar] rangeOfWeekendStartDate:&weekend interval:&weekendInterval containingDate:[NSDate date]];
     (void)[[NSDateInterval alloc] initWithStartDate:[NSDate date] duration:1.0];
+    NSDateComponents *components = nil;
+    NSURLComponents *url = nil;
+    (void)[components isValidDate];
+    (void)url.percentEncodedHost;
     (void)[WKWebView class];
     (void)MTLCreateSystemDefaultDevice();
 }

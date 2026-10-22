@@ -136,8 +136,10 @@ local function availability(text)
         if not start then
             return found
         end
-        if name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true) then
-            local _, close = text:find("%b()", stop)
+        local open, close = text:find("%b()", stop)
+        local available = name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true)
+        local since = name:find("DEPRECATED", 1, true) and close and text:sub(stop, close):find("API_TO_BE_DEPRECATED", 1, true)
+        if (available or since) and open == stop then
             table.insert(found, {start = start, stop = close})
             position = close + 1
         else
@@ -248,6 +250,10 @@ local function merged_ranges(ranges)
         end
     end
     return merged
+end
+
+local function property_getter(declaration)
+    return declaration:match("getter%s*=%s*([%a_][%w_]*)")
 end
 
 local function property_name(declaration)
@@ -396,8 +402,10 @@ local function lowering_of(text, implemented)
                     break
                 end
                 local declared_end = statement_end(text, mark + 1)
-                local name = property_name(text:sub(mark + 1, declared_end))
-                if name and (members["-" .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
+                local declaration = text:sub(mark + 1, declared_end)
+                local name = property_name(declaration)
+                local getter = property_getter(declaration) or name
+                if name and (members["-" .. getter] or members["-" .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -442,8 +450,10 @@ local function lowering_of(text, implemented)
                     break
                 end
                 local declared_end = statement_end(text, mark + 1)
-                local property = property_name(text:sub(mark + 1, declared_end))
-                if property and members["-" .. property] then
+                local declaration = text:sub(mark + 1, declared_end)
+                local property = property_name(declaration)
+                local getter = property_getter(declaration) or property
+                if property and (members["-" .. getter] or members["-" .. property]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -983,7 +993,8 @@ function device_members_in(text, released, cache)
                 local name = property_name(declaration)
                 if name and ios_later(declaration) then
                     local setter = "-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"
-                    for _, key in ipairs({"-" .. name, setter}) do
+                    local getter = property_getter(declaration) or name
+                    for _, key in ipairs({"-" .. getter, "-" .. name, setter}) do
                         if keys[key] then
                             set.classes[class] = set.classes[class] or {}
                             set.classes[class][key] = true
@@ -1126,7 +1137,18 @@ function swift_names(set)
     return names
 end
 
-local function lowered_by(line, names, types)
+local function type_opened(line)
+    return line:match("^public%s+struct%s+([%a_][%w_]*)") or line:match("^public%s+class%s+([%a_][%w_]*)") or
+           line:match("^public%s+enum%s+([%a_][%w_]*)") or line:match("^extension%s+([%a_][%w_]*)") or
+           line:match("^struct%s+([%a_][%w_]*)") or line:match("^class%s+([%a_][%w_]*)") or
+           line:match("^enum%s+([%a_][%w_]*)")
+end
+
+local function implemented_scope(scope, names)
+    return scope ~= nil and names["type " .. scope] == true
+end
+
+local function lowered_by(line, names, types, scope)
     local name = line:match("public%s+var%s+([%a_][%w_]*)") or line:match("public%s+func%s+([%a_][%w_]*)")
     if name then
         return names[name]
@@ -1145,6 +1167,15 @@ local function lowered_by(line, names, types)
     if declared then
         return names["type " .. declared] or false
     end
+    if line:match("^%s*public%s+static%s+func%s+[=<>!+%-*/&|^%%~]") then
+        return implemented_scope(scope, names)
+    end
+    if not line:find("public", 1, true) and (line:match("^%s+[%a ]*func%s+[%a_]") or line:match("^%s+[%a ]*var%s+[%a_]")) then
+        return implemented_scope(scope, names)
+    end
+    if line:match("^private%s+[%a ]*func%s") or line:match("^fileprivate%s+[%a ]*func%s") or line:match("^internal%s+[%a ]*func%s") then
+        return true
+    end
     return false
 end
 
@@ -1154,18 +1185,22 @@ function lower_swift_text(text, names, types)
         table.insert(lines, line)
     end
     types = types or {}
-    local kept, pending = {}, nil
+    local kept, pending, scope = {}, nil, nil
     for _, line in ipairs(lines) do
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
         if major and tonumber(major) >= 7 then
             pending = #kept + 1
-        elseif pending and lowered_by(line, names, types) then
+        elseif pending and lowered_by(line, names, types, scope) then
             kept[pending] = false
             pending = nil
         elseif not line:match("^%s*@available%(") then
             pending = nil
         end
         table.insert(kept, line)
+        if line:match("^}") then
+            scope = nil
+        end
+        scope = type_opened(line) or scope
     end
     local buffer = {}
     for _, line in ipairs(kept) do
