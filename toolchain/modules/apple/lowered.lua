@@ -712,12 +712,84 @@ function build_overlay(sdk, out, src)
     return vfs
 end
 
-function swift_overlays(root)
+local function swift_base(selector)
+    local head = selector:match("^([%a_][%w_]*)")
+    if not head then
+        return nil
+    end
+    head = head:gsub("^stringBy(%u)", "%1")
+    head = head:gsub("With%u.*$", "")
+    head = head:gsub("For%u.*$", "")
+    if head == "" then
+        return nil
+    end
+    return head:sub(1, 1):lower() .. head:sub(2)
+end
+
+function swift_names(implemented)
+    local names = {}
+    for _, members in pairs(implemented.classes) do
+        for key in pairs(members) do
+            local base = swift_base(key:sub(2))
+            if base then
+                names[base] = true
+            end
+        end
+    end
+    return names
+end
+
+function lower_swift_text(text, names)
+    local lines = {}
+    for line in text:gmatch("([^\n]*)\n") do
+        table.insert(lines, line)
+    end
+    local kept, pending = {}, nil
+    for _, line in ipairs(lines) do
+        local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
+        if major and tonumber(major) >= 7 then
+            pending = #kept + 1
+            table.insert(kept, line)
+        elseif pending and (line:match("public%s+var%s+[%a_]") or line:match("public%s+func%s+[%a_]")) then
+            local name = line:match("public%s+var%s+([%a_][%w_]*)") or line:match("public%s+func%s+([%a_][%w_]*)")
+            if names[name] then
+                kept[pending] = false
+            end
+            pending = nil
+            table.insert(kept, line)
+        elseif line:match("^%s*@available%(") then
+            table.insert(kept, line)
+        else
+            pending = nil
+            table.insert(kept, line)
+        end
+    end
+    local buffer = {}
+    for _, line in ipairs(kept) do
+        if line then
+            table.insert(buffer, line .. "\n")
+        end
+    end
+    table.insert(buffer, text:match("([^\n]*)$"))
+    return table.concat(buffer)
+end
+
+function swift_overlays(root, src)
     for _, entry in ipairs(MEMBERS) do
         local lowering = entry.overlay
         if lowering then
             local file = path.join(root, table.unpack(lowering.file))
             io.writefile(file, replaced(io.readfile(file), lowering, "the Swift overlay " .. file, entry.member))
+        end
+    end
+    if src then
+        local names = swift_names(union_of(implemented_in(src)))
+        for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", "Foundation", "*.swift"))) do
+            local text = io.readfile(file)
+            local lowered = lower_swift_text(text, names)
+            if lowered ~= text then
+                io.writefile(file, lowered)
+            end
         end
     end
 end

@@ -119,6 +119,28 @@ function main()
     }, "\n")
     local lowered_property = lowered.lower_header(property, {classes = {NSString = {["-stringByRemovingPercentEncoding"] = true}}, functions = {}})
     assert(count(lowered_property, "AVAILABLE") == 0, "an implemented property kept its availability:\n" .. lowered_property)
+    local swift = table.concat({
+        "extension StringProtocol where Index == String.Index {",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public func addingPercentEncoding(",
+        "    withAllowedCharacters allowedCharacters: CharacterSet",
+        "  ) -> String? {",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public var removingPercentEncoding: String? {",
+        "    return _ns.removingPercentEncoding",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public var unrelated: String? {",
+        "  }",
+        "}",
+        "",
+    }, "\n")
+    local names = lowered.swift_names({classes = {NSString = {["-stringByRemovingPercentEncoding"] = true,
+                                                             ["-stringByAddingPercentEncodingWithAllowedCharacters:"] = true}}, functions = {}})
+    local swift_lowered = lowered.lower_swift_text(swift, names)
+    assert(count(swift_lowered, "@available") == 1 and swift_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public var unrelated", 1, true),
+           "the Swift overlay must lower the availability of the members Backports implements and keep the others:\n" .. swift_lowered)
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)
