@@ -7,6 +7,20 @@ public struct PresentationIntent: Hashable, Codable, CustomDebugStringConvertibl
         self.components = types
     }
 
+    private enum CodingKeys: String, CodingKey {
+        case components
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let types = try container.decode([IntentType].self, forKey: .components)
+        guard !types.isEmpty else {
+            throw DecodingError.dataCorruptedError(forKey: .components, in: container,
+                                                   debugDescription: "a presentation intent needs at least one component")
+        }
+        self.components = types
+    }
+
     public var count: Int {
         return components.count
     }
