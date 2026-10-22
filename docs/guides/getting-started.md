@@ -2,8 +2,9 @@
 
 This guide takes a Mac from a `git clone` to two results: `./xmakew test -P .` ends green, and the Backports
 library builds. Every command in it was run from a clean clone, on an empty revenant home, with `-j 2` where a
-build takes a job count. The first configure and the first test run are the slow steps: the Swift runtime and
-libcxx have no published prebuilt release yet, so they are built from source.
+build takes a job count. The first configure installs the packages the project needs: in the verification run that
+was thirteen, most of them built from source (boost and dynarmic among them), and it took about five minutes. The
+Swift component, which CI's `swift` job builds, is not part of these steps.
 
 ## What you need
 
@@ -29,7 +30,7 @@ enforced by a check and which are not. Neither is needed to run the commands bel
 
 The first run of `./xmakew` builds the pinned xmake under `~/.revenant/cache/xmake/`, which takes a few
 minutes. The two variables take LLVM, Swift and ld64 from kern0x1b/revenant's releases; without them those
-three are built from source, which takes hours. `--emulator_vulkan=n` leaves the emulator's Vulkan backend
+three are built from source, which takes hours: LLVM alone is about 3,200 build steps. `--emulator_vulkan=n` leaves the emulator's Vulkan backend
 off, as CI does.
 
 ## 4. Run the tests

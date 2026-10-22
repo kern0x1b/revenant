@@ -20,20 +20,10 @@ jobs:
   checks:
     runs-on: macos-26
     timeout-minutes: 60
-    env:
-      REVENANT_PREBUILT: kern0x1b/revenant
-      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64"
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Select Xcode 26.6 and show its clang
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
-          xcode-select -p
-          xcrun --find clang
-          xcrun clang --version
+      - uses: ./.github/actions/revenant-setup
 
       - uses: actions/cache/restore@v4
         id: xmake
@@ -46,14 +36,6 @@ jobs:
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
-
-      - uses: actions/cache/restore@v4
-        id: ccache
-        with:
-          path: ~/.revenant/cache/ccache
-          key: ccache-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: |
-            ccache-${{ runner.os }}-
 
       - name: Install the packages
         id: configure
@@ -72,12 +54,6 @@ jobs:
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: ~/.revenant/cache/ccache
-          key: ccache-${{ runner.os }}-${{ github.run_id }}
-
-      - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
           path: ~/.revenant/cache/xmake
@@ -86,21 +62,13 @@ jobs:
   backports:
     runs-on: macos-26
     timeout-minutes: 30
-    env:
-      REVENANT_PREBUILT: kern0x1b/revenant
-      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64"
     steps:
       - uses: actions/checkout@v4
 
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
 
-      - name: Select Xcode 26.6 and show its clang
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
-          xcode-select -p
-          xcrun --find clang
-          xcrun clang --version
+      - uses: ./.github/actions/revenant-setup
 
       - uses: actions/cache/restore@v4
         id: xmake
@@ -126,20 +94,8 @@ jobs:
           restore-keys: |
             backports-generated-${{ runner.os }}-
 
-      - name: Check that the branch has the Backports component
-        id: component
-        run: |
-          if git grep -q 'option("component"' -- '*xmake.lua'; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=backports::this branch has no component option; the Backports build is skipped"
-            echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
-          fi
-
       - uses: actions/cache/restore@v4
         id: objects
-        if: steps.component.outputs.present == 'true'
         with:
           path: |
             build/.objs
@@ -148,7 +104,6 @@ jobs:
           key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
 
       - name: Configure the Backports component
-        if: steps.component.outputs.present == 'true'
         timeout-minutes: 20
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
@@ -157,7 +112,6 @@ jobs:
           echo "stage configure ends $(date -u +%H:%M:%S)"
 
       - name: Extract the facts of every framework
-        if: steps.component.outputs.present == 'true'
         timeout-minutes: 10
         run: |
           echo "stage facts starts $(date -u +%H:%M:%S)"
@@ -165,7 +119,7 @@ jobs:
           echo "stage facts ends $(date -u +%H:%M:%S)"
 
       - name: Show the package logs when the configure failed
-        if: failure() && steps.component.outputs.present == 'true'
+        if: failure()
         run: |
           find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
           for f in $(find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
@@ -174,21 +128,20 @@ jobs:
           done
 
       - name: Save the package store
-        if: steps.component.outputs.present == 'true' && steps.store.outputs.cache-hit != 'true'
+        if: steps.store.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - name: Save the generated skeleton
-        if: steps.component.outputs.present == 'true' && steps.generated.outputs.cache-hit != 'true'
+        if: steps.generated.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: build/generated/backports
           key: backports-generated-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
 
       - name: Build the Backports component
-        if: steps.component.outputs.present == 'true'
         timeout-minutes: 12
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
@@ -197,7 +150,7 @@ jobs:
           echo "stage build ends $(date -u +%H:%M:%S)"
 
       - uses: actions/cache/save@v4
-        if: steps.component.outputs.present == 'true' && steps.objects.outputs.cache-hit != 'true'
+        if: steps.objects.outputs.cache-hit != 'true'
         with:
           path: |
             build/.objs
@@ -206,7 +159,6 @@ jobs:
           key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
-        if: steps.component.outputs.present == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: backports-libraries
@@ -214,12 +166,10 @@ jobs:
           if-no-files-found: error
 
       - name: Run the Backports tests
-        if: steps.component.outputs.present == 'true'
         timeout-minutes: 10
         run: ./xmakew test -P . "backports_uikit/*" --output-on-failure
 
       - name: Check the exports and count the implemented members
-        if: steps.component.outputs.present == 'true'
         timeout-minutes: 10
         run: |
           mkdir -p "$RUNNER_TEMP/report"
@@ -236,7 +186,7 @@ jobs:
           exit "$status"
 
       - uses: actions/upload-artifact@v4
-        if: always() && steps.component.outputs.present == 'true'
+        if: always()
         with:
           name: backports-report
           path: ${{ runner.temp }}/report
@@ -251,21 +201,15 @@ jobs:
   swift:
     runs-on: macos-26
     timeout-minutes: 45
-    env:
-      REVENANT_PREBUILT: kern0x1b/revenant
-      REVENANT_PREBUILT_ONLY: "llvm,swift,ld64,swift-runtime,libcxx"
     steps:
       - uses: actions/checkout@v4
 
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
 
-      - name: Select Xcode 26.6 and show its clang
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
-          xcode-select -p
-          xcrun --find clang
-          xcrun clang --version
+      - uses: ./.github/actions/revenant-setup
+        with:
+          prebuilt-only: "llvm,swift,ld64,swift-runtime,libcxx"
 
       - uses: actions/cache/restore@v4
         id: xmake

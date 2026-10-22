@@ -1,0 +1,27 @@
+name: revenant-setup
+description: Select Xcode 26.6 on the macOS runner, and export the prebuilt-package variables for the rest of the job.
+
+inputs:
+  prebuilt-only:
+    description: The packages whose missing prebuilt release is an error, not a source build.
+    required: false
+    default: "llvm,swift,ld64"
+
+runs:
+  using: composite
+  steps:
+    - name: Select Xcode 26.6 and show its clang
+      shell: bash
+      run: |
+        sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+        xcode-select -p
+        xcrun --find clang
+        xcrun clang --version
+
+    - name: Export the prebuilt-package variables
+      shell: bash
+      env:
+        PREBUILT_ONLY: ${{ inputs.prebuilt-only }}
+      run: |
+        echo "REVENANT_PREBUILT=kern0x1b/revenant" >> "$GITHUB_ENV"
+        echo "REVENANT_PREBUILT_ONLY=$PREBUILT_ONLY" >> "$GITHUB_ENV"
