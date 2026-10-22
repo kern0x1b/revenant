@@ -11,7 +11,10 @@ The target rules and the values each one reads, the settings a port sets for the
 | `@addon/revenant/app` | `Name.app` | `app.plist-file`, `app.plist`, `app.resources`, `app.frameworks`, `app.url-scheme` |
 | `@addon/revenant/library` | a shared library an application bundles | the values on any target below; checked, stripped, signed and import-checked with the bundle |
 | `@addon/revenant/swift` | added beside one of the rules above | `swift.module` (default the target's name), `swift.flags` |
+| `@addon/revenant/rust` | a Rust staticlib for armv7 on iOS 6.0, built by cargo | `rust.crate` (the folder with its `Cargo.toml` and `Cargo.lock`, relative to the project), `rust.library` (the crate's `[lib]` name; default the target's name, with `-` as `_`), `rust.package` (the `-p` package of a workspace), `rust.features` (the exact feature set; the default features are off), `rust.rustflags` (rustc flags, added to `RUSTFLAGS`) |
 | `@addon/revenant/check` | a project check | `check.*`, see below |
+
+`rust` needs `revenant@rust` (see [packages](packages.md)) and an armv7 target with `apple_minimum` 6.0. It builds the crate with the pinned nightly's cargo for [the armv7 iOS 6 spec](../../../toolchain/src/rust/armv7-apple-ios6.json), `-Zbuild-std` over core, alloc, std and panic_abort, and the apple-ios toolchain's clang for the crate's C code. Its archive is a static library, so a target that `add_deps()` it links it, and the public `links` and `linkdirs` it sets reach that target. The how-to is in [build a Rust crate](../../guides/toolchain/rust.md).
 
 `revenant.libraries` names the packages whose shared libraries the target loads. A tweak or daemon finds them in `/usr/lib/revenant/<Package>/`; an application carries them in its bundle with `app.frameworks`.
 
@@ -53,7 +56,7 @@ The rule passes `-Wno-incompatible-sysroot` to armv6, armv7 and armv7s targets. 
 | Setting | Meaning |
 | --- | --- |
 | `apple_minimum` | the oldest release the port runs on, for example `6.0`. A release the architecture cannot run is refused, naming the architectures that can. |
-| `apple_sdk` | the SDK version. The default is 16.4; `26.2` is also available. |
+| `apple_sdk` | the SDK version. The default is 26.2, the one SDK every configure uses; `16.4` is also available. |
 
 ## Checks on every linked binary
 
