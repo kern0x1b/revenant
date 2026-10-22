@@ -23,13 +23,14 @@ point (ADR 0003) sorts the way the released keys were computed.
   different buildhash. Run xmake through `./xmakew`.
 - The pin is a rule until the real fix lands: byte-order sorting in xmake's buildhash (through the xmake patch
   set). That moves every key, so it waits for the next planned rebuild of llvm and swift.
-- The pin needs `en_US.UTF-8` on the machine. Without it the sort falls back to the C order without an error.
+- The pin needs `en_US.UTF-8` on the machine. If it is unavailable, xmake may not use the intended order.
 
 ## Enforced by
 
-Not yet. A repository test that reads `xmakew` and fails when the pin is missing would enforce it; none exists.
+`repository/layout` checks that `xmakew` sets and exports `LC_COLLATE=en_US.UTF-8`, and that the test process
+receives that value.
 
 ## Not enforced
 
-That `xmakew` pins the collation, and that the machine has `en_US.UTF-8`. Both are checkable by running the
-prebuilt trace (`REVENANT_PREBUILT_TRACE=1`) and comparing keys with a release.
+That the machine has the `en_US.UTF-8` locale installed and uses it for sorting. The check verifies the environment
+variable, not the locale's availability or effective collation.

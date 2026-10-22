@@ -1,6 +1,6 @@
 # 0011: One set of path and argument helpers for a member's tools
 
-Status: proposed
+Status: accepted
 
 ## Context
 
@@ -26,7 +26,7 @@ allowed, but it is one more reason the helper's location matters.
 - **C. Move everything into the addon.** The WebKit and SwiftUI functions are specific to their members, so this
   moves member knowledge into the addon. Rejected.
 
-## Decision (proposed)
+## Decision
 
 Option B. The shared part is the member and checkout paths and the argument parser. The member-specific functions stay
 in the member. The addon module takes the folder of the caller as an argument, because a module under
@@ -40,5 +40,5 @@ in the member. The addon module takes the folder of the caller as an argument, b
 
 ## Enforced by
 
-Not enforced yet. Proposed: a repository check that no two `lib/tree.lua` files define the same function name, so a
-copy cannot come back unnoticed once B is in place.
+`repository/layout` checks that member `lib/tree.lua` files import the shared addon module and do not duplicate
+function definitions. `toolchain_light/checkout_test` checks the member and checkout paths and the shared argument parser.

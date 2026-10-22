@@ -130,12 +130,62 @@ function main()
         table.insert(errors, file .. ": " .. why)
     end
     local files = os.iorunv("git", {"-C", root, "-c", "core.quotepath=false", "ls-files"})
+    local launcher = io.readfile(path.join(root, "xmakew"))
+    if not launcher:find("LC_COLLATE=en_US.UTF-8", 1, true) or not launcher:find("export LC_COLLATE", 1, true) or
+       os.getenv("LC_COLLATE") ~= "en_US.UTF-8" then
+        wrong("xmakew", "sets the collation used to compute the prebuilt keys")
+    end
+    local helpers, helper_files = {}, 0
+    for file in files:gmatch("[^\n]+") do
+        if file:match("^frameworks/[^/]+/tools/lib/tree%.lua$") then
+            helper_files = helper_files + 1
+            local text = io.readfile(path.join(root, file))
+            if not text:find("@addon.revenant.member", 1, true) then
+                wrong(file, "imports shared member paths and argument parsing from @addon.revenant.member")
+            end
+            for name in text:gmatch("function%s+([%w_]+)%s*%(") do
+                if helpers[name] then
+                    wrong(file, "duplicates " .. name .. " from " .. helpers[name])
+                else
+                    helpers[name] = file
+                end
+            end
+        end
+    end
+    if helper_files == 0 then
+        wrong("frameworks", "has no member tools/lib/tree.lua files to check")
+    end
+    local indexed = {}
+    local index = io.readfile(path.join(root, "docs", "README.md"))
+    for target in index:gmatch("%]%((.-)%)") do
+        local destination = target:match("^<([^>]+)>") or target:match("^(%S+)")
+        if destination and destination:endswith(".md") and not destination:match("^%a[%w+.-]*:") and not destination:match("^//") then
+            local resolved = path.normalize(path.join(root, "docs", destination))
+            indexed[path.relative(resolved, root)] = true
+        end
+    end
     local present = {}
     local folders = {}
     local recipes = {}
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
+        if file:endswith(".md") then
+            local text = io.readfile(path.join(root, file))
+            for target in text:gmatch("%]%((.-)%)") do
+                local destination = target:match("^<([^>]+)>") or target:match("^(%S+)")
+                if destination and not destination:match("^%a[%w+.-]*:") and not destination:match("^//") then
+                    local relative = destination:match("^([^#]*)")
+                    local linked = relative ~= "" and path.normalize(path.join(root, path.directory(file), relative)) or path.join(root, file)
+                    if not os.isfile(linked) and not os.isdir(linked) then
+                        wrong(file, "broken local link: " .. destination)
+                    end
+                end
+            end
+            if parts[1] == "docs" and file ~= "docs/README.md" and not file:match("^docs/explanation/decisions/%d%d%d%d%-") and not indexed[file] then
+                wrong(file, "is missing from docs/README.md")
+            end
+        end
         if file:lower():find("telegram", 1, true) then
             wrong(file, "the test app's source is not in the repository: see docs/explanation/decisions/0009-app-under-test.md")
         end
