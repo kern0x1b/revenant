@@ -210,8 +210,7 @@ local function scenekit_flags(target, modules)
     return {"-Xcc", "-ivfsoverlay", "-Xcc", overlay}
 end
 
-local function generate_spatial(folder)
-    local spatial = import("spatial_float", {rootdir = TOOLS, anonymous = true})
+local function generate_spatial(spatial, folder)
     return spatial.generate(path.join(SRC, "Spatial"), folder)
 end
 
@@ -251,7 +250,7 @@ local function overlay(name, folder, opt)
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
                 os.mkdir(folder)
-                target:add("files", table.unpack(opt.generate(folder)))
+                target:add("files", table.unpack(opt.generate(import("spatial_float", {rootdir = TOOLS, anonymous = true}), folder)))
             end
             local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
                            "-Xfrontend", "-disable-implicit-string-processing-module-import"}
