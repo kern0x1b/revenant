@@ -5,6 +5,7 @@
 
 static char RevenantSearchItemsKey;
 static char RevenantOperationQueueKey;
+static char RevenantForwardingKey;
 
 NSArray *revenant_metadata_urls(NSArray *items);
 
@@ -39,15 +40,14 @@ NSArray *revenant_metadata_urls(NSArray *items)
 
 - (void)setSearchItems:(NSArray *)searchItems
 {
-    static __thread BOOL forwarding;
-    if (forwarding)
+    if (objc_getAssociatedObject(self, &RevenantForwardingKey))
         return;
     objc_setAssociatedObject(self, &RevenantSearchItemsKey, [searchItems copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     SEL setter = NSSelectorFromString(@"setSearchItemURLs:");
     if ([self respondsToSelector:setter]) {
-        forwarding = YES;
+        objc_setAssociatedObject(self, &RevenantForwardingKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self performSelector:setter withObject:searchItems ? revenant_metadata_urls(searchItems) : nil];
-        forwarding = NO;
+        objc_setAssociatedObject(self, &RevenantForwardingKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
