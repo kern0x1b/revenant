@@ -16,4 +16,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0008](0008-backports-loud-stubs.md) | Backports live in `frameworks/Backports`; a gap is a loud stub | the build (`open_gap` raises) |
 | [0009](0009-app-under-test.md) | The Telegram test is read-only source plus an overlay outside the repository | `repository/layout` (no tracked path names it) |
 | [0010](0010-collation-of-xmake.md) | xmake sorts with the collation `./xmakew` sets (`en_US.UTF-8`) | none yet (see the record) |
-| [0011](0011-shared-member-helpers.md) | One set of path and argument helpers for a member's tools (proposed) | none yet (see the record) |
+| [0011](0011-shared-member-helpers.md) | One set of path and argument helpers for a member's tools | `repository/layout` (a member's `tree.lua` binds the shared module) |
