@@ -216,6 +216,9 @@ function arguments(ctx)
     for _, option in ipairs(options(ctx)) do
         table.insert(argv, "-D" .. option[1] .. "=" .. option[2])
     end
+    if os.getenv("REVENANT_WEBKIT_PYTHON") then
+        table.insert(argv, "-DPython_EXECUTABLE=" .. os.getenv("REVENANT_WEBKIT_PYTHON"))
+    end
     return argv
 end
 
@@ -515,6 +518,10 @@ function install(package)
     table.join2(argv, arguments(ctx))
     os.vrunv(cmake_program(), argv, {envs = environment})
     verify_configured(ctx)
+    if os.getenv("REVENANT_ENGINE_CONFIGURE_ONLY") then
+        print("configured only: " .. build)
+        return
+    end
     build_with(package, build, nil, environment)
     verify_exports(ctx)
     verify_compat(ctx)
