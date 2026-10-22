@@ -1232,6 +1232,22 @@ local function lowered_by(line, names, types, scope)
     return false
 end
 
+local function operator_extension(lines, at, names)
+    local name = lines[at]:match("^extension%s+([%a_][%w_]*)%s*{")
+    if not name or not names["type " .. name] then
+        return false
+    end
+    for index = at + 1, #lines do
+        if lines[index]:match("^}") then
+            return false
+        end
+        if lines[index]:match("^%s*public%s+static%s+func%s+[=<>!+%-*/&|^%%~]") then
+            return true
+        end
+    end
+    return false
+end
+
 function lower_swift_text(text, names, types)
     local lines = {}
     for line in text:gmatch("([^\n]*)\n") do
@@ -1239,11 +1255,11 @@ function lower_swift_text(text, names, types)
     end
     types = types or {}
     local kept, pending, scope = {}, nil, nil
-    for _, line in ipairs(lines) do
+    for index, line in ipairs(lines) do
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
         if major and tonumber(major) >= 7 then
             pending = #kept + 1
-        elseif pending and lowered_by(line, names, types, scope) then
+        elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names)) then
             kept[pending] = false
             pending = nil
         elseif not (line:match("^%s*@available%(") or line:match("^%s*///") or line:match("^%s*//") or line:match("^%s*@[%w_]+") or line:match("^%s*$")) then
