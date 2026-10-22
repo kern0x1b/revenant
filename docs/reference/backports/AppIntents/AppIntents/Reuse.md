@@ -22,7 +22,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
   the SwiftUI targets of the revenant project, with no `revenant@swiftui` package to depend on, so a port cannot
   build against it yet (the ask is with the band).
 * **`the deleted registry package registry/CoreSpotlight/ios9.json`** — the backports package's own
-  registry entry, read by the AppIntents recipe through the runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). The
+  registry entry, read by the AppIntents recipe through the runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`, which no build sets since the port headers were removed). The
   `scriptdir()` defect that hid it was this delivery's; the registry itself is not ours.
 * **Apple's own `.swiftinterface`s and `swift-api-digester`** — as *references* for the declarations
   and for the measurement, which is not reuse of an implementation: nothing from them is vendored.

@@ -106,8 +106,7 @@ function compare(found, opt)
     local known = merged()
     local imports = opt.imports or {}
     local exported = opt.exported or {}
-    local where = string.format("at %s%s", tostring(opt.minimum or "an unstated release"),
-                                opt.backports and " with the backports" or "")
+    local where = string.format("at %s", tostring(opt.minimum or "an unstated release"))
     for _, library in ipairs(table.orderkeys(found)) do
         local recorded = known[library] or {}
         for _, symbol in ipairs(found[library]) do

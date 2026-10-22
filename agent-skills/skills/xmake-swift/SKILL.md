@@ -103,12 +103,10 @@ has checked:
   program links the runtime's build mark by name (`rules/swift/xmake.lua:62-69`), and a target that
   reaches two builds is refused (`target(<Name>) links 2 builds of swift-runtime at once: …`,
   `platform.lua:288-314`). Require every Swift package with the program's configs.
-- **Backports in Swift.** `configs = {backports = true}` on `swift-runtime` (and `backports_uikit`
-  for an application) makes what the `frameworks/Backports` targets implement available from the program's
-  release in Swift too. The rule then requires the program to carry the backports with the configs
-  the runtime links (`coredata`, and `uikit` with `backports_uikit`), and names what is missing
-  (`rules/swift/xmake.lua:69-91`). Which API to take from the backports is the skill `backports`;
-  calling them from Swift is the skill `swift` §5.
+- **Backports in Swift.** The runtime has no `backports` config. A Swift target that uses a Backports API
+  links the `frameworks/Backports` library by `add_deps` in its own target; the overlays see the SDK's headers
+  lowered by the toolchain. Which API to take from the backports is the skill `backports`; calling them from
+  Swift is the skill `swift` §5.
 
 ## 5. Objective-C and Swift in one app
 

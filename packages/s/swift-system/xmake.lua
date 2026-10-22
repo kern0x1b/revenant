@@ -12,7 +12,7 @@ package("swift-system")
                             default = swift_system_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
         package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftSystem")
@@ -100,6 +100,6 @@ package("swift-system")
         local found = {["libswiftSystem.dylib"] = table.orderkeys(names)}
         local minimum = toolchain:config("deployment")
         local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
-            imports = read.imports, exported = read.exported, minimum = minimum, backports = true, exact = true})
-        assert(#differs == 0, "libswiftSystem.dylib's weak imports and its guard rows differ at " .. minimum .. " with the backports:\n  " .. table.concat(differs, "\n  "))
+            imports = read.imports, exported = read.exported, minimum = minimum, exact = true})
+        assert(#differs == 0, "libswiftSystem.dylib's weak imports and its guard rows differ at " .. minimum .. ":\n  " .. table.concat(differs, "\n  "))
     end)
