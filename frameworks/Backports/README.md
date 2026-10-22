@@ -4,11 +4,11 @@ Lists the iOS SDK members that the minimum deployment target lacks, emits a skel
 
 ## Scope
 
-`backports_min_ios` (xmake option, default `6.0`) is the oldest iOS the build supports. In scope: a member introduced after it, and every member of a framework absent at it. A framework's introduction is approximated as the lowest introduction version among its annotated members.
+`backports_min_ios` (xmake option, default `6.0`) is the oldest iOS the build supports. In scope: a member introduced after it, and every member of a framework absent at it. A framework's introduction is approximated as the lowest introduction version among its annotated members. A class, method or property the header marks unavailable on iOS is out of scope at every version.
 
 ## Facts
 
-- ObjC and C: the umbrella header is run through `clang -Xclang -ast-dump` as text and streamed. `AvailabilityAttr` gives the introduction. A redeclaration prints a `prev <address>` pair before the name; the parser drops it, so a class, protocol or function is never named `prev`. Each row has a `flags` column: `unavailable` for a class the header marks unavailable on iOS, `nonruntime` for a protocol marked `objc_non_runtime_protocol`.
+- ObjC and C: the umbrella header is run through `clang -Xclang -ast-dump` as text and streamed. `AvailabilityAttr` gives the introduction. A redeclaration prints a `prev <address>` pair before the name; the parser drops it, so a class, protocol or function is never named `prev`. Each row has a `flags` column of space-separated words: `unavailable` for a class, method or property that the header marks unavailable on iOS (`API_UNAVAILABLE(ios)`, `NS_UNAVAILABLE`, or `__attribute__((unavailable))`), `nonruntime` for a protocol marked `objc_non_runtime_protocol`, and for a property `class` (a class property) and `getter:<selector>` (a custom getter, as in `getter=isEnabled`). An unavailable row is out of scope: no app built against the iOS SDK can reference it.
 - Swift: `swift-api-digester -dump-sdk -swift-only` writes JSON, with one module cache shared by all frameworks.
 - Each framework is one TSV in `build/generated/backports/cache/<sdk version>-<generator digest>/`. Four shards run in parallel under `/bin/sh`.
 
@@ -25,7 +25,7 @@ Lists the iOS SDK members that the minimum deployment target lacks, emits a skel
 
 ## Implemented count
 
-The implemented members are the symbols of the objects that `src/<Framework>` compiles to, read from `build/.objs` with `nm` (classes, C functions, global variables) and the same `nm` listing for methods (with their class or category and selector). A property counts when its getter is implemented. The clang AST was the first source of these keys; reading it cost hours on each cold build.
+The implemented members are the symbols of the objects that `src/<Framework>` compiles to, read from `build/.objs` with `nm` (classes, C functions, global variables) and the same `nm` listing for methods (with their class or category and selector). A property counts when its getter is implemented: the getter is the custom selector when the header gives one (`getter=isEnabled`), and a class property's getter is a class method. A method of a `Revenant<Name>` proxy counts for `Name` when `src/` implements it on the proxy. `-init` counts as implemented, because a class that does not implement it inherits `NSObject`'s, which every proxy inherits too. The clang AST was the first source of these keys; reading it cost hours on each cold build.
 
 - Swift: a `$s` symbol that the objects define (any letter but `U`) implements the Swift member with that mangled symbol. The Backports libraries are armv7 and compile only `.m`, `.mm` and `.c`, so no Swift object is built today and the Swift count reads zero. The stock Swift compiler refuses an iOS 6 deployment target (its minimum is iOS 7.0), so an armv7 Swift build needs the revenant `swift` package, which this job does not build. `frameworks/SwiftUI` and `frameworks/Combine` are separate components: the Backports job builds neither, so their symbols are not counted.
 - Protocols: a protocol counts as implemented when a source under `src/` defines it, meaning a `@protocol Name` line with no `;` after the name (a forward declaration or a `@protocol(Name)` expression does not count). The rule reads the sources, not the objects: clang gives every image a private copy of each protocol a translation unit references, so an object cannot tell a definition from a use.

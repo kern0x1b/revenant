@@ -196,21 +196,45 @@ function in_scope_rows(state, framework)
     local intro = sdkfiles.framework_introduced(framework.rows)
     local kept = {}
     for _, row in ipairs(framework.rows) do
-        if sdkfiles.in_scope(row, state.minimum, intro) then
+        if sdkfiles.in_scope(row, state.minimum, intro) and not has_flag(row, "unavailable") then
             table.insert(kept, row)
         end
     end
     return kept
 end
 
+function has_flag(row, flag)
+    return string.find(" " .. (row.flags or "") .. " ", " " .. flag .. " ", 1, true) ~= nil
+end
+
+function method_key(row)
+    if row.kind == "property" then
+        local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+        return (has_flag(row, "class") and "class method" or "instance method") .. "|" .. row.container .. "|" .. getter
+    end
+    return row.kind .. "|" .. row.container .. "|" .. row.name
+end
+
+function inherited_init(row)
+    return row.kind == "instance method" and row.name == "init"
+end
+
 function is_implemented(implemented, framework, row)
     local keys = implemented[framework.name] or {}
-    if row.kind == "property" then
-        return keys["instance method|" .. row.container .. "|" .. row.name] == true
-    elseif row.kind == "Swift declaration" then
+    if row.kind == "Swift declaration" then
         return keys["swift symbol||" .. row.symbol] == true
+    elseif row.kind == "class" or row.kind == "C function" or row.kind == "global variable" then
+        return keys[key_of(row)] == true
     end
-    return keys[key_of(row)] == true
+    if inherited_init(row) or keys[method_key(row)] == true then
+        return true
+    end
+    local proxy = row.kind .. "|Revenant" .. row.container .. "|" .. row.name
+    if row.kind == "property" then
+        proxy = (has_flag(row, "class") and "class method" or "instance method") .. "|Revenant" .. row.container .. "|"
+            .. (string.match(row.flags or "", "getter:(%S+)") or row.name)
+    end
+    return keys[proxy] == true
 end
 
 function main(...)

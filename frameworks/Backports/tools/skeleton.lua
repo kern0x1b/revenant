@@ -85,10 +85,12 @@ local function objc_model(rows, implemented)
             local class_method = row.kind == "class method"
             method(row.container, row.name, class_method, (class_method and "+" or "-") .. "[" .. row.container .. " " .. row.name .. "]")
         elseif row.kind == "property" then
-            local label = "-[" .. row.container .. " " .. row.name .. "]"
-            method(row.container, row.name, false, label)
+            local class_method = string.find(" " .. (row.flags or "") .. " ", " class ", 1, true) ~= nil
+            local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+            local sign = class_method and "+" or "-"
+            method(row.container, getter, class_method, sign .. "[" .. row.container .. " " .. getter .. "]")
             if string.find(row.signature, "^readonly ") == nil then
-                method(row.container, setter(row.name), false, "-[" .. row.container .. " " .. setter(row.name) .. "]")
+                method(row.container, setter(row.name), class_method, sign .. "[" .. row.container .. " " .. setter(row.name) .. "]")
             end
         end
     end

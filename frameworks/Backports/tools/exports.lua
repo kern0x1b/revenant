@@ -157,10 +157,10 @@ local function reachable(row, symbol_owners, method_owners)
         return symbol_owners["_" .. row.name] ~= nil
     elseif row.kind == "Swift declaration" then
         return symbol_owners["_" .. row.symbol] ~= nil
-    elseif row.kind == "property" then
-        return method_owners["instance method|" .. row.container .. "|" .. row.name] ~= nil
+    elseif generate.inherited_init(row) then
+        return true
     end
-    return method_owners[row.kind .. "|" .. row.container .. "|" .. row.name] ~= nil
+    return method_owners[generate.method_key(row)] ~= nil
 end
 
 local function implemented_row(row, framework, keys, defined)

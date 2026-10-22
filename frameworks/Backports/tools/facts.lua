@@ -48,6 +48,21 @@ local function method_signature(node)
     return head .. table.concat(parts, " ")
 end
 
+local function property_flags(child)
+    local flags = {}
+    if child.flags["class"] then
+        table.insert(flags, "class")
+    end
+    local getter = ast.getter_of(child)
+    if getter then
+        table.insert(flags, "getter:" .. getter)
+    end
+    if ast.has_unavailable(child) then
+        table.insert(flags, "unavailable")
+    end
+    return table.concat(flags, " ")
+end
+
 local function members(state, container, node, intro)
     for _, child in ipairs(node.children) do
         if not child.implicit and child.name ~= nil then
@@ -55,10 +70,10 @@ local function members(state, container, node, intro)
             if child.kind == "ObjCMethodDecl" then
                 add(state, {kind = child.class_method and "class method" or "instance method", container = container,
                     name = child.name, symbol = (child.class_method and "+" or "-") .. "[" .. container .. " " .. child.name .. "]",
-                    signature = method_signature(child), intro = own})
+                    signature = method_signature(child), intro = own, flags = ast.has_unavailable(child) and "unavailable" or ""})
             elseif child.kind == "ObjCPropertyDecl" then
                 add(state, {kind = "property", container = container, name = child.name, symbol = container .. "." .. child.name,
-                    signature = (child.flags.readonly and "readonly " or "") .. (child.type or ""), intro = own})
+                    signature = (child.flags.readonly and "readonly " or "") .. (child.type or ""), intro = own, flags = property_flags(child)})
             end
         end
     end
@@ -70,7 +85,7 @@ local function objc_top(state, top)
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a class whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
         local super = ast.children_of(top, "super")[1]
         add(state, {kind = "class", container = "", name = top.name, symbol = "_OBJC_CLASS_$_" .. top.name,
-            signature = super and super.type or "", intro = intro, flags = ast.ios_unavailable(top) and "unavailable" or ""})
+            signature = super and super.type or "", intro = intro, flags = ast.has_unavailable(top) and "unavailable" or ""})
         members(state, top.name, top, intro)
     elseif top.kind == "ObjCCategoryDecl" then
         local interface = ast.children_of(top, "ObjCInterface")[1]
