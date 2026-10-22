@@ -126,7 +126,12 @@ local function frameworks_of(cache, names, sdk)
     return out
 end
 
-function implemented_classes()
+local implemented_cache = nil
+
+function implemented_names()
+    if implemented_cache then
+        return implemented_cache
+    end
     local names = {}
     local text = os.iorunv("/usr/bin/grep", {"-rhoE", "--include=*.m", "--include=*.mm",
         "^(@implementation [A-Za-z_][A-Za-z0-9_]*([^(A-Za-z0-9_]|$)|REVENANT_ALIAS(_OF)?\\([A-Za-z_][A-Za-z0-9_]*)", sdkfiles.src_root()})
@@ -153,6 +158,19 @@ function implemented_classes()
             names[name] = true
         end
     end
+    local constants = os.iorunv("/usr/bin/grep", {"-rhE", "--include=*.m", "--include=*.mm", "--include=*.c",
+        "^[A-Za-z_].*=", sdkfiles.src_root()})
+    for line in constants:gmatch("[^\n]+") do
+        local left = string.match(line, "^([^=]*)=")
+        if left and string.find(left, "%f[%w_]const%f[^%w_]") and not string.find(left, "(", 1, true)
+            and not string.find(left, "^static") and not string.find(left, "^extern") then
+            local name = string.match(left, "([%a_][%w_]*)%s*$")
+            if name then
+                names[name] = true
+            end
+        end
+    end
+    implemented_cache = names
     return names
 end
 
@@ -191,25 +209,102 @@ function prepare(only)
     }
 end
 
+local everything_state = nil
+
+function everything()
+    everything_state = everything_state or prepare()
+    return everything_state
+end
+
 function skeleton_for(name)
-    local state = prepare({name})
-    local pending = {}
-    for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework),
-            unavailable = unavailable_classes(framework.rows)})
+    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending_of(everything(), {name}), implemented_names())
+end
+
+function declared_intros(state)
+    if state.declared == nil then
+        local lowest = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(framework.rows) do
+                if row.kind == "class" and row.intro ~= nil and (lowest[row.name] == nil or row.intro < lowest[row.name]) then
+                    lowest[row.name] = row.intro
+                end
+            end
+        end
+        state.declared = lowest
     end
-    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
+    return state.declared
 end
 
 function in_scope_rows(state, framework)
     local intro = sdkfiles.framework_introduced(framework.rows)
+    local declared = declared_intros(state)
     local kept = {}
     for _, row in ipairs(framework.rows) do
-        if sdkfiles.in_scope(row, state.minimum, intro) and not has_flag(row, "unavailable") then
+        local scoped = row
+        if row.kind == "class" and row.intro == nil and declared[row.name] ~= nil then
+            scoped = {intro = declared[row.name]}
+        end
+        if sdkfiles.in_scope(scoped, state.minimum, intro) and not has_flag(row, "unavailable") then
             table.insert(kept, row)
         end
     end
     return kept
+end
+
+local function single_owned(row)
+    return row.kind == "class" or row.kind == "global variable"
+end
+
+local folders_cache = nil
+
+function library_folders()
+    if folders_cache == nil then
+        folders_cache = {}
+        local text = io.readfile(path.join(sdkfiles.root(), "frameworks", "Backports", "xmake.lua"))
+        for folder in string.gmatch(text, 'folder = "([%w_]+)"') do
+            folders_cache[folder] = true
+        end
+    end
+    return folders_cache
+end
+
+function owners_of(state)
+    if state.owners == nil then
+        local folders = library_folders()
+        local owners = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(in_scope_rows(state, framework)) do
+                if single_owned(row) then
+                    local key = row.kind .. "|" .. row.name
+                    local score = (folders[framework.name] and 2 or 0) + (row.intro ~= nil and 1 or 0)
+                    if owners[key] == nil or score > owners[key].score then
+                        owners[key] = {framework = framework.name, score = score}
+                    end
+                end
+            end
+        end
+        state.owners = owners
+    end
+    return state.owners
+end
+
+function pending_of(state, only)
+    local owners = owners_of(state)
+    local pending = {}
+    for _, framework in ipairs(state.frameworks) do
+        if only == nil or table.contains(only, framework.name) then
+            local rows = {}
+            for _, row in ipairs(in_scope_rows(state, framework)) do
+                local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
+                if not single_owned(row) or (owner and owner.framework == framework.name) then
+                    table.insert(rows, row)
+                end
+            end
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows,
+                unavailable = unavailable_classes(framework.rows)})
+        end
+    end
+    return pending
 end
 
 function unavailable_classes(rows)
@@ -261,14 +356,9 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local state = prepare()
-    local pending = {}
-    for _, framework in ipairs(state.frameworks) do
-        table.insert(pending, {name = framework.name, import = framework.import, rows = in_scope_rows(state, framework),
-            unavailable = unavailable_classes(framework.rows)})
-    end
+    local pending = pending_of(everything())
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_classes())
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names())
     print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals, %d C functions, %d Swift symbols under %s",
         totals.objc, totals.classes, totals.protocols, totals.globals, totals.c, totals.swift, path.join(sdkfiles.build_root(), "skeleton")))
 end

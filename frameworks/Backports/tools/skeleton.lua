@@ -3,6 +3,11 @@ local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local SWIFT_FUNCTION = {Func = true, Constructor = true, Accessor = true, Subscript = true}
 local SWIFT_METADATA = {Struct = true, Class = true, Enum = true}
 
+function owns_module(module, symbol)
+    local prefix = string.format("$s%d%s", #module, module)
+    return string.sub(symbol, 1, #prefix) == prefix
+end
+
 function swift_stub(row)
     local kind = row.signature
     if SWIFT_FUNCTION[kind] then
@@ -213,12 +218,14 @@ function write(skeleton, frameworks, implemented)
             if row.kind == "C function" then
                 table.insert(functions, {symbol = row.symbol, label = framework.name .. "." .. row.name})
             elseif row.kind == "global variable" then
-                table.insert(globals, row.name)
+                if not implemented[row.name] then
+                    table.insert(globals, row.name)
+                end
             elseif row.kind == "protocol" and row.flags ~= "nonruntime" then
                 table.insert(protocols, row.name)
             elseif row.kind == "Swift declaration" then
                 local kind, symbol = swift_stub(row)
-                if kind then
+                if kind and owns_module(framework.name, row.symbol) then
                     local entry = {symbol = symbol, label = framework.name .. "." .. (row.container ~= "" and (row.container .. ".") or "") .. row.name}
                     table.insert(kind == "function" and swift or data, entry)
                 end
