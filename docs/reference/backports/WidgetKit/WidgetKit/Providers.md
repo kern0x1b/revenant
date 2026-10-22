@@ -15,14 +15,14 @@ The two intent providers also ask for recommendations - the intents the system s
 to configure this widget with - which is `recommendations()`, and the app-intent one names the intent
 instance the widget is configured with, which is what the `for:` of those two spellings is.
 
-These are the rows the module's next pass writes; the rest of WidgetKit's surface is declared and
-measured (**240 of 340 placed, and the 100 that are not** are listed in
-`the missing-rows list, **regenerated** from the corpus ledger and a digester dump, not kept`, and the counts section below says where the 245 came
-from and what took the five).
+These are the rows the module's last pass wrote, in the section below; the rest of WidgetKit's surface
+is declared and measured (**240 of 340 placed, and the 100 that are not** are in the missing-rows
+list, regenerated from the corpus ledger and a digester dump and not kept), and the counts section
+below says where the 245 came from and what took the five.
 
 ## What landed after the TipKit differential, and what the ledger can see of it
 
-The ten rows the coordinator named are **declared and compile** (`Sources/WidgetKit/Providers.swift`
+The ten rows the coordinator named are **declared and compile** (`frameworks/Backports/src/WidgetKit/Providers.swift`
 and `Configuration.swift`):
 
 | row | where |
@@ -60,9 +60,9 @@ placed before only because it was an empty refinement, with no member of its own
 
 ## The 95 rows, classified against the digester's own dump
 
-the row classifier (since removed) read the `-dump-sdk` dump of the built module and
-`the missing-rows list, **regenerated** from the corpus ledger and a digester dump, not kept` and sorts every row; the writeup for the ledger band is
-Of the 95:
+The row classifier (since removed) read the `-dump-sdk` dump of the built module and the missing-rows
+list, regenerated from the corpus ledger and a digester dump and not kept, and sorted every row. Of
+the 95:
 
 | how the digester prints it | rows | whose work it is |
 | --- | --- | --- |

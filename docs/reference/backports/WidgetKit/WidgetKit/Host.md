@@ -14,14 +14,14 @@ What the module does about it:
 
 | the framework's call | this module's answer |
 | --- | --- |
-| the system draws the widget | the app's own surface draws it. `Widget.Body` is the port's view type, and the configuration's `body` is what the app's surface shows |
+| the system draws the widget | the app's own surface draws it. `Widget.Body` is a `WidgetBody`, and its `BodyType` is what the app's surface reads and shows |
 | `WidgetCenter.reloadTimelines(ofKind:)` / `reloadAllTimelines()` | the port's own redraw: `RevenantWidgetRegistry.shared.redraw(kind)` and `.redrawControl(kind)`, the handlers the app installs for its in-app widget and control surfaces |
 | `WidgetCenter.currentConfigurations()` / `getCurrentConfigurations(_:)` | the configurations the app registered in `RevenantWidgetRegistry`, in the order it registered them; `WidgetInfo.widgetConfigurationIntent(of:)` reads the intent back out of the same record |
 | `WidgetCenter.invalidateConfigurationRecommendations()` / `invalidateRelevance(ofKind:)` | the registry forgets what it cached, which is what the system does; with nothing cached it is a no-op that changes nothing |
 | `WidgetCenter.currentPushInfo` | `nil` until a caller installs a token, because only the system's host mints one for a widget |
 | the recommendations the system shows for a widget it does not have | `AppIntentRecommendation` and `IntentRecommendation` are the app's own values, offered to the app's own surface |
 | the Dynamic Island | the four regions, their positions, their margins, the keyline tint and the URL are real stored values; there is no cutout on these devices to draw them around |
-| `AccessoryWidgetBackground`, `ControlWidgetButton`, `ControlWidgetToggle` and their labels | declared with the framework's own shape; what draws is the app's own view, and the accessory background's `body` stops with a message rather than pretending to be a view |
+| `AccessoryWidgetBackground`, `ControlWidgetButton`, `ControlWidgetToggle` and their labels | declared with the framework's own shape except the `body` each would need, which is a `SwiftUI.View` row: the two default labels and the accessory background carry no `body`, and what draws is the app's own view |
 
 What is the app's own and is real: the timeline, its entries, the reload policy, the relevance, the
 provider context (family, preview flag, size, variants), the configurations with their kinds, intents and
