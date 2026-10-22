@@ -115,7 +115,7 @@ local AREAS = {
         name = "iOS 10 constraints, fonts, previews, refresh controls and bars",
         sources = {"UIFont+TextStyles10.m", "UICollectionView+Getter10.m", "UIViewPropertyAnimator+Getter10.m", "NSLayoutConstraint+Anchors10.m",
                    "UILayoutGuide+Ambiguity10.m", "UIImage+RendererFormat10.m", "UIPreviewInteraction.m", "UIViewController+FocusRestore10.m",
-                   "UIAccessibilityElement+ContainerSpace10.m", "UIScrollView+RefreshControl10.m", "UITabBar+Tint10.m", "UICloudSharingController.m"},
+                   "UIAccessibilityElement+ContainerSpace10.m", "UIScrollView+RefreshControl10.m", "RevenantRefreshHost.m", "UITabBar+Tint10.m", "UICloudSharingController.m"},
         members = {
             "+[UIFont preferredFontForTextStyle:compatibleWithTraitCollection:]", "-[UICollectionView prefetchingEnabled]",
             "-[UIViewPropertyAnimator interruptible]", "-[UIViewPropertyAnimator manualHitTestingEnabled]", "-[UIViewPropertyAnimator userInteractionEnabled]",
