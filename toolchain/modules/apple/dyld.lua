@@ -829,18 +829,6 @@ local function first_release_file(ladder, sdkdir, under)
     return kept_file("first-release", hash.strhash128(sdk_key(sdkdir) .. " " .. ladder_signature(ladder)), under)
 end
 
-
-function kept_files(sdkdirs, ladders, under)
-    local files = {}
-    for _, sdkdir in ipairs(sdkdirs) do
-        table.insert(files, owners_file(sdkdir, under))
-        for _, ladder in ipairs(ladders) do
-            table.insert(files, first_release_file(ladder, sdkdir, under))
-        end
-    end
-    return files
-end
-
 local FIRST = {}
 
 function first_releases(ladder, sdkdir, symbols)
