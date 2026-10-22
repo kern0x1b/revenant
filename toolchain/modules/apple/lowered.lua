@@ -326,8 +326,18 @@ function lower_header(text, implemented)
     return lowering_of(text, implemented)
 end
 
+local built = {}
+
 function overlay(sdk, out, src)
     src = src or path.join(os.projectdir(), "frameworks", "Backports", "src")
+    local key = table.concat({sdk, out, src}, "|")
+    if not built[key] then
+        built[key] = build_overlay(sdk, out, src)
+    end
+    return built[key]
+end
+
+function build_overlay(sdk, out, src)
     local changed = {}
     for _, entry in ipairs(MEMBERS) do
         local header = entry.header
