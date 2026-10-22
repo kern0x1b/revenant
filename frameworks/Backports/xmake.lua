@@ -280,6 +280,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             return #failures == 0
         end)
     target_end()
+end
+
+if is_plat("iphoneos") then
     target("BackportsProbe")
         set_kind("binary")
         set_default(false)
@@ -289,6 +292,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_deps("HealthKitBackports")
         add_syslinks("objc")
         add_frameworks("Foundation")
+    target_end()
 end
 
 option("air2cpu", {default = false, showmenu = true,
