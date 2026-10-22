@@ -82,5 +82,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Lua files under `tools/` and `toolchain/modules/` are snake_case, as xmake's own module files are (`find_tool.lua`):
   `frameworks/SwiftUI/tools/api_surface.lua`, `toolchain/tools/cache_index/`. The names of the data a tool writes, such as
   `~/.revenant/cache-index`, are not file names, and keep their spelling.
+- Speed and memory on the A5 (iPhone 4S, iPad 2) are part of correctness ([0014](docs/explanation/decisions/0014-performance-is-a-requirement.md)):
+  what we write or generate is efficient by design and aims to beat Apple's own code where Apple never tuned it for
+  the A5; a change on a hot path carries a before and after measurement; compiler optimisations the A5 needs are
+  patches on `llvm` and `swift`.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
