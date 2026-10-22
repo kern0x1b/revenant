@@ -76,7 +76,7 @@ function binaries_under(root)
     return found
 end
 
-local function cstring(data, at)
+function cstring(data, at)
     local finish = data:find("\0", at + 1, true)
     return data:sub(at + 1, finish - 1)
 end
@@ -235,7 +235,7 @@ function images(data)
     return {image(data, 0)}
 end
 
-local function uleb(data, at)
+function uleb(data, at)
     local value, shift = 0, 0
     while true do
         local byte = data:byte(at + 1)

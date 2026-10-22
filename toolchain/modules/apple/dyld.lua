@@ -6,23 +6,7 @@ import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 
 local caches = {}
 
-local function cstring(data, at)
-    local finish = data:find("\0", at + 1, true)
-    return data:sub(at + 1, finish - 1)
-end
-
-local function uleb(data, at)
-    local value, shift = 0, 0
-    while true do
-        local byte = data:byte(at + 1)
-        at = at + 1
-        value = value | ((byte & 0x7F) << shift)
-        shift = shift + 7
-        if byte < 0x80 then
-            return value, at
-        end
-    end
-end
+local cstring, uleb = macho.cstring, macho.uleb
 
 function root()
     return path.join(workspace.home(), "dyld")
