@@ -1,6 +1,10 @@
-local paths = import("@addon.revenant.member", {anonymous = true}).paths(os.scriptdir())
-root = paths.member
-revenant = paths.revenant
+function root(...)
+    return path.join(path.normalize(path.absolute(path.join(os.scriptdir(), "..", ".."))), ...)
+end
+
+function revenant(...)
+    return path.join(path.normalize(path.join(root(), "..", "..")), ...)
+end
 
 function sources()
     return root("src")

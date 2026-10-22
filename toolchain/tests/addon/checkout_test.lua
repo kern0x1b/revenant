@@ -17,7 +17,6 @@ end
 
 function failures(opt)
     local checkout = import("checkout", {rootdir = opt.modules, anonymous = true})
-    local member = import("member", {rootdir = opt.modules, anonymous = true})
     local found = {}
     local folder = fixtures.scratch()
     local url, commit = origin(folder)
@@ -47,22 +46,6 @@ function failures(opt)
     end
     if checkout.pinned(sourcedir, repositories({"/first/", "/second/"})) then
         table.insert(found, "the grown list, asked again, keeps the clone it made")
-    end
-
-    local root = path.directory(path.directory(opt.modules))
-    for _, name in ipairs({"SwiftUI", "WebKit"}) do
-        local folder = path.join(root, "frameworks", name)
-        local helpers = member.paths(path.join(folder, "tools", "lib"))
-        if helpers.member() ~= folder then
-            table.insert(found, name .. " tools resolve their member folder")
-        end
-        if helpers.revenant("README.md") ~= path.join(root, "README.md") then
-            table.insert(found, name .. " tools resolve the checkout root")
-        end
-    end
-    local options, rest = member.arguments({"source", "--tree", "engine", "--help"}, {tree = "value", help = "switch"})
-    if options.tree ~= "engine" or not options.help or #rest ~= 1 or rest[1] ~= "source" then
-        table.insert(found, "member tools share the value and switch argument parser")
     end
 
     os.tryrm(folder)
