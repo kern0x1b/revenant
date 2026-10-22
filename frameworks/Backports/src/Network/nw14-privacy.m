@@ -49,7 +49,7 @@ nw_resolver_config_t nw_resolver_config_create_tls(nw_endpoint_t server_endpoint
         return NULL;
     RevenantNWResolverConfig *config = [[RevenantNWResolverConfig alloc] init];
     config->_kind = @"tls";
-    config->_endpoint = (RevenantNWEndpoint *)server_endpoint;
+    config->_endpoint = (RevenantNWEndpointValue *)server_endpoint;
     config->_servers = [NSMutableArray array];
     return config;
 }
@@ -60,7 +60,7 @@ nw_resolver_config_t nw_resolver_config_create_https(nw_endpoint_t url_endpoint)
         return NULL;
     RevenantNWResolverConfig *config = [[RevenantNWResolverConfig alloc] init];
     config->_kind = @"https";
-    config->_endpoint = (RevenantNWEndpoint *)url_endpoint;
+    config->_endpoint = (RevenantNWEndpointValue *)url_endpoint;
     config->_servers = [NSMutableArray array];
     return config;
 }
@@ -70,7 +70,7 @@ void nw_resolver_config_add_server_address(nw_resolver_config_t config, nw_endpo
     RevenantNWResolverConfig *value = (RevenantNWResolverConfig *)config;
     if (!value || !server_address)
         return;
-    [value->_servers addObject:(RevenantNWEndpoint *)server_address];
+    [value->_servers addObject:(RevenantNWEndpointValue *)server_address];
 }
 
 void nw_ip_options_set_disable_multicast_loopback(nw_protocol_options_t options, bool disable_multicast_loopback)

@@ -28,6 +28,10 @@ Host requirements: the Command Line Tools. xmake fetches the rest: the SDK, `cma
 Xcode is not needed and neither is Theos; `strip`, `otool`, `nm`, `plutil` and
 `install_name_tool` are found through the Command Line Tools.
 
+The engine build runs WebKit's own build as WebKit ships it: its 26 Python generators, the Perl scripts among them,
+and the tools it names. The Command Line Tools provide `python3` and `perl`; the engine takes the `python3` it finds on
+the PATH and passes it to CMake as `Python_EXECUTABLE`, and the engine's configure fails when there is none.
+
 ## 1. The engine source
 
 The engine is upstream WebKit at one commit of `main` with this port as an ordered series of

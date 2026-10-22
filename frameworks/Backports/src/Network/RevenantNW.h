@@ -26,7 +26,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 
 
 
-@class RevenantNWEndpoint;
+@class RevenantNWEndpointValue;
 @class RevenantNWParameters;
 @class RevenantNWProtocolDefinition;
 @class RevenantNWProtocolOptions;
@@ -50,7 +50,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @class RevenantNWWebSocketResponse;
 @class RevenantNWEthernetChannel;
 
-@interface RevenantNWEndpoint : REVENANT_NW_OBJECT(OS_nw_endpoint) {
+@interface RevenantNWEndpointValue : REVENANT_NW_OBJECT(OS_nw_endpoint) {
 @public
     nw_endpoint_type_t _type;
     NSString *_hostname;
@@ -119,7 +119,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @interface RevenantNWParameters : REVENANT_NW_OBJECT(OS_nw_parameters) {
 @public
     RevenantNWProtocolStack *_stack;
-    RevenantNWEndpoint *_localEndpoint;
+    RevenantNWEndpointValue *_localEndpoint;
     id _requiredInterface;
     nw_interface_type_t _requiredInterfaceType;
     NSMutableArray *_prohibitedInterfaces;
@@ -152,8 +152,8 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 
 @interface RevenantNWRelayHop : REVENANT_NW_OBJECT(OS_nw_relay_hop) {
 @public
-    RevenantNWEndpoint *_http3;
-    RevenantNWEndpoint *_http2;
+    RevenantNWEndpointValue *_http3;
+    RevenantNWEndpointValue *_http2;
     RevenantNWProtocolOptions *_tls;
     NSMutableArray *_headerNames;
     NSMutableArray *_headerValues;
@@ -163,7 +163,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @interface RevenantNWProxyConfig : REVENANT_NW_OBJECT(OS_nw_proxy_config) {
 @public
     NSString *_kind;
-    RevenantNWEndpoint *_endpoint;
+    RevenantNWEndpointValue *_endpoint;
     RevenantNWProtocolOptions *_tls;
     RevenantNWRelayHop *_firstHop;
     RevenantNWRelayHop *_secondHop;
@@ -190,7 +190,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @interface RevenantNWResolverConfig : REVENANT_NW_OBJECT(OS_nw_resolver_config) {
 @public
     NSString *_kind;
-    RevenantNWEndpoint *_endpoint;
+    RevenantNWEndpointValue *_endpoint;
     NSMutableArray *_servers;
 }
 @end
@@ -221,7 +221,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     NSString *_name;
     NSString *_type;
     NSString *_domain;
-    RevenantNWEndpoint *_endpoint;
+    RevenantNWEndpointValue *_endpoint;
     RevenantNWTxtRecord *_txtRecord;
     NSMutableArray *_interfaces;
 }
@@ -230,9 +230,9 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @interface RevenantNWGroupDescriptor : REVENANT_NW_OBJECT(OS_nw_group_descriptor) {
 @public
     NSString *_kind;
-    RevenantNWEndpoint *_multicastGroup;
-    RevenantNWEndpoint *_remoteEndpoint;
-    RevenantNWEndpoint *_specificSource;
+    RevenantNWEndpointValue *_multicastGroup;
+    RevenantNWEndpointValue *_remoteEndpoint;
+    RevenantNWEndpointValue *_specificSource;
     NSMutableArray *_endpoints;
     BOOL _disableUnicastTraffic;
 }
@@ -243,8 +243,8 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     RevenantNWProtocolDefinition *_definition;
     RevenantNWProtocolOptions *_options;
     RevenantNWParameters *_parameters;
-    RevenantNWEndpoint *_localEndpoint;
-    RevenantNWEndpoint *_remoteEndpoint;
+    RevenantNWEndpointValue *_localEndpoint;
+    RevenantNWEndpointValue *_remoteEndpoint;
     nw_framer_start_handler_t _startHandler;
     nw_framer_input_handler_t _inputHandler;
     nw_framer_output_handler_t _outputHandler;
@@ -290,7 +290,7 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     uint32_t _previousAttemptCount;
     BOOL _proxyConfigured;
     BOOL _usedProxy;
-    RevenantNWEndpoint *_proxyEndpoint;
+    RevenantNWEndpointValue *_proxyEndpoint;
     NSMutableArray *_protocols;
     NSMutableArray *_protocolHandshakeMilliseconds;
     NSMutableArray *_protocolHandshakeRTTMilliseconds;
@@ -305,8 +305,8 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     uint32_t _endpointCount;
     nw_report_resolution_protocol_t _protocol;
     nw_report_resolution_source_t _source;
-    RevenantNWEndpoint *_preferred;
-    RevenantNWEndpoint *_successful;
+    RevenantNWEndpointValue *_preferred;
+    RevenantNWEndpointValue *_successful;
     NSMutableArray *_endpoints;
 }
 @end

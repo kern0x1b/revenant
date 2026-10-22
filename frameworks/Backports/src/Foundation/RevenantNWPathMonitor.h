@@ -8,7 +8,7 @@
 #endif
 #import <SystemConfiguration/SystemConfiguration.h>
 
-@interface RevenantNWPath : REVENANT_NW_OBJECT(OS_nw_path)
+@interface RevenantNWPathValue : REVENANT_NW_OBJECT(OS_nw_path)
 @end
 
 @interface RevenantNWPathMonitor : REVENANT_NW_OBJECT(OS_nw_path_monitor) {
@@ -19,7 +19,7 @@
     nw_path_monitor_update_handler_t _update;
     nw_path_monitor_cancel_handler_t _cancel;
     SCNetworkReachabilityRef _reachability;
-    RevenantNWPath *_last;
+    RevenantNWPathValue *_last;
     BOOL _started, _cancelled;
     int _generation;
 }

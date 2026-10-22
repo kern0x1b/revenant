@@ -1,4 +1,5 @@
 local generate = import("generate", {rootdir = os.scriptdir(), anonymous = true})
+local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 local sources = import("implemented", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("libraries", {rootdir = os.scriptdir(), anonymous = true})
 local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
@@ -24,7 +25,7 @@ end
 local function owner_of(kind, container, name)
     if kind == "class" then
         return "_OBJC_CLASS_$_" .. name, "symbol"
-    elseif kind == "C function" or kind == "global variable" then
+    elseif kind == "C function" or kind == "global variable" or kind == "swift symbol" then
         return "_" .. name, "symbol"
     end
     return kind .. "|" .. container .. "|" .. name, "method"
@@ -150,24 +151,53 @@ function analyse(keys, libs, public)
     return {keys = keys, summary = summary, lines = lines, missing = total_missing, duplicated = total_duplicated}
 end
 
-local function status_of(state, keys)
+local function reachable(row, symbol_owners, method_owners)
+    if row.kind == "class" then
+        return symbol_owners["_OBJC_CLASS_$_" .. row.name] ~= nil
+    elseif row.kind == "C function" or row.kind == "global variable" then
+        return symbol_owners["_" .. row.name] ~= nil
+    elseif row.kind == "Swift declaration" then
+        local kind, symbol = skeleton.swift_stub(row)
+        return kind ~= nil and symbol_owners["_" .. symbol] ~= nil
+    elseif generate.inherited_init(row) then
+        return true
+    end
+    return method_owners[generate.method_key(row)] ~= nil
+end
+
+local function implemented_row(row, framework, keys, defined)
+    if row.kind == "protocol" then
+        return defined[row.name] == true
+    end
+    return generate.is_implemented(keys, framework, row)
+end
+
+local function status_of(state, keys, symbol_owners, method_owners, defined)
     local status = {}
-    local total_implemented, total_members = 0, 0
+    local total_implemented, total_members, total_reachable, total_linkable = 0, 0, 0, 0
     for _, framework in ipairs(state.frameworks) do
-        local implemented, members = 0, 0
+        local implemented, members, linkable, found = 0, 0, 0, 0
         for _, row in ipairs(generate.in_scope_rows(state, framework)) do
             if row.kind ~= "enum constant" then
                 members = members + 1
-                if generate.is_implemented(keys, framework, row) then
+                if implemented_row(row, framework, keys, defined) then
                     implemented = implemented + 1
+                end
+                if row.kind ~= "protocol" then
+                    linkable = linkable + 1
+                    if reachable(row, symbol_owners, method_owners) then
+                        found = found + 1
+                    end
                 end
             end
         end
         total_implemented = total_implemented + implemented
         total_members = total_members + members
-        table.insert(status, string.format("%-28s implemented %d of %d", framework.name, implemented, members))
+        total_reachable = total_reachable + found
+        total_linkable = total_linkable + linkable
+        table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d", framework.name, implemented, members, found, linkable))
     end
-    table.insert(status, string.format("%-28s implemented %d of %d", "total", total_implemented, total_members))
+    table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d", "total", total_implemented, total_members, total_reachable, total_linkable))
     return status
 end
 
@@ -195,7 +225,8 @@ function main(libdir, report)
     print(table.concat(summary, "\n"))
     print("report " .. report)
 
-    local status = status_of(state, result.keys)
+    local symbol_owners, _, method_owners = exported_owners(libs)
+    local status = status_of(state, result.keys, symbol_owners, method_owners, sources.defined_protocols())
     local status_report = path.join(path.directory(report), "status.txt")
     io.writefile(status_report, table.concat(status, "\n") .. "\n")
     print("status " .. status_report)
