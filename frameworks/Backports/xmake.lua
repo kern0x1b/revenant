@@ -310,6 +310,9 @@ local FOUNDATION_TESTS = {
     calendar_next_date = {"NSCalendar+NextDate8.m", "NSCalendar+Components.m", "NSDateComponents+Component8.m", "RevenantCalendarUnits.m"},
     calendar_day_changed = {"NSCalendarDayChanged8.m"},
     expiring_activity = {"NSProcessInfo+ExpiringActivity82.m"},
+    coder_minimum_length = {"NSCoder+MinimumLength184.m"},
+    bundle_localizations = {"NSBundle+Localizations184.m"},
+    date_components_day = {"NSDateComponents+DayOfYear18.m", "NSDateComponents+RepeatedDay26.m", "NSDateComponents+Component8.m", "NSCalendar+Components.m", "RevenantCalendarUnits.m"},
 }
 
 local QUARTZCORE_TESTS = {
