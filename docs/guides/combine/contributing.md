@@ -52,13 +52,12 @@ Consequences to respect:
 | Path | Holds |
 | --- | --- |
 | `xmake.lua` | `CombineXCTest` and `CombineTests`, upstream's tests as a daemon, with the module from the package `revenant@combine` and its tree; `CombineGenerated`, the gyb check. The module and its C++ helper are built by the package, not by this component |
-| `patches/` | the series the recipe applies, one patch per file; their `sha256` digests are in the recipe |
 | `tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
 | `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/reference/combine/test-results.md`) |
 | `tests/control` | the Debian control of the test daemon |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
-| `../../docs/` at the top of revenant | `guides/combine/` (this guide, build and test, usage), `reference/combine/` (features, test results, the third-party notice), `explanation/combine/` (how it works) |
-| `../../../packages/c/combine/` | the recipe: the pin of OpenCombine and the list of patches |
+| `../../docs/guides/combine/`, `../../docs/reference/combine/`, `../../docs/explanation/combine/` | this guide, build and test, and usage; features, test results and the third-party notice; how it works |
+| `../../packages/c/combine/` | the recipe: the pin of OpenCombine, and `patches/`, the series it applies, one patch per file (their `sha256` digests are in the recipe) |
 
 ## 3. How to build, and how to check
 

@@ -16,7 +16,7 @@ A prototype. It is enough for a screen with a list, navigation, state and an obs
 
 ### What is supported, what is ignored, what is missing
 
-The count is kept by the script `coverage.lua`, over the SwiftUI and SwiftUICore interfaces of SDK 26.2 that `../tools/apple_names.lua types` lists (1344 public types and typealiases). The list of `View` modifiers (311) remains manual: it was started in the first commit and has not changed since the 16.4 interface.
+The count is kept by the script `frameworks/SwiftUI/tools/coverage.lua`, over the SwiftUI and SwiftUICore interfaces of SDK 26.2 that `frameworks/SwiftUI/tools/apple_names.lua types` lists (1344 public types and typealiases). The list of `View` modifiers (311) remains manual: it was started in the first commit and has not changed since the 16.4 interface.
 As of today: **664 types** and **311 modifiers**, of which **206 work**, 0 stubs (they write to the log), 105 declared and ignored.
 Of what Apple declares available on iOS: **646 of 1208 types** and **289 of 289 modifiers**, of which **202 work**, 0 stubs, 87 ignored.
 (The rest of the interface is marked `@available(iOS, unavailable)`, which means macOS, tvOS and watchOS. The list of types and the list of modifiers are built by `frameworks/SwiftUI/tools/apple_names.lua`, its `types` and `modifiers` commands.)

@@ -2,7 +2,7 @@
 
 **Combine for the platforms Apple's framework never reached: one `import Combine`, down to iOS 6, armv7.**
 
-Combine is [OpenCombine], a source-level reimplementation of Apple's [Combine] framework, patched to vend a single module named `Combine`. Code written against the system framework (`ObservableObject`, `@Published`, publishers, subjects, schedulers, `Timer.publish`) builds and runs unchanged on legacy iOS (tested on iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI](../SwiftUI) in the legacy-iOS work of the [toolchain](../../toolchain). Combine is not a fork: the code is OpenCombine's, pinned at one upstream commit, and what is ours is the patch series in `patches/`, applied by the `revenant@combine` recipe.
+Combine is [OpenCombine], a source-level reimplementation of Apple's [Combine] framework, patched to vend a single module named `Combine`. Code written against the system framework (`ObservableObject`, `@Published`, publishers, subjects, schedulers, `Timer.publish`) builds and runs unchanged on legacy iOS (tested on iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI](../SwiftUI) in the legacy-iOS work of the [toolchain](../../toolchain). Combine is not a fork: the code is OpenCombine's, pinned at one upstream commit, and what is ours is the patch series in `packages/c/combine/patches/`, applied by the `revenant@combine` recipe.
 
 ## Build and test
 

@@ -1,0 +1,71 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Claude Haiku 5.5" <noreply@anthropic.com>
+Date: Thu, 22 Oct 2026 02:06:41 +0200
+Subject: [PATCH] An install folder without manifest.txt is not installed
+
+The legacy build-hash lookups in package.lua took an install folder as
+the install whenever the folder existed. A folder left by an install
+that stopped part way has no manifest, because xmake writes the
+manifest last, so the lookups now take a folder only when its manifest
+exists. That is the same test the install action applies before it
+installs again.
+
+Self-review: clean
+Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+---
+ xmake/core/package/package.lua | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 19326db90..682cafce4 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1819,6 +1819,9 @@ function _instance:buildhash()
+             end
+             return path.join(dir, ...)
+         end
++        local function _installed_in(buildhash)
++            return os.isfile(_get_installdir(buildhash, "manifest.txt"))
++        end
+ 
+         -- we need to be compatible with the hash value string for the previous xmake version
+         -- without builtin pic configuration (< 2.5.1).
+@@ -1826,7 +1829,7 @@ function _instance:buildhash()
+             local configs = table.copy(self:_configs_for_buildhash())
+             configs.pic = nil
+             buildhash = _get_buildhash(configs, {sourcehash = false, toolchains = false})
+-            if not os.isdir(_get_installdir(buildhash)) then
++            if not _installed_in(buildhash) then
+                 buildhash = nil
+             end
+         end
+@@ -1835,7 +1838,7 @@ function _instance:buildhash()
+         -- without sourcehash (< 2.5.2)
+         if not buildhash then
+             buildhash = _get_buildhash(self:_configs_for_buildhash(), {sourcehash = false, toolchains = false})
+-            if not os.isdir(_get_installdir(buildhash)) then
++            if not _installed_in(buildhash) then
+                 buildhash = nil
+             end
+         end
+@@ -1844,7 +1847,7 @@ function _instance:buildhash()
+         -- without toolchains (< 2.6.4)
+         if not buildhash then
+             buildhash = _get_buildhash(self:_configs_for_buildhash(), {toolchains = false})
+-            if not os.isdir(_get_installdir(buildhash)) then
++            if not _installed_in(buildhash) then
+                 buildhash = nil
+             end
+         end
+@@ -1854,7 +1857,7 @@ function _instance:buildhash()
+         -- @see https://github.com/xmake-io/xmake/issues/4477
+         if not buildhash then
+             buildhash = _get_buildhash(self:_configs_for_buildhash(), {vs_runtime = true})
+-            if not os.isdir(_get_installdir(buildhash)) then
++            if not _installed_in(buildhash) then
+                 buildhash = nil
+             end
+         end
+-- 
+2.54.0 (Apple Git-157)
+

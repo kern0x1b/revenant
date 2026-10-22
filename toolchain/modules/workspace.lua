@@ -9,7 +9,7 @@ local HOME_VARIABLE = "REVENANT_HOME"
 local resolved = {}
 
 function root()
-    return path.directory(path.directory(path.absolute(os.scriptdir())))
+    return path.directory(path.directory(path.normalize(path.absolute(os.scriptdir()))))
 end
 
 function home()
@@ -83,8 +83,11 @@ end
 
 function package_of(requirement, install)
     local scratch = fresh("package-resolve")
-    io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
-                                                                 "revenant " .. root(), requirement))
+    local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
+    if install then
+        table.insert(lines, string.format("add_addons(%q, {sourcedir = %q})", "revenant", path.join(root(), "toolchain")))
+    end
+    io.writefile(path.join(scratch, "xmake.lua"), table.concat(lines, "\n") .. "\n")
     local failure
     local result = try {
         function ()
@@ -122,10 +125,15 @@ function sdk_package(version, opt)
     if resolved[key] and not opt.install then
         return resolved[key]
     end
-    local folder = sdk_in(package_of("iphoneos-sdk " .. version, opt.install), version)
+    local requirement = "iphoneos-sdk " .. version
+    local installdir = package_of(requirement, opt.install)
+    if not os.isfile(path.join(sdk_in(installdir, version), "SDKSettings.json")) then
+        os.tryrm(installdir)
+        installdir = package_of(requirement, true)
+    end
+    local folder = sdk_in(installdir, version)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; configure the project "
-              .. "with ./xmakew f -P . so xmake installs it again", folder)
+        raise("workspace: the iphoneos-sdk install is incomplete even after installing it again: %s has no SDKSettings.json", folder)
     end
     resolved[key] = folder
     return folder

@@ -47,7 +47,7 @@ conformance that wants another specification names its own beside it.
 | `AppEntity(schema:)` | open by the coordinator's ruling of 2026-09-28, with the reason in `Macros.md`: the interface names the `memberAttribute` role and not the attribute it adds, and Apple's expansion is not on this machine |
 
 **Measured, and it places.** The module compiles for `armv7-apple-ios6.1.3` with the extension member
-in it -- 0 errors, `object 2056252 bytes`, through `heavy.sh` (`the device compile, **now `packages/a/appintents/xmake.lua`'s own flags**; the script is not kept`),
+in it -- 0 errors, `object 2056252 bytes`, through a device compile run alone (**now `packages/a/appintents/xmake.lua`'s own flags**; the script that ran it is not kept),
 and the digester's dump of that build has the member. Against the **80-row** corpus ledger the
 module goes from 13 placed to **14**, and `AppEntity.defaultResolverSpecification` is no longer in
 `AppIntents-missing.tsv`; the four rows that carry that name and are still there belong to other

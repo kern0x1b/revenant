@@ -199,7 +199,7 @@ bytes: **2786 defined, 425 undefined**. Of the undefined, 118 are the Swift stan
 62 the Swift runtime's (both in `libswiftCore`, which a program links), 39 are objc classes and C
 symbols the frameworks carry, 6 are `Observation`'s, 3 the port's own `Foundation` overlay — and
 **exactly 10** are swift-foundation's, which is `lib_FoundationEssentials.dylib`, which does not
-exist because f25214c6's run output is its typecheck-only `check.sh` path:
+exist, because f25214c6's run typechecked the module without linking it:
 
 ```
 _$s20FoundationEssentials9PredicateV8evaluateySbxxQpKF   ModelContext.fetch

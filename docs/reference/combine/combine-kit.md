@@ -22,7 +22,7 @@ in apple, not ours: 229
 in ours, not apple: 293
 ```
 
-Row coverage was then measured with the corpus's own tool: `swiftinterface-surface.py`
+Row coverage was then measured with the corpus's own tool, which is not in this tree: it
 reads Apple's declarations from its `.swiftinterface`, and reads ours from the
 `.swiftinterface` the toolchain synthesises out of the built `.swiftmodule`, so both sides
 are spelled the way the corpus spells them.
@@ -162,13 +162,15 @@ DIFFERENTIAL: 4 differing lines
 -collect/byTimeOrCount/on-the-count	value [3]
 ```
 
+The harness that produced this table is not in this tree, so the table is a record of the run, not a check.
+
 **The run builds the module itself.** It used to link whatever `Combine.o` was already in
 the tree, so a change to the module's Swift could sit in the sources while the run measured
 the old object and answered `identical` - a mutation of the source read as a pass, which is
-the one thing this table must never do. `run.sh` now builds the host module from the sources
-beside it before it builds either probe, and a failure to build stops the run. With that,
+the one thing this table must never do. The harness then built the host module from the sources
+beside it before it built either probe, and a failure to build stopped the run. With that,
 `MergeInner.request(_:)` had its demand pass-through loop emptied - nothing but a comment -
-and `run.sh` alone, with no separate build step, reported
+and the harness alone, with no separate build step, reported
 
 ```
 cases: cases 40
@@ -189,7 +191,7 @@ The host copy of the module is called `CombineKit`, and the staged sources have 
 own `Combine.` prefix rewritten to that name. The reason is the host, not the module: on
 macOS the SDK's own Foundation imports Apple's Combine, and a module called `Combine` links
 Apple's Combine beside it through the autolink its interface carries, and the two sets of
-classes then collide. `run.sh` refuses to start if `otool` finds Apple's Combine in the
+classes then collide. The harness refuses to start if `otool` finds Apple's Combine in the
 binary, and that refusal has already caught it once. The Foundation-integrated part of the
 module (`NotificationCenter.Publisher`, `Timer.publish`, the run loop and operation queue
 schedulers, KVO) is measured on the device instead, because the host copy cannot carry it.

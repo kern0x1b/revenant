@@ -36,7 +36,7 @@ The two variables make the configure take LLVM, Swift and ld64 from their releas
 configure builds those packages from source, which takes hours. `./xmakew test -P .` runs every host test in about two
 minutes once the package store is warm;
 `./xmakew test -P . 'repository/*'` runs the layout and comment checks in seconds. The suites and what runs where:
-[the toolchain's tests](docs/reference/toolchain/tests.md); the prebuilt packages: [docs/guides/prebuilt.md](docs/guides/prebuilt.md).
+[the toolchain's tests](docs/reference/toolchain/tests.md); the prebuilt packages: [docs/guides/prebuilt.md](docs/guides/prebuilt.md). The same steps, from a clean clone to a built Backports library, are in [the getting-started guide](docs/guides/getting-started.md).
 
 ## One xmake project
 

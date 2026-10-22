@@ -5,7 +5,7 @@ The public surface of an SDK's `.swiftinterface`, read with **swift-syntax's `Sw
 
     owner <TAB> member <TAB> argument labels <TAB> kind
 
-The earlier regex gate (`api_invented`, since removed) read the same files with hand-written patterns, which miss what
+The earlier regex gate, since removed, read the same files with hand-written patterns, which miss what
 a parser sees: an `associatedtype` witness printed as a `var`, a nested `typealias` printed as a
 property, an enum `case`, an `init`, a `subscript`, a static in a constrained extension. Those are
 exactly the rows it then called invented.
@@ -37,7 +37,7 @@ count found, because the sets it partitions would otherwise hold vacuously at `0
 
 | artifact | columns | what it is | read by |
 | --- | --- | --- | --- |
-| `apple-26-surface.tsv` | 4 — owner, member, argument labels, kind | the **old** hand-written extractor's output | `api_invented.lua` |
+| `apple-26-surface.tsv` | 4 — owner, member, argument labels, kind | `api_surface.lua apple`'s output, the surftool's rows of Apple's 26.2 surface | `api_invented.lua` |
 | `surface-26.2*.tsv` | **3** — owner, kind, name | `surface_rows.lua sdk`'s output: the surface of the SDK's interfaces | `surface_diff.lua diff` |
 | `gaps*.tsv` | 1 — `Owner#name` | **gap rows**: what this tree declares no name for. 341 of them in `gaps14.tsv`, and *not* the 344 of the `|O\N|` above | read by eye; `surface_diff.lua gaps` writes them |
 | `ours*.tsv` | 4 — owner, kind, name, path | `surface_rows.lua tree`'s output: this tree's own declarations | `surface_diff.lua gaps` |

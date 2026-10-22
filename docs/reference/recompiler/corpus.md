@@ -2,7 +2,7 @@
 
 `tests/` holds the translator's own regression programs and `tests/perf/` its benchmark. Their sources are C, Objective-C,
 assembly and Swift. The steps that build, translate and check them are Lua run by xmake: a `check.lua` or `build.lua`
-beside the sources, and the shared parts in `tools/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
+beside the sources, and the shared parts in `recompiler/tools/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
 
 ## Running
 
@@ -67,7 +67,7 @@ instruction rather than an exclusive loop. The check proves three things, all on
 2. xlate lifts every function, and each lifted function holds exactly one `atomicrmw` or `cmpxchg`, with the
    operation, the integer width, the alignment and the LLVM ordering its instruction asks for. A and L together
    become `acq_rel`, which is also what seq_cst compiles to.
-3. The lifted code, compiled for armv7 with the flags `translate.lua` uses, carries the byte, halfword, word and
+3. The lifted code, compiled for armv7 with the flags `recompiler/tools/translate.lua` uses, carries the byte, halfword, word and
    doubleword exclusive pairs the atomics are lowered to. The program is libc-free and has no Objective-C or blocks,
    which the runtime a full translation links expects, so the check stops at the lifted object.
 
@@ -135,8 +135,8 @@ names that image. This holds for each kind of bind: the superclass pointer, a cl
   - a `--replaces` entry that is an image's own install name.
 - A bind to a system path is the host's library unless `--replaces` says a guest image stands for it.
 - A library that an image re-exports whole (`LC_REEXPORT_DYLIB`) is answered by that image, and counts as answered in
-  the list `translate.lua` reads.
-- `translate.lua` takes the symbols that no host library supplies from xlate's own answers, not from what the images
+  the list `recompiler/tools/translate.lua` reads.
+- `recompiler/tools/translate.lua` takes the symbols that no host library supplies from xlate's own answers, not from what the images
   export. An app that binds the host's `NSString` next to an embedded image that defines its own still needs `NSString`
   bridged. An app that binds the embedded image's `NSString` does not.
 

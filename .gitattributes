@@ -21,3 +21,4 @@ frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
 frameworks/SwiftUI/src/TextSettings.swift comments=upstream
 frameworks/Backports/tests/data/demand/sample.m comments=fixture
 frameworks/Backports/tests/data/demand/sample.swift comments=fixture
+toolchain/tests/addon/toolchain_check/apple-ios-before-on-check.lua comments=fixture
