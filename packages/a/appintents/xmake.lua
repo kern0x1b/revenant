@@ -3,7 +3,7 @@ package("appintents")
     set_description("The AppIntents framework of iOS 16, as one Swift module a port writes `import AppIntents` for, built against the revenant@swift-runtime a port carries")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "26.2", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = appintents_sources_digest, type = "string", readonly = true})

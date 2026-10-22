@@ -3,7 +3,7 @@ package("activitykit")
     set_description("The ActivityKit framework of iOS 16.1, as one Swift module a port writes `import ActivityKit` for, built against the revenant@swift-runtime and revenant@appintents a port carries")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "26.2", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = activitykit_sources_digest, type = "string", readonly = true})
