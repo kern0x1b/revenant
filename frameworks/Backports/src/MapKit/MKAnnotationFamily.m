@@ -97,7 +97,7 @@ static RevenantAnnotationState *RevenantStateFor(id view)
                    @"it is answered from the release's LEFT callout accessory slot, which is beside the "
                    @"callout and not under its title, because iOS 6 has no detail area: the selector and "
                    @"-calloutView are both absent from the armv7 cache of 6.1.3, and the native fix -- a "
-                   @"callout of this port's own -- is open in coordination/crutches.md");
+                   @"callout of this port's own -- is not written, and no file in this repository tracks it.");
     return self.leftCalloutAccessoryView;
 }
 

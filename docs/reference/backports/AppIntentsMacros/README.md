@@ -1,12 +1,16 @@
-# revenant@appintents-macros
+# AppIntentsMacros: the macro plugins, and a package that does not exist yet
+
+**Status: planned.** No package `revenant@appintents-macros` is in `packages/`, no recipe builds these plugins, and
+nothing in this tree builds the sources in `frameworks/Backports/src/AppIntentsMacros/` (`main.swift` and
+`Schema.swift`). What follows is the design for it, not a description of a built artifact.
 
 The macro plugins `revenant@appintents` and `revenant@tipkit` name: `AppIntentsMacros` and `TipKitMacros`,
 as host executables a device compile loads with `-load-plugin-executable`.
 
 The framework expands these with its own compiler plugin, which is on the framework's own releases and
-not on these, so a port that writes `@AppEntity(schema:)` has no expansion. This package is the port's
-own expansion of them, and it is what the 19 macro rows in `revenant@appintents` and the three in
-`revenant@tipkit` are waiting for.
+not on these, so a port that writes `@AppEntity(schema:)` has no expansion. The planned package would be the
+port's own expansion of them; the 19 macro rows in `revenant@appintents` and the three in `revenant@tipkit`
+are waiting for it.
 
 **Built against `revenant@swift-syntax`**, the Apache-2.0 upstream at the tag that matches the fleet's
 6.4 toolchain, and not against the toolchain's own copy: that copy exports every macro protocol
