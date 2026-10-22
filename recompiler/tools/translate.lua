@@ -27,10 +27,6 @@ local function lines(text)
     return list
 end
 
-local function sorted(list)
-    return env.sorted(list)
-end
-
 local function unique(list)
     local seen, result = {}, {}
     for _, item in ipairs(list) do
@@ -39,7 +35,7 @@ local function unique(list)
             table.insert(result, item)
         end
     end
-    return sorted(result)
+    return env.sorted(result)
 end
 
 local function readlines(file)
@@ -225,7 +221,7 @@ local function split_compile(e, out, lifted, host, bytes)
             table.insert(pieces, piece)
         end
     end
-    sorted(pieces)
+    env.sorted(pieces)
     local objects = {path.join(split, "data.o")}
     for _, piece in ipairs(pieces) do
         table.insert(jobs, {piece = piece, bitcode = piece .. ".code.bc", object = piece .. ".o"})
@@ -301,7 +297,7 @@ function translate(input, includes, out, images, opt)
     end
     run("xcrun", table.join({"clang"}, guest, {"-fno-builtin", "-c", path.join(lab, "src", "runtime", "int128.c"), "-o", o("support-int128.o")}))
     run("xcrun", table.join({"clang"}, guest, {"-fno-builtin", "-c", path.join(lab, "src", "runtime", "availability.c"), "-o", o("support-availability.o")}))
-    local support = sorted(os.files(o("support-*.o")))
+    local support = env.sorted(os.files(o("support-*.o")))
     writelines(o("provided.txt"), unique(nm_defined(support)))
 
     local replaces = {}
@@ -349,14 +345,14 @@ function translate(input, includes, out, images, opt)
             table.insert(weakonly, symbol)
         end
     end
-    writelines(o("weak-only.txt"), sorted(weakonly))
+    writelines(o("weak-only.txt"), env.sorted(weakonly))
     local resolved = readlines(o("guest-resolved.txt"))
     writelines(o("provided.txt"), unique(table.join(readlines(o("provided.txt")), resolved)))
 
     local backport_libs, strip_dylibs = {}, {}
     local backports = getenv("BACKPORTS_DIR")
     if backports ~= nil then
-        backport_libs = backports ~= "" and sorted(os.files(path.join(backports, "lib*Backports.dylib"))) or {}
+        backport_libs = backports ~= "" and env.sorted(os.files(path.join(backports, "lib*Backports.dylib"))) or {}
         if #backport_libs == 0 then
             raise("BACKPORTS_DIR='%s' holds no lib*Backports.dylib; unset it to translate without backports", backports)
         end
