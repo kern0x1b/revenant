@@ -1,0 +1,22 @@
+package("meson")
+    set_kind("binary")
+    set_homepage("https://mesonbuild.com")
+    set_description("The meson build system, 1.6.0 as Telegram pins it, run by the python3 of the build machine, as ADR 0013 lets an upstream's own build run its interpreter")
+    set_license("Apache-2.0")
+
+    add_urls("https://github.com/mesonbuild/meson/releases/download/$(version)/meson-$(version).tar.gz")
+    add_versions("1.6.0", "999b65f21c03541cf11365489c1fad22e2418bb0c3d50ca61139f2eec09d5496")
+
+    on_install("@macosx", "@linux", function (package)
+        local home = package:installdir("share", "meson")
+        os.cp("*", home)
+        local launcher = package:installdir("bin", "meson")
+        os.tryrm(launcher)
+        io.writefile(launcher,"#!/bin/sh\nexec python3 \"" .. path.join(home, "meson.py") .. "\" \"$@\"\n")
+        os.vrunv("chmod", {"755", launcher})
+    end)
+
+    on_test(function (package)
+        assert(os.isfile(package:installdir("bin", "meson")), "meson is not installed")
+        assert(os.isfile(path.join(package:installdir("share", "meson"), "meson.py")), "meson.py is not installed")
+    end)
