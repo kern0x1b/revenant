@@ -2,7 +2,7 @@ import("core.base.json")
 import("core.project.config")
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", "..", ".."))
-local emulator = import("emulator", {rootdir = path.join(ROOT, "toolchain", "modules"), anonymous = true})
+local emulator = import("@addon.revenant.emulator", {anonymous = true})
 
 local DEVICE = "iPhone4,1"
 local RELEASE = "6.1.3"
