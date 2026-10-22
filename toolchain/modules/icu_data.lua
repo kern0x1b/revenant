@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 local trees = {"", "curr/", "lang/", "region/", "zone/", "unit/", "coll/", "brkitr/", "rbnf/"}
 local dropped = {"rbnf/", "translit/"}
 local languages = {"af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "cs", "cy", "da", "de", "el", "en", "es", "et", "eu", "fa", "fi", "fil", "fr", "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "ka", "kk", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mr", "ms", "my", "nb", "ne", "nl", "nn", "no", "pa", "pl", "pt", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tl", "tr", "uk", "ur", "uz", "vi", "zh"}
@@ -78,7 +80,7 @@ function trim(bin, archive)
         end
     end
     removed = table.unique(removed)
-    table.sort(removed)
+    byteorder.sort(removed)
     io.writefile(path.join(work, "removed.txt"), table.concat(removed, "\n") .. "\n")
     local argv = {"-r", path.join(work, "removed.txt")}
     if #added > 0 then
