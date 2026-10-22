@@ -1,0 +1,18 @@
+diff --git a/stdlib/public/Darwin/Foundation/Data.swift b/stdlib/public/Darwin/Foundation/Data.swift
+--- a/stdlib/public/Darwin/Foundation/Data.swift
++++ b/stdlib/public/Darwin/Foundation/Data.swift
+@@ -1927,11 +1927,11 @@
+             }
+             switch self {
+             case .virtualMemory:
+-                return { NSDataDeallocatorVM($0, $1) }
++                return { NSDataDeallocatorVM($0, UInt(bitPattern: $1)) }
+             case .unmap:
+-                return { NSDataDeallocatorUnmap($0, $1) }
++                return { NSDataDeallocatorUnmap($0, UInt(bitPattern: $1)) }
+             case .free:
+-                return { NSDataDeallocatorFree($0, $1) }
++                return { NSDataDeallocatorFree($0, UInt(bitPattern: $1)) }
+             case .none:
+                 return { _, _ in }
+             case .custom(let b):
