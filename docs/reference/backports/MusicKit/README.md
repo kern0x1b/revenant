@@ -1,7 +1,9 @@
 # MusicKit for a legacy Apple platform
 
 A module named `MusicKit`, for `armv7-apple-ios6.1.3`, so that a program written against MusicKit 26
-compiles and runs on a device this port serves.
+compiles and runs on a device this port serves. It does not build today: `revenant@musickit` refuses on
+load, because `Catalog.swift` uses `URLComponents`, which the iOS 6 SDK declares for iOS 7, and
+`URLQueryItem`, which needs iOS 8.
 
 ## What it is
 
@@ -20,7 +22,7 @@ corpus measures the surface against. What each of them answers is in the table b
 | `MusicItem` | what every catalogue item has: its identifier, and nothing else |
 | `MusicAuthorization.currentStatus` | `.notDetermined` — a device with no Apple Music has not been asked |
 | `MusicAuthorization.request()` | `.denied` — see below |
-| the catalogue types, the requests, the responses | not carried yet; the next delivery |
+| the catalogue types, the requests, the responses | carried in `Catalog.swift`; not built at this release, because the package refuses on load (see below) |
 
 **`MusicAuthorization` is answered as a device with no Apple Music at all**, which is every device
 this port runs on: no Music app, no Apple Music account, and no way to grant one. A request therefore
@@ -53,13 +55,15 @@ request.
 
 ## Not carried yet
 
-The catalogue types, the search and library requests, the responses, the players and
-`MusicLibrary`. The surface is 1316 rows; this is its foundation — the identity every item has and
-the authorization a client asks for before it uses any of it.
+The players and `MusicLibrary` are not carried. The surface is 1316 rows; what is here is its
+foundation — the identity every item has, the authorization a client asks for before it uses any of it,
+and the catalogue in `Catalog.swift`.
 
 ## The catalogue, added
 
-`Catalog.swift` carries the requests and the types, against the documented Apple Music API:
+`Catalog.swift` carries the requests and the types, against the documented Apple Music API. The source
+is there and the build is not: each of these URLs is composed with `URLComponents` and `URLQueryItem`,
+which is the refusal named at the top.
 
 | | the path this sends |
 | --- | --- |
@@ -74,8 +78,10 @@ registered, and `us` is the documented default: this release has no way to ask a
 (`Locale.current` is iOS 10), so a storefront a caller did not name is the registered default rather
 than a guess.
 
-**Measured: the whole module - identity, authorization, token, catalogue requests and types - compiles
-for `armv7-apple-ios6.1.3` under the port's flags.** The C shim builds on its own too.
+**Measured before the catalogue was added: identity, authorization and the token compile for
+`armv7-apple-ios6.1.3` under the port's flags, and the C shim builds on its own.** The catalogue is
+what the package refuses on today (see above), and since the recipe raises on load, no install builds
+any of these files.
 
 ### Two things the build says, written down rather than argued with
 

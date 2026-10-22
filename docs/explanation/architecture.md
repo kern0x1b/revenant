@@ -57,6 +57,8 @@ add_packages("swiftui")
 
 `<checkout>` supplies the external packages the outside project also needs (the Swift runtime, libc++, the SDK), and `<dir>` supplies the packages generated from our targets. The mechanism was checked on a host library: a package generated with `./xmakew package -P . -o <dir>` was built and run by a separate project that named `<dir>` as its repository. The iOS route is not yet checked; see the status below.
 
+The Backports libraries come as one package, `org.revenant.backports`, which `./xmakew deb -P .` writes; see [decision 0012](decisions/0012-one-backports-package.md).
+
 Why packages and not a copy of our sources: a package names one target and its links, so an outside project takes exactly what the target builds, and the same target serves the checkout and every outside project.
 
 ## What is a target and what is a package now
@@ -84,4 +86,4 @@ A recipe that converts while still listed fails the check, and so does a listed 
 
 The swift rule installs the `.swiftmodule` of a static or a shared Swift target into `lib/swift/iphoneos`, so a wrapper of a Swift target hands its module to a consumer.
 
-CI's check workflow configures three things: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Backports` component again, for the firmware tools, and then the `Swift` component, whose nine targets it builds and installs through their wrappers. The prebuilt workflow configures the `Swift` component too, for the libcxx and swift-runtime packages. Nothing configures the whole iOS graph, so the `Combine` component's test targets are not built by CI yet.
+CI's check workflow configures three things: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Backports` component again, for the firmware tools, and then the `Swift` component, whose nine targets it builds and installs through their wrappers. The prebuilt workflow configures the `Swift` component too, for the libcxx and swift-runtime packages. Nothing configures the whole iOS graph in CI, so the `Combine` component's test targets are not built by CI yet. The whole graph would need the `swift-runtime` and `libcxx` releases for its own keys, which are the SDK 16.4 ones (`docs/guides/prebuilt.md`).

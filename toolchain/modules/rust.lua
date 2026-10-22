@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 local TRIPLE = "armv7-apple-ios6"
 
 function triple()
@@ -53,7 +55,7 @@ function sources(target)
             table.insert(found, file)
         end
     end
-    table.sort(found)
+    byteorder.sort(found)
     return found
 end
 

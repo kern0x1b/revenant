@@ -77,6 +77,7 @@ end
 function write(opt)
     opt = opt or {}
     task.run("config", {}, {disable_dump = true})
+    import("apple.platform")
     local written, carried = {}, {}
     local grouped = packages()
     for _, control in ipairs(table.orderkeys(grouped)) do
@@ -141,6 +142,25 @@ function write(opt)
                                          outputdir = opt.outputdir or config.builddir()})
             cprint("${bright green}deb${clear} %s", output)
             table.insert(written, {deb = output, stage = stage})
+        end
+    end
+    if not opt.target and #platform.backport_libraries() > 0 then
+        local signer
+        for _, target in ipairs(project.ordertargets()) do
+            if target:pkg("ldid") then
+                signer = target
+                break
+            end
+        end
+        if not signer then
+            raise("the project builds Backports libraries, and no target carries ldid to sign their package with")
+        end
+        local described = platform.backports_deb(signer)
+        if not carried[described.name] then
+            carried[described.name] = true
+            local copied = platform.copy_program(described.deb, path.join(opt.outputdir or config.builddir(), path.filename(described.deb)), described.name)
+            cprint("${bright green}deb${clear} %s", copied)
+            table.insert(written, {deb = copied})
         end
     end
     if #written == 0 then

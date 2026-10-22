@@ -3,7 +3,7 @@ package("realityfoundation")
     set_description("The RealityFoundation framework of iOS 13, as one Swift module and dylib a port writes `import RealityFoundation` for, built against the revenant@swift-runtime a port carries; its SceneKit part is not yet backported below iOS 8")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = realityfoundation_sources_digest, type = "string", readonly = true})

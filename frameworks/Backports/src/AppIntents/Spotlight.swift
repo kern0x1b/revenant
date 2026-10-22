@@ -147,20 +147,11 @@ public enum RevenantSpotlightJournal {
 public let RevenantAppEntityIdentifierAttribute = RevenantSpotlightJournal.entityIdentifierAttribute
 #endif
 
-#if REVENANT_APPINTENTS_PORT_HEADERS
 @available(iOS 8.0, *)
 extension NSUserActivity {
-#if REVENANT_APPINTENTS_NSUSERACTIVITY_INTENT
-    public func widgetConfigurationIntent<Intent>(of intentType: Intent.Type = Intent.self) -> Intent?
-        where Intent: WidgetConfigurationIntent {
-        return intent as? Intent
-    }
-#endif
-
     public var appEntityIdentifier: String? {
         return userInfo?[RevenantAppEntityIdentifierKey] as? String
     }
 }
 
 public let RevenantAppEntityIdentifierKey = "AppIntentsEntityIdentifier"
-#endif

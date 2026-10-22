@@ -1,7 +1,9 @@
 # revenant@swift-data
 
 The SwiftData module for the port's armv7 releases: a Swift module named `SwiftData`, built
-against the `revenant@swift-runtime` a port carries, so a program writes `import SwiftData`.
+against the `revenant@swift-runtime` a port carries, so a program writes `import SwiftData`. It does
+not build today: `revenant@swift-data` refuses on load, because `DefaultStore.swift` imports
+`FoundationEssentials`, which the iOS 6 SDK does not provide.
 
 The storage is the release's own Core Data - `NSPersistentContainer` and
 `NSPersistentStoreDescription` from iOS 6.0, the backports' `NSPersistentHistory*`,
@@ -63,9 +65,11 @@ The link is **not** finished, and for one reason only. The 433 undefined symbols
 The **11** swift-foundation ones are 8 + 3: `Predicate`, `SortDescriptor`, `Date`, `UUID`. They are
 swift-foundation's, and f25214c6's run typechecked the module without linking it, so
 `lib_FoundationEssentials.dylib` does not exist anywhere. Every other import of this module resolves
-against the runtime and the Core Data backports. The ten are named one by one in
-`frameworks/Backports/tests/SwiftData/harness/symbols.lua`, and `on_test` fails when one of them stops being undefined or when an
-eleventh appears.
+against the runtime and the Core Data backports. The harness names **ten** of them one by one in
+`frameworks/Backports/tests/SwiftData/harness/symbols.lua`, and `on_test` fails when one of those
+stops being undefined or when a swift-foundation symbol it does not name appears; the object this
+table was measured from has eleven, so that check fails on it until the build is re-measured and the
+list and the count are settled together.
 
 **Which build verifies this package.** `swift-data` is in no `LIBRARIES` and no gate config, so
 **the backports gate never builds it** - a green gate says nothing about it. Two things verify it,
@@ -83,7 +87,7 @@ and they are different jobs:
   OBJECT  SwiftData.o  895464 bytes  Mach-O object arm_v7
   SYMBOLS defined=2836 undefined=433
   ```
-- the **committed check** is `xmake l packages/s/swift-data/harness/symbols.lua` with
+- the **committed check** is `xmake l frameworks/Backports/tests/SwiftData/harness/symbols.lua` with
   `REVENANT_SWIFTDATA_OBJECT` naming an object or the installed `libSwiftData.a`, which prints the same
   `SYMBOLS` and `UNDEFINED` lines and runs the ten-symbol check; and the package's `on_test`, which
   runs that check on what it installed. Its control is the same file with
@@ -98,8 +102,9 @@ job, not a quick one.**
 
 Wired to the store, and the two places are where the wiring is: `DefaultStore` conforms to
 `HistoryProviding` and holds `fetchHistory` and `deleteHistory` at
-`files/SwiftData/DefaultStore.swift:331`, and `ModelContext.fetchHistory` and `deleteHistory` hand
-the descriptor to the store at `files/SwiftData/ModelContext.swift:318`. What is still missing is
+`frameworks/Backports/src/SwiftData/DefaultStore.swift:263`, and `ModelContext.fetchHistory` and
+`deleteHistory` hand the descriptor to the store at
+`frameworks/Backports/src/SwiftData/ModelContext.swift:254`. What is still missing is
 `@Model`'s expansion: the seven macro names are declared and the module builds without any plugin, but
 a program that writes `@Model` needs `SwiftDataMacros`.
 

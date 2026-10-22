@@ -11,8 +11,8 @@ so the pick is a consequence of the table and not a preference. **No code in thi
 | `IntentPerson` | 4 | **readable**: four coding rows, placed by a call-site typecheck |
 | `AppEntity` | 4 | **readable**: two placed by declaration, two rows that name a member on a protocol which only inherits it |
 | `AttributedString` | 4 | **gated**: the same type |
-| `Calendar` | 4 | **gated**: `Calendar.RecurrenceRule` is iOS 10+, and `Calendar.swift` is in the runtime's `still_ios7` |
-| `Measurement` | 4 | **gated**: absent, and `swift-runtime/xmake.lua:39` records why |
+| `Calendar` | 4 | **gated**: `Calendar.RecurrenceRule` is iOS 10+, and the Swift target's `REVENANT_APPINTENTS_RECURRENCE_RULE` probe is what measures it |
+| `Measurement` | 4 | **gated**: absent at the port's release, which the Swift target's `REVENANT_APPINTENTS_MEASUREMENT` probe measures |
 | `IntentItemSection` | 3 | **readable**: the same result-builder gap, after the `Builder` typealias |
 | `CSSearchableIndex` | 3 | **placed** by the registry fix and the overlay |
 | `CSSearchableItem` | 3 | **placed** by the same |
@@ -21,7 +21,7 @@ so the pick is a consequence of the table and not a preference. **No code in thi
 | `IntentFile` | 2 | **placed** by the two factories |
 | `IntentParameterSummary` | 2 | normalisation 5, the generic parameter list |
 | `NSUserActivity` | 2 | **another band's**: the Objective-C framework this band does not touch |
-| the 19 schema-macro rows (`AppEntity(schema:)` … `UnionValue()`) | 19 | **Apple's plugin**: open by the ruling, with the contracts in `Macros.md` |
+| the 16 schema-macro rows (`AppEntity(schema:)` … `UnionValue()`) | 16 | **Apple's plugin**: open by the ruling, with the contracts in `Macros.md` |
 | the tail (`Bool`, `EntityQueryProperty`, `StringSearchCriteria`, `TransientAppEntity`, the comparator, `AppIntentError`, the URL-representation pair, `DynamicOptionsProvider`, `StartWorkoutIntent`, `OpenURLIntent`, `ParameterSummaryCaseBuilder`, `CSSearchableItemAttributeSet`, `IntentParameter`) | 15 | mixed: normalisation, a gate, or a reading — each in `Unplaced.md` |
 
 ## The pick, and why
@@ -31,7 +31,7 @@ not pick**: all seven rows are behind `REVENANT_APPINTENTS_ATTRIBUTED_STRING`, a
 only when a probe finds `AttributedString` in the runtime — which no installed runtime has
 (`LocalizedStringResource` and `AttributedString` alike: zero hits in every
 `…/lib/swift/iphoneos` in the store). It is the Foundation Swift family's, and the queue line says so.
-Neither the 4-row gated families nor the 19 macro rows are mine to lift: one waits on the Foundation
+Neither the 4-row gated families nor the 16 macro rows are mine to lift: one waits on the Foundation
 band, the other on the addon release.
 
 **So the pick is `IntentItem` + `IntentItemSection` — 7 rows together — as the largest family that is
@@ -53,5 +53,5 @@ code, and it needs one device compile to settle.
 4. Then, from the tail and by size: `ForegroundContinuableIntent` (2), `FileEntityIdentifier` (2),
    `EntityQueryProperty` / `StringSearchCriteria` / the comparator / `AppIntentError`, each with the same
    call-site reading, one wip each.
-5. The 19 macro rows and the 19 gated rows stay where they are: the first needs the addon release,
+5. The 16 macro rows and the 19 gated rows stay where they are: the first needs the addon release,
    the second the Foundation Swift family.

@@ -1,9 +1,10 @@
-# `ForegroundContinuableIntent` — the two rows, and why they are not written yet
+# `ForegroundContinuableIntent` — the two rows, and the shapes they are written to
 
 The next family piece after the two builder families, by the order in `NextFamily.md`. The corpus
-ledger carries two rows, and this module has an **empty** `extension ForegroundContinuableIntent`
-(`Remaining.swift:230`), so both are undeclared — and the check says so rather than the facts
-asserting it: the shape check over the framework's declarations.
+ledger carries two rows, and this module declares both in `extension ForegroundContinuableIntent`
+(`frameworks/Backports/src/AppIntents/Remaining.swift:177`), with the second overload's
+`alwaysConfirm:` spelling beside them, so the check reads three declarations for the ledger's two
+rows.
 
 **What the framework declares**, quoted from the machine's `revenant@iphoneos-sdk` 26.2 install:
 
@@ -57,6 +58,5 @@ parameter and a return type the interface fixes to the *caller's* `Result`**:
   declaration that only had the overload the ledger names would be a subset, and a subset chosen by
   which row happens to be in the ledger is a metric, not a shape.
 
-So this piece is the **check and the two quoted declarations**, which is what lets the next one write
-the code against the interface rather than against my memory of it. The check runs, exits 0, and
-prints `0 of 2 rows declared` — which is the fact.
+So the declarations are written, and the check reads their shapes against the interface rather than
+against memory of it. The check runs, exits 0, and prints `3 of 3 rows declared, 0 shape failure(s)`.
