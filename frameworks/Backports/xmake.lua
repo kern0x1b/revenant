@@ -315,6 +315,9 @@ local FOUNDATION_TESTS = {
     date_components_day = {"NSDateComponents+DayOfYear18.m", "NSDateComponents+RepeatedDay26.m", "NSDateComponents+Component8.m", "NSCalendar+Components.m", "RevenantCalendarUnits.m"},
     task_progress = {"RevenantTaskProgress.m"},
     cookie_storage = {"RevenantCookieStorage.m", "NSHTTPCookieStorage+Task8.m"},
+    shared_observers = {"NSKeyValueSharedObservers18.m"},
+    progress_publish = {"NSProgress+Publish7.m"},
+    measurement_formatter = {"NSMeasurementFormatter.m", "RevenantMeasurementData.m", "RevenantUnitFormat.m"},
 }
 
 local QUARTZCORE_TESTS = {
