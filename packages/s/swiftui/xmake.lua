@@ -3,7 +3,7 @@ package("swiftui")
     set_description("Revenant's SwiftUI for iOS 6 as a module and a static library a port imports, with Apple's module name, built against the revenant@swift-runtime and revenant@combine a port carries")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "26.2", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the SwiftUI sources it builds, so a changed source is a different package.", default = swiftui_sources_digest, type = "string", readonly = true})

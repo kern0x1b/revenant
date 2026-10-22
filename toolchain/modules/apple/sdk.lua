@@ -5,6 +5,10 @@ function developer(installdir)
     return path.join(installdir, "Developer.app", "Contents", "Developer")
 end
 
+function apple_sdk_release()
+    return "26.2"
+end
+
 function folder(installdir, release)
     local root = developer(installdir)
     if not root then

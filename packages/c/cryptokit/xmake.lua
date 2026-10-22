@@ -3,7 +3,7 @@ package("cryptokit")
     set_description("The CryptoKit framework of iOS 13 for SHA-2 digests, HMAC, symmetric keys and AES-GCM, as one Swift module and dylib a port writes `import CryptoKit` for, over CommonCrypto with AES-GCM composed in software, built against the revenant@swift-runtime a port carries")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "26.2", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = cryptokit_sources_digest, type = "string", readonly = true})

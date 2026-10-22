@@ -3,7 +3,7 @@ package("swift-embedded")
     set_description("Embedded Swift's standard library for an iOS device: the Swift module for the port's architecture and oldest release, compiled from the sources of the swift package, and the Unicode tables it calls")
     set_license("Apache-2.0 WITH Swift-exception")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "26.2", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, the component that builds the module and the Swift module builder, so a changed build is a different package.", default = swift_embedded_sources_digest, type = "string", readonly = true})
