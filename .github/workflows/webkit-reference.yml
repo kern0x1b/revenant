@@ -36,8 +36,8 @@ jobs:
           curl -fsSL -o "$work/icu.tgz" https://github.com/unicode-org/icu/releases/download/release-78.3/icu4c-78.3-sources.tgz
           echo "3a2e7a47604ba702f345878308e6fefeca612ee895cf4a5f222e7955fabfe0c0  $work/icu.tgz" | shasum -a 256 -c -
           tar -xzf "$work/icu.tgz" -C "$work"
-          configure=$(find "$work" -path '*/source/configure' -maxdepth 4 | head -1)
-          test -n "$configure"
+          configure=$(find "$work" -path '*/source/configure' -maxdepth 4 -print -quit)
+          test -n "$configure" || { echo "ICU source: no configure under $work"; exit 1; }
           echo "interpreter: $(command -v python3) $(python3 -c 'import sys; print(sys.version.split()[0])')" | tee "$out/icu-run.txt"
           cd "$work/build"
           sh "$configure" --enable-static --disable-shared --disable-tests --disable-samples --disable-extras 2>&1 | tee "$out/configure.log"
@@ -74,10 +74,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          build=$(find "$HOME/.revenant/cache/xmake-global" -path '*webkit-engine*' -name build.ninja | head -1)
-          test -n "$build"
-          ninja=$(find "$HOME/.revenant/cache/xmake-global" -path '*/packages/n/ninja/*' -name ninja -type f | head -1)
-          test -n "$ninja"
+          build=$(find "$HOME/.revenant/cache/xmake-global" -path '*/webkit-engine/latest/build/build.ninja' -print -quit)
+          test -n "$build" || { echo "no build.ninja of webkit-engine in the store"; exit 1; }
+          ninja=$(find "$HOME/.revenant/cache/xmake-global" -path '*/packages/n/ninja/*' -name ninja -type f -print -quit)
+          test -n "$ninja" || { echo "no ninja in the store"; exit 1; }
+          echo "build: $build"
+          echo "ninja: $ninja"
           py=$(command -v python3)
           pyver=$("$py" -c 'import sys; print(sys.version.split()[0])')
           commit=$(sed -n 's/^ *local commit = "\([0-9a-f]*\)".*/\1/p' packages/w/webkit/xmake.lua | cut -c1-7)
