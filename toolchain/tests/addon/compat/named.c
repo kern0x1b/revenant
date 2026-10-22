@@ -55,10 +55,10 @@ int main(int argc, char **argv)
     expect(fstatat(AT_FDCWD, made, &info, 0) == 0 && S_ISDIR(info.st_mode), "fstatat must see the folder mkdirat made");
     expect(fstatat(AT_FDCWD, made, &info, AT_SYMLINK_NOFOLLOW) == 0, "fstatat must accept AT_SYMLINK_NOFOLLOW");
     expect(fstatat(AT_FDCWD, made, &info, 0x100) == -1 && errno == EINVAL, "fstatat must refuse flags it does not know");
+    expect(mkdirat(dir, "other", 0700) == 0 && exists("other"), "mkdirat against a descriptor must make the folder inside it");
+    expect(fstatat(dir, made, &info, 0) == 0 && S_ISDIR(info.st_mode), "fstatat against a descriptor must see the folder inside it");
     errno = 0;
-    expect(mkdirat(dir, "other", 0700) == -1 && errno == ENOTSUP, "mkdirat against a descriptor must report ENOTSUP, not emulate it");
-    errno = 0;
-    expect(fstatat(dir, made, &info, 0) == -1 && errno == ENOTSUP, "fstatat against a descriptor must report ENOTSUP");
+    expect(fstatat(dir, "missing", &info, 0) == -1 && errno == ENOENT, "fstatat against a descriptor must report a missing name as ENOENT");
     expect(fstatat(dir, absolute_made, &info, 0) == 0, "an absolute path ignores the descriptor, so fstatat answers it");
 
     int written = openat(AT_FDCWD, file, O_CREAT | O_WRONLY, 0600);
@@ -68,8 +68,11 @@ int main(int argc, char **argv)
         close(written);
     }
     expect(openat(AT_FDCWD, "missing", O_RDONLY) == -1 && errno == ENOENT, "openat must report a missing file as ENOENT");
-    errno = 0;
-    expect(openat(dir, file, O_RDONLY) == -1 && errno == ENOTSUP, "openat against a descriptor must report ENOTSUP");
+    int by_descriptor = openat(dir, file, O_RDONLY);
+    expect(by_descriptor >= 0, "openat against a descriptor must open the file inside it");
+    if (by_descriptor >= 0) {
+        close(by_descriptor);
+    }
     int by_absolute = openat(dir, absolute_file, O_RDONLY);
     expect(by_absolute >= 0, "openat of an absolute path ignores the descriptor");
     if (by_absolute >= 0) {
@@ -88,13 +91,17 @@ int main(int argc, char **argv)
     expect(stat(file, &original) == 0 && stat("follow", &followed) == 0 && original.st_ino == followed.st_ino,
            "the link AT_SYMLINK_FOLLOW made must be a name for the file the symbolic link names");
     errno = 0;
-    expect(linkat(dir, file, AT_FDCWD, "fromdir", 0) == -1 && errno == ENOTSUP, "linkat against a descriptor must report ENOTSUP");
+    expect(linkat(dir, file, AT_FDCWD, "fromdir", 0) == -1 && errno == ENOTSUP,
+           "linkat between a descriptor and the working directory must report ENOTSUP, since one call cannot pin both");
 
     expect(renameat(AT_FDCWD, alias, AT_FDCWD, moved) == 0 && !exists(alias) && exists(moved),
            "renameat must move a name against the working directory");
     errno = 0;
     expect(renameat(dir, moved, AT_FDCWD, alias) == -1 && errno == ENOTSUP && exists(moved),
-           "renameat against a descriptor must report ENOTSUP and leave the name where it was");
+           "renameat between a descriptor and the working directory must report ENOTSUP and leave the name where it was");
+    expect(renameat(dir, moved, dir, "moved-again") == 0 && exists("moved-again") && !exists(moved) &&
+           renameat(dir, "moved-again", dir, moved) == 0 && exists(moved),
+           "renameat within one descriptor must rename the name inside it and back");
 
     char moved_path[1024], alias_path[1024];
     snprintf(moved_path, sizeof moved_path, "%s/moved", root);
@@ -116,13 +123,18 @@ int main(int argc, char **argv)
            "fclonefileat must report ENOTSUP so copies fall back to copyfile");
     close(source);
 
-    errno = 0;
     DIR *listing = fdopendir(open(root, O_RDONLY));
-    expect(listing == NULL && errno == ENOTSUP, "fdopendir must report ENOTSUP, since it would re-resolve the folder's path");
+    int listed = 0;
+    for (struct dirent *entry = listing ? readdir(listing) : NULL; entry != NULL; entry = readdir(listing)) {
+        listed |= strcmp(entry->d_name, alias) == 0;
+    }
+    expect(listing != NULL && listed, "fdopendir must list the folder the descriptor names");
+    if (listing != NULL) {
+        closedir(listing);
+    }
 
     expect(unlinkat(AT_FDCWD, alias_path, 0) == 0 && !exists(alias_path), "unlinkat must remove a file against the working directory");
-    errno = 0;
-    expect(unlinkat(dir, made, AT_REMOVEDIR) == -1 && errno == ENOTSUP, "unlinkat against a descriptor must report ENOTSUP");
+    expect(unlinkat(dir, "other", AT_REMOVEDIR) == 0 && !exists("other"), "unlinkat against a descriptor must remove the folder inside it");
     expect(unlinkat(AT_FDCWD, made, AT_REMOVEDIR) == 0 && !exists(made), "unlinkat with AT_REMOVEDIR must remove a folder");
     expect(unlinkat(AT_FDCWD, made, 0x100) == -1 && errno == EINVAL, "unlinkat must refuse flags it does not know");
 
