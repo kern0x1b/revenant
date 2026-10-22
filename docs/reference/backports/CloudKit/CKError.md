@@ -16,8 +16,9 @@ containers (88 rows: 47 for CKError, 41 for CKError.Code).
 | CKError.Code enum, its 37 cases, `rawValue`, `init(rawValue:)`, `RawValue`, `_ErrorType` | all | - |
 | CKError `serverRecord`, `clientRecord`, `ancestorRecord` | - | 3 rows: their type is `CloudKit.CKRecord`, the class the CloudKit backports carry as Objective-C. A Swift module reaches it through the lifted headers, which is the CKRecord group of this band, not this file. |
 
-85 of 88 rows are in the file. Nothing here is built into `libswiftCore` or the runtime yet: the
-recipe does not name `files/CloudKit`, so the runtime digest is unchanged and no port links it.
+85 of 88 rows are in the file. The file is built into the `swiftCloudKit` overlay in
+`frameworks/Backports/src/Swift/xmake.lua`, which `revenant@cloudkit` links: the three record
+properties wait for the lifted `CKRecord` headers, not for a build.
 
 ## Constants
 
@@ -70,6 +71,3 @@ headers). This is a typecheck only: no object was written and nothing was run on
 
 - An armv7 object, a link, a run on the emulator or the 4S. None of it has been done.
 - The three record properties. They need the CKRecord class in a Swift module.
-- Whether the runtime's build (`swift-runtime` recipe) accepts `files/CloudKit`. It is not wired
-  in, because wiring it changes the runtime digest and would rebuild the runtime, which is a
-  separate measured step.
