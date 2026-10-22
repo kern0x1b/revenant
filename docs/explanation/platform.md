@@ -20,22 +20,24 @@ hardware the device does not have.
 - Clean room: the generator emits facts only (signatures, types, availability, relations). Behaviour is written
   as specs in our own words, from Apple's documentation and measurements, in `docs/reference/backports/`.
   Implementers read the specs, not the SDK. No text of Apple's headers is copied.
-- Each framework's tests are `.m` files. One driver, `./xmakew test -P .`, runs them in parallel against the real macOS
-  or Mac Catalyst framework, in ten minutes or less.
+- Each framework's tests are `.m` files (the Swift frameworks' are `.swift`). One driver, `./xmakew test -P .`, runs them in parallel against the real macOS framework, in ten minutes or less.
 
 ## Delivery
 
-One `.deb` for the whole repository, installed once through Cydia. It holds the backports, the frameworks this
-repository writes (SwiftUI, Combine, WebKit, and so on) and the Swift runtime. After it is installed, any
-application works as on a newer iOS. That includes applications this toolchain did not build.
+The delivery is a Debian package per control file, installed through Cydia. The aim is one package for the whole
+repository, holding the backports, the frameworks this repository writes (SwiftUI, Combine, WebKit, and so on) and
+the Swift runtime, so that after it is installed any application works as on a newer iOS. That includes applications
+this toolchain did not build. That package is not written yet: a target that links a Backports library cannot be
+packaged, and `platform.lua` refuses it and names the target. What exists today is the WebKit port
+(`space.kern0x1b.rev`), the SwiftUI showcase (`space.kern0x1b.swiftui`), the CallKit tweak and the test packages.
 
 - An application built by today's Xcode is arm64 only, and these devices are 32-bit ARM. Such a binary runs
   there through the recompiler, which binds its imports to the backports libraries when it translates it.
   An application this toolchain builds links them directly.
-- The libraries live in `/usr/lib/revenant/`, never over a system file, so the same package stays correct on a
+- The libraries live in `/usr/lib/revenant/org.revenant.backports/`, never over a system file, so the same package stays correct on a
   later iOS that has the real framework. Only an application that links a library loads it.
-- Where the system has its own implementation it wins at run time: Objective-C through the class alias, C and
-  Swift through a forwarder. How, and what is still to measure: `backports-loading.md`.
+- Where the system has its own implementation it wins at run time: Objective-C through the class alias, which is built. The
+  forwarder for C and Swift is not built yet. How, and what is still to measure: `backports-loading.md`.
 
 ## What is worked on
 
