@@ -44,9 +44,20 @@ The host test `toolchain/tests/addon/compat/named.c` runs the shims on the host 
 
 ## The minimum stamped in the objects
 
-rustc clamps the iOS deployment target to 10.0. Setting `IPHONEOS_DEPLOYMENT_TARGET=6.0` gives the warning `the minimum supported by rustc is 10.0` and the target is still 10.0. So the LLVM target is `thumbv7-apple-ios10.0.0` and each Rust object of the archive records `LC_VERSION_MIN_IPHONEOS 10.0`: 68 objects in the measured archive. The linked binary records 6.0, and the linker prints one warning per object.
+rustc raises the iOS deployment target to a floor of 10.0 for armv7, and the floor cannot be lowered. The source of this nightly (`rustc-nightly-src`, from `static.rust-lang.org/dist/2026-10-22`) says why:
 
-This matters in two places. dyld does not check the minimum of an object, only of the image, so the image runs where its own minimum says it does. LLVM chooses some library calls by the triple's version, so a call it emits for iOS 10 is an import the check sees, and the check names it when iOS 6 lacks it; the measured program imports none of that kind. What the check does not see is a codegen difference that uses no import, and none was found in the measured program. Neither point is verified on a device. The warnings stay visible; they are not silenced.
+- `apple_deployment_target()` in `rustc_session` takes the `IPHONEOS_DEPLOYMENT_TARGET` value and returns `version.max(min)`. `min` is `minimum_deployment_target(target)`, which for an iOS target that is not arm64 falls through to `os_minimum_deployment_target`, 10.0. Setting the variable to 6.0 only prints the warning `minimum supported by rustc is 10.0`; the version used is 10.0.
+- The LLVM triple is `versioned_llvm_target`, which appends that version to the spec's `llvm-target`. `add_version_to_llvm_target` asserts that the spec's triple is unversioned, so a spec cannot carry `armv7-apple-ios6.0.0`: rustc refuses it with `LLVM target must not already be versioned`.
+
+So neither the target spec nor the environment can set an object's minimum below 10.0, and no linker argument can either, since the objects are compiled before linking. The measured archives agree: with `IPHONEOS_DEPLOYMENT_TARGET=6.0` set, each Rust object of tlottie, mtproto and wallet still records `LC_VERSION_MIN_IPHONEOS 10.0` (21, 50 and 127 members), and the linker prints `built for newer iOS version (10.0) than being linked (6.0)` twice per member. The binary records 6.0.
+
+Lifting it would take a change to rustc. Rewriting each member's `LC_VERSION_MIN` after the build (for example with `ld -r -platform_version`) would make the objects say 6.0 while LLVM compiled them for the 10.0 triple, which is the claim this page refuses to make; it is not done. The warnings stay visible; they are not silenced.
+
+This matters in two places. dyld does not check the minimum of an object, only of the image, so the image runs where its own minimum says it does. LLVM chooses some library calls by the triple's version, so a call it emits for iOS 10 is an import the check sees, and the check names it when iOS 6 lacks it. The Telegram crates do emit one: tlottie imports `__sincosf_stret`, which iOS 7 introduced, and apple-compat's table already shims it. The check does not see a codegen difference that uses no import; none was found in the measured programs, and none is verified on a device.
+
+## Embedded bitcode and LTO
+
+A crate's own profile can enable LTO: tlottie sets `lto = "fat"`, the mtproto workspace `lto = "thin"`. With LTO on, rustc keeps LLVM bitcode in the archive's objects, and the linker of this toolchain rejected one of them, the mtproto archive's `mtproto_engine` member, with `is not mach-o or llvm bitcode file`. The rule's contract is machine-code archives, so it does not rely on bitcode members. rustc also refuses `-C embed-bitcode=no` together with LTO (`options -C embed-bitcode=no and -C lto are incompatible`). Telegram's Bazel build never links these archives with LTO, since rules_rust does not read the profile and LTO would duplicate std across the archives, so the rule passes `--config profile.release.lto=false` and `-Cembed-bitcode=no` for every crate. With both set, the archives hold only Mach-O members.
 
 ## Other measurements
 
@@ -54,6 +65,18 @@ This matters in two places. dyld does not check the minimum of an object, only o
 - The no_std and std staticlibs link into the armv7 program with `-lhello` and pass the import check against the 6.0 cache, after the 13 shims are linked.
 - The link stage passes `measure: ... record iOS 6.0` for the program, and the rebased-pointer check passes.
 - Not measured: running the program on an iPhone 4S or in the emulator. The Rust crate has not been run on iOS 6.
+
+## Telegram's Rust engines
+
+The app links three Rust archives, each through a Bazel `rust_static_library` in Telegram-iOS 13.0.0: `tlottie` (`submodules/tlottie`, features `cpu`, `std`, `c-api`), `mtproto_engine_ffi` (the `mtproto-ffi` package of the mtproto workspace) and `wallet_engine` (`third-party/wallet-engine`). They were built from their own folders in the reference tree through a symlink, read-only, with `--locked`; nothing in that tree was written. Each archive was force-loaded into an armv7 iOS 6.0 program, so the imports are those of every member, and checked against the 6.0 cache.
+
+| Crate | Built | Missing non-weak imports before apple-compat | After apple-compat |
+| --- | --- | --- | --- |
+| `tlottie` | yes, 21 members | 14: the 13 of the `hello` measurement, and `__sincosf_stret` (iOS 7) | none |
+| `mtproto_engine_ffi` | yes, 50 members | 13 | none |
+| `wallet_engine` | yes, 127 members | 13, and `CFRelease` from `iana-time-zone`, which needs the CoreFoundation framework the app links | none, with CoreFoundation |
+
+Every one of those symbols is already in apple-compat, so the crates needed no new shim. The weak symbols the probes list are `___isOSVersionAtLeast` and `___isPlatformVersionAtLeast`, the compiler-rt availability checks, which the programs define in their own text rather than import. Nothing has run on iOS 6: the programs link and pass the import check, which is the static part of the claim.
 
 ## Packaging
 
