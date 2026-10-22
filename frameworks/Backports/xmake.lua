@@ -313,6 +313,8 @@ local FOUNDATION_TESTS = {
     coder_minimum_length = {"NSCoder+MinimumLength184.m"},
     bundle_localizations = {"NSBundle+Localizations184.m"},
     date_components_day = {"NSDateComponents+DayOfYear18.m", "NSDateComponents+RepeatedDay26.m", "NSDateComponents+Component8.m", "NSCalendar+Components.m", "RevenantCalendarUnits.m"},
+    task_progress = {"RevenantTaskProgress.m"},
+    cookie_storage = {"RevenantCookieStorage.m", "NSHTTPCookieStorage+Task8.m"},
 }
 
 local QUARTZCORE_TESTS = {
@@ -331,7 +333,7 @@ local function host_tests(folder, tests, library)
             for _, source in ipairs(sources) do
                 add_files(path.join(SRC, library or folder, source))
             end
-            add_includedirs(TESTS)
+            add_includedirs(TESTS, path.join(SRC, "Foundation"))
             add_mflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
             add_frameworks("Foundation")
