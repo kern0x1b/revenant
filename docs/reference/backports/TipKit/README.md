@@ -57,7 +57,7 @@ The Backports build does not include this package; the `Swift` component does:
 
 `require` builds the package and the packages its recipe declares (here `revenant@swift-runtime` and
 `revenant@appintents`), so that one command is enough. The first run also builds swift-runtime and
-libcxx from source, because neither has a published prebuilt release yet; see
+libcxx from source unless it takes their prebuilt releases; see
 [prebuilt packages](../../../guides/prebuilt.md).
 
 If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,

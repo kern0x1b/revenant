@@ -1,7 +1,9 @@
 # revenant@widgetkit
 
 The WidgetKit framework of iOS 14, as one Swift module a port writes `import WidgetKit` for, built
-against the `revenant@swift-runtime` a port carries.
+against the `revenant@swift-runtime` a port carries. It does not build today: `revenant@widgetkit`
+refuses on load, because `Values.swift` and `Timeline.swift` both declare `TimelineEntry`,
+`TimelineEntryRelevance` and `Timeline`, so the module has two of each before a row is counted.
 
     target("my-port")
         add_requires("revenant@swift-runtime")
@@ -42,10 +44,11 @@ So:
 
 ## What it needs from the port
 
-`Widget`'s `body` is a `WidgetBody`, whose one requirement is the type the system draws. That is the
-port's own view type: SwiftUI where the port has it, the port's own view where it does not. The
-configurations and the providers are declared with the framework's own shape, so an app written against
-either builds unchanged.
+`Widget`'s `body` is a `WidgetBody`, whose one requirement is an associated type named `BodyType`,
+left unconstrained here. Apple's constrains it to `SwiftUI.View`; on a release with no SwiftUI the port
+cannot, so the app's own surface reads `BodyType` and draws it. The configurations and the providers
+keep the framework's own shape; a body declared as a SwiftUI view compiles once the port's SwiftUI
+declares that conformance, and not before.
 
 ## Licence
 
@@ -59,8 +62,8 @@ The Backports build does not include this package; the `Swift` component does:
     ./xmakew require -P . -y revenant@widgetkit
 
 `require` builds the package and the packages its recipe declares (here `revenant@swift-runtime` and
-`revenant@appintents`), so that one command is enough. The first run also builds swift-runtime and
-libcxx from source, because neither has a published prebuilt release yet; see
+`revenant@appintents`), once the refusal is gone, so that one command is enough. The first run also
+builds swift-runtime and libcxx from source unless it takes their prebuilt releases; see
 [prebuilt packages](../../../guides/prebuilt.md).
 
 If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,

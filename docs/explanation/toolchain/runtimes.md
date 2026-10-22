@@ -55,13 +55,13 @@ Embedded Swift is the subset of the language without a runtime library of its ow
 
 ### The templates are expanded in Lua
 
-The runtime's `.gyb` templates, and Embedded Swift's module and Combine's, are expanded by `modules/gyb`, a port of Swift's `gyb.py` to Lua, because no Python runs in the build. An interpreter covers the Python its code blocks use, down to float formatting, arbitrary-precision integers and the Mersenne Twister of `random.Random`. A construct it does not implement raises an error rather than being guessed at.
+The runtime's `.gyb` templates, and Embedded Swift's module and Combine's, are expanded by `modules/gyb`, a port of Swift's `gyb.py` to Lua that predates [0013](../decisions/0013-upstream-builds-keep-their-python.md) and stays while it is correct and tested. An interpreter covers the Python its code blocks use, down to float formatting, arbitrary-precision integers and the Mersenne Twister of `random.Random`. A construct it does not implement raises an error rather than being guessed at.
 
 ## Backports: the newest behaviour, and absence where it is unsafe
 
 A backport makes an API that a later release added work on the release the port runs on. Its policy is set out in [the platform](../platform.md#the-backports); the choices below are how it is carried out.
 
-**Each band is one library for a range of releases.** A library is built for one release: the one its imports are checked against. A source file whose exported symbols that release already exports is left out, and its symbols are re-exported from the system's library, so a newer release never holds two classes of one name. The reason is that two copies of a class would be two classes. The backports are one per process for the same reason.
+**Each framework is one library, built for one release.** There are no bands: `backports_min_ios` is the only minimum, and a library is built for the release its imports are checked against. Where the system has a member of its own, the library does not add it, so a newer release never holds two classes of one name. The reason is that two copies of a class would be two classes. The backports are one per process for the same reason.
 
 **The newest behaviour is carried.** Where a later release corrected a number, the corrected one is used. `NSUnitMass`'s stone is the plain case: iOS 10 converts a stone by 0.157473, the reciprocal of the 6.35029 it should be, and a program that asks for stones is asking for stones. Each class's facts say what was read, from which library and release, and what was left out on purpose.
 

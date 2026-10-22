@@ -18,7 +18,7 @@ The project, its directory and its build targets carry the same name.
   Only the nodes marked dirty are laid out again.
 - **Animation.** Ordinary properties are handed to `UIView.animate`; data that UIKit cannot interpolate is driven frame
   by frame by a display-link animator.
-- **Combine** is `frameworks/Combine`, built with the same Swift runtime; it is a module named `Combine`, so apps write `import Combine`.
+- **Combine** is the package `combine` (OpenCombine with our patches), built with the same Swift runtime; it is a module named `Combine`, so apps write `import Combine`. The component `frameworks/Combine` holds the tests that run against it.
 - **Observation cost.** Tracking what a body reads costs under 1% of a body evaluation.
 - **Field reflection checks itself.** The reflection that finds `@State` and the other property wrappers in a view checks
   itself once. If the runtime's entry points ever disagree with Swift's layout, it falls back to the struct's type

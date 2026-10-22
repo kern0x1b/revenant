@@ -2,8 +2,10 @@
 
 The Matter framework is carried by building connectedhomeip's own Darwin framework for the port's release. `revenant@matter`
 (`packages/m/matter/xmake.lua`) runs that project's GN build of `libCHIP.a` with the port's toolchain, then compiles the
-framework's hundred Objective-C++ sources over it and links `libMatterBackports.dylib`. Nothing here is re-typed: the
-classes are the Matter SDK's classes, and their behaviour is connectedhomeip's.
+framework's hundred Objective-C++ sources over it. It stops before the link: the recipe raises at `xmake.lua:229`, because
+`libMatterBackports` needs the Backports libraries, which are project targets a package cannot depend on yet. The link
+measurements below are what the campaign produced by hand. Nothing here is re-typed: the classes are the Matter SDK's
+classes, and their behaviour is connectedhomeip's.
 
 The package's crypto is BoringSSL. The recipe sets `chip_crypto="boringssl"` in the GN arguments, and it fetches BoringSSL at
 commit `9cac8a6` into the build tree under `third_party/boringssl/repo/src`, which this package does not change.
@@ -13,9 +15,10 @@ commit `9cac8a6` into the build tree under `third_party/boringssl/repo/src`, whi
 - **All 125 objects compile for `armv7-apple-ios6.1.3`**: the 100 `MTR*` Objective-C++ of the framework and the 23
   app-layer C++ files its own Xcode target carries, read out of that target's Sources phase, plus the two generated
   Apple-spelling categories. The objects are built in the package's own source tree.
-- **The link succeeds** with `-Wl,-no_implicit_dylibs` (see the flag's reason below): `libMatterBackports.dylib`,
-  45 110 492 bytes, `MH_MAGIC ARM V7`, 1506 exported `MTR*` classes, 24 777 exported symbols, 382 undefined, install
-  name `/usr/lib/revenant/org.revenant.backports/libMatterBackports.dylib`.
+- **The link, run by hand over the 125 objects, succeeds** with `-Wl,-no_implicit_dylibs` (see the flag's reason below):
+  `libMatterBackports.dylib`, 45 110 492 bytes, `MH_MAGIC ARM V7`, 1506 exported `MTR*` classes, 24 777 exported
+  symbols, 382 undefined, install name `/usr/lib/revenant/org.revenant.backports/libMatterBackports.dylib`. The recipe
+  does not carry the flag and does not reach its own link: the raise above stops it first.
 - The four link experiments that found the flag, each one a link over the 125 objects: dropping the two sources the
   framework's target shares with `libCHIP.a` (`DescriptorCluster.cpp`, `AttributePersistenceProviderInstance.cpp`)
   still asserts, so the duplicate hypothesis is out; `-Wl,-no_implicit_dylibs` **links**; only `-lc++` without `-lc++abi`

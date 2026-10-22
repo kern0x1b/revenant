@@ -1,14 +1,14 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "UniformTypeIdentifiers")
 local fixture = path.join(backports, "tests", "UniformTypeIdentifiers", "main.swift")
-local out = path.join(backports, "..", "..", "build", "tests", "UniformTypeIdentifiers")
 
 local function swiftc(args)
     os.vrunv("xcrun", table.join({"swiftc", "-O"}, args))
 end
 
 function main()
-    os.mkdir(out)
+    local out = workspace.run("backports-tests", "UniformTypeIdentifiers")
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     swiftc({fixture, "-o", host})

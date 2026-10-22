@@ -4,7 +4,7 @@ public struct TimelineEntryRelevance: Codable, Hashable {
     public var score: Float
     public var duration: TimeInterval
 
-    public init(score: Float, duration: TimeInterval) {
+    public init(score: Float, duration: TimeInterval = 0.0) {
         self.score = score
         self.duration = duration
     }
@@ -20,8 +20,8 @@ extension TimelineEntry {
 }
 
 public struct Timeline<EntryType: TimelineEntry> {
-    public var entries: [EntryType]
-    public var policy: TimelineReloadPolicy
+    public let entries: [EntryType]
+    public let policy: TimelineReloadPolicy
 
     public init(entries: [EntryType], policy: TimelineReloadPolicy) {
         self.entries = entries
@@ -42,8 +42,8 @@ public struct TimelineReloadPolicy: Equatable {
         self.kind = kind
     }
 
-    public static var atEnd: TimelineReloadPolicy { TimelineReloadPolicy(.atEnd) }
-    public static var never: TimelineReloadPolicy { TimelineReloadPolicy(.never) }
+    public static let atEnd = TimelineReloadPolicy(.atEnd)
+    public static let never = TimelineReloadPolicy(.never)
 
     public static func after(_ date: Date) -> TimelineReloadPolicy {
         TimelineReloadPolicy(.after(date))

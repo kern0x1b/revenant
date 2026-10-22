@@ -29,7 +29,9 @@ out as the one module under `src/` of the install: `Sources/OpenCombine` as `src
 header of its gyb templates as `src/utils`. It then compiles `src/Combine` into `libCombine.a`
 and its module, and the C++ helper into `libCombineHelpers.a`. With `sources = true` it
 installs the tree alone and compiles nothing, for a project that builds the module itself:
-revenant does, in `frameworks/Combine`.
+no target in the repository asks for that mode, because the recipe builds the module; the
+`frameworks/Combine` component compiles upstream's own tests out of the tree the recipe
+installs either way.
 
 ## The patches
 

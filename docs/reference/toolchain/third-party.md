@@ -9,7 +9,7 @@ under `licenses/` when it installs.
 The point of this file is that a reader can tell, without building anything,
 exactly what a port built with the toolchain links against, what builds it, and under
 what terms. Versions and licenses here are taken from the package definitions, and
-package paths are relative to `toolchain/`. The packages are described in
+package paths are relative to the checkout's root. The packages are described in
 [packages](packages.md).
 
 ## Libraries a port links

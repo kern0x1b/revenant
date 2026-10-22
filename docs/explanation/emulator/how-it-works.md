@@ -2,8 +2,8 @@
 
 ## What it does
 
-- Emulates the devices in `emulator profile --list`: iPhone 2G, 3G, 3GS, 4 and 4S, iPod touch 1, 2 and 4, iPad and
-  iPad 2.
+- Emulates the devices in `emulator profile --list`, which names them by product type: iPhone 2G, 3G, 3GS, 4 and
+  4S (iPhone1,1 to iPhone4,1), iPod touch 1, 2 and 4 (iPod1,1, iPod2,1, iPod4,1), iPad and iPad 2 (iPad1,1, iPad2,1).
 - Boots real firmware root filesystems from iPhone OS 3.0 through iOS 6.1.3 in Revenant's acceptance runs; the kernel
   ABIs it knows are listed by `emulator abi`.
 - Draws the guest's OpenGL ES on a host Vulkan driver, plays its audio, delivers touch and button input, and answers

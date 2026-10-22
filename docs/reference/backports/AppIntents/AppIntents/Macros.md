@@ -1,11 +1,12 @@
 # The macro rows, and why the expansion cannot be compared on this machine
 
-Nineteen rows name a macro the framework's compiler expands: `AppIntentsMacros` (16 — `AppEntity`,
-`AppEnum`, `AppIntent`, `AssistantEntity`, `AssistantEnum`, `AssistantIntent`, `ComputedProperty`
-×5, `DeferredProperty` ×2, `UnionValue`) and `TipKitMacros` (2 — `Rule`, `Parameter`).
-`Sources/AppIntents/Remaining.swift` and `Sources/TipKit/Predicates.swift` **declare** them with the
-framework's own `@attached` attributes; what is missing is the plugin that expands them, and that
-plugin is Apple's, on Apple's releases, and is not here.
+Nineteen rows name a macro the framework's compiler expands: sixteen use `AppIntentsMacros` (`AppEntity`,
+`AppEnum`, `AppIntent`, `AssistantEntity`, `AssistantEnum`, `AssistantIntent`, `ComputedProperty`,
+`DeferredProperty`, `UnionValue`) and three use `TipKitMacros` (over its two macros, `Rule` and
+`Parameter`). `frameworks/Backports/src/AppIntents/Remaining.swift` **declares** the AppIntents ones
+with the framework's own `@attached` attributes; the TipKit two are declared nowhere in the tree, so
+their three rows name a macro no source here carries. What is missing either way is the plugin that
+expands them, and that plugin is Apple's, on Apple's releases, and is not here.
 
 **Measured: Apple's plugin is not reachable on this machine.** The toolchain the packages build
 against (`revenant@swift`, 6.4) ships two host plugins and no more:
@@ -43,9 +44,9 @@ matches the interface's declared attachments exactly, and the hand-checked expan
 example was checked by hand and is not kept in the repository.
 
 **The loader is in place.** `415a119e "Let a port expand a macro plugin its dependencies ship"` is
-cherry-picked here (`-x`, so both series carry the same commit): `rules/swift/xmake.lua:182` adds each
-dependency's `REVENANT_SWIFT_PLUGINS` folders as `-plugin-path`, so a package that builds a plugin can
-be found by a port that uses it. What remains is the plugin itself, for the host, built with
+cherry-picked here (`-x`, so both series carry the same commit): `toolchain/rules/swift/xmake.lua`
+adds each dependency's `REVENANT_SWIFT_PLUGINS` folders as `-plugin-path`, so a package that builds a
+plugin can be found by a port that uses it. What remains is the plugin itself, for the host, built with
 swift-syntax (Apache-2.0), and the 19 rows move when it exists and not before.
 
 ## The `memberAttribute` role, and the rows that are open because of it

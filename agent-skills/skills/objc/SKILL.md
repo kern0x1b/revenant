@@ -112,9 +112,13 @@ The file holds Objective-C classes only. C functions and constants (GCD, CoreGra
 checked by the import check of every build (skill `build`).
 
 Revenant's `revenant@apple-compat` carries shims for C calls of the system library that a later
-release added or changed: `arc4random_buf` (4.3), `openat`, `fchmodat`, `unlinkat`, `fdopendir`
-(8.0), `clock_gettime`, `clock_getres` (10.0), `aligned_alloc` (13.0), and
-`dispatch_get_global_queue` given a class of service (8.0) — one header each under
+release added or changed: `arc4random_buf` (4.3), `memset_s` (7.0), `openat`, `fchmodat`,
+`fstatat`, `unlinkat`, `fdopendir` (8.0), `clock_gettime`, `clock_getres`,
+`clock_gettime_nsec_np`, `os_system_version_get_current_version` (10.0), `aligned_alloc` (13.0),
+and the `dispatch_` calls of a libdispatch that took a block (`dispatch_get_global_queue` given a
+class of service (8.0), `dispatch_after`, `dispatch_async`, `dispatch_sync`, `dispatch_group_async`,
+`dispatch_group_notify`, `dispatch_queue_create`, `dispatch_resume`,
+`dispatch_source_set_event_handler`) — one header each under
 `include/revenant/` of the package at the pinned repository tag. A target names the calls it takes,
 and the shim replaces that call in every file of the target:
 

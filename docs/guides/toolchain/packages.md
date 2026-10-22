@@ -93,6 +93,7 @@ The `swift` rule adds those folders to the compile of any target that requires t
 - **A `copy` that matches nothing is silent.** A download that leaves one directory is entered by the build, so `os.curdir()` is that directory. A copy written against the level above matches nothing and reports nothing, so a recipe that lays out an install asserts what it laid down.
 - **A library built with a SOVERSION.** Its build tree holds `libfoo.dylib` as a link to `libfoo.1.2.3.dylib`. A copy of `*.dylib` that matches the unversioned name copies the link, not the file, and the package ends with a dangling symlink. Copy the real file, and recreate the short name with `os.symlink` if consumers link against it.
 - **Two `xmake` processes on one project** hold each other's package locks. A build that appears to make no progress for a long time is usually a second one left over from an earlier run.
-- **A build cut short** can leave `.git/index.lock` in the package's source cache under `~/.xmake/cache/packages/`. Remove that lock file before building again.
+- **A build cut short** can leave `.git/index.lock` in the package's source cache under
+  `~/.revenant/cache/xmake-global/.xmake/cache/packages/`. Remove that lock file before building again.
 - **xmake asks before installing a package**, and a command run in the background waits for that answer forever. Pass `-y` there.
 - **A changed backport source or build module** is a different package with its own install path, but a port caches how it resolved its packages. `xmake f -c` installs the new one; `xmake f` alone keeps the port linking against the install it had.

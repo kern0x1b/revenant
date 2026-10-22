@@ -10,7 +10,7 @@ have the same first two functions under different names: `root(...)` in one, `me
 member's folder, and `revenant(...)`, the checkout's root. They differ in everything else. SwiftUI's tools use the
 addon's workspace (`run`, `fresh`, `sdk`, the `demo` target). WebKit's tools use `where(name)` (xmake's package
 folder for WebKit), `engine_source`, the packaging `patches` and `recipe`, and `arguments(argv, flags)`, a
-flag parser. Eighteen tools and three device tests call these, and the copies have already diverged.
+flag parser. Fifteen tools and three device tests call these, and the copies have already diverged.
 
 The three device tests in `frameworks/WebKit/tests/device/` import the same file with `rootdir` into `tools/lib`,
 which is the path form ADR 0004 forbids for the addon's own modules. That import is of the member's file, so it is
@@ -22,7 +22,7 @@ allowed, but it is one more reason the helper's location matters.
 - **B. One addon module with the shared part, and a thin binding per member.** The addon module (for example
   `toolchain/modules/member.lua`, imported as `@addon.revenant.member`) holds the path helpers that take the calling
   tool's folder, and the argument parser, which is not specific to any member. Each member's `lib/tree.lua` keeps
-  only its own functions and delegates the shared ones, so the 18 call sites do not change.
+  only its own functions and delegates the shared ones, so the call sites do not change.
 - **C. Move everything into the addon.** The WebKit and SwiftUI functions are specific to their members, so this
   moves member knowledge into the addon. Rejected.
 

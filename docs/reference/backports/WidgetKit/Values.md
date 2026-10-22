@@ -3,6 +3,12 @@
 What `frameworks/Backports/src/WidgetKit/Values.swift` carries, what it was checked against, and where each value comes
 from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain.
 
+`Timeline.swift` carried a second, older copy of all ten types below: a `Double` score, a `String` raw
+`WidgetFamily`, and enum-valued rendering, accent, detail and mounting types. It no longer does. The
+ten are declared once, here, in the 26.2 interface's shape: the `Float` score, the `duration` default,
+`Timeline`'s `let` members and the two static `let` policies. `Timeline.swift` keeps the provider
+context, the relevance types, the activity family, and the texture and push values.
+
 ## What is carried
 
 Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containers below) and
@@ -10,7 +16,7 @@ Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containe
 
 | Type | Rows | Source of the shape |
 | --- | --- | --- |
-| `TimelineEntryRelevance` (score, duration, Codable, Hashable) | 9 | swift.tsv |
+| `TimelineEntryRelevance` (score: `Float`, duration with a default of 0, Codable, Hashable) | 9 | swift.tsv |
 | `TimelineEntry` (date, relevance with a nil default) | 4 | swift.tsv |
 | `Timeline<EntryType>` (entries, policy, init) | 4 | swift.tsv |
 | `TimelineReloadPolicy` (atEnd, never, after(_:), ==) | 5 | swift.tsv |
@@ -25,9 +31,9 @@ Spec rows: `the deleted registry package spec/WidgetKit/swift.tsv` (the containe
 the explicit initialisers and `after(_:)`, and the members the conformances synthesise (`==`,
 `hash(into:)`, `hashValue`, `init(from:)`, `encode(to:)`, `init(rawValue:)`, `rawValue`, `RawValue`).
 
-Not carried: `WidgetRelevance`, `WidgetRelevanceAttribute`, `WidgetRelevanceGroup`, `WidgetInfo`,
-`TimelineProvider` and the other protocols that name AppIntents or Intents types. They belong to the
-AppIntents and Intents groups, not to this file.
+Not carried here: `WidgetRelevance`, `WidgetRelevanceAttribute`, `WidgetRelevanceGroup`, `WidgetInfo`,
+`TimelineProvider` and the other protocols that name AppIntents or Intents types. They belong to
+`Timeline.swift` and the AppIntents and Intents groups, not to this file.
 
 ## WidgetFamily raw values
 
@@ -105,7 +111,7 @@ the interpolation prints the case name. The probe now prints 26 lines, identical
 
 Toolchain: revenant@swift 6.4.0. SDK: iPhoneOS16.4 from the `iphoneos-sdk` 16.4 package. Runtime
 resource: the same run-folder farm as the AuthenticationServices error group, over the installed
-swift-runtime 6.4.0 variant named in the CKError facts.
+swift-runtime 6.4.0 variant named in [CKError](../CloudKit/CKError.md).
 
 - Typecheck: `swiftc -target armv7-apple-ios6.1.3 -sdk <iPhoneOS16.4.sdk> -resource-dir <farm>
   -vfsoverlay <variant>/share/lift/vfs.yaml -parse-as-library -typecheck files/WidgetKit/Values.swift`
@@ -115,8 +121,8 @@ swift-runtime 6.4.0 variant named in the CKError facts.
 
 ## Against the generated skeleton
 
-`swiftcode` rendered WidgetKit's skeleton (395 declarations, `tools/gen.lua swiftcode`, 26.2 SDK). The file
-was checked against it:
+The skeleton was rendered by the tree's `swiftcode` renderer at the time (`tools/gen.lua swiftcode`,
+since removed, 395 declarations, 26.2 SDK). The file was checked against it:
 
 - Conformances: the skeleton gives `WidgetFamily` Int, CustomDebugStringConvertible,
   CustomStringConvertible, Equatable, Hashable, RawRepresentable and Sendable; `WidgetRenderingMode`
@@ -138,5 +144,6 @@ was checked against it:
 
 - The object was not linked and not run on an armv7 image, the emulator or a 4S.
 - The accessory raw values against an iOS 26.2 runtime (see above).
-- The recipe does not name `files/WidgetKit`. Wiring waits for the swift-runtime install, which is
-  blocked on the lift's measured set.
+- The package does not build this file today: `revenant@widgetkit` refuses on load because `Values.swift`
+  and `Timeline.swift` both declare `TimelineEntry`, `TimelineEntryRelevance` and `Timeline`. The file
+  compiles on its own, as measured above.

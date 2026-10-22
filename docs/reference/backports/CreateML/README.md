@@ -1,7 +1,10 @@
 # CreateML and CreateMLComponents, for the port's armv7 releases
 
-Four Swift modules and the CoreML overlay they need, built for armv7 by `packages/c/createml/xmake.lua` against the
-`revenant@swift-runtime` a port carries. What follows was checked against the sources in `frameworks/Backports/src/`.
+Four Swift modules and the CoreML overlay they need, in `frameworks/Backports/src/`, which
+`packages/c/createml/xmake.lua` would build for armv7 against the `revenant@swift-runtime` a port
+carries. It does not build them today: the recipe refuses on load, because the CoreML overlay's
+`ShapedArray.swift` names `MLMultiArrayDataType`, which the SDK declares for iOS 11 and later. What
+follows was checked against the sources in `frameworks/Backports/src/`.
 
 | Module | Holds |
 | --- | --- |

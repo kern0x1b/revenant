@@ -29,7 +29,7 @@ if is_plat("iphoneos") then
         includes("@addon/revenant/emulate")
     end
     if whole then
-        add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
         add_requires("revenant@libcxx", {alias = "libcxx"})
     end
     add_requires("revenant@apple-compat", {alias = "apple-compat"})

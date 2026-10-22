@@ -139,7 +139,8 @@ function provider(paths)
                     if type_length and module == owner then
                         local type_name = after:sub(1, tonumber(type_length))
                         local kind = after:sub(tonumber(type_length) + 1, tonumber(type_length) + 1)
-                        if kind == "V" or kind == "C" or kind == "O" or kind == "P" then
+                        local protocol_descriptor = kind == "M" and after:sub(tonumber(type_length) + 2, tonumber(type_length) + 2) == "p"
+                        if kind == "V" or kind == "C" or kind == "O" or kind == "P" or protocol_descriptor then
                             index.swift_types[module .. "." .. type_name] = true
                         end
                     end

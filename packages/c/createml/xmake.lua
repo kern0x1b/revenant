@@ -3,7 +3,7 @@ package("createml")
     set_description("CreateML and CreateMLComponents for the port's armv7 releases: on-device training of the tabular regressors and classifiers, over the device's own BLAS and LAPACK, as the Swift modules TabularData, CoreML, CreateMLComponents and CreateML built against the revenant@swift-runtime a port carries")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
-    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", default = "16.4", type = "string"})
+    add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("recipe", {description = "The digest of this recipe and the Swift sources it builds, so a changed declaration is a different package.", default = createml_sources_digest, type = "string", readonly = true})

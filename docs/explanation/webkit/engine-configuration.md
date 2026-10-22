@@ -61,11 +61,11 @@ CFNetwork, AVFoundation, CoreMedia, CoreAudio, AudioToolbox, Accelerate, IOKit, 
   `__gxx_personality_sj0`. iOS ships only the DWARF personality, `__gxx_personality_v0`.
 - **ICU `--disable-renaming`.** WebKit defines `U_DISABLE_RENAMING=1` on Apple platforms, because Apple's
   `libicucore` exports unsuffixed names. A stock ICU build exports `u_charDirection_74`, so it is built the same way.
-- **Headers from the current SDK, the runtime from the old one.** C++23 needs a libc++ newer than anything in the iOS
-  10.3 SDK, so the compile takes its headers from the current Xcode SDK with `-nostdinc++` and
-  `-isystem .../iPhoneOS26.5.sdk/usr/include/c++/v1`, and its C library and frameworks from the old SDK, with
+- **Headers and runtime from our own libc++.** C++23 needs a libc++ newer than anything in the iOS
+  10.3 SDK, so the compile takes its headers from the `libcxx` package with `-nostdinc++` and
+  `-isystem .../include/c++/v1`, and its C library and frameworks from the old SDK, with
   `-target armv7-apple-ios6.0` and `-D_LIBCPP_DISABLE_AVAILABILITY`. Headers are enough to compile; the runtime is
-  bundled, as LightKit bundles its own.
+  bundled, as the LightweightBrowser bundles its own.
 
 ## Changes outside the engine's own guards
 
