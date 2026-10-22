@@ -4,12 +4,12 @@ option("swiftui_perf", {default = false, showmenu = true,
                         description = "Have the demo application run its timing scenarios after launch and quit."})
 
 local component = get_config("component")
-if component ~= "" and component ~= "SwiftUI" then
+if component ~= "" and component ~= "SwiftUI" and component ~= "SwiftUIDemo" then
     return
 end
 
 if is_plat("iphoneos") then
-    if component == "SwiftUI" then
+    if component == "SwiftUI" or component == "SwiftUIDemo" then
         add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
         add_requires("revenant@libcxx", {alias = "libcxx"})
         add_requires("revenant@combine", {alias = "combine"})
@@ -61,6 +61,10 @@ if is_plat("iphoneos") then
             os.vrunv(os.programfile(), {"l", path.join(target:scriptdir(), "tools", "coverage.lua"), "--check", "--before-build"})
         end)
 
+    if component == "SwiftUI" then
+        return
+    end
+
     target("SwiftUIDemo")
         demo_application("space.kern0x1b.swiftui.demo", "SwiftUI")
         if has_config("swiftui_perf") then
@@ -74,7 +78,7 @@ if is_plat("iphoneos") then
             add_values("app.plist", "SwiftUISnapshotOnly=" .. only)
         end
 
-    if component == "SwiftUI" then
+    if component == "SwiftUIDemo" then
         return
     end
 

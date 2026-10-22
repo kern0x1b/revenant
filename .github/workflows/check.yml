@@ -251,9 +251,9 @@ jobs:
         timeout-minutes: 20
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
-      - name: Configure the SwiftUI component
+      - name: Configure the SwiftUI demo's component
         timeout-minutes: 45
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUI -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Build the demo and package it with its platform package
         timeout-minutes: 60
