@@ -6,7 +6,7 @@ local addon = path.join(os.scriptdir(), "addon")
 local toolchain = path.directory(os.scriptdir())
 add_requires("revenant@ld64 956.6", {alias = "ld64"})
 add_requires("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
-add_requires("revenant@iphoneos-sdk 16.4", {alias = "iphoneos-sdk"})
+add_requires("revenant@iphoneos-sdk 26.2", {alias = "iphoneos-sdk"})
 add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 
 local light = {"assets_extract_test", "binding_test", "checkout_test", "compat_test", "descriptions_test", "digest_test", "firmware_test",
