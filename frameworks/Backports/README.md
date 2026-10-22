@@ -69,7 +69,6 @@ These framework targets fail before building on iOS 6 while Telegram's demanded 
 - `NetworkBackports`: Telegram needs the Swift `NWProtocolTCP.Options`, `NWListener`, `NWProtocolFramer` and `NWProtocolFramerImplementation` overlays. `NWConnection`, `NWEndpoint` and `NWParameters` are implemented.
 - `LinkPresentationBackports`: TelegramCore imports `LinkPresentation` and uses `LPMetadataProvider`.
 - `WebKitBackports`: BrowserUI needs `WKSnapshotConfiguration`, `WKContextMenuElementInfo`, `WKDownloadDelegate`, `WKURLSchemeHandler` and `WKURLSchemeTask`.
-- `IntentsBackports`: TelegramIntents needs `INPerson`, `INPersonHandle` and `INSendMessageIntent`.
 
 `WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
 
