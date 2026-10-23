@@ -1,0 +1,1416 @@
+diff -ruN a/llvm-project/libcxx/include/c++/v1/algorithm b/llvm-project/libcxx/include/c++/v1/algorithm
+--- a/llvm-project/libcxx/include/c++/v1/algorithm
++++ b/llvm-project/libcxx/include/c++/v1/algorithm
+@@ -2123,4 +2123,21 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER == 14
++#    include <execution>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <bit>
++#    include <concepts>
++#    include <cstdlib>
++#    include <cstring>
++#    include <iterator>
++#    include <memory>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_ALGORITHM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/any b/llvm-project/libcxx/include/c++/v1/any
+--- a/llvm-project/libcxx/include/c++/v1/any
++++ b/llvm-project/libcxx/include/c++/v1/any
+@@ -580,4 +580,20 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 17
++#    include <chrono>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <iterator>
++#    include <memory>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <variant>
++#  endif
++
+ #endif // _LIBCPP_ANY
+diff -ruN a/llvm-project/libcxx/include/c++/v1/array b/llvm-project/libcxx/include/c++/v1/array
+--- a/llvm-project/libcxx/include/c++/v1/array
++++ b/llvm-project/libcxx/include/c++/v1/array
+@@ -606,4 +606,14 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iterator>
++#    include <new>
++#    include <type_traits>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_ARRAY
+diff -ruN a/llvm-project/libcxx/include/c++/v1/atomic b/llvm-project/libcxx/include/c++/v1/atomic
+--- a/llvm-project/libcxx/include/c++/v1/atomic
++++ b/llvm-project/libcxx/include/c++/v1/atomic
+@@ -636,4 +636,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cmath>
++#    include <compare>
++#    include <cstddef>
++#    include <cstdlib>
++#    include <cstring>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_ATOMIC
+diff -ruN a/llvm-project/libcxx/include/c++/v1/barrier b/llvm-project/libcxx/include/c++/v1/barrier
+--- a/llvm-project/libcxx/include/c++/v1/barrier
++++ b/llvm-project/libcxx/include/c++/v1/barrier
+@@ -202,4 +202,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <iterator>
++#    include <memory>
++#    include <stdexcept>
++#    include <variant>
++#  endif
++
+ #endif // _LIBCPP_BARRIER
+diff -ruN a/llvm-project/libcxx/include/c++/v1/bit b/llvm-project/libcxx/include/c++/v1/bit
+--- a/llvm-project/libcxx/include/c++/v1/bit
++++ b/llvm-project/libcxx/include/c++/v1/bit
+@@ -98,4 +98,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <limits>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_BIT
+diff -ruN a/llvm-project/libcxx/include/c++/v1/bitset b/llvm-project/libcxx/include/c++/v1/bitset
+--- a/llvm-project/libcxx/include/c++/v1/bitset
++++ b/llvm-project/libcxx/include/c++/v1/bitset
+@@ -979,4 +979,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstdlib>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_BITSET
+diff -ruN a/llvm-project/libcxx/include/c++/v1/charconv b/llvm-project/libcxx/include/c++/v1/charconv
+--- a/llvm-project/libcxx/include/c++/v1/charconv
++++ b/llvm-project/libcxx/include/c++/v1/charconv
+@@ -114,4 +114,17 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cmath>
++#    include <concepts>
++#    include <cstddef>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <cstring>
++#    include <iosfwd>
++#    include <limits>
++#    include <new>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_CHARCONV
+diff -ruN a/llvm-project/libcxx/include/c++/v1/chrono b/llvm-project/libcxx/include/c++/v1/chrono
+--- a/llvm-project/libcxx/include/c++/v1/chrono
++++ b/llvm-project/libcxx/include/c++/v1/chrono
+@@ -1174,4 +1174,28 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 17
++#    include <cstdint>
++#    include <stdexcept>
++#    include <string_view>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <bit>
++#    include <concepts>
++#    include <cstring>
++#    include <forward_list>
++#    include <string>
++#    include <tuple>
++#    include <vector>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER == 20
++#    include <charconv>
++#    if _LIBCPP_HAS_LOCALIZATION
++#      include <locale>
++#      include <ostream>
++#    endif
++#  endif
++
+ #endif // _LIBCPP_CHRONO
+diff -ruN a/llvm-project/libcxx/include/c++/v1/cmath b/llvm-project/libcxx/include/c++/v1/cmath
+--- a/llvm-project/libcxx/include/c++/v1/cmath
++++ b/llvm-project/libcxx/include/c++/v1/cmath
+@@ -617,4 +617,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_CMATH
+diff -ruN a/llvm-project/libcxx/include/c++/v1/codecvt b/llvm-project/libcxx/include/c++/v1/codecvt
+--- a/llvm-project/libcxx/include/c++/v1/codecvt
++++ b/llvm-project/libcxx/include/c++/v1/codecvt
+@@ -605,4 +605,20 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstddef>
++#    include <cstdlib>
++#    include <cstring>
++#    include <initializer_list>
++#    include <iosfwd>
++#    include <limits>
++#    include <mutex>
++#    include <new>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_CODECVT
+diff -ruN a/llvm-project/libcxx/include/c++/v1/compare b/llvm-project/libcxx/include/c++/v1/compare
+--- a/llvm-project/libcxx/include/c++/v1/compare
++++ b/llvm-project/libcxx/include/c++/v1/compare
+@@ -174,4 +174,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cmath>
++#    include <cstddef>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_COMPARE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/complex b/llvm-project/libcxx/include/c++/v1/complex
+--- a/llvm-project/libcxx/include/c++/v1/complex
++++ b/llvm-project/libcxx/include/c++/v1/complex
+@@ -1491,4 +1491,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <iosfwd>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_COMPLEX
+diff -ruN a/llvm-project/libcxx/include/c++/v1/concepts b/llvm-project/libcxx/include/c++/v1/concepts
+--- a/llvm-project/libcxx/include/c++/v1/concepts
++++ b/llvm-project/libcxx/include/c++/v1/concepts
+@@ -171,4 +171,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_CONCEPTS
+diff -ruN a/llvm-project/libcxx/include/c++/v1/condition_variable b/llvm-project/libcxx/include/c++/v1/condition_variable
+--- a/llvm-project/libcxx/include/c++/v1/condition_variable
++++ b/llvm-project/libcxx/include/c++/v1/condition_variable
+@@ -370,4 +370,19 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <cstring>
++#    include <initializer_list>
++#    include <iosfwd>
++#    include <new>
++#    include <stdexcept>
++#    include <system_error>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_CONDITION_VARIABLE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/coroutine b/llvm-project/libcxx/include/c++/v1/coroutine
+--- a/llvm-project/libcxx/include/c++/v1/coroutine
++++ b/llvm-project/libcxx/include/c++/v1/coroutine
+@@ -69,4 +69,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <iosfwd>
++#    include <limits>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_COROUTINE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/cwchar b/llvm-project/libcxx/include/c++/v1/cwchar
+--- a/llvm-project/libcxx/include/c++/v1/cwchar
++++ b/llvm-project/libcxx/include/c++/v1/cwchar
+@@ -263,4 +263,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#  endif
++
+ #endif // _LIBCPP_CWCHAR
+diff -ruN a/llvm-project/libcxx/include/c++/v1/deque b/llvm-project/libcxx/include/c++/v1/deque
+--- a/llvm-project/libcxx/include/c++/v1/deque
++++ b/llvm-project/libcxx/include/c++/v1/deque
+@@ -2559,4 +2559,16 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <functional>
++#    include <iosfwd>
++#    include <iterator>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_DEQUE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/exception b/llvm-project/libcxx/include/c++/v1/exception
+--- a/llvm-project/libcxx/include/c++/v1/exception
++++ b/llvm-project/libcxx/include/c++/v1/exception
+@@ -102,4 +102,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <new>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_EXCEPTION
+diff -ruN a/llvm-project/libcxx/include/c++/v1/execution b/llvm-project/libcxx/include/c++/v1/execution
+--- a/llvm-project/libcxx/include/c++/v1/execution
++++ b/llvm-project/libcxx/include/c++/v1/execution
+@@ -160,4 +160,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#  endif
++
+ #endif // _LIBCPP_EXECUTION
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/iterator b/llvm-project/libcxx/include/c++/v1/experimental/iterator
+--- a/llvm-project/libcxx/include/c++/v1/experimental/iterator
++++ b/llvm-project/libcxx/include/c++/v1/experimental/iterator
+@@ -137,4 +137,10 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <iosfwd>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_EXPERIMENTAL_ITERATOR
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/memory b/llvm-project/libcxx/include/c++/v1/experimental/memory
+--- a/llvm-project/libcxx/include/c++/v1/experimental/memory
++++ b/llvm-project/libcxx/include/c++/v1/experimental/memory
+@@ -200,4 +200,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <limits>
++#  endif
++
+ #endif /* _LIBCPP_EXPERIMENTAL_MEMORY */
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/propagate_const b/llvm-project/libcxx/include/c++/v1/experimental/propagate_const
+--- a/llvm-project/libcxx/include/c++/v1/experimental/propagate_const
++++ b/llvm-project/libcxx/include/c++/v1/experimental/propagate_const
+@@ -494,4 +494,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_EXPERIMENTAL_PROPAGATE_CONST
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/simd b/llvm-project/libcxx/include/c++/v1/experimental/simd
+--- a/llvm-project/libcxx/include/c++/v1/experimental/simd
++++ b/llvm-project/libcxx/include/c++/v1/experimental/simd
+@@ -93,4 +93,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#  endif
++
+ #endif /* _LIBCPP_EXPERIMENTAL_SIMD */
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/type_traits b/llvm-project/libcxx/include/c++/v1/experimental/type_traits
+--- a/llvm-project/libcxx/include/c++/v1/experimental/type_traits
++++ b/llvm-project/libcxx/include/c++/v1/experimental/type_traits
+@@ -158,4 +158,8 @@
+ #  endif /* _LIBCPP_STD_VER >= 14 */
+ #endif   // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#    if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#      include <cstddef>
++#    endif
++
+ #endif /* _LIBCPP_EXPERIMENTAL_TYPE_TRAITS */
+diff -ruN a/llvm-project/libcxx/include/c++/v1/experimental/utility b/llvm-project/libcxx/include/c++/v1/experimental/utility
+--- a/llvm-project/libcxx/include/c++/v1/experimental/utility
++++ b/llvm-project/libcxx/include/c++/v1/experimental/utility
+@@ -51,4 +51,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#  endif
++
+ #endif /* _LIBCPP_EXPERIMENTAL_UTILITY */
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ext/hash_map b/llvm-project/libcxx/include/c++/v1/ext/hash_map
+--- a/llvm-project/libcxx/include/c++/v1/ext/hash_map
++++ b/llvm-project/libcxx/include/c++/v1/ext/hash_map
+@@ -832,4 +832,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <iterator>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_HASH_MAP
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ext/hash_set b/llvm-project/libcxx/include/c++/v1/ext/hash_set
+--- a/llvm-project/libcxx/include/c++/v1/ext/hash_set
++++ b/llvm-project/libcxx/include/c++/v1/ext/hash_set
+@@ -579,4 +579,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <iterator>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_HASH_SET
+diff -ruN a/llvm-project/libcxx/include/c++/v1/filesystem b/llvm-project/libcxx/include/c++/v1/filesystem
+--- a/llvm-project/libcxx/include/c++/v1/filesystem
++++ b/llvm-project/libcxx/include/c++/v1/filesystem
+@@ -578,4 +578,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstdlib>
++#    include <cstring>
++#    include <iosfwd>
++#    include <new>
++#    include <system_error>
++#  endif
++
+ #endif // _LIBCPP_FILESYSTEM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/format b/llvm-project/libcxx/include/c++/v1/format
+--- a/llvm-project/libcxx/include/c++/v1/format
++++ b/llvm-project/libcxx/include/c++/v1/format
+@@ -264,4 +264,31 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <array>
++#    include <cctype>
++#    include <cerrno>
++#    include <clocale>
++#    include <cmath>
++#    include <cstddef>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <cstring>
++#    include <initializer_list>
++#    include <limits>
++#    include <locale>
++#    include <new>
++#    include <optional>
++#    include <queue>
++#    include <stack>
++#    include <stdexcept>
++#    include <string>
++#    include <string_view>
++#    include <tuple>
++
++#    if _LIBCPP_HAS_WIDE_CHARACTERS
++#      include <cwchar>
++#    endif
++#  endif
++
+ #endif // _LIBCPP_FORMAT
+diff -ruN a/llvm-project/libcxx/include/c++/v1/forward_list b/llvm-project/libcxx/include/c++/v1/forward_list
+--- a/llvm-project/libcxx/include/c++/v1/forward_list
++++ b/llvm-project/libcxx/include/c++/v1/forward_list
+@@ -1615,4 +1615,19 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <atomic>
++#    include <concepts>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <cstring>
++#    include <functional>
++#    include <iosfwd>
++#    include <iterator>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_FORWARD_LIST
+diff -ruN a/llvm-project/libcxx/include/c++/v1/fstream b/llvm-project/libcxx/include/c++/v1/fstream
+--- a/llvm-project/libcxx/include/c++/v1/fstream
++++ b/llvm-project/libcxx/include/c++/v1/fstream
+@@ -1698,4 +1698,20 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <limits>
++#    include <mutex>
++#    include <new>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 23
++#    include <filesystem>
++#  endif
++
+ #endif // _LIBCPP_FSTREAM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/functional b/llvm-project/libcxx/include/c++/v1/functional
+--- a/llvm-project/libcxx/include/c++/v1/functional
++++ b/llvm-project/libcxx/include/c++/v1/functional
+@@ -608,4 +608,30 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && defined(_LIBCPP_CXX03_LANG)
++#    include <limits>
++#    include <new>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 14
++#    include <array>
++#    include <initializer_list>
++#    include <unordered_map>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <exception>
++#    include <iosfwd>
++#    include <memory>
++#    include <stdexcept>
++#    include <tuple>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#    include <vector>
++#  endif
++
+ #endif // _LIBCPP_FUNCTIONAL
+diff -ruN a/llvm-project/libcxx/include/c++/v1/future b/llvm-project/libcxx/include/c++/v1/future
+--- a/llvm-project/libcxx/include/c++/v1/future
++++ b/llvm-project/libcxx/include/c++/v1/future
+@@ -2085,4 +2085,17 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 17
++#    include <chrono>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <cstdlib>
++#    include <exception>
++#    include <iosfwd>
++#    include <system_error>
++#    include <thread>
++#  endif
++
+ #endif // _LIBCPP_FUTURE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/initializer_list b/llvm-project/libcxx/include/c++/v1/initializer_list
+--- a/llvm-project/libcxx/include/c++/v1/initializer_list
++++ b/llvm-project/libcxx/include/c++/v1/initializer_list
+@@ -110,4 +110,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#  endif
++
+ #endif // _LIBCPP_INITIALIZER_LIST
+diff -ruN a/llvm-project/libcxx/include/c++/v1/iomanip b/llvm-project/libcxx/include/c++/v1/iomanip
+--- a/llvm-project/libcxx/include/c++/v1/iomanip
++++ b/llvm-project/libcxx/include/c++/v1/iomanip
+@@ -559,4 +559,19 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <array>
++#    include <bitset>
++#    include <deque>
++#    include <format>
++#    include <functional>
++#    include <istream>
++#    include <ostream>
++#    include <print>
++#    include <queue>
++#    include <stack>
++#    include <unordered_map>
++#    include <vector>
++#  endif
++
+ #endif // _LIBCPP_IOMANIP
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ios b/llvm-project/libcxx/include/c++/v1/ios
+--- a/llvm-project/libcxx/include/c++/v1/ios
++++ b/llvm-project/libcxx/include/c++/v1/ios
+@@ -898,4 +898,20 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstddef>
++#    include <cstdlib>
++#    include <cstring>
++#    include <initializer_list>
++#    include <limits>
++#    include <mutex>
++#    include <new>
++#    include <stdexcept>
++#    include <system_error>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_IOS
+diff -ruN a/llvm-project/libcxx/include/c++/v1/istream b/llvm-project/libcxx/include/c++/v1/istream
+--- a/llvm-project/libcxx/include/c++/v1/istream
++++ b/llvm-project/libcxx/include/c++/v1/istream
+@@ -1426,4 +1426,11 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <iosfwd>
++#    include <ostream>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_ISTREAM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/iterator b/llvm-project/libcxx/include/c++/v1/iterator
+--- a/llvm-project/libcxx/include/c++/v1/iterator
++++ b/llvm-project/libcxx/include/c++/v1/iterator
+@@ -766,4 +766,18 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 17
++#    include <variant>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <exception>
++#    include <new>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_ITERATOR
+diff -ruN a/llvm-project/libcxx/include/c++/v1/latch b/llvm-project/libcxx/include/c++/v1/latch
+--- a/llvm-project/libcxx/include/c++/v1/latch
++++ b/llvm-project/libcxx/include/c++/v1/latch
+@@ -134,4 +134,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <cstddef>
++#  endif
++
+ #endif // _LIBCPP_LATCH
+diff -ruN a/llvm-project/libcxx/include/c++/v1/limits b/llvm-project/libcxx/include/c++/v1/limits
+--- a/llvm-project/libcxx/include/c++/v1/limits
++++ b/llvm-project/libcxx/include/c++/v1/limits
+@@ -533,4 +533,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_LIMITS
+diff -ruN a/llvm-project/libcxx/include/c++/v1/list b/llvm-project/libcxx/include/c++/v1/list
+--- a/llvm-project/libcxx/include/c++/v1/list
++++ b/llvm-project/libcxx/include/c++/v1/list
+@@ -1830,4 +1830,18 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <atomic>
++#    include <concepts>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <functional>
++#    include <iosfwd>
++#    include <iterator>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_LIST
+diff -ruN a/llvm-project/libcxx/include/c++/v1/locale b/llvm-project/libcxx/include/c++/v1/locale
+--- a/llvm-project/libcxx/include/c++/v1/locale
++++ b/llvm-project/libcxx/include/c++/v1/locale
+@@ -223,4 +223,15 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdarg>
++#    include <iterator>
++#    include <mutex>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_LOCALE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/map b/llvm-project/libcxx/include/c++/v1/map
+--- a/llvm-project/libcxx/include/c++/v1/map
++++ b/llvm-project/libcxx/include/c++/v1/map
+@@ -2348,4 +2348,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstdlib>
++#    include <functional>
++#    include <iterator>
++#    include <type_traits>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_MAP
+diff -ruN a/llvm-project/libcxx/include/c++/v1/memory b/llvm-project/libcxx/include/c++/v1/memory
+--- a/llvm-project/libcxx/include/c++/v1/memory
++++ b/llvm-project/libcxx/include/c++/v1/memory
+@@ -1005,4 +1005,21 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstddef>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <cstring>
++#    include <iosfwd>
++#    include <iterator>
++#    include <new>
++#    include <stdexcept>
++#    include <tuple>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_MEMORY
+diff -ruN a/llvm-project/libcxx/include/c++/v1/memory_resource b/llvm-project/libcxx/include/c++/v1/memory_resource
+--- a/llvm-project/libcxx/include/c++/v1/memory_resource
++++ b/llvm-project/libcxx/include/c++/v1/memory_resource
+@@ -78,4 +78,12 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER >= 17 && _LIBCPP_STD_VER <= 20
++#    include <mutex>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <stdexcept>
++#  endif
++
+ #endif /* _LIBCPP_MEMORY_RESOURCE */
+diff -ruN a/llvm-project/libcxx/include/c++/v1/mutex b/llvm-project/libcxx/include/c++/v1/mutex
+--- a/llvm-project/libcxx/include/c++/v1/mutex
++++ b/llvm-project/libcxx/include/c++/v1/mutex
+@@ -530,4 +530,19 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <cstring>
++#    include <ctime>
++#    include <initializer_list>
++#    include <iosfwd>
++#    include <new>
++#    include <stdexcept>
++#    include <system_error>
++#    include <type_traits>
++#    include <typeinfo>
++#  endif
++
+ #endif // _LIBCPP_MUTEX
+diff -ruN a/llvm-project/libcxx/include/c++/v1/new b/llvm-project/libcxx/include/c++/v1/new
+--- a/llvm-project/libcxx/include/c++/v1/new
++++ b/llvm-project/libcxx/include/c++/v1/new
+@@ -121,4 +121,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_NEW
+diff -ruN a/llvm-project/libcxx/include/c++/v1/numbers b/llvm-project/libcxx/include/c++/v1/numbers
+--- a/llvm-project/libcxx/include/c++/v1/numbers
++++ b/llvm-project/libcxx/include/c++/v1/numbers
+@@ -166,4 +166,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstddef>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_NUMBERS
+diff -ruN a/llvm-project/libcxx/include/c++/v1/numeric b/llvm-project/libcxx/include/c++/v1/numeric
+--- a/llvm-project/libcxx/include/c++/v1/numeric
++++ b/llvm-project/libcxx/include/c++/v1/numeric
+@@ -209,4 +209,22 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 14
++#    include <initializer_list>
++#    include <limits>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <climits>
++#    include <cmath>
++#    include <concepts>
++#    include <cstdint>
++#    include <execution>
++#    include <functional>
++#    include <iterator>
++#    include <new>
++#    include <optional>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_NUMERIC
+diff -ruN a/llvm-project/libcxx/include/c++/v1/optional b/llvm-project/libcxx/include/c++/v1/optional
+--- a/llvm-project/libcxx/include/c++/v1/optional
++++ b/llvm-project/libcxx/include/c++/v1/optional
+@@ -1777,4 +1777,21 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <climits>
++#    include <concepts>
++#    include <ctime>
++#    include <iterator>
++#    include <limits>
++#    include <memory>
++#    include <ratio>
++#    include <stdexcept>
++#    include <tuple>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#    include <variant>
++#  endif
++
+ #endif // _LIBCPP_OPTIONAL
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ostream b/llvm-project/libcxx/include/c++/v1/ostream
+--- a/llvm-project/libcxx/include/c++/v1/ostream
++++ b/llvm-project/libcxx/include/c++/v1/ostream
+@@ -212,4 +212,17 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdio>
++#    include <cstdlib>
++#    include <format>
++#    include <iosfwd>
++#    include <iterator>
++#    include <print>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_OSTREAM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/queue b/llvm-project/libcxx/include/c++/v1/queue
+--- a/llvm-project/libcxx/include/c++/v1/queue
++++ b/llvm-project/libcxx/include/c++/v1/queue
+@@ -978,4 +978,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstdlib>
++#    include <functional>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_QUEUE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/random b/llvm-project/libcxx/include/c++/v1/random
+--- a/llvm-project/libcxx/include/c++/v1/random
++++ b/llvm-project/libcxx/include/c++/v1/random
+@@ -1743,4 +1743,20 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <climits>
++#    include <cmath>
++#    include <concepts>
++#    include <cstddef>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <limits>
++#    include <numeric>
++#    include <string>
++#    include <type_traits>
++#    include <vector>
++#  endif
++
+ #endif // _LIBCPP_RANDOM
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ranges b/llvm-project/libcxx/include/c++/v1/ranges
+--- a/llvm-project/libcxx/include/c++/v1/ranges
++++ b/llvm-project/libcxx/include/c++/v1/ranges
+@@ -552,4 +552,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_RANGES
+diff -ruN a/llvm-project/libcxx/include/c++/v1/ratio b/llvm-project/libcxx/include/c++/v1/ratio
+--- a/llvm-project/libcxx/include/c++/v1/ratio
++++ b/llvm-project/libcxx/include/c++/v1/ratio
+@@ -496,4 +496,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_RATIO
+diff -ruN a/llvm-project/libcxx/include/c++/v1/regex b/llvm-project/libcxx/include/c++/v1/regex
+--- a/llvm-project/libcxx/include/c++/v1/regex
++++ b/llvm-project/libcxx/include/c++/v1/regex
+@@ -5848,4 +5848,17 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <iterator>
++#    include <mutex>
++#    include <new>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_REGEX
+diff -ruN a/llvm-project/libcxx/include/c++/v1/scoped_allocator b/llvm-project/libcxx/include/c++/v1/scoped_allocator
+--- a/llvm-project/libcxx/include/c++/v1/scoped_allocator
++++ b/llvm-project/libcxx/include/c++/v1/scoped_allocator
+@@ -579,4 +579,18 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <climits>
++#    include <concepts>
++#    include <cstring>
++#    include <ctime>
++#    include <iterator>
++#    include <memory>
++#    include <ratio>
++#    include <stdexcept>
++#    include <type_traits>
++#    include <variant>
++#  endif
++
+ #endif // _LIBCPP_SCOPED_ALLOCATOR
+diff -ruN a/llvm-project/libcxx/include/c++/v1/semaphore b/llvm-project/libcxx/include/c++/v1/semaphore
+--- a/llvm-project/libcxx/include/c++/v1/semaphore
++++ b/llvm-project/libcxx/include/c++/v1/semaphore
+@@ -186,4 +186,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <atomic>
++#    include <cstddef>
++#  endif
++
+ #endif // _LIBCPP_SEMAPHORE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/set b/llvm-project/libcxx/include/c++/v1/set
+--- a/llvm-project/libcxx/include/c++/v1/set
++++ b/llvm-project/libcxx/include/c++/v1/set
+@@ -1710,4 +1710,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <cstdlib>
++#    include <functional>
++#    include <iterator>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_SET
+diff -ruN a/llvm-project/libcxx/include/c++/v1/shared_mutex b/llvm-project/libcxx/include/c++/v1/shared_mutex
+--- a/llvm-project/libcxx/include/c++/v1/shared_mutex
++++ b/llvm-project/libcxx/include/c++/v1/shared_mutex
+@@ -455,4 +455,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <system_error>
++#  endif
++
+ #endif // _LIBCPP_SHARED_MUTEX
+diff -ruN a/llvm-project/libcxx/include/c++/v1/span b/llvm-project/libcxx/include/c++/v1/span
+--- a/llvm-project/libcxx/include/c++/v1/span
++++ b/llvm-project/libcxx/include/c++/v1/span
+@@ -638,4 +638,12 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <array>
++#    include <concepts>
++#    include <functional>
++#    include <iterator>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_SPAN
+diff -ruN a/llvm-project/libcxx/include/c++/v1/stack b/llvm-project/libcxx/include/c++/v1/stack
+--- a/llvm-project/libcxx/include/c++/v1/stack
++++ b/llvm-project/libcxx/include/c++/v1/stack
+@@ -384,4 +384,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <concepts>
++#    include <functional>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_STACK
+diff -ruN a/llvm-project/libcxx/include/c++/v1/stdexcept b/llvm-project/libcxx/include/c++/v1/stdexcept
+--- a/llvm-project/libcxx/include/c++/v1/stdexcept
++++ b/llvm-project/libcxx/include/c++/v1/stdexcept
+@@ -291,4 +291,12 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <exception>
++#    include <iosfwd>
++#    include <new>
++#  endif
++
+ #endif // _LIBCPP_STDEXCEPT
+diff -ruN a/llvm-project/libcxx/include/c++/v1/stop_token b/llvm-project/libcxx/include/c++/v1/stop_token
+--- a/llvm-project/libcxx/include/c++/v1/stop_token
++++ b/llvm-project/libcxx/include/c++/v1/stop_token
+@@ -62,4 +62,9 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <iosfwd>
++#  endif
++
+ #endif // _LIBCPP_STOP_TOKEN
+diff -ruN a/llvm-project/libcxx/include/c++/v1/streambuf b/llvm-project/libcxx/include/c++/v1/streambuf
+--- a/llvm-project/libcxx/include/c++/v1/streambuf
++++ b/llvm-project/libcxx/include/c++/v1/streambuf
+@@ -444,4 +444,8 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstdint>
++#  endif
++
+ #endif // _LIBCPP_STREAMBUF
+diff -ruN a/llvm-project/libcxx/include/c++/v1/string b/llvm-project/libcxx/include/c++/v1/string
+--- a/llvm-project/libcxx/include/c++/v1/string
++++ b/llvm-project/libcxx/include/c++/v1/string
+@@ -3976,4 +3976,15 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iterator>
++#    include <new>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_STRING
+diff -ruN a/llvm-project/libcxx/include/c++/v1/string_view b/llvm-project/libcxx/include/c++/v1/string_view
+--- a/llvm-project/libcxx/include/c++/v1/string_view
++++ b/llvm-project/libcxx/include/c++/v1/string_view
+@@ -981,4 +981,12 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iterator>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_STRING_VIEW
+diff -ruN a/llvm-project/libcxx/include/c++/v1/system_error b/llvm-project/libcxx/include/c++/v1/system_error
+--- a/llvm-project/libcxx/include/c++/v1/system_error
++++ b/llvm-project/libcxx/include/c++/v1/system_error
+@@ -173,4 +173,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstdint>
++#    include <cstring>
++#    include <limits>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_SYSTEM_ERROR
+diff -ruN a/llvm-project/libcxx/include/c++/v1/thread b/llvm-project/libcxx/include/c++/v1/thread
+--- a/llvm-project/libcxx/include/c++/v1/thread
++++ b/llvm-project/libcxx/include/c++/v1/thread
+@@ -136,4 +136,16 @@
+ 
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 17
++#    include <chrono>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstring>
++#    include <functional>
++#    include <new>
++#    include <system_error>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_THREAD
+diff -ruN a/llvm-project/libcxx/include/c++/v1/tuple b/llvm-project/libcxx/include/c++/v1/tuple
+--- a/llvm-project/libcxx/include/c++/v1/tuple
++++ b/llvm-project/libcxx/include/c++/v1/tuple
+@@ -1462,4 +1462,14 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <exception>
++#    include <iosfwd>
++#    include <new>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_TUPLE
+diff -ruN a/llvm-project/libcxx/include/c++/v1/typeindex b/llvm-project/libcxx/include/c++/v1/typeindex
+--- a/llvm-project/libcxx/include/c++/v1/typeindex
++++ b/llvm-project/libcxx/include/c++/v1/typeindex
+@@ -110,4 +110,11 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <iosfwd>
++#    include <new>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_TYPEINDEX
+diff -ruN a/llvm-project/libcxx/include/c++/v1/typeinfo b/llvm-project/libcxx/include/c++/v1/typeinfo
+--- a/llvm-project/libcxx/include/c++/v1/typeinfo
++++ b/llvm-project/libcxx/include/c++/v1/typeinfo
+@@ -396,4 +396,10 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_TYPEINFO
+diff -ruN a/llvm-project/libcxx/include/c++/v1/unordered_map b/llvm-project/libcxx/include/c++/v1/unordered_map
+--- a/llvm-project/libcxx/include/c++/v1/unordered_map
++++ b/llvm-project/libcxx/include/c++/v1/unordered_map
+@@ -2392,4 +2392,14 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <bit>
++#    include <cmath>
++#    include <concepts>
++#    include <cstdlib>
++#    include <iterator>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_UNORDERED_MAP
+diff -ruN a/llvm-project/libcxx/include/c++/v1/unordered_set b/llvm-project/libcxx/include/c++/v1/unordered_set
+--- a/llvm-project/libcxx/include/c++/v1/unordered_set
++++ b/llvm-project/libcxx/include/c++/v1/unordered_set
+@@ -1847,4 +1847,14 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cmath>
++#    include <concepts>
++#    include <cstdlib>
++#    include <functional>
++#    include <iterator>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_UNORDERED_SET
+diff -ruN a/llvm-project/libcxx/include/c++/v1/utility b/llvm-project/libcxx/include/c++/v1/utility
+--- a/llvm-project/libcxx/include/c++/v1/utility
++++ b/llvm-project/libcxx/include/c++/v1/utility
+@@ -338,4 +338,15 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <limits>
++#  endif
++
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <cstdlib>
++#    include <iosfwd>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_UTILITY
+diff -ruN a/llvm-project/libcxx/include/c++/v1/valarray b/llvm-project/libcxx/include/c++/v1/valarray
+--- a/llvm-project/libcxx/include/c++/v1/valarray
++++ b/llvm-project/libcxx/include/c++/v1/valarray
+@@ -3317,4 +3317,14 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <concepts>
++#    include <cstdlib>
++#    include <cstring>
++#    include <functional>
++#    include <stdexcept>
++#    include <type_traits>
++#  endif
++
+ #endif // _LIBCPP_VALARRAY
+diff -ruN a/llvm-project/libcxx/include/c++/v1/variant b/llvm-project/libcxx/include/c++/v1/variant
+--- a/llvm-project/libcxx/include/c++/v1/variant
++++ b/llvm-project/libcxx/include/c++/v1/variant
+@@ -1671,4 +1671,13 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <cstddef>
++#    include <exception>
++#    include <tuple>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_VARIANT
+diff -ruN a/llvm-project/libcxx/include/c++/v1/vector b/llvm-project/libcxx/include/c++/v1/vector
+--- a/llvm-project/libcxx/include/c++/v1/vector
++++ b/llvm-project/libcxx/include/c++/v1/vector
+@@ -376,4 +376,26 @@
+ #  endif
+ #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+ 
++#  if !defined(_LIBCPP_REMOVE_TRANSITIVE_INCLUDES) && _LIBCPP_STD_VER <= 20
++#    include <algorithm>
++#    include <array>
++#    include <atomic>
++#    include <cctype>
++#    include <cerrno>
++#    include <clocale>
++#    include <concepts>
++#    include <cstdint>
++#    include <cstdlib>
++#    include <iosfwd>
++#    if _LIBCPP_HAS_LOCALIZATION
++#      include <locale>
++#    endif
++#    include <string>
++#    include <string_view>
++#    include <tuple>
++#    include <type_traits>
++#    include <typeinfo>
++#    include <utility>
++#  endif
++
+ #endif // _LIBCPP_VECTOR
