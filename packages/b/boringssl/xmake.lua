@@ -1,13 +1,14 @@
 package("boringssl")
     set_kind("library")
     set_homepage("https://boringssl.googlesource.com/boringssl")
-    set_description("BoringSSL at master-with-bazel commit cf686573 (2024-03-06), the snapshot Telegram vendors, as libcrypto and libssl for armv7 iOS 6 with its 32-bit ARM assembly: target.h keeps the assembly on Apple, and the ios32 perlasm output is generated into apple-arm/ and listed by CMake")
+    set_description("BoringSSL at master-with-bazel commit cf686573 (2024-03-06), the snapshot Telegram vendors, as libcrypto and libssl for armv7 iOS 6 with its 32-bit ARM assembly: target.h keeps the assembly on Apple, the ios32 perlasm output is generated into apple-arm/ and listed by CMake, and the system random source reads /dev/urandom where CCRandomGenerateBytes is absent")
     set_license("OpenSSL")
 
     add_urls("https://github.com/google/boringssl.git")
     add_versions("2024.03.06", "cf6865731655cf49f473732aa87e0804f6011a25")
     add_patches("2024.03.06", "patches/0001-target-h-keep-apple-arm32-asm.patch")
     add_patches("2024.03.06", "patches/0002-cmake-apple-armv7-ios32-assembly.patch")
+    add_patches("2024.03.06", "patches/0003-urandom-where-ccrandom-is-absent.patch")
     add_links("ssl", "crypto")
     add_deps("revenant@libcxx", {alias = "libcxx"})
 
