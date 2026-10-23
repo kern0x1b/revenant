@@ -12,6 +12,7 @@ function main()
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     local boringssl = workspace.package_of("boringssl", true, {plat = "macosx", arch = "arm64"})
+    assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     swiftc({fixture, "-o", host})
     swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),

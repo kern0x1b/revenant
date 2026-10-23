@@ -216,14 +216,17 @@ local function overlay(name, folder, opt)
         if #table.wrap(opt.packages) > 0 then
             add_packages(table.unpack(opt.packages))
         end
-        if opt.cmodule then
-            add_swiftflags("-I" .. path.join(SRC, folder, opt.cmodule))
-        end
         if #table.wrap(opt.links) > 0 then
             add_links(table.unpack(opt.links))
         end
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
+            if opt.cmodule then
+                target:add("swift.flags", "-I", path.join(SRC, folder, opt.cmodule))
+                for _, name in ipairs(table.wrap(opt.packages)) do
+                    target:add("swift.flags", "-Xcc", "-I" .. target:pkg(name):installdir("include"))
+                end
+            end
         end)
         before_build(function (target)
             if opt.minimum then
