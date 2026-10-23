@@ -361,7 +361,7 @@ package("swift-runtime")
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
             local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
-            local lowered_headers = import("@addon.revenant.apple.lowered", {anonymous = true}).overlay(toolchain:config("sdkdir"), path.absolute("lowered-foundation"), nil, {Foundation = true, CoreFoundation = true, CoreGraphics = true})
+            local lowered_headers = import("@addon.revenant.apple.lowered", {anonymous = true}).overlay(toolchain:config("sdkdir"), path.absolute("lowered"))
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do

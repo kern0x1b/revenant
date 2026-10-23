@@ -1107,7 +1107,7 @@ local function input_digest(sdk, text)
     return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
 end
 
-function overlay(sdk, out, set, frameworks)
+function overlay(sdk, out, set)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local key = table.concat({sdk, out, hash.strhash128(text)}, "|")
     if built[key] then
@@ -1115,22 +1115,17 @@ function overlay(sdk, out, set, frameworks)
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text .. (frameworks and serialize(frameworks) or ""))
+    local digest = input_digest(sdk, text)
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), frameworks)
+        vfs = build_overlay(sdk, out, set or read_all_members())
         io.writefile(stamp, digest)
     end
     built[key] = vfs
     return vfs
 end
 
-local function in_scope(file, frameworks)
-    local name = file:match("/([%w_]+)%.framework/")
-    return frameworks == nil or name == nil or frameworks[name] == true
-end
-
-function build_overlay(sdk, out, set, frameworks)
+function build_overlay(sdk, out, set)
     local changed = member_headers(sdk)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
@@ -1141,14 +1136,12 @@ function build_overlay(sdk, out, set, frameworks)
     end
     local roots = {}
     for file, text in pairs(changed) do
-        if in_scope(file, frameworks) then
-            local copy = path.join(out, path.relative(file, sdk))
-            os.mkdir(path.directory(copy))
-            write_if_changed(copy, text)
-            local dir = path.directory(file)
-            roots[dir] = roots[dir] or {}
-            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
-        end
+        local copy = path.join(out, path.relative(file, sdk))
+        os.mkdir(path.directory(copy))
+        write_if_changed(copy, text)
+        local dir = path.directory(file)
+        roots[dir] = roots[dir] or {}
+        table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
     end
     local dirs = {}
     for dir in pairs(roots) do
