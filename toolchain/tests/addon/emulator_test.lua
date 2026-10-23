@@ -479,7 +479,7 @@ end
 
 local function queue_step(emulator, folder, opt, found)
     local work = path.join(folder, "queue")
-    local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), REVENANT_HOME = path.join(work, "home")}
+    local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), XMAKE_MAIN_REPO = fixtures.empty_repository(folder), REVENANT_HOME = path.join(work, "home")}
     os.mkdir(work)
     local shared = path.join(os.getenv("HOME"), ".xmake", "addons")
     local before = os.exists(shared) and os.files(shared) or {}

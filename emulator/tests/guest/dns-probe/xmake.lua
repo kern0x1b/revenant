@@ -50,15 +50,4 @@ if get_config("component") == "" and not is_plat("iphoneos") and rootfs and ld a
                     "-o", output}, objects, libraries))
             end, {files = table.join(inputs, libraries), dependfile = target:dependfile(output)})
         end)
-
-    target("emulator_install_guest_dns_probe")
-        set_kind("phony")
-        set_default(false)
-        add_deps("emulator_guest_dns_probe")
-        on_build(function (target)
-            local rootfs = get_config("emulator_guest_rootfs")
-            os.cp(path.join(target:targetdir(), "guest", "dns_async_probe"), path.join(rootfs, "usr", "libexec", "emulator-dns-probe"))
-            os.cp(path.join(target:scriptdir(), "org.revenant.emulator.dns-probe.plist"),
-                  path.join(rootfs, "System", "Library", "LaunchDaemons", "org.revenant.emulator.dns-probe.plist"))
-        end)
 end

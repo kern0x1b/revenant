@@ -64,6 +64,17 @@ function scratch()
     return folder
 end
 
+function empty_repository(folder)
+    local main = path.join(folder, "main")
+    if not os.isdir(main) then
+        os.mkdir(main)
+        os.vrunv("git", {"init", "-q", main})
+        os.vrunv("git", {"-C", main, "symbolic-ref", "HEAD", "refs/heads/master"})
+        os.vrunv("git", {"-C", main, "-c", "user.name=revenant", "-c", "user.email=revenant@example.invalid", "commit", "-q", "--allow-empty", "-m", "empty"})
+    end
+    return main
+end
+
 function refusal(action)
     local errors
     try {
