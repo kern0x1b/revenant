@@ -1,0 +1,4 @@
+Package: org.revenant.emulateshims.pinned-path
+Name: pinned-path probe under the emulator
+Architecture: iphoneos-arm
+Description: records what realpath, getcwd and a relative open resolve to while a thread's working directory is pinned

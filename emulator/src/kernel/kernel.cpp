@@ -3298,7 +3298,29 @@ std::filesystem::path CompatibilityKernel::resolve_guest_path(
             resolve_guest_path(data_path, true));
     }
     return RootfsPathResolver { rootfs_ }.resolve(
-        path, guest_working_directory_, follow_final_symlink);
+        path, working_directory(), follow_final_symlink);
+}
+
+thread_local std::optional<std::size_t> CompatibilityKernel::syscall_processor_;
+
+std::optional<std::uint32_t> CompatibilityKernel::current_thread_object() const
+{
+    if (!syscall_processor_)
+        return std::nullopt;
+    return thread_object_for_processor(*syscall_processor_);
+}
+
+std::filesystem::path CompatibilityKernel::working_directory() const
+{
+    if (const auto thread = current_thread_object()) {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        if (const auto found =
+                shared_state_->thread_working_directories.find(*thread);
+            found != shared_state_->thread_working_directories.end()) {
+            return found->second;
+        }
+    }
+    return guest_working_directory_;
 }
 
 std::optional<hfs::Metadata> CompatibilityKernel::query_hfs_metadata(

@@ -2,7 +2,7 @@ local root = path.absolute(path.directory(os.scriptdir()))
 
 local layout = {
     top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSES", "REUSE.toml",
-           "xmake.lua", "xmakew", "tools", "docs", "toolchain", "packages", "addons", "emulator", "recompiler",
+           "xmake.lua", "xmakew", "tools", "docs", "toolchain", "packages", "addons", "emulator", "neon", "recompiler",
            "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
            ".gitignore"},
     component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "tests", "examples", "tools"},
