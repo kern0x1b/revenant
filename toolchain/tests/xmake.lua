@@ -87,7 +87,7 @@ if get_config("tests") == "device" then
     suites("toolchain_device", device, table.join(packages, {"swift"}), "device")
 
     local bench = path.join(os.scriptdir(), "bench")
-    local workloads = {"msgsend", "alloc", "collections", "strings"}
+    local workloads = {"msgsend", "alloc", "collections", "strings", "compute"}
     target("bench")
         set_kind("phony")
         set_default(false)

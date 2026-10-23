@@ -14,7 +14,8 @@ local WORKLOADS = {
     msgsend = {sources = {"msgsend.m"}, gated = {"Counter.bump"}},
     alloc = {sources = {"alloc.m"}, gated = {"Node.initWithValue", "Node.value"}},
     collections = {sources = {"collections.m"}, gated = {}},
-    strings = {sources = {"strings.m"}, gated = {}}
+    strings = {sources = {"strings.m"}, gated = {}},
+    compute = {sources = {"compute.c"}, gated = {}}
 }
 
 local function scratch(name)
