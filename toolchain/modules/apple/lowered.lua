@@ -5,16 +5,6 @@ local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anony
 
 local MEMBERS = {
     {
-        member = "os_unfair_lock",
-        header = {
-            name = "os",
-            directory = {"usr", "include", "os"},
-            file = "lock.h",
-            find = "#define OS_UNFAIR_LOCK_AVAILABILITY \\\n\t\t__API_AVAILABLE(macos(10.12), ios(10.0), tvos(10.0), watchos(3.0))",
-            replace = "#define OS_UNFAIR_LOCK_AVAILABILITY",
-        },
-    },
-    {
         member = "NSJSONWritingSortedKeys",
         header = {
             name = "Foundation",
