@@ -82,7 +82,7 @@ toolchain("apple-ios")
             table.join2(linked, {"-lBlocksRuntime", "-lobjc"})
         end
         local neon = toolchain:is_arch("armv7") and {"-isystem", path.join(os.scriptdir(), "..", "..", "..", "neon", "include")} or {}
-        local compiled = table.join(target, thread_local, neon, toolchain:config("optimize") == "packages" and {"-O3"} or {})
+        local compiled = table.join(target, thread_local, neon, toolchain:config("optimize") == "packages" and {"-O2"} or {})
         toolchain:add("cxflags", compiled)
         local objc = semver.compare(minimum, "5.0") < 0 and {"-Xclang", "-fobjc-runtime-has-weak"} or {}
         toolchain:add("mxflags", table.join(compiled, objc))

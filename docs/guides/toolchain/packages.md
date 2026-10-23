@@ -58,7 +58,7 @@ A script that runs make or autoconf itself passes the toolchain's environment, a
 
 The include builds autotools' own `m4` and `pkgconf` packages, because macOS's `/usr/bin/m4` is GNU M4 1.4.6, which autoconf 2.72 refuses. A host step of a two-stage build, such as a generator built for macOS, runs with the process environment, which does not carry the toolchain's.
 
-Every package the port requires is built with `-O3`, as a release build of a Makefile or autotools project expects. An install script runs in the extracted source, so its current directory is the source root.
+Every package the port requires is built with `-O2`, the level the measurement chose for package code on the A5: `-O3` costs about 3.3 times the code of `-O2` for 0.2 percent fewer instructions, see [the codegen reference](../../reference/toolchain/codegen.md). An install script runs in the extracted source, so its current directory is the source root.
 
 ## Hand a symbol shim to a package
 
