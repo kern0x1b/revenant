@@ -76,7 +76,7 @@ A port takes a package by its name and an alias, adds it to the target, and name
         add_rules("@addon/revenant/app")
         add_deps("FoundationBackports")
 
-The Backport libraries are the component's own targets, and the package a program depends on for them is written by `./xmakew deb`; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
+The Backport libraries are the component's own targets, and the package a program depends on for them is written by `./xmakew deb -P .`; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
 
 ### Swift
 

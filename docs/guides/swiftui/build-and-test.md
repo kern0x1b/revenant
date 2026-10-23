@@ -7,10 +7,10 @@
   `swift-runtime`, `libcxx`, the iOS SDK and the tools are packages the project requires. The `frameworks/Backports`
   targets are the project's own. An app outside revenant does not take SwiftUI from a recipe any more; see
   [the architecture](../../explanation/architecture.md) for the packages `xmake package` writes for our targets.
-- To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate` drives once the project is
+- To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate -P .` drives once the project is
   configured with `--emulate=y`. `frameworks/SwiftUI/tools/emulate.lua` does that configure itself; use the emulator the way the
   repository's skill `emulator-session` says.
-- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device` (skill
+- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device -P .` (skill
   `device-session`).
 
 Run output (logs, pictures, API dumps, the copy of Apple's framework) goes under `$HOME/.revenant/cache/<task>/swiftui/`,
@@ -29,13 +29,13 @@ From the top of revenant:
 Building `SwiftUI` begins with `frameworks/SwiftUI/tools/coverage.lua --check --before-build`, which refuses to continue if
 the ledger and the code disagree. The count of invented names is not part of that: it is read from the `invented.txt`
 that `frameworks/SwiftUI/tools/api_surface.lua` makes from the module the build produces, so a fresh tree runs the build, then
-api_surface.lua, then a plain `./xmakew l frameworks/SwiftUI/tools/coverage.lua --check`, which compares that count
+api_surface.lua, then a plain `./xmakew l -P . frameworks/SwiftUI/tools/coverage.lua --check`, which compares that count
 with the ledger. Everything is compiled with availability checking **on**, against the same Swift runtime the app
 carries.
 
 ## Usage
 
-From the top of revenant, each a `./xmakew l frameworks/SwiftUI/tools/<script>`:
+From the top of revenant, each a `./xmakew l -P . frameworks/SwiftUI/tools/<script>`:
 
 ```bash
 emulate.lua tests                        # the engine tests, in the emulator

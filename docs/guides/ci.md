@@ -29,7 +29,7 @@ Four caches make a warm run quick:
 
 - the pinned xmake binary, keyed by `xmakew` and `packages/x/xmake`;
 - the package store `~/.revenant/cache/xmake-global`. The backports job keys it by the output of
-  `./xmakew l tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. The checks job
+  `./xmakew l -P . tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. The checks job
   keys its own store by the files that decide what it installs: the xmake recipes of the packages, the third-party
   packages the default tests build, `toolchain/modules/prebuilt.lua`, and the component files that declare requirements.
   Each store is restored by exact key and saved once, after the configure has succeeded, so a store is never saved
