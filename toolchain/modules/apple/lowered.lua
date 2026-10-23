@@ -15,6 +15,66 @@ local MEMBERS = {
         },
     },
     {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "float preferred CF_REFINED_FOR_SWIFT;",
+            replace = "float preferred;",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
         member = "NSJSONWritingSortedKeys",
         header = {
             name = "Foundation",
