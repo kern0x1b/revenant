@@ -11,7 +11,7 @@ package("emulator")
     for _, file in ipairs(sources) do
         table.insert(digests, path.relative(file, root) .. "=" .. hash.sha256(file))
     end
-    add_configs("sources", {description = "The digest of the emulator's sources in this checkout, so a changed source is a different emulator.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("sources", {description = "The digest of the emulator's sources in this checkout, so a changed source is a different emulator.", default = hash.strhash128(table.concat(digests, ";")), type = "string"})
     add_configs("sdl", {description = "Build the SDL2 window backend, for watching a guest on the desktop.", default = false, type = "boolean"})
     add_configs("ffmpeg", {description = "Build the FFmpeg audio decoder, for a guest that plays compressed audio.", default = false, type = "boolean"})
 
