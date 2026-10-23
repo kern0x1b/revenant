@@ -47,7 +47,7 @@ package("libcxx")
         end
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local macho = import("@addon.revenant.apple.macho", {anonymous = true})
-        for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch"}) do
+        for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch", "keep-apple-transitive-includes.patch"}) do
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end
         local compat = package:dep("apple-compat")
