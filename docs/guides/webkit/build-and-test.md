@@ -349,7 +349,7 @@ modern Google and YouTube broken; the port renders them.
 **Iterating on the Settings pane** does not need a respring: redeploy `RevPrefs.bundle`, then `killall Preferences` and
 reopen it.
 
-The numeric device suite is `frameworks/WebKit/tests/device/run.lua`, run with `./xmakew l`;
+The numeric device suite is `frameworks/WebKit/tests/device/run.lua`, run with `./xmakew l -P .`;
 [the device suite](../../reference/webkit/device-suite.md) describes what it measures. The host and browser batteries
 are in [tests](../../reference/webkit/tests.md).
 

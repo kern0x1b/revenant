@@ -32,6 +32,6 @@ target("named")
 
 target("pinned-path")
     add_rules("@addon/revenant/daemon")
-    add_files("pinned-path.c")
+    add_files("pinned-path.c", SHIMS .. "openat.c", SHIMS .. "linkat.c")
     set_values("revenant.version", "1.0")
     set_values("revenant.control", "control-pinned-path")

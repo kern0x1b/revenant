@@ -12,8 +12,8 @@ From the top of revenant:
 ./xmakew f -P . -p iphoneos -a armv7 -y
 ./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests
 ./xmakew test -P . SwiftUITypeChecks/*
-./xmakew l frameworks/SwiftUI/tools/emulate.lua tests
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua tests
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua snapshots
 ```
 
 The requirements, the tools and the checks that gate a change are in [build, run and test](../../docs/guides/swiftui/build-and-test.md). The layout is in the [contributor guide](../../docs/guides/swiftui/contributing.md), and every document is in [the index](../../docs/README.md).

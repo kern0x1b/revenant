@@ -36,7 +36,7 @@ libdispatch answers, the check is in the device group: `compat_device_test` and 
 The suites that run only for the iPhone OS platform (`SwiftUITypeChecks`, `CombineGenerated`, and the WebKit host
 tests behind `webkit_host_tests`) are declared by the platform, not by the default run; they belong to the components
 that define them. The fixtures of `tests/emulate/` and `tests/swiftui/` are built for a device and are not xmake tests
-yet. Each `tests/emulate/<case>/` runs with `./xmakew l toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
+yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
 `install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
 its probe line), and `output` (a program's stdout and stderr reach the host, through a run that ends and through one
 that hangs). Their scratch folders are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.

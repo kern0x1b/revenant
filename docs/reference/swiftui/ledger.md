@@ -124,8 +124,8 @@ From the root of revenant:
 ./xmakew f -P . -p iphoneos -a armv7 -y
 ./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests   # the module, the demo, the snapshot bundle, the engine's tests (armv7, iOS 6)
 ./xmakew test -P . SwiftUITypeChecks/*                                  # the Table and TabContent builders accept and refuse, as Apple's do
-./xmakew l frameworks/SwiftUI/tools/emulate.lua tests                   # the engine's unit tests in the emulator
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # snapshot tests: the scenario trees against frameworks/SwiftUI/tests/data/snapshots/
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua tests                   # the engine's unit tests in the emulator
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # snapshot tests: the scenario trees against frameworks/SwiftUI/tests/data/snapshots/
 ```
 
 The build goes against the installation of the package `revenant@swift-runtime` 6.4.0 that the revenant project requires, in xmake's shared store. The flags are set by the toolchain's rules.
