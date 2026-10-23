@@ -1,0 +1,4 @@
+Package: org.revenant.emulateshims.named
+Name: named shims under the emulator
+Architecture: iphoneos-arm
+Description: the apple-compat plain-name *at test, run by the emulator to check descriptor calls and the cross-folder cases
