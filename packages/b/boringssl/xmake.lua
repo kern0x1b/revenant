@@ -6,9 +6,9 @@ package("boringssl")
 
     add_urls("https://github.com/google/boringssl.git")
     add_versions("2024.03.06", "cf6865731655cf49f473732aa87e0804f6011a25")
-    add_patches("2024.03.06", "patches/0001-target-h-keep-apple-arm32-asm.patch")
-    add_patches("2024.03.06", "patches/0002-cmake-apple-armv7-ios32-assembly.patch")
-    add_patches("2024.03.06", "patches/0003-urandom-where-ccrandom-is-absent.patch")
+    add_patches("2024.03.06", "patches/0001-target-h-keep-apple-arm32-asm.patch", "24f496e7b803a7a1e4a582f572bd117b33963e9834adfb6c0d3234e885c8bf4d")
+    add_patches("2024.03.06", "patches/0002-cmake-apple-armv7-ios32-assembly.patch", "384213742b2e4a6d50823094ccfe3717dac974cf902dd87775d2b1629742ce87")
+    add_patches("2024.03.06", "patches/0003-urandom-where-ccrandom-is-absent.patch", "81fe3447a7fc99c95dcf43251feabba903caff41b7dc707dc0603b88bfc25f83")
     add_links("ssl", "crypto")
     add_deps("revenant@libcxx", {alias = "libcxx"})
 
