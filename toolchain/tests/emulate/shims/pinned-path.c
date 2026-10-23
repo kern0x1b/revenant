@@ -69,10 +69,50 @@ int main(int argc, char **argv)
     } else {
         printf("symlink in pinned folder: errno=%d\n", errno);
     }
+    char moved[MAXPATHLEN];
+    snprintf(moved, sizeof moved, "%s/pinned-moved", root);
+    int renamed = rename(folder, moved);
+    printf("rename pinned folder: %d errno=%d\n", renamed, errno);
+    char contents[16] = {0};
+    int after = open("file", O_RDONLY);
+    if (after >= 0) {
+        read(after, contents, sizeof contents - 1);
+        printf("pinned open after rename: fd=%d contents=%s\n", after, contents);
+        close(after);
+    } else {
+        printf("pinned open after rename: fd=%d errno=%d\n", after, errno);
+    }
+    if (directory >= 0) {
+        char seen[MAXPATHLEN];
+        report("pinned F_GETPATH of the folder after rename", fcntl(directory, F_GETPATH, seen) == 0 ? seen : NULL);
+    }
+    report("pinned getcwd after rename", getcwd(buffer, sizeof buffer));
     int unpinned = __pthread_fchdir(-1);
     printf("__pthread_fchdir(-1): %d errno=%d\n", unpinned, errno);
     report("unpinned getcwd", getcwd(buffer, sizeof buffer));
     report("unpinned realpath file", realpath("file", resolved));
+    unlink("linked-follow");
+    unlink("linked-plain");
+    snprintf(link_path, sizeof link_path, "%s/file-link", moved);
+    if (symlink("file", link_path) == 0) {
+        int linked = linkat(directory, "file-link", AT_FDCWD, "linked-follow", AT_SYMLINK_FOLLOW);
+        printf("linkat AT_SYMLINK_FOLLOW through the pinned folder: %d errno=%d\n", linked, errno);
+        if (linked == 0) {
+            int seen = open("linked-follow", O_RDONLY);
+            char text[16] = {0};
+            if (seen >= 0) {
+                read(seen, text, sizeof text - 1);
+                close(seen);
+            }
+            printf("linkat AT_SYMLINK_FOLLOW contents: %s\n", text);
+        }
+        errno = 0;
+        int plain = linkat(directory, "file-link", AT_FDCWD, "linked-plain", 0);
+        printf("linkat without AT_SYMLINK_FOLLOW on a symbolic link: %d errno=%d\n", plain, errno);
+        unlink(link_path);
+    } else {
+        printf("symlink for the linkat test: errno=%d\n", errno);
+    }
     if (directory >= 0) {
         close(directory);
     }

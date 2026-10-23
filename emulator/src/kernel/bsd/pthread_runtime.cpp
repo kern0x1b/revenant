@@ -577,6 +577,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
             std::lock_guard mach_lock { shared_state_->mach_mutex };
             if (thread_object) {
                 process_.thread_disk_io_policies.erase(*thread_object);
+                release_thread_directory_locked(*thread_object);
                 if (auto task = shared_state_->task_thread_port_objects.find(
                         process_.pid);
                     task != shared_state_->task_thread_port_objects.end()) {
