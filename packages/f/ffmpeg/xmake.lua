@@ -6,7 +6,7 @@ package("ffmpeg")
 
     add_urls("https://github.com/FFmpeg/FFmpeg.git")
     add_versions("8.1.2", "38b88335f99e76ed89ff3c93f877fdefce736c13")
-    add_patches("8.1.2", "patches/0001-telegram-version-and-mov-stsd.patch")
+    add_patches("8.1.2", "patches/0001-version-and-mov-stsd.patch")
     add_patches("8.1.2", "patches/0002-audiotoolbox-uint32-out-params.patch")
     add_links("avformat", "avcodec", "swresample", "avutil")
     add_deps("revenant@libcxx", {alias = "libcxx"})
