@@ -39,7 +39,7 @@ The result is in the reference. The short reading: the profile shrinks the text 
 
 The emulator writes the blocks it executed with `--perf-block-profile`, which is the trace an order file needs. The prototype maps those blocks to symbols of the binary and writes the list the linker takes. The order file orders whole functions, and it does not need `-ffunction-sections` for Mach-O, because ld64 reorders the atoms of `__text`.
 
-Its gain depends on the layout the default link gives. A function that is hot and sits between cold ones costs a page it does not need; a hot set that is already contiguous gains nothing. The reference shows the case measured.
+Its gain depends on the layout the default link gives. A function that is hot and sits between cold ones costs a page it does not need; a hot set that is already contiguous gains nothing. The prototype over libopus shows both cases. A full encode and decode touches 60 of the library's 61 text pages, so the order file has nothing to gather. A one-frame run, which is closer to a launch path, touched 59 pages in the default layout and 51 with the order file, at the same instruction count. The gain is real and small here, and it grows with the size of the image the launch path leaves cold, which is the case for an app of Telegram's size. That is reasoned, not measured: no Telegram binary exists to measure.
 
 ## Codegen
 

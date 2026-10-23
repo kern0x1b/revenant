@@ -67,8 +67,18 @@ The order file was made from the block profile of `bench` by `toolchain/tools/or
 
 The binary's text is 247,472 bytes in the default layout and 248,042 in the ordered one. The checksum is 443282e1 in every
 run. `bench` executes 60 of the binary's 61 text pages, so an order file has nothing to gather on it: this trace covers the
-library's text. A trace of a launch path that touches a small part of the image is the case an order file is for, and the
-`startup` rows are that test.
+library's text.
+
+The `startup` program is one frame of the same encode and decode, which is what a launch path of a voice call looks like
+in miniature. Its trace was not the one that made the order file, so the order is the full run's, applied to a shorter run.
+
+| run | layout | checksum | cpu-ticks | distinct text pages executed |
+| --- | --- | --- | ---: | ---: |
+| startup | default | 2ce84a64 | 3,616,959 | 59 |
+| startup | `-order_file` | 2ce84a64 | 3,616,959 | 51 |
+
+The layout moved 8 pages out of the run's footprint, 14%, and left the instruction count unchanged, as a layout should. The
+counter `page-misses` read 334 in both, so it is not the measure of this effect, as the note above says.
 
 The block profile of a run costs time and changes the page-miss count (333 to 378 on the same binary). It is used here only
 for the set of pages an execution touches, never for the count in the table of the emulator.
