@@ -1,0 +1,17 @@
+local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
+
+function main()
+    local sdk = workspace.sdk()
+    local out = path.join(os.projectdir(), "build", "tests", "lowered-vfs")
+    os.rm(out)
+    local vfs = io.readfile(lowered.overlay(sdk, out))
+    local system = path.join(sdk, "usr", "include")
+    assert(vfs:find('"name": "' .. system, 1, true) == nil, "the overlay maps a usr/include directory, so clang reaches the SDK's availability headers through two paths and builds _AvailabilityInternal twice")
+    assert(vfs:find('"name": "' .. path.join(sdk, "System", "Library", "Frameworks", "Foundation.framework", "Headers"), 1, true), "the overlay lost the framework headers it lowers")
+    local lock = path.join(lowered.include_directory(out), "os", "lock.h")
+    assert(os.isfile(lock), "os/lock.h is not in the include directory the lowering passes ahead of the SDK")
+    local header = io.readfile(lock)
+    assert(header:find("#define OS_UNFAIR_LOCK_AVAILABILITY", 1, true), "os/lock.h lost the OS_UNFAIR_LOCK_AVAILABILITY define")
+    assert(header:find("__API_AVAILABLE(macos(10.12), ios(10.0)", 1, true) == nil, "os/lock.h still carries the iOS 10 availability")
+end

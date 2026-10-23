@@ -12,6 +12,18 @@ void revenantProbe(NSString *text, NSFileManager *files)
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
     (void)[text stringByRemovingPercentEncoding];
+    (void)[[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
+    (void)[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:1 toDate:[NSDate date] options:0];
+    (void)[[NSCalendar currentCalendar] isDateInToday:[NSDate date]];
+    NSDate *weekend = nil;
+    NSTimeInterval weekendInterval = 0;
+    (void)[[NSCalendar currentCalendar] rangeOfWeekendStartDate:&weekend interval:&weekendInterval containingDate:[NSDate date]];
+    id interval = nil;
+    (void)[interval initWithStartDate:[NSDate date] duration:1.0];
+    NSDateComponents *components = nil;
+    id url = nil;
+    (void)[components isValidDate];
+    (void)[url percentEncodedHost];
     (void)[WKWebView class];
     (void)MTLCreateSystemDefaultDevice();
 }
@@ -27,6 +39,7 @@ local ACCEPTANCE = [=[
 #import <AVFoundation/AVFoundation.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <Metal/Metal.h>
+#import <Accelerate/Accelerate.h>
 
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
@@ -40,7 +53,8 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[text stringByRemovingPercentEncoding];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
-    (void)[[NSData alloc] initWithBase64EncodedString:@"" options:0];
+    NSDataBase64DecodingOptions decoding = NSDataBase64DecodingIgnoreUnknownCharacters;
+    (void)[[NSData alloc] initWithBase64EncodedString:@"" options:decoding];
     (void)[[WKWebViewConfiguration alloc] init];
     (void)[[CNPostalAddress alloc] init];
     (void)[[LAContext alloc] init];
@@ -55,6 +69,13 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)scene.activityItemsConfigurationSource;
     (void)[[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[]];
     (void)AVAudioSessionPortBluetoothLE;
+    AVAssetWriter *writer = nil;
+    AVAssetWriterInput *input = nil;
+    [writer addInput:input];
+    vImage_ARGBToYpCbCrMatrix matrix;
+    vImage_YpCbCrPixelRange range = {0, 128, 255, 255, 255, 1, 255, 0};
+    vImage_ARGBToYpCbCr info;
+    (void)vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix, &range, &info, kvImageARGB8888, kvImage420Yp8_Cb8_Cr8, 0);
 }
 ]=]
 
@@ -97,7 +118,7 @@ function main()
     local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
     assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
 
-    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), path.join(os.scriptdir(), "data", "src"))
+    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), lowered.members_of(path.join(os.scriptdir(), "data", "src"), sdk))
     local unimplemented = path.join(probes, "unimplemented.m")
     io.writefile(unimplemented, UNIMPLEMENTED)
     local refused, refusal = compiles(sdk, fixture, unimplemented, path.join(probes, "unimplemented.log"))
@@ -120,7 +141,91 @@ function main()
     }, "\n")
     local lowered_property = lowered.lower_header(property, {classes = {NSString = {["-stringByRemovingPercentEncoding"] = true}}, functions = {}})
     assert(count(lowered_property, "AVAILABLE") == 0, "an implemented property kept its availability:\n" .. lowered_property)
+    local swift = table.concat({
+        "extension StringProtocol where Index == String.Index {",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public func addingPercentEncoding(",
+        "    withAllowedCharacters allowedCharacters: CharacterSet",
+        "  ) -> String? {",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public var removingPercentEncoding: String? {",
+        "    return _ns.removingPercentEncoding",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public var unrelated: String? {",
+        "  }",
+        "}",
+        "",
+    }, "\n")
+    local names = lowered.swift_names({classes = {NSString = {["-stringByRemovingPercentEncoding"] = true,
+                                                             ["-stringByAddingPercentEncodingWithAllowedCharacters:"] = true}}, functions = {}})
+    local swift_lowered = lowered.lower_swift_text(swift, names)
+    assert(count(swift_lowered, "@available") == 1 and swift_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public var unrelated", 1, true),
+           "the Swift overlay must lower the availability of the members Backports implements and keep the others:\n" .. swift_lowered)
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)
+    local typedefs = table.concat({
+        "typedef NS_OPTIONS(NSUInteger, SampleOptions) {",
+        "    SampleOne = 1UL << 0",
+        "} API_AVAILABLE(macos(10.9), ios(7.0));",
+        "typedef NS_OPTIONS(NSUInteger, SampleOther) {",
+        "    SampleTwo = 1UL << 0",
+        "} API_AVAILABLE(macos(10.9), ios(7.0));",
+        "API_AVAILABLE(ios(14.3))",
+        "typedef NS_ENUM(NSInteger, SampleLeading) {",
+        "    SampleLead = 0",
+        "};",
+        "typedef void (^SampleBlock)(void) API_AVAILABLE(ios(9.0));",
+        "@interface SampleReader : NSObject",
+        "- (void)readWithOptions:(SampleOptions)options block:(SampleBlock)block API_AVAILABLE(macos(10.9), ios(7.0));",
+        "@end",
+        "",
+    }, "\n")
+    local typed = lowered.lower_header(typedefs, {classes = {SampleReader = {["-readWithOptions:block:"] = true}}, functions = {}, globals = {}, protocols = {},
+                                                  types = {SampleOptions = true, SampleLeading = true, SampleBlock = true}})
+    assert(count(typed, "AVAILABLE") == 1 and typed:find("} ;\n", 1, true) and typed:find("} API_AVAILABLE(macos(10.9), ios(7.0));\n", 1, true),
+           "a typedef the backported signatures use lowers with them, and the one they do not use keeps its availability:\n" .. typed)
+    assert(not typed:find("API_AVAILABLE(ios(14.3))", 1, true) and not typed:find("API_AVAILABLE(ios(9.0))", 1, true),
+           "an availability written before a typedef, and on a block typedef, lowers with the typedef:\n" .. typed)
+    local base64 = table.concat({
+        "@available(macOS 10.9, iOS 7.0, *)",
+        "public typealias Base64DecodingOptions = NSData.Base64DecodingOptions",
+        "extension Data {",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public init?(base64Encoded base64String: __shared String, options: Data.Base64DecodingOptions = []) {",
+        "  }",
+        "  @available(macOS 10.9, iOS 7.0, *)",
+        "  public init?(base64Encoded base64Data: __shared Data, options: Data.Base64DecodingOptions = []) {",
+        "  }",
+        "}",
+        "",
+    }, "\n")
+    local base64_names = lowered.swift_names({classes = {NSData = {["-initWithBase64EncodedString:options:"] = true}}, functions = {}, globals = {}})
+    local base64_lowered = lowered.lower_swift_text(base64, base64_names, {NSDataBase64DecodingOptions = true})
+    assert(count(base64_lowered, "@available") == 1 and base64_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public init?(base64Encoded base64Data", 1, true),
+           "the Swift base64 initializer and the typealias of its options lower with the Objective-C member, and the Data overload keeps its availability:\n" .. base64_lowered)
+    local released = {AVSampleWriter = {instance = {"addInput:", "count", "oldMethod:"}, ["class"] = {}},
+                      AVSampleLater = {instance = {}, ["class"] = {}}}
+    local device_sample = table.concat({
+        "API_AVAILABLE(ios(8.0))",
+        "@interface AVSampleLater : NSObject",
+        "@end",
+        "@interface AVSampleWriter : NSObject",
+        "- (void)addInput:(id)input API_AVAILABLE(macos(10.10), visionos(1.0), ios(8.0));",
+        "- (void)oldMethod:(id)x API_AVAILABLE(ios(4.1));",
+        "- (void)notOnDevice:(id)x API_AVAILABLE(ios(9.0));",
+        "@property (nonatomic, readonly) int count API_AVAILABLE(ios(8.0));",
+        "@end",
+        "",
+    }, "\n")
+    local device = lowered.device_members_in(device_sample, released, {})
+    assert(device.classes.AVSampleWriter and device.classes.AVSampleWriter["-addInput:"] and device.classes.AVSampleWriter["-count"]
+           and not device.classes.AVSampleWriter["-oldMethod:"] and not device.classes.AVSampleWriter["-notOnDevice:"],
+           "the release's members that the SDK annotates later are the device members, and only those:\n" .. tostring(device.classes.AVSampleWriter))
+    assert(device.classes.AVSampleLater, "a class the release implements and the SDK annotates later is a device class")
+    local device_lowered = lowered.lower_header(device_sample, device)
+    assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
+           "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
 end

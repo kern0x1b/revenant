@@ -16,6 +16,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Continuous checks](guides/ci.md) | what CI runs |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
+| [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |
 
 ## Toolchain
 
@@ -93,6 +94,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | Document | About |
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
+| [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |
