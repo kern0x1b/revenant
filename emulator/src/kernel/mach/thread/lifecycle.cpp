@@ -105,6 +105,8 @@ bool CompatibilityKernel::dispatch_mach_thread_lifecycle_message(
                 shared_state_->task_thread_port_objects.find(target->first);
             if (task != shared_state_->task_thread_port_objects.end()) {
                 task->second.erase(target->second);
+                if (target_object)
+                    release_thread_directory_locked(*target_object);
                 if (task->second.empty())
                     shared_state_->task_thread_port_objects.erase(task);
             }

@@ -99,6 +99,17 @@ void CompatibilityKernel::release_process_mach_rights()
 
 void CompatibilityKernel::release_process_descriptors()
 {
+    {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        if (const auto task =
+                shared_state_->task_thread_port_objects.find(process_.pid);
+            task != shared_state_->task_thread_port_objects.end()) {
+            for (const auto& [processor, thread_object] : task->second) {
+                static_cast<void>(processor);
+                release_thread_directory_locked(thread_object);
+            }
+        }
+    }
     file_descriptors_.clear();
     regular_file_open_descriptions_.clear();
     virtual_block_descriptors_.clear();
