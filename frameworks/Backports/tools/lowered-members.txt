@@ -53,10 +53,17 @@ class ARVideoFormat
 class ARWorldMap
 class ARWorldTrackingConfiguration
 class ASAuthorization
+class ASAuthorizationAppleIDButton
 class ASAuthorizationAppleIDCredential
 class ASAuthorizationAppleIDProvider
 class ASAuthorizationAppleIDRequest
+class ASAuthorizationController
 class ASAuthorizationOpenIDRequest
+class ASAuthorizationPlatformPublicKeyCredentialAssertion
+class ASAuthorizationPlatformPublicKeyCredentialAssertionRequest
+class ASAuthorizationPlatformPublicKeyCredentialProvider
+class ASAuthorizationPlatformPublicKeyCredentialRegistration
+class ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest
 class ASAuthorizationRequest
 class ASCredentialIdentityStore
 class ASCredentialIdentityStoreState
@@ -230,6 +237,8 @@ class AXRequest
 class BEAvailability
 class BGAppRefreshTask
 class BGAppRefreshTaskRequest
+class BGContinuedProcessingTask
+class BGContinuedProcessingTaskRequest
 class BGProcessingTask
 class BGProcessingTaskRequest
 class BGTask
@@ -650,9 +659,12 @@ class INInteraction
 class INMessage
 class INParameter
 class INPaymentMethod
+class INPerson
+class INPersonHandle
 class INPreferences
 class INRideCompletionStatus
 class INRideDriver
+class INSendMessageIntent
 class INSpeakableString
 class INUIAddVoiceShortcutButton
 class INUIAddVoiceShortcutViewController
@@ -672,6 +684,8 @@ class LAEnvironmentMechanismBiometry
 class LAEnvironmentMechanismCompanion
 class LAEnvironmentMechanismUserPassword
 class LAEnvironmentState
+class LPLinkMetadata
+class LPMetadataProvider
 class MDLAnimatedMatrix4x4
 class MDLAnimatedQuaternion
 class MDLAnimatedQuaternionArray
@@ -1737,6 +1751,7 @@ class RevenantLayoutManager7
 class RevenantLayoutSupport
 class RevenantLayoutTransition
 class RevenantLeaf
+class RevenantLinkFetch
 class RevenantLinkTarget
 class RevenantListItemHandler
 class RevenantListMenuDelegate
@@ -1912,6 +1927,7 @@ class RevenantSafeAreaChanges11
 class RevenantSameSiteInstaller
 class RevenantSceneObserver
 class RevenantScheduledBuffer
+class RevenantSchemeRegistration
 class RevenantScreenCoordinateSpace
 class RevenantScreenSpace
 class RevenantScrollGuideObserver
@@ -2021,6 +2037,8 @@ class RevenantWeakDelegateBox
 class RevenantWeakGroup
 class RevenantWeakMapTable
 class RevenantWebPagination7
+class RevenantWebSchemeTask
+class RevenantWebURLProtocol
 class RevenantZoomRamp
 class RevenantZoomSampleRelay
 class SCNCamera
@@ -2560,6 +2578,8 @@ class VNDetectRectanglesRequest
 class VNDetectTextRectanglesRequest
 class VNDetectedObjectObservation
 class VNDetectedPoint
+class VNDocumentCameraScan
+class VNDocumentCameraViewController
 class VNFaceLandmarkRegion
 class VNFaceLandmarkRegion2D
 class VNFaceLandmarks
@@ -2626,6 +2646,7 @@ class WKBackForwardListItem
 class WKContentRuleList
 class WKContentRuleListStore
 class WKContentWorld
+class WKContextMenuElementInfo
 class WKFrameInfo
 class WKNavigation
 class WKNavigationAction
@@ -2633,6 +2654,7 @@ class WKNavigationResponse
 class WKPreferences
 class WKProcessPool
 class WKScriptMessage
+class WKSnapshotConfiguration
 class WKUserContentController
 class WKUserScript
 class WKWebExtension
@@ -3919,6 +3941,7 @@ function revenant_default_duration
 function revenant_default_preferred
 function revenant_default_shadow_colour
 function revenant_deliver_trait_registrations
+function revenant_device_check_unsupported
 function revenant_diffable_changes
 function revenant_diffable_finish
 function revenant_diffable_source_description
@@ -4040,6 +4063,11 @@ function revenant_layer_refresh_corner_curve
 function revenant_layer_refresh_masked_corners
 function revenant_layout_has_baseline
 function revenant_layout_perform
+function revenant_link_charset
+function revenant_link_first
+function revenant_link_parse_html
+function revenant_link_resolve
+function revenant_link_text
 function revenant_list_menu_interaction
 function revenant_lzma_compress
 function revenant_lzma_decompress
@@ -4361,6 +4389,8 @@ function revenant_uttype_catalogue_types
 function revenant_vision_bilinear
 function revenant_weak_get
 function revenant_weak_set
+function revenant_web_bind_scheme
+function revenant_web_download_delegate_protocol
 function revenant_white_colour
 function sec_certificate_copy_ref
 function sec_certificate_create
@@ -6536,11 +6566,9 @@ global INWorkoutNameIdentifierSwim
 global INWorkoutNameIdentifierWalk
 global INWorkoutNameIdentifierYoga
 global LABiometryTypeNone
-global LACompanionTypeMac
-global LAErrorBiometryNotAvailable
 global LAErrorDomain
 global LAErrorInvalidContext
-global LAErrorNotInteractive
+global LPErrorDomain
 global MDLVertexAttributeAnisotropy
 global MDLVertexAttributeBinormal
 global MDLVertexAttributeBitangent
@@ -6651,6 +6679,18 @@ global MKPointOfInterestCategoryWinery
 global MKPointOfInterestCategoryZoo
 global MKRevenantOSRMProfileCycling
 global MKRevenantOSRMProfileWalking
+global MLCActivationTypeClamp
+global MLCArithmeticOperationDivideNoNaN
+global MLCArithmeticOperationMax
+global MLCArithmeticOperationMin
+global MLCArithmeticOperationMultiplyNoNaN
+global MLCDataTypeFloat16
+global MLCDataTypeInt8
+global MLCDataTypeUInt8
+global MLCDeviceTypeANE
+global MLCReductionTypeAll
+global MLCReductionTypeAny
+global MLCReductionTypeL1Norm
 global MLFeatureTypeSequence
 global MLFeatureValueImageOptionCropAndScale
 global MLFeatureValueImageOptionCropRect
@@ -6697,6 +6737,73 @@ global MPNowPlayingInfoPropertyIsLiveStream
 global MPNowPlayingInfoPropertyMediaType
 global MPNowPlayingInfoPropertyPlaybackProgress
 global MPNowPlayingInfoPropertyServiceIdentifier
+global MPSAliasingStrategyShallNotAlias
+global MPSAlphaTypeAlphaIsOne
+global MPSAlphaTypeNonPremultiplied
+global MPSAlphaTypePremultiplied
+global MPSCNNNeuronTypeAbsolute
+global MPSCNNNeuronTypeELU
+global MPSCNNNeuronTypeExponential
+global MPSCNNNeuronTypeGeLU
+global MPSCNNNeuronTypeHardSigmoid
+global MPSCNNNeuronTypeLinear
+global MPSCNNNeuronTypeLogarithm
+global MPSCNNNeuronTypeNone
+global MPSCNNNeuronTypePower
+global MPSCNNNeuronTypeReLU
+global MPSCNNNeuronTypeReLUN
+global MPSCNNNeuronTypeSigmoid
+global MPSCNNNeuronTypeSoftPlus
+global MPSCNNNeuronTypeSoftSign
+global MPSCNNNeuronTypeTanH
+global MPSDataLayoutFeatureChannelsxHeightxWidth
+global MPSDataLayoutHeightxWidthxFeatureChannels
+global MPSDataTypeBool
+global MPSDataTypeFloat16
+global MPSDataTypeFloat32
+global MPSDataTypeInt16
+global MPSDataTypeInt32
+global MPSDataTypeInt64
+global MPSDataTypeInt8
+global MPSDataTypeInvalid
+global MPSDataTypeUInt16
+global MPSDataTypeUInt32
+global MPSDataTypeUInt64
+global MPSDataTypeUInt8
+global MPSGraphDeviceTypeMetal
+global MPSGraphExecutionStageCompleted
+global MPSGraphOptionsDefault
+global MPSGraphPaddingModeAntiPeriodic
+global MPSGraphPaddingModePeriodic
+global MPSGraphPaddingModeZero
+global MPSImageEdgeModeClamp
+global MPSImageEdgeModeZero
+global MPSImageFeatureChannelFormatFloat16
+global MPSImageFeatureChannelFormatFloat32
+global MPSImageFeatureChannelFormatNone
+global MPSImageFeatureChannelFormatUnorm16
+global MPSImageFeatureChannelFormatUnorm8
+global MPSKernelOptionsNone
+global MPSMatrixDecompositionStatusNonPositiveDefinite
+global MPSMatrixDecompositionStatusSingular
+global MPSMatrixDecompositionStatusSuccess
+global MPSMatrixRandomDistributionDefault
+global MPSMatrixRandomDistributionNormal
+global MPSMatrixRandomDistributionUniform
+global MPSNNPaddingMethodAddRemainderToBottomRight
+global MPSNNPaddingMethodAlignCentered
+global MPSNNPaddingMethodAlignTopLeft
+global MPSNNPaddingMethodAlign_reserved
+global MPSNNPaddingMethodCustom
+global MPSNNPaddingMethodSizeSame
+global MPSNNPaddingMethodSizeValidOnly
+global MPSNNRegularizationTypeL1
+global MPSNNRegularizationTypeL2
+global MPSNNRegularizationTypeNone
+global MPSRNNSequenceDirectionForward
+global MPSStateResourceTypeBuffer
+global MPSStateResourceTypeNone
+global MPSStateResourceTypeTexture
 global MPVolumeViewWirelessRouteActiveDidChangeNotification
 global MPVolumeViewWirelessRoutesAvailableDidChangeNotification
 global MTKModelErrorDomain
@@ -6758,9 +6865,6 @@ global MTLVertexFormatUShortNormalized
 global MXErrorDomain
 global NFCErrorDomain
 global NFCISO15693TagResponseErrorKey
-global NFCReaderErrorUnsupportedFeature
-global NFCTypeNameFormatEmpty
-global NFCTypeNameFormatNFCWellKnown
 global NLLanguageAmharic
 global NLLanguageArabic
 global NLLanguageArmenian
@@ -7295,6 +7399,10 @@ global PHPhotosErrorInvalidResource
 global PHPhotosErrorMissingResource
 global PKPassLibraryRecoveredPassesUserInfoKey
 global PKPassLibraryRemotePaymentPassesDidChangeNotification
+global PKPaymentNetworkAmex
+global PKPaymentNetworkDiscover
+global PKPaymentNetworkMasterCard
+global PKPaymentNetworkVisa
 global PKPushTypeComplication
 global PKPushTypeFileProvider
 global PKPushTypeVoIP
@@ -7664,7 +7772,6 @@ global UIKeyInputRightArrow
 global UIKeyInputUpArrow
 global UIKeyboardIsLocalUserInfoKey
 global UILargeContentViewerInteractionEnabledStatusDidChangeNotification
-global UIModalPresentationAutomatic
 global UIModalPresentationNone
 global UIPasteboardDetectionPatternNumber
 global UIPasteboardDetectionPatternProbableWebSearch
@@ -7878,13 +7985,6 @@ global WKWebsiteDataTypeSessionStorage
 global WKWebsiteDataTypeWebSQLDatabases
 global k3DMixerParam_DryWetReverbBlend
 global k3DMixerParam_GlobalReverbGainInDecibels
-global kAUAudioMixParameter_RemixAmount
-global kAUAudioMixParameter_Style
-global kAUAudioMixProperty_EnableSpatialization
-global kAUAudioMixProperty_SpatialAudioMixMetadata
-global kAUSoundIsolationSoundType_HighQualityVoice
-global kAudioUnitProperty_SpatialMixerAnyInputIsUsingPersonalizedHRTF
-global kAudioUnitSubType_AUAudioMix
 global kCAContentsFormatGray8Uint
 global kCAContentsFormatRGBA16Float
 global kCAContentsFormatRGBA8Uint
@@ -8104,6 +8204,24 @@ global kUTTypePolygon
 global kUTTypeStereolithography
 global kUTTypeUniversalSceneDescription
 global kUTTypeUniversalSceneDescriptionMobile
+global kvImage420Yp8_Cb8_Cr8
+global kvImage420Yp8_CbCr8
+global kvImage422CbYpCrYp16
+global kvImage422CbYpCrYp8
+global kvImage422CbYpCrYp8_AA8
+global kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10
+global kvImage422YpCbYpCr8
+global kvImage444AYpCbCr16
+global kvImage444AYpCbCr8
+global kvImage444CbYpCrA8
+global kvImage444CrYpCb10
+global kvImage444CrYpCb8
+global kvImageARGB16Q12
+global kvImageARGB16U
+global kvImageARGB8888
+global kvImageNoAllocate
+global kvImagePrintDiagnosticsToConsole
+global kvImageUseFP16Accumulator
 global revenantOpenInNewWindowTitle
 global revenant_avfaudioErrorDomain
 global revenant_call_answered
@@ -8446,6 +8564,12 @@ member ASAuthorization -encodeWithCoder:
 member ASAuthorization -initWithCoder:
 member ASAuthorization -provider
 member ASAuthorization -revenant_initWithProvider:credential:
+member ASAuthorizationAppleIDButton +buttonWithType:style:
+member ASAuthorizationAppleIDButton -cornerRadius
+member ASAuthorizationAppleIDButton -drawRect:
+member ASAuthorizationAppleIDButton -initWithAuthorizationButtonType:authorizationButtonStyle:
+member ASAuthorizationAppleIDButton -revenant_title
+member ASAuthorizationAppleIDButton -setCornerRadius:
 member ASAuthorizationAppleIDCredential +supportsSecureCoding
 member ASAuthorizationAppleIDCredential -authorizationCode
 member ASAuthorizationAppleIDCredential -authorizedScopes
@@ -8471,6 +8595,13 @@ member ASAuthorizationAppleIDRequest -init
 member ASAuthorizationAppleIDRequest -revenant_initWithProvider:
 member ASAuthorizationAppleIDRequest -setUser:
 member ASAuthorizationAppleIDRequest -user
+member ASAuthorizationController -cancel
+member ASAuthorizationController -initWithAuthorizationRequests:
+member ASAuthorizationController -performAutoFillAssistedRequests
+member ASAuthorizationController -performRequests
+member ASAuthorizationController -performRequestsWithOptions:
+member ASAuthorizationController -revenant_complete
+member ASAuthorizationController -revenant_error
 member ASAuthorizationOpenIDRequest -copyWithZone:
 member ASAuthorizationOpenIDRequest -init
 member ASAuthorizationOpenIDRequest -nonce
@@ -8482,6 +8613,45 @@ member ASAuthorizationOpenIDRequest -setRequestedOperation:
 member ASAuthorizationOpenIDRequest -setRequestedScopes:
 member ASAuthorizationOpenIDRequest -setState:
 member ASAuthorizationOpenIDRequest -state
+member ASAuthorizationPlatformPublicKeyCredentialAssertion -credentialID
+member ASAuthorizationPlatformPublicKeyCredentialAssertion -rawAuthenticatorData
+member ASAuthorizationPlatformPublicKeyCredentialAssertion -rawClientDataJSON
+member ASAuthorizationPlatformPublicKeyCredentialAssertion -signature
+member ASAuthorizationPlatformPublicKeyCredentialAssertion -userID
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest +supportsSecureCoding
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -allowedCredentials
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -challenge
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -copyWithZone:
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -relyingPartyIdentifier
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -revenant_initWithProvider:challenge:
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -setAllowedCredentials:
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -setChallenge:
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -setUserVerificationPreference:
+member ASAuthorizationPlatformPublicKeyCredentialAssertionRequest -userVerificationPreference
+member ASAuthorizationPlatformPublicKeyCredentialProvider -createCredentialAssertionRequestWithChallenge:
+member ASAuthorizationPlatformPublicKeyCredentialProvider -createCredentialRegistrationRequestWithChallenge:displayName:name:userID:
+member ASAuthorizationPlatformPublicKeyCredentialProvider -createCredentialRegistrationRequestWithChallenge:name:userID:
+member ASAuthorizationPlatformPublicKeyCredentialProvider -initWithRelyingPartyIdentifier:
+member ASAuthorizationPlatformPublicKeyCredentialProvider -relyingPartyIdentifier
+member ASAuthorizationPlatformPublicKeyCredentialRegistration -credentialID
+member ASAuthorizationPlatformPublicKeyCredentialRegistration -rawAttestationObject
+member ASAuthorizationPlatformPublicKeyCredentialRegistration -rawClientDataJSON
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest +supportsSecureCoding
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -attestationPreference
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -challenge
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -copyWithZone:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -displayName
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -name
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -relyingPartyIdentifier
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -revenant_initWithProvider:challenge:name:userID:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setAttestationPreference:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setChallenge:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setDisplayName:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setName:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setUserID:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -setUserVerificationPreference:
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -userID
+member ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest -userVerificationPreference
 member ASAuthorizationRequest +supportsSecureCoding
 member ASAuthorizationRequest -copyWithZone:
 member ASAuthorizationRequest -encodeWithCoder:
@@ -10037,6 +10207,10 @@ member AXRequest -revenant_withTechnology:
 member AXRequest -technology
 member BEAvailability +isEligibleForContext:completionHandler:
 member BGAppRefreshTaskRequest -initWithIdentifier:
+member BGContinuedProcessingTask -progress
+member BGContinuedProcessingTask -updateTitle:subtitle:
+member BGContinuedProcessingTaskRequest -copyWithZone:
+member BGContinuedProcessingTaskRequest -initWithIdentifier:title:subtitle:
 member BGProcessingTaskRequest -copyWithZone:
 member BGProcessingTaskRequest -initWithIdentifier:
 member BGProcessingTaskRequest -requiresExternalPower
@@ -13526,6 +13700,30 @@ member INPaymentMethod -copyWithZone:
 member INPaymentMethod -encodeWithCoder:
 member INPaymentMethod -initWithCoder:
 member INPaymentMethod -initWithType:name:identificationHint:icon:
+member INPerson +supportsSecureCoding
+member INPerson -aliases
+member INPerson -copyWithZone:
+member INPerson -displayName
+member INPerson -encodeWithCoder:
+member INPerson -hash
+member INPerson -initWithCoder:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:aliases:suggestionType:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:isContactSuggestion:suggestionType:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:isMe:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:isMe:suggestionType:
+member INPerson -initWithPersonHandle:nameComponents:displayName:image:contactIdentifier:customIdentifier:relationship:
+member INPerson -isContactSuggestion
+member INPerson -isEqual:
+member INPerson -suggestionType
+member INPersonHandle +supportsSecureCoding
+member INPersonHandle -copyWithZone:
+member INPersonHandle -encodeWithCoder:
+member INPersonHandle -hash
+member INPersonHandle -initWithCoder:
+member INPersonHandle -initWithValue:type:
+member INPersonHandle -initWithValue:type:label:
+member INPersonHandle -isEqual:
 member INPreferences +requestSiriAuthorization:
 member INPreferences +siriAuthorizationStatus
 member INPreferences +siriLanguageCode
@@ -13549,6 +13747,15 @@ member INRideCompletionStatus -isOutstanding
 member INRideCompletionStatus -paymentAmount
 member INRideDriver -initWithHandle:displayName:image:rating:phoneNumber:
 member INRideDriver -initWithHandle:nameComponents:image:rating:phoneNumber:
+member INSendMessageIntent +supportsSecureCoding
+member INSendMessageIntent -copyWithZone:
+member INSendMessageIntent -encodeWithCoder:
+member INSendMessageIntent -hash
+member INSendMessageIntent -init
+member INSendMessageIntent -initWithCoder:
+member INSendMessageIntent -initWithRecipients:content:groupName:serviceName:sender:
+member INSendMessageIntent -initWithRecipients:outgoingMessageType:content:speakableGroupName:conversationIdentifier:serviceName:sender:attachments:
+member INSendMessageIntent -isEqual:
 member INSpeakableString +supportsSecureCoding
 member INSpeakableString -copyWithZone:
 member INSpeakableString -encodeWithCoder:
@@ -13757,6 +13964,20 @@ member LAEnvironmentState -copyWithZone:
 member LAEnvironmentState -hash
 member LAEnvironmentState -initWithRevenantMechanisms:biometry:userPassword:companions:
 member LAEnvironmentState -isEqual:
+member LPLinkMetadata +revenant_metadataFromHTML:originalURL:finalURL:imageURL:iconURL:
+member LPLinkMetadata +supportsSecureCoding
+member LPLinkMetadata -copyWithZone:
+member LPLinkMetadata -encodeWithCoder:
+member LPLinkMetadata -initWithCoder:
+member LPMetadataProvider -cancel
+member LPMetadataProvider -errorForFetchError:
+member LPMetadataProvider -fetchResource:completion:
+member LPMetadataProvider -finishPageWithData:response:error:
+member LPMetadataProvider -finishWithMetadata:error:
+member LPMetadataProvider -init
+member LPMetadataProvider -startFetchingMetadataForRequest:completionHandler:
+member LPMetadataProvider -startFetchingMetadataForURL:completionHandler:
+member LPMetadataProvider -timedRequest:
 member MDLAnimatedMatrix4x4 -double4x4AtTime:
 member MDLAnimatedMatrix4x4 -float4x4AtTime:
 member MDLAnimatedMatrix4x4 -init
@@ -22122,6 +22343,14 @@ member RevenantLayoutInvalidation +load
 member RevenantLayoutManager7 +load
 member RevenantLayoutSupport -length
 member RevenantLayoutTransition -tick
+member RevenantLinkFetch -cancel
+member RevenantLinkFetch -connection:didFailWithError:
+member RevenantLinkFetch -connection:didReceiveData:
+member RevenantLinkFetch -connection:didReceiveResponse:
+member RevenantLinkFetch -connectionDidFinishLoading:
+member RevenantLinkFetch -finishWithData:error:
+member RevenantLinkFetch -initWithRequest:
+member RevenantLinkFetch -startWithCompletion:
 member RevenantLinkTarget -fire:
 member RevenantListItemHandler -revenant_call:completion:
 member RevenantListMenuDelegate -contextMenuInteraction:configurationForMenuAtLocation:
@@ -23632,6 +23861,18 @@ member RevenantWeakMapTable -setObject:forKey:
 member RevenantWeakMapTable -takePending
 member RevenantWeakMapTable -valuePointerFunctions
 member RevenantWebPagination7 +load
+member RevenantWebSchemeTask -didFailWithError:
+member RevenantWebSchemeTask -didFinish
+member RevenantWebSchemeTask -didReceiveData:
+member RevenantWebSchemeTask -didReceiveResponse:
+member RevenantWebSchemeTask -initWithRequest:protocol:
+member RevenantWebSchemeTask -request
+member RevenantWebSchemeTask -revenant_active
+member RevenantWebSchemeTask -revenant_stop
+member RevenantWebURLProtocol +canInitWithRequest:
+member RevenantWebURLProtocol +canonicalRequestForRequest:
+member RevenantWebURLProtocol -startLoading
+member RevenantWebURLProtocol -stopLoading
 member RevenantZoomRamp -step
 member RevenantZoomSampleRelay -captureOutput:didOutputSampleBuffer:fromConnection:
 member RevenantZoomSampleRelay -class
@@ -29331,6 +29572,11 @@ member VNDetectedPoint +revenant_pointWithX:y:confidence:
 member VNDetectedPoint -confidence
 member VNDetectedPoint -encodeWithCoder:
 member VNDetectedPoint -initWithCoder:
+member VNDocumentCameraScan -imageOfPageAtIndex:
+member VNDocumentCameraScan -pageCount
+member VNDocumentCameraScan -title
+member VNDocumentCameraViewController +isSupported
+member VNDocumentCameraViewController -viewDidAppear:
 member VNFaceLandmarkRegion +new
 member VNFaceLandmarkRegion2D -pointsInImageOfSize:
 member VNFaceObservation +faceObservationWithRequestRevision:boundingBox:roll:yaw:
@@ -29580,6 +29826,7 @@ member WKContentWorld +defaultClientWorld
 member WKContentWorld +pageWorld
 member WKContentWorld +worldWithName:
 member WKContentWorld -name
+member WKContextMenuElementInfo -linkURL
 member WKFrameInfo +revenant_frameWithMainFrame:request:
 member WKFrameInfo -copyWithZone:
 member WKFrameInfo -isMainFrame
@@ -29613,6 +29860,14 @@ member WKScriptMessage -body
 member WKScriptMessage -frameInfo
 member WKScriptMessage -name
 member WKScriptMessage -webView
+member WKSnapshotConfiguration -afterScreenUpdates
+member WKSnapshotConfiguration -copyWithZone:
+member WKSnapshotConfiguration -init
+member WKSnapshotConfiguration -rect
+member WKSnapshotConfiguration -setAfterScreenUpdates:
+member WKSnapshotConfiguration -setRect:
+member WKSnapshotConfiguration -setSnapshotWidth:
+member WKSnapshotConfiguration -snapshotWidth
 member WKUserContentController +supportsSecureCoding
 member WKUserContentController -addScriptMessageHandler:name:
 member WKUserContentController -addUserScript:
@@ -29853,6 +30108,7 @@ member WKWebView -setCustomUserAgent:
 member WKWebView -setNavigationDelegate:
 member WKWebView -setUIDelegate:
 member WKWebView -stopLoading
+member WKWebView -takeSnapshotWithConfiguration:completionHandler:
 member WKWebView -title
 member WKWebView -webView:didFailLoadWithError:
 member WKWebView -webView:shouldStartLoadWithRequest:navigationType:
@@ -29873,6 +30129,7 @@ member WKWebViewConfiguration -initWithCoder:
 member WKWebViewConfiguration -mediaTypesRequiringUserActionForPlayback
 member WKWebViewConfiguration -preferences
 member WKWebViewConfiguration -processPool
+member WKWebViewConfiguration -revenant_bindURLSchemeHandlersToWebView:
 member WKWebViewConfiguration -selectionGranularity
 member WKWebViewConfiguration -setAllowsAirPlayForMediaPlayback:
 member WKWebViewConfiguration -setAllowsInlineMediaPlayback:
@@ -29886,9 +30143,11 @@ member WKWebViewConfiguration -setPreferences:
 member WKWebViewConfiguration -setProcessPool:
 member WKWebViewConfiguration -setSelectionGranularity:
 member WKWebViewConfiguration -setSuppressesIncrementalRendering:
+member WKWebViewConfiguration -setURLSchemeHandler:forURLScheme:
 member WKWebViewConfiguration -setUserContentController:
 member WKWebViewConfiguration -setWebsiteDataStore:
 member WKWebViewConfiguration -suppressesIncrementalRendering
+member WKWebViewConfiguration -urlSchemeHandlerForURLScheme:
 member WKWebViewConfiguration -userContentController
 member WKWebViewConfiguration -websiteDataStore
 member WKWebpagePreferences -init
@@ -29915,6 +30174,7 @@ member __NSConcreteUUID -initWithUUIDString:
 member cls -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
 protocol ARAnchorCopying
 protocol ARTrackable
+protocol ASAuthorizationControllerDelegate
 protocol ASWebAuthenticationPresentationContextProviding
 protocol AVAsynchronousKeyValueLoading
 protocol AVAudioMixing
@@ -30177,8 +30437,11 @@ protocol VTFrameProcessorConfiguration
 protocol VTFrameProcessorParameters
 protocol WKNavigationDelegate
 protocol WKScriptMessageHandler
+protocol WKURLSchemeHandler
+protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
+protocol_member ASAuthorizationControllerDelegate -authorizationController:didCompleteWithError:
 protocol_member ASWebAuthenticationPresentationContextProviding -presentationAnchorForWebAuthenticationSession:
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
 protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
@@ -30986,6 +31249,12 @@ protocol_member WKNavigationDelegate -webView:didFailProvisionalNavigation:withE
 protocol_member WKNavigationDelegate -webView:didFinishNavigation:
 protocol_member WKNavigationDelegate -webView:didStartProvisionalNavigation:
 protocol_member WKScriptMessageHandler -userContentController:didReceiveScriptMessage:
+protocol_member WKURLSchemeHandler -webView:startURLSchemeTask:
+protocol_member WKURLSchemeHandler -webView:stopURLSchemeTask:
+protocol_member WKURLSchemeTask -didFailWithError:
+protocol_member WKURLSchemeTask -didFinish
+protocol_member WKURLSchemeTask -didReceiveData:
+protocol_member WKURLSchemeTask -didReceiveResponse:
 type ARBlendShapeLocation
 type AREnvironmentTexturing
 type ARFrameSemantics
@@ -31003,7 +31272,10 @@ type ARSkeletonJointName
 type ARTrackingState
 type ARTrackingStateReason
 type ARWorldMappingStatus
+type ASAuthorizationAppleIDButtonStyle
+type ASAuthorizationAppleIDButtonType
 type ASAuthorizationAppleIDProviderCredentialState
+type ASAuthorizationControllerRequestOptions
 type ASAuthorizationOpenIDOperation
 type ASAuthorizationProviderAuthorizationOperation
 type ASAuthorizationPublicKeyCredentialAttestationKind
@@ -31242,7 +31514,10 @@ type HMPresenceEventUserType
 type ICDownloadOption
 type ICScannerFunctionalUnitType
 type INMessageType
+type INOutgoingMessageType
 type INPaymentMethodType
+type INPersonHandleType
+type INPersonSuggestionType
 type INRideFeedbackTypeOptions
 type INShortcutAvailabilityOptions
 type INSiriAuthorizationStatus
@@ -31255,7 +31530,6 @@ type LAAccessControlOperation
 type LABiometryType
 type LACompanionType
 type LACredentialType
-type LAError
 type LAPolicy
 type MDLDataPrecision
 type MIDIReadBlock
@@ -31301,6 +31575,8 @@ type MLTaskState
 type MLUpdateProgressEvent
 type MPSAliasingStrategy
 type MPSAlphaType
+type MPSCNNBinaryConvolutionFlags
+type MPSCNNBinaryConvolutionType
 type MPSCNNConvolutionFlags
 type MPSCNNLossType
 type MPSCNNNeuronType
@@ -31309,12 +31585,14 @@ type MPSDataLayout
 type MPSDataType
 type MPSGraphDeviceType
 type MPSGraphExecutionStage
+type MPSGraphNonMaximumSuppressionCoordinateMode
 type MPSGraphOptions
 type MPSGraphPaddingMode
 type MPSGraphTensorDataDictionary
 type MPSGraphTensorShapedTypeDictionary
 type MPSImageEdgeMode
 type MPSImageFeatureChannelFormat
+type MPSMatrixDecompositionStatus
 type MPSNNPaddingMethod
 type MPSNNRegularizationType
 type MPSRNNSequenceDirection

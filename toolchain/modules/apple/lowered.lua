@@ -992,6 +992,9 @@ local function ios_later(text)
     for found_major, found_minor in text:gmatch("%f[%w_]ios%(%s*(%d+)%.?(%d*)") do
         major, minor = tonumber(found_major), tonumber(found_minor) or 0
     end
+    for found_major, found_minor in text:gmatch("__IPHONE_(%d+)_(%d+)") do
+        major, minor = tonumber(found_major), tonumber(found_minor)
+    end
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
 end
 
@@ -999,8 +1002,8 @@ function later_constants(sdk)
     local found = {}
     for _, file in ipairs(framework_headers(sdk)) do
         for line in io.readfile(file):gmatch("[^\n]*") do
-            if line:find("API_AVAILABLE", 1, true) and ios_later(line) then
-                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+API_AVAILABLE")
+            if line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
+                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+[%w_]*AVAILABLE")
                 if name and line:find("=", 1, true) and not line:find("const", 1, true) then
                     found[name] = true
                 end
