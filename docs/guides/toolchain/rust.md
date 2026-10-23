@@ -59,7 +59,7 @@ The explanation gives the measurement behind both, and why the linker's message 
 
 ## Limits on this release
 
-The shims answer what iOS 6 can do safely, and a few std calls fail rather than race. `std::fs::remove_dir_all` recurses through descriptors and fails with `ENOTSUP`, since iOS 6 has no descriptor-relative system call. `std::fs::read_dir`, `copy`, `rename` and `hard_link` work through the paths they are given. The `std::os::darwin::fs` directories answer the sandbox's user domain only. The reasons are in [Rust on iOS 6](../../explanation/toolchain/rust.md).
+The shims answer what iOS 6 can do safely. `std::fs::remove_dir_all` recurses through descriptors and works: each descriptor call pins its folder for that call, so a folder renamed during the walk is still the one emptied. `std::fs::read_dir`, `copy`, `rename` and `hard_link` work through the paths they are given. A call that needs two folders named by descriptors in one call answers `ENOTSUP`, and so do `RENAME_EXCL` and `fclonefileat`; std takes those answers as its cue to fall back. The `std::os::darwin::fs` directories answer the sandbox's user domain only. The reasons are in [Rust on iOS 6](../../explanation/toolchain/rust.md).
 
 ## Changing the nightly
 

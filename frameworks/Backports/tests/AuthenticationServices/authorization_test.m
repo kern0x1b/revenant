@@ -1,6 +1,7 @@
 #import "../Foundation/check.h"
 #import <AuthenticationServices/AuthenticationServices.h>
 #import <dlfcn.h>
+#import "../../src/AuthenticationServices/RevenantASAppleIDButtonMetrics.h"
 
 @interface RevenantAuthorizationDelegate : NSObject <ASAuthorizationControllerDelegate>
 
@@ -81,6 +82,13 @@ int main(int argc, char **argv)
 
     id copy = [registration copy];
     revenant_check([[copy challenge] isEqualToData:challenge] && [[copy name] isEqualToString:@"user"], "copied registration request keeps its fields", @"differs");
+
+    ASAuthorizationAppleIDButton *hostButton = [ASAuthorizationAppleIDButton buttonWithType:ASAuthorizationAppleIDButtonTypeSignIn style:ASAuthorizationAppleIDButtonStyleWhite];
+    revenant_check(hostButton.cornerRadius == RevenantASAppleIDButtonCornerRadius, "default corner radius matches the host button", [NSString stringWithFormat:@"%g", (double)hostButton.cornerRadius]);
+    revenant_expect_string("sign in title", RevenantASAppleIDButtonTitle(ASAuthorizationAppleIDButtonTypeSignIn), @"Sign in with Apple");
+    revenant_expect_string("continue title", RevenantASAppleIDButtonTitle(ASAuthorizationAppleIDButtonTypeContinue), @"Continue with Apple");
+    revenant_expect_string("sign up title", RevenantASAppleIDButtonTitle(ASAuthorizationAppleIDButtonTypeSignUp), @"Sign up with Apple");
+    revenant_check(RevenantASAppleIDButtonLogoCharacter == 0xF8FF, "logo character is U+F8FF", @"differs");
 
     return revenant_finish();
 }

@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8f65624d..c4bccfe8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -252,6 +252,20 @@ set(
+ if(OPENSSL_ASM)
+   list(APPEND CRYPTO_SOURCES_ASM_USED ${CRYPTO_SOURCES_ASM})
+ endif()
++if(OPENSSL_ASM AND APPLE AND CMAKE_OSX_ARCHITECTURES MATCHES "armv7")
++  list(APPEND CRYPTO_SOURCES_ASM_USED
++    apple-arm/crypto/chacha/chacha-armv4-apple.S
++    apple-arm/crypto/fipsmodule/aesv8-armv7-apple.S
++    apple-arm/crypto/fipsmodule/armv4-mont-apple.S
++    apple-arm/crypto/fipsmodule/bsaes-armv7-apple.S
++    apple-arm/crypto/fipsmodule/ghash-armv4-apple.S
++    apple-arm/crypto/fipsmodule/ghashv8-armv7-apple.S
++    apple-arm/crypto/fipsmodule/sha1-armv4-large-apple.S
++    apple-arm/crypto/fipsmodule/sha256-armv4-apple.S
++    apple-arm/crypto/fipsmodule/sha512-armv4-apple.S
++    apple-arm/crypto/fipsmodule/vpaes-armv7-apple.S
++    apple-arm/crypto/test/trampoline-armv4-apple.S)
++endif()
+ if(OPENSSL_NASM)
+   list(APPEND CRYPTO_SOURCES_ASM_USED ${CRYPTO_SOURCES_NASM})
+ endif()

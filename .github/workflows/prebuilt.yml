@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: prebuilt-${{ inputs.package }}
+  group: prebuilt-${{ inputs.package }}-${{ github.ref_name }}
   cancel-in-progress: false
 
 defaults:
@@ -126,6 +126,31 @@ jobs:
               *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
             esac
           } 2>&1 | tee "$RUNNER_TEMP/build.log"
+
+      - name: Collect the evidence of a failed build
+        if: failure()
+        run: |
+          evidence="$RUNNER_TEMP/evidence"
+          mkdir -p "$evidence"
+          cp "$RUNNER_TEMP/build.log" "$evidence/build.log" 2>/dev/null || true
+          cache="$(getconf DARWIN_USER_CACHE_DIR)clang/ModuleCache"
+          if [ -d "$cache" ]; then
+            tar -C "$(dirname "$cache")" -cf "$evidence/clang-module-cache.tar" ModuleCache
+          fi
+          lowered=$(find "$HOME/.revenant/cache/xmake-global/.xmake/cache/packages" -type d -name lowered -path '*/swift-runtime/*/source/lowered' 2>/dev/null | head -n 1)
+          if [ -n "$lowered" ]; then
+            tar -C "$(dirname "$lowered")" -cf "$evidence/lowered.tar" lowered
+          fi
+          ls -la "$evidence"
+
+      - name: Keep the evidence of a failed build
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilt-${{ inputs.package }}-failure-${{ github.run_id }}
+          path: ${{ runner.temp }}/evidence
+          retention-days: 14
+          if-no-files-found: warn
 
       - name: Attach the archive to the release of its key
         env:
