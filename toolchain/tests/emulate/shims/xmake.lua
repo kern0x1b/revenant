@@ -30,6 +30,12 @@ target("named")
     set_values("revenant.version", "1.0")
     set_values("revenant.control", "control-named")
 
+target("pin-leak")
+    add_rules("@addon/revenant/daemon")
+    add_files("pin-leak.c")
+    set_values("revenant.version", "1.0")
+    set_values("revenant.control", "control-pin-leak")
+
 target("pinned-path")
     add_rules("@addon/revenant/daemon")
     add_files("pinned-path.c", SHIMS .. "openat.c", SHIMS .. "linkat.c")
