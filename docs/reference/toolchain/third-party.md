@@ -29,6 +29,22 @@ carried into the program that ships to the device.
 | [zlib](https://github.com/madler/zlib) — the raw deflate codec behind `COMPRESSION_ZLIB` in the Compression backport, unmodified, built as `libzcodec.a` so the system `libz` is not linked | `v1.3.2` (`da607da739fa6047df13e66a2af6b8bec7c2a498`) | Zlib; the licence is installed with the package under `licenses/LICENSE` | `packages/z/zlib` |
 | [LZ4](https://github.com/lz4/lz4) — the block codec behind `COMPRESSION_LZ4_RAW` and the blocks of `COMPRESSION_LZ4` in the Compression backport, `lib/` only, unmodified, built with its symbols hidden | `v1.9.2` (`fdf2ef5809ca875c454510610764d9125ef2ebbd`) | BSD-2-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lz4` |
 | [xz](https://github.com/tukaani-project/xz) — the liblzma subset behind `COMPRESSION_LZMA` in the Compression backport (the LZMA1 and LZMA2 coders, the xz container, the CRC32, CRC64 and SHA-256 checks), unmodified sources, built with its symbols hidden and a configuration header of this repository (`packages/x/xz/port/config.h`, derived from the upstream's `dos/config.h`) | `v5.8.4` (`d3e650e63c110e830fd5391e7f8b45df0b91d3da`) | 0BSD; the licence is installed with the package under `licenses/COPYING.0BSD` | `packages/x/xz` |
+| [mozjpeg](https://github.com/mozilla/mozjpeg) — the JPEG encoder Telegram writes its photos with, as static `libjpeg` and `libturbojpeg`, built for armv7 | `61e03cc6b25ea506085dce1ee93ddd1f4b6588e6` (master, 4.1.4 plus 22 commits: the snapshot Telegram's tree holds, every file identical) | BSD-3-Clause | `packages/m/mozjpeg` |
+| [libvpx](https://github.com/webmproject/libvpx) — the VP8 and VP9 codec, as static `libvpx`, built for armv7 with its NEON assembly (see below) | `e7bfd8b6c230a6824e7fd1efa2378a7322986128` (master, 1.13.0 plus 435 commits: the snapshot Telegram's tree holds, every file identical bar its `.git` file) | BSD-3-Clause | `packages/v/vpx` |
+| [dav1d](https://code.videolan.org/videolan/dav1d) — the AV1 decoder, as static `libdav1d`, built for armv7 with its ARM assembly (see below) | `330e20672e85f9de1678dccd6957845898ef57a1` (1.5.0 plus 23 commits: the snapshot Telegram's tree holds, every file identical bar its `.git` file) | BSD-2-Clause | `packages/d/dav1d` |
+| [TDLib](https://github.com/tdlib/td) — `tde2e` and `tdutils`, the end-to-end encryption and utilities of secret chats, as static libraries | `e894536b2f46caad93f997448d2daff9431b19dd` (v1.8.0 plus 7675 commits: the snapshot Telegram's tree holds, identical bar its `.git` file and the line endings of three Windows scripts) | BSL-1.0 | `packages/t/td` |
+
+The pins are the snapshots Telegram's tree holds, found by comparing every file's content against upstream history:
+each is a release plus master commits, not a release tag. Each armv7 build keeps its NEON or ARM assembly, which upstream's
+own build tooling produces; revenant's clang assembles it at the 6.0 target, and the archives are checked for NEON objects
+and a 6.0 minimum in every member. mozjpeg's own `GNUInstallDirs` resolves a relative `CMAKE_INSTALL_LIBDIR` against the
+source tree, so the recipe passes an absolute one, or the archives land in the source directory; its NEON code is C
+intrinsics, with no assembly objects. libvpx's configure would assemble its ARM `.asm` files, after `ads2gas_apple.pl`
+(upstream's perl), with Apple's bare `as`, which records iOS 5.0 whatever the target says; so its make runs with `AS` and
+`ASFLAGS` set to revenant's clang at the 6.0 target, and with `CC` and `CXX` set to revenant's clang too, since configure's
+own `xcrun` lookups would pick the command-line tools. dav1d needs no `gas-preprocessor.pl` for armv7 under clang: meson's
+gate for it applies to MSVC only. Neither build has run on a device here. TDLib's `tde2e` and `tdutils` need zlib, OpenSSL
+and libc++ at link time; xmake does not pass a package's own dependencies on to its consumers, so each consumer names them.
 
 ## The compiler, linker, signer and SDK
 
@@ -38,7 +54,6 @@ the linker, signer and SDK stubs do not.
 | Component | Version | License | Package |
 | --- | --- | --- | --- |
 | Swift compiler | 6.4.0 | Apache-2.0 WITH Swift-exception | `packages/s/swift`, `packages/s/swift-bootstrap` |
-| LLVM / clang: the `clang-c` headers, the C API the declaration extractor reads the SDK through (`include/clang-c` of the clang 21.1.0 release, nothing else) | 21.1.0 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm-clang-c` |
 | LLVM / clang | 23.1.3 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm` |
 | ld64, from cctools-port (with apple-libtapi to read the SDK's `.tbd` stubs) | 956.6 | APSL-2.0; libtapi is Apache-2.0 WITH LLVM-exception plus NCSA | `packages/l/ld64` |
 | ldid | 2.1.5-procursus7+23.gaf86971 | AGPL-3.0-or-later (build-time signer; linked into nothing that ships) | `packages/l/ldid` |

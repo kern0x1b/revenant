@@ -117,5 +117,5 @@ when the releases are rebuilt anyway. Until then the key stays as the release ha
 - **The llvm package has no libLTO.** Neither llvm configuration installs `libLTO.dylib`: the default installs clang
   alone, and the `libraries` configuration's distribution components do not list LTO. A link with `-flto=thin` then
   fails, because the linker cannot load the library for the bitcode objects it reads, so every LTO link fails. The
-  change is to install `libLTO.dylib` with llvm and keep `-flto=thin` in the engine. Until that rebuild the reference
-  configure strips the flag on its own branch only; the engine build keeps it.
+  change is to install `libLTO.dylib` with llvm and keep `-flto=thin` in the engine. Until that rebuild the engine's
+  configure fails its compiler check, and nothing strips the flag to work around it.

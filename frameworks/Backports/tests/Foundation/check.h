@@ -1,6 +1,10 @@
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 #include <stdio.h>
 #include <string.h>
+
+#define REVENANT_IMP(base, selector, type) ((type)method_getImplementation(class_getInstanceMethod([base class], selector)))
+#define REVENANT_CLASS_IMP(base, selector, type) ((type)method_getImplementation(class_getClassMethod([base class], selector)))
 
 static int revenant_checks;
 static int revenant_failures;

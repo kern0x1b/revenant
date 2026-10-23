@@ -459,9 +459,8 @@ static NSAttributedString *RevenantFormat(NSAttributedString *format, NSUInteger
                         locale:(NSLocale *)locale, ...
 {
     va_list arguments;
-    (void)locale;
     va_start(arguments, locale);
-    NSAttributedString *result = RevenantFormat(format, options, nil, arguments);
+    NSAttributedString *result = RevenantFormat(format, options, locale, arguments);
     va_end(arguments);
     return [self initWithAttributedString:result];
 }
@@ -480,6 +479,48 @@ static NSAttributedString *RevenantFormat(NSAttributedString *format, NSUInteger
 {
     va_list arguments;
     va_start(arguments, options);
+    NSAttributedString *result = RevenantFormat(format, options, [NSLocale currentLocale], arguments);
+    va_end(arguments);
+    return result;
+}
+
+- (instancetype)initWithFormat:(NSAttributedString *)format
+                       options:(NSAttributedStringFormattingOptions)options
+                        locale:(NSLocale *)locale
+                       context:(NSDictionary<NSAttributedStringFormattingContextKey, id> *)context
+                     arguments:(va_list)arguments
+{
+    return [self initWithAttributedString:RevenantFormat(format, options, locale, arguments)];
+}
+
+- (instancetype)initWithFormat:(NSAttributedString *)format
+                       options:(NSAttributedStringFormattingOptions)options
+                        locale:(NSLocale *)locale
+                       context:(NSDictionary<NSAttributedStringFormattingContextKey, id> *)context, ...
+{
+    va_list arguments;
+    va_start(arguments, context);
+    NSAttributedString *result = RevenantFormat(format, options, locale, arguments);
+    va_end(arguments);
+    return [self initWithAttributedString:result];
+}
+
++ (instancetype)localizedAttributedStringWithFormat:(NSAttributedString *)format
+                                            context:(NSDictionary<NSAttributedStringFormattingContextKey, id> *)context, ...
+{
+    va_list arguments;
+    va_start(arguments, context);
+    NSAttributedString *result = RevenantFormat(format, 0, [NSLocale currentLocale], arguments);
+    va_end(arguments);
+    return result;
+}
+
++ (instancetype)localizedAttributedStringWithFormat:(NSAttributedString *)format
+                                            options:(NSAttributedStringFormattingOptions)options
+                                            context:(NSDictionary<NSAttributedStringFormattingContextKey, id> *)context, ...
+{
+    va_list arguments;
+    va_start(arguments, context);
     NSAttributedString *result = RevenantFormat(format, options, [NSLocale currentLocale], arguments);
     va_end(arguments);
     return result;

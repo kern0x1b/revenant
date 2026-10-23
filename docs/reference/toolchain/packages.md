@@ -11,7 +11,6 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | Package | Version | What it is |
 | --- | --- | --- |
 | `llvm` | clang 23.1.3 | the compilers and the runtime that every architecture is built with, without Xcode |
-| `llvm-clang-c` | | the clang C API headers, which the declaration reader uses to read the SDK |
 | `swift` | 6.4.0 | the Swift compiler, built from the sources of its own tag |
 | `swift-bootstrap` | 6.4.0 | the swift.org release that builds the compiler, cut to the driver and frontend |
 | `swift-syntax` | | the SwiftSyntax library for a port's macro plugin |
@@ -19,7 +18,6 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `ldid` | 2.1.5-procursus7+23.gaf86971 | the signer. Signing runs the binary of this package, never one found on `PATH` |
 | `libplist` | | the plist library `ldid` and the emulator use |
 | `iphoneos-sdk` | 26.2 (16.4 with `apple_sdk`) | the iOS SDK from theos/sdks, laid out as Xcode lays it out, with the `crt1` and `libgcc_s` files of iPhone OS 2 to iOS 6 and the library stubs of older releases |
-| `gn` | | the GN meta-build tool, a host tool for a package whose upstream builds with GN |
 | `rust` | nightly-2026-10-22 | the Rust toolchain of that nightly (rustc 1.101.0-nightly) with rust-src, installed for the host by rustup 1.29.2, whose installer is pinned by checksum. The `channel` config names it; it exports `REVENANT_RUST_BIN` and `REVENANT_RUST_CARGO_HOME` |
 
 ## Runtimes
@@ -40,7 +38,7 @@ The `frameworks/Backports` targets carry the Objective-C APIs later releases add
 | Package | What it is |
 | --- | --- |
 | `combine` | Combine on OpenCombine with the patches of this repository, one module named `Combine` |
-| `activitykit`, `appintents`, `createml`, `matter`, `musickit`, `swift-crypto`, `swift-data`, `swift-system`, `tipkit`, `widgetkit` | the other frameworks of the repository |
+| `activitykit`, `appintents`, `createml`, `musickit`, `swift-crypto`, `swift-data`, `swift-system`, `tipkit`, `widgetkit` | the other frameworks of the repository |
 | `realityfoundation`, `realitykit`, `spatial`, `cloudkit`, `weatherkit`, `network`, `cryptokit`, `uniformtypeidentifiers` | the overlays of Apple's frameworks, one dylib and one Swift module each, built against `swift-runtime`; the first two overlay SceneKit, whose part below iOS 8 is not yet backported, and `network` is the Network framework's overlay, whose part below iOS 12 is not yet backported; the open gaps are listed in [the Backports README](../../../frameworks/Backports/README.md) |
 
 SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWebAuth` and the CallKit tweak `revenant-callkit-screen` are targets of their components, not packages: their sources are ours, and the components' `xmake.lua` files define them. The `SwiftUI` target is installed for a port by a thin wrapper package of its own, `revenant@swiftui`. See [the architecture](../../explanation/architecture.md).
@@ -49,7 +47,7 @@ SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWe
 
 | Package | What it is |
 | --- | --- |
-| `box2d`, `ggml`, `lz4`, `lzfse`, `micro-ecc`, `monocypher`, `opencv`, `openssl`, `picotls`, `quicly`, `suitesparse-ordering`, `xz`, `zlib` | libraries a port links, each built for the target and carried into its program |
+| `box2d`, `ggml`, `lz4`, `lzfse`, `micro-ecc`, `monocypher`, `openssl`, `suitesparse-ordering`, `xz`, `zlib` | libraries a port links, each built for the target and carried into its program |
 | `emulator` | the emulator, which boots a firmware's userland on macOS arm64 |
 | `emulator-guest` | the guest programs, `revenant-runner` and `revenant-sblaunch` |
 | `firmware-tools` | `revenant-firmware`, which decrypts the FileVault root filesystems and the Apple Encrypted Archives of firmware |

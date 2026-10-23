@@ -33,9 +33,9 @@ REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64 ./xma
 ```
 
 The two variables make the configure take LLVM, Swift and ld64 from their releases, as CI does. Without them the
-configure builds those packages from source, which takes hours. `./xmakew test -P .` runs every host test in about two
-minutes once the package store is warm;
-`./xmakew test -P . 'repository/*'` runs the layout and comment checks in seconds. The suites and what runs where:
+configure builds those packages from source. `./xmakew test -P .` runs every host test. The repository checks run in
+seconds; the light toolchain suites need no package builds. `./xmakew test -P . 'repository/*'` runs the layout,
+comment, copied-text and credential checks. The suites and what runs where:
 [the toolchain's tests](docs/reference/toolchain/tests.md); the prebuilt packages: [docs/guides/prebuilt.md](docs/guides/prebuilt.md). The same steps, from a clean clone to a built Backports library, are in [the getting-started guide](docs/guides/getting-started.md).
 
 ## One xmake project

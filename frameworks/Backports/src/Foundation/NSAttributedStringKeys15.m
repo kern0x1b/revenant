@@ -7,3 +7,4 @@ NSString * const NSLanguageIdentifierAttributeName = @"NSLanguage";
 NSString * const NSPresentationIntentAttributeName = @"NSPresentationIntent";
 NSString * const NSProgressFileOperationKindDuplicating = @"NSProgressFileOperationKindDuplicating";
 NSString * const NSReplacementIndexAttributeName = @"NSReplacementIndex";
+NSString * const NSMorphologyAttributeName = @"NSMorphology";

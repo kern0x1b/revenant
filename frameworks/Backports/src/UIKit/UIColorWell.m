@@ -103,13 +103,11 @@
     UIResponder *responder = self;
     while (responder && ![responder isKindOfClass:[UIViewController class]])
         responder = responder.nextResponder;
-    UIViewController *top = (UIViewController *)responder;
+    UIViewController *top = (UIViewController *)responder ?: [UIApplication sharedApplication].keyWindow.rootViewController;
     while (top.presentedViewController)
         top = top.presentedViewController;
-    if (!top) {
-        revenant_menus_say_once(@"color-well-presenter", @"UIColorWell: the well is not in a view controller's view, so there is nothing to present the color picker from");
+    if (!top)
         return;
-    }
     UIColorPickerViewController *picker = [[UIColorPickerViewController alloc] init];
     if (_selectedColor)
         picker.selectedColor = _selectedColor;

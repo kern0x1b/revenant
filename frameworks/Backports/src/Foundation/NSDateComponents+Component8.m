@@ -23,6 +23,8 @@
         case NSCalendarUnitWeekOfYear: self.weekOfYear = value; break;
         case NSCalendarUnitYearForWeekOfYear: self.yearForWeekOfYear = value; break;
         case NSCalendarUnitNanosecond: self.nanosecond = value; break;
+        case NSCalendarUnitDayOfYear: self.dayOfYear = value; break;
+        case NSCalendarUnitIsRepeatedDay: self.repeatedDay = value != 0; break;
         default:
             [NSException raise:NSInvalidArgumentException format:@"NSDateComponents cannot set calendar unit %lu by component", (unsigned long)unit];
     }
@@ -46,6 +48,8 @@
         case NSCalendarUnitWeekOfYear: return self.weekOfYear;
         case NSCalendarUnitYearForWeekOfYear: return self.yearForWeekOfYear;
         case NSCalendarUnitNanosecond: return self.nanosecond;
+        case NSCalendarUnitDayOfYear: return self.dayOfYear;
+        case NSCalendarUnitIsRepeatedDay: return self.repeatedDay ? 1 : 0;
         default:
             [NSException raise:NSInvalidArgumentException format:@"NSDateComponents has no value for calendar unit %lu by component", (unsigned long)unit];
             return NSDateComponentUndefined;

@@ -48,6 +48,21 @@ local function method_signature(node)
     return head .. table.concat(parts, " ")
 end
 
+local function property_flags(child)
+    local flags = {}
+    if child.flags["class"] then
+        table.insert(flags, "class")
+    end
+    local getter = ast.getter_of(child)
+    if getter then
+        table.insert(flags, "getter:" .. getter)
+    end
+    if ast.has_unavailable(child) then
+        table.insert(flags, "unavailable")
+    end
+    return table.concat(flags, " ")
+end
+
 local function members(state, container, node, intro)
     for _, child in ipairs(node.children) do
         if not child.implicit and child.name ~= nil then
@@ -55,10 +70,10 @@ local function members(state, container, node, intro)
             if child.kind == "ObjCMethodDecl" then
                 add(state, {kind = child.class_method and "class method" or "instance method", container = container,
                     name = child.name, symbol = (child.class_method and "+" or "-") .. "[" .. container .. " " .. child.name .. "]",
-                    signature = method_signature(child), intro = own})
+                    signature = method_signature(child), intro = own, flags = ast.has_unavailable(child) and "unavailable" or ""})
             elseif child.kind == "ObjCPropertyDecl" then
                 add(state, {kind = "property", container = container, name = child.name, symbol = container .. "." .. child.name,
-                    signature = (child.flags.readonly and "readonly " or "") .. (child.type or ""), intro = own})
+                    signature = (child.flags.readonly and "readonly " or "") .. (child.type or ""), intro = own, flags = property_flags(child)})
             end
         end
     end
@@ -67,25 +82,30 @@ end
 local function objc_top(state, top)
     local intro = ast.ios_intro(top)
     if top.kind == "ObjCInterfaceDecl" and top.name and defined(top) then
+        assert(string.find(top.name, "^[%a_][%w_]*$"), "a class whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
         local super = ast.children_of(top, "super")[1]
         add(state, {kind = "class", container = "", name = top.name, symbol = "_OBJC_CLASS_$_" .. top.name,
-            signature = super and super.type or "", intro = intro})
+            signature = super and super.type or "", intro = intro, flags = ast.has_unavailable(top) and "unavailable" or ""})
         members(state, top.name, top, intro)
     elseif top.kind == "ObjCCategoryDecl" then
         local interface = ast.children_of(top, "ObjCInterface")[1]
         if interface and interface.type then
+            assert(string.find(interface.type, "^[%a_][%w_]*$"), "a category whose class is not an identifier, '" .. interface.type .. "', in: " .. top.body)
             members(state, interface.type, top, intro)
         end
     elseif top.kind == "ObjCProtocolDecl" and top.name and defined(top) then
+        assert(string.find(top.name, "^[%a_][%w_]*$"), "a protocol whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
         add(state, {kind = "protocol", container = "", name = top.name, symbol = "_OBJC_PROTOCOL_$_" .. top.name,
-            signature = "", intro = intro})
+            signature = "", intro = intro, flags = #ast.children_of(top, "ObjCNonRuntimeProtocolAttr") > 0 and "nonruntime" or ""})
     elseif top.kind == "FunctionDecl" and top.name and not top.flags.static and not top.flags.inline and not top.implicit
         and not string.find(top.name, "^__builtin") then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a C function whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
-        add(state, {kind = "C function", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro})
+        add(state, {kind = "C function", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro,
+            flags = ast.has_unavailable(top) and "unavailable" or ""})
     elseif top.kind == "VarDecl" and top.name and top.flags.extern then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a global whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
-        add(state, {kind = "global variable", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro})
+        add(state, {kind = "global variable", container = "", name = top.name, symbol = top.name, signature = top.type or "", intro = intro,
+            flags = ast.has_unavailable(top) and "unavailable" or ""})
     elseif top.kind == "EnumDecl" then
         for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
             if child.name then

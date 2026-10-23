@@ -38,8 +38,7 @@ package("webkit")
         {"0022-WebKitLegacy-reinstate-the-WebKit1-API-iOS-links.patch", "05141e4951725ca50bf5d89954d6e1aac9dd7c006c1e42605be5230037254361"},
         {"0023-Describe-the-iOS-6-port-in-one-page.patch", "07240ceb7b8206cba93b0e972282534e7706686c6ea1d2d93fc011059a519961"},
         {"0024-Keep-the-webkitglib-2.54-state-these-files-had-in-th.patch", "8061a88fd3852a8693aec123336b2fb8895984aad4ffba334aed517d624e864d"},
-        {"0025-Configure-without-running-Python.patch", "7c68f32092e35d29fef5888370568ebdc2ea516bb9aca47ae8919ec9fad765f8"},
-        {"0026-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"}}
+        {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"}}
 
     local digests = {table.concat(tree, ",")}
     for _, patch in ipairs(patches) do

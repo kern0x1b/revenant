@@ -10,6 +10,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Architecture](explanation/architecture.md) | the three layers, what each top-level folder is, and how an app built outside gets our libraries |
 | [Decisions](explanation/decisions/README.md) | the architecture decisions, each with the check that enforces it |
 | [Loading the backports](explanation/backports-loading.md) | how the backport libraries are loaded |
+| [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [Continuous checks](guides/ci.md) | what CI runs |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
@@ -114,7 +115,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
-| [Matter](reference/backports/Matter/MatterFramework.md) | the Matter framework, iOS 12 to 26, on iOS 6 |
 | [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
 | [RealityFoundation: audio](reference/backports/RealityFoundation/Audio.md) | `Audio.swift`: deleted, and what brings it back |
 | [RealityFoundation: SceneKit](reference/backports/RealityFoundation/SceneKit.md) | RealityFoundation and RealityKit below iOS 8.0 |
