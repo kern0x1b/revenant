@@ -2928,6 +2928,7 @@ function NSDataFromGCMicroGamepadSnapshotData
 function NSDirectionalEdgeInsetsFromString
 function NSExtensionMain
 function NSStringFromDirectionalEdgeInsets
+function RevenantASAppleIDButtonTitle
 function RevenantAURenderInput
 function RevenantAccessFromWord
 function RevenantBLEMIDIParse

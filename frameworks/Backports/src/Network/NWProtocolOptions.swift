@@ -1,12 +1,6 @@
 import Darwin
 import Foundation
 
-public enum NWProtocolTLS {
-    public final class Options: @unchecked Sendable {
-        public init() {}
-    }
-}
-
 public final class NWProtocolStack: @unchecked Sendable {
     public var applicationProtocols: [NWProtocolFramer.Options] = []
 
