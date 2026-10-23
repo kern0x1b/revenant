@@ -31355,7 +31355,6 @@ type AudioComponentFlags
 type AudioComponentInstantiationOptions
 type BEEligibilityContext
 type CACornerMask
-type CAFrameRateRange
 type CAGradientLayerType
 type CALayerContentsFormat
 type CALayerCornerCurve
