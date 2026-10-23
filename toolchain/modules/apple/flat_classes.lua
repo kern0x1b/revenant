@@ -1,25 +1,41 @@
 local STUBBED = {
-    "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
-    "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLComponents",
-    "NSURLQueryItem", "NSURLSessionWebSocketMessage", "NSUnitConverterLinear",
+    {
+        framework = "Foundation",
+        classes = {
+            "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
+            "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLComponents",
+            "NSURLQueryItem", "NSURLSessionWebSocketMessage", "NSUnitConverterLinear",
+        },
+    },
+    {
+        framework = "CFNetwork",
+        classes = {"NSURLSessionWebSocketMessage"},
+    },
 }
 
 function class_names()
-    local names = {}
-    for _, name in ipairs(STUBBED) do
-        table.insert(names, name)
+    local names, seen = {}, {}
+    for _, entry in ipairs(STUBBED) do
+        for _, name in ipairs(entry.classes) do
+            if not seen[name] then
+                seen[name] = true
+                table.insert(names, name)
+            end
+        end
     end
     return names
 end
 
 function stub_directory(sdk, out)
-    local folder = path.join(out, "Foundation.framework")
-    os.mkdir(folder)
-    local text = io.readfile(path.join(sdk, "System", "Library", "Frameworks", "Foundation.framework", "Foundation.tbd"))
-    for _, name in ipairs(STUBBED) do
-        text = (text:gsub("([%s,])" .. name .. ",%s*", "%1"))
+    for _, entry in ipairs(STUBBED) do
+        local folder = path.join(out, entry.framework .. ".framework")
+        os.mkdir(folder)
+        local text = io.readfile(path.join(sdk, "System", "Library", "Frameworks", entry.framework .. ".framework", entry.framework .. ".tbd"))
+        for _, name in ipairs(entry.classes) do
+            text = (text:gsub("([%s,])" .. name .. ",%s*", "%1"))
+        end
+        io.writefile(path.join(folder, entry.framework .. ".tbd"), text)
     end
-    io.writefile(path.join(folder, "Foundation.tbd"), text)
     return out
 end
 
