@@ -34,6 +34,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [ld64](reference/toolchain/ld64.md) | the linker package: Apple's ld64 from cctools-port, its patches and why the port needs it |
 | [Tools](reference/toolchain/tools.md) | the developer tools |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
+| [Guest memory](reference/toolchain/guest-memory.md) | the helper that reads a task's virtual, resident and peak size, and what the emulator answers for it |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
