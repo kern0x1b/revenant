@@ -4,7 +4,7 @@ local function fail(message)
 end
 
 local function usage()
-    io.stderr:write("usage: ./xmakew l toolchain/tools/order_file/order_file.lua [--nm PROGRAM] [--otool PROGRAM] [--image NAME] BLOCK-PROFILE BINARY OUTPUT\n")
+    io.stderr:write("usage: ./xmakew l -P . toolchain/tools/order_file/order_file.lua [--nm PROGRAM] [--otool PROGRAM] [--image NAME] BLOCK-PROFILE BINARY OUTPUT\n")
     os.exit(64)
 end
 

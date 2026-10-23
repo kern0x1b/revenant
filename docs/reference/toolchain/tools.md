@@ -34,7 +34,7 @@ The index is written to `$HOME/.revenant/cache-index/`: one file per release of 
 
 `toolchain/tools/order_file/order_file.lua` turns the block profile of an emulator run into an order file for ld64's `-order_file`: the functions of the binary that the run executed, hottest first, one symbol per line with its Mach-O underscore. The run is an emulator boot with `--perf-block-profile`, whose `perf/block-profile.tsv` the tool reads.
 
-    ./xmakew l toolchain/tools/order_file/order_file.lua [--nm PROGRAM] [--otool PROGRAM] [--image NAME] BLOCK-PROFILE BINARY OUTPUT
+    ./xmakew l -P . toolchain/tools/order_file/order_file.lua [--nm PROGRAM] [--otool PROGRAM] [--image NAME] BLOCK-PROFILE BINARY OUTPUT
 
 `BINARY` is the host copy of the program the run executed, and `--image` is the name the profile gives it (its basename, by default). The symbols come from `nm -n` and the `__TEXT` base from `otool -l`, both on the host; the default programs are the host's `nm` and `otool`. The tool has no test of its own yet, and its use is in [the optimisation measurements](optimisation.md).
 
