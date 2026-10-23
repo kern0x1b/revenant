@@ -35,6 +35,7 @@ int main(int argc, char **argv)
         return 2;
     }
     const char *root = argv[1];
+    mkdir(root, 0700);
     if (chdir(root) != 0) {
         printf("FAIL  the scratch folder must be the working directory\n");
         return 2;

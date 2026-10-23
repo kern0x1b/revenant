@@ -70,6 +70,7 @@ int main(int argc, char **argv)
         return 2;
     }
     const char *root = argv[1];
+    mkdir(root, 0700);
     if (chdir(root) != 0) {
         printf("FAIL  the race test could not enter its scratch folder\n");
         return 2;
