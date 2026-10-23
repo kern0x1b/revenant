@@ -1,4 +1,5 @@
 #import <AuthenticationServices/AuthenticationServices.h>
+#import "RevenantASAppleIDButtonMetrics.h"
 
 @implementation ASAuthorizationAppleIDButton {
     ASAuthorizationAppleIDButtonType _buttonType;
@@ -16,7 +17,7 @@
     if ((self = [super initWithFrame:CGRectZero])) {
         _buttonType = type;
         _buttonStyle = style;
-        _cornerRadius = 8;
+        _cornerRadius = RevenantASAppleIDButtonCornerRadius;
         self.opaque = NO;
         self.backgroundColor = [UIColor clearColor];
         self.contentMode = UIViewContentModeRedraw;
@@ -37,15 +38,7 @@
 
 - (NSString *)revenant_title
 {
-    switch (_buttonType) {
-        case ASAuthorizationAppleIDButtonTypeContinue:
-            return @"Continue with Apple";
-        case ASAuthorizationAppleIDButtonTypeSignUp:
-            return @"Sign up with Apple";
-        case ASAuthorizationAppleIDButtonTypeSignIn:
-            return @"Sign in with Apple";
-    }
-    return @"Sign in with Apple";
+    return RevenantASAppleIDButtonTitle(_buttonType);
 }
 
 - (void)drawRect:(CGRect)rect
@@ -63,7 +56,7 @@
         [[UIColor blackColor] setStroke];
         [border stroke];
     }
-    NSString *title = [self revenant_title];
+    NSString *title = [NSString stringWithFormat:@"%C %@", RevenantASAppleIDButtonLogoCharacter, [self revenant_title]];
     UIFont *font = [UIFont boldSystemFontOfSize:17];
     CGSize size = [title sizeWithFont:font];
     CGRect text = CGRectMake(CGRectGetMidX(bounds) - size.width / 2, CGRectGetMidY(bounds) - size.height / 2, size.width, size.height);
