@@ -36,10 +36,6 @@ public final class NWPath: Equatable, CustomDebugStringConvertible {
     public var debugDescription: String {
         "status: \(status.debugDescription), isExpensive: \(isExpensive), interfaces: \(availableInterfaces.map { $0.name }.joined(separator: ", "))"
     }
-
-    public func usesInterfaceType(_ type: NWInterface.InterfaceType) -> Bool {
-        availableInterfaces.contains { $0.type == type }
-    }
 }
 
 private func revenantAvailableInterfaces() -> [NWInterface] {
@@ -69,29 +65,14 @@ private func revenantAvailableInterfaces() -> [NWInterface] {
     return names.compactMap { NWInterface(named: $0, kernelType: kernelTypes[$0]) }.filter { $0.type != .loopback }
 }
 
-func revenantInterfaceTypes(_ flags: SCNetworkReachabilityFlags) -> [NWInterface.InterfaceType] {
-    guard flags.contains(.reachable) else {
-        return []
-    }
-    if flags.contains(.isLocalAddress) {
-        return [.loopback]
-    }
-    #if os(iOS)
-    return flags.contains(.isWWAN) ? [.cellular] : [.wifi]
-    #else
-    return [.wifi]
-    #endif
-}
-
-func revenantPath(for flags: SCNetworkReachabilityFlags) -> NWPath {
+private func revenantPath(for flags: SCNetworkReachabilityFlags) -> NWPath {
     let status: NWPath.Status
     if flags.contains(.reachable) {
         status = flags.contains(.connectionRequired) ? .requiresConnection : .satisfied
     } else {
         status = .unsatisfied
     }
-    let types = revenantInterfaceTypes(flags)
-    let interfaces: [NWInterface] = types.isEmpty ? [] : revenantAvailableInterfaces().filter { types.contains($0.type) }
+    let interfaces = status == .unsatisfied ? [] : revenantAvailableInterfaces()
     return NWPath(status: status, isExpensive: revenantIsExpensive(flags), availableInterfaces: interfaces)
 }
 

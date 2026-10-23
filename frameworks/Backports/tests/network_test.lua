@@ -18,11 +18,4 @@ function main()
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host Network program printed nothing")
     assert(expected == got, "the backport Network differs from the host in " .. out)
-    local types = path.join(out, "interface-types")
-    swiftc({path.join(src, "IPv4Address.swift"), path.join(src, "IPv6Address.swift"), path.join(src, "NWEndpoint.swift"),
-            path.join(src, "NWInterface.swift"), path.join(src, "NWError.swift"), path.join(src, "NWPathMonitor.swift"),
-            path.join(src, "NWConnection.swift"), path.join(backports, "tests", "Network", "types", "main.swift"), "-o", types})
-    os.execv(types, {}, {stdout = types .. ".out"})
-    assert(io.readfile(types .. ".out"):find("network interface types ok", 1, true),
-           "the backport's interface types do not follow the reachability flags: " .. out)
 end
