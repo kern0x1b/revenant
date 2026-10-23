@@ -9,9 +9,6 @@
 
 int __pthread_fchdir(int descriptor);
 
-/* The test only means something when the emulator's host descriptor limit is below THREADS, so run it with the limit
-   lowered, for example (ulimit -n 512; xmake emulate ... run /usr/libexec/pin-leak <folder>). Without the limit,
-   a leaked pin per thread still fits and the test passes. */
 #define THREADS 600
 
 static char folder[MAXPATHLEN];
