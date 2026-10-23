@@ -296,7 +296,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "probe", "missing_probe.c"))
         add_frameworks("Foundation")
-        add_ldflags("-Wl,-U,_OBJC_CLASS_$_RevenantNoSuchClass", {force = true})
+        add_shflags("-Wl,-U,_OBJC_CLASS_$_RevenantNoSuchClass", {force = true})
     target_end()
 
     target("backports_runtime")
