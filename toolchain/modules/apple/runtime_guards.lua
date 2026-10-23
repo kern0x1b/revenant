@@ -28,6 +28,7 @@ GUARDS = {
         ["_dispatch_queue_get_qos_class"] = "stdlib/public/Darwin/Dispatch/Queue.swift:472 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
     },
     ["libswiftFoundation.dylib"] = {
+        ["_OBJC_CLASS_$_NSPresentationIntent"] = "toolchain/src/swift-runtime/overlay/Foundation/PresentationIntent.swift:239 (the bridging extension, available from iOS 15 as the SDK's NSAttributedString.h declares NSPresentationIntent)",
         ["_NSCalendarIdentifierIslamicTabular"] = "stdlib/public/Darwin/Foundation/Calendar.swift:974 (and :1014) @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_NSCalendarIdentifierIslamicUmmAlQura"] = "stdlib/public/Darwin/Foundation/Calendar.swift:974 (and :1014) @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_NSDataDeallocatorFree"] = "patch packages/s/swift-runtime/patches/overlays/the-overlay-of-foundation-asks-for-ios-7-where-it-reaches-ios-7.patch:40",

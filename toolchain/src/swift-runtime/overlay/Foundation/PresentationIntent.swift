@@ -236,6 +236,7 @@ fileprivate enum Tag: Hashable {
     }
 }
 
+@available(iOS 15.0, macOS 12.0, *)
 extension PresentationIntent: _ObjectiveCBridgeable {
     public typealias _ObjectiveCType = __NSPresentationIntent
 
