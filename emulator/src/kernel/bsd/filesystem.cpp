@@ -196,7 +196,7 @@ bool CompatibilityKernel::dispatch_bsd_thread_directory(
         bsd_error(cpu, 2);
         return true;
     }
-    const int descriptor = open(host.c_str(), O_RDONLY | O_DIRECTORY);
+    const int descriptor = open(host.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (descriptor == -1) {
         bsd_error(cpu, 2);
         return true;

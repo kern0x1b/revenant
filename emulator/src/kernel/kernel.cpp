@@ -30,6 +30,7 @@
 #include "kernel/darwin_resource_abi.hpp"
 #include <fcntl.h>
 #include <sys/param.h>
+#include <unistd.h>
 #include "network/darwin_route_socket.hpp"
 #include "network/dns_configuration_hle.hpp"
 #include "kernel/graphics_services_input.hpp"
@@ -3323,6 +3324,18 @@ std::optional<std::filesystem::path> CompatibilityKernel::guest_path_of_host(
     if (relative.empty() || *relative.begin() == "..")
         return std::nullopt;
     return (std::filesystem::path { "/" } / relative).lexically_normal();
+}
+
+void CompatibilityKernel::release_thread_directory_locked(
+    std::uint32_t thread_object)
+{
+    const auto found =
+        shared_state_->thread_working_directories.find(thread_object);
+    if (found == shared_state_->thread_working_directories.end())
+        return;
+    if (found->second.host_descriptor >= 0)
+        close(found->second.host_descriptor);
+    shared_state_->thread_working_directories.erase(found);
 }
 
 std::filesystem::path CompatibilityKernel::working_directory() const
