@@ -32,10 +32,12 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Packages](reference/toolchain/packages.md) | the packages and their versions |
 | [ld64](reference/toolchain/ld64.md) | the linker package: Apple's ld64 from cctools-port, its patches and why the port needs it |
 | [Tools](reference/toolchain/tools.md) | the developer tools |
+| [Optimisation measurements](reference/toolchain/optimisation.md) | the prototypes' numbers: emulator instructions, page misses and text size, and the codegen reproducers |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
+| [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
 ## Emulator
 
