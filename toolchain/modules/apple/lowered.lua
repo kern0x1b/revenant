@@ -1,6 +1,7 @@
 local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 local json = import("core.base.json")
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
+local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 
 local MEMBERS = {
     {
@@ -71,7 +72,7 @@ end
 local function scan_source(file, found)
     local container, pending = nil, nil
     for line in io.readfile(file):gmatch("[^\n]*") do
-        local class = line:match("^@implementation%s+([%w_]+)")
+        local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
         if class then
             container = class
             found.classes[class] = found.classes[class] or {}
@@ -383,7 +384,7 @@ local function lowering_of(text, implemented)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) then
+            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
                 lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
@@ -961,7 +962,20 @@ function merge_sets(a, b)
 end
 
 function read_all_members()
-    return merge_sets(read_members(), read_device_members())
+    local set = merge_sets(read_members(), read_device_members())
+    set.weak_classes = {}
+    for _, rows in pairs(runtime_guards.guards()) do
+        for symbol in pairs(rows) do
+            local class = symbol:match("^_OBJC_CLASS_%$_(.+)$")
+            if class then
+                set.weak_classes[class] = true
+            elseif not symbol:find("^_OBJC_") then
+                set.globals[symbol:sub(2)] = nil
+                set.functions[symbol:sub(2)] = nil
+            end
+        end
+    end
+    return set
 end
 
 local function ios_later(text)
@@ -978,7 +992,7 @@ function later_constants(sdk)
         for line in io.readfile(file):gmatch("[^\n]*") do
             if line:find("API_AVAILABLE", 1, true) and ios_later(line) then
                 local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+API_AVAILABLE")
-                if name and (line:find("=", 1, true) or line:find("const", 1, true)) then
+                if name and line:find("=", 1, true) and not line:find("const", 1, true) then
                     found[name] = true
                 end
             end
@@ -1172,17 +1186,22 @@ end
 function swift_names(set)
     local names = {}
     for class, members in pairs(set.classes) do
-        for key in pairs(members) do
+        local weak = set.weak_classes and set.weak_classes[class]
+        local scope = class:startswith("NS") and class:sub(3) or class
+        names["scoped " .. scope] = true
+        for key in pairs(weak and {} or members) do
             local base = not key:sub(2):find("^init") and swift_base(key:sub(2))
             if base then
                 names[base] = true
+                names["scope " .. scope .. " " .. base] = true
             end
             local init = swift_init(key)
             if init then
                 names[init] = true
+                names["scope " .. scope .. " " .. init] = true
             end
         end
-        if class:startswith("NS") then
+        if class:startswith("NS") and not weak then
             names["type " .. class] = true
             names["type " .. class:sub(3)] = true
         end
@@ -1204,6 +1223,9 @@ end
 local function lowered_by(line, names, types, scope)
     local name = line:match("public%s+var%s+([%a_][%w_]*)") or line:match("public%s+func%s+([%a_][%w_]*)")
     if name then
+        if scope and names["scoped " .. scope] then
+            return names["scope " .. scope .. " " .. name] or false
+        end
         return names[name]
     end
     local label, rest = line:match("public%s+init%??%(%s*([%a_][%w_]*)%s+[%a_][%w_]*%s*:%s*(.*)$")
@@ -1248,16 +1270,33 @@ local function operator_extension(lines, at, names)
     return false
 end
 
-function lower_swift_text(text, names, types)
+local function guarded_lines(file)
+    local lines = {}
+    local name = path.filename(file)
+    for _, rows in pairs(runtime_guards.guards()) do
+        for _, citation in pairs(rows) do
+            local start = citation:find("Foundation/" .. name .. ":", 1, true)
+            if start then
+                for line in citation:sub(start):gmatch(":(%d+)") do
+                    lines[tonumber(line)] = true
+                end
+            end
+        end
+    end
+    return lines
+end
+
+function lower_swift_text(text, names, types, keep)
     local lines = {}
     for line in text:gmatch("([^\n]*)\n") do
         table.insert(lines, line)
     end
     types = types or {}
+    keep = keep or {}
     local kept, pending, scope = {}, nil, nil
     for index, line in ipairs(lines) do
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
-        if major and tonumber(major) >= 7 then
+        if major and tonumber(major) >= 7 and not keep[index] then
             pending = #kept + 1
         elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names)) then
             kept[pending] = false
@@ -1293,7 +1332,7 @@ function swift_overlays(root, set)
     local names, types = swift_names(set), set.types or {}
     for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", "Foundation", "*.swift"))) do
         local text = io.readfile(file)
-        local lowered = lower_swift_text(text, names, types)
+        local lowered = lower_swift_text(text, names, types, guarded_lines(file))
         if lowered ~= text then
             io.writefile(file, lowered)
         end
