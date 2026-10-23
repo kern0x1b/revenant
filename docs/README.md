@@ -15,6 +15,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Continuous checks](guides/ci.md) | what CI runs |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
+| [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |
 
 ## Toolchain
 
