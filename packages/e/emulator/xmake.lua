@@ -32,7 +32,8 @@ package("emulator")
         os.vrunv(os.programfile(), table.join({"f", "-p", "macosx", "-a", "arm64", "-m", "release",
                                                "--emulator_sdl=" .. (package:config("sdl") and "y" or "n"),
                                                "--emulator_ffmpeg=" .. (package:config("ffmpeg") and "y" or "n")}, argv))
-        os.vrunv(os.programfile(), table.join({"install", "-o", package:installdir(), "emulator"}, argv))
+        os.vrunv(os.programfile(), table.join({"build"}, argv, {"emulator"}))
+        os.vrunv(os.programfile(), table.join({"install", "-o", package:installdir()}, argv, {"emulator"}))
         local binary = path.join(package:installdir("bin"), "emulator")
         local allowed = {"/usr/lib/", "/System/", "@rpath/libvulkan", path.translate(os.getenv("XMAKE_GLOBALDIR") or path.join(os.getenv("HOME"), ".xmake"))}
         local linked = os.iorunv("otool", {"-L", binary})
