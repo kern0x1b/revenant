@@ -24,11 +24,13 @@ func serverParameters(_ identity: SecIdentity) -> NWParameters {
     let tls = NWProtocolTLS.Options()
     tls.securityProtocolOptions.localIdentity = identity
     tls.securityProtocolOptions.applicationProtocols = ["h2"]
+    tls.securityProtocolOptions.peerAuthenticationRequired = false
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
     #else
     let tls = NWProtocolTLS.Options()
     sec_protocol_options_set_local_identity(tls.securityProtocolOptions, sec_identity_create(identity)!)
     sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "h2")
+    sec_protocol_options_set_peer_authentication_required(tls.securityProtocolOptions, false)
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
     #endif
 }

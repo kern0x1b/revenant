@@ -63,9 +63,12 @@ final class NWTLSSession {
         SSLSetIOFuncs(context, revenantReadFunction, revenantWriteFunction)
         SSLSetConnection(context, Unmanaged.passUnretained(self).toOpaque())
         if serverSide {
-            if let identity = options.localIdentity {
-                SSLSetCertificate(context, [identity] as CFArray)
+            guard let identity = options.localIdentity, SSLSetCertificate(context, [identity] as CFArray) == noErr else {
+                return nil
             }
+            // Client authentication is enforced by the handshake itself: SecureTransport validates the client chain
+            // unless breakOnClientAuth is set, and a client that sends no certificate fails the handshake.
+            SSLSetClientSideAuthenticate(context, options.peerAuthenticationRequired ? .alwaysAuthenticate : .neverAuthenticate)
         } else if let name = options.serverName ?? defaultServerName {
             SSLSetPeerDomainName(context, name, name.utf8.count)
         }
