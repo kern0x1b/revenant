@@ -85,7 +85,7 @@ jobs:
         run: ./xmakew test -P . --output-on-failure
 
       - name: Save the package store
-        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
+        if: success() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global

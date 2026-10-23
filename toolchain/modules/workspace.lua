@@ -92,8 +92,47 @@ local function sdk_in(installdir, version)
     return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
+local function exclusively(name, body)
+    local lock = path.join(cache(), "locks", (name:gsub("[^%w]", "_")) .. ".lock")
+    ensure(path.directory(lock))
+    local waited = 0
+    while os.execv("mkdir", {lock}, {try = true, stdout = os.nuldev(), stderr = os.nuldev()}) ~= 0 do
+        if waited >= 900000 then
+            break
+        end
+        os.sleep(1000)
+        waited = waited + 1000
+    end
+    local failure
+    try {
+        function ()
+            body()
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        }
+    }
+    os.tryrm(lock)
+    if failure then
+        raise("%s", failure)
+    end
+end
+
 local function populated(folder)
     return os.isdir(folder) and (#os.files(path.join(folder, "*")) > 0 or #os.dirs(path.join(folder, "*")) > 0)
+end
+
+local function installdir_of(scratch, requirement)
+    local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
+    local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
+    local entries = start and json.decode(output:sub(start)) or {}
+    for _, entry in ipairs(entries) do
+        if entry.require == requirement and entry.installdir then
+            return entry.installdir
+        end
+    end
 end
 
 function package_of(requirement, install, platform)
@@ -110,19 +149,15 @@ function package_of(requirement, install, platform)
                 os.execv(os.programfile(), {"f", "-c", "-p", platform.plat, "-a", platform.arch, "-y"}, {curdir = scratch})
             end
             if install then
-                os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
-            end
-            local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
-            local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
-            local entries = start and json.decode(output:sub(start)) or {}
-            for _, entry in ipairs(entries) do
-                if entry.require == requirement and entry.installdir then
-                    if install and not populated(entry.installdir) then
+                exclusively(requirement .. (platform and (platform.plat .. platform.arch) or ""), function ()
+                    os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
+                    local folder = installdir_of(scratch, requirement)
+                    if folder and not populated(folder) then
                         os.execv(os.programfile(), {"require", "-y", "--force"}, {curdir = scratch})
                     end
-                    return entry.installdir
-                end
+                end)
             end
+            return installdir_of(scratch, requirement)
         end,
         catch {
             function (errors)
