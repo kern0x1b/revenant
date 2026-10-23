@@ -249,7 +249,7 @@ if is_plat("iphoneos") then
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
-                                  network = "network_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua"})
+                                  network = "network_test.lua", networktls = "network_tls_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,

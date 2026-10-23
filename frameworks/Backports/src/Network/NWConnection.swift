@@ -80,6 +80,11 @@ public final class NWConnection: @unchecked Sendable {
     private var framerImplementation: (any NWProtocolFramerImplementation)?
     private var framedInput: [Data] = []
     private var outboundPayload = Data()
+    private var tls: NWTLSSession?
+
+    public var negotiatedApplicationProtocol: String? {
+        tls?.negotiatedApplicationProtocol
+    }
 
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
@@ -192,10 +197,6 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         setState(.preparing)
-        guard parameters.tlsOptions == nil else {
-            fail(.posix(.ENOTSUP))
-            return
-        }
         guard case .hostPort(let host, let port) = endpoint else {
             fail(.posix(.EAFNOSUPPORT))
             return
@@ -243,6 +244,17 @@ public final class NWConnection: @unchecked Sendable {
             parameters.tcpOptions?.apply(to: fd)
         }
         startFramer()
+        if let options = parameters.tlsOptions {
+            var serverName: String?
+            if case .hostPort(let host, _) = endpoint {
+                serverName = hostText(host)
+            }
+            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName) else {
+                fail(.tls(errSSLInternal))
+                return
+            }
+            tls = session
+        }
         self.connecting = connecting
         let read = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
         read.setEventHandler { [weak self] in
@@ -262,6 +274,10 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func becomeReady() {
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         let path = NWPath(status: .satisfied, isExpensive: false, availableInterfaces: [])
         currentPath = path
         setState(.ready)
@@ -288,6 +304,9 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func updateSources() {
+        if let session = tls, !session.isEstablished {
+            return
+        }
         setReadActive(state == .ready && !endOfStream && !receives.isEmpty)
         setWriteActive(connecting || (state == .ready && !sends.isEmpty))
     }
@@ -306,7 +325,49 @@ public final class NWConnection: @unchecked Sendable {
             }
             return
         }
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         flushSends()
+    }
+
+    private func driveHandshake(_ session: NWTLSSession) {
+        switch session.handshake() {
+        case .complete:
+            becomeReady()
+        case .wouldBlock:
+            setReadActive(true)
+            setWriteActive(session.wantsWrite)
+        case .failed(let status):
+            if revenantCertificateFailures.contains(status) {
+                close(to: .waiting(.tls(status)))
+            } else {
+                fail(.tls(status))
+            }
+        }
+    }
+
+    private func writeRaw(_ bytes: UnsafeRawPointer, _ count: Int) -> (written: Int, wouldBlock: Bool, error: NWError?) {
+        if let session = tls, session.isEstablished {
+            let result = session.write(bytes, count)
+            switch result.status {
+            case noErr:
+                return (result.count, false, nil)
+            case errSSLWouldBlock:
+                return (result.count, true, nil)
+            default:
+                return (result.count, false, .tls(result.status))
+            }
+        }
+        let written = Darwin.send(descriptor, bytes, count, 0)
+        if written < 0 {
+            if errno == EAGAIN {
+                return (0, true, nil)
+            }
+            return (0, false, .posix(errno: errno))
+        }
+        return (written, false, nil)
     }
 
     private func flushSends() {
@@ -315,25 +376,22 @@ public final class NWConnection: @unchecked Sendable {
         }
         while var pending = sends.first {
             let remaining = pending.data.count - pending.offset
-            let written = pending.data.withUnsafeBytes { bytes -> Int in
-                Darwin.send(descriptor, bytes.baseAddress!.advanced(by: pending.offset), remaining, 0)
-            }
-            if written < 0 {
-                if errno == EAGAIN {
+            if remaining > 0 {
+                let result = pending.data.withUnsafeBytes { bytes -> (written: Int, wouldBlock: Bool, error: NWError?) in
+                    writeRaw(bytes.baseAddress!.advanced(by: pending.offset), remaining)
+                }
+                if let error = result.error {
+                    sends.removeFirst()
+                    complete(pending.completion, with: error)
+                    fail(error)
+                    return
+                }
+                pending.offset += result.written
+                if pending.offset < pending.data.count {
+                    sends[0] = pending
                     setWriteActive(true)
                     return
                 }
-                let error = NWError.posix(errno: errno)
-                sends.removeFirst()
-                complete(pending.completion, with: error)
-                fail(error)
-                return
-            }
-            pending.offset += written
-            if pending.offset < pending.data.count {
-                sends[0] = pending
-                setWriteActive(true)
-                return
             }
             sends.removeFirst()
             complete(pending.completion, with: nil)
@@ -348,19 +406,43 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func handleReadable() {
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         guard let first = receives.first else {
             setReadActive(false)
             return
         }
         let isDatagram = parameters.transport == .udp
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         var buffer = [UInt8](repeating: 0, count: first.maximumLength)
-        let count = recv(descriptor, &buffer, first.maximumLength, 0)
-        if count < 0 {
-            if errno == EAGAIN {
+        let count: Int
+        if let session = tls {
+            let result = buffer.withUnsafeMutableBytes { session.read($0.baseAddress!, first.maximumLength) }
+            switch result.status {
+            case noErr:
+                count = result.count
+            case errSSLClosedGraceful:
+                count = 0
+            case errSSLWouldBlock:
+                return
+            default:
+                fail(.tls(result.status))
                 return
             }
-            fail(.posix(errno: errno))
-            return
+        } else {
+            count = recv(descriptor, &buffer, first.maximumLength, 0)
+            if count < 0 {
+                if errno == EAGAIN {
+                    return
+                }
+                fail(.posix(errno: errno))
+                return
+            }
         }
         if count == 0 {
             endOfStream = true
@@ -441,6 +523,8 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         stopFramer()
+        tls?.close()
+        tls = nil
         teardownSources()
         if descriptor >= 0 {
             Darwin.close(descriptor)
