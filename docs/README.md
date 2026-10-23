@@ -35,6 +35,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Tools](reference/toolchain/tools.md) | the developer tools |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
 | [Guest memory](reference/toolchain/guest-memory.md) | the helper that reads a task's virtual, resident and peak size, and what the emulator answers for it |
+| [Device codegen](reference/toolchain/codegen.md) | what the toolchain sets for the device's code generation, what was measured on the bench workloads, and what is held |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
