@@ -23,6 +23,10 @@ function failures(opt)
     if source.requirement_configs(empty).sources ~= nil then
         table.insert(found, "a checkout without emulator sources must pass no sources config")
     end
+    local module = io.readfile(path.join(opt.modules, "emulator_source.lua"))
+    if module:find("import(", 1, true) then
+        table.insert(found, "emulator_source is included by the emulate addon, where import() is not allowed, so it must not import anything")
+    end
     local addon = io.readfile(path.join(os.scriptdir(), "../../includes/emulate/xmake.lua"))
     if not addon:find("requirement_configs", 1, true) then
         table.insert(found, "the emulate addon must give the emulator package its sources config from the checkout, so a changed source is a new package")

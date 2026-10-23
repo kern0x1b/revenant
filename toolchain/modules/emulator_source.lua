@@ -1,11 +1,20 @@
-import("byteorder", {rootdir = os.scriptdir()})
+local function byteorder_less(a, b)
+    local shared = math.min(#a, #b)
+    for at = 1, shared do
+        local x, y = a:byte(at), b:byte(at)
+        if x ~= y then
+            return x < y
+        end
+    end
+    return #a < #b
+end
 
 function digest(root)
     local files = os.files(path.join(root, "emulator", "**"))
     if #files == 0 then
         return nil
     end
-    byteorder.sort(files)
+    table.sort(files, byteorder_less)
     local digests = {}
     for _, file in ipairs(files) do
         table.insert(digests, path.relative(file, root) .. "=" .. hash.sha256(file))
