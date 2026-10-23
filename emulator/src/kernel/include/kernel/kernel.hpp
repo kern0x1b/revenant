@@ -671,6 +671,8 @@ private:
     [[nodiscard]] std::filesystem::path resolve_guest_path(
         const std::string& path, bool follow_final_symlink = true) const;
     [[nodiscard]] std::filesystem::path working_directory() const;
+    [[nodiscard]] std::optional<std::filesystem::path> guest_path_of_host(
+        const std::filesystem::path& host) const;
     [[nodiscard]] std::optional<std::uint32_t> current_thread_object() const;
     [[nodiscard]] std::optional<hfs::Metadata> query_hfs_metadata(
         const std::filesystem::path& path, bool follow_symlink,
