@@ -213,6 +213,12 @@ local function overlay(name, folder, opt)
         if #table.wrap(opt.frameworks) > 0 then
             add_frameworks(table.unpack(opt.frameworks))
         end
+        if #table.wrap(opt.packages) > 0 then
+            add_packages(table.unpack(opt.packages))
+        end
+        if opt.cmodule then
+            add_swiftflags("-I" .. path.join(SRC, folder, opt.cmodule))
+        end
         if #table.wrap(opt.links) > 0 then
             add_links(table.unpack(opt.links))
         end
@@ -269,7 +275,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL"})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

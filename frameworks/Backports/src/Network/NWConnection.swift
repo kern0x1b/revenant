@@ -84,6 +84,14 @@ public final class NWConnection: @unchecked Sendable {
     private var outboundPayload = Data()
     private var tls: NWTLSSession?
 
+    public var negotiatedApplicationProtocol: String? {
+        tls?.negotiatedApplicationProtocol
+    }
+
+    public var negotiatedTLSVersion: UInt16? {
+        tls?.negotiatedVersion
+    }
+
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
         self.parameters = parameters

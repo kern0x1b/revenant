@@ -92,7 +92,7 @@ local function sdk_in(installdir, version)
     return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
-function package_of(requirement, install)
+function package_of(requirement, install, platform)
     local scratch = fresh("package-resolve")
     local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
     if install then
@@ -102,6 +102,9 @@ function package_of(requirement, install)
     local failure
     local result = try {
         function ()
+            if platform then
+                os.execv(os.programfile(), {"f", "-c", "-p", platform.plat, "-a", platform.arch, "-y"}, {curdir = scratch})
+            end
             if install then
                 os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
             end

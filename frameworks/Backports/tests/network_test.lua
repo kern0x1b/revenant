@@ -11,8 +11,11 @@ function main()
     local out = workspace.run("backports-tests", "Network")
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
+    local boringssl = workspace.package_of("boringssl", true, {plat = "macosx", arch = "arm64"})
     swiftc({fixture, "-o", host})
-    swiftc(table.join({"-D", "REVENANT_BACKPORT"}, os.files(path.join(src, "*.swift")), {fixture, "-o", backport}))
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+                      os.files(path.join(src, "*.swift")),
+                      {fixture, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", backport}))
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")

@@ -105,6 +105,8 @@ local LIBRARIES = {
     {name = "DispatchBackports", folder = "Dispatch", frameworks = {}, libraries = {}, archives = {}, system = {}},
 }
 
+add_requires("revenant@boringssl", {alias = "boringssl"})
+
 if is_plat("iphoneos") then
     add_requires("revenant@lzfse lzfse-1.0", {alias = "lzfse"})
     add_requires("revenant@zlib v1.3.2", {alias = "zlib"})

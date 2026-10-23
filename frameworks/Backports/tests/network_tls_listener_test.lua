@@ -10,23 +10,17 @@ end
 
 function main()
     local out = workspace.run("backports-tests", "NetworkTLSListener")
+    local boringssl = workspace.package_of("boringssl", true, {plat = "macosx", arch = "arm64"})
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     swiftc({fixture, "-o", host})
-    swiftc(table.join({"-D", "REVENANT_BACKPORT"}, os.files(path.join(src, "*.swift")), {fixture, "-o", backport}))
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+                      os.files(path.join(src, "*.swift")),
+                      {fixture, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", backport}))
     os.execv(host, {identity}, {stdout = host .. ".out"})
     os.execv(backport, {identity}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host Network TLS listener program printed nothing")
     assert(expected:find("tls listener server negotiated h2", 1, true), "the host did not negotiate h2")
-    local function withoutNegotiated(text)
-        local kept = {}
-        for line in text:gmatch("[^\n]+") do
-            if not line:find("negotiated", 1, true) then
-                table.insert(kept, line)
-            end
-        end
-        return table.concat(kept, "\n")
-    end
-    assert(withoutNegotiated(expected) == withoutNegotiated(got), "the backport Network TLS differs from the host in " .. out)
+    assert(expected == got, "the backport Network TLS differs from the host in " .. out)
 end
