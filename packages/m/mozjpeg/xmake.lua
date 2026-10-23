@@ -13,6 +13,12 @@ package("mozjpeg")
         local configs = {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DPNG_SUPPORTED=FALSE", "-DENABLE_SHARED=FALSE",
                          "-DWITH_JPEG8=1", "-DBUILD=10000", "-DCMAKE_INSTALL_LIBDIR=" .. path.join(package:installdir(), "lib")}
         cmake.install(package, configs, {licenses = "LICENSE.md", prune = {"lib/pkgconfig", "lib/cmake", "share", "bin"}})
+        local headers = package:installdir("include")
+        local nested = path.join(headers, "mozjpeg")
+        os.mkdir(nested)
+        for _, header in ipairs(os.files(path.join(headers, "*.h"))) do
+            os.mv(header, nested)
+        end
     end)
 
     on_test(function (package)
@@ -20,6 +26,6 @@ package("mozjpeg")
             assert(os.isfile(path.join(package:installdir("lib"), "lib" .. library .. ".a")), "lib" .. library .. ".a is not installed")
         end
         for _, header in ipairs({"turbojpeg.h", "jpeglib.h", "jmorecfg.h", "jconfig.h"}) do
-            assert(os.isfile(path.join(package:installdir("include"), header)), header .. " is not installed")
+            assert(os.isfile(path.join(package:installdir("include"), "mozjpeg", header)), header .. " is not installed under include/mozjpeg")
         end
     end)

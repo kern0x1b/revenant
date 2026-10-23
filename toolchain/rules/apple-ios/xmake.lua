@@ -25,6 +25,7 @@ rule("apple-ios")
         if not target:get("strip") then
             target:data_set("revenant.strip.unset", true)
         end
+        import("@self.apple.backports").attach(target, project)
         local mapped = "-ffile-prefix-map=" .. os.projectdir() .. "=/port"
         target:add("cxflags", mapped)
         target:add("mxflags", mapped)
