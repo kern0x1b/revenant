@@ -278,7 +278,8 @@ package("swift-runtime")
             os.mkdir(module)
             local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name,
                                       "-parse-as-library", "-swift-version", "5", "-O", "-wmo",
-                                      "-Xfrontend", "-disable-implicit-string-processing-module-import"}, use_ld,
+                                      "-Xfrontend", "-disable-implicit-string-processing-module-import",
+                                      "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}, use_ld,
                                      opt and opt.extra_flags or {},
                                      (opt and opt.concurrency) and {} or {"-Xfrontend", "-disable-implicit-concurrency-module-import"},
                                      runtime_flags, swift.availability(source))
@@ -392,8 +393,7 @@ package("swift-runtime")
                           {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
                                           "-enable-experimental-feature", "BuiltinModule",
-                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers,
-                                          "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}})
+                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers}})
 
             local function generated_from(folder, name)
                 return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
