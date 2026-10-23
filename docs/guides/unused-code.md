@@ -17,8 +17,8 @@ and say in the commit message what was searched.
 - **An import by variable.** `import(name, ...)` loads whatever `name` holds. List the calls whose argument is not a
   string literal, `git grep -n -E 'import\(\s*[^"]'`, and the calls that build a literal with `..`,
   `git grep -n -E 'import\("[^"]*"\s*\.\.'`. Then find where the variable comes from.
-- **A call by name.** `module[name](...)`, `_G[...]`, `rawget` and `getfenv` reach a function by a string. Search for
-  them in the module's folder and in its callers.
+- **A call by name.** A function read from a table by a string, as in `module[name]`, and `_G[name]`, `rawget` and
+  `getfenv`, reach a function by its name. Search for them in the module's folder and in its callers.
 - **A list of names.** A table of suites, packages or targets that a loop walks. Check that every name in it still
   resolves.
 
