@@ -3,6 +3,30 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <stdlib.h>
 
+enum {
+    RevenantLinkEntity,
+    RevenantLinkCharset,
+    RevenantLinkTitle,
+    RevenantLinkTag,
+    RevenantLinkAttribute,
+};
+
+static NSRegularExpression *revenant_link_expression(NSUInteger which)
+{
+    static NSArray *expressions;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        expressions = @[
+            [NSRegularExpression regularExpressionWithPattern:@"&(#[xX][0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);" options:0 error:NULL],
+            [NSRegularExpression regularExpressionWithPattern:@"charset\\s*=\\s*[\"']?([A-Za-z0-9_.:-]+)" options:NSRegularExpressionCaseInsensitive error:NULL],
+            [NSRegularExpression regularExpressionWithPattern:@"<title[^>]*>(.*?)</title" options:NSRegularExpressionCaseInsensitive | NSRegularExpressionDotMatchesLineSeparators error:NULL],
+            [NSRegularExpression regularExpressionWithPattern:@"<(meta|link)\\b([^>]*)>" options:NSRegularExpressionCaseInsensitive error:NULL],
+            [NSRegularExpression regularExpressionWithPattern:@"([a-zA-Z_:][-a-zA-Z0-9_:.]*)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s\"'=<>`]+))" options:0 error:NULL],
+        ];
+    });
+    return expressions[which];
+}
+
 static NSString *revenant_link_entity(NSString *entity)
 {
     static NSDictionary *named;
@@ -29,7 +53,7 @@ static NSString *revenant_link_unescape(NSString *text)
     if ([text rangeOfString:@"&"].location == NSNotFound) {
         return text;
     }
-    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"&(#[xX][0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);" options:0 error:NULL];
+    NSRegularExpression *expression = revenant_link_expression(RevenantLinkEntity);
     NSMutableString *result = [NSMutableString string];
     __block NSUInteger position = 0;
     [expression enumerateMatchesInString:text options:0 range:NSMakeRange(0, text.length) usingBlock:^(NSTextCheckingResult *match, NSMatchingFlags flags, BOOL *stop) {
@@ -59,7 +83,7 @@ NSString *revenant_link_first(NSArray *values)
 NSString *revenant_link_charset(NSData *data)
 {
     NSString *head = [[NSString alloc] initWithBytes:data.bytes length:MIN(data.length, (NSUInteger)2048) encoding:NSISOLatin1StringEncoding];
-    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"charset\\s*=\\s*[\"']?([A-Za-z0-9_.:-]+)" options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSRegularExpression *expression = revenant_link_expression(RevenantLinkCharset);
     NSTextCheckingResult *match = [expression firstMatchInString:head options:0 range:NSMakeRange(0, head.length)];
     return match ? [head substringWithRange:[match rangeAtIndex:1]] : nil;
 }
@@ -101,14 +125,14 @@ NSDictionary *revenant_link_parse_html(NSString *html)
     __block NSString *appleIcon = nil;
     __block NSString *icon = nil;
 
-    NSRegularExpression *titleExpression = [NSRegularExpression regularExpressionWithPattern:@"<title[^>]*>(.*?)</title" options:NSRegularExpressionCaseInsensitive | NSRegularExpressionDotMatchesLineSeparators error:NULL];
+    NSRegularExpression *titleExpression = revenant_link_expression(RevenantLinkTitle);
     NSTextCheckingResult *titleMatch = [titleExpression firstMatchInString:html options:0 range:NSMakeRange(0, html.length)];
     if (titleMatch) {
         title = revenant_link_first(@[revenant_link_unescape([html substringWithRange:[titleMatch rangeAtIndex:1]])]);
     }
 
-    NSRegularExpression *tagExpression = [NSRegularExpression regularExpressionWithPattern:@"<(meta|link)\\b([^>]*)>" options:NSRegularExpressionCaseInsensitive error:NULL];
-    NSRegularExpression *attributeExpression = [NSRegularExpression regularExpressionWithPattern:@"([a-zA-Z_:][-a-zA-Z0-9_:.]*)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s\"'=<>`]+))" options:0 error:NULL];
+    NSRegularExpression *tagExpression = revenant_link_expression(RevenantLinkTag);
+    NSRegularExpression *attributeExpression = revenant_link_expression(RevenantLinkAttribute);
     [tagExpression enumerateMatchesInString:html options:0 range:NSMakeRange(0, html.length) usingBlock:^(NSTextCheckingResult *tag, NSMatchingFlags flags, BOOL *stop) {
         NSString *name = [[html substringWithRange:[tag rangeAtIndex:1]] lowercaseString];
         NSString *attributeText = [html substringWithRange:[tag rangeAtIndex:2]];
