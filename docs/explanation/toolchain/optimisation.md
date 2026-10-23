@@ -33,7 +33,9 @@ Two things were looked at and set aside. Memory counts as speed (decision 0014),
 
 The profile runtime for iOS is missing, so instrumented PGO cannot be used by the fleet today. The prototype builds it from compiler-rt's sources with the packaged clang, which is what the llvm recipe would do with `COMPILER_RT_BUILD_PROFILE=ON` for iOS. The training binary runs under the emulator and writes its profile into the rootfs clone; the profile is merged with the release's `llvm-profdata` (the Command Line Tools one reads only the raw format it was built with, and refused the 23.1.3 profile), and the evaluation build uses a different input seed, so the profile is not measured on the data it was trained on.
 
-The result is in the reference. The short reading: the profile shrinks the text by 16%, and it raises the executed instructions by 6% on this workload. The second number is the one to explain before any PGO patch is taken: the hot loops of `longest_match` and `inflate_fast` are the candidates, and the block profile of both builds is the tool for it.
+The result is in the reference. The short reading: the profile shrinks the text by 16%, and it raises the executed instructions by 6% on this workload.
+
+Decision: PGO does not land, and no llvm recipe change for it is made. The instruction count rose, and a rise in instructions is not a speed claim, so the change is not taken on the strength of the text size alone. It returns only when a device measurement of the A5 shows the profiled build faster, and then with the explanation of the instruction rise that the block profile of both builds would give (the emulator's block profile of the zlib benchmark did not finish, so that explanation is still open).
 
 ## Order files
 

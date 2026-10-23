@@ -25,6 +25,9 @@ measurement on this machine, and each row says what it measures. None is a time 
 
 ## PGO on zlib 1.3.2
 
+Decision: PGO does not land. The instrumented profile raised the guest instructions by 6.3% on this workload; the
+recipe change for the iOS profile runtime was never made, so there is nothing on the branch to revert.
+
 zlib at the pin of `packages/z/zlib` (`da607da7`), built for armv7 ios 6.0 with `-O2 -mcpu=cortex-a9 -mfpu=neon`, with a
 benchmark of `compress2` at level 6 and `uncompress` over 512 KB of compressible data, six rounds. The training profile
 used seed 2026 and the evaluation seed 7, so the profile was not measured on its own data.
@@ -56,7 +59,7 @@ the host linker.
 - `bench`: encode and decode of 150 VOIP frames of 20 ms at 24 kbit/s, with a deterministic input.
 - `startup`: the same with one frame, as a launch-like path.
 
-The order file was made from the block profile of `bench` by `toolchain/tools/order_file/order_file.lua --image bench`:
+The order file was made from the block profile of `bench` by `toolchain/tools/order_file/order_file.lua --llvm-bin DIR --image bench`, with `DIR` the llvm package's `bin` (`llvm-nm` and `llvm-objdump`, not the host's):
 217 functions with executed blocks, hottest first.
 
 | run | layout | cpu-ticks | page-misses | distinct text pages executed |
