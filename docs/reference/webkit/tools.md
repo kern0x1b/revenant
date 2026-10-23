@@ -34,7 +34,7 @@ scp -P <port> "$(./xmakew where -P . webkit-device-tools)/bin/revmem" root@<phon
 
 ## The scripts on this side
 
-The scripts are Lua, run as `./xmakew l frameworks/WebKit/tools/<name>.lua`; each prints its usage with `--help`.
+The scripts are Lua, run as `./xmakew l -P . frameworks/WebKit/tools/<name>.lua`; each prints its usage with `--help`.
 
 | Script | What it does |
 | --- | --- |

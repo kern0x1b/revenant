@@ -429,7 +429,7 @@ left needs work per family rather than per file:
 The audit that found the lost adaptations is now a script:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/carry_audit.lua <reference tree> Source/WebCore/page
+./xmakew l -P . frameworks/WebKit/tools/carry_audit.lua <reference tree> Source/WebCore/page
 ```
 
 It compares, per file, how many port markers a file carries here against the
@@ -638,7 +638,7 @@ mechanically, which would change meaning in some of them for no benefit.
 For triage during a merge:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/port_delta.lua --unguarded Source/WebCore/platform
+./xmakew l -P . frameworks/WebKit/tools/port_delta.lua --unguarded Source/WebCore/platform
 ```
 
 lists the changed files in an area that carry no guard, largest diff first -

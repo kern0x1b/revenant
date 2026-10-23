@@ -12,20 +12,20 @@
   to any driver the system has. Without a usable Vulkan driver a boot draws with the built-in reference renderer and
   logs one `[gles-renderer] Vulkan unavailable (...)` line saying why. The first install of the `swiftshader`
   package builds SwiftShader with CMake; an install already in xmake's package store is reused.
-- A root filesystem of the firmware to run, for example one unpacked by `./xmakew firmware rootfs`.
+- A root filesystem of the firmware to run, for example one unpacked by `./xmakew firmware -P . rootfs`.
 
 ## Build
 
 The emulator is a member of revenant and builds from the top of revenant:
 
 ```sh
-./xmakew f -y
-./xmakew build emulator
-./xmakew test
+./xmakew f -P . -y
+./xmakew build -P . emulator
+./xmakew test -P .
 ```
 
 The options are `--emulator_vulkan` (on), `--emulator_sdl`, `--emulator_ffmpeg`, `--emulator_lto` (on, release only)
-and `--emulator_dynarmic_test_emit_failure`, given to `./xmakew f`; `./xmakew f --menu` lists them. The guest probe
+and `--emulator_dynarmic_test_emit_failure`, given to `./xmakew f -P .`; `./xmakew f -P . --menu` lists them. The guest probe
 in `tests/guest/dns-probe` is built when `--emulator_guest_rootfs` and `--emulator_armv6_ld` name a root filesystem and an
 ARMv6 linker. Boost is the 1.81.0 release and needs no compiler flag with Apple clang 21.
 

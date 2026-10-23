@@ -80,7 +80,7 @@ To unpack a root filesystem by hand:
 
     xmake firmware --device=iPhone3,1 rootfs 6.0
 
-Several ports and sessions emulate at once. A boot takes one of `min(cores/3, RAM/5 GB)` slots of the machine, and a second session waits for a golden image being built rather than building it again.
+Several ports and sessions emulate at once. A boot takes one of the machine's slots, which number `max(1, min(cores // 3, RAM // 5 GB))` (at least one, even on a small machine), and a second session waits for a golden image being built rather than building it again.
 
 ## Time
 
