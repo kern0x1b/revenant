@@ -9,7 +9,7 @@ reference says what runs where.
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
 | `toolchain_light` | 16 suites of `tests/addon/` that need no package builds | the repository | always |
-| `toolchain_packages` | 18 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
+| `toolchain_packages` | 19 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
 | `toolchain_device` | six suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `port_test`, `swift_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs | only with `./xmakew f -P . --tests=device` |
 | `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |
 | `recompiler_device` | `classpair` and `ordinal` | the prebuilt packages and a claimed device | only with `./xmakew f -P . --tests=device` |
@@ -40,6 +40,12 @@ yet. Each `tests/emulate/<case>/` runs with `./xmakew l toolchain/tests/emulate/
 `install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
 its probe line), and `output` (a program's stdout and stderr reach the host, through a run that ends and through one
 that hangs). Their scratch folders are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+
+`optimisation_test` compiles `tests/data/optimisation/codegen.c` with the packaged clang for armv7 and reads the assembly of
+each function. It pins the code-generation misses that [the optimisation explanation](../../explanation/toolchain/optimisation.md#codegen)
+names: a case that still shows its miss passes, and the day the miss is gone the suite fails and names the case, so the
+case moves to the controls with the patch that fixed it. The controls are the same code where the backend already does
+the job, which shows the miss is in the backend's choice and not in the code's shape.
 
 ## Known gaps
 
