@@ -28,6 +28,9 @@
 #include "kernel/darwin_kqueue_abi.hpp"
 #include "network/darwin_network_abi.hpp"
 #include "kernel/darwin_resource_abi.hpp"
+#include <fcntl.h>
+#include <sys/param.h>
+#include <unistd.h>
 #include "network/darwin_route_socket.hpp"
 #include "network/dns_configuration_hle.hpp"
 #include "kernel/graphics_services_input.hpp"
@@ -3310,6 +3313,31 @@ std::optional<std::uint32_t> CompatibilityKernel::current_thread_object() const
     return thread_object_for_processor(*syscall_processor_);
 }
 
+std::optional<std::filesystem::path> CompatibilityKernel::guest_path_of_host(
+    const std::filesystem::path& host) const
+{
+    std::error_code error;
+    const auto root = std::filesystem::weakly_canonical(rootfs_, error);
+    if (error)
+        return std::nullopt;
+    const auto relative = host.lexically_normal().lexically_relative(root);
+    if (relative.empty() || *relative.begin() == "..")
+        return std::nullopt;
+    return (std::filesystem::path { "/" } / relative).lexically_normal();
+}
+
+void CompatibilityKernel::release_thread_directory_locked(
+    std::uint32_t thread_object)
+{
+    const auto found =
+        shared_state_->thread_working_directories.find(thread_object);
+    if (found == shared_state_->thread_working_directories.end())
+        return;
+    if (found->second.host_descriptor >= 0)
+        close(found->second.host_descriptor);
+    shared_state_->thread_working_directories.erase(found);
+}
+
 std::filesystem::path CompatibilityKernel::working_directory() const
 {
     if (const auto thread = current_thread_object()) {
@@ -3317,7 +3345,15 @@ std::filesystem::path CompatibilityKernel::working_directory() const
         if (const auto found =
                 shared_state_->thread_working_directories.find(*thread);
             found != shared_state_->thread_working_directories.end()) {
-            return found->second;
+            const auto& pinned = found->second;
+            if (pinned.host_descriptor >= 0) {
+                char host[MAXPATHLEN];
+                if (fcntl(pinned.host_descriptor, F_GETPATH, host) == 0) {
+                    if (const auto guest = guest_path_of_host(host))
+                        return *guest;
+                }
+            }
+            return pinned.guest;
         }
     }
     return guest_working_directory_;

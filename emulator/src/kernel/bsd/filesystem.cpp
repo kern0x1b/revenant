@@ -38,6 +38,7 @@
 #include <utility>
 #include <vector>
 
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -142,8 +143,14 @@ bool CompatibilityKernel::dispatch_bsd_thread_directory(
         bool cleared = false;
         if (thread) {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
-            cleared =
-                shared_state_->thread_working_directories.erase(*thread) != 0;
+            if (const auto found =
+                    shared_state_->thread_working_directories.find(*thread);
+                found != shared_state_->thread_working_directories.end()) {
+                if (found->second.host_descriptor >= 0)
+                    close(found->second.host_descriptor);
+                shared_state_->thread_working_directories.erase(found);
+                cleared = true;
+            }
         }
         if (cleared) {
             bsd_success(cpu, 0);
@@ -154,13 +161,14 @@ bool CompatibilityKernel::dispatch_bsd_thread_directory(
     }
 
     std::filesystem::path guest;
+    std::filesystem::path host;
     if (number == 348) {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
             return true;
         }
-        const auto host = resolve_guest_path(*path);
+        host = resolve_guest_path(*path);
         std::error_code failure;
         if (!std::filesystem::exists(host, failure)) {
             bsd_error(cpu, 2);
@@ -182,14 +190,23 @@ bool CompatibilityKernel::dispatch_bsd_thread_directory(
             return true;
         }
         guest = *directory;
+        host = resolve_guest_path(guest.string());
     }
     if (!thread) {
         bsd_error(cpu, 2);
         return true;
     }
+    const int descriptor = open(host.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (descriptor == -1) {
+        bsd_error(cpu, 2);
+        return true;
+    }
     {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
-        shared_state_->thread_working_directories[*thread] = guest;
+        auto& pinned = shared_state_->thread_working_directories[*thread];
+        if (pinned.host_descriptor >= 0)
+            close(pinned.host_descriptor);
+        pinned = {guest, descriptor};
     }
     bsd_success(cpu, 0);
     return true;

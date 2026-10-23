@@ -43,6 +43,7 @@ CompatibilityKernel::create_guest_thread(
                     task->second.find(static_cast<std::uint32_t>(*processor));
                 old_thread != task->second.end()) {
                 process_.thread_disk_io_policies.erase(old_thread->second);
+                release_thread_directory_locked(old_thread->second);
                 task->second.erase(old_thread);
             }
             if (task->second.empty())

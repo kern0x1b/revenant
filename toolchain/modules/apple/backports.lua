@@ -1,6 +1,7 @@
 local PACKAGES = {
     Network = "network", CryptoKit = "cryptokit", RealityKit = "realitykit", RealityFoundation = "realityfoundation",
-    Spatial = "spatial", CloudKit = "cloudkit", WeatherKit = "weatherkit", UniformTypeIdentifiers = "uniformtypeidentifiers"
+    Spatial = "spatial", CloudKit = "cloudkit", WeatherKit = "weatherkit", UniformTypeIdentifiers = "uniformtypeidentifiers",
+    StoreKit = "storekit", AuthenticationServices = "authenticationservices"
 }
 
 local function swift_imports(file)

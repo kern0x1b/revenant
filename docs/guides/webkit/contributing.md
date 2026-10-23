@@ -115,10 +115,10 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
   `DEBIAN/postinst` script. The version is `version` in `xmake.lua`.
 - Deploy: `./xmakew device install -P .` builds the package, runs `dpkg -i` on the phone
   `device.env` names, and refuses a .deb whose app would replace another bundle id.
-  Claim the device first (`./xmakew device claim`). The package's `postinst` kills MobileSafari and
+  Claim the device first (`./xmakew device -P . claim`). The package's `postinst` kills MobileSafari and
   Preferences: the engine loads when an injected app launches, so a new one needs the browser restarted, and
   a respring would re-lock the phone.
-- Tests: `tests/device/run-batteries.lua` and `tests/device/*.lua`, run with `./xmakew l`; the
+- Tests: `tests/device/run-batteries.lua` and `tests/device/*.lua`, run with `./xmakew l -P .`; the
   host tests are `./xmakew test -P .` after `./xmakew f -P . --webkit_host_tests=y`.
 - Documentation: the guides beside this file, the explanations in [`docs/explanation/webkit/`](../../explanation/webkit/)
   and the reference in [`docs/reference/webkit/`](../../reference/webkit/). The [README](../../../frameworks/WebKit/README.md)

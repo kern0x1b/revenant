@@ -11,8 +11,8 @@ This is a research prototype, not a product. It takes a real 64-bit App Store ap
 From the top of revenant:
 
 ```sh
-./xmakew f -y
-./xmakew build xlate xlgen
+./xmakew f -P . -y
+./xmakew build -P . xlate xlgen
 ```
 
 Then translate an arm64 executable, as [build and translate](../docs/guides/recompiler/build-and-translate.md) describes. Every document is in [the index](../docs/README.md).

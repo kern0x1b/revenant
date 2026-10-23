@@ -6,11 +6,11 @@ beside the sources, and the shared parts in `recompiler/tools/` (`env.lua`, `cor
 
 ## Running
 
-From the revenant root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
+From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlate xlgen`:
 
 ```sh
-./xmakew test 'recompiler_corpus/*'
-./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime
+./xmakew test -P . 'recompiler_corpus/*'
+./xmakew build -P . recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
@@ -21,9 +21,9 @@ build targets each leave an `.app` or an executable in their own target folder.
 A check that also has a device part is run by hand, with the output folder as its argument:
 
 ```sh
-./xmakew l recompiler/tests/weakimport/check.lua <out>
-./xmakew l recompiler/tests/classpair/check.lua <out>
-./xmakew l recompiler/tests/swiftconformance/check.lua <out>
+./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
+./xmakew l -P . recompiler/tests/classpair/check.lua <out>
+./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ```
 
 These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
