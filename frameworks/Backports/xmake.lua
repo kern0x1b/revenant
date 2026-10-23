@@ -1,6 +1,8 @@
 option("backports_min_ios", {default = "6.0", showmenu = true,
     description = "The oldest iOS a build supports: the backports hold every member introduced after it, and every member of a framework absent at it."})
 
+add_requires("revenant@boringssl", {alias = "boringssl"})
+
 if get_config("component") == "Swift" then
     includes("src/Swift")
     return
@@ -104,8 +106,6 @@ local LIBRARIES = {
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "DispatchBackports", folder = "Dispatch", frameworks = {}, libraries = {}, archives = {}, system = {}},
 }
-
-add_requires("revenant@boringssl", {alias = "boringssl"})
 
 if is_plat("iphoneos") then
     add_requires("revenant@lzfse lzfse-1.0", {alias = "lzfse"})

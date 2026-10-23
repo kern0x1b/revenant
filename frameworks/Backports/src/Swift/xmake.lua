@@ -221,12 +221,6 @@ local function overlay(name, folder, opt)
         end
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
-            if opt.cmodule then
-                target:add("swift.flags", "-I", path.join(SRC, folder, opt.cmodule))
-                for _, name in ipairs(table.wrap(opt.packages)) do
-                    target:add("swift.flags", "-Xcc", "-I" .. target:pkg(name):installdir("include"))
-                end
-            end
         end)
         before_build(function (target)
             if opt.minimum then
@@ -254,6 +248,12 @@ local function overlay(name, folder, opt)
                                                            apinotes = import("apinotes", {rootdir = TOOLS, anonymous = true})}))
             end
             add_flags(target, flags)
+            if opt.cmodule then
+                add_flags(target, {"-I", path.join(SRC, folder, opt.cmodule)})
+                for _, name in ipairs(table.wrap(opt.packages)) do
+                    add_flags(target, {"-Xcc", "-I" .. path.join(target:pkg(name):installdir(), "include")})
+                end
+            end
         end)
     target_end()
 end
