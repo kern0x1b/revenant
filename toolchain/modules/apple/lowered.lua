@@ -1132,6 +1132,13 @@ local function system_include_relative(file, sdk)
     end
 end
 
+local VFS_SUBTREES = {os = true}
+
+local function vfs_subtree(relative)
+    local head = relative and relative:match("^([^/]+)")
+    return head ~= nil and VFS_SUBTREES[head] == true
+end
+
 function include_directory(out)
     return path.join(out, "include")
 end
@@ -1152,7 +1159,8 @@ function build_overlay(sdk, out, set)
             local copy = path.join(include_directory(out), relative)
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
-        else
+        end
+        if not relative or vfs_subtree(relative) then
             local copy = path.join(out, path.relative(file, sdk))
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
@@ -1162,7 +1170,8 @@ function build_overlay(sdk, out, set)
         end
     end
     for dir in pairs(roots) do
-        if system_include_relative(dir, sdk) or dir == path.join(sdk, "usr", "include") then
+        local relative = system_include_relative(dir, sdk)
+        if (relative and not vfs_subtree(relative)) or dir == path.join(sdk, "usr", "include") then
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end
