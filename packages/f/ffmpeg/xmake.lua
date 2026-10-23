@@ -8,6 +8,7 @@ package("ffmpeg")
     add_versions("8.1.2", "38b88335f99e76ed89ff3c93f877fdefce736c13")
     add_patches("8.1.2", "patches/0001-version-and-mov-stsd.patch", "c7fc29dc410e56cd7b4eb86ad20702bb73347f09dbc185fd89db5fed69af8066")
     add_patches("8.1.2", "patches/0002-audiotoolbox-uint32-out-params.patch", "cfbe482fec85966fa0b3db121df16648442f66438e4462bb9d507309f4575d0c")
+    add_patches("8.1.2", "patches/0003-audiotoolbox-encoder-uint32-out-params.patch", "d7f2ce04e2872d0d3ab1c7aaecb1bdbc7295b0bd38294ef7c98e5d318dd812d7")
     add_links("avformat", "avcodec", "swresample", "avutil")
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_deps("revenant@opus", {alias = "opus"})
@@ -41,9 +42,20 @@ package("ffmpeg")
                 "Libs: -L${libdir} -l" .. item.lib,
                 ""}, "\n"))
         end
+        local pkgconf_home = package:dep("pkgconf"):installdir()
+        local tools = path.absolute("tools")
+        os.mkdir(tools)
+        local pkgconf = path.join(tools, "pkg-config")
+        os.cp(path.join(pkgconf_home, "bin", "pkgconf"), pkgconf)
+        local built_against = nil
+        for line in os.iorunv("otool", {"-L", pkgconf}):gmatch("[^\n]+") do
+            built_against = built_against or line:match("^%s*(%S*libpkgconf%S*)")
+        end
+        os.vrunv("install_name_tool", {"-change", built_against, path.join(pkgconf_home, "lib", "libpkgconf.7.dylib"), pkgconf})
+        os.vrunv("codesign", {"--force", "--sign", "-", pkgconf})
         local envs = {PKG_CONFIG_LIBDIR = pc, SOURCE_DATE_EPOCH = "0", IPHONEOS_DEPLOYMENT_TARGET = deployment}
         local options = {"--prefix=" .. package:installdir(), "--target-os=darwin", "--arch=" .. package:arch(),
-            "--cc=" .. cc, "--as=" .. cc .. " -c", "--enable-cross-compile", "--pkg-config=pkgconf",
+            "--cc=" .. cc, "--as=" .. cc .. " -c", "--enable-cross-compile", "--pkg-config=" .. pkgconf,
             "--disable-programs", "--disable-armv5te", "--disable-armv6", "--disable-armv6t2", "--disable-doc",
             "--enable-pic", "--disable-all", "--disable-everything", "--enable-avcodec", "--enable-swresample",
             "--enable-avformat", "--disable-xlib", "--enable-libopus", "--enable-libvpx", "--enable-libdav1d",
