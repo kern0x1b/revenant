@@ -411,6 +411,7 @@ static void RevenantSCNSayUnmeasured(CAAnimation *animation)
         [queue removeLastObject];
         [queue addObjectsFromArray:node.childNodes];
         [[node revenantAnimations] evaluateAtTime:now model:node];
+        [node revenantStepActionsAtTime:now];
         for (SCNMaterial *material in node.geometry.materials) {
             if ([seen containsObject:material]) {
                 continue;

@@ -348,6 +348,11 @@ local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
 }
 
+local SCENEKIT_TESTS = {
+    action_math = {"RevenantSCNActionMath.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m"},
+}
+
 local function host_tests(folder, tests, library, frameworks, options)
     options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
@@ -382,4 +387,5 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
+    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore"})
 end
