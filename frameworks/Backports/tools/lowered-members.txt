@@ -7079,6 +7079,7 @@ global NSJSONWritingWithoutEscapingSlashes
 global NSKeyedArchiveRootObjectKey
 global NSLanguageIdentifierAttributeName
 global NSLineBreakStrategyStandard
+global NSLinkAttributeName
 global NSListItemDelimiterAttributeName
 global NSLocalizedFailureErrorKey
 global NSLocalizedNumberFormatAttributeName
