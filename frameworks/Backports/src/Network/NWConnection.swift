@@ -45,7 +45,7 @@ public final class NWConnection: @unchecked Sendable {
 
     private struct PendingSend {
         let data: Data
-        let completion: SendCompletion
+        var completion: SendCompletion
         var offset: Int
     }
 
@@ -73,6 +73,11 @@ public final class NWConnection: @unchecked Sendable {
     private var sends: [PendingSend] = []
     private var receives: [PendingReceive] = []
     private var inbound = Data()
+    private var acceptedDescriptor: Int32 = -1
+    private var framer: NWProtocolFramer.Instance?
+    private var framerImplementation: (any NWProtocolFramerImplementation)?
+    private var framedInput: [Data] = []
+    private var outboundPayload = Data()
 
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
@@ -84,13 +89,36 @@ public final class NWConnection: @unchecked Sendable {
         self.parameters = parameters
     }
 
+    init(accepted descriptor: Int32, endpoint: NWEndpoint, using parameters: NWParameters) {
+        self.endpoint = endpoint
+        self.parameters = parameters
+        self.acceptedDescriptor = descriptor
+    }
+
+    deinit {
+        teardownSources()
+        if descriptor >= 0 {
+            Darwin.close(descriptor)
+        }
+        if acceptedDescriptor >= 0 {
+            Darwin.close(acceptedDescriptor)
+        }
+    }
+
     public func start(queue: DispatchQueue) {
         guard state == .setup, self.queue == nil else {
             return
         }
         self.queue = queue
         queue.async {
-            self.open()
+            if self.acceptedDescriptor >= 0 {
+                let fd = self.acceptedDescriptor
+                self.acceptedDescriptor = -1
+                self.setState(.preparing)
+                self.attach(fd, connecting: false)
+            } else {
+                self.open()
+            }
         }
     }
 
@@ -103,7 +131,19 @@ public final class NWConnection: @unchecked Sendable {
     public func send(content: Data?, contentContext: ContentContext = .defaultMessage, isComplete: Bool = false, completion: SendCompletion) {
         let data = content ?? Data()
         perform {
-            self.sends.append(PendingSend(data: data, completion: completion, offset: 0))
+            if let framer = self.framer, let implementation = self.framerImplementation {
+                let before = self.sends.count
+                self.outboundPayload = data
+                implementation.handleOutput(framer: framer, message: NWProtocolFramer.Message(), messageLength: data.count, isComplete: isComplete)
+                self.outboundPayload = Data()
+                if self.sends.count > before {
+                    self.sends[self.sends.count - 1].completion = completion
+                } else {
+                    self.sends.append(PendingSend(data: Data(), completion: completion, offset: 0))
+                }
+            } else {
+                self.sends.append(PendingSend(data: data, completion: completion, offset: 0))
+            }
             self.flushSends()
         }
     }
@@ -145,6 +185,10 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         setState(.preparing)
+        guard parameters.tlsOptions == nil else {
+            fail(.posix(.ENOTSUP))
+            return
+        }
         guard case .hostPort(let host, let port) = endpoint else {
             fail(.posix(.EAFNOSUPPORT))
             return
@@ -188,6 +232,10 @@ public final class NWConnection: @unchecked Sendable {
 
     private func attach(_ fd: Int32, connecting: Bool) {
         descriptor = fd
+        if parameters.transport == .tcp {
+            parameters.tcpOptions?.apply(to: fd)
+        }
+        startFramer()
         self.connecting = connecting
         let read = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
         read.setEventHandler { [weak self] in
@@ -324,10 +372,17 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         inbound.append(contentsOf: buffer[0..<count])
+        if framer != nil {
+            runFramer()
+        }
         deliverReceives()
     }
 
     private func deliverReceives() {
+        if framer != nil {
+            deliverFramedReceives()
+            return
+        }
         while let first = receives.first {
             if parameters.transport == .udp {
                 break
@@ -374,6 +429,7 @@ public final class NWConnection: @unchecked Sendable {
         guard !isClosed else {
             return
         }
+        stopFramer()
         teardownSources()
         if descriptor >= 0 {
             Darwin.close(descriptor)
@@ -400,6 +456,51 @@ public final class NWConnection: @unchecked Sendable {
         pending.forEach { $0.completion(nil, nil, true, failure) }
     }
 
+    private func startFramer() {
+        guard framer == nil, let options = parameters.defaultProtocolStack.applicationProtocols.first else {
+            return
+        }
+        let instance = NWProtocolFramer.Instance(channel: self)
+        let implementation = options.definition.implementation.init(framer: instance)
+        framer = instance
+        framerImplementation = implementation
+        _ = implementation.start(framer: instance)
+    }
+
+    private func stopFramer() {
+        guard let instance = framer, let implementation = framerImplementation else {
+            return
+        }
+        _ = implementation.stop(framer: instance)
+        implementation.cleanup(framer: instance)
+        framer = nil
+        framerImplementation = nil
+        framedInput = []
+    }
+
+    private func runFramer() {
+        guard let instance = framer, let implementation = framerImplementation else {
+            return
+        }
+        _ = implementation.handleInput(framer: instance)
+    }
+
+    private func deliverFramedReceives() {
+        while !receives.isEmpty {
+            if !framedInput.isEmpty {
+                let message = framedInput.removeFirst()
+                let pending = receives.removeFirst()
+                pending.completion(message, .defaultStream, false, nil)
+            } else if endOfStream {
+                let pending = receives.removeFirst()
+                pending.completion(nil, .defaultStream, true, nil)
+            } else {
+                break
+            }
+        }
+        updateSources()
+    }
+
     private func teardownSources() {
         if let read = readSource {
             if !readActive {
@@ -417,5 +518,44 @@ public final class NWConnection: @unchecked Sendable {
         writeSource = nil
         readActive = false
         writeActive = false
+    }
+}
+
+extension NWConnection: NWFramingChannel {
+    func framingParseInput(minimumIncompleteLength: Int, maximumLength: Int, parse: (UnsafeMutableRawBufferPointer?, Bool) -> Int) -> Bool {
+        let complete = endOfStream
+        if inbound.isEmpty {
+            guard complete else {
+                return false
+            }
+            _ = parse(nil, true)
+            return true
+        }
+        guard inbound.count >= minimumIncompleteLength || complete else {
+            return false
+        }
+        let consumed = inbound.withUnsafeMutableBytes { buffer -> Int in
+            parse(UnsafeMutableRawBufferPointer(rebasing: buffer.prefix(maximumLength)), complete)
+        }
+        if consumed > 0 {
+            inbound.removeFirst(min(consumed, inbound.count))
+        }
+        return true
+    }
+
+    func framingDeliver(_ data: Data, isComplete: Bool) {
+        framedInput.append(data)
+    }
+
+    func framingWrite(_ data: Data) {
+        sends.append(PendingSend(data: data, completion: .idempotent, offset: 0))
+    }
+
+    func framingWritePayload(length: Int) -> Bool {
+        guard length >= 0, length <= outboundPayload.count else {
+            return false
+        }
+        sends.append(PendingSend(data: Data(outboundPayload.prefix(length)), completion: .idempotent, offset: 0))
+        return true
     }
 }

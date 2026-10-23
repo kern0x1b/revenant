@@ -14,7 +14,8 @@ function main()
     swiftc({fixture, "-o", host})
     swiftc({"-D", "REVENANT_BACKPORT", path.join(src, "IPv4Address.swift"), path.join(src, "IPv6Address.swift"),
             path.join(src, "NWEndpoint.swift"), path.join(src, "NWInterface.swift"), path.join(src, "NWError.swift"),
-            path.join(src, "NWPathMonitor.swift"), path.join(src, "NWConnection.swift"), fixture, "-o", backport})
+            path.join(src, "NWPathMonitor.swift"), path.join(src, "NWConnection.swift"), path.join(src, "NWProtocolOptions.swift"),
+            path.join(src, "NWProtocolFramer.swift"), path.join(src, "NWListener.swift"), fixture, "-o", backport})
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
