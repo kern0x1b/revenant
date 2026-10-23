@@ -60,7 +60,7 @@ and did not crash:
 ```
 
 It reconfigures the project with the emulator and the demo component, and restores its options afterwards. It is a tool
-rather than a `./xmakew test` target: a launch started from inside a running test never began its boot in my runs, while
+rather than a test target: a launch started from inside a running test never began its boot in my runs, while
 the same launch from the command line does. The emulator packages have no prebuilt release, so the first configure
 builds them, and the boot takes minutes of host time, so the tool is not part of `checks` in CI.
 
