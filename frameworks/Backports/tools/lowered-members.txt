@@ -31029,6 +31029,7 @@ type AVAudioEngineManualRenderingStatus
 type AVAudioEnvironmentDistanceAttenuationModel
 type AVAudioEnvironmentOutputType
 type AVAudioSessionCategoryOptions
+type AVAudioSessionRecordPermission
 type AVAudioSessionRouteSharingPolicy
 type AVAudioUnitDistortionPreset
 type AVAudioUnitEQFilterType
@@ -31091,6 +31092,8 @@ type CGImagePixelFormatInfo
 type CGPDFTagType
 type CIRAWFilterOption
 type CKAccountStatus
+type CKApplicationPermissionBlock
+type CKApplicationPermissionStatus
 type CKApplicationPermissions
 type CKDatabaseScope
 type CKNotificationType
@@ -31176,10 +31179,14 @@ type GCDualSenseAdaptiveTriggerMode
 type GCDualSenseAdaptiveTriggerPositionalAmplitudes
 type GCDualSenseAdaptiveTriggerPositionalResistiveStrengths
 type GCDualSenseAdaptiveTriggerStatus
+type GCExtendedGamepadSnapShotDataV100
 type GCExtendedGamepadSnapshotData
+type GCGamepadSnapShotDataV100
 type GCHapticsLocality
 type GCKeyCode
 type GCKeyboardValueChangedHandler
+type GCMicroGamepadSnapShotDataV100
+type GCMicroGamepadSnapshotData
 type GCMouseMoved
 type GCQuaternion
 type GCRotationRate
@@ -31318,7 +31325,9 @@ type MTL4CopySparseTextureMappingOperation
 type MTL4UpdateSparseBufferMappingOperation
 type MTL4UpdateSparseTextureMappingOperation
 type MTLArgumentType
+type MTLAutoreleasedArgument
 type MTLBarrierScope
+type MTLBindingAccess
 type MTLBindingType
 type MTLBlitOption
 type MTLCPUCacheMode
@@ -31348,6 +31357,7 @@ type MTLTriangleFillMode
 type MTLVertexFormat
 type MTLWinding
 type MXLaunchTaskID
+type NCWidgetDisplayMode
 type NEHotspotHelperHandler
 type NFCISO15693RequestFlag
 type NFCISO15693ResponseFlag
@@ -31401,6 +31411,7 @@ type NSMeasurementFormatterUnitOptions
 type NSOrderedCollectionDifferenceCalculationOptions
 type NSPersistentHistoryChangeType
 type NSPersistentHistoryResultType
+type NSPersistentStoreUbiquitousTransitionType
 type NSPersonNameComponentsFormatterOptions
 type NSPersonNameComponentsFormatterStyle
 type NSPredicateOperatorType
@@ -31450,10 +31461,13 @@ type PDFDisplayDirection
 type PDFDisplayMode
 type PHAccessLevel
 type PHAssetCollectionSubtype
+type PHAssetCollectionType
 type PHAssetPlaybackStyle
 type PHAssetResourceDataRequestID
 type PHAssetResourceType
 type PHAuthorizationStatus
+type PHCollectionListSubtype
+type PHCollectionListType
 type PHPickerConfigurationAssetRepresentationMode
 type PHPickerConfigurationSelection
 type PKAddressField
@@ -31499,11 +31513,13 @@ type UIActivityViewControllerCompletionWithItemsHandler
 type UIAlertActionStyle
 type UIAlertControllerSeverity
 type UIAlertControllerStyle
+type UIApplicationOpenURLOptionsKey
 type UIApplicationShortcutIconType
 type UIAttachmentBehaviorType
 type UIBackgroundRefreshStatus
 type UIBarButtonItemStyle
 type UIBarButtonSystemItem
+type UIBarMetrics
 type UIBarPosition
 type UIBehavioralStyle
 type UIBlurEffectStyle
@@ -31547,6 +31563,8 @@ type UIDeferredMenuElementIdentifier
 type UIDisplayGamut
 type UIDocumentBrowserActionAvailability
 type UIDocumentBrowserImportMode
+type UIDocumentMenuOrder
+type UIDocumentPickerMode
 type UIDropOperation
 type UIEdgeInsets
 type UIEditMenuArrowDirection
@@ -31611,6 +31629,7 @@ type UIPointerEffectTintMode
 type UIPreferredPresentationStyle
 type UIPressPhase
 type UIPressType
+type UIPreviewActionStyle
 type UIPrintRenderingQuality
 type UIPrinterJobTypes
 type UIPrinterPickerCompletionHandler
@@ -31651,6 +31670,7 @@ type UITableViewCellDragState
 type UITableViewCellFocusStyle
 type UITableViewDropIntent
 type UITableViewHeaderFooterViewConfigurationUpdateHandler
+type UITableViewRowActionStyle
 type UITableViewSeparatorInsetReference
 type UITextDropAction
 type UITextDropEditability
@@ -31672,6 +31692,10 @@ type UIUserInterfaceLayoutDirection
 type UIUserInterfaceLevel
 type UIUserInterfaceSizeClass
 type UIUserInterfaceStyle
+type UIUserNotificationActionBehavior
+type UIUserNotificationActionContext
+type UIUserNotificationActivationMode
+type UIUserNotificationType
 type UIVibrancyEffectStyle
 type UIViewAnimatingPosition
 type UIViewAnimationOptions
@@ -31679,6 +31703,7 @@ type UIViewKeyframeAnimationOptions
 type UIViewTintAdjustmentMode
 type UIWindowSceneActivationActionConfigurationProvider
 type UIWindowSceneDismissalAnimation
+type UIWindowScenePresentationStyle
 type UIWritingToolsCoordinatorTextAnimation
 type UNAlertStyle
 type UNAuthorizationOptions
@@ -31694,6 +31719,7 @@ type VNHumanBodyPoseObservationJointName
 type VNHumanBodyPoseObservationJointsGroupName
 type VNHumanHandPoseObservationJointName
 type VNHumanHandPoseObservationJointsGroupName
+type VNVideoProcessingOption
 type VTCompressionOutputHandler
 type VTCompressionSessionOptionFlags
 type VTDecompressionMultiImageCapableOutputHandler
