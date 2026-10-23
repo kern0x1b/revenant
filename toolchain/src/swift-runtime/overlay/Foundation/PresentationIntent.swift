@@ -278,6 +278,7 @@ extension PresentationIntent: _ObjectiveCBridgeable {
     }
 }
 
+@available(iOS 15.0, macOS 12.0, *)
 extension PresentationIntent.IntentType {
     fileprivate func objectiveC(nestedInside parent: __NSPresentationIntent?) -> __NSPresentationIntent {
         switch kind {
@@ -310,6 +311,7 @@ extension PresentationIntent.IntentType {
     }
 }
 
+@available(iOS 15.0, macOS 12.0, *)
 extension PresentationIntent.Kind {
     fileprivate init(objectiveC node: __NSPresentationIntent) {
         switch node.intentKind.rawValue {
@@ -331,6 +333,7 @@ extension PresentationIntent.Kind {
     }
 }
 
+@available(iOS 15.0, macOS 12.0, *)
 extension __NSPresentationIntent {
     fileprivate func integer(forKey key: String) -> Int {
         return (value(forKey: key) as? NSNumber)?.intValue ?? 0
