@@ -130,6 +130,15 @@ local function implemented_in(src)
     return folders
 end
 
+local function introduced_after_six(text)
+    local major, minor = text:match("%f[%w_]ios%(%s*(%d+)%.?(%d*)")
+    if not major then
+        return false
+    end
+    major, minor = tonumber(major), tonumber(minor)
+    return major > 6 or (major == 6 and minor ~= nil and minor > 0)
+end
+
 local function availability(text)
     local found, position = {}, 1
     while true do
@@ -139,7 +148,7 @@ local function availability(text)
         end
         local open, close = text:find("%b()", stop)
         local available = name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true)
-        local since = name:find("DEPRECATED", 1, true) and close and text:sub(stop, close):find("API_TO_BE_DEPRECATED", 1, true)
+        local since = name:find("DEPRECATED", 1, true) and close and introduced_after_six(text:sub(stop, close))
         if (available or since) and open == stop then
             table.insert(found, {start = start, stop = close})
             position = close + 1
