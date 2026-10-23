@@ -6995,6 +6995,7 @@ global NLTagWhitespace
 global NLTagWord
 global NLTagWordJoiner
 global NSAlternateDescriptionAttributeName
+global NSAttachmentAttributeName
 global NSBinaryStoreInsecureDecodingCompatibilityOption
 global NSBinaryStoreSecureDecodingClasses
 global NSBundleResourceRequestLoadingPriorityUrgent
