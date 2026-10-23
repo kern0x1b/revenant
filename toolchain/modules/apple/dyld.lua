@@ -6,23 +6,7 @@ import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 
 local caches = {}
 
-local function cstring(data, at)
-    local finish = data:find("\0", at + 1, true)
-    return data:sub(at + 1, finish - 1)
-end
-
-local function uleb(data, at)
-    local value, shift = 0, 0
-    while true do
-        local byte = data:byte(at + 1)
-        at = at + 1
-        value = value | ((byte & 0x7F) << shift)
-        shift = shift + 7
-        if byte < 0x80 then
-            return value, at
-        end
-    end
-end
+local cstring, uleb = macho.cstring, macho.uleb
 
 function root()
     return path.join(workspace.home(), "dyld")
@@ -845,18 +829,6 @@ local function first_release_file(ladder, sdkdir, under)
     return kept_file("first-release", hash.strhash128(sdk_key(sdkdir) .. " " .. ladder_signature(ladder)), under)
 end
 
-
-function kept_files(sdkdirs, ladders, under)
-    local files = {}
-    for _, sdkdir in ipairs(sdkdirs) do
-        table.insert(files, owners_file(sdkdir, under))
-        for _, ladder in ipairs(ladders) do
-            table.insert(files, first_release_file(ladder, sdkdir, under))
-        end
-    end
-    return files
-end
-
 local FIRST = {}
 
 function first_releases(ladder, sdkdir, symbols)
@@ -1131,70 +1103,6 @@ function check(cachefile, binaries, folder, opt)
     cprint("imports: every non-weak import of the %s slices of %d binaries resolves against %d exports%s", cache.architecture, count, cache.count,
            unguarded > 0 and string.format("; %d weak import%s it does not export, each named in a warning above", unguarded, unguarded == 1 and "" or "s") or "")
     return warnings
-end
-
-function image_symbols(cache, loaded)
-    local image = loaded.image
-    local linkedit
-    for _, segment in ipairs(image.segments) do
-        if segment.name == "__LINKEDIT" then
-            linkedit = segment
-        end
-    end
-    local found = {exports = {}, reexports = {}, indirect = {}, function_starts = {}}
-    if not linkedit then
-        return found
-    end
-    local function at(offset, size)
-        return cache.read_address(linkedit.vmaddr + (offset - linkedit.fileoff), size)
-    end
-    if image.export_trie and image.export_trie[2] ~= 0 then
-        local trie = at(image.export_trie[1], image.export_trie[2])
-        for name, cursor in pairs(trie_payloads(trie)) do
-            local flags
-            flags, cursor = uleb(trie, cursor)
-            if flags & 0x08 == 0 then
-                table.insert(found.exports, {uleb(trie, cursor) + loaded.address, name})
-            else
-                table.insert(found.reexports, name)
-            end
-        end
-    end
-    if image.symtab and image.indirect and image.indirect[2] > 0 then
-        local symoff, nsyms, stroff = image.symtab[1], image.symtab[2], image.symtab[3]
-        local entry = image.wide and 16 or 12
-        local indirect = at(image.indirect[1], image.indirect[2] * 4)
-        for _, section in ipairs(image.sections) do
-            local kind = section.flags & 0xFF
-            if kind == 6 or kind == 7 or kind == 8 then
-                local slot = kind == 8 and section.reserved2 or (image.wide and 8 or 4)
-                for index = 0, (slot > 0 and section.size // slot or 0) - 1 do
-                    local position = section.reserved1 + index
-                    if position < image.indirect[2] then
-                        local symbol = string.unpack("<I4", indirect, position * 4 + 1)
-                        if symbol & 0xC0000000 == 0 and symbol < nsyms then
-                            local strx = string.unpack("<I4", at(symoff + symbol * entry, 4))
-                            table.insert(found.indirect, {section.addr + index * slot, cache.string_at(linkedit.vmaddr + (stroff + strx - linkedit.fileoff))})
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if image.function_starts and image.function_starts[2] > 0 then
-        local data = at(image.function_starts[1], image.function_starts[2])
-        local cursor, address = 0, loaded.address
-        while cursor < #data do
-            local delta
-            delta, cursor = uleb(data, cursor)
-            if delta == 0 then
-                break
-            end
-            address = address + delta
-            table.insert(found.function_starts, address)
-        end
-    end
-    return found
 end
 
 local function encoded_uleb(value)
