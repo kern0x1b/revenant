@@ -1,9 +1,11 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 function digest(root)
     local files = os.files(path.join(root, "emulator", "**"))
     if #files == 0 then
         return nil
     end
-    table.sort(files)
+    byteorder.sort(files)
     local digests = {}
     for _, file in ipairs(files) do
         table.insert(digests, path.relative(file, root) .. "=" .. hash.sha256(file))
