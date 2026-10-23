@@ -75,6 +75,8 @@ int main(int argc, char **argv)
         revenant_expect_quaternion("slerp at zero is the start", RevenantSCNQuaternionSlerp(identity, third, 0), identity);
         revenant_expect_quaternion("slerp at one is the end", RevenantSCNQuaternionSlerp(identity, third, 1), third);
         revenant_expect_quaternion("slerp at one half is half the angle", RevenantSCNQuaternionSlerp(identity, third, 0.5), sixth);
+
+        revenant_check(revenant_negative ? NO : YES, "negative control", @"the negative control is inverted");
     }
     return revenant_finish();
 }

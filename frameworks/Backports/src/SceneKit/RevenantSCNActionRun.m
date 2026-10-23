@@ -24,6 +24,11 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
     NSMutableArray<RevenantSCNActionRun *> *_active;
 }
 
+@synthesize action = _action;
+@synthesize key = _key;
+@synthesize completion = _completion;
+@synthesize lastTime = _lastTime;
+
 - (instancetype)initWithAction:(SCNAction *)action key:(NSString *)key completion:(void (^)(void))completion time:(CFTimeInterval)time
 {
     if ((self = [super init])) {

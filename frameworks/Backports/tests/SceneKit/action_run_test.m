@@ -147,6 +147,8 @@ int main(int argc, char **argv)
         SCNAction *copy = [[SCNAction moveBy:SCNVector3Make(1, 2, 3) duration:4] copy];
         revenant_expect_number("copy keeps the duration", copy.duration, 4);
         revenant_check(copy.revenantKind == RevenantSCNActionKindMoveBy, "copy keeps the kind", @"copy changed the kind");
+
+        revenant_check(revenant_negative ? NO : YES, "negative control", @"the negative control is inverted");
     }
     return revenant_finish();
 }
