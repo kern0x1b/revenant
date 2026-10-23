@@ -29,13 +29,13 @@ A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only 
 
 ## One clean
 
-    ./xmakew l tools/clean.lua [--dry-run]
-    ./xmakew l tools/clean.lua --packages [--dry-run]
-    ./xmakew l tools/clean.lua --all [--dry-run]
+    ./xmakew l -P . tools/clean.lua [--dry-run]
+    ./xmakew l -P . tools/clean.lua --packages [--dry-run]
+    ./xmakew l -P . tools/clean.lua --all [--dry-run]
 
 | Level | Removes | Keeps |
 | --- | --- | --- |
-| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders, an old `ccache` folder | the package store, the xmake binaries |
+| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders and logs | the package store, the xmake binaries |
 | `--packages` | the same and the package store | the xmake binaries |
 | `--all` | everything under `~/.revenant/cache`; the xmake binaries are built again on the next `./xmakew` | nothing |
 
@@ -54,7 +54,7 @@ changes exactly when those files do:
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
-A change to documentation rebuilds nothing. `./xmakew l tools/keys.lua [package ...]` prints each large
+A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or

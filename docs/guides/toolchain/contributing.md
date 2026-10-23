@@ -58,7 +58,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   digest (`packages/s/swift-runtime/xmake.lua`, `packages/s/swift-runtime/port/digest.lua`), so a changed
   backport or patch is already a different package with its own install path. A private store re-resolves the whole
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
-  of its own: `./xmakew build ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.
+  of its own: `./xmakew build -P . ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.
 
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any

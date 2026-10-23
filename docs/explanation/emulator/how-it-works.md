@@ -10,7 +10,7 @@
   the guest's IOKit, Mach and BSD calls itself.
 - Publishes the hardware the firmware looks for (audio, baseband, display, keybag) the way the real devices do. The
   iPhone 4S's Voice audio device is described from a registry dump of a real one.
-- Runs a test program inside the guest and hands back its result. That is how the toolchain's `./xmakew emulate`
+- Runs a test program inside the guest and hands back its result. That is how the toolchain's `./xmakew emulate -P .`
   uses it.
 
 ## How it works
