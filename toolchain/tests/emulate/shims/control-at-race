@@ -1,0 +1,4 @@
+Package: org.revenant.emulateshims.at-race
+Name: at-race under the emulator
+Architecture: iphoneos-arm
+Description: the apple-compat *at race test, run by the emulator to check the per-thread working directory calls

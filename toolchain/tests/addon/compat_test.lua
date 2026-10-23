@@ -196,7 +196,7 @@ local function clock_failures(folder, shims)
     os.mkdir(path.join(folder, "listed"))
     io.writefile(path.join(folder, "listed", "marker"), "")
     local built = clang(folder, {"-O2", path.join(shims, "clock_gettime.c"), path.join(shims, "clock_gettime_nsec_np.c"),
-                                 path.join(shims, "fdopendir.c"), "clock.c", "-o", "clock"})
+                                 path.join(shims, "openat.c"), path.join(shims, "fdopendir.c"), "clock.c", "-o", "clock"})
     if built.code ~= 0 then
         return {"the clock_gettime and fdopendir shims must compile: " .. built.stderr:sub(-400)}
     end
@@ -212,6 +212,28 @@ local function at_failures(folder, shims)
         return {"the *at shims must compile: " .. built.stderr:sub(-400)}
     end
     return silent("*at", run(folder, path.join(folder, "at"), {path.join(folder, "at-root")}))
+end
+
+local function race_failures(folder, shims)
+    fixture(folder, "at-race.c")
+    os.mkdir(path.join(folder, "race-root"))
+    local built = clang(folder, {"-O2", path.join(shims, "openat.c"), path.join(shims, "fstatat.c"), path.join(shims, "unlinkat.c"),
+                                 "at-race.c", "-o", "at-race"})
+    if built.code ~= 0 then
+        return {"the *at race test must compile: " .. built.stderr:sub(-400)}
+    end
+    return silent("*at race", run(folder, path.join(folder, "at-race"), {path.join(folder, "race-root")}))
+end
+
+local function tree_failures(folder, shims)
+    fixture(folder, "remove-tree.c")
+    os.mkdir(path.join(folder, "tree-root"))
+    local built = clang(folder, {"-O2", path.join(shims, "openat.c"), path.join(shims, "fstatat.c"), path.join(shims, "unlinkat.c"),
+                                 path.join(shims, "fdopendir.c"), "remove-tree.c", "-o", "remove-tree"})
+    if built.code ~= 0 then
+        return {"the *at tree removal test must compile: " .. built.stderr:sub(-400)}
+    end
+    return silent("*at tree removal", run(folder, path.join(folder, "remove-tree"), {path.join(folder, "tree-root")}))
 end
 
 local function renamed_failures(folder, shims, headers)
@@ -642,6 +664,8 @@ function failures(opt)
         local checks = {
             function (scratch) return clock_failures(scratch, shims) end,
             function (scratch) return at_failures(scratch, shims) end,
+            function (scratch) return race_failures(scratch, shims) end,
+            function (scratch) return tree_failures(scratch, shims) end,
             function (scratch) return renamed_failures(scratch, shims, headers) end,
             function (scratch) return linked_failures(scratch, shims, headers) end,
             function (scratch) return named_failures(scratch, shims) end,
