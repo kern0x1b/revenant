@@ -4,22 +4,26 @@ local function fail(message)
 end
 
 local function usage()
-    io.stderr:write("usage: ./xmakew l -P . toolchain/tools/order_file/order_file.lua [--nm PROGRAM] [--otool PROGRAM] [--image NAME] BLOCK-PROFILE BINARY OUTPUT\n")
+    io.stderr:write("usage: ./xmakew l -P . toolchain/tools/order_file/order_file.lua --llvm-bin DIR [--image NAME] BLOCK-PROFILE BINARY OUTPUT\n")
     os.exit(64)
 end
 
 local function parse_arguments(arguments)
-    local options = {nm = "nm", otool = "otool", image = nil}
+    local options = {}
     local positional = {}
     local index = 1
     while index <= #arguments do
         local argument = arguments[index]
-        if argument == "--nm" or argument == "--otool" or argument == "--image" then
+        if argument == "--llvm-bin" or argument == "--image" then
             index = index + 1
             if arguments[index] == nil then
                 usage()
             end
-            options[argument:sub(3)] = arguments[index]
+            if argument == "--llvm-bin" then
+                options.llvm_bin = arguments[index]
+            else
+                options.image = arguments[index]
+            end
         elseif argument:sub(1, 2) == "--" then
             usage()
         else
@@ -27,11 +31,13 @@ local function parse_arguments(arguments)
         end
         index = index + 1
     end
-    if #positional ~= 3 then
+    if #positional ~= 3 or not options.llvm_bin then
         usage()
     end
     options.profile, options.binary, options.output = positional[1], positional[2], positional[3]
     options.image = options.image or path.filename(options.binary)
+    options.nm = path.join(options.llvm_bin, "llvm-nm")
+    options.objdump = path.join(options.llvm_bin, "llvm-objdump")
     return options
 end
 
@@ -60,8 +66,7 @@ end
 
 local function text_symbols(program, binary)
     local symbols = {}
-    local listing = os.iorunv(program, {"-n", binary})
-    each_line(listing, function (line)
+    each_line(os.iorunv(program, {"-n", binary}), function (line)
         local address, kind, name = line:match("^(%x+) (%a) (%S+)$")
         if address and (kind == "T" or kind == "t") then
             table.insert(symbols, {address = tonumber(address, 16), name = name})
@@ -79,7 +84,7 @@ end
 local function text_base(program, binary)
     local base = nil
     local after_segname = false
-    each_line(os.iorunv(program, {"-l", binary}), function (line)
+    each_line(os.iorunv(program, {"--private-headers", binary}), function (line)
         if base then
             return
         end
@@ -136,19 +141,23 @@ end
 
 function main(...)
     local options = parse_arguments({...})
-    if not os.isfile(options.profile) then
-        fail(options.profile .. " is not there")
+    for _, file in ipairs({options.profile, options.binary}) do
+        if not os.isfile(file) then
+            fail(file .. " is not there")
+        end
     end
-    if not os.isfile(options.binary) then
-        fail(options.binary .. " is not there")
+    for _, tool in ipairs({options.nm, options.objdump}) do
+        if not os.isfile(tool) then
+            fail(tool .. " is not there: --llvm-bin must name the bin folder of the llvm package with its libraries config")
+        end
     end
     local symbols = text_symbols(options.nm, options.binary)
     if #symbols == 0 then
         fail("no text symbols in " .. options.binary .. " from " .. options.nm)
     end
-    local base = text_base(options.otool, options.binary)
+    local base = text_base(options.objdump, options.binary)
     if not base then
-        fail("no __TEXT segment in " .. options.binary .. " from " .. options.otool)
+        fail("no __TEXT segment in " .. options.binary .. " from " .. options.objdump)
     end
     local ticks = heat(options, symbols, base)
     local names = {}

@@ -14,7 +14,7 @@ local light = {"assets_extract_test", "binding_test", "checkout_test", "compat_t
 
 local packaged = {"architectures_test", "atomics_test", "backports_package_test", "blocks_test", "carried_test", "checks_test", "device_test",
                   "debian_test", "dyld_test", "gdb_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
-                  "optimisation_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "weak_test"}
+                  "optimisation_test", "order_file_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "weak_test"}
 
 local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "port_test", "swift_test", "tweak_test"}
 
