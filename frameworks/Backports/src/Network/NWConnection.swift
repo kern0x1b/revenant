@@ -1,5 +1,7 @@
 import Foundation
 
+private let nwFramingInputLimit = 1 << 20
+
 public final class NWConnection: @unchecked Sendable {
     public enum State: Equatable, CustomDebugStringConvertible {
         case setup
@@ -115,6 +117,11 @@ public final class NWConnection: @unchecked Sendable {
                 let fd = self.acceptedDescriptor
                 self.acceptedDescriptor = -1
                 self.setState(.preparing)
+                guard self.parameters.tlsOptions == nil else {
+                    Darwin.close(fd)
+                    self.fail(.posix(errno: ENOTSUP))
+                    return
+                }
                 self.attach(fd, connecting: false)
             } else {
                 self.open()
@@ -373,6 +380,10 @@ public final class NWConnection: @unchecked Sendable {
         }
         inbound.append(contentsOf: buffer[0..<count])
         if framer != nil {
+            guard inbound.count <= nwFramingInputLimit else {
+                fail(.posix(errno: EMSGSIZE))
+                return
+            }
             runFramer()
         }
         deliverReceives()
