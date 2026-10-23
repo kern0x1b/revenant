@@ -29,9 +29,21 @@ public struct NWParameters: Sendable {
 
     let transport: Transport
     public var allowLocalEndpointReuse = false
+    public var preferNoProxies = false
+    public let defaultProtocolStack = NWProtocolStack()
+    let tcpOptions: NWProtocolTCP.Options?
+    let tlsOptions: NWProtocolTLS.Options?
 
     private init(transport: Transport) {
         self.transport = transport
+        self.tcpOptions = transport == .tcp ? NWProtocolTCP.Options() : nil
+        self.tlsOptions = nil
+    }
+
+    public init(tls: NWProtocolTLS.Options?, tcp: NWProtocolTCP.Options) {
+        self.transport = .tcp
+        self.tcpOptions = tcp
+        self.tlsOptions = tls
     }
 
     public static var tcp: NWParameters {

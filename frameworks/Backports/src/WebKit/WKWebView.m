@@ -170,6 +170,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
 {
+    [configuration revenant_bindURLSchemeHandlersToWebView:self];
     _configuration = [configuration copy];
     _title = @"";
     _items = [NSMutableArray array];
