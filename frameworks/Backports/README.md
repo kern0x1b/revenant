@@ -63,7 +63,6 @@ These framework targets fail before building on iOS 6 while Telegram's demanded 
 
 - `AuthenticationServicesBackports`: Telegram's authorization flows need `ASAuthorizationController`, its delegate and presentation protocols, `ASAuthorizationAppleIDButton`, the passkey provider, assertion and registration types, and `ASCredentialUpdater`.
 - `NetworkBackports`: Telegram needs the Swift `NWProtocolTCP.Options`, `NWListener`, `NWProtocolFramer` and `NWProtocolFramerImplementation` overlays. `NWConnection`, `NWEndpoint` and `NWParameters` are implemented.
-- `WebKitBackports`: BrowserUI needs `WKSnapshotConfiguration`, `WKContextMenuElementInfo`, `WKDownloadDelegate`, `WKURLSchemeHandler` and `WKURLSchemeTask`.
 
 `WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
 
