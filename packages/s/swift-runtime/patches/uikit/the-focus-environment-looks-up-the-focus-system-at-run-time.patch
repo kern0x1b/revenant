@@ -1,0 +1,46 @@
+--- a/stdlib/public/SwiftShims/UIKitOverlayShims.h
++++ b/stdlib/public/SwiftShims/UIKitOverlayShims.h
+@@ -14,17 +14,42 @@
+ #define SWIFT_STDLIB_SHIMS_UIKIT_OVERLAY_H
+ 
+ @import UIKit;
++#import <objc/runtime.h>
++#import <objc/message.h>
+ 
+ #if __has_feature(nullability)
+ #pragma clang assume_nonnull begin
+ #endif
+ 
+ #if TARGET_OS_TV || TARGET_OS_IOS
++// UIFocusSystem is looked up at run time rather than imported: an import is weak on a release
++// without the class, and the runtime's load check then needs an export for it. The class is kept
++// once found; while it is missing the lookup runs again on each call, so a Backports library that
++// loads later is still seen.
+ static inline BOOL _swift_UIKit_UIFocusEnvironmentContainsEnvironment(
+                                                                       id<UIFocusEnvironment> environment,
+                                                                       id<UIFocusEnvironment> otherEnvironment
+                                                                       ) API_AVAILABLE(ios(11.0), tvos(11.0)) {
+-    return [UIFocusSystem environment:environment containsEnvironment:otherEnvironment];
++    static Class focusSystem;
++    if (!focusSystem) {
++        focusSystem = objc_getClass("UIFocusSystem");
++    }
++    SEL contains = @selector(environment:containsEnvironment:);
++    if (focusSystem && [focusSystem respondsToSelector:contains]) {
++        return ((BOOL (*)(id, SEL, id, id))objc_msgSend)(focusSystem, contains, environment, otherEnvironment);
++    }
++    // Without the class, an environment contains itself and its descendants: walk up from
++    // otherEnvironment and look for environment.
++    for (id<UIFocusEnvironment> candidate = otherEnvironment; candidate != nil; ) {
++        if (candidate == environment) {
++            return YES;
++        }
++        if (![candidate respondsToSelector:@selector(parentFocusEnvironment)]) {
++            break;
++        }
++        candidate = ((id<UIFocusEnvironment> (*)(id, SEL))objc_msgSend)(candidate, @selector(parentFocusEnvironment));
++    }
++    return NO;
+ }
+ #endif // TARGET_OS_TV || TARGET_OS_IOS
+ 
