@@ -63,13 +63,15 @@ reinstall a changed dependency causes; patch `0010` waits for a lock without sto
 An install builds into a generation folder beside the package's folder, `<hash>.g<token>`, and publishes it by
 swapping the link `<hash>` to it in one rename (patch `0015`). A reader of the store takes no lock, and what it may
 assume depends on how it reads. A reader that resolves `<hash>` once and reads every file of the install from the
-generation it resolved sees the old install or the new one, whole, for as long as at most one publish happens during
-its reads. A reader that resolves `<hash>` again for each file can read files of two generations across a publish, so
-a reader that needs one install resolves it once. A failed install leaves the published one as it was.
-The guarantee is for one generation back. The generation a publish replaces stays until the next publish, so a path
-into it still reads; after the second publish it is removed, and reading a file under it fails with "cannot open
-file" rather than returning old files. A consumer that keeps a generation's path, such as a CMake config it cached,
-must reconfigure after two installs of the package. Export copies the files the link names (patch `0016`), and
+generation it resolved sees the old install or the new one, whole, for as long as its reads last within the grace
+period below. A reader that resolves `<hash>` again for each file can read files of two generations across a publish,
+so a reader that needs one install resolves it once. A failed install leaves the published one as it was.
+The generation a publish replaces stays for a grace period, `REVENANT_GENERATION_GRACE` seconds (an hour by default),
+counted from the time it was replaced. So a path into it still reads through two publishes that come within the grace.
+After the grace it is removed at the next publish, and reading a file under it fails with "cannot open file" rather
+than returning old files. A consumer that keeps a generation's path, such as a CMake config it cached, must reconfigure
+once the grace has passed after two installs of the package. The hour is the longest CI run on main, 48 minutes, with
+margin; a read longer than the grace is not protected. Export copies the files the link names (patch `0016`), and
 import publishes them the same way, so an exported package imports whole.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).
