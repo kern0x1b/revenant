@@ -392,7 +392,8 @@ package("swift-runtime")
                           {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
                                           "-enable-experimental-feature", "BuiltinModule",
-                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers}})
+                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers,
+                                          "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}})
 
             local function generated_from(folder, name)
                 return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
