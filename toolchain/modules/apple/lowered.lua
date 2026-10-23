@@ -1125,6 +1125,17 @@ function overlay(sdk, out, set)
     return vfs
 end
 
+local function system_include_relative(file, sdk)
+    local folder = path.join(sdk, "usr", "include")
+    if file:sub(1, #folder + 1) == folder .. "/" then
+        return file:sub(#folder + 2)
+    end
+end
+
+function include_directory(out)
+    return path.join(out, "include")
+end
+
 function build_overlay(sdk, out, set)
     local changed = member_headers(sdk)
     for _, file in ipairs(framework_headers(sdk)) do
@@ -1136,12 +1147,24 @@ function build_overlay(sdk, out, set)
     end
     local roots = {}
     for file, text in pairs(changed) do
-        local copy = path.join(out, path.relative(file, sdk))
-        os.mkdir(path.directory(copy))
-        write_if_changed(copy, text)
-        local dir = path.directory(file)
-        roots[dir] = roots[dir] or {}
-        table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+        local relative = system_include_relative(file, sdk)
+        if relative then
+            local copy = path.join(include_directory(out), relative)
+            os.mkdir(path.directory(copy))
+            write_if_changed(copy, text)
+        else
+            local copy = path.join(out, path.relative(file, sdk))
+            os.mkdir(path.directory(copy))
+            write_if_changed(copy, text)
+            local dir = path.directory(file)
+            roots[dir] = roots[dir] or {}
+            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+        end
+    end
+    for dir in pairs(roots) do
+        if system_include_relative(dir, sdk) or dir == path.join(sdk, "usr", "include") then
+            raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
+        end
     end
     local dirs = {}
     for dir in pairs(roots) do

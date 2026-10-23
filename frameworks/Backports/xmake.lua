@@ -251,7 +251,8 @@ else
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
                                   network = "network_test.lua", networktls = "network_tls_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
-                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua"})
+                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua",
+                                  vfs = "lowered_vfs_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
