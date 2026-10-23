@@ -92,6 +92,10 @@ local function sdk_in(installdir, version)
     return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
+local function populated(folder)
+    return os.isdir(folder) and (#os.files(path.join(folder, "*")) > 0 or #os.dirs(path.join(folder, "*")) > 0)
+end
+
 function package_of(requirement, install, platform)
     local scratch = fresh("package-resolve")
     local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
@@ -113,6 +117,9 @@ function package_of(requirement, install, platform)
             local entries = start and json.decode(output:sub(start)) or {}
             for _, entry in ipairs(entries) do
                 if entry.require == requirement and entry.installdir then
+                    if install and not populated(entry.installdir) then
+                        os.execv(os.programfile(), {"require", "-y", "--force"}, {curdir = scratch})
+                    end
                     return entry.installdir
                 end
             end

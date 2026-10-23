@@ -251,7 +251,10 @@ local function overlay(name, folder, opt)
             if opt.cmodule then
                 add_flags(target, {"-I", path.join(SRC, folder, opt.cmodule)})
                 for _, name in ipairs(table.wrap(opt.packages)) do
-                    add_flags(target, {"-Xcc", "-I" .. path.join(target:pkg(name):installdir(), "include")})
+                    local pkg = target:pkg(name)
+                    if pkg then
+                        add_flags(target, {"-Xcc", "-I" .. path.join(pkg:installdir(), "include")})
+                    end
                 end
             end
         end)
