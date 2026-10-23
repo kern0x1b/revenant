@@ -290,6 +290,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_packages("emulator-guest")
         add_tests("foundation_url_components")
         add_tests("loader_class_backport")
+        add_tests("screenshot_notification")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
