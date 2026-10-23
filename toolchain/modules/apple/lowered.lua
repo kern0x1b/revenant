@@ -554,7 +554,7 @@ local function lowering_of(text, implemented)
             local first = statement_start(text, start, true)
             local last = first and statement_end(text, stop)
             local segment = first and text:sub(first, last) or ""
-            if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
+            if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) and not segment:find("API_AVAILABLE_BEGIN", 1, true) then
                 lower(first, last)
             elseif text:match("^%s*API_AVAILABLE%(", stop + 1) or text:match("^%s*=", stop + 1) then
                 local ending = constant_end(text, start)
