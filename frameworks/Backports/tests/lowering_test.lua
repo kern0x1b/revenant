@@ -18,12 +18,16 @@ void revenantProbe(NSString *text, NSFileManager *files)
     NSDate *weekend = nil;
     NSTimeInterval weekendInterval = 0;
     (void)[[NSCalendar currentCalendar] rangeOfWeekendStartDate:&weekend interval:&weekendInterval containingDate:[NSDate date]];
-    NSDateInterval *interval = nil;
-    (void)[interval initWithStartDate:[NSDate date] duration:1.0];
+    if (@available(iOS 10.0, *)) {
+        NSDateInterval *interval = nil;
+        (void)[interval initWithStartDate:[NSDate date] duration:1.0];
+    }
     NSDateComponents *components = nil;
-    NSURLComponents *url = nil;
     (void)[components isValidDate];
-    (void)[url percentEncodedHost];
+    if (@available(iOS 7.0, *)) {
+        NSURLComponents *url = nil;
+        (void)[url percentEncodedHost];
+    }
     (void)[WKWebView class];
     (void)MTLCreateSystemDefaultDevice();
 }
