@@ -30,6 +30,8 @@ class AVVideoComposition
 class CASpringAnimation
 class CLLocation
 class CPListItem
+class CTCall
+class CTCallCenter
 class CTSubscriber
 class GKAchievement
 class ICCameraDevice
@@ -135,6 +137,12 @@ member AVSampleBufferDisplayLayer -stopRequestingMediaData
 member AVURLAsset -assetCache
 member CLLocation -courseAccuracy
 member CLLocation -speedAccuracy
+member CTCall -callID
+member CTCall -callState
+member CTCall -setCallID:
+member CTCall -setCallState:
+member CTCallCenter -currentCalls
+member CTCallCenter -setCurrentCalls:
 member CTSubscriber -carrierToken
 member GKAchievement -player
 member GKAchievement -setPlayer:

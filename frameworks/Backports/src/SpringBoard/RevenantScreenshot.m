@@ -3,12 +3,6 @@
 #import <objc/message.h>
 #import <notify.h>
 
-// A Substrate-compatible tweak for SpringBoard (the filter in RevenantScreenshot.plist selects it). SpringBoard
-// saves each screenshot through -[SBScreenShotter saveScreenshot:]. After the original runs, the tweak posts the
-// Darwin notification named for the application in front, which the Backports UIKit library turns into
-// UIApplicationUserDidTakeScreenshotNotification in that application. Nothing is posted when SpringBoard itself
-// is in front.
-
 static IMP RevenantOriginalSaveScreenshot;
 
 static NSString *RevenantFrontmostApplicationIdentifier(id springBoard) {

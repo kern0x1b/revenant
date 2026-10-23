@@ -2,10 +2,6 @@
 #import <UIKit/UIKit.h>
 #import <notify.h>
 
-// The screenshot tweak posts the Darwin notification for the application in front. The backport
-// must turn it into UIApplicationUserDidTakeScreenshotNotification, once, on the main thread. The
-// negative control posts a name that is not this application's, so nothing may arrive, and it still
-// expects one delivery: the driver requires the negative run to fail.
 REVENANT_CASE(screenshot_notification)
 {
     NSString *application = [[NSBundle mainBundle] bundleIdentifier] ?: [[NSProcessInfo processInfo] processName];
