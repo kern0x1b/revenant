@@ -290,7 +290,7 @@ jobs:
 
       - name: Build the Swift targets
         timeout-minutes: 20
-        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit swiftAuthenticationServices 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Install the Swift packages through their wrappers
         timeout-minutes: 20

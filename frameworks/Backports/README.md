@@ -69,7 +69,6 @@ The large members still open, with a design note for each, are in `docs/explanat
 
 These framework targets fail before building on iOS 6 while Telegram's demanded API is missing:
 
-- `AuthenticationServicesBackports`: Telegram's authorization flows need `ASAuthorizationController`, its delegate and presentation protocols, `ASAuthorizationAppleIDButton`, the passkey provider, assertion and registration types, and `ASCredentialUpdater`.
 
 `WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
 
