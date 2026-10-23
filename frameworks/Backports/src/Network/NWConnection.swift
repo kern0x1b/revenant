@@ -84,10 +84,6 @@ public final class NWConnection: @unchecked Sendable {
     private var outboundPayload = Data()
     private var tls: NWTLSSession?
 
-    public var negotiatedApplicationProtocol: String? {
-        tls?.negotiatedApplicationProtocol
-    }
-
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
         self.parameters = parameters
@@ -124,12 +120,12 @@ public final class NWConnection: @unchecked Sendable {
                 let fd = self.acceptedDescriptor
                 self.acceptedDescriptor = -1
                 self.setState(.preparing)
-                guard self.parameters.tlsOptions == nil else {
+                guard self.parameters.tlsOptions == nil || self.parameters.tlsOptions?.securityProtocolOptions.localIdentity != nil else {
                     Darwin.close(fd)
                     self.fail(.posix(errno: ENOTSUP))
                     return
                 }
-                self.attach(fd, connecting: false)
+                self.attach(fd, connecting: false, serverSide: true)
             } else {
                 self.open()
             }
@@ -240,7 +236,7 @@ public final class NWConnection: @unchecked Sendable {
         fail(.posix(errno: lastError))
     }
 
-    private func attach(_ fd: Int32, connecting: Bool) {
+    private func attach(_ fd: Int32, connecting: Bool, serverSide: Bool = false) {
         descriptor = fd
         if parameters.transport == .tcp {
             parameters.tcpOptions?.apply(to: fd)
@@ -251,7 +247,7 @@ public final class NWConnection: @unchecked Sendable {
             if case .hostPort(let host, _) = endpoint {
                 serverName = hostText(host)
             }
-            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName) else {
+            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName, serverSide: serverSide) else {
                 fail(.tls(errSSLInternal))
                 return
             }

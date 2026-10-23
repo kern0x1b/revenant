@@ -7,6 +7,7 @@ public enum NWProtocolTLS {
         public var serverName: String?
         public var applicationProtocols: [String] = []
         public var peerAuthenticationRequired = true
+        public var localIdentity: SecIdentity?
 
         public init() {}
     }
@@ -29,7 +30,6 @@ private let revenantServerAuthCompleted: OSStatus = -9841
 let revenantCertificateFailures: Set<OSStatus> = [-9807, -9812, -9813, -9814, -9815, -9825]
 
 private typealias NWSetALPNFunction = @convention(c) (SSLContext, CFArray) -> OSStatus
-private typealias NWCopyALPNFunction = @convention(c) (SSLContext, UnsafeMutablePointer<CFArray?>) -> OSStatus
 
 private func revenantSymbol<T>(_ name: String, as type: T.Type) -> T? {
     guard let symbol = dlsym(revenantDefaultSymbols, name) else {
@@ -52,10 +52,9 @@ final class NWTLSSession {
     private let peerAuthenticationRequired: Bool
     private(set) var isEstablished = false
     private(set) var wantsWrite = false
-    private(set) var negotiatedApplicationProtocol: String?
 
-    init?(descriptor: Int32, options: NWProtocolTLS.SecurityProtocolOptions, defaultServerName: String?) {
-        guard let context = SSLCreateContext(kCFAllocatorDefault, .clientSide, .streamType) else {
+    init?(descriptor: Int32, options: NWProtocolTLS.SecurityProtocolOptions, defaultServerName: String?, serverSide: Bool) {
+        guard let context = SSLCreateContext(kCFAllocatorDefault, serverSide ? .serverSide : .clientSide, .streamType) else {
             return nil
         }
         self.context = context
@@ -63,13 +62,17 @@ final class NWTLSSession {
         self.peerAuthenticationRequired = options.peerAuthenticationRequired
         SSLSetIOFuncs(context, revenantReadFunction, revenantWriteFunction)
         SSLSetConnection(context, Unmanaged.passUnretained(self).toOpaque())
-        if let name = options.serverName ?? defaultServerName {
+        if serverSide {
+            if let identity = options.localIdentity {
+                SSLSetCertificate(context, [identity] as CFArray)
+            }
+        } else if let name = options.serverName ?? defaultServerName {
             SSLSetPeerDomainName(context, name, name.utf8.count)
         }
         if !options.applicationProtocols.isEmpty, let setALPN = revenantSymbol("SSLSetALPNProtocols", as: NWSetALPNFunction.self) {
             _ = setALPN(context, options.applicationProtocols as CFArray)
         }
-        if !options.peerAuthenticationRequired {
+        if !serverSide && !options.peerAuthenticationRequired {
             SSLSetSessionOption(context, .breakOnServerAuth, true)
         }
     }
@@ -81,7 +84,6 @@ final class NWTLSSession {
             switch status {
             case noErr:
                 isEstablished = true
-                negotiatedApplicationProtocol = copyNegotiatedProtocol()
                 return .complete
             case errSSLWouldBlock:
                 return .wouldBlock
@@ -137,16 +139,5 @@ final class NWTLSSession {
             return errSSLWouldBlock
         }
         return errSSLClosedAbort
-    }
-
-    private func copyNegotiatedProtocol() -> String? {
-        guard let copy = revenantSymbol("SSLCopyALPNProtocols", as: NWCopyALPNFunction.self) else {
-            return nil
-        }
-        var protocols: CFArray?
-        guard copy(context, &protocols) == noErr, let names = protocols as? [String] else {
-            return nil
-        }
-        return names.first
     }
 }
