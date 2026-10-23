@@ -63,5 +63,10 @@ reinstall a changed dependency causes; patch `0010` waits for a lock without sto
 An install builds into a generation folder beside the package's folder, `<hash>.g<token>`, and publishes it by
 swapping the link `<hash>` to it in one rename (patch `0015`): a reader of the store, which takes no lock, sees the
 old install or the new one, whole, never a part of either. A failed install leaves the published one as it was.
+The guarantee is for one generation back. The generation a publish replaces stays until the next publish, so a path
+into it still reads; after the second publish it is removed, and reading a file under it fails with "cannot open
+file" rather than returning old files. A consumer that keeps a generation's path, such as a CMake config it cached,
+must reconfigure after two installs of the package. Export copies the files the link names (patch `0016`), and
+import publishes them the same way, so an exported package imports whole.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).

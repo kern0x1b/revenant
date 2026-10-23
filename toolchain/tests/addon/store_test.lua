@@ -69,12 +69,36 @@ local function published(store)
     end
 end
 
+local function generation_of(installed)
+    if not os.islink(installed) then
+        return nil
+    end
+    return path.join(path.directory(installed), os.readlink(installed))
+end
+
+local function readable(file)
+    local text = nil
+    try
+    {
+        function ()
+            text = io.readfile(file)
+        end,
+        catch
+        {
+            function ()
+                text = nil
+            end
+        }
+    }
+    return text
+end
+
 local function whole(dir, generation)
     if not dir or not os.isdir(dir) then
         return false
     end
     for index = 1, 40 do
-        local text = io.readfile(path.join(dir, "payload", string.format("part-%02d", index)))
+        local text = readable(path.join(dir, "payload", string.format("part-%02d", index)))
         if text ~= generation .. " " .. string.rep("x", 200) .. "\n" then
             return false
         end
@@ -107,6 +131,16 @@ function failures(opt)
         return os.execv(os.programfile(), argv, {curdir = project, try = true, stdout = log, stderr = log,
                                                   envs = table.join(envs, extra or {})})
     end
+    local function leftovers()
+        return #os.dirs(path.join(store, ".xmake", "packages", "f", "fakeinstall", "latest", "*"))
+    end
+    local function uninstall()
+        if xmake({"require", "--uninstall", "-y", "fakeinstall"}) ~= 0 then
+            table.insert(found, "uninstalling the fake package failed: " .. (io.readfile(log) or ""))
+        elseif leftovers() > 0 then
+            table.insert(found, "uninstalling the fake package left its installed folder or a generation of it behind")
+        end
+    end
 
     if xmake({"require", "-y"}, {FAKE_GENERATION = "old"}) ~= 0 then
         table.insert(found, "the first install of the fake package failed: " .. (io.readfile(log) or ""))
@@ -118,6 +152,10 @@ function failures(opt)
         table.insert(found, "the first install left no installed folder to read")
         os.tryrm(folder)
         return found
+    end
+    local first = generation_of(installed)
+    if not first then
+        table.insert(found, "the published install is not a link to a generation")
     end
 
     local reader = path.join(folder, "reader.lua")
@@ -157,24 +195,61 @@ function failures(opt)
                 " reads while a forced reinstall replaced it: a reader must see the old install or the new one, whole")
         end
     end
-
-    local now = published(store)
-    if not whole(now, "new") then
+    if not whole(published(store), "new") then
         table.insert(found, "after the forced reinstall the installed folder does not hold the whole new install")
+    end
+    if first and not whole(first, "old") then
+        table.insert(found, "the generation that the publish replaced was not kept until the next publish")
+    end
+
+    if xmake({"require", "-f", "-y"}, {FAKE_GENERATION = "newest"}) ~= 0 then
+        table.insert(found, "the second forced reinstall failed: " .. (io.readfile(log) or ""))
+    end
+    if first then
+        local raised = false
+        try
+        {
+            function ()
+                io.readfile(path.join(first, "payload", "part-01"))
+            end,
+            catch
+            {
+                function ()
+                    raised = true
+                end
+            }
+        }
+        if not raised then
+            table.insert(found, "a generation two publishes old still reads: it must be gone, so a stale path fails")
+        end
+    end
+    if not whole(published(store), "newest") then
+        table.insert(found, "after the second forced reinstall the installed folder does not hold the whole install")
     end
 
     if xmake({"require", "-f", "-y"}, {FAKE_GENERATION = "newer", FAKE_FAIL = "yes"}) == 0 then
         table.insert(found, "a forced reinstall whose install fails was reported as a success")
     end
-    if not whole(published(store), "new") then
+    if not whole(published(store), "newest") then
         table.insert(found, "a failed forced reinstall changed the installed folder: it must stay the install it was")
     end
 
-    if xmake({"require", "--uninstall", "-y", "fakeinstall"}) ~= 0 then
-        table.insert(found, "uninstalling the fake package failed: " .. (io.readfile(log) or ""))
-    elseif #os.dirs(path.join(store, ".xmake", "packages", "f", "fakeinstall", "latest", "*")) > 0 then
-        table.insert(found, "uninstalling the fake package left its installed folder or a generation of it behind")
+    local exported = path.join(folder, "export")
+    if xmake({"require", "--export", "--packagedir=" .. exported, "-y", "fakeinstall"}) ~= 0 then
+        table.insert(found, "exporting the fake package failed: " .. (io.readfile(log) or ""))
     end
+    uninstall()
+    if xmake({"require", "--import", "--packagedir=" .. exported, "-y", "fakeinstall"}) ~= 0 then
+        table.insert(found, "importing the fake package failed: " .. (io.readfile(log) or ""))
+    else
+        local imported = published(store)
+        if not whole(imported, "newest") then
+            table.insert(found, "after the import the installed folder does not hold the whole exported install")
+        elseif not os.islink(imported) then
+            table.insert(found, "after the import the installed folder is not a link to its generation")
+        end
+    end
+    uninstall()
 
     os.tryrm(folder)
     return found
