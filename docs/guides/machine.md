@@ -41,6 +41,42 @@ A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only 
 
 Only ignored and untracked build folders are removed: `git check-ignore` decides.
 
+## Scratch: kept while it is used, removed when it is not
+
+`./xmakew` sweeps the scratch of finished tasks by itself, at most once a day, and prints what it freed:
+
+    ./xmakew l -P . tools/clean.lua --scratch [--dry-run]
+
+The sweep is `--scratch`, and it is safe while workers run. It removes a folder `cache/<name>` only when all three hold:
+
+- no live worktree is named after it: the names come from `git worktree list` of the checkout, and the checkout's own
+  name is always kept;
+- nothing in it was modified in the last 7 days (`find -mtime`);
+- no process has a file open in it (`lsof -F n` lists every open path once, and the folder is matched against them).
+
+It never touches `cache/xmake` or `cache/xmake-global` (the binaries, the package store and its locks), nor the data
+folders under `~/.revenant`. If `lsof` fails, nothing is removed. The sweep records its run in `cache/.scratch-swept`,
+and the wrapper runs the sweep again only when that file is more than a day old.
+
+Seven days: a paused task, a weekend, or a worker that has come back to a branch keeps its scratch; a folder that no
+live worktree names and that nothing has touched for a week is rebuilt in minutes if it is needed again.
+
+The freed size is the change in free space on the volume, read with `df` before and after the sweep, not the sum of
+`du`. Clones share their blocks, so `du` counts a clone's full size although it frees nothing. Measured on this volume
+with a 300 MB file:
+
+| Copy | Free space it took | `du` reports |
+| --- | --- | --- |
+| `cp -p` | 300 MB | 300 MB |
+| `cp -c -p` (clonefile) | 0 MB | 300 MB |
+| `ditto` on the same volume | 0 MB | 300 MB |
+| `cp -c` from a mounted disk image | 5 MB | not measured |
+
+So a clone is made only on the same volume, and a copy from a disk image is always real. Every emulator image is a
+clone (`emulator.clone` is `cp -c -R`), and the files the emulator copies into its image use `cp -c -p` too. The
+firmware's root filesystem is copied once per release out of its disk image, with `ditto`, and no clone can be made
+from there; each emulator image after that is a clone of it.
+
 ## Build each package once
 
 A package's key is its build hash: the platform, the architecture, its configs and the toolchain names.
