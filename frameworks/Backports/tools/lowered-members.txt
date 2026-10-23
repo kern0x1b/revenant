@@ -547,6 +547,7 @@ class HKActivitySummaryType
 class HKAnchoredObjectQuery
 class HKBiologicalSexObject
 class HKBloodTypeObject
+class HKCDADocument
 class HKCDADocumentSample
 class HKCategorySample
 class HKCategoryType
@@ -696,6 +697,7 @@ class MDLMesh
 class MDLMeshBufferData
 class MDLMeshBufferDataAllocator
 class MDLMeshBufferMap
+class MDLMeshBufferZoneDefault
 class MDLNoiseTexture
 class MDLNormalMapTexture
 class MDLObject
@@ -999,6 +1001,7 @@ class MPSImageLaplacianPyramidAdd
 class MPSImageLaplacianPyramidSubtract
 class MPSImageMultiply
 class MPSImageNormalizedHistogram
+class MPSImagePyramid
 class MPSImageReduceUnary
 class MPSImageSobel
 class MPSImageStatisticsMean
@@ -1462,6 +1465,7 @@ class NSURLSession
 class NSURLSessionConfiguration
 class NSURLSessionDataTask
 class NSURLSessionDownloadTask
+class NSURLSessionStreamTask
 class NSURLSessionStreamTaskState
 class NSURLSessionTask
 class NSURLSessionTaskMetrics
@@ -1580,7 +1584,6 @@ class PKPaymentToken
 class PKPushCredentials
 class PKPushPayload
 class PKPushRegistry
-class REVENANT_ALIAS_CLASS
 class RPBroadcastActivityViewController
 class RPBroadcastConfiguration
 class RPBroadcastController
@@ -6072,8 +6075,6 @@ global HKClinicalTypeIdentifierCoverageRecord
 global HKDataTypeIdentifierHeartbeatSeries
 global HKDataTypeIdentifierStateOfMind
 global HKDataTypeIdentifierUserAnnotatedMedicationConcept
-global HKDetailedCDAValidationErrorKey
-global HKErrorDomain
 global HKFHIRReleaseDSTU2
 global HKFHIRReleaseR4
 global HKFHIRReleaseUnknown
@@ -6116,33 +6117,19 @@ global HKMetadataKeyWaterSalinity
 global HKMetricPrefixFemto
 global HKPredicateKeyPathAverage
 global HKPredicateKeyPathAverageHeartRate
-global HKPredicateKeyPathCategoryValue
-global HKPredicateKeyPathClinicalRecordFHIRResourceIdentifier
-global HKPredicateKeyPathClinicalRecordFHIRResourceType
-global HKPredicateKeyPathCorrelation
 global HKPredicateKeyPathCount
-global HKPredicateKeyPathDateComponents
-global HKPredicateKeyPathDevice
 global HKPredicateKeyPathECGClassification
 global HKPredicateKeyPathECGSymptomsStatus
-global HKPredicateKeyPathEndDate
 global HKPredicateKeyPathLogOrigin
 global HKPredicateKeyPathMax
 global HKPredicateKeyPathMedicationConceptIdentifier
-global HKPredicateKeyPathMetadata
 global HKPredicateKeyPathMin
 global HKPredicateKeyPathMostRecent
 global HKPredicateKeyPathMostRecentDuration
 global HKPredicateKeyPathMostRecentEndDate
 global HKPredicateKeyPathMostRecentStartDate
-global HKPredicateKeyPathQuantity
 global HKPredicateKeyPathScheduledDate
-global HKPredicateKeyPathSource
-global HKPredicateKeyPathSourceRevision
-global HKPredicateKeyPathStartDate
 global HKPredicateKeyPathStatus
-global HKPredicateKeyPathUUID
-global HKPredicateKeyPathWorkout
 global HKPredicateKeyPathWorkoutActivity
 global HKPredicateKeyPathWorkoutActivityAverageQuantity
 global HKPredicateKeyPathWorkoutActivityDuration
@@ -6153,12 +6140,10 @@ global HKPredicateKeyPathWorkoutActivityStartDate
 global HKPredicateKeyPathWorkoutActivitySumQuantity
 global HKPredicateKeyPathWorkoutActivityType
 global HKPredicateKeyPathWorkoutAverageQuantity
-global HKPredicateKeyPathWorkoutDuration
 global HKPredicateKeyPathWorkoutEffortRelationship
 global HKPredicateKeyPathWorkoutMaximumQuantity
 global HKPredicateKeyPathWorkoutMinimumQuantity
 global HKPredicateKeyPathWorkoutSumQuantity
-global HKPredicateKeyPathWorkoutType
 global HKQuantityTypeIdentifierAppleMoveTime
 global HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances
 global HKQuantityTypeIdentifierAppleSleepingWristTemperature
@@ -6210,8 +6195,6 @@ global HKVerifiableClinicalRecordCredentialTypeRecovery
 global HKVerifiableClinicalRecordSourceTypeEUDigitalCOVIDCertificate
 global HKVerifiableClinicalRecordSourceTypeSMARTHealthCard
 global HKVisionPrescriptionTypeIdentifier
-global HKWorkoutRouteTypeIdentifier
-global HKWorkoutTypeIdentifier
 global HMAccessoryCategoryTypeAirConditioner
 global HMAccessoryCategoryTypeAirDehumidifier
 global HMAccessoryCategoryTypeAirHeater
@@ -6739,7 +6722,6 @@ global MTLBinaryArchiveDomain
 global MTLCaptureErrorDomain
 global MTLCommandBufferEncoderInfoErrorKey
 global MTLCommandBufferErrorDomain
-global MTLCommonCounter
 global MTLCommonCounterClipperInvocations
 global MTLCommonCounterClipperPrimitivesOut
 global MTLCommonCounterComputeKernelInvocations
@@ -6749,7 +6731,6 @@ global MTLCommonCounterFragmentsPassed
 global MTLCommonCounterPostTessellationVertexCycles
 global MTLCommonCounterPostTessellationVertexInvocations
 global MTLCommonCounterRenderTargetWriteCycles
-global MTLCommonCounterSet
 global MTLCommonCounterSetStageUtilization
 global MTLCommonCounterSetStatistic
 global MTLCommonCounterSetTimestamp
@@ -6775,7 +6756,6 @@ global MTLVertexFormatUCharNormalized
 global MTLVertexFormatUShort
 global MTLVertexFormatUShortNormalized
 global MXErrorDomain
-global NEHotspotConfigurationErrorDomain
 global NFCErrorDomain
 global NFCISO15693TagResponseErrorKey
 global NFCReaderErrorUnsupportedFeature
@@ -12576,6 +12556,19 @@ member HKBloodTypeObject -description
 member HKBloodTypeObject -encodeWithCoder:
 member HKBloodTypeObject -initWithCoder:
 member HKBloodTypeObject -revenant_initWithBloodType:
+member HKCDADocument +supportsSecureCoding
+member HKCDADocument -authorName
+member HKCDADocument -copyWithZone:
+member HKCDADocument -custodianName
+member HKCDADocument -description
+member HKCDADocument -documentData
+member HKCDADocument -encodeWithCoder:
+member HKCDADocument -hash
+member HKCDADocument -initWithCoder:
+member HKCDADocument -isEqual:
+member HKCDADocument -patientName
+member HKCDADocument -revenant_initWithDocumentData:title:patientName:authorName:custodianName:
+member HKCDADocument -title
 member HKCDADocumentSample +CDADocumentSampleWithData:startDate:endDate:metadata:
 member HKCDADocumentSample +CDADocumentSampleWithData:startDate:endDate:metadata:validationError:
 member HKCDADocumentSample +supportsSecureCoding
@@ -13944,6 +13937,11 @@ member MDLMeshBufferDataAllocator -newZoneForBuffersWithSize:andType:
 member MDLMeshBufferMap -bytes
 member MDLMeshBufferMap -dealloc
 member MDLMeshBufferMap -initWithBytes:deallocator:
+member MDLMeshBufferZoneDefault +load
+member MDLMeshBufferZoneDefault -allocator
+member MDLMeshBufferZoneDefault -capacity
+member MDLMeshBufferZoneDefault -revenant_setCapacity:allocator:
+member MDLMeshBufferZoneDefault -revenant_zoneState
 member MDLNoiseTexture -initCellularNoiseWithFrequency:name:textureDimensions:
 member MDLNoiseTexture -initScalarNoiseWithSmoothness:name:textureDimensions:channelCount:channelEncoding:grayscale:
 member MDLNoiseTexture -initVectorNoiseWithSmoothness:name:textureDimensions:channelEncoding:
@@ -16581,6 +16579,15 @@ member MPSImageNormalizedHistogram -encodeToCommandBuffer:sourceTexture:minmaxTe
 member MPSImageNormalizedHistogram -histogramSizeForSourceFormat:
 member MPSImageNormalizedHistogram -initWithCoder:device:
 member MPSImageNormalizedHistogram -initWithDevice:histogramInfo:
+member MPSImagePyramid -initWithCoder:device:
+member MPSImagePyramid -initWithDevice:
+member MPSImagePyramid -initWithDevice:centerWeight:
+member MPSImagePyramid -initWithDevice:kernelWidth:kernelHeight:weights:
+member MPSImagePyramid -kernelHeight
+member MPSImagePyramid -kernelWidth
+member MPSImagePyramid -revenant_mps_filter
+member MPSImagePyramid -revenant_mps_filterHeight
+member MPSImagePyramid -revenant_mps_filterWidth
 member MPSImageReduceUnary -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageReduceUnary -initWithCoder:device:
 member MPSImageReduceUnary -initWithDevice:
@@ -20271,6 +20278,24 @@ member NSURLSessionDataTask -init
 member NSURLSessionDownloadTask +new
 member NSURLSessionDownloadTask -cancelByProducingResumeData:
 member NSURLSessionDownloadTask -init
+member NSURLSessionStreamTask -captureStreams
+member NSURLSessionStreamTask -closeRead
+member NSURLSessionStreamTask -closeWrite
+member NSURLSessionStreamTask -init
+member NSURLSessionStreamTask -initWithSession:hostName:port:
+member NSURLSessionStreamTask -readDataOfMinLength:maxLength:timeout:completionHandler:
+member NSURLSessionStreamTask -resume
+member NSURLSessionStreamTask -revenant_delegateFor:
+member NSURLSessionStreamTask -revenant_finishMetrics
+member NSURLSessionStreamTask -revenant_inert:why:
+member NSURLSessionStreamTask -revenant_open
+member NSURLSessionStreamTask -revenant_readSocketNames
+member NSURLSessionStreamTask -revenant_state
+member NSURLSessionStreamTask -revenant_stateMade
+member NSURLSessionStreamTask -revenant_tellDelegate:input:
+member NSURLSessionStreamTask -startSecureConnection
+member NSURLSessionStreamTask -stopSecureConnection
+member NSURLSessionStreamTask -writeData:timeout:completionHandler:
 member NSURLSessionTask +new
 member NSURLSessionTask -cancel
 member NSURLSessionTask -copyWithZone:
@@ -21392,51 +21417,6 @@ member PKPushRegistry -initWithQueue:
 member PKPushRegistry -pushTokenForType:
 member PKPushRegistry -revenant_deliverToken:forType:
 member PKPushRegistry -setDesiredPushTypes:
-member REVENANT_ALIAS_CLASS +load
-member REVENANT_ALIAS_CLASS +supportsSecureCoding
-member REVENANT_ALIAS_CLASS -allocator
-member REVENANT_ALIAS_CLASS -authorName
-member REVENANT_ALIAS_CLASS -capacity
-member REVENANT_ALIAS_CLASS -captureStreams
-member REVENANT_ALIAS_CLASS -closeRead
-member REVENANT_ALIAS_CLASS -closeWrite
-member REVENANT_ALIAS_CLASS -copyWithZone:
-member REVENANT_ALIAS_CLASS -custodianName
-member REVENANT_ALIAS_CLASS -description
-member REVENANT_ALIAS_CLASS -documentData
-member REVENANT_ALIAS_CLASS -encodeWithCoder:
-member REVENANT_ALIAS_CLASS -hash
-member REVENANT_ALIAS_CLASS -init
-member REVENANT_ALIAS_CLASS -initWithCoder:
-member REVENANT_ALIAS_CLASS -initWithCoder:device:
-member REVENANT_ALIAS_CLASS -initWithDevice:
-member REVENANT_ALIAS_CLASS -initWithDevice:centerWeight:
-member REVENANT_ALIAS_CLASS -initWithDevice:kernelWidth:kernelHeight:weights:
-member REVENANT_ALIAS_CLASS -initWithSession:hostName:port:
-member REVENANT_ALIAS_CLASS -isEqual:
-member REVENANT_ALIAS_CLASS -kernelHeight
-member REVENANT_ALIAS_CLASS -kernelWidth
-member REVENANT_ALIAS_CLASS -patientName
-member REVENANT_ALIAS_CLASS -readDataOfMinLength:maxLength:timeout:completionHandler:
-member REVENANT_ALIAS_CLASS -resume
-member REVENANT_ALIAS_CLASS -revenant_delegateFor:
-member REVENANT_ALIAS_CLASS -revenant_finishMetrics
-member REVENANT_ALIAS_CLASS -revenant_inert:why:
-member REVENANT_ALIAS_CLASS -revenant_initWithDocumentData:title:patientName:authorName:custodianName:
-member REVENANT_ALIAS_CLASS -revenant_mps_filter
-member REVENANT_ALIAS_CLASS -revenant_mps_filterHeight
-member REVENANT_ALIAS_CLASS -revenant_mps_filterWidth
-member REVENANT_ALIAS_CLASS -revenant_open
-member REVENANT_ALIAS_CLASS -revenant_readSocketNames
-member REVENANT_ALIAS_CLASS -revenant_setCapacity:allocator:
-member REVENANT_ALIAS_CLASS -revenant_state
-member REVENANT_ALIAS_CLASS -revenant_stateMade
-member REVENANT_ALIAS_CLASS -revenant_tellDelegate:input:
-member REVENANT_ALIAS_CLASS -revenant_zoneState
-member REVENANT_ALIAS_CLASS -startSecureConnection
-member REVENANT_ALIAS_CLASS -stopSecureConnection
-member REVENANT_ALIAS_CLASS -title
-member REVENANT_ALIAS_CLASS -writeData:timeout:completionHandler:
 member RPBroadcastActivityViewController +loadBroadcastActivityViewControllerWithHandler:
 member RPBroadcastActivityViewController +loadBroadcastActivityViewControllerWithPreferredExtension:handler:
 member RPBroadcastActivityViewController -loadView
