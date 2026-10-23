@@ -619,43 +619,6 @@ function encoded_version(text)
     return ((parts[1] or 0) << 16) | ((parts[2] or 0) << 8) | (parts[3] or 0)
 end
 
-function imported_symbols(binary, architecture)
-    local data = read(binary)
-    local imported = {}
-    for _, found in ipairs(images(data)) do
-        if not architecture or found.architecture == architecture then
-            each_symbol(data, found, function (name, kind, section, desc)
-                if kind & 0xE0 == 0 and kind & 0x0E == 0 and kind & 0x01 ~= 0 and name:startswith("_") then
-                    imported[name:sub(2)] = true
-                end
-            end)
-        end
-    end
-    return imported
-end
-
-function text_literals(binary, architecture)
-    local data = read(binary)
-    local literals = {}
-    for _, found in ipairs(images(data)) do
-        if not architecture or found.architecture == architecture then
-            for _, section in ipairs(found.sections) do
-                if section.segment == "__TEXT" and section.name == "__cstring" then
-                    for _, segment in ipairs(found.segments) do
-                        if segment.name == section.segment then
-                            local at = found.base + segment.fileoff + (section.addr - segment.vmaddr)
-                            for literal in data:sub(at + 1, at + section.size):gmatch("([^%z]+)%z") do
-                                literals[literal] = true
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return literals
-end
-
 function system_imports(data, found)
     local imported = {}
     each_symbol(data, found, function (name, kind, section, desc)

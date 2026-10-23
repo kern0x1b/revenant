@@ -6,7 +6,7 @@ and sets the prebuilt variables through the composite action `.github/actions/re
 choose a runner, so each job keeps its own `runs-on`.
 
 - `checks` runs `./xmakew test -P .`: every test a host with the prebuilt packages can run, in parallel. That is the
-  repository's layout, comment, copied-text and credential checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
+  repository's layout, comment, copied-text, credential and open-gap checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
   `toolchain_packages/*`), the emulator's and the recompiler's host tests. It sets `REVENANT_PREBUILT=kern0x1b/revenant`
   and `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`, so LLVM, Swift and ld64 come from their releases and a missing release is an error, not a
   source build. It configures with `--emulator_vulkan=n`: the Vulkan renderer's SwiftShader is built from source, which
@@ -16,8 +16,8 @@ choose a runner, so each job keeps its own `runs-on`.
   built in the job. It configures and builds the Backports component
   (`./xmakew f -P . -p iphoneos -a armv7 --component=Backports`, then `./xmakew build -P .`) and uploads
   `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`.
-- `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, swiftSpatial,
-  swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
+- `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, WidgetKit,
+  swiftSpatial, swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
   packages through their wrappers. It names `swift-runtime` and `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a
   missing release of either is an error.
 
