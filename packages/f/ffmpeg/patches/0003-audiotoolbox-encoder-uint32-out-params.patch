@@ -1,0 +1,36 @@
+diff --git a/libavcodec/audiotoolboxenc.c b/libavcodec/audiotoolboxenc.c
+index 0e26d732..d252d665 100644
+--- a/libavcodec/audiotoolboxenc.c
++++ b/libavcodec/audiotoolboxenc.c
+@@ -399,7 +399,7 @@ static av_cold int ffat_init_encoder(AVCodecContext *avctx)
+     if (!AudioConverterGetPropertyInfo(at->converter, kAudioConverterCompressionMagicCookie,
+                                        &cookie_size, NULL) &&
+         cookie_size) {
+-        int extradata_size = cookie_size;
++        UInt32 extradata_size = cookie_size;
+         uint8_t *extradata;
+         avctx->extradata_size = cookie_size;
+         if (!(avctx->extradata = av_mallocz(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE)))
+@@ -520,6 +520,7 @@ static int ffat_encode(AVCodecContext *avctx, AVPacket *avpkt,
+ {
+     ATDecodeContext *at = avctx->priv_data;
+     OSStatus ret;
++    UInt32 nb_packets;
+ 
+     AudioBufferList out_buffers = {
+         .mNumberBuffers = 1,
+@@ -563,11 +564,12 @@ static int ffat_encode(AVCodecContext *avctx, AVPacket *avpkt,
+ 
+     out_buffers.mBuffers[0].mData = avpkt->data;
+ 
+-    *got_packet_ptr = avctx->frame_size / at->frame_size;
++    nb_packets = avctx->frame_size / at->frame_size;
+ 
+     ret = AudioConverterFillComplexBuffer(at->converter, ffat_encode_callback, avctx,
+-                                          got_packet_ptr, &out_buffers,
++                                          &nb_packets, &out_buffers,
+                                           (avctx->frame_size > at->frame_size) ? NULL : &out_pkt_desc);
++    *got_packet_ptr = nb_packets;
+ 
+     ff_bufqueue_discard_all(&at->used_frame_queue);
+ 

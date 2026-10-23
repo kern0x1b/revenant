@@ -228,8 +228,10 @@ func pathStatus() {
     let monitor = NWPathMonitor()
     let first = DispatchSemaphore(value: 0)
     var statuses: [String] = []
+    var loopback = false
     monitor.pathUpdateHandler = { path in
         statuses.append("\(path.status)")
+        loopback = path.availableInterfaces.contains { $0.type == .loopback }
         first.signal()
     }
     monitor.start(queue: queue)
@@ -237,6 +239,7 @@ func pathStatus() {
     monitor.cancel()
     queue.sync {
         print("path first status \(statuses.first ?? "none")")
+        print("path has loopback interface \(loopback)")
     }
 }
 
@@ -247,8 +250,172 @@ func endpoints() {
     print("named \(named.debugDescription)")
 }
 
+func tcpOptionDefaults() {
+    let options = NWProtocolTCP.Options()
+    print("tcp defaults noDelay \(options.noDelay) keepalive \(options.enableKeepalive) idle \(options.keepaliveIdle) count \(options.keepaliveCount) interval \(options.keepaliveInterval) fastOpen \(options.enableFastOpen)")
+    options.noDelay = true
+    options.enableKeepalive = true
+    options.keepaliveIdle = 5
+    options.keepaliveCount = 2
+    options.keepaliveInterval = 5
+    let parameters = NWParameters(tls: nil, tcp: options)
+    print("tcp parameters preferNoProxies \(parameters.preferNoProxies)")
+}
+
+final class LengthPrefixFramer: NWProtocolFramerImplementation {
+    static var label: String = "LengthPrefix"
+    static let definition = NWProtocolFramer.Definition(implementation: LengthPrefixFramer.self)
+
+    required init(framer: NWProtocolFramer.Instance) {
+    }
+
+    func start(framer: NWProtocolFramer.Instance) -> NWProtocolFramer.StartResult {
+        return .ready
+    }
+
+    func handleInput(framer: NWProtocolFramer.Instance) -> Int {
+        var consumed = true
+        while consumed {
+            consumed = false
+            _ = framer.parseInput(minimumIncompleteLength: 4, maximumLength: 65536) { buffer, _ in
+                guard let buffer = buffer, buffer.count >= 4 else {
+                    return 0
+                }
+                let length = Int(buffer.loadUnaligned(as: UInt32.self).bigEndian)
+                guard buffer.count >= 4 + length else {
+                    return 0
+                }
+                framer.deliverInput(data: Data(buffer[4..<(4 + length)]), message: NWProtocolFramer.Message(definition: LengthPrefixFramer.definition), isComplete: true)
+                consumed = true
+                return 4 + length
+            }
+        }
+        return 0
+    }
+
+    func handleOutput(framer: NWProtocolFramer.Instance, message: NWProtocolFramer.Message, messageLength: Int, isComplete: Bool) {
+        framer.writeOutput(data: withUnsafeBytes(of: UInt32(messageLength).bigEndian) { Data($0) })
+        try! framer.writeOutputNoCopy(length: messageLength)
+    }
+
+    func wakeup(framer: NWProtocolFramer.Instance) {
+    }
+
+    func stop(framer: NWProtocolFramer.Instance) -> Bool {
+        return true
+    }
+
+    func cleanup(framer: NWProtocolFramer.Instance) {
+    }
+}
+
+func listenerExchange() {
+    let ready = DispatchSemaphore(value: 0)
+    let serverReceived = DispatchSemaphore(value: 0)
+    let clientReady = DispatchSemaphore(value: 0)
+    let clientReceived = DispatchSemaphore(value: 0)
+    var serverText = "none"
+    var clientText = "none"
+    guard let listener = try? NWListener(using: .tcp, on: 0) else {
+        print("listener could not start")
+        return
+    }
+    listener.stateUpdateHandler = { state in
+        if state == .ready {
+            ready.signal()
+        }
+    }
+    listener.newConnectionHandler = { connection in
+        connection.start(queue: queue)
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 16) { data, _, _, _ in
+            serverText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
+            connection.send(content: Data("pong".utf8), completion: .contentProcessed { _ in
+                serverReceived.signal()
+            })
+        }
+    }
+    listener.start(queue: queue)
+    print(ready.wait(timeout: .now() + wait) == .success ? "listener reached ready" : "listener never ready")
+    guard let port = listener.port else {
+        print("listener has no port")
+        return
+    }
+    print("listener port assigned \(port.rawValue != 0)")
+    let client = NWConnection(host: "127.0.0.1", port: port, using: .tcp)
+    client.stateUpdateHandler = { state in
+        if state == .ready {
+            clientReady.signal()
+        }
+    }
+    client.start(queue: queue)
+    print(clientReady.wait(timeout: .now() + wait) == .success ? "client reached ready" : "client never ready")
+    client.send(content: Data("ping".utf8), completion: .contentProcessed { _ in })
+    client.receive(minimumIncompleteLength: 1, maximumLength: 16) { data, _, _, _ in
+        clientText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
+        clientReceived.signal()
+    }
+    print(clientReceived.wait(timeout: .now() + wait) == .success ? "client received reply" : "client reply timed out")
+    _ = serverReceived.wait(timeout: .now() + wait)
+    queue.sync {
+        print("listener server received \(serverText) client received \(clientText)")
+    }
+    client.cancel()
+    listener.cancel()
+}
+
+func framedExchange() {
+    let ready = DispatchSemaphore(value: 0)
+    let serverReceived = DispatchSemaphore(value: 0)
+    let clientReceived = DispatchSemaphore(value: 0)
+    var serverText = "none"
+    var clientText = "none"
+    var parameters = NWParameters.tcp
+    parameters.defaultProtocolStack.applicationProtocols.insert(NWProtocolFramer.Options(definition: LengthPrefixFramer.definition), at: 0)
+    guard let listener = try? NWListener(using: parameters, on: 0) else {
+        print("framed listener could not start")
+        return
+    }
+    listener.stateUpdateHandler = { state in
+        if state == .ready {
+            ready.signal()
+        }
+    }
+    listener.newConnectionHandler = { connection in
+        connection.start(queue: queue)
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 1024) { data, _, _, _ in
+            serverText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
+            connection.send(content: Data("framed ack".utf8), completion: .contentProcessed { _ in
+                serverReceived.signal()
+            })
+        }
+    }
+    listener.start(queue: queue)
+    _ = ready.wait(timeout: .now() + wait)
+    guard let port = listener.port else {
+        print("framed listener has no port")
+        return
+    }
+    let client = NWConnection(host: "127.0.0.1", port: port, using: parameters)
+    client.start(queue: queue)
+    client.send(content: Data("hello framed".utf8), completion: .contentProcessed { _ in })
+    client.receive(minimumIncompleteLength: 1, maximumLength: 1024) { data, _, _, _ in
+        clientText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
+        clientReceived.signal()
+    }
+    print(clientReceived.wait(timeout: .now() + wait) == .success ? "framed client received a message" : "framed reply timed out")
+    _ = serverReceived.wait(timeout: .now() + wait)
+    queue.sync {
+        print("framed server received \(serverText) client received \(clientText)")
+    }
+    client.cancel()
+    listener.cancel()
+}
+
 tcpExchange()
 udpExchange()
 refusedConnection()
 pathStatus()
 endpoints()
+tcpOptionDefaults()
+listenerExchange()
+framedExchange()

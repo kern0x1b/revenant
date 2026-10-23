@@ -23,9 +23,11 @@ deployment target and the cause, and pointing at the open gaps in `frameworks/Ba
 
 ## Enforced by
 
-The build: `open_gap` raises in `before_build`, so an open gap stops the build that reaches it.
+The build: `open_gap` raises in `before_build`, so an open gap stops the build that reaches it. `repository/open_gaps`
+reads every gap name in `frameworks/Backports/src/Swift/xmake.lua` and fails when the README does not name it in
+backticks.
 
 ## Not enforced
 
-That every `open_gap` name appears in `frameworks/Backports/README.md`, and that the README lists no gap that is
-closed. Both are checkable with a test that reads the README; none exists yet.
+That the README lists no gap that is closed: a name in its open-gaps section that no `open_gap` declares is not
+checked, because the README also names partial members, which are not gaps.

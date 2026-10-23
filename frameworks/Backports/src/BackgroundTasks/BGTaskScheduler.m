@@ -67,6 +67,8 @@ static BOOL revenant_background_mode(NSString *mode)
 {
     NSString *mode = [taskRequest isKindOfClass:[BGProcessingTaskRequest class]] ? @"processing" : @"fetch";
     NSInteger code = revenant_permitted(taskRequest.identifier) && revenant_background_mode(mode) ? BGTaskSchedulerErrorCodeUnavailable : BGTaskSchedulerErrorCodeNotPermitted;
+    if ([taskRequest isKindOfClass:[BGContinuedProcessingTaskRequest class]])
+        code = BGTaskSchedulerErrorCodeUnavailable;
     if (error)
         *error = [NSError errorWithDomain:BGTaskSchedulerErrorDomain code:code userInfo:nil];
     return NO;

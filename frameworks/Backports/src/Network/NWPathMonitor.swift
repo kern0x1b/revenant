@@ -47,9 +47,13 @@ private func revenantAvailableInterfaces() -> [NWInterface] {
         freeifaddrs(list)
     }
     var names: [String] = []
+    var kernelTypes: [String: UInt8] = [:]
     var entry: UnsafeMutablePointer<ifaddrs>? = first
     while let current = entry {
         let flags = Int32(current.pointee.ifa_flags)
+        if let address = current.pointee.ifa_addr, let data = current.pointee.ifa_data, address.pointee.sa_family == UInt8(AF_LINK) {
+            kernelTypes[String(cString: current.pointee.ifa_name)] = data.assumingMemoryBound(to: if_data.self).pointee.ifi_type
+        }
         if flags & IFF_UP != 0, let address = current.pointee.ifa_addr, address.pointee.sa_family == UInt8(AF_INET) || address.pointee.sa_family == UInt8(AF_INET6) {
             let name = String(cString: current.pointee.ifa_name)
             if !names.contains(name) {
@@ -58,7 +62,7 @@ private func revenantAvailableInterfaces() -> [NWInterface] {
         }
         entry = current.pointee.ifa_next
     }
-    return names.compactMap { NWInterface(named: $0) }
+    return names.compactMap { NWInterface(named: $0, kernelType: kernelTypes[$0]) }.filter { $0.type != .loopback }
 }
 
 private func revenantPath(for flags: SCNetworkReachabilityFlags) -> NWPath {
