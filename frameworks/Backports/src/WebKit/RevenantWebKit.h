@@ -26,6 +26,10 @@ extern NSString *const RevenantWebKitBridgeScheme;
 + (instancetype)revenant_actionWithRequest:(NSURLRequest *)request type:(WKNavigationType)type mainFrame:(BOOL)mainFrame;
 @end
 
+@interface WKWebViewConfiguration (RevenantURLSchemes)
+- (void)revenant_bindURLSchemeHandlersToWebView:(WKWebView *)webView;
+@end
+
 @interface WKScriptMessage (RevenantWebKit)
 + (instancetype)revenant_messageWithBody:(id)body name:(NSString *)name webView:(WKWebView *)webView mainFrame:(BOOL)mainFrame;
 @end

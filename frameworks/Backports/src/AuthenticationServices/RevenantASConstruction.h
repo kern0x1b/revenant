@@ -63,4 +63,18 @@
     __attribute__((objc_method_family(init)));
 @end
 
+@interface ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
+                                challenge:(NSData *)challenge
+                                     name:(NSString *)name
+                                   userID:(NSData *)userID
+    __attribute__((objc_method_family(init)));
+@end
+
+@interface ASAuthorizationPlatformPublicKeyCredentialAssertionRequest (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
+                                challenge:(NSData *)challenge
+    __attribute__((objc_method_family(init)));
+@end
+
 #endif

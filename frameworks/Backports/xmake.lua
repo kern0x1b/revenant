@@ -42,12 +42,14 @@ local LIBRARIES = {
     {name = "AccelerateBackports", folder = "Accelerate", frameworks = {"Accelerate", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"suitesparse-ordering"}, system = {}},
     {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "CoreFoundationBackports", "CoreMediaBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AVFAudioBackports", folder = "AVFAudio", frameworks = {"AudioToolbox", "CoreAudio", "AVFoundation", "UIKit", "Foundation", "Accelerate", "QuartzCore"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "AVFoundationBackports"}, archives = {}, system = {}},
-    {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
+    {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation", "CoreGraphics", "QuartzCore"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
     {name = "LocalAuthenticationBackports", folder = "LocalAuthentication", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "OpenGLESBackports", folder = "OpenGLES", frameworks = {"OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SafariServicesBackports", folder = "SafariServices", frameworks = {"SafariServices", "UIKit", "Foundation", "CoreGraphics", "QuartzCore", "MobileCoreServices"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "AuthenticationServicesBackports", folder = "AuthenticationServices", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports", "SafariServicesBackports"}, archives = {}, system = {}},
+    {name = "AuthenticationServicesBackports", folder = "AuthenticationServices", frameworks = {"UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "SafariServicesBackports"}, archives = {}, system = {}},
     {name = "BackgroundTasksBackports", folder = "BackgroundTasks", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "DeviceCheckBackports", folder = "DeviceCheck", frameworks = {"DeviceCheck", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -88,6 +90,7 @@ local LIBRARIES = {
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
@@ -118,6 +121,16 @@ if is_plat("iphoneos") then
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
     local OURS = {RevenantCoding = true, RevenantCKWebAuth = true}
+
+    local function open_gap(name, cause)
+        before_build(function (target)
+            local toolchain = target:toolchain("apple-ios")
+            toolchain:load()
+            raise("%s is not yet backported to iOS %s: %s; see the open gaps in frameworks/Backports/README.md", name,
+                toolchain:config("deployment"), cause)
+        end)
+    end
+
     local CODING = path.join(SRC, "Intents", "coding")
     local WEBAUTH = path.join(SRC, "CloudKit", "webauth")
     local TWEAK = path.join(SRC, "CallKit", "tweak")
@@ -154,6 +167,9 @@ if is_plat("iphoneos") then
         target(library.name)
             set_kind("shared")
             add_rules("@addon/revenant/apple-ios")
+            if library.gap then
+                open_gap(table.unpack(library.gap))
+            end
             set_optimize("smallest")
             set_symbols("none")
             add_cflags(table.join(FLAGS, {"-fvisibility=hidden", "-fmacro-prefix-map=" .. ROOT .. "/="}))
@@ -379,4 +395,10 @@ if not is_plat("iphoneos") then
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
+    host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m"}}, nil, {"Foundation", "AuthenticationServices"}, {defines = {"REVENANT_HOST_BUILD"}})
 end
