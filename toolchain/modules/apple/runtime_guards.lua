@@ -72,6 +72,7 @@ GUARDS = {
     ["libswiftUIKit.dylib"] = {
         ["_NSURLThumbnailDictionaryKey"] = "stdlib/public/Darwin/UIKit/UIKit_FoundationExtensions.swift.gyb:82 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
         ["_UIContentSizeCategoryCompareToCategory"] = "stdlib/public/Darwin/UIKit/UIKit.swift:371 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
+        ["_OBJC_CLASS_$_UIFontMetrics"] = "stdlib/public/Darwin/UIKit/UIKit.swift:357 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
         ["_UIContentSizeCategoryIsAccessibilityCategory"] = "stdlib/public/Darwin/UIKit/UIKit.swift:366 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
     },
 }

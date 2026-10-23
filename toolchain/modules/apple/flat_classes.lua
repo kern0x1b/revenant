@@ -4,14 +4,9 @@ local STUBBED = {
     "NSURLQueryItem", "NSURLSessionWebSocketMessage", "NSUnitConverterLinear",
 }
 
-local UNSTUBBED = {"UIFontMetrics"}
-
 function class_names()
     local names = {}
     for _, name in ipairs(STUBBED) do
-        table.insert(names, name)
-    end
-    for _, name in ipairs(UNSTUBBED) do
         table.insert(names, name)
     end
     return names
