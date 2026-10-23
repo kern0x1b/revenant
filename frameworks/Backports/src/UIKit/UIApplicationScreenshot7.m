@@ -7,8 +7,6 @@
 // This library observes the name for its own application and posts the UIKit notification on the
 // main queue. The name is the same rule the tweak uses: the prefix and the bundle identifier, or
 // the process name when the process has no bundle.
-static NSString *const RevenantScreenshotNotificationPrefix = @"org.revenant.screenshot.";
-
 static NSString *RevenantScreenshotApplicationName(void) {
     NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
     return identifier ?: [[NSProcessInfo processInfo] processName];
@@ -22,7 +20,7 @@ static void RevenantScreenshotTaken(CFNotificationCenterRef center, void *observ
 }
 
 __attribute__((constructor)) static void RevenantScreenshotObserve(void) {
-    NSString *name = [RevenantScreenshotNotificationPrefix stringByAppendingString:RevenantScreenshotApplicationName()];
+    NSString *name = [@"org.revenant.screenshot." stringByAppendingString:RevenantScreenshotApplicationName()];
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, RevenantScreenshotTaken,
                                     (__bridge CFStringRef)name, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
