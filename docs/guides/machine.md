@@ -60,5 +60,8 @@ package's key and its digest configs; run it before and after a change to see wh
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
 reinstall a changed dependency causes; patch `0010` waits for a lock without stopping the process's other jobs).
+An install builds into a generation folder beside the package's folder, `<hash>.g<token>`, and publishes it by
+swapping the link `<hash>` to it in one rename (patch `0015`): a reader of the store, which takes no lock, sees the
+old install or the new one, whole, never a part of either. A failed install leaves the published one as it was.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).
