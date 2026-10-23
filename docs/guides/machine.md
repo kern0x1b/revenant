@@ -61,8 +61,11 @@ Two requests for one package build it once: xmake locks each package's cache fol
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
 reinstall a changed dependency causes; patch `0010` waits for a lock without stopping the process's other jobs).
 An install builds into a generation folder beside the package's folder, `<hash>.g<token>`, and publishes it by
-swapping the link `<hash>` to it in one rename (patch `0015`): a reader of the store, which takes no lock, sees the
-old install or the new one, whole, never a part of either. A failed install leaves the published one as it was.
+swapping the link `<hash>` to it in one rename (patch `0015`). A reader of the store takes no lock, and what it may
+assume depends on how it reads. A reader that resolves `<hash>` once and reads every file of the install from the
+generation it resolved sees the old install or the new one, whole, for as long as at most one publish happens during
+its reads. A reader that resolves `<hash>` again for each file can read files of two generations across a publish, so
+a reader that needs one install resolves it once. A failed install leaves the published one as it was.
 The guarantee is for one generation back. The generation a publish replaces stays until the next publish, so a path
 into it still reads; after the second publish it is removed, and reading a file under it fails with "cannot open
 file" rather than returning old files. A consumer that keeps a generation's path, such as a CMake config it cached,
