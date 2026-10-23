@@ -12,7 +12,7 @@ namespace {
 const char kFilterPath[] = "/var/root/gtest_filter";
 const char kResultsPath[] = "/var/root/gtest.json";
 
-}  // namespace
+}
 
 void ApplyEmulatorGtestFilter() {
   setvbuf(stdout, NULL, _IONBF, 0);

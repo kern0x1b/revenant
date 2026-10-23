@@ -7,4 +7,4 @@
 #include "revenant_neon_a64.h"
 #endif
 
-#endif  // REVENANT_NEON_ARM_NEON_H_
+#endif

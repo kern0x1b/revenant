@@ -1,7 +1,3 @@
-// Prints one line per AArch64-only intrinsic that neon/include implements: its name and a hash of
-// its results over the same pseudorandom inputs. Built for arm64 it calls the native intrinsics;
-// built for armv7 it calls the compatibility header. The two outputs must be identical.
-
 #include <arm_neon.h>
 #include <stdint.h>
 #include <stdio.h>

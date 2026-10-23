@@ -1,9 +1,6 @@
 #ifndef REVENANT_NEON_A64_H_
 #define REVENANT_NEON_A64_H_
 
-// The AArch64-only NEON intrinsics for armv7, in terms of the ARMv7 NEON instructions. Included by
-// arm_neon.h after the SDK's header on every armv7 compile; nothing here is compiled for arm64.
-
 #define REVENANT_A64_INLINE static __inline__ __attribute__((always_inline, unused))
 
 #define REVENANT_RED_Q8(NAME, OPV, OPP, S, T, VT, DT)                          \
@@ -336,4 +333,4 @@ REVENANT_A64_INLINE uint64x2_t vcltzq_s64(int64x2_t a) {
 
 #define vdupq_laneq_s16(v, lane) vdupq_n_s16(vgetq_lane_s16((v), (lane)))
 
-#endif  // REVENANT_NEON_A64_H_
+#endif
