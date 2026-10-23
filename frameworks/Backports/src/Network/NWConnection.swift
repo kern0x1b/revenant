@@ -79,6 +79,8 @@ public final class NWConnection: @unchecked Sendable {
     private var framer: NWProtocolFramer.Instance?
     private var framerImplementation: (any NWProtocolFramerImplementation)?
     private var framedInput: [Data] = []
+    private var framedHead = 0
+    private var inboundHead = 0
     private var outboundPayload = Data()
     private var tls: NWTLSSession?
 
@@ -449,6 +451,8 @@ public final class NWConnection: @unchecked Sendable {
             setReadActive(false)
             if isDatagram {
                 deliverReceive(Data(), complete: true, error: nil)
+            } else if framer != nil {
+                deliverReceives()
             } else {
                 deliverReceive(inbound.isEmpty ? nil : inbound, complete: true, error: nil)
                 inbound = Data()
@@ -462,7 +466,7 @@ public final class NWConnection: @unchecked Sendable {
         }
         inbound.append(contentsOf: buffer[0..<count])
         if framer != nil {
-            guard inbound.count <= nwFramingInputLimit else {
+            guard inbound.count - inboundHead <= nwFramingInputLimit else {
                 fail(.posix(errno: EMSGSIZE))
                 return
             }
@@ -571,6 +575,8 @@ public final class NWConnection: @unchecked Sendable {
         framer = nil
         framerImplementation = nil
         framedInput = []
+        framedHead = 0
+        inboundHead = 0
     }
 
     private func runFramer() {
@@ -582,8 +588,13 @@ public final class NWConnection: @unchecked Sendable {
 
     private func deliverFramedReceives() {
         while !receives.isEmpty {
-            if !framedInput.isEmpty {
-                let message = framedInput.removeFirst()
+            if framedHead < framedInput.count {
+                let message = framedInput[framedHead]
+                framedHead += 1
+                if framedHead == framedInput.count {
+                    framedInput.removeAll(keepingCapacity: true)
+                    framedHead = 0
+                }
                 let pending = receives.removeFirst()
                 pending.completion(message, .defaultStream, false, nil)
             } else if endOfStream {
@@ -619,21 +630,27 @@ public final class NWConnection: @unchecked Sendable {
 extension NWConnection: NWFramingChannel {
     func framingParseInput(minimumIncompleteLength: Int, maximumLength: Int, parse: (UnsafeMutableRawBufferPointer?, Bool) -> Int) -> Bool {
         let complete = endOfStream
-        if inbound.isEmpty {
+        let pending = inbound.count - inboundHead
+        if pending == 0 {
             guard complete else {
                 return false
             }
             _ = parse(nil, true)
             return true
         }
-        guard inbound.count >= minimumIncompleteLength || complete else {
+        guard pending >= minimumIncompleteLength || complete else {
             return false
         }
+        let head = inboundHead
         let consumed = inbound.withUnsafeMutableBytes { buffer -> Int in
-            parse(UnsafeMutableRawBufferPointer(rebasing: buffer.prefix(maximumLength)), complete)
+            parse(UnsafeMutableRawBufferPointer(rebasing: buffer[head...].prefix(maximumLength)), complete)
         }
         if consumed > 0 {
-            inbound.removeFirst(min(consumed, inbound.count))
+            inboundHead += min(consumed, pending)
+        }
+        if inboundHead > 0 && inboundHead >= inbound.count / 2 {
+            inbound.removeSubrange(0..<inboundHead)
+            inboundHead = 0
         }
         return true
     }

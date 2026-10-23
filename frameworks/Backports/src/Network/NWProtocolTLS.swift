@@ -63,7 +63,7 @@ final class NWTLSSession {
         self.peerAuthenticationRequired = options.peerAuthenticationRequired
         SSLSetIOFuncs(context, revenantReadFunction, revenantWriteFunction)
         SSLSetConnection(context, Unmanaged.passUnretained(self).toOpaque())
-        if let name = options.serverName ?? defaultServerName, !NWTLSSession.isNumericAddress(name) {
+        if let name = options.serverName ?? defaultServerName {
             SSLSetPeerDomainName(context, name, name.utf8.count)
         }
         if !options.applicationProtocols.isEmpty, let setALPN = revenantSymbol("SSLSetALPNProtocols", as: NWSetALPNFunction.self) {
@@ -72,10 +72,6 @@ final class NWTLSSession {
         if !options.peerAuthenticationRequired {
             SSLSetSessionOption(context, .breakOnServerAuth, true)
         }
-    }
-
-    private static func isNumericAddress(_ name: String) -> Bool {
-        name.contains(":") || name.allSatisfy { $0.isNumber || $0 == "." }
     }
 
     func handshake() -> NWTLSHandshake {
