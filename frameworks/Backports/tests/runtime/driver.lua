@@ -55,6 +55,7 @@ local function run(app, guest)
     local program = emulator_program()
     local firmware = firmware_root()
     local libraries = os.files(path.join(libraries_folder(app), "lib*Backports.dylib"))
+    table.join2(libraries, os.files(path.join(libraries_folder(app), "lib*Probe.dylib")))
     if #libraries == 0 then
         raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libraries_folder(app))
     end
