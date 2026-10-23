@@ -1,6 +1,5 @@
 set_project("emulatetlsprobe")
 set_version("0.0.1")
--- The addon version must match toolchain/tests/common/addon.version: xmake's description scope has no io to read it.
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "https://github.com/kern0x1b/revenant.git"))
 add_addons("revenant " .. (os.getenv("REVENANT_ADDON") or "v0.8.17"))
 set_config("apple_minimum", "6.1.3")

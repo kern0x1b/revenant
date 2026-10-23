@@ -21,7 +21,6 @@ function main(device, release)
     xmake({"build", "-y"}, path.join(out, "build.log"))
     xmake({"emulate", "-d", device, "-r", release, "install"}, path.join(out, "install.log"))
 
-    -- The probe reaches public hosts by address, so the run uses the host's network.
     local run = path.join(out, "run.log")
     local ran = xmake({"emulate", "-d", device, "-r", release, "-n", "host", "-s", "240", "-t", "1500", "run", path.join("/usr/libexec", PROGRAM)},
                       run, {try = true})
@@ -34,7 +33,6 @@ function main(device, release)
     assert(#probes > 0, "the run printed no probe line: the program did not run, see " .. run)
     assert(ran == 0, "the run exited " .. ran .. ", see " .. run)
 
-    -- These facts come from the firmware alone, so they must hold whatever the network does.
     local text = table.concat(probes, "\n")
     assert(text:find("probe: version TLS1.2 set 0 max TLS1.2", 1, true), "the firmware does not stop at TLS 1.2")
     for _, cipher in ipairs(NO_GCM) do

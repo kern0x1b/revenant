@@ -11,8 +11,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-// Each entry is the name a client asks for (SNI and certificate check) and the IPv4 address the probe connects to,
-// resolved on the host, because the guest's DNS does not resolve under host networking.
 static const char* targets[][2] = {
     {"www.apple.com", "23.36.157.47"},
     {"www.google.com", "142.251.151.119"},
@@ -139,8 +137,6 @@ static int connectTo(const char* address)
     return fd;
 }
 
-// The probe verifies the chain itself: with break-on-server-auth set, it reads the trust verdict of the firmware's
-// trust store, so a trust failure is reported apart from a protocol failure.
 static void handshake(const char* host, const char* address, SSLProtocol minimum, SSLProtocol maximum)
 {
     int fd = connectTo(address);
@@ -165,7 +161,6 @@ static void handshake(const char* host, const char* address, SSLProtocol minimum
                 SecTrustResultType result = kSecTrustResultInvalid;
                 OSStatus evaluate = SecTrustEvaluate(peer, &result);
                 snprintf(trust, sizeof trust, "evaluate %d result %d", (int)evaluate, (int)result);
-                // Proceed (1) and Unspecified (4) are trusted; anything else would fail a default handshake.
                 trusted = evaluate == noErr && (result == kSecTrustResultProceed || result == kSecTrustResultUnspecified);
                 CFRelease(peer);
             }

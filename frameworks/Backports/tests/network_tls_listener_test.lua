@@ -18,8 +18,6 @@ function main()
     os.execv(backport, {identity}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host Network TLS listener program printed nothing")
-    -- Known gap: SecureTransport exposes no negotiated-protocol getter, so the backport prints
-    -- "unavailable" where the host reports "h2". Every other line must match exactly.
     assert(expected:find("tls listener server negotiated h2", 1, true), "the host did not negotiate h2")
     local function withoutNegotiated(text)
         local kept = {}

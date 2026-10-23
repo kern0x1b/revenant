@@ -52,8 +52,6 @@ func clientParameters() -> NWParameters {
 
 func negotiated(_ connection: NWConnection) -> String {
     #if REVENANT_BACKPORT
-    // SecureTransport has no negotiated-protocol getter (SSLCopyALPNProtocols reports the
-    // peer's list and returns errSecParam here), so the backport cannot report it yet.
     return "unavailable"
     #else
     guard let metadata = connection.metadata(definition: NWProtocolTLS.definition) as? NWProtocolTLS.Metadata else {
