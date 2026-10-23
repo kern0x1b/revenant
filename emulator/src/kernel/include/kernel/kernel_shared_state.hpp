@@ -1137,6 +1137,7 @@ struct KernelSharedState {
     std::map<std::uint32_t, std::uint32_t> task_name_port_pids;
     std::map<std::uint32_t, std::map<std::uint32_t, std::uint32_t>>
         task_thread_port_objects;
+    std::map<std::uint32_t, std::filesystem::path> thread_working_directories;
     std::map<std::uint32_t, std::map<std::uint32_t, std::uint32_t>>
         task_special_ports;
     std::map<std::uint32_t, TaskExceptionActions> task_exception_actions;

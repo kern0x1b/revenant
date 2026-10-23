@@ -1,5 +1,7 @@
 import Foundation
 
+private let nwFramingInputLimit = 1 << 20
+
 public final class NWConnection: @unchecked Sendable {
     public enum State: Equatable, CustomDebugStringConvertible {
         case setup
@@ -45,7 +47,7 @@ public final class NWConnection: @unchecked Sendable {
 
     private struct PendingSend {
         let data: Data
-        let completion: SendCompletion
+        var completion: SendCompletion
         var offset: Int
     }
 
@@ -73,6 +75,18 @@ public final class NWConnection: @unchecked Sendable {
     private var sends: [PendingSend] = []
     private var receives: [PendingReceive] = []
     private var inbound = Data()
+    private var acceptedDescriptor: Int32 = -1
+    private var framer: NWProtocolFramer.Instance?
+    private var framerImplementation: (any NWProtocolFramerImplementation)?
+    private var framedInput: [Data] = []
+    private var framedHead = 0
+    private var inboundHead = 0
+    private var outboundPayload = Data()
+    private var tls: NWTLSSession?
+
+    public var negotiatedApplicationProtocol: String? {
+        tls?.negotiatedApplicationProtocol
+    }
 
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
@@ -84,13 +98,41 @@ public final class NWConnection: @unchecked Sendable {
         self.parameters = parameters
     }
 
+    init(accepted descriptor: Int32, endpoint: NWEndpoint, using parameters: NWParameters) {
+        self.endpoint = endpoint
+        self.parameters = parameters
+        self.acceptedDescriptor = descriptor
+    }
+
+    deinit {
+        teardownSources()
+        if descriptor >= 0 {
+            Darwin.close(descriptor)
+        }
+        if acceptedDescriptor >= 0 {
+            Darwin.close(acceptedDescriptor)
+        }
+    }
+
     public func start(queue: DispatchQueue) {
         guard state == .setup, self.queue == nil else {
             return
         }
         self.queue = queue
         queue.async {
-            self.open()
+            if self.acceptedDescriptor >= 0 {
+                let fd = self.acceptedDescriptor
+                self.acceptedDescriptor = -1
+                self.setState(.preparing)
+                guard self.parameters.tlsOptions == nil else {
+                    Darwin.close(fd)
+                    self.fail(.posix(errno: ENOTSUP))
+                    return
+                }
+                self.attach(fd, connecting: false)
+            } else {
+                self.open()
+            }
         }
     }
 
@@ -103,7 +145,19 @@ public final class NWConnection: @unchecked Sendable {
     public func send(content: Data?, contentContext: ContentContext = .defaultMessage, isComplete: Bool = false, completion: SendCompletion) {
         let data = content ?? Data()
         perform {
-            self.sends.append(PendingSend(data: data, completion: completion, offset: 0))
+            if let framer = self.framer, let implementation = self.framerImplementation {
+                let before = self.sends.count
+                self.outboundPayload = data
+                implementation.handleOutput(framer: framer, message: NWProtocolFramer.Message(), messageLength: data.count, isComplete: isComplete)
+                self.outboundPayload = Data()
+                if self.sends.count > before {
+                    self.sends[self.sends.count - 1].completion = completion
+                } else {
+                    self.sends.append(PendingSend(data: Data(), completion: completion, offset: 0))
+                }
+            } else {
+                self.sends.append(PendingSend(data: data, completion: completion, offset: 0))
+            }
             self.flushSends()
         }
     }
@@ -188,6 +242,21 @@ public final class NWConnection: @unchecked Sendable {
 
     private func attach(_ fd: Int32, connecting: Bool) {
         descriptor = fd
+        if parameters.transport == .tcp {
+            parameters.tcpOptions?.apply(to: fd)
+        }
+        startFramer()
+        if let options = parameters.tlsOptions {
+            var serverName: String?
+            if case .hostPort(let host, _) = endpoint {
+                serverName = hostText(host)
+            }
+            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName) else {
+                fail(.tls(errSSLInternal))
+                return
+            }
+            tls = session
+        }
         self.connecting = connecting
         let read = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
         read.setEventHandler { [weak self] in
@@ -207,6 +276,10 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func becomeReady() {
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         let path = NWPath(status: .satisfied, isExpensive: false, availableInterfaces: [])
         currentPath = path
         setState(.ready)
@@ -233,6 +306,9 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func updateSources() {
+        if let session = tls, !session.isEstablished {
+            return
+        }
         setReadActive(state == .ready && !endOfStream && !receives.isEmpty)
         setWriteActive(connecting || (state == .ready && !sends.isEmpty))
     }
@@ -251,7 +327,49 @@ public final class NWConnection: @unchecked Sendable {
             }
             return
         }
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         flushSends()
+    }
+
+    private func driveHandshake(_ session: NWTLSSession) {
+        switch session.handshake() {
+        case .complete:
+            becomeReady()
+        case .wouldBlock:
+            setReadActive(true)
+            setWriteActive(session.wantsWrite)
+        case .failed(let status):
+            if revenantCertificateFailures.contains(status) {
+                close(to: .waiting(.tls(status)))
+            } else {
+                fail(.tls(status))
+            }
+        }
+    }
+
+    private func writeRaw(_ bytes: UnsafeRawPointer, _ count: Int) -> (written: Int, wouldBlock: Bool, error: NWError?) {
+        if let session = tls, session.isEstablished {
+            let result = session.write(bytes, count)
+            switch result.status {
+            case noErr:
+                return (result.count, false, nil)
+            case errSSLWouldBlock:
+                return (result.count, true, nil)
+            default:
+                return (result.count, false, .tls(result.status))
+            }
+        }
+        let written = Darwin.send(descriptor, bytes, count, 0)
+        if written < 0 {
+            if errno == EAGAIN {
+                return (0, true, nil)
+            }
+            return (0, false, .posix(errno: errno))
+        }
+        return (written, false, nil)
     }
 
     private func flushSends() {
@@ -260,25 +378,22 @@ public final class NWConnection: @unchecked Sendable {
         }
         while var pending = sends.first {
             let remaining = pending.data.count - pending.offset
-            let written = pending.data.withUnsafeBytes { bytes -> Int in
-                Darwin.send(descriptor, bytes.baseAddress!.advanced(by: pending.offset), remaining, 0)
-            }
-            if written < 0 {
-                if errno == EAGAIN {
+            if remaining > 0 {
+                let result = pending.data.withUnsafeBytes { bytes -> (written: Int, wouldBlock: Bool, error: NWError?) in
+                    writeRaw(bytes.baseAddress!.advanced(by: pending.offset), remaining)
+                }
+                if let error = result.error {
+                    sends.removeFirst()
+                    complete(pending.completion, with: error)
+                    fail(error)
+                    return
+                }
+                pending.offset += result.written
+                if pending.offset < pending.data.count {
+                    sends[0] = pending
                     setWriteActive(true)
                     return
                 }
-                let error = NWError.posix(errno: errno)
-                sends.removeFirst()
-                complete(pending.completion, with: error)
-                fail(error)
-                return
-            }
-            pending.offset += written
-            if pending.offset < pending.data.count {
-                sends[0] = pending
-                setWriteActive(true)
-                return
             }
             sends.removeFirst()
             complete(pending.completion, with: nil)
@@ -293,25 +408,51 @@ public final class NWConnection: @unchecked Sendable {
     }
 
     private func handleReadable() {
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         guard let first = receives.first else {
             setReadActive(false)
             return
         }
         let isDatagram = parameters.transport == .udp
+        if let session = tls, !session.isEstablished {
+            driveHandshake(session)
+            return
+        }
         var buffer = [UInt8](repeating: 0, count: first.maximumLength)
-        let count = recv(descriptor, &buffer, first.maximumLength, 0)
-        if count < 0 {
-            if errno == EAGAIN {
+        let count: Int
+        if let session = tls {
+            let result = buffer.withUnsafeMutableBytes { session.read($0.baseAddress!, first.maximumLength) }
+            switch result.status {
+            case noErr:
+                count = result.count
+            case errSSLClosedGraceful:
+                count = 0
+            case errSSLWouldBlock:
+                return
+            default:
+                fail(.tls(result.status))
                 return
             }
-            fail(.posix(errno: errno))
-            return
+        } else {
+            count = recv(descriptor, &buffer, first.maximumLength, 0)
+            if count < 0 {
+                if errno == EAGAIN {
+                    return
+                }
+                fail(.posix(errno: errno))
+                return
+            }
         }
         if count == 0 {
             endOfStream = true
             setReadActive(false)
             if isDatagram {
                 deliverReceive(Data(), complete: true, error: nil)
+            } else if framer != nil {
+                deliverReceives()
             } else {
                 deliverReceive(inbound.isEmpty ? nil : inbound, complete: true, error: nil)
                 inbound = Data()
@@ -324,10 +465,21 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         inbound.append(contentsOf: buffer[0..<count])
+        if framer != nil {
+            guard inbound.count - inboundHead <= nwFramingInputLimit else {
+                fail(.posix(errno: EMSGSIZE))
+                return
+            }
+            runFramer()
+        }
         deliverReceives()
     }
 
     private func deliverReceives() {
+        if framer != nil {
+            deliverFramedReceives()
+            return
+        }
         while let first = receives.first {
             if parameters.transport == .udp {
                 break
@@ -374,6 +526,9 @@ public final class NWConnection: @unchecked Sendable {
         guard !isClosed else {
             return
         }
+        stopFramer()
+        tls?.close()
+        tls = nil
         teardownSources()
         if descriptor >= 0 {
             Darwin.close(descriptor)
@@ -400,6 +555,58 @@ public final class NWConnection: @unchecked Sendable {
         pending.forEach { $0.completion(nil, nil, true, failure) }
     }
 
+    private func startFramer() {
+        guard framer == nil, let options = parameters.defaultProtocolStack.applicationProtocols.first else {
+            return
+        }
+        let instance = NWProtocolFramer.Instance(channel: self)
+        let implementation = options.definition.implementation.init(framer: instance)
+        framer = instance
+        framerImplementation = implementation
+        _ = implementation.start(framer: instance)
+    }
+
+    private func stopFramer() {
+        guard let instance = framer, let implementation = framerImplementation else {
+            return
+        }
+        _ = implementation.stop(framer: instance)
+        implementation.cleanup(framer: instance)
+        framer = nil
+        framerImplementation = nil
+        framedInput = []
+        framedHead = 0
+        inboundHead = 0
+    }
+
+    private func runFramer() {
+        guard let instance = framer, let implementation = framerImplementation else {
+            return
+        }
+        _ = implementation.handleInput(framer: instance)
+    }
+
+    private func deliverFramedReceives() {
+        while !receives.isEmpty {
+            if framedHead < framedInput.count {
+                let message = framedInput[framedHead]
+                framedHead += 1
+                if framedHead == framedInput.count {
+                    framedInput.removeAll(keepingCapacity: true)
+                    framedHead = 0
+                }
+                let pending = receives.removeFirst()
+                pending.completion(message, .defaultStream, false, nil)
+            } else if endOfStream {
+                let pending = receives.removeFirst()
+                pending.completion(nil, .defaultStream, true, nil)
+            } else {
+                break
+            }
+        }
+        updateSources()
+    }
+
     private func teardownSources() {
         if let read = readSource {
             if !readActive {
@@ -417,5 +624,50 @@ public final class NWConnection: @unchecked Sendable {
         writeSource = nil
         readActive = false
         writeActive = false
+    }
+}
+
+extension NWConnection: NWFramingChannel {
+    func framingParseInput(minimumIncompleteLength: Int, maximumLength: Int, parse: (UnsafeMutableRawBufferPointer?, Bool) -> Int) -> Bool {
+        let complete = endOfStream
+        let pending = inbound.count - inboundHead
+        if pending == 0 {
+            guard complete else {
+                return false
+            }
+            _ = parse(nil, true)
+            return true
+        }
+        guard pending >= minimumIncompleteLength || complete else {
+            return false
+        }
+        let head = inboundHead
+        let consumed = inbound.withUnsafeMutableBytes { buffer -> Int in
+            parse(UnsafeMutableRawBufferPointer(rebasing: buffer[head...].prefix(maximumLength)), complete)
+        }
+        if consumed > 0 {
+            inboundHead += min(consumed, pending)
+        }
+        if inboundHead > 0 && inboundHead >= inbound.count / 2 {
+            inbound.removeSubrange(0..<inboundHead)
+            inboundHead = 0
+        }
+        return true
+    }
+
+    func framingDeliver(_ data: Data, isComplete: Bool) {
+        framedInput.append(data)
+    }
+
+    func framingWrite(_ data: Data) {
+        sends.append(PendingSend(data: data, completion: .idempotent, offset: 0))
+    }
+
+    func framingWritePayload(length: Int) -> Bool {
+        guard length >= 0, length <= outboundPayload.count else {
+            return false
+        }
+        sends.append(PendingSend(data: Data(outboundPayload.prefix(length)), completion: .idempotent, offset: 0))
+        return true
     }
 }

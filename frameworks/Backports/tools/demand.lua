@@ -209,6 +209,8 @@ local function status_of(item)
         return "backported", "component"
     elseif item.runtime then
         return "runtime", "runtime"
+    elseif item.app then
+        return "app", "application"
     end
     return "missing", ""
 end
@@ -364,7 +366,7 @@ local function selector_item(ctx, ledger, selector, level, file)
         end
     end
     local item = new_item({kind = "selector", container = "", name = selector, framework = framework, intro = lowest,
-        present = present, backed = ctx.backed.selectors[selector] == true})
+        present = present, backed = ctx.backed.selectors[selector] == true, app = ctx.app_selectors[selector] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -546,8 +548,8 @@ local function framework_totals(ctx, ledger)
     for _, key in ipairs(ledger.order) do
         local item = ledger.items[key]
         local name = item.framework or "(none)"
-        totals[name] = totals[name] or {referenced = 0, present = 0, backported = 0, runtime = 0, missing = 0, exact = 0,
-            syntax = 0, text = 0}
+        totals[name] = totals[name] or {referenced = 0, present = 0, backported = 0, runtime = 0, missing = 0, app = 0,
+            exact = 0, syntax = 0, text = 0}
         local row = totals[name]
         row.referenced = row.referenced + 1
         row[item.status] = row[item.status] + 1
@@ -667,6 +669,7 @@ local function write_report(opt, ctx, ledger, meta)
         by_status.backported or 0, meta.by_via.Backports or 0, meta.by_via.component or 0))
     say(string.format("provided by the revenant Swift runtime and not on iOS %s: %d", opt.ios, by_status.runtime or 0))
     say(string.format("missing: %d", by_status.missing or 0))
+    say(string.format("resolved by the application's own declarations, not counted as missing: %d", by_status.app or 0))
     local by_kind = {}
     for _, item in ipairs(missing) do
         by_kind[item.kind] = (by_kind[item.kind] or 0) + 1
@@ -760,11 +763,17 @@ function main(...)
     phase("backported objects")
 
     local files = source_files(opt.sources, opt.lists)
-    local records, declared = {}, {}
+    local records, declared, app_selectors = {}, {}, {}
     for _, file in ipairs(files) do
         local record = scanner.scan(file)
         for _, name in ipairs(record.declared) do
             declared[name] = true
+        end
+        for _, name in ipairs(record.method_declarations) do
+            app_selectors[name] = true
+        end
+        for _, name in ipairs(record.declared_members) do
+            app_selectors[name] = true
         end
         table.insert(records, record)
     end
@@ -793,7 +802,7 @@ function main(...)
     end
 
     local ctx = {u = u, cache = cache, target = ast.version_of(opt.ios), backed = backed,
-        declared = declared, source = source, sdk = state.sdk, sdk_version = state.version,
+        declared = declared, app_selectors = app_selectors, source = source, sdk = state.sdk, sdk_version = state.version,
         runtime = products.provider(opt.runtime), component = products.provider(opt.components)}
     presence(ctx)
     local ledger = {items = {}, order = {}, missing_pairs = {}, candidates = {}, candidate_order = {}, unmatched = {},

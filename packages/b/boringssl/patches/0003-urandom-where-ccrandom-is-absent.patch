@@ -1,0 +1,45 @@
+diff --git a/src/crypto/rand_extra/ios.c b/src/crypto/rand_extra/ios.c
+index 73f0ef3..567d19d 100644
+--- a/src/crypto/rand_extra/ios.c
++++ b/src/crypto/rand_extra/ios.c
+@@ -17,11 +17,40 @@
+ #include "../fipsmodule/rand/internal.h"
+ 
+ #if defined(OPENSSL_RAND_IOS)
++#include <errno.h>
++#include <fcntl.h>
+ #include <stdlib.h>
++#include <unistd.h>
+ 
+ #include <CommonCrypto/CommonRandom.h>
+ 
++extern CCRNGStatus CCRandomGenerateBytes(void *bytes, size_t count)
++    __attribute__((weak_import));
++
++static void urandom_fill(uint8_t *out, size_t requested) {
++  int fd = open("/dev/urandom", O_RDONLY);
++  if (fd < 0) {
++    abort();
++  }
++  while (requested > 0) {
++    ssize_t n = read(fd, out, requested);
++    if (n < 0 && errno == EINTR) {
++      continue;
++    }
++    if (n <= 0) {
++      abort();
++    }
++    out += n;
++    requested -= (size_t)n;
++  }
++  close(fd);
++}
++
+ void CRYPTO_sysrand(uint8_t *out, size_t requested) {
++  if (CCRandomGenerateBytes == NULL) {
++    urandom_fill(out, requested);
++    return;
++  }
+   if (CCRandomGenerateBytes(out, requested) != kCCSuccess) {
+     abort();
+   }

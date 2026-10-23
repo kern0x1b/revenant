@@ -42,6 +42,44 @@ jobs:
         timeout-minutes: 30
         run: ./xmakew f -P . -y --emulator_vulkan=n
 
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Check whether the iOS 6.0 inventory is cached
+        id: inventory
+        run: |
+          if [ -f "$HOME/.revenant/dyld/6.0/classes_armv7.json" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the firmware tools through the Backports configuration
+        if: steps.inventory.outputs.present != 'true'
+        timeout-minutes: 45
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - name: Write the iOS 6.0 inventory from the shared cache
+        if: steps.inventory.outputs.present != 'true'
+        timeout-minutes: 30
+        run: ./xmakew firmware -P . -y --arch=armv7 classes 6.0
+
+      - name: Configure the host again
+        if: steps.inventory.outputs.present != 'true'
+        timeout-minutes: 30
+        run: ./xmakew f -P . -y --emulator_vulkan=n
+
+      - name: Assert the iOS 6.0 inventory is in place
+        run: test -f "$HOME/.revenant/dyld/6.0/classes_armv7.json"
+
       - name: Run the tests
         id: tests
         run: ./xmakew test -P . --output-on-failure
@@ -290,11 +328,11 @@ jobs:
 
       - name: Build the Swift targets
         timeout-minutes: 20
-        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit swiftAuthenticationServices 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Install the Swift packages through their wrappers
         timeout-minutes: 20
-        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@storekit revenant@authenticationservices revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
         if: steps.store.outputs.cache-hit != 'true'

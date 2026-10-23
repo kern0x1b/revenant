@@ -102,6 +102,99 @@ namespace {
 
 }
 
+std::optional<std::filesystem::path>
+CompatibilityKernel::guest_directory_of_descriptor(
+    std::uint32_t descriptor, std::uint32_t& error) const
+{
+    if (const auto duplicate = duplicated_descriptors_.find(descriptor);
+        duplicate != duplicated_descriptors_.end()) {
+        descriptor = duplicate->second;
+    }
+    const auto found = file_descriptors_.find(descriptor);
+    if (found == file_descriptors_.end()) {
+        error = bsd_support::bad_file_descriptor;
+        return std::nullopt;
+    }
+    std::error_code failure;
+    if (!std::filesystem::is_directory(found->second, failure)) {
+        error = failure ? 2U : 20U;
+        return std::nullopt;
+    }
+    const auto relative = found->second.lexically_relative(rootfs_);
+    if (relative.empty() &&
+        found->second.lexically_normal() != rootfs_.lexically_normal()) {
+        error = 2;
+        return std::nullopt;
+    }
+    return (std::filesystem::path { "/" } / relative).lexically_normal();
+}
+
+bool CompatibilityKernel::dispatch_bsd_thread_directory(
+    Cpu& cpu, std::uint32_t number)
+{
+    if (number != 348 && number != 349)
+        return false;
+    auto& registers = cpu.registers();
+    const auto thread = current_thread_object();
+    const bool clears = number == 349 ? static_cast<std::int32_t>(registers[0]) == -1
+                                      : registers[0] == 0;
+    if (clears) {
+        bool cleared = false;
+        if (thread) {
+            std::lock_guard mach_lock { shared_state_->mach_mutex };
+            cleared =
+                shared_state_->thread_working_directories.erase(*thread) != 0;
+        }
+        if (cleared) {
+            bsd_success(cpu, 0);
+        } else {
+            bsd_error(cpu, bsd_support::bad_file_descriptor);
+        }
+        return true;
+    }
+
+    std::filesystem::path guest;
+    if (number == 348) {
+        const auto path = memory_.read_c_string(registers[0]);
+        if (!path) {
+            bsd_error(cpu, bsd_support::bad_address);
+            return true;
+        }
+        const auto host = resolve_guest_path(*path);
+        std::error_code failure;
+        if (!std::filesystem::exists(host, failure)) {
+            bsd_error(cpu, 2);
+            return true;
+        }
+        if (!std::filesystem::is_directory(host, failure)) {
+            bsd_error(cpu, 20);
+            return true;
+        }
+        const std::filesystem::path given { *path };
+        guest = (given.is_absolute() ? given : working_directory() / given)
+                    .lexically_normal();
+    } else {
+        std::uint32_t error = 0;
+        const auto directory =
+            guest_directory_of_descriptor(registers[0], error);
+        if (!directory) {
+            bsd_error(cpu, error);
+            return true;
+        }
+        guest = *directory;
+    }
+    if (!thread) {
+        bsd_error(cpu, 2);
+        return true;
+    }
+    {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        shared_state_->thread_working_directories[*thread] = guest;
+    }
+    bsd_success(cpu, 0);
+    return true;
+}
+
 void CompatibilityKernel::dispatch_bsd_filesystem(
     Cpu& cpu, std::uint32_t number)
 {
@@ -526,7 +619,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         std::filesystem::path guest { *path };
         guest = guest.is_absolute()
                     ? guest.lexically_normal()
-                    : (guest_working_directory_ / guest).lexically_normal();
+                    : (working_directory() / guest).lexically_normal();
         guest_working_directory_ =
             guest.empty() ? std::filesystem::path { "/" } : guest;
         output_.write(
@@ -535,29 +628,13 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         return;
     }
     case 13: {
-        auto fd = registers[0];
-        if (const auto duplicate = duplicated_descriptors_.find(fd);
-            duplicate != duplicated_descriptors_.end()) {
-            fd = duplicate->second;
-        }
-        const auto descriptor = file_descriptors_.find(fd);
-        if (descriptor == file_descriptors_.end()) {
-            bsd_error(cpu, bsd_support::bad_file_descriptor);
+        std::uint32_t error = 0;
+        const auto directory = guest_directory_of_descriptor(registers[0], error);
+        if (!directory) {
+            bsd_error(cpu, error);
             return;
         }
-        std::error_code error;
-        if (!std::filesystem::is_directory(descriptor->second, error)) {
-            bsd_error(cpu, error ? 2U : 20U);
-            return;
-        }
-        const auto relative = descriptor->second.lexically_relative(rootfs_);
-        if (relative.empty() && descriptor->second.lexically_normal() !=
-                                    rootfs_.lexically_normal()) {
-            bsd_error(cpu, 2);
-            return;
-        }
-        guest_working_directory_ = std::filesystem::path { "/" } / relative;
-        guest_working_directory_ = guest_working_directory_.lexically_normal();
+        guest_working_directory_ = *directory;
         output_.write(
             "[vfs] fchdir " + guest_working_directory_.string() + "\n");
         bsd_success(cpu, 0);

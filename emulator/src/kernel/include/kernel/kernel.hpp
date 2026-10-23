@@ -534,6 +534,10 @@ private:
     void dispatch_bsd(Cpu& cpu, std::uint32_t number);
     void dispatch_bsd_process_sockets(Cpu& cpu);
     [[nodiscard]] bool dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number);
+    [[nodiscard]] bool dispatch_bsd_thread_directory(
+        Cpu& cpu, std::uint32_t number);
+    [[nodiscard]] std::optional<std::filesystem::path>
+    guest_directory_of_descriptor(std::uint32_t descriptor, std::uint32_t& error) const;
     void dispatch_bsd_psynch(Cpu& cpu, std::uint32_t number);
     [[nodiscard]] bool service_bsd_workqueue(Cpu* requesting_cpu);
     void dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys);
@@ -666,6 +670,8 @@ private:
     void trace_unknown(Cpu& cpu, std::string kind, std::uint32_t number);
     [[nodiscard]] std::filesystem::path resolve_guest_path(
         const std::string& path, bool follow_final_symlink = true) const;
+    [[nodiscard]] std::filesystem::path working_directory() const;
+    [[nodiscard]] std::optional<std::uint32_t> current_thread_object() const;
     [[nodiscard]] std::optional<hfs::Metadata> query_hfs_metadata(
         const std::filesystem::path& path, bool follow_symlink,
         bool include_directory_entry_count = true) const;
@@ -864,6 +870,7 @@ private:
     Mbx2dHle mbx2d_hle_;
     MobileFramebufferHle mobile_framebuffer_hle_;
     std::filesystem::path guest_working_directory_ { "/" };
+    static thread_local std::optional<std::size_t> syscall_processor_;
     std::string process_image_ { "/sbin/launchd" };
     ProcessContext process_;
     DarwinPthreadRuntime pthread_runtime_;

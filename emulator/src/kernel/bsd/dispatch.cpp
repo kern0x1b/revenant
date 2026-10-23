@@ -119,7 +119,16 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         dispatch_bsd(cpu, *canonical);
         return;
     }
+    const auto saved_processor = syscall_processor_;
+    syscall_processor_ = cpu.processor_id();
+    struct RestoreProcessor {
+        std::optional<std::size_t>& slot;
+        std::optional<std::size_t> saved;
+        ~RestoreProcessor() { slot = saved; }
+    } restore_processor { syscall_processor_, saved_processor };
     if (dispatch_bsd_pthread(cpu, number))
+        return;
+    if (dispatch_bsd_thread_directory(cpu, number))
         return;
 
     switch (number) {

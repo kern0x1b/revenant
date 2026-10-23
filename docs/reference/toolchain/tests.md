@@ -8,7 +8,7 @@ reference says what runs where.
 
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
-| `toolchain_light` | 16 suites of `tests/addon/` that need no package builds | the repository | always |
+| `toolchain_light` | 17 suites of `tests/addon/` that need no package builds | the repository | always |
 | `toolchain_packages` | 19 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
 | `toolchain_device` | six suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `port_test`, `swift_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs | only with `./xmakew f -P . --tests=device` |
 | `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |

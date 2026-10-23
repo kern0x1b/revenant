@@ -38,8 +38,10 @@ The pins are the snapshots Telegram's tree holds, found by comparing every file'
 each is a release plus master commits, not a release tag. Each armv7 build keeps its NEON or ARM assembly, which upstream's
 own build tooling produces; revenant's clang assembles it at the 6.0 target, and the archives are checked for NEON objects
 and a 6.0 minimum in every member. mozjpeg's own `GNUInstallDirs` resolves a relative `CMAKE_INSTALL_LIBDIR` against the
-source tree, so the recipe passes an absolute one, or the archives land in the source directory; its NEON code is C
-intrinsics, with no assembly objects. libvpx's configure would assemble its ARM `.asm` files, after `ads2gas_apple.pl`
+source tree, so the recipe passes an absolute one, or the archives land in the source directory. Its NEON code is the
+intrinsics path, not generic C: `jsimd_neon.S` uses GNU directives (`.fpu`, `.arch`) that clang's integrated assembler
+rejects on Mach-O, so CMake's GAS probe selects the intrinsics on its own, and the recipe leaves `NEON_INTRINSICS` at its
+default. Assembling the `.S` would need upstream's gas-preprocessor, which is not wired. libvpx's configure would assemble its ARM `.asm` files, after `ads2gas_apple.pl`
 (upstream's perl), with Apple's bare `as`, which records iOS 5.0 whatever the target says; so its make runs with `AS` and
 `ASFLAGS` set to revenant's clang at the 6.0 target, and with `CC` and `CXX` set to revenant's clang too, since configure's
 own `xcrun` lookups would pick the command-line tools. dav1d needs no `gas-preprocessor.pl` for armv7 under clang: meson's
@@ -54,7 +56,6 @@ the linker, signer and SDK stubs do not.
 | Component | Version | License | Package |
 | --- | --- | --- | --- |
 | Swift compiler | 6.4.0 | Apache-2.0 WITH Swift-exception | `packages/s/swift`, `packages/s/swift-bootstrap` |
-| LLVM / clang: the `clang-c` headers, the C API the declaration extractor reads the SDK through (`include/clang-c` of the clang 21.1.0 release, nothing else) | 21.1.0 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm-clang-c` |
 | LLVM / clang | 23.1.3 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm` |
 | ld64, from cctools-port (with apple-libtapi to read the SDK's `.tbd` stubs) | 956.6 | APSL-2.0; libtapi is Apache-2.0 WITH LLVM-exception plus NCSA | `packages/l/ld64` |
 | ldid | 2.1.5-procursus7+23.gaf86971 | AGPL-3.0-or-later (build-time signer; linked into nothing that ships) | `packages/l/ldid` |
