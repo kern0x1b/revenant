@@ -278,7 +278,8 @@ package("swift-runtime")
             os.mkdir(module)
             local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name,
                                       "-parse-as-library", "-swift-version", "5", "-O", "-wmo",
-                                      "-Xfrontend", "-disable-implicit-string-processing-module-import"}, use_ld,
+                                      "-Xfrontend", "-disable-implicit-string-processing-module-import",
+                                      "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}, use_ld,
                                      opt and opt.extra_flags or {},
                                      (opt and opt.concurrency) and {} or {"-Xfrontend", "-disable-implicit-concurrency-module-import"},
                                      runtime_flags, swift.availability(source))
@@ -360,6 +361,10 @@ package("swift-runtime")
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"})
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
+            local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
+            local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
+            local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"))
+            local lowered_include = lowered.include_directory(path.absolute("lowered"))
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
@@ -384,12 +389,13 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"})),
+                "UUID.swift"}), {presentation_intent}),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}, foundation_objects,
                           {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
-                                          "-enable-experimental-feature", "BuiltinModule"}})
+                                          "-enable-experimental-feature", "BuiltinModule",
+                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
 
             local function generated_from(folder, name)
                 return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
