@@ -105,5 +105,9 @@ Open:
   That fallback has not been seen on a real system class.
 - `revenant_adopt_methods` adds backport methods to the system class where it lacks them. Whether an adopted method's
   ivar offsets match the system class's layout is not checked on a real system class.
-- The `network` prebuilt key moved with the swift-runtime digest. The prebuild workflow gained a `network` choice on this
-  branch, and its build has not run yet.
+- The `network` package has no prebuilt install or pack path, so consumers build it from source. Its key moved with the
+  swift-runtime digest, and nothing is dispatched for it.
+- The Network host test compares the Swift Network framework's live path state with the backport's. That state depends on
+  the machine's interfaces, so the comparison is limited to deterministic output. The path mapping is checked from fixed
+  inputs in `tests/Network/mapping/main.swift` (the host's answers for one recorded state, and documented cases), and the
+  live path only against invariants in `tests/Network/live/main.swift`.
