@@ -116,3 +116,68 @@ against the iOS 26.2 SDK with the lowered overlay, against the same SDK with the
 iOS 16.4 SDK. The `CKRecord` blocker in `reference/backports/CloudKit/CKRecord.md` is about the 16.4 generator copy of
 the CloudKit headers and the `CKRecord` class, not `CKContainer`. The configuration that loses `CKContainer` is not known
 here; a Swift error text and the exact typecheck command are what would settle it.
+
+## Work queue: the unattempted Telegram modules
+
+The demand scan (`frameworks/Backports/tools/demand.lua`) over the 2,247 source files of the 493 unattempted Telegram
+13.0 modules, against the iOS 6.1.3 cache, with the Swift runtime given as `--runtime`:
+
+    ./xmakew l -P . frameworks/Backports/tools/demand.lua --report <dir> --files <list of source paths> \
+        --runtime <swift-runtime>/lib/swift/iphoneos --ios 6.1.3
+
+The scan finds 152 SDK items that are neither on iOS 6.1.3 nor backported. Only 44 of the 493 modules reference any of
+them. The other 450 modules, which include `SubcodecObjC` (no sources), reference none, so their blocking is the build
+order, not a missing SDK item. The table ranks the items by the number of modules that use them, from `missing.tsv`
+with each module taken from its owning file. `exact` is a syntax-level use. `text` is a name found in the sources without
+syntax confirmation; the names checked are real uses (`PHAsset` appears in 38 Telegram source files, `MTLTextureDescriptor`
+in 22). A framework row is an import, and has no introduction version in the cache.
+
+| Rank | SDK item | Kind | Introduced (iOS) | Level | Modules | Files |
+| ---: | --- | --- | ---: | --- | ---: | ---: |
+| 1 | `Metal` | framework | - | exact | 13 | 37 |
+| 2 | `MTLTextureDescriptor` | class | 8.0 | text | 9 | 17 |
+| 3 | `Photos` | framework | - | exact | 9 | 15 |
+| 4 | `MTLRenderPipelineDescriptor` | class | 8.0 | text | 9 | 14 |
+| 5 | `MetalKit` | framework | - | exact | 7 | 18 |
+| 6 | `MTLCreateSystemDefaultDevice` | C function | 8.0 | text | 5 | 8 |
+| 7 | `Vision` | framework | - | exact | 5 | 7 |
+| 8 | `MTLRenderPassDescriptor` | class | 8.0 | text | 4 | 12 |
+| 9 | `VNImageRequestHandler` | class | 11.0 | text | 4 | 5 |
+| 10 | `PHPhotoLibrary` | class | 8.0 | text | 4 | 4 |
+| 11 | `PHAsset` | class | 8.0 | text | 3 | 7 |
+| 12 | `MetalPerformanceShaders` | framework | - | exact | 3 | 5 |
+| 13 | `LAContext` | class | 8.0 | text | 3 | 4 |
+| 14 | `MTLComputePipelineDescriptor` | class | 9.0 | text | 3 | 4 |
+| 15 | `PHImageRequestOptions` | class | 8.0 | text | 3 | 4 |
+| 16 | `AVKit` | framework | - | exact | 3 | 4 |
+| 17 | `LocalAuthentication` | framework | - | exact | 3 | 4 |
+| 18 | `PHImageResultIsDegradedKey` | global variable | 8.0 | text | 3 | 4 |
+| 19 | `VNFaceObservation` | class | 11.0 | text | 3 | 3 |
+| 20 | `kvImage420Yp8_Cb8_Cr8` | enum constant | 8.0 | text | 3 | 3 |
+| 21 | `kvImageARGB8888` | enum constant | 8.0 | text | 3 | 3 |
+| 22 | `PHImageManager` | class | 8.0 | text | 2 | 5 |
+| 23 | `PHVideoRequestOptions` | class | 8.0 | text | 2 | 4 |
+| 24 | `CryptoKit` | framework | - | exact | 2 | 4 |
+| 25 | `MLArrayBatchProvider` | class | 12.0 | text | 2 | 3 |
+| 26 | `MLDictionaryFeatureProvider` | class | 11.0 | text | 2 | 3 |
+| 27 | `MLFeatureValue` | class | 11.0 | text | 2 | 3 |
+| 28 | `MLModel` | class | 11.0 | text | 2 | 3 |
+| 29 | `MLModelConfiguration` | class | 12.0 | text | 2 | 3 |
+| 30 | `MLPredictionOptions` | class | 11.0 | text | 2 | 3 |
+| 31 | `PHFetchOptions` | class | 8.0 | text | 2 | 3 |
+| 32 | `SCNParticleSystem` | class | 8.0 | text | 2 | 3 |
+| 33 | `SCNScene` | class | 8.0 | text | 2 | 3 |
+| 34 | `SCNView` | class | 8.0 | text | 2 | 3 |
+| 35 | `CoreML` | framework | - | exact | 2 | 3 |
+| 36 | `Network` | framework | - | exact | 2 | 3 |
+| 37 | `SceneKit` | framework | - | exact | 2 | 3 |
+| 38 | `SCNSceneRenderer` | protocol | 8.0 | text | 2 | 3 |
+| 39 | `AVPictureInPictureController` | class | 9.0 | text | 2 | 2 |
+| 40 | `CAMetalLayer` | class | 8.0 | text | 2 | 2 |
+
+Caveats for the queue:
+
+- The `Metal`, `MetalKit` and `CoreML` framework rows and their class rows count the same modules, so the ranks overlap.
+- The 1,293 member-name candidates are text only and not counted, so a missing method on a class that is present is not in this table.
+- No `--component` was given, so an item a revenant component provides shows as missing (`Combine` is an example).
+- `missing_files.tsv` also lists keys that are backported; the table uses only the keys whose status is `missing` in `missing.tsv`.
