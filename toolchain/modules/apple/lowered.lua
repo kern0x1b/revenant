@@ -364,43 +364,103 @@ local function statement_end(text, at)
     return stop or text:find("\n", at, true) or #text
 end
 
-local function trimmed_of_markers(text, start, stop)
-    local moved, at = start, start
-    while true do
-        local _, marker_stop = text:find("API_AVAILABLE_BEGIN", at, true)
-        if not marker_stop or marker_stop > stop then
-            break
+local function trimmed_of_markers(text, start, stop, markers)
+    markers = markers or {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+    local moved = start
+    for name, body in pairs(markers.begin) do
+        local at = start
+        while true do
+            local marker_start, marker_stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not marker_start or marker_start > stop then
+                break
+            end
+            local last = marker_stop
+            if body == false then
+                local _, paren_stop = text:find("^%s*%b()", marker_stop + 1)
+                last = paren_stop or marker_stop
+            end
+            moved = math.max(moved, last + 1)
+            at = marker_stop + 1
         end
-        local _, paren_stop = text:find("^%s*%b()", marker_stop + 1)
-        moved = math.max(moved, (paren_stop or marker_stop) + 1)
-        at = marker_stop + 1
     end
-    at = start
-    while true do
-        local marker_start, marker_stop = text:find("API_AVAILABLE_END", at, true)
-        if not marker_start or marker_start > stop then
-            break
+    for name in pairs(markers.ends) do
+        local at = start
+        while true do
+            local marker_start, marker_stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not marker_start or marker_start > stop then
+                break
+            end
+            moved = math.max(moved, marker_stop + 1)
+            at = marker_stop + 1
         end
-        moved = math.max(moved, marker_stop + 1)
-        at = marker_stop + 1
     end
     return moved, stop
 end
 
-local function regions_of(text)
-    local regions, position = {}, 1
-    while true do
-        local start, stop = text:find("API_AVAILABLE_BEGIN%s*%b()", position)
-        if not start then
-            return regions
+local LITERAL_MARKERS = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+
+local function regions_of(text, markers)
+    markers = markers or LITERAL_MARKERS
+    local found = {}
+    for name, body in pairs(markers.begin) do
+        if text:find(name, 1, true) then
+            local position = 1
+            while true do
+                local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
+                if not start then
+                    break
+                end
+                if not in_directive(text, start) then
+                    if body == false then
+                        local _, paren = text:find("^%s*%b()", stop + 1)
+                        if paren then
+                            table.insert(found, {start = start, stop = paren, text = text:sub(start, paren), name = name})
+                        end
+                    else
+                        table.insert(found, {start = start, stop = stop, text = body, name = name})
+                    end
+                end
+                position = stop + 1
+            end
         end
-        local ends_start, ends_stop = text:find("API_AVAILABLE_END", stop, true)
-        if not ends_start then
-            return regions
-        end
-        table.insert(regions, {start = start, stop = stop, ends_start = ends_start, ends_stop = ends_stop, text = text:sub(start, stop)})
-        position = ends_stop + 1
     end
+    table.sort(found, function (a, b) return a.start < b.start end)
+    local ends = {}
+    for name in pairs(markers.ends) do
+        if text:find(name, 1, true) then
+            local position = 1
+            while true do
+                local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
+                if not start then
+                    break
+                end
+                if not in_directive(text, start) then
+                    table.insert(ends, {start = start, stop = stop, name = name})
+                end
+                position = stop + 1
+            end
+        end
+    end
+    table.sort(ends, function (a, b) return a.start < b.start end)
+    local regions, index = {}, 1
+    for _, begin in ipairs(found) do
+        if begin.start >= index then
+            local ending = nil
+            for _, candidate in ipairs(ends) do
+                if candidate.start > begin.stop then
+                    ending = candidate
+                    break
+                end
+            end
+            if not ending then
+                return regions
+            end
+            table.insert(regions, {start = begin.start, stop = begin.stop, ends_start = ending.start, ends_stop = ending.stop,
+                text = begin.text, begin_text = text:sub(begin.start, begin.stop), end_text = text:sub(ending.start, ending.stop)})
+            index = ending.stop + 1
+        end
+    end
+    return regions
 end
 
 local function merged_ranges(ranges)
@@ -415,8 +475,10 @@ local function merged_ranges(ranges)
         local last = merged[#merged]
         if last and range.start <= last.stop and not range.remove and not last.remove then
             last.stop = math.max(last.stop, range.stop)
+            last.before = last.before or range.before
+            last.after = last.after or range.after
         else
-            table.insert(merged, {start = range.start, stop = range.stop, remove = range.remove})
+            table.insert(merged, {start = range.start, stop = range.stop, remove = range.remove, before = range.before, after = range.after})
         end
     end
     return merged
@@ -511,6 +573,7 @@ local function apply_ranges(text, merged)
             if #availability(lowered) > 0 then
                 raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
             end
+            lowered = (range.before or "") .. lowered .. (range.after or "")
         end
         if lowered ~= segment then
             table.insert(edits, {start = range.start, stop = range.stop, text = lowered})
@@ -538,6 +601,28 @@ local function constant_end(text, at)
     return #text
 end
 
+local function class_spans(text)
+    local spans = {}
+    for position in text:gmatch("()@interface%f[^%w_]") do
+        table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+    end
+    for position in text:gmatch("()@protocol%f[^%w_]") do
+        if not text:match("^[^;\n]*;", position) then
+            table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+        end
+    end
+    return spans
+end
+
+local function overlaps_any(range, spans)
+    for _, span in ipairs(spans) do
+        if range.start <= span.stop and range.stop >= span.start then
+            return true
+        end
+    end
+    return false
+end
+
 local function lowering_of(text, implemented)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -551,9 +636,10 @@ local function lowering_of(text, implemented)
         end
     end
     local ranges = {}
+    local markers = implemented.markers
     local function lower(start, stop, remove)
         if not remove then
-            start, stop = trimmed_of_markers(text, start, stop)
+            start, stop = trimmed_of_markers(text, start, stop, markers)
         end
         if stop >= start then
             table.insert(ranges, {start = start, stop = stop, remove = remove})
@@ -665,6 +751,9 @@ local function lowering_of(text, implemented)
         if hit.kind == "global" then
             local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
+            if first then
+                first = trimmed_of_markers(text, first, start, markers)
+            end
             local last = first and statement_end(text, stop)
             local segment = first and text:sub(first, last) or ""
             if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) and not segment:find("API_AVAILABLE_BEGIN", 1, true) then
@@ -693,13 +782,26 @@ local function lowering_of(text, implemented)
             end
         end
     end
-    for _, region in ipairs(regions_of(text)) do
+    local spans = nil
+    for _, region in ipairs(regions_of(text, implemented.markers)) do
         if ios_later(region.text) then
+            spans = spans or class_spans(text)
+            local inside, whole = {}, false
             for _, range in ipairs(ranges) do
-                if not range.remove and range.start >= region.start and range.stop <= region.ends_stop then
-                    lower(region.start, region.stop, true)
-                    lower(region.ends_start, region.ends_stop, true)
-                    break
+                if not range.remove and range.start > region.stop and range.stop < region.ends_start then
+                    if overlaps_any(range, spans) then
+                        whole = true
+                    end
+                    table.insert(inside, range)
+                end
+            end
+            if whole then
+                lower(region.start, region.stop, true)
+                lower(region.ends_start, region.ends_stop, true)
+            else
+                for _, range in ipairs(inside) do
+                    range.before = "\n" .. region.end_text .. "\n"
+                    range.after = "\n" .. region.begin_text .. "\n"
                 end
             end
         end
@@ -1017,6 +1119,28 @@ local function framework_headers(sdk)
         end
     end
     return files
+end
+
+local markers_cache = {}
+
+function region_markers(sdk)
+    if markers_cache[sdk] then
+        return markers_cache[sdk]
+    end
+    local markers = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+    for _, file in ipairs(framework_headers(sdk)) do
+        local text = io.readfile(file)
+        if text:find("API_AVAILABLE_", 1, true) then
+            for name, body in text:gmatch("#%s*define%s+([%w_]+)%s+(API_AVAILABLE_BEGIN%b())") do
+                markers.begin[name] = body
+            end
+            for name in text:gmatch("#%s*define%s+([%w_]+)%s+API_AVAILABLE_END%f[^%w_]") do
+                markers.ends[name] = true
+            end
+        end
+    end
+    markers_cache[sdk] = markers
+    return markers
 end
 
 local function member_headers(sdk)
@@ -1364,6 +1488,7 @@ function include_directory(out)
 end
 
 function build_overlay(sdk, out, set, subtrees)
+    set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(include_directory(out), "simd", "math.h")
     os.mkdir(path.directory(simd))
@@ -1402,7 +1527,7 @@ function build_overlay(sdk, out, set, subtrees)
         changed[notes] = lowered_apinotes(io.readfile(notes), set)
     end
     local roots = {}
-    local names = {}
+    local file_roots = {}
     for file, text in pairs(changed) do
         local relative = system_include_relative(file, sdk)
         if relative then
@@ -1414,22 +1539,18 @@ function build_overlay(sdk, out, set, subtrees)
             local copy = path.join(out, path.relative(file, sdk))
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
-            local dir = path.directory(file)
-            roots[dir] = roots[dir] or {}
-            names[dir] = names[dir] or {}
-            table.insert(names[dir], relative or path.filename(file))
-            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+            if VFS_FILES[relative] then
+                table.insert(file_roots, string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], file, copy))
+            else
+                local dir = path.directory(file)
+                roots[dir] = roots[dir] or {}
+                table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+            end
         end
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
-        local remaps = false
-        for _, name in ipairs(names[dir]) do
-            if not VFS_FILES[name] then
-                remaps = true
-            end
-        end
-        if (relative and not vfs_subtree(relative, subtrees)) or (dir == path.join(sdk, "usr", "include") and remaps) then
+        if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end
@@ -1442,6 +1563,10 @@ function build_overlay(sdk, out, set, subtrees)
     for _, dir in ipairs(dirs) do
         byteorder.sort(roots[dir])
         table.insert(entries, string.format([[    {"name": "%s", "type": "directory", "contents": [%s]}]], dir, table.concat(roots[dir], ", ")))
+    end
+    byteorder.sort(file_roots)
+    for _, root in ipairs(file_roots) do
+        table.insert(entries, "    " .. root)
     end
     local vfs = path.join(out, "vfs.yaml")
     write_if_changed(vfs, string.format([[
