@@ -6,7 +6,7 @@ import Security
 let wait: DispatchTimeInterval = .seconds(10)
 
 func loadIdentity() -> SecIdentity {
-    let data = Data(base64Encoded: identityBase64)!
+    let data = Data(identityBytes)
     var items: CFArray?
     let options: [String: Any] = [kSecImportExportPassphrase as String: "revenant", "toMemoryOnly": true]
     let status = SecPKCS12Import(data as CFData, options as CFDictionary, &items)
@@ -130,3 +130,42 @@ queue.sync {
 }
 strictClient.cancel()
 strictListener.cancel()
+
+let reachHosts: [(String, String)] = [
+    ("www.apple.com", "23.36.157.47"),
+    ("www.google.com", "142.251.151.119"),
+    ("www.cloudflare.com", "104.16.124.96"),
+    ("tls13.cloudflare.com", "104.16.132.229"),
+    ("web.telegram.org", "149.154.167.99"),
+    ("api.telegram.org", "149.154.166.110"),
+    ("github.com", "140.82.121.4"),
+    ("letsencrypt.org", "63.176.8.218"),
+    ("example.com", "172.66.147.243"),
+    ("tls-v1-2.badssl.com", "104.154.89.105"),
+]
+
+for (name, address) in reachHosts {
+    let tls = NWProtocolTLS.Options()
+    tls.securityProtocolOptions.serverName = name
+    tls.securityProtocolOptions.applicationProtocols = ["h2", "http/1.1"]
+    let connection = NWConnection(host: NWEndpoint.Host(address), port: NWEndpoint.Port(rawValue: 443)!,
+                                  using: NWParameters(tls: tls, tcp: NWProtocolTCP.Options()))
+    let outcome = DispatchSemaphore(value: 0)
+    var result = "timeout"
+    connection.stateUpdateHandler = { state in
+        switch state {
+        case .ready:
+            result = "ready alpn \(negotiated(connection)) version \(negotiatedVersion(connection))"
+            outcome.signal()
+        case .waiting(let error), .failed(let error):
+            result = "failed \(error.debugDescription)"
+            outcome.signal()
+        default:
+            break
+        }
+    }
+    connection.start(queue: queue)
+    _ = outcome.wait(timeout: .now() + .seconds(15))
+    print("reach \(name) \(result)")
+    connection.cancel()
+}

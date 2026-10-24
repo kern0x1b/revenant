@@ -27,8 +27,12 @@ function main(device, release)
         os.ln(path.join(root, name), path.join(out, name))
     end
     local identity = path.join(backports, "tests", "Network", "tls", "identity.p12")
-    local encoded = os.iorunv("base64", {"-i", identity}):gsub("%s", "")
-    io.writefile(path.join(out, "identity.swift"), string.format("let identityBase64 = \"%s\"\n", encoded))
+    local bytes = io.readfile(identity, {encoding = "binary"})
+    local values = {}
+    for index = 1, #bytes do
+        table.insert(values, tostring(bytes:byte(index)))
+    end
+    io.writefile(path.join(out, "identity.swift"), string.format("let identityBytes: [UInt8] = [%s]\n", table.concat(values, ",")))
 
     os.setenv("REVENANT_ROOT", root)
     local function xmake(args, log, opt)
@@ -39,8 +43,13 @@ function main(device, release)
     xmake({"emulate", "-d", device, "-r", release, "install"}, path.join(out, "install.log"))
 
     local run = path.join(out, "run.log")
-    local ran = xmake({"emulate", "-d", device, "-r", release, "-n", "loopback", "-s", "240", "-t", "1500", "run", path.join("/usr/libexec", PROGRAM)},
+    local ran = xmake({"emulate", "-d", device, "-r", release, "-n", "host", "-s", "240", "-t", "1500", "run", path.join("/usr/libexec", PROGRAM)},
                       run, {try = true})
+    for _, line in ipairs(runs.lines(run)) do
+        if line:startswith("reach ") then
+            print(line)
+        end
+    end
 
     local host = path.join(out, "host")
     os.vrunv("xcrun", {"swiftc", "-O", path.join(backports, "tests", "Network", "tlsserver", "main.swift"), "-o", host})
