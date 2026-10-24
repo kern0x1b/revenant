@@ -98,3 +98,13 @@ translation costs on a quiet Mac from above. The warm run translated the same 22
 - A 30 s `sample` of a warm boot 120 s in shows the translator under `GetCurrentBlockThunk` →
   `AddressSpace::EmitBlock` in the largest stack (1674 samples); the emulator's symbols for its own functions are
   merged by LTO, so the rest of the time is seen only through Dynarmic and libc frames.
+
+## How many emulators run at once
+
+Every emulator start takes one of the machine's slots (`emulator.acquire`): the emulate plugin's boots, its debug
+command, the first boot of a golden image, and the runtime driver's boot. The slot files live in
+`~/.revenant/emulator-slots` whatever `REVENANT_EMULATOR_ROOT` names, so a test run with a scratch root shares the
+machine's slots. The count is `emulator.capacity_of(cores, megabytes)`, sized from the measurements above: a full boot
+kept about one core busy (231 CPU s in 240 s of wall time, fixed build), and its peak footprint was 4.7 GiB. The
+constants in `toolchain/modules/emulator.lua` are one core and 4800 MB per emulator, with 2 cores and 4096 MB kept for
+the system and builds. On the measured machine (12 cores, 24 GB) that is 4 slots.
