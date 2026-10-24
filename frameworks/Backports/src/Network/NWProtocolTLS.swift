@@ -37,7 +37,8 @@ private let revenantRawSign: NWRawSignFunction? = dlsym(UnsafeMutableRawPointer(
     unsafeBitCast($0, to: NWRawSignFunction.self)
 }
 
-@available(iOS 10.0, macOS 10.12, *)
+#if os(macOS)
+@available(macOS 10.12, *)
 private func revenantMessageAlgorithm(_ algorithm: UInt16) -> SecKeyAlgorithm? {
     switch algorithm {
     case 0x0201:
@@ -48,16 +49,19 @@ private func revenantMessageAlgorithm(_ algorithm: UInt16) -> SecKeyAlgorithm? {
         return .rsaSignatureMessagePKCS1v15SHA384
     case 0x0601:
         return .rsaSignatureMessagePKCS1v15SHA512
+    #if os(macOS)
     case 0x0804:
         return .rsaSignatureMessagePSSSHA256
     case 0x0805:
         return .rsaSignatureMessagePSSSHA384
     case 0x0806:
         return .rsaSignatureMessagePSSSHA512
+    #endif
     default:
         return nil
     }
 }
+#endif
 
 private func revenantDigestInfo(_ algorithm: UInt16, _ input: UnsafePointer<UInt8>, _ count: Int) -> [UInt8]? {
     switch algorithm {
@@ -283,7 +287,7 @@ final class NWTLSSession {
     }
 
     fileprivate func verifyPeerChain(_ ssl: OpaquePointer) -> ssl_verify_result_t {
-        guard let chain = SSL_get0_peer_certificates(ssl) else {
+        guard let chain = SSL_get_peer_full_cert_chain(ssl) else {
             verifyFailure = revenantCertificateChainInvalid
             return ssl_verify_invalid
         }

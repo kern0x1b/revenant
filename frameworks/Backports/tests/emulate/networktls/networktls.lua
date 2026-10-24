@@ -55,9 +55,23 @@ function main(device, release)
     os.vrunv("xcrun", {"swiftc", "-O", path.join(backports, "tests", "Network", "tlsserver", "main.swift"), "-o", host})
     os.execv(host, {identity}, {stdout = host .. ".out"})
 
+    local function without_versions(lines)
+        local kept = {}
+        for _, line in ipairs(lines) do
+            if not line:find(" version ", 1, true) then
+                table.insert(kept, line)
+            end
+        end
+        return kept
+    end
     local expected, got = tls_lines(host .. ".out"), tls_lines(run)
     assert(#expected > 0, "the host Network TLS program printed nothing")
     assert(ran == 0, "the emulated run exited " .. ran .. ", see " .. run)
-    assert(table.concat(expected, "\n") == table.concat(got, "\n"),
+    assert(table.concat(without_versions(expected), "\n") == table.concat(without_versions(got), "\n"),
            "the emulated Network TLS differs from the host in " .. out .. ": host " .. #expected .. " lines, guest " .. #got)
+    for _, line in ipairs(got) do
+        if line:find(" version ", 1, true) then
+            assert(line:find(" version 303", 1, true), "the iOS server must negotiate TLS 1.2, got: " .. line)
+        end
+    end
 end
