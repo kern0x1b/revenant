@@ -99,6 +99,27 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: host tests of the same paths (`audio_test.m`, `action_run_test.m`). Device: pending.
 - Removed by: the runtime case passing on the emulator, and a run on a real iPhone 4S with the mute switch set and other audio playing.
 
+### C17. SCNView adopts SCNSceneRenderer, and 21 of its 64 members raise
+
+- Stands in for: the rest of SCNSceneRenderer on a GLES view. Telegram needs the protocol as a type and the delegate callbacks, which SCNView already gives; the other members are Metal, SpriteKit, ray picking, or GPU features the GLES renderer does not have.
+- Gaps: `presentScene:withTransition:incomingPointOfView:completionHandler:`, `hitTest:options:`, `isNodeInsideFrustum:withPointOfView:`, `nodesInsideFrustumWithPointOfView:`, `prepareObject:shouldAbortBlock:`, `prepareObjects:withCompletionHandler:`, and the properties `loops`, `autoenablesDefaultLighting`, `temporalAntialiasingEnabled`, `showsStatistics`, `debugOptions`, `overlaySKScene`, `usesReverseZ`, `workingColorSpace`, `currentRenderPassDescriptor`, `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat`, `audioEnvironmentNode` and `currentViewport`. Each raises `NSInternalInconsistencyException` naming the member, so a call is loud and `respondsToSelector:` answers yes.
+- Measurement: the members test (`lowered_members_test.lua`) passes with the list regenerated; the library compiles against the armv7 iOS 6.0 SDK with no diagnostics for the stubs. The stubs are not run by any test.
+- Removed by: a native implementation of each member on the GLES renderer, or a decision to drop the adoption and the stubs.
+
+### C18. sceneTime and playing run on a wall clock with an offset
+
+- Stands in for: SceneKit's scene timeline. `sceneTime` is the wall time plus an offset while playing, and it is held while `playing` is NO; `setSceneTime:` sets it, and the frame's animations and delegate callbacks use it.
+- Gaps: there is no timeline, so `loops` has no meaning here and raises (C17). The offset model holds the time across pauses and sets it on the wall clock; SceneKit's own timeline has durations and a scene-wide clock we do not model.
+- Measurement: host tests of `RevenantSCNClock` (`tests/SceneKit/clock_test.m`): defaults, set while playing and paused, resume from the held time, and repeated pauses.
+- Removed by: a scene timeline with durations, replacing the wall clock.
+
+### C19. audioEngine is the engine of custom audio nodes only
+
+- Stands in for: the engine SceneKit uses for its audio. `SCNView.audioEngine` returns the shared `AVAudioEngine` that custom `AVAudioNode` players attach to (C10, C12). Source players play through OpenAL and are not on this engine, so attaching to it does not affect them.
+- Gaps: a caller that expects SceneKit's own engine to hold every player finds only the custom ones.
+- Measurement: the node attach test (`audio_test.m`); not measured on the device.
+- Removed by: moving source players onto the same engine, or documenting the split as the intended API.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
