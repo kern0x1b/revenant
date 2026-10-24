@@ -1030,6 +1030,9 @@ function boot(opt)
     if opt.perf then
         table.insert(argv, "--perf-summary")
     end
+    if opt.verbose then
+        table.insert(argv, "--verbose")
+    end
     local input, control = pipe.openpair("BB")
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do

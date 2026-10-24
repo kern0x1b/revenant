@@ -59,7 +59,7 @@ local function install_bundle(rootfs, binary)
 end
 
 local function grant_photos_access(rootfs)
-    local directory = emulator.guest_path(rootfs, "/var/mobile/Library/TCC")
+    local directory = emulator.guest_path(rootfs, "/var/root/Library/TCC")
     os.mkdir(directory)
     local database = path.join(directory, "TCC.db")
     local clients = {APP_ID, "/" .. BINARY, "RevenantBackportsRuntime"}
