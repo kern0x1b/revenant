@@ -2,6 +2,8 @@ if not is_plat("iphoneos") then
     return
 end
 
+add_requires("revenant@boringssl", {alias = "boringssl"})
+
 local SRC = path.directory(os.scriptdir())
 local TOOLS = path.join(SRC, "..", "tools")
 

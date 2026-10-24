@@ -1,4 +1,4 @@
-import CBoringSSL
+@_implementationOnly import CBoringSSL
 import Foundation
 import Security
 
