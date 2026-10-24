@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -15,6 +16,8 @@
 #include <string_view>
 
 namespace emulator {
+
+[[nodiscard]] std::uint64_t host_unix_milliseconds() noexcept;
 
 class Output {
 public:
