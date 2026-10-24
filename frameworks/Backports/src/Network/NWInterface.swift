@@ -13,6 +13,12 @@ public struct NWInterface: Hashable, CustomDebugStringConvertible {
     public let index: Int
     public let type: InterfaceType
 
+    internal init(name: String, index: Int, type: InterfaceType) {
+        self.name = name
+        self.index = index
+        self.type = type
+    }
+
     internal init?(named name: String) {
         self.init(named: name, kernelType: nil)
     }
