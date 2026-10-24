@@ -64,11 +64,17 @@ static struct revenant_alias *revenant_aliases(size_t *count)
     return found;
 }
 
+static Class revenant_system_class(Class proxy, const char *name)
+{
+    Class found = objc_getClass(name);
+    return found && class_getSuperclass(found) != proxy ? found : Nil;
+}
+
 static Class revenant_release_class(Class cls, const struct revenant_alias *aliases, size_t count)
 {
     for (size_t index = 0; index < count; index++) {
         if (aliases[index].proxy == (const void *)cls) {
-            Class release = objc_getClass(aliases[index].name);
+            Class release = revenant_system_class(cls, aliases[index].name);
             return release ? release : cls;
         }
     }
@@ -336,7 +342,7 @@ __attribute__((constructor)) static void revenant_backports_attach(void)
     size_t own_count = own ? own_size / sizeof *own : 0;
     Class *releases = calloc(own_count ? own_count : 1, sizeof *releases);
     for (size_t index = 0; index < own_count; index++) {
-        releases[index] = objc_getClass(own[index].name);
+        releases[index] = revenant_system_class((Class)own[index].proxy, own[index].name);
         if (!releases[index])
             continue;
         revenant_reparent((Class)own[index].proxy, releases[index]);

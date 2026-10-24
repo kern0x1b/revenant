@@ -181,7 +181,8 @@ void SessionDiagnostics::stopped(std::uint32_t stopped_pid,
         initial_.kernel->bootstrap_checked_in_service_count();
     output_.line("[boot] milestone=service-check-in service-state=" +
                 std::string { checked_in_services == 0 ? "waiting" : "ready" } +
-                " checked-in-services=" + std::to_string(checked_in_services));
+                " checked-in-services=" + std::to_string(checked_in_services) +
+                " host-ms=" + std::to_string(host_unix_milliseconds()));
     std::size_t allocated_count = 0;
     std::size_t runnable_count = 0;
     std::size_t waiting_count = 0;

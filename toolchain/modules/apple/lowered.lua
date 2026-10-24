@@ -203,7 +203,7 @@ local function scan_source(file, found)
             pending = line
         elseif pending then
             pending = pending .. " " .. line
-        elseif not container and line:match("^[%a_]") and not line:match("^static") and not line:match("^typedef") and not line:match(";%s*$") then
+        elseif not container and line:match("^[%a_]") and not line:match("^static") and not line:match("^typedef") and not line:match(";%s*$") and not line:match("^[%a_][%w_]*%s*%(") then
             local name = line:match("^[%a_][^=;(]-([%a_][%w_]*)%s*%(")
             if name then
                 found.functions[name] = true

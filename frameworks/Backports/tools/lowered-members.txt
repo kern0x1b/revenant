@@ -111,6 +111,7 @@ class AVAudioPCMBuffer
 class AVAudioPlayerNode
 class AVAudioSession
 class AVAudioSessionCapability
+class AVAudioSessionPortDescription
 class AVAudioSessionPortExtensionBluetoothMicrophone
 class AVAudioTime
 class AVAudioUnit
@@ -4272,20 +4273,6 @@ function CopyInstrumentInfoFromSoundBank
 function CopyNameFromSoundBank
 function DNSServiceBrowse
 function DNSServiceResolve
-function EVENANT_ALIAS
-function EVENANT_ALIAS_OF
-function EVENANT_AVMETADATA_BODY
-function EVENANT_AX_MATH_CONTENT
-function EVENANT_AX_MATH_EXPRESSIONS_ONLY
-function EVENANT_DEFINE_NN_REDUCE
-function EVENANT_DEFINE_REDUCE
-function EVENANT_TEXT_TRAITS
-function EVENANT_TRAIT
-function EVENANT_VDSP_ADDSUB
-function EVENANT_VDSP_RAMP
-function EVENANT_VDSP_SLIDING_WINDOW_MAXIMUM
-function EVENANT_VDSP_SPLIT_COMPLEX
-function EVENANT_VIDEO_TOOLBOX_VALUE_STORE
 function GCExtendedGamepadSnapShotDataV100FromNSData
 function GCExtendedGamepadSnapshotDataFromNSData
 function GCGamepadSnapShotDataV100FromNSData
@@ -4706,8 +4693,6 @@ function VTHDRPerFrameMetadataGenerationSessionCreate
 function VTHDRPerFrameMetadataGenerationSessionGetTypeID
 function _MXSignpostMetricsSnapshot
 function __attribute__
-function _asm__
-function _attribute__
 function _os_log_create
 function _os_log_debug_impl
 function _os_log_error_impl
@@ -4725,9 +4710,6 @@ function compression_encode_scratch_buffer_size
 function compression_stream_destroy
 function compression_stream_init
 function compression_stream_process
-function evenantARGBToYUV
-function evenantYUVToARGB
-function evenantYUVToARGBNoAlpha
 function glBeginQuery
 function glBeginTransformFeedback
 function glBindBufferBase
@@ -5289,7 +5271,6 @@ function nw_ws_response_create
 function nw_ws_response_enumerate_additional_headers
 function nw_ws_response_get_selected_subprotocol
 function nw_ws_response_get_status
-function oid
 function os_log_create
 function os_log_is_debug_enabled
 function os_log_is_enabled
@@ -11523,6 +11504,9 @@ member AVAudioSession -setPreferredInput:error:
 member AVAudioSessionCapability -initWithRevenantSupported:
 member AVAudioSessionCapability -isEnabled
 member AVAudioSessionCapability -isSupported
+member AVAudioSessionPortDescription -dataSources
+member AVAudioSessionPortDescription -selectedDataSource
+member AVAudioSessionPortDescription -setPreferredDataSource:error:
 member AVAudioSessionPortExtensionBluetoothMicrophone -farFieldCapture
 member AVAudioSessionPortExtensionBluetoothMicrophone -highQualityRecording
 member AVAudioSessionPortExtensionBluetoothMicrophone -init
@@ -13250,6 +13234,8 @@ member CLFloor -initWithCoder:
 member CLFloor -initWithRevenantLevel:
 member CLFloor -level
 member CLGeocoder -geocodeAddressString:inRegion:preferredLocale:completionHandler:
+member CLGeocoder -geocodePostalAddress:completionHandler:
+member CLGeocoder -geocodePostalAddress:preferredLocale:completionHandler:
 member CLGeocoder -reverseGeocodeLocation:preferredLocale:completionHandler:
 member CLLocation -floor
 member CLLocationManager +isMonitoringAvailableForClass:
@@ -22534,6 +22520,7 @@ member NSTermOfAddress -isEqual:
 member NSTermOfAddress -languageIdentifier
 member NSTermOfAddress -pronouns
 member NSTextAttachment +textAttachmentWithImage:
+member NSTextAttachment -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
 member NSTextAttachment -bounds
 member NSTextAttachment -contents
 member NSTextAttachment -fileType

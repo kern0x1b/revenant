@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
-@implementation NSPersonNameComponents {
-@private
+REVENANT_ALIAS_STATE(NSPersonNameComponents, NSObject,
     NSString *_namePrefix;
     NSString *_givenName;
     NSString *_middleName;
@@ -9,7 +9,9 @@
     NSString *_nameSuffix;
     NSString *_nickname;
     NSPersonNameComponents *_phoneticRepresentation;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSPersonNameComponents) (RevenantComponents)
 
 + (BOOL)supportsSecureCoding
 {
@@ -50,7 +52,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    NSPersonNameComponents *copy = [[[self class] allocWithZone:zone] init];
+    REVENANT_ALIAS_CLASS(NSPersonNameComponents) *copy = [[[self class] allocWithZone:zone] init];
     copy->_namePrefix = [_namePrefix copy];
     copy->_givenName = [_givenName copy];
     copy->_middleName = [_middleName copy];
@@ -72,7 +74,7 @@ static BOOL revenant_same(id left, id right)
         return YES;
     if (![other isKindOfClass:[NSPersonNameComponents class]])
         return NO;
-    NSPersonNameComponents *components = other;
+    REVENANT_ALIAS_CLASS(NSPersonNameComponents) *components = other;
     return revenant_same(_namePrefix, components->_namePrefix) && revenant_same(_givenName, components->_givenName) && revenant_same(_middleName, components->_middleName) &&
         revenant_same(_familyName, components->_familyName) && revenant_same(_nameSuffix, components->_nameSuffix) && revenant_same(_nickname, components->_nickname) &&
         revenant_same(_phoneticRepresentation, components->_phoneticRepresentation);
