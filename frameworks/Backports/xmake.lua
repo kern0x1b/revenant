@@ -261,7 +261,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -270,16 +270,14 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/apple-ios")
-        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"),
-                  path.join(SRC, "SceneKit", "SCNAudioSource.m"), path.join(SRC, "SceneKit", "SCNAudioPlayer.m"),
-                  path.join(SRC, "SceneKit", "RevenantSCNSoundEngine.m"), path.join(SRC, "SceneKit", "RevenantSCNStream.m"))
+        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
         add_includedirs(path.join(RUNTIME, "app"))
         add_mflags("-fobjc-arc")
         if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("FoundationBackports", "UIKitBackports", "AVFoundationBackports")
+            add_deps("FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox")
         add_syslinks("objc")

@@ -10,8 +10,6 @@
 #import "../../../src/SceneKit/RevenantSCNAudio.h"
 #import "../../../src/SceneKit/RevenantSCNSoundEngine.h"
 
-const SCNMatrix4 SCNMatrix4Identity = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-
 static BOOL revenant_finishes(SCNAudioPlayer *player, NSTimeInterval within)
 {
     __block BOOL finished = NO;
@@ -34,6 +32,7 @@ static BOOL revenant_finishes(SCNAudioPlayer *player, NSTimeInterval within)
         }
         usleep(10000);
     }
+    printf("REVENANT-PROBE finish guest=%.3f finished=%d\n", CACurrentMediaTime() - started, finished);
     return finished;
 }
 
@@ -82,7 +81,7 @@ REVENANT_CASE(scenekit_audio)
         printf("REVENANT-PROBE start raised %s: %s\n", [exception.name UTF8String], [exception.reason UTF8String]);
     }
     revenant_expect_true(@"a source starts playing on iOS 6.1.3", started != (BOOL)negative, @"the source is not playing");
-    BOOL finished = revenant_finishes(player, 12.0);
+    BOOL finished = revenant_finishes(player, 3.0);
     printf("REVENANT-PROBE tone finished on its own=%d\n", finished);
     revenant_expect_true(@"a 2 second tone finishes on its own", finished != (BOOL)negative, @"the tone did not finish");
 
@@ -99,7 +98,7 @@ REVENANT_CASE(scenekit_audio)
         printf("REVENANT-PROBE stream start raised %s: %s\n", [exception.name UTF8String], [exception.reason UTF8String]);
     }
     revenant_expect_true(@"a streamed source starts playing on iOS 6.1.3", streamStarted != (BOOL)negative, @"the stream is not playing");
-    BOOL streamFinished = revenant_finishes(streaming, 12.0);
+    BOOL streamFinished = revenant_finishes(streaming, 3.0);
     printf("REVENANT-PROBE stream finished on its own=%d\n", streamFinished);
     revenant_expect_true(@"a streamed 2 second tone finishes on its own", streamFinished != (BOOL)negative, @"the stream did not finish");
 
