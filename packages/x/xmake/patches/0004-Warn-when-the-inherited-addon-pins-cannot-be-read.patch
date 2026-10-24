@@ -9,6 +9,9 @@ silently, so the child used the active versions with nothing said.
 It now warns with the value and the reason and uses no inherited pins.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  xmake/core/package/addon.lua | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)

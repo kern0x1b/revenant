@@ -1092,10 +1092,23 @@ function boot(opt)
             log = log, errors = errors, frame = os.isfile(frame) and frame or nil}
 end
 
+local RESERVED_CORES = 2
+local RESERVED_MB = 4096
+local CORES_PER_EMULATOR = 1
+local MB_PER_EMULATOR = 4800
+
+function capacity_of(cores, megabytes)
+    local by_cores = (cores - RESERVED_CORES) // CORES_PER_EMULATOR
+    local by_memory = (megabytes - RESERVED_MB) // MB_PER_EMULATOR
+    return math.max(1, math.min(by_cores, by_memory))
+end
+
 function capacity()
-    local cores = os.cpuinfo("ncpu")
-    local gigabytes = os.meminfo("totalsize") // 1024
-    return math.max(1, math.min(cores // 3, gigabytes // 5))
+    return capacity_of(os.cpuinfo("ncpu"), os.meminfo("totalsize"))
+end
+
+function slots_folder()
+    return path.join(path.directory(dyld.root()), "emulator-slots")
 end
 
 function crowded(load, cores)
@@ -1128,7 +1141,7 @@ end
 
 function acquire(opt)
     opt = opt or {}
-    local folder = directory(opt.folder or path.join(root(), "slots"))
+    local folder = directory(opt.folder or slots_folder())
     local count = opt.count or capacity()
     if opt.patience ~= 0 then
         wait_for_quiet(opt)

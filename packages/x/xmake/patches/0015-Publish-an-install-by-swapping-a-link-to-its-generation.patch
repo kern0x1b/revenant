@@ -28,6 +28,9 @@ reads it: the unpatched xmake showed an incomplete install in 162 of 204
 reads, this one in none of 74. The grace is an hour because the longest CI
 run on main took 48 minutes, so an hour covers a consumer as long as CI's
 longest job.
+
+Changes-build-output: no
+
 ---
  xmake/core/package/addon.lua                  |  7 +-
  xmake/core/package/package.lua                | 83 ++++++++++++++++++-

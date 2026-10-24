@@ -259,6 +259,7 @@ struct PerformanceSnapshot {
     std::uint64_t jit_stable_table_collisions { };
     std::uint64_t jit_rsb_hits { };
     std::uint64_t jit_rsb_misses { };
+    std::uint64_t jit_fast_dispatch_hint_exits { };
     std::uint64_t jit_stable_link_hits { };
     std::uint64_t jit_stable_link_misses { };
     std::uint64_t jit_host_yield_checks { };
@@ -443,7 +444,7 @@ public:
     void record_jit_dispatch(std::uint64_t fast_link_hits,
         std::uint64_t fast_link_misses, std::uint64_t stable_table_probes,
         std::uint64_t stable_table_collisions, std::uint64_t rsb_hits,
-        std::uint64_t rsb_misses);
+        std::uint64_t rsb_misses, std::uint64_t fast_dispatch_hint_exits);
     void record_jit_dispatch(std::uint64_t stable_link_hits,
         std::uint64_t stable_link_misses, std::uint64_t rsb_hits,
         std::uint64_t rsb_misses);
@@ -637,6 +638,7 @@ private:
     std::atomic<std::uint64_t> jit_stable_table_collisions_ { };
     std::atomic<std::uint64_t> jit_rsb_hits_ { };
     std::atomic<std::uint64_t> jit_rsb_misses_ { };
+    std::atomic<std::uint64_t> jit_fast_dispatch_hint_exits_ { };
     std::atomic<std::uint64_t> jit_host_yield_checks_ { };
     std::atomic<std::uint64_t> jit_host_yields_ { };
     std::atomic<std::uint64_t> jit_host_slice_budget_samples_ { };

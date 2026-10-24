@@ -16,6 +16,9 @@ wants lka. Both stay asleep until they are killed.
 Inside a coroutine the lock is now tried again every 100 ms, and the
 wait yields to the scheduler, so the holder finishes and lets go. Outside
 a coroutine the blocking lock stays.
+
+Changes-build-output: no
+
 ---
  xmake/core/package/package.lua | 14 +++++++++++---
  1 file changed, 11 insertions(+), 3 deletions(-)

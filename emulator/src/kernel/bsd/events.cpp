@@ -2600,6 +2600,70 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
+        const auto put32_le = [](std::vector<std::byte>& bytes,
+                                  std::uint32_t value) {
+            for (std::size_t shift = 0; shift < 32; shift += 8)
+                bytes.push_back(static_cast<std::byte>(value >> shift));
+        };
+        if (*mib0 == darwin::sysctl::control_vm &&
+            *mib1 == darwin::sysctl::vm_loadavg && registers[1] == 2) {
+            write_read_only_bytes(
+                foundation::encode_user32_loadavg(load_average()));
+            return;
+        }
+        if (*mib0 == darwin::sysctl::control_net &&
+            *mib1 == darwin::network::link_protocol_family && *mib2 == 0 &&
+            *mib3 == darwin::network::ifmib_system && registers[1] == 5 &&
+            memory_.read32(registers[0] + 16U) ==
+                darwin::network::ifmib_ifcount) {
+            std::uint32_t highest_index = 0;
+            {
+                std::lock_guard network_lock { shared_state_->network_mutex };
+                for (const auto& entry : shared_state_->network_interfaces) {
+                    highest_index = std::max(highest_index,
+                        static_cast<std::uint32_t>(entry.second.index));
+                }
+            }
+            std::vector<std::byte> bytes;
+            put32_le(bytes, highest_index);
+            write_read_only_bytes(bytes);
+            return;
+        }
+        if (*mib0 == darwin::sysctl::control_net &&
+            *mib1 == darwin::network::link_protocol_family && *mib2 == 0 &&
+            *mib3 == darwin::network::ifmib_ifdata && registers[1] == 6) {
+            const auto index = memory_.read32(registers[0] + 16U);
+            const auto selector = memory_.read32(registers[0] + 20U);
+            if (!index || !selector) {
+                bsd_error(cpu, bsd_support::bad_address);
+                return;
+            }
+            if (*selector == darwin::network::ifdata_general ||
+                *selector == darwin::network::ifdata_linkspecific) {
+                std::optional<darwin::network::InterfaceSnapshot> found;
+                {
+                    std::lock_guard network_lock { shared_state_->network_mutex };
+                    for (const auto& [name, candidate] :
+                        shared_state_->network_interfaces) {
+                        if (static_cast<std::uint32_t>(candidate.index) ==
+                            *index) {
+                            found = kernel_network::make_interface_snapshot(
+                                name, candidate);
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    bsd_error(cpu, darwin::error::no_entry);
+                    return;
+                }
+                write_read_only_bytes(
+                    *selector == darwin::network::ifdata_general
+                        ? darwin::network::make_ifmibdata(*found)
+                        : std::vector<std::byte> {});
+                return;
+            }
+        }
         std::ostringstream message;
         message << "[sysctl] unsupported mib";
         for (std::uint32_t index = 0; index < registers[1] && index < 8;

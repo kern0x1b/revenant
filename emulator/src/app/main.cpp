@@ -237,11 +237,14 @@ std::size_t jit_code_cache_size(const std::vector<std::string>& args)
     const auto& value = *configured;
     std::size_t consumed { };
     const auto mebibytes = std::stoull(value, &consumed, 10);
+    const auto minimum_mebibytes =
+        JitCodeCacheGovernor::minimum_demand_working_set_bytes / bytes_per_mebibyte;
     const auto maximum_mebibytes =
         JitWorkPolicy::maximum_native_slab_bytes() / bytes_per_mebibyte;
-    if (consumed != value.size() || mebibytes < 8U ||
+    if (consumed != value.size() || mebibytes < minimum_mebibytes ||
         mebibytes > maximum_mebibytes) {
-        throw std::runtime_error { "--jit-cache-mib must be in the range 8.." +
+        throw std::runtime_error { "--jit-cache-mib must be in the range " +
+                                   std::to_string(minimum_mebibytes) + ".." +
                                    std::to_string(maximum_mebibytes) };
     }
     return static_cast<std::size_t>(mebibytes) * 1024U * 1024U;
@@ -1093,6 +1096,16 @@ void boot(const std::vector<std::string>& args, Output& output)
         options.time_scale = parsed;
     }
     options.jit_observer_only = flag(args, "--jit-observer-only");
+    options.shared_image_slab = flag(args, "--shared-image-slab");
+    if (const auto value = option(args, "--image-slab-mib")) {
+        if (!options.shared_image_slab)
+            throw std::runtime_error {
+                "--image-slab-mib needs --shared-image-slab"
+            };
+        options.image_slab_bytes = static_cast<std::size_t>(parse_mib_value(
+            *value, "--image-slab-mib", 8U,
+            JitWorkPolicy::maximum_native_slab_bytes() / bytes_per_mebibyte));
+    }
     options.report_performance = flag(args, "--perf-summary");
     if (const auto value = option(args, "--ticks"))
         options.ticks = std::stoull(*value);

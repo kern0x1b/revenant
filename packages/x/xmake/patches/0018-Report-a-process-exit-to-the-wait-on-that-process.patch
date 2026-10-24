@@ -12,6 +12,9 @@ under the same lock, and an exit kept for a process whose wait was removed is
 kept for the next wait on that pid.
 
 Self-review: crutches left
+
+Changes-build-output: no
+
 ---
   src/tbox/platform/posix/poller_process.c | 50 ++++++++++++++++++++++++++------
   1 file changed, 41 insertions(+), 9 deletions(-)
