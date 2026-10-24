@@ -11,6 +11,9 @@ of its descriptor with fstat, or nil where a file has no inode (Windows).
 _filelock:inode is the Lua side of it.
 
 Self-review: crutches left
+
+Changes-build-output: no
+
 ---
   src/tbox/platform/bsd/filelock.c     | 9 +++++++++
   src/tbox/platform/filelock.h         | 8 ++++++++

@@ -17,6 +17,9 @@ is now, another process has just reinstalled the package for the same
 dependencies and this one uses that install. install_always and --force
 still rebuild. package:manifest_reload() drops the manifest a package
 has cached and reads it from disk.
+
+Changes-build-output: no
+
 ---
  xmake/core/package/package.lua                |  5 ++++
  .../action/require/impl/actions/install.lua   | 26 ++++++++++++++++++-

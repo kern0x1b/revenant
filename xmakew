@@ -24,7 +24,33 @@ sha256() {
     fi
 }
 
+patchset() {
+    marked=""
+    while read -r name checksum; do
+        [ -n "$name" ] || continue
+        declared=$(awk '/^---$/{exit} /^Changes-build-output: (yes|no)$/{print $2}' "$1/$name" | head -n 1)
+        if [ "$declared" = yes ]; then
+            marked="$marked$name $checksum
+"
+        elif [ "$declared" != no ]; then
+            echo "xmakew: $name does not declare Changes-build-output: yes or no" >&2
+            exit 1
+        fi
+    done <<EOF
+$3
+EOF
+    if [ -n "$marked" ]; then
+        printf '%s\n%s' "$2" "$marked" | sha256 | cut -d' ' -f1
+    fi
+}
+
+if [ "${1:-}" = --patchset ]; then
+    patchset "$2" "$3" "$4"
+    exit 0
+fi
+
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
+digest=$(patchset "$package/patches" "$commit" "$patches")
 cache=$HOME/.revenant/cache/xmake
 prefix=$cache/$key
 
@@ -55,6 +81,8 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         ./configure --prefix="$work/install"
         make -j"${XMAKE_MAX_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
         make install
+        mkdir -p "$work/install/share/xmake"
+        printf '%s\n' "$digest" > "$work/install/share/xmake/revenant-patch-set"
         mkdir -p "$work/lua"
         for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
             case ${file##*/} in
