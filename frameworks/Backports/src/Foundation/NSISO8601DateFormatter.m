@@ -125,7 +125,7 @@ NSString *revenant_iso8601_pattern(NSISO8601DateFormatOptions options)
 + (NSString *)stringFromDate:(NSDate *)date timeZone:(NSTimeZone *)timeZone
                formatOptions:(NSISO8601DateFormatOptions)formatOptions
 {
-    NSISO8601DateFormatter *formatter = [[self alloc] init];
+    NSISO8601DateFormatter *formatter = (NSISO8601DateFormatter *)[[self alloc] init];
     formatter.timeZone = timeZone;
     formatter.formatOptions = formatOptions;
     return [formatter stringFromDate:date];
