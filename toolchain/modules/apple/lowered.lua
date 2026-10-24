@@ -431,7 +431,7 @@ local function constant_end(text, at)
     return #text
 end
 
-local function lowering_of(text, implemented)
+local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
     for position, word in text:gmatch("()([%a_][%w_]*)") do
@@ -573,7 +573,7 @@ local function lowering_of(text, implemented)
         end
     end
     if implemented.types then
-        for _, declaration in ipairs(typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations or typedef_declarations(text)) do
             if declaration.annotated and declaration.name and implemented.types[declaration.name] then
                 for _, piece in ipairs(pieces_of(text, declaration.start, declaration.stop)) do
                     lower(piece[1], piece[2])
@@ -903,6 +903,35 @@ local function member_headers(sdk)
     return changed
 end
 
+local function names_of(set)
+    local names = {classes = set.classes or {}, protocols = set.protocols or {}, words = {}}
+    for _, field in ipairs({"globals", "functions", "types"}) do
+        for name in pairs(set[field] or {}) do
+            names.words[name] = true
+        end
+    end
+    return names
+end
+
+local function mentions(text, names)
+    for class in text:gmatch("@interface%s+([%w_]+)") do
+        if names.classes[class] then
+            return true
+        end
+    end
+    for protocol in text:gmatch("@protocol%s+([%w_]+)") do
+        if names.protocols[protocol] then
+            return true
+        end
+    end
+    for word in text:gmatch("[%a_][%w_]*") do
+        if names.words[word] then
+            return true
+        end
+    end
+    return false
+end
+
 local function lowered_types(sdk, set)
     local changed = member_headers(sdk)
     local declared, queue, queued = {}, {}, {}
@@ -912,13 +941,17 @@ local function lowered_types(sdk, set)
             table.insert(queue, name)
         end
     end
+    local names = names_of(set)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
-        local _, used = lowering_of(text, set)
-        for key in pairs(used) do
-            enqueue(key:sub(2))
+        local declarations = typedef_declarations(text)
+        if mentions(text, names) then
+            local _, used = lowering_of(text, set, declarations)
+            for key in pairs(used) do
+                enqueue(key:sub(2))
+            end
         end
-        for _, declaration in ipairs(typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations) do
             if declaration.name then
                 declared[declaration.name] = declared[declaration.name] or {}
                 table.insert(declared[declaration.name], declaration)
@@ -1062,16 +1095,73 @@ local function ios_later(text)
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
 end
 
+local function digest_of(base, files)
+    local parts = {}
+    for _, file in ipairs(files) do
+        table.insert(parts, path.relative(file, base) .. "=" .. hash.sha256(file))
+    end
+    return hash.strhash128(table.concat(parts, "\n"))
+end
+
+local function members_key(src, sdk)
+    local sdk_files = table.join(framework_headers(sdk))
+    for _, entry in ipairs(MEMBERS) do
+        table.insert(sdk_files, path.join(directory_of(sdk, entry.header), entry.header.file))
+    end
+    byteorder.sort(sdk_files)
+    local src_files = os.files(path.join(src, "**"))
+    byteorder.sort(src_files)
+    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+    local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
+    return hash.strhash128(table.concat({
+        "generator=" .. digest_of(MODULE_DIR, generator),
+        "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
+        "device=" .. hash.sha256(device_members_file()),
+        "src=" .. digest_of(src, src_files),
+        "sdk=" .. digest_of(sdk, sdk_files),
+    }, "\n"))
+end
+
+function members_text(src, sdk)
+    local folder = path.join(workspace.cache(), "lowered-members")
+    local final = path.join(folder, members_key(src, sdk) .. ".txt")
+    local cached = os.isfile(final) and try {function () return io.readfile(final) end}
+    if cached then
+        return cached
+    end
+    local text = serialize(members_of(src, sdk))
+    os.mkdir(folder)
+    for _, stale in ipairs(os.files(path.join(folder, "*.txt"))) do
+        os.tryrm(stale)
+    end
+    local partial = final .. "." .. tostring(os.time()) .. ".partial"
+    io.writefile(partial, text)
+    os.mv(partial, final)
+    return text
+end
+
 function later_constants(sdk)
     local found = {}
     for _, file in ipairs(framework_headers(sdk)) do
-        for line in io.readfile(file):gmatch("[^\n]*") do
-            if line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
-                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+[%w_]*AVAILABLE")
-                if name and line:find("=", 1, true) and not line:find("const", 1, true) then
-                    found[name] = true
+        local text = io.readfile(file)
+        local seen = {}
+        local at = text:find("AVAILABLE", 1, true)
+        while at do
+            local first = at
+            while first > 1 and text:byte(first - 1) ~= 10 do
+                first = first - 1
+            end
+            if not seen[first] then
+                seen[first] = true
+                local line = text:match("^[^\n]*", first)
+                if line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
+                    local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+[%w_]*AVAILABLE")
+                    if name and line:find("=", 1, true) and not line:find("const", 1, true) then
+                        found[name] = true
+                    end
                 end
             end
+            at = text:find("AVAILABLE", at + 1, true)
         end
     end
     return found
