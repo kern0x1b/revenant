@@ -245,6 +245,8 @@ package("swift-runtime")
         end
         local platform_source = path.join(path.absolute("platform"), "stdlib", "public", "Platform")
         local generated = path.absolute(path.join("build", "overlay"))
+        local module_cache = path.join(generated, "module-cache")
+        os.mkdir(module_cache)
         os.mkdir(generated)
         local overlay_sources = {}
         for _, name in ipairs({"Darwin", "tgmath"}) do
@@ -253,7 +255,7 @@ package("swift-runtime")
         for _, name in ipairs({"Platform.swift", "TiocConstants.swift", "POSIXError.swift", "MachError.swift"}) do
             table.insert(overlay_sources, path.join(platform_source, name))
         end
-        local overlay_flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", "Darwin",
+        local overlay_flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", "Darwin", "-module-cache-path", module_cache,
                                           "-parse-as-library", "-swift-version", "5", "-O", "-wmo",
                                           "-Xfrontend", "-disable-implicit-concurrency-module-import",
                                           "-Xfrontend", "-disable-implicit-string-processing-module-import",
@@ -276,7 +278,7 @@ package("swift-runtime")
         local function build_overlay(name, overlay_sources, links, objects, opt)
             local module = path.join(install, name .. ".swiftmodule")
             os.mkdir(module)
-            local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name,
+            local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name, "-module-cache-path", module_cache,
                                       "-parse-as-library", "-swift-version", "5", "-O", "-wmo",
                                       "-Xfrontend", "-disable-implicit-string-processing-module-import",
                                       "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}, use_ld,
