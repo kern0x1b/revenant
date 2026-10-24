@@ -2993,6 +2993,7 @@ private:
         config.always_little_endian = true;
         config.enable_cycle_counting = true;
         config.optimizations = jit_optimizations();
+        config.dispatch_counters = performance_counters().enabled();
         config.check_halt_on_memory_access = true;
         config.code_cache_size = code_cache_size_;
         config.coprocessors[15] = cp15_;
@@ -3200,7 +3201,9 @@ private:
             delta(current.stable_table_collisions,
                 recorded_dispatch_counters_.stable_table_collisions),
             delta(current.rsb_hits, recorded_dispatch_counters_.rsb_hits),
-            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses));
+            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses),
+            delta(current.fast_dispatch_hint_exits,
+                recorded_dispatch_counters_.fast_dispatch_hint_exits));
     }
 
     [[nodiscard]] std::uint64_t executor_local_memory_bytes() const noexcept

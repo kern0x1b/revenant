@@ -14,12 +14,12 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
  src/dynarmic/CMakeLists.txt                  |  4 ++--
  src/dynarmic/backend/arm64/a32_interface.cpp | 18 +++++++++---------
  src/dynarmic/backend/x64/a32_interface.cpp   | 18 +++++++++---------
- src/dynarmic/interface/A32/a32.h             |  2 +-
- src/dynarmic/interface/A32/config.h          |  2 +-
- 6 files changed, 24 insertions(+), 24 deletions(-)
+ src/dynarmic/interface/A32/a32.h             |  4 +++-
+ src/dynarmic/interface/A32/config.h          |  6 +++++-
+ 6 files changed, 30 insertions(+), 24 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 336a4f04..2ae232eb 100644
+index 336a4f0..2ae232e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -19,8 +19,8 @@ option(DYNARMIC_FATAL_ERRORS "Errors are fatal" OFF)
@@ -34,7 +34,7 @@ index 336a4f04..2ae232eb 100644
  option(DYNARMIC_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
  option(DYNARMIC_USE_BUNDLED_EXTERNALS "Use all bundled externals (useful when e.g. cross-compiling)" OFF)
 diff --git a/src/dynarmic/CMakeLists.txt b/src/dynarmic/CMakeLists.txt
-index 6ef5bdb6..30441cd8 100644
+index 6ef5bdb..30441cd 100644
 --- a/src/dynarmic/CMakeLists.txt
 +++ b/src/dynarmic/CMakeLists.txt
 @@ -522,9 +522,9 @@ endif()
@@ -50,7 +50,7 @@ index 6ef5bdb6..30441cd8 100644
  if (DYNARMIC_IGNORE_ASSERTS)
      target_compile_definitions(dynarmic PRIVATE MCL_IGNORE_ASSERTS=1)
 diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
-index f1dbf0fd..a7e54c63 100644
+index bdbf6f2..9f3a125 100644
 --- a/src/dynarmic/backend/arm64/a32_interface.cpp
 +++ b/src/dynarmic/backend/arm64/a32_interface.cpp
 @@ -15,7 +15,7 @@
@@ -135,7 +135,7 @@ index f1dbf0fd..a7e54c63 100644
      bool test_emit_failure_injected{};
  #endif
 diff --git a/src/dynarmic/backend/x64/a32_interface.cpp b/src/dynarmic/backend/x64/a32_interface.cpp
-index 90829f62..4d69533a 100644
+index 90829f6..4d69533 100644
 --- a/src/dynarmic/backend/x64/a32_interface.cpp
 +++ b/src/dynarmic/backend/x64/a32_interface.cpp
 @@ -15,7 +15,7 @@
@@ -220,10 +220,18 @@ index 90829f62..4d69533a 100644
      bool test_emit_failure_injected{};
  #endif
 diff --git a/src/dynarmic/interface/A32/a32.h b/src/dynarmic/interface/A32/a32.h
-index 73232f4e..f25c91cc 100644
+index 73232f4..ae8cb88 100644
 --- a/src/dynarmic/interface/A32/a32.h
 +++ b/src/dynarmic/interface/A32/a32.h
-@@ -176,7 +176,7 @@ public:
+@@ -35,6 +35,7 @@ struct DispatchCounters {
+     std::uint64_t fast_link_misses{};
+     std::uint64_t stable_table_probes{};
+     std::uint64_t stable_table_collisions{};
++    std::uint64_t fast_dispatch_hint_exits{};
+ };
+ 
+ class NativeCodeSlab final {
+@@ -176,7 +178,7 @@ public:
       * execution is stopped.
       */
      void GeneratePortableIR(std::uint64_t location_descriptor);
@@ -233,7 +241,7 @@ index 73232f4e..f25c91cc 100644
      /**
       * Emits a previously optimized IR block without translating guest code.
 diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
-index e0d192a5..cdc008b9 100644
+index e0d192a..0edb514 100644
 --- a/src/dynarmic/interface/A32/config.h
 +++ b/src/dynarmic/interface/A32/config.h
 @@ -100,7 +100,7 @@ struct UserCallbacks : public TranslateCallbacks {
@@ -245,6 +253,17 @@ index e0d192a5..cdc008b9 100644
              std::uint64_t location_descriptor,
              std::uint64_t translation_nanoseconds,
              const Dynarmic::IR::Block& block) noexcept {
+@@ -230,6 +230,10 @@ struct UserConfig {
+     size_t processor_id = 0;
+     ExclusiveMonitor* global_monitor = nullptr;
+ 
++    /// Count return stack buffer predictions and FastDispatchHint exits in the emitted code (arm64).
++    /// Each counted event costs a few instructions, so this is for runs that report counters.
++    bool dispatch_counters = false;
++
+     /// Select the architecture version to use.
+     /// There are minor behavioural differences between versions.
+     ArchVersion arch_version = ArchVersion::v8;
 -- 
 2.54.0 (Apple Git-157)
 
