@@ -1,0 +1,4 @@
+Package: org.revenant.emulatex509
+Name: emulate X509 encode probe
+Architecture: iphoneos-arm
+Description: A program that parses a fixed certificate with BoringSSL and encodes each part back, to find which encoder fails on armv7 iOS 6.1.3 where the same code passes on macOS.

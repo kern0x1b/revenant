@@ -1,4 +1,5 @@
 @_implementationOnly import CBoringSSL
+@_implementationOnly import CommonCrypto
 import Foundation
 import Security
 
@@ -30,15 +31,69 @@ let revenantCertificateFailures: Set<OSStatus> = [-9807, -9812, -9813, -9814, -9
 private let revenantCertificateChainInvalid: OSStatus = -9807
 private let revenantPeerHandshakeFailed: OSStatus = -9824
 
-private typealias NWCopyKeyDataFunction = @convention(c) (SecKey, UnsafeMutablePointer<Unmanaged<CFError>?>?) -> CFData?
+private typealias NWRawSignFunction = @convention(c) (SecKey, Int32, UnsafePointer<UInt8>, Int, UnsafeMutablePointer<UInt8>, UnsafeMutablePointer<Int>) -> OSStatus
 
-private func revenantCopyKeyData(_ key: SecKey) -> Data? {
-    guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "SecKeyCopyExternalRepresentation") else {
+private let revenantRawSign: NWRawSignFunction? = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "SecKeyRawSign").map {
+    unsafeBitCast($0, to: NWRawSignFunction.self)
+}
+
+@available(iOS 10.0, macOS 10.12, *)
+private func revenantMessageAlgorithm(_ algorithm: UInt16) -> SecKeyAlgorithm? {
+    switch algorithm {
+    case 0x0201:
+        return .rsaSignatureMessagePKCS1v15SHA1
+    case 0x0401:
+        return .rsaSignatureMessagePKCS1v15SHA256
+    case 0x0501:
+        return .rsaSignatureMessagePKCS1v15SHA384
+    case 0x0601:
+        return .rsaSignatureMessagePKCS1v15SHA512
+    case 0x0804:
+        return .rsaSignatureMessagePSSSHA256
+    case 0x0805:
+        return .rsaSignatureMessagePSSSHA384
+    case 0x0806:
+        return .rsaSignatureMessagePSSSHA512
+    default:
         return nil
     }
-    let copy = unsafeBitCast(symbol, to: NWCopyKeyDataFunction.self)
-    return copy(key, nil) as Data?
 }
+
+private func revenantDigestInfo(_ algorithm: UInt16, _ input: UnsafePointer<UInt8>, _ count: Int) -> [UInt8]? {
+    switch algorithm {
+    case 0x0201:
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+        CC_SHA1(input, CC_LONG(count), &digest)
+        return [0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14] + digest
+    case 0x0401:
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+        CC_SHA256(input, CC_LONG(count), &digest)
+        return [0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20] + digest
+    case 0x0501:
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA384_DIGEST_LENGTH))
+        CC_SHA384(input, CC_LONG(count), &digest)
+        return [0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30] + digest
+    case 0x0601:
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA512_DIGEST_LENGTH))
+        CC_SHA512(input, CC_LONG(count), &digest)
+        return [0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40] + digest
+    default:
+        return nil
+    }
+}
+
+private let revenantSignWithKey: @convention(c) (OpaquePointer?, UnsafeMutablePointer<UInt8>?, UnsafeMutablePointer<Int>?, Int, UInt16, UnsafePointer<UInt8>?, Int) -> ssl_private_key_result_t = { ssl, out, outLength, maxOut, algorithm, input, inputLength in
+    guard let ssl, let session = SSL_get_ex_data(ssl, 0), let out, let outLength, let input else {
+        return ssl_private_key_failure
+    }
+    return Unmanaged<NWTLSSession>.fromOpaque(session).takeUnretainedValue().sign(algorithm, input, inputLength, out, outLength, maxOut)
+}
+
+private let revenantPrivateKeyMethod: UnsafeMutablePointer<SSL_PRIVATE_KEY_METHOD> = {
+    let method = UnsafeMutablePointer<SSL_PRIVATE_KEY_METHOD>.allocate(capacity: 1)
+    method.initialize(to: SSL_PRIVATE_KEY_METHOD(sign: revenantSignWithKey, decrypt: nil, complete: nil))
+    return method
+}()
 
 private final class ProtocolList {
     let storage: UnsafeMutablePointer<UInt8>
@@ -97,6 +152,7 @@ final class NWTLSSession {
     private let serverSide: Bool
     private let serverName: String?
     private let alpnOffer: ProtocolList?
+    private let signingKey: SecKey?
     private var verifyFailure: OSStatus?
     private(set) var isEstablished = false
     private(set) var wantsWrite = false
@@ -110,11 +166,22 @@ final class NWTLSSession {
         let name = options.serverName ?? defaultServerName
         let offer = options.applicationProtocols.isEmpty ? nil : ProtocolList(options.applicationProtocols)
 
+        var signing: SecKey?
         if serverSide {
-            guard let identity = options.localIdentity, NWTLSSession.install(identity, into: context) else {
+            guard let identity = options.localIdentity, NWTLSSession.installCertificate(identity, into: context),
+                  let key = NWTLSSession.privateKey(of: identity) else {
                 SSL_CTX_free(context)
                 return nil
             }
+            signing = key
+            SSL_CTX_set_private_key_method(context, revenantPrivateKeyMethod)
+            #if os(macOS)
+            var preferences: [UInt16] = [0x0804, 0x0805, 0x0806, 0x0401, 0x0501, 0x0601, 0x0201]
+            #else
+            var preferences: [UInt16] = [0x0401, 0x0501, 0x0601, 0x0201]
+            SSL_CTX_set_max_proto_version(context, UInt16(TLS1_2_VERSION))
+            #endif
+            SSL_CTX_set_signing_algorithm_prefs(context, &preferences, preferences.count)
             var mode = SSL_VERIFY_NONE
             if peerRequired {
                 mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
@@ -136,6 +203,7 @@ final class NWTLSSession {
         self.context = context
         self.ssl = ssl
         self.serverSide = serverSide
+        self.signingKey = signing
         self.serverName = serverSide ? nil : name
         self.alpnOffer = serverSide ? offer : nil
         SSL_set_fd(ssl, descriptor)
@@ -265,40 +333,66 @@ final class NWTLSSession {
         }
     }
 
-    private static func install(_ identity: SecIdentity, into context: OpaquePointer) -> Bool {
+    private static func installCertificate(_ identity: SecIdentity, into context: OpaquePointer) -> Bool {
         var certificate: SecCertificate?
-        var key: SecKey?
-        guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate,
-              SecIdentityCopyPrivateKey(identity, &key) == errSecSuccess, let key,
-              let keyData = revenantCopyKeyData(key)
-        else {
+        guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate else {
             return false
         }
         let certificateData = SecCertificateCopyData(certificate) as Data
-        let x509 = certificateData.withUnsafeBytes { raw -> OpaquePointer? in
+        guard let x509 = certificateData.withUnsafeBytes({ raw -> OpaquePointer? in
             var pointer = raw.bindMemory(to: UInt8.self).baseAddress
             return d2i_X509(nil, &pointer, raw.count)
-        }
-        let rsa = keyData.withUnsafeBytes { raw -> OpaquePointer? in
-            var pointer = raw.bindMemory(to: UInt8.self).baseAddress
-            return d2i_RSAPrivateKey(nil, &pointer, raw.count)
-        }
-        guard let x509 else {
+        }) else {
             return false
         }
         defer {
             X509_free(x509)
         }
-        guard let rsa, let pkey = EVP_PKEY_new() else {
-            return false
+        return SSL_CTX_use_certificate(context, x509) == 1
+    }
+
+    private static func privateKey(of identity: SecIdentity) -> SecKey? {
+        var key: SecKey?
+        guard SecIdentityCopyPrivateKey(identity, &key) == errSecSuccess else {
+            return nil
         }
-        defer {
-            EVP_PKEY_free(pkey)
+        return key
+    }
+
+    fileprivate func sign(_ algorithm: UInt16, _ input: UnsafePointer<UInt8>, _ inputLength: Int,
+                          _ out: UnsafeMutablePointer<UInt8>, _ outLength: UnsafeMutablePointer<Int>, _ maxOut: Int) -> ssl_private_key_result_t {
+        guard let key = signingKey else {
+            return ssl_private_key_failure
         }
-        guard EVP_PKEY_assign(pkey, EVP_PKEY_RSA, UnsafeMutableRawPointer(rsa)) == 1 else {
-            RSA_free(rsa)
-            return false
+        let signature: Data
+        #if os(macOS)
+        guard #available(macOS 10.12, *), let message = revenantMessageAlgorithm(algorithm),
+              let data = SecKeyCreateSignature(key, message, Data(bytes: input, count: inputLength) as CFData, nil) as Data? else {
+            return ssl_private_key_failure
         }
-        return SSL_CTX_use_certificate(context, x509) == 1 && SSL_CTX_use_PrivateKey(context, pkey) == 1
+        signature = data
+        #else
+        guard let rawSign = revenantRawSign, let info = revenantDigestInfo(algorithm, input, inputLength) else {
+            return ssl_private_key_failure
+        }
+        let size = SecKeyGetBlockSize(key)
+        var buffer = [UInt8](repeating: 0, count: size)
+        var length = size
+        let status = info.withUnsafeBufferPointer { digest in
+            buffer.withUnsafeMutableBufferPointer { output in
+                rawSign(key, 1, digest.baseAddress!, digest.count, output.baseAddress!, &length)
+            }
+        }
+        guard status == errSecSuccess else {
+            return ssl_private_key_failure
+        }
+        signature = Data(buffer.prefix(length))
+        #endif
+        guard signature.count <= maxOut else {
+            return ssl_private_key_failure
+        }
+        signature.copyBytes(to: out, count: signature.count)
+        outLength.pointee = signature.count
+        return ssl_private_key_success
     }
 }
