@@ -1915,6 +1915,7 @@ class RevenantSCNAnimations
 class RevenantSCNArchivedColor
 class RevenantSCNArchivedColorSpace
 class RevenantSCNArchivedData
+class RevenantSCNAudioPlayerDelegate
 class RevenantSCNCoding
 class RevenantSCNDraw
 class RevenantSCNMesh
@@ -2041,6 +2042,8 @@ class RevenantWebSchemeTask
 class RevenantWebURLProtocol
 class RevenantZoomRamp
 class RevenantZoomSampleRelay
+class SCNAudioPlayer
+class SCNAudioSource
 class SCNCamera
 class SCNGeometry
 class SCNGeometryElement
@@ -3133,6 +3136,7 @@ function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
+function RevenantSCNAudioMixFor
 function RevenantSCNProjectPoint
 function RevenantSCNProjectionMatrix
 function RevenantSCNUnprojectPoint
@@ -23260,7 +23264,7 @@ member RevenantRegistration -revenant_call:previous:
 member RevenantResourceKeysInstaller +load
 member RevenantRotationCoordinator -targetTransform
 member RevenantRotationDriver +load
-member RevenantSCNAnimations +evaluateScene:atTime:
+member RevenantSCNAnimations +evaluateScene:atTime:listener:
 member RevenantSCNAnimations -addAnimation:forKey:
 member RevenantSCNAnimations -animationForKey:
 member RevenantSCNAnimations -animationKeys
@@ -23290,6 +23294,7 @@ member RevenantSCNArchivedData -initWithCoder:
 member RevenantSCNArchivedData -length
 member RevenantSCNArchivedData -mutableBytes
 member RevenantSCNArchivedData -setLength:
+member RevenantSCNAudioPlayerDelegate -audioPlayerDidFinishPlaying:successfully:
 member RevenantSCNCoding +colorWithLinearWhite:
 member RevenantSCNCoding +currentSourceURL
 member RevenantSCNCoding +decodeArrayOfClass:coder:forKey:
@@ -23887,6 +23892,32 @@ member RevenantZoomSampleRelay -isKindOfClass:
 member RevenantZoomSampleRelay -isMemberOfClass:
 member RevenantZoomSampleRelay -methodSignatureForSelector:
 member RevenantZoomSampleRelay -respondsToSelector:
+member SCNAudioPlayer +audioPlayerWithSource:
+member SCNAudioPlayer -initWithSource:
+member SCNAudioPlayer -revenantAVPlayer
+member SCNAudioPlayer -revenantApplyMix:
+member SCNAudioPlayer -revenantDidFinishPlayback
+member SCNAudioPlayer -revenantIsSpatial
+member SCNAudioPlayer -revenantSourceVolume
+member SCNAudioPlayer -revenantStartOnNode:
+member SCNAudioPlayer -revenantStop
+member SCNAudioSource +audioSourceNamed:
+member SCNAudioSource -copyWithZone:
+member SCNAudioSource -initWithFileNamed:
+member SCNAudioSource -initWithURL:
+member SCNAudioSource -isPositional
+member SCNAudioSource -load
+member SCNAudioSource -loops
+member SCNAudioSource -rate
+member SCNAudioSource -revenantData
+member SCNAudioSource -revenantURL
+member SCNAudioSource -setLoops:
+member SCNAudioSource -setPositional:
+member SCNAudioSource -setRate:
+member SCNAudioSource -setShouldStream:
+member SCNAudioSource -setVolume:
+member SCNAudioSource -shouldStream
+member SCNAudioSource -volume
 member SCNCamera +camera
 member SCNCamera +supportsSecureCoding
 member SCNCamera -copyWithZone:
@@ -23954,10 +23985,12 @@ member SCNMaterialProperty -setContents:
 member SCNNode +node
 member SCNNode +supportsSecureCoding
 member SCNNode -addAnimation:forKey:
+member SCNNode -addAudioPlayer:
 member SCNNode -addChildNode:
 member SCNNode -addParticleSystem:
 member SCNNode -animationForKey:
 member SCNNode -animationKeys
+member SCNNode -audioPlayers
 member SCNNode -childNodeWithName:recursively:
 member SCNNode -childNodes
 member SCNNode -clone
@@ -23975,8 +24008,10 @@ member SCNNode -particleSystems
 member SCNNode -pauseAnimationForKey:
 member SCNNode -presentationNode
 member SCNNode -removeAllAnimations
+member SCNNode -removeAllAudioPlayers
 member SCNNode -removeAllParticleSystems
 member SCNNode -removeAnimationForKey:
+member SCNNode -removeAudioPlayer:
 member SCNNode -removeFromParentNode
 member SCNNode -removeParticleSystem:
 member SCNNode -resumeAnimationForKey:
@@ -23985,6 +24020,8 @@ member SCNNode -revenantModelValueForKeyPath:
 member SCNNode -revenantPresentedOpacity
 member SCNNode -revenantPresentedTransform
 member SCNNode -revenantPresentedWorldTransform
+member SCNNode -revenantRemoveFinishedAudioPlayer:
+member SCNNode -revenantUpdateAudioWithListener:
 member SCNNode -rotation
 member SCNNode -setBoundingBoxMin:max:
 member SCNNode -setEulerAngles:
@@ -24048,6 +24085,7 @@ member SCNScene -lightingEnvironment
 member SCNScene -revenantSourceURL
 member SCNScene -setAttribute:forKey:
 member SCNView +layerClass
+member SCNView -audioListener
 member SCNView -commandQueue
 member SCNView -context
 member SCNView -currentRenderCommandEncoder
@@ -24075,6 +24113,7 @@ member SCNView -revenantSetContext:
 member SCNView -revenantSetUp
 member SCNView -revenantUpdateDisplayLink
 member SCNView -scene
+member SCNView -setAudioListener:
 member SCNView -setDelegate:
 member SCNView -setEaglContext:
 member SCNView -setJitteringEnabled:
@@ -30179,6 +30218,7 @@ protocol ASAuthorizationControllerDelegate
 protocol ASWebAuthenticationPresentationContextProviding
 protocol AVAsynchronousKeyValueLoading
 protocol AVAudioMixing
+protocol AVAudioPlayerDelegate
 protocol AVCaptureAudioDataOutputSampleBufferDelegate
 protocol AVCaptureDataOutputSynchronizerDelegate
 protocol AVCapturePhotoCaptureDelegate
@@ -30447,6 +30487,7 @@ protocol_member ASWebAuthenticationPresentationContextProviding -presentationAnc
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
 protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
 protocol_member AVAudioMixing -destinationForMixer:bus:
+protocol_member AVAudioPlayerDelegate -audioPlayerDidFinishPlaying:successfully:
 protocol_member AVCaptureAudioDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
 protocol_member AVCaptureDataOutputSynchronizerDelegate -dataOutputSynchronizer:didOutputSynchronizedDataCollection:
 protocol_member AVCapturePhotoCaptureDelegate -captureOutput:didCapturePhotoForResolvedSettings:
