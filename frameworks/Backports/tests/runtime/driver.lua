@@ -162,6 +162,9 @@ local function tree_hash(folder)
     for _, file in ipairs(os.files(path.join(folder, "**"))) do
         table.insert(parts, path.relative(file, folder) .. "=" .. file_hash(file))
     end
+    if #parts == 0 then
+        raise("no files under %s to fingerprint", folder)
+    end
     table.sort(parts)
     return text_hash(table.concat(parts, "\n"))
 end
@@ -208,20 +211,11 @@ local function acquire(lock, key)
     end
 end
 
-local function run(app, guest)
-    local program = path.absolute(emulator_program())
-    local firmware = firmware_root()
-    local libs_dir = path.absolute(libraries_folder(app))
-    local libraries = os.files(path.join(libs_dir, "lib*Backports.dylib"))
-    table.join2(libraries, os.files(path.join(libs_dir, "lib*Probe.dylib")))
-    table.sort(libraries)
-    if #libraries == 0 then
-        raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libs_dir)
-    end
+function fingerprint(app, guest, libraries, program, firmware)
     local identity = {
         program = file_hash(program),
         app = file_hash(app),
-        guest = tree_hash(guest),
+        guest = tree_hash(path.join(guest, "usr")),
         driver = file_hash(DRIVER),
         cases = text_hash(table.concat(case_names(), "\n")),
         image = image_hash(firmware),
@@ -232,6 +226,21 @@ local function run(app, guest)
     end
     local key = text_hash(table.concat({identity.program, identity.app, identity.guest, identity.driver,
                                         identity.cases, identity.image, table.concat(identity.libraries, ";")}, ";"))
+    return {identity = identity, key = key}
+end
+
+local function run(app, guest)
+    local program = path.absolute(emulator_program())
+    local firmware = firmware_root()
+    local libs_dir = path.absolute(libraries_folder(app))
+    local libraries = os.files(path.join(libs_dir, "lib*Backports.dylib"))
+    table.join2(libraries, os.files(path.join(libs_dir, "lib*Probe.dylib")))
+    table.sort(libraries)
+    if #libraries == 0 then
+        raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libs_dir)
+    end
+    local fingerprinted = fingerprint(app, guest, libraries, program, firmware)
+    local identity, key = fingerprinted.identity, fingerprinted.key
     local folder = path.join(home_cache(), key)
     local saved = path.join(folder, "cases.json")
     if os.isfile(saved) then
