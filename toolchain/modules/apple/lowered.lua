@@ -1539,9 +1539,9 @@ local function system_include_relative(file, sdk)
     end
 end
 
-VFS_SUBTREES = {os = true}
+VFS_SUBTREES = {}
 
-VFS_FILES = {["os.apinotes"] = true}
+VFS_FILES = {}
 
 local function lowered_apinotes(text, set)
     local functions = set.functions or {}
