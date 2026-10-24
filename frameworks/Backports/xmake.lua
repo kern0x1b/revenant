@@ -278,7 +278,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("FoundationBackports", "UIKitBackports")
+            add_deps("FoundationBackports", "UIKitBackports", "IOSurfaceBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
         add_syslinks("objc")
@@ -312,6 +312,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("screenshot_notification")
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
+        add_tests("keybag_lock_state")
+        add_tests("iosurface_surface")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)

@@ -143,6 +143,11 @@ CoreSurfaceHle::CoreSurfaceHle(UserlandHleRegistry& registry,
         std::string { core_foundation_image }, "_CFDictionaryGetValue");
     registry.register_guest_function(
         std::string { core_foundation_image }, "_CFNumberGetValue");
+    // _CFRelease is registered by the telephony module on this same image.
+    registry.register_guest_function(
+        std::string { core_foundation_image }, "_CFEqual");
+    registry.register_guest_function(
+        std::string { core_foundation_image }, "_CFRetain");
 }
 
 void CoreSurfaceHle::reset()
@@ -788,6 +793,130 @@ void CoreSurfaceHle::submit(Buffer& buffer, UserlandHleCall& call)
     display_->replace_pixels(std::move(pixels), call.process_id());
 }
 
+void CoreSurfaceHle::find_attribute(UserlandHleCall& call,
+    std::uint32_t client, std::uint32_t key, std::size_t index,
+    AttributeFound found)
+{
+    const auto* buffer = find(client);
+    if (buffer == nullptr || index >= buffer->attributes.size()) {
+        found(call, std::nullopt);
+        return;
+    }
+    call.cpu().registers()[0] = buffer->attributes.at(index).key;
+    call.cpu().registers()[1] = key;
+    if (!call.call_guest_function("_CFEqual",
+            [this, client, key, index, found](UserlandHleCall& equal) {
+                if (equal.cpu().registers()[0] != 0) {
+                    found(equal, index);
+                    return;
+                }
+                find_attribute(equal, client, key, index + 1, found);
+            })) {
+        found(call, std::nullopt);
+    }
+}
+
+void CoreSurfaceHle::run_guest_calls(UserlandHleCall& call,
+    std::vector<GuestCall> calls, std::size_t index,
+    std::function<void(UserlandHleCall&)> finish)
+{
+    if (index == calls.size()) {
+        finish(call);
+        return;
+    }
+    call.cpu().registers()[0] = calls[index].argument;
+    if (!call.call_guest_function(calls[index].symbol,
+            [this, calls, index, finish](UserlandHleCall& next) {
+                run_guest_calls(next, calls, index + 1, finish);
+            })) {
+        call.set_return(0);
+    }
+}
+
+void CoreSurfaceHle::copy_attribute(UserlandHleCall& call,
+    std::uint32_t client, std::uint32_t key)
+{
+    find_attribute(call, client, key, 0,
+        [this, client](UserlandHleCall& found, std::optional<std::size_t> index) {
+            const auto* buffer = find(client);
+            if (!index || buffer == nullptr) {
+                found.set_return(0);
+                return;
+            }
+            const auto value = buffer->attributes.at(*index).value;
+            run_guest_calls(found, { { "_CFRetain", value } }, 0,
+                [value](UserlandHleCall& retained) {
+                    retained.set_return(value);
+                });
+        });
+}
+
+void CoreSurfaceHle::set_attribute(UserlandHleCall& call,
+    std::uint32_t client, std::uint32_t key, std::uint32_t value)
+{
+    if (value == 0) {
+        remove_attribute(call, client, key);
+        return;
+    }
+    if (find(client) == nullptr) {
+        call.set_return(0);
+        return;
+    }
+    find_attribute(call, client, key, 0,
+        [this, client, key, value](UserlandHleCall& found,
+            std::optional<std::size_t> index) {
+            std::vector<GuestCall> calls { { "_CFRetain", key },
+                { "_CFRetain", value } };
+            std::optional<SurfaceAttributes::Entry> old;
+            if (index) {
+                old = find(client)->attributes.at(*index);
+                calls.push_back({ "_CFRelease", old->key });
+                calls.push_back({ "_CFRelease", old->value });
+            }
+            run_guest_calls(found, std::move(calls), 0,
+                [this, client, key, value, old](UserlandHleCall& stored) {
+                    auto* buffer = find(client);
+                    if (buffer == nullptr) {
+                        stored.set_return(0);
+                        return;
+                    }
+                    // The index may have moved during the guest releases, so
+                    // the entry is found again by its key.
+                    const auto current = buffer->attributes.find_key(
+                        old ? old->key : key);
+                    if (current) {
+                        buffer->attributes.replace(*current, key, value);
+                    } else {
+                        buffer->attributes.append(key, value);
+                    }
+                    stored.set_return(0);
+                });
+        });
+}
+
+void CoreSurfaceHle::remove_attribute(UserlandHleCall& call,
+    std::uint32_t client, std::uint32_t key)
+{
+    find_attribute(call, client, key, 0,
+        [this, client](UserlandHleCall& found, std::optional<std::size_t> index) {
+            const auto* buffer = find(client);
+            if (!index || buffer == nullptr) {
+                found.set_return(0);
+                return;
+            }
+            const auto old = buffer->attributes.at(*index);
+            run_guest_calls(found, { { "_CFRelease", old.key },
+                    { "_CFRelease", old.value } }, 0,
+                [this, client, old](UserlandHleCall& removed) {
+                    if (auto* current = find(client)) {
+                        if (const auto entry = current->attributes.find_key(old.key))
+                            current->attributes.erase(*entry);
+                    }
+                    removed.set_return(0);
+                });
+        });
+}
+
 void CoreSurfaceHle::dispatch(UserlandHleCall& call)
 {
     const auto symbol = call.symbol();
@@ -1018,17 +1147,28 @@ void CoreSurfaceHle::dispatch(UserlandHleCall& call)
                 call.memory().write32(call.argument(2), buffer->seed));
         }
         call.set_return(success);
-    } else if (operation == "GetYCbCrMatrix" || operation == "CopyProperty" ||
-               operation == "CopyValue") {
+    } else if (operation == "CopyValue") {
+        copy_attribute(call, buffer->client, call.argument(1));
+    } else if (operation == "SetValue") {
+        set_attribute(call, buffer->client, call.argument(1), call.argument(2));
+    } else if (operation == "RemoveValue") {
+        remove_attribute(call, buffer->client, call.argument(1));
+    } else if (operation == "IncrementUseCount") {
+        buffer->use_count.increment();
+        call.set_return(success);
+    } else if (operation == "DecrementUseCount") {
+        buffer->use_count.decrement();
+        call.set_return(success);
+    } else if (operation == "GetUseCount") {
+        call.set_return(buffer->use_count.count());
+    } else if (operation == "IsInUse") {
+        call.set_return(buffer->use_count.in_use() ? 1U : 0U);
+    } else if (operation == "GetYCbCrMatrix" || operation == "CopyProperty") {
         call.set_return(0);
     } else if (operation == "SetYCbCrMatrix" || operation == "SetProperty" ||
-               operation == "RemoveProperty" || operation == "SetValue" ||
-               operation == "RemoveValue" || operation == "IncrementUseCount" ||
-               operation == "DecrementUseCount" || operation == "BindAccel" ||
+               operation == "RemoveProperty" || operation == "BindAccel" ||
                operation == "BindAccelOnPlane") {
         call.set_return(success);
-    } else if (operation == "GetUseCount" || operation == "IsInUse") {
-        call.set_return(0);
     } else {
         if (unsupported_trace_count_ < maximum_unsupported_traces) {
             call.output().write(
