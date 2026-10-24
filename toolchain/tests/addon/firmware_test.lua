@@ -102,6 +102,7 @@ function failures(opt)
     os.vrunv("hdiutil", {"create", "-quiet", "-size", "40m", "-fs", "HFS+", "-volname", "revenant", "-type", "UDIF", hfs})
     os.mkdir(volume)
     os.vrunv("hdiutil", {"attach", "-quiet", "-nobrowse", "-mountpoint", volume, hfs})
+    local failure = nil
     try {
         function ()
             io.writefile(path.join(volume, "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_armv7"), "the cache of one firmware")
@@ -119,9 +120,14 @@ function failures(opt)
                 table.insert(found, "a compressed library beside the cache is taken readable, byte for byte: " .. (unread or "the bytes differ"))
             end
         end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
         finally {
             function ()
-                local detached, failure = false, nil
+                local detached, detach = false, nil
                 try {
                     function ()
                         os.vrunv("hdiutil", {"detach", "-quiet", volume})
@@ -129,7 +135,7 @@ function failures(opt)
                     end,
                     catch {
                         function (raised)
-                            failure = tostring(raised)
+                            detach = tostring(raised)
                         end
                     }
                 }
@@ -142,12 +148,17 @@ function failures(opt)
                             table.insert(services, line:trim())
                         end
                     end
-                    raise("the image did not detach from %s: %s; open on it: %s; indexing and mounting services: %s",
-                          volume, failure, holders ~= "" and holders or "none", #services > 0 and table.concat(services, "; ") or "none")
+                    local message = string.format("the image did not detach from %s: %s; open on it: %s; indexing and mounting services: %s",
+                                                  volume, detach, holders ~= "" and holders or "none", #services > 0 and table.concat(services, "; ") or "none")
+                    raise("%s", failure and (failure .. "\n" .. message) or message)
                 end
             end
         }
     }
+
+    if failure then
+        raise("%s", failure)
+    end
 
     os.tryrm(outside)
     os.mkdir(path.join(outside, "dev"))
