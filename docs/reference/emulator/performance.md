@@ -59,7 +59,7 @@ Provenance: the shared package store's Dynarmic source was rewritten at 15:07, a
 
 `xmake emulate run` of the daemon test `emulatelaunchd` (the port of `toolchain/tests/emulate/launchd`, iPhone4,1 on 6.1.3, built from this branch) passed: the probes found `com.apple.cvmsServ` registered at the first instruction and 244 Mach services declared, and the verdict was pass in 1.9 guest s, 218.8 host s at time scale 10. `/usr/bin/time -l` over the xmake command gave 249 s wall and 109 CPU s (77 user, 33 sys); the emulator's own footprint was not captured for this run.
 
-The device test `toolchain_device/emulator_test` runs one failing step, the queue step, because the `queue` xmake task was removed by the heavy job pool (see `docs/reference/toolchain/tests.md`). The suite's other checks did not fail.
+The device test `toolchain_device/emulator_test` no longer has a queue step: the heavy job pool it tested is gone, and an addon install check replaces it (see `docs/reference/toolchain/tests.md`).
 
 ### Earlier 64 MB and 32 MB runs
 

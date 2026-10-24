@@ -6,6 +6,7 @@ import("apple.macho")
 import("gdb")
 import("apple.firmware")
 import("byteorder")
+import("generations")
 
 RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
@@ -61,6 +62,10 @@ function remove(folder)
 end
 
 function root()
+    local override = os.getenv("REVENANT_EMULATOR_ROOT")
+    if override and override ~= "" then
+        return override
+    end
     return path.join(path.directory(dyld.root()), "emulator")
 end
 
@@ -843,22 +848,34 @@ function verdict(state, results, opt)
     return result
 end
 
-function report_output(folder, output)
+local function show_line(style, text, say)
+    if say then
+        return say(text)
+    end
+    cprint("${" .. style .. "}%s${clear}", text)
+end
+
+function report_output(folder, output, say)
     if output == 0 then
-        cprint("${color.warning}the program's output was not captured${clear}: the runner could not open it, and it says why in %s",
-               path.join(folder, "results", "runner.stderr"))
+        show_line("color.warning", "the program's output was not captured: the runner could not open it, and it says why in " ..
+                  path.join(folder, "results", "runner.stderr"), say)
         return false
     end
     local said = false
     for _, name in ipairs({"test.stdout", "test.stderr"}) do
         local file = path.join(folder, "results", name)
         if os.isfile(file) and os.filesize(file) > 0 then
-            io.write(io.readfile(file))
+            local text = io.readfile(file)
+            if say then
+                say(text)
+            else
+                io.write(text)
+            end
             said = true
         end
     end
     if not said then
-        cprint("${dim}the program wrote nothing to stdout or stderr${clear}")
+        show_line("dim", "the program wrote nothing to stdout or stderr", say)
     end
     return said
 end
@@ -1081,49 +1098,6 @@ function capacity()
     return math.max(1, math.min(cores // 3, gigabytes // 5))
 end
 
-BUILD_SLOT = "REVENANT_BUILD_SLOT"
-
-function build_slot_name()
-    return BUILD_SLOT
-end
-
-function build_capacity()
-    local cores = os.cpuinfo("ncpu") or 4
-    return math.max(2, cores // 4)
-end
-
-JOBS_TASKS = {build = true, test = true, require = true, pack = true, install = true}
-
-function build_jobs(cores, capacity)
-    return math.max(1, (cores or 4) // math.max(1, capacity or 1))
-end
-
-function queued_arguments(program, arguments, jobs)
-    if path.basename(program) ~= "xmake" then
-        return arguments
-    end
-    local task, given = nil, #arguments + 1
-    for index, argument in ipairs(arguments) do
-        if argument == "--" then
-            given = index
-            break
-        elseif argument:startswith("-j") or argument:startswith("--jobs") then
-            return arguments
-        elseif not argument:startswith("-") and not task then
-            task = argument
-        end
-    end
-    if task and not JOBS_TASKS[task] then
-        return arguments
-    end
-    return table.join(table.slice(arguments, 1, given - 1), {"-j", tostring(jobs)}, table.slice(arguments, given))
-end
-
-function holds_build_slot(environment)
-    local value = (environment or os.getenvs())[BUILD_SLOT]
-    return value ~= nil and value ~= ""
-end
-
 function crowded(load, cores)
     return load ~= nil and cores ~= nil and cores > 0 and load > cores
 end
@@ -1184,28 +1158,57 @@ function release(slot)
     slot.lock:close()
 end
 
-function clone_golden(rootfs, destination)
-    local lock = io.openlock(path.directory(rootfs) .. ".lock")
-    lock:lock({shared = true})
-    local ok, errors = try {function () clone(rootfs, destination) return true end, catch {function (caught) return false, caught end}}
-    lock:unlock()
-    lock:close()
-    if not ok then
-        raise(errors)
+function clone_golden(opt, destination)
+    for _ = 1, 20 do
+        local folder = golden(opt)
+        local lock = generations.hold(folder)
+        if os.isfile(path.join(folder, "golden.json")) then
+            local ok, errors = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) return false, caught end}}
+            generations.release(lock)
+            if ok then
+                return
+            end
+            if os.isfile(path.join(folder, "golden.json")) then
+                raise(errors)
+            end
+            os.tryrm(destination)
+        else
+            generations.release(lock)
+        end
     end
+    raise("the golden image of %s %s was replaced on every attempt to read it", opt.identifier, opt.build)
+end
+
+local function published_names(parent, prefix)
+    local names = {}
+    local pattern = path.join(parent, (prefix or "") .. "*")
+    for _, item in ipairs(table.join(os.dirs(pattern), os.files(pattern))) do
+        local name = path.filename(item):match("^[^.]+")
+        if name then
+            table.insert(names, name)
+        end
+    end
+    return table.unique(names)
 end
 
 function retire(parent, opt, kept)
-    for _, marker in ipairs(os.files(path.join(parent, opt.identifier .. "_" .. opt.build .. "_*", "golden.json"))) do
-        local folder = path.directory(marker)
-        local recorded = try {function () return json.loadfile(marker) end}
-        if path.filename(folder) ~= kept and recorded and recorded.emulator ~= opt.emulator_hash then
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
-                remove(folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
+    for _, name in ipairs(published_names(parent, opt.identifier .. "_" .. opt.build .. "_")) do
+        if name ~= kept then
+            local published = path.join(parent, name)
+            local lockpath = published .. ".build.lock"
+            local lock = generations.try_take(lockpath)
+            if lock then
+                local current = generations.resolve(published)
+                local recorded = current and try {function () return json.loadfile(path.join(current, "golden.json")) end}
+                if recorded and recorded.emulator ~= opt.emulator_hash then
+                    generations.unpublish(published)
+                end
+                generations.sweep(published)
+                if generations.empty(published) then
+                    generations.drop(lockpath, lock)
+                else
+                    generations.release(lock)
+                end
             end
         end
     end
@@ -1294,47 +1297,54 @@ function clean(opt)
             table.insert(removed, folder)
         end
     end
-    if opt.goldens then
-        for _, marker in ipairs(os.files(path.join(base, "golden.noindex", "*", "golden.json"))) do
-            local folder = path.directory(marker)
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
-                remove(folder)
-                table.insert(removed, folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
-            end
+    local parent = path.join(base, "golden.noindex")
+    for _, name in ipairs(published_names(parent)) do
+        local published = path.join(parent, name)
+        local lock = generations.take(published .. ".build.lock")
+        if opt.goldens then
+            generations.unpublish(published)
+            generations.sweep(published, {grace = 0})
+            table.insert(removed, published)
+        else
+            generations.sweep(published)
+        end
+        if generations.empty(published) then
+            generations.drop(published .. ".build.lock", lock)
+        else
+            generations.release(lock)
         end
     end
     return removed
 end
 
-function golden(opt)
+local function golden_key(opt)
     local written = {}
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
         table.insert(written, table.concat(key, " "))
     end
-    local key = string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
-                              table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+    return string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
+                         table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+end
+
+function golden(opt)
+    local key = golden_key(opt)
     local parent = path.join(opt.root or root(), "golden.noindex")
-    local folder = path.join(parent, key)
-    local marker = path.join(folder, "golden.json")
-    if os.isfile(marker) then
-        return path.join(folder, "rootfs")
+    local published = path.join(parent, key)
+    local current = generations.resolve(published)
+    if current and os.isfile(path.join(current, "golden.json")) then
+        return current
     end
     directory(parent)
-    local lock = io.openlock(path.join(parent, key .. ".lock"))
-    lock:lock()
+    local lock = generations.take(published .. ".build.lock")
+    local built, staging, staged
     local ok, errors = try {
         function ()
-            if os.isfile(marker) then
+            current = generations.resolve(published)
+            if current and os.isfile(path.join(current, "golden.json")) then
+                built = current
                 return true
             end
-            for _, stale in ipairs(os.dirs(path.join(parent, key .. ".partial-*"))) do
-                remove(stale)
-            end
-            local staging = path.join(parent, key .. ".partial-" .. os.getpid())
+            staging, staged = generations.begin(published)
             local rootfs = path.join(staging, "rootfs")
             clone(opt.firmware, rootfs)
             home(rootfs, opt.build)
@@ -1348,13 +1358,19 @@ function golden(opt)
                       milestone(booted.state), opt.deadline, booted.log)
             end
             json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
-            remove(folder)
-            os.mv(staging, folder)
+            generations.publish(published, staging)
+            built = staging
+            staging = nil
+            generations.release(staged)
+            staged = nil
             retire(parent, opt, key)
             return true
         end,
         catch {
             function (caught)
+                if staging then
+                    generations.abort(published, staging, staged)
+                end
                 return false, caught
             end
         }
@@ -1364,5 +1380,9 @@ function golden(opt)
     if not ok then
         raise(errors)
     end
-    return path.join(folder, "rootfs")
+    return built
+end
+
+function golden_published(opt)
+    return path.join(opt.root or root(), "golden.noindex", golden_key(opt))
 end
