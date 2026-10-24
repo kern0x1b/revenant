@@ -165,8 +165,11 @@ local function scan_adoption(file, found)
     for line in io.readfile(file):gmatch("[^\n]*") do
         local list = line:match("^@interface%s+[%w_]+[^<]*<([^>]+)>")
         if list then
+            local class = line:match("^@interface%s+([%w_]+)")
             for name in list:gmatch("[%w_]+") do
                 found.protocols[name] = true
+                found.adopters[name] = found.adopters[name] or {}
+                found.adopters[name][class] = true
             end
         end
     end
@@ -175,7 +178,7 @@ end
 local function implemented_in(src)
     local folders = {}
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
-        local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
+        local found = {classes = {}, functions = {}, globals = {}, protocols = {}, adopters = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 scan_source(file, found)
@@ -703,7 +706,7 @@ local function method_keys(block)
     while true do
         local mark = block:find("\n[%-%+]%s*%(", at)
         if not mark then
-            return keys
+            break
         end
         local _, stop = block:find(";", mark + 1, true)
         local declaration = block:sub(mark + 1, stop or #block)
@@ -713,6 +716,23 @@ local function method_keys(block)
         end
         at = mark + 1
     end
+    at = 1
+    while true do
+        local mark = block:find("\n@property", at, true)
+        if not mark then
+            break
+        end
+        local declared_end = statement_end(block, mark + 1)
+        local declaration = block:sub(mark + 1, declared_end)
+        local property = property_name(declaration)
+        if property then
+            local attributes = declaration:match("^%s*@property%s*(%b())") or ""
+            local getter = property_getter(declaration) or property
+            table.insert(keys, {key = (attributes:find("class", 1, true) and "+" or "-") .. getter, selector = getter, property = true})
+        end
+        at = mark + 1
+    end
+    return keys
 end
 
 local function protocol_blocks(sdk, names)
@@ -731,6 +751,27 @@ local function protocol_blocks(sdk, names)
         end
     end
     return blocks
+end
+
+local function adopters_of(folders, name)
+    local classes = {}
+    for _, found in pairs(folders) do
+        for class in pairs(found.adopters[name] or {}) do
+            classes[class] = true
+        end
+    end
+    return classes
+end
+
+local function adopter_implements(folders, classes, key)
+    for _, found in pairs(folders) do
+        for class in pairs(classes) do
+            if found.classes[class] and found.classes[class][key] then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 function protocol_status(src, sdk, folders)
@@ -787,7 +828,13 @@ function protocol_status(src, sdk, folders)
     for name in pairs(candidates) do
         local members, used = {}, false
         for _, method in ipairs(methods[name]) do
-            if implemented_any[method.selector] or usage_of(usage, method.selector) then
+            local implemented
+            if method.property then
+                implemented = adopter_implements(folders, adopters_of(folders, name), method.key)
+            else
+                implemented = implemented_any[method.selector] or usage_of(usage, method.selector)
+            end
+            if implemented then
                 members[method.key] = true
                 used = true
             end
