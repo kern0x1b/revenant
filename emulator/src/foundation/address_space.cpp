@@ -286,12 +286,11 @@ void AddressSpace::track_exclusive_access(
     for (std::uint64_t base = first; base < end; base += page_size) {
         const auto page_address = static_cast<std::uint32_t>(base);
         const auto mask = reservation_granule_mask(address, size, page_address);
-        const auto inserted =
-            exclusive_write_tracked_pages_.try_emplace(page_address, 0U).second;
+        exclusive_write_tracked_pages_.try_emplace(page_address, 0U);
         exclusive_write_tracked_pages_.at(page_address) |= mask;
+        write_tracked_pages_.insert(page_address);
         const auto* page = find_page_locked(page_address);
-        if (inserted)
-            refresh_jit_page_locked(page_address);
+        refresh_jit_page_locked(page_address);
         if (page == nullptr || !page->shared_writable || !page->backing)
             continue;
 
@@ -1686,8 +1685,8 @@ bool AddressSpace::write_integer(std::uint32_t address, T value)
 }
 
 template <typename T>
-bool AddressSpace::compare_exchange_integer(
-    std::uint32_t address, T expected, T value)
+bool AddressSpace::compare_exchange_integer(std::uint32_t address, T expected,
+    T value, std::optional<std::uint64_t> reservation_generation)
 {
     static_assert(std::is_unsigned_v<T>);
     auto lock = write_lock();
@@ -1695,6 +1694,22 @@ bool AddressSpace::compare_exchange_integer(
             MemoryPermission::Read | MemoryPermission::Write)) {
         release_exclusive_write_tracking_locked(address, sizeof(T));
         return false;
+    }
+    if (reservation_generation) {
+        std::uint64_t current_generation = 0;
+        const auto checked_end = page_range_end(address, sizeof(T));
+        for (std::uint64_t base = page_base(address); base < checked_end;
+            base += page_size) {
+            const auto* checked =
+                find_page_locked(static_cast<std::uint32_t>(base));
+            if (checked != nullptr)
+                current_generation =
+                    std::max(current_generation, checked->write_generation);
+        }
+        if (current_generation != *reservation_generation) {
+            release_exclusive_write_tracking_locked(address, sizeof(T));
+            return false;
+        }
     }
     ensure_unique_page_map_locked();
     const auto offset = address & (page_size - 1U);
@@ -1979,25 +1994,33 @@ AddressSpace::translation_profile_mapping_generation() const noexcept
         std::memory_order_acquire);
 }
 
-bool AddressSpace::compare_exchange8(
-    std::uint32_t address, std::uint8_t expected, std::uint8_t value)
+bool AddressSpace::compare_exchange8(std::uint32_t address,
+    std::uint8_t expected, std::uint8_t value,
+    std::optional<std::uint64_t> reservation_generation)
 {
-    return compare_exchange_integer(address, expected, value);
+    return compare_exchange_integer(
+        address, expected, value, reservation_generation);
 }
-bool AddressSpace::compare_exchange16(
-    std::uint32_t address, std::uint16_t expected, std::uint16_t value)
+bool AddressSpace::compare_exchange16(std::uint32_t address,
+    std::uint16_t expected, std::uint16_t value,
+    std::optional<std::uint64_t> reservation_generation)
 {
-    return compare_exchange_integer(address, expected, value);
+    return compare_exchange_integer(
+        address, expected, value, reservation_generation);
 }
-bool AddressSpace::compare_exchange32(
-    std::uint32_t address, std::uint32_t expected, std::uint32_t value)
+bool AddressSpace::compare_exchange32(std::uint32_t address,
+    std::uint32_t expected, std::uint32_t value,
+    std::optional<std::uint64_t> reservation_generation)
 {
-    return compare_exchange_integer(address, expected, value);
+    return compare_exchange_integer(
+        address, expected, value, reservation_generation);
 }
-bool AddressSpace::compare_exchange64(
-    std::uint32_t address, std::uint64_t expected, std::uint64_t value)
+bool AddressSpace::compare_exchange64(std::uint32_t address,
+    std::uint64_t expected, std::uint64_t value,
+    std::optional<std::uint64_t> reservation_generation)
 {
-    return compare_exchange_integer(address, expected, value);
+    return compare_exchange_integer(
+        address, expected, value, reservation_generation);
 }
 
 std::optional<std::uint8_t> AddressSpace::exchange8(

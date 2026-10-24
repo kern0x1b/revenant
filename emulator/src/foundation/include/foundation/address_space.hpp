@@ -179,14 +179,18 @@ public:
         std::uint32_t address, std::uint32_t size);
     [[nodiscard]] bool translation_profile_stable(
         std::uint32_t address, std::size_t size) const;
-    bool compare_exchange8(
-        std::uint32_t address, std::uint8_t expected, std::uint8_t value);
-    bool compare_exchange16(
-        std::uint32_t address, std::uint16_t expected, std::uint16_t value);
-    bool compare_exchange32(
-        std::uint32_t address, std::uint32_t expected, std::uint32_t value);
-    bool compare_exchange64(
-        std::uint32_t address, std::uint64_t expected, std::uint64_t value);
+    bool compare_exchange8(std::uint32_t address, std::uint8_t expected,
+        std::uint8_t value,
+        std::optional<std::uint64_t> reservation_generation = std::nullopt);
+    bool compare_exchange16(std::uint32_t address, std::uint16_t expected,
+        std::uint16_t value,
+        std::optional<std::uint64_t> reservation_generation = std::nullopt);
+    bool compare_exchange32(std::uint32_t address, std::uint32_t expected,
+        std::uint32_t value,
+        std::optional<std::uint64_t> reservation_generation = std::nullopt);
+    bool compare_exchange64(std::uint32_t address, std::uint64_t expected,
+        std::uint64_t value,
+        std::optional<std::uint64_t> reservation_generation = std::nullopt);
     [[nodiscard]] std::optional<std::uint8_t> exchange8(
         std::uint32_t address, std::uint8_t value);
     [[nodiscard]] std::optional<std::uint32_t> exchange32(
@@ -269,7 +273,8 @@ private:
         std::uint32_t address, MemoryPermission access) const;
     template <typename T> bool write_integer(std::uint32_t address, T value);
     template <typename T>
-    bool compare_exchange_integer(std::uint32_t address, T expected, T value);
+    bool compare_exchange_integer(std::uint32_t address, T expected, T value,
+        std::optional<std::uint64_t> reservation_generation);
     template <typename T>
     [[nodiscard]] std::optional<T> exchange_integer(
         std::uint32_t address, T value);

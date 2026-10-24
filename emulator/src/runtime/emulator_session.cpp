@@ -1469,7 +1469,6 @@ void EmulatorSession::run()
         static_cast<std::int64_t>(
             iokit_abi::display_vsync::period_absolute_time) } };
     GuestParallelismPolicy guest_parallelism_policy { guest_ticks_per_second };
-    std::optional<XnuThreadId> last_serial_thread;
     std::optional<XnuThreadId> scheduler_handoff_thread;
     std::optional<std::uint32_t> display_urgent_process;
     std::optional<XnuThreadId> display_urgent_thread;
@@ -3702,13 +3701,9 @@ void EmulatorSession::run()
                 prepared.scheduled.thread.thread);
         }
 
-        if (guest_processor_count == 1 && !prepared_slices.empty() &&
-            last_serial_thread !=
-                std::optional<XnuThreadId> {
-                    prepared_slices.front().scheduled.thread }) {
-            prepared_slices.front().execution.cpu->clear_exclusive_state(
-                prepared_slices.front().scheduled.processor);
-            last_serial_thread = prepared_slices.front().scheduled.thread;
+        for (auto& prepared : prepared_slices) {
+            prepared.execution.cpu->clear_exclusive_state(
+                prepared.scheduled.processor);
         }
         if (parallel_guest_batch) {
             std::vector<GuestExecutionRequest*> execution_requests;
