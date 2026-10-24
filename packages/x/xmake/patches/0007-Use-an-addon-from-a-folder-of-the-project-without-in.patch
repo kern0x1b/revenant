@@ -41,6 +41,9 @@ and a plugin, that nothing is installed or fetched, that the plugin is
 gone outside the project, and that a folder holding another addon is
 refused. Without the change the project tries to install the fixtures
 from the repositories and fails ("package(custom-rule) not found").
+
+Changes-build-output: yes
+
 ---
  tests/actions/addon/test.lua                  | 41 ++++++++
  xmake/actions/addon/main.lua                  |  3 +-

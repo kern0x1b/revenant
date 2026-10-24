@@ -28,6 +28,9 @@ falls back to the active version and says so. Without this change, on the
 previous commits, the first gets 2.0.0 and the second gets no warning.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Changes-build-output: yes
+
 ---
  tests/actions/addon/test.lua                  | 28 +++++++++++++
  xmake/core/package/addon.lua                  | 39 ++++++++++++++-----

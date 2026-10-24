@@ -25,7 +25,7 @@ sha256() {
 }
 
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
-digest=$(printf '%s\n%s\n' "$commit" "$patches" | sha256 | cut -d' ' -f1)
+digest=$(sh "$root/tools/xmake-patchset.sh" "$package/patches" "$commit" "$patches")
 cache=$HOME/.revenant/cache/xmake
 prefix=$cache/$key
 
