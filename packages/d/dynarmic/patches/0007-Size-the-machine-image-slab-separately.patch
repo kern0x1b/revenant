@@ -5,7 +5,7 @@ diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/co
      NativeCodeSlab* image_native_code_slab = nullptr;
      std::uint32_t image_code_begin = 0;
      std::uint32_t image_code_end = 0;
-+    size_t image_code_cache_size = 0;  // bytes; 0 sizes the image slab like code_cache_size
++    size_t image_code_cache_size = 0;
  
      // Optional executor-owned indirection used by generated host callbacks.
      // The link must remain alive for the Jit and contain a UserCallbacks*
