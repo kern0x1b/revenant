@@ -95,7 +95,7 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 ### C16. The OpenAL device path, the audio session and streaming are not run on iOS 6.1.3
 
 - Stands in for: the output path of AVAudioSession and AVAudioPlayer, which SceneKit uses on the device. The OpenAL device, the ExtAudioFile decode, source playback and stream playback run only on the macOS host.
-- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. The emulator's audio advances at about the guest clock, so a 2 s tone finishes after about 9 guest seconds; the case allows 12. Nothing has run on a real device.
+- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. On an idle host the 2 s tone finishes at 2.38 guest seconds and the 2 s stream at 2.19, measured with the guest clock (the window is 3 s). Under host load (other builds running) the same emulator finished a tone at about 9 guest seconds and once stalled: its IO callbacks run late, and the schedule `max(now, next) + period` drops device time that is never recovered. A timeline schedule (`next + period`) cut that run to 4.4 seconds but stalled the mixer, so it was reverted and the emulator code is unchanged. Nothing has run on a real device.
 - Measurement: the emulator run above (positive and negative modes of the case) and host tests of the same paths (`audio_test.m`, `action_run_test.m`).
 - Removed by: a run on a real iPhone 4S with the mute switch set and other audio playing.
 
@@ -124,8 +124,14 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 
 - Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable.
 - Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The GLES path is not run on a device, and the emulator has no GLES 2 context for EAGL (it reports GLES 1.1), so `SCNView` is not exercised on any run.
-- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). Device: pending.
+- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). Device: pending, see C21.
 - Removed by: a device run that renders a still scene with jittering on and off and compares its edges, and a check of the animated case.
+
+### C21. The GLES draw path draws no geometry on the emulator
+
+- Stands in for: nothing yet; this is the open check of C20. A snapshot of an `SCNView` with an `SCNPlane` on the 6.1.3 emulator (iPhone4,1, renderer on) returns an image, but it is entirely clear: 4096 clear pixels and none opaque, with and without jittering. The cause is not known: the collection of the plane into the draw items looks right, so the failure is in the GL path (shaders, state or the draw) or in the emulator's GLES.
+- Gaps: the render case `tests/runtime/pending/scenekit_render.m` is not registered in the runtime suite. It compares a plain and a jittered snapshot for anti-aliased edges and an unchanged interior; it cannot pass until the plane is drawn. Registering it would also let its failure abort the shared runtime app, which runs every case in one process.
+- Removed by: a snapshot with the plane visible on the emulator, then the render case registered and passing.
 
 ## Removed
 
