@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
 typedef NS_ENUM(NSUInteger, RevenantURLPart) {
     RevenantURLScheme,
@@ -14,7 +15,7 @@ typedef NS_ENUM(NSUInteger, RevenantURLPart) {
 
 BOOL revenant_url_parse(NSString *string, NSRange *ranges);
 BOOL revenant_url_valid(RevenantURLPart part, NSString *string);
-NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
+NSString *revenant_url_compose(id components, NSRange *ranges);
 
 static NSString *revenant_url_substring(NSString *string, NSRange range)
 {
@@ -35,7 +36,7 @@ static NSNumber *revenant_url_port(NSString *digits)
     return [NSNumber numberWithLongLong:(long long)value];
 }
 
-static void revenant_url_require(BOOL valid, NSURLComponents *components, SEL selector, NSString *what)
+static void revenant_url_require(BOOL valid, id components, SEL selector, NSString *what)
 {
     if (!valid)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: invalid characters in %@", [components class], NSStringFromSelector(selector), what];
@@ -46,7 +47,7 @@ static BOOL revenant_url_same(NSString *first, NSString *second)
     return first == second || [first isEqualToString:second];
 }
 
-@implementation NSURLComponents {
+REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     NSString *_scheme;
     NSString *_percentEncodedUser;
     NSString *_percentEncodedPassword;
@@ -55,10 +56,10 @@ static BOOL revenant_url_same(NSString *first, NSString *second)
     NSString *_percentEncodedPath;
     NSString *_percentEncodedQuery;
     NSString *_percentEncodedFragment;
-}
+)
 
-@dynamic string, queryItems, percentEncodedQueryItems, encodedHost;
-@dynamic rangeOfScheme, rangeOfUser, rangeOfPassword, rangeOfHost, rangeOfPort, rangeOfPath, rangeOfQuery, rangeOfFragment;
+@implementation REVENANT_ALIAS_CLASS(NSURLComponents) (RevenantComponents)
+
 
 + (instancetype)componentsWithURL:(NSURL *)url resolvingAgainstBaseURL:(BOOL)resolve
 {
@@ -96,7 +97,7 @@ static BOOL revenant_url_same(NSString *first, NSString *second)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    NSURLComponents *copy = [[[self class] allocWithZone:zone] init];
+    REVENANT_ALIAS_CLASS(NSURLComponents) *copy = [[[self class] allocWithZone:zone] init];
     copy->_scheme = _scheme;
     copy->_percentEncodedUser = _percentEncodedUser;
     copy->_percentEncodedPassword = _percentEncodedPassword;
@@ -282,7 +283,7 @@ static BOOL revenant_url_same(NSString *first, NSString *second)
         return YES;
     if (![object isKindOfClass:[NSURLComponents class]])
         return NO;
-    NSURLComponents *other = object;
+    REVENANT_ALIAS_CLASS(NSURLComponents) *other = object;
     return revenant_url_same(self.scheme, other.scheme) && revenant_url_same(self.percentEncodedUser, other.percentEncodedUser) &&
            revenant_url_same(self.percentEncodedPassword, other.percentEncodedPassword) && revenant_url_same(self.percentEncodedHost, other.percentEncodedHost) &&
            (self.port == other.port || [self.port isEqual:other.port]) && revenant_url_same(self.percentEncodedPath, other.percentEncodedPath) &&

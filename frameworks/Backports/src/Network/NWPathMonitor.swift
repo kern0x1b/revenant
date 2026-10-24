@@ -22,11 +22,30 @@ public final class NWPath: Equatable, CustomDebugStringConvertible {
     public let status: Status
     public let isExpensive: Bool
     public let availableInterfaces: [NWInterface]
+    private let usedInterfaceType: NWInterface.InterfaceType?
 
     init(status: Status, isExpensive: Bool, availableInterfaces: [NWInterface]) {
         self.status = status
         self.isExpensive = isExpensive
         self.availableInterfaces = availableInterfaces
+        self.usedInterfaceType = NWPath.primaryInterfaceType(status: status, isExpensive: isExpensive, availableInterfaces: availableInterfaces)
+    }
+
+    public func usesInterfaceType(_ type: NWInterface.InterfaceType) -> Bool {
+        usedInterfaceType == type
+    }
+
+    private static func primaryInterfaceType(status: Status, isExpensive: Bool, availableInterfaces: [NWInterface]) -> NWInterface.InterfaceType? {
+        guard status != .unsatisfied else {
+            return nil
+        }
+        if isExpensive {
+            return .cellular
+        }
+        for type in [NWInterface.InterfaceType.wifi, .wiredEthernet, .loopback, .other] where availableInterfaces.contains(where: { $0.type == type }) {
+            return type
+        }
+        return nil
     }
 
     public static func == (lhs: NWPath, rhs: NWPath) -> Bool {
@@ -101,6 +120,13 @@ private func revenantCurrentFlags(_ reachability: SCNetworkReachability) -> SCNe
     return flags
 }
 
+func revenantCurrentPath() -> NWPath {
+    guard let reachability = revenantReachability() else {
+        return NWPath(status: .unsatisfied, isExpensive: false, availableInterfaces: [])
+    }
+    return revenantPath(for: revenantCurrentFlags(reachability))
+}
+
 public final class NWPathMonitor {
     private let requiredInterfaceType: NWInterface.InterfaceType?
     private var reachability: SCNetworkReachability?
@@ -118,10 +144,7 @@ public final class NWPathMonitor {
     }
 
     public var currentPath: NWPath {
-        guard let reachability = revenantReachability() else {
-            return NWPath(status: .unsatisfied, isExpensive: false, availableInterfaces: [])
-        }
-        return revenantPath(for: revenantCurrentFlags(reachability))
+        revenantCurrentPath()
     }
 
     public func start(queue: DispatchQueue) {

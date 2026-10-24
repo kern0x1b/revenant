@@ -37,12 +37,13 @@ end
 
 local function complete(dir)
     if not os.isdir(dir) then
-        return false
+        return false, "missing " .. dir .. " link " .. tostring(os.islink(dir))
     end
     for index = 1, 40 do
-        local text = read(path.join(dir, "payload", string.format("part-%02d", index)))
+        local file = path.join(dir, "payload", string.format("part-%02d", index))
+        local text = read(file)
         if not text or not (text:match("^old x+\n$") or text:match("^new x+\n$")) then
-            return false
+            return false, file .. " text " .. (text and string.format("%q", text:sub(1, 40)) or "nil") .. " isfile " .. tostring(os.isfile(file)) .. " link " .. tostring(os.islink(dir) and os.readlink(dir))
         end
     end
     return true
@@ -50,14 +51,17 @@ end
 
 function main(dir, stop, ready)
     io.writefile(ready, "ready")
-    local reads, violations = 0, 0
+    local reads, violations, first = 0, 0, nil
     while not os.isfile(stop) do
         reads = reads + 1
-        if not complete(dir) then
+        local ok, why = complete(dir)
+        if not ok then
             violations = violations + 1
+            first = first or why
         end
     end
     print("reads " .. reads .. " violations " .. violations)
+    print("first " .. tostring(first))
 end
 ]]
 
@@ -192,7 +196,7 @@ function failures(opt)
         end
         if tonumber(violations) > 0 then
             table.insert(found, "readers saw an incomplete install in " .. violations .. " of " .. reads ..
-                " reads while a forced reinstall replaced it: a reader must see the old install or the new one, whole")
+                " reads while a forced reinstall replaced it: a reader must see the old install or the new one, whole; " .. said)
         end
     end
     if not whole(published(store), "new") then

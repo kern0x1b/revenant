@@ -1,10 +1,12 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
-@implementation NSDateInterval {
-@private
+REVENANT_ALIAS_STATE(NSDateInterval, NSObject,
     NSDate *_startDate;
     NSTimeInterval _duration;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSDateInterval) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {

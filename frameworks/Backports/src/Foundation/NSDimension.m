@@ -1,7 +1,13 @@
 #import <Foundation/Foundation.h>
 #import "RevenantDimension.h"
+#import "../revenant_alias.h"
 
-@implementation NSDimension
+REVENANT_ALIAS_STATE(NSDimension, NSUnit,
+    NSUInteger _reserved;
+    NSUnitConverter *_converter;
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSDimension) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {
