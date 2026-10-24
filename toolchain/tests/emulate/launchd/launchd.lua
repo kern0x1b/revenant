@@ -9,6 +9,7 @@ function main(device, release)
     local out = runs.folder("emulate-launchd")
     os.tryrm(out)
     os.mkdir(out)
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
     for _, name in ipairs({"xmake.lua", "control", "main.c"}) do
         os.cp(path.join(here, name), path.join(out, name))
     end
