@@ -1093,6 +1093,7 @@ void boot(const std::vector<std::string>& args, Output& output)
         options.time_scale = parsed;
     }
     options.jit_observer_only = flag(args, "--jit-observer-only");
+    options.shared_image_slab = flag(args, "--shared-image-slab");
     options.report_performance = flag(args, "--perf-summary");
     if (const auto value = option(args, "--ticks"))
         options.ticks = std::stoull(*value);

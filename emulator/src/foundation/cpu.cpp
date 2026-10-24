@@ -2909,6 +2909,7 @@ private:
             return;
         }
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {
@@ -2967,6 +2968,12 @@ private:
         }
         Dynarmic::A32::UserConfig config { callbacks_.get() };
         config.native_code_slab = execution_context_->native_code_slab();
+        if (auto* image_slab = machine_image_code_slab(); image_slab != nullptr) {
+            const auto image_region = machine_image_code_region();
+            config.image_native_code_slab = image_slab;
+            config.image_code_begin = image_region.begin;
+            config.image_code_end = image_region.end;
+        }
         config.callbacks_link = runtime_link_cell_address_;
         if (performance_counters().native_lookup_diagnostics_enabled()) {
             config.native_code_block_lookup_callback =
@@ -3477,6 +3484,7 @@ public:
             return;
         static_cast<void>(execution_context_->request_cache_clear());
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {

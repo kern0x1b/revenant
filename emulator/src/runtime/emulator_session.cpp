@@ -67,6 +67,7 @@
 #include "device_state/network_preferences.hpp"
 #include "foundation/address_space.hpp"
 #include "foundation/cpu.hpp"
+#include "foundation/darwin_address_layout.hpp"
 #include "foundation/deadline_queue.hpp"
 #include "foundation/device_model.hpp"
 #include "graphics/display.hpp"
@@ -281,6 +282,16 @@ void EmulatorSession::run()
             ActivationHardwareModelPolicy::DevelopmentBoard) {
         device.identity.hardware_model_override =
             device.identity.activation_hardware_model;
+    }
+    if (options.shared_image_slab) {
+        const auto bounds = darwin_address_bounds(
+            darwin_configuration.abi.address_layout);
+        set_machine_image_code_region(ImageCodeRegion {
+            options.rootfs.string() + "|" +
+                std::string { device.identity.product_type },
+            bounds.shared_region_base, bounds.shared_region_end });
+    } else {
+        set_machine_image_code_region(ImageCodeRegion { });
     }
     const auto ticks_option = options.ticks;
     const auto bounded_execution = ticks_option.has_value();

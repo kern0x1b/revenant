@@ -584,6 +584,17 @@ private:
     mutable JitArtifactStoreStats stats_;
 };
 
+struct ImageCodeRegion {
+    std::string identity;
+    std::uint32_t begin { };
+    std::uint32_t end { };
+};
+
+void set_machine_image_code_region(ImageCodeRegion region);
+[[nodiscard]] ImageCodeRegion machine_image_code_region();
+[[nodiscard]] Dynarmic::A32::NativeCodeSlab* machine_image_code_slab();
+void service_machine_image_code_slab();
+
 class ExecutionContext {
 public:
     ExecutionContext();

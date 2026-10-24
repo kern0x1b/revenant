@@ -48,6 +48,7 @@ struct BootOptions {
     bool disable_scheduler_preemption { };
     double time_scale { 1.0 };
     bool jit_observer_only { };
+    bool shared_image_slab { };
     bool report_performance { };
     std::optional<std::uint64_t> ticks;
     std::optional<std::size_t> cores;
