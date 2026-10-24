@@ -15,7 +15,7 @@ set by a recipe or a rule and never compared with an alternative on a workload.
 | --- | --- | --- | --- |
 | CPU tuning, `-mcpu=cortex-a9` | WebKit only. The toolchain sets no `-mcpu`, so every other device target gets clang's default for `armv7-apple-ios6.0`, which is `-target-cpu generic` | `frameworks/WebKit/xmake.lua` (`add_cxflags`), `frameworks/WebKit/src/modules/engine.lua:75` | yes, instructions only: no change, see Measurements |
 | `-mfpu=neon` | WebKit only. The default of the target already includes `+neon` and `+vfp3`, so the flag adds nothing | `frameworks/WebKit/xmake.lua`, `frameworks/WebKit/src/modules/engine.lua:75` | yes, the default's features read with `clang -###` |
-| `-O` of packages | `-O2` in the held commit described under Held; `-O3` on `work/performance` until that commit is batched. Added to every package compile by the toolchain when `optimize=packages` | `toolchain/toolchains/apple-ios/xmake.lua:85`, `toolchain/includes/apple-ios/xmake.lua:41` | yes, on the package-style kernel `compute`, see Measurements |
+| `-O` of packages | `-O3` on `work/performance`, added to every package compile by the toolchain when `optimize=packages`. Changing it to `-Os` is held, see Decisions and Held | `toolchain/toolchains/apple-ios/xmake.lua:85`, `toolchain/includes/apple-ios/xmake.lua:41` | yes, on the package-style kernel `compute`, see Measurements |
 | `-O` of app and library targets in release | `smallest`: xmake's `mode.release` sets `optimize` to `smallest` on iphoneos, so `-Os` for C and ObjC, and `-Osize` for Swift through `swift.lua`'s `smallest`. The toolchain does not change it | xmake's `share/xmake/rules/mode/xmake.lua:56-60`, `toolchain/modules/apple/swift.lua:150,171` | yes for C and ObjC: `-O2`, `-O3` and `-Oz` against `-Os`, see Measurements. Swift: no |
 | `-O` of Swift in the runtime and the stdlib | `-O -wmo`: the swift-runtime's Swift modules, and the stdlib core with `-enforce-exclusivity=unchecked` | `packages/s/swift-runtime/xmake.lua:257,280`, `toolchain/modules/apple/swift.lua:103-113` | no |
 | Swift exclusivity, user code | checked (the default); `-enforce-exclusivity=unchecked` is set only for the stdlib build | `toolchain/modules/apple/swift.lua:113` (stdlib only) | no |
@@ -53,7 +53,7 @@ package-style kernel of CRC-32, FNV-1a and a 64-by-64 integer matrix product). T
 packaged llvm 23.1.3 and the iPhoneOS 26.2 SDK, and run as the first process of an iPhone 4S boot of iOS 6.1.3 under the
 emulator built from this checkout. The numbers are guest instructions (the emulator's CPU ticks for the run), not times.
 Each setting was run in report mode (`REVENANT_BENCH_REPORT=1`, `REVENANT_BENCH_FLAGS`). The deltas are against `-Os`, the
-default.
+default. The runs were repeated on the committed code: the counts and the code sizes reproduced exactly.
 
 Guest instructions, the four Objective-C workloads:
 
@@ -77,26 +77,28 @@ Guest instructions, the package-style kernel `compute`:
 | `-Os -mcpu=cortex-a9` | 29,679,959 | 0% |
 | `-O2 -mcpu=cortex-a9` | 29,664,813 | -0.05% |
 
-Code size, the `__text` section in bytes, from `size -m` of each linked binary. The Mach-O file size is not used: the
-`__TEXT` segment is aligned to 32 KiB, so the file size stays the same across settings and cannot show a change.
+Code size, the `__text` section in bytes, from `size -m` of each linked binary, with the guest-memory helper compiled at
+the same setting as the workload. The Mach-O file size is not used: the `__TEXT` segment is aligned to 32 KiB, so the file
+size stays the same across settings and cannot show a change.
 
 | Setting | msgsend | alloc | collections | strings | compute |
 | --- | --- | --- | --- | --- | --- |
-| `-Os` | 458 | 530 | 670 | 578 | 886 |
-| `-O2` | 656 (+43%) | 822 (+55%) | 868 (+30%) | 776 (+34%) | 890 (+0.5%) |
-| `-O3` | 700 (+53%) | 866 (+63%) | 912 (+36%) | 820 (+42%) | 2,954 (+233%) |
-| `-Oz` | 436 (-5%) | 492 (-7%) | 588 (-12%) | 528 (-9%) | 794 (-10%) |
+| `-Os` | 458 | 530 | 670 | 578 | 838 |
+| `-O2` | 656 (+43%) | 822 (+55%) | 868 (+30%) | 776 (+34%) | 1,040 (+24%) |
+| `-O3` | 700 (+53%) | 866 (+63%) | 912 (+36%) | 820 (+42%) | 3,148 (+276%) |
+| `-Oz` | 436 (-5%) | 492 (-7%) | 588 (-12%) | 528 (-9%) | 740 (-12%) |
 
 The calls to the workloads' own methods (`Node.value` 1,600,000, `Node.initWithValue` 200,000, `Counter.bump` 1,000,000)
 and the resident sizes are the same under every setting.
 
 What the numbers say:
 
-- The counts repeat exactly: `msgsend` gave 45,744,143 in three separate runs and under parallel load, and the compute
-  baseline was recorded and compared on the committed code.
+- The counts repeat exactly across runs and under parallel load: `msgsend` gave 45,744,143 each time, and the compute
+  baseline reproduces on the committed code.
 - On the Objective-C workloads `-O2` and `-O3` save at most 0.23% of the instructions and add 30% to 63% to the code.
-- On the compute kernel `-O3` saves 0.28% of the instructions over `-Os` and makes the code 3.3 times as large; `-O2`
-  saves 0.05% and keeps the code within 0.5% of `-Os`.
+- On the compute kernel the instruction counts run `-O3` (-0.28%), `-O2` (-0.05%), `-Os` (0). The code runs `-Os` 838,
+  `-O2` 1,040 (+24%), `-O3` 3,148 (+276%). `-O2` buys 0.05% of the instructions for a quarter more code, so it is not
+  worth its size over `-Os`.
 - `-Oz` cuts the code by 5% to 12% and costs 1% to 12% more instructions on three of the five workloads.
 - `-mcpu=cortex-a9` changes the instruction count by at most one tick. The emulator counts instructions, and a CPU model
   changes the schedule and the cycles, not the count, so this run cannot show a gain or a loss from it.
@@ -107,11 +109,13 @@ What the numbers say:
   for 30% to 63% more code, and `-Oz` trades 1% to 12% speed for 5% to 12% less code. Speed is the requirement, so no
   level is adopted that loses speed. These workloads are small, so the code-size figures are for the workloads, not an
   app; a level for a large binary needs a measurement on an app-sized target.
-- **Packages change from `-O3` to `-O2`, held.** On the package-style kernel `-O2` gives up 0.23% of the instructions that
-  `-O3` saves (`-O3` saves 0.28% over `-Os`, `-O2` saves 0.05%), and in exchange the code stays within 0.5% of `-Os`
-  instead of 233% above it. The change is in a
-  commit on `work/performance` that is not pushed, because it changes the toolchain file whose digest is part of the
-  prebuilt keys: the packages built with the apple-ios toolchain, libcxx and swift-runtime among them, get new keys.
+- **Packages should be `-Os`, not `-O3`: held.** On the package-style kernel `-O3` costs 276% more code than `-Os` for
+  0.28% of the instructions, and `-O2` costs 24% more code for 0.05%. `-Os` is the smallest code, and it is 0.05% slower than
+  `-O2`, the next level up. The change is a local commit that is not pushed, because it changes the toolchain
+  file whose digest is part of the prebuilt keys. The keys of every package built with the apple-ios toolchain move, libcxx
+  and swift-runtime among them, whether or not the flag reaches them. Caveat: CMake packages (libcxx, swift-runtime, opus,
+  mozjpeg, TDLib) take `-O3` from CMake's Release build type, which comes after the toolchain's flags, so the change
+  reaches only the packages built by xmake's own rules. That was read from the CMake helper, not built here.
 - **`-mcpu=cortex-a9` is not adopted.** The emulator cannot count what a CPU model changes, and whether it helps the A5 is
   a question of cycles, which only a timing on the device answers. Until that timing exists, the default (`generic`, which
   already includes NEON) stays.
@@ -119,7 +123,7 @@ What the numbers say:
 
 ## Held
 
-- The packages `-O2` change above: the commit is local and unpushed until it is batched with the prebuilt keys it moves.
+- The packages `-Os` change above: the commit is local and unpushed until it is batched with the prebuilt keys it moves.
 - Thin LTO for the device. It needs libLTO in the llvm package, and the llvm release does not ship it (the distribution
   lists no LTO). Adding it changes the llvm package's prebuilt key, so its push is held for the batch.
 
