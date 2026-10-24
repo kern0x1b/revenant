@@ -13,7 +13,7 @@ function main()
                     if class then
                         implemented[class] = true
                     end
-                    local name = line:match("const%s+([%a_][%w_]*)%s*=")
+                    local name = lowered.global_of(line)
                     if name then
                         defined[name] = true
                     end

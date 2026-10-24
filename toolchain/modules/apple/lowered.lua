@@ -130,6 +130,13 @@ local function selector_of(declaration)
     return text:match("^%s*[%-%+]%s*([%a_][%w_]*)")
 end
 
+function global_of(line)
+    if line:match("^[%a_]") and not line:match("^static") and line:match("const[^=;(]-[%a_][%w_]*%s*=") then
+        return line:match("const[^=;(]-([%a_][%w_]*)%s*=")
+    end
+    return nil
+end
+
 local function scan_source(file, found)
     local container, pending = nil, nil
     for line in io.readfile(file):gmatch("[^\n]*") do
@@ -148,8 +155,8 @@ local function scan_source(file, found)
             if name then
                 found.functions[name] = true
             end
-        elseif not container and line:match("const%s+[%a_][%w_]*%s*=") then
-            found.globals[line:match("const%s+([%a_][%w_]*)%s*=")] = true
+        elseif not container and global_of(line) then
+            found.globals[global_of(line)] = true
         end
         if pending and (pending:find("{", 1, true) or pending:find(";", 1, true)) then
             local selector = selector_of(pending)
