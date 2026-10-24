@@ -393,6 +393,8 @@ void EmulatorSession::run()
                 : adaptive_jit_code_cache_size(host.memory_budget_snapshot()));
     const auto jit_cache_budget = jit_code_cache_budget(
         options.jit_cache_budget_bytes, host.memory_budget_snapshot());
+    output.line("[boot] host-start-ms=" +
+                std::to_string(host_unix_milliseconds()));
     output.line("[jit] code-cache-mib=" +
                 std::to_string(configured_jit_code_cache_size / 1024U / 1024U));
     output.line(

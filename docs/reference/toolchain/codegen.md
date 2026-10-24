@@ -3,7 +3,7 @@
 This reference lists every place that sets code generation for the device (the iPhone OS slices, armv7 on the A5), what
 each sets now, and whether anything measured it. The decision is [0014](../../explanation/decisions/0014-performance-is-a-requirement.md):
 the build settings for the device are chosen by measurement on the A5 and are not inherited. The measurement method is
-the `bench/*` group of `./xmakew test` (see [the toolchain's tests](tests.md)); its emulator counts compare versions of the
+the `bench/*` group of `./xmakew test -P .` (see [the toolchain's tests](tests.md)); its emulator counts compare versions of the
 same code and are never times.
 
 "Measured" says what a run of this repository has shown for the setting, and nothing else: `no` means the setting was
