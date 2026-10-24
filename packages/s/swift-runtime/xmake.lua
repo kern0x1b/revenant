@@ -364,6 +364,8 @@ package("swift-runtime")
             local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
             local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
             local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"))
+            local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
+            local flat_flags = flat.link_flags(flat.stub_directory(toolchain:config("sdkdir"), path.join(generated, "flat-stubs")))
             local lowered_include = lowered.include_directory(path.absolute("lowered"))
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
@@ -390,8 +392,8 @@ package("swift-runtime")
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
                 "UUID.swift"}), {presentation_intent}),
-                          {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
-                           "-framework", "Foundation", "-framework", "CoreFoundation"}, foundation_objects,
+                          table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
+                           "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
                                           "-enable-experimental-feature", "BuiltinModule",
@@ -400,8 +402,8 @@ package("swift-runtime")
             local function generated_from(folder, name)
                 return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
             end
-            foundation_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
-                                "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"}
+            foundation_links = table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
+                                "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"})
             build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift")},
                           table.join(foundation_links, {"-framework", "QuartzCore"}))
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
@@ -557,7 +559,7 @@ package("swift-runtime")
         for _, library in ipairs(table.orderkeys(read.imports)) do
             local names = {}
             for symbol, weak in pairs(read.imports[library]) do
-                if weak and not read.exported[symbol] then
+                if weak and not read.exported[symbol] and not read.flat[library][symbol] then
                     names[symbol] = true
                 end
             end
