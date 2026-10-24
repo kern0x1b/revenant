@@ -532,6 +532,7 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
     NSHashTable<SCNScene *> *_surveyed;
 }
 @synthesize lastRenderPointOfView = _lastRenderPointOfView, lastRenderWidth = _lastRenderWidth, lastRenderHeight = _lastRenderHeight;
+@synthesize jitterX = _jitterX, jitterY = _jitterY;
 
 - (instancetype)initWithContext:(EAGLContext *)context
 {
@@ -1130,6 +1131,12 @@ static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
     SCNMatrix4 view = RevenantSCNMatrixInvert(cameraWorld);
     SCNCamera *camera = pointOfView.camera;
     SCNMatrix4 projection = RevenantSCNProjectionMatrix(pointOfView, width, height);
+    if (self.jitterX != 0 || self.jitterY != 0) {
+        SCNMatrix4 shift = SCNMatrix4Identity;
+        shift.m41 = 2 * self.jitterX / width;
+        shift.m42 = 2 * self.jitterY / height;
+        projection = RevenantSCNMatrixMultiply(projection, shift);
+    }
     self.lastRenderPointOfView = pointOfView;
     self.lastRenderWidth = width;
     self.lastRenderHeight = height;

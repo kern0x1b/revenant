@@ -53,6 +53,8 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 @property (nonatomic, strong) SCNNode *lastRenderPointOfView;
 @property (nonatomic, assign) int lastRenderWidth;
 @property (nonatomic, assign) int lastRenderHeight;
+@property (nonatomic, assign) float jitterX;
+@property (nonatomic, assign) float jitterY;
 - (void)renderScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height;
 + (SCNNode *)defaultPointOfViewInScene:(SCNScene *)scene;
 @end

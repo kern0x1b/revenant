@@ -1,5 +1,7 @@
 #import "RevenantSCN.h"
 #import "RevenantSCNClock.h"
+#import "RevenantSCNJitter.h"
+#import "RevenantSCNJitterBuffers.h"
 #import "RevenantSCNMath.h"
 #import "../RevenantSayOnce.h"
 #import <OpenGLES/EAGL.h>
@@ -29,6 +31,13 @@ static void revenant_unsupported(const char *member)
     NSInteger _preferredFramesPerSecond;
     BOOL _jitteringEnabled;
     RevenantSCNClock *_clock;
+    RevenantSCNJitterBuffers *_jitter;
+    NSUInteger _jitterFrame;
+    NSUInteger _jitterAccumulated;
+    BOOL _jitterKeyValid;
+    NSTimeInterval _jitterTime;
+    SCNScene *_jitterScene;
+    SCNNode *_jitterPointOfView;
 }
 
 + (Class)layerClass
@@ -91,16 +100,21 @@ static void revenant_unsupported(const char *member)
 
 - (void)revenantDeleteFramebuffer
 {
-    if (_context == nil || _framebuffer == 0) {
+    if (_context == nil) {
         return;
     }
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
-    glDeleteFramebuffers(1, &_framebuffer);
-    glDeleteRenderbuffers(1, &_colorBuffer);
-    glDeleteRenderbuffers(1, &_depthBuffer);
-    _framebuffer = _colorBuffer = _depthBuffer = 0;
-    _drawableWidth = _drawableHeight = 0;
+    [_jitter dispose];
+    _jitter = nil;
+    _jitterKeyValid = NO;
+    if (_framebuffer) {
+        glDeleteFramebuffers(1, &_framebuffer);
+        glDeleteRenderbuffers(1, &_colorBuffer);
+        glDeleteRenderbuffers(1, &_depthBuffer);
+        _framebuffer = _colorBuffer = _depthBuffer = 0;
+        _drawableWidth = _drawableHeight = 0;
+    }
     [EAGLContext setCurrentContext:previous];
 }
 
@@ -185,11 +199,51 @@ static void revenant_unsupported(const char *member)
     if (scene && [delegate respondsToSelector:@selector(renderer:willRenderScene:atTime:)]) {
         [delegate renderer:self willRenderScene:scene atTime:time];
     }
-    [self revenantClear];
-    [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
+    if (_jitteringEnabled && scene) {
+        [self revenantDrawJitteredScene:scene pointOfView:_pointOfView width:width height:height time:time];
+    } else {
+        [self revenantClear];
+        [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
+        _jitterKeyValid = NO;
+    }
     if (scene && [delegate respondsToSelector:@selector(renderer:didRenderScene:atTime:)]) {
         [delegate renderer:self didRenderScene:scene atTime:time];
     }
+}
+
+- (void)revenantDrawJitteredScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height time:(NSTimeInterval)time
+{
+    if (_jitter == nil) {
+        _jitter = [[RevenantSCNJitterBuffers alloc] init];
+    }
+    if (![_jitter isUsable]) {
+        [self revenantClear];
+        [_renderer renderScene:scene pointOfView:pointOfView width:width height:height];
+        return;
+    }
+    [_jitter resizeToWidth:width height:height];
+    if (!_jitterKeyValid || time != _jitterTime || scene != _jitterScene || pointOfView != _jitterPointOfView) {
+        _jitterAccumulated = 0;
+        _jitterTime = time;
+        _jitterScene = scene;
+        _jitterPointOfView = pointOfView;
+        _jitterKeyValid = YES;
+    }
+    if (_jitterAccumulated < [RevenantSCNJitter sampleCount]) {
+        float x = 0, y = 0;
+        [RevenantSCNJitter offsetForFrame:_jitterFrame x:&x y:&y];
+        [_jitter bindSampleFramebuffer];
+        [self revenantClear];
+        _renderer.jitterX = x;
+        _renderer.jitterY = y;
+        [_renderer renderScene:scene pointOfView:pointOfView width:width height:height];
+        _renderer.jitterX = 0;
+        _renderer.jitterY = 0;
+        [_jitter accumulateSampleWithWeight:[RevenantSCNJitter weightForAccumulated:_jitterAccumulated]];
+        _jitterAccumulated++;
+    }
+    _jitterFrame++;
+    [_jitter presentToFramebuffer:_framebuffer];
 }
 
 - (void)revenantDrawFrame
@@ -342,9 +396,7 @@ static void revenant_unsupported(const char *member)
 - (void)setJitteringEnabled:(BOOL)jitteringEnabled
 {
     _jitteringEnabled = jitteringEnabled;
-    if (jitteringEnabled) {
-        revenant_say_once_for(@"scenekit jittering", @"SceneKit: SCNView keeps jitteringEnabled, but a still scene is not refined by jittered frames yet");
-    }
+    _jitterKeyValid = NO;
 }
 
 - (EAGLContext *)eaglContext

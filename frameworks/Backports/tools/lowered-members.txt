@@ -1919,6 +1919,8 @@ class RevenantSCNArchivedData
 class RevenantSCNClock
 class RevenantSCNCoding
 class RevenantSCNDraw
+class RevenantSCNJitter
+class RevenantSCNJitterBuffers
 class RevenantSCNMesh
 class RevenantSCNRenderEngine
 class RevenantSCNShaderProgram
@@ -23334,6 +23336,18 @@ member RevenantSCNCoding +markFound:forKey:onObject:
 member RevenantSCNCoding +popSourceURL
 member RevenantSCNCoding +pushSourceURL:
 member RevenantSCNCoding +wasFound:onObject:
+member RevenantSCNJitter +offsetForFrame:x:y:
+member RevenantSCNJitter +sampleCount
+member RevenantSCNJitter +weightForAccumulated:
+member RevenantSCNJitterBuffers -accumulateSampleWithWeight:
+member RevenantSCNJitterBuffers -bindSampleFramebuffer
+member RevenantSCNJitterBuffers -deleteTargets
+member RevenantSCNJitterBuffers -dispose
+member RevenantSCNJitterBuffers -drawTexture:
+member RevenantSCNJitterBuffers -init
+member RevenantSCNJitterBuffers -isUsable
+member RevenantSCNJitterBuffers -presentToFramebuffer:
+member RevenantSCNJitterBuffers -resizeToWidth:height:
 member RevenantSCNRenderEngine +defaultPointOfViewInScene:
 member RevenantSCNRenderEngine -applySampling:
 member RevenantSCNRenderEngine -dealloc
@@ -24246,6 +24260,7 @@ member SCNView -revenantClear
 member SCNView -revenantDeleteFramebuffer
 member SCNView -revenantDisplayLinkFired:
 member SCNView -revenantDrawFrame
+member SCNView -revenantDrawJitteredScene:pointOfView:width:height:time:
 member SCNView -revenantPrepareDrawable
 member SCNView -revenantRenderAtTime:width:height:
 member SCNView -revenantSetContext:
