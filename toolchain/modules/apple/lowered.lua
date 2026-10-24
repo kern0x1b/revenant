@@ -315,8 +315,9 @@ local function merged_ranges(ranges)
         local last = merged[#merged]
         if last and range.start <= last.stop then
             last.stop = math.max(last.stop, range.stop)
+            last.introduce = last.introduce and range.introduce or nil
         else
-            table.insert(merged, {start = range.start, stop = range.stop})
+            table.insert(merged, {start = range.start, stop = range.stop, introduce = range.introduce})
         end
     end
     return merged
@@ -392,6 +393,21 @@ local function typedef_declarations(text)
     end
 end
 
+local function introduced(text)
+    local pieces, position = {}, 1
+    for _, macro in ipairs(availability(text)) do
+        table.insert(pieces, text:sub(position, macro.start - 1))
+        local spelled = text:sub(macro.start, macro.stop)
+        if text:sub(macro.start, macro.start + 12) == "API_AVAILABLE" then
+            spelled = spelled:gsub("ios%([%d%.]+%)", "ios(6.0)")
+        end
+        table.insert(pieces, spelled)
+        position = macro.stop + 1
+    end
+    table.insert(pieces, text:sub(position))
+    return table.concat(pieces)
+end
+
 local function apply_ranges(text, merged)
     local edits = {}
     for _, range in ipairs(merged) do
@@ -400,8 +416,8 @@ local function apply_ranges(text, merged)
         if segment:find("\n%s*#") then
             raise("a backported declaration spans a preprocessor line: %s", excerpt)
         end
-        local lowered = without_availability(segment)
-        if #availability(lowered) > 0 then
+        local lowered = range.introduce and introduced(segment) or without_availability(segment)
+        if not range.introduce and #availability(lowered) > 0 then
             raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
         end
         if lowered ~= segment then
@@ -443,9 +459,9 @@ local function lowering_of(text, implemented)
         end
     end
     local ranges = {}
-    local function lower(start, stop)
+    local function lower(start, stop, introduce)
         if stop >= start then
-            table.insert(ranges, {start = start, stop = stop})
+            table.insert(ranges, {start = start, stop = stop, introduce = introduce})
         end
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
@@ -453,8 +469,8 @@ local function lowering_of(text, implemented)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
-                lower(first, text:find("\n", stop, true) or #text)
+            if first and not text:match("^%s*%(", stop + 1) then
+                lower(first, text:find("\n", stop, true) or #text, implemented.weak_classes and implemented.weak_classes[class])
             end
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -490,7 +506,8 @@ local function lowering_of(text, implemented)
                 local declaration = text:sub(mark + 1, declared_end)
                 local name = property_name(declaration)
                 local getter = property_getter(declaration) or name
-                if name and (members["-" .. getter] or members["-" .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
+                local sign = declaration:find("%(%s*class") and "+" or "-"
+                if name and (members[sign .. getter] or members[sign .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -538,7 +555,8 @@ local function lowering_of(text, implemented)
                 local declaration = text:sub(mark + 1, declared_end)
                 local property = property_name(declaration)
                 local getter = property_getter(declaration) or property
-                if property and (members["-" .. getter] or members["-" .. property]) then
+                local sign = declaration:find("%(%s*class") and "+" or "-"
+                if property and (members[sign .. getter] or members[sign .. property]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -1390,18 +1408,22 @@ local function guarded_lines(file)
     return lines
 end
 
-function lower_swift_text(text, names, types, keep)
+function lower_swift_text(text, names, types, keep, weak)
     local lines = {}
     for line in text:gmatch("([^\n]*)\n") do
         table.insert(lines, line)
     end
     types = types or {}
     keep = keep or {}
+    weak = weak or {}
     local kept, pending, scope = {}, nil, nil
     for index, line in ipairs(lines) do
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
         if major and tonumber(major) >= 7 and not keep[index] then
             pending = #kept + 1
+        elseif pending and lowered_by(line, weak, types, scope) then
+            kept[pending] = kept[pending]:gsub("iOS%s+[%d%.]+", "iOS 6.0")
+            pending = nil
         elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names)) then
             kept[pending] = false
             pending = nil
@@ -1424,6 +1446,16 @@ function lower_swift_text(text, names, types, keep)
     return table.concat(buffer)
 end
 
+function swift_weak_names(set)
+    local names = {}
+    for class in pairs(set.classes) do
+        if class:startswith("NS") and set.weak_classes and set.weak_classes[class] then
+            names["type " .. class:sub(3)] = true
+        end
+    end
+    return names
+end
+
 function swift_overlays(root, set)
     for _, entry in ipairs(MEMBERS) do
         local lowering = entry.overlay
@@ -1436,7 +1468,7 @@ function swift_overlays(root, set)
     local names, types = swift_names(set), set.types or {}
     for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", "Foundation", "*.swift"))) do
         local text = io.readfile(file)
-        local lowered = lower_swift_text(text, names, types, guarded_lines(file))
+        local lowered = lower_swift_text(text, names, types, guarded_lines(file), swift_weak_names(set))
         if lowered ~= text then
             io.writefile(file, lowered)
         end
