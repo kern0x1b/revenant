@@ -44,11 +44,13 @@ int main(int argc, char **argv)
     for (volatile long spin = 0; spin < 30000000; spin++) {
     }
     for (size_t index = 0; index < sizeof clocks / sizeof clocks[0]; index++) {
-        struct timespec ours, darwins;
+        struct timespec ours, darwins, later;
         int answered = revenant_clock_gettime(clocks[index].clock, &ours);
         clock_gettime(clocks[index].clock, &darwins);
-        long long apart = ((long long)darwins.tv_sec - ours.tv_sec) * 1000000000LL + darwins.tv_nsec - ours.tv_nsec;
-        expect(answered == 0 && apart > -clocks[index].tolerance && apart < clocks[index].tolerance &&
+        int again = revenant_clock_gettime(clocks[index].clock, &later);
+        long long lead = ((long long)darwins.tv_sec - ours.tv_sec) * 1000000000LL + darwins.tv_nsec - ours.tv_nsec;
+        long long lag = ((long long)later.tv_sec - darwins.tv_sec) * 1000000000LL + later.tv_nsec - darwins.tv_nsec;
+        expect(answered == 0 && again == 0 && lead > -clocks[index].tolerance && lag > -clocks[index].tolerance &&
                ours.tv_nsec >= 0 && ours.tv_nsec < 1000000000, clocks[index].what);
     }
     struct timespec monotonic, raw;
@@ -63,8 +65,10 @@ int main(int argc, char **argv)
     for (size_t index = 0; index < sizeof counted / sizeof counted[0]; index++) {
         uint64_t ours = revenant_clock_gettime_nsec_np(counted[index]);
         uint64_t darwins = clock_gettime_nsec_np(counted[index]);
-        long long apart = (long long)(ours - darwins);
-        expect(ours != 0 && apart > -5000000LL && apart < 5000000LL,
+        uint64_t later = revenant_clock_gettime_nsec_np(counted[index]);
+        long long lead = (long long)(darwins - ours);
+        long long lag = (long long)(later - darwins);
+        expect(ours != 0 && later != 0 && lead > -5000000LL && lag > -5000000LL,
                "clock_gettime_nsec_np counts the nanoseconds of the clock Darwin's counts");
     }
     errno = 0;
