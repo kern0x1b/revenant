@@ -1,4 +1,0 @@
-Package: org.revenant.emulateshims.pin-leak
-Name: pin leak under the emulator
-Architecture: iphoneos-arm
-Description: pins a folder from more threads than the emulator has host descriptors, each thread exiting without clearing its pin, and checks that the process keeps working; run it with the emulator's soft descriptor limit below 600, such as ulimit -n 512, or a leaked pin per thread still fits
