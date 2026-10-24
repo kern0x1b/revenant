@@ -16,7 +16,7 @@ float revenant_tanpif(float);
 void revenant_sincospif(float, float *, float *);
 
 static const double SINE_ULP = 1.0;
-static const double TANGENT_ULP = 2.0;
+static const double TANGENT_ULP = 1.0;
 static const double HOST_ULP = 2.0;
 static const double FLOAT_ULP = 0.5;
 static const int SAMPLES = 1000000;
@@ -144,10 +144,6 @@ static void check_edges(void)
         judge("cospi", error_with_host_zero(revenant_cospi(x), __cospi(x)), HOST_ULP, input);
         judge("sincospi.sin", error_with_host_zero(sine, __sinpi(x)), HOST_ULP, input);
         judge("sincospi.cos", error_with_host_zero(cosine, __cospi(x)), HOST_ULP, input);
-        if (revenant_tanpi(x) != sine / cosine && !(isnan(sine) && isnan(revenant_tanpi(x)))) {
-            failures += 1;
-            printf("FAIL  tanpi(%s) is not sinpi over cospi\n", input);
-        }
     }
 }
 

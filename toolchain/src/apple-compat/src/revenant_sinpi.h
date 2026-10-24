@@ -20,12 +20,19 @@ static const double REVENANT_PI_HI_HEAD = 0x1.921fb5p+1;
 static const double REVENANT_PI_HI_TAIL = 0x4442d18p-51;
 static const double REVENANT_SPLIT = 134217729.0;
 
-static inline void revenant_sinpi_kernel(double h, double *sine, double *cosine)
+static inline void revenant_split(double value, double *high, double *low)
+{
+    const double scaled = REVENANT_SPLIT * value;
+    *high = scaled - (scaled - value);
+    *low = value - *high;
+}
+
+static inline void revenant_sinpi_kernel(double h, double *sine, double *sine_tail, double *cosine, double *cosine_tail)
 {
     const double z = h * h;
-    const double split = REVENANT_SPLIT * h;
-    const double high = split - (split - h);
-    const double low = h - high;
+    double high;
+    double low;
+    revenant_split(h, &high, &low);
     const double p = h * REVENANT_PI_HI;
     const double err = ((high * REVENANT_PI_HI_HEAD - p) + high * REVENANT_PI_HI_TAIL + low * REVENANT_PI_HI_HEAD) + low * REVENANT_PI_HI_TAIL;
     const double lo = err + h * REVENANT_PI_LO;
@@ -39,9 +46,10 @@ static inline void revenant_sinpi_kernel(double h, double *sine, double *cosine)
     s = s * z - 1.907518241220842136965e-1;
     s = s * z + 8.117424252833536436370e-1;
     s = s * z - 1.644934066848226436472e0;
-    const double zs = z * s;
-    const double sum = p + lo;
-    *sine = p + (lo + sum * zs);
+    const double corr = lo + (p + lo) * (z * s);
+    const double sine_hi = p + corr;
+    *sine = sine_hi;
+    *sine_tail = (p - sine_hi) + corr;
 
     double c = -1.387895246221377211447e-7;
     c = c * z + 4.303069587032947007298e-6;
@@ -52,20 +60,27 @@ static inline void revenant_sinpi_kernel(double h, double *sine, double *cosine)
     c = c * z - 1.335262768854589495875e0;
     c = c * z + 4.058712126416768218185e0;
     c = c * z - 4.934802200544679309417e0;
-    *cosine = 1.0 + z * c;
+    const double d = z * c;
+    const double cos_hi = 1.0 + d;
+    *cosine = cos_hi;
+    *cosine_tail = (1.0 - cos_hi) + d;
 }
 
-static inline void revenant_sincospi_core(double x, double *sinp, double *cosp)
+static inline void revenant_sincospi_core(double x, double *sinp, double *sinp_tail, double *cosp, double *cosp_tail)
 {
     const double a = __builtin_fabs(x);
     if (!(a < INFINITY)) {
         *sinp = x - x;
+        *sinp_tail = 0.0;
         *cosp = x - x;
+        *cosp_tail = 0.0;
         return;
     }
     if (a >= 0x1p53) {
         *sinp = __builtin_copysign(0.0, x);
+        *sinp_tail = 0.0;
         *cosp = 1.0;
+        *cosp_tail = 0.0;
         return;
     }
     double ip = a;
@@ -84,15 +99,58 @@ static inline void revenant_sincospi_core(double x, double *sinp, double *cosp)
     const int swap = g > 0.25;
     const double h = swap ? 0.5 - g : g;
     double ks;
+    double ks_tail;
     double kc;
-    revenant_sinpi_kernel(h, &ks, &kc);
+    double kc_tail;
+    revenant_sinpi_kernel(h, &ks, &ks_tail, &kc, &kc_tail);
     const double sg = swap ? kc : ks;
+    const double sg_tail = swap ? kc_tail : ks_tail;
     const double cg = swap ? ks : kc;
+    const double cg_tail = swap ? ks_tail : kc_tail;
     const double sign_ip = odd ? -1.0 : 1.0;
     const double sign_x = signbit(x) ? -1.0 : 1.0;
-    *sinp = sg == 0.0 ? __builtin_copysign(0.0, x) : sign_x * sign_ip * sg;
-    const double cos_value = sign_ip * cg;
-    *cosp = cg == 0.0 ? 0.0 : flip ? -cos_value : cos_value;
+    if (sg == 0.0) {
+        *sinp = __builtin_copysign(0.0, x);
+        *sinp_tail = 0.0;
+    } else {
+        const double sign = sign_x * sign_ip;
+        *sinp = sign * sg;
+        *sinp_tail = sign * sg_tail;
+    }
+    if (cg == 0.0) {
+        *cosp = 0.0;
+        *cosp_tail = 0.0;
+    } else {
+        const double sign = flip ? -sign_ip : sign_ip;
+        *cosp = sign * cg;
+        *cosp_tail = sign * cg_tail;
+    }
+}
+
+static inline double revenant_tanpi_core(double x)
+{
+    double sine;
+    double sine_tail;
+    double cosine;
+    double cosine_tail;
+    revenant_sincospi_core(x, &sine, &sine_tail, &cosine, &cosine_tail);
+    if (cosine == 0.0)
+        return sine / cosine;
+    const double q = sine / cosine;
+    double product_high;
+    double product_low;
+    {
+        double qh;
+        double ql;
+        double ch;
+        double cl;
+        revenant_split(q, &qh, &ql);
+        revenant_split(cosine, &ch, &cl);
+        product_high = q * cosine;
+        product_low = ((qh * ch - product_high) + qh * cl + ql * ch) + ql * cl;
+    }
+    const double residual = (((sine - product_high) - product_low) + sine_tail) - q * cosine_tail;
+    return q + residual / cosine;
 }
 
 #endif

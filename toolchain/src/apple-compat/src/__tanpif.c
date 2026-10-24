@@ -2,8 +2,5 @@
 
 float __tanpif(float x)
 {
-    double sine;
-    double cosine;
-    revenant_sincospi_core(x, &sine, &cosine);
-    return (float)(sine / cosine);
+    return (float)revenant_tanpi_core(x);
 }
