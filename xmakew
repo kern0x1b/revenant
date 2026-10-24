@@ -25,6 +25,7 @@ sha256() {
 }
 
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
+digest=$(printf '%s\n%s\n' "$commit" "$patches" | sha256 | cut -d' ' -f1)
 cache=$HOME/.revenant/cache/xmake
 prefix=$cache/$key
 
@@ -55,6 +56,8 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         ./configure --prefix="$work/install"
         make -j"${XMAKE_MAX_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
         make install
+        mkdir -p "$work/install/share/xmake"
+        printf '%s\n' "$digest" > "$work/install/share/xmake/revenant-patch-set"
         mkdir -p "$work/lua"
         for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
             case ${file##*/} in

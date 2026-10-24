@@ -1,0 +1,43 @@
+From 25e751dbc47a6100d54ced527eff0190c8fdc0d8 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 18:57:54 +0200
+Subject: [PATCH] Fold the xmake patch set's digest into every package's build
+ hash
+
+A package's build hash names its install folder, so two installs with the same platform, configs, source and toolchains share a folder. The patches that revenant applies to xmake change what an install does and where it publishes, so an install built by a different patch set must not reuse a folder the old one wrote. The build hash now ends with the digest that xmakew writes beside the binary, revenant-patch-set, which is the commit and the patch list of this build.
+
+Every variant of the hash takes the digest, including the compatibility variants that look for an older install, so an install keyed without the digest is never picked up. A binary without the digest file raises an error rather than keying packages on a patch set it cannot name.
+---
+ xmake/core/package/package.lua | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 37a54a4..55cd446 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1824,6 +1824,14 @@ function _instance:_strhash128(str)
+     return hash.uuid4(str):replace("-", "", {plain = true}):lower()
+ end
+ 
++local function _patchset_digest()
++    local file = path.join(os.programdir(), "revenant-patch-set")
++    if not os.isfile(file) then
++        os.raise("the xmake binary has no patch set digest at %s: build it with xmakew", file)
++    end
++    return io.readfile(file):trim()
++end
++
+ -- get the build hash
+ function _instance:buildhash()
+     local buildhash = self._BUILDHASH
+@@ -1886,6 +1894,7 @@ function _instance:buildhash()
+                 table.sort(toolchains)
+                 str = str .. "_" .. table.concat(toolchains, "_")
+             end
++            str = str .. "_" .. _patchset_digest()
+             return self:_strhash128(str)
+         end
+         local function _get_installdir(...)
+-- 
+2.54.0 (Apple Git-157)
+

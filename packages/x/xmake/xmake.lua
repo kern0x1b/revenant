@@ -24,7 +24,8 @@ package("xmake")
         {"0014-A-query-for-an-install-folder-creates-no-folder.patch", "c17c3b2c45dcbc834c8ebca4be6135b6d594b77728827fb8ffe02465c5b532da"},
         {"0015-Publish-an-install-by-swapping-a-link-to-its-generation.patch", "2820d32683c836c01e14127fcd73bfa0c347ec51346a8be5f13561d4cfa53336"},
         {"0016-Export-the-generation-a-published-install-links-to.patch", "df795248a49d2417c68acb649df50ff2db93959b48c925b90b02d0fb7d078213"},
-        {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "c963b3f233fce5320430b36707df5d6e0fb1fc1c398fe03a4fb4e91aad995783"}}) do
+        {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "c963b3f233fce5320430b36707df5d6e0fb1fc1c398fe03a4fb4e91aad995783"},
+        {"0019-Fold-the-xmake-patch-set-s-digest-into-every-package.patch", "6498c07026abe34ca35d9511bb81280ec68f4a1a456092a9b18086f0f25800c6"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
