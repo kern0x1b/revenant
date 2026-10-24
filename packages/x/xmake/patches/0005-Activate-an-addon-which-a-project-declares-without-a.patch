@@ -22,7 +22,7 @@ on the previous commits, it fails: the active version stays 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
-Changes-build-output: yes
+Changes-build-output: no
 
 ---
  .../autofetch-lockbare/xmake-addons.lock      |  8 +++++++

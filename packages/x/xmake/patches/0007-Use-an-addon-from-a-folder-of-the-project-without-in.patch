@@ -42,7 +42,7 @@ gone outside the project, and that a folder holding another addon is
 refused. Without the change the project tries to install the fixtures
 from the repositories and fails ("package(custom-rule) not found").
 
-Changes-build-output: yes
+Changes-build-output: no
 
 ---
  tests/actions/addon/test.lua                  | 41 ++++++++

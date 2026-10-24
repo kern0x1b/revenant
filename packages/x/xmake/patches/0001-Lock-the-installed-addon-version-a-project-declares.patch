@@ -34,7 +34,7 @@ without this one it fails at the first check, the project locks 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
-Changes-build-output: yes
+Changes-build-output: no
 
 ---
  .../projects/autofetch-release/xmake.lua      |  6 ++

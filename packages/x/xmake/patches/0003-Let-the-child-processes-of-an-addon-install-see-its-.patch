@@ -25,7 +25,7 @@ test_autofetch_keep_active_version fails there ("a child process sees
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
-Changes-build-output: yes
+Changes-build-output: no
 
 ---
  tests/actions/addon/test.lua                  |  5 +++-
