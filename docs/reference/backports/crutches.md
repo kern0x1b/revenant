@@ -38,6 +38,67 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - The runtime's UIKit overlay imports `_OBJC_CLASS_$_UIFocusSystem` weakly (guard table, `UIKit.swift:398`); Telegram's `UIKitRuntimeUtils` needs the class unguarded.
 - Removal: the runtime links the Backports UIKit library that exports the class, so the load check's exports include it. Pending implementation.
 
+### SceneKit audio (branch work/scenekit-audio)
+
+### C8. Reverb is a dry and wet split on the ASA send
+
+- Stands in for: the reverb of AVAudioEnvironmentNode. The dry gain is `volume × (1 − reverbBlend)` and the send level of the ASA reverb is `reverbBlend`; a blend of zero applies neither and needs no ASA.
+- Gaps: the wet level of ASA is not calibrated against AVAudioEnvironmentNode's reverb, so an equal blend gives equal dry and wet gains here, not equal loudness there.
+- Measurement: host readback of `AL_GAIN` and the `rvsl` send at blends 0, 0.25 and 0.5 (`tests/SceneKit/audio_test.m`).
+- Removed by: a listening comparison on the device against AVAudioEnvironmentNode at the same blend.
+
+### C9. Distance is OpenAL's clamped inverse law with AVAudioEnvironmentNode's defaults
+
+- Stands in for: AVAudioEnvironmentNode's inverse distance model (reference distance 1, maximum distance 100000, rolloff factor 1). OpenAL's clamped inverse law is the same formula, set per source.
+- Gaps: not compared with Apple's output on the device.
+- Measurement: host readback of the three source parameters, and a falloff ratio between 0.15 and 0.35 for 1 m against 4 m.
+- Removed by: a device comparison of the falloff against AVAudioEnvironmentNode.
+
+### C10. Custom AVAudioNode players are attached without spatialisation
+
+- Stands in for: SceneKit placing a custom node in its environment. The node is connected to the main mixer of a shared `AVAudioEngine`.
+- Gaps: a custom node is not positioned from its node's transform nor from the listener, and `didFinishPlayback` is never called for it, because the node decides when its audio ends.
+- Measurement: host attach on start and detach on stop (`audio_test.m`). The device is not measured for custom nodes.
+- Removed by: an environment node that positions custom nodes, and an end notification for them.
+
+### C11. `audioNode` is nil for players built from a source
+
+- Stands in for: the internal AVAudioPlayerNode that SceneKit uses for a source player. The player plays through the OpenAL source instead, so there is no node to return.
+- Measurement: host check that a source player has no node and a node player returns its node.
+- Removed by: a source player that plays through an AVAudioPlayerNode, or a documented decision to keep `audioNode` nil.
+
+### C12. The engine behind custom nodes is the Backports AUGraph lowering
+
+- Stands in for: `AVAudioEngine` (iOS 8). The Backports build it on an AUGraph in `AVFoundationBackports`.
+- Gaps: the lowering is unverified on iOS 6.1.3. Start, connect and attach run through the AUGraph on the device, and only the host (Apple's engine) has run them.
+- Measurement: host attach, connect and detach with Apple's `AVAudioEngine` (`audio_test.m`).
+- Removed by: a device run of a custom node playing through the engine.
+
+### C13. Archives carry the URL of the source
+
+- Stands in for: SceneKit's archive. A macOS archive of a source made with `initWithURL:` stores `url` as nil; the keys are otherwise the same as ours (`loops`, `positional`, `rate`, `reverbBlend`, `shouldStream`, `url`, `volume`).
+- Gaps: our archive keeps the URL, so a source decoded from it plays. Apple's archive of the same source decodes to a source with no URL, which cannot play.
+- Measurement: host check that the archive keys equal the macOS keys, and that flags and values survive a round trip (`audio_test.m`).
+- Removed by: a decision to match Apple's nil `url`, or to keep the URL as the only way to play after decode.
+
+### C14. Velocity is a finite difference of positions
+
+- Kept by the coordinator's decision: SceneKit has no velocity of its own, so the velocity is the difference between the last two positions, and zero for the first sample. Listed here so the choice is visible; it is not a stand-in.
+
+### C15. Reverb needs the ASA procedures when the blend is above zero
+
+- Stands in for: the reverb of AVAudioEnvironmentNode, through the ASA send of OpenAL (`alcASASetSource`, `rvsl`). A blend of zero needs no ASA.
+- Gaps: the ASA procedures are not exported from `OpenAL.framework` on 6.1.3 (checked against the image: `_alcASASetSource`, `_alcASASetListener` and `_alcASAGetSource` are absent as exports). They are resolved at run time with `alcGetProcAddress`, and a device without them raises `NSInternalInconsistencyException` on a start with a blend above zero. Whether the procedures resolve on 6.1.3 has not been measured on a device.
+- Measurement: host readback of the send through `alcASAGetSource` (`audio_test.m`). Device: pending the runtime case (C16).
+- Removed by: the runtime case reporting that `alcGetProcAddress` resolves the three procedures on 6.1.3.
+
+### C16. The OpenAL device path, the audio session and streaming are not run on iOS 6.1.3
+
+- Stands in for: the output path of AVAudioSession and AVAudioPlayer, which SceneKit uses on the device. The OpenAL device, the ExtAudioFile decode, source playback and stream playback run only on the macOS host.
+- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). The image check shows the symbols exported on 6.1.3, including `ExtAudioFileSeek` for stream loops, but nothing has run on the device or the emulator. The runtime case `tests/runtime/cases/scenekit_audio.m` is built for the device and reaches the emulator, but the app stops in the probe of the missing-class case before any case runs (a null read in `libRevenantMissingProbe.dylib`, outside this change), so its results are not in yet.
+- Measurement: host tests of the same paths (`audio_test.m`, `action_run_test.m`). Device: pending.
+- Removed by: the runtime case passing on the emulator, and a run on a real iPhone 4S with the mute switch set and other audio playing.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
