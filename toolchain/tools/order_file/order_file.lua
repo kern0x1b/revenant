@@ -1,3 +1,6 @@
+local MODULES = path.join(os.scriptdir(), "..", "..", "modules")
+local byteorder = import("byteorder", {rootdir = MODULES, anonymous = true})
+
 local function fail(message)
     io.stderr:write("order_file.lua: " .. message .. "\n")
     os.exit(64)
@@ -72,12 +75,7 @@ local function text_symbols(program, binary)
             table.insert(symbols, {address = tonumber(address, 16), name = name})
         end
     end)
-    table.sort(symbols, function (a, b)
-        if a.address ~= b.address then
-            return a.address < b.address
-        end
-        return a.name < b.name
-    end)
+    table.sort(symbols, function (a, b) return a.address < b.address or (a.address == b.address and byteorder.less(a.name, b.name)) end)
     return symbols
 end
 
@@ -164,12 +162,7 @@ function main(...)
     for name in pairs(ticks) do
         table.insert(names, name)
     end
-    table.sort(names, function (a, b)
-        if ticks[a] ~= ticks[b] then
-            return ticks[a] > ticks[b]
-        end
-        return a < b
-    end)
+    table.sort(names, function (a, b) return ticks[a] > ticks[b] or (ticks[a] == ticks[b] and byteorder.less(a, b)) end)
     io.writefile(options.output, #names > 0 and (table.concat(names, "\n") .. "\n") or "")
     print(string.format("%d symbols with executed blocks, written to %s", #names, options.output))
 end
