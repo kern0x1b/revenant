@@ -111,3 +111,20 @@ Open:
   the machine's interfaces, so the comparison is limited to deterministic output. The path mapping is checked from fixed
   inputs in `tests/Network/mapping/main.swift` (the host's answers for one recorded state, and documented cases), and the
   live path only against invariants in `tests/Network/live/main.swift`.
+
+## Selectors Display calls through the delegates
+
+The respondsToSelector check was asked for as a generator change: count a selector that a class sends through
+`respondsToSelector:` as a protocol member. Two of Display's errors are the selectors that prompted it, and the probe
+on the lowered iOS 6 SDK settles both without that change:
+
+- `scrollViewDidChangeAdjustedContentInset:` on `UIScrollViewDelegate` implements without a diagnostic under
+  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`. The lowered header no longer marks the protocol member,
+  so no generator change is needed for it.
+- `accessibilityAttributedScrollStatusForScrollView:` on `UIScrollView` is in `lowered-members.txt` and implemented in
+  `RevenantIOS11.m`, but the cached overlay the probe reads does not declare it, so the probe reports "no visible
+  @interface". Display's error is the Swift declaration's iOS 11 mark, which the UIKit Swift overlay carries, not the ObjC
+  header. The fix is in the overlay, not the generator.
+
+Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
+re-checked with the next Display build.
