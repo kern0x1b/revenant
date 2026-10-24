@@ -288,7 +288,9 @@ void EmulatorSession::run()
         bounded_execution ? std::make_shared<hfs::GuestIdTable>() : nullptr;
     const auto device_time_policy =
         bounded_execution ? DeviceTimePolicy::DeterministicExecution
-                          : DeviceTimePolicy::HostMappedInteractive;
+        : options.windowed || options.gdb_port.has_value()
+            ? DeviceTimePolicy::HostMappedInteractive
+            : DeviceTimePolicy::FastForwardIdle;
     const auto ticks = ticks_option ? *ticks_option
                                     : std::numeric_limits<std::uint64_t>::max();
     const bool disable_scheduler_preemption =
@@ -2478,6 +2480,8 @@ void EmulatorSession::run()
                   << " (one guest second takes that many host seconds)";
             output.line(scale.str());
         }
+    }
+    if (device_time_policy != DeviceTimePolicy::DeterministicExecution) {
         const auto host_wall_time =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
@@ -2486,8 +2490,12 @@ void EmulatorSession::run()
             initial_runtime->kernel->set_wall_time(
                 static_cast<std::uint64_t>(host_wall_time));
         }
-        output.line("[clock] mode=virtual-rtc seed=host-once rate=realtime "
-                    "timezone=guest");
+        output.line(
+            realtime_pacer
+                ? "[clock] mode=virtual-rtc seed=host-once rate=realtime "
+                  "timezone=guest"
+                : "[clock] mode=virtual-rtc seed=host-once rate=fast-forward "
+                  "timezone=guest");
     }
     GuestTickClock executed_time_clock { guest_ticks_per_second };
     std::uint64_t executed_ticks_since_catch_up { };
@@ -4060,7 +4068,7 @@ void EmulatorSession::run()
         }
         if (realtime_pacer)
             executed_ticks_since_catch_up += scheduler_round_ticks;
-        if (device_time_policy == DeviceTimePolicy::DeterministicExecution) {
+        if (device_time_policy != DeviceTimePolicy::HostMappedInteractive) {
             scheduler.advance_time(scheduler_round_ticks);
             if (scheduler_round_ticks != 0) {
                 initial_runtime->kernel->advance_time_by(
