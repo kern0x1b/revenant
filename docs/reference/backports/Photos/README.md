@@ -20,6 +20,11 @@ The Photos change APIs refuse unsupported edits with a change error, including a
 and asset metadata changes that AssetsLibrary cannot perform. Resource creation accepts one primary photo or video;
 adjustment data and Live Photo pairings are unavailable.
 
-The host tests cover representation selection and the cache's byte limit and eviction order. The iPhone 4S runtime test
-creates and fetches a photo, checks its local-availability result, requests a thumbnail, and verifies a change observer
-can refetch its result.
+requestLivePhotoForAsset fails with PHPhotosErrorRequestNotSupportedForAsset: a Live Photo needs iOS 9.1. cancelImageRequest
+stops delivery of a request that has not yet been delivered, and the result carries PHImageCancelledKey.
+
+The host tests cover representation selection and the cache's byte limit, eviction order, oversized objects and recency
+on a hit. The iPhone 4S runtime test creates and fetches a photo, checks its local-availability result, requests a
+thumbnail, and verifies a change observer can refetch its result. It is not run by CI. On the emulator it fails at the
+first step: the guest never contacts assetsd, so AssetsLibrary grants no access and the test reports that. Its
+thumbnail timing is not measured until that is fixed.

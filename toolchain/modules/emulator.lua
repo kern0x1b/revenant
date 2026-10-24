@@ -674,10 +674,13 @@ function scan(state, line)
     elseif line == "REVENANT-PERF-END" then
         state.perf_end = true
     end
-    if line == "[control] perf-begin label=photos-thumbnail" then
-        state.perf_started = true
-    elseif line:startswith("[perf-display] label=photos-thumbnail ") then
-        state.perf_finished = true
+    local perf_started = line:match("^%[control%] perf%-begin label=(%S+)$")
+    if perf_started then
+        state.perf_started = perf_started
+    end
+    local perf_finished = line:match("^%[perf%-display%] label=(%S+) ")
+    if perf_finished then
+        state.perf_finished = perf_finished
     end
     local started = line:match("^%[transition%] input%-complete id=(%d+)") or line:match("^%[transition%] settle id=(%d+)")
     if started then

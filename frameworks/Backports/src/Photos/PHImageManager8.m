@@ -181,6 +181,64 @@ static NSData *revenant_data(ALAssetRepresentation *representation, PHAssetImage
     return data;
 }
 
+static NSMutableDictionary *revenant_pending(void)
+{
+    static NSMutableDictionary *pending;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        pending = [NSMutableDictionary dictionary];
+    });
+    return pending;
+}
+
+static void revenant_cancel(PHImageRequestID requestID)
+{
+    NSMutableDictionary *pending = revenant_pending();
+    @synchronized (pending) {
+        if (pending[@(requestID)])
+            pending[@(requestID)] = @YES;
+    }
+}
+
+static BOOL revenant_cancelled(PHImageRequestID requestID)
+{
+    NSMutableDictionary *pending = revenant_pending();
+    @synchronized (pending) {
+        return [pending[@(requestID)] boolValue];
+    }
+}
+
+static BOOL revenant_complete(PHImageRequestID requestID)
+{
+    NSMutableDictionary *pending = revenant_pending();
+    @synchronized (pending) {
+        BOOL cancelled = [pending[@(requestID)] boolValue];
+        [pending removeObjectForKey:@(requestID)];
+        return cancelled;
+    }
+}
+
+static void revenant_deliver_image(PHImageRequestID requestID, UIImage *image, NSMutableDictionary *info, void (^handler)(UIImage *result, NSDictionary *info))
+{
+    if (revenant_complete(requestID)) {
+        info[PHImageCancelledKey] = @YES;
+        handler(nil, info);
+        return;
+    }
+    handler(image, info);
+}
+
+static void revenant_deliver_data(PHImageRequestID requestID, NSData *data, NSString *uti, UIImageOrientation orientation, NSMutableDictionary *info,
+                                  void (^handler)(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info))
+{
+    if (revenant_complete(requestID)) {
+        info[PHImageCancelledKey] = @YES;
+        handler(nil, nil, UIImageOrientationUp, info);
+        return;
+    }
+    handler(data, uti, orientation, info);
+}
+
 @implementation PHImageManager
 
 - (instancetype)init
@@ -211,55 +269,30 @@ static NSData *revenant_data(ALAssetRepresentation *representation, PHAssetImage
     return manager;
 }
 
-+ (NSMutableSet *)cancelled
-{
-    static NSMutableSet *set;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        set = [NSMutableSet set];
-    });
-    return set;
-}
-
 + (PHImageRequestID)issue
 {
     static int32_t last;
     return OSAtomicIncrement32(&last);
 }
 
-+ (BOOL)takeCancellation:(PHImageRequestID)requestID
-{
-    NSMutableSet *set = [self cancelled];
-    @synchronized (set) {
-        BOOL was = [set containsObject:@(requestID)];
-        [set removeObject:@(requestID)];
-        return was;
-    }
-}
-
 - (void)cancelImageRequest:(PHImageRequestID)requestID
 {
-    NSMutableSet *set = [PHImageManager cancelled];
-    @synchronized (set) {
-        [set addObject:@(requestID)];
-    }
+    revenant_cancel(requestID);
 }
 
-- (PHImageRequestID)revenant_request:(PHImageRequestID)requestID synchronous:(BOOL)synchronous work:(void (^)(BOOL cancelled, NSMutableDictionary *info))work
+- (PHImageRequestID)revenant_request:(PHImageRequestID)requestID synchronous:(BOOL)synchronous work:(void (^)(NSMutableDictionary *info))work
 {
-    NSMutableDictionary *(^fresh)(void) = ^NSMutableDictionary *{
-        return [NSMutableDictionary dictionaryWithObjectsAndKeys:@(requestID), PHImageResultRequestIDKey, @NO, PHImageResultIsInCloudKey, nil];
-    };
+    NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:@(requestID), PHImageResultRequestIDKey, @NO, PHImageResultIsInCloudKey, nil];
     if (synchronous) {
-        work(NO, fresh());
+        work(info);
         return requestID;
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        BOOL cancelled = [PHImageManager takeCancellation:requestID];
-        NSMutableDictionary *info = fresh();
-        dispatch_async(dispatch_get_main_queue(), ^{
-            work(cancelled, info);
-        });
+    NSMutableDictionary *pending = revenant_pending();
+    @synchronized (pending) {
+        pending[@(requestID)] = @NO;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        work(info);
     });
     return requestID;
 }
@@ -270,55 +303,65 @@ static NSData *revenant_data(ALAssetRepresentation *representation, PHAssetImage
     PHImageRequestID requestID = [PHImageManager issue];
     PHImageRequestOptions *requestOptions = [options copy] ?: [[PHImageRequestOptions alloc] init];
     NSString *key = revenant_image_cache_key(asset, targetSize, contentMode, requestOptions);
-    BOOL synchronous = requestOptions.synchronous;
     __block UIImage *rendered = nil;
     void (^render)(void) = ^{
         rendered = revenant_image(revenant_requested_asset(asset, requestOptions.version), targetSize, contentMode, requestOptions);
         if (rendered)
             [revenant_image_cache() setObject:rendered forKey:key cost:revenant_image_cost(rendered)];
     };
-    if (!synchronous) {
-        return [self revenant_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
-            info[PHImageResultIsDegradedKey] = @NO;
-            if (cancelled) {
-                info[PHImageCancelledKey] = @YES;
-                resultHandler(nil, info);
-                return;
-            }
+    if (requestOptions.synchronous) {
+        return [self revenant_request:requestID synchronous:YES work:^(NSMutableDictionary *info) {
             if (!asset.isLocallyAvailable) {
                 info[PHImageErrorKey] = revenant_unavailable_asset_error(asset);
                 resultHandler(nil, info);
                 return;
             }
-            UIImage *cached = [revenant_image_cache() objectForKey:key];
-            if (cached) {
-                resultHandler(cached, info);
-                return;
-            }
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            rendered = [revenant_image_cache() objectForKey:key];
+            if (!rendered)
                 render();
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (!rendered)
-                        info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
-                    resultHandler(rendered, info);
-                });
-            });
+            info[PHImageResultIsDegradedKey] = @NO;
+            if (!rendered)
+                info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
+            resultHandler(rendered, info);
         }];
     }
-    return [self revenant_request:requestID synchronous:YES work:^(BOOL cancelled, NSMutableDictionary *info) {
-        if (!asset.isLocallyAvailable) {
-            info[PHImageErrorKey] = revenant_unavailable_asset_error(asset);
-            resultHandler(nil, info);
+    return [self revenant_request:requestID synchronous:NO work:^(NSMutableDictionary *info) {
+        info[PHImageResultIsDegradedKey] = @NO;
+        if (revenant_cancelled(requestID)) {
+            revenant_deliver_image(requestID, nil, info, resultHandler);
             return;
         }
-        rendered = [revenant_image_cache() objectForKey:key];
-        if (!rendered)
+        if (!asset.isLocallyAvailable) {
+            info[PHImageErrorKey] = revenant_unavailable_asset_error(asset);
+            revenant_deliver_image(requestID, nil, info, resultHandler);
+            return;
+        }
+        UIImage *cached = [revenant_image_cache() objectForKey:key];
+        if (cached) {
+            revenant_deliver_image(requestID, cached, info, resultHandler);
+            return;
+        }
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             render();
-        info[PHImageResultIsDegradedKey] = @NO;
-        if (!rendered)
-            info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
-        resultHandler(rendered, info);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (!rendered)
+                    info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
+                revenant_deliver_image(requestID, rendered, info, resultHandler);
+            });
+        });
     }];
+}
+
+- (PHImageRequestID)requestLivePhotoForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize contentMode:(PHImageContentMode)contentMode options:(PHLivePhotoRequestOptions *)options
+                               resultHandler:(void (^)(PHLivePhoto *livePhoto, NSDictionary *info))resultHandler
+{
+    PHImageRequestID requestID = [PHImageManager issue];
+    NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:@(requestID), PHImageResultRequestIDKey, @NO, PHImageResultIsInCloudKey, nil];
+    info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorRequestNotSupportedForAsset reason:@"a Live Photo needs iOS 9.1; the AssetsLibrary on iOS 6 keeps no paired video"];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        resultHandler(nil, info);
+    });
+    return requestID;
 }
 
 - (PHImageRequestID)requestImageDataForAsset:(PHAsset *)asset options:(PHImageRequestOptions *)options
@@ -346,22 +389,22 @@ static NSData *revenant_data(ALAssetRepresentation *representation, PHAssetImage
             info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the data of the asset could not be read"];
         completion(data, data ? representation.UTI : nil, data ? (UIImageOrientation)representation.orientation : UIImageOrientationUp);
     };
-    return [self revenant_request:requestID synchronous:requestOptions.synchronous work:^(BOOL cancelled, NSMutableDictionary *info) {
-        if (cancelled) {
-            info[PHImageCancelledKey] = @YES;
-            resultHandler(nil, nil, UIImageOrientationUp, info);
-            return;
-        }
-        if (requestOptions.synchronous) {
+    if (requestOptions.synchronous) {
+        return [self revenant_request:requestID synchronous:YES work:^(NSMutableDictionary *info) {
             read(info, ^(NSData *data, NSString *uti, UIImageOrientation orientation) {
                 resultHandler(data, uti, orientation, info);
             });
+        }];
+    }
+    return [self revenant_request:requestID synchronous:NO work:^(NSMutableDictionary *info) {
+        if (revenant_cancelled(requestID)) {
+            revenant_deliver_data(requestID, nil, nil, UIImageOrientationUp, info, resultHandler);
             return;
         }
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             read(info, ^(NSData *data, NSString *uti, UIImageOrientation orientation) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    resultHandler(data, uti, orientation, info);
+                    revenant_deliver_data(requestID, data, uti, orientation, info, resultHandler);
                 });
             });
         });
@@ -390,10 +433,13 @@ static NSData *revenant_data(ALAssetRepresentation *representation, PHAssetImage
 {
     PHVideoRequestOptions *requestOptions = [options copy] ?: [[PHVideoRequestOptions alloc] init];
     PHImageRequestID requestID = [PHImageManager issue];
-    return [self revenant_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
-        NSURL *url = cancelled ? nil : [self revenant_videoURL:asset version:requestOptions.version];
-        if (cancelled)
+    return [self revenant_request:requestID synchronous:NO work:^(NSMutableDictionary *info) {
+        if (revenant_complete(requestID)) {
             info[PHImageCancelledKey] = @YES;
+            result(nil, info);
+            return;
+        }
+        NSURL *url = [self revenant_videoURL:asset version:requestOptions.version];
         NSError *error = nil;
         if (!url) {
             error = asset.isLocallyAvailable
