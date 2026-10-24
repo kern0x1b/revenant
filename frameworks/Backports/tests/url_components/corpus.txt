@@ -1,0 +1,56 @@
+https://user:pass@example.com:8443/a/b%20c?x=1&y=%2F#frag
+http://example.com
+https://example.com/path?
+https://example.com/path#
+mailto:someone@example.com
+file:///tmp/a%20b.txt
+https://[::1]:8080/x
+ftp://host/dir/
+//example.com/path
+/relative/path?q=1
+relative/path
+https://example.com/a?b=c?d
+https://example.com:/
+https://example.com:99999/
+http://ex ample.com/
+http://a%zz.com/
+https://example.com/%E2%82%AC?x=%F0%9F%98%80
+https://example.com/path;params=1,2
+https://example.com/a@b/c
+https://u@h/
+1http://x/
+scheme-with+chars://h/
+<empty>
+https://example.com/a?x=y&z
+https://example.com/#a#b
+https://example.com/a{b}c
+https://example.com/a|b
+https://example.com/a"b<c>
+https://example.com/a\b
+https://example.com/a^b`c
+https://example.com/a%b
+https://example.com/a b
+https://example.com/a?x=y z
+https://example.com/a?x=[y]
+https://example.com/a?x=y#f?g
+https://example.com/a#f g
+https://example.com/a#f"g
+https://example.com/a'b
+https://例子.测试/路径
+https://example.com/路径?q=é
+http://exa_mple.com/
+https://ex%20ample.com/
+https://example.com:80a/
+https://user:pa:ss@example.com/
+https://us er@example.com/
+https://example.com/a!b$c&d(e)f*g+h,i;j=k
+https://example.com?x
+https://example.com#
+http:/x
+http:x
+:x
+https://
+https://example.com:-1/
+https://example.com:65536/
+https://[::1/
+https://[v1.fe]/
