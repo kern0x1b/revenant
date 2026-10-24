@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS access (service TEXT NOT NULL, client TEXT NOT NULL, 
 CREATE TABLE IF NOT EXISTS access_times (service TEXT NOT NULL, client TEXT NOT NULL, client_type INTEGER NOT NULL, last_used_time INTEGER NOT NULL, CONSTRAINT key PRIMARY KEY (service, client, client_type));
 CREATE TABLE IF NOT EXISTS access_overrides (service TEXT PRIMARY KEY NOT NULL);
 INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 0, 1, 1);
+INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 1, 1, 1);
+INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 0, 1, 1);
+INSERT OR REPLACE INTO access_times VALUES ('kTCCServicePhotos', '%s', 0, 0);
+INSERT OR REPLACE INTO access_times VALUES ('kTCCServicePhotos', '%s', 1, 0);
+INSERT OR REPLACE INTO access_times VALUES ('kTCCServicePhotos', '%s', 0, 0);
 ]]
 
 local function owned_by_mobile(file)
@@ -57,7 +62,9 @@ local function grant_photos_access(rootfs)
     local directory = emulator.guest_path(rootfs, "/var/mobile/Library/TCC")
     os.mkdir(directory)
     local database = path.join(directory, "TCC.db")
-    os.vrunv("sqlite3", {database, string.format(TCC_SCHEMA, APP_ID)})
+    local clients = {APP_ID, "/" .. BINARY, "RevenantBackportsRuntime"}
+    local values = table.join(clients, clients)
+    os.vrunv("sqlite3", {database, string.format(TCC_SCHEMA, table.unpack(values))})
     owned_by_mobile(directory)
     owned_by_mobile(database)
 end
@@ -129,7 +136,7 @@ local function libraries_folder(app)
     return folder
 end
 
-local function run(app, guest)
+local function run(app, guest, ldid)
     local program = emulator_program()
     local firmware = firmware_root()
     local libraries = os.files(path.join(libraries_folder(app), "lib*Backports.dylib"))
@@ -166,8 +173,10 @@ local function run(app, guest)
         local binary = emulator.guest_path(rootfs, BINARY)
         os.mkdir(path.directory(binary))
         os.cp(app, binary)
+        os.vrunv(ldid, {"-S", binary})
         os.vrunv("chmod", {"0755", binary})
         install_bundle(rootfs, binary)
+        emulator.register_application(rootfs, APP)
         emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
         local results = emulator.results(rootfs)
         local verdict_file = path.join(results, "verdict.json")
@@ -233,7 +242,8 @@ function failures(case, target)
         if not guest then
             raise("emulator-guest is not installed for this configuration")
         end
-        return run(app, guest:installdir())
+        local ldid = path.join(target:dep("backports_runtime_app"):pkg("ldid"):installdir(), "bin", "ldid")
+        return run(app, guest:installdir(), ldid)
     end)
     if not values or values[1] == nil then
         table.insert(found, failure or "the runtime run returned no results")

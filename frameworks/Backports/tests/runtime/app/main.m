@@ -1,9 +1,7 @@
 #import "revenant_check.h"
 #include <stdio.h>
 #include <string.h>
-#include <spawn.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #define REVENANT_CASE_CAPACITY 128
@@ -79,15 +77,6 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (getuid() == 0) {
-            pid_t starter = 0;
-            char *starterArguments[] = {"launchctl", "start", "com.apple.assetsd", NULL};
-            extern char **environ;
-            int spawned = posix_spawn(&starter, "/bin/launchctl", NULL, NULL, starterArguments, environ);
-            int starterStatus = -1;
-            if (spawned == 0)
-                waitpid(starter, &starterStatus, 0);
-            printf("REVENANT-START assetsd spawn=%d status=%d\n", spawned, starterStatus);
-            fflush(stdout);
             setgid(501);
             setuid(501);
         }

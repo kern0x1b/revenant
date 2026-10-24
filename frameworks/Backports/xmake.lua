@@ -280,6 +280,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             add_deps("FoundationBackports", "UIKitBackports", "PhotosBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "AssetsLibrary")
+        add_packages("ldid")
         add_syslinks("objc")
     target_end()
 

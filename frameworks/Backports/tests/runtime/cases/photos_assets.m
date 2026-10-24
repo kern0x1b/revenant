@@ -2,6 +2,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <Photos/Photos.h>
 #import <UIKit/UIKit.h>
+#include <dlfcn.h>
 #include <mach/mach.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -61,6 +62,34 @@ REVENANT_CASE(photos_assets)
            databaseResult, databaseResult == 0 ? (long long)tccDatabase.st_size : -1LL,
            databaseResult == 0 ? (unsigned)tccDatabase.st_uid : 0, databaseResult == 0 ? (unsigned)tccDatabase.st_gid : 0,
            databaseResult == 0 ? (unsigned)tccDatabase.st_mode : 0);
+    fflush(stdout);
+    void *tccFramework = dlopen("/System/Library/PrivateFrameworks/TCC.framework/TCC", RTLD_NOW);
+    printf("PHOTOS-PROBE tcc-framework=%d\n", tccFramework != NULL);
+    const char *tccNames[] = {"TCCAccessPreflight", "TCCAccessCopyInformation", "TCCAccessRequest", NULL};
+    for (int index = 0; tccFramework && tccNames[index]; index++)
+        printf("PHOTOS-PROBE symbol %s=%p\n", tccNames[index], dlsym(tccFramework, tccNames[index]));
+    if (tccFramework) {
+        int (*preflight)(CFStringRef service, CFDictionaryRef options) = (int (*)(CFStringRef, CFDictionaryRef))dlsym(tccFramework, "TCCAccessPreflight");
+        if (preflight)
+            printf("PHOTOS-PROBE preflight=%d\n", preflight(CFSTR("kTCCServicePhotos"), NULL));
+    }
+    void *sqlite = dlopen("/usr/lib/libsqlite3.dylib", RTLD_NOW);
+    int (*open_database)(const char *, void **, int, const char *) = sqlite ? (int (*)(const char *, void **, int, const char *))dlsym(sqlite, "sqlite3_open_v2") : NULL;
+    int (*prepare)(void *, const char *, int, void **, const char **) = sqlite ? (int (*)(void *, const char *, int, void **, const char **))dlsym(sqlite, "sqlite3_prepare_v2") : NULL;
+    int (*step)(void *) = sqlite ? (int (*)(void *))dlsym(sqlite, "sqlite3_step") : NULL;
+    const unsigned char *(*column_text)(void *, int) = sqlite ? (const unsigned char *(*)(void *, int))dlsym(sqlite, "sqlite3_column_text") : NULL;
+    if (open_database && prepare && step && column_text) {
+        void *database = NULL;
+        int opened = open_database("/var/mobile/Library/TCC/TCC.db", &database, 1, NULL);
+        printf("PHOTOS-PROBE tcc-db open=%d\n", opened);
+        void *statement = NULL;
+        if (opened == 0 && prepare(database, "SELECT service, client, client_type, allowed, prompt_count FROM access", -1, &statement, NULL) == 0) {
+            while (step(statement) == 100)
+                printf("PHOTOS-PROBE row %s|%s|%s|%s|%s\n", column_text(statement, 0), column_text(statement, 1), column_text(statement, 2), column_text(statement, 3), column_text(statement, 4));
+        }
+    }
+    fflush(stdout);
+    fflush(stdout);
     fflush(stdout);
     mach_port_t probePort = MACH_PORT_NULL;
     kern_return_t probeLookup = bootstrap_look_up(bootstrap_port, "com.apple.assetsd.messagingServer", &probePort);
