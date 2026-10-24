@@ -105,6 +105,56 @@ Two further forms were looked at and are not missed. A single 64-bit addend, `(u
 which is as short as UMAAL can be with one addend. The 32-bit-carry multiply loop of boringssl's `bn_mul_add_words`
 compiles to `umaal` as the control does.
 
+### Why `xor16_alias` is scalar
+
+The pass dump and the remarks of the packaged clang, for `xor16_alias` at `-O2 -mcpu=cortex-a9 -mfpu=neon` on
+`armv7-apple-ios6.0`:
+
+- `-Rpass=loop-unroll`: `completely unrolled loop with 16 iterations` at the loop. The loop vectoriser never sees a loop.
+- `-print-before=loop-vectorize`: the function is straight-line code already, sixteen loads from each source, sixteen
+  xors and sixteen stores, in program order: each store to `d[i]` comes before the loads of `s[i+1]` and `k[i+1]`.
+- The SLP vectoriser emits no remark for the list, and the code stays scalar.
+- With `-mllvm -unroll-full-max-count=0` the loop survives: the loop vectoriser versions it with an overlap check and
+  emits `vld1.8` twice, `veor` and `vst1.8`, with a scalar loop for the overlapping case.
+- `-mllvm -unroll-threshold=0` gives the same result as the count of zero.
+
+An earlier run of `-disable-loop-unrolling` looked like a no-op: `-mllvm` options passed through an unquoted shell
+variable were dropped, and the assembly read was stale. The results above pass each option as its own argument.
+
+### BoringSSL bignum baseline
+
+`bn_mul_add_words` and `bn_mul_words` from BoringSSL's generic C (`crypto/fipsmodule/bn/generic.c` of the reference tree,
+built with `-DOPENSSL_NO_ASM`, as Telegram's build does), in a driver that runs both over 64 words for 4000 rounds. Built in
+ARM mode with the current compiler (packaged 23.1.3):
+
+| build | guest instructions | checksum |
+| --- | ---: | --- |
+| current compiler, ARM mode | 6,685,597 | 0ff907b2 |
+
+### The two ARM patches, measured and dropped
+
+Two patches on the ARM backend were built into an llvm prebuilt (`80e13773` for clang, `ff73b51b` with the libraries config),
+installed and measured against the current compiler. Both are dropped: neither is a measured win.
+
+| measurement | current compiler | patched compiler | difference |
+| --- | ---: | ---: | ---: |
+| bignum library `generic.c`, object bytes compared | 6,685,597 | 6,685,597 | 0; the object is byte-identical |
+| bignum driver and library, both built by the patched compiler | 6,685,597 | 7,005,576 | +4.8%, all in the driver's code |
+| opus 1.5.1, cmake build, 150 VOIP frames, same checksum `d79006c2` | 216,734,571 | 217,573,933 | +0.39%; the library is 553,800 bytes against 551,336 |
+
+The two patches are not separated in these numbers. The bignum library is unchanged by them together. The driver's
+change is in its own 64-iteration loops, which the unroll cap touches and the UMAAL change does not. The UMAAL change's
+share of the opus difference is not measured, because the two patches were built together.
+
+- The UMAAL patch (a known-zero check in `PerformUMLALCombine`) does not flip `mul_add_words_carry64`: the loop still has
+  `umlal` and `adc`, and the patched compiler adds one `mov` per word. The high half of the carry is a loop-carried value
+  that the DAG cannot see as zero across the back edge.
+- The unroll cap (single-block NEON loops of at least eight iterations are not fully unrolled before vectorisation) flips
+  `xor16_alias` to `vld1.8` and `veor`, and `xor16_restrict` is unchanged. It is not a win on the codec: the vectorised
+  loops need runtime overlap checks.
+
+A refined cap, measured on the codec and the driver before it is built, is the candidate to take next.
+
 ## Emulator observations
 
 - A Thumb `main` given with `--binary` faults at `pc=0x8004`, the third Thumb instruction of `main`, with the CPSR's
