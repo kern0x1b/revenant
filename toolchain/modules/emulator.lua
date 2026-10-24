@@ -493,7 +493,7 @@ local function place(tree, rootfs)
         else
             os.mkdir(path.directory(target))
             os.tryrm(target)
-            os.vrunv("cp", {"-p", source, target})
+            os.vrunv("cp", {"-c", "-p", source, target})
             local wanted, got = os.filesize(source), os.isfile(target) and os.filesize(target) or -1
             if got ~= wanted then
                 remove(path.directory(destination))

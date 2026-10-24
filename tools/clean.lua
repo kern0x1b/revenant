@@ -113,6 +113,27 @@ local function plan(level)
     return targets
 end
 
+local function scratch(dry)
+    local retention = import("@addon.revenant.retention", {anonymous = true})
+    local report = retention.sweep(home(), {checkout = checkout(), dry = dry})
+    if report.error then
+        print("scratch: %s", report.error)
+        return
+    end
+    for _, item in ipairs(report.kept) do
+        print("kept     %s: %s", path.filename(item.folder), item.why)
+    end
+    for _, folder in ipairs(report.removed) do
+        print("%s %s", dry and "would remove" or "removed", folder)
+    end
+    if dry then
+        print("would remove %d scratch folders; kept %d", #report.removed, #report.kept)
+    else
+        print("removed %d scratch folders; kept %d; freed %s of disk, by the free space before and after (du overstates clones)",
+              #report.removed, #report.kept, human(report.freed_kib))
+    end
+end
+
 function main(...)
     local arguments = {...}
     local level, dry = "default", false
@@ -121,11 +142,16 @@ function main(...)
             level = "packages"
         elseif argument == "--all" then
             level = "all"
+        elseif argument == "--scratch" then
+            level = "scratch"
         elseif argument == "--dry-run" or argument == "-n" then
             dry = true
         else
-            raise("usage: ./xmakew l tools/clean.lua [--packages | --all] [--dry-run]")
+            raise("usage: ./xmakew l tools/clean.lua [--packages | --all | --scratch] [--dry-run]")
         end
+    end
+    if level == "scratch" then
+        return scratch(dry)
     end
     local total = 0
     for _, target in ipairs(plan(level)) do
