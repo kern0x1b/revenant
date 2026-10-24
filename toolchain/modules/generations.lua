@@ -9,8 +9,9 @@
 -- (an hour by default), counted from the time it was replaced, and is removed after that once no reader holds it.
 -- A folder from before generations existed is a generation too: publishing moves it aside.
 --
--- A build holds <published>.build.lock exclusively from begin to publish or abort. This module does not take that
--- lock: sweep removes the generations that no build is making, so its caller must hold it.
+-- A build holds the lock of its generation from begin to publish or abort, so a sweep leaves it alone. Every sweep and
+-- every build of a name is made under <published>.build.lock, which the caller takes (emulator.lua): that serializes the
+-- builds of one name and keeps two sweeps of it from running at once.
 
 local REPLACED = ".replaced"
 local DEFAULT_GRACE = 3600
@@ -83,6 +84,10 @@ local function displace(published)
     end
     if os.isdir(published) then
         local legacy = published .. ".g" .. hash.rand32()
+        -- the readers of a real folder hold <published>.lock, which moves with it, so that they keep their hold on it
+        if os.isfile(published .. ".lock") and not rename(published .. ".lock", legacy .. ".lock") then
+            raise("cannot move the lock of %s aside", published)
+        end
         if not rename(published, legacy) then
             raise("cannot move %s aside", published)
         end
@@ -114,20 +119,31 @@ function sweep(published, opt)
     end
 end
 
--- begin a generation for a build of the published name, after the abandoned ones of earlier builds are gone
+-- begin a generation for a build of the published name, after the abandoned ones of earlier builds are gone. The build
+-- holds the lock of the generation until it publishes or aborts, so a sweep leaves the generation alone meanwhile.
 function begin(published)
     sweep(published)
     local generation = published .. ".g" .. hash.rand32()
     os.mkdir(generation)
-    return generation
+    local lock = io.openlock(generation .. ".lock")
+    lock:lock()
+    return generation, lock
 end
 
--- abandon a generation that a build has not published
-function abort(generation)
-    discard(generation)
+-- abandon a generation that a build has not published, or whose publish failed after the link moved; the generation that
+-- is published stays. The lock of the generation is released either way.
+function abort(published, generation, lock)
+    if resolve(published) ~= generation then
+        discard(generation)
+    end
+    release(lock)
+    if not os.isdir(generation) then
+        os.tryrm(generation .. ".lock")
+    end
 end
 
--- publish a generation a build has made: the published name becomes a link to it, in one rename
+-- publish a generation a build has made: the published name becomes a link to it, in one rename. The caller releases the
+-- lock of the generation after this returns.
 function publish(published, generation)
     local previous = displace(published)
     local link = published .. ".t" .. hash.rand32()
@@ -145,4 +161,9 @@ function unpublish(published)
     if os.islink(published) then
         os.tryrm(published)
     end
+end
+
+-- whether nothing of the published name is left: no link, no folder and no generation
+function empty(published)
+    return not os.islink(published) and not os.isdir(published) and #generations_of(published) == 0
 end

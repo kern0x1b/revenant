@@ -1181,22 +1181,26 @@ function release(slot)
 end
 
 -- copy the golden image of these inputs to destination. The copy reads a generation it holds, so a golden image that is
--- replaced meanwhile does not leave the copy partial.
+-- replaced meanwhile does not leave the copy partial: a copy that fails because its generation was moved from under it
+-- is made again from the generation now published.
 function clone_golden(opt, destination)
     for _ = 1, 20 do
         local folder = golden(opt)
         local lock = generations.hold(folder)
         -- the generation may have been removed between golden() and the lock, so check it under the lock
-        local whole = os.isfile(path.join(folder, "golden.json"))
-        if whole then
+        if os.isfile(path.join(folder, "golden.json")) then
             local ok, errors = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) return false, caught end}}
             generations.release(lock)
-            if not ok then
+            if ok then
+                return
+            end
+            if os.isfile(path.join(folder, "golden.json")) then
                 raise(errors)
             end
-            return
+            os.tryrm(destination)
+        else
+            generations.release(lock)
         end
-        generations.release(lock)
     end
     raise("the golden image of %s %s was replaced on every attempt to read it", opt.identifier, opt.build)
 end
@@ -1229,6 +1233,9 @@ function retire(parent, opt, kept)
                     generations.unpublish(published)
                 end
                 generations.sweep(published)
+                if generations.empty(published) then
+                    os.tryrm(published .. ".build.lock")
+                end
                 lock:unlock()
                 lock:close()
             elseif lock then
@@ -1334,6 +1341,10 @@ function clean(opt)
         else
             generations.sweep(published)
         end
+        -- a name with nothing left drops its build lock too; a build that makes the name again makes a new one
+        if generations.empty(published) then
+            os.tryrm(published .. ".build.lock")
+        end
         lock:unlock()
         lock:close()
     end
@@ -1363,7 +1374,7 @@ function golden(opt)
     directory(parent)
     local lock = io.openlock(published .. ".build.lock")
     lock:lock()
-    local built, staging
+    local built, staging, staged
     local ok, errors = try {
         function ()
             current = generations.resolve(published)
@@ -1371,7 +1382,7 @@ function golden(opt)
                 built = current
                 return true
             end
-            staging = generations.begin(published)
+            staging, staged = generations.begin(published)
             local rootfs = path.join(staging, "rootfs")
             clone(opt.firmware, rootfs)
             home(rootfs, opt.build)
@@ -1387,13 +1398,16 @@ function golden(opt)
             json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
             generations.publish(published, staging)
             built = staging
+            staging = nil
+            generations.release(staged)
+            staged = nil
             retire(parent, opt, key)
             return true
         end,
         catch {
             function (caught)
                 if staging then
-                    generations.abort(staging)
+                    generations.abort(published, staging, staged)
                 end
                 return false, caught
             end

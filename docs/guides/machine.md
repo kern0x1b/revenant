@@ -109,5 +109,15 @@ than returning old files. A consumer that keeps a generation's path, such as a C
 once the grace has passed after two installs of the package. The hour is the longest CI run on main, 48 minutes, with
 margin; a read longer than the grace is not protected. Export copies the files the link names (patch `0016`), and
 import publishes them the same way, so an exported package imports whole.
+
+The emulator's golden images under `golden.noindex` follow the same design (`toolchain/modules/generations.lua`). That
+module is a copy of the store's design in its own words, not shared code: the store's code is methods of xmake's package
+instances, which a toolchain module cannot call, so the two are kept to one design by the tests rather than by one
+implementation. Two things differ on purpose. A golden image's build lock `<name>.build.lock` goes with its name once
+nothing of the name is left; a session that was blocked on the old lock file when it went can build the same golden
+image once more, and since each build holds its generation's lock from its start to its publish, a sweep does not remove
+that build's generation, and the publish stays atomic, so no reader sees a partial image. A real golden folder from
+before generations keeps its reader lock, `<name>.lock`, which moves aside with the folder, so a reader that holds it
+keeps it.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).

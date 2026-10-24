@@ -1,4 +1,5 @@
 import("fixtures")
+import("core.base.json")
 import("core.base.process")
 
 -- The golden image of the emulator is a published generation, as a package is in the store: an install that replaces it
@@ -202,7 +203,10 @@ function failures(opt)
         os.sleep(300)
         emulator.clean({root = root, goldens = true})
     end
-    -- a racer's last line is its report; under the test's xmake it does not exit after that, so the report ends it
+    -- a racer's last line is its report, and the racer exits after it. The exit is not waited for: process:wait reports an
+    -- exit only to a wait that is pending when the child exits, so an exit that comes while another child is waited on, or
+    -- before its wait starts, reads as still running (measured, and written up in docs/guides/toolchain/contributing.md),
+    -- so the report ends the racer
     local function reported(log)
         local said = os.isfile(log) and io.readfile(log) or ""
         return said:match("reads %d+ violations %d+") ~= nil
@@ -229,6 +233,54 @@ function failures(opt)
     emulator.clean({root = root, goldens = true})
     if generation_count(root) ~= 0 then
         table.insert(found, "after the race and a final clean, " .. generation_count(root) .. " golden generations are left: "
+                     .. table.concat(leftovers(path.join(root, "golden.noindex")), "; "))
+    end
+    if os.isfile(published .. ".build.lock") then
+        table.insert(found, "after the race and a final clean, the build lock of the golden image is still there")
+    end
+
+    -- a golden image from before generations is a real folder with its golden.json. It is read as it is, and a clean that
+    -- replaces it moves it aside together with its lock, so that a reader holding it keeps it
+    local legacy_opt = table.join(golden, {emulator_hash = "legacy"})
+    local legacy = emulator.golden_published(legacy_opt)
+    os.mkdir(path.join(legacy, "rootfs"))
+    os.execv("cp", {"-R", path.join(firmware, "payload"), path.join(legacy, "rootfs", "payload")})
+    json.savefile(path.join(legacy, "golden.json"), {identifier = "fake", build = "1A1", emulator = "legacy", seconds = 1})
+    emulator.clone_golden(legacy_opt, path.join(folder, "legacy", "rootfs"))
+    if os.islink(legacy) or not os.isdir(legacy) then
+        table.insert(found, "a golden folder from before generations was replaced by a link while it was only read")
+    end
+    if not whole(path.join(folder, "legacy", "rootfs")) then
+        table.insert(found, "a copy of a golden folder from before generations is not whole")
+    end
+    local held_legacy = generations.hold(legacy)
+    emulator.clean({root = root, goldens = true})
+    local moved = os.dirs(legacy .. ".g*")
+    if #moved ~= 1 or not whole(path.join(moved[1], "rootfs")) then
+        table.insert(found, "a golden folder from before generations that a reader holds was not kept whole when a clean replaced it")
+    end
+    generations.release(held_legacy)
+
+    -- the replaced folder stays for its grace period, then goes once nothing holds it
+    emulator.clean({root = root})
+    if #os.dirs(legacy .. ".g*") ~= 1 then
+        table.insert(found, "a golden folder replaced a moment ago is gone before its grace period has ended")
+    end
+    os.setenv("REVENANT_GENERATION_GRACE", "0")
+    emulator.clean({root = root})
+    os.setenv("REVENANT_GENERATION_GRACE", "3600")
+    if #os.dirs(legacy .. ".g*") ~= 0 then
+        table.insert(found, "a replaced golden folder that nothing holds is still there after its grace period of zero")
+    end
+
+    -- the next install builds the golden image again and publishes it as a link; a clean then leaves nothing behind
+    emulator.clone_golden(legacy_opt, path.join(folder, "rebuilt", "rootfs"))
+    if not os.islink(legacy) or not whole(path.join(folder, "rebuilt", "rootfs")) then
+        table.insert(found, "an install after a golden folder from before generations did not publish a whole link")
+    end
+    emulator.clean({root = root, goldens = true})
+    if os.islink(legacy) or os.isfile(legacy .. ".build.lock") or generation_count(root) ~= 0 then
+        table.insert(found, "after a golden folder from before generations is replaced and cleaned, something is left: "
                      .. table.concat(leftovers(path.join(root, "golden.noindex")), "; "))
     end
 
