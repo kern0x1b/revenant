@@ -145,6 +145,30 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     return [[self alloc] initRevenantWithPreview:preview];
 }
 
++ (instancetype)automaticEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [UIPointerEffect effectWithPreview:preview];
+}
+
++ (instancetype)highlightEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [[UIPointerHighlightEffect alloc] initRevenantWithPreview:preview];
+}
+
++ (instancetype)liftEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [[UIPointerLiftEffect alloc] initRevenantWithPreview:preview];
+}
+
++ (instancetype)hoverEffectWithPreview:(UITargetedPreview *)preview preferredTintMode:(UIPointerEffectTintMode)mode prefersShadow:(BOOL)shadow prefersScaledContent:(BOOL)scaled
+{
+    UIPointerHoverEffect *effect = [[UIPointerHoverEffect alloc] initRevenantWithPreview:preview];
+    effect.preferredTintMode = mode;
+    effect.prefersShadow = shadow;
+    effect.prefersScaledContent = scaled;
+    return effect;
+}
+
 - (instancetype)initRevenantWithPreview:(UITargetedPreview *)preview
 {
     if ((self = [super init]))
@@ -275,7 +299,7 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     NSArray<UIPointerAccessory *> *_accessories;
 }
 
-+ (instancetype)styleWithEffect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape
++ (instancetype)revenantStyleWithEffect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape
 {
     return [[self alloc] initRevenantWithType:1 effect:effect shape:shape axes:(UIAxis)0];
 }

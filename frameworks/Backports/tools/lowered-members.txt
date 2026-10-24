@@ -9065,7 +9065,9 @@ global UIFontDescriptorTextStyleAttribute
 global UIFontDescriptorTraitsAttribute
 global UIFontDescriptorVisibleNameAttribute
 global UIFontFeatureSelectorIdentifierKey
+global UIFontFeatureSelectorIdentifierKey_ForNewSwiftAPI
 global UIFontFeatureTypeIdentifierKey
+global UIFontFeatureTypeIdentifierKey_ForNewSwiftAPI
 global UIFontSlantTrait
 global UIFontSymbolicTrait
 global UIFontTextStyleBody
@@ -29768,7 +29770,11 @@ member UIPointerAccessory -orientationMatchesAngle
 member UIPointerAccessory -position
 member UIPointerAccessory -setOrientationMatchesAngle:
 member UIPointerAccessory -shape
+member UIPointerEffect +automaticEffectWithPreview:
 member UIPointerEffect +effectWithPreview:
+member UIPointerEffect +highlightEffectWithPreview:
+member UIPointerEffect +hoverEffectWithPreview:preferredTintMode:prefersShadow:prefersScaledContent:
+member UIPointerEffect +liftEffectWithPreview:
 member UIPointerEffect -copyWithZone:
 member UIPointerEffect -description
 member UIPointerEffect -hash
@@ -29824,7 +29830,7 @@ member UIPointerShape -initRevenant
 member UIPointerShape -isEqual:
 member UIPointerShape -revenant_path
 member UIPointerStyle +hiddenPointerStyle
-member UIPointerStyle +styleWithEffect:shape:
+member UIPointerStyle +revenantStyleWithEffect:shape:
 member UIPointerStyle +styleWithShape:constrainedAxes:
 member UIPointerStyle -accessories
 member UIPointerStyle -copyWithZone:
@@ -34412,7 +34418,6 @@ type UIPasteboardOption
 type UIPencilInteractionPhase
 type UIPencilPreferredAction
 type UIPointerAccessoryPosition
-type UIPointerEffectTintMode
 type UIPreferredPresentationStyle
 type UIPressPhase
 type UIPressType
