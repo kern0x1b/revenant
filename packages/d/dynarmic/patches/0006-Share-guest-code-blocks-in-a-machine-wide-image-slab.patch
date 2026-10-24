@@ -1,0 +1,186 @@
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index d56d79f..6e78ce6 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -836,6 +836,12 @@ struct Jit::Impl final {
+         image_code_slab = this->conf.image_native_code_slab != nullptr
+                             ? this->conf.image_native_code_slab
+                             : native_code_slab;
++        image_slab_enabled = image_code_slab != native_code_slab && this->conf.image_code_end > this->conf.image_code_begin;
++        if (image_slab_enabled) {
++            image_code_slab->initialize(
++                this->conf, jit, &jit_state, &GetCurrentBlockThunk, this, true);
++            image_code_slab->register_executor(&jit_state, &jit_state);
++        }
+         if (this->conf.lookup_link) {
+             this->conf.lookup_link->store(
+                 reinterpret_cast<u64>(this),
+@@ -854,6 +860,9 @@ struct Jit::Impl final {
+     }
+ 
+     ~Impl() {
++        if (image_slab_enabled) {
++            image_code_slab->unregister_executor(&jit_state, &jit_state);
++        }
+         if (native_code_slab != nullptr) {
+             native_code_slab->unregister_executor(&jit_state, &jit_state);
+         }
+@@ -863,19 +872,26 @@ struct Jit::Impl final {
+         ASSERT(!jit_interface->is_executing);
+         PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
+ 
++        if (image_slab_enabled) {
++            image_code_slab->service_pending_invalidation();
++        }
+         const auto execution_generation = native_code_slab->enter_execution(&jit_state);
+         active_generation = execution_generation;
++        const auto image_generation = image_slab_enabled ? image_code_slab->enter_execution(&jit_state) : std::uint64_t{};
+         jit_interface->is_executing = true;
+         SCOPE_EXIT {
+             jit_interface->is_executing = false;
+             active_generation = 0;
++            if (image_slab_enabled) {
++                image_code_slab->leave_execution(&jit_state, image_generation);
++            }
+             native_code_slab->leave_execution(
+                 &jit_state, execution_generation);
+         };
+ 
+         const CodePtr current_codeptr = GetCurrentBlock(execution_generation);
+ 
+-        const HaltReason hr = native_code_slab->run_code(
++        const HaltReason hr = SlabFor(GetCurrentLocation().Value())->run_code(
+             &jit_state, current_codeptr);
+ 
+         PerformRequestedCacheInvalidation(hr);
+@@ -887,17 +903,24 @@ struct Jit::Impl final {
+         ASSERT(!jit_interface->is_executing);
+         PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
+ 
++        if (image_slab_enabled) {
++            image_code_slab->service_pending_invalidation();
++        }
+         const auto execution_generation = native_code_slab->enter_execution(&jit_state);
+         active_generation = execution_generation;
++        const auto image_generation = image_slab_enabled ? image_code_slab->enter_execution(&jit_state) : std::uint64_t{};
+         jit_interface->is_executing = true;
+         SCOPE_EXIT {
+             jit_interface->is_executing = false;
+             active_generation = 0;
++            if (image_slab_enabled) {
++                image_code_slab->leave_execution(&jit_state, image_generation);
++            }
+             native_code_slab->leave_execution(
+                 &jit_state, execution_generation);
+         };
+ 
+-        const HaltReason hr = native_code_slab->step_code(
++        const HaltReason hr = SlabFor(GetCurrentLocation().Value())->step_code(
+             &jit_state, GetCurrentSingleStep(execution_generation));
+ 
+         PerformRequestedCacheInvalidation(hr);
+@@ -953,7 +976,7 @@ struct Jit::Impl final {
+             return PortableIREmitOutcome::EmitFailed;
+         }
+         NativeCodeSlab::BlockDescriptor existing;
+-        auto* slab = SlabFor(block.Location().Value());
++        auto* slab = SlabForBlock(block);
+         auto generation = slab->generation();
+         if (slab->find_block(
+                 block.Location().Value(), generation, existing)) {
+@@ -1139,11 +1162,19 @@ private:
+ 
+     NativeCodeSlab* SlabFor(u64 location_descriptor) const {
+         const auto pc = A32::LocationDescriptor{IR::LocationDescriptor{location_descriptor}}.PC();
+-        return pc >= conf.image_code_begin && pc < conf.image_code_end
++        return image_slab_enabled && pc >= conf.image_code_begin && pc < conf.image_code_end
+                  ? image_code_slab
+                  : native_code_slab;
+     }
+ 
++    NativeCodeSlab* SlabForBlock(const IR::Block& block) const {
++        const auto slab = SlabFor(block.Location().Value());
++        if (slab == native_code_slab || A32::LocationDescriptor{block.EndLocation()}.PC() <= conf.image_code_end) {
++            return slab;
++        }
++        return native_code_slab;
++    }
++
+     IR::LocationDescriptor GetCurrentLocation() const {
+         return jit_state.GetLocationDescriptor();
+     }
+@@ -1160,8 +1191,11 @@ private:
+                                                           .entrypoint));
+     }
+ 
+-    NativeCodeSlab::BlockDescriptor EmitToSlab(IR::Block& block, std::uint64_t generation) {
+-        return SlabFor(block.Location().Value())->impl->emit(block, generation, jit_interface->is_executing);
++    NativeCodeSlab::BlockDescriptor EmitToSlab(IR::Block& block, std::uint64_t generation, NativeCodeSlab* target = nullptr) {
++        if (target == nullptr) {
++            target = SlabForBlock(block);
++        }
++        return target->impl->emit(block, target == native_code_slab ? generation : target->generation(), jit_interface->is_executing);
+     }
+ 
+     NativeCodeSlab::BlockDescriptor ReturnFromRunCodeDescriptor(std::uint64_t generation) const {
+@@ -1173,8 +1207,10 @@ private:
+         IR::LocationDescriptor descriptor, std::uint64_t generation) {
+         NativeCodeSlab::BlockDescriptor block;
+         auto* slab = SlabFor(descriptor.Value());
++        const auto slab_generation = slab == native_code_slab ? generation : slab->generation();
+         if (slab->find_block(
+-                descriptor.Value(), generation, block)) {
++                descriptor.Value(), slab_generation, block) ||
++            (slab != native_code_slab && native_code_slab->find_block(descriptor.Value(), generation, block))) {
+             if (jit_interface->is_executing && conf.native_code_block_lookup_callback != nullptr) {
+                 conf.native_code_block_lookup_callback(
+                     conf.native_code_block_lookup_callback_arg,
+@@ -1183,6 +1219,11 @@ private:
+             return block;
+         }
+ 
++        NativeCodeSlab* emit_target = nullptr;
++        if (slab != native_code_slab && slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
++            slab = native_code_slab;
++            emit_target = native_code_slab;
++        }
+         const auto translation_started = std::chrono::steady_clock::now();
+ 
+         bool portable_completion_called = false;
+@@ -1236,7 +1277,7 @@ private:
+ 
+             try {
+                 IR::Block ir_block = std::move(*portable_artifact);
+-                const auto emitted = EmitToSlab(ir_block, generation);
++                const auto emitted = EmitToSlab(ir_block, generation, emit_target);
+                 if (emitted.entrypoint == nullptr) {
+                     complete_portable_artifact(
+                         PortableIREmitOutcome::EmitFailed);
+@@ -1258,7 +1299,7 @@ private:
+         slab->ensure_memory_committed(
+             MINIMUM_REMAINING_CODESIZE);
+         IR::Block ir_block = TranslateBlock(descriptor);
+-        auto emitted = EmitToSlab(ir_block, generation);
++        auto emitted = EmitToSlab(ir_block, generation, emit_target);
+         if (emitted.entrypoint == nullptr) {
+             return ReturnFromRunCodeDescriptor(generation);
+         }
+@@ -1317,6 +1358,10 @@ private:
+                     const auto upper = range.upper();
+                     native_code_slab->invalidate_cache_range(
+                         lower, static_cast<std::size_t>(upper - lower) + 1U);
++                    if (image_slab_enabled && upper >= conf.image_code_begin && lower < conf.image_code_end) {
++                        image_code_slab->invalidate_cache_range(
++                            lower, static_cast<std::size_t>(upper - lower) + 1U);
++                    }
+                 }
+             }
+             invalid_cache_ranges.clear();
+@@ -1330,6 +1375,7 @@ private:
+     std::unique_ptr<NativeCodeSlab> owned_native_code_slab;
+     NativeCodeSlab* native_code_slab{};
+     NativeCodeSlab* image_code_slab{};
++    bool image_slab_enabled{};
+     bool native_code_slab_shared{};
+     std::uint64_t active_generation{};
+ 
