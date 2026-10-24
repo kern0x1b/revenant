@@ -6,6 +6,66 @@ local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous
 
 local MEMBERS = {
     {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeNone API_AVAILABLE(macos(10.13.2), ios(11.2)) = kLABiometryTypeNone,",
+            replace = "LABiometryTypeNone = kLABiometryTypeNone,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryNone API_DEPRECATED_WITH_REPLACEMENT(\"LABiometryTypeNone\", macos(10.13, 10.13.2), ios(11.0, 11.2)) = LABiometryTypeNone,",
+            replace = "",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeFaceID API_AVAILABLE(macos(10.15)) = kLABiometryTypeFaceID,",
+            replace = "LABiometryTypeFaceID = kLABiometryTypeFaceID,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeOpticID API_AVAILABLE(visionos(1.0), ios(17.0), macos(14.0)) = kLABiometryTypeOpticID,",
+            replace = "LABiometryTypeOpticID = kLABiometryTypeOpticID,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "} API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            replace = "};",
+        },
+    },
+    {
+        member = "LAContext biometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LAContext.h",
+            find = "@property (nonatomic, readonly) LABiometryType biometryType API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            replace = "@property (nonatomic, readonly) LABiometryType biometryType;",
+        },
+    },
+    {
         member = "os_unfair_lock",
         header = {
             name = "os",

@@ -92,6 +92,17 @@ local function sdk_in(installdir, version)
     return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
+local function installdir_of(scratch, requirement)
+    local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
+    local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
+    local entries = start and json.decode(output:sub(start)) or {}
+    for _, entry in ipairs(entries) do
+        if entry.require == requirement and entry.installdir then
+            return entry.installdir
+        end
+    end
+end
+
 function package_of(requirement, install)
     local scratch = fresh("package-resolve")
     local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
@@ -102,17 +113,12 @@ function package_of(requirement, install)
     local failure
     local result = try {
         function ()
-            if install then
+            local folder = installdir_of(scratch, requirement)
+            if install and not (folder and os.isfile(path.join(folder, "manifest.txt"))) then
                 os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
+                folder = installdir_of(scratch, requirement)
             end
-            local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
-            local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
-            local entries = start and json.decode(output:sub(start)) or {}
-            for _, entry in ipairs(entries) do
-                if entry.require == requirement and entry.installdir then
-                    return entry.installdir
-                end
-            end
+            return folder
         end,
         catch {
             function (errors)
