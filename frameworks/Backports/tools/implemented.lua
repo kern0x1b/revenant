@@ -70,3 +70,72 @@ function from_objects(root)
     assert(total > 0, "no member of a src/<Framework> object under " .. root)
     return keys
 end
+
+local function lowered_into(keys, set)
+    keys.lowered = keys.lowered or {}
+    local found = keys.lowered
+    for class, members in pairs(set.classes) do
+        found["class||" .. class] = true
+        for member in pairs(members) do
+            local sign, selector = member:match("^([%+%-])(.+)$")
+            if sign then
+                found[(sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector] = true
+            end
+        end
+    end
+    for name in pairs(set.functions) do
+        found["C function||" .. name] = true
+    end
+    for name in pairs(set.globals) do
+        found["global variable||" .. name] = true
+        found["enum constant||" .. name] = true
+    end
+end
+
+local SWIFT_KINDS = {class = true, struct = true, enum = true, protocol = true, actor = true}
+
+function swift_types(src)
+    local names = {}
+    for _, file in ipairs(os.files(path.join(src, "**.swift"))) do
+        for line in io.readfile(file):gmatch("[^\n]+") do
+            local words, public = {}, false
+            for word in line:gmatch("[%w_]+") do
+                table.insert(words, word)
+            end
+            for index, word in ipairs(words) do
+                if word == "public" or word == "open" then
+                    public = true
+                elseif public and SWIFT_KINDS[word] and words[index + 1] then
+                    names[words[index + 1]] = true
+                end
+            end
+        end
+    end
+    return names
+end
+
+local COMPONENT_SOURCES = {SwiftUI = "frameworks/SwiftUI/src"}
+
+function components(repository)
+    local found = {swift = {}, folders = {}}
+    for framework, relative in pairs(COMPONENT_SOURCES) do
+        found.folders[framework] = true
+        for name in pairs(swift_types(path.join(repository, relative))) do
+            found.swift[name] = true
+        end
+    end
+    return found
+end
+
+function registry(root, src, set)
+    local keys = {}
+    if #os.files(path.join(root, "**.o")) > 0 then
+        keys = from_objects(root)
+    end
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        local name = path.filename(folder)
+        keys[name] = keys[name] or {}
+    end
+    lowered_into(keys, set)
+    return keys
+end

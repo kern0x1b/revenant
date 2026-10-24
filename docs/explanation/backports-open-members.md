@@ -119,65 +119,69 @@ here; a Swift error text and the exact typecheck command are what would settle i
 
 ## Work queue: the unattempted Telegram modules
 
-The demand scan (`frameworks/Backports/tools/demand.lua`) over the 2,247 source files of the 493 unattempted Telegram
-13.0 modules, against the iOS 6.1.3 cache, with the Swift runtime given as `--runtime`:
+The demand scan (`frameworks/Backports/tools/demand.lua`, method in `docs/guides/backports/demand.md`) over the 2,224
+source files of the 490 unattempted Telegram 13.0 modules that own sources, against the iOS 6.1.3 cache, with the Swift
+runtime given as `--runtime`:
 
     ./xmakew l -P . frameworks/Backports/tools/demand.lua --report <dir> --files <list of source paths> \
         --runtime <swift-runtime>/lib/swift/iphoneos --ios 6.1.3
 
-The scan finds 152 SDK items that are neither on iOS 6.1.3 nor backported. Only 44 of the 493 modules reference any of
-them. The other 450 modules, which include `SubcodecObjC` (no sources), reference none, so their blocking is the build
-order, not a missing SDK item. The table ranks the items by the number of modules that use them, from `missing.tsv`
-with each module taken from its owning file. `exact` is a syntax-level use. `text` is a name found in the sources without
-syntax confirmation; the names checked are real uses (`PHAsset` appears in 38 Telegram source files, `MTLTextureDescriptor`
-in 22). A framework row is an import, and has no introduction version in the cache.
+The scan now reads the tree as the registry: the lowered member list, the framework folders and the Swift declarations of
+`frameworks/Backports/src`, and the objects of the build when there are some. Before that it read only the build's objects,
+which this worktree holds for 12 folders, and it counted 145 backported items as missing, among them `Metal`,
+`MTLTextureDescriptor`, `PHPhotoLibrary`, `LAContext`, `VNImageRequestHandler`, `MLModel` and `SCNScene`. All of them are
+implemented by the tree. The corrected scan has 28 missing SDK items, so the queue is the whole list and not forty items.
+Sixteen modules reference at least one of them. Each module is taken from its owning file, which is the longest module
+folder that contains the file.
+
+Member gaps: the scan reports none on a receiver of known class. The Objective-C messages with typed receivers are
+backported where the tree lowers them, for example `[_wrapperView snapshotViewAfterScreenUpdates:]` (an iOS 7 selector) and
+`UIView -setTintColor:`. A Swift member access is a candidate only. Of 1,277 candidate names, 289 are missing: the SDK declares them only on
+classes annotated after iOS 6.1.3, and no lowered member has the name. The top names by file count (`max`, `toInt64`,
+`after`, `min`) are Swift standard library or app names, so the candidates cannot be attributed to a class, and they are
+not in this queue.
+
+`exact` is a syntax-level use. `text` is a name found in the sources without syntax confirmation. The text items are not
+each checked against the sources.
+
+Introduced is the SDK's annotation in major version, where a framework row has none.
 
 | Rank | SDK item | Kind | Introduced (iOS) | Level | Modules | Files |
 | ---: | --- | --- | ---: | --- | ---: | ---: |
-| 1 | `Metal` | framework | - | exact | 13 | 37 |
-| 2 | `MTLTextureDescriptor` | class | 8.0 | text | 9 | 17 |
-| 3 | `Photos` | framework | - | exact | 9 | 15 |
-| 4 | `MTLRenderPipelineDescriptor` | class | 8.0 | text | 9 | 14 |
-| 5 | `MetalKit` | framework | - | exact | 7 | 18 |
-| 6 | `MTLCreateSystemDefaultDevice` | C function | 8.0 | text | 5 | 8 |
-| 7 | `Vision` | framework | - | exact | 5 | 7 |
-| 8 | `MTLRenderPassDescriptor` | class | 8.0 | text | 4 | 12 |
-| 9 | `VNImageRequestHandler` | class | 11.0 | text | 4 | 5 |
-| 10 | `PHPhotoLibrary` | class | 8.0 | text | 4 | 4 |
-| 11 | `PHAsset` | class | 8.0 | text | 3 | 7 |
-| 12 | `MetalPerformanceShaders` | framework | - | exact | 3 | 5 |
-| 13 | `LAContext` | class | 8.0 | text | 3 | 4 |
-| 14 | `MTLComputePipelineDescriptor` | class | 9.0 | text | 3 | 4 |
-| 15 | `PHImageRequestOptions` | class | 8.0 | text | 3 | 4 |
-| 16 | `AVKit` | framework | - | exact | 3 | 4 |
-| 17 | `LocalAuthentication` | framework | - | exact | 3 | 4 |
-| 18 | `PHImageResultIsDegradedKey` | global variable | 8.0 | text | 3 | 4 |
-| 19 | `VNFaceObservation` | class | 11.0 | text | 3 | 3 |
-| 20 | `kvImage420Yp8_Cb8_Cr8` | enum constant | 8.0 | text | 3 | 3 |
-| 21 | `kvImageARGB8888` | enum constant | 8.0 | text | 3 | 3 |
-| 22 | `PHImageManager` | class | 8.0 | text | 2 | 5 |
-| 23 | `PHVideoRequestOptions` | class | 8.0 | text | 2 | 4 |
-| 24 | `CryptoKit` | framework | - | exact | 2 | 4 |
-| 25 | `MLArrayBatchProvider` | class | 12.0 | text | 2 | 3 |
-| 26 | `MLDictionaryFeatureProvider` | class | 11.0 | text | 2 | 3 |
-| 27 | `MLFeatureValue` | class | 11.0 | text | 2 | 3 |
-| 28 | `MLModel` | class | 11.0 | text | 2 | 3 |
-| 29 | `MLModelConfiguration` | class | 12.0 | text | 2 | 3 |
-| 30 | `MLPredictionOptions` | class | 11.0 | text | 2 | 3 |
-| 31 | `PHFetchOptions` | class | 8.0 | text | 2 | 3 |
-| 32 | `SCNParticleSystem` | class | 8.0 | text | 2 | 3 |
-| 33 | `SCNScene` | class | 8.0 | text | 2 | 3 |
-| 34 | `SCNView` | class | 8.0 | text | 2 | 3 |
-| 35 | `CoreML` | framework | - | exact | 2 | 3 |
-| 36 | `Network` | framework | - | exact | 2 | 3 |
-| 37 | `SceneKit` | framework | - | exact | 2 | 3 |
-| 38 | `SCNSceneRenderer` | protocol | 8.0 | text | 2 | 3 |
-| 39 | `AVPictureInPictureController` | class | 9.0 | text | 2 | 2 |
-| 40 | `CAMetalLayer` | class | 8.0 | text | 2 | 2 |
+| 1 | `NSTextAttachmentViewProvider` | class | 15.0 | text | 2 | 2 |
+| 2 | `kVTCouldNotFindVideoEncoderErr` | enum constant | 26.0 | text | 2 | 2 |
+| 3 | `IOSurface` | framework | - | exact | 2 | 2 |
+| 4 | `SCNSceneRenderer` | protocol | 8.0 | text | 2 | 3 |
+| 5 | `AVCaptureEventInteraction` | class | 17.0 | text | 1 | 1 |
+| 6 | `AVPictureInPictureVideoCallViewController` | class | 15.0 | text | 1 | 2 |
+| 7 | `CIRenderDestination` | class | 11.0 | text | 1 | 2 |
+| 8 | `MPSImageBilinearScale` | class | 11.0 | text | 1 | 1 |
+| 9 | `NSTextLayoutFragment` | class | 15.0 | text | 1 | 1 |
+| 10 | `NSTextLayoutManager` | class | 15.0 | text | 1 | 1 |
+| 11 | `PKPaymentButton` | class | 8.0 | text | 1 | 1 |
+| 12 | `VNGenerateForegroundInstanceMaskRequest` | class | 17.0 | text | 1 | 1 |
+| 13 | `VNGeneratePersonSegmentationRequest` | class | 15.0 | text | 1 | 1 |
+| 14 | `VNInstanceMaskObservation` | class | 17.0 | text | 1 | 1 |
+| 15 | `Combine` | framework | - | exact | 1 | 1 |
+| 16 | `Translation` | framework | - | exact | 1 | 1 |
+| 17 | `PHImageManagerMaximumSize` | global variable | 8.0 | text | 1 | 1 |
+| 18 | `kSecAttrAccess` | global variable | 2.0 | text | 1 | 1 |
+| 19 | `kSecAttrAccessControl` | global variable | 8.0 | text | 1 | 1 |
+| 20 | `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` | global variable | 8.0 | text | 1 | 1 |
+| 21 | `kSecUseAuthenticationContext` | global variable | 9.0 | text | 1 | 1 |
+| 22 | `kSecUseDataProtectionKeychain` | global variable | 13.0 | text | 1 | 3 |
+| 23 | `ASAuthorizationControllerPresentationContextProviding` | protocol | 13.0 | text | 1 | 1 |
+| 24 | `MTLBinaryArchive` | protocol | 14.0 | text | 1 | 2 |
+| 25 | `NSTextLayoutManagerDelegate` | protocol | 15.0 | text | 1 | 1 |
+| 26 | `ObservableObject` | swift type | 13.0 | text | 1 | 1 |
+| 27 | `Published` | swift type | 13.0 | text | 1 | 1 |
+| 28 | `TranslationSession` | swift type | 18.0 | text | 1 | 1 |
 
 Caveats for the queue:
 
-- The `Metal`, `MetalKit` and `CoreML` framework rows and their class rows count the same modules, so the ranks overlap.
-- The 1,293 member-name candidates are text only and not counted, so a missing method on a class that is present is not in this table.
-- No `--component` was given, so an item a revenant component provides shows as missing (`Combine` is an example).
-- `missing_files.tsv` also lists keys that are backported; the table uses only the keys whose status is `missing` in `missing.tsv`.
+- `kSecAttrAccess` is annotated from iOS 2.0 in the SDK, and the iOS 6.1.3 cache does not export it, so the scan reports it
+  missing. It is not checked on a device.
+- `Combine` is missing because its source is the upstream package `packages/c/combine`, which xmake fetches, and no
+  `--component` library is built here. `Translation`, `TranslationSession` and the iOS 17 classes are not in the tree.
+- The `Metal`, `MetalKit`, `MetalPerformanceShaders`, `CoreML` and `SceneKit` rows are now backported by their folders, but
+  their protocols and some classes are still missing; those are the rows above, not the framework rows.
