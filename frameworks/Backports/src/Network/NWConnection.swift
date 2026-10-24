@@ -274,8 +274,22 @@ public final class NWConnection: @unchecked Sendable {
         writeSource = write
         if connecting {
             setWriteActive(true)
+            scheduleConnectTimeout()
         } else {
             becomeReady()
+        }
+    }
+
+    private func scheduleConnectTimeout() {
+        let seconds = parameters.tcpOptions?.connectionTimeout ?? 0
+        guard seconds > 0 else {
+            return
+        }
+        queue?.asyncAfter(deadline: .now() + .seconds(seconds)) { [weak self] in
+            guard let self, self.connecting else {
+                return
+            }
+            self.fail(.posix(errno: ETIMEDOUT))
         }
     }
 

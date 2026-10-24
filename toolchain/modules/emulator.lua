@@ -1004,6 +1004,7 @@ function boot(opt)
     input:close()
     local state, offset, reason = {}, 0, "deadline"
     local pending = ""
+    local progressed = started
     while true do
         local ok = proc:wait(500)
         if os.isfile(log) then
@@ -1012,6 +1013,9 @@ function boot(opt)
             local chunk = handle:read("a") or ""
             handle:close()
             offset = offset + #chunk
+            if #chunk > 0 then
+                progressed = os.mclock()
+            end
             pending = pending .. chunk
             for line in pending:gmatch("([^\n]*)\n") do
                 scan(state, line)
@@ -1028,7 +1032,7 @@ function boot(opt)
             reason = "reached"
             break
         end
-        if os.mclock() - started > opt.deadline * 1000 then
+        if boot_expired(os.mclock(), progressed, started, opt.deadline) then
             break
         end
     end
@@ -1093,6 +1097,12 @@ end
 function holds_build_slot(environment)
     local value = (environment or os.getenvs())[BUILD_SLOT]
     return value ~= nil and value ~= ""
+end
+
+BOOT_CEILING = 10
+
+function boot_expired(now, progressed, started, deadline)
+    return now - progressed > deadline * 1000 or now - started > deadline * 1000 * BOOT_CEILING
 end
 
 function crowded(load, cores)
@@ -1333,7 +1343,7 @@ function golden(opt)
     lock:unlock()
     lock:close()
     if not ok then
-        raise(errors)
+        raise("%s", tostring(errors))
     end
     return path.join(folder, "rootfs")
 end

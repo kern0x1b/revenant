@@ -164,8 +164,9 @@ for (name, address) in reachHosts {
             break
         }
     }
+    let started = Date()
     connection.start(queue: queue)
-    _ = outcome.wait(timeout: .now() + .seconds(15))
-    print("reach \(name) \(result)")
+    _ = outcome.wait(timeout: .now() + .seconds(120))
+    print("reach \(name) \(result) after \(Int(Date().timeIntervalSince(started))) s")
     connection.cancel()
 }
