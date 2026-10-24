@@ -2844,6 +2844,7 @@ function DNSServiceBrowse
 function DNSServiceResolve
 function EVENANT_ALIAS
 function EVENANT_ALIAS_OF
+function EVENANT_ALIAS_STATE
 function EVENANT_AVMETADATA_BODY
 function EVENANT_AX_MATH_CONTENT
 function EVENANT_AX_MATH_EXPRESSIONS_ONLY
