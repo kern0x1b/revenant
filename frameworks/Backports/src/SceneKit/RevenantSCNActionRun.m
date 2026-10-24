@@ -2,6 +2,7 @@
 #import "RevenantSCNActionMath.h"
 #import "RevenantSCNMath.h"
 #include <math.h>
+#include <stdlib.h>
 
 static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat progress)
 {
@@ -12,6 +13,7 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
 {
     NSTimeInterval _elapsed;
     NSTimeInterval _childClock;
+    NSTimeInterval _runDuration;
     BOOL _started;
     SCNVector3 _startPosition;
     SCNVector3 _startEuler;
@@ -56,6 +58,11 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
     _startScale = node.scale;
     _startOrientation = node.orientation;
     _startOpacity = node.opacity;
+    _runDuration = _action.duration;
+    if (_action.revenantKind == RevenantSCNActionKindWaitRandom) {
+        double unit = (double)arc4random_uniform(1000001) / 1000000.0;
+        _runDuration = MAX(_action.duration + _action.revenantScalar * (unit - 0.5), 0);
+    }
 }
 
 - (double)easedProgress:(double)progress
@@ -75,7 +82,7 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
     if (!_started) {
         [self captureStartOnNode:node];
     }
-    NSTimeInterval duration = _action.duration;
+    NSTimeInterval duration = _runDuration;
     if (duration <= 0) {
         [self applyProgress:1 elapsed:0 onNode:node];
         *leftover = dt;
@@ -126,8 +133,8 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
             break;
         }
         case RevenantSCNActionKindScaleBy: {
-            CGFloat factor = 1 + (action.revenantScalar - 1) * p;
-            node.scale = SCNVector3Make(_startScale.x * factor, _startScale.y * factor, _startScale.z * factor);
+            CGFloat change = action.revenantScalar * p;
+            node.scale = SCNVector3Make(_startScale.x + change, _startScale.y + change, _startScale.z + change);
             break;
         }
         case RevenantSCNActionKindScaleTo: {
@@ -138,10 +145,16 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
             break;
         }
         case RevenantSCNActionKindFadeOpacityBy:
-            node.opacity = _startOpacity * (1 + (action.revenantScalar - 1) * p);
+            node.opacity = _startOpacity + action.revenantScalar * p;
             break;
         case RevenantSCNActionKindFadeOpacityTo:
             node.opacity = _startOpacity + (action.revenantScalar - _startOpacity) * p;
+            break;
+        case RevenantSCNActionKindFadeIn:
+            node.opacity = _startOpacity + (1 - _startOpacity) * p;
+            break;
+        case RevenantSCNActionKindFadeOut:
+            node.opacity = _startOpacity - _startOpacity * p;
             break;
         case RevenantSCNActionKindHide:
             node.hidden = YES;
@@ -177,6 +190,14 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
 - (BOOL)advanceCompositeBy:(NSTimeInterval)dt onNode:(SCNNode *)node leftover:(NSTimeInterval *)leftover
 {
     SCNAction *action = _action;
+    if (action.revenantContainsRandomWait) {
+        NSTimeInterval rest = 0;
+        if ([self advanceChildrenBy:dt * action.speed onNode:node leftover:&rest]) {
+            *leftover = action.speed > 0 ? rest / action.speed : 0;
+            return YES;
+        }
+        return NO;
+    }
     NSTimeInterval duration = action.duration;
     NSTimeInterval time = _elapsed + dt * action.speed;
     BOOL over = time >= duration;

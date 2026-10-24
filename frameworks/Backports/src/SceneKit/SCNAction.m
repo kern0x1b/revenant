@@ -11,6 +11,7 @@
     NSArray<SCNAction *> *_children;
     NSUInteger _repeatCount;
     BOOL _repeatsForever;
+    BOOL _containsRandom;
     RevenantSCNActionBlock _block;
     RevenantSCNActionCustomBlock _customBlock;
     dispatch_queue_t _queue;
@@ -39,7 +40,17 @@
 {
     SCNAction *action = [self revenantActionOfKind:kind duration:0];
     action->_children = [children copy];
+    for (SCNAction *child in action->_children) {
+        if (child->_containsRandom) {
+            action->_containsRandom = YES;
+        }
+    }
     return action;
+}
+
+- (BOOL)revenantContainsRandomWait
+{
+    return _containsRandom;
 }
 
 - (RevenantSCNActionKind)revenantKind
@@ -179,6 +190,7 @@
     copy->_children = _children;
     copy->_repeatCount = _repeatCount;
     copy->_repeatsForever = _repeatsForever;
+    copy->_containsRandom = _containsRandom;
     copy->_block = _block;
     copy->_customBlock = _customBlock;
     copy->_queue = _queue;
@@ -282,16 +294,12 @@
 
 + (SCNAction *)fadeInWithDuration:(NSTimeInterval)sec
 {
-    SCNAction *action = [self revenantActionOfKind:RevenantSCNActionKindFadeOpacityTo duration:sec];
-    action->_scalar = 1;
-    return action;
+    return [self revenantActionOfKind:RevenantSCNActionKindFadeIn duration:sec];
 }
 
 + (SCNAction *)fadeOutWithDuration:(NSTimeInterval)sec
 {
-    SCNAction *action = [self revenantActionOfKind:RevenantSCNActionKindFadeOpacityTo duration:sec];
-    action->_scalar = 0;
-    return action;
+    return [self revenantActionOfKind:RevenantSCNActionKindFadeOut duration:sec];
 }
 
 + (SCNAction *)fadeOpacityBy:(CGFloat)factor duration:(NSTimeInterval)sec
@@ -321,6 +329,64 @@
 + (SCNAction *)waitForDuration:(NSTimeInterval)sec
 {
     return [self revenantActionOfKind:RevenantSCNActionKindWait duration:sec];
+}
+
++ (SCNAction *)waitForDuration:(NSTimeInterval)sec withRange:(NSTimeInterval)durationRange
+{
+    SCNAction *action = [self revenantActionOfKind:RevenantSCNActionKindWaitRandom duration:sec];
+    action->_scalar = durationRange;
+    action->_containsRandom = YES;
+    return action;
+}
+
+- (SCNAction *)reversedAction
+{
+    switch (_kind) {
+        case RevenantSCNActionKindMoveBy:
+            return [SCNAction moveBy:SCNVector3Make(-_vector.x, -_vector.y, -_vector.z) duration:_leafDuration];
+        case RevenantSCNActionKindRotateBy:
+            return [SCNAction rotateByX:-_vector.x y:-_vector.y z:-_vector.z duration:_leafDuration];
+        case RevenantSCNActionKindRotateByAngle:
+            return [SCNAction rotateByAngle:-_scalar aroundAxis:_vector duration:_leafDuration];
+        case RevenantSCNActionKindScaleBy:
+            return [SCNAction scaleBy:-_scalar duration:_leafDuration];
+        case RevenantSCNActionKindFadeOpacityBy:
+            return [SCNAction fadeOpacityBy:-_scalar duration:_leafDuration];
+        case RevenantSCNActionKindFadeIn:
+            return [SCNAction fadeOutWithDuration:_leafDuration];
+        case RevenantSCNActionKindFadeOut:
+            return [SCNAction fadeInWithDuration:_leafDuration];
+        case RevenantSCNActionKindHide:
+            return [SCNAction unhide];
+        case RevenantSCNActionKindUnhide:
+            return [SCNAction hide];
+        case RevenantSCNActionKindSequence: {
+            NSMutableArray<SCNAction *> *reversed = [NSMutableArray arrayWithCapacity:_children.count];
+            for (SCNAction *child in [_children reverseObjectEnumerator]) {
+                [reversed addObject:child.reversedAction];
+            }
+            return [SCNAction sequence:reversed];
+        }
+        case RevenantSCNActionKindGroup: {
+            NSMutableArray<SCNAction *> *reversed = [NSMutableArray arrayWithCapacity:_children.count];
+            for (SCNAction *child in _children) {
+                [reversed addObject:child.reversedAction];
+            }
+            return [SCNAction group:reversed];
+        }
+        case RevenantSCNActionKindRepeat: {
+            SCNAction *child = _children.firstObject.reversedAction;
+            return _repeatsForever ? [SCNAction repeatActionForever:child] : [SCNAction repeatAction:child count:_repeatCount];
+        }
+        case RevenantSCNActionKindMoveTo:
+        case RevenantSCNActionKindRotateTo:
+        case RevenantSCNActionKindRotateToAxisAngle:
+        case RevenantSCNActionKindScaleTo:
+        case RevenantSCNActionKindFadeOpacityTo:
+            return [SCNAction waitForDuration:_leafDuration];
+        default:
+            return [self copy];
+    }
 }
 
 + (SCNAction *)removeFromParentNode
