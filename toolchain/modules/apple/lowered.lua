@@ -1335,6 +1335,25 @@ end
 
 VFS_SUBTREES = {os = true}
 
+VFS_FILES = {["os.apinotes"] = true}
+
+local function lowered_apinotes(text, set)
+    local functions = set.functions or {}
+    local current = nil
+    local lines = {}
+    for line in text:gmatch("[^\n]+") do
+        local name = line:match("^%- Name: (%S+)")
+        if name then
+            current = name
+        end
+        if current and functions[current] and line:match("^  SwiftName:") then
+            line = line:gsub("__(%w+):", "%1:")
+        end
+        table.insert(lines, line)
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
 local function vfs_subtree(relative, subtrees)
     local head = relative and relative:match("^([^/]+)")
     return head ~= nil and (subtrees or VFS_SUBTREES)[head] == true
@@ -1369,7 +1388,21 @@ function build_overlay(sdk, out, set, subtrees)
             changed[file] = lowered
         end
     end
+    for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
+        for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, set)
+            if lowered ~= text then
+                changed[file] = lowered
+            end
+        end
+    end
+    local notes = path.join(sdk, "usr", "include", "os.apinotes")
+    if os.isfile(notes) then
+        changed[notes] = lowered_apinotes(io.readfile(notes), set)
+    end
     local roots = {}
+    local names = {}
     for file, text in pairs(changed) do
         local relative = system_include_relative(file, sdk)
         if relative then
@@ -1377,18 +1410,26 @@ function build_overlay(sdk, out, set, subtrees)
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
         end
-        if not relative or vfs_subtree(relative, subtrees) then
+        if not relative or vfs_subtree(relative, subtrees) or VFS_FILES[relative] then
             local copy = path.join(out, path.relative(file, sdk))
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
             local dir = path.directory(file)
             roots[dir] = roots[dir] or {}
+            names[dir] = names[dir] or {}
+            table.insert(names[dir], relative or path.filename(file))
             table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
         end
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
-        if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
+        local remaps = false
+        for _, name in ipairs(names[dir]) do
+            if not VFS_FILES[name] then
+                remaps = true
+            end
+        end
+        if (relative and not vfs_subtree(relative, subtrees)) or (dir == path.join(sdk, "usr", "include") and remaps) then
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end
