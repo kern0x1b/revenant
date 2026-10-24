@@ -119,9 +119,18 @@ here; a Swift error text and the exact typecheck command are what would settle i
 
 ## Keychain, Photos, VideoToolbox, PassKit and IOSurface: what each item stands on
 
-- `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: iOS 6 has no class that requires a passcode, so the backport maps it
-  to `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` (`"aku"`). Items stored with it do not disappear when the passcode is
-  removed, which the SDK promises. The host test checks the value against the macOS oracle and fails the `"akpu"` value.
+- `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: the value is `"aku"` on iOS 6, the closest native class, so items
+  stored with it are not refused when the device has no passcode, and they are not removed when a passcode is removed
+  later. The SDK promises both, and the backport does neither. The host test checks the value against the macOS oracle
+  and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
+  - The passcode predicate. The 6.1.3 MobileKeyBag exports `MKBGetDeviceLockState` and `MKBDeviceUnlockedSinceBoot`, and
+    its strings name no passcode key, so the return code that means "a passcode is set" is not known from the cache. A
+    measurement with and without a passcode, on a device or the emulator, settles it.
+  - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
+    defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
+    and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.
+  Until both are in, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` is a weaker class than its name, and that is the
+  decision to make before Telegram's passcode storage ships on iOS 6.
 - `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the value is defined, but the flags are not enforced.
   The constructor returns NULL with `errSecUnimplemented`, so biometric or passcode flags fail loudly. Enforcing
   `kSecUseAuthenticationContext` or an access control at `SecItemAdd`/`SecItemCopyMatching` needs interception of the
@@ -133,16 +142,24 @@ here; a Swift error text and the exact typecheck command are what would settle i
 - `kVTCouldNotFindVideoEncoderErr`: the iOS 26.2 SDK declares it as a plain enum constant (`-12908`) with no availability
   annotation, and the backport already compiles against that declaration. It is not a symbol, so there is nothing to
   backport and no oracle to compare.
-- `PKPaymentButton`: a `UIButton` subclass with the iOS 26 selectors, which ignore `disableCardArt` because the button draws
-  no card art. It draws a plain title, not Apple's artwork, and its tap logs the unavailability error. The contract test
-  checks the SDK header and the source. The compile of `initWithCoder:` warns that the override is missing.
+- `PKPaymentButton`: a `UIButton` subclass. Its title is the Apple logo (U+F8FF) followed by "Pay", with the type's phrase
+  before it (Buy, Donate, Check out, and so on). The logo is in the iOS 6.1.3 system font: the 6.1.3 Helvetica Neue file in
+  the firmware maps U+F8FF to a glyph, and a control code point maps to none. The default corner radius is 4, Apple's
+  default. The white style is a white fill with black text, the outline style adds a 1-point black border, and the black
+  style is a black fill with white text. The phrase for each type is not checked against Apple's guidelines, and the logo
+  is the only artwork. Telegram shows the button only when `PKPaymentAuthorizationViewController.canMakePayments(usingNetworks:)`
+  is true, and both backport implementations answer NO, so the button stays hidden. The iOS 26 selectors ignore
+  `disableCardArt`, because the button draws no card art. The contract test checks the SDK header and the source.
 - IOSurface: 40 of the SDK's functions are forwarded to the system's private `IOSurface` library, and each one is in the
   iOS 6.1.3 export table. Six component functions and `IOSurfaceGetSubsampling`, `IOSurfaceAllowsPixelSizeCasting` and
   `IOSurfaceSetOwnershipIdentity` are not wrapped, because iOS 6.1.3 does not export them. A wrapper that cannot find a symbol
-  aborts with the name.
-- Deferred, not implemented: `MPSImageBilinearScale` (needs a render-to-texture path and a device cost measurement),
-  `MTLBinaryArchive` (needs a pipeline serialization path that iOS 6 SGX may not expose), and `CIRenderDestination` (needs
-  a CoreImage render-to-Metal-texture path, and there is no CoreImage folder).
+  aborts with the name. The program has not run on the 6.1.3 emulator. `xmake emulate` needs the revenant addon, and
+  installing `revenant v0.8.17` fails on this host with a package-name mismatch. The in-repo emulate fixtures configure
+  the whole package set first, which pulls swift and webkit, and the rules forbid building swift here.
+- Deferred, not implemented: `MPSImageBilinearScale`, `MTLBinaryArchive` and `CIRenderDestination`. The Metal backport
+  renders through GL framebuffers (`RevenantMetalEncoder.m`), and it has 84 files. `glGetProgramBinary` and
+  `glProgramBinary` are stubs that report an error (`src/OpenGLES/ES3Functions.m`), so there is no compiled program to
+  archive. There is no CoreImage folder, and the MPS folder has 100 files and no bilinear scale.
 
 ## Work queue: the unattempted Telegram modules
 
