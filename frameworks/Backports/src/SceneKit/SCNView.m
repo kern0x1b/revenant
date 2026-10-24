@@ -15,6 +15,7 @@
     CADisplayLink *_displayLink;
     SCNScene *_scene;
     SCNNode *_pointOfView;
+    SCNNode *_audioListener;
     __weak id<SCNSceneRendererDelegate> _delegate;
     NSInteger _preferredFramesPerSecond;
     BOOL _jitteringEnabled;
@@ -159,7 +160,7 @@
         [delegate renderer:self updateAtTime:time];
     }
     if (scene) {
-        [RevenantSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime()];
+        [RevenantSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime() listener:_audioListener ?: _pointOfView];
     }
     if ([delegate respondsToSelector:@selector(renderer:didApplyAnimationsAtTime:)]) {
         [delegate renderer:self didApplyAnimationsAtTime:time];
@@ -284,6 +285,16 @@
 - (SCNNode *)pointOfView
 {
     return _pointOfView;
+}
+
+- (SCNNode *)audioListener
+{
+    return _audioListener;
+}
+
+- (void)setAudioListener:(SCNNode *)audioListener
+{
+    _audioListener = audioListener;
 }
 
 - (void)setPointOfView:(SCNNode *)pointOfView

@@ -402,7 +402,7 @@ static void RevenantSCNSayUnmeasured(CAAnimation *animation)
     [_entries removeObjectsInArray:finished ?: @[]];
 }
 
-+ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now
++ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now listener:(SCNNode *)listener
 {
     NSMutableArray<SCNNode *> *queue = [NSMutableArray arrayWithObject:scene.rootNode];
     NSHashTable *seen = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
@@ -411,6 +411,7 @@ static void RevenantSCNSayUnmeasured(CAAnimation *animation)
         [queue removeLastObject];
         [queue addObjectsFromArray:node.childNodes];
         [[node revenantAnimations] evaluateAtTime:now model:node];
+        [node revenantUpdateAudioWithListener:listener];
         for (SCNMaterial *material in node.geometry.materials) {
             if ([seen containsObject:material]) {
                 continue;

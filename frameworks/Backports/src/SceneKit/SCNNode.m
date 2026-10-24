@@ -17,6 +17,7 @@
     SCNNode *_presentation;
     BOOL _isPresentation;
     RevenantSCNAnimations *_animations;
+    NSMutableArray<SCNAudioPlayer *> *_audioPlayers;
 }
 
 - (instancetype)init
@@ -465,6 +466,59 @@
 - (NSArray<SCNParticleSystem *> *)particleSystems
 {
     return self->_particleSystems.count ? [self->_particleSystems copy] : nil;
+}
+
+#pragma mark SCNAudioSupport
+
+- (void)addAudioPlayer:(SCNAudioPlayer *)player
+{
+    if (self->_audioPlayers == nil) {
+        self->_audioPlayers = [NSMutableArray array];
+    }
+    [self->_audioPlayers addObject:player];
+    [player revenantStartOnNode:self];
+}
+
+- (void)removeAudioPlayer:(SCNAudioPlayer *)player
+{
+    if ([self->_audioPlayers containsObject:player]) {
+        [self->_audioPlayers removeObject:player];
+        [player revenantStop];
+    }
+}
+
+- (void)removeAllAudioPlayers
+{
+    for (SCNAudioPlayer *player in self->_audioPlayers) {
+        [player revenantStop];
+    }
+    [self->_audioPlayers removeAllObjects];
+}
+
+- (NSArray<SCNAudioPlayer *> *)audioPlayers
+{
+    return self->_audioPlayers ? [self->_audioPlayers copy] : @[];
+}
+
+- (void)revenantRemoveFinishedAudioPlayer:(SCNAudioPlayer *)player
+{
+    [self->_audioPlayers removeObject:player];
+}
+
+- (void)revenantUpdateAudioWithListener:(SCNNode *)listener
+{
+    if (self->_audioPlayers.count == 0) {
+        return;
+    }
+    SCNMatrix4 listenerWorld = listener ? [listener revenantPresentedWorldTransform] : SCNMatrix4Identity;
+    SCNMatrix4 listenerInverse = RevenantSCNMatrixInvert(listenerWorld);
+    SCNMatrix4 world = [self revenantPresentedWorldTransform];
+    SCNVector3 position = SCNVector3Make(world.m41, world.m42, world.m43);
+    for (SCNAudioPlayer *player in self->_audioPlayers) {
+        if ([player revenantIsSpatial]) {
+            [player revenantApplyMix:RevenantSCNAudioMixFor(listenerInverse, position, [player revenantSourceVolume])];
+        }
+    }
 }
 
 @end

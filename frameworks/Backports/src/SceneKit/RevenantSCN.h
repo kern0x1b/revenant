@@ -1,5 +1,6 @@
 #import <SceneKit/SceneKit.h>
 #import <UIKit/UIKit.h>
+#import "RevenantSCNAudio.h"
 
 @interface SCNPhysicsRadialGravityField : SCNPhysicsField <NSSecureCoding>
 @end
@@ -70,7 +71,7 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 - (NSDictionary<NSString *, NSValue *> *)presented;
 - (RevenantSCNAnimations *)revenantCopy;
 - (void)evaluateAtTime:(CFTimeInterval)now model:(id<RevenantSCNAnimatable>)model;
-+ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now;
++ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now listener:(SCNNode *)listener;
 @end
 
 @interface SCNNode (RevenantSCNAnimation) <RevenantSCNAnimatable>
