@@ -50,6 +50,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Contributor guide](guides/emulator/contributing.md) | the layout, what bites, the conventions |
 | [How it works](explanation/emulator/how-it-works.md) | what is emulated and how the pieces fit |
 | [Where the time goes](explanation/emulator/performance.md) | why the emulator is as slow as it is, and why not another emulator |
+| [Snapshot and restore](explanation/emulator/snapshot.md) | what a booted machine holds, what a snapshot would save and restore, and the measured costs |
 | [Performance measurements](reference/emulator/performance.md) | the measured runs and the counters of a boot |
 | [Shared translation](explanation/emulator/shared-translation.md) | the design for translating the shared cache once |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
