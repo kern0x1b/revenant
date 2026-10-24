@@ -1142,6 +1142,7 @@ function constants_defined_in(src)
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 for line in io.readfile(file):gmatch("[^\n]*") do
                     local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
+                        or line:match("^[%a_][%w_]*%s*%*%s*([%a_][%w_]*)%s*[;=]")
                     if name then
                         defined[name] = true
                     end
