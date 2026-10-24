@@ -23,7 +23,6 @@ LOCKDOWN_KEYS = {{"com\\.apple\\.purplebuddy-SetupState", "-string", "DONE"}}
 CRASH_LOOP = 3
 REGISTERS = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
 TIME_SCALE = 10
-RUN_JIT_CACHE_MIB = 64
 UNLOCK_SLIDE = "drag 50 430 300 430 900 40"
 
 function launch_instructions(log)
@@ -1021,10 +1020,6 @@ function boot(opt)
                   "--time-scale", tostring(scale)}
     if opt.perf then
         table.insert(argv, "--perf-summary")
-    end
-    if opt.jit_cache_mib then
-        table.insert(argv, "--jit-cache-mib")
-        table.insert(argv, tostring(opt.jit_cache_mib))
     end
     local input, control = pipe.openpair("BB")
     local envs = {}

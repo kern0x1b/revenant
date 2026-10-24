@@ -135,8 +135,7 @@ local function run(ctx, argv)
     local results = emulator.results(rootfs)
     local ok, result, booted, errors = try {
         function ()
-            local boot = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, jit_cache_mib = emulator.RUN_JIT_CACHE_MIB,
-                                                      stop = function ()
+            local boot = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = function ()
                 return os.isfile(path.join(results, "verdict.json"))
             end}))
             local reports = emulator.reports(rootfs)
