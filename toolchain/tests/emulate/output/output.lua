@@ -50,6 +50,8 @@ function main(device, release)
     local here = os.scriptdir()
     local out = runs.folder("emulate-output")
     os.mkdir(out)
+    -- the golden image and the images of this run are made in its own folder, not in the machine's emulator folder
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
 
     local function xmake(args, log, opt)
         return os.execv(os.programfile(), args, table.join({curdir = here, stdout = log, stderr = log}, opt or {}))

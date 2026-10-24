@@ -60,7 +60,13 @@ function remove(folder)
     end
 end
 
+-- the folder of the emulator's images, caches and golden images: ~/.revenant/emulator, or REVENANT_EMULATOR_ROOT, which a
+-- test that emulates a device points at a folder of its own, so that the machine's golden images are left alone
 function root()
+    local override = os.getenv("REVENANT_EMULATOR_ROOT")
+    if override and override ~= "" then
+        return override
+    end
     return path.join(path.directory(dyld.root()), "emulator")
 end
 
@@ -1077,49 +1083,6 @@ function capacity()
     return math.max(1, math.min(cores // 3, gigabytes // 5))
 end
 
-BUILD_SLOT = "REVENANT_BUILD_SLOT"
-
-function build_slot_name()
-    return BUILD_SLOT
-end
-
-function build_capacity()
-    local cores = os.cpuinfo("ncpu") or 4
-    return math.max(2, cores // 4)
-end
-
-JOBS_TASKS = {build = true, test = true, require = true, pack = true, install = true}
-
-function build_jobs(cores, capacity)
-    return math.max(1, (cores or 4) // math.max(1, capacity or 1))
-end
-
-function queued_arguments(program, arguments, jobs)
-    if path.basename(program) ~= "xmake" then
-        return arguments
-    end
-    local task, given = nil, #arguments + 1
-    for index, argument in ipairs(arguments) do
-        if argument == "--" then
-            given = index
-            break
-        elseif argument:startswith("-j") or argument:startswith("--jobs") then
-            return arguments
-        elseif not argument:startswith("-") and not task then
-            task = argument
-        end
-    end
-    if task and not JOBS_TASKS[task] then
-        return arguments
-    end
-    return table.join(table.slice(arguments, 1, given - 1), {"-j", tostring(jobs)}, table.slice(arguments, given))
-end
-
-function holds_build_slot(environment)
-    local value = (environment or os.getenvs())[BUILD_SLOT]
-    return value ~= nil and value ~= ""
-end
-
 function crowded(load, cores)
     return load ~= nil and cores ~= nil and cores > 0 and load > cores
 end
@@ -1225,8 +1188,9 @@ function retire(parent, opt, kept)
     for _, name in ipairs(published_names(parent, opt.identifier .. "_" .. opt.build .. "_")) do
         if name ~= kept then
             local published = path.join(parent, name)
-            local lock = io.openlock(published .. ".build.lock")
-            if lock and lock:trylock() then
+            local lockpath = published .. ".build.lock"
+            local lock = generations.try_take(lockpath)
+            if lock then
                 local current = generations.resolve(published)
                 local recorded = current and try {function () return json.loadfile(path.join(current, "golden.json")) end}
                 if recorded and recorded.emulator ~= opt.emulator_hash then
@@ -1234,12 +1198,10 @@ function retire(parent, opt, kept)
                 end
                 generations.sweep(published)
                 if generations.empty(published) then
-                    os.tryrm(published .. ".build.lock")
+                    generations.drop(lockpath, lock)
+                else
+                    generations.release(lock)
                 end
-                lock:unlock()
-                lock:close()
-            elseif lock then
-                lock:close()
             end
         end
     end
@@ -1332,8 +1294,7 @@ function clean(opt)
     local parent = path.join(base, "golden.noindex")
     for _, name in ipairs(published_names(parent)) do
         local published = path.join(parent, name)
-        local lock = io.openlock(published .. ".build.lock")
-        lock:lock()
+        local lock = generations.take(published .. ".build.lock")
         if opt.goldens then
             generations.unpublish(published)
             generations.sweep(published, {grace = 0})
@@ -1341,12 +1302,13 @@ function clean(opt)
         else
             generations.sweep(published)
         end
-        -- a name with nothing left drops its build lock too; a build that makes the name again makes a new one
+        -- a name with nothing left drops its build lock too, removed while it is held; a build that makes the name again
+        -- makes a new one
         if generations.empty(published) then
-            os.tryrm(published .. ".build.lock")
+            generations.drop(published .. ".build.lock", lock)
+        else
+            generations.release(lock)
         end
-        lock:unlock()
-        lock:close()
     end
     return removed
 end
@@ -1372,8 +1334,7 @@ function golden(opt)
         return current
     end
     directory(parent)
-    local lock = io.openlock(published .. ".build.lock")
-    lock:lock()
+    local lock = generations.take(published .. ".build.lock")
     local built, staging, staged
     local ok, errors = try {
         function ()

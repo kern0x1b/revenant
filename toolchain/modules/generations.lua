@@ -41,6 +41,70 @@ function release(lock)
     lock:close()
 end
 
+-- the inode of the file the path names now, or nil when it names none
+local function named_inode(path)
+    if not os.isfile(path) then
+        return nil
+    end
+    local lock = io.openlock(path)
+    local inode = lock:inode()
+    lock:close()
+    return inode
+end
+
+-- take the lock of a path that its holders remove. The lock is taken on the file the path names, and kept only when the
+-- path still names that file once the lock is held: a waiter that was blocked on a file a holder has removed finds the
+-- path gone or replaced, releases the old file, and takes the lock of the file that replaced it. With try, a lock held by
+-- another session is not waited for, and nil is returned.
+local function take_lock(path, try)
+    while true do
+        local lock = io.openlock(path)
+        if not lock then
+            raise("cannot open the lock %s", path)
+        end
+        local taken
+        if try then
+            taken = lock:trylock()
+        else
+            -- a lock of a module, which runs in xmake's sandbox, returns nothing when it is taken and raises when it is not
+            taken = lock:lock() ~= false
+        end
+        if not taken then
+            lock:close()
+            if try then
+                return nil
+            end
+            raise("cannot lock %s", path)
+        end
+        local held = lock:inode()
+        if not held then
+            release(lock)
+            raise("cannot read the inode of the lock %s", path)
+        end
+        if held == named_inode(path) then
+            return lock
+        end
+        release(lock)
+    end
+end
+
+-- take the lock of a path, waiting for it
+function take(path)
+    return take_lock(path, false)
+end
+
+-- take the lock of a path if no other session holds it, or return nil
+function try_take(path)
+    return take_lock(path, true)
+end
+
+-- remove a lock file while the caller holds its lock, then release the lock: a session waiting on the removed file takes
+-- the lock of the file that replaces it, if any
+function drop(path, lock)
+    os.tryrm(path)
+    release(lock)
+end
+
 -- rename one name over another in one step. xmake's os.rename does not move a link or a folder, and os.mv moves a link
 -- into the folder it names when the destination is a link to a folder; mv -h replaces the destination link itself.
 local function rename(source, destination)

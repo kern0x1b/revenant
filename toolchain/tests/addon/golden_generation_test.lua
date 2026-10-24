@@ -76,6 +76,19 @@ function main(mode, modules, root, firmware, folder, count)
 end
 ]]
 
+-- a session that waits for a build lock: it writes that it waits, takes the lock, writes when it has it, holds it for a
+-- moment, and releases it
+local BLOCKED = [[
+function main(modules, lockpath, mark)
+    local generations = import("generations", {rootdir = modules, anonymous = true})
+    io.writefile(mark .. ".waiting", "")
+    local lock = generations.take(lockpath)
+    io.writefile(mark .. ".acquired", tostring(os.mclock()))
+    os.sleep(500)
+    generations.release(lock)
+end
+]]
+
 local function write_firmware(firmware)
     os.mkdir(path.join(firmware, "payload"))
     for index = 1, PARTS do
@@ -203,25 +216,19 @@ function failures(opt)
         os.sleep(300)
         emulator.clean({root = root, goldens = true})
     end
-    -- a racer's last line is its report, and the racer exits after it. The exit is not waited for: process:wait reports an
-    -- exit only to a wait that is pending when the child exits, so an exit that comes while another child is waited on, or
-    -- before its wait starts, reads as still running (measured, and written up in docs/guides/toolchain/contributing.md),
-    -- so the report ends the racer
-    local function reported(log)
-        local said = os.isfile(log) and io.readfile(log) or ""
-        return said:match("reads %d+ violations %d+") ~= nil
-    end
+    -- each racer ends after its report, and is waited for: process:wait reports the exit of a child to the wait on it, with
+    -- its status (patch 0018 of xmake's package). A racer that has not exited within two minutes is killed, and that is found
     for _, state in ipairs(children) do
-        local waited = 0
-        while not reported(state.log) and waited < 120000 do
-            os.sleep(200)
-            waited = waited + 200
+        local exited, status = state.child:wait(120000)
+        if exited ~= 1 then
+            try {function () state.child:kill() end}
         end
-        try {function () state.child:kill() end}
         state.child:close()
         local said = os.isfile(state.log) and io.readfile(state.log) or ""
-        if not reported(state.log) then
-            table.insert(found, state.name .. " racer did not report within 120 seconds, and printed: " .. said)
+        if exited ~= 1 then
+            table.insert(found, state.name .. " racer did not exit within 120 seconds, and printed: " .. said)
+        elseif status ~= 0 then
+            table.insert(found, state.name .. " racer exited with status " .. tostring(status) .. ", and printed: " .. said)
         end
         local reads, violations = said:match("reads (%d+) violations (%d+)")
         if not reads then
@@ -282,6 +289,47 @@ function failures(opt)
     if os.islink(legacy) or os.isfile(legacy .. ".build.lock") or generation_count(root) ~= 0 then
         table.insert(found, "after a golden folder from before generations is replaced and cleaned, something is left: "
                      .. table.concat(leftovers(path.join(root, "golden.noindex")), "; "))
+    end
+
+    -- a session that waits for a build lock while its holder removes the file it holds takes the lock of the file that
+    -- replaces it, and is let in only after the replacement is released. The holder removes its file while it holds it,
+    -- a successor takes the new file before the holder releases the old one, and the waiting session is blocked on the
+    -- old file until then
+    local blocked = path.join(folder, "blocked.build.lock")
+    local blocked_script = path.join(folder, "blocked.lua")
+    io.writefile(blocked_script, BLOCKED)
+    local mark = path.join(folder, "blocked")
+    local holder = generations.take(blocked)
+    local waiter = process.openv(os.programfile(), {"l", blocked_script, modules, blocked, mark},
+                                 {curdir = folder, envs = envs, stdout = mark .. ".log", stderr = mark .. ".log"})
+    local waited = 0
+    while not os.isfile(mark .. ".waiting") and waited < 60000 do
+        os.sleep(100)
+        waited = waited + 100
+    end
+    os.sleep(1000)
+    os.tryrm(blocked)
+    local successor = generations.take(blocked)
+    generations.release(holder)
+    os.sleep(1500)
+    if os.isfile(mark .. ".acquired") then
+        table.insert(found, "a session waiting on a build lock took it while the session that replaced the lock's file held it")
+    end
+    local released = os.mclock()
+    generations.release(successor)
+    local exited, status = waiter:wait(20000)
+    if exited ~= 1 then
+        try {function () waiter:kill() end}
+    end
+    waiter:close()
+    local acquired = os.isfile(mark .. ".acquired") and tonumber(io.readfile(mark .. ".acquired")) or nil
+    if not acquired then
+        table.insert(found, "the session waiting on the build lock never took it, and printed " .. (os.isfile(mark .. ".log") and io.readfile(mark .. ".log") or ""))
+    elseif acquired < released then
+        table.insert(found, "the session waiting on the build lock took it before the session that replaced the lock's file released it")
+    end
+    if exited ~= 1 or status ~= 0 then
+        table.insert(found, "the session waiting on the build lock did not exit cleanly: exited " .. tostring(exited) .. ", status " .. tostring(status))
     end
 
     os.tryrm(folder)

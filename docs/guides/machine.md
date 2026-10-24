@@ -20,7 +20,7 @@ Everything under `~/.revenant` that is not `cache` is data, and no clean touches
 | --- | --- | --- |
 | `dyld` | `toolchain/modules/apple/firmware.lua` | the shared caches and libraries of each iOS release, taken out of decrypted firmware |
 | `firmware` | `toolchain/modules/apple/firmware.lua` and the `firmware` plugin | the firmware catalog, the root file systems, a download that resumes |
-| `emulator` | the emulator's image commands | golden images that took a first boot to make |
+| `emulator` | the emulator's image commands | golden images that took a first boot to make; `REVENANT_EMULATOR_ROOT` names another folder for all of it |
 | `devices` | `toolchain/modules/device.lua` | which run holds which device |
 | `cache-index` | `toolchain/tools/cache_index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
 | `corpus` | the corpus tools | data read from applications and devices; `REVENANT_CORPUS_ROOT` names another place |

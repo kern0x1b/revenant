@@ -12,6 +12,8 @@ function main(device, release)
     local out = runs.folder("emulate-pin-leak")
     os.tryrm(out)
     os.mkdir(out)
+    -- the golden image and the images of this run are made in its own folder, not in the machine's emulator folder
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
     for _, name in ipairs({"pin-leak.c", "control"}) do
         os.cp(path.join(here, name), path.join(out, name))
     end
