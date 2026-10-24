@@ -2,6 +2,7 @@ import("core.base.json")
 import("core.project.config")
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", "..", ".."))
+local DRIVER = path.join(os.scriptdir(), "driver.lua")
 local emulator = import("@addon.revenant.emulator", {anonymous = true})
 
 local DEVICE = "iPhone4,1"
@@ -20,6 +21,27 @@ end
 
 local function emulator_program()
     return path.join(ROOT, "build", "macosx", "arm64", "release", "emulator")
+end
+
+local TCC_SCHEMA = [[
+CREATE TABLE IF NOT EXISTS admin (key TEXT PRIMARY KEY NOT NULL, value INTEGER NOT NULL);
+INSERT OR IGNORE INTO admin VALUES ('version', 4);
+CREATE TABLE IF NOT EXISTS access (service TEXT NOT NULL, client TEXT NOT NULL, client_type INTEGER NOT NULL, allowed INTEGER NOT NULL, prompt_count INTEGER NOT NULL, CONSTRAINT key PRIMARY KEY (service, client, client_type));
+CREATE TABLE IF NOT EXISTS access_times (service TEXT NOT NULL, client TEXT NOT NULL, client_type INTEGER NOT NULL, last_used_time INTEGER NOT NULL, CONSTRAINT key PRIMARY KEY (service, client, client_type));
+CREATE TABLE IF NOT EXISTS access_overrides (service TEXT PRIMARY KEY NOT NULL);
+INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 0, 1, 1);
+INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 1, 1, 1);
+]]
+
+local function grant_photos_access(rootfs)
+    local directory = emulator.guest_path(rootfs, "/var/mobile/Library/TCC")
+    os.mkdir(directory)
+    local database = path.join(directory, "TCC.db")
+    os.vrunv("sqlite3", {database, string.format(TCC_SCHEMA, "/" .. BINARY, "/" .. BINARY)})
+    for _, file in ipairs({directory, database}) do
+        os.vrunv("xattr", {"-w", "hfsfuse.record.owner_id", "501", file})
+        os.vrunv("xattr", {"-w", "hfsfuse.record.group_id", "501", file})
+    end
 end
 
 local function require_present(file, message)
@@ -97,7 +119,7 @@ local function run(app, guest)
     if #libraries == 0 then
         raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libraries_folder(app))
     end
-    local identity = {hash.sha256(program), hash.sha256(app), hash.sha256(guest)}
+    local identity = {hash.sha256(program), hash.sha256(app), hash.sha256(guest), hash.sha256(DRIVER)}
     for _, library in ipairs(libraries) do
         table.insert(identity, hash.sha256(library))
     end
@@ -117,6 +139,7 @@ local function run(app, guest)
         local started = os.mclock()
         local rootfs = path.join(folder, "rootfs")
         emulator.clone(firmware, rootfs)
+        grant_photos_access(rootfs)
         local destination = emulator.guest_path(rootfs, INSTALL)
         os.mkdir(destination)
         for _, library in ipairs(libraries) do
