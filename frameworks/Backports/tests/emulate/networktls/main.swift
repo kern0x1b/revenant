@@ -1,7 +1,6 @@
 import Darwin
 import Dispatch
 import Foundation
-import Network
 import Security
 
 let wait: DispatchTimeInterval = .seconds(10)

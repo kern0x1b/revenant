@@ -30,6 +30,16 @@ let revenantCertificateFailures: Set<OSStatus> = [-9807, -9812, -9813, -9814, -9
 private let revenantCertificateChainInvalid: OSStatus = -9807
 private let revenantPeerHandshakeFailed: OSStatus = -9824
 
+private typealias NWCopyKeyDataFunction = @convention(c) (SecKey, UnsafeMutablePointer<Unmanaged<CFError>?>?) -> CFData?
+
+private func revenantCopyKeyData(_ key: SecKey) -> Data? {
+    guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "SecKeyCopyExternalRepresentation") else {
+        return nil
+    }
+    let copy = unsafeBitCast(symbol, to: NWCopyKeyDataFunction.self)
+    return copy(key, nil) as Data?
+}
+
 private final class ProtocolList {
     let storage: UnsafeMutablePointer<UInt8>
     let count: Int
@@ -260,7 +270,7 @@ final class NWTLSSession {
         var key: SecKey?
         guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate,
               SecIdentityCopyPrivateKey(identity, &key) == errSecSuccess, let key,
-              let keyData = SecKeyCopyExternalRepresentation(key, nil) as Data?
+              let keyData = revenantCopyKeyData(key)
         else {
             return false
         }
