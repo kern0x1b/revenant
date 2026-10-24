@@ -252,7 +252,7 @@ else
                                   network = "network_test.lua", networktls = "network_tls_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua",
-                                  vfs = "lowered_vfs_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -383,6 +383,15 @@ local QUARTZCORE_TESTS = {
     spring_animation = {"RevenantSpringSolver.m", "RevenantSpringKeyframes.m", "CASpringAnimation.m"},
 }
 
+local CORETEXT_TESTS = {
+    open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
+}
+
+local SCENEKIT_TESTS = {
+    action_math = {"RevenantSCNActionMath.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m"},
+}
+
 local function host_tests(folder, tests, library, frameworks, options)
     options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
@@ -416,6 +425,8 @@ if not is_plat("iphoneos") then
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
+    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})

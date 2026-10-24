@@ -1285,6 +1285,22 @@ end
 
 function build_overlay(sdk, out, set, subtrees)
     local changed = member_headers(sdk)
+    local simd = path.join(include_directory(out), "simd", "math.h")
+    os.mkdir(path.directory(simd))
+    write_if_changed(simd, table.concat({
+        "#if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 70000",
+        "#ifdef __cplusplus",
+        "extern \"C\" {",
+        "#endif",
+        "void __sincospif(float, float *, float *);",
+        "void __sincospi(double, double *, double *);",
+        "#ifdef __cplusplus",
+        "}",
+        "#endif",
+        "#endif",
+        "#include_next <simd/math.h>",
+        "",
+    }, "\n"))
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local lowered = lowering_of(text, set)
