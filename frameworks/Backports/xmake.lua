@@ -162,6 +162,7 @@ if is_plat("iphoneos") then
         add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
         set_values("tweak.filter", path.join(TWEAK, "springboard.plist"))
         set_values("revenant.control", path.join(TWEAK, "control"))
+        set_values("revenant.version", "1.0.0")
 
     for _, library in ipairs(LIBRARIES) do
         target(library.name)

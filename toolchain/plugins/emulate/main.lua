@@ -197,7 +197,9 @@ local function launch(ctx, identifier, steps)
     local scale = tonumber(option.get("scale")) or emulator.TIME_SCALE
     local driver = emulator.launch_driver({results = results, run = folder, application = application, steps = steps,
                                            seconds = seconds, scale = scale})
-    local booted = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = driver.stop}))
+    local booted = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = driver.stop, perf = true}))
+    local instructions = emulator.launch_instructions(booted.log)
+    local visible = emulator.last_visible_pixels(booted.log)
     os.cp(results, path.join(folder, "results"))
     local reports = emulator.reports(rootfs)
     for _, report in ipairs(reports) do
@@ -206,7 +208,8 @@ local function launch(ctx, identifier, steps)
     local result = {identifier = identifier, application = application, shots = driver.shots, failure = driver.failure,
                     exit = driver.exit, pid = driver.application and driver.application.pid, unlocks = driver.unlocks,
                     held = driver.held, held_seconds = driver.held_seconds,
-                    reason = booted.reason, seconds = booted.seconds, scale = booted.scale,
+                    reason = booted.reason, seconds = booted.seconds, scale = booted.scale, instructions = instructions,
+                    visible_pixels = visible,
                     stdout = path.join(folder, "results", "app.stdout"), stderr = path.join(folder, "results", "app.stderr")}
     json.savefile(path.join(folder, "verdict.json"), result)
     if not option.get("keep") then
@@ -248,6 +251,12 @@ local function launch(ctx, identifier, steps)
               booted.reason, where, #steps, booted.log)
     end
     cprint("${bright green}launched${clear} %s as pid %s %s, %d snapshot(s)", identifier, driver.application.pid, where, #driver.shots)
+    if instructions then
+        cprint("${dim}launch: %d guest instructions from the spawn to the first settled frame", instructions)
+    end
+    if visible then
+        cprint("${dim}settled frame: %d visible pixels of 614400", visible)
+    end
     if driver.held == "exited" then
         cprint("${bright green}held${clear} until %s ended, %.0f guest seconds after it was frontmost", identifier, driver.held_seconds)
     elseif driver.held == "deadline" then

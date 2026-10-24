@@ -41,6 +41,7 @@ From the top of revenant, each a `./xmakew l -P . frameworks/SwiftUI/tools/<scri
 emulate.lua tests                        # the engine tests, in the emulator
 emulate.lua snapshots [--accept] [--only=NAME]   # rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
 emulate.lua perf                         # in-app timings of deeply nested layouts
+emulate.lua package                      # the platform and demo packages installed, the demo launched and checked to draw
 coverage.lua --check                     # the ledger, checked against the code
 api_surface.lua                          # the typed API diff against Apple's interface
 api_surface.lua apple                    # Apple's 26.2 surface, which the invented-name gate reads
@@ -49,5 +50,18 @@ device.lua shots SCENARIO...             # scenarios rendered on a claimed phone
 
 `xmake emulate launch` starts the application the way SpringBoard does, so it reaches
 `application:didFinishLaunchingWithOptions:`; the engine tests are a console binary and go through `xmake emulate run`.
+
+The package path installs the platform package `org.revenant.backports` and the demo's package into an iPhone 4S on iOS
+6.1.3, the way dpkg installs them, launches the demo through SpringBoard and checks that it started, drew a settled frame
+and did not crash:
+
+```bash
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua package
+```
+
+It reconfigures the project with the emulator and the demo component, and restores its options afterwards. It is a tool
+rather than a test target: a launch started from inside a running test never began its boot in my runs, while
+the same launch from the command line does. The emulator packages have no prebuilt release, so the first configure
+builds them, and the boot takes minutes of host time, so the tool is not part of `checks` in CI.
 
 

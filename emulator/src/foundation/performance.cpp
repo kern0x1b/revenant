@@ -3487,6 +3487,7 @@ std::string format_display_performance_summary(
     std::ostringstream text;
     text << std::fixed << std::setprecision(2)
          << "[perf-display] label=" << label
+         << " cpu-ticks=" << snapshot.cpu_ticks
          << " guest-submit=" << snapshot.display_submissions << " guest-fps="
          << frames_per_second(snapshot.display_submissions,
                 snapshot.display_first_nanoseconds,

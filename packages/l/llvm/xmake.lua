@@ -19,6 +19,13 @@ package("llvm")
     end
     add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different compiler.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
+    local iphoneos = path.join(os.scriptdir(), "..", "..", "i", "iphoneos-sdk")
+    local sdk = {}
+    for _, file in ipairs({"xmake.lua", path.join("port", "digest.lua")}) do
+        table.insert(sdk, file .. "=" .. hash.sha256(path.join(iphoneos, file)))
+    end
+    add_configs("sdk", {description = "The digest of the iPhoneOS SDK's recipe and the files it adds, which the iOS builtins are compiled against, so a changed SDK is a different compiler.", default = hash.strhash128(table.concat(sdk, ";")), type = "string", readonly = true})
+
     on_download(function (package, opt)
         if import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
             return
@@ -54,10 +61,10 @@ package("llvm")
                            "-DLLVM_ENABLE_LIBXML2=OFF", "-DLLVM_ENABLE_TERMINFO=OFF",
                            "-DCLANG_ENABLE_STATIC_ANALYZER=OFF", "-DCLANG_ENABLE_OBJC_REWRITER=OFF",
                            "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", "-DLLVM_PARALLEL_LINK_JOBS=" .. parallel.link_jobs()}
-        local targets = {"install-clang", "install-clang-resource-headers"}
+        local targets = {"install-clang", "install-clang-resource-headers", "install-LTO"}
         if package:config("libraries") then
             table.join2(configure, {"-DLLVM_BUILD_LLVM_DYLIB=ON", "-DLLVM_LINK_LLVM_DYLIB=ON",
-                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis"})
+                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis;LTO"})
             targets = {"install-distribution"}
         end
         os.vrunv("cmake", configure)
@@ -102,6 +109,7 @@ package("llvm")
         end
         assert(not os.iorunv("xcrun", {"nm", "-g", archive}):find("___emutls_get_address", 1, true),
                "the iOS builtins carry emutls, which hands every image its own copy")
+        assert(os.isfile(path.join(package:installdir("lib"), "libLTO.dylib")), "the llvm install has no libLTO.dylib, which an -flto link loads for its bitcode objects")
         local probe = os.tmpfile() .. ".c"
         io.writefile(probe, "_Thread_local int probe;\n")
         local clang = path.join(package:installdir("bin"), "clang")
