@@ -94,13 +94,19 @@ changes exactly when those files do:
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
 
-Open: the build hash leaves out a package's patch set unless the package has a `recipe` or `additions` digest config.
-Two recipes with the same version and different patches then share one install, and the second project gets the first
-one's patched files. The source directory is not the cause: a git checkout is reset and its patches are applied again
-for each install. `toolchain/tests/addon/source_patch_test.lua` checks a digest-configured recipe, `dynarmic`, which
-installs its own patches. The xmake-level fix, keying the build hash on the patch set for every package, is not made.
-Until it is, these packages have no digest of their patches: `boringssl`, `farmdec`, `ffmpeg`, `iphoneos-sdk` (its
-16.4 patch is outside its `additions` digest), `ldid`, `openssl`, `swiftshader` and `xmake`.
+The build hash also ends with the digest of the xmake patch set the binary was built with. xmakew writes that digest to
+`share/xmake/revenant-patch-set` beside the binary, and patch `0019` folds it into every variant of the hash, so a changed
+xmake patch moves every package's key once. A binary without the file refuses to compute a build hash.
+`toolchain/tests/addon/patch_set_test.lua` checks that a different digest moves a key, that a copy with the same digest
+does not, and that a change to a package's description does not.
+
+Open: the build hash leaves out a package's own recipe patch set unless the package has a `recipe` or `additions` digest
+config. Two recipes with the same version and different patches then share one install, and the second project gets the
+first one's patched files. The source directory is not the cause: a git checkout is reset and its patches are applied
+again for each install. `toolchain/tests/addon/source_patch_test.lua` checks a digest-configured recipe, `dynarmic`, which
+installs its own patches. Keying the build hash on each recipe's patch set is not made. Until it is, these packages have
+no digest of their patches: `boringssl`, `farmdec`, `ffmpeg`, `iphoneos-sdk` (its 16.4 patch is outside its `additions`
+digest), `ldid`, `openssl`, `swiftshader` and `xmake`.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
