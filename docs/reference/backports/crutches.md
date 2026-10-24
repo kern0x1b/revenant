@@ -95,13 +95,13 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 ### C16. The OpenAL device path, the audio session and streaming are not run on iOS 6.1.3
 
 - Stands in for: the output path of AVAudioSession and AVAudioPlayer, which SceneKit uses on the device. The OpenAL device, the ExtAudioFile decode, source playback and stream playback run only on the macOS host.
-- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). The image check shows the symbols exported on 6.1.3, including `ExtAudioFileSeek` for stream loops, but nothing has run on the device or the emulator. The runtime case `tests/runtime/cases/scenekit_audio.m` is built for the device and reaches the emulator, but the app stops in the probe of the missing-class case before any case runs (a null read in `libRevenantMissingProbe.dylib`, outside this change), so its results are not in yet.
-- Measurement: host tests of the same paths (`audio_test.m`, `action_run_test.m`). Device: pending.
-- Removed by: the runtime case passing on the emulator, and a run on a real iPhone 4S with the mute switch set and other audio playing.
+- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. The emulator's audio advances at about the guest clock, so a 2 s tone finishes after about 9 guest seconds; the case allows 12. Nothing has run on a real device.
+- Measurement: the emulator run above (positive and negative modes of the case) and host tests of the same paths (`audio_test.m`, `action_run_test.m`).
+- Removed by: a run on a real iPhone 4S with the mute switch set and other audio playing.
 
 ### C17. SCNView adopts SCNSceneRenderer, and 21 of its 64 members raise
 
-- Stands in for: the rest of SCNSceneRenderer on a GLES view. Telegram needs the protocol as a type and the delegate callbacks, which SCNView already gives; the other members are Metal, SpriteKit, ray picking, or GPU features the GLES renderer does not have.
+- Stands in for: the rest of SCNSceneRenderer on a GLES view. The four Telegram files (PremiumUI, PremiumCoin, PremiumStar, GiftAvatar) call none of these members; they use the protocol as a type, the delegate callbacks, and `isJitteringEnabled`, which is implemented natively (C20). The other members are Metal, SpriteKit, ray picking, or GPU features the GLES renderer does not have.
 - Gaps: `presentScene:withTransition:incomingPointOfView:completionHandler:`, `hitTest:options:`, `isNodeInsideFrustum:withPointOfView:`, `nodesInsideFrustumWithPointOfView:`, `prepareObject:shouldAbortBlock:`, `prepareObjects:withCompletionHandler:`, and the properties `loops`, `autoenablesDefaultLighting`, `temporalAntialiasingEnabled`, `showsStatistics`, `debugOptions`, `overlaySKScene`, `usesReverseZ`, `workingColorSpace`, `currentRenderPassDescriptor`, `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat`, `audioEnvironmentNode` and `currentViewport`. Each raises `NSInternalInconsistencyException` naming the member, so a call is loud and `respondsToSelector:` answers yes.
 - Measurement: the members test (`lowered_members_test.lua`) passes with the list regenerated; the library compiles against the armv7 iOS 6.0 SDK with no diagnostics for the stubs. The stubs are not run by any test.
 - Removed by: a native implementation of each member on the GLES renderer, or a decision to drop the adoption and the stubs.
@@ -119,6 +119,13 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Gaps: a caller that expects SceneKit's own engine to hold every player finds only the custom ones.
 - Measurement: the node attach test (`audio_test.m`); not measured on the device.
 - Removed by: moving source players onto the same engine, or documenting the split as the intended API.
+
+### C20. Jittering accumulates up to eight samples while the frame does not change
+
+- Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable.
+- Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The GLES path is not run on a device, and the emulator has no GLES 2 context for EAGL (it reports GLES 1.1), so `SCNView` is not exercised on any run.
+- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). Device: pending.
+- Removed by: a device run that renders a still scene with jittering on and off and compares its edges, and a check of the animated case.
 
 ## Removed
 
