@@ -6,6 +6,7 @@
 // emulated audio hardware.
 
 #include "media/core_audio_hle.hpp"
+#include "media/io_proc_timeline.hpp"
 
 #include <algorithm>
 #include <array>
@@ -473,8 +474,10 @@ std::optional<CoreAudioHle::ScheduledIoProc> CoreAudioHle::take_due_io_proc(
                                       ? registration.buffer_frame_size
                                       : buffer_frame_size_) *
                 virtual_time_units_per_second / sample_rate);
-    registration.next_deadline =
-        std::max(now, registration.next_deadline) + period;
+    const auto due = registration.next_deadline == 0 ? now : registration.next_deadline;
+    const auto timeline = io_proc_timeline_after(due, now, period);
+    registration.next_deadline = timeline.next_deadline;
+    registration.underruns += timeline.underruns;
     registration.in_flight = true;
     if (registration.output != nullptr && registration.callback_count < 2U) {
         registration.output->line(
@@ -1182,6 +1185,7 @@ void CoreAudioHle::start_io(UserlandHleCall& call)
     state.running = true;
     state.in_flight = false;
     state.next_deadline = 0;
+    state.underruns = 0;
     state.sample_time = 0;
     state.callback_count = 0;
     state.peak_since_report = 0;

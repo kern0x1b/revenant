@@ -2378,7 +2378,6 @@ CompatibilityKernel::timer_deadline_snapshot() const
             static_cast<void>(processor);
             consider(local_deadline, receive.deadline);
         }
-        consider(local_deadline, core_audio_hle_.next_io_proc_deadline());
         consider(local_deadline, kernel_bsd::interval_timer::next_deadline(
                                      *shared_state_, process_.pid));
         local_timer_deadline_cache_ = local_deadline;
@@ -2389,6 +2388,7 @@ CompatibilityKernel::timer_deadline_snapshot() const
     std::uint64_t generation = 0;
     for (unsigned attempt = 0; attempt < 2U; ++attempt) {
         deadline = local_timer_deadline_cache_;
+        consider(deadline, core_audio_hle_.next_io_proc_deadline());
         consider(deadline, hid_event_system_hle_.next_sample_deadline());
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
