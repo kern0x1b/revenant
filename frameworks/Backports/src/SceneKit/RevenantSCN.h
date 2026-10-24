@@ -1,5 +1,6 @@
 #import <SceneKit/SceneKit.h>
 #import <UIKit/UIKit.h>
+#import "RevenantSCNActions.h"
 
 @interface SCNPhysicsRadialGravityField : SCNPhysicsField <NSSecureCoding>
 @end
@@ -78,6 +79,10 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 - (SCNMatrix4)revenantPresentedTransform;
 - (SCNMatrix4)revenantPresentedWorldTransform;
 - (CGFloat)revenantPresentedOpacity;
+@end
+
+@interface SCNNode (RevenantSCNActions)
+- (void)revenantStepActionsAtTime:(CFTimeInterval)now;
 @end
 
 @interface SCNMaterialProperty (RevenantSCNAnimation) <RevenantSCNAnimatable>
