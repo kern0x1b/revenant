@@ -8,7 +8,9 @@ local emulator = import("@addon.revenant.emulator", {anonymous = true})
 local DEVICE = "iPhone4,1"
 local RELEASE = "6.1.3"
 local BUILD = "10B329"
-local BINARY = "usr/libexec/revenant-backports-runtime"
+local APP_ID = "org.revenant.backports.runtime"
+local APP = "var/mobile/Applications/7E6B3B4A-6A5C-4A8E-9C35-0B1F2E7D9A11/RevenantBackportsRuntime.app"
+local BINARY = APP .. "/RevenantBackportsRuntime"
 local INSTALL = "usr/lib/revenant/org.revenant.backports"
 
 local function home_cache()
@@ -30,18 +32,34 @@ CREATE TABLE IF NOT EXISTS access (service TEXT NOT NULL, client TEXT NOT NULL, 
 CREATE TABLE IF NOT EXISTS access_times (service TEXT NOT NULL, client TEXT NOT NULL, client_type INTEGER NOT NULL, last_used_time INTEGER NOT NULL, CONSTRAINT key PRIMARY KEY (service, client, client_type));
 CREATE TABLE IF NOT EXISTS access_overrides (service TEXT PRIMARY KEY NOT NULL);
 INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 0, 1, 1);
-INSERT OR REPLACE INTO access VALUES ('kTCCServicePhotos', '%s', 1, 1, 1);
 ]]
+
+local function owned_by_mobile(file)
+    os.vrunv("xattr", {"-w", "hfsfuse.record.owner_id", "501", file})
+    os.vrunv("xattr", {"-w", "hfsfuse.record.group_id", "501", file})
+end
+
+local function install_bundle(rootfs, binary)
+    local bundle = emulator.guest_path(rootfs, APP)
+    os.mkdir(bundle)
+    local info = path.join(bundle, "Info.plist")
+    os.vrunv("plutil", {"-create", "xml1", info})
+    for _, key in ipairs({{"CFBundleIdentifier", APP_ID}, {"CFBundleExecutable", "RevenantBackportsRuntime"},
+                          {"CFBundleName", "RevenantBackportsRuntime"}, {"CFBundlePackageType", "APPL"}}) do
+        os.vrunv("plutil", {"-replace", key[1], "-string", key[2], info})
+    end
+    for _, file in ipairs({bundle, info, binary}) do
+        owned_by_mobile(file)
+    end
+end
 
 local function grant_photos_access(rootfs)
     local directory = emulator.guest_path(rootfs, "/var/mobile/Library/TCC")
     os.mkdir(directory)
     local database = path.join(directory, "TCC.db")
-    os.vrunv("sqlite3", {database, string.format(TCC_SCHEMA, "/" .. BINARY, "/" .. BINARY)})
-    for _, file in ipairs({directory, database}) do
-        os.vrunv("xattr", {"-w", "hfsfuse.record.owner_id", "501", file})
-        os.vrunv("xattr", {"-w", "hfsfuse.record.group_id", "501", file})
-    end
+    os.vrunv("sqlite3", {database, string.format(TCC_SCHEMA, APP_ID)})
+    owned_by_mobile(directory)
+    owned_by_mobile(database)
 end
 
 local function require_present(file, message)
@@ -149,6 +167,7 @@ local function run(app, guest)
         os.mkdir(path.directory(binary))
         os.cp(app, binary)
         os.vrunv("chmod", {"0755", binary})
+        install_bundle(rootfs, binary)
         emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
         local results = emulator.results(rootfs)
         local verdict_file = path.join(results, "verdict.json")

@@ -1,8 +1,15 @@
 #import "../app/revenant_check.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 #import <Photos/Photos.h>
 #import <UIKit/UIKit.h>
+#include <mach/mach.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
+
+extern mach_port_t bootstrap_port;
+kern_return_t bootstrap_look_up(mach_port_t bp, const char *service_name, mach_port_t *sp);
 
 @interface RevenantPhotosTestObserver : NSObject <PHPhotoLibraryChangeObserver>
 @property (nonatomic, copy) void (^handler)(PHChange *change);
@@ -44,6 +51,36 @@ static BOOL revenant_wait_for_file(NSString *path)
 
 REVENANT_CASE(photos_assets)
 {
+    printf("PHOTOS-PROBE status=%d\n", (int)[ALAssetsLibrary authorizationStatus]);
+    struct stat tccDirectory, tccDatabase;
+    int directoryResult = stat("/var/mobile/Library/TCC", &tccDirectory);
+    int databaseResult = stat("/var/mobile/Library/TCC/TCC.db", &tccDatabase);
+    printf("PHOTOS-PROBE uid=%u tcc-dir=%d mode=%o owner=%u group=%u tcc-db=%d size=%lld owner=%u group=%u mode=%o\n",
+           getuid(), directoryResult, directoryResult == 0 ? (unsigned)tccDirectory.st_mode : 0,
+           directoryResult == 0 ? (unsigned)tccDirectory.st_uid : 0, directoryResult == 0 ? (unsigned)tccDirectory.st_gid : 0,
+           databaseResult, databaseResult == 0 ? (long long)tccDatabase.st_size : -1LL,
+           databaseResult == 0 ? (unsigned)tccDatabase.st_uid : 0, databaseResult == 0 ? (unsigned)tccDatabase.st_gid : 0,
+           databaseResult == 0 ? (unsigned)tccDatabase.st_mode : 0);
+    fflush(stdout);
+    mach_port_t probePort = MACH_PORT_NULL;
+    kern_return_t probeLookup = bootstrap_look_up(bootstrap_port, "com.apple.assetsd.messagingServer", &probePort);
+    printf("PHOTOS-PROBE lookup assetsd=%d port=%u\n", probeLookup, probePort);
+    probeLookup = bootstrap_look_up(bootstrap_port, "com.apple.tccd", &probePort);
+    printf("PHOTOS-PROBE lookup tccd=%d port=%u\n", probeLookup, probePort);
+    fflush(stdout);
+    ALAssetsLibrary *probeLibrary = [[ALAssetsLibrary alloc] init];
+    [probeLibrary enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+        printf("PHOTOS-PROBE group=%s\n", group ? "yes" : "nil");
+        fflush(stdout);
+    } failureBlock:^(NSError *error) {
+        printf("PHOTOS-PROBE failure domain=%s code=%ld %s\n", [error.domain UTF8String], (long)error.code, [[error localizedDescription] UTF8String]);
+        fflush(stdout);
+    }];
+    NSDate *probeDeadline = [NSDate dateWithTimeIntervalSinceNow:5];
+    while ([probeDeadline timeIntervalSinceNow] > 0)
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+    printf("PHOTOS-PROBE after status=%d\n", (int)[ALAssetsLibrary authorizationStatus]);
+    fflush(stdout);
     BOOL authorized = revenant_wait_for_photo_authorization();
     revenant_expect_true(@"the photo library grants access", authorized, @"authorization was not granted");
     if (!authorized)
