@@ -1,11 +1,6 @@
-// This Source Code Form is subject to the Mozilla Public
+// This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
-//
-// Unit test for the machine image slab's region: the slab is kept while the
-// region and its size stay the same, a new size retires it (the size set by
-// --image-slab-mib), and a disabled region drops it. Build with BUILD_TESTING
-// and run `ctest -R machine_image_region`.
 
 #include "foundation/jit_artifact.hpp"
 
@@ -37,7 +32,7 @@ ImageCodeRegion region(std::size_t cache_bytes)
         cache_bytes };
 }
 
-}  // namespace
+}
 
 int main()
 {
