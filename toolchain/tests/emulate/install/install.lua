@@ -10,7 +10,6 @@ function main(device, release)
     local here = os.scriptdir()
     local out = runs.folder("emulate-install")
     os.mkdir(out)
-    -- the golden image and the images of this run are made in its own folder, not in the machine's emulator folder
     os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
 
     local existing = runs.images_of(PROJECT)[1]

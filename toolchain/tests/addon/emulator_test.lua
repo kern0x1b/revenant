@@ -948,19 +948,26 @@ local function output_step(emulator, folder, found)
         if stdout then
             io.writefile(path.join(folder, "results", "test.stdout"), stdout)
         end
-        local said = emulator.report_output(folder, output)
-        return said
+        local shown = {}
+        local said = emulator.report_output(folder, output, function (text)
+            table.insert(shown, text)
+        end)
+        return said, table.concat(shown)
     end
-    if not run("hello from the guest\n", 1) then
-        table.insert(found, "a run whose program wrote to stdout prints it and says so")
+    local said, shown = run("hello from the guest\n", 1)
+    if not said or not string.find(shown, "hello from the guest", 1, true) then
+        table.insert(found, "a run whose program wrote to stdout shows its text and says so")
     end
-    if run("", 1) then
-        table.insert(found, "a program that wrote nothing is not reported as having written something")
+    said, shown = run("", 1)
+    if said or not string.find(shown, "wrote nothing", 1, true) then
+        table.insert(found, "a program that wrote nothing is shown as having written nothing")
     end
-    -- output 0 is the runner saying it could not open the program's files, so the log gets the not-captured line only:
-    -- this synthetic case is the one that prints that line, and it must not print the text the file holds
-    if run("hello from the guest\n", 0) then
-        table.insert(found, "a verdict that says the output was not captured keeps the file's text off the host, whatever it holds")
+    said, shown = run("hello from the guest\n", 0)
+    if said or not string.find(shown, "the program's output was not captured", 1, true) then
+        table.insert(found, "a run whose output was not captured shows that it was not captured, and does not pass silently")
+    end
+    if string.find(shown, "hello from the guest", 1, true) then
+        table.insert(found, "a run whose output was not captured does not show the file's text")
     end
 end
 

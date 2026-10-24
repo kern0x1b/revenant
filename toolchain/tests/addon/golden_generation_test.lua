@@ -2,14 +2,9 @@ import("fixtures")
 import("core.base.json")
 import("core.base.process")
 
--- The golden image of the emulator is a published generation, as a package is in the store: an install that replaces it
--- keeps the old one for its readers, and a copy of the golden image is whole however often it is replaced meanwhile.
-
 local PARTS = 40
 local WORD = "fixed"
 
--- the racers are separate processes, since a lock taken twice in one process does not exclude itself across the
--- handles this test opens; each one reads the golden image the way an install or a clone does
 local RACER = [[
 local PARTS = 40
 local WORD = "fixed"
@@ -76,8 +71,6 @@ function main(mode, modules, root, firmware, folder, count)
 end
 ]]
 
--- a session that waits for a lock: it writes that it waits, takes the lock (shared when its last argument is "1"), writes
--- when it has it, holds it for a moment, and releases it
 local BLOCKED = [[
 function main(modules, lockpath, mark, shared)
     local generations = import("generations", {rootdir = modules, anonymous = true})
@@ -112,7 +105,6 @@ local function generation_count(root)
     return #os.dirs(path.join(root, "golden.noindex", "*.g*"))
 end
 
--- what is left in the golden images folder, with whether each generation is replaced and whether its lock is free
 local function leftovers(parent)
     local said = {}
     for _, item in ipairs(table.join(os.dirs(path.join(parent, "*")), os.files(path.join(parent, "*")))) do
@@ -136,9 +128,6 @@ local function leftovers(parent)
     return said
 end
 
--- a session waiting on a lock while its holder removes the file it holds: the holder removes its file while it holds it, a
--- successor takes the new file before the holder releases the old one, and the waiting session, in its own process, is
--- let in only after the successor releases. shared is the mode the waiting session takes the lock in.
 local function blocked_session(found, generations, modules, folder, envs, label, lockpath, shared)
     local script = path.join(folder, label .. ".lua")
     io.writefile(script, BLOCKED)
@@ -190,7 +179,6 @@ function failures(opt)
                     firmware = firmware, boot = function () return {reason = "reached", seconds = 1, state = {springboard = true, migrated = true}, log = "none"} end}
     local published = emulator.golden_published(golden)
 
-    -- one install builds the golden image, publishes it as a link to a generation, and copies it whole
     emulator.clone_golden(golden, path.join(folder, "first", "rootfs"))
     if not whole(path.join(folder, "first", "rootfs")) then
         table.insert(found, "the first install's copy is not whole")
@@ -203,7 +191,6 @@ function failures(opt)
         table.insert(found, "the published generation has no golden.json")
     end
 
-    -- a reader that holds the generation keeps it through a replacement, and the replacement is built beside it
     if first then
         local held = generations.hold(first)
         emulator.clean({root = root, goldens = true})
@@ -220,7 +207,6 @@ function failures(opt)
         end
         generations.release(held)
 
-        -- a replaced generation that nothing holds stays for its grace period, then goes
         emulator.clean({root = root})
         if not os.isdir(first) then
             table.insert(found, "a generation that was replaced a moment ago is gone before its grace period has ended")
@@ -237,12 +223,9 @@ function failures(opt)
         end
     end
 
-    -- two installs and a reader race a sweep that replaces the golden image; no copy is incomplete, and nothing is left
     local racer = path.join(folder, "racer.lua")
     io.writefile(racer, RACER)
     local modules = opt.modules
-    -- the racers run xmake with a store of their own, as the store race test does: the test's own xmake holds the
-    -- shared store's locks, and a racer that used it would wait for them
     local store = path.join(folder, "store")
     os.mkdir(store)
     local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder)}
@@ -257,8 +240,6 @@ function failures(opt)
         os.sleep(300)
         emulator.clean({root = root, goldens = true})
     end
-    -- each racer ends after its report, and is waited for: process:wait reports the exit of a child to the wait on it, with
-    -- its status (patch 0018 of xmake's package). A racer that has not exited within two minutes is killed, and that is found
     for _, state in ipairs(children) do
         local exited, status = state.child:wait(120000)
         if exited ~= 1 then
@@ -287,8 +268,6 @@ function failures(opt)
         table.insert(found, "after the race and a final clean, the build lock of the golden image is still there")
     end
 
-    -- a golden image from before generations is a real folder with its golden.json. It is read as it is, and a clean that
-    -- replaces it moves it aside together with its lock, so that a reader holding it keeps it
     local legacy_opt = table.join(golden, {emulator_hash = "legacy"})
     local legacy = emulator.golden_published(legacy_opt)
     os.mkdir(path.join(legacy, "rootfs"))
@@ -309,7 +288,6 @@ function failures(opt)
     end
     generations.release(held_legacy)
 
-    -- the replaced folder stays for its grace period, then goes once nothing holds it
     emulator.clean({root = root})
     if #os.dirs(legacy .. ".g*") ~= 1 then
         table.insert(found, "a golden folder replaced a moment ago is gone before its grace period has ended")
@@ -321,7 +299,6 @@ function failures(opt)
         table.insert(found, "a replaced golden folder that nothing holds is still there after its grace period of zero")
     end
 
-    -- the next install builds the golden image again and publishes it as a link; a clean then leaves nothing behind
     emulator.clone_golden(legacy_opt, path.join(folder, "rebuilt", "rootfs"))
     if not os.islink(legacy) or not whole(path.join(folder, "rebuilt", "rootfs")) then
         table.insert(found, "an install after a golden folder from before generations did not publish a whole link")
@@ -332,16 +309,11 @@ function failures(opt)
                      .. table.concat(leftovers(path.join(root, "golden.noindex")), "; "))
     end
 
-    -- a session that waits on a lock that its holder removes takes the lock of the file that replaces it, and is let in
-    -- only after the replacement is released: once for a build lock (exclusive), and once for a generation's lock, which a
-    -- reader takes shared and a sweep takes exclusive
     blocked_session(found, generations, modules, folder, envs, "build-lock", path.join(folder, "blocked.build.lock"), false)
     local generation_published = path.join(folder, "blocked-generation")
     local generation_lock = generation_published .. ".g1.lock"
     blocked_session(found, generations, modules, folder, envs, "generation-lock", generation_lock, true)
 
-    -- the lock file that the reader made again, or that the successor left, belongs to a generation with no folder: a sweep
-    -- removes it
     generations.sweep(generation_published)
     if os.isfile(generation_lock) then
         table.insert(found, "a sweep leaves the lock file of a generation that has no folder")

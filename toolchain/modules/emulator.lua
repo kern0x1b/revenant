@@ -61,8 +61,6 @@ function remove(folder)
     end
 end
 
--- the folder of the emulator's images, caches and golden images: ~/.revenant/emulator, or REVENANT_EMULATOR_ROOT, which a
--- test that emulates a device points at a folder of its own, so that the machine's golden images are left alone
 function root()
     local override = os.getenv("REVENANT_EMULATOR_ROOT")
     if override and override ~= "" then
@@ -850,22 +848,34 @@ function verdict(state, results, opt)
     return result
 end
 
-function report_output(folder, output)
+local function show_line(style, text, say)
+    if say then
+        return say(text)
+    end
+    cprint("${" .. style .. "}%s${clear}", text)
+end
+
+function report_output(folder, output, say)
     if output == 0 then
-        cprint("${color.warning}the program's output was not captured${clear}: the runner could not open it, and it says why in %s",
-               path.join(folder, "results", "runner.stderr"))
+        show_line("color.warning", "the program's output was not captured: the runner could not open it, and it says why in " ..
+                  path.join(folder, "results", "runner.stderr"), say)
         return false
     end
     local said = false
     for _, name in ipairs({"test.stdout", "test.stderr"}) do
         local file = path.join(folder, "results", name)
         if os.isfile(file) and os.filesize(file) > 0 then
-            io.write(io.readfile(file))
+            local text = io.readfile(file)
+            if say then
+                say(text)
+            else
+                io.write(text)
+            end
             said = true
         end
     end
     if not said then
-        cprint("${dim}the program wrote nothing to stdout or stderr${clear}")
+        show_line("dim", "the program wrote nothing to stdout or stderr", say)
     end
     return said
 end
@@ -1148,14 +1158,10 @@ function release(slot)
     slot.lock:close()
 end
 
--- copy the golden image of these inputs to destination. The copy reads a generation it holds, so a golden image that is
--- replaced meanwhile does not leave the copy partial: a copy that fails because its generation was moved from under it
--- is made again from the generation now published.
 function clone_golden(opt, destination)
     for _ = 1, 20 do
         local folder = golden(opt)
         local lock = generations.hold(folder)
-        -- the generation may have been removed between golden() and the lock, so check it under the lock
         if os.isfile(path.join(folder, "golden.json")) then
             local ok, errors = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) return false, caught end}}
             generations.release(lock)
@@ -1173,8 +1179,6 @@ function clone_golden(opt, destination)
     raise("the golden image of %s %s was replaced on every attempt to read it", opt.identifier, opt.build)
 end
 
--- the names in parent that have golden images: the part of each entry's name before its first dot, which is the name
--- of a published golden and of its generations and locks. A name whose link is gone still has generations to sweep.
 local function published_names(parent, prefix)
     local names = {}
     local pattern = path.join(parent, (prefix or "") .. "*")
@@ -1187,8 +1191,6 @@ local function published_names(parent, prefix)
     return table.unique(names)
 end
 
--- retire the goldens of the same identifier and build that another emulator made, and sweep the rest. A name whose
--- build lock is taken is skipped; readers of a retired generation keep it until its grace period has passed.
 function retire(parent, opt, kept)
     for _, name in ipairs(published_names(parent, opt.identifier .. "_" .. opt.build .. "_")) do
         if name ~= kept then
@@ -1295,7 +1297,6 @@ function clean(opt)
             table.insert(removed, folder)
         end
     end
-    -- every published golden: unpublished and swept at once with --goldens, otherwise only what its grace has ended for
     local parent = path.join(base, "golden.noindex")
     for _, name in ipairs(published_names(parent)) do
         local published = path.join(parent, name)
@@ -1307,8 +1308,6 @@ function clean(opt)
         else
             generations.sweep(published)
         end
-        -- a name with nothing left drops its build lock too, removed while it is held; a build that makes the name again
-        -- makes a new one
         if generations.empty(published) then
             generations.drop(published .. ".build.lock", lock)
         else
@@ -1318,7 +1317,6 @@ function clean(opt)
     return removed
 end
 
--- the name of the golden image of these inputs, which is a link to its generation once one is published
 local function golden_key(opt)
     local written = {}
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
@@ -1328,8 +1326,6 @@ local function golden_key(opt)
                          table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
 end
 
--- the golden image of these inputs, as the generation folder that holds its rootfs and golden.json. A golden image that
--- is not published yet is built beside any published one and published by swapping the link to it.
 function golden(opt)
     local key = golden_key(opt)
     local parent = path.join(opt.root or root(), "golden.noindex")
@@ -1387,7 +1383,6 @@ function golden(opt)
     return built
 end
 
--- the published name of the golden image of these inputs
 function golden_published(opt)
     return path.join(opt.root or root(), "golden.noindex", golden_key(opt))
 end
