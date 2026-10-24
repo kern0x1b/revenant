@@ -13,7 +13,6 @@ on:
           - swift-runtime
           - libcxx
           - ld64
-          - network
         default: llvm
 
 permissions:
@@ -91,11 +90,11 @@ jobs:
           exit "$rc"
 
       - name: Install the firmware tools through the Backports configuration
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v
 
       - name: Restore the iOS 6.0 armv7 shared cache
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
         id: dyld
         uses: actions/cache/restore@v4
         with:
@@ -103,11 +102,11 @@ jobs:
           key: dyld-shared-cache-6.0-armv7-v1
 
       - name: Fetch the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
       - name: Save the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/dyld/6.0
@@ -122,7 +121,7 @@ jobs:
               llvm) ./xmakew require -P . -y -v --extra="{system=false}" revenant@llvm ;;
               llvm-libraries) ./xmakew require -P . -y -v --extra="{system=false,configs={libraries=true}}" revenant@llvm ;;
               swift) ./xmakew require -P . -y -v --extra="{system=false}" revenant@swift ;;
-              libcxx|swift-runtime|network) ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v && ./xmakew require -P . -y -v --extra="{system=false}" revenant@$PACKAGE ;;
+              libcxx|swift-runtime) ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v && ./xmakew require -P . -y -v --extra="{system=false}" revenant@$PACKAGE ;;
               ld64) ./xmakew require -P . -y -v --extra="{system=false}" revenant@ld64 ;;
               *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
             esac
