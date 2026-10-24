@@ -4,12 +4,15 @@
 #include <errno.h>
 #include <pthread.h>
 #include <string.h>
+#import "../revenant_alias.h"
 
-@implementation NSURLSessionWebSocketMessage {
+REVENANT_ALIAS_STATE(NSURLSessionWebSocketMessage, NSObject,
     NSURLSessionWebSocketMessageType _type;
     NSData *_data;
     NSString *_string;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSURLSessionWebSocketMessage) (RevenantBackport)
 
 + (instancetype)new
 {

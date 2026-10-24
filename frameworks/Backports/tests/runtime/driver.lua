@@ -11,6 +11,8 @@ local BUILD = "10B329"
 local BINARY = "usr/libexec/revenant-backports-runtime"
 local INSTALL = "usr/lib/revenant/org.revenant.backports"
 
+local shared = {}
+
 local function home_cache()
     return path.join(os.getenv("HOME"), ".revenant", "cache", "runtime-tests")
 end
@@ -62,6 +64,23 @@ function guarded(body)
     return values
 end
 
+function once(key, body)
+    local entry = shared[key]
+    if not entry then
+        entry = {done = false}
+        shared[key] = entry
+        entry.values, entry.failure = guarded(body)
+        entry.done = true
+    end
+    while not entry.done do
+        os.sleep(200)
+    end
+    if not entry.values then
+        raise("%s", entry.failure)
+    end
+    return entry.values[1], entry.values[2], entry.values[3]
+end
+
 function judge(case, cases, finished, description)
     local found = {}
     if not finished then
@@ -90,6 +109,57 @@ local function libraries_folder(app)
     return folder
 end
 
+local function execute(program, firmware, libraries, app, guest, folder, saved)
+    local started = os.mclock()
+    local rootfs = path.join(folder, "rootfs")
+    emulator.clone(firmware, rootfs)
+    local destination = emulator.guest_path(rootfs, INSTALL)
+    os.mkdir(destination)
+    for _, library in ipairs(libraries) do
+        os.cp(library, path.join(destination, path.filename(library)))
+    end
+    local binary = emulator.guest_path(rootfs, BINARY)
+    os.mkdir(path.directory(binary))
+    os.cp(app, binary)
+    os.vrunv("chmod", {"0755", binary})
+    emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
+    local results = emulator.results(rootfs)
+    local verdict_file = path.join(results, "verdict.json")
+    local slot = emulator.acquire()
+    local booted = try {
+        function ()
+            return emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
+                                  cache = path.join(home_cache(), "host-cache"),
+                                  tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
+                                  scale = emulator.TIME_SCALE, deadline = 900,
+                                  stop = function () return os.isfile(verdict_file) end})
+        end,
+        catch {
+            function (errors)
+                emulator.release(slot)
+                raise(errors)
+            end
+        }
+    }
+    emulator.release(slot)
+    local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
+                                                             scale = booted.scale, host_seconds = booted.seconds,
+                                                             reports = emulator.reports(rootfs)})
+    local stdout = path.join(results, "test.stdout")
+    local text = os.isfile(stdout) and io.readfile(stdout) or ""
+    os.cp(results, path.join(folder, "results"))
+    io.writefile(path.join(folder, "app.stdout"), text)
+    emulator.remove(rootfs)
+    local cases, finished = parse(text)
+    local description = emulator.describe(verdict) .. "; the emulator log is " .. tostring(booted.log)
+    if finished then
+        json.savefile(saved, cases)
+        cprint("${dim}runtime run on %s %s in %.1f host s at time scale %s, %s", DEVICE, RELEASE,
+               (os.mclock() - started) / 1000, booted.scale, emulator.describe(verdict))
+    end
+    return cases, finished, description
+end
+
 local function run(app, guest)
     local program = emulator_program()
     local firmware = firmware_root()
@@ -109,67 +179,24 @@ local function run(app, guest)
         return json.loadfile(saved), true, ""
     end
     os.mkdir(folder)
-    local lock = io.openlock(path.join(home_cache(), key .. ".lock"))
-    lock:lock()
-    local values, failure = guarded(function ()
-        if os.isfile(saved) then
-            return json.loadfile(saved), true, ""
+    return once(key, function ()
+        local lock = io.openlock(path.join(home_cache(), key .. ".lock"))
+        while not lock:trylock() do
+            os.sleep(200)
         end
-        local started = os.mclock()
-        local rootfs = path.join(folder, "rootfs")
-        emulator.clone(firmware, rootfs)
-        local destination = emulator.guest_path(rootfs, INSTALL)
-        os.mkdir(destination)
-        for _, library in ipairs(libraries) do
-            os.cp(library, path.join(destination, path.filename(library)))
+        local values, failure = guarded(function ()
+            if os.isfile(saved) then
+                return json.loadfile(saved), true, ""
+            end
+            return execute(program, firmware, libraries, app, guest, folder, saved)
+        end)
+        lock:unlock()
+        lock:close()
+        if not values then
+            raise(failure)
         end
-        local binary = emulator.guest_path(rootfs, BINARY)
-        os.mkdir(path.directory(binary))
-        os.cp(app, binary)
-        os.vrunv("chmod", {"0755", binary})
-        emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
-        local results = emulator.results(rootfs)
-        local verdict_file = path.join(results, "verdict.json")
-        local slot = emulator.acquire()
-        local booted = try {
-            function ()
-                return emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
-                                      cache = path.join(home_cache(), "host-cache"),
-                                      tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
-                                      scale = emulator.TIME_SCALE, deadline = 900,
-                                      stop = function () return os.isfile(verdict_file) end})
-            end,
-            catch {
-                function (errors)
-                    emulator.release(slot)
-                    raise(errors)
-                end
-            }
-        }
-        emulator.release(slot)
-        local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
-                                                                 scale = booted.scale, host_seconds = booted.seconds,
-                                                                 reports = emulator.reports(rootfs)})
-        local stdout = path.join(results, "test.stdout")
-        local text = os.isfile(stdout) and io.readfile(stdout) or ""
-        os.cp(results, path.join(folder, "results"))
-        io.writefile(path.join(folder, "app.stdout"), text)
-        emulator.remove(rootfs)
-        local cases, finished = parse(text)
-        local description = emulator.describe(verdict) .. "; the emulator log is " .. tostring(booted.log)
-        if finished then
-            json.savefile(saved, cases)
-            cprint("${dim}runtime run on %s %s in %.1f host s at time scale %s, %s", DEVICE, RELEASE,
-                   (os.mclock() - started) / 1000, booted.scale, emulator.describe(verdict))
-        end
-        return cases, finished, description
+        return values[1], values[2], values[3]
     end)
-    lock:unlock()
-    lock:close()
-    if not values then
-        raise(failure)
-    end
-    return values[1], values[2], values[3]
 end
 
 function failures(case, target)
