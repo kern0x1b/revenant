@@ -24,8 +24,33 @@ sha256() {
     fi
 }
 
+patchset() {
+    marked=""
+    while read -r name checksum; do
+        [ -n "$name" ] || continue
+        declared=$(awk '/^---$/{exit} /^Changes-build-output: (yes|no)$/{print $2}' "$1/$name" | head -n 1)
+        if [ "$declared" = yes ]; then
+            marked="$marked$name $checksum
+"
+        elif [ "$declared" != no ]; then
+            echo "xmakew: $name does not declare Changes-build-output: yes or no" >&2
+            exit 1
+        fi
+    done <<EOF
+$3
+EOF
+    if [ -n "$marked" ]; then
+        printf '%s\n%s' "$2" "$marked" | sha256 | cut -d' ' -f1
+    fi
+}
+
+if [ "${1:-}" = --patchset ]; then
+    patchset "$2" "$3" "$4"
+    exit 0
+fi
+
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
-digest=$(sh "$root/tools/xmake-patchset.sh" "$package/patches" "$commit" "$patches")
+digest=$(patchset "$package/patches" "$commit" "$patches")
 cache=$HOME/.revenant/cache/xmake
 prefix=$cache/$key
 

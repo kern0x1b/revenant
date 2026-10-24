@@ -98,8 +98,8 @@ The build hash has three more terms, one for the xmake that builds the packages,
 under, and one for each package's own patches.
 
 The first covers revenant's xmake patches. Each patch in `packages/x/xmake/patches` declares in its header whether it
-can change what a build produces, with `Changes-build-output: yes` or `no`; `tools/xmake-patchset.sh` takes the xmake
-commit and the patches that say `yes`, xmakew writes the digest to `share/xmake/revenant-patch-set` beside the binary,
+can change what a build produces, with `Changes-build-output: yes` or `no`; `xmakew` takes the xmake
+commit and the patches that say `yes` and writes the digest to `share/xmake/revenant-patch-set` beside the binary,
 and patch `0020` folds it into every variant of the hash. A patch marked `yes` moves every package's key once, so an
 unmarked patch moves none. A binary without the file refuses to compute a build hash. No patch is marked now: the
 addon patches `0001` to `0003` and `0005` to `0007` change which addon version a build loads, which the second term

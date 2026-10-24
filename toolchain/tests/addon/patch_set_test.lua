@@ -41,7 +41,6 @@ local PROBE = [[
 import("core.package.addon")
 import("core.package.package")
 
--- an argument installs name@version, and pin:name@version also pins it
 function main(repo, name, ...)
     for _, arg in ipairs({...}) do
         local spec = arg:match("^pin:(.+)$")
@@ -64,7 +63,7 @@ local function root()
 end
 
 local function digest_script()
-    return path.join(root(), "tools", "xmake-patchset.sh")
+    return path.join(root(), "xmakew")
 end
 
 local function patch_list(dir, names)
@@ -76,7 +75,7 @@ local function patch_list(dir, names)
 end
 
 local function digest_of(dir, commit, names)
-    local out = os.iorunv("sh", {digest_script(), dir, commit, patch_list(dir, names)})
+    local out = os.iorunv("sh", {digest_script(), "--patchset", dir, commit, patch_list(dir, names)})
     return (out or ""):trim()
 end
 
@@ -279,9 +278,6 @@ function failures(opt)
         table.insert(found, "a package whose applied patch changed keeps its build hash: the patch set must be in the key")
     end
 
-    -- the addons which a project pins are in the key: a build under another version is another build,
-    -- an installed addon which the project does not pin and an addon from a folder of the project are not.
-    -- The fixture is in its last state here, so fake_described is the key it has without any addon
     local source = path.join(folder, "srcaddon")
     os.mkdir(path.join(source, "plugins"))
     io.writefile(path.join(source, "addon.lua"), "addon(\"srcaddon\")\n    set_description(\"a fixture\")\n")
