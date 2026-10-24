@@ -151,6 +151,11 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
 
 - (double)revenantDuration
 {
+    if (_shouldStream) {
+        double sampleRate = 0;
+        unsigned long long frames = 0;
+        return _url && [RevenantSCNSoundEngine probeURL:_url sampleRate:&sampleRate frames:&frames] && sampleRate > 0 ? (double)frames / sampleRate : 0;
+    }
     if (_sampleRate <= 0) {
         [self revenantBufferForSpatial:YES];
     }
@@ -166,6 +171,36 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
 {
     [self load];
     return _data;
+}
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    if ((self = [super init])) {
+        _url = [[coder decodeObjectOfClass:[NSURL class] forKey:@"url"] copy];
+        _positional = [coder decodeBoolForKey:@"positional"];
+        _volume = [coder decodeFloatForKey:@"volume"];
+        _rate = [coder decodeFloatForKey:@"rate"];
+        _reverbBlend = [coder decodeFloatForKey:@"reverbBlend"];
+        _loops = [coder decodeBoolForKey:@"loops"];
+        _shouldStream = [coder decodeBoolForKey:@"shouldStream"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:_url forKey:@"url"];
+    [coder encodeBool:_positional forKey:@"positional"];
+    [coder encodeFloat:_volume forKey:@"volume"];
+    [coder encodeFloat:_rate forKey:@"rate"];
+    [coder encodeFloat:_reverbBlend forKey:@"reverbBlend"];
+    [coder encodeBool:_loops forKey:@"loops"];
+    [coder encodeBool:_shouldStream forKey:@"shouldStream"];
 }
 
 - (id)copyWithZone:(NSZone *)zone

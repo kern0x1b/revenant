@@ -66,7 +66,7 @@ local LIBRARIES = {
     {name = "CoreSpotlightBackports", folder = "CoreSpotlight", frameworks = {"CoreSpotlight", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PushKitBackports", folder = "PushKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "JavaScriptCoreBackports", folder = "JavaScriptCore", frameworks = {"JavaScriptCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "OpenAL", "AudioToolbox"}, libraries = {"FoundationBackports", "OpenGLESBackports"}, archives = {}, system = {}},
+    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "OpenAL", "AudioToolbox", "AVFoundation"}, libraries = {"FoundationBackports", "OpenGLESBackports", "AVFoundationBackports"}, archives = {}, system = {}},
     {name = "MediaPlayerBackports", folder = "MediaPlayer", frameworks = {"MediaPlayer", "AVFoundation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessageUIBackports", folder = "MessageUI", frameworks = {"MessageUI", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessagesBackports", folder = "Messages", frameworks = {"MessageUI", "Messages", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -261,7 +261,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -270,16 +270,18 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/apple-ios")
-        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
+        add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"),
+                  path.join(SRC, "SceneKit", "SCNAudioSource.m"), path.join(SRC, "SceneKit", "SCNAudioPlayer.m"),
+                  path.join(SRC, "SceneKit", "RevenantSCNSoundEngine.m"), path.join(SRC, "SceneKit", "RevenantSCNStream.m"))
         add_includedirs(path.join(RUNTIME, "app"))
         add_mflags("-fobjc-arc")
         if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("FoundationBackports", "UIKitBackports")
+            add_deps("FoundationBackports", "UIKitBackports", "AVFoundationBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox")
         add_syslinks("objc")
     target_end()
 
@@ -311,6 +313,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("screenshot_notification")
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
+        add_tests("scenekit_audio")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
@@ -390,8 +393,8 @@ local CORETEXT_TESTS = {
 
 local SCENEKIT_TESTS = {
     action_math = {"RevenantSCNActionMath.m"},
-    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m"},
-    audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
+    audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
 }
 
 local function host_tests(folder, tests, library, frameworks, options)
@@ -428,7 +431,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
-    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox"})
+    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})

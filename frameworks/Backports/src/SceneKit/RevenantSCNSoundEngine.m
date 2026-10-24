@@ -2,6 +2,7 @@
 #import <OpenAL/al.h>
 #import <OpenAL/alc.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVFoundation.h>
 #include <math.h>
 
 typedef ALenum (*RevenantASASetListenerProc)(ALuint property, ALvoid *data, ALuint dataSize);
@@ -17,6 +18,7 @@ static RevenantASASetSourceProc revenant_set_source;
 static BOOL revenant_has_previous;
 static SCNVector3 revenant_previous_position;
 static CFTimeInterval revenant_previous_time;
+static AVAudioEngine *revenant_node_engine;
 
 static SCNVector3 revenant_normalized(SCNVector3 v)
 {
@@ -32,6 +34,14 @@ static SCNVector3 revenant_normalized(SCNVector3 v)
 + (BOOL)isActive
 {
     return revenant_context != NULL;
+}
+
++ (AVAudioEngine *)nodeEngine
+{
+    if (revenant_node_engine == nil) {
+        revenant_node_engine = [[AVAudioEngine alloc] init];
+    }
+    return revenant_node_engine;
 }
 
 + (void)prepare
@@ -51,8 +61,6 @@ static SCNVector3 revenant_normalized(SCNVector3 v)
     revenant_context = context;
     alcMakeContextCurrent(context);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    alDopplerFactor(1);
-    alDopplerVelocity(343.3f);
     revenant_set_listener = (RevenantASASetListenerProc)alcGetProcAddress(device, "alcASASetListener");
     revenant_set_source = (RevenantASASetSourceProc)alcGetProcAddress(device, "alcASASetSource");
     if (revenant_set_listener) {
@@ -110,6 +118,9 @@ static SCNVector3 revenant_normalized(SCNVector3 v)
     }
     alSourcei(source, AL_BUFFER, buffer);
     alSourcei(source, AL_SOURCE_RELATIVE, relative ? AL_TRUE : AL_FALSE);
+    alSourcef(source, AL_REFERENCE_DISTANCE, 1);
+    alSourcef(source, AL_MAX_DISTANCE, 100000);
+    alSourcef(source, AL_ROLLOFF_FACTOR, 1);
     return source;
 }
 
@@ -132,6 +143,11 @@ static SCNVector3 revenant_normalized(SCNVector3 v)
     return revenant_device ? alcGetProcAddress(revenant_device, name) : NULL;
 }
 
++ (BOOL)supportsReverb
+{
+    return revenant_set_source != NULL;
+}
+
 + (BOOL)setSource:(unsigned int)source reverbSend:(float)level
 {
     if (revenant_set_source == NULL) {
@@ -139,6 +155,26 @@ static SCNVector3 revenant_normalized(SCNVector3 v)
     }
     ALfloat send = fminf(fmaxf(level, 0), 1);
     return revenant_set_source(REVENANT_ASA_REVERB_SEND_LEVEL, source, &send, sizeof(send)) == AL_NO_ERROR;
+}
+
++ (BOOL)probeURL:(NSURL *)url sampleRate:(double *)sampleRate frames:(unsigned long long *)frames
+{
+    ExtAudioFileRef file = NULL;
+    if (ExtAudioFileOpenURL((__bridge CFURLRef)url, &file) != noErr || file == NULL) {
+        return NO;
+    }
+    AudioStreamBasicDescription fileFormat;
+    UInt32 size = sizeof(fileFormat);
+    SInt64 length = 0;
+    UInt32 lengthSize = sizeof(length);
+    BOOL ok = ExtAudioFileGetProperty(file, kExtAudioFileProperty_FileDataFormat, &size, &fileFormat) == noErr &&
+              ExtAudioFileGetProperty(file, kExtAudioFileProperty_FileLengthFrames, &lengthSize, &length) == noErr;
+    ExtAudioFileDispose(file);
+    if (ok) {
+        *sampleRate = fileFormat.mSampleRate;
+        *frames = (unsigned long long)length;
+    }
+    return ok;
 }
 
 + (nullable NSData *)decodeURL:(NSURL *)url channels:(unsigned int)channels sampleRate:(double *)sampleRate frames:(unsigned long long *)frames

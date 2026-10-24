@@ -1922,6 +1922,7 @@ class RevenantSCNMesh
 class RevenantSCNRenderEngine
 class RevenantSCNShaderProgram
 class RevenantSCNSoundEngine
+class RevenantSCNStream
 class RevenantSCNTexture
 class RevenantSKWeakReference
 class RevenantSafariPage
@@ -23350,11 +23351,22 @@ member RevenantSCNSoundEngine +deleteSource:
 member RevenantSCNSoundEngine +isActive
 member RevenantSCNSoundEngine +newBuffer:channels:sampleRate:
 member RevenantSCNSoundEngine +newSourceWithBuffer:relative:
+member RevenantSCNSoundEngine +nodeEngine
 member RevenantSCNSoundEngine +prepare
+member RevenantSCNSoundEngine +probeURL:sampleRate:frames:
 member RevenantSCNSoundEngine +procedureNamed:
 member RevenantSCNSoundEngine +setListenerWorld:atTime:
 member RevenantSCNSoundEngine +setSource:position:velocity:
 member RevenantSCNSoundEngine +setSource:reverbSend:
+member RevenantSCNSoundEngine +supportsReverb
+member RevenantSCNStream -dealloc
+member RevenantSCNStream -dispose
+member RevenantSCNStream -fillBuffer:loops:
+member RevenantSCNStream -initWithURL:channels:
+member RevenantSCNStream -isExhaustedOnSource:
+member RevenantSCNStream -primeSource:loops:
+member RevenantSCNStream -readFrames:intoBytes:loops:
+member RevenantSCNStream -refillSource:loops:
 member RevenantSafariPage -dealloc
 member RevenantSafariPage -initWithURL:
 member RevenantSafariPage -initialURL
@@ -23974,7 +23986,10 @@ member SCNAction -setTimingMode:
 member SCNAction -speed
 member SCNAction -timingFunction
 member SCNAction -timingMode
+member SCNAudioPlayer +audioPlayerWithAVAudioNode:
 member SCNAudioPlayer +audioPlayerWithSource:
+member SCNAudioPlayer -applyMixToSource:
+member SCNAudioPlayer -initWithAVAudioNode:
 member SCNAudioPlayer -initWithSource:
 member SCNAudioPlayer -revenantDidFinishPlayback
 member SCNAudioPlayer -revenantIsPlaying
@@ -23984,8 +23999,11 @@ member SCNAudioPlayer -revenantStartOnNode:
 member SCNAudioPlayer -revenantStop
 member SCNAudioPlayer -revenantUpdateWithWorld:time:
 member SCNAudioSource +audioSourceNamed:
+member SCNAudioSource +supportsSecureCoding
 member SCNAudioSource -copyWithZone:
 member SCNAudioSource -dealloc
+member SCNAudioSource -encodeWithCoder:
+member SCNAudioSource -initWithCoder:
 member SCNAudioSource -initWithFileNamed:
 member SCNAudioSource -initWithURL:
 member SCNAudioSource -isPositional
