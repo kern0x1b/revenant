@@ -2909,6 +2909,7 @@ private:
             return;
         }
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {
@@ -2967,6 +2968,13 @@ private:
         }
         Dynarmic::A32::UserConfig config { callbacks_.get() };
         config.native_code_slab = execution_context_->native_code_slab();
+        if (auto* image_slab = machine_image_code_slab(); image_slab != nullptr) {
+            const auto image_region = machine_image_code_region();
+            config.image_native_code_slab = image_slab;
+            config.image_code_begin = image_region.begin;
+            config.image_code_end = image_region.end;
+            config.image_code_cache_size = image_region.cache_bytes;
+        }
         config.callbacks_link = runtime_link_cell_address_;
         if (performance_counters().native_lookup_diagnostics_enabled()) {
             config.native_code_block_lookup_callback =
@@ -2993,6 +3001,7 @@ private:
         config.always_little_endian = true;
         config.enable_cycle_counting = true;
         config.optimizations = jit_optimizations();
+        config.dispatch_counters = performance_counters().enabled();
         config.check_halt_on_memory_access = true;
         config.code_cache_size = code_cache_size_;
         config.coprocessors[15] = cp15_;
@@ -3200,7 +3209,9 @@ private:
             delta(current.stable_table_collisions,
                 recorded_dispatch_counters_.stable_table_collisions),
             delta(current.rsb_hits, recorded_dispatch_counters_.rsb_hits),
-            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses));
+            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses),
+            delta(current.fast_dispatch_hint_exits,
+                recorded_dispatch_counters_.fast_dispatch_hint_exits));
     }
 
     [[nodiscard]] std::uint64_t executor_local_memory_bytes() const noexcept
@@ -3474,6 +3485,7 @@ public:
             return;
         static_cast<void>(execution_context_->request_cache_clear());
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {

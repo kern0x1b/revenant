@@ -7,7 +7,10 @@ package("dynarmic")
     local patches = {"0001-Apply-the-emulator-s-dynarmic-arm64-backend.patch",
                      "0002-tests-Implement-the-swap-callbacks-in-the-A32-test-e.patch",
                      "0003-Name-the-fault-injection-hooks-for-the-core-not-for-.patch",
-                     "0004-Invalidate-only-the-emitted-prelude-when-a-code-cache-is-created.patch"}
+                     "0004-Invalidate-only-the-emitted-prelude-when-a-code-cache-is-created.patch",
+                     "0005-Route-block-lookups-through-an-optional-image-code-slab.patch",
+                     "0006-Share-guest-code-blocks-in-a-machine-wide-image-slab.patch",
+                     "0007-Size-the-machine-image-slab-separately.patch"}
     add_urls("https://github.com/MC-XiaoXiao/dynarmic.git")
     add_versions("6.7.0", commit)
 
@@ -18,10 +21,9 @@ package("dynarmic")
         local sha256 = hash.sha256(file)
         add_patches("6.7.0", file, sha256)
         table.insert(identity, name .. "=" .. sha256)
-        table.insert(digests, name .. "=" .. sha256)
     end
     add_defines("DYNARMIC_BUILD_FINGERPRINT=0x" .. hash.strhash128(table.concat(identity, "\n")):sub(1, 16) .. "ULL")
-    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different build.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different build; the patches it applies are in the build hash.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     add_configs("test_emit_failure", {description = "Compile the fault-injection hooks of the portable emitter, for tests.", default = false, type = "boolean"})
 

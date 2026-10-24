@@ -345,6 +345,19 @@ local function load_step(emulator, found)
     if load ~= nil and (type(load) ~= "number" or load < 0) then
         table.insert(found, "the machine's load reads as a number or as nothing, read " .. tostring(load))
     end
+    for _, case in ipairs({{12, 24576, 4}, {8, 16384, 2}, {2, 1024, 1}, {64, 262144, 53}}) do
+        if emulator.capacity_of(case[1], case[2]) ~= case[3] then
+            table.insert(found, string.format("%d cores and %d MB take %d emulators at once, not %d",
+                                              case[1], case[2], case[3], emulator.capacity_of(case[1], case[2])))
+        end
+    end
+    local slots = emulator.slots_folder()
+    local prior = os.getenv("REVENANT_EMULATOR_ROOT")
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(os.tmpdir(), "revenant-slot-root-" .. os.getpid()))
+    if emulator.slots_folder() ~= slots then
+        table.insert(found, "the slots of the machine move with a scratch emulator root, so they are not the machine's")
+    end
+    os.setenv("REVENANT_EMULATOR_ROOT", prior or "")
     local slot = emulator.acquire({folder = path.join(os.tmpdir(), "revenant-slot-test-" .. os.getpid()), count = 1, patience = 0})
     if not slot then
         table.insert(found, "a run with no patience still takes a slot")
@@ -397,16 +410,21 @@ local function concurrency(folder, modules, found)
     os.sleep(1500)
     os.rm(marker)
     emulator.release(taken)]], modules)
-    spawned({slot, slot, slot, slot, slot}, {{slots, holders}, {slots, holders}, {slots, holders}, {slots, holders}, {slots, holders}})
+    spawned({slot, slot, slot}, {{slots, holders}, {slots, holders}, {slots, holders}})
     local peaks = os.files(path.join(holders, "*.peak"))
-    if #peaks ~= 5 then
-        table.insert(found, string.format("five processes waiting for two slots all get one, %d did", #peaks))
+    if #peaks ~= 3 then
+        table.insert(found, string.format("three starts for two slots all get one, %d did", #peaks))
     end
+    local most = 0
     for _, peak in ipairs(peaks) do
         local holding = tonumber(io.readfile(peak))
+        most = math.max(most, holding)
         if holding > 2 then
             table.insert(found, string.format("two slots were held by %d processes at once", holding))
         end
+    end
+    if most ~= 2 then
+        table.insert(found, string.format("three starts for two slots never held both slots at once, most was %d", most))
     end
 end
 

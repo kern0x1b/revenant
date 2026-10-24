@@ -21,6 +21,9 @@ installs, locks and loads 1.0.0, and 1.0.0 becomes active. Without this change,
 on the previous commits, it fails: the active version stays 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  .../autofetch-lockbare/xmake-addons.lock      |  8 +++++++
  .../projects/autofetch-lockbare/xmake.lua     |  6 ++++++

@@ -9,6 +9,9 @@ a dangling link: its generation was not in the export, so importing it
 installed nothing. The export now copies the folder the link names.
 
 Self-review: crutches left
+
+Changes-build-output: no
+
 ---
  .../private/action/require/impl/export_packages.lua        | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)

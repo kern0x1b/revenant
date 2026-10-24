@@ -7,6 +7,9 @@ Subject: [PATCH] Fetch an install again once it is published, so the caches
 An install fetched its package while it was still building the generation folder that it publishes. The fetch kept that folder's paths in two places: the process's fetch result, which the project's package cache copies (installdir, includedirs, sysincludedirs, linkdirs, libfiles), and the detect cache, which outlives the process. A project configured right after an install therefore kept a generation path. The grace period retires that generation once a later install of the package publishes a newer one, and the build then failed with a missing header or library.
 
 The install now fetches the package again after it publishes and after it aborts. The fetch result and the detect cache then describe the published link, which every publish keeps current. A failed install leaves what the published install gives, or nothing when there is none.
+
+Changes-build-output: no
+
 ---
  xmake/modules/private/action/require/impl/actions/install.lua | 2 ++
  1 file changed, 2 insertions(+)

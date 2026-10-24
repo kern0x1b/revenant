@@ -14,6 +14,8 @@ The lock is now a file beside the install directory, <installdir>.lock,
 so the instance that comes second waits for the first one. It then reads
 the manifest the first one wrote, and does not install again.
 
+Changes-build-output: no
+
 ---
  xmake/core/package/package.lua | 8 ++++++--
  1 file changed, 6 insertions(+), 2 deletions(-)

@@ -10,6 +10,7 @@ function main(device, release)
     os.tryrm(out)
     os.mkdir(out)
     os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
+    os.setenv("REVENANT_REPO", path.absolute(path.join(here, "..", "..", "..", "..")))
     for _, name in ipairs({"xmake.lua", "control", "main.c"}) do
         os.cp(path.join(here, name), path.join(out, name))
     end

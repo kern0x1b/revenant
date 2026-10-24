@@ -411,6 +411,8 @@ struct KernelSharedState {
         std::array<std::byte, 16> ipv4_gateway { };
         std::array<std::byte, 28> ipv6_address { };
         std::array<std::byte, 28> ipv6_netmask { };
+        darwin::network::InterfaceCounters counters;
+        std::uint64_t up_time_nanoseconds { };
     };
     struct KernelEvent {
         std::uint32_t identifier { };

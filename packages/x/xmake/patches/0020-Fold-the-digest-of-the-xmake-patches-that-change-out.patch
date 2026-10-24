@@ -1,0 +1,50 @@
+From 619e53ad63a37be1a971eddf6c7d77cdfd61f237 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 18:57:54 +0200
+Subject: [PATCH] Fold the digest of the xmake patches that change output into
+ every build hash
+
+A package's build hash names its install folder. Some of the patches that revenant applies to xmake change what a build produces for the same package, so an install built by another set of such patches must not reuse a folder the old one wrote. The build hash now ends with the digest that xmakew writes beside the binary, revenant-patch-set: the xmake commit and the patches that declare Changes-build-output: yes. An empty digest, when no patch declares it, adds nothing to the hash.
+
+Every variant of the hash takes the digest, including the compatibility variants that look for an older install, so an install keyed without the digest is never picked up. A binary without the digest file raises an error rather than keying packages on a patch set it cannot name.
+
+Changes-build-output: no
+
+---
+ xmake/core/package/package.lua | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 37a54a4..64d9a05 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1824,6 +1824,15 @@ function _instance:_strhash128(str)
+     return hash.uuid4(str):replace("-", "", {plain = true}):lower()
+ end
+ 
++local function _patchset_digest()
++    local file = path.join(os.programdir(), "revenant-patch-set")
++    if not os.isfile(file) then
++        os.raise("the xmake binary has no patch set digest at %s: build it with xmakew", file)
++    end
++    local digest = io.readfile(file):trim()
++    return digest ~= "" and digest or nil
++end
++
+ -- get the build hash
+ function _instance:buildhash()
+     local buildhash = self._BUILDHASH
+@@ -1886,6 +1895,10 @@ function _instance:buildhash()
+                 table.sort(toolchains)
+                 str = str .. "_" .. table.concat(toolchains, "_")
+             end
++            local patchset = _patchset_digest()
++            if patchset then
++                str = str .. "_" .. patchset
++            end
+             return self:_strhash128(str)
+         end
+         local function _get_installdir(...)
+-- 
+2.54.0 (Apple Git-157)
+

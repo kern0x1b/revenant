@@ -128,3 +128,12 @@ on the lowered iOS 6 SDK settles both without that change:
 
 Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
 re-checked with the next Display build.
+
+## Open, not fixed: a read race in the package store test
+
+`toolchain_light/store_test` failed once on CI (run 40119837571, on the golden-stable branch at 76332140e): a reader
+saw an incomplete install in 1 of 308 reads while a forced reinstall replaced it. The cause is not known. The same test
+passed in 88 local runs: 18 before the failure, 30 in a plain loop, and 40 under six CPU-bound processes. The reader now
+names the first file it failed on, with its text, whether it exists, and the state of the install's link, so the next
+occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
+path of patch 0015, and main's xmake was not run in the loop.

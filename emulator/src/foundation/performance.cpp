@@ -527,6 +527,7 @@ void PerformanceCounters::reset(bool enabled)
     jit_stable_table_collisions_.store(0, std::memory_order_relaxed);
     jit_rsb_hits_.store(0, std::memory_order_relaxed);
     jit_rsb_misses_.store(0, std::memory_order_relaxed);
+    jit_fast_dispatch_hint_exits_.store(0, std::memory_order_relaxed);
     jit_host_yield_checks_.store(0, std::memory_order_relaxed);
     jit_host_yields_.store(0, std::memory_order_relaxed);
     jit_host_slice_budget_samples_.store(0, std::memory_order_relaxed);
@@ -1426,7 +1427,7 @@ void PerformanceCounters::record_jit_demand_translation(
 void PerformanceCounters::record_jit_dispatch(std::uint64_t fast_link_hits,
     std::uint64_t fast_link_misses, std::uint64_t stable_table_probes,
     std::uint64_t stable_table_collisions, std::uint64_t rsb_hits,
-    std::uint64_t rsb_misses)
+    std::uint64_t rsb_misses, std::uint64_t fast_dispatch_hint_exits)
 {
     if (!enabled())
         return;
@@ -1439,6 +1440,8 @@ void PerformanceCounters::record_jit_dispatch(std::uint64_t fast_link_hits,
         stable_table_collisions, std::memory_order_relaxed);
     jit_rsb_hits_.fetch_add(rsb_hits, std::memory_order_relaxed);
     jit_rsb_misses_.fetch_add(rsb_misses, std::memory_order_relaxed);
+    jit_fast_dispatch_hint_exits_.fetch_add(
+        fast_dispatch_hint_exits, std::memory_order_relaxed);
 }
 
 void PerformanceCounters::record_jit_dispatch(std::uint64_t stable_link_hits,
@@ -1446,7 +1449,7 @@ void PerformanceCounters::record_jit_dispatch(std::uint64_t stable_link_hits,
     std::uint64_t rsb_misses)
 {
     record_jit_dispatch(stable_link_hits, stable_link_misses,
-        stable_link_hits + stable_link_misses, 0, rsb_hits, rsb_misses);
+        stable_link_hits + stable_link_misses, 0, rsb_hits, rsb_misses, 0);
 }
 
 void PerformanceCounters::record_jit_host_yield(
@@ -2808,6 +2811,8 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
         jit_stable_table_collisions_.load(std::memory_order_relaxed);
     result.jit_rsb_hits = jit_rsb_hits_.load(std::memory_order_relaxed);
     result.jit_rsb_misses = jit_rsb_misses_.load(std::memory_order_relaxed);
+    result.jit_fast_dispatch_hint_exits =
+        jit_fast_dispatch_hint_exits_.load(std::memory_order_relaxed);
     result.jit_stable_link_hits = result.jit_fast_link_hits;
     result.jit_stable_link_misses = result.jit_fast_link_misses;
     result.jit_host_yield_checks =
@@ -3307,6 +3312,8 @@ std::string format_performance_summary(const PerformanceSnapshot& snapshot)
          << snapshot.jit_stable_table_probes
          << " jit-rsb=" << snapshot.jit_rsb_hits << "/"
          << snapshot.jit_rsb_misses
+         << " jit-fast-dispatch-hint-exits="
+         << snapshot.jit_fast_dispatch_hint_exits
          << " jit-host-yield-checks=" << snapshot.jit_host_yield_checks
          << " jit-host-yields=" << snapshot.jit_host_yields
          << " jit-host-budget-ns="
