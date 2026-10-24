@@ -235,36 +235,43 @@ int main(int argc, char **argv)
         revenant_check(ratio > 0.9 && ratio < 1.1, "a non-positional source ignores the listener's position", @"moving the listener changed the volume");
 
         revenant_hold_listener(SCNVector3Make(0, 0, 0));
-        SCNAudioPlayer *still = [SCNAudioPlayer audioPlayerWithSource:source];
-        [still revenantStartOnNode:nil];
-        [still revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10)) time:CACurrentMediaTime()];
-        double stillFrequency = revenant_frequency(revenant_capture(0.6));
-        [still revenantStop];
+        const int dopplerRounds = 3;
+        double oursTotal = 0;
+        double referenceTotal = 0;
+        for (int round = 0; round < dopplerRounds; round++) {
+            SCNAudioPlayer *still = [SCNAudioPlayer audioPlayerWithSource:source];
+            [still revenantStartOnNode:nil];
+            [still revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10)) time:CACurrentMediaTime()];
+            double stillFrequency = revenant_frequency(revenant_capture(0.6));
+            [still revenantStop];
 
-        SCNAudioPlayer *approach = [SCNAudioPlayer audioPlayerWithSource:source];
-        [approach revenantStartOnNode:nil];
-        CFTimeInterval now = CACurrentMediaTime();
-        [approach revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10)) time:now];
-        [approach revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10 + 3.433)) time:now + 0.1];
-        double approachingFrequency = revenant_frequency(revenant_capture(0.6));
-        [approach revenantStop];
+            SCNAudioPlayer *approach = [SCNAudioPlayer audioPlayerWithSource:source];
+            [approach revenantStartOnNode:nil];
+            CFTimeInterval now = CACurrentMediaTime();
+            [approach revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10)) time:now];
+            [approach revenantUpdateWithWorld:revenant_at(SCNVector3Make(0, 0, -10 + 3.433)) time:now + 0.1];
+            double approachingFrequency = revenant_frequency(revenant_capture(0.6));
+            [approach revenantStop];
 
-        ALuint raw = 0;
-        alGenSources(1, &raw);
-        alSourcei(raw, AL_BUFFER, [source revenantBufferForSpatial:YES]);
-        alSourcei(raw, AL_SOURCE_RELATIVE, AL_FALSE);
-        alSource3f(raw, AL_POSITION, 0, 0, -10);
-        alSource3f(raw, AL_VELOCITY, 0, 0, 0);
-        alSourcePlay(raw);
-        double rawStill = revenant_frequency(revenant_capture(0.6));
-        alSource3f(raw, AL_VELOCITY, 0, 0, 34.33);
-        alSourcePlay(raw);
-        double rawApproaching = revenant_frequency(revenant_capture(0.6));
-        alSourceStop(raw);
-        alDeleteSources(1, &raw);
+            ALuint raw = 0;
+            alGenSources(1, &raw);
+            alSourcei(raw, AL_BUFFER, [source revenantBufferForSpatial:YES]);
+            alSourcei(raw, AL_SOURCE_RELATIVE, AL_FALSE);
+            alSource3f(raw, AL_POSITION, 0, 0, -10);
+            alSource3f(raw, AL_VELOCITY, 0, 0, 0);
+            alSourcePlay(raw);
+            double rawStill = revenant_frequency(revenant_capture(0.6));
+            alSource3f(raw, AL_VELOCITY, 0, 0, 34.33);
+            alSourcePlay(raw);
+            double rawApproaching = revenant_frequency(revenant_capture(0.6));
+            alSourceStop(raw);
+            alDeleteSources(1, &raw);
 
-        double ours = approachingFrequency / stillFrequency;
-        double reference = rawApproaching / rawStill;
+            oursTotal += approachingFrequency / stillFrequency;
+            referenceTotal += rawApproaching / rawStill;
+        }
+        double ours = oursTotal / dopplerRounds;
+        double reference = referenceTotal / dopplerRounds;
         revenant_check(ours > 1.02, "a source approaching rises in pitch", @"an approaching source does not rise");
         revenant_check(fabs(ours - reference) < 0.03, "the doppler shift matches Apple's OpenAL for the same velocity", [NSString stringWithFormat:@"%g is not Apple's %g", ours, reference]);
 
