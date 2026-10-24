@@ -983,6 +983,12 @@ function members_of(src, sdk)
             set.globals[name] = true
         end
     end
+    local defined = constants_defined_in(src)
+    for name in pairs(later_externs(sdk)) do
+        if defined[name] then
+            set.globals[name] = true
+        end
+    end
     local status = protocol_status(src, sdk, folders)
     set.protocols = status.backed
     set.protocol_members = {}
@@ -1089,6 +1095,38 @@ function later_constants(sdk)
         end
     end
     return found
+end
+
+function later_externs(sdk)
+    local found = {}
+    for _, file in ipairs(framework_headers(sdk)) do
+        for line in io.readfile(file):gmatch("[^\n]*") do
+            if line:find("EXTERN", 1, true) and line:find("const", 1, true) and line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
+                local name = line:match("const%s+[%a_][%w_]*%s+([%a_][%w_]*)%s+[%w_]*AVAILABLE") or line:match("const%s+([%a_][%w_]*)%s+[%w_]*AVAILABLE")
+                if name then
+                    found[name] = true
+                end
+            end
+        end
+    end
+    return found
+end
+
+function constants_defined_in(src)
+    local defined = {}
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                for line in io.readfile(file):gmatch("[^\n]*") do
+                    local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
+                    if name then
+                        defined[name] = true
+                    end
+                end
+            end
+        end
+    end
+    return defined
 end
 
 local function released_keys(released, class, cache)
