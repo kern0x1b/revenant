@@ -52,6 +52,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Where the time goes](explanation/emulator/performance.md) | why the emulator is as slow as it is, and why not another emulator |
 | [Performance measurements](reference/emulator/performance.md) | the measured runs and the counters of a boot |
 | [Shared translation](explanation/emulator/shared-translation.md) | the design for translating the shared cache once |
+| [Load average and interface records](explanation/emulator/load-average-and-link-sysctl.md) | the `vm.loadavg` and `net.link.generic` answers, and what is not modelled |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
 | [Guest tests](reference/emulator/guest-tests.md) | the guest programs that check what only a running guest shows |

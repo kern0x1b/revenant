@@ -28,6 +28,7 @@
 #include "kernel/darwin_kqueue_abi.hpp"
 #include "network/darwin_network_abi.hpp"
 #include "kernel/darwin_resource_abi.hpp"
+#include "kernel/mach_thread_policy_abi.hpp"
 #include <fcntl.h>
 #include <sys/param.h>
 #include <unistd.h>
@@ -3479,6 +3480,31 @@ void CompatibilityKernel::trace_unknown(
     }
     message << std::dec << '\n';
     output_.write(message.str());
+}
+
+void CompatibilityKernel::sample_load_average(std::size_t runnable_threads)
+{
+    constexpr auto period =
+        static_cast<std::uint64_t>(foundation::load_average_period_seconds) *
+        darwin::mach::thread_policy::absolute_time_units_per_second;
+    const auto now = current_absolute_time();
+    const auto runnable = static_cast<std::uint32_t>(std::min<std::size_t>(
+        runnable_threads, std::numeric_limits<std::uint32_t>::max()));
+    std::lock_guard lock { load_average_mutex_ };
+    if (next_load_average_sample_ == 0) {
+        next_load_average_sample_ = now + period;
+        return;
+    }
+    while (next_load_average_sample_ <= now) {
+        load_average_.sample(runnable);
+        next_load_average_sample_ += period;
+    }
+}
+
+foundation::LoadAverage CompatibilityKernel::load_average() const
+{
+    std::lock_guard lock { load_average_mutex_ };
+    return load_average_;
 }
 
 }

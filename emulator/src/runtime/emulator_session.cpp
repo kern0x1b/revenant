@@ -2555,6 +2555,8 @@ void EmulatorSession::run()
             guest_ticks_per_second);
         scheduler.synchronize_time(scheduler_time);
         scheduler.set_realtime_clock_ticks(scheduler_time);
+        initial_runtime->kernel->sample_load_average(
+            scheduler.runnable_count());
     };
     const auto jit_work_observation_due =
         [&](std::chrono::steady_clock::time_point now, bool guest_quiet) {

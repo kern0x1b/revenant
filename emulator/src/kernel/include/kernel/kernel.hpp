@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "foundation/address_space.hpp"
+#include "foundation/load_average.hpp"
 #include "network/apple80211_event_stream.hpp"
 #include "network/apple80211_hle.hpp"
 #include "media/audio.hpp"
@@ -412,6 +413,8 @@ public:
     {
         return shared_state_->clock.wall_time();
     }
+    void sample_load_average(std::size_t runnable_threads);
+    [[nodiscard]] foundation::LoadAverage load_average() const;
     [[nodiscard]] std::size_t bootstrap_checked_in_service_count() const;
     void report_stalled_receives(std::uint64_t threshold_nanoseconds) const;
     void set_wall_time(std::uint64_t unix_time_nanoseconds)
@@ -1036,6 +1039,9 @@ private:
     std::uint32_t virtual_processor_count_ { 1 };
     HostNetworkPolicy host_network_policy_ { HostNetworkPolicy::Isolated };
     std::mutex mutex_;
+    mutable std::mutex load_average_mutex_;
+    foundation::LoadAverage load_average_;
+    std::uint64_t next_load_average_sample_ { };
 };
 
 }

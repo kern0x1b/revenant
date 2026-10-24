@@ -309,6 +309,43 @@ std::vector<std::byte> make_route_interface_list(
     return result;
 }
 
+std::vector<std::byte> make_ifmibdata(const InterfaceSnapshot& interface)
+{
+    constexpr std::size_t name_offset = 0;
+    constexpr std::size_t flags_offset = 20;
+    constexpr std::size_t data_offset = 52;
+    constexpr std::size_t if_data_type_offset = data_offset;
+    constexpr std::size_t if_data_addrlen_offset = data_offset + 3;
+    constexpr std::size_t if_data_hdrlen_offset = data_offset + 4;
+    constexpr std::size_t if_data_mtu_offset = data_offset + 8;
+    constexpr std::size_t if_data_baudrate_offset = data_offset + 16;
+    constexpr std::size_t name_capacity = 15;
+    constexpr std::size_t ethernet_header_length = 14;
+
+    std::vector<std::byte> record(ifmibdata_size);
+    const auto name_length = std::min(interface.name.size(), name_capacity);
+    std::transform(interface.name.begin(),
+        interface.name.begin() + static_cast<std::ptrdiff_t>(name_length),
+        record.begin() + static_cast<std::ptrdiff_t>(name_offset),
+        [](char character) { return static_cast<std::byte>(character); });
+    put32(record, flags_offset, interface.flags);
+    const auto ethernet = interface.type == interface_type_ethernet;
+    record[if_data_type_offset] = static_cast<std::byte>(interface.type);
+    record[if_data_addrlen_offset] =
+        static_cast<std::byte>(std::min<std::size_t>(
+            interface.link_address_length, interface.link_address.size()));
+    record[if_data_hdrlen_offset] = static_cast<std::byte>(
+        ethernet ? ethernet_header_length : std::size_t { 0 });
+    put32(record, if_data_mtu_offset, interface.mtu);
+    const auto baudrate = ethernet ? std::uint64_t { ethernet_baudrate }
+                                   : std::uint64_t { 0 };
+    put32(record, if_data_baudrate_offset,
+        static_cast<std::uint32_t>(baudrate));
+    put32(record, if_data_baudrate_offset + 4U,
+        static_cast<std::uint32_t>(baudrate >> 32U));
+    return record;
+}
+
 std::vector<std::byte> make_network_event_data(
     const InterfaceSnapshot& interface)
 {

@@ -249,6 +249,17 @@ struct InterfaceSnapshot {
     std::uint32_t address_family = address_family_unspecified,
     std::uint32_t interface_index = 0);
 
+inline constexpr std::uint32_t link_protocol_family = 18;
+inline constexpr std::uint32_t ifmib_system = 1;
+inline constexpr std::uint32_t ifmib_ifdata = 2;
+inline constexpr std::uint32_t ifmib_ifcount = 1;
+inline constexpr std::uint32_t ifdata_general = 1;
+inline constexpr std::uint32_t ifdata_linkspecific = 2;
+inline constexpr std::size_t ifmibdata_size = 180;
+
+[[nodiscard]] std::vector<std::byte> make_ifmibdata(
+    const InterfaceSnapshot& interface);
+
 [[nodiscard]] std::vector<std::byte> make_network_event_data(
     const InterfaceSnapshot& interface);
 [[nodiscard]] std::vector<std::byte> make_ipv4_network_event_data(
