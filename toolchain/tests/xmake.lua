@@ -85,4 +85,32 @@ suites("toolchain_light", light, {})
 suites("toolchain_packages", packaged, packages)
 if get_config("tests") == "device" then
     suites("toolchain_device", device, table.join(packages, {"swift"}), "device")
+
+    local bench = path.join(os.scriptdir(), "bench")
+    local workloads = {"msgsend", "alloc", "collections", "strings", "compute"}
+    target("bench")
+        set_kind("phony")
+        set_default(false)
+        set_group("device")
+        add_packages(table.unpack(packages))
+        for _, name in ipairs(workloads) do
+            add_tests(name)
+        end
+        on_test(function (target, opt)
+            local name = path.filename(opt.name)
+            local sdk = os.dirs(path.join(target:pkg("iphoneos-sdk"):installdir(), "Developer.app", "Contents", "Developer",
+                                          "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))[1]
+            local failures = import("run", {rootdir = bench, anonymous = true}).check(name, {
+                clang = path.join(target:pkg("llvm"):installdir(), "bin", "clang"),
+                ld64 = path.join(target:pkg("ld64"):installdir(), "bin", "ld"),
+                ld64_version = import("core.project.project").required_package("ld64"):requirestr():match("%s(%S+)$"),
+                ldid = path.join(target:pkg("ldid"):installdir(), "bin", "ldid"),
+                sdk = sdk
+            })
+            for _, failure in ipairs(failures) do
+                cprint("${red}bench/%s: %s", name, failure)
+            end
+            return #failures == 0
+        end)
+    target_end()
 end
