@@ -6,7 +6,8 @@ package("dynarmic")
     local commit = "21944ab87740a957c39ddd73cd4ecaeb700f7e73"
     local patches = {"0001-Apply-the-emulator-s-dynarmic-arm64-backend.patch",
                      "0002-tests-Implement-the-swap-callbacks-in-the-A32-test-e.patch",
-                     "0003-Name-the-fault-injection-hooks-for-the-core-not-for-.patch"}
+                     "0003-Name-the-fault-injection-hooks-for-the-core-not-for-.patch",
+                     "0004-Invalidate-only-the-emitted-prelude-when-a-code-cache-is-created.patch"}
     add_urls("https://github.com/MC-XiaoXiao/dynarmic.git")
     add_versions("6.7.0", commit)
 
