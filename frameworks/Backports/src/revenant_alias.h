@@ -16,7 +16,7 @@ struct revenant_alias {
 #define REVENANT_ALIAS_RELEASE(Name) self
 #define REVENANT_ALIAS_ANSWER(Name, own, released) (own)
 #define REVENANT_ALIAS_DECLARE(Name)
-#define REVENANT_ALIAS_INTERFACE(Name, Super)
+#define REVENANT_ALIAS_INTERFACE(Name, Super, ...)
 #define REVENANT_ALIAS_LINKAGE(Name)
 #else
 #define REVENANT_ALIAS_CLASS(Name) Revenant##Name
@@ -26,8 +26,8 @@ struct revenant_alias {
     ((__bridge const void *)self == REVENANT_ALIAS_SELF(Name) && REVENANT_ALIAS_RELEASE(Name) ? (released) : (own))
 #define REVENANT_ALIAS_DECLARE(Name) \
     extern char revenant_alias_class_##Name __asm__("_OBJC_CLASS_$_Revenant" #Name);
-#define REVENANT_ALIAS_INTERFACE(Name, Super) \
-    @interface REVENANT_ALIAS_CLASS(Name) : Super \
+#define REVENANT_ALIAS_INTERFACE(Name, Super, ...) \
+    @interface REVENANT_ALIAS_CLASS(Name) : Super { __VA_ARGS__ } \
     @end
 #define REVENANT_ALIAS_LINKAGE(Name) \
     __asm__(".globl _OBJC_CLASS_$_" #Name "\n"                                                                     \
@@ -60,10 +60,10 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
     return NULL;
 }
 
-#define REVENANT_ALIAS_OF(Name, Super)                                                                               \
+#define REVENANT_ALIAS_STATE(Name, Super, ...)                                                                               \
     REVENANT_ALIAS_DECLARE(Name) \
                                                                                                                    \
-    REVENANT_ALIAS_INTERFACE(Name, Super) \
+    REVENANT_ALIAS_INTERFACE(Name, Super, __VA_ARGS__) \
                                                                                                                    \
     @implementation REVENANT_ALIAS_CLASS(Name) \
                                                                                                                    \
@@ -161,6 +161,7 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
                                                                                                                    \
     REVENANT_ALIAS_LINKAGE(Name) \
 
+#define REVENANT_ALIAS_OF(Name, Super) REVENANT_ALIAS_STATE(Name, Super, )
 #define REVENANT_ALIAS(Name) REVENANT_ALIAS_OF(Name, NSObject)
 #endif
 
