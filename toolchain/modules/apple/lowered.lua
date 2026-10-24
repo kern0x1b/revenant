@@ -303,6 +303,45 @@ local function statement_end(text, at)
     return stop or text:find("\n", at, true) or #text
 end
 
+local function trimmed_of_markers(text, start, stop)
+    local moved, at = start, start
+    while true do
+        local _, marker_stop = text:find("API_AVAILABLE_BEGIN", at, true)
+        if not marker_stop or marker_stop > stop then
+            break
+        end
+        local _, paren_stop = text:find("^%s*%b()", marker_stop + 1)
+        moved = math.max(moved, (paren_stop or marker_stop) + 1)
+        at = marker_stop + 1
+    end
+    at = start
+    while true do
+        local marker_start, marker_stop = text:find("API_AVAILABLE_END", at, true)
+        if not marker_start or marker_start > stop then
+            break
+        end
+        moved = math.max(moved, marker_stop + 1)
+        at = marker_stop + 1
+    end
+    return moved, stop
+end
+
+local function regions_of(text)
+    local regions, position = {}, 1
+    while true do
+        local start, stop = text:find("API_AVAILABLE_BEGIN%s*%b()", position)
+        if not start then
+            return regions
+        end
+        local ends_start, ends_stop = text:find("API_AVAILABLE_END", stop, true)
+        if not ends_start then
+            return regions
+        end
+        table.insert(regions, {start = start, stop = stop, ends_start = ends_start, ends_stop = ends_stop, text = text:sub(start, stop)})
+        position = ends_stop + 1
+    end
+end
+
 local function merged_ranges(ranges)
     table.sort(ranges, function (a, b)
         if a.start ~= b.start then
@@ -313,11 +352,11 @@ local function merged_ranges(ranges)
     local merged = {}
     for _, range in ipairs(ranges) do
         local last = merged[#merged]
-        if last and range.start <= last.stop then
+        if last and range.start <= last.stop and not range.remove and not last.remove then
             last.stop = math.max(last.stop, range.stop)
             last.introduce = last.introduce and range.introduce or nil
         else
-            table.insert(merged, {start = range.start, stop = range.stop, introduce = range.introduce})
+            table.insert(merged, {start = range.start, stop = range.stop, introduce = range.introduce, remove = range.remove})
         end
     end
     return merged
@@ -416,9 +455,17 @@ local function apply_ranges(text, merged)
         if segment:find("\n%s*#") then
             raise("a backported declaration spans a preprocessor line: %s", excerpt)
         end
-        local lowered = range.introduce and introduced(segment) or without_availability(segment)
-        if not range.introduce and #availability(lowered) > 0 then
-            raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
+        local lowered
+        if range.remove then
+            lowered = ""
+        else
+            if segment:find("API_AVAILABLE_BEGIN", 1, true) then
+                raise("a backported declaration spans the start of an availability region: %s", excerpt)
+            end
+            lowered = range.introduce and introduced(segment) or without_availability(segment)
+            if not range.introduce and #availability(lowered) > 0 then
+                raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
+            end
         end
         if lowered ~= segment then
             table.insert(edits, {start = range.start, stop = range.stop, text = lowered})
@@ -459,9 +506,12 @@ local function lowering_of(text, implemented)
         end
     end
     local ranges = {}
-    local function lower(start, stop, introduce)
+    local function lower(start, stop, introduce, remove)
+        if not remove then
+            start, stop = trimmed_of_markers(text, start, stop)
+        end
         if stop >= start then
-            table.insert(ranges, {start = start, stop = stop, introduce = introduce})
+            table.insert(ranges, {start = start, stop = stop, introduce = introduce, remove = remove})
         end
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
@@ -594,6 +644,17 @@ local function lowering_of(text, implemented)
             if declaration.annotated and declaration.name and implemented.types[declaration.name] then
                 for _, piece in ipairs(pieces_of(text, declaration.start, declaration.stop)) do
                     lower(piece[1], piece[2])
+                end
+            end
+        end
+    end
+    for _, region in ipairs(regions_of(text)) do
+        if ios_later(region.text) then
+            for _, range in ipairs(ranges) do
+                if not range.remove and range.start >= region.start and range.stop <= region.ends_stop then
+                    lower(region.start, region.stop, nil, true)
+                    lower(region.ends_start, region.ends_stop, nil, true)
+                    break
                 end
             end
         end
@@ -843,7 +904,7 @@ function serialize(set, header)
         table.insert(lines, "function " .. name)
     end
     for name in pairs(set.globals) do
-        table.insert(lines, "global " .. name)
+        table.insert(lines, ((set.enums or {})[name] and "enum " or "global ") .. name)
     end
     for name in pairs(set.protocols) do
         table.insert(lines, "protocol " .. name)
@@ -859,7 +920,7 @@ function serialize(set, header)
 end
 
 function parse(text)
-    local set = {classes = {}, functions = {}, globals = {}, protocols = {}, protocol_members = {}, types = {}}
+    local set = {classes = {}, functions = {}, globals = {}, enums = {}, protocols = {}, protocol_members = {}, types = {}}
     for line in text:gmatch("[^\n]+") do
         if not line:find("^#") then
             local kind, first, second = line:match("^(%S+) (%S+) ?(%S*)$")
@@ -872,6 +933,9 @@ function parse(text)
                 set.functions[first] = true
             elseif kind == "global" then
                 set.globals[first] = true
+            elseif kind == "enum" then
+                set.globals[first] = true
+                set.enums[first] = true
             elseif kind == "protocol" then
                 set.protocols[first] = true
                 set.protocol_members[first] = set.protocol_members[first] or {}
@@ -974,18 +1038,18 @@ local function identifiers_in(src)
     return used
 end
 
-function members_of(src, sdk)
+function members_of(src, sdk, intros)
     local folders = implemented_in(src)
     local set = union_of(folders)
     local used = identifiers_in(src)
-    for name in pairs(later_constants(sdk)) do
-        if used[name] then
-            set.globals[name] = true
-        end
-    end
     local defined = constants_defined_in(src)
-    for name in pairs(later_externs(sdk)) do
-        if defined[name] then
+    set.enums = {}
+    for name, found in pairs(intros or {}) do
+        local later = found.intro ~= nil and found.intro > 6000
+        if later and found.kind == "enum" and used[name] then
+            set.globals[name] = true
+            set.enums[name] = true
+        elseif later and found.kind == "extern" and defined[name] then
             set.globals[name] = true
         end
     end
@@ -1071,7 +1135,7 @@ function read_all_members()
     return set
 end
 
-local function ios_later(text)
+function ios_later(text)
     local major, minor = nil, nil
     for found_major, found_minor in text:gmatch("%f[%w_]ios%(%s*(%d+)%.?(%d*)") do
         major, minor = tonumber(found_major), tonumber(found_minor) or 0
@@ -1082,35 +1146,6 @@ local function ios_later(text)
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
 end
 
-function later_constants(sdk)
-    local found = {}
-    for _, file in ipairs(framework_headers(sdk)) do
-        for line in io.readfile(file):gmatch("[^\n]*") do
-            if line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
-                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+[%w_]*AVAILABLE")
-                if name and line:find("=", 1, true) and not line:find("const", 1, true) then
-                    found[name] = true
-                end
-            end
-        end
-    end
-    return found
-end
-
-function later_externs(sdk)
-    local found = {}
-    for _, file in ipairs(framework_headers(sdk)) do
-        for line in io.readfile(file):gmatch("[^\n]*") do
-            if line:find("EXTERN", 1, true) and line:find("const", 1, true) and line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
-                local name = line:match("const%s+[%a_][%w_]*%s+([%a_][%w_]*)%s+[%w_]*AVAILABLE") or line:match("const%s+([%a_][%w_]*)%s+[%w_]*AVAILABLE")
-                if name then
-                    found[name] = true
-                end
-            end
-        end
-    end
-    return found
-end
 
 function constants_defined_in(src)
     local defined = {}
@@ -1223,18 +1258,19 @@ local function input_digest(sdk, text)
     return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
 end
 
-function overlay(sdk, out, set)
+function overlay(sdk, out, set, subtrees)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
-    local key = table.concat({sdk, out, hash.strhash128(text)}, "|")
+    local mapped = subtrees or VFS_SUBTREES
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ",")}, "|")
     if built[key] then
         return built[key]
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text)
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ","))
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members())
+        vfs = build_overlay(sdk, out, set or read_all_members(), mapped)
         io.writefile(stamp, digest)
     end
     built[key] = vfs
@@ -1248,18 +1284,18 @@ local function system_include_relative(file, sdk)
     end
 end
 
-local VFS_SUBTREES = {os = true}
+VFS_SUBTREES = {os = true}
 
-local function vfs_subtree(relative)
+local function vfs_subtree(relative, subtrees)
     local head = relative and relative:match("^([^/]+)")
-    return head ~= nil and VFS_SUBTREES[head] == true
+    return head ~= nil and (subtrees or VFS_SUBTREES)[head] == true
 end
 
 function include_directory(out)
     return path.join(out, "include")
 end
 
-function build_overlay(sdk, out, set)
+function build_overlay(sdk, out, set, subtrees)
     local changed = member_headers(sdk)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
@@ -1276,7 +1312,7 @@ function build_overlay(sdk, out, set)
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
         end
-        if not relative or vfs_subtree(relative) then
+        if not relative or vfs_subtree(relative, subtrees) then
             local copy = path.join(out, path.relative(file, sdk))
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
@@ -1287,7 +1323,7 @@ function build_overlay(sdk, out, set)
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
-        if (relative and not vfs_subtree(relative)) or dir == path.join(sdk, "usr", "include") then
+        if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end

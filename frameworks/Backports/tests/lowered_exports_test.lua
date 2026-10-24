@@ -17,7 +17,7 @@ function main()
             end
         end
     end
-    local enums = lowered.later_constants(workspace.sdk())
+    local enums = members.enums or {}
     local problems = {}
     for name in pairs(members.globals) do
         if not defined[name] and not enums[name] then
