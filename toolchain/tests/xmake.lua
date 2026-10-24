@@ -18,6 +18,10 @@ local packaged = {"architectures_test", "atomics_test", "backports_package_test"
 
 local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "port_test", "swift_test", "tweak_test"}
 
+if get_config("tests") == "device" then
+    add_requires("revenant@swift 6.4.0", {alias = "swift", system = false})
+end
+
 local install_hints = {
     ["iphoneos-sdk"] = "configure the project with ./xmakew f -P . first, which installs it",
 }
@@ -79,8 +83,7 @@ local packages = {"ld64", "ldid", "iphoneos-sdk", "llvm"}
 
 suites("toolchain_light", light, {})
 suites("toolchain_packages", packaged, packages)
-suites("toolchain_packages", {"sincospif_test"}, packages)
+suites("toolchain_packages", {"sincospi_test"}, packages)
 if get_config("tests") == "device" then
-    add_requires("revenant@swift 6.4.0", {alias = "swift", system = false})
     suites("toolchain_device", device, table.join(packages, {"swift"}), "device")
 end
