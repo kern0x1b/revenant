@@ -125,11 +125,23 @@ local function execute(program, firmware, libraries, app, guest, folder, saved)
     emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
     local results = emulator.results(rootfs)
     local verdict_file = path.join(results, "verdict.json")
-    local booted = emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
+    local slot = emulator.acquire()
+    local booted = try {
+        function ()
+            return emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
                                   cache = path.join(home_cache(), "host-cache"),
                                   tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
                                   scale = emulator.TIME_SCALE, deadline = 900,
                                   stop = function () return os.isfile(verdict_file) end})
+        end,
+        catch {
+            function (errors)
+                emulator.release(slot)
+                raise(errors)
+            end
+        }
+    }
+    emulator.release(slot)
     local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
                                                              scale = booted.scale, host_seconds = booted.seconds,
                                                              reports = emulator.reports(rootfs)})

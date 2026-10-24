@@ -111,3 +111,12 @@ Open:
   the machine's interfaces, so the comparison is limited to deterministic output. The path mapping is checked from fixed
   inputs in `tests/Network/mapping/main.swift` (the host's answers for one recorded state, and documented cases), and the
   live path only against invariants in `tests/Network/live/main.swift`.
+
+## Open, not fixed: a read race in the package store test
+
+`toolchain_light/store_test` failed once on CI (run 40119837571, on the golden-stable branch at 76332140e): a reader
+saw an incomplete install in 1 of 308 reads while a forced reinstall replaced it. The cause is not known. The same test
+passed in 88 local runs: 18 before the failure, 30 in a plain loop, and 40 under six CPU-bound processes. The reader now
+names the first file it failed on, with its text, whether it exists, and the state of the install's link, so the next
+occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
+path of patch 0015, and main's xmake was not run in the loop.
