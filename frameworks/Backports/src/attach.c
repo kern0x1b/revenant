@@ -343,14 +343,8 @@ __attribute__((constructor)) static void revenant_backports_attach(void)
     Class *releases = calloc(own_count ? own_count : 1, sizeof *releases);
     for (size_t index = 0; index < own_count; index++) {
         releases[index] = revenant_system_class((Class)own[index].proxy, own[index].name);
-        if (!releases[index]) {
-            if (!objc_getClass(own[index].name)) {
-                Class made = objc_allocateClassPair((Class)own[index].proxy, own[index].name, 0);
-                if (made)
-                    objc_registerClassPair(made);
-            }
+        if (!releases[index])
             continue;
-        }
         revenant_reparent((Class)own[index].proxy, releases[index]);
         capacity += revenant_method_count((Class)own[index].proxy) + revenant_method_count(object_getClass((id)own[index].proxy));
     }

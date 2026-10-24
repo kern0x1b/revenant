@@ -67,6 +67,15 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
                                                                                                                    \
     @implementation REVENANT_ALIAS_CLASS(Name) \
                                                                                                                    \
+    + (void)load                                                                                                   \
+    {                                                                                                              \
+        if (!objc_getClass(#Name)) {                                                                               \
+            Class made = objc_allocateClassPair(self, #Name, 0);                                                   \
+            if (made)                                                                                              \
+                objc_registerClassPair(made);                                                                      \
+        }                                                                                                          \
+    }                                                                                                              \
+                                                                                                                   \
     + (Class)class                                                                                                 \
     {                                                                                                              \
         return REVENANT_ALIAS_ANSWER(Name, self, REVENANT_ALIAS_RELEASE(Name));                                              \
