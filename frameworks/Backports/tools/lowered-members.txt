@@ -34304,6 +34304,7 @@ type UIAlertControllerStyle
 type UIApplicationOpenURLOptionsKey
 type UIApplicationShortcutIconType
 type UIAttachmentBehaviorType
+type UIAxis
 type UIBackgroundRefreshStatus
 type UIBarButtonItemStyle
 type UIBarButtonSystemItem
@@ -34424,6 +34425,7 @@ type UIPrinterJobTypes
 type UIPrinterPickerCompletionHandler
 type UIPushBehaviorMode
 type UIRectCorner
+type UIRectEdge
 type UISceneActivationState
 type UISceneCaptureState
 type UISceneCollectionJoinBehavior

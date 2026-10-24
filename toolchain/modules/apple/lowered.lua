@@ -399,68 +399,65 @@ end
 
 local LITERAL_MARKERS = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
 
+local function present_names(text, names)
+    local present = {}
+    for name, body in pairs(names) do
+        if text:find(name, 1, true) then
+            present[name] = body
+        end
+    end
+    return present
+end
+
+local function earliest_marker(text, names, position, begins)
+    local best = nil
+    for name, body in pairs(names) do
+        local at = position
+        while true do
+            local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not start or (best and start >= best.start) then
+                break
+            end
+            local found = nil
+            if not in_directive(text, start) then
+                if not begins then
+                    found = {start = start, stop = stop, text = text:sub(start, stop)}
+                elseif body == false then
+                    local _, paren = text:find("^%s*%b()", stop + 1)
+                    if paren then
+                        found = {start = start, stop = paren, text = text:sub(start, paren)}
+                    end
+                else
+                    found = {start = start, stop = stop, text = body}
+                end
+            end
+            if found then
+                best = found
+                break
+            end
+            at = stop + 1
+        end
+    end
+    return best
+end
+
 local function regions_of(text, markers)
     markers = markers or LITERAL_MARKERS
-    local found = {}
-    for name, body in pairs(markers.begin) do
-        if text:find(name, 1, true) then
-            local position = 1
-            while true do
-                local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
-                if not start then
-                    break
-                end
-                if not in_directive(text, start) then
-                    if body == false then
-                        local _, paren = text:find("^%s*%b()", stop + 1)
-                        if paren then
-                            table.insert(found, {start = start, stop = paren, text = text:sub(start, paren), name = name})
-                        end
-                    else
-                        table.insert(found, {start = start, stop = stop, text = body, name = name})
-                    end
-                end
-                position = stop + 1
-            end
+    local begins, ends = present_names(text, markers.begin), present_names(text, markers.ends)
+    local regions, position = {}, 1
+    while true do
+        local begin = earliest_marker(text, begins, position, true)
+        if not begin then
+            return regions
         end
-    end
-    table.sort(found, function (a, b) return a.start < b.start end)
-    local ends = {}
-    for name in pairs(markers.ends) do
-        if text:find(name, 1, true) then
-            local position = 1
-            while true do
-                local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", position)
-                if not start then
-                    break
-                end
-                if not in_directive(text, start) then
-                    table.insert(ends, {start = start, stop = stop, name = name})
-                end
-                position = stop + 1
-            end
+        local ending = earliest_marker(text, ends, begin.stop + 1, false)
+        if not ending then
+            return regions
         end
+        table.insert(regions, {start = begin.start, stop = begin.stop, ends_start = ending.start, ends_stop = ending.stop,
+            text = begin.text, begin_text = text:sub(begin.start, begin.stop), end_text = text:sub(ending.start, ending.stop)})
+        position = ending.stop + 1
     end
-    table.sort(ends, function (a, b) return a.start < b.start end)
-    local regions, index = {}, 1
-    for _, begin in ipairs(found) do
-        if begin.start >= index then
-            local ending = nil
-            for _, candidate in ipairs(ends) do
-                if candidate.start > begin.stop then
-                    ending = candidate
-                    break
-                end
-            end
-            if not ending then
-                return regions
-            end
-            table.insert(regions, {start = begin.start, stop = begin.stop, ends_start = ending.start, ends_stop = ending.stop,
-                text = begin.text, begin_text = text:sub(begin.start, begin.stop), end_text = text:sub(ending.start, ending.stop)})
-            index = ending.stop + 1
-        end
-    end
-    return regions
 end
 
 local function merged_ranges(ranges)
@@ -1113,7 +1110,9 @@ end
 
 local function framework_headers(sdk)
     local files = {}
-    for _, framework in ipairs(frameworks_in(path.join(sdk, "System", "Library", "Frameworks"), {})) do
+    local frameworks = frameworks_in(path.join(sdk, "System", "Library", "Frameworks"), {})
+    frameworks_in(path.join(sdk, "System", "Library", "SubFrameworks"), frameworks)
+    for _, framework in ipairs(frameworks) do
         for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
             table.insert(files, file)
         end
