@@ -57,7 +57,7 @@ package("llvm")
         local targets = {"install-clang", "install-clang-resource-headers"}
         if package:config("libraries") then
             table.join2(configure, {"-DLLVM_BUILD_LLVM_DYLIB=ON", "-DLLVM_LINK_LLVM_DYLIB=ON",
-                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis"})
+                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis;llvm-nm;llvm-objdump"})
             targets = {"install-distribution"}
         end
         os.vrunv("cmake", configure)
