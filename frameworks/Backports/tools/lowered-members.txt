@@ -29068,6 +29068,8 @@ member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
 member UIImageView -preferredSymbolConfiguration
 member UIImageView -setPreferredSymbolConfiguration:
+member UIImageView -setTintColor:
+member UIImageView -tintColor
 member UIImpactFeedbackGenerator +feedbackGeneratorWithStyle:forView:
 member UIImpactFeedbackGenerator -impactOccurred
 member UIImpactFeedbackGenerator -impactOccurredAtLocation:
@@ -29134,6 +29136,7 @@ member UIKeyCommand -allowsAutomaticLocalization
 member UIKeyCommand -allowsAutomaticMirroring
 member UIKeyCommand -copyWithZone:
 member UIKeyCommand -description
+member UIKeyCommand -discoverabilityTitle
 member UIKeyCommand -encodeWithCoder:
 member UIKeyCommand -hash
 member UIKeyCommand -init
@@ -29143,6 +29146,7 @@ member UIKeyCommand -isEqual:
 member UIKeyCommand -modifierFlags
 member UIKeyCommand -setAllowsAutomaticLocalization:
 member UIKeyCommand -setAllowsAutomaticMirroring:
+member UIKeyCommand -setDiscoverabilityTitle:
 member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -followsUndockedKeyboard

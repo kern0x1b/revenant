@@ -1462,7 +1462,7 @@ end
 
 VFS_SUBTREES = {os = true}
 
-VFS_FILES = {["os.apinotes"] = true}
+VFS_FILES = {["os.apinotes"] = true, ["compression.h"] = true}
 
 local function lowered_apinotes(text, set)
     local functions = set.functions or {}
@@ -1518,6 +1518,16 @@ function build_overlay(sdk, out, set, subtrees)
     end
     for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
         for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, set)
+            if lowered ~= text then
+                changed[file] = lowered
+            end
+        end
+    end
+    for name in pairs(VFS_FILES) do
+        local file = path.join(sdk, "usr", "include", name)
+        if name:match("%.h$") and os.isfile(file) then
             local text = changed[file] or io.readfile(file)
             local lowered = lowering_of(text, set)
             if lowered ~= text then
