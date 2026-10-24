@@ -23330,9 +23330,10 @@ member RevenantSCNJitterBuffers -accumulateSampleWithWeight:
 member RevenantSCNJitterBuffers -bindSampleFramebuffer
 member RevenantSCNJitterBuffers -deleteTargets
 member RevenantSCNJitterBuffers -dispose
-member RevenantSCNJitterBuffers -drawTexture:
+member RevenantSCNJitterBuffers -drawQuad
 member RevenantSCNJitterBuffers -init
 member RevenantSCNJitterBuffers -isUsable
+member RevenantSCNJitterBuffers -prepareDraw
 member RevenantSCNJitterBuffers -presentToFramebuffer:
 member RevenantSCNJitterBuffers -resizeToWidth:height:
 member RevenantSCNRenderEngine +defaultPointOfViewInScene:
@@ -24194,8 +24195,13 @@ member SCNPhysicsWorld -updateCollisionPairs
 member SCNPlane +planeWithWidth:height:
 member SCNPlane +supportsSecureCoding
 member SCNPlane -encodeWithCoder:
+member SCNPlane -geometryElements
+member SCNPlane -geometrySources
+member SCNPlane -geometrySourcesForSemantic:
 member SCNPlane -init
 member SCNPlane -initWithCoder:
+member SCNPlane -revenantElement
+member SCNPlane -revenantSources
 member SCNScene +scene
 member SCNScene +sceneWithURL:options:error:
 member SCNScene +supportsSecureCoding
@@ -24248,9 +24254,9 @@ member SCNView -revenantClear
 member SCNView -revenantDeleteFramebuffer
 member SCNView -revenantDisplayLinkFired:
 member SCNView -revenantDrawFrame
-member SCNView -revenantDrawJitteredScene:pointOfView:width:height:time:
+member SCNView -revenantDrawJitteredScene:pointOfView:width:height:time:framebuffer:
 member SCNView -revenantPrepareDrawable
-member SCNView -revenantRenderAtTime:width:height:
+member SCNView -revenantRenderAtTime:width:height:framebuffer:
 member SCNView -revenantSetContext:
 member SCNView -revenantSetUp
 member SCNView -revenantUpdateDisplayLink

@@ -177,7 +177,7 @@ static void revenant_unsupported(const char *member)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-- (void)revenantRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height
+- (void)revenantRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height framebuffer:(GLuint)framebuffer
 {
     id<SCNSceneRendererDelegate> delegate = _delegate;
     SCNScene *scene = _scene;
@@ -200,7 +200,7 @@ static void revenant_unsupported(const char *member)
         [delegate renderer:self willRenderScene:scene atTime:time];
     }
     if (_jitteringEnabled && scene) {
-        [self revenantDrawJitteredScene:scene pointOfView:_pointOfView width:width height:height time:time];
+        [self revenantDrawJitteredScene:scene pointOfView:_pointOfView width:width height:height time:time framebuffer:framebuffer];
     } else {
         [self revenantClear];
         [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
@@ -211,10 +211,8 @@ static void revenant_unsupported(const char *member)
     }
 }
 
-- (void)revenantDrawJitteredScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height time:(NSTimeInterval)time
+- (void)revenantDrawJitteredScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height time:(NSTimeInterval)time framebuffer:(GLuint)framebuffer
 {
-    GLint target = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &target);
     if (_jitter == nil) {
         _jitter = [[RevenantSCNJitterBuffers alloc] init];
     }
@@ -245,7 +243,7 @@ static void revenant_unsupported(const char *member)
         _jitterAccumulated++;
     }
     _jitterFrame++;
-    [_jitter presentToFramebuffer:(GLuint)target];
+    [_jitter presentToFramebuffer:framebuffer];
 }
 
 - (void)revenantDrawFrame
@@ -256,7 +254,7 @@ static void revenant_unsupported(const char *member)
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
     if ([self revenantPrepareDrawable]) {
-        [self revenantRenderAtTime:[_clock sceneTimeAtWallTime:CACurrentMediaTime()] width:_drawableWidth height:_drawableHeight];
+        [self revenantRenderAtTime:[_clock sceneTimeAtWallTime:CACurrentMediaTime()] width:_drawableWidth height:_drawableHeight framebuffer:_framebuffer];
         glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
     }
@@ -312,7 +310,7 @@ static void revenant_unsupported(const char *member)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
     UIImage *image = nil;
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        [self revenantRenderAtTime:0 width:width height:height];
+        [self revenantRenderAtTime:0 width:width height:height framebuffer:framebuffer];
         NSMutableData *pixels = [NSMutableData dataWithLength:(NSUInteger)(width * height * 4)];
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.mutableBytes);
         NSMutableData *flipped = [NSMutableData dataWithLength:pixels.length];
