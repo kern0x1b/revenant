@@ -41,6 +41,13 @@
     return [[self alloc] init];
 }
 
++ (instancetype)nodeWithGeometry:(SCNGeometry *)geometry
+{
+    SCNNode *node = [self node];
+    node.geometry = geometry;
+    return node;
+}
+
 @synthesize name = _name;
 @synthesize light = _light;
 @synthesize camera = _camera;

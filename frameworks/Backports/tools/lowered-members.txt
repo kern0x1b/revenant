@@ -24108,6 +24108,7 @@ member SCNMaterialProperty -revenantModelValueForKeyPath:
 member SCNMaterialProperty -revenantPresentedContentsTransform
 member SCNMaterialProperty -setContents:
 member SCNNode +node
+member SCNNode +nodeWithGeometry:
 member SCNNode +supportsSecureCoding
 member SCNNode -actionForKey:
 member SCNNode -actionKeys

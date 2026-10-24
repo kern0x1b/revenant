@@ -213,6 +213,8 @@ static void revenant_unsupported(const char *member)
 
 - (void)revenantDrawJitteredScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height time:(NSTimeInterval)time
 {
+    GLint target = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &target);
     if (_jitter == nil) {
         _jitter = [[RevenantSCNJitterBuffers alloc] init];
     }
@@ -243,7 +245,7 @@ static void revenant_unsupported(const char *member)
         _jitterAccumulated++;
     }
     _jitterFrame++;
-    [_jitter presentToFramebuffer:_framebuffer];
+    [_jitter presentToFramebuffer:(GLuint)target];
 }
 
 - (void)revenantDrawFrame
