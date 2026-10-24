@@ -3863,11 +3863,6 @@ function os_log_type_enabled
 function os_signpost_enabled
 function os_signpost_id_generate
 function os_signpost_id_make_with_pointer
-function os_unfair_lock_assert_not_owner
-function os_unfair_lock_assert_owner
-function os_unfair_lock_lock
-function os_unfair_lock_trylock
-function os_unfair_lock_unlock
 function quadrature_integrate
 function revenant_add_trait_change_observer
 function revenant_add_trait_extras_description
@@ -31785,6 +31780,7 @@ type UIAccessibilityNavigationStyle
 type UIAccessibilityTextualContext
 type UIAccessibilityTraits
 type UIActionIdentifier
+type UIActivityCategory
 type UIActivityItemsConfigurationInteraction
 type UIActivityItemsConfigurationMetadataKey
 type UIActivityItemsConfigurationPreviewIntent
@@ -31904,6 +31900,7 @@ type UIPasteControlDisplayMode
 type UIPasteboardDetectionPattern
 type UIPasteboardOption
 type UIPencilInteractionPhase
+type UIPencilPreferredAction
 type UIPointerAccessoryPosition
 type UIPointerEffectTintMode
 type UIPreferredPresentationStyle
