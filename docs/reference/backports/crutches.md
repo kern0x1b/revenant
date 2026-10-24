@@ -89,13 +89,13 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 
 - Stands in for: the reverb of AVAudioEnvironmentNode, through the ASA send of OpenAL (`alcASASetSource`, `rvsl`). A blend of zero needs no ASA.
 - Gaps: the ASA procedures are not exported from `OpenAL.framework` on 6.1.3 (checked against the image: `_alcASASetSource`, `_alcASASetListener` and `_alcASAGetSource` are absent as exports). They are resolved at run time with `alcGetProcAddress`, and a device without them raises `NSInternalInconsistencyException` on a start with a blend above zero. Whether the procedures resolve on 6.1.3 has not been measured on a device.
-- Measurement: host readback of the send through `alcASAGetSource` (`audio_test.m`). Device: pending the runtime case (C16).
-- Removed by: the runtime case reporting that `alcGetProcAddress` resolves the three procedures on 6.1.3.
+- Measurement: host readback of the send through `alcASAGetSource` (`audio_test.m`). On the 6.1.3 emulator the runtime case `scenekit_audio` reports `ALC_EXT_ASA` present and the three procedures non-NULL from `alcGetProcAddress` (C16). A real device is not measured.
+- Removed by: that report on a real 6.1.3 device.
 
 ### C16. The OpenAL device path, the audio session and streaming are not run on iOS 6.1.3
 
 - Stands in for: the output path of AVAudioSession and AVAudioPlayer, which SceneKit uses on the device. The OpenAL device, the ExtAudioFile decode, source playback and stream playback run only on the macOS host.
-- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. On an idle host the 2 s tone finishes at 2.38 guest seconds and the 2 s stream at 2.19, measured with the guest clock (the window is 3 s). Under host load (other builds running) the same emulator finished a tone at about 9 guest seconds and once stalled: its IO callbacks run late, and the schedule `max(now, next) + period` drops device time that is never recovered. A timeline schedule (`next + period`) cut that run to 4.4 seconds but stalled the mixer, so it was reverted and the emulator code is unchanged. Nothing has run on a real device.
+- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. The last emulator run with the grid schedule finished the 2 s tone at 2.79 guest seconds and the 2 s stream at 1.76, measured with the guest clock, so the tone's margin in the 3 s window is about 0.2 s. An earlier run under host load stalled: the kernel cached the IO proc deadline while a callback was in flight and did not refresh it after completion, so the wakeup was lost. The kernel now reads that deadline on every check, and the IO proc keeps the grid of its start time (C22). Under host load this has not been measured since the fix. Nothing has run on a real device.
 - Measurement: the emulator run above (positive and negative modes of the case) and host tests of the same paths (`audio_test.m`, `action_run_test.m`).
 - Removed by: a run on a real iPhone 4S with the mute switch set and other audio playing.
 
@@ -123,15 +123,23 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 ### C20. Jittering accumulates up to eight samples while the frame does not change
 
 - Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable.
-- Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The GLES path is not run on a device, and the emulator has no GLES 2 context for EAGL (it reports GLES 1.1), so `SCNView` is not exercised on any run.
-- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). Device: pending, see C21.
+- Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The accumulation is a mix shader between two ping-pong textures, not blending, because blending with `GL_CONSTANT_ALPHA` drew nothing on the emulator. The GLES path is not run on a real device.
+- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). On the 6.1.3 emulator, the render case (C21) gives 75 intermediate edge pixels with jittering and none without, and an identical centre. A real device is not measured.
 - Removed by: a device run that renders a still scene with jittering on and off and compares its edges, and a check of the animated case.
 
-### C21. The GLES draw path draws no geometry on the emulator
+### C21. The GLES draw path drew no geometry on the emulator (resolved)
 
-- Stands in for: nothing yet; this is the open check of C20. A snapshot of an `SCNView` with an `SCNPlane` on the 6.1.3 emulator (iPhone4,1, renderer on) returns an image, but it is entirely clear: 4096 clear pixels and none opaque, with and without jittering. The cause is not known: the collection of the plane into the draw items looks right, so the failure is in the GL path (shaders, state or the draw) or in the emulator's GLES.
-- Gaps: the render case `tests/runtime/pending/scenekit_render.m` is not registered in the runtime suite. It compares a plain and a jittered snapshot for anti-aliased edges and an unchanged interior; it cannot pass until the plane is drawn. Registering it would also let its failure abort the shared runtime app, which runs every case in one process.
-- Removed by: a snapshot with the plane visible on the emulator, then the render case registered and passing.
+- Stands in for: nothing now. Before the fix, a snapshot of an `SCNView` with an `SCNPlane` on the 6.1.3 emulator (iPhone4,1, renderer on) was entirely clear, with and without jittering. Three causes, all in our code: `SCNPlane` had no vertex sources or elements, so the renderer had nothing to draw; the jitter path read `GL_FRAMEBUFFER_BINDING`, which the emulator's GLES does not support (it returns 0 and sets `GL_INVALID_ENUM`), so it presented to framebuffer 0; and the accumulation blended with `GL_CONSTANT_ALPHA`, which gave zeros. The framebuffer is now passed in, the plane builds a grid of positions, normals and texture coordinates with triangle indices, and the accumulation is a mix shader between two ping-pong textures.
+- Gaps: the emulator's GLES 2 path passes its own guest test `gles2` with the renderer on (76 of 76) once the guest is linked with the project's ld64; the Apple default linker produced binaries that trap with SIGILL on the emulator. The renderer there is SwiftShader, so no device GPU is checked.
+- Measurement: the runtime case `scenekit_render` passes on the 6.1.3 emulator (483.8 host s at time scale 10). The plain snapshot has 492 opaque pixels and the jittered one 455; the edges have 0 and 75 intermediate pixels, and the centre differs by 0.
+- Removed by: the same case passing on a real 6.1.3 device.
+
+### C22. Late audio buffers are counted, not reported
+
+- Stands in for: the device's report of an underrun. When an IO proc callback runs late, `CoreAudioHle` skips the grid points it missed and adds them to `underruns` in the IO proc registration (`io_proc_timeline_after`). Nothing prints or returns the count, so neither the guest nor the log shows the underrun.
+- Gaps: the missed buffers are not replayed, so the guest hears them as a gap.
+- Measurement: `emulator/tests/unit/io_proc_timeline_test.cpp`: delayed callbacks record underruns, every grid point is either played or an underrun, and the negative control shows the old schedule drifting off the grid.
+- Removed by: reporting the count where the guest or the log can read it, or delivering the due buffers to catch up.
 
 ## Removed
 

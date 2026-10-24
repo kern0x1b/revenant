@@ -321,6 +321,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
         add_tests("scenekit_audio")
+        add_tests("scenekit_render")
         add_tests("alias_public_name")
         add_tests("alias_system_class")
         on_test(function (target, opt)
