@@ -82,4 +82,14 @@ if [ -z "$(find "$scratch_stamp" -mmin -1440 2>/dev/null)" ]; then
     "$prefix/bin/xmake" l -P "$root" "$root/tools/clean.lua" --scratch || echo "xmakew: the scratch retention did not finish" >&2
 fi
 
-exec "$prefix/bin/xmake" "$@"
+case " $* " in
+    *" -P "* | *" --project"*)
+        exec "$prefix/bin/xmake" "$@"
+        ;;
+esac
+if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+    command=$1
+    shift
+    exec "$prefix/bin/xmake" "$command" -P "$root" "$@"
+fi
+exec "$prefix/bin/xmake" -P "$root" "$@"
