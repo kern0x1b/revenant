@@ -29,6 +29,6 @@ and say in the commit message what was searched.
 2. Search the tree after the removal with each form above.
 3. Run the tests of the area: `./xmakew test -P . 'repository/*'`, and the suite of the area. A package that only a
    prebuilt job builds is not proved by a local test, so check that job's inputs as well.
-4. If the file is an input to a package's digest, run `./xmakew l tools/keys.lua <package>` before and after the
+4. If the file is an input to a package's digest, run `./xmakew l -P . tools/keys.lua <package>` before and after the
    change, to see what the change rebuilds. The digest configs are in [the machine guide](machine.md#build-each-package-once).
 5. Put the search in the commit message in one sentence: which forms were searched, and where.

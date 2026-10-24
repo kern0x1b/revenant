@@ -801,12 +801,12 @@ local function launch_step(emulator, folder, found)
     local function driven()
         os.tryrm(results)
         os.mkdir(results)
-        local sent = {}
+        local sent, perf = {}, {}
         local driver = emulator.launch_driver({results = results, run = "/run", application = "/Applications/Probe.app",
                                                steps = {"tap 160 260"}})
         return driver, sent, function (state)
-            return driver.stop(state, function (command) table.insert(sent, command) end)
-        end
+            return driver.stop(state, function (command) table.insert(command:startswith("perf-") and perf or sent, command) end)
+        end, perf
     end
     do
         local _, sent, tick = driven()
@@ -820,7 +820,7 @@ local function launch_step(emulator, folder, found)
             table.insert(found, "a screen locked with a passcode is not unlocked, sent " .. table.concat(sent, ";"))
         end
     end
-    local driver, sent, tick = driven()
+    local driver, sent, tick, perf = driven()
     local state = {}
     tick(state)
     io.writefile(path.join(results, "test.stdout"), "revenant-sblaunch: 0.0 s: waiting for SpringBoard\nrevenant-sblaunch: 21.5 s: SpringBoard refused with 3 (device locked), screen=locked\n")
@@ -835,8 +835,8 @@ local function launch_step(emulator, folder, found)
     end
     state.stable = {[1] = true}
     tick(state)
-    if #sent ~= 2 or sent[2] ~= "unlock" then
-        table.insert(found, "a screen still locked after its unlock settled is unlocked again, sent " .. table.concat(sent, ";"))
+    if #sent ~= 2 or sent[2] ~= "drag 50 430 300 430 900 40" then
+        table.insert(found, "a screen still locked after its unlock settled is slid open, sent " .. table.concat(sent, ";"))
     end
     state.transition, state.stable[2] = 2, true
     json.savefile(path.join(results, "verdict.json"), {test = {spawned = 1, exit = 0}})
@@ -880,6 +880,9 @@ local function launch_step(emulator, folder, found)
                                           table.concat(sent, ";"), tostring(done)))
     end
 
+    if table.concat(perf, ";") ~= "perf-begin launch;perf-end" then
+        table.insert(found, "the launch is measured from its spawn to its first settled frame, sent " .. table.concat(perf, ";"))
+    end
     driver, sent, tick = driven()
     json.savefile(path.join(results, "verdict.json"), {test = {spawned = 1, exit = 4}})
     if not tick({ready = true}) or driver.failure ~= "refused" then
@@ -904,7 +907,7 @@ local function launch_step(emulator, folder, found)
                                                            application = "/Applications/Probe.app", steps = steps,
                                                            seconds = BUDGET, scale = SCALE, clock = function () return now end})
         local function tick(state)
-            return driver.stop(state, function (command) table.insert(sent, command) end)
+            return driver.stop(state, function (command) table.insert(command:startswith("perf-") and {} or sent, command) end)
         end
         json.savefile(path.join(results, "verdict.json"),
                       {machine = "iPhone4,1", system = "6.1.3 (10B329)", uikit = 1, UIApplication = 1, runner_seconds = 17.924,

@@ -18,7 +18,7 @@ no app they describe exists anywhere in this repository.
 From the revenant checkout:
 
 ```
-./xmakew l agent-skills/tests/run.lua [--runtime claude] [--hours N] list timer …   # or: all
+./xmakew l -P . agent-skills/tests/run.lua [--runtime claude] [--hours N] list timer …   # or: all
 ```
 
 Run output goes under `$HOME/.revenant/cache/<task>/agent-skills/` (`toolchain/modules/workspace.lua`
@@ -53,7 +53,7 @@ lifetime minus 15 minutes, so the copy never has to refresh the login.
 
 ## What counts
 
-`./xmakew l agent-skills/tests/check.lua PROJECT SCENARIO PLUGIN [EVIDENCE]` prints one `ok`/`FAIL` line per check and ends with
+`./xmakew l -P . agent-skills/tests/check.lua PROJECT SCENARIO PLUGIN [EVIDENCE]` prints one `ok`/`FAIL` line per check and ends with
 `RUN COUNTS` only if all pass:
 
 - the app's own sources are in the scenario's language, and `PROJECT.md` exists;

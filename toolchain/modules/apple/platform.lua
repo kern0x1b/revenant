@@ -218,7 +218,7 @@ function provided_libraries(target)
     return table.join(backport_libraries(target), shared and shared.libraries or {})
 end
 
-function backport_libraries()
+function project_backports()
     local found = {}
     for _, target in ipairs(project.ordertargets()) do
         if target:name():endswith("Backports") and target:is_shared() and target:is_plat("iphoneos") then
@@ -233,7 +233,7 @@ function backports_deb(signer)
         raise("target(%s) signs the Backports package, and carries no ldid to sign it with: add_packages(\"ldid\") to it, or a rule that adds it", signer:name())
     end
     local all, identities = shared_packages(signer)
-    return backports_package.ensure({targets = backport_libraries(), ldid = ldid(signer), packages = all, provided = identities,
+    return backports_package.ensure({targets = project_backports(), ldid = ldid(signer), packages = all, provided = identities,
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
 end
 

@@ -144,7 +144,7 @@ function write(opt)
             table.insert(written, {deb = output, stage = stage})
         end
     end
-    if not opt.target and #platform.backport_libraries() > 0 then
+    if not opt.target and #platform.project_backports() > 0 then
         local signer
         for _, target in ipairs(project.ordertargets()) do
             if target:pkg("ldid") then

@@ -41,5 +41,5 @@ Speed and memory are part of correctness for everything this repository writes o
 
 ## Enforced by
 
-Not enforced. A benchmark group under `./xmakew test`, with recorded baselines that a regression fails, is the check
+Not enforced. A benchmark group under `./xmakew test -P .`, with recorded baselines that a regression fails, is the check
 this record needs.

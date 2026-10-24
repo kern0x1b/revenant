@@ -76,4 +76,10 @@ fi
 
 XMAKE_GLOBALDIR=${XMAKE_GLOBALDIR:-$HOME/.revenant/cache/xmake-global}
 export XMAKE_GLOBALDIR
+
+scratch_stamp=$HOME/.revenant/cache/.scratch-swept
+if [ -z "$(find "$scratch_stamp" -mmin -1440 2>/dev/null)" ]; then
+    "$prefix/bin/xmake" l -P "$root" "$root/tools/clean.lua" --scratch || echo "xmakew: the scratch retention did not finish" >&2
+fi
+
 exec "$prefix/bin/xmake" "$@"

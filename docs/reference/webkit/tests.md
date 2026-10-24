@@ -2,8 +2,8 @@
 
 Run before every deploy, from the top of revenant:
 
-    ./xmakew f -P . --webkit_host_tests=y && ./xmakew test -P .   ICU data checks on this Mac
-    ./xmakew l frameworks/WebKit/tests/device/run-batteries.lua    JavaScript batteries under jsc on the iPhone
+    ./xmakew f -P . --webkit_host_tests=y && ./xmakew test -P .   # ICU data checks on this Mac
+    ./xmakew l -P . frameworks/WebKit/tests/device/run-batteries.lua    # JavaScript batteries under jsc on the iPhone
 
 ## host
 
