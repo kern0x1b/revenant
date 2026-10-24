@@ -17,7 +17,7 @@ and the four CoreGraphics typealiases that no `.swiftinterface` declares are on 
 reason.
 
 It is a host project of its own, `frameworks/SwiftUI/tests/surface/xmake.lua`, because the gate itself must stay Lua-only and
-fast: `./xmakew l frameworks/SwiftUI/tools/api_surface.lua apple` builds it and writes the surface file,
+fast: `./xmakew l -P . frameworks/SwiftUI/tools/api_surface.lua apple` builds it and writes the surface file,
 `apple-26-surface.tsv` in the run folder (`$HOME/.revenant/cache/<task>/swiftui/api/`), which `api_invented.lua`
 reads.
 
@@ -45,11 +45,11 @@ count found, because the sets it partitions would otherwise hold vacuously at `0
 **`surface_rows.lua tree` writes four columns and `surface_diff.lua diff` reads three**, so the three-column *ours* file is made
 by `surface_rows.lua collapse`, which drops the path and collapses a row whose owner, kind and name repeat:
 
-    ./xmakew l frameworks/SwiftUI/tools/surface_rows.lua collapse ours13.tsv > ours13-3col.tsv
+    ./xmakew l -P . frameworks/SwiftUI/tools/surface_rows.lua collapse ours13.tsv > ours13-3col.tsv
 
 The refusal covers a 2-column file, a 4-column file, a 1-column *old* side, and an empty *new* side with and without `--allow-empty-new`.
 
-    $ ./xmakew l frameworks/SwiftUI/tools/surface_diff.lua diff old.tsv new.tsv      # new.tsv has two columns
+    $ ./xmakew l -P . frameworks/SwiftUI/tools/surface_diff.lua diff old.tsv new.tsv      # new.tsv has two columns
     …/new.tsv: line 1 has 2 tab-separated column(s), the 3 this diff reads are owner/kind/name; 1 line(s)
     in all (first at line 1). Refusing to read the file as the empty set: the partition below would hold
     vacuously. Use the artifact that has three columns (docs/reference/swiftui/surface.md says …).

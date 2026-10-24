@@ -161,7 +161,7 @@ int main(int argc, char **argv)
                 [arguments addObject:argument];
         }
         if (arguments.count != 2) {
-            fprintf(stderr, "usage: assets-extract [--scales 1,2,3] CATALOGUE OUTPUT-FOLDER\n");
+            fprintf(stderr, "usage: assets-extract [--scales 1,2,3] [--keep-appearance] CATALOGUE OUTPUT-FOLDER\n");
             return 64;
         }
         if (!dlopen("/System/Library/PrivateFrameworks/CoreUI.framework/CoreUI", RTLD_NOW)) {

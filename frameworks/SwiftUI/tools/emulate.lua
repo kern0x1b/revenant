@@ -1,10 +1,12 @@
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+local driver = import("driver", {rootdir = path.join(os.scriptdir(), "..", "tests", "package"), anonymous = true})
 
-local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/emulate.lua tests|snapshots|perf [options]
+local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/emulate.lua tests|snapshots|perf|package [options]
   tests                     the engine tests (SwiftUITests) as the guest's first process
   snapshots [--accept] [--only=NAME]
                             the snapshot bundle through SpringBoard, its trees against tests/data/snapshots/
   perf                      the demo's timing scenarios through SpringBoard
+  package                   the platform and demo packages installed as dpkg installs them, the demo launched and checked to draw
   --device=ID --release=V   the emulated device and release (tests: iPhone4,1 6.1.3; the others: iPod4,1 6.0)
   --seconds=N --timeout=N   xmake emulate's -s and -t]]
 
@@ -201,8 +203,31 @@ local function perf(arguments)
     lines_with(stdout, {"perf"})
 end
 
+local function package(arguments)
+    local chosen = options(arguments, {device = "iPhone4,1", release = "6.1.3", seconds = "240", timeout = "3600"})
+    local out = tree.fresh("package")
+    configure(out, {component = "SwiftUIDemo"})
+    local status, folder, log = emulate(out, "launch", chosen, "launch", "space.kern0x1b.swiftui.demo")
+    restore(out, {component = ""})
+    local text = io.readfile(log):gsub("\27%[[%d;]*m", "")
+    local found = driver.failures(text, folder)
+    if folder and os.isfile(path.join(folder, "verdict.json")) then
+        os.cp(path.join(folder, "verdict.json"), out)
+    end
+    if status ~= 0 and #found == 0 then
+        table.insert(found, string.format("xmake emulate launch exited %s", status))
+    end
+    if #found > 0 then
+        for _, failure in ipairs(found) do
+            cprint("${red}%s", failure)
+        end
+        raise("the demo's packages do not install and run; the launch log is %s", log)
+    end
+    print("the demo's packages installed, the demo ran and drew; the verdict is in %s", out)
+end
+
 function main(action, ...)
-    local actions = {tests = tests, snapshots = snapshots, perf = perf}
+    local actions = {tests = tests, snapshots = snapshots, perf = perf, package = package}
     if not actions[action] then
         raise(USAGE)
     end

@@ -22,6 +22,22 @@ LOCKDOWN_KEYS = {{"com\\.apple\\.purplebuddy-SetupState", "-string", "DONE"}}
 CRASH_LOOP = 3
 REGISTERS = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
 TIME_SCALE = 10
+UNLOCK_SLIDE = "drag 50 430 300 430 900 40"
+
+function launch_instructions(log)
+    local text = os.isfile(log) and io.readfile(log) or ""
+    local ticks = text:match("%[perf%-display%] label=launch cpu%-ticks=(%d+)")
+    return ticks and tonumber(ticks) or nil
+end
+
+function last_visible_pixels(log)
+    local text = os.isfile(log) and io.readfile(log) or ""
+    local visible
+    for pixels in text:gmatch("%[display%] frame=%d+ visible%-pixels=(%d+)") do
+        visible = tonumber(pixels)
+    end
+    return visible
+end
 
 function directory(folder)
     if not os.isdir(folder) then
@@ -493,7 +509,7 @@ local function place(tree, rootfs)
         else
             os.mkdir(path.directory(target))
             os.tryrm(target)
-            os.vrunv("cp", {"-p", source, target})
+            os.vrunv("cp", {"-c", "-p", source, target})
             local wanted, got = os.filesize(source), os.isfile(target) and os.filesize(target) or -1
             if got ~= wanted then
                 remove(path.directory(destination))
@@ -926,6 +942,7 @@ function launch_driver(opt)
                     return true
                 end
                 driver.launched = clock()
+                send("perf-begin launch")
                 settle(state, send)
                 return false
             end
@@ -933,7 +950,7 @@ function launch_driver(opt)
             local last = (os.isfile(stdout) and io.readfile(stdout) or ""):match("([^\n]*)\n$") or ""
             local idle = not driver.unlocking or (state.stable or {})[driver.unlocking]
             if idle and last:find("screen=locked", 1, true) then
-                send("unlock")
+                send(driver.unlocks == 0 and "unlock" or UNLOCK_SLIDE)
                 driver.unlocks = driver.unlocks + 1
                 driver.unlocking = (state.transition or 0) + 1
             end
@@ -942,6 +959,10 @@ function launch_driver(opt)
                 driver.settling = state.transition
             end
             if driver.settling and (state.stable or {})[driver.settling] then
+                if driver.launched and not driver.measured then
+                    send("perf-end")
+                    driver.measured = true
+                end
                 driver.pending = path.join(opt.run, string.format("app-%d.png", #driver.shots))
                 send("snapshot " .. driver.pending)
                 driver.phase = "shooting"
@@ -992,6 +1013,9 @@ function boot(opt)
                   "--display", "headless", "--gles-backend", "software", "--control-stdin",
                   "--network", opt.network or "isolated", "--frame-output", frame,
                   "--time-scale", tostring(scale)}
+    if opt.perf then
+        table.insert(argv, "--perf-summary")
+    end
     local input, control = pipe.openpair("BB")
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do

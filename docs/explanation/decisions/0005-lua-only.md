@@ -10,7 +10,7 @@ xmake modules that the rest of the build used.
 
 ## Decision
 
-Build logic, tests and tools are Lua, run by xmake (`./xmakew l`, `./xmakew test`). There is no Python, and no
+Build logic, tests and tools are Lua, run by xmake (`./xmakew l -P .`, `./xmakew test -P .`). There is no Python, and no
 shell script beside `./xmakew` (see 0003). A script that needs a system tool calls it with `os.iorunv` or
 `os.execv` from Lua.
 

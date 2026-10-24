@@ -912,15 +912,19 @@ function image_imports(binaries, others, architecture)
         table.join2(exported, defined_exports(data, image, image.base))
         loaded[binary] = {data = data, image = image}
     end
-    local imports = {}
+    local imports, flat = {}, {}
     for _, binary in ipairs(binaries) do
-        local names = {}
+        local names, looked_up = {}, {}
         for _, symbol in ipairs(undefined_imports(loaded[binary].data, loaded[binary].image)) do
             names[symbol.name] = symbol.weak
+            if symbol.ordinal == 0xFE then
+                looked_up[symbol.name] = true
+            end
         end
         imports[path.filename(binary)] = names
+        flat[path.filename(binary)] = looked_up
     end
-    return {imports = imports, exported = exported}
+    return {imports = imports, exported = exported, flat = flat}
 end
 
 function missing_imports(cachefile, binaries, root)

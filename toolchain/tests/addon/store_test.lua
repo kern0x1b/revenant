@@ -125,7 +125,7 @@ function failures(opt)
     }, "\n"))
     local store = path.join(folder, "store")
     os.mkdir(store)
-    local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder)}
+    local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder), REVENANT_GENERATION_GRACE = "0"}
     local log = path.join(folder, "xmake.log")
     local function xmake(argv, extra)
         return os.execv(os.programfile(), argv, {curdir = project, try = true, stdout = log, stderr = log,

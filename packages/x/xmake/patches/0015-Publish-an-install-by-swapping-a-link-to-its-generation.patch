@@ -11,8 +11,11 @@ installers.
 An install now builds into a new generation folder next to the published
 one, named <installdir>.g<token>. The published installdir is a link to the
 generation, and publishing swaps the link with one rename, so a reader gets
-the old install or the new one, whole. The previous generation stays until
-the next publish, so a reader that resolved it still finds its files.
+the old install or the new one, whole. The generation a publish replaces
+stays for a grace period, REVENANT_GENERATION_GRACE seconds (an hour by
+default), counted from the time it was replaced, so a reader that resolved it
+still finds its files while the grace lasts. Two publishes within the grace
+keep it; a reader that runs longer than the grace can lose its files.
 
 A generation is never renamed: the manifest and the files of the install
 record its path, so only the link moves. A failed install removes its
@@ -22,14 +25,16 @@ it the same way.
 
 Measured with a forced reinstall of a 40-file package while another process
 reads it: the unpatched xmake showed an incomplete install in 162 of 204
-reads, this one in none of 74.
+reads, this one in none of 74. The grace is an hour because the longest CI
+run on main took 48 minutes, so an hour covers a consumer as long as CI's
+longest job.
 ---
  xmake/core/package/addon.lua                  |  7 +-
- xmake/core/package/package.lua                | 76 ++++++++++++++++++-
- .../action/require/impl/actions/install.lua   | 18 +++--
+ xmake/core/package/package.lua                | 83 ++++++++++++++++++-
+ .../action/require/impl/actions/install.lua   | 18 ++--
  .../action/require/impl/import_packages.lua   |  5 +-
  .../require/impl/uninstall_packages.lua       |  2 +-
- 5 files changed, 93 insertions(+), 15 deletions(-)
+ 5 files changed, 100 insertions(+), 15 deletions(-)
 
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
 index 7c6c8fd..382ca69 100644
@@ -50,7 +55,7 @@ index 7c6c8fd..382ca69 100644
  
      local ok, errors = os.rm(installdir)
 diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
-index a4499b8..4e7a792 100644
+index a4499b8..37a54a4 100644
 --- a/xmake/core/package/package.lua
 +++ b/xmake/core/package/package.lua
 @@ -827,7 +827,7 @@ end
@@ -86,7 +91,7 @@ index a4499b8..4e7a792 100644
      local dirs = table.pack(...)
      local opt = dirs[dirs.n]
      if table.is_dictionary(opt) then
-@@ -993,6 +1001,68 @@ function _instance:installdir(...)
+@@ -993,6 +1001,75 @@ function _instance:installdir(...)
      return dir
  end
  
@@ -100,8 +105,9 @@ index a4499b8..4e7a792 100644
 +end
 +
 +-- publish the generation the install built: the published directory is a link to the generation, and the link
-+-- is swapped in one rename, so a reader gets the old install or the new one, never a part of either. The old
-+-- generation stays until the next publish, so that a reader which resolved it still finds all of its files.
++-- is swapped in one rename, so a reader gets the old install or the new one, never a part of either. The generation
++-- a publish replaces is kept for a grace period, REVENANT_GENERATION_GRACE seconds (an hour by default), counted from
++-- the time it was replaced, so that a reader which resolved it still finds all of its files while the grace lasts.
 +function _instance:staging_publish()
 +    local staging = self._STAGINGDIR
 +    if not staging then
@@ -119,6 +125,9 @@ index a4499b8..4e7a792 100644
 +        end
 +        previous = path.filename(legacy)
 +    end
++    if previous then
++        io.writefile(path.join(path.directory(publicdir), previous, ".replaced"), tostring(os.time()))
++    end
 +    local link = publicdir .. ".t" .. hash.rand32()
 +    os.ln(path.filename(staging), link)
 +    if not os.rename(link, publicdir) then
@@ -126,9 +135,12 @@ index a4499b8..4e7a792 100644
 +        os.raise("cannot publish the install of %s", self:displayname())
 +    end
 +    self._STAGINGDIR = nil
++    local grace = tonumber(os.getenv("REVENANT_GENERATION_GRACE")) or 3600
 +    local keep = {[path.filename(staging)] = true, [previous or ""] = true}
 +    for _, generation in ipairs(os.dirs(publicdir .. ".g*")) do
-+        if not keep[path.filename(generation)] then
++        local marker = path.join(generation, ".replaced")
++        local replaced = os.isfile(marker) and tonumber(io.readfile(marker))
++        if not keep[path.filename(generation)] and (not replaced or os.time() - replaced >= grace) then
 +            os.rm(generation)
 +        end
 +    end
@@ -155,7 +167,7 @@ index a4499b8..4e7a792 100644
  -- get the script directory
  function _instance:scriptdir()
      return self._SCRIPTDIR
-@@ -1148,7 +1218,7 @@ function _instance:manifest_save()
+@@ -1148,7 +1225,7 @@ function _instance:manifest_save()
      -- @see https://github.com/xmake-io/xmake/issues/2210
      --
      manifest.artifacts = {}

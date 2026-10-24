@@ -29,7 +29,7 @@ Rellume, farmdec and BlocksRuntime are packages of the package repository, pinne
 - Missing target-OS APIs are **reported, not stubbed** by the translator. They belong to the backports. When a target
   needs a backport that does not exist yet, route the request to the backports and do not improvise a stub in
   `src/runtime/`.
-- Scripts are Lua run by `./xmakew l`; no shell or Python scripts of the repository's own (an upstream's build runs what it ships, ADR 0013). No comments in code, scripts or recipes: the why
+- Scripts are Lua run by `./xmakew l -P .`; no shell or Python scripts of the repository's own (an upstream's build runs what it ships, ADR 0013). No comments in code, scripts or recipes: the why
   goes in the commit message, and what a reader needs goes in `docs/`.
 - Git is forward only, as the root `AGENTS.md` says.
 - **Git holds source only.** Run output (device crash logs and syslogs, screenshots, message traces, script output

@@ -2,6 +2,7 @@ local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..")
 local json = import("core.base.json")
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
+local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 
 local MEMBERS = {
     {
@@ -354,9 +355,8 @@ local function merged_ranges(ranges)
         local last = merged[#merged]
         if last and range.start <= last.stop and not range.remove and not last.remove then
             last.stop = math.max(last.stop, range.stop)
-            last.introduce = last.introduce and range.introduce or nil
         else
-            table.insert(merged, {start = range.start, stop = range.stop, introduce = range.introduce, remove = range.remove})
+            table.insert(merged, {start = range.start, stop = range.stop, remove = range.remove})
         end
     end
     return merged
@@ -432,21 +432,6 @@ local function typedef_declarations(text)
     end
 end
 
-local function introduced(text)
-    local pieces, position = {}, 1
-    for _, macro in ipairs(availability(text)) do
-        table.insert(pieces, text:sub(position, macro.start - 1))
-        local spelled = text:sub(macro.start, macro.stop)
-        if text:sub(macro.start, macro.start + 12) == "API_AVAILABLE" then
-            spelled = spelled:gsub("ios%([%d%.]+%)", "ios(6.0)")
-        end
-        table.insert(pieces, spelled)
-        position = macro.stop + 1
-    end
-    table.insert(pieces, text:sub(position))
-    return table.concat(pieces)
-end
-
 local function apply_ranges(text, merged)
     local edits = {}
     for _, range in ipairs(merged) do
@@ -462,8 +447,8 @@ local function apply_ranges(text, merged)
             if segment:find("API_AVAILABLE_BEGIN", 1, true) then
                 raise("a backported declaration spans the start of an availability region: %s", excerpt)
             end
-            lowered = range.introduce and introduced(segment) or without_availability(segment)
-            if not range.introduce and #availability(lowered) > 0 then
+            lowered = without_availability(segment)
+            if #availability(lowered) > 0 then
                 raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
             end
         end
@@ -506,12 +491,12 @@ local function lowering_of(text, implemented)
         end
     end
     local ranges = {}
-    local function lower(start, stop, introduce, remove)
+    local function lower(start, stop, remove)
         if not remove then
             start, stop = trimmed_of_markers(text, start, stop)
         end
         if stop >= start then
-            table.insert(ranges, {start = start, stop = stop, introduce = introduce, remove = remove})
+            table.insert(ranges, {start = start, stop = stop, remove = remove})
         end
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
@@ -519,8 +504,8 @@ local function lowering_of(text, implemented)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) then
-                lower(first, text:find("\n", stop, true) or #text, implemented.weak_classes and implemented.weak_classes[class])
+            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
+                lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -652,8 +637,8 @@ local function lowering_of(text, implemented)
         if ios_later(region.text) then
             for _, range in ipairs(ranges) do
                 if not range.remove and range.start >= region.start and range.stop <= region.ends_stop then
-                    lower(region.start, region.stop, nil, true)
-                    lower(region.ends_start, region.ends_stop, nil, true)
+                    lower(region.start, region.stop, true)
+                    lower(region.ends_start, region.ends_stop, true)
                     break
                 end
             end
@@ -1121,6 +1106,9 @@ end
 function read_all_members()
     local set = merge_sets(read_members(), read_device_members())
     set.weak_classes = {}
+    for _, name in ipairs(flat_classes.class_names()) do
+        set.weak_classes[name] = true
+    end
     for _, rows in pairs(runtime_guards.guards()) do
         for symbol in pairs(rows) do
             local class = symbol:match("^_OBJC_CLASS_%$_(.+)$")
@@ -1482,22 +1470,18 @@ local function guarded_lines(file)
     return lines
 end
 
-function lower_swift_text(text, names, types, keep, weak)
+function lower_swift_text(text, names, types, keep)
     local lines = {}
     for line in text:gmatch("([^\n]*)\n") do
         table.insert(lines, line)
     end
     types = types or {}
     keep = keep or {}
-    weak = weak or {}
     local kept, pending, scope = {}, nil, nil
     for index, line in ipairs(lines) do
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
         if major and tonumber(major) >= 7 and not keep[index] then
             pending = #kept + 1
-        elseif pending and lowered_by(line, weak, types, scope) then
-            kept[pending] = kept[pending]:gsub("iOS%s+[%d%.]+", "iOS 6.0")
-            pending = nil
         elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names)) then
             kept[pending] = false
             pending = nil
@@ -1520,16 +1504,6 @@ function lower_swift_text(text, names, types, keep, weak)
     return table.concat(buffer)
 end
 
-function swift_weak_names(set)
-    local names = {}
-    for class in pairs(set.classes) do
-        if class:startswith("NS") and set.weak_classes and set.weak_classes[class] then
-            names["type " .. class:sub(3)] = true
-        end
-    end
-    return names
-end
-
 function swift_overlays(root, set)
     for _, entry in ipairs(MEMBERS) do
         local lowering = entry.overlay
@@ -1542,7 +1516,7 @@ function swift_overlays(root, set)
     local names, types = swift_names(set), set.types or {}
     for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", "Foundation", "*.swift"))) do
         local text = io.readfile(file)
-        local lowered = lower_swift_text(text, names, types, guarded_lines(file), swift_weak_names(set))
+        local lowered = lower_swift_text(text, names, types, guarded_lines(file))
         if lowered ~= text then
             io.writefile(file, lowered)
         end

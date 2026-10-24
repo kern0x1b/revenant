@@ -370,7 +370,7 @@ For comparison: the prototype itself (half a day of work) covered "a screen with
 ```
 ./xmakew build -P . CombineTests                               # Combine and the OpenCombine tests under armv7
 ./xmakew build -P . SwiftUI SwiftUIDemo SwiftUIProbe           # the SwiftUI module, SwiftUIDemo.app and SwiftUIProbe
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots      # the demo's scenarios in the emulator, through SpringBoard
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua snapshots      # the demo's scenarios in the emulator, through SpringBoard
 ```
 
 The firmware analysis of section 2 was run with scripts that are not kept in the repository.
