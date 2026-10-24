@@ -1,6 +1,7 @@
 #import <SceneKit/SceneKit.h>
 #import <UIKit/UIKit.h>
 #import "RevenantSCNAudio.h"
+#import "RevenantSCNSoundEngine.h"
 #import "RevenantSCNActions.h"
 
 @interface SCNPhysicsRadialGravityField : SCNPhysicsField <NSSecureCoding>

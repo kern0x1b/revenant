@@ -1,4 +1,5 @@
 #import "RevenantSCNAudio.h"
+#import "RevenantSCNSoundEngine.h"
 
 static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSources;
 
@@ -9,8 +10,13 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
     BOOL _positional;
     float _volume;
     float _rate;
+    float _reverbBlend;
     BOOL _loops;
     BOOL _shouldStream;
+    unsigned int _monoBuffer;
+    unsigned int _stereoBuffer;
+    double _sampleRate;
+    unsigned long long _frames;
 }
 
 - (instancetype)initWithURL:(NSURL *)url
@@ -50,6 +56,14 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
     return source;
 }
 
+- (void)dealloc
+{
+    if ([RevenantSCNSoundEngine isActive]) {
+        [RevenantSCNSoundEngine deleteBuffer:_monoBuffer];
+        [RevenantSCNSoundEngine deleteBuffer:_stereoBuffer];
+    }
+}
+
 - (BOOL)isPositional
 {
     return _positional;
@@ -80,6 +94,16 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
     _rate = rate;
 }
 
+- (float)reverbBlend
+{
+    return _reverbBlend;
+}
+
+- (void)setReverbBlend:(float)reverbBlend
+{
+    _reverbBlend = reverbBlend;
+}
+
 - (BOOL)loops
 {
     return _loops;
@@ -107,6 +131,32 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
     }
 }
 
+- (unsigned int)revenantBufferForSpatial:(BOOL)spatial
+{
+    unsigned int *slot = spatial ? &_monoBuffer : &_stereoBuffer;
+    if (*slot == 0) {
+        [RevenantSCNSoundEngine prepare];
+        double sampleRate = 0;
+        unsigned long long frames = 0;
+        NSData *pcm = [RevenantSCNSoundEngine decodeURL:_url channels:spatial ? 1 : 2 sampleRate:&sampleRate frames:&frames];
+        if (pcm == nil) {
+            [NSException raise:NSInvalidArgumentException format:@"SCNAudioSource: %@ cannot be decoded", _url];
+        }
+        *slot = [RevenantSCNSoundEngine newBuffer:pcm channels:spatial ? 1 : 2 sampleRate:sampleRate];
+        _sampleRate = sampleRate;
+        _frames = frames;
+    }
+    return *slot;
+}
+
+- (double)revenantDuration
+{
+    if (_sampleRate <= 0) {
+        [self revenantBufferForSpatial:YES];
+    }
+    return _sampleRate > 0 ? (double)_frames / _sampleRate : 0;
+}
+
 - (NSURL *)revenantURL
 {
     return _url;
@@ -125,6 +175,7 @@ static NSMutableDictionary<NSString *, SCNAudioSource *> *RevenantSCNAudioSource
     copy->_positional = _positional;
     copy->_volume = _volume;
     copy->_rate = _rate;
+    copy->_reverbBlend = _reverbBlend;
     copy->_loops = _loops;
     copy->_shouldStream = _shouldStream;
     return copy;

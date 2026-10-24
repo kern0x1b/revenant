@@ -2,31 +2,24 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef struct {
-    float pan;
-    float volume;
-} RevenantSCNAudioMix;
-
-RevenantSCNAudioMix RevenantSCNAudioMixFor(SCNMatrix4 listenerInverse, SCNVector3 position, float sourceVolume);
-
-@class AVAudioPlayer;
-
 @interface SCNNode (RevenantSCNAudioPlayers)
 - (void)revenantRemoveFinishedAudioPlayer:(SCNAudioPlayer *)player;
-- (void)revenantUpdateAudioWithListener:(SCNNode *)listener;
+- (void)revenantUpdateAudioAtTime:(CFTimeInterval)now;
 @end
 
 @interface SCNAudioPlayer (RevenantSCNAudio)
-- (nullable AVAudioPlayer *)revenantAVPlayer;
 - (void)revenantStartOnNode:(nullable SCNNode *)node;
 - (void)revenantStop;
+- (void)revenantUpdateWithWorld:(SCNMatrix4)world time:(CFTimeInterval)now;
 - (void)revenantDidFinishPlayback;
 - (BOOL)revenantIsSpatial;
-- (float)revenantSourceVolume;
-- (void)revenantApplyMix:(RevenantSCNAudioMix)mix;
+- (BOOL)revenantIsPlaying;
+- (unsigned int)revenantSource;
 @end
 
 @interface SCNAudioSource (RevenantSCNAudio)
+- (unsigned int)revenantBufferForSpatial:(BOOL)spatial;
+- (double)revenantDuration;
 - (nullable NSURL *)revenantURL;
 - (nullable NSData *)revenantData;
 @end

@@ -66,7 +66,7 @@ local LIBRARIES = {
     {name = "CoreSpotlightBackports", folder = "CoreSpotlight", frameworks = {"CoreSpotlight", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PushKitBackports", folder = "PushKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "JavaScriptCoreBackports", folder = "JavaScriptCore", frameworks = {"JavaScriptCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "AVFoundation"}, libraries = {"FoundationBackports", "OpenGLESBackports"}, archives = {}, system = {}},
+    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "OpenAL", "AudioToolbox"}, libraries = {"FoundationBackports", "OpenGLESBackports"}, archives = {}, system = {}},
     {name = "MediaPlayerBackports", folder = "MediaPlayer", frameworks = {"MediaPlayer", "AVFoundation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessageUIBackports", folder = "MessageUI", frameworks = {"MessageUI", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessagesBackports", folder = "Messages", frameworks = {"MessageUI", "Messages", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -390,8 +390,8 @@ local CORETEXT_TESTS = {
 
 local SCENEKIT_TESTS = {
     action_math = {"RevenantSCNActionMath.m"},
-    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNAudio.m"},
-    audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNAudio.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m"},
+    audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m"},
 }
 
 local function host_tests(folder, tests, library, frameworks, options)
@@ -428,7 +428,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
-    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "AVFoundation"})
+    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})

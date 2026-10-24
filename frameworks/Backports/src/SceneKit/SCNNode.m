@@ -506,18 +506,17 @@
     [self->_audioPlayers removeObject:player];
 }
 
-- (void)revenantUpdateAudioWithListener:(SCNNode *)listener
+- (void)revenantUpdateAudioAtTime:(CFTimeInterval)now
 {
     if (self->_audioPlayers.count == 0) {
         return;
     }
-    SCNMatrix4 listenerWorld = listener ? [listener revenantPresentedWorldTransform] : SCNMatrix4Identity;
-    SCNMatrix4 listenerInverse = RevenantSCNMatrixInvert(listenerWorld);
     SCNMatrix4 world = [self revenantPresentedWorldTransform];
-    SCNVector3 position = SCNVector3Make(world.m41, world.m42, world.m43);
-    for (SCNAudioPlayer *player in self->_audioPlayers) {
-        if ([player revenantIsSpatial]) {
-            [player revenantApplyMix:RevenantSCNAudioMixFor(listenerInverse, position, [player revenantSourceVolume])];
+    for (NSUInteger index = 0; index < self->_audioPlayers.count;) {
+        NSUInteger count = self->_audioPlayers.count;
+        [self->_audioPlayers[index] revenantUpdateWithWorld:world time:now];
+        if (self->_audioPlayers.count == count) {
+            index++;
         }
     }
 }

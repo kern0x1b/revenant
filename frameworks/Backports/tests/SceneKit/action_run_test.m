@@ -308,7 +308,7 @@ int main(int argc, char **argv)
         run = revenant_run(spoken, nil);
         revenant_check(!revenant_advance(run, fake, 0.05), "play audio runs while the audio plays", @"play audio ended early");
         revenant_check(revenant_added_players.count == 1, "play audio adds one player to its node", @"no player was added");
-        revenant_check([revenant_added_players.firstObject revenantAVPlayer].isPlaying, "the node's player is playing", @"the player is not playing");
+        revenant_check([revenant_added_players.firstObject revenantIsPlaying], "the node's player is playing", @"the player is not playing");
         revenant_check(revenant_advance(run, fake, 0.1), "play audio that waits ends with the audio", @"play audio is still running");
         [[NSFileManager defaultManager] removeItemAtURL:clipURL error:NULL];
 

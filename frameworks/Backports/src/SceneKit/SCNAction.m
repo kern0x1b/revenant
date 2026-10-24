@@ -15,7 +15,6 @@
     BOOL _repeatsForever;
     BOOL _containsRandom;
     SCNAudioSource *_audioSource;
-    SCNAudioPlayer *_audioPlayer;
     BOOL _waitsForAudio;
     RevenantSCNActionBlock _block;
     RevenantSCNActionCustomBlock _customBlock;
@@ -68,13 +67,6 @@
     return _waitsForAudio;
 }
 
-- (SCNAudioPlayer *)revenantAudioPlayer
-{
-    if (_audioPlayer == nil) {
-        _audioPlayer = [SCNAudioPlayer audioPlayerWithSource:_audioSource];
-    }
-    return _audioPlayer;
-}
 
 - (RevenantSCNActionKind)revenantKind
 {
@@ -140,7 +132,7 @@
 {
     switch (_kind) {
         case RevenantSCNActionKindPlayAudio:
-            return _waitsForAudio ? [self revenantAudioPlayer].revenantAVPlayer.duration : 0;
+            return _waitsForAudio ? [_audioSource revenantDuration] : 0;
         case RevenantSCNActionKindSequence: {
             NSTimeInterval total = 0;
             for (SCNAction *child in _children) {
