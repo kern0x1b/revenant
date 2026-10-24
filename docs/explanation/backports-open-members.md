@@ -83,3 +83,36 @@ Decisions still open:
 - `WKSecurityOrigin`, `WKWindowFeatures`, `WKDownload` and `WKSnapshotConfiguration` need a decision on what the
   `UIWebView` engine can report: an origin, a download and a snapshot are not `UIWebView` features. A loud stub, named in
   the open gaps of `frameworks/Backports/README.md`, is the default if the engine cannot report them.
+
+## Telegram 13.0 members: the crutches left
+
+The members of the Telegram 13.0 series are implemented and lowered, and each has a test. These are the places where a
+member stands on something weaker than a host oracle, or on an assumption a device would have to confirm.
+
+- AVFAudio data sources (`src/AVFAudio/AVAudioSessionPortDescription7.m`): no host oracle, because the member is
+  `API_UNAVAILABLE(macos)`. The test is a contract check of the SDK declarations and the backport source
+  (`tests/ios6_members_test.lua`). The iOS 6 behaviour is not run on a device. It rests on the SDK's `ios(6.0)` annotation
+  of `AVAudioSession.inputDataSource`, and on the port answering for the current input only.
+- CLGeocoder postal address (`src/CoreLocation/CLGeocoder+PostalAddress11.m`): a contract test only. Geocoding needs the
+  network, so there is no offline behavioural oracle. The mapping is the existing `RevenantContacts` one, reached through
+  a forward declaration and a link dependency on `ContactsBackports`. The locale is ignored, as in
+  `CLGeocoder+PreferredLocale.m`.
+- NSTextAttachment attachment bounds (`src/UIKit/NSTextAttachment+Text7.m`): the host test
+  (`tests/attachment_bounds_test.lua`) compiles the backport against AppKit. Its shim maps `valueWithCGRect:` and
+  `CGRectValue` to the macOS names. The empty attachment is not compared, because AppKit returns a 32 by 32 placeholder
+  icon there and the iOS documentation says zero.
+- NWPath `usesInterfaceType:` (`src/Network/NWPathMonitor.swift`): the interface comes from the flags and the interface
+  names. On a Mac whose `en0` is wired, the host answers wired and the backport answers wifi. `NWConnection`'s path is the
+  default route, not the connection's own route, so a loopback connection reports wifi where Apple reports loopback.
+  The Swift code is not built for armv7 here; the swift job builds it.
+
+Lowering of protocol properties: `protocol_status` counts a property member of a protocol as implemented only when a
+class that adopts the protocol implements it. Name matches in unrelated classes do not count, so `title` or `length` on
+one class does not lower `MKAnnotation` or `MTLBuffer`. Method members keep their name-based rule.
+
+CKContainer in Swift: not reproduced. The typecheck of `CloudData.swift`'s `fetchRawData` body
+(`CKContainer.default()`, `database(with:)`, `CKRecord.ID`, `CKError.errorDomain`) passes at `armv7-apple-ios6.1.3`
+against the iOS 26.2 SDK with the lowered overlay, against the same SDK with the pre-change overlay, and against the raw
+iOS 16.4 SDK. The `CKRecord` blocker in `reference/backports/CloudKit/CKRecord.md` is about the 16.4 generator copy of
+the CloudKit headers and the `CKRecord` class, not `CKContainer`. The configuration that loses `CKContainer` is not known
+here; a Swift error text and the exact typecheck command are what would settle it.
