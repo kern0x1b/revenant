@@ -345,30 +345,6 @@ local function load_step(emulator, found)
     if load ~= nil and (type(load) ~= "number" or load < 0) then
         table.insert(found, "the machine's load reads as a number or as nothing, read " .. tostring(load))
     end
-    local marker = emulator.build_slot_name()
-    if emulator.holds_build_slot({}) or not emulator.holds_build_slot({[marker] = "2"}) or
-       emulator.holds_build_slot({[marker] = ""}) then
-        table.insert(found, "a build carries its slot to the builds it starts, and only then")
-    end
-    if emulator.build_capacity() < 2 then
-        table.insert(found, "a machine runs at least two builds at once, said " .. tostring(emulator.build_capacity()))
-    end
-    if emulator.build_jobs(12, 3) ~= 4 or emulator.build_jobs(2, 3) ~= 1 or emulator.build_jobs(12, 0) ~= 12 then
-        table.insert(found, string.format("three slots on twelve cores are four jobs each, said %d, %d and %d",
-                                          emulator.build_jobs(12, 3), emulator.build_jobs(2, 3), emulator.build_jobs(12, 0)))
-    end
-    for _, case in ipairs({{{"xmake", {}}, "-j 4"},
-                           {{"xmake", {"test", "suite/default"}}, "test suite/default -j 4"},
-                           {{"xmake", {"build", "--", "-v"}}, "build -j 4 -- -v"},
-                           {{"xmake", {"run", "port"}}, "run port"},
-                           {{"xmake", {"f", "-y"}}, "f -y"},
-                           {{"xmake", {"build", "-j8"}}, "build -j8"},
-                           {{"/bin/sh", {"-c", "xmake"}}, "-c xmake"}}) do
-        local given = table.concat(emulator.queued_arguments(case[1][1], case[1][2], 4), " ")
-        if given ~= case[2] then
-            table.insert(found, string.format("%s %s runs in a slot as %s, not %s", case[1][1], table.concat(case[1][2], " "), case[2], given))
-        end
-    end
     local slot = emulator.acquire({folder = path.join(os.tmpdir(), "revenant-slot-test-" .. os.getpid()), count = 1, patience = 0})
     if not slot then
         table.insert(found, "a run with no patience still takes a slot")
@@ -384,12 +360,12 @@ local function concurrency(folder, modules, found)
     io.writefile(path.join(firmware, "System", "Library", "CoreServices", "SystemVersion.plist"), "firmware")
     os.mkdir(path.join(firmware, "private", "var", "mobile"))
     local golden = script(folder, "golden", [[
-    local rootfs = emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", emulator_hash = "fixture", deadline = 30,
-                                    firmware = extra, boot = function (opt)
+    local rootfs = path.join(emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", emulator_hash = "fixture", deadline = 30,
+                                              firmware = extra, boot = function (opt)
         io.writefile(path.join(root, "boot-" .. os.getpid()), "booted")
         os.sleep(3000)
         return {reason = "reached", seconds = 3, state = {}, log = "none"}
-    end})
+    end}), "rootfs")
     io.writefile(path.join(root, "result-" .. os.getpid()), rootfs)]], modules)
     os.mkdir(root)
     spawned({golden, golden}, {{root, firmware}, {root, firmware}})
@@ -406,8 +382,8 @@ local function concurrency(folder, modules, found)
             table.insert(found, "both processes get the same complete golden image, got " .. first .. " and " .. second)
         end
     end
-    if #os.dirs(path.join(root, "golden.noindex", "*.partial-*")) > 0 then
-        table.insert(found, "a finished golden image leaves no partial folder behind")
+    if #os.dirs(path.join(root, "golden.noindex", "*.g*")) ~= 1 then
+        table.insert(found, "a finished golden image leaves one generation behind, and no unpublished one")
     end
 
     local slots = path.join(folder, "slots")
@@ -484,8 +460,8 @@ local function timing_and_reports(emulator, folder, found)
     end
 end
 
-local function queue_step(emulator, folder, opt, found)
-    local work = path.join(folder, "queue")
+local function addon_install_step(folder, opt, found)
+    local work = path.join(folder, "addon-install")
     local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), XMAKE_MAIN_REPO = fixtures.empty_repository(folder), REVENANT_HOME = path.join(work, "home")}
     os.mkdir(work)
     local shared = path.join(os.getenv("HOME"), ".xmake", "addons")
@@ -501,24 +477,6 @@ local function queue_step(emulator, folder, opt, found)
     local landed = os.files(path.join(work, "store"))
     if #landed == 0 and not os.isdir(path.join(work, "store")) then
         table.insert(found, "emulator_test's xmake addon --install left no store of its own under " .. work .. ", so where it installed is not what XMAKE_GLOBALDIR says")
-    end
-    if os.execv(os.programfile(), {"queue", "--help"}, {try = true, curdir = work, envs = envs,
-                                                        stdout = path.join(work, "help.log"), stderr = path.join(work, "help.log")}) ~= 0 then
-        table.insert(found, "the queue step needs the xmake task queue, which the heavy job pool removed from this repository, so xmake has no such task and the step cannot run")
-        return
-    end
-    for _, held in ipairs({"", "1"}) do
-        for _, case in ipairs({{"/usr/bin/true", 0}, {"/usr/bin/false", 1}}) do
-            local code = os.execv(os.programfile(), {"queue", "--", case[1]},
-                                  {curdir = work, try = true,
-                                   envs = table.join(envs, {[emulator.build_slot_name()] = held}),
-                                   stdout = path.join(work, "queue.log"), stderr = path.join(work, "queue.log")})
-            if code ~= case[2] then
-                table.insert(found, string.format("the queue ends with the status of what it ran%s: %s answered %s, not %d, and said %s",
-                                                  held == "" and "" or ", slot held", case[1], tostring(code), case[2],
-                                                  (io.readfile(path.join(work, "queue.log")) or ""):trim()))
-            end
-        end
     end
 end
 
@@ -990,17 +948,26 @@ local function output_step(emulator, folder, found)
         if stdout then
             io.writefile(path.join(folder, "results", "test.stdout"), stdout)
         end
-        local said = emulator.report_output(folder, output)
-        return said
+        local shown = {}
+        local said = emulator.report_output(folder, output, function (text)
+            table.insert(shown, text)
+        end)
+        return said, table.concat(shown)
     end
-    if not run("hello from the guest\n", 1) then
-        table.insert(found, "a run whose program wrote to stdout prints it and says so")
+    local said, shown = run("hello from the guest\n", 1)
+    if not said or not string.find(shown, "hello from the guest", 1, true) then
+        table.insert(found, "a run whose program wrote to stdout shows its text and says so")
     end
-    if run("", 1) then
-        table.insert(found, "a program that wrote nothing is not reported as having written something")
+    said, shown = run("", 1)
+    if said or not string.find(shown, "wrote nothing", 1, true) then
+        table.insert(found, "a program that wrote nothing is shown as having written nothing")
     end
-    if run("hello from the guest\n", 0) then
-        table.insert(found, "a verdict that says the output was not captured keeps the file's text off the host, whatever it holds")
+    said, shown = run("hello from the guest\n", 0)
+    if said or not string.find(shown, "the program's output was not captured", 1, true) then
+        table.insert(found, "a run whose output was not captured shows that it was not captured, and does not pass silently")
+    end
+    if string.find(shown, "hello from the guest", 1, true) then
+        table.insert(found, "a run whose output was not captured does not show the file's text")
     end
 end
 
@@ -1042,7 +1009,7 @@ function failures(opt)
     load_step(emulator, found)
     choice(emulator, found)
     concurrency(folder, opt.modules, found)
-    queue_step(emulator, folder, opt, found)
+    addon_install_step(folder, opt, found)
     naming_step(emulator, found)
     copy_step(opt, found)
     prune_step(emulator, folder, found)

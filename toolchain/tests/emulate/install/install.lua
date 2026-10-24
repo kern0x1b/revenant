@@ -10,6 +10,7 @@ function main(device, release)
     local here = os.scriptdir()
     local out = runs.folder("emulate-install")
     os.mkdir(out)
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
 
     local existing = runs.images_of(PROJECT)[1]
     if existing then

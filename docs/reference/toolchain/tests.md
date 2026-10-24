@@ -24,9 +24,9 @@ prints each failure and fails. Run one target with `./xmakew test -P . 'toolchai
 `toolchain_device` and `recompiler_device` are outside the default run by declaration: without `--tests=device` they
 are not in the project, so `./xmakew test -P .` does not see them. `swift_test` reads the system libraries of a firmware
 release held under `~/.revenant/dyld`, and when they are not held it fails and names
-`./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` runs its own xmake addon install and then a queue step that
-runs the xmake task `queue`; the heavy job pool removed that task, so the step fails and names it, and the other checks
-of the suite pass.
+`./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` checks its own xmake addon install: the addon lands in
+the store the run names, and the machine's own addons are left alone. The `emulate` tests under `toolchain/tests/emulate`
+set `REVENANT_EMULATOR_ROOT` to a folder of their run, so they write no golden image to the machine's emulator folder.
 
 `macho_test` builds its encrypted armv7 image with the packaged ld64 and the packaged iPhone OS SDK, and adds the
 `LC_ENCRYPTION_INFO` command itself, in the header's padding, as the system linker of older Xcode versions writes it:
