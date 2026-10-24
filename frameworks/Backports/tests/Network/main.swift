@@ -227,24 +227,16 @@ func refusedConnection() {
 func pathStatus() {
     let monitor = NWPathMonitor()
     let first = DispatchSemaphore(value: 0)
-    var statuses: [String] = []
     var loopback = false
-    var uses: [String] = []
     monitor.pathUpdateHandler = { path in
-        statuses.append("\(path.status)")
         loopback = path.availableInterfaces.contains { $0.type == .loopback }
-        uses = [NWInterface.InterfaceType.wifi, .cellular, .wiredEthernet, .loopback, .other].map { "\($0) \(path.usesInterfaceType($0))" }
         first.signal()
     }
     monitor.start(queue: queue)
     print(first.wait(timeout: .now() + wait) == .success ? "path update delivered" : "path update missing")
     monitor.cancel()
     queue.sync {
-        print("path first status \(statuses.first ?? "none")")
         print("path has loopback interface \(loopback)")
-        for line in uses {
-            print("path uses \(line)")
-        }
     }
 }
 
