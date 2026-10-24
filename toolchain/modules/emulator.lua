@@ -668,6 +668,17 @@ function scan(state, line)
     elseif line:startswith("[display] frame=") then
         state.frames = (state.frames or 0) + 1
     end
+    local perf_begin = line:match("^REVENANT%-PERF%-BEGIN (%S+)$")
+    if perf_begin then
+        state.perf_begin = perf_begin
+    elseif line == "REVENANT-PERF-END" then
+        state.perf_end = true
+    end
+    if line == "[control] perf-begin label=photos-thumbnail" then
+        state.perf_started = true
+    elseif line:startswith("[perf-display] label=photos-thumbnail ") then
+        state.perf_finished = true
+    end
     local started = line:match("^%[transition%] input%-complete id=(%d+)") or line:match("^%[transition%] settle id=(%d+)")
     if started then
         state.transition = math.max(state.transition or 0, tonumber(started))
@@ -992,6 +1003,9 @@ function boot(opt)
                   "--display", "headless", "--gles-backend", "software", "--control-stdin",
                   "--network", opt.network or "isolated", "--frame-output", frame,
                   "--time-scale", tostring(scale)}
+    if opt.perf_summary then
+        table.insert(argv, "--perf-summary")
+    end
     local input, control = pipe.openpair("BB")
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do

@@ -91,11 +91,31 @@ local function run(app, guest)
             emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
             local results = emulator.results(rootfs)
             local verdict_file = path.join(results, "verdict.json")
+            local perf_ready = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-ready")
+            local perf_done = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-done")
             local booted = emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
                                           cache = path.join(home_cache(), "host-cache"),
                                           tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
-                                          scale = emulator.TIME_SCALE, deadline = 900,
-                                          stop = function () return os.isfile(verdict_file) end})
+                                          scale = emulator.TIME_SCALE, deadline = 900, perf_summary = true,
+                                          stop = function (state, control)
+                                              if state.perf_begin and not state.perf_begin_sent then
+                                                  control("perf-begin " .. state.perf_begin)
+                                                  state.perf_begin_sent = true
+                                              end
+                                              if state.perf_started and not state.perf_ready then
+                                                  io.writefile(perf_ready, "ready\n")
+                                                  state.perf_ready = true
+                                              end
+                                              if state.perf_end and not state.perf_end_sent then
+                                                  control("perf-end")
+                                                  state.perf_end_sent = true
+                                              end
+                                              if state.perf_finished and not state.perf_done then
+                                                  io.writefile(perf_done, "done\n")
+                                                  state.perf_done = true
+                                              end
+                                              return os.isfile(verdict_file)
+                                          end})
             local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
                                                                      scale = booted.scale, host_seconds = booted.seconds,
                                                                      reports = emulator.reports(rootfs)})
