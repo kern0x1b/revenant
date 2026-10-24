@@ -125,7 +125,9 @@ here; a Swift error text and the exact typecheck command are what would settle i
   and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
   - The passcode predicate. The 6.1.3 MobileKeyBag exports `MKBGetDeviceLockState` and `MKBDeviceUnlockedSinceBoot`, and
     its strings name no passcode key, so the return code that means "a passcode is set" is not known from the cache. A
-    measurement with and without a passcode, on a device or the emulator, settles it.
+    measurement with and without a passcode, on a device or the emulator, settles it. The case `keybag_lock_state` expects
+    3 on a fresh image, but it has no result yet: the runtime driver runs on this host did not return for it, and the
+    lock it waits on is shared with other worktrees' runs.
   - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
     defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
     and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.
@@ -143,17 +145,20 @@ here; a Swift error text and the exact typecheck command are what would settle i
   annotation, and the backport already compiles against that declaration. It is not a symbol, so there is nothing to
   backport and no oracle to compare.
 - `PKPaymentButton`: a `UIButton` subclass. Its title is the Apple logo (U+F8FF) followed by "Pay", with the type's phrase
-  before it (Buy, Donate, Check out, and so on). The logo is in the iOS 6.1.3 system font: the 6.1.3 Helvetica Neue file in
+  before it. The phrases checked against Apple's documentation are Buy ("Buy with"), InStore ("Pay with"), Support,
+  Contribute, Donate, Book, and SetUp ("Set up" followed by Apple Pay, as the HIG shows it). The plain type and the types
+  Checkout, Subscribe, Reload, AddMoney, TopUp, Order, Rent, Tip and Continue have no confirmed phrase, so they show the
+  logo and "Pay" alone; the phrases for those are open. The SDK headers carry no per-type text. The logo is in the iOS 6.1.3 system font: the 6.1.3 Helvetica Neue file in
   the firmware maps U+F8FF to a glyph, and a control code point maps to none. The default corner radius is 4, Apple's
   default. The white style is a white fill with black text, the outline style adds a 1-point black border, and the black
-  style is a black fill with white text. The phrase for each type is not checked against Apple's guidelines, and the logo
-  is the only artwork. Telegram shows the button only when `PKPaymentAuthorizationViewController.canMakePayments(usingNetworks:)`
+  style is a black fill with white text. The logo is the only artwork. Telegram shows the button only when `PKPaymentAuthorizationViewController.canMakePayments(usingNetworks:)`
   is true, and both backport implementations answer NO, so the button stays hidden. The iOS 26 selectors ignore
   `disableCardArt`, because the button draws no card art. The contract test checks the SDK header and the source.
 - IOSurface: 40 of the SDK's functions are forwarded to the system's private `IOSurface` library, and each one is in the
   iOS 6.1.3 export table. Six component functions and `IOSurfaceGetSubsampling`, `IOSurfaceAllowsPixelSizeCasting` and
   `IOSurfaceSetOwnershipIdentity` are not wrapped, because iOS 6.1.3 does not export them. A wrapper that cannot find a symbol
-  aborts with the name. The program has not run on the 6.1.3 emulator. `xmake emulate` needs the revenant addon, and
+  aborts with the name. The case `iosurface_surface` runs the host oracle's operations on the 6.1.3 emulator, but it has no
+  result yet, for the same reason as the keybag case. `xmake emulate` needs the revenant addon, and
   installing `revenant v0.8.17` fails on this host with a package-name mismatch. The in-repo emulate fixtures configure
   the whole package set first, which pulls swift and webkit, and the rules forbid building swift here.
 - Deferred, not implemented: `MPSImageBilinearScale`, `MTLBinaryArchive` and `CIRenderDestination`. The Metal backport

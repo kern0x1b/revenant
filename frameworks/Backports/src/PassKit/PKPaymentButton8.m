@@ -8,35 +8,26 @@ static NSString *RevenantPaymentButtonTitle(PKPaymentButtonType type)
         case PKPaymentButtonTypeBuy:
             return @"Buy with  Pay";
         case PKPaymentButtonTypeSetUp:
-            return @"Set Up with  Pay";
+            return @"Set up  Pay";
         case PKPaymentButtonTypeInStore:
             return @"Pay with  Pay";
         case PKPaymentButtonTypeDonate:
             return @"Donate with  Pay";
-        case PKPaymentButtonTypeCheckout:
-            return @"Check out with  Pay";
         case PKPaymentButtonTypeBook:
             return @"Book with  Pay";
-        case PKPaymentButtonTypeSubscribe:
-            return @"Subscribe with  Pay";
-        case PKPaymentButtonTypeReload:
-            return @"Reload with  Pay";
-        case PKPaymentButtonTypeAddMoney:
-            return @"Add Money with  Pay";
-        case PKPaymentButtonTypeTopUp:
-            return @"Top Up with  Pay";
-        case PKPaymentButtonTypeOrder:
-            return @"Order with  Pay";
-        case PKPaymentButtonTypeRent:
-            return @"Rent with  Pay";
         case PKPaymentButtonTypeSupport:
             return @"Support with  Pay";
         case PKPaymentButtonTypeContribute:
             return @"Contribute with  Pay";
+        case PKPaymentButtonTypeCheckout:
+        case PKPaymentButtonTypeSubscribe:
+        case PKPaymentButtonTypeReload:
+        case PKPaymentButtonTypeAddMoney:
+        case PKPaymentButtonTypeTopUp:
+        case PKPaymentButtonTypeOrder:
+        case PKPaymentButtonTypeRent:
         case PKPaymentButtonTypeTip:
-            return @"Tip with  Pay";
         case PKPaymentButtonTypeContinue:
-            return @"Continue with  Pay";
         case PKPaymentButtonTypePlain:
         default:
             return @" Pay";
