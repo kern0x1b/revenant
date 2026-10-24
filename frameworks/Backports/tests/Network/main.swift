@@ -227,10 +227,8 @@ func refusedConnection() {
 func pathStatus() {
     let monitor = NWPathMonitor()
     let first = DispatchSemaphore(value: 0)
-    var statuses: [String] = []
     var loopback = false
     monitor.pathUpdateHandler = { path in
-        statuses.append("\(path.status)")
         loopback = path.availableInterfaces.contains { $0.type == .loopback }
         first.signal()
     }
@@ -238,7 +236,6 @@ func pathStatus() {
     print(first.wait(timeout: .now() + wait) == .success ? "path update delivered" : "path update missing")
     monitor.cancel()
     queue.sync {
-        print("path first status \(statuses.first ?? "none")")
         print("path has loopback interface \(loopback)")
     }
 }
