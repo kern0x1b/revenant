@@ -5427,7 +5427,7 @@ void set_machine_image_code_region(ImageCodeRegion region)
 {
     const std::lock_guard lock { machine_image_code_mutex };
     const bool enabled = region.end > region.begin && !region.identity.empty();
-    if (machine_image_slab && (!enabled || region.identity != machine_image_region.identity)) {
+    if (machine_image_slab && (!enabled || region.identity != machine_image_region.identity || region.cache_bytes != machine_image_region.cache_bytes)) {
         retired_image_slabs.push_back(std::move(machine_image_slab));
         machine_image_slab.reset();
     }

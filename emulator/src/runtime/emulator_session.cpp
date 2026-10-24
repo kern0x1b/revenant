@@ -289,7 +289,13 @@ void EmulatorSession::run()
         set_machine_image_code_region(ImageCodeRegion {
             options.rootfs.string() + "|" +
                 std::string { device.identity.product_type },
-            bounds.shared_region_base, bounds.shared_region_end });
+            bounds.shared_region_base, bounds.shared_region_end,
+            options.image_slab_bytes.value_or(0U) });
+        output.line("[jit] image-slab-mib=" +
+                    (options.image_slab_bytes
+                            ? std::to_string(*options.image_slab_bytes /
+                                             1024U / 1024U)
+                            : std::string { "shared" }));
     } else {
         set_machine_image_code_region(ImageCodeRegion { });
     }

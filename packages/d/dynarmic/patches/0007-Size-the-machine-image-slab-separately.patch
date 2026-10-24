@@ -1,0 +1,28 @@
+diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
+--- a/src/dynarmic/interface/A32/config.h
++++ b/src/dynarmic/interface/A32/config.h
+@@ -180,6 +180,7 @@
+     NativeCodeSlab* image_native_code_slab = nullptr;
+     std::uint32_t image_code_begin = 0;
+     std::uint32_t image_code_end = 0;
++    size_t image_code_cache_size = 0;  // bytes; 0 sizes the image slab like code_cache_size
+ 
+     // Optional executor-owned indirection used by generated host callbacks.
+     // The link must remain alive for the Jit and contain a UserCallbacks*
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -838,8 +838,12 @@
+                             : native_code_slab;
+         image_slab_enabled = image_code_slab != native_code_slab && this->conf.image_code_end > this->conf.image_code_begin;
+         if (image_slab_enabled) {
++            auto image_config = this->conf;
++            if (this->conf.image_code_cache_size != 0) {
++                image_config.code_cache_size = this->conf.image_code_cache_size;
++            }
+             image_code_slab->initialize(
+-                this->conf, jit, &jit_state, &GetCurrentBlockThunk, this, true);
++                image_config, jit, &jit_state, &GetCurrentBlockThunk, this, true);
+             image_code_slab->register_executor(&jit_state, &jit_state);
+         }
+         if (this->conf.lookup_link) {

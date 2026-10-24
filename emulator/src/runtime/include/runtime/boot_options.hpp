@@ -54,6 +54,7 @@ struct BootOptions {
     std::optional<std::size_t> cores;
     std::optional<std::size_t> jit_cache_bytes;
     std::optional<std::size_t> jit_cache_budget_bytes;
+    std::optional<std::size_t> image_slab_bytes;
     std::size_t artifact_memory_bytes { 64U * 1024U * 1024U };
     std::optional<std::size_t> artifact_disk_bytes;
     JitProfileMode jit_profile_mode { JitProfileMode::Off };

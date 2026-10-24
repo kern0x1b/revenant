@@ -588,6 +588,7 @@ struct ImageCodeRegion {
     std::string identity;
     std::uint32_t begin { };
     std::uint32_t end { };
+    std::size_t cache_bytes { };
 };
 
 void set_machine_image_code_region(ImageCodeRegion region);

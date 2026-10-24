@@ -2973,6 +2973,7 @@ private:
             config.image_native_code_slab = image_slab;
             config.image_code_begin = image_region.begin;
             config.image_code_end = image_region.end;
+            config.image_code_cache_size = image_region.cache_bytes;
         }
         config.callbacks_link = runtime_link_cell_address_;
         if (performance_counters().native_lookup_diagnostics_enabled()) {
