@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
+#import "../revenant_alias.h"
 
 @interface RevenantPresentationIntentState : NSObject
 @property NSInteger intentKind;
@@ -37,7 +38,7 @@ static BOOL revenant_is_span(NSInteger kind)
     return kind == NSPresentationIntentKindListItem || kind == NSPresentationIntentKindBlockQuote;
 }
 
-static NSInteger revenant_indentation_level(NSPresentationIntent *intent)
+static NSInteger revenant_indentation_level(id intent)
 {
     NSUInteger capacity = 16, count = 0;
     NSPresentationIntent *__unsafe_unretained *chain = (NSPresentationIntent *__unsafe_unretained *)malloc(capacity * sizeof(*chain));
@@ -75,12 +76,12 @@ static NSInteger revenant_indentation_level(NSPresentationIntent *intent)
     return level;
 }
 
-static RevenantPresentationIntentState *revenant_state(NSPresentationIntent *intent)
+static RevenantPresentationIntentState *revenant_state(id intent)
 {
     return objc_getAssociatedObject(intent, &RevenantPresentationIntentStateKey);
 }
 
-static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSInteger identity, NSPresentationIntent *parent)
+static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSInteger identity, id parent)
 {
     NSPresentationIntent *intent = [NSPresentationIntent alloc];
     struct objc_super super = { .receiver = intent, .super_class = [NSObject class] };
@@ -100,7 +101,9 @@ static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSIn
     return intent;
 }
 
-@implementation NSPresentationIntent
+REVENANT_ALIAS(NSPresentationIntent)
+
+@implementation REVENANT_ALIAS_CLASS(NSPresentationIntent) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {
@@ -245,7 +248,7 @@ static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSIn
 
 - (BOOL)isEqualToPresentationIntentIgnoringIdentity:(NSPresentationIntent *)other
 {
-    if (other == self)
+    if ((id)other == self)
         return YES;
     if (![other isKindOfClass:[NSPresentationIntent class]])
         return NO;
@@ -269,7 +272,7 @@ static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSIn
 
 - (BOOL)isEquivalentToPresentationIntent:(NSPresentationIntent *)other
 {
-    if (other == self)
+    if ((id)other == self)
         return YES;
     if (![other isKindOfClass:[NSPresentationIntent class]])
         return NO;
