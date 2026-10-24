@@ -10,6 +10,7 @@
 
 #include "kernel/graphics_services_input.hpp"
 #include "kernel/kernel.hpp"
+#include "foundation/output.hpp"
 #include "foundation/performance.hpp"
 
 #include <cstdint>
@@ -137,7 +138,7 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
                 message << ',';
             message << '"' << (*arguments)[index] << '"';
         }
-        message << '\n';
+        message << " host-ms=" << host_unix_milliseconds() << '\n';
         output_.write(message.str());
         cpu.halt(Dynarmic::HaltReason::UserDefined6);
         return true;

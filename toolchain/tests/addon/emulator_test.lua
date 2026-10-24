@@ -64,6 +64,13 @@ local function verdicts(emulator, folder, found)
             table.insert(found, string.format("a %s run is %s..., the verdict says %s", case[1], case[4], described))
         end
     end
+    local daemons = {LOGS.springboard[1], LOGS.springboard[3]}
+    local lean_run = recorded(folder, "lean-daemons", daemons)
+    local lean = emulator.describe(emulator.verdict(emulator.scan_file(path.join(lean_run, "emulator.log"), {}),
+                                   path.join(lean_run, "results"), {frame = path.join(lean_run, "frame.png"), lean = true}))
+    if not lean:startswith("boot-blocked(runner") then
+        table.insert(found, "a lean run without SpringBoard is blocked at the runner, and the verdict says " .. lean)
+    end
     local state = emulator.scan_file(path.join(recorded(folder, "migrated", table.join(LOGS.migrating, {"[process] exit pid=75 status=0"})), "emulator.log"), {})
     if not state.migrated or not state.springboard then
         table.insert(found, "DataMigrator exiting cleanly after SpringBoard started is the golden image's milestone")

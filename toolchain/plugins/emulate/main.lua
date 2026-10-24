@@ -140,6 +140,7 @@ local function run(ctx, argv)
     emulator.clone(image, rootfs)
     local seconds = tonumber(option.get("seconds"))
     emulator.install_runner(rootfs, ctx.guest, argv, seconds, ctx.version)
+    emulator.lean_run(rootfs)
     local results = emulator.results(rootfs)
     local ok, result, booted, errors = try {
         function ()
@@ -149,7 +150,7 @@ local function run(ctx, argv)
             local reports = emulator.reports(rootfs)
             local verdict = emulator.verdict(boot.state, results, {frame = boot.frame, errors = boot.errors,
                                                                    scale = boot.scale, host_seconds = boot.seconds,
-                                                                   reports = reports})
+                                                                   reports = reports, lean = true})
             os.cp(results, path.join(folder, "results"))
             for _, report in ipairs(reports) do
                 os.cp(report.file, path.join(folder, "results", "reports", path.filename(report.file)))
