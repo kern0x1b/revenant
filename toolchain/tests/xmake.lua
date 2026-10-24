@@ -83,6 +83,7 @@ local packages = {"ld64", "ldid", "iphoneos-sdk", "llvm"}
 
 suites("toolchain_light", light, {})
 suites("toolchain_packages", packaged, packages)
+suites("toolchain_packages", {"sincospi_test"}, packages)
 if get_config("tests") == "device" then
     suites("toolchain_device", device, table.join(packages, {"swift"}), "device")
 

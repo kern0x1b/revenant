@@ -16,6 +16,66 @@ local MEMBERS = {
         },
     },
     {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "float preferred CF_REFINED_FOR_SWIFT;",
+            replace = "float preferred;",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
+        member = "CAFrameRateRange",
+        header = {
+            name = "QuartzCore",
+            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
+            file = "CAFrameRateRange.h",
+            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            replace = "",
+        },
+    },
+    {
         member = "NSJSONWritingSortedKeys",
         header = {
             name = "Foundation",
@@ -495,7 +555,7 @@ local function lowering_of(text, implemented)
             local first = statement_start(text, start, true)
             local last = first and statement_end(text, stop)
             local segment = first and text:sub(first, last) or ""
-            if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
+            if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) and not segment:find("API_AVAILABLE_BEGIN", 1, true) then
                 lower(first, last)
             elseif text:match("^%s*API_AVAILABLE%(", stop + 1) or text:match("^%s*=", stop + 1) then
                 local ending = constant_end(text, start)
@@ -1142,6 +1202,22 @@ end
 
 function build_overlay(sdk, out, set)
     local changed = member_headers(sdk)
+    local simd = path.join(include_directory(out), "simd", "math.h")
+    os.mkdir(path.directory(simd))
+    write_if_changed(simd, table.concat({
+        "#if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 70000",
+        "#ifdef __cplusplus",
+        "extern \"C\" {",
+        "#endif",
+        "void __sincospif(float, float *, float *);",
+        "void __sincospi(double, double *, double *);",
+        "#ifdef __cplusplus",
+        "}",
+        "#endif",
+        "#endif",
+        "#include_next <simd/math.h>",
+        "",
+    }, "\n"))
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local lowered = lowering_of(text, set)
