@@ -60,17 +60,29 @@ jobs:
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          restore-keys: |
+            xmake-global-checks-${{ runner.os }}-
 
       - name: Install the packages
         id: configure
         timeout-minutes: 30
-        run: ./xmakew f -P . -y --emulator_vulkan=n
+        run: |
+          ./xmakew f -P . -y --emulator_vulkan=n 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/cache/restore@v4
         id: dyld
         with:
           path: ~/.revenant/dyld/6.0
           key: dyld-shared-cache-6.0-armv7-v1
+
+      - uses: actions/cache/restore@v4
+        id: inventory-cache
+        with:
+          path: ~/.revenant/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v1-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
 
       - name: Check whether the iOS 6.0 inventory is cached
         id: inventory
@@ -104,12 +116,19 @@ jobs:
       - name: Assert the iOS 6.0 inventory is in place
         run: test -f "$HOME/.revenant/dyld/6.0/classes_armv7.json"
 
+      - name: Save the iOS 6.0 inventory
+        if: steps.inventory.outputs.present != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v1-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
+
       - name: Run the tests
         id: tests
         run: ./xmakew test -P . --output-on-failure
 
       - name: Save the package store
-        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
+        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
@@ -149,6 +168,8 @@ jobs:
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          restore-keys: |
+            xmake-global-${{ runner.os }}-
 
       - uses: actions/cache/restore@v4
         id: generated
@@ -166,17 +187,21 @@ jobs:
             build/.deps
             build/iphoneos
             build/backports-sources.txt
-          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
           restore-keys: |
-            backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-
+            backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-
 
       - name: Configure the Backports component
+        id: configure
         timeout-minutes: 45
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | tee "$RUNNER_TEMP/backports-configure.log" | stamp
           echo "stage configure ends $(date -u +%H:%M:%S)"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/backports-configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Extract the facts of every framework
         timeout-minutes: 10
@@ -212,7 +237,7 @@ jobs:
           done
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true'
+        if: steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
@@ -249,7 +274,7 @@ jobs:
             build/.deps
             build/iphoneos
             build/backports-sources.txt
-          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - name: Upload the Backports libraries
         uses: actions/upload-artifact@v4
@@ -298,6 +323,89 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
+  package:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
+      - uses: ./.github/actions/revenant-setup
+        with:
+          prebuilt-only: "llvm,swift,ld64,swift-runtime,libcxx"
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Key the Backports objects as the backports job keys them
+        id: objects_keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/restore@v4
+        id: objects
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.objects_keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - name: Configure the SwiftUI demo's component
+        timeout-minutes: 45
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Build the demo and package it with its platform package
+        timeout-minutes: 60
+        run: ./xmakew deb -P . SwiftUIDemo 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Check the demo's Depends and the platform package's file list
+        run: ./xmakew l -P . toolchain/tools/deb_check.lua build space.kern0x1b.swiftui org.revenant.backports
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swiftui-packages
+          path: build/*.deb
+          if-no-files-found: error
+
+      - name: Save the package store
+        if: steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
   swift:
     needs: changes
     if: needs.changes.outputs.native == 'true'
@@ -328,16 +436,24 @@ jobs:
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
-
-      - name: Install the firmware tools through the Backports configuration
-        timeout-minutes: 45
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          restore-keys: |
+            xmake-global-${{ runner.os }}-
 
       - uses: actions/cache/restore@v4
         id: dyld
         with:
           path: ~/.revenant/dyld/6.0
           key: dyld-shared-cache-6.0-armv7-v1
+
+      - name: Install the firmware tools through the Backports configuration
+        id: firmware-tools
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 45
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | tee "$RUNNER_TEMP/firmware-tools.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/firmware-tools.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: steps.dyld.outputs.cache-hit != 'true'
@@ -351,8 +467,13 @@ jobs:
           key: dyld-shared-cache-6.0-armv7-v1
 
       - name: Configure the Swift component
+        id: configure-swift
         timeout-minutes: 20
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | tee "$RUNNER_TEMP/swift-configure.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/swift-configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build the Swift targets
         timeout-minutes: 20
@@ -363,7 +484,7 @@ jobs:
         run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@storekit revenant@authenticationservices revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true'
+        if: steps.store.outputs.cache-hit != 'true' && (steps.firmware-tools.outputs.installed == 'true' || steps.configure-swift.outputs.installed == 'true')
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global

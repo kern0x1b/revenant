@@ -24,7 +24,7 @@ rule("tweak")
         platform.install_placed(target, target:data("revenant.install") .. "/" .. target:filename())
         local filter = target:values("tweak.filter")
         if filter then
-            os.vcp(path.join(target:scriptdir(), filter), path.join(folder, target:basename() .. ".plist"))
+            os.vcp(path.absolute(filter, target:scriptdir()), path.join(folder, target:basename() .. ".plist"))
         end
         platform.install_files(target)
     end)

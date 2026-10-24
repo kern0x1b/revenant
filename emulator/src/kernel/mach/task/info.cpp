@@ -61,6 +61,8 @@ namespace {
             return darwin::mach::task_info::basic_32_word_count;
         case darwin::mach::task_info::basic_64_flavor:
             return darwin::mach::task_info::basic_64_word_count;
+        case darwin::mach::task_info::basic_64_2_flavor:
+            return darwin::mach::task_info::basic_64_2_word_count;
         case darwin::mach::task_info::dyld_info_flavor:
             return darwin::mach::task_info::dyld_info_word_count;
         default:
@@ -151,7 +153,8 @@ bool CompatibilityKernel::dispatch_mach_task_info_message(
         info[2] = static_cast<std::uint32_t>(
             memory_.resident_page_count() * AddressSpace::page_size);
         info[7] = darwin::mach::task_info::timeshare_policy;
-    } else if (*flavor == darwin::mach::task_info::basic_64_flavor) {
+    } else if (*flavor == darwin::mach::task_info::basic_64_flavor ||
+               *flavor == darwin::mach::task_info::basic_64_2_flavor) {
         if (*target_pid == process_.pid) {
             const auto virtual_size =
                 static_cast<std::uint64_t>(memory_.mapped_page_count()) *

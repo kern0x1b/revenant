@@ -25,6 +25,7 @@ set_config("apple_minimum", "6.0")
 if is_plat("iphoneos") then
     includes("@addon/revenant/apple-ios")
     includes("emulator/src/guest")
+    includes("toolchain/src/guest-memory")
     if has_config("emulate") then
         includes("@addon/revenant/emulate")
     end

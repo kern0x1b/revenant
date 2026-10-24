@@ -55,6 +55,7 @@ local function run(app, guest)
     local program = emulator_program()
     local firmware = firmware_root()
     local libraries = os.files(path.join(libraries_folder(app), "lib*Backports.dylib"))
+    table.join2(libraries, os.files(path.join(libraries_folder(app), "lib*Probe.dylib")))
     if #libraries == 0 then
         raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libraries_folder(app))
     end
@@ -96,7 +97,7 @@ local function run(app, guest)
             local booted = emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
                                           cache = path.join(home_cache(), "host-cache"),
                                           tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
-                                          scale = emulator.TIME_SCALE, deadline = 900, perf_summary = true,
+                                          scale = emulator.TIME_SCALE, deadline = 900, perf = true,
                                           stop = function (state, control)
                                               if state.perf_begin and not state.perf_begin_sent then
                                                   control("perf-begin " .. state.perf_begin)

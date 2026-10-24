@@ -2,6 +2,7 @@ local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..")
 local json = import("core.base.json")
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
+local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 
 local MEMBERS = {
     {
@@ -973,6 +974,9 @@ end
 function read_all_members()
     local set = merge_sets(read_members(), read_device_members())
     set.weak_classes = {}
+    for _, name in ipairs(flat_classes.class_names()) do
+        set.weak_classes[name] = true
+    end
     for _, rows in pairs(runtime_guards.guards()) do
         for symbol in pairs(rows) do
             local class = symbol:match("^_OBJC_CLASS_%$_(.+)$")
