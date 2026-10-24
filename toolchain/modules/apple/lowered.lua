@@ -400,9 +400,13 @@ end
 local LITERAL_MARKERS = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
 
 local function present_names(text, names)
+    local words = {}
+    for word in text:gmatch("[%w_]*AVAILABLE[%w_]*") do
+        words[word] = true
+    end
     local present = {}
     for name, body in pairs(names) do
-        if text:find(name, 1, true) then
+        if words[name] then
             present[name] = body
         end
     end
