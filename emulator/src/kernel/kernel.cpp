@@ -28,6 +28,7 @@
 #include "kernel/darwin_kqueue_abi.hpp"
 #include "network/darwin_network_abi.hpp"
 #include "kernel/darwin_resource_abi.hpp"
+#include "kernel/mach_thread_policy_abi.hpp"
 #include <fcntl.h>
 #include <sys/param.h>
 #include <unistd.h>
@@ -221,6 +222,8 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
 {
     memory_.set_file_generation_registry(
         shared_state_->guest_file_generation_registry);
+    for (auto& entry : shared_state_->network_interfaces)
+        entry.second.up_time_nanoseconds = shared_state_->clock.wall_time();
     shared_state_->shared_mapping_page_cache->set_generation_registry(
         shared_state_->guest_file_generation_registry);
     opengles_hle_.set_guest_capabilities(
@@ -1824,6 +1827,11 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
                 pending->second.bytes, pending->second.destination);
             if (sent.status == HostSocketStatus::WouldBlock)
                 return false;
+            count_interface_traffic(
+                pending->second.socket->loopback_for(
+                    pending->second.destination),
+                true, sent.transferred,
+                sent.status == HostSocketStatus::Error);
             if (sent.status == HostSocketStatus::Error) {
                 bsd_error(cpu, sent.darwin_error);
             } else {
@@ -3479,6 +3487,41 @@ void CompatibilityKernel::trace_unknown(
     }
     message << std::dec << '\n';
     output_.write(message.str());
+}
+
+void CompatibilityKernel::sample_load_average(std::size_t runnable_threads)
+{
+    constexpr auto period =
+        static_cast<std::uint64_t>(foundation::load_average_period_seconds) *
+        darwin::mach::thread_policy::absolute_time_units_per_second;
+    const auto now = current_absolute_time();
+    const auto runnable = static_cast<std::uint32_t>(std::min<std::size_t>(
+        runnable_threads, std::numeric_limits<std::uint32_t>::max()));
+    std::lock_guard lock { load_average_mutex_ };
+    if (next_load_average_sample_ == 0) {
+        next_load_average_sample_ = now + period;
+        return;
+    }
+    while (next_load_average_sample_ <= now) {
+        load_average_.sample(runnable);
+        next_load_average_sample_ += period;
+    }
+}
+
+foundation::LoadAverage CompatibilityKernel::load_average() const
+{
+    std::lock_guard lock { load_average_mutex_ };
+    return load_average_;
+}
+
+void CompatibilityKernel::count_interface_traffic(bool loopback, bool output,
+    std::size_t bytes, bool failed)
+{
+    std::lock_guard network_lock { shared_state_->network_mutex };
+    const auto found = shared_state_->network_interfaces.find(
+        loopback ? "lo0" : "en0");
+    if (found != shared_state_->network_interfaces.end())
+        found->second.counters.record(output, bytes, failed);
 }
 
 }
