@@ -87,26 +87,31 @@ changes exactly when those files do:
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
-| `dynarmic` | `recipe` | the recipe and its patches |
+| `dynarmic` | `recipe` | the recipe; its patches are in the build hash, see below |
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
 
-The build hash also ends with the digest of the xmake patch set the binary was built with. xmakew writes that digest to
-`share/xmake/revenant-patch-set` beside the binary, and patch `0019` folds it into every variant of the hash, so a changed
-xmake patch moves every package's key once. A binary without the file refuses to compute a build hash.
-`toolchain/tests/addon/patch_set_test.lua` checks that a different digest moves a key, that a copy with the same digest
-does not, and that a change to a package's description does not.
+The build hash has two more terms for patches. The first covers revenant's xmake patches. Each patch in
+`packages/x/xmake/patches` declares in its header whether it can change what a build produces, with
+`Changes-build-output: yes` or `no`; `tools/xmake-patchset.sh` takes the xmake commit and the patches that say `yes`,
+xmakew writes the digest to `share/xmake/revenant-patch-set` beside the binary, and patch `0020` folds it into every
+variant of the hash. A patch marked `yes` moves every package's key once, so an unmarked patch moves none. A binary
+without the file refuses to compute a build hash. The marked patches are `0001`, `0002`, `0003`, `0005`, `0006` and
+`0007` (which addon version a build runs) and `0015` (the paths a build embeds); the others change locks, job counts,
+warnings, process waits, manifest checks, exports, fetches, the Lua parser or the keys, and no build output. The second term covers each package's own
+patches: the sha256 of every patch the package applies at its version, in order, from patch `0021`. A package with
+patches moves when one changes, and a package without patches does not. Before this term, two recipes at one version
+with different patches shared one install, and the second project got the first one's patched files. The source
+directory was never the cause: a git checkout is reset and its patches are applied again for each install.
 
-Open: the build hash leaves out a package's own recipe patch set unless the package has a `recipe` or `additions` digest
-config. Two recipes with the same version and different patches then share one install, and the second project gets the
-first one's patched files. The source directory is not the cause: a git checkout is reset and its patches are applied
-again for each install. `toolchain/tests/addon/source_patch_test.lua` checks a digest-configured recipe, `dynarmic`, which
-installs its own patches. Keying the build hash on each recipe's patch set is not made. Until it is, these packages have
-no digest of their patches: `boringssl`, `farmdec`, `ffmpeg`, `iphoneos-sdk` (its 16.4 patch is outside its `additions`
-digest), `ldid`, `openssl`, `swiftshader` and `xmake`.
+At the latest version the packages with patches are `boringssl`, `combine`, `dynarmic`, `farmdec`, `ffmpeg`, `ldid`,
+`openssl`, `rellume`, `swiftshader`, `webkit` and `xmake`. `iphoneos-sdk`'s patch applies to 16.4 only. `llvm`, `swift`,
+`swift-runtime` and `libcxx` declare no `add_patches`, so the term leaves their keys alone.
+`toolchain/tests/addon/patch_set_test.lua` checks the digest against the recipe's marked patches, the moves and the
+refusal, and the per-package term, including a patch declared without a sha256.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a

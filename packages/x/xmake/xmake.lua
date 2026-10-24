@@ -27,7 +27,8 @@ package("xmake")
         {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "40f1377cd96f5fe66feb13390658f84e9127d1a4acf48643b10d54c343d3f4d6"},
         {"0018-Report-a-process-exit-to-the-wait-on-that-process.patch", "45efce0489dd57a4ac0c430cbf6333d7a029107633ff2f955caab682598d8a61"},
         {"0019-Read-the-inode-of-the-file-a-lock-holds.patch", "d3cd9eba5df146444db1a0f11ebf4d7592ae0ca562b1def31f779c51d1f11955"},
-        {"0020-Fold-the-digest-of-the-xmake-patches-that-change-out.patch", "c3056f6b12d5197bb2d337948e7721ce88f679605b4d0480c6a706836408f4e2"}}) do
+        {"0020-Fold-the-digest-of-the-xmake-patches-that-change-out.patch", "c3056f6b12d5197bb2d337948e7721ce88f679605b4d0480c6a706836408f4e2"},
+        {"0021-Put-each-package-s-applied-patch-sha256-list-into-it.patch", "f7a636db5a95804ddf50dc56fd126142c4957b22e2942d7ebddd6e096aa50b07"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
