@@ -3,6 +3,7 @@
 #import <Photos/Photos.h>
 #import <UIKit/UIKit.h>
 #include <dlfcn.h>
+#include <pwd.h>
 #include <mach/mach.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -53,6 +54,9 @@ static BOOL revenant_wait_for_file(NSString *path)
 REVENANT_CASE(photos_assets)
 {
     printf("PHOTOS-PROBE status=%d\n", (int)[ALAssetsLibrary authorizationStatus]);
+    struct passwd *mobileEntry = getpwnam("mobile");
+    printf("PHOTOS-PROBE getpwnam mobile=%s\n", mobileEntry ? mobileEntry->pw_dir : "(nil)");
+    fflush(stdout);
     struct stat tccDirectory, tccDatabase;
     int directoryResult = stat("/var/mobile/Library/TCC", &tccDirectory);
     int databaseResult = stat("/var/mobile/Library/TCC/TCC.db", &tccDatabase);

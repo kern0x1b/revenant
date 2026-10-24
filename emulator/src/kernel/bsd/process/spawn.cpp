@@ -137,6 +137,12 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
                 message << ',';
             message << '"' << (*arguments)[index] << '"';
         }
+        message << " env=";
+        for (std::size_t index = 0; index < environment->size(); ++index) {
+            if (index != 0)
+                message << ',';
+            message << '"' << (*environment)[index] << '"';
+        }
         message << '\n';
         output_.write(message.str());
         cpu.halt(Dynarmic::HaltReason::UserDefined6);

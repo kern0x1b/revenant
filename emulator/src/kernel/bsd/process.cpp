@@ -618,6 +618,12 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 exec_message << ',';
             exec_message << '"' << (*arguments)[index] << '"';
         }
+        exec_message << " env=";
+        for (std::size_t index = 0; index < environment->size(); ++index) {
+            if (index != 0)
+                exec_message << ',';
+            exec_message << '"' << (*environment)[index] << '"';
+        }
         exec_message << '\n';
         output_.write(exec_message.str());
         if (!exec_handler_ ||
