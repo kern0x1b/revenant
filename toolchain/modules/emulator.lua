@@ -14,6 +14,7 @@ LAUNCHER = "usr/libexec/revenant-sblaunch"
 INSTALLATION_CACHE = "private/var/mobile/Library/Caches/com.apple.mobile.installation.plist"
 RUNNER_JOB = "System/Library/LaunchDaemons/org.revenant.emulator.runner.plist"
 LAUNCHD_CONF = "private/etc/launchd.conf"
+SPRINGBOARD_JOB = "System/Library/LaunchDaemons/com.apple.SpringBoard.plist"
 RUNNER_TASK = RESULTS .. "/job"
 MIGRATOR = "System/Library/PrivateFrameworks/DataMigration.framework/Support/DataMigrator"
 SETUP_KEYS = {{"SetupDone", "-bool", "YES"}, {"SetupFinishedAllSteps", "-bool", "YES"}, {"AssistantPresented", "-bool", "YES"}}
@@ -22,6 +23,7 @@ LOCKDOWN_KEYS = {{"com\\.apple\\.purplebuddy-SetupState", "-string", "DONE"}}
 CRASH_LOOP = 3
 REGISTERS = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
 TIME_SCALE = 10
+RUN_JIT_CACHE_MIB = 64
 UNLOCK_SLIDE = "drag 50 430 300 430 900 40"
 
 function launch_instructions(log)
@@ -650,6 +652,10 @@ function runner_job()
         ""}, "\n")
 end
 
+function lean_run(rootfs)
+    remove(guest_path(rootfs, SPRINGBOARD_JOB))
+end
+
 function install_runner(rootfs, guest, argv, deadline, release)
     local runner = guest_path(rootfs, RUNNER)
     os.mkdir(path.directory(runner))
@@ -783,7 +789,7 @@ function gap(state)
     return longest
 end
 
-function milestone(state)
+function milestone(state, lean)
     if not state.ready then
         return "emulator"
     end
@@ -791,7 +797,7 @@ function milestone(state)
     if looping then
         return looping
     end
-    if not state.springboard then
+    if not lean and not state.springboard then
         return "SpringBoard"
     end
     if state.migrator and not state.migrated then
@@ -805,7 +811,7 @@ function verdict(state, results, opt)
     local file = path.join(results, "verdict.json")
     local timing = {scale = opt.scale or TIME_SCALE, host_seconds = opt.host_seconds, reports = opt.reports}
     if not os.isfile(file) then
-        return table.join2({state = "boot-blocked", milestone = milestone(state), frame = opt.frame,
+        return table.join2({state = "boot-blocked", milestone = milestone(state, opt.lean), frame = opt.frame,
                             errors = opt.errors, gap = gap(state)}, timing)
     end
     local recorded = json.loadfile(file)
@@ -1015,6 +1021,10 @@ function boot(opt)
                   "--time-scale", tostring(scale)}
     if opt.perf then
         table.insert(argv, "--perf-summary")
+    end
+    if opt.jit_cache_mib then
+        table.insert(argv, "--jit-cache-mib")
+        table.insert(argv, tostring(opt.jit_cache_mib))
     end
     local input, control = pipe.openpair("BB")
     local envs = {}
