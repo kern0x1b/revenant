@@ -35,6 +35,8 @@ local SOURCE_NEEDLES = {
     "- (void)setCornerRadius:(CGFloat)cornerRadius",
     "- (void)revenantReportUnavailable",
     "RevenantPassKitNoHardwareError()",
+    "@\"\u{F8FF} Pay\"",
+    "- (instancetype)initWithCoder:(NSCoder *)coder __attribute__((objc_designated_initializer));",
 }
 
 local ENUM_NEEDLES = {

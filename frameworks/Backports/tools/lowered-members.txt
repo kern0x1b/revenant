@@ -22421,6 +22421,7 @@ member PKPaymentAuthorizationViewController +canMakePaymentsUsingNetworks:capabi
 member PKPaymentButton +buttonWithType:style:
 member PKPaymentButton +buttonWithType:style:disableCardArt:
 member PKPaymentButton -cornerRadius
+member PKPaymentButton -initWithCoder:
 member PKPaymentButton -initWithFrame:
 member PKPaymentButton -initWithPaymentButtonType:paymentButtonStyle:
 member PKPaymentButton -initWithPaymentButtonType:paymentButtonStyle:disableCardArt:
