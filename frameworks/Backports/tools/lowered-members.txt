@@ -5792,7 +5792,10 @@ function revenant_unit_written
 function revenant_unit_written_name
 function revenant_unit_written_short
 function revenant_unsupported
+function revenant_url_component
 function revenant_url_compose
+function revenant_url_host_escaped
+function revenant_url_host_text
 function revenant_url_parse
 function revenant_url_valid
 function revenant_uttype_catalogue_add
@@ -22749,6 +22752,8 @@ member NSURLComponents -rangeOfPort
 member NSURLComponents -rangeOfQuery
 member NSURLComponents -rangeOfScheme
 member NSURLComponents -rangeOfUser
+member NSURLComponents -revenantHostText
+member NSURLComponents -revenantPortText
 member NSURLComponents -scheme
 member NSURLComponents -setFragment:
 member NSURLComponents -setHost:
