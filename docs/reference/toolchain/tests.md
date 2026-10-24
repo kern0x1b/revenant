@@ -41,8 +41,14 @@ tests behind `webkit_host_tests`) are declared by the platform, not by the defau
 that define them. The fixtures of `tests/emulate/` and `tests/swiftui/` are built for a device and are not xmake tests
 yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
 `install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
-its probe line), and `output` (a program's stdout and stderr reach the host, through a run that ends and through one
-that hangs). Their scratch folders are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+its probe line), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
+that hangs), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
+limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
+are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+
+The emulate cases are not in CI's light budget: each one boots a firmware image on the emulator for minutes, and a cold
+emulator store builds the emulator first, so they run by hand with the command above. What needs no emulator run is in
+`light`: `emulator_source_test` checks the emulator's sources digest, its locale independence, and that the recipe and addon use it.
 
 `optimisation_test` compiles `tests/data/optimisation/codegen.c` with the packaged clang for armv7 and reads the assembly of
 each function. It pins the code-generation misses that [the optimisation explanation](../../explanation/toolchain/optimisation.md#codegen)
