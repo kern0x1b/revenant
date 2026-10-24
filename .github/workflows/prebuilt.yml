@@ -91,11 +91,11 @@ jobs:
           exit "$rc"
 
       - name: Install the firmware tools through the Backports configuration
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network'
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v
 
       - name: Restore the iOS 6.0 armv7 shared cache
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network'
         id: dyld
         uses: actions/cache/restore@v4
         with:
@@ -103,11 +103,11 @@ jobs:
           key: dyld-shared-cache-6.0-armv7-v1
 
       - name: Fetch the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network') && steps.dyld.outputs.cache-hit != 'true'
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
       - name: Save the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || inputs.package == 'network') && steps.dyld.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/dyld/6.0
