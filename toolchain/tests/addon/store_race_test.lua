@@ -134,6 +134,16 @@ local function whole(dir, word)
     return true
 end
 
+local function generation_in_cache(project)
+    for _, file in ipairs(os.files(path.join(project, ".xmake", "**"))) do
+        local text = io.readfile(file, {encoding = "binary"}) or ""
+        local generation = text:match("fakeinstall/latest/%x+%.g%x+")
+        if generation then
+            return file, generation
+        end
+    end
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
@@ -177,11 +187,19 @@ function failures(opt)
     io.writefile(reader, READER)
     local stop = path.join(folder, "stop")
     local children = {}
-    for _, mode in ipairs({"pass", "file"}) do
-        local ready, readerlog = path.join(folder, mode .. ".ready"), path.join(folder, mode .. ".log")
-        local child = process.openv(os.programfile(), {"l", reader, installed, stop, ready, mode},
+    -- the two readers that hold the published link follow every publish; the one that holds the first generation's
+    -- path is a build that kept a generation path in its flags, and it must fail once that generation's grace ends
+    -- a pass holds one resolved folder for about 12 seconds, so the pass reader stops before the grace period ends:
+    -- a read longer than the grace is not protected, and the file reader resolves the link for every file
+    local stop_pass = path.join(folder, "stop-pass")
+    local specs = {{name = "pass", mode = "pass", dir = installed, stop = stop_pass},
+                   {name = "file", mode = "file", dir = installed, stop = stop},
+                   {name = "generation", mode = "pass", dir = first, stop = stop}}
+    for _, spec in ipairs(specs) do
+        local ready, readerlog = path.join(folder, spec.name .. ".ready"), path.join(folder, spec.name .. ".log")
+        local child = process.openv(os.programfile(), {"l", reader, spec.dir, spec.stop, ready, spec.mode},
                                     {envs = envs, stdout = readerlog, stderr = readerlog})
-        children[mode] = {child = child, ready = ready, log = readerlog}
+        children[spec.name] = {child = child, ready = ready, log = readerlog}
     end
     for _, reader_state in pairs(children) do
         local waited = 0
@@ -203,9 +221,11 @@ function failures(opt)
     if not os.isdir(first) then
         table.insert(found, "the generation the first publish replaced is gone after the second publish, before its grace period has ended: a reader that resolved it cannot finish")
     end
-    io.writefile(stop, "stop")
+    if not whole(published(store), "newer") then
+        table.insert(found, "after the second forced reinstall the installed folder does not hold the whole install")
+    end
 
-    for mode, reader_state in pairs(children) do
+    local function finish(name, reader_state)
         if reader_state.child:wait(60000) == 0 then
             reader_state.child:kill()
         end
@@ -213,17 +233,19 @@ function failures(opt)
         local said = os.isfile(reader_state.log) and io.readfile(reader_state.log) or ""
         local reads, violations = said:match("reads (%d+) violations (%d+)")
         if not reads then
-            table.insert(found, mode .. " reader did not report its reads: " .. said)
-        else
-            if tonumber(violations) > 0 then
-                table.insert(found, mode .. " reader saw an incomplete install in " .. violations .. " of " .. reads ..
-                    " reads while two publishes ran: a generation must stay whole for a reader while its grace period lasts\n" .. said)
+            table.insert(found, name .. " reader did not report its reads: " .. said)
+        elseif name == "generation" then
+            if tonumber(violations) == 0 then
+                table.insert(found, "the reader that held the first generation's path read it whole past the grace period: the grace no longer ends for a reader that holds a generation path")
             end
+        elseif tonumber(violations) > 0 then
+            table.insert(found, name .. " reader saw an incomplete install in " .. violations .. " of " .. reads ..
+                " reads across publishes: a generation must stay whole for a reader while its grace period lasts\n" .. said)
         end
     end
-    if not whole(published(store), "newer") then
-        table.insert(found, "after the second forced reinstall the installed folder does not hold the whole install")
-    end
+    io.writefile(stop_pass, "stop")
+    finish("pass", children.pass)
+    children.pass = nil
 
     os.sleep(3000)
     envs.REVENANT_GENERATION_GRACE = "2"
@@ -235,6 +257,18 @@ function failures(opt)
     end
     if not whole(published(store), "newest") then
         table.insert(found, "after the third forced reinstall the installed folder does not hold the whole install")
+    end
+    if not whole(installed, "newest") then
+        table.insert(found, "after the grace period a path through the published link no longer holds the whole install: a build must reference the link, which every publish keeps current")
+    end
+    local cached, generation = generation_in_cache(project)
+    if cached then
+        table.insert(found, "the project's package cache " .. cached .. " holds the generation " .. generation .. ": a build that reads the cache keeps a path the grace period retires; the cache must hold the published link")
+    end
+
+    io.writefile(stop, "stop")
+    for name, reader_state in pairs(children) do
+        finish(name, reader_state)
     end
 
     os.tryrm(folder)
