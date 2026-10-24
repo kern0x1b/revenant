@@ -30,6 +30,14 @@ Left out: the dark appearance, Display P3 renditions, size classes, device subty
 
 The index is written to `$HOME/.revenant/cache-index/`: one file per release of the names it holds, and `first-rung.tsv.gz` for every name. "First" means the oldest held release that carries the name, on the ladder `dyld.held_ladder({"armv7","armv7s"})` gives in `modules/apple/dyld.lua`. The reading child runs under `nice -n 19`; a cold build reads the whole ladder once and takes a long time, so run it one at a time.
 
+## order_file
+
+`toolchain/tools/order_file/order_file.lua` turns the block profile of an emulator run into an order file for ld64's `-order_file`: the functions of the binary that the run executed, hottest first, one symbol per line with its Mach-O underscore. The run is an emulator boot with `--perf-block-profile`, whose `perf/block-profile.tsv` the tool reads.
+
+    ./xmakew l -P . toolchain/tools/order_file/order_file.lua --llvm-bin DIR [--image NAME] BLOCK-PROFILE BINARY OUTPUT
+
+`DIR` is the `bin` folder of the llvm package with its `libraries` config, which installs `llvm-nm` and `llvm-objdump` beside clang. `BINARY` is the host copy of the program the run executed, and `--image` is the name the profile gives it (its basename, by default). The symbols come from `llvm-nm -n` and the `__TEXT` base from `llvm-objdump --private-headers`. The packaged test `toolchain_packages/order_file_test` builds a program, writes a profile for it and checks the order that comes out. Its use is in [the optimisation measurements](optimisation.md).
+
 ## Other tools
 
 `toolchain/tools/recipe_digests.lua` writes the `port/digest.lua` of every recipe from the recipe and the
