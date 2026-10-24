@@ -7,10 +7,11 @@
 #include "network/host_network.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <memory>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -107,10 +108,15 @@ int main()
     }
 
     for (std::size_t index = 0; index < 3; ++index) {
+        for (int attempt = 0; attempt < 5000 && !receiver->readable();
+             ++attempt)
+            std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
         const auto received = receiver->receive(64);
+        CHECK(received.status == emulator::HostSocketStatus::Success);
+        if (received.status == emulator::HostSocketStatus::WouldBlock)
+            continue;
         const auto loopback = receiver->loopback_for(received.address);
         CHECK(loopback);
-        CHECK(received.status == emulator::HostSocketStatus::Success);
         CHECK(received.bytes == payload(index == 0 ? 5 : index == 1 ? 7 : 11));
         (loopback ? lo0 : en0)
             .record(false, received.transferred,
