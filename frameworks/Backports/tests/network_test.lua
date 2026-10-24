@@ -6,7 +6,7 @@ local mapping = path.join(backports, "tests", "Network", "mapping", "main.swift"
 local live = path.join(backports, "tests", "Network", "live", "main.swift")
 
 local function swiftc(args)
-    os.vrunv("xcrun", table.join({"swiftc", "-O"}, args))
+    os.vrunv("xcrun", table.join({"swiftc", "-Onone"}, args))
 end
 
 local function mutant_of(files, folder)
