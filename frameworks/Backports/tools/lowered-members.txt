@@ -23931,12 +23931,14 @@ member SCNAction +scaleTo:duration:
 member SCNAction +sequence:
 member SCNAction +unhide
 member SCNAction +waitForDuration:
+member SCNAction +waitForDuration:withRange:
 member SCNAction -copyWithZone:
 member SCNAction -duration
 member SCNAction -init
 member SCNAction -revenantAxisAngle
 member SCNAction -revenantBlock
 member SCNAction -revenantChildren
+member SCNAction -revenantContainsRandomWait
 member SCNAction -revenantCustomBlock
 member SCNAction -revenantIsComposite
 member SCNAction -revenantKind
@@ -23946,6 +23948,7 @@ member SCNAction -revenantRepeatsForever
 member SCNAction -revenantScalar
 member SCNAction -revenantShortestUnitArc
 member SCNAction -revenantVector
+member SCNAction -reversedAction
 member SCNAction -setDuration:
 member SCNAction -setSpeed:
 member SCNAction -setTimingFunction:
