@@ -6,6 +6,7 @@ import("apple.macho")
 import("gdb")
 import("apple.firmware")
 import("byteorder")
+import("generations")
 
 RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
@@ -1179,28 +1180,59 @@ function release(slot)
     slot.lock:close()
 end
 
-function clone_golden(rootfs, destination)
-    local lock = io.openlock(path.directory(rootfs) .. ".lock")
-    lock:lock({shared = true})
-    local ok, errors = try {function () clone(rootfs, destination) return true end, catch {function (caught) return false, caught end}}
-    lock:unlock()
-    lock:close()
-    if not ok then
-        raise(errors)
+-- copy the golden image of these inputs to destination. The copy reads a generation it holds, so a golden image that is
+-- replaced meanwhile does not leave the copy partial.
+function clone_golden(opt, destination)
+    for _ = 1, 20 do
+        local folder = golden(opt)
+        local lock = generations.hold(folder)
+        -- the generation may have been removed between golden() and the lock, so check it under the lock
+        local whole = os.isfile(path.join(folder, "golden.json"))
+        if whole then
+            local ok, errors = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) return false, caught end}}
+            generations.release(lock)
+            if not ok then
+                raise(errors)
+            end
+            return
+        end
+        generations.release(lock)
     end
+    raise("the golden image of %s %s was replaced on every attempt to read it", opt.identifier, opt.build)
 end
 
+-- the names in parent that have golden images: the part of each entry's name before its first dot, which is the name
+-- of a published golden and of its generations and locks. A name whose link is gone still has generations to sweep.
+local function published_names(parent, prefix)
+    local names = {}
+    local pattern = path.join(parent, (prefix or "") .. "*")
+    for _, item in ipairs(table.join(os.dirs(pattern), os.files(pattern))) do
+        local name = path.filename(item):match("^[^.]+")
+        if name then
+            table.insert(names, name)
+        end
+    end
+    return table.unique(names)
+end
+
+-- retire the goldens of the same identifier and build that another emulator made, and sweep the rest. A name whose
+-- build lock is taken is skipped; readers of a retired generation keep it until its grace period has passed.
 function retire(parent, opt, kept)
-    for _, marker in ipairs(os.files(path.join(parent, opt.identifier .. "_" .. opt.build .. "_*", "golden.json"))) do
-        local folder = path.directory(marker)
-        local recorded = try {function () return json.loadfile(marker) end}
-        if path.filename(folder) ~= kept and recorded and recorded.emulator ~= opt.emulator_hash then
-            local lock = io.openlock(folder .. ".lock")
+    for _, name in ipairs(published_names(parent, opt.identifier .. "_" .. opt.build .. "_")) do
+        if name ~= kept then
+            local published = path.join(parent, name)
+            local lock = io.openlock(published .. ".build.lock")
             if lock and lock:trylock() then
-                remove(folder)
+                local current = generations.resolve(published)
+                local recorded = current and try {function () return json.loadfile(path.join(current, "golden.json")) end}
+                if recorded and recorded.emulator ~= opt.emulator_hash then
+                    generations.unpublish(published)
+                end
+                generations.sweep(published)
                 lock:unlock()
                 lock:close()
-                os.tryrm(folder .. ".lock")
+            elseif lock then
+                lock:close()
             end
         end
     end
@@ -1289,47 +1321,57 @@ function clean(opt)
             table.insert(removed, folder)
         end
     end
-    if opt.goldens then
-        for _, marker in ipairs(os.files(path.join(base, "golden.noindex", "*", "golden.json"))) do
-            local folder = path.directory(marker)
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
-                remove(folder)
-                table.insert(removed, folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
-            end
+    -- every published golden: unpublished and swept at once with --goldens, otherwise only what its grace has ended for
+    local parent = path.join(base, "golden.noindex")
+    for _, name in ipairs(published_names(parent)) do
+        local published = path.join(parent, name)
+        local lock = io.openlock(published .. ".build.lock")
+        lock:lock()
+        if opt.goldens then
+            generations.unpublish(published)
+            generations.sweep(published, {grace = 0})
+            table.insert(removed, published)
+        else
+            generations.sweep(published)
         end
+        lock:unlock()
+        lock:close()
     end
     return removed
 end
 
-function golden(opt)
+-- the name of the golden image of these inputs, which is a link to its generation once one is published
+local function golden_key(opt)
     local written = {}
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
         table.insert(written, table.concat(key, " "))
     end
-    local key = string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
-                              table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+    return string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
+                         table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+end
+
+-- the golden image of these inputs, as the generation folder that holds its rootfs and golden.json. A golden image that
+-- is not published yet is built beside any published one and published by swapping the link to it.
+function golden(opt)
+    local key = golden_key(opt)
     local parent = path.join(opt.root or root(), "golden.noindex")
-    local folder = path.join(parent, key)
-    local marker = path.join(folder, "golden.json")
-    if os.isfile(marker) then
-        return path.join(folder, "rootfs")
+    local published = path.join(parent, key)
+    local current = generations.resolve(published)
+    if current and os.isfile(path.join(current, "golden.json")) then
+        return current
     end
     directory(parent)
-    local lock = io.openlock(path.join(parent, key .. ".lock"))
+    local lock = io.openlock(published .. ".build.lock")
     lock:lock()
+    local built, staging
     local ok, errors = try {
         function ()
-            if os.isfile(marker) then
+            current = generations.resolve(published)
+            if current and os.isfile(path.join(current, "golden.json")) then
+                built = current
                 return true
             end
-            for _, stale in ipairs(os.dirs(path.join(parent, key .. ".partial-*"))) do
-                remove(stale)
-            end
-            local staging = path.join(parent, key .. ".partial-" .. os.getpid())
+            staging = generations.begin(published)
             local rootfs = path.join(staging, "rootfs")
             clone(opt.firmware, rootfs)
             home(rootfs, opt.build)
@@ -1343,13 +1385,16 @@ function golden(opt)
                       milestone(booted.state), opt.deadline, booted.log)
             end
             json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
-            remove(folder)
-            os.mv(staging, folder)
+            generations.publish(published, staging)
+            built = staging
             retire(parent, opt, key)
             return true
         end,
         catch {
             function (caught)
+                if staging then
+                    generations.abort(staging)
+                end
                 return false, caught
             end
         }
@@ -1359,5 +1404,10 @@ function golden(opt)
     if not ok then
         raise(errors)
     end
-    return path.join(folder, "rootfs")
+    return built
+end
+
+-- the published name of the golden image of these inputs
+function golden_published(opt)
+    return path.join(opt.root or root(), "golden.noindex", golden_key(opt))
 end

@@ -96,16 +96,11 @@ local function booter(ctx)
     end
 end
 
-local function golden(ctx)
-    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
-    return emulator.golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}))
-end
-
 local function install(ctx)
     local written = packaging.write()
-    local base = golden(ctx)
+    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
     local rootfs = path.join(ctx.image, "rootfs")
-    emulator.clone_golden(base, rootfs)
+    emulator.clone_golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}), rootfs)
     local applications = {}
     for _, package in ipairs(written) do
         local placed = emulator.install_deb(package.deb, rootfs)

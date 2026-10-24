@@ -377,12 +377,12 @@ local function concurrency(folder, modules, found)
     io.writefile(path.join(firmware, "System", "Library", "CoreServices", "SystemVersion.plist"), "firmware")
     os.mkdir(path.join(firmware, "private", "var", "mobile"))
     local golden = script(folder, "golden", [[
-    local rootfs = emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", emulator_hash = "fixture", deadline = 30,
-                                    firmware = extra, boot = function (opt)
+    local rootfs = path.join(emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", emulator_hash = "fixture", deadline = 30,
+                                              firmware = extra, boot = function (opt)
         io.writefile(path.join(root, "boot-" .. os.getpid()), "booted")
         os.sleep(3000)
         return {reason = "reached", seconds = 3, state = {}, log = "none"}
-    end})
+    end}), "rootfs")
     io.writefile(path.join(root, "result-" .. os.getpid()), rootfs)]], modules)
     os.mkdir(root)
     spawned({golden, golden}, {{root, firmware}, {root, firmware}})
@@ -399,8 +399,8 @@ local function concurrency(folder, modules, found)
             table.insert(found, "both processes get the same complete golden image, got " .. first .. " and " .. second)
         end
     end
-    if #os.dirs(path.join(root, "golden.noindex", "*.partial-*")) > 0 then
-        table.insert(found, "a finished golden image leaves no partial folder behind")
+    if #os.dirs(path.join(root, "golden.noindex", "*.g*")) ~= 1 then
+        table.insert(found, "a finished golden image leaves one generation behind, and no unpublished one")
     end
 
     local slots = path.join(folder, "slots")
