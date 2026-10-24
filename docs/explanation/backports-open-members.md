@@ -83,3 +83,27 @@ Decisions still open:
 - `WKSecurityOrigin`, `WKWindowFeatures`, `WKDownload` and `WKSnapshotConfiguration` need a decision on what the
   `UIWebView` engine can report: an origin, a download and a snapshot are not `UIWebView` features. A loud stub, named in
   the open gaps of `frameworks/Backports/README.md`, is the default if the engine cannot report them.
+
+## The system-class path of the alias proxies
+
+What exists: the 13 classes of the alias pattern (`REVENANT_ALIAS_STATE` in `frameworks/Backports/src/revenant_alias.h`)
+register their public name from the proxy's `+load` where the system has no class, and `attach.c` reparents the proxy to
+the system class where it has one. On the 6.1.3 emulator, `alias_public_name` checks that each of the 12 public names is
+registered once under its own name, and `alias_system_class` checks that a class of that name present before the loader
+is the one `[NSPersonNameComponents class]` answers with, and that Backports registers no second class. Both pass in one
+emulator run (`backports_runtime`, four cases, about 175 s).
+
+Open:
+
+- No run on the device. The iPhone 4S on 9.3.6 is the release where NSURLComponents, NSURLQueryItem and
+  NSPersonNameComponents collide. No alias case has run on it.
+- No iOS 7 to 9 image. `alias_system_class` uses a stand-in `NSPersonNameComponents` that `frameworks/Backports/tests/runtime/probe/system_stand_in.m`
+  creates, not the system's class. The emulator's Darwin table maps the build prefixes `10` and `11` (iOS 6 and 7); iOS 8
+  and 9 are refused. No iOS 7 firmware was fetched. The first real check is NSURLComponents on iOS 7, and the first
+  reparent onto a real system class has not run anywhere.
+- The reparent path (`revenant_reparent`) keeps the proxy as a subclass of NSObject and logs when the layouts differ.
+  That fallback has not been seen on a real system class.
+- `revenant_adopt_methods` adds backport methods to the system class where it lacks them. Whether an adopted method's
+  ivar offsets match the system class's layout is not checked on a real system class.
+- The `network` prebuilt key moved with the swift-runtime digest. The prebuild workflow gained a `network` choice on this
+  branch, and its build has not run yet.
