@@ -1916,6 +1916,7 @@ class RevenantSCNAnimations
 class RevenantSCNArchivedColor
 class RevenantSCNArchivedColorSpace
 class RevenantSCNArchivedData
+class RevenantSCNClock
 class RevenantSCNCoding
 class RevenantSCNDraw
 class RevenantSCNMesh
@@ -23312,6 +23313,11 @@ member RevenantSCNArchivedData -initWithCoder:
 member RevenantSCNArchivedData -length
 member RevenantSCNArchivedData -mutableBytes
 member RevenantSCNArchivedData -setLength:
+member RevenantSCNClock -init
+member RevenantSCNClock -isPlaying
+member RevenantSCNClock -sceneTimeAtWallTime:
+member RevenantSCNClock -setPlaying:atWallTime:
+member RevenantSCNClock -setSceneTime:atWallTime:
 member RevenantSCNCoding +colorWithLinearWhite:
 member RevenantSCNCoding +currentSourceURL
 member RevenantSCNCoding +decodeArrayOfClass:coder:forKey:
@@ -24200,22 +24206,40 @@ member SCNScene -lightingEnvironment
 member SCNScene -revenantSourceURL
 member SCNScene -setAttribute:forKey:
 member SCNView +layerClass
+member SCNView -audioEngine
+member SCNView -audioEnvironmentNode
 member SCNView -audioListener
+member SCNView -autoenablesDefaultLighting
+member SCNView -colorPixelFormat
 member SCNView -commandQueue
 member SCNView -context
 member SCNView -currentRenderCommandEncoder
+member SCNView -currentRenderPassDescriptor
+member SCNView -currentViewport
 member SCNView -dealloc
+member SCNView -debugOptions
 member SCNView -delegate
+member SCNView -depthPixelFormat
 member SCNView -device
 member SCNView -didMoveToWindow
 member SCNView -eaglContext
+member SCNView -hitTest:options:
 member SCNView -initWithCoder:
 member SCNView -initWithFrame:
 member SCNView -initWithFrame:options:
 member SCNView -isJitteringEnabled
+member SCNView -isNodeInsideFrustum:withPointOfView:
+member SCNView -isPlaying
+member SCNView -isTemporalAntialiasingEnabled
 member SCNView -layoutSubviews
+member SCNView -loops
+member SCNView -nodesInsideFrustumWithPointOfView:
+member SCNView -overlaySKScene
 member SCNView -pointOfView
 member SCNView -preferredFramesPerSecond
+member SCNView -prepareObject:shouldAbortBlock:
+member SCNView -prepareObjects:withCompletionHandler:
+member SCNView -presentScene:withTransition:incomingPointOfView:completionHandler:
 member SCNView -projectPoint:
 member SCNView -renderingAPI
 member SCNView -revenantClear
@@ -24228,15 +24252,29 @@ member SCNView -revenantSetContext:
 member SCNView -revenantSetUp
 member SCNView -revenantUpdateDisplayLink
 member SCNView -scene
+member SCNView -sceneTime
 member SCNView -setAudioListener:
+member SCNView -setAutoenablesDefaultLighting:
+member SCNView -setDebugOptions:
 member SCNView -setDelegate:
 member SCNView -setEaglContext:
 member SCNView -setJitteringEnabled:
+member SCNView -setLoops:
+member SCNView -setOverlaySKScene:
+member SCNView -setPlaying:
 member SCNView -setPointOfView:
 member SCNView -setPreferredFramesPerSecond:
 member SCNView -setScene:
+member SCNView -setSceneTime:
+member SCNView -setShowsStatistics:
+member SCNView -setTemporalAntialiasingEnabled:
+member SCNView -setUsesReverseZ:
+member SCNView -showsStatistics
 member SCNView -snapshot
+member SCNView -stencilPixelFormat
 member SCNView -unprojectPoint:
+member SCNView -usesReverseZ
+member SCNView -workingColorSpace
 member SFAuthenticationSession -cancel
 member SFAuthenticationSession -init
 member SFAuthenticationSession -initWithURL:callbackURLScheme:completionHandler:
@@ -30486,6 +30524,7 @@ protocol RevenantVoiceServicesListing
 protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
 protocol RevenantWebView
+protocol SCNSceneRenderer
 protocol SCNSceneRendererDelegate
 protocol SFSafariViewControllerDelegate
 protocol SKSceneDelegate
@@ -31041,6 +31080,14 @@ protocol_member PKPushRegistryDelegate -pushRegistry:didInvalidatePushTokenForTy
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:
 protocol_member PKPushRegistryDelegate -pushRegistry:didUpdatePushCredentials:forType:
+protocol_member SCNSceneRenderer -hitTest:options:
+protocol_member SCNSceneRenderer -isNodeInsideFrustum:withPointOfView:
+protocol_member SCNSceneRenderer -nodesInsideFrustumWithPointOfView:
+protocol_member SCNSceneRenderer -prepareObject:shouldAbortBlock:
+protocol_member SCNSceneRenderer -prepareObjects:withCompletionHandler:
+protocol_member SCNSceneRenderer -presentScene:withTransition:incomingPointOfView:completionHandler:
+protocol_member SCNSceneRenderer -projectPoint:
+protocol_member SCNSceneRenderer -unprojectPoint:
 protocol_member SCNSceneRendererDelegate -renderer:didApplyAnimationsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didApplyConstraintsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didRenderScene:atTime:

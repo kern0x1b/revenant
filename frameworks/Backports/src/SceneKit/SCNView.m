@@ -1,10 +1,19 @@
 #import "RevenantSCN.h"
+#import "RevenantSCNClock.h"
 #import "RevenantSCNMath.h"
 #import "../RevenantSayOnce.h"
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/QuartzCore.h>
+
+static void revenant_unsupported(const char *member)
+{
+    [NSException raise:NSInternalInconsistencyException format:@"SCNView: %s is not supported by this SceneKit backport", member];
+}
+
+@interface SCNView () <SCNSceneRenderer>
+@end
 
 @implementation SCNView
 {
@@ -19,6 +28,7 @@
     __weak id<SCNSceneRendererDelegate> _delegate;
     NSInteger _preferredFramesPerSecond;
     BOOL _jitteringEnabled;
+    RevenantSCNClock *_clock;
 }
 
 + (Class)layerClass
@@ -49,6 +59,7 @@
 
 - (void)revenantSetUp
 {
+    _clock = [[RevenantSCNClock alloc] init];
     self.contentScaleFactor = [UIScreen mainScreen].scale;
     CAEAGLLayer *layer = (CAEAGLLayer *)self.layer;
     layer.opaque = NO;
@@ -160,7 +171,7 @@
         [delegate renderer:self updateAtTime:time];
     }
     if (scene) {
-        [RevenantSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime() listener:_audioListener ?: _pointOfView];
+        [RevenantSCNAnimations evaluateScene:scene atTime:time listener:_audioListener ?: _pointOfView];
     }
     if ([delegate respondsToSelector:@selector(renderer:didApplyAnimationsAtTime:)]) {
         [delegate renderer:self didApplyAnimationsAtTime:time];
@@ -189,7 +200,7 @@
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
     if ([self revenantPrepareDrawable]) {
-        [self revenantRenderAtTime:CACurrentMediaTime() width:_drawableWidth height:_drawableHeight];
+        [self revenantRenderAtTime:[_clock sceneTimeAtWallTime:CACurrentMediaTime()] width:_drawableWidth height:_drawableHeight];
         glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
     }
@@ -369,6 +380,184 @@
 - (id<MTLCommandQueue>)commandQueue
 {
     return nil;
+}
+
+- (NSTimeInterval)sceneTime
+{
+    return [_clock sceneTimeAtWallTime:CACurrentMediaTime()];
+}
+
+- (void)setSceneTime:(NSTimeInterval)sceneTime
+{
+    [_clock setSceneTime:sceneTime atWallTime:CACurrentMediaTime()];
+}
+
+- (BOOL)isPlaying
+{
+    return [_clock isPlaying];
+}
+
+- (void)setPlaying:(BOOL)playing
+{
+    [_clock setPlaying:playing atWallTime:CACurrentMediaTime()];
+}
+
+- (AVAudioEngine *)audioEngine
+{
+    return [RevenantSCNSoundEngine nodeEngine];
+}
+
+- (void)presentScene:(SCNScene *)scene withTransition:(SKTransition *)transition incomingPointOfView:(nullable SCNNode *)pointOfView completionHandler:(nullable void (^)(void))completionHandler
+{
+    revenant_unsupported("presentScene:withTransition:incomingPointOfView:completionHandler:");
+}
+
+- (NSArray<SCNHitTestResult *> *)hitTest:(CGPoint)point options:(nullable NSDictionary<SCNHitTestOption, id> *)options
+{
+    revenant_unsupported("hitTest:options:");
+    return nil;
+}
+
+- (BOOL)isNodeInsideFrustum:(SCNNode *)node withPointOfView:(SCNNode *)pointOfView
+{
+    revenant_unsupported("isNodeInsideFrustum:withPointOfView:");
+    return NO;
+}
+
+- (NSArray<SCNNode *> *)nodesInsideFrustumWithPointOfView:(SCNNode *)pointOfView
+{
+    revenant_unsupported("nodesInsideFrustumWithPointOfView:");
+    return nil;
+}
+
+- (BOOL)prepareObject:(id)object shouldAbortBlock:(nullable NS_NOESCAPE BOOL (^)(void))block
+{
+    revenant_unsupported("prepareObject:shouldAbortBlock:");
+    return NO;
+}
+
+- (void)prepareObjects:(NSArray *)objects withCompletionHandler:(nullable void (^)(BOOL success))completionHandler
+{
+    revenant_unsupported("prepareObjects:withCompletionHandler:");
+}
+
+- (BOOL)loops
+{
+    revenant_unsupported("loops");
+    return NO;
+}
+
+- (void)setLoops:(BOOL)loops
+{
+    revenant_unsupported("loops");
+}
+
+- (BOOL)autoenablesDefaultLighting
+{
+    revenant_unsupported("autoenablesDefaultLighting");
+    return NO;
+}
+
+- (void)setAutoenablesDefaultLighting:(BOOL)autoenablesDefaultLighting
+{
+    revenant_unsupported("autoenablesDefaultLighting");
+}
+
+- (BOOL)isTemporalAntialiasingEnabled
+{
+    revenant_unsupported("temporalAntialiasingEnabled");
+    return NO;
+}
+
+- (void)setTemporalAntialiasingEnabled:(BOOL)temporalAntialiasingEnabled
+{
+    revenant_unsupported("temporalAntialiasingEnabled");
+}
+
+- (BOOL)showsStatistics
+{
+    revenant_unsupported("showsStatistics");
+    return NO;
+}
+
+- (void)setShowsStatistics:(BOOL)showsStatistics
+{
+    revenant_unsupported("showsStatistics");
+}
+
+- (SCNDebugOptions)debugOptions
+{
+    revenant_unsupported("debugOptions");
+    return 0;
+}
+
+- (void)setDebugOptions:(SCNDebugOptions)debugOptions
+{
+    revenant_unsupported("debugOptions");
+}
+
+- (SKScene *)overlaySKScene
+{
+    revenant_unsupported("overlaySKScene");
+    return nil;
+}
+
+- (void)setOverlaySKScene:(SKScene *)overlaySKScene
+{
+    revenant_unsupported("overlaySKScene");
+}
+
+- (BOOL)usesReverseZ
+{
+    revenant_unsupported("usesReverseZ");
+    return NO;
+}
+
+- (void)setUsesReverseZ:(BOOL)usesReverseZ
+{
+    revenant_unsupported("usesReverseZ");
+}
+
+- (CGColorSpaceRef)workingColorSpace
+{
+    revenant_unsupported("workingColorSpace");
+    return NULL;
+}
+
+- (MTLRenderPassDescriptor *)currentRenderPassDescriptor
+{
+    revenant_unsupported("currentRenderPassDescriptor");
+    return nil;
+}
+
+- (MTLPixelFormat)colorPixelFormat
+{
+    revenant_unsupported("colorPixelFormat");
+    return MTLPixelFormatInvalid;
+}
+
+- (MTLPixelFormat)depthPixelFormat
+{
+    revenant_unsupported("depthPixelFormat");
+    return MTLPixelFormatInvalid;
+}
+
+- (MTLPixelFormat)stencilPixelFormat
+{
+    revenant_unsupported("stencilPixelFormat");
+    return MTLPixelFormatInvalid;
+}
+
+- (AVAudioEnvironmentNode *)audioEnvironmentNode
+{
+    revenant_unsupported("audioEnvironmentNode");
+    return nil;
+}
+
+- (CGRect)currentViewport
+{
+    revenant_unsupported("currentViewport");
+    return CGRectZero;
 }
 
 @end

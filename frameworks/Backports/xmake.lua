@@ -393,6 +393,7 @@ local CORETEXT_TESTS = {
 
 local SCENEKIT_TESTS = {
     action_math = {"RevenantSCNActionMath.m"},
+    clock = {"RevenantSCNClock.m"},
     action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
     audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
 }
