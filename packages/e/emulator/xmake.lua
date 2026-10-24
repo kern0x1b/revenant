@@ -5,7 +5,7 @@ package("emulator")
     set_license("MPL-2.0")
 
     local root = path.translate(path.join(os.scriptdir(), "..", "..", ".."))
-    includes(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules", "emulator_source.lua"))
+    includes(path.join(os.scriptdir(), "port", "sources.lua"))
     add_configs("sources", {description = "The digest of the emulator's sources in this checkout, so a changed source is a different emulator.", default = digest(root) or "", type = "string"})
     add_configs("sdl", {description = "Build the SDL2 window backend, for watching a guest on the desktop.", default = false, type = "boolean"})
     add_configs("ffmpeg", {description = "Build the FFmpeg audio decoder, for a guest that plays compressed audio.", default = false, type = "boolean"})

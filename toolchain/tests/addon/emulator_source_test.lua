@@ -1,7 +1,9 @@
 import("fixtures")
 
 function failures(opt)
-    local source = import("emulator_source", {rootdir = opt.modules, anonymous = true})
+    local repository = path.join(os.scriptdir(), "../../..")
+    local port = path.join(repository, "packages", "e", "emulator", "port")
+    local source = import("sources", {rootdir = port, anonymous = true})
     local found = {}
     local root = fixtures.scratch()
     os.mkdir(path.join(root, "emulator", "src"))
@@ -23,25 +25,24 @@ function failures(opt)
     if source.requirement_configs(empty).sources ~= nil then
         table.insert(found, "a checkout without emulator sources must pass no sources config")
     end
-    local module = io.readfile(path.join(opt.modules, "emulator_source.lua"))
+    local module = io.readfile(path.join(port, "sources.lua"))
     if module:find("import(", 1, true) then
-        table.insert(found, "emulator_source is included by the emulate addon, where import() is not allowed, so it must not import anything")
+        table.insert(found, "sources.lua is included by the emulator recipe and the emulate addon, where import() is not allowed, so it must not import anything")
     end
-    local repository = path.join(os.scriptdir(), "../../..")
-    local recipe = io.readfile(path.join(repository, "packages", "e", "emulator", "xmake.lua"))
-    if not recipe:find("emulator_source.lua", 1, true) or recipe:find("table.sort", 1, true) then
-        table.insert(found, "the emulator recipe must take its default sources config from emulator_source, so a direct require gets the addon's key")
+    local recipe = io.readfile(path.join(port, "..", "xmake.lua"))
+    if not recipe:find('"port", "sources.lua"', 1, true) or recipe:find("table.sort", 1, true) then
+        table.insert(found, "the emulator recipe must take its default sources config from port/sources.lua, so a direct require gets the addon's key")
     end
     if not os.iorunv("locale", {"-a"}):find("de_DE.UTF-8", 1, true) then
         table.insert(found, "the locale check needs de_DE.UTF-8 installed on this host")
     end
     local probe = fixtures.scratch()
     local script = path.join(probe, "digest.lua")
-    io.writefile(script, "local source = import(\"emulator_source\", {rootdir = os.getenv(\"EMULATOR_SOURCE_MODULES\")})\n"
+    io.writefile(script, "local source = import(\"sources\", {rootdir = os.getenv(\"EMULATOR_SOURCE_PORT\")})\n"
                       .. "print(source.digest(os.getenv(\"EMULATOR_SOURCE_ROOT\")))\n")
     local digests = {}
     for _, locale in ipairs({"de_DE.UTF-8", "C"}) do
-        local envs = table.join(os.getenvs(), {LC_ALL = locale, EMULATOR_SOURCE_MODULES = opt.modules, EMULATOR_SOURCE_ROOT = repository})
+        local envs = table.join(os.getenvs(), {LC_ALL = locale, EMULATOR_SOURCE_PORT = port, EMULATOR_SOURCE_ROOT = repository})
         local output = os.iorunv(os.programfile(), {"lua", script}, {curdir = probe, envs = envs})
         for line in output:gmatch("[^\n]+") do
             if line:match("^%x+$") then

@@ -42,7 +42,7 @@ local function context()
     if not is_host("macosx") or os.arch() ~= "arm64" then
         raise("xmake emulate runs on macOS arm64 hosts only, and this is %s %s", os.host(), os.arch())
     end
-    local sources = import("emulator_source", {rootdir = path.join(os.scriptdir(), "../../modules"), anonymous = true})
+    local sources = import("sources", {rootdir = path.join(os.scriptdir(), "../../../packages/e/emulator/port"), anonymous = true})
     local digest = sources.digest(path.join(os.scriptdir(), "../../.."))
     local marker = path.join(os.projectdir(), "build", "emulator-sources")
     if digest ~= nil and (not os.isfile(marker) or io.readfile(marker) ~= digest) then
