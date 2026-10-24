@@ -38,9 +38,19 @@ package("loose")
 local PATCH_LINE = "    add_patches(\"1.0\", \"patches/fake.patch\", \"%s\")\n"
 
 local PROBE = [[
+import("core.package.addon")
 import("core.package.package")
 
-function main(repo, name)
+-- an argument installs name@version, and pin:name@version also pins it
+function main(repo, name, ...)
+    for _, arg in ipairs({...}) do
+        local spec = arg:match("^pin:(.+)$")
+        local addonname, version = (spec or arg):match("^(.-)@(.+)$")
+        addon.register(addonname, version, {})
+        if spec then
+            addon.pin(addonname, version)
+        end
+    end
     local file = path.join(repo, "packages", "f", name, "xmake.lua")
     local instance = package.load_from_repository(name, path.directory(file), {packagefile = file})
     instance:version_set("1.0")
@@ -100,12 +110,13 @@ local function patch_file(dir, name, declared, body)
     io.writefile(path.join(dir, name), table.concat(lines, "\n") .. "\n")
 end
 
-local function key_of(program, envs, repo, name)
+local function key_of(program, envs, repo, name, ...)
     local found = nil
+    local args = table.join({"l", path.join(repo, "probe.lua"), repo, name}, {...})
     try
     {
         function ()
-            local out = os.iorunv(program, {"l", path.join(repo, "probe.lua"), repo, name}, {envs = envs})
+            local out = os.iorunv(program, args, {envs = envs})
             found = out:match("buildhash (%x+)")
         end,
         catch
@@ -266,6 +277,34 @@ function failures(opt)
 
     if fake_patched == fake_then then
         table.insert(found, "a package whose applied patch changed keeps its build hash: the patch set must be in the key")
+    end
+
+    -- the addons which a project pins are in the key: a build under another version is another build,
+    -- an installed addon which the project does not pin and an addon from a folder of the project are not.
+    -- The fixture is in its last state here, so fake_described is the key it has without any addon
+    local source = path.join(folder, "srcaddon")
+    os.mkdir(path.join(source, "plugins"))
+    io.writefile(path.join(source, "addon.lua"), "addon(\"srcaddon\")\n    set_description(\"a fixture\")\n")
+    local idle = key_of(program, envs, repo, "fake", "idle@1.0.0")
+    local pinned_1 = key_of(program, envs, repo, "fake", "pin:pinned@1.0.0")
+    local pinned_2 = key_of(program, envs, repo, "fake", "pin:pinned@2.0.0")
+    local sourced_envs = {XMAKE_GLOBALDIR = store, XMAKE_ADDONS_SOURCEDIRS = string.serialize({srcaddon = source}, {strip = true, indent = false})}
+    local sourced = key_of(program, sourced_envs, repo, "fake", "pin:srcaddon@latest")
+    computed("the fixture with an installed addon which no project pins", idle)
+    computed("the fixture with a pinned addon", pinned_1)
+    computed("the fixture with another version of the pinned addon", pinned_2)
+    computed("the fixture with an addon from a folder which is pinned", sourced)
+    if idle ~= fake_described then
+        table.insert(found, "an installed addon which the project does not pin moved the build hash: only the pinned versions may move it")
+    end
+    if pinned_1 == fake_described then
+        table.insert(found, "a pinned addon keeps the build hash of the fixture without it: a build under another addon version is another build")
+    end
+    if pinned_2 == pinned_1 then
+        table.insert(found, "another version of a pinned addon keeps its build hash: the version a build runs under must be in the key")
+    end
+    if sourced ~= fake_described then
+        table.insert(found, "an addon from a folder of the project moved the build hash: it has no version to pin")
     end
     if fake_described ~= fake_patched then
         table.insert(found, "a change to a package's description moved its build hash: only its patch set may move the key")

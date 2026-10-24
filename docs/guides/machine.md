@@ -94,16 +94,30 @@ changes exactly when those files do:
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
 
-The build hash has two more terms for patches. The first covers revenant's xmake patches. Each patch in
-`packages/x/xmake/patches` declares in its header whether it can change what a build produces, with
-`Changes-build-output: yes` or `no`; `tools/xmake-patchset.sh` takes the xmake commit and the patches that say `yes`,
-xmakew writes the digest to `share/xmake/revenant-patch-set` beside the binary, and patch `0020` folds it into every
-variant of the hash. A patch marked `yes` moves every package's key once, so an unmarked patch moves none. A binary
-without the file refuses to compute a build hash. The marked patches are `0001`, `0002`, `0003`, `0005`, `0006` and
-`0007` (which addon version a build runs) and `0015` (the paths a build embeds); the others change locks, job counts,
-warnings, process waits, manifest checks, exports, fetches, the Lua parser or the keys, and no build output. The second term covers each package's own
-patches: the sha256 of every patch the package applies at its version, in order, from patch `0021`. A package with
-patches moves when one changes, and a package without patches does not. Before this term, two recipes at one version
+The build hash has three more terms, one for the xmake that builds the packages, one for the addons a build runs
+under, and one for each package's own patches.
+
+The first covers revenant's xmake patches. Each patch in `packages/x/xmake/patches` declares in its header whether it
+can change what a build produces, with `Changes-build-output: yes` or `no`; `tools/xmake-patchset.sh` takes the xmake
+commit and the patches that say `yes`, xmakew writes the digest to `share/xmake/revenant-patch-set` beside the binary,
+and patch `0020` folds it into every variant of the hash. A patch marked `yes` moves every package's key once, so an
+unmarked patch moves none. A binary without the file refuses to compute a build hash. No patch is marked now: the
+addon patches `0001` to `0003` and `0005` to `0007` change which addon version a build loads, which the second term
+keys, and `0015` publishes an install under its generation path, which is the store's design and the same for every
+build with a key; the others change locks, job counts, warnings, process waits, manifest checks, exports, fetches, the
+Lua parser or the keys, and no build output.
+
+The second term, from patch `0022`, covers the addons a build runs under. A package's recipes run the code of the addon
+version the project pins: the installed addons which the process pins are in the hash, by name and version, for
+example `revenant@v0.8.10` for a project that locks that release. An addon from a folder of the project, as this
+repository's `xmake.lua` declares revenant (`add_addons("revenant", {sourcedir = "toolchain"})`), has no version and
+adds nothing, and a process which pins nothing keeps its keys. Two versions of one addon therefore build two installs.
+A project which locks an installed addon moves its keys once; a normal build of this repository loads the folder and
+moves none.
+
+The third term covers each package's own patches: the sha256 of every patch the package applies at its version, in
+order, from patch `0021`. A package with patches moves when one changes, and a package without patches does not.
+Before this term, two recipes at one version
 with different patches shared one install, and the second project got the first one's patched files. The source
 directory was never the cause: a git checkout is reset and its patches are applied again for each install.
 
@@ -111,7 +125,8 @@ At the latest version the packages with patches are `boringssl`, `combine`, `dyn
 `openssl`, `rellume`, `swiftshader`, `webkit` and `xmake`. `iphoneos-sdk`'s patch applies to 16.4 only. `llvm`, `swift`,
 `swift-runtime` and `libcxx` declare no `add_patches`, so the term leaves their keys alone.
 `toolchain/tests/addon/patch_set_test.lua` checks the digest against the recipe's marked patches, the moves and the
-refusal, and the per-package term, including a patch declared without a sha256.
+refusal, the per-package term, including a patch declared without a sha256, and the addon term: a pinned version moves
+the key, an installed addon which nothing pins and a folder of the project do not.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
