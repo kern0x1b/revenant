@@ -36,13 +36,18 @@ Four caches make a warm run quick:
   `./xmakew l -P . tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. The checks job
   keys its own store by the files that decide what it installs: the xmake recipes of the packages, the third-party
   packages the default tests build, `toolchain/modules/prebuilt.lua`, and the component files that declare requirements.
-  Each store is restored by exact key and saved once, after the configure has succeeded, so a store is never saved
-  half-made;
+  A store is restored by its exact key, or else by the newest store with the same prefix (`restore-keys`), so xmake
+  installs only the packages whose own build hash is new. A store is saved only when the configure log shows an install,
+  so a warm run writes nothing back, and a store is saved after the configure has succeeded, never half-made;
+- the iOS 6.0 inventory `~/.revenant/dyld/6.0/classes_armv7.json`, keyed by the firmware code that writes it
+  (`toolchain/plugins/firmware`, `objc.lua`, `dyld.lua` and `firmware.lua`). While it is present the checks job skips the
+  Backports configure that installs the firmware tools, which takes five minutes or more. The swift job runs that
+  configure only when the dyld cache misses, since only the `fetch` needs the tool;
 - the generated skeleton `build/generated/backports`, keyed by the store key and the hashes of the five
   `frameworks/Backports/tools/` files that write it (`ast`, `facts`, `generate`, `skeleton`, `sdk`), and saved on the
   same condition;
 - the objects `build/.objs`, their depfiles `build/.deps`, the libraries `build/iphoneos` and the source manifest
-  `build/backports-sources.txt`. The key has two parts: the store key and the hashes of `toolchain/**`, `packages/**`,
+  `build/backports-sources.txt`. The key has two parts: the store key and the hashes of the toolchain folders the build reads (`toolchain/` without `tests/`), `packages/**`,
   `addons/**`, `xmake.lua`, `xmakew` and `frameworks/Backports/xmake.lua`, which must match exactly; and the hash of
   `frameworks/Backports/**`. When only the second part differs, the job restores the newest objects with the same first
   part. The manifest holds the git blob hash of every file under `frameworks/Backports` and of every generated
@@ -76,3 +81,20 @@ gh run download "$run" --name backports-libraries --dir "$HOME/.revenant/cache/c
 
 The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job reached
 the upload, so a run that stopped earlier has none.
+
+## What a warm push costs
+
+Measured on one branch with no change to a package recipe, so every store and cache the jobs restore is a hit. The
+baseline is the workflow as it was on `main`, and the after rows are the second run of the new workflow, when the
+caches it creates are in place. The first run after a change to a cache key creates the new entries and costs more.
+
+| Run | Wall time | macOS job-minutes | `checks` | `backports` | `swift` |
+| --- | --- | --- | --- | --- | --- |
+| baseline, `40044072531` | 14 min | 27 | 9 min 55 s | 7 min 40 s | 9 min 12 s |
+| after, `40046661803` | 4 min 12 s | 10 | 4 min 12 s | 3 min 34 s | 2 min 13 s |
+
+The baseline `checks` job spent 5 min 11 s in the firmware-tools configure, which installs nothing on a store hit: the
+time is in the iOS configure itself, in a stretch where xmake prints nothing for about ten minutes on a host. The
+change skips that configure when the inventory is cached, and `swift` skips it on a dyld hit, which removes it from
+both jobs on a warm push. The first run after the change to the inventory and objects keys, `40045244974`, ran the
+configure and the Backports build once; those entries are now cached.
