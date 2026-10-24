@@ -1266,7 +1266,11 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         if (const auto udp = virtual_udp_sockets_.find(fd);
             udp != virtual_udp_sockets_.end()) {
             bsd::VirtualUdpStatus sent { };
+            bool loopback = false;
             if (registers[4] == 0 && registers[5] == 0) {
+                const auto peer = udp->second->peer_address();
+                loopback = peer && darwin::network::darwin_address_is_loopback(
+                                       *peer);
                 sent = udp->second->send(*bytes);
             } else if (registers[4] == 0 || registers[5] < 2) {
                 bsd_error(cpu, bsd_support::invalid_argument);
@@ -1278,8 +1282,12 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                     bsd_error(cpu, bsd_support::bad_address);
                     return;
                 }
+                loopback = darwin::network::darwin_address_is_loopback(
+                    *destination);
                 sent = udp->second->send(*bytes, *destination);
             }
+            count_interface_traffic(loopback, true, bytes->size(),
+                sent != bsd::VirtualUdpStatus::Success);
             if (sent != bsd::VirtualUdpStatus::Success) {
                 bsd_error(cpu, sent == bsd::VirtualUdpStatus::BadFileDescriptor
                                    ? bsd_support::bad_file_descriptor

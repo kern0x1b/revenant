@@ -222,6 +222,8 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
 {
     memory_.set_file_generation_registry(
         shared_state_->guest_file_generation_registry);
+    for (auto& entry : shared_state_->network_interfaces)
+        entry.second.up_time_nanoseconds = shared_state_->clock.wall_time();
     shared_state_->shared_mapping_page_cache->set_generation_registry(
         shared_state_->guest_file_generation_registry);
     opengles_hle_.set_guest_capabilities(
@@ -1825,6 +1827,11 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
                 pending->second.bytes, pending->second.destination);
             if (sent.status == HostSocketStatus::WouldBlock)
                 return false;
+            count_interface_traffic(
+                pending->second.socket->loopback_for(
+                    pending->second.destination),
+                true, sent.transferred,
+                sent.status == HostSocketStatus::Error);
             if (sent.status == HostSocketStatus::Error) {
                 bsd_error(cpu, sent.darwin_error);
             } else {
@@ -3505,6 +3512,16 @@ foundation::LoadAverage CompatibilityKernel::load_average() const
 {
     std::lock_guard lock { load_average_mutex_ };
     return load_average_;
+}
+
+void CompatibilityKernel::count_interface_traffic(bool loopback, bool output,
+    std::size_t bytes, bool failed)
+{
+    std::lock_guard network_lock { shared_state_->network_mutex };
+    const auto found = shared_state_->network_interfaces.find(
+        loopback ? "lo0" : "en0");
+    if (found != shared_state_->network_interfaces.end())
+        found->second.counters.record(output, bytes, failed);
 }
 
 }

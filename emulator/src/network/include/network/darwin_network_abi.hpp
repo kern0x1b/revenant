@@ -227,6 +227,36 @@ inline constexpr std::size_t kernel_event_header_size = 24;
 inline constexpr std::size_t interface_name_size = 16;
 inline constexpr std::size_t maximum_retained_kernel_events = 256;
 
+struct InterfaceCounters {
+    std::uint64_t input_packets { };
+    std::uint64_t input_bytes { };
+    std::uint64_t input_errors { };
+    std::uint64_t output_packets { };
+    std::uint64_t output_bytes { };
+    std::uint64_t output_errors { };
+
+    void record(bool output, std::size_t bytes, bool failed)
+    {
+        if (failed) {
+            if (output)
+                ++output_errors;
+            else
+                ++input_errors;
+            return;
+        }
+        if (output) {
+            ++output_packets;
+            output_bytes += bytes;
+        } else {
+            ++input_packets;
+            input_bytes += bytes;
+        }
+    }
+};
+
+[[nodiscard]] bool darwin_address_is_loopback(
+    std::span<const std::byte> address);
+
 struct InterfaceSnapshot {
     std::string name;
     std::uint16_t index { };
@@ -242,6 +272,8 @@ struct InterfaceSnapshot {
     std::optional<std::array<std::byte, 16>> ipv4_broadcast;
     std::optional<std::array<std::byte, 28>> ipv6_address;
     std::optional<std::array<std::byte, 28>> ipv6_netmask;
+    InterfaceCounters counters;
+    std::uint64_t up_time_nanoseconds { };
 };
 
 [[nodiscard]] std::vector<std::byte> make_route_interface_list(

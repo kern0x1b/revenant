@@ -415,6 +415,8 @@ public:
     }
     void sample_load_average(std::size_t runnable_threads);
     [[nodiscard]] foundation::LoadAverage load_average() const;
+    void count_interface_traffic(bool loopback, bool output, std::size_t bytes,
+        bool failed);
     [[nodiscard]] std::size_t bootstrap_checked_in_service_count() const;
     void report_stalled_receives(std::uint64_t threshold_nanoseconds) const;
     void set_wall_time(std::uint64_t unix_time_nanoseconds)

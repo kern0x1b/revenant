@@ -53,6 +53,10 @@ bool CompatibilityKernel::send_host_socket_bytes(Cpu& cpu, std::uint32_t fd,
     }
 
     const auto result = host->second->send(bytes, destination);
+    if (result.status != HostSocketStatus::WouldBlock) {
+        count_interface_traffic(host->second->loopback_for(destination), true,
+            result.transferred, result.status == HostSocketStatus::Error);
+    }
     if (result.status == HostSocketStatus::WouldBlock) {
         if (nonblocking) {
             bsd_error(cpu, bsd_support::would_block);

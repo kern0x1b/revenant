@@ -88,6 +88,12 @@ int main()
         std::byte { 0x00 }, std::byte { 0x00 }, std::byte { 0x00 },
         std::byte { 0x01 } };
     ethernet.link_address_length = 6;
+    ethernet.counters.input_packets = 3;
+    ethernet.counters.input_errors = 1;
+    ethernet.counters.input_bytes = 23;
+    ethernet.counters.output_packets = 2;
+    ethernet.counters.output_bytes = 11;
+    ethernet.up_time_nanoseconds = 5'000'000'123ULL;
 
     const auto en0 = make_ifmibdata(ethernet);
     CHECK(en0.size() == ifmibdata_size);
@@ -101,7 +107,15 @@ int main()
     CHECK(en0[data_offset + 4] == std::byte { 14 });
     CHECK(read32(en0, mtu_offset) == default_ethernet_mtu);
     CHECK(read64(en0, baudrate_offset) == 10'000'000ULL);
-    CHECK(std::all_of(en0.begin() + counters_offset, en0.end(),
+    CHECK(read64(en0, counters_offset) == 3);
+    CHECK(read64(en0, counters_offset + 8) == 1);
+    CHECK(read64(en0, counters_offset + 16) == 2);
+    CHECK(read64(en0, counters_offset + 24) == 0);
+    CHECK(read64(en0, counters_offset + 40) == 23);
+    CHECK(read64(en0, counters_offset + 48) == 11);
+    CHECK(read32(en0, data_offset + 120) == 5);
+    CHECK(read32(en0, data_offset + 124) == 0);
+    CHECK(std::all_of(en0.begin() + data_offset + 128, en0.end(),
         [](std::byte value) { return value == std::byte { 0 }; }));
 
     if (failures == 0)

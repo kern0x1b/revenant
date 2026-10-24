@@ -28,8 +28,17 @@ reads). The reference is XNU `xnu-2050.22.13`, the closest device-era tag; the d
   `if_data64`. `make_ifmibdata` in `network/darwin_network_abi.cpp` fills the fields the interface model
   has: name, flags, type, address length, header length, MTU, and the baud rate that the route record
   already reports (10 Mb/s for `en0`, 0 for `lo0`).
-- Packet and byte counters, the timing fields and the last-change time are zero, because the model does not
-  track them.
+- Traffic counters are the emulator's own. Every guest socket call that moves bytes adds one packet and its
+  byte count on completion: a host send or receive (`HostSocket`), a virtual UDP send or receive, and the
+  retry of a pending host write. A call that returns `WouldBlock` counts nothing; a call that fails counts
+  one error, on the interface chosen below. The socket layer never sees an input drop, so `ifi_iqdrops` stays
+  zero, and `ifi_collisions`, multicast and protocol-unknown counts are zero because nothing produces them.
+- The interface is `lo0` when the peer is a loopback address (IPv4 `127/8`, IPv6 `::1`), and `en0` otherwise.
+  For a send with a destination the destination decides; for a receive the sender's address decides; a
+  connected socket uses its peer, read once with `getpeername` and cached. For a virtual UDP socket the
+  connected or explicit address decides, and an unconnected write uses `en0`.
+- `ifi_lastchange` is the emulator's wall clock when the kernel started, which is when the interface model
+  brings each interface up. It is not updated on later changes, because the model has none.
 - `IFDATA_LINKSPECIFIC` returns zero bytes: the model has no link-specific MIB, and XNU returns the empty
   `if_linkmib` the same way.
 - An index that is not in the model, including 0, returns `ENOENT`, as `sysctl_ifdata` does.
