@@ -117,6 +117,33 @@ iOS 16.4 SDK. The `CKRecord` blocker in `reference/backports/CloudKit/CKRecord.m
 the CloudKit headers and the `CKRecord` class, not `CKContainer`. The configuration that loses `CKContainer` is not known
 here; a Swift error text and the exact typecheck command are what would settle it.
 
+## Keychain, Photos, VideoToolbox, PassKit and IOSurface: what each item stands on
+
+- `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: iOS 6 has no class that requires a passcode, so the backport maps it
+  to `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` (`"aku"`). Items stored with it do not disappear when the passcode is
+  removed, which the SDK promises. The host test checks the value against the macOS oracle and fails the `"akpu"` value.
+- `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the value is defined, but the flags are not enforced.
+  The constructor returns NULL with `errSecUnimplemented`, so biometric or passcode flags fail loudly. Enforcing
+  `kSecUseAuthenticationContext` or an access control at `SecItemAdd`/`SecItemCopyMatching` needs interception of the
+  SecItem calls, and the tree has no such layer.
+- `kSecUseAuthenticationContext` and `kSecUseDataProtectionKeychain`: the values match macOS. The second is a no-op on iOS 6.
+- `kSecAttrAccess` is not backported. The only use in the Telegram 13.0 tree is `PasscodeKeychainScopeTests.swift`, a
+  macOS scope test, and the production code uses `kSecAttrAccessGroup`, which iOS 6 has.
+- `PHImageManagerMaximumSize`: a typed SDK constant, now lowered and checked against the macOS value.
+- `kVTCouldNotFindVideoEncoderErr`: the iOS 26.2 SDK declares it as a plain enum constant (`-12908`) with no availability
+  annotation, and the backport already compiles against that declaration. It is not a symbol, so there is nothing to
+  backport and no oracle to compare.
+- `PKPaymentButton`: a `UIButton` subclass with the iOS 26 selectors, which ignore `disableCardArt` because the button draws
+  no card art. It draws a plain title, not Apple's artwork, and its tap logs the unavailability error. The contract test
+  checks the SDK header and the source. The compile of `initWithCoder:` warns that the override is missing.
+- IOSurface: 40 of the SDK's functions are forwarded to the system's private `IOSurface` library, and each one is in the
+  iOS 6.1.3 export table. Six component functions and `IOSurfaceGetSubsampling`, `IOSurfaceAllowsPixelSizeCasting` and
+  `IOSurfaceSetOwnershipIdentity` are not wrapped, because iOS 6.1.3 does not export them. A wrapper that cannot find a symbol
+  aborts with the name.
+- Deferred, not implemented: `MPSImageBilinearScale` (needs a render-to-texture path and a device cost measurement),
+  `MTLBinaryArchive` (needs a pipeline serialization path that iOS 6 SGX may not expose), and `CIRenderDestination` (needs
+  a CoreImage render-to-Metal-texture path, and there is no CoreImage folder).
+
 ## Work queue: the unattempted Telegram modules
 
 The demand scan (`frameworks/Backports/tools/demand.lua`, method in `docs/guides/backports/demand.md`) over the 2,224

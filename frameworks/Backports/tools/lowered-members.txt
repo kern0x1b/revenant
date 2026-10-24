@@ -1587,6 +1587,7 @@ class PKPayment
 class PKPaymentAuthorizationController
 class PKPaymentAuthorizationResult
 class PKPaymentAuthorizationViewController
+class PKPaymentButton
 class PKPaymentMethod
 class PKPaymentOrderDetails
 class PKPaymentRequest
@@ -2867,6 +2868,46 @@ function GCMicroGamepadSnapshotDataFromNSData
 function IOMainPort
 function IORegistryEntryCopyFromPath
 function IORegistryEntryCopyPath
+function IOSurfaceAlignProperty
+function IOSurfaceCopyAllValues
+function IOSurfaceCopyValue
+function IOSurfaceCreate
+function IOSurfaceCreateMachPort
+function IOSurfaceDecrementUseCount
+function IOSurfaceGetAllocSize
+function IOSurfaceGetBaseAddress
+function IOSurfaceGetBaseAddressOfPlane
+function IOSurfaceGetBytesPerElement
+function IOSurfaceGetBytesPerElementOfPlane
+function IOSurfaceGetBytesPerRow
+function IOSurfaceGetBytesPerRowOfPlane
+function IOSurfaceGetElementHeight
+function IOSurfaceGetElementHeightOfPlane
+function IOSurfaceGetElementWidth
+function IOSurfaceGetElementWidthOfPlane
+function IOSurfaceGetHeight
+function IOSurfaceGetHeightOfPlane
+function IOSurfaceGetID
+function IOSurfaceGetPixelFormat
+function IOSurfaceGetPlaneCount
+function IOSurfaceGetPropertyAlignment
+function IOSurfaceGetPropertyMaximum
+function IOSurfaceGetSeed
+function IOSurfaceGetTypeID
+function IOSurfaceGetUseCount
+function IOSurfaceGetWidth
+function IOSurfaceGetWidthOfPlane
+function IOSurfaceIncrementUseCount
+function IOSurfaceIsInUse
+function IOSurfaceLock
+function IOSurfaceLookup
+function IOSurfaceLookupFromMachPort
+function IOSurfaceRemoveAllValues
+function IOSurfaceRemoveValue
+function IOSurfaceSetPurgeable
+function IOSurfaceSetValue
+function IOSurfaceSetValues
+function IOSurfaceUnlock
 function JSGlobalContextCopyName
 function JSGlobalContextIsInspectable
 function JSGlobalContextSetInspectable
@@ -22377,6 +22418,15 @@ member PKPaymentAuthorizationResult -setErrors:
 member PKPaymentAuthorizationViewController +canMakePayments
 member PKPaymentAuthorizationViewController +canMakePaymentsUsingNetworks:
 member PKPaymentAuthorizationViewController +canMakePaymentsUsingNetworks:capabilities:
+member PKPaymentButton +buttonWithType:style:
+member PKPaymentButton +buttonWithType:style:disableCardArt:
+member PKPaymentButton -cornerRadius
+member PKPaymentButton -initWithFrame:
+member PKPaymentButton -initWithPaymentButtonType:paymentButtonStyle:
+member PKPaymentButton -initWithPaymentButtonType:paymentButtonStyle:disableCardArt:
+member PKPaymentButton -revenantReportUnavailable
+member PKPaymentButton -revenantSetUpWithType:style:
+member PKPaymentButton -setCornerRadius:
 member PKPaymentMethod +supportsSecureCoding
 member PKPaymentMethod -copyWithZone:
 member PKPaymentMethod -displayName
@@ -32827,6 +32877,8 @@ type PKPassLibraryAuthorizationStatus
 type PKPassLibraryCapability
 type PKPassType
 type PKPaymentAuthorizationStatus
+type PKPaymentButtonStyle
+type PKPaymentButtonType
 type PKPaymentMethodType
 type RPCameraPosition
 type RPSampleBufferType
