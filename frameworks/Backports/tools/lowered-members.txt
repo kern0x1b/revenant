@@ -111,6 +111,7 @@ class AVAudioPCMBuffer
 class AVAudioPlayerNode
 class AVAudioSession
 class AVAudioSessionCapability
+class AVAudioSessionPortDescription
 class AVAudioSessionPortExtensionBluetoothMicrophone
 class AVAudioTime
 class AVAudioUnit
@@ -9140,6 +9141,9 @@ member AVAudioSession -setPreferredInput:error:
 member AVAudioSessionCapability -initWithRevenantSupported:
 member AVAudioSessionCapability -isEnabled
 member AVAudioSessionCapability -isSupported
+member AVAudioSessionPortDescription -dataSources
+member AVAudioSessionPortDescription -selectedDataSource
+member AVAudioSessionPortDescription -setPreferredDataSource:error:
 member AVAudioSessionPortExtensionBluetoothMicrophone -farFieldCapture
 member AVAudioSessionPortExtensionBluetoothMicrophone -highQualityRecording
 member AVAudioSessionPortExtensionBluetoothMicrophone -init
@@ -10867,6 +10871,8 @@ member CLFloor -initWithCoder:
 member CLFloor -initWithRevenantLevel:
 member CLFloor -level
 member CLGeocoder -geocodeAddressString:inRegion:preferredLocale:completionHandler:
+member CLGeocoder -geocodePostalAddress:completionHandler:
+member CLGeocoder -geocodePostalAddress:preferredLocale:completionHandler:
 member CLGeocoder -reverseGeocodeLocation:preferredLocale:completionHandler:
 member CLLocation -floor
 member CLLocationManager +isMonitoringAvailableForClass:
@@ -20151,6 +20157,7 @@ member NSTermOfAddress -isEqual:
 member NSTermOfAddress -languageIdentifier
 member NSTermOfAddress -pronouns
 member NSTextAttachment +textAttachmentWithImage:
+member NSTextAttachment -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
 member NSTextAttachment -bounds
 member NSTextAttachment -contents
 member NSTextAttachment -fileType

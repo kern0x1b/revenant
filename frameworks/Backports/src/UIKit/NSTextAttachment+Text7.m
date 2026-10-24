@@ -29,6 +29,15 @@ static void hold(id object, Ivar held, id value)
     objc_setAssociatedObject(self, BoundsKey, [NSValue valueWithCGRect:bounds], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+- (CGRect)attachmentBoundsForTextContainer:(NSTextContainer *)textContainer proposedLineFragment:(CGRect)lineFragment glyphPosition:(CGPoint)position characterIndex:(NSUInteger)charIndex
+{
+    CGRect bounds = self.bounds;
+    if (!CGRectEqualToRect(bounds, CGRectZero))
+        return bounds;
+    CGSize size = self.image.size;
+    return CGRectMake(0, 0, size.width, size.height);
+}
+
 - (NSData *)contents
 {
     Ivar held = ivar(self, "_data");
