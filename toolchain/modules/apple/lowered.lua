@@ -11,8 +11,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIPointerStyle.h",
-            find = "+ (instancetype)styleWithEffect:(UIPointerEffect *)effect shape:(nullable UIPointerShape *)shape NS_REFINED_FOR_SWIFT;",
-            replace = "+ (instancetype)revenantStyleWithEffect:(UIPointerEffect *)effect shape:(nullable UIPointerShape *)shape NS_SWIFT_NAME(init(revenantEffect:shape:));",
+            find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
+            replace = "+ (instancetype)systemPointerStyle;",
         },
     },
     {

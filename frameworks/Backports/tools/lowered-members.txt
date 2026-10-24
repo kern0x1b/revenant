@@ -29830,8 +29830,9 @@ member UIPointerShape -initRevenant
 member UIPointerShape -isEqual:
 member UIPointerShape -revenant_path
 member UIPointerStyle +hiddenPointerStyle
-member UIPointerStyle +revenantStyleWithEffect:shape:
+member UIPointerStyle +styleWithEffect:shape:
 member UIPointerStyle +styleWithShape:constrainedAxes:
+member UIPointerStyle +systemPointerStyle
 member UIPointerStyle -accessories
 member UIPointerStyle -copyWithZone:
 member UIPointerStyle -description

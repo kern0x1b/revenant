@@ -73,7 +73,7 @@
 +@available(iOS 13.4, *)
 +extension UIPointerStyle {
 +    public convenience init(effect: UIPointerEffect, shape: UIPointerShape? = nil) {
-+        self.init(revenantEffect: effect.revenantObject, shape: shape?.revenantObject)
++        self.init(__effect: effect.revenantObject, shape: shape?.revenantObject)
 +    }
 +
 +    public convenience init(shape: UIPointerShape, constrainedAxes: UIAxis = []) {

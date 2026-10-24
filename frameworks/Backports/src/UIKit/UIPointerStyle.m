@@ -299,7 +299,7 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     NSArray<UIPointerAccessory *> *_accessories;
 }
 
-+ (instancetype)revenantStyleWithEffect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape
++ (instancetype)styleWithEffect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape
 {
     return [[self alloc] initRevenantWithType:1 effect:effect shape:shape axes:(UIAxis)0];
 }
@@ -312,6 +312,11 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
 + (instancetype)hiddenPointerStyle
 {
     return [[self alloc] initRevenantWithType:0 effect:nil shape:nil axes:(UIAxis)0];
+}
+
++ (instancetype)systemPointerStyle
+{
+    return [[self alloc] initRevenantWithType:3 effect:nil shape:nil axes:(UIAxis)0];
 }
 
 - (instancetype)initRevenantWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes
@@ -376,7 +381,7 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
 
 - (NSString *)description
 {
-    NSString *type = _type == 0 ? @"hidden" : _type == 1 ? @"content effect" : @"shape";
+    NSString *type = _type == 0 ? @"hidden" : _type == 1 ? @"content effect" : _type == 3 ? @"system" : @"shape";
     return [NSString stringWithFormat:@"<%@: %p; type = %@>", [self class], self, type];
 }
 
