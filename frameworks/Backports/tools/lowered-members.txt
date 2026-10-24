@@ -1910,6 +1910,7 @@ class RevenantResourceKeysInstaller
 class RevenantRotationCoordinator
 class RevenantRotationDriver
 class RevenantRowSeparatorView
+class RevenantSCNActionRun
 class RevenantSCNAnimationEntry
 class RevenantSCNAnimations
 class RevenantSCNArchivedColor
@@ -2041,6 +2042,7 @@ class RevenantWebSchemeTask
 class RevenantWebURLProtocol
 class RevenantZoomRamp
 class RevenantZoomSampleRelay
+class SCNAction
 class SCNCamera
 class SCNGeometry
 class SCNGeometryElement
@@ -3133,6 +3135,10 @@ function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
+function RevenantSCNActionCubicProgress
+function RevenantSCNActionEase
+function RevenantSCNActionShortestAngle
+function RevenantSCNActionTimingPoints
 function RevenantSCNProjectPoint
 function RevenantSCNProjectionMatrix
 function RevenantSCNUnprojectPoint
@@ -6995,6 +7001,7 @@ global NLTagWhitespace
 global NLTagWord
 global NLTagWordJoiner
 global NSAlternateDescriptionAttributeName
+global NSAttachmentAttributeName
 global NSBinaryStoreInsecureDecodingCompatibilityOption
 global NSBinaryStoreSecureDecodingClasses
 global NSBundleResourceRequestLoadingPriorityUrgent
@@ -23260,6 +23267,17 @@ member RevenantRegistration -revenant_call:previous:
 member RevenantResourceKeysInstaller +load
 member RevenantRotationCoordinator -targetTransform
 member RevenantRotationDriver +load
+member RevenantSCNActionRun -advanceBy:onNode:leftover:
+member RevenantSCNActionRun -advanceChildrenBy:onNode:leftover:
+member RevenantSCNActionRun -advanceCompositeBy:onNode:leftover:
+member RevenantSCNActionRun -advanceGroupBy:onNode:leftover:
+member RevenantSCNActionRun -advanceLeafBy:onNode:leftover:
+member RevenantSCNActionRun -advanceRepeatBy:onNode:leftover:
+member RevenantSCNActionRun -advanceSequenceBy:onNode:leftover:
+member RevenantSCNActionRun -applyProgress:elapsed:onNode:
+member RevenantSCNActionRun -captureStartOnNode:
+member RevenantSCNActionRun -easedProgress:
+member RevenantSCNActionRun -initWithAction:key:completion:time:
 member RevenantSCNAnimations +evaluateScene:atTime:
 member RevenantSCNAnimations -addAnimation:forKey:
 member RevenantSCNAnimations -animationForKey:
@@ -23887,6 +23905,58 @@ member RevenantZoomSampleRelay -isKindOfClass:
 member RevenantZoomSampleRelay -isMemberOfClass:
 member RevenantZoomSampleRelay -methodSignatureForSelector:
 member RevenantZoomSampleRelay -respondsToSelector:
+member SCNAction +customActionWithDuration:actionBlock:
+member SCNAction +fadeInWithDuration:
+member SCNAction +fadeOpacityBy:duration:
+member SCNAction +fadeOpacityTo:duration:
+member SCNAction +fadeOutWithDuration:
+member SCNAction +group:
+member SCNAction +hide
+member SCNAction +moveBy:duration:
+member SCNAction +moveByX:y:z:duration:
+member SCNAction +moveTo:duration:
+member SCNAction +removeFromParentNode
+member SCNAction +repeatAction:count:
+member SCNAction +repeatActionForever:
+member SCNAction +revenantActionOfKind:duration:
+member SCNAction +revenantCompositeOfKind:children:
+member SCNAction +rotateByAngle:aroundAxis:duration:
+member SCNAction +rotateByX:y:z:duration:
+member SCNAction +rotateToAxisAngle:duration:
+member SCNAction +rotateToX:y:z:duration:
+member SCNAction +rotateToX:y:z:duration:shortestUnitArc:
+member SCNAction +runBlock:
+member SCNAction +runBlock:queue:
+member SCNAction +scaleBy:duration:
+member SCNAction +scaleTo:duration:
+member SCNAction +sequence:
+member SCNAction +unhide
+member SCNAction +waitForDuration:
+member SCNAction +waitForDuration:withRange:
+member SCNAction -copyWithZone:
+member SCNAction -duration
+member SCNAction -init
+member SCNAction -revenantAxisAngle
+member SCNAction -revenantBlock
+member SCNAction -revenantChildren
+member SCNAction -revenantContainsRandomWait
+member SCNAction -revenantCustomBlock
+member SCNAction -revenantIsComposite
+member SCNAction -revenantKind
+member SCNAction -revenantQueue
+member SCNAction -revenantRepeatCount
+member SCNAction -revenantRepeatsForever
+member SCNAction -revenantScalar
+member SCNAction -revenantShortestUnitArc
+member SCNAction -revenantVector
+member SCNAction -reversedAction
+member SCNAction -setDuration:
+member SCNAction -setSpeed:
+member SCNAction -setTimingFunction:
+member SCNAction -setTimingMode:
+member SCNAction -speed
+member SCNAction -timingFunction
+member SCNAction -timingMode
 member SCNCamera +camera
 member SCNCamera +supportsSecureCoding
 member SCNCamera -copyWithZone:
@@ -23953,6 +24023,8 @@ member SCNMaterialProperty -revenantPresentedContentsTransform
 member SCNMaterialProperty -setContents:
 member SCNNode +node
 member SCNNode +supportsSecureCoding
+member SCNNode -actionForKey:
+member SCNNode -actionKeys
 member SCNNode -addAnimation:forKey:
 member SCNNode -addChildNode:
 member SCNNode -addParticleSystem:
@@ -23966,6 +24038,7 @@ member SCNNode -encodeWithCoder:
 member SCNNode -eulerAngles
 member SCNNode -getBoundingBoxMin:max:
 member SCNNode -getBoundingSphereCenter:radius:
+member SCNNode -hasActions
 member SCNNode -init
 member SCNNode -initWithCoder:
 member SCNNode -isAnimationForKeyPaused:
@@ -23974,6 +24047,8 @@ member SCNNode -parentNode
 member SCNNode -particleSystems
 member SCNNode -pauseAnimationForKey:
 member SCNNode -presentationNode
+member SCNNode -removeActionForKey:
+member SCNNode -removeAllActions
 member SCNNode -removeAllAnimations
 member SCNNode -removeAllParticleSystems
 member SCNNode -removeAnimationForKey:
@@ -23985,7 +24060,12 @@ member SCNNode -revenantModelValueForKeyPath:
 member SCNNode -revenantPresentedOpacity
 member SCNNode -revenantPresentedTransform
 member SCNNode -revenantPresentedWorldTransform
+member SCNNode -revenantStepActionsAtTime:
 member SCNNode -rotation
+member SCNNode -runAction:
+member SCNNode -runAction:completionHandler:
+member SCNNode -runAction:forKey:
+member SCNNode -runAction:forKey:completionHandler:
 member SCNNode -setBoundingBoxMin:max:
 member SCNNode -setEulerAngles:
 member SCNNode -setOrientation:
@@ -31354,7 +31434,6 @@ type AudioComponentFlags
 type AudioComponentInstantiationOptions
 type BEEligibilityContext
 type CACornerMask
-type CAFrameRateRange
 type CAGradientLayerType
 type CALayerContentsFormat
 type CALayerCornerCurve
@@ -31760,6 +31839,7 @@ type PKPaymentAuthorizationStatus
 type PKPaymentMethodType
 type RPCameraPosition
 type RPSampleBufferType
+type SCNActionTimingMode
 type SCNGeometryPrimitiveType
 type SCNLightAreaType
 type SFSafariViewControllerDismissButtonStyle
