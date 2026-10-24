@@ -76,13 +76,13 @@ function main(mode, modules, root, firmware, folder, count)
 end
 ]]
 
--- a session that waits for a build lock: it writes that it waits, takes the lock, writes when it has it, holds it for a
--- moment, and releases it
+-- a session that waits for a lock: it writes that it waits, takes the lock (shared when its last argument is "1"), writes
+-- when it has it, holds it for a moment, and releases it
 local BLOCKED = [[
-function main(modules, lockpath, mark)
+function main(modules, lockpath, mark, shared)
     local generations = import("generations", {rootdir = modules, anonymous = true})
     io.writefile(mark .. ".waiting", "")
-    local lock = generations.take(lockpath)
+    local lock = generations.take(lockpath, shared == "1")
     io.writefile(mark .. ".acquired", tostring(os.mclock()))
     os.sleep(500)
     generations.release(lock)
@@ -134,6 +134,47 @@ local function leftovers(parent)
         table.insert(said, path.filename(item) .. " is " .. detail)
     end
     return said
+end
+
+-- a session waiting on a lock while its holder removes the file it holds: the holder removes its file while it holds it, a
+-- successor takes the new file before the holder releases the old one, and the waiting session, in its own process, is
+-- let in only after the successor releases. shared is the mode the waiting session takes the lock in.
+local function blocked_session(found, generations, modules, folder, envs, label, lockpath, shared)
+    local script = path.join(folder, label .. ".lua")
+    io.writefile(script, BLOCKED)
+    local mark = path.join(folder, label)
+    local holder = generations.take(lockpath)
+    local waiter = process.openv(os.programfile(), {"l", script, modules, lockpath, mark, shared and "1" or "0"},
+                                 {curdir = folder, envs = envs, stdout = mark .. ".log", stderr = mark .. ".log"})
+    local waited = 0
+    while not os.isfile(mark .. ".waiting") and waited < 60000 do
+        os.sleep(100)
+        waited = waited + 100
+    end
+    os.sleep(1000)
+    os.tryrm(lockpath)
+    local successor = generations.take(lockpath)
+    generations.release(holder)
+    os.sleep(1500)
+    if os.isfile(mark .. ".acquired") then
+        table.insert(found, label .. ": the session waiting on it took the lock while the session that replaced its file held it")
+    end
+    local released = os.mclock()
+    generations.release(successor)
+    local exited, status = waiter:wait(20000)
+    if exited ~= 1 then
+        try {function () waiter:kill() end}
+    end
+    waiter:close()
+    local acquired = os.isfile(mark .. ".acquired") and tonumber(io.readfile(mark .. ".acquired")) or nil
+    if not acquired then
+        table.insert(found, label .. ": the session waiting on it never took the lock, and printed " .. (os.isfile(mark .. ".log") and io.readfile(mark .. ".log") or ""))
+    elseif acquired < released then
+        table.insert(found, label .. ": the session waiting on it took the lock before the session that replaced its file released it")
+    end
+    if exited ~= 1 or status ~= 0 then
+        table.insert(found, label .. ": the session waiting on it did not exit cleanly: exited " .. tostring(exited) .. ", status " .. tostring(status))
+    end
 end
 
 function failures(opt)
@@ -291,45 +332,19 @@ function failures(opt)
                      .. table.concat(leftovers(path.join(root, "golden.noindex")), "; "))
     end
 
-    -- a session that waits for a build lock while its holder removes the file it holds takes the lock of the file that
-    -- replaces it, and is let in only after the replacement is released. The holder removes its file while it holds it,
-    -- a successor takes the new file before the holder releases the old one, and the waiting session is blocked on the
-    -- old file until then
-    local blocked = path.join(folder, "blocked.build.lock")
-    local blocked_script = path.join(folder, "blocked.lua")
-    io.writefile(blocked_script, BLOCKED)
-    local mark = path.join(folder, "blocked")
-    local holder = generations.take(blocked)
-    local waiter = process.openv(os.programfile(), {"l", blocked_script, modules, blocked, mark},
-                                 {curdir = folder, envs = envs, stdout = mark .. ".log", stderr = mark .. ".log"})
-    local waited = 0
-    while not os.isfile(mark .. ".waiting") and waited < 60000 do
-        os.sleep(100)
-        waited = waited + 100
-    end
-    os.sleep(1000)
-    os.tryrm(blocked)
-    local successor = generations.take(blocked)
-    generations.release(holder)
-    os.sleep(1500)
-    if os.isfile(mark .. ".acquired") then
-        table.insert(found, "a session waiting on a build lock took it while the session that replaced the lock's file held it")
-    end
-    local released = os.mclock()
-    generations.release(successor)
-    local exited, status = waiter:wait(20000)
-    if exited ~= 1 then
-        try {function () waiter:kill() end}
-    end
-    waiter:close()
-    local acquired = os.isfile(mark .. ".acquired") and tonumber(io.readfile(mark .. ".acquired")) or nil
-    if not acquired then
-        table.insert(found, "the session waiting on the build lock never took it, and printed " .. (os.isfile(mark .. ".log") and io.readfile(mark .. ".log") or ""))
-    elseif acquired < released then
-        table.insert(found, "the session waiting on the build lock took it before the session that replaced the lock's file released it")
-    end
-    if exited ~= 1 or status ~= 0 then
-        table.insert(found, "the session waiting on the build lock did not exit cleanly: exited " .. tostring(exited) .. ", status " .. tostring(status))
+    -- a session that waits on a lock that its holder removes takes the lock of the file that replaces it, and is let in
+    -- only after the replacement is released: once for a build lock (exclusive), and once for a generation's lock, which a
+    -- reader takes shared and a sweep takes exclusive
+    blocked_session(found, generations, modules, folder, envs, "build-lock", path.join(folder, "blocked.build.lock"), false)
+    local generation_published = path.join(folder, "blocked-generation")
+    local generation_lock = generation_published .. ".g1.lock"
+    blocked_session(found, generations, modules, folder, envs, "generation-lock", generation_lock, true)
+
+    -- the lock file that the reader made again, or that the successor left, belongs to a generation with no folder: a sweep
+    -- removes it
+    generations.sweep(generation_published)
+    if os.isfile(generation_lock) then
+        table.insert(found, "a sweep leaves the lock file of a generation that has no folder")
     end
 
     os.tryrm(folder)

@@ -29,13 +29,6 @@ function resolve(published)
     return os.isdir(published) and published or nil
 end
 
--- read a generation for as long as the caller holds the lock: a sweep does not remove it meanwhile
-function hold(generation)
-    local lock = io.openlock(generation .. ".lock")
-    lock:lock({shared = true})
-    return lock
-end
-
 function release(lock)
     lock:unlock()
     lock:close()
@@ -55,8 +48,8 @@ end
 -- take the lock of a path that its holders remove. The lock is taken on the file the path names, and kept only when the
 -- path still names that file once the lock is held: a waiter that was blocked on a file a holder has removed finds the
 -- path gone or replaced, releases the old file, and takes the lock of the file that replaced it. With try, a lock held by
--- another session is not waited for, and nil is returned.
-local function take_lock(path, try)
+-- another session is not waited for, and nil is returned. With shared, the lock is a shared one.
+local function take_lock(path, try, shared)
     while true do
         local lock = io.openlock(path)
         if not lock then
@@ -64,10 +57,10 @@ local function take_lock(path, try)
         end
         local taken
         if try then
-            taken = lock:trylock()
+            taken = lock:trylock({shared = shared})
         else
             -- a lock of a module, which runs in xmake's sandbox, returns nothing when it is taken and raises when it is not
-            taken = lock:lock() ~= false
+            taken = lock:lock({shared = shared}) ~= false
         end
         if not taken then
             lock:close()
@@ -88,14 +81,14 @@ local function take_lock(path, try)
     end
 end
 
--- take the lock of a path, waiting for it
-function take(path)
-    return take_lock(path, false)
+-- take the lock of a path, waiting for it, shared or exclusive
+function take(path, shared)
+    return take_lock(path, false, shared)
 end
 
 -- take the lock of a path if no other session holds it, or return nil
 function try_take(path)
-    return take_lock(path, true)
+    return take_lock(path, true, false)
 end
 
 -- remove a lock file while the caller holds its lock, then release the lock: a session waiting on the removed file takes
@@ -103,6 +96,11 @@ end
 function drop(path, lock)
     os.tryrm(path)
     release(lock)
+end
+
+-- read a generation for as long as the caller holds the lock: a sweep does not remove it meanwhile
+function hold(generation)
+    return take_lock(generation .. ".lock", false, true)
 end
 
 -- rename one name over another in one step. xmake's os.rename does not move a link or a folder, and os.mv moves a link
@@ -170,14 +168,20 @@ function sweep(published, opt)
     for _, folder in ipairs(generations_of(published)) do
         local replaced = replaced_at(folder)
         if folder ~= current and folder ~= opt.keep and (not replaced or now - replaced >= limit) then
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
+            local lock = try_take(folder .. ".lock")
+            if lock then
                 discard(folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
-            elseif lock then
-                lock:close()
+                drop(folder .. ".lock", lock)
+            end
+        end
+    end
+    -- a reader that waited on the lock of a generation which a sweep removed makes that lock file again when it retries,
+    -- and nothing else removes it: the lock files of generations that are gone are removed here, each under its own lock
+    for _, file in ipairs(os.files(published .. ".g*.lock")) do
+        if not os.isdir(file:sub(1, #file - #".lock")) then
+            local lock = try_take(file)
+            if lock then
+                drop(file, lock)
             end
         end
     end
@@ -189,20 +193,19 @@ function begin(published)
     sweep(published)
     local generation = published .. ".g" .. hash.rand32()
     os.mkdir(generation)
-    local lock = io.openlock(generation .. ".lock")
-    lock:lock()
-    return generation, lock
+    return generation, take(generation .. ".lock")
 end
 
 -- abandon a generation that a build has not published, or whose publish failed after the link moved; the generation that
--- is published stays. The lock of the generation is released either way.
+-- is published stays. The lock of the generation is released either way, and removed with the generation it locks.
 function abort(published, generation, lock)
     if resolve(published) ~= generation then
         discard(generation)
     end
-    release(lock)
-    if not os.isdir(generation) then
-        os.tryrm(generation .. ".lock")
+    if os.isdir(generation) then
+        release(lock)
+    else
+        drop(generation .. ".lock", lock)
     end
 end
 

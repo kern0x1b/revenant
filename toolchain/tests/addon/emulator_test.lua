@@ -957,6 +957,8 @@ local function output_step(emulator, folder, found)
     if run("", 1) then
         table.insert(found, "a program that wrote nothing is not reported as having written something")
     end
+    -- output 0 is the runner saying it could not open the program's files, so the log gets the not-captured line only:
+    -- this synthetic case is the one that prints that line, and it must not print the text the file holds
     if run("hello from the guest\n", 0) then
         table.insert(found, "a verdict that says the output was not captured keeps the file's text off the host, whatever it holds")
     end
