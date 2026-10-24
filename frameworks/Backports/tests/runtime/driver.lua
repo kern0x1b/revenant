@@ -28,7 +28,7 @@ local function require_present(file, message)
     end
 end
 
-local function parse(text)
+function parse(text)
     local cases = {}
     local finished = false
     for line in text:gmatch("[^\n]+") do
@@ -41,6 +41,44 @@ local function parse(text)
         end
     end
     return cases, finished
+end
+
+function guarded(body)
+    local failure
+    local values = try {
+        function ()
+            return {body()}
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised or "the body raised nothing")
+            end
+        }
+    }
+    if failure or not values then
+        return nil, failure or "the body returned nothing"
+    end
+    return values
+end
+
+function judge(case, cases, finished, description)
+    local found = {}
+    if not finished then
+        table.insert(found, string.format("the runtime app did not finish on %s %s (%s): %s", DEVICE, RELEASE, BUILD, description))
+        return found
+    end
+    local outcome = cases[case]
+    if not outcome then
+        table.insert(found, "the runtime app printed no result for " .. case)
+        return found
+    end
+    if not outcome.positive or outcome.positive.outcome ~= "pass" then
+        table.insert(found, "the check must pass on iOS " .. RELEASE .. ": " .. (outcome.positive and (outcome.positive.outcome .. ": " .. outcome.positive.detail) or "no result"))
+    end
+    if not outcome.negative or outcome.negative.outcome ~= "fail" then
+        table.insert(found, "the negative control must fail: " .. (outcome.negative and (outcome.negative.outcome .. ": " .. outcome.negative.detail) or "no result"))
+    end
+    return found
 end
 
 local function libraries_folder(app)
@@ -67,123 +105,97 @@ local function run(app, guest)
     local folder = path.join(home_cache(), key)
     local saved = path.join(folder, "cases.json")
     if os.isfile(saved) then
-        return json.loadfile(saved)
+        return json.loadfile(saved), true, ""
     end
     os.mkdir(folder)
     local lock = io.openlock(path.join(home_cache(), key .. ".lock"))
     lock:lock()
-    local ok, cases = try {
-        function ()
-            if os.isfile(saved) then
-                return true, json.loadfile(saved)
-            end
-            local started = os.mclock()
-            local rootfs = path.join(folder, "rootfs")
-            emulator.clone(firmware, rootfs)
-            local destination = emulator.guest_path(rootfs, INSTALL)
-            os.mkdir(destination)
-            for _, library in ipairs(libraries) do
-                os.cp(library, path.join(destination, path.filename(library)))
-            end
-            local binary = emulator.guest_path(rootfs, BINARY)
-            os.mkdir(path.directory(binary))
-            os.cp(app, binary)
-            os.vrunv("chmod", {"0755", binary})
-            emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
-            local results = emulator.results(rootfs)
-            local verdict_file = path.join(results, "verdict.json")
-            local perf_ready = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-ready")
-            local perf_done = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-done")
-            local booted = emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
-                                          cache = path.join(home_cache(), "host-cache"),
-                                          tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
-                                          scale = emulator.TIME_SCALE, deadline = 900, perf = true,
-                                          stop = function (state, control)
-                                              if state.perf_begin and not state.perf_begin_sent then
-                                                  control("perf-begin " .. state.perf_begin)
-                                                  state.perf_begin_sent = true
-                                              end
-                                              if state.perf_started and not state.perf_ready then
-                                                  io.writefile(perf_ready, "ready\n")
-                                                  state.perf_ready = true
-                                              end
-                                              if state.perf_end and not state.perf_end_sent then
-                                                  control("perf-end")
-                                                  state.perf_end_sent = true
-                                              end
-                                              if state.perf_finished and not state.perf_done then
-                                                  io.writefile(perf_done, "done\n")
-                                                  state.perf_done = true
-                                              end
-                                              return os.isfile(verdict_file)
-                                          end})
-            local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
-                                                                     scale = booted.scale, host_seconds = booted.seconds,
-                                                                     reports = emulator.reports(rootfs)})
-            local stdout = path.join(results, "test.stdout")
-            local text = os.isfile(stdout) and io.readfile(stdout) or ""
-            os.cp(results, path.join(folder, "results"))
-            io.writefile(path.join(folder, "app.stdout"), text)
-            emulator.remove(rootfs)
-            local parsed, finished = parse(text)
-            if not finished then
-                raise("the runtime app did not finish on %s %s (%s): %s; the emulator log is %s", DEVICE, RELEASE, BUILD,
-                      emulator.describe(verdict), booted.log)
-            end
-            json.savefile(saved, parsed)
+    local values, failure = guarded(function ()
+        if os.isfile(saved) then
+            return json.loadfile(saved), true, ""
+        end
+        local started = os.mclock()
+        local rootfs = path.join(folder, "rootfs")
+        emulator.clone(firmware, rootfs)
+        local destination = emulator.guest_path(rootfs, INSTALL)
+        os.mkdir(destination)
+        for _, library in ipairs(libraries) do
+            os.cp(library, path.join(destination, path.filename(library)))
+        end
+        local binary = emulator.guest_path(rootfs, BINARY)
+        os.mkdir(path.directory(binary))
+        os.cp(app, binary)
+        os.vrunv("chmod", {"0755", binary})
+        emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
+        local results = emulator.results(rootfs)
+        local verdict_file = path.join(results, "verdict.json")
+        local perf_ready = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-ready")
+        local perf_done = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-done")
+        local booted = emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
+                                      cache = path.join(home_cache(), "host-cache"),
+                                      tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
+                                      scale = emulator.TIME_SCALE, deadline = 900, perf = true,
+                                      stop = function (state, control)
+                                          if state.perf_begin and not state.perf_begin_sent then
+                                              control("perf-begin " .. state.perf_begin)
+                                              state.perf_begin_sent = true
+                                          end
+                                          if state.perf_started and not state.perf_ready then
+                                              io.writefile(perf_ready, "ready\n")
+                                              state.perf_ready = true
+                                          end
+                                          if state.perf_end and not state.perf_end_sent then
+                                              control("perf-end")
+                                              state.perf_end_sent = true
+                                          end
+                                          if state.perf_finished and not state.perf_done then
+                                              io.writefile(perf_done, "done\n")
+                                              state.perf_done = true
+                                          end
+                                          return os.isfile(verdict_file)
+                                      end})
+        local verdict = emulator.verdict(booted.state, results, {frame = booted.frame, errors = booted.errors,
+                                                                 scale = booted.scale, host_seconds = booted.seconds,
+                                                                 reports = emulator.reports(rootfs)})
+        local stdout = path.join(results, "test.stdout")
+        local text = os.isfile(stdout) and io.readfile(stdout) or ""
+        os.cp(results, path.join(folder, "results"))
+        io.writefile(path.join(folder, "app.stdout"), text)
+        emulator.remove(rootfs)
+        local cases, finished = parse(text)
+        local description = emulator.describe(verdict) .. "; the emulator log is " .. tostring(booted.log)
+        if finished then
+            json.savefile(saved, cases)
             cprint("${dim}runtime run on %s %s in %.1f host s at time scale %s, %s", DEVICE, RELEASE,
                    (os.mclock() - started) / 1000, booted.scale, emulator.describe(verdict))
-            return true, parsed
-        end,
-        catch {
-            function (raised)
-                return false, raised
-            end
-        }
-    }
+        end
+        return cases, finished, description
+    end)
     lock:unlock()
     lock:close()
-    if not ok then
-        raise(cases)
+    if not values then
+        raise(failure)
     end
-    return cases
+    return values[1], values[2], values[3]
 end
 
 function failures(case, target)
     local found = {}
-    local ok, result = try {
-        function ()
-            local app = target:dep("backports_runtime_app"):targetfile()
-            require_present(emulator_program(), "the emulator is not built: ./xmakew f -P . -p macosx -a arm64 -y, then ./xmakew build -P . emulator")
-            require_present(firmware_root(), string.format("the %s iOS %s root filesystem is not under ~/.revenant/firmware: ./xmakew firmware --device=%s rootfs %s",
-                                                          DEVICE, RELEASE, DEVICE, RELEASE))
-            require_present(app, "the runtime app is not built: ./xmakew build -P . backports_runtime_app")
-            local guest = target:pkg("emulator-guest")
-            if not guest then
-                raise("emulator-guest is not installed for this configuration")
-            end
-            return true, run(app, guest:installdir())
-        end,
-        catch {
-            function (raised)
-                return false, tostring(raised)
-            end
-        }
-    }
-    if not ok then
-        table.insert(found, result)
+    local values, failure = guarded(function ()
+        local app = target:dep("backports_runtime_app"):targetfile()
+        require_present(emulator_program(), "the emulator is not built: ./xmakew f -P . -p macosx -a arm64 -y, then ./xmakew build -P . emulator")
+        require_present(firmware_root(), string.format("the %s iOS %s root filesystem is not under ~/.revenant/firmware: ./xmakew firmware --device=%s rootfs %s",
+                                                      DEVICE, RELEASE, DEVICE, RELEASE))
+        require_present(app, "the runtime app is not built: ./xmakew build -P . backports_runtime_app")
+        local guest = target:pkg("emulator-guest")
+        if not guest then
+            raise("emulator-guest is not installed for this configuration")
+        end
+        return run(app, guest:installdir())
+    end)
+    if not values or values[1] == nil then
+        table.insert(found, failure or "the runtime run returned no results")
         return found
     end
-    local outcome = result[case]
-    if not outcome then
-        table.insert(found, "the runtime app printed no result for " .. case)
-        return found
-    end
-    if not outcome.positive or outcome.positive.outcome ~= "pass" then
-        table.insert(found, "the check must pass on iOS " .. RELEASE .. ": " .. (outcome.positive and (outcome.positive.outcome .. ": " .. outcome.positive.detail) or "no result"))
-    end
-    if not outcome.negative or outcome.negative.outcome ~= "fail" then
-        table.insert(found, "the negative control must fail: " .. (outcome.negative and (outcome.negative.outcome .. ": " .. outcome.negative.detail) or "no result"))
-    end
-    return found
+    return judge(case, values[1], values[2], values[3])
 end
