@@ -140,6 +140,31 @@ static inline SCNMatrix4 RevenantSCNMatrixCompose(SCNVector3 position, SCNQuater
     return m;
 }
 
+static inline SCNQuaternion RevenantSCNQuaternionMultiply(SCNQuaternion a, SCNQuaternion b)
+{
+    return SCNVector4Make(a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+                          a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+                          a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+                          a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z);
+}
+
+static inline SCNQuaternion RevenantSCNQuaternionSlerp(SCNQuaternion from, SCNQuaternion to, float t)
+{
+    float cosine = from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w;
+    if (cosine < 0) {
+        to = SCNVector4Make(-to.x, -to.y, -to.z, -to.w);
+        cosine = -cosine;
+    }
+    float a = 1 - t, b = t;
+    if (cosine < 0.9995f) {
+        float theta = acosf(cosine);
+        float sine = sinf(theta);
+        a = sinf((1 - t) * theta) / sine;
+        b = sinf(t * theta) / sine;
+    }
+    return SCNVector4Make(a * from.x + b * to.x, a * from.y + b * to.y, a * from.z + b * to.z, a * from.w + b * to.w);
+}
+
 static inline SCNQuaternion RevenantSCNQuaternionFromMatrix(SCNMatrix4 m)
 {
     float trace = m.m11 + m.m22 + m.m33;
