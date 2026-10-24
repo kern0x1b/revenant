@@ -1916,12 +1916,12 @@ class RevenantSCNAnimations
 class RevenantSCNArchivedColor
 class RevenantSCNArchivedColorSpace
 class RevenantSCNArchivedData
-class RevenantSCNAudioPlayerDelegate
 class RevenantSCNCoding
 class RevenantSCNDraw
 class RevenantSCNMesh
 class RevenantSCNRenderEngine
 class RevenantSCNShaderProgram
+class RevenantSCNSoundEngine
 class RevenantSCNTexture
 class RevenantSKWeakReference
 class RevenantSafariPage
@@ -3142,7 +3142,6 @@ function RevenantSCNActionCubicProgress
 function RevenantSCNActionEase
 function RevenantSCNActionShortestAngle
 function RevenantSCNActionTimingPoints
-function RevenantSCNAudioMixFor
 function RevenantSCNProjectPoint
 function RevenantSCNProjectionMatrix
 function RevenantSCNUnprojectPoint
@@ -23312,7 +23311,6 @@ member RevenantSCNArchivedData -initWithCoder:
 member RevenantSCNArchivedData -length
 member RevenantSCNArchivedData -mutableBytes
 member RevenantSCNArchivedData -setLength:
-member RevenantSCNAudioPlayerDelegate -audioPlayerDidFinishPlaying:successfully:
 member RevenantSCNCoding +colorWithLinearWhite:
 member RevenantSCNCoding +currentSourceURL
 member RevenantSCNCoding +decodeArrayOfClass:coder:forKey:
@@ -23346,6 +23344,17 @@ member RevenantSCNRenderEngine -renderScene:pointOfView:width:height:
 member RevenantSCNRenderEngine -surveyScene:
 member RevenantSCNRenderEngine -textureFor:sRGB:hasAlpha:
 member RevenantSCNRenderEngine -unprojectPoint:
+member RevenantSCNSoundEngine +decodeURL:channels:sampleRate:frames:
+member RevenantSCNSoundEngine +deleteBuffer:
+member RevenantSCNSoundEngine +deleteSource:
+member RevenantSCNSoundEngine +isActive
+member RevenantSCNSoundEngine +newBuffer:channels:sampleRate:
+member RevenantSCNSoundEngine +newSourceWithBuffer:relative:
+member RevenantSCNSoundEngine +prepare
+member RevenantSCNSoundEngine +procedureNamed:
+member RevenantSCNSoundEngine +setListenerWorld:atTime:
+member RevenantSCNSoundEngine +setSource:position:velocity:
+member RevenantSCNSoundEngine +setSource:reverbSend:
 member RevenantSafariPage -dealloc
 member RevenantSafariPage -initWithURL:
 member RevenantSafariPage -initialURL
@@ -23942,7 +23951,6 @@ member SCNAction +waitForDuration:withRange:
 member SCNAction -copyWithZone:
 member SCNAction -duration
 member SCNAction -init
-member SCNAction -revenantAudioPlayer
 member SCNAction -revenantAudioSource
 member SCNAction -revenantAxisAngle
 member SCNAction -revenantBlock
@@ -23968,26 +23976,31 @@ member SCNAction -timingFunction
 member SCNAction -timingMode
 member SCNAudioPlayer +audioPlayerWithSource:
 member SCNAudioPlayer -initWithSource:
-member SCNAudioPlayer -revenantAVPlayer
-member SCNAudioPlayer -revenantApplyMix:
 member SCNAudioPlayer -revenantDidFinishPlayback
+member SCNAudioPlayer -revenantIsPlaying
 member SCNAudioPlayer -revenantIsSpatial
-member SCNAudioPlayer -revenantSourceVolume
+member SCNAudioPlayer -revenantSource
 member SCNAudioPlayer -revenantStartOnNode:
 member SCNAudioPlayer -revenantStop
+member SCNAudioPlayer -revenantUpdateWithWorld:time:
 member SCNAudioSource +audioSourceNamed:
 member SCNAudioSource -copyWithZone:
+member SCNAudioSource -dealloc
 member SCNAudioSource -initWithFileNamed:
 member SCNAudioSource -initWithURL:
 member SCNAudioSource -isPositional
 member SCNAudioSource -load
 member SCNAudioSource -loops
 member SCNAudioSource -rate
+member SCNAudioSource -revenantBufferForSpatial:
 member SCNAudioSource -revenantData
+member SCNAudioSource -revenantDuration
 member SCNAudioSource -revenantURL
+member SCNAudioSource -reverbBlend
 member SCNAudioSource -setLoops:
 member SCNAudioSource -setPositional:
 member SCNAudioSource -setRate:
+member SCNAudioSource -setReverbBlend:
 member SCNAudioSource -setShouldStream:
 member SCNAudioSource -setVolume:
 member SCNAudioSource -shouldStream
@@ -24101,7 +24114,7 @@ member SCNNode -revenantPresentedTransform
 member SCNNode -revenantPresentedWorldTransform
 member SCNNode -revenantRemoveFinishedAudioPlayer:
 member SCNNode -revenantStepActionsAtTime:
-member SCNNode -revenantUpdateAudioWithListener:
+member SCNNode -revenantUpdateAudioAtTime:
 member SCNNode -rotation
 member SCNNode -runAction:
 member SCNNode -runAction:completionHandler:
@@ -30302,7 +30315,6 @@ protocol ASAuthorizationControllerDelegate
 protocol ASWebAuthenticationPresentationContextProviding
 protocol AVAsynchronousKeyValueLoading
 protocol AVAudioMixing
-protocol AVAudioPlayerDelegate
 protocol AVCaptureAudioDataOutputSampleBufferDelegate
 protocol AVCaptureDataOutputSynchronizerDelegate
 protocol AVCapturePhotoCaptureDelegate
@@ -30571,7 +30583,6 @@ protocol_member ASWebAuthenticationPresentationContextProviding -presentationAnc
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
 protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
 protocol_member AVAudioMixing -destinationForMixer:bus:
-protocol_member AVAudioPlayerDelegate -audioPlayerDidFinishPlaying:successfully:
 protocol_member AVCaptureAudioDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
 protocol_member AVCaptureDataOutputSynchronizerDelegate -dataOutputSynchronizer:didOutputSynchronizedDataCollection:
 protocol_member AVCapturePhotoCaptureDelegate -captureOutput:didCapturePhotoForResolvedSettings:
