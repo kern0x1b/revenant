@@ -12,13 +12,16 @@ package("dynarmic")
     add_versions("6.7.0", commit)
 
     local identity = {commit}
+    local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, name in ipairs(patches) do
         local file = path.join(os.scriptdir(), "patches", name)
         local sha256 = hash.sha256(file)
         add_patches("6.7.0", file, sha256)
         table.insert(identity, name .. "=" .. sha256)
+        table.insert(digests, name .. "=" .. sha256)
     end
     add_defines("DYNARMIC_BUILD_FINGERPRINT=0x" .. hash.strhash128(table.concat(identity, "\n")):sub(1, 16) .. "ULL")
+    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different build.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     add_configs("test_emit_failure", {description = "Compile the fault-injection hooks of the portable emitter, for tests.", default = false, type = "boolean"})
 

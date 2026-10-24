@@ -1,0 +1,36 @@
+From ba8ea3002911a255732c722cff8fc76b2c4320e2 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 15:31:54 +0200
+Subject: [PATCH] Fetch an install again once it is published, so the caches
+ name its link
+
+An install fetched its package while it was still building the generation folder that it publishes. The fetch kept that folder's paths in two places: the process's fetch result, which the project's package cache copies (installdir, includedirs, sysincludedirs, linkdirs, libfiles), and the detect cache, which outlives the process. A project configured right after an install therefore kept a generation path. The grace period retires that generation once a later install of the package publishes a newer one, and the build then failed with a missing header or library.
+
+The install now fetches the package again after it publishes and after it aborts. The fetch result and the detect cache then describe the published link, which every publish keeps current. A failed install leaves what the published install gives, or nothing when there is none.
+---
+ xmake/modules/private/action/require/impl/actions/install.lua | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
+index 3585732..bd26d54 100644
+--- a/xmake/modules/private/action/require/impl/actions/install.lua
++++ b/xmake/modules/private/action/require/impl/actions/install.lua
+@@ -633,6 +633,7 @@ function main(package)
+ 
+                 -- publish the install: readers get it whole, or the one it replaces
+                 package:staging_publish()
++                fetchinfo = package:fetch({force = true})
+             end
+ 
+             -- leave the package environments
+@@ -675,6 +676,7 @@ function main(package)
+                 end
+                 -- nothing was published, so the published install stays as it was
+                 package:staging_abort()
++                package:fetch({force = true})
+ 
+                 -- the addon is registered before testing it, its `on_test` needs to use it,
+                 -- e.g. xmake create -t esp32.blink, so we need to unregister it again here,
+-- 
+2.54.0 (Apple Git-157)
+

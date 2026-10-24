@@ -87,11 +87,20 @@ changes exactly when those files do:
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
+| `dynarmic` | `recipe` | the recipe and its patches |
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
+
+Open: the build hash leaves out a package's patch set unless the package has a `recipe` or `additions` digest config.
+Two recipes with the same version and different patches then share one install, and the second project gets the first
+one's patched files. The source directory is not the cause: a git checkout is reset and its patches are applied again
+for each install. `toolchain/tests/addon/source_patch_test.lua` checks a digest-configured recipe, `dynarmic`, which
+installs its own patches. The xmake-level fix, keying the build hash on the patch set for every package, is not made.
+Until it is, these packages have no digest of their patches: `boringssl`, `farmdec`, `ffmpeg`, `iphoneos-sdk` (its
+16.4 patch is outside its `additions` digest), `ldid`, `openssl`, `swiftshader` and `xmake`.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
@@ -109,5 +118,10 @@ than returning old files. A consumer that keeps a generation's path, such as a C
 once the grace has passed after two installs of the package. The hour is the longest CI run on main, 48 minutes, with
 margin; a read longer than the grace is not protected. Export copies the files the link names (patch `0016`), and
 import publishes them the same way, so an exported package imports whole.
+
+Two crutches are left in the store generation work. A process that dies between the fetch that validates a staged
+install and the fetch after its publish leaves the generation path in the detect cache until the next install of that
+package (patch `0017`). The store race test (`toolchain/tests/addon/store_race_test.lua`) reads the include and library
+folders only, so the bindir, rpath and pkgconfig paths of a package have no test.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).
