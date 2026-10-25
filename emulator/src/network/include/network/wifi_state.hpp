@@ -16,6 +16,7 @@
 #include <string_view>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "network/virtual_network.hpp"
 
 namespace emulator {
@@ -74,6 +75,8 @@ public:
     [[nodiscard]] bool set_airplane_mode(bool enabled);
     [[nodiscard]] bool associate(std::string_view ssid = { });
     [[nodiscard]] bool disassociate();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     [[nodiscard]] static WifiIpv4Configuration default_ipv4_configuration();
