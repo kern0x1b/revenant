@@ -99,6 +99,11 @@ caches it creates are in place. The first run after a change to a cache key crea
 | baseline, `40044072531` | 14 min | 27 | 9 min 55 s | 7 min 40 s | 9 min 12 s |
 | after, `40046661803` | 4 min 12 s | 10 | 4 min 12 s | 3 min 34 s | 2 min 13 s |
 
+Before the gating, a push that changed only documentation still ran `checks` and `package` in full. Measured on
+`40185450738` (a documentation-only change) the `checks` tests took 705 s and `package` took 1205 s, of which its
+SwiftUI demo configure took 7 min 27 s and its build 11 min 18 s, so about 25 macOS minutes for a change that only
+the repository checks read. Since the gating, such a push runs the `repository` job alone.
+
 The baseline `checks` job spent 5 min 11 s in the firmware-tools configure, which installs nothing on a store hit: the
 time is in the iOS configure itself, in a stretch where xmake prints nothing for about ten minutes on a host. The
 change skips that configure when the inventory is cached, and `swift` skips it on a dyld hit, which removes it from
