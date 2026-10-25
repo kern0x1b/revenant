@@ -56,4 +56,38 @@ function main()
     assert(partial:sub(1, undefined):match(".*(UT_AVAILABLE_%u+)") == "UT_AVAILABLE_BEGIN", "UndefinedThing, which Backports do not define, must still sit in the iOS 14 region")
     local defined = partial:find("DefinedThing", 1, true)
     assert(partial:sub(1, defined):match(".*(UT_AVAILABLE_%u+)") == "UT_AVAILABLE_END", "DefinedThing is lowered, so the region must close before its declaration")
+    local enum = lowered.lower_header(table.concat({
+        "API_AVAILABLE_BEGIN(macos(10.11), ios(8), tvos(10))",
+        "typedef NS_ENUM(NSInteger, PHFakeMode) {",
+        "    PHFakeModeFit = 0,",
+        "    PHFakeModeFill = 1,",
+        "    PHFakeModeLater API_AVAILABLE(macos(10.12), ios(9), tvos(10)) = 2,",
+        "    PHFakeModeNever = 3",
+        "} NS_SWIFT_NAME(PHFake.Mode);",
+        "API_AVAILABLE_END",
+        ""
+    }, "\n"), {globals = {PHFakeModeFit = true, PHFakeModeFill = true}, functions = {}, classes = {}, protocols = {}, protocol_members = {}, types = {}})
+    local declaration = enum:match("typedef NS_ENUM%(NSInteger, PHFakeMode%) %b{}")
+    assert(declaration, "the enum shaped like PhotosTypes.h did not lower to a declaration")
+    assert(not declaration:find("API_AVAILABLE_BEGIN", 1, true) and not declaration:find("API_AVAILABLE_END", 1, true), "an availability region opens or closes inside the enum body")
+    assert(enum:find("PHFakeModeFit = 0,", 1, true) and enum:find("PHFakeModeFill = 1,", 1, true), "the backported constants of the enum lost their values or gained a gate")
+    assert(enum:find("PHFakeModeNever API_AVAILABLE(macos(10.11), ios(8), tvos(10)) = 3", 1, true), "the enum's constant that Backports do not define lost the region's availability")
+    assert(enum:find("PHFakeModeLater API_AVAILABLE(macos(10.12), ios(9), tvos(10)) = 2", 1, true), "the enum's constant with its own availability lost it")
+    assert(enum:sub(1, enum:find("typedef", 1, true) - 1):match(".*(API_AVAILABLE_%u+)") == "API_AVAILABLE_END", "the enum must sit outside the region, so the region closes before it")
+    assert(enum:match("NS_SWIFT_NAME%(PHFake%.Mode%);(.*)$"):find("API_AVAILABLE_BEGIN", 1, true), "the region must reopen after the enum")
+    local nested = {}
+    for _, file in ipairs(os.files(path.join(out, "System", "Library", "Frameworks", "**.h"))) do
+        local depth = 0
+        for line in io.readfile(file):gmatch("[^\n]+") do
+            local code = line:gsub("//.*$", "")
+            if depth > 0 and (code:find("API_AVAILABLE_BEGIN", 1, true) or code:find("API_AVAILABLE_END", 1, true)) then
+                table.insert(nested, path.filename(file))
+                break
+            end
+            for brace in code:gmatch("[{}]") do
+                depth = depth + (brace == "{" and 1 or -1)
+            end
+        end
+    end
+    assert(#nested == 0, "availability regions open or close inside a brace body in: " .. table.concat(nested, ", "))
 end
