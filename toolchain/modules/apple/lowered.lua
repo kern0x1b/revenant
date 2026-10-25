@@ -1496,7 +1496,7 @@ end
 function read_all_members()
     local set = merge_sets(read_members(), read_device_members())
     set.weak_classes = {}
-    for _, name in ipairs(flat_classes.class_names()) do
+    for _, name in ipairs(flat_classes.weak_class_names()) do
         set.weak_classes[name] = true
     end
     for _, rows in pairs(runtime_guards.guards()) do

@@ -13,6 +13,8 @@ local STUBBED = {
     },
 }
 
+local EXPORTED = {NSURLComponents = true}
+
 function class_names()
     local names, seen = {}, {}
     for _, entry in ipairs(STUBBED) do
@@ -21,6 +23,16 @@ function class_names()
                 seen[name] = true
                 table.insert(names, name)
             end
+        end
+    end
+    return names
+end
+
+function weak_class_names()
+    local names = {}
+    for _, name in ipairs(class_names()) do
+        if not EXPORTED[name] then
+            table.insert(names, name)
         end
     end
     return names
