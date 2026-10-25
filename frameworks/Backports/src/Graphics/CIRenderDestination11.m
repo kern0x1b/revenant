@@ -5,8 +5,29 @@
 #endif
 
 #import <CoreImage/CoreImage.h>
+#import <CoreVideo/CoreVideo.h>
+#import <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
 #import "RevenantCIRenderDestination.h"
+#if defined(REVENANT_HOST_BUILD)
+#define GL_SILENCE_DEPRECATION
+#import <OpenGL/gl.h>
+#else
+#import <OpenGLES/ES2/gl.h>
+#endif
+#if COREIMAGE_SUPPORTS_IOSURFACE
+#import <IOSurface/IOSurfaceObjC.h>
+#endif
+
+static const OSType RevenantCIPixelFormatRGBA = 0x52474241;
+
+typedef struct {
+    NSUInteger x;
+    NSUInteger y;
+    NSUInteger width;
+    NSUInteger height;
+    CGAffineTransform transform;
+} RevenantCIRegion;
 
 static NSError *RevenantCIRenderError(NSInteger code, NSString *message)
 {
@@ -24,6 +45,72 @@ static BOOL RevenantCIFormatForPixelFormat(MTLPixelFormat pixelFormat, CIFormat 
             return YES;
         default:
             return NO;
+    }
+}
+
+static BOOL RevenantCIFormatForFourCC(OSType fourCC, CIFormat *format)
+{
+    if (fourCC == kCVPixelFormatType_32BGRA) {
+        *format = kCIFormatBGRA8;
+        return YES;
+    }
+    if (fourCC == RevenantCIPixelFormatRGBA) {
+        *format = kCIFormatRGBA8;
+        return YES;
+    }
+    return NO;
+}
+
+static NSUInteger RevenantCIBytesPerPixel(CIFormat format)
+{
+    if (format == kCIFormatBGRA8 || format == kCIFormatRGBA8) {
+        return 4;
+    }
+    if (format == kCIFormatRGBAh) {
+        return 8;
+    }
+    if (format == kCIFormatRGBAf) {
+        return 16;
+    }
+    return 0;
+}
+
+static BOOL RevenantCIRegionMake(NSUInteger destinationWidth, NSUInteger destinationHeight, CGRect rect, CGPoint point, BOOL flipped, RevenantCIRegion *region)
+{
+    const NSInteger width = destinationWidth;
+    const NSInteger height = destinationHeight;
+    const NSInteger atX = floor(point.x);
+    const NSInteger atY = floor(point.y);
+    const NSInteger fromX = floor(rect.origin.x);
+    const NSInteger fromY = floor(rect.origin.y);
+    const NSInteger x0 = MAX(0, atX);
+    const NSInteger x1 = MIN(width, atX + floor(rect.size.width));
+    const NSInteger bottom = MAX(0, atY);
+    const NSInteger top = MIN(height, atY + floor(rect.size.height));
+    if (x1 <= x0 || top <= bottom) {
+        return NO;
+    }
+    const CGFloat dx = (CGFloat)(atX - fromX - x0);
+    region->x = x0;
+    region->width = x1 - x0;
+    region->height = top - bottom;
+    if (flipped) {
+        region->y = height - top;
+        region->transform = CGAffineTransformMakeTranslation(dx, (CGFloat)(atY - fromY - bottom));
+    } else {
+        region->y = bottom;
+        CGAffineTransform flip = CGAffineTransformConcat(CGAffineTransformMakeScale(1, -1), CGAffineTransformMakeTranslation(0, height));
+        region->transform = CGAffineTransformConcat(flip, CGAffineTransformMakeTranslation(dx, (CGFloat)(fromY - atY - (height - top))));
+    }
+    return YES;
+}
+
+static void RevenantCICopyRegion(const void *source, NSUInteger sourceRowBytes, void *destination, NSUInteger destinationRowBytes, const RevenantCIRegion *region, NSUInteger bytesPerPixel)
+{
+    const uint8_t *from = source;
+    uint8_t *to = destination;
+    for (NSUInteger row = 0; row < region->height; row++) {
+        memcpy(to + (region->y + row) * destinationRowBytes + region->x * bytesPerPixel, from + row * sourceRowBytes, region->width * bytesPerPixel);
     }
 }
 
@@ -115,6 +202,10 @@ static void RevenantCIUnpremultiply(const float *floats, void *data, NSUInteger 
     void *_bitmapData;
     NSUInteger _bytesPerRow;
     CIFormat _bitmapFormat;
+    CVPixelBufferRef _pixelBuffer;
+    IOSurfaceRef _surface;
+    GLuint _glTexture;
+    GLenum _glTarget;
     CIRenderDestinationAlphaMode _alphaMode;
     BOOL _flipped;
     BOOL _dithered;
@@ -137,6 +228,12 @@ static void RevenantCIUnpremultiply(const float *floats, void *data, NSUInteger 
 {
     if (_colorSpace) {
         CGColorSpaceRelease(_colorSpace);
+    }
+    if (_pixelBuffer) {
+        CVPixelBufferRelease(_pixelBuffer);
+    }
+    if (_surface) {
+        CFRelease(_surface);
     }
 }
 
@@ -179,6 +276,42 @@ static void RevenantCIUnpremultiply(const float *floats, void *data, NSUInteger 
     return self;
 }
 
+- (instancetype)initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer
+{
+    if ((self = [super init])) {
+        _pixelBuffer = CVPixelBufferRetain(pixelBuffer);
+        _width = CVPixelBufferGetWidth(pixelBuffer);
+        _height = CVPixelBufferGetHeight(pixelBuffer);
+        [self revenant_applyDefaults];
+    }
+    return self;
+}
+
+#if COREIMAGE_SUPPORTS_IOSURFACE
+- (instancetype)initWithIOSurface:(IOSurface *)surface
+{
+    if ((self = [super init])) {
+        _surface = (IOSurfaceRef)CFRetain((__bridge IOSurfaceRef)surface);
+        _width = IOSurfaceGetWidth(_surface);
+        _height = IOSurfaceGetHeight(_surface);
+        [self revenant_applyDefaults];
+    }
+    return self;
+}
+#endif
+
+- (instancetype)initWithGLTexture:(unsigned int)texture target:(unsigned int)target width:(NSUInteger)width height:(NSUInteger)height
+{
+    if ((self = [super init])) {
+        _glTexture = texture;
+        _glTarget = target;
+        _width = width;
+        _height = height;
+        [self revenant_applyDefaults];
+    }
+    return self;
+}
+
 - (void)revenant_applyDefaults
 {
     _alphaMode = CIRenderDestinationAlphaPremultiplied;
@@ -202,61 +335,158 @@ static void RevenantCIUnpremultiply(const float *floats, void *data, NSUInteger 
     _colorSpace = colorSpace;
 }
 
+- (BOOL)revenant_resolveFormat:(CIFormat *)format error:(NSError **)error
+{
+    if (_bitmapData) {
+        if (!RevenantCIBytesPerPixel(_bitmapFormat)) {
+            if (error)
+                *error = RevenantCIRenderError(2, @"the bitmap format has no CoreImage pixel size");
+            return NO;
+        }
+        *format = _bitmapFormat;
+        return YES;
+    }
+    if (_pixelBuffer) {
+        if (!RevenantCIFormatForFourCC(CVPixelBufferGetPixelFormatType(_pixelBuffer), format)) {
+            if (error)
+                *error = RevenantCIRenderError(4, @"the pixel buffer's pixel format has no CoreImage format");
+            return NO;
+        }
+        return YES;
+    }
+    if (_surface) {
+        if (!RevenantCIFormatForFourCC(IOSurfaceGetPixelFormat(_surface), format)) {
+            if (error)
+                *error = RevenantCIRenderError(4, @"the surface's pixel format has no CoreImage format");
+            return NO;
+        }
+        return YES;
+    }
+    if (_glTexture) {
+        if (_glTarget != GL_TEXTURE_2D) {
+            if (error)
+                *error = RevenantCIRenderError(5, @"only GL_TEXTURE_2D destinations are supported");
+            return NO;
+        }
+        *format = kCIFormatRGBA8;
+        return YES;
+    }
+    if (!RevenantCIFormatForPixelFormat(_pixelFormat, format)) {
+        if (error)
+            *error = RevenantCIRenderError(1, @"the destination's pixel format has no CoreImage format");
+        return NO;
+    }
+    if (!_texture && !_textureProvider) {
+        if (error)
+            *error = RevenantCIRenderError(9, @"the destination has no texture");
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)revenant_writeRegion:(const RevenantCIRegion *)region format:(CIFormat)format pixels:(const void *)pixels rowBytes:(NSUInteger)rowBytes texture:(id<MTLTexture>)texture error:(NSError **)error
+{
+    const NSUInteger bytesPerPixel = RevenantCIBytesPerPixel(format);
+    if (_bitmapData) {
+        RevenantCICopyRegion(pixels, rowBytes, _bitmapData, _bytesPerRow, region, bytesPerPixel);
+        return YES;
+    }
+    if (_pixelBuffer) {
+        if (CVPixelBufferLockBaseAddress(_pixelBuffer, 0) != kCVReturnSuccess) {
+            if (error)
+                *error = RevenantCIRenderError(7, @"the pixel buffer cannot be locked");
+            return NO;
+        }
+        RevenantCICopyRegion(pixels, rowBytes, CVPixelBufferGetBaseAddress(_pixelBuffer), CVPixelBufferGetBytesPerRow(_pixelBuffer), region, bytesPerPixel);
+        CVPixelBufferUnlockBaseAddress(_pixelBuffer, 0);
+        return YES;
+    }
+    if (_surface) {
+        if (IOSurfaceLock(_surface, 0, NULL) != KERN_SUCCESS) {
+            if (error)
+                *error = RevenantCIRenderError(8, @"the surface cannot be locked");
+            return NO;
+        }
+        RevenantCICopyRegion(pixels, rowBytes, IOSurfaceGetBaseAddress(_surface), IOSurfaceGetBytesPerRow(_surface), region, bytesPerPixel);
+        IOSurfaceUnlock(_surface, 0, NULL);
+        return YES;
+    }
+    if (_glTexture) {
+        GLint previous = 0;
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &previous);
+        glBindTexture(GL_TEXTURE_2D, _glTexture);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, (GLint)region->x, (GLint)region->y, (GLsizei)region->width, (GLsizei)region->height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        glBindTexture(GL_TEXTURE_2D, previous);
+        return YES;
+    }
+    [texture replaceRegion:MTLRegionMake2D(region->x, region->y, region->width, region->height) mipmapLevel:0 withBytes:pixels bytesPerRow:rowBytes];
+    return YES;
+}
+
 - (CIRenderTask *)revenant_renderImage:(CIImage *)image context:(CIContext *)context error:(NSError **)error
 {
-    id<MTLTexture> texture = _texture ?: (_textureProvider ? _textureProvider() : nil);
-    CIFormat format = _bitmapFormat;
-    NSUInteger rowBytes = _bytesPerRow;
-    void *bytes = _bitmapData;
-    NSMutableData *scratch = nil;
-    if (!bytes) {
-        if (!texture || !RevenantCIFormatForPixelFormat(_pixelFormat, &format)) {
-            if (error)
-                *error = RevenantCIRenderError(1, @"the destination's pixel format has no CoreImage format");
-            return nil;
-        }
-        rowBytes = _width * 4;
-        scratch = [NSMutableData dataWithLength:rowBytes * _height];
-        bytes = scratch.mutableBytes;
-    }
-    CGRect bounds = CGRectMake(0, 0, _width, _height);
-    CIImage *source = image;
-    if (!_flipped) {
-        source = [source imageByApplyingTransform:CGAffineTransformConcat(CGAffineTransformMakeScale(1, -1), CGAffineTransformMakeTranslation(0, _height))];
-    }
-    CGColorSpaceRef colorSpace = _colorSpace;
-    CGColorSpaceRef srgb = NULL;
-    if (!colorSpace) {
-        srgb = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-        colorSpace = srgb;
-    }
+    return [self revenant_renderImage:image fromRect:CGRectMake(0, 0, _width, _height) atPoint:CGPointZero context:context error:error];
+}
+
+- (CIRenderTask *)revenant_renderImage:(CIImage *)image fromRect:(CGRect)rect atPoint:(CGPoint)point context:(CIContext *)context error:(NSError **)error
+{
     NSDate *started = [NSDate date];
-    if (_alphaMode == CIRenderDestinationAlphaUnpremultiplied) {
-        if (format != kCIFormatBGRA8 && format != kCIFormatRGBA8) {
-            if (srgb) {
-                CGColorSpaceRelease(srgb);
-            }
+    CIFormat format = kCIFormatRGBA8;
+    if (![self revenant_resolveFormat:&format error:error]) {
+        return nil;
+    }
+    if (_alphaMode == CIRenderDestinationAlphaUnpremultiplied && format != kCIFormatBGRA8 && format != kCIFormatRGBA8) {
+        if (error)
+            *error = RevenantCIRenderError(3, @"unpremultiplied rendering needs an 8-bit BGRA or RGBA destination");
+        return nil;
+    }
+    id<MTLTexture> texture = nil;
+    if (!_bitmapData && !_pixelBuffer && !_surface && !_glTexture) {
+        texture = _texture ?: (_textureProvider ? _textureProvider() : nil);
+        if (!texture) {
             if (error)
-                *error = RevenantCIRenderError(3, @"unpremultiplied rendering needs an 8-bit BGRA or RGBA destination");
+                *error = RevenantCIRenderError(9, @"the destination has no texture");
             return nil;
         }
-        NSMutableData *floats = [NSMutableData dataWithLength:_width * _height * 4 * sizeof(float)];
-        [context render:source toBitmap:floats.mutableBytes rowBytes:(NSInteger)(_width * 4 * sizeof(float)) bounds:bounds format:kCIFormatRGBAf colorSpace:colorSpace];
-        RevenantCIUnpremultiply(floats.mutableBytes, bytes, _width, _height, rowBytes, format == kCIFormatBGRA8);
-    } else {
-        [context render:source toBitmap:bytes rowBytes:(NSInteger)rowBytes bounds:bounds format:format colorSpace:colorSpace];
     }
-    if (_alphaMode == CIRenderDestinationAlphaNone) {
-        RevenantCIMakeOpaque(bytes, _width, _height, rowBytes);
-    }
-    if (srgb) {
-        CGColorSpaceRelease(srgb);
-    }
-    if (texture) {
-        [texture replaceRegion:MTLRegionMake2D(0, 0, _width, _height) mipmapLevel:0 withBytes:bytes bytesPerRow:rowBytes];
+    RevenantCIRegion region;
+    if (RevenantCIRegionMake(_width, _height, rect, point, _flipped, &region)) {
+        const NSUInteger bytesPerPixel = RevenantCIBytesPerPixel(format);
+        const NSUInteger rowBytes = region.width * bytesPerPixel;
+        NSMutableData *pixels = [NSMutableData dataWithLength:rowBytes * region.height];
+        CGRect bounds = CGRectMake(0, 0, region.width, region.height);
+        CIImage *source = [image imageByApplyingTransform:region.transform];
+        CGColorSpaceRef colorSpace = _colorSpace;
+        CGColorSpaceRef srgb = NULL;
+        if (!colorSpace) {
+            srgb = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+            colorSpace = srgb;
+        }
+        if (_alphaMode == CIRenderDestinationAlphaUnpremultiplied) {
+            NSMutableData *floats = [NSMutableData dataWithLength:region.width * region.height * 4 * sizeof(float)];
+            [context render:source toBitmap:floats.mutableBytes rowBytes:(NSInteger)(region.width * 4 * sizeof(float)) bounds:bounds format:kCIFormatRGBAf colorSpace:colorSpace];
+            RevenantCIUnpremultiply(floats.mutableBytes, pixels.mutableBytes, region.width, region.height, rowBytes, format == kCIFormatBGRA8);
+        } else {
+            [context render:source toBitmap:pixels.mutableBytes rowBytes:(NSInteger)rowBytes bounds:bounds format:format colorSpace:colorSpace];
+        }
+        if (_alphaMode == CIRenderDestinationAlphaNone && bytesPerPixel == 4) {
+            RevenantCIMakeOpaque(pixels.mutableBytes, region.width, region.height, rowBytes);
+        }
+        if (srgb) {
+            CGColorSpaceRelease(srgb);
+        }
+        if (![self revenant_writeRegion:&region format:format pixels:pixels.mutableBytes rowBytes:rowBytes texture:texture error:error]) {
+            return nil;
+        }
     }
     CIRenderInfo *info = [[CIRenderInfo alloc] initWithKernelExecutionTime:-[started timeIntervalSinceNow] passCount:1 pixelsProcessed:(NSInteger)(_width * _height)];
     return [[CIRenderTask alloc] initWithInfo:info];
+}
+
+- (BOOL)revenant_prepareRenderWithError:(NSError **)error
+{
+    CIFormat format = kCIFormatRGBA8;
+    return [self revenant_resolveFormat:&format error:error];
 }
 
 @end
