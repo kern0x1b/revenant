@@ -85,6 +85,32 @@ What is open:
 - `prepareRender` checks the destination's format and backing, and nothing else. It does not reserve or compile anything.
   The oracle agrees with the host on the bitmap and R8 cases.
 
+## VideoToolbox: `VTCreateCGImageFromCVPixelBuffer` and `VTIsHardwareDecodeSupported`
+
+What exists, from `frameworks/Backports/src/VideoToolbox/VTCreateCGImage9_0.m` and `VTIsHardwareDecodeSupported11_0.m`:
+
+- `VTCreateCGImageFromCVPixelBuffer` converts 8-bit bi-planar 4:2:0 NV12 (video and full range) and 32BGRA and 32ARGB to a
+  `CGImage` in sRGB. The matrix (BT.601 or BT.709) is read from `kCVImageBufferYCbCrMatrixKey`. The NV12 path is scalar C in
+  Q10 fixed point with nearest chroma. The host oracle `tests/VideoToolbox/conversion_test.m` runs the same seeded frames
+  through macOS and the backport: NV12 within 1 per channel in all four range and matrix cases, and 32BGRA and 32ARGB
+  exactly on valid premultiplied pixels. The check count is 21.
+- `VTIsHardwareDecodeSupported` answers for H.264 only. It creates a 320 by 240 format description with a 29-byte `avcC`
+  and a decompression session that requires hardware acceleration, then reports whether the session was created. The
+  oracle `tests/VideoToolbox/hardware_test.m` checks H.264 against macOS (both report yes), and HEVC and AV1 as no.
+- The `kVTProfileLevel_H264_*` constants: the iOS 26.2 SDK and the macOS SDK declare the same 35 names. Those missing from the
+  6.1.3 export table are 14, and all 14 are already defined in Backports, so the missing set is empty.
+
+What is open:
+
+- Bit depth: 10-bit bi-planar input is refused with `kVTPixelTransferNotSupportedErr`. macOS converts it, so the oracle
+  asserts the refusal rather than a match. Telegram's calls take 8-bit formats.
+- Speed: the conversion is scalar C. `vImage` has no YUV-to-ARGB conversion in the 6.1.3 export table, and no NEON path
+  is written. The per-frame time on the A5 is not measured.
+- Colour space: every image is tagged sRGB. A buffer's own colour attachments are not read.
+- Hardware: the H.264 check is verified on the host only. The session with the hardware requirement has not been run on an
+  A5 device, so the device answer is unknown until it is. HEVC and AV1 report no by design: the A5 has no hardware decoder
+  for either, and Telegram asks only about AV1.
+
 ## WebKit (`WK*`)
 
 What exists, from `frameworks/Backports/src/WebKit` (14 `WK*` source files):
