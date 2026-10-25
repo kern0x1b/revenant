@@ -1241,7 +1241,7 @@ local function local_symbols(cache, address, wide)
     local head = read(region_offset, 24)
     local nlist_offset, nlist_count, strings_offset, strings_size, entries_offset, entries_count = string.unpack("<I4I4I4I4I4I4", head, 1)
     local base = string.unpack("<I8", cache.read(cache.main, cache.main.mapping_offset, 8), 1)
-    local entry_width = region_size >= entries_offset + entries_count * 16 and #read(region_offset + entries_offset, math.min(16, region_size - entries_offset)) == 16 and 16 or 12
+    local entry_width = file.header:sub(1, 16):find("arm64", 1, true) and 16 or 12
     local entries = read(region_offset + entries_offset, entries_count * entry_width)
     local start, count
     for index = 0, entries_count - 1 do
