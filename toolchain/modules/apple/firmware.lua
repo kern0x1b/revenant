@@ -505,6 +505,34 @@ function harvest(mount, release, firmware, architecture)
     return found
 end
 
+local DETACH_ATTEMPTS = 5
+
+local function detach_image(mount)
+    local errors = nil
+    for attempt = 1, DETACH_ATTEMPTS do
+        local detached = false
+        try {
+            function ()
+                os.vrunv("hdiutil", {"detach", mount})
+                detached = true
+            end,
+            catch {
+                function (raised)
+                    errors = tostring(raised)
+                end
+            }
+        }
+        if detached then
+            return
+        end
+        if attempt < DETACH_ATTEMPTS then
+            print("the image at %s is busy, detach attempt %d of %d failed, retrying", mount, attempt, DETACH_ATTEMPTS)
+            os.sleep(attempt * 500)
+        end
+    end
+    raise("%s", errors)
+end
+
 local function mount_and_harvest(image, release, architecture, firmware)
     local mount = image .. ".mount"
     os.mkdir(mount)
@@ -530,7 +558,7 @@ local function mount_and_harvest(image, release, architecture, firmware)
         },
         finally {
             function ()
-                os.vrunv("hdiutil", {"detach", mount})
+                detach_image(mount)
                 os.tryrm(mount)
             end
         }
@@ -741,7 +769,7 @@ local function copy_tree(image, destination)
         end,
         finally {
             function ()
-                os.vrunv("hdiutil", {"detach", mount})
+                detach_image(mount)
                 os.tryrm(mount)
             end
         }
