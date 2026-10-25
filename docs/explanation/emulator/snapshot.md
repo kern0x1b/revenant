@@ -172,6 +172,65 @@ The Light Touch project and its qemu-ios fork were read on GitHub on 2026-10-24,
 `savevm` and migration. Its `JIT-SNAPSHOTS.md` covers statistics, not machine snapshots, so it adds no design for this
 emulator beyond the qemu ideas above.
 
+## Serialisation design, from the code
+
+Scope is the `run` profile (`docs/reference/emulator/performance.md`, "Run profile"): a boot without SpringBoard, whose
+clone has the SpringBoard LaunchDaemon removed. It holds launchd and its daemons, and the runner writes `results/verdict.json`. A snapshot
+is taken at a scheduler point the machine reaches itself (quiescence, below), never in the middle of an instruction.
+
+The unit is one `Runtime` per guest process (`src/runtime/process.hpp:131`: `memory` (AddressSpace), `cpus`
+(CpuCluster), `kernel` (CompatibilityKernel)), plus the state the kernels share: `KernelSharedState`
+(`src/kernel/include/kernel/kernel_shared_state.hpp`, 1,727 lines), the virtual clock, and the host-side objects.
+
+Each row names an owner, where it lives, what it holds, and what the snapshot does with it. Save means written as data.
+Rebuild means recomputed at restore from the rootfs or the device configuration. Refuse means the snapshot is not taken
+while the state exists.
+
+| owner | where | holds | treatment |
+|---|---|---|---|
+| pages | `AddressSpace::Page` (`src/foundation/include/foundation/address_space.hpp:255`), `GuestPageBacking` (`file_page_cache.hpp:229`) | 4 KiB bytes of each materialised page, write generation, flags `file_cached`, `shared_writable`, `copy_on_write_possible` | save anonymous and shared-writable bytes. Name file-cached pages by their `RuntimeBackingGeneration` (`file_page_cache.hpp:36`: backing path, `GuestFileGeneration`, `ContentIdentity`), offset and size, and read them back from the file |
+| mappings | `AddressSpace` regions, `FileMapping` (`address_space.hpp:264`), permission chunks | ranges, permissions, file offsets | save ranges and permissions; rebuild file mappings from the file key |
+| shared backings | `shared_ptr<GuestPageBacking>` referenced by pages in one or more processes | one backing, several referrers | save each backing once under an identity; pages refer to the identity |
+| CPU | `CpuThreadState` (`cpu.hpp:154`): 16 registers, 64 extension registers, cpsr, fpscr, `cthread_self` | per-thread registers | save all five. The JIT save and load (`cpu.cpp:3061`, `3085`) copy only the first four, so `cthread_self` is written explicitly. The exclusive monitor is cleared on restore (`Cpu::clear_exclusive_state`). Translated code is not state |
+| scheduler | `XnuScheduler` (`src/mach/include/mach/xnu_scheduler.hpp`): `threads_` (307), `process_threads_` (310), `processor_run_queues_` (306), counts `runnable_count_`, `waiting_count_`, `active_timeshare_count_` (314–316) | thread records, queue order, counts | save the records and queue order; recompute the counts on restore and check them against the saved ones |
+| clock | `VirtualClock` (`virtual_clock.hpp:15`): `now_`, `wall_time_offset_` | guest time | save both. The pacer (`RealtimePacer`, `realtime_pacer.hpp:24`, with its initial host time at line 46) is rebuilt at restore. Deadlines held in host time convert to guest time |
+| per-process kernel tables | `CompatibilityKernel` (`kernel.hpp:80`), members at 844–1024 | descriptors (`file_descriptors_` 885, `file_offsets_` 890, `file_status_flags_` 893, `descriptor_flags_` 894, `descriptor_guards_` 895, `virtual_descriptors_` 897, `duplicated_descriptors_` 921), signals (`signal_actions_` 933, `thread_signal_masks_` 934, `pending_signals_` 942, `alternate_signal_stacks_` 950), kqueues (`kqueues_` 929), socket options and names (`socket_options_` 920, `bound_socket_names_` 914), `random_state_` (962), `guest_working_directory_` (880), `process_image_` (882) | save the plain data. The maps keyed by id keep their keys. A descriptor that names a host file reopens at restore from its path, offset and flags, and the restore fails if the file key has changed |
+| host network objects | `host_sockets_` (905), `virtual_udp_sockets_` (911), `unix_listener_states_` (917), `route_socket_states_` (927), `pending_host_connects_` (999) and the other host pending maps | host descriptors and operations in flight | refuse while any exists. The `[loader]` line prints `network=` from the host network policy (`emulator_session.cpp:2155`); the policy in force for the `run` profile is the first thing to measure |
+| handlers | `CompatibilityKernel` handler members, `kernel.hpp:966–990` (19 in all, from `thread_create_handler_` to `mapped_executable_handler_` and the rest) | callbacks into the session | not saved. The session rewires them at restore, in the order spawn uses |
+| blocked operations | `pending_waits_` (993), `pending_mach_receives_` (994), `pending_kevents_`, `pending_recvmsgs_`, `pending_timers_`, `pending_semaphore_waits_`, `pending_psynch_waits_`, `pending_polls_`, `pending_selects_` and the rest through line 1024 | what each blocked thread waits for | save waits on guest state (a timer, a Mach receive, a semaphore, a psynch wait) as kind and deadline. Refuse waits that depend on host state |
+| Mach IPC | `spaces_` (`mach_namespace.hpp:113`: per-task names and rights), `objects_` (`mach_port_object.hpp:165`), `mach_queues` of `MachMessage` (`kernel_shared_state.hpp:1150`, struct at 442), `mach_semaphores` (1318), `mach_memory_entries` (1322) | names, rights, queued messages, semaphores, memory entries | save all of it. Port ids and names keep their values |
+| shared kernel state | `KernelSharedState`: `processes` (`std::map<std::uint32_t, ProcessRecord>`, line 1412; `ProcessRecord` at 537: uid, gid, command, executable path, arguments, environment, entitlements, incarnation), `bootstrap_checked_in_services` (1239), `psynch_runtime` (1417), `MachMemoryObject` (937) | per-machine tables | save the tables that carry state. Rebuild derived data (the launchd job catalog, device strings, Darwin identity) from the rootfs and the configuration |
+| notify bus | `DarwinNotifyStateHle` (`darwin_notify_state_hle.hpp`): `SharedBus` `registrations` (71–73, shared through `bus_`, line 88), `token_names_` (78), `virtual_tokens_` (79), `next_virtual_token_` (80) | (process, token) keys with name and port; virtual tokens | save the registrations as (process, token, name, port) and the token tables. Providers and the dispatcher are callbacks, rebuilt at restore |
+| graphics, HID, audio, UI | `KernelSharedState`: `hid_event_queue` (369), `graphics_services_capability_memory` (377), foreground transitions (about 815–830), touch transform (897); `DisplayState` (`graphics/include/graphics/display.hpp:57`), `WifiState` (`network/include/network/wifi_state.hpp:65`), `AudioService` (`media/include/media/audio.hpp:87`) | display, touch, audio and foreground state | not saved. Refuse while a transition or an input is pending. Rebuild the rest from the configuration |
+| IOKit | `IOKitService` and `IOKitRegistryProperty` (`kernel_shared_state.hpp:580`, 620), connection states from `IOKitConnection` (648) on | registry and connection state | rebuild the registry from the device model. Save connection state |
+| device state | lockdown `data_ark.plist` (`device_state/lockdown_state.cpp:237`, applied at boot in `EmulatorSession::run` at `emulator_session.cpp:264` and reapplied at shutdown at line 5051), `baseband_device_state` (`kernel_shared_state.hpp:1376`), `KeyStore` (forward-declared at line 68) | files and host state | the files stay in the rootfs and are not part of the snapshot. The keybag and key store are proposed for a later stage |
+| translation | JIT caches and the artifact store (`foundation/jit_artifact.cpp`), with `--jit-artifact-disk-mib` at 256 MiB by default (`src/app/main.cpp:651–657`) | native code | not saved. A restored run reuses the disk artifacts by default; measure with and without |
+| host | rootfs path, dyld cache, host threads, display presenter, host network | host-only | rebuild |
+
+Quiescence. A snapshot is taken at a scheduler point where every saved category is in a serialisable state and every
+refused category is empty. The session names the first refused category it finds, and a refused snapshot is not written.
+
+Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
+content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
+rejects a section it does not know. Pages are written as address, flags and a backing index, with each backing's 4 KiB
+written once. Identities keep the values the guest sees (pids, port names, thread ids, descriptors). Host pointers are
+never written.
+
+Restore. Validate the header and refuse on any mismatch in build, device or rootfs identity. Rebuild the host objects,
+create the processes and address spaces, load the pages and mappings, load the CPUs and the scheduler, load the kernel
+tables, rewire the handlers, and restart the clock and the pacer at the saved guest time. Restore starts from quiescence,
+so nothing is in flight.
+
+Round-trip test. (1) Cold boot of the `run` profile to the runner's verdict, recording the results and the `[process]`
+lines after the snapshot point. (2) Cold boot to the snapshot point, take the snapshot, continue to the verdict. (3)
+Restore the snapshot, continue to the verdict. The oracle is that the verdict and results of (1), (2) and (3) are equal,
+and that the `[process]` lines after the snapshot point match. Timing is cold to verdict against restore to verdict, in
+wall time and CPU time, with the translation cache empty and then with the disk artifacts present.
+
+Not yet settled, to measure before code: how many entries each pending map holds at a quiescent point of the `run`
+profile; whether host network objects exist there; how long a restore takes for about 1 million pages, of which about
+0.9 GiB are anonymous or shared-writable.
+
 ## Stages
 
 The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
