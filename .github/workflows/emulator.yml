@@ -9,11 +9,16 @@ on:
         options:
           - boot
           - measure
+          - snapshot
         default: boot
       ticks:
-        description: The CPU ticks every boot of the run is bounded by
+        description: The CPU ticks every boot of the run is bounded by; for snapshot, the ticks the cold and the restored runs go to
         type: string
         default: "4000000000"
+      save_ticks:
+        description: For snapshot, the CPU ticks the snapshot is saved at, a multiple of 1048576 below ticks
+        type: string
+        default: "1048576"
       control:
         description: The branch or commit of origin the control emulator is built from, for measure
         type: string
@@ -40,6 +45,7 @@ jobs:
     timeout-minutes: 240
     env:
       TICKS: ${{ inputs.ticks }}
+      SAVE_TICKS: ${{ inputs.save_ticks }}
       CONTROL: ${{ inputs.control }}
       ROUNDS: ${{ inputs.rounds }}
     steps:
@@ -143,6 +149,19 @@ jobs:
           ./xmakew build -P . emulator
           df -h /
 
+      - name: Run the snapshot gates and the unit tests of the snapshot code
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 90
+        run: ./xmakew test -P . repository/layout repository/comments_check 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' --output-on-failure
+
+      - name: Round trip a snapshot through save, cold and restore
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
+
       - name: Build the control emulator from the control ref
         if: inputs.job == 'measure'
         timeout-minutes: 90
@@ -202,9 +221,18 @@ jobs:
           find "$HOME/Library/Logs/DiagnosticReports" -maxdepth 1 -iname '*emulator*' -exec cp {} "$out/crash-reports/" \;
           ls -la "$out/crash-reports"
 
+      - name: Keep the snapshot logs and the comparison
+        if: always() && inputs.job == 'snapshot'
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          find "$RUNNER_TEMP/snapshot" -maxdepth 2 \( -name '*.log' -o -name '*.log.err' \) -exec cp {} "$out/" \; 2>/dev/null || true
+          if [ -f "$out/comparison.txt" ]; then cat "$out/comparison.txt" >> "$GITHUB_STEP_SUMMARY"; fi
+          ls -la "$out"
+
       - name: Delete the scratch of the run
         if: always()
-        run: rm -rf "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"
+        run: rm -rf "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" "$RUNNER_TEMP/snapshot"
 
       - name: Measure the disk
         if: always()
