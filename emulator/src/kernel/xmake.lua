@@ -88,6 +88,13 @@ target("emulator_kernel_mach_input")
     add_files("mach/input/graphics_services.cpp", "mach/input/graphics_services_input_abi.cpp")
     add_deps("emulator_kernel_api", "emulator_foundation", "emulator_mach", {public = true})
 
+target("emulator_kernel_hid_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/hid_event_system_snapshot_test.cpp")
+    add_deps("emulator_kernel")
+    add_tests("kernel.hid_event_system_snapshot")
+
 target("emulator_kernel")
     set_kind("static")
     add_files("kernel.cpp", "commpage.cpp", "hid_event_system_hle.cpp", "hid_event_transaction.cpp",

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/hid_accelerometer.hpp"
 
 #include <cstddef>
@@ -31,6 +32,8 @@ public:
     }
     [[nodiscard]] bool prepare_pending_event(
         Cpu& cpu, std::uint32_t process, std::uint32_t svc_immediate);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     UserlandHleRegistry& registry_;

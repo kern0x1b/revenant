@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/hid_event_queue.hpp"
 
 namespace emulator {
@@ -14,6 +15,8 @@ class HidAccelerometer {
 public:
     void start(std::uint64_t now) { next_sample_ = now + sample_period; }
     void stop() { next_sample_.reset(); }
+    void save(snapshot::Writer& out) const { snapshot::save(out, next_sample_); }
+    void load(snapshot::Reader& in) { snapshot::load(in, next_sample_); }
 
     [[nodiscard]] std::optional<std::uint64_t> next_deadline() const
     {

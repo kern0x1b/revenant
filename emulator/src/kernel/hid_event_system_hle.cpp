@@ -104,4 +104,26 @@ bool HidEventSystemHle::prepare_pending_event(
     return delivering_;
 }
 
+void HidEventSystemHle::save(snapshot::Writer& out) const
+{
+    if (delivering_)
+        throw snapshot::RefusedError { "hid.delivering" };
+    snapshot::save(out, consumer_process_);
+    snapshot::save(out, static_cast<std::uint64_t>(consumer_processor_));
+    accelerometer_.save(out);
+}
+
+void HidEventSystemHle::load(snapshot::Reader& in)
+{
+    std::uint32_t consumer_process { };
+    snapshot::load(in, consumer_process);
+    std::uint64_t consumer_processor { };
+    snapshot::load(in, consumer_processor);
+    HidAccelerometer accelerometer;
+    accelerometer.load(in);
+    consumer_process_ = consumer_process;
+    consumer_processor_ = static_cast<std::size_t>(consumer_processor);
+    accelerometer_ = accelerometer;
+}
+
 }
