@@ -34,8 +34,6 @@ public:
         entries_.push_back(Entry { key, value });
     }
 
-    // Callers may hold an index across a re-entrant guest call, so an index that
-    // no longer exists is ignored rather than trusted.
     void replace(std::size_t index, std::uint32_t key, std::uint32_t value)
     {
         if (index < entries_.size())
