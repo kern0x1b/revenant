@@ -72,6 +72,7 @@ package("swift")
             end
         end
         for _, patch in ipairs({{"swift", "a-runtime-the-program-brings-with-it.patch"},
+                                {"swift", "application-availability-floor.patch"},
                                 {"swift-driver", "no-minimum-ios-for-a-bundled-runtime.patch"}}) do
             os.vrunv("git", {"-C", patch[1], "apply", path.join(package:scriptdir(), "patches", patch[2])})
         end
@@ -189,4 +190,48 @@ package("swift")
         assert(not refused, "the frontend must refuse a feature of this Swift release at iOS 6.0 without -bundled-swift-runtime")
         os.vrunv(frontend, table.join(argv, {"-bundled-swift-runtime"}))
         os.tryrm(folder)
+
+        local floor = os.tmpfile() .. ".dir"
+        local system = path.join(floor, "system")
+        local application = path.join(floor, "application")
+        os.mkdir(system)
+        os.mkdir(application)
+        io.writefile(path.join(system, "Sdk.swift"), "@available(iOS 10, *)\npublic func sdkApi() {}\n")
+        io.writefile(path.join(application, "Display.swift"),
+                     "@available(iOS 13, *)\npublic func displayApi() {}\n@available(iOS 16, *)\npublic func newerApi() {}\n")
+        io.writefile(path.join(floor, "local.swift"),
+                     "import Display\n@available(iOS 13, *)\nfunc localApi() {}\nfunc use() { displayApi(); localApi() }\n")
+        io.writefile(path.join(floor, "sdk.swift"), "import Sdk\nfunc use() { sdkApi() }\n")
+        io.writefile(path.join(floor, "newer.swift"), "import Display\nfunc use() { newerApi() }\n")
+        io.writefile(path.join(floor, "plain.swift"), "import Display\nfunc use() { displayApi() }\n")
+        local transcript = path.join(floor, "transcript.txt")
+        local function run(argv)
+            local ok = os.execv(frontend, table.join({"-frontend", "-parse-stdlib", "-target", "armv7-apple-ios6.0"}, argv),
+                                {stdout = transcript, stderr = transcript, try = true})
+            return ok, io.readfile(transcript)
+        end
+        local emitted, text = run({"-emit-module", "-module-name", "Sdk", "-emit-module-path", path.join(system, "Sdk.swiftmodule"),
+                                   path.join(system, "Sdk.swift")})
+        assert(emitted, "the system module Sdk did not emit: " .. text)
+        emitted, text = run({"-emit-module", "-module-name", "Display", "-emit-module-path", path.join(application, "Display.swiftmodule"),
+                             path.join(application, "Display.swift")})
+        assert(emitted, "the application module Display did not emit: " .. text)
+        local function client(source, extra)
+            return run(table.join({"-typecheck", "-module-name", "Client", "-I", application, "-Isystem", system}, extra,
+                                  {path.join(floor, source)}))
+        end
+        local floored = {"-application-availability-floor", "15"}
+        local ok
+        ok, text = client("local.swift", floored)
+        assert(ok, "a reference to a declaration of a non-system module at iOS 13 must typecheck at iOS 6.0 with floor 15: " .. text)
+        ok, text = client("sdk.swift", floored)
+        assert(not ok and text:find("only available in iOS 10", 1, true),
+               "the floor must not relax a system declaration: an SDK API at iOS 10 must still be refused at iOS 6.0: " .. text)
+        ok, text = client("newer.swift", floored)
+        assert(not ok and text:find("only available in iOS 16", 1, true),
+               "the floor is a floor: a declaration at iOS 16 must still be refused with floor 15: " .. text)
+        ok, text = client("plain.swift", {})
+        assert(not ok and text:find("only available in iOS 13", 1, true),
+               "without the floor a declaration at iOS 13 must still be refused at iOS 6.0: " .. text)
+        os.tryrm(floor)
     end)
