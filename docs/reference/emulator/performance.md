@@ -386,3 +386,204 @@ So the code-cache bound is not the cut. Reaching 30% needs one of two changes, a
   boot-time and idle-CPU limits measured on a quiet host, which this machine was not.
 
 The choice between them is the coordinator's. The per-owner resident bytes are still unmeasured.
+
+The next section takes the first of the two: the per-block bookkeeping.
+
+## Per-block bookkeeping: measured 2026-10-25
+
+The live-block table above put 72% of the malloc heap under Dynarmic's block translation. A stats build (an environment
+flag, not committed) printed the containers of one address space each time it had translated another 20,000 blocks. The
+checkpoint below is the one with 17,072 live blocks, from the build before the change, with the default robin_map load
+factor of 0.5:
+
+| Structure | Bytes | Per block |
+|---|---|---|
+| `block_infos` buckets (65,536 slots of 208 B) | 13.63 MB | 798 B |
+| `block_references` (20,707 descriptors, 26,140 referrers) | 6.22 MB | 364 B |
+| Emit-time relocations (142,371 entries of 16 B) | 2.28 MB | 133 B |
+| `block_relocations` (26,508 entries) | 2.10 MB | 123 B |
+| Code, for comparison | 6.78 MB | 397 B |
+
+The bookkeeping came to 1,419 B a block against 397 B of code. The `block_entries` map was sized the same way and was not
+changed here.
+
+The IR is not kept after emit. In the default path `translation_completed` returns before any artifact is published or
+recorded, unless artifact publication is on (`emulator/src/foundation/cpu.cpp`, the early return near line 1237). The IR
+block is a local of the translate-and-emit call and is freed on return. Persistence is off, so there was nothing to
+drop here.
+
+Retranslation, per address space. At each checkpoint the stats build counted unique guest descriptors against all
+translations:
+
+| Translations in the address space | Unique descriptors | Repeats |
+|---|---|---|
+| 20,000 (9 samples) | 18,070 to 18,844 | 6% to 10% |
+| 40,000 (4 samples) | 37,784 to 38,822 | 3% to 6% |
+| 60,000 (1 sample) | 57,916 | 3.5% |
+
+No sample had a retirement (`retired=0`), so these repeats did not come from `RetireCodeRange`. The source of the repeats
+is not identified. The boot-wide unique count was not taken, so the 2.28 M translations per boot have no matching unique
+count here, and no retranslation saving is claimed.
+
+The change (patch `0010-Keep-the-per-block-bookkeeping-compact.patch`, in `packages/d/dynarmic/patches/`):
+
+- `block_infos` stores a copy of the emitted info without the emit-time relocation list.
+- `block_references` holds a vector of entry points per descriptor, not a set. `RetireCodeRange` removes an entry point
+  with `std::remove` and drops the descriptor when its list is empty.
+- `block_relocations` and the fastmem patch list are vectors, not per-block maps.
+- `ClearCache` swaps each container for an empty one, so the buckets are released. `block_infos` uses a 0.9 maximum
+  load factor.
+- `Link` no longer checks for a duplicate referrer (a block links each target once, and `std::remove` already removes
+  every copy). `RelinkForDescriptor` no longer inserts an empty entry for a descriptor with no referrers.
+
+The dynarmic patch was measured in alternating boots against the control. The control is `main` with dynarmic patches 1
+to 9. Each boot ran `run-footprint-v2.sh`: the SpringBoard spawn, then 60 s, then a 10 to 19 s idle window. The host load
+is the load average at launch.
+
+Footprint, MB (`footprint`, dirty plus compressed):
+
+| Pair | Control | Compact | Change |
+|---|---|---|---|
+| A, round 1 (load 5.6, earlier build with the duplicate check) | 4,723 | 3,104 | −34% |
+| A, round 2 (load 4.7, earlier build with the duplicate check) | 4,571 | 2,551 | −44% |
+| B, round 1 (load 15 to 16, final build) | 3,540 | 2,382 | −33% |
+| B, round 2 (load 17 to 39, final build) | 2,842 | 1,715 | −40% |
+
+The final build (set B) averages 3,191 MB against 2,049 MB, −36%. Both final pairs are past the −30% target. Two pairs
+per build are too few to bound the spread, so the number needs a repeat on a quiet host.
+
+Boot, the SpringBoard spawn:
+
+| Pair | Control wall s (CPU s at spawn) | Compact wall s (CPU s at spawn) | Load at start |
+|---|---|---|---|
+| A, round 1 | 40 (39.9) | 35 (35.7) | 5.6 |
+| A, round 2 | 35 (35.6) | 50 (50.5) | 4.7 |
+| B, round 1 | 111 (65.6) | 132 (70.3) | 15.0 |
+| B, round 2 | 208 (72.7) | 182 (62.1) | 17.3 |
+
+Within the control build the wall-clock time runs from 35 s to 208 s, so it follows the host load. The CPU at spawn is
+steadier. The final build averages 66.2 s against 69.1 s for the control. The earlier build with the duplicate check
+(set A) averaged 43.1 s against 37.8 s, a rise of about 5 s that the final build does not show. Two pairs cannot tell
+whether that rise was real.
+
+Idle CPU, cores over the idle window:
+
+| Pair | Control | Compact |
+|---|---|---|
+| A, rounds 1 and 2 | 0.90, 0.81 | 0.91, 0.73 |
+| B, rounds 1 and 2 | 0.56, 0.18 | 0.25, 0.25 |
+
+Within one build the idle CPU ranges from 0.18 to 0.91 cores, so these pairs do not separate the builds, and nothing
+here shows a rise.
+
+The dynarmic suite passes with the patch: 47 test cases and 200,561 assertions, built with
+`DYNARMIC_ENABLE_TEST_EMIT_FAILURE=ON` (the fault-injection hooks, so the emit-failure paths run).
+
+Not done: the retranslation source, the `block_entries` map, and a quiet-host repeat of the footprint and boot pairs.
+The next section supersedes the first two items.
+
+## Retranslation: the exec reset and the shared image slab, measured 2026-10-25
+
+A repeat is a descriptor emitted again in the same address space after an invalidation removed it. A probe build (not
+committed) tagged every removed descriptor with the call that removed it and counted the repeats by that tag. The
+counts come from one default boot, with the probe reporting every 100,000 emits.
+
+Default boot, 1.9 M emits by SpringBoard plus the idle window:
+
+| Removed by | Repeats |
+|---|---|
+| Exec reset, `emulator/src/runtime/emulator_session.cpp:3913` (`exec_cpu.clear_cache()` after the new image is loaded) | 110,192 |
+| Range invalidation, `userland_hle.cpp:2479` and `kernel.cpp:3075` | 8 |
+
+That is 110,200 repeats in 1.9 M emits, 5.8%. The repeats fall in two 16 MB regions of guest address space: 0x39 has
+94,445 (86%) and 0x2f has 15,627 (14%). On this device those regions hold the shared-cache libraries; that is inferred
+from the addresses and not checked against the mapping. An exec reset clears the runtime's native code slab, so the
+new image translates the same library code again.
+
+With `--shared-image-slab` (the machine-wide image slab, which survives an exec), the same probe at 500,000 emits:
+
+| Region or reason | Repeats |
+|---|---|
+| Exec reset | 15,816 |
+| Region 0x39 | 47 |
+| Region 0x2f | 15,767 |
+
+The image slab removes the 0x39 repeats. The 0x2f repeats remain; the section at the end of this file identifies them as dyld. The emit total for
+the slab boot is lower: the probe's last report was at 500,000 emits, against 1.9 M for the default boot to the same
+point in the boot.
+
+Footprint, boot CPU and idle CPU on clean `main` (no probe), two alternating rounds, host load 9 to 58:
+
+| Pair | Default MB | `--shared-image-slab` MB | Change |
+|---|---|---|---|
+| 1 | 2,885 | 1,615 | −44% |
+| 2 | 2,669 | 1,399 | −48% |
+
+The mean is 2,777 MB against 1,507 MB, −46%. CPU to the SpringBoard spawn was 54.2 and 54.4 s by default against 29.8 and
+35.0 s with the flag, about 38% less. The wall-clock boot times were 55 and 65 s by default and 30 and 41 s with the
+flag, with load averages at launch of 40 and 12 against 11 and 10, so they are not comparable. Idle CPU was 0.37 and
+0.71 cores by default and 1.32 and 0.51 with the flag, over 11 to 13 s windows; that does not settle a difference.
+
+The flag was opt-in when this was measured. The default changes in the section at the end of this file.
+
+The reverse block index is now a sorted vector (patch `0011-Keep-the-reverse-block-index-in-a-sorted-vector.patch`). Its
+`std::map` node was 48 B a block, and a vector entry is 16 B plus the spare capacity, about 25 to 30 B a block saved, or
+about 2% of the 1,419 B of bookkeeping per block. The dynarmic suite passes (47 test cases, 200,561 assertions). A sanity
+boot reaches SpringBoard with a footprint of 2,697 MB, inside the default range above, so the saving is too small to
+show in single boots.
+
+`block_entries` stays at the default 0.5 load factor. It holds 65,536 buckets for 17,072 blocks, about 1.6 MB or 92 B a
+block at 24 B a bucket. A maximum load factor of 0.9 would halve that, but the map is the lookup for every link and
+native-slab find, and robin-hood probes lengthen at 0.9. That lookup cost needs measuring before the change is made.
+
+## The shared image slab is the default, and the 0x2f repeats are dyld, measured 2026-10-25
+
+`--shared-image-slab` is now the default, and `--no-shared-image-slab` turns the machine-wide image slab off.
+`--image-slab-mib` still needs the slab, so only `--no-shared-image-slab` makes it fail.
+
+The slab publishes translations by guest address and does not record which process made them. That is sound only while
+every process that runs an address runs the same bytes there. A process can break that: copy-on-write detaches a page
+it writes, and the userland HLE writes trampolines and continuation SVCs into guest memory (`userland_hle.cpp`). Before
+the flip, `emulator/tests/unit/image_slab_test.cpp` showed the hole. A process that writes its private copy of a shared
+page and invalidates it publishes that code into the slab, and a clean process then runs it. With the rule below
+disabled, the test fails with `clean.run() is 7, expected 1`.
+
+The rule: an `ExecutionContext` that invalidates a range inside the image region is private from then on. Its Jit is
+built without the machine slab, and the Jit is rebuilt at the next run boundary (`service_pending_shared_invalidation`).
+Clean processes keep the slab. The test checks that a process runs the new code after an exec and a copy-on-write
+write and invalidate, that a clean process still runs the original bytes after another process wrote, and that the
+writer does not grow the slab. The machine-wide invalidation still happens on every write. Not covered: mprotect and
+unmap reach the same `request_cache_range` call (`kernel.cpp:2989`, `3075`, `3101`), and the test calls that function
+rather than the kernel path.
+
+Results:
+
+- The suite (`./xmakew test -P .`) ran 177 tests: 176 passed, including `emulator_image_slab_test` and
+  `emulator_machine_image_region_test`. One failed: `toolchain_light/compat_test`, a host libdispatch cancellation
+  probe. It timed out once and failed on a timing measurement the second time. Nothing in this change is in its build,
+  and it was not checked on `main`.
+- A boot with the default prints `[jit] image-slab-mib=shared`. SpringBoard finished starting after 66 s wall (52.6 s
+  of CPU at spawn) at load 25, and after 246 s at load 22 to 33. The footprint at the default was not measured:
+  `vmmap` and `footprint` did not return in two attempts. The paired numbers above (2,777 MB by default and 1,507 MB
+  with the flag) are the footprint evidence, since the default takes that path.
+
+The 0x2f repeats. A probe tagged each repeat by reason, by 1 MiB region and by 64 KiB page (dynarmic patch 0012, reverted
+by hand). In the default boot, the first 2.5 M emits held 17,449 repeats. SpringBoard was not reached within 900 s at
+load 20 to 25, so the probe covers the boot before it:
+
+| Reason or place | Repeats |
+|---|---|
+| Clear (the exec reset) | 17,435 of 17,449 |
+| Region 0x2f | 17,360 |
+| Page 0x2fe10000 | 12,781 |
+| Page 0x2fe00000 | 4,579 |
+
+The boot log has `[loader] dyld_entry=0x2fe01028`. So the 0x2f repeats are dyld, mapped at 0x2fe00000. On the classic
+layout the shared region starts at 0x30000000, so the image slab does not cover dyld. Each exec clears the native slab
+(`emulator_session.cpp:3913`), and every process retranslates dyld: about 0.7% of emits in this boot.
+
+Candidate fix, not done: put dyld's mapping in the image region, or in a second region. dyld is a file mapping, so it
+needs the same copy-on-write rule as the shared cache. The layout is in `darwin_address_layout.hpp`.
+
+Not done: dyld in the image region (the candidate above), the `block_entries` load factor, and a quiet-host repeat of
+the footprint and boot pairs.

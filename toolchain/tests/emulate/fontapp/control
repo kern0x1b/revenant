@@ -1,0 +1,4 @@
+Package: org.revenant.emulatefontapp
+Name: emulate font app
+Architecture: iphoneos-arm
+Description: A UIKit application that asks for the system font from inside UIApplicationMain's launch and prints what it got.

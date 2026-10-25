@@ -2955,6 +2955,10 @@ private:
             observed_invalidation_epoch_) {
             return;
         }
+        if (jit_ && jit_image_slab_ != machine_image_code_slab_for(*execution_context_)) {
+            jit_.reset();
+        }
+        ensure_jit();
         execution_context_->native_code_slab()->service_pending_invalidation();
         service_machine_image_code_slab();
         const auto slab_generation =
@@ -3016,9 +3020,10 @@ private:
         }
         Dynarmic::A32::UserConfig config { callbacks_.get() };
         config.native_code_slab = execution_context_->native_code_slab();
-        if (auto* image_slab = machine_image_code_slab(); image_slab != nullptr) {
+        jit_image_slab_ = machine_image_code_slab_for(*execution_context_);
+        if (jit_image_slab_ != nullptr) {
             const auto image_region = machine_image_code_region();
-            config.image_native_code_slab = image_slab;
+            config.image_native_code_slab = jit_image_slab_;
             config.image_code_begin = image_region.begin;
             config.image_code_end = image_region.end;
             config.image_code_cache_size = image_region.cache_bytes;
@@ -3330,6 +3335,7 @@ private:
     const std::atomic<std::uint64_t>*
         exclusive_monitor_values_link_cell_address_ { };
     std::unique_ptr<Dynarmic::A32::Jit> jit_;
+    Dynarmic::A32::NativeCodeSlab* jit_image_slab_ { };
     JitHostExecutionBudget host_execution_budget_;
     AddressRanges own_image_ranges_;
     std::uint32_t own_image_count_ { 0xffffffffU };

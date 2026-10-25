@@ -118,6 +118,7 @@ private:
         std::uint64_t next_deadline { };
         std::uint64_t sample_time { };
         std::uint64_t callback_count { };
+        std::uint64_t underruns { };
         std::uint32_t peak_since_report { };
         std::optional<std::size_t> processor;
         bool running { };

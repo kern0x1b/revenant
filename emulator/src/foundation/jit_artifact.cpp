@@ -5412,13 +5412,15 @@ namespace {
                address < region.end && last > region.begin;
     }
 
-    void request_machine_image_cache_range(
+    bool request_machine_image_cache_range(
         std::uint32_t address, std::size_t length)
     {
         const std::lock_guard lock { machine_image_code_mutex };
         if (machine_image_slab && intersects_machine_image_region(machine_image_region, address, length)) {
             machine_image_slab->request_cache_range(address, length);
+            return true;
         }
+        return false;
     }
 
 }
@@ -5447,6 +5449,14 @@ Dynarmic::A32::NativeCodeSlab* machine_image_code_slab()
 {
     const std::lock_guard lock { machine_image_code_mutex };
     return machine_image_slab.get();
+}
+
+Dynarmic::A32::NativeCodeSlab* machine_image_code_slab_for(
+    const ExecutionContext& context)
+{
+    if (context.image_private())
+        return nullptr;
+    return machine_image_code_slab();
 }
 
 void service_machine_image_code_slab()
@@ -5546,7 +5556,8 @@ std::uint64_t ExecutionContext::request_cache_range(
         return cache_invalidation_epoch();
     const std::lock_guard lock { invalidation_mutex_ };
     native_code_slab_->request_cache_range(address, length);
-    request_machine_image_cache_range(address, length);
+    if (request_machine_image_cache_range(address, length))
+        image_private_.store(true, std::memory_order_release);
     auto epoch =
         cache_invalidation_epoch_.fetch_add(1U, std::memory_order_acq_rel) + 1U;
     if (epoch == 0U) {

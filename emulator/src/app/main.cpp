@@ -92,6 +92,7 @@ std::string usage()
            "[--binary /sbin/launchd] [--guest-command COMMAND] [--ticks N] "
            "[--census-output FILE] [--snapshot-out FILE] [--snapshot-in FILE] "
            "[--cores N] [--jit-cache-mib 8..512] "
+           "[--no-shared-image-slab] [--image-slab-mib N] "
            "[--jit-cache-budget-mib 256..4096] "
            "[--watch-address ADDR] [--gdb PORT] "
            "[--display headless|sdl] [--network isolated|loopback|host] "
@@ -1097,11 +1098,11 @@ void boot(const std::vector<std::string>& args, Output& output)
         options.time_scale = parsed;
     }
     options.jit_observer_only = flag(args, "--jit-observer-only");
-    options.shared_image_slab = flag(args, "--shared-image-slab");
+    options.shared_image_slab = !flag(args, "--no-shared-image-slab");
     if (const auto value = option(args, "--image-slab-mib")) {
         if (!options.shared_image_slab)
             throw std::runtime_error {
-                "--image-slab-mib needs --shared-image-slab"
+                "--image-slab-mib needs the shared image slab, not --no-shared-image-slab"
             };
         options.image_slab_bytes = static_cast<std::size_t>(parse_mib_value(
             *value, "--image-slab-mib", 8U,
