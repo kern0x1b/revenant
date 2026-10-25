@@ -65,8 +65,6 @@ std::optional<bool> HostReadinessProbe::answer(int descriptor,
     const auto slot = slots_.find(slot_key(descriptor, events));
     if (slot == slots_.end())
         return std::nullopt;
-    // Same test as HostSocket::readable() and writable(): the requested
-    // direction, or a hangup or error, makes the descriptor ready.
     const auto revents = requests_[slot->second].revents;
     return (revents & (events | POLLHUP | POLLERR)) != 0;
 }

@@ -35,7 +35,6 @@ void expect_answer(std::optional<bool> answer, bool expected,
     expect(answer.has_value() && *answer == expected, what);
 }
 
-// The answer one descriptor gets from its own poll, as HostSocket does it.
 bool single_readable(int descriptor)
 {
     pollfd entry { descriptor, POLLIN, 0 };

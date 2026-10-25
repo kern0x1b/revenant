@@ -20,16 +20,11 @@ namespace emulator {
 
 class HostReadinessProbe {
 public:
-    // Asks for the read or write readiness of a host descriptor on the next
-    // run(). A repeated request for the same descriptor is answered once.
     void request_readable(int descriptor);
     void request_writable(int descriptor);
 
-    // Polls every requested descriptor once with a zero timeout.
     void run();
 
-    // The answer for a descriptor that was requested and then run(), or
-    // nullopt when it was not requested and the caller has to ask the host.
     [[nodiscard]] std::optional<bool> readable(int descriptor) const;
     [[nodiscard]] std::optional<bool> writable(int descriptor) const;
 

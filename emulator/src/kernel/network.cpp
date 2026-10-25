@@ -1229,8 +1229,6 @@ void CompatibilityKernel::synchronize_interface_routes(
 
 namespace {
 
-// The probe pass's answer for a host socket it asked about, else the socket's
-// own poll. A socket the pass did not ask about is answered by readable().
 bool host_socket_readable(const HostSocket& socket,
     const HostReadinessProbe* host_readiness)
 {
@@ -1606,8 +1604,6 @@ std::optional<std::uint32_t> CompatibilityKernel::collect_ready_kevents(
     if (queue == kqueues_.end())
         return std::nullopt;
     std::uint32_t written = 0;
-    // One host poll answers every host socket this queue waits on, rather
-    // than one poll per registration.
     HostReadinessProbe host_readiness;
     for (const auto& registration : queue->second) {
         if (!registration.enabled)

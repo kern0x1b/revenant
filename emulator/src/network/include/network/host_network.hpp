@@ -91,7 +91,6 @@ public:
     [[nodiscard]] HostSocketResult shutdown(std::uint32_t how);
     [[nodiscard]] bool readable() const;
     [[nodiscard]] bool writable() const;
-    // False where readable() or writable() answers without asking the host.
     [[nodiscard]] bool readable_polls() const;
     [[nodiscard]] bool writable_polls() const;
     [[nodiscard]] int descriptor() const { return descriptor_; }
