@@ -16,6 +16,8 @@
 #include "foundation/application_path.hpp"
 #include "foundation/fault_dump.hpp"
 #include "foundation/guest_image_table.hpp"
+#include "foundation/macho.hpp"
+#include <algorithm>
 #include "device_state/darwin_kernel_identity.hpp"
 #include "foundation/rootfs_path_resolver.hpp"
 
@@ -2589,10 +2591,84 @@ std::vector<std::string> CompatibilityKernel::fault_word_report(
                             ? read_guest_image_table(memory,
                                   all_image_info_address)
                             : GuestImageTable { };
+    const auto* cache = dyld_shared_cache_.get();
+    const auto architecture =
+        arm_architecture_for_model(device_model_.processor.model);
+    struct CacheImageEntry {
+        std::uint32_t index { };
+        std::string name;
+    };
+    std::vector<CacheImageEntry> cache_images;
+    std::optional<std::int64_t> slide;
+    if (cache != nullptr) {
+        for (const auto& image : cache->images()) {
+            const auto path = std::string { image.path };
+            const auto slash = path.rfind('/');
+            cache_images.push_back(CacheImageEntry {
+                image.index,
+                slash == std::string::npos ? path : path.substr(slash + 1) });
+        }
+        for (const auto& guest : images.images()) {
+            if (const auto view = cache->find_image(guest.path)) {
+                slide = static_cast<std::int64_t>(guest.load_address) -
+                        static_cast<std::int64_t>(view->unslid_load_address);
+                break;
+            }
+        }
+    }
+    struct CacheSegmentSpan {
+        std::uint64_t begin { };
+        std::uint64_t end { };
+        std::size_t entry { };
+    };
+    std::optional<std::vector<CacheSegmentSpan>> cache_spans;
+    const auto cache_symbol = [&](std::uint32_t address) -> std::string {
+        if (!slide)
+            return { };
+        const auto unslid = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(address) - *slide);
+        if (!cache_spans) {
+            cache_spans.emplace();
+            for (std::size_t entry = 0; entry < cache_images.size(); ++entry) {
+                const auto parsed =
+                    cache->parse_image(cache_images[entry].index, architecture);
+                if (!parsed)
+                    continue;
+                for (const auto& segment : parsed->segments()) {
+                    if (segment.vm_size == 0U)
+                        continue;
+                    cache_spans->push_back(CacheSegmentSpan {
+                        segment.vm_address,
+                        static_cast<std::uint64_t>(segment.vm_address) +
+                            segment.vm_size,
+                        entry });
+                }
+            }
+        }
+        const auto span = std::find_if(cache_spans->begin(), cache_spans->end(),
+            [unslid](const CacheSegmentSpan& candidate) {
+                return unslid >= candidate.begin && unslid < candidate.end;
+            });
+        if (span == cache_spans->end())
+            return { };
+        const auto& entry = cache_images[span->entry];
+        const auto parsed = cache->parse_image(entry.index, architecture);
+        if (!parsed)
+            return { };
+        std::vector<MachSection> sections;
+        for (const auto& segment : parsed->segments())
+            sections.insert(sections.end(), segment.sections.begin(),
+                segment.sections.end());
+        const auto label = symbol_offset_label(parsed->symbols(), sections,
+            static_cast<std::uint32_t>(unslid));
+        return label.empty() ? std::string { } : entry.name + "`" + label;
+    };
     return describe_fault_words(
         registers,
         [&memory](std::uint32_t address) { return memory.read32(address); },
-        [&images](std::uint32_t address) -> std::string {
+        [&images, &cache_symbol](std::uint32_t address) -> std::string {
+            if (auto symbol = cache_symbol(address); !symbol.empty())
+                return symbol;
             const auto* image = images.find(address);
             if (image == nullptr)
                 return { };
