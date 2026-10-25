@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 218> saved_members {
+inline constexpr std::array<std::string_view, 220> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -224,13 +224,15 @@ inline constexpr std::array<std::string_view, 218> saved_members {
     "kss.mach_port_objects",
     "kss.task_special_ports",
     "kss.task_thread_port_objects",
+    "kss.mach_queues",
+    "kss.mach_semaphores",
     "kss.kernel_events",
     "kss.process_kevent_states",
     "kss.processes",
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 46> open_members {
+inline constexpr std::array<std::string_view, 44> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
@@ -270,8 +272,6 @@ inline constexpr std::array<std::string_view, 46> open_members {
     "ck.virtual_udp_sockets_",
     "ck.wifi_driver_event_streams_",
     "ck.directory_entries_cache_",
-    "kss.mach_queues",
-    "kss.mach_semaphores",
     "wifi.event_broker_",
     "mem.jit_read_page_table_",
     "mem.jit_write_page_table_",

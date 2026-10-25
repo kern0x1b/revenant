@@ -10,10 +10,12 @@
 #include <array>
 #include <atomic>
 #include <bit>
+#include <deque>
 #include <filesystem>
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 
 namespace emulator {
 
@@ -77,6 +79,165 @@ KernelSharedState::ProcessKeventState load_kevent_state(snapshot::Reader& in)
     snapshot::load(in, state.exit_generation);
     snapshot::load(in, state.wait_status);
     return state;
+}
+
+template <typename Container, typename Save>
+void save_list(snapshot::Writer& out, const Container& values, Save save_element)
+{
+    snapshot::save(out, static_cast<std::uint64_t>(values.size()));
+    for (const auto& value : values)
+        save_element(out, value);
+}
+
+template <typename Container, typename Load>
+void load_list(snapshot::Reader& in, Container& values, Load load_element)
+{
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    values.clear();
+    for (std::uint64_t index = 0; index < count; ++index)
+        values.push_back(load_element(in));
+}
+
+void save_ool_payload(snapshot::Writer& out,
+    const KernelSharedState::MachMessage::OolPayload& payload)
+{
+    snapshot::save(out, payload.descriptor_offset);
+    snapshot::save(out, payload.bytes);
+}
+
+KernelSharedState::MachMessage::OolPayload load_ool_payload(snapshot::Reader& in)
+{
+    KernelSharedState::MachMessage::OolPayload payload;
+    snapshot::load(in, payload.descriptor_offset);
+    snapshot::load(in, payload.bytes);
+    return payload;
+}
+
+void save_ool_port_array(snapshot::Writer& out,
+    const KernelSharedState::MachMessage::OolPortArray& array)
+{
+    snapshot::save(out, array.descriptor_offset);
+    snapshot::save(out, array.count);
+    snapshot::save(out, array.dead_elements);
+}
+
+KernelSharedState::MachMessage::OolPortArray load_ool_port_array(
+    snapshot::Reader& in)
+{
+    KernelSharedState::MachMessage::OolPortArray array;
+    snapshot::load(in, array.descriptor_offset);
+    snapshot::load(in, array.count);
+    snapshot::load(in, array.dead_elements);
+    return array;
+}
+
+void save_port_transfer(snapshot::Writer& out,
+    const KernelSharedState::MachMessage::PortTransfer& transfer)
+{
+    snapshot::save(out, transfer.descriptor_offset);
+    snapshot::save(out, transfer.sender_name);
+    snapshot::save(out, transfer.array_index);
+    snapshot::save(out, transfer.object);
+    snapshot::save(out, transfer.right);
+    snapshot::save(out, transfer.disposition);
+}
+
+KernelSharedState::MachMessage::PortTransfer load_port_transfer(
+    snapshot::Reader& in)
+{
+    KernelSharedState::MachMessage::PortTransfer transfer;
+    snapshot::load(in, transfer.descriptor_offset);
+    snapshot::load(in, transfer.sender_name);
+    snapshot::load(in, transfer.array_index);
+    snapshot::load(in, transfer.object);
+    snapshot::load(in, transfer.right);
+    snapshot::load(in, transfer.disposition);
+    return transfer;
+}
+
+void save_receive_pointer_fixup(snapshot::Writer& out,
+    const KernelSharedState::MachMessage::ReceivePointerFixup& fixup)
+{
+    snapshot::save(out, fixup.value_offset);
+    snapshot::save(out, fixup.target_offset);
+}
+
+KernelSharedState::MachMessage::ReceivePointerFixup load_receive_pointer_fixup(
+    snapshot::Reader& in)
+{
+    KernelSharedState::MachMessage::ReceivePointerFixup fixup;
+    snapshot::load(in, fixup.value_offset);
+    snapshot::load(in, fixup.target_offset);
+    return fixup;
+}
+
+void save_mach_message(
+    snapshot::Writer& out, const KernelSharedState::MachMessage& message)
+{
+    snapshot::save(out, message.bytes);
+    snapshot::save(out, message.destination);
+    snapshot::save(out, message.sender_pid);
+    snapshot::save(out, message.sender_identity_version);
+    snapshot::save(out, message.host_enqueue_nanoseconds);
+    snapshot::save(out, message.sender_uid);
+    snapshot::save(out, message.sender_gid);
+    snapshot::save(out, message.graphics_input_sequence);
+    snapshot::save(out, message.graphics_input_kind);
+    snapshot::save(out, message.graphics_touch_phase);
+    snapshot::save(out, message.display_vsync_connection_object);
+    snapshot::save(out, message.display_vsync_registration_generation);
+    snapshot::save(out, message.display_vsync_sequence);
+    save_list(out, message.ool_payloads, save_ool_payload);
+    save_list(out, message.ool_port_arrays, save_ool_port_array);
+    snapshot::save(out, message.reply_object);
+    snapshot::save(out, message.reply_right);
+    snapshot::save(out, message.destination_send_object);
+    save_list(out, message.port_transfers, save_port_transfer);
+    save_list(out, message.receive_pointer_fixups, save_receive_pointer_fixup);
+}
+
+KernelSharedState::MachMessage load_mach_message(snapshot::Reader& in)
+{
+    KernelSharedState::MachMessage message;
+    snapshot::load(in, message.bytes);
+    snapshot::load(in, message.destination);
+    snapshot::load(in, message.sender_pid);
+    snapshot::load(in, message.sender_identity_version);
+    snapshot::load(in, message.host_enqueue_nanoseconds);
+    snapshot::load(in, message.sender_uid);
+    snapshot::load(in, message.sender_gid);
+    snapshot::load(in, message.graphics_input_sequence);
+    snapshot::load(in, message.graphics_input_kind);
+    snapshot::load(in, message.graphics_touch_phase);
+    snapshot::load(in, message.display_vsync_connection_object);
+    snapshot::load(in, message.display_vsync_registration_generation);
+    snapshot::load(in, message.display_vsync_sequence);
+    load_list(in, message.ool_payloads, load_ool_payload);
+    load_list(in, message.ool_port_arrays, load_ool_port_array);
+    snapshot::load(in, message.reply_object);
+    snapshot::load(in, message.reply_right);
+    snapshot::load(in, message.destination_send_object);
+    load_list(in, message.port_transfers, load_port_transfer);
+    load_list(in, message.receive_pointer_fixups, load_receive_pointer_fixup);
+    return message;
+}
+
+void save_mach_semaphore(
+    snapshot::Writer& out, const KernelSharedState::MachSemaphore& semaphore)
+{
+    snapshot::save(out, semaphore.count);
+    snapshot::save(out, semaphore.owner_pid);
+    snapshot::save(out, semaphore.waiters);
+}
+
+KernelSharedState::MachSemaphore load_mach_semaphore(snapshot::Reader& in)
+{
+    KernelSharedState::MachSemaphore semaphore;
+    snapshot::load(in, semaphore.count);
+    snapshot::load(in, semaphore.owner_pid);
+    snapshot::load(in, semaphore.waiters);
+    return semaphore;
 }
 
 void save_display_geometry(snapshot::Writer& out, const DisplayGeometry& geometry)
@@ -389,6 +550,16 @@ void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const
     mach_port_objects.save(out);
     snapshot::save(out, task_special_ports);
     snapshot::save(out, task_thread_port_objects);
+    snapshot::save(out, static_cast<std::uint64_t>(mach_queues.size()));
+    for (const auto& [object, queue] : mach_queues) {
+        snapshot::save(out, object);
+        save_list(out, queue, save_mach_message);
+    }
+    snapshot::save(out, static_cast<std::uint64_t>(mach_semaphores.size()));
+    for (const auto& [object, semaphore] : mach_semaphores) {
+        snapshot::save(out, object);
+        save_mach_semaphore(out, semaphore);
+    }
     snapshot::save(out, static_cast<std::uint64_t>(kernel_events.size()));
     for (const auto& event : kernel_events)
         save_kernel_event(out, event);
@@ -408,6 +579,26 @@ void KernelSharedState::load_port_and_event_tables(snapshot::Reader& in)
     mach_port_objects.load(in);
     snapshot::load(in, task_special_ports);
     snapshot::load(in, task_thread_port_objects);
+    std::uint64_t queue_count { };
+    snapshot::load(in, queue_count);
+    mach_queues.clear();
+    for (std::uint64_t index = 0; index < queue_count; ++index) {
+        std::uint32_t object { };
+        snapshot::load(in, object);
+        std::deque<MachMessage> queue;
+        load_list(in, queue, load_mach_message);
+        if (!mach_queues.emplace(object, std::move(queue)).second)
+            throw snapshot::FormatError { "snapshot repeats a Mach queue" };
+    }
+    std::uint64_t semaphore_count { };
+    snapshot::load(in, semaphore_count);
+    mach_semaphores.clear();
+    for (std::uint64_t index = 0; index < semaphore_count; ++index) {
+        std::uint32_t object { };
+        snapshot::load(in, object);
+        if (!mach_semaphores.emplace(object, load_mach_semaphore(in)).second)
+            throw snapshot::FormatError { "snapshot repeats a Mach semaphore" };
+    }
     std::uint64_t event_count { };
     snapshot::load(in, event_count);
     kernel_events.clear();

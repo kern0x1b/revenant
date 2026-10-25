@@ -8,6 +8,7 @@
 #include "foundation/application_display.hpp"
 #include "foundation/display_geometry.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/touch_input.hpp"
 #include "graphics/core_animation_remote_abi.hpp"
 
 #include <cstddef>
@@ -17,6 +18,7 @@
 #include <map>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -247,6 +249,26 @@ void populate_tables(KernelSharedState& state)
     state.mach_port_objects.create(0x20100, 0x400);
     state.task_special_ports = { { 1, { { 4, 0x20101 } } } };
     state.task_thread_port_objects = { { 0x400, { { 0x501, 0x20102 } } } };
+    KernelSharedState::MachMessage message;
+    message.bytes = { std::byte { 0x11 }, std::byte { 0x22 } };
+    message.destination = 0x20100;
+    message.sender_pid = 0x400;
+    message.sender_identity_version = 3;
+    message.host_enqueue_nanoseconds = 99;
+    message.graphics_input_kind = KernelSharedState::MachMessage::GraphicsInputKind::Touch;
+    message.graphics_touch_phase = emulator::TouchPhase::Move;
+    message.ool_payloads.push_back({ 8, { std::byte { 0x33 } } });
+    message.ool_port_arrays.push_back({ 16, 2, { 0x20102 } });
+    message.reply_object = 0x20101;
+    message.reply_right = emulator::xnu::ipc::Right::SendOnce;
+    message.destination_send_object = 0x20100;
+    message.port_transfers.push_back({ 24, 0x10002, 1U, 0x20103,
+        emulator::xnu::ipc::Right::Receive, 17 });
+    message.receive_pointer_fixups.push_back({ 32, 40 });
+    state.mach_queues[0x20100].push_back(std::move(message));
+    state.mach_queues[0x20101];
+    state.mach_semaphores.emplace(0x20104,
+        KernelSharedState::MachSemaphore { 2, 0x400, { { 0x400, 1 } } });
 }
 
 std::vector<std::byte> save_tables(const KernelSharedState& state)
@@ -280,6 +302,22 @@ void round_trip_restores_the_tables()
         "a task special port is restored");
     expect(restored.task_thread_port_objects.at(0x400).at(0x501) == 0x20102,
         "a thread port object is restored");
+    expect(restored.mach_queues.contains(0x20101) &&
+            restored.mach_queues.at(0x20101).empty(),
+        "an empty Mach queue is restored");
+    const auto& queued = restored.mach_queues.at(0x20100);
+    expect(queued.size() == 1 && queued.front().bytes.size() == 2 &&
+            queued.front().ool_payloads.front().bytes.size() == 1 &&
+            queued.front().ool_port_arrays.front().dead_elements.size() == 1,
+        "a queued message keeps its bytes and out-of-line memory");
+    expect(queued.front().port_transfers.front().array_index == 1U &&
+            queued.front().port_transfers.front().right ==
+                emulator::xnu::ipc::Right::Receive &&
+            queued.front().graphics_touch_phase == emulator::TouchPhase::Move,
+        "a queued message keeps its port transfers and graphics input");
+    expect(restored.mach_semaphores.at(0x20104).count == 2 &&
+            restored.mach_semaphores.at(0x20104).waiters.size() == 1,
+        "a Mach semaphore keeps its count and waiters");
     expect(save_tables(restored) == bytes,
         "saving the restored tables reproduces the same stream");
 }
