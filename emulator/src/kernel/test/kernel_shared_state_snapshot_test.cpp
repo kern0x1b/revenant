@@ -126,6 +126,57 @@ std::vector<std::byte> save_scalars(const KernelSharedState& state)
     return out.bytes();
 }
 
+void populate_service_tables(KernelSharedState& state)
+{
+    state.bootstrap_checked_in_services = { "com.apple.springboard", "com.apple.backboardd" };
+    state.bootstrap_service_generations = { { "com.apple.springboard", 3 } };
+    state.bootstrap_service_objects = { { "com.apple.springboard", 4 } };
+    state.camera_accelerator_services = { { "camera", 5 } };
+    state.camera_sensor_variables = { { 6, 7 } };
+    state.ioaudio2_services = { { "audio", 8 } };
+    state.iokit_iterators = { { 9, { 10, 11 } } };
+    state.host_display_pending_lock_power_off_sequences = { 12, 13 };
+    state.nvram_serialized = { std::byte { 14 } };
+    state.package_extensions = { "extension" };
+    state.posix_named_semaphore_objects = { { "semaphore", 15 } };
+    state.unix_socket_nodes = { "/var/run/socket" };
+    state.application_event_objects_by_process = { { 16, 17 } };
+    state.audit_session_port_objects = { { 18, 19 } };
+    state.mach_inflight_send_rights = { { 20, 21 } };
+    state.mach_port_contexts = { { 22, 23 } };
+    state.mach_port_sets = { { 24, { 25, 26 } } };
+    state.mach_ports_being_removed = { 27 };
+    state.mach_registered_ports = { { 28, { 29, 30, 31 } } };
+    state.mach_send_possible_armed_destinations = { 32 };
+    state.task_name_port_pids = { { 33, 34 } };
+    state.semaphore_wakeups = { { 35, 36 } };
+    state.semaphore_terminations = { { 37, 38 } };
+    state.surface_transport_port_surfaces = { { 39, 40 } };
+    state.surface_transport_surface_ports = { { 41, 42 } };
+    state.shared_memory_objects = { { "shared", "/tmp/shared" } };
+    state.volatile_shared_memory_backings = { "/tmp/volatile" };
+}
+
+void round_trip_restores_the_service_tables()
+{
+    KernelSharedState source;
+    populate_service_tables(source);
+    Writer out;
+    source.save_service_tables(out);
+    const auto bytes = out.bytes();
+
+    KernelSharedState restored;
+    Reader in { bytes };
+    restored.load_service_tables(in);
+    expect(in.at_end(), "the service table stream is consumed");
+    expect(restored.shared_memory_objects.at("shared") == "/tmp/shared",
+        "a shared memory path is restored");
+    Writer again;
+    restored.save_service_tables(again);
+    expect(again.bytes() == bytes,
+        "saving the restored service tables reproduces the same stream");
+}
+
 void refused_host_wake_is_named()
 {
     KernelSharedState state;
@@ -407,6 +458,7 @@ int main()
     refused_host_wake_is_named();
     truncated_stream_is_a_format_error();
     round_trip_restores_the_tables();
+    round_trip_restores_the_service_tables();
     repeated_kevent_state_is_refused();
     round_trip_restores_the_processes();
     unknown_core_animation_abi_is_refused();

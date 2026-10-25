@@ -10,6 +10,9 @@
 #include <array>
 #include <atomic>
 #include <bit>
+#include <filesystem>
+#include <map>
+#include <set>
 #include <string>
 
 namespace emulator {
@@ -433,6 +436,82 @@ void KernelSharedState::load_process_table(snapshot::Reader& in)
         if (!processes.emplace(pid, load_process_record(in)).second)
             throw snapshot::FormatError { "snapshot repeats a process" };
     }
+}
+
+void KernelSharedState::save_service_tables(snapshot::Writer& out) const
+{
+    snapshot::save(out, bootstrap_checked_in_services);
+    snapshot::save(out, bootstrap_service_generations);
+    snapshot::save(out, bootstrap_service_objects);
+    snapshot::save(out, camera_accelerator_services);
+    snapshot::save(out, camera_sensor_variables);
+    snapshot::save(out, ioaudio2_services);
+    snapshot::save(out, iokit_iterators);
+    snapshot::save(out, host_display_pending_lock_power_off_sequences);
+    snapshot::save(out, nvram_serialized);
+    snapshot::save(out, package_extensions);
+    snapshot::save(out, posix_named_semaphore_objects);
+    snapshot::save(out, unix_socket_nodes);
+    snapshot::save(out, application_event_objects_by_process);
+    snapshot::save(out, audit_session_port_objects);
+    snapshot::save(out, mach_inflight_send_rights);
+    snapshot::save(out, mach_port_contexts);
+    snapshot::save(out, mach_port_sets);
+    snapshot::save(out, mach_ports_being_removed);
+    snapshot::save(out, mach_registered_ports);
+    snapshot::save(out, mach_send_possible_armed_destinations);
+    snapshot::save(out, task_name_port_pids);
+    snapshot::save(out, semaphore_wakeups);
+    snapshot::save(out, semaphore_terminations);
+    snapshot::save(out, surface_transport_port_surfaces);
+    snapshot::save(out, surface_transport_surface_ports);
+    std::map<std::string, std::string> shared_memory_paths;
+    for (const auto& [name, path] : shared_memory_objects)
+        shared_memory_paths.emplace(name, path.string());
+    snapshot::save(out, shared_memory_paths);
+    std::set<std::string> volatile_paths;
+    for (const auto& path : volatile_shared_memory_backings)
+        volatile_paths.insert(path.string());
+    snapshot::save(out, volatile_paths);
+}
+
+void KernelSharedState::load_service_tables(snapshot::Reader& in)
+{
+    snapshot::load(in, bootstrap_checked_in_services);
+    snapshot::load(in, bootstrap_service_generations);
+    snapshot::load(in, bootstrap_service_objects);
+    snapshot::load(in, camera_accelerator_services);
+    snapshot::load(in, camera_sensor_variables);
+    snapshot::load(in, ioaudio2_services);
+    snapshot::load(in, iokit_iterators);
+    snapshot::load(in, host_display_pending_lock_power_off_sequences);
+    snapshot::load(in, nvram_serialized);
+    snapshot::load(in, package_extensions);
+    snapshot::load(in, posix_named_semaphore_objects);
+    snapshot::load(in, unix_socket_nodes);
+    snapshot::load(in, application_event_objects_by_process);
+    snapshot::load(in, audit_session_port_objects);
+    snapshot::load(in, mach_inflight_send_rights);
+    snapshot::load(in, mach_port_contexts);
+    snapshot::load(in, mach_port_sets);
+    snapshot::load(in, mach_ports_being_removed);
+    snapshot::load(in, mach_registered_ports);
+    snapshot::load(in, mach_send_possible_armed_destinations);
+    snapshot::load(in, task_name_port_pids);
+    snapshot::load(in, semaphore_wakeups);
+    snapshot::load(in, semaphore_terminations);
+    snapshot::load(in, surface_transport_port_surfaces);
+    snapshot::load(in, surface_transport_surface_ports);
+    std::map<std::string, std::string> shared_memory_paths;
+    snapshot::load(in, shared_memory_paths);
+    shared_memory_objects.clear();
+    for (const auto& [name, path] : shared_memory_paths)
+        shared_memory_objects.emplace(name, std::filesystem::path { path });
+    std::set<std::string> volatile_paths;
+    snapshot::load(in, volatile_paths);
+    volatile_shared_memory_backings.clear();
+    for (const auto& path : volatile_paths)
+        volatile_shared_memory_backings.insert(std::filesystem::path { path });
 }
 
 void KernelSharedState::save_key_store_identity(snapshot::Writer& out) const

@@ -1710,6 +1710,8 @@ struct KernelSharedState {
     void load_process_table(snapshot::Reader& in);
     void save_key_store_identity(snapshot::Writer& out) const;
     void load_key_store_identity(snapshot::Reader& in);
+    void save_service_tables(snapshot::Writer& out) const;
+    void load_service_tables(snapshot::Reader& in);
 
     std::mutex mach_mutex;
     std::shared_ptr<bsd::sandbox::Extensions> sandbox_extensions;
