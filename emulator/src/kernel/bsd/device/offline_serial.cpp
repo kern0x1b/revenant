@@ -7,6 +7,8 @@
 
 #include "kernel/offline_serial_device.hpp"
 
+#include "foundation/snapshot_io.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -42,6 +44,34 @@ void State::set_attributes(const darwin::tty::Arm32Attributes& attributes)
 void State::inherit_configuration(const State& parent)
 {
     set_attributes(parent.attributes());
+}
+
+void State::save(snapshot::Writer& out) const
+{
+    const std::lock_guard lock { mutex_ };
+    snapshot::save(out, attributes_.input_flags);
+    snapshot::save(out, attributes_.output_flags);
+    snapshot::save(out, attributes_.control_flags);
+    snapshot::save(out, attributes_.local_flags);
+    snapshot::save(out, attributes_.control_characters);
+    snapshot::save(out, attributes_.input_speed);
+    snapshot::save(out, attributes_.output_speed);
+    snapshot::save(out, command_);
+    snapshot::save(out, receive_queue_);
+}
+
+void State::load(snapshot::Reader& in)
+{
+    const std::lock_guard lock { mutex_ };
+    snapshot::load(in, attributes_.input_flags);
+    snapshot::load(in, attributes_.output_flags);
+    snapshot::load(in, attributes_.control_flags);
+    snapshot::load(in, attributes_.local_flags);
+    snapshot::load(in, attributes_.control_characters);
+    snapshot::load(in, attributes_.input_speed);
+    snapshot::load(in, attributes_.output_speed);
+    snapshot::load(in, command_);
+    snapshot::load(in, receive_queue_);
 }
 
 std::size_t State::write(std::span<const std::byte> bytes)

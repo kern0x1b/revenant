@@ -119,6 +119,7 @@ void check_kernel_snapshot_round_trips()
 {
     Machine source;
     CompatibilityKernelSnapshot::advance_clock(source.kernel, 5'000'000);
+    CompatibilityKernelSnapshot::perturb_bookkeeping(source.kernel);
     emulator::snapshot::Writer out;
     source.kernel.save_snapshot(out);
     const auto bytes = out.bytes();
@@ -127,6 +128,8 @@ void check_kernel_snapshot_round_trips()
     emulator::snapshot::Reader in { bytes };
     target.kernel.load_snapshot(in);
     check(in.at_end(), "the kernel snapshot stream is consumed exactly");
+    check(target.kernel.process().pid == 7,
+        "the restored kernel carries the saved process identity");
 
     emulator::snapshot::Writer again;
     target.kernel.save_snapshot(again);

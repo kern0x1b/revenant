@@ -22,4 +22,16 @@ void CompatibilityKernelSnapshot::advance_clock(CompatibilityKernel& kernel,
     kernel.shared_state_->clock.advance_to(deadline);
 }
 
+void CompatibilityKernelSnapshot::perturb_bookkeeping(CompatibilityKernel& kernel)
+{
+    kernel.process_.pid = 7;
+    kernel.process_.login_name = "mobile";
+    kernel.process_.resource_limits[0].current = 42;
+    kernel.process_.thread_disk_io_policies.emplace(3U, 1U);
+    kernel.load_average_.sample(4);
+    auto attributes = kernel.offline_serial_state_.attributes();
+    attributes.input_flags = 0x1234U;
+    kernel.offline_serial_state_.set_attributes(attributes);
+}
+
 }

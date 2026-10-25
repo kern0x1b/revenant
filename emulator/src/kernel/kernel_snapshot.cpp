@@ -30,6 +30,76 @@ void reject_if_populated(const char* member, const Container& container)
         };
 }
 
+void save_process_context(snapshot::Writer& out, const ProcessContext& process)
+{
+    snapshot::save(out, process.pid);
+    snapshot::save(out, process.parent_pid);
+    snapshot::save(out, process.process_group);
+    snapshot::save(out, process.session_id);
+    snapshot::save(out, process.audit_session_id);
+    snapshot::save(out, process.uid);
+    snapshot::save(out, process.effective_uid);
+    snapshot::save(out, process.gid);
+    snapshot::save(out, process.effective_gid);
+    snapshot::save(out, process.file_creation_mask);
+    for (const auto& limit : process.resource_limits) {
+        snapshot::save(out, limit.current);
+        snapshot::save(out, limit.maximum);
+    }
+    snapshot::save(out, process.login_name);
+    snapshot::save(out, process.task_port);
+    snapshot::save(out, process.thread_port);
+    snapshot::save(out, process.host_port);
+    snapshot::save(out, process.bootstrap_port);
+    snapshot::save(out, process.clock_port);
+    snapshot::save(out, process.calendar_clock_port);
+    snapshot::save(out, process.io_master_port);
+    snapshot::save(out, process.io_registry_options_port);
+    snapshot::save(out, process.thread_base_priority);
+    snapshot::save(out, process.nice_value);
+    snapshot::save(out, process.disk_io_policy);
+    snapshot::save(out, process.thread_disk_io_policies);
+    snapshot::save(out, process.exited);
+    snapshot::save(out, process.waiting_for_events);
+    snapshot::save(out, process.exit_status);
+    snapshot::save(out, process.termination_signal);
+}
+
+void load_process_context(snapshot::Reader& in, ProcessContext& process)
+{
+    snapshot::load(in, process.pid);
+    snapshot::load(in, process.parent_pid);
+    snapshot::load(in, process.process_group);
+    snapshot::load(in, process.session_id);
+    snapshot::load(in, process.audit_session_id);
+    snapshot::load(in, process.uid);
+    snapshot::load(in, process.effective_uid);
+    snapshot::load(in, process.gid);
+    snapshot::load(in, process.effective_gid);
+    snapshot::load(in, process.file_creation_mask);
+    for (auto& limit : process.resource_limits) {
+        snapshot::load(in, limit.current);
+        snapshot::load(in, limit.maximum);
+    }
+    snapshot::load(in, process.login_name);
+    snapshot::load(in, process.task_port);
+    snapshot::load(in, process.thread_port);
+    snapshot::load(in, process.host_port);
+    snapshot::load(in, process.bootstrap_port);
+    snapshot::load(in, process.clock_port);
+    snapshot::load(in, process.calendar_clock_port);
+    snapshot::load(in, process.io_master_port);
+    snapshot::load(in, process.io_registry_options_port);
+    snapshot::load(in, process.thread_base_priority);
+    snapshot::load(in, process.nice_value);
+    snapshot::load(in, process.disk_io_policy);
+    snapshot::load(in, process.thread_disk_io_policies);
+    snapshot::load(in, process.exited);
+    snapshot::load(in, process.waiting_for_events);
+    snapshot::load(in, process.exit_status);
+    snapshot::load(in, process.termination_signal);
+}
+
 }
 
 void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
@@ -132,6 +202,10 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
         snapshot::save(out, deadline);
         snapshot::save(out, event);
     }
+    snapshot::save(out, load_average_.ldavg);
+    snapshot::save(out, load_average_.fscale);
+    save_process_context(out, process_);
+    offline_serial_state_.save(out);
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -254,6 +328,10 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
         snapshot::load(in, event);
         scheduled_wifi_driver_events_.emplace(deadline, event);
     }
+    snapshot::load(in, load_average_.ldavg);
+    snapshot::load(in, load_average_.fscale);
+    load_process_context(in, process_);
+    offline_serial_state_.load(in);
 }
 
 void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const

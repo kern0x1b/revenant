@@ -20,6 +20,7 @@ struct CompatibilityKernelSnapshot {
         const AddressSpace& memory);
     static void add_pending_timer(CompatibilityKernel& kernel);
     static void advance_clock(CompatibilityKernel& kernel, std::uint64_t deadline);
+    static void perturb_bookkeeping(CompatibilityKernel& kernel);
 };
 
 void require_covered_members(

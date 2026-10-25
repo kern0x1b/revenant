@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 197> saved_members {
+inline constexpr std::array<std::string_view, 200> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -50,6 +50,9 @@ inline constexpr std::array<std::string_view, 197> saved_members {
     "wifi.link_state_",
     "ck.guest_working_directory_",
     "ck.process_image_",
+    "ck.process_",
+    "ck.load_average_",
+    "ck.offline_serial_state_",
     "ck.thread_ports_",
     "ck.thread_signal_masks_",
     "ck.thread_pending_signals_",
@@ -209,7 +212,7 @@ inline constexpr std::array<std::string_view, 197> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 111> open_members {
+inline constexpr std::array<std::string_view, 108> open_members {
     "kss.active_springboard_alert_items",
     "kss.ambient_light_sensor",
     "kss.apple_key_store_available",
@@ -263,9 +266,6 @@ inline constexpr std::array<std::string_view, 111> open_members {
     "kss.user_interface_geometry",
     "kss.virtual_effaceable_storage_available",
     "ck.dyld_shared_cache_",
-    "ck.process_",
-    "ck.load_average_",
-    "ck.offline_serial_state_",
     "ck.bpf_descriptors_",
     "ck.kernel_control_endpoints_",
     "ck.route_socket_states_",
