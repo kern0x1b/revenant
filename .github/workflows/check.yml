@@ -103,6 +103,12 @@ jobs:
         timeout-minutes: 20
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
+      - uses: actions/cache/save@v4
+        if: steps.dyld.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v1
+
       - name: Write the iOS 6.0 inventory from the shared cache
         if: steps.inventory.outputs.present != 'true'
         timeout-minutes: 30
