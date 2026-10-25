@@ -227,9 +227,37 @@ Restore the snapshot, continue to the verdict. The oracle is that the verdict an
 and that the `[process]` lines after the snapshot point match. Timing is cold to verdict against restore to verdict, in
 wall time and CPU time, with the translation cache empty and then with the disk artifacts present.
 
-Not yet settled, to measure before code: how many entries each pending map holds at a quiescent point of the `run`
-profile; whether host network objects exist there; how long a restore takes for about 1 million pages, of which about
-0.9 GiB are anonymous or shared-writable.
+Measured, the pending state of a `run`-profile boot (`--verbose --perf-summary`, counts taken at quit, not at a defined
+quiescent point). Each cell is the largest count in any runtime, then the number of runtimes with a non-zero count, at a
+120 s window (21 processes) and a 600 s window (63 processes):
+
+| map | 120 s | 600 s |
+|---|---|---|
+| `pending_waits_` | 0 | 0 |
+| `pending_mach_receives_` | 1 / 7 | 10 / 39 |
+| `pending_kevents_` | 0 | 2 / 57 |
+| `pending_semaphore_waits_` | 1 / 1 | 3 / 19 |
+| `pending_psynch_waits_` | 0 | 4 / 3 |
+| `pending_signal_suspends_` | 0 | 1 / 11 |
+| `pending_selects_` | 1 / 1 | 1 / 4 |
+| `pending_io_poll_cache_` | 2 / 1 | 7 / 60 |
+| `pending_event_processors_` | 2 / 8 | 17 / 62 |
+| `host_sockets_` | 3 / 1 | 3 / 2 |
+| `unix_listener_states_` | 11 / 20 | 11 / 7 |
+| `virtual_udp_sockets_`, `route_socket_states_`, host connects, accepts and writes, baseband writes, flocks, record locks, polls, timers, recvmsgs, socket reads, unix accepts | 0 | 0 |
+| `kqueues_` | 2 / 21 | 5 / 63 |
+| `file_descriptors_` | 0 | 12 / 19 |
+| `virtual_descriptors_` | 35 / 21 | 80 / 63 |
+| `thread_pending_signals_` | 3 / 20 | 19 / 63 |
+
+Reading: no runtime ever held a `pending_waits_` entry, and the host connect, accept and write maps and the baseband
+writes stayed empty. Mach receives, kevent, semaphore and psynch waits, signal suspends, io-poll caches and event
+processors are non-zero in a running guest, so a snapshot must save them as guest-state waits or wait for them to drain.
+Host sockets are present in one or two runtimes, so the host-network refusal in the table will fire on a `run` boot
+unless those sockets are closed first. These counts are at quit; the quiescent point is still undefined.
+
+Still open: whether a quiescent point exists where the waits and host sockets above are empty, and how long a restore
+takes for about 1 million pages, of which about 0.9 GiB are anonymous or shared-writable.
 
 ## Stages
 
@@ -249,8 +277,12 @@ The ready point is `[boot] milestone=springboard-finished-startup`, logged when 
 `com.apple.springboard.finishedstartup`. The hook is `_notify_post` in `libsystem_notify.dylib`, where that symbol is
 defined. The notify HLE does not record it on its own: `publish()` logs nothing, and the notify hooks had been
 registered under `libSystem.B.dylib`, which installs none of them. Five of the six
-registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` still
-installs under neither image, so the provider-initializer guard it was written for (`27048fc11`) is inactive.
+registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` is not
+exported, but it is a local symbol of that image. The 6.1.3 cache holds the local symbols in its main file (header
+`localSymbolsOffset` 0x0c985000, `localSymbolsSize` 0x01ee15ff), so the earlier note that it had none was wrong. Reading
+them needed two fixes: `apple.dyld` assumed 16-byte entries for the 32-bit cache (the entries are 12 bytes), and the
+emulator's image symbols came only from the stripped `LC_SYMTAB`. With both, the guard installs (`functions=7` on every
+`libsystem_notify` line) and the provider-initializer guard from `27048fc11` is active.
 
 Plain boots, with the milestone reached in some and not others:
 
