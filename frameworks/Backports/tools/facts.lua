@@ -158,6 +158,16 @@ function objc_facts(sdk, name, version)
 end
 
 function constant_intros(sdk)
+    local file = path.join(sdkfiles.cache_folder(sdkfiles.sdk_version(sdk)), "constant_intros.tsv")
+    if os.isfile(file) then
+        local cached = {}
+        for line in io.lines(file) do
+            local name, intro, kind = string.match(line, "^([^\t]*)\t([^\t]*)\t([^\t]*)$")
+            assert(name, "a malformed constant intro row in " .. file .. ": " .. line)
+            cached[name] = {intro = tonumber(intro), kind = kind}
+        end
+        return cached
+    end
     local intros = {}
     local function note(name, intro, kind)
         if name and (intros[name] == nil or intros[name].intro == nil) then
@@ -180,6 +190,14 @@ function constant_intros(sdk)
             end)
         end
     end
+    local rows = {}
+    for name, found in pairs(intros) do
+        table.insert(rows, string.format("%s\t%s\t%s", name, found.intro and tostring(found.intro) or "", found.kind))
+    end
+    table.sort(rows)
+    os.mkdir(path.directory(file))
+    io.writefile(file .. ".part", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
+    os.mv(file .. ".part", file)
     return intros
 end
 
