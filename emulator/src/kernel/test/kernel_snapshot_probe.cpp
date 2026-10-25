@@ -16,4 +16,10 @@ void CompatibilityKernelSnapshot::add_pending_timer(CompatibilityKernel& kernel)
     kernel.pending_timers_.emplace(1U, PendingTimer { });
 }
 
+void CompatibilityKernelSnapshot::advance_clock(CompatibilityKernel& kernel,
+    std::uint64_t deadline)
+{
+    kernel.shared_state_->clock.advance_to(deadline);
+}
+
 }

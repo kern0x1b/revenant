@@ -115,6 +115,25 @@ void check_uncovered_members_are_refused_by_name(
         "the refusal names a populated member");
 }
 
+void check_kernel_snapshot_round_trips()
+{
+    Machine source;
+    CompatibilityKernelSnapshot::advance_clock(source.kernel, 5'000'000);
+    emulator::snapshot::Writer out;
+    source.kernel.save_snapshot(out);
+    const auto bytes = out.bytes();
+
+    Machine target;
+    emulator::snapshot::Reader in { bytes };
+    target.kernel.load_snapshot(in);
+    check(in.at_end(), "the kernel snapshot stream is consumed exactly");
+
+    emulator::snapshot::Writer again;
+    target.kernel.save_snapshot(again);
+    check(again.bytes() == bytes,
+        "the restored kernel saves the same bytes as the source");
+}
+
 int main()
 {
     AddressSpace memory;
@@ -123,6 +142,7 @@ int main()
     CompatibilityKernel kernel { memory, output };
     check_live_continuation_is_refused();
     check_uncovered_members_are_refused_by_name(kernel, memory);
+    check_kernel_snapshot_round_trips();
     for (const auto& name :
         CompatibilityKernelSnapshot::populated_members(kernel)) {
         check_accounted(name);

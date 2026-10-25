@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ struct CompatibilityKernelSnapshot {
     static std::vector<std::string> populated_memory(
         const AddressSpace& memory);
     static void add_pending_timer(CompatibilityKernel& kernel);
+    static void advance_clock(CompatibilityKernel& kernel, std::uint64_t deadline);
 };
 
 void require_covered_members(

@@ -511,6 +511,8 @@ public:
     }
     void save_kernel_bookkeeping(snapshot::Writer& out) const;
     void load_kernel_bookkeeping(snapshot::Reader& in);
+    void save_snapshot(snapshot::Writer& out) const;
+    void load_snapshot(snapshot::Reader& in);
 
 private:
     friend struct CompatibilityKernelSnapshot;

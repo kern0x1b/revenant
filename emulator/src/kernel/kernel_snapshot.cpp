@@ -256,4 +256,38 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     }
 }
 
+void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const
+{
+    save_kernel_bookkeeping(out);
+    shared_state_->save_scalar_state(out);
+    shared_state_->clock.save(out);
+    shared_state_->save_port_and_event_tables(out);
+    shared_state_->save_process_table(out);
+    shared_state_->save_key_store_identity(out);
+    shared_state_->save_service_tables(out);
+    display_state_->save(out);
+    surface_store_->save(out);
+    wifi_state_->save(out);
+    darwin_notify_state_hle_.save(out);
+    hid_event_system_hle_.save(out);
+    userland_hle_.save(out);
+}
+
+void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
+{
+    load_kernel_bookkeeping(in);
+    shared_state_->load_scalar_state(in);
+    shared_state_->clock.load(in);
+    shared_state_->load_port_and_event_tables(in);
+    shared_state_->load_process_table(in);
+    shared_state_->load_key_store_identity(in);
+    shared_state_->load_service_tables(in);
+    display_state_->load(in);
+    surface_store_->load(in);
+    wifi_state_->load(in);
+    darwin_notify_state_hle_.load(in);
+    hid_event_system_hle_.load(in);
+    userland_hle_.load(in);
+}
+
 }
