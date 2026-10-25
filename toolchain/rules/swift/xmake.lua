@@ -1,3 +1,7 @@
+local function availability_floor_flags(version)
+    return version and {"-Xfrontend", "-application-availability-floor", "-Xfrontend", version} or {}
+end
+
 rule("swift")
     add_deps("@self/apple-ios")
     set_extensions(".swift")
@@ -162,7 +166,7 @@ rule("swift")
                     symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                     prefix_map = os.projectdir() .. "=/port",
                     has_main = has_main
-                }), modules, plugins, table.wrap(target:values("swift.flags")), swift.availability_floor_flags(floor), emitted, {"-c"},
+                }), modules, plugins, table.wrap(target:values("swift.flags")), availability_floor_flags(floor), emitted, {"-c"},
                                     sourcebatch.sourcefiles, {"-o", objectfile})
                 depend.on_changed(function ()
                     progress.show(jobopt.progress, "${color.build.object}compiling.swift %s", target:name())
@@ -185,7 +189,7 @@ rule("swift")
                 symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                 prefix_map = os.projectdir() .. "=/port",
                 has_main = has_main
-            }), table.wrap(target:values("swift.flags")), swift.availability_floor_flags(floor), {"-emit-bc"}, sourcebatch.sourcefiles,
+            }), table.wrap(target:values("swift.flags")), availability_floor_flags(floor), {"-emit-bc"}, sourcebatch.sourcefiles,
                                     {"-o", bitcode})
             local codegen = table.join(table.wrap(toolchain:get("cxflags")), swift.codegen_flags({optimize = target:get("optimize")}),
                                        {"-c", bitcode, "-o", objectfile})
