@@ -41,6 +41,9 @@ function main()
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host Network program printed nothing")
+    if expected ~= got then
+        os.execv("diff", {"-u", host .. ".out", backport .. ".out"}, {try = true})
+    end
     assert(expected == got, "the backport Network differs from the host in " .. out)
 
     local mutant = mutant_of(files, path.join(out, "mutant"))

@@ -318,8 +318,9 @@ local function swift_type_item(ctx, ledger, name, level, file)
     local bridged = ctx.u.classes[bridge] ~= nil and ctx.class_present(bridge)
     local provided = swift.framework .. "." .. name
     local item = new_item({kind = "swift type", container = "", name = name, framework = swift.framework,
-        intro = swift.intro, present = ctx.annotated(swift.intro), backed = false, bridge = bridged and bridge or "",
-        component = ctx.component.swift_types[provided] == true, runtime = ctx.runtime.swift_types[provided] == true})
+        intro = swift.intro, present = ctx.annotated(swift.intro), backed = ctx.backed.swift[name] == true,
+        bridge = bridged and bridge or "", component = ctx.component.swift_types[provided] == true
+        or ctx.revenant.swift[name] == true, runtime = ctx.runtime.swift_types[provided] == true})
     return add(ledger, key, item, file, level)
 end
 
@@ -378,7 +379,8 @@ local function framework_item(ctx, ledger, name, level, file)
     end
     local present = ctx.cache.libraries["/System/Library/Frameworks/" .. name .. ".framework/" .. name] ~= nil
     local item = new_item({kind = "framework", container = "", name = name, framework = name, present = present,
-        backed = ctx.backed.folders[name] == true, component = ctx.component.modules[name] == true,
+        backed = ctx.backed.folders[name] == true, component = ctx.component.modules[name] == true
+        or ctx.revenant.folders[name] == true,
         runtime = ctx.runtime.modules[name] == true})
     return add(ledger, key, item, file, level)
 end
@@ -613,7 +615,9 @@ local function write_report(opt, ctx, ledger, meta)
 
     local pair_rows = {}
     for _, pair in ipairs(ledger.missing_pairs) do
-        table.insert(pair_rows, pair.file .. "\t" .. pair.key)
+        if ledger.items[pair.key].status == "missing" then
+            table.insert(pair_rows, pair.file .. "\t" .. pair.key)
+        end
     end
     table.sort(pair_rows, scanner.bytes_less)
     io.writefile(path.join(opt.report, "missing_files.tsv"), table.concat(pair_rows, "\n") .. "\n")
@@ -746,9 +750,14 @@ function main(...)
     phase("sdk facts")
     local cache, source = cache_of(opt.ios)
     phase("cache " .. source)
-    local keys = implemented.from_objects(opt.objects)
     local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
-    local status = lowered.protocol_status(path.join(os.scriptdir(), "..", "src"), sdkfiles.sdk_folder())
+    local src = path.join(os.scriptdir(), "..", "src")
+    local set = lowered.read_members()
+    local keys = implemented.registry(opt.objects, src, set)
+    local status = lowered.protocol_status(src, sdkfiles.sdk_folder())
+    for name in pairs(set.protocols) do
+        status.backed[name] = true
+    end
     local uncalled = {}
     for name in pairs(status.uncalled) do
         table.insert(uncalled, name)
@@ -756,6 +765,7 @@ function main(...)
     table.sort(uncalled)
     io.writefile(path.join(opt.report, "protocols-uncalled.txt"), table.concat(uncalled, "\n") .. "\n")
     local backed = backed_index(keys, u.classes, status.backed)
+    backed.swift = implemented.swift_types(src)
     local folders = 0
     for _ in pairs(backed.folders) do
         folders = folders + 1
@@ -803,7 +813,8 @@ function main(...)
 
     local ctx = {u = u, cache = cache, target = ast.version_of(opt.ios), backed = backed,
         declared = declared, app_selectors = app_selectors, source = source, sdk = state.sdk, sdk_version = state.version,
-        runtime = products.provider(opt.runtime), component = products.provider(opt.components)}
+        runtime = products.provider(opt.runtime), component = products.provider(opt.components),
+        revenant = implemented.components(path.join(os.scriptdir(), "..", "..", ".."))}
     presence(ctx)
     local ledger = {items = {}, order = {}, missing_pairs = {}, candidates = {}, candidate_order = {}, unmatched = {},
         unmatched_count = 0, outside = 0, contradictions = 0, unannotated = 0, refs = 0}

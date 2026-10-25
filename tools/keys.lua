@@ -1,33 +1,33 @@
-import("core.package.package")
+import("core.base.task")
+import("private.action.require.impl.package")
+
+local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
 
 local HEAVY = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64"}
 
-local function inputs(name, root)
-    local dir = path.join(root, "packages", name:sub(1, 1), name)
-    if not os.isfile(path.join(dir, "xmake.lua")) then
-        raise("keys: %s has no recipe at %s", name, dir)
-    end
-    local instance = package.load_from_repository(name, dir, {packagefile = path.join(dir, "xmake.lua")})
-    local found = {}
-    for _, config in ipairs(table.wrap(instance:get("configs"))) do
-        if instance:extraconf("configs", config, "readonly") then
-            table.insert(found, config .. "=" .. tostring(instance:extraconf("configs", config, "default")))
-        end
-    end
-    table.sort(found)
-    local versions = table.orderkeys(instance:get("versions") and instance:get("versions") or {})
-    return found, versions[#versions] or "latest"
-end
-
 function main(...)
-    local root = path.directory(os.scriptdir())
+    task.run("config", {}, {disable_dump = true})
     local names = {...}
     if #names == 0 then
         names = HEAVY
     end
+    local requires, extra = {}, {}
     for _, name in ipairs(names) do
-        local found, version = inputs(name, root)
-        local key = hash.strhash128(table.concat(table.join({name, version}, found), ";"))
-        print("%s %s %s %s", name, version, key, table.concat(found, " "))
+        requires[#requires + 1] = "revenant@" .. name
+        extra["revenant@" .. name] = {system = false}
+    end
+    local instances = package.load_packages(requires, {requires_extra = extra})
+    for _, name in ipairs(names) do
+        local found = false
+        for _, instance in ipairs(instances) do
+            if instance:name() == name and instance:is_toplevel() then
+                print("%s %s %s", name, instance:version_str() or "latest", prebuilt.key(instance))
+                found = true
+                break
+            end
+        end
+        if not found then
+            raise("keys: the project requires no package %s", name)
+        end
     end
 end

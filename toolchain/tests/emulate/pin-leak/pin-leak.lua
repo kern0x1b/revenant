@@ -7,7 +7,7 @@ local GUEST_FOLDER = "/private/var/tmp/revenant-pin-leak"
 function main(device, release)
     device = device or "iPhone4,1"
     release = release or "6.1.3"
-    local here = os.scriptdir()
+    local here = path.absolute(os.scriptdir())
     local repository = path.absolute(path.join(here, "..", "..", "..", ".."))
     local out = runs.folder("emulate-pin-leak")
     os.tryrm(out)

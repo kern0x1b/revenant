@@ -18,10 +18,13 @@
 #include <limits>
 #include <map>
 #include <mutex>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -98,6 +101,139 @@ private:
 };
 
 namespace {
+
+    std::uint32_t local_read_u32(std::span<const std::byte> bytes,
+        std::size_t offset)
+    {
+        std::uint32_t value { };
+        for (std::size_t index = 0; index < 4U; ++index) {
+            value |= static_cast<std::uint32_t>(std::to_integer<std::uint8_t>(
+                         bytes[offset + index]))
+                     << (8U * index);
+        }
+        return value;
+    }
+
+    std::uint64_t local_read_u64(std::span<const std::byte> bytes,
+        std::size_t offset)
+    {
+        std::uint64_t value { };
+        for (std::size_t index = 0; index < 8U; ++index) {
+            value |= static_cast<std::uint64_t>(std::to_integer<std::uint8_t>(
+                         bytes[offset + index]))
+                     << (8U * index);
+        }
+        return value;
+    }
+
+    std::optional<std::span<const std::byte>> local_range(
+        const ImmutableFileView& view, std::uint64_t offset,
+        std::uint64_t size)
+    {
+        if (offset > view.size() || size > view.size() - offset)
+            return std::nullopt;
+        return view.range(offset, size);
+    }
+
+    std::vector<MachSymbol> cache_local_symbols(const DyldSharedCache& cache,
+        std::uint64_t unslid_load_address)
+    {
+        constexpr std::size_t header_size = 0x200U;
+        constexpr std::size_t local_region_field = 0x48U;
+        constexpr std::size_t local_region_size_field = 0x50U;
+        constexpr std::uint64_t local_info_size = 24U;
+        constexpr std::uint64_t entry_size = 12U;
+        constexpr std::uint64_t nlist_size = 12U;
+        constexpr std::uint8_t stab_mask = 0xe0U;
+        const auto main = cache.immutable_file_view_at(0U);
+        if (!main || main->size() < header_size)
+            return { };
+        const auto header = main->range(0U, header_size);
+        const std::string_view identity {
+            reinterpret_cast<const char*>(header.data()), 16U
+        };
+        if (identity.substr(0U, 7U) != "dyld_v1" ||
+            identity.find("arm64") != std::string_view::npos)
+            return { };
+        const auto region_offset =
+            local_read_u64(header, local_region_field);
+        const auto region_size =
+            local_read_u64(header, local_region_size_field);
+        if (region_size < local_info_size)
+            return { };
+        const auto info = local_range(*main, region_offset, local_info_size);
+        if (!info)
+            return { };
+        const auto nlist_offset = local_read_u32(*info, 0U);
+        const auto nlist_count = local_read_u32(*info, 4U);
+        const auto strings_offset = local_read_u32(*info, 8U);
+        const auto strings_size = local_read_u32(*info, 12U);
+        const auto entries_offset = local_read_u32(*info, 16U);
+        const auto entries_count = local_read_u32(*info, 20U);
+        if (entries_offset > region_size ||
+            entries_count > (region_size - entries_offset) / entry_size)
+            return { };
+        const auto mappings = cache.main_cache().mappings;
+        if (mappings.empty() || unslid_load_address < mappings.front().address)
+            return { };
+        const auto target = unslid_load_address - mappings.front().address;
+        if (target > std::numeric_limits<std::uint32_t>::max())
+            return { };
+        const auto entries = local_range(
+            *main, region_offset + entries_offset, entries_count * entry_size);
+        if (!entries)
+            return { };
+        std::optional<std::pair<std::uint64_t, std::uint64_t>> found;
+        for (std::uint64_t index = 0; index < entries_count; ++index) {
+            const auto at = static_cast<std::size_t>(index * entry_size);
+            if (local_read_u32(*entries, at) == target)
+                found = std::pair<std::uint64_t, std::uint64_t> {
+                    local_read_u32(*entries, at + 4U),
+                    local_read_u32(*entries, at + 8U)
+                };
+        }
+        if (!found || found->second == 0U)
+            return { };
+        const auto [first, count] = *found;
+        if (first > nlist_count || count > nlist_count - first)
+            return { };
+        const auto nlists = local_range(*main,
+            region_offset + nlist_offset + first * nlist_size,
+            count * nlist_size);
+        const auto strings = local_range(
+            *main, region_offset + strings_offset, strings_size);
+        if (!nlists || !strings)
+            return { };
+        std::vector<MachSymbol> symbols;
+        symbols.reserve(count);
+        for (std::uint64_t index = 0; index < count; ++index) {
+            const auto at = static_cast<std::size_t>(index * nlist_size);
+            const auto type = std::to_integer<std::uint8_t>((*nlists)[at + 4U]);
+            if ((type & stab_mask) != 0U)
+                continue;
+            const auto name_offset = local_read_u32(*nlists, at);
+            if (name_offset >= strings->size())
+                continue;
+            const auto name_bytes = strings->subspan(name_offset);
+            const auto terminator = std::find(
+                name_bytes.begin(), name_bytes.end(), std::byte { 0 });
+            std::string name;
+            name.reserve(
+                static_cast<std::size_t>(terminator - name_bytes.begin()));
+            for (auto byte = name_bytes.begin(); byte != terminator; ++byte)
+                name.push_back(static_cast<char>(std::to_integer<std::uint8_t>(*byte)));
+            if (name.empty())
+                continue;
+            symbols.push_back(MachSymbol { std::move(name),
+                local_read_u32(*nlists, at + 8U), type,
+                std::to_integer<std::uint8_t>((*nlists)[at + 5U]),
+                static_cast<std::uint16_t>(
+                    std::to_integer<std::uint8_t>((*nlists)[at + 6U]) |
+                    (std::to_integer<std::uint8_t>((*nlists)[at + 7U])
+                        << 8U)) });
+        }
+        return symbols;
+    }
 
     constexpr std::size_t magic_offset = 0;
     constexpr std::size_t magic_size = 16;
@@ -1931,11 +2067,13 @@ std::shared_ptr<const MachOImage> DyldSharedCache::parse_image(
         source = files_[header->file_index];
     }
     try {
-        auto parsed = std::make_shared<const MachOImage>(
+        auto parsed = std::make_shared<MachOImage>(
             MachOImage::parse(source.path, architecture,
                 source.content_identity, ImmutableSnapshotKind::RuntimeHot,
                 header->file_offset, source.immutable_snapshot,
                 source.file_generation, source.immutable_file_view));
+        parsed->add_local_symbols(
+            cache_local_symbols(*this, image.unslid_load_address));
         image_store_->images.emplace(key, parsed);
         ++image_builds;
         return parsed;

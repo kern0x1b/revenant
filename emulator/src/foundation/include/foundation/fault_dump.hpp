@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "foundation/macho.hpp"
+
 #include <array>
 #include <cstdint>
 #include <functional>
@@ -22,6 +24,10 @@ namespace emulator {
 using GuestWordReader =
     std::function<std::optional<std::uint32_t>(std::uint32_t)>;
 using GuestWordLabel = std::function<std::string(std::uint32_t)>;
+
+[[nodiscard]] std::string symbol_offset_label(
+    const std::vector<MachSymbol>& symbols,
+    const std::vector<MachSection>& sections, std::uint32_t address);
 
 [[nodiscard]] std::vector<std::string> describe_fault_words(
     const std::array<std::uint32_t, 16>& registers,

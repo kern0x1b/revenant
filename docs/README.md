@@ -12,7 +12,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Loading the backports](explanation/backports-loading.md) | how the backport libraries are loaded |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
-| [Continuous checks](guides/ci.md) | what CI runs |
+| [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
 | [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |
@@ -57,6 +57,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Load average and interface records](explanation/emulator/load-average-and-link-sysctl.md) | the `vm.loadavg` and `net.link.generic` answers, and what is not modelled |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
+| [Fatal-fault report](reference/emulator/fault-report.md) | the fields of the fatal line and the fault words, and how their addresses are named |
 | [Guest tests](reference/emulator/guest-tests.md) | the guest programs that check what only a running guest shows |
 | [Graphics](reference/emulator/graphics.md) | the shader limits, the Vulkan driver path and the Core Image path |
 | [Third-party](reference/emulator/third-party.md) | what is bundled or linked, and under which license |

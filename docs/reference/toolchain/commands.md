@@ -55,7 +55,7 @@ The xmake verbs the toolchain adds, their options and defaults, the verdicts and
 | `shot [FILE]` | Copies the last frame. |
 | `clean` | Removes this port's images, or every image and golden image with `-a`. |
 
-`until-exit` holds the guest until the application has ended, so an application that produces a result over time is given the time to produce it. The verdict then says in `held` whether the application's own end (`exited`) or the run's budget (`deadline`) came first.
+`until-exit` holds the guest until the application has ended, so an application that produces a result over time is given the time to produce it. The verdict then says in `held` whether the application's own end (`exited`) or the run's budget (`deadline`) came first. An application that ends with status 0 is a success, whether it ends during the steps or before them. Any other end makes the command exit with the application's status, or with 128 plus the signal that ended it.
 
 ### Verdicts
 

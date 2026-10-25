@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger, RevenantSCNActionKind) {
     RevenantSCNActionKindFadeIn,
     RevenantSCNActionKindFadeOut,
     RevenantSCNActionKindWaitRandom,
+    RevenantSCNActionKindPlayAudio,
 };
 
 typedef void (^RevenantSCNActionBlock)(SCNNode *node);
@@ -44,6 +45,8 @@ typedef void (^RevenantSCNActionCustomBlock)(SCNNode *node, CGFloat elapsedTime)
 - (nullable dispatch_queue_t)revenantQueue;
 - (BOOL)revenantIsComposite;
 - (BOOL)revenantContainsRandomWait;
+- (nullable SCNAudioSource *)revenantAudioSource;
+- (BOOL)revenantWaitsForCompletion;
 @end
 
 @interface RevenantSCNActionRun : NSObject
