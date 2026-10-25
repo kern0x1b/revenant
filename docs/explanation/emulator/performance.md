@@ -64,6 +64,29 @@ blocks (0.4%) do not round-trip through the deserializer and stay misses.
 Full boots, 4.0 billion ticks, one repeat each, host load varying: cold 2261504 blocks, 166 s user, 193 s wall;
 warm 2247932 blocks, 196 s user, 545 s wall. The warm boot imported nothing, only the 256 hotset prefetches.
 
+## The register allocator's seed, measured 2026-10-25
+
+Dynarmic's arm64 register allocator built a `std::random_device` and seeded a `std::mt19937` for every block it
+emitted (patch 0009 seeds it once per emitting thread). In the emit profile that `arc4random` path was 3% of the
+samples (237 of 8004). The boot matrix ran 4.0 billion ticks (`--time-scale 10`, headless, software GLES), serially,
+three cold and three warm boots per build, each warm boot from its cold run's store. The host load varied, so the
+spread is the honest figure:
+
+| build | cold, µs per block (min–max) | warm, µs per block (min–max) | cold user s | warm user s |
+|-------|------------------------------|------------------------------|-------------|-------------|
+| baseline, no 0009 | 21.1 (18.2–24.5) | 22.3 (18.9–25.6) | 111 | 112 |
+| patched, 0009 | 19.1 (16.8–22.4) | 23.7 (15.9–30.8) | 109 | 113 |
+
+Translation time is the `translation-compile-ns` counter: the time the arm64 backend spends in one translation
+(frontend and emit). Every run translated 2.28–2.29 million blocks and reached SpringBoard with no CPU fault. The
+cold difference is 9% in the mean, and the warm one goes the other way, so three repeats cannot tell the two builds
+apart. The patch removes a real cost, but about 3% of the emit, which is below what the host noise resolves.
+
+The 2× target is not reached by this change. The next emit items are `RegAlloc::UpdateAllUses` (about 10% of
+the samples), `BlockRangeInformation::AddRange` (boost::icl, about 7%) and `Link` with `RelinkForDescriptor` (about
+7%). Removing all three would leave about three quarters of the emit, so 2× needs a change to how the register
+allocator tracks uses, not one more allocation.
+
 ## What would make the matrix affordable
 
 - Share the translated shared cache between processes (1 above): translate UIKit once per machine
