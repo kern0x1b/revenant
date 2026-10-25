@@ -13,7 +13,8 @@ package("dynarmic")
                      "0007-Size-the-machine-image-slab-separately.patch",
                      "0008-Set-the-cache-invalidation-flags-under-their-lock.patch",
                      "0009-Seed-the-register-allocator-s-generator-once-per-thread.patch",
-                     "0010-Keep-the-per-block-bookkeeping-compact.patch"}
+                     "0010-Keep-the-per-block-bookkeeping-compact.patch",
+                     "0011-Keep-the-reverse-block-index-in-a-sorted-vector.patch"}
     add_urls("https://github.com/MC-XiaoXiao/dynarmic.git")
     add_versions("6.7.0", commit)
 

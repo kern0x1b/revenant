@@ -480,3 +480,62 @@ The dynarmic suite passes with the patch: 47 test cases and 200,561 assertions, 
 `DYNARMIC_ENABLE_TEST_EMIT_FAILURE=ON` (the fault-injection hooks, so the emit-failure paths run).
 
 Not done: the retranslation source, the `block_entries` map, and a quiet-host repeat of the footprint and boot pairs.
+The next section supersedes the first two items.
+
+## Retranslation: the exec reset and the shared image slab, measured 2026-10-25
+
+A repeat is a descriptor emitted again in the same address space after an invalidation removed it. A probe build (not
+committed) tagged every removed descriptor with the call that removed it and counted the repeats by that tag. The
+counts come from one default boot, with the probe reporting every 100,000 emits.
+
+Default boot, 1.9 M emits by SpringBoard plus the idle window:
+
+| Removed by | Repeats |
+|---|---|
+| Exec reset, `emulator/src/runtime/emulator_session.cpp:3913` (`exec_cpu.clear_cache()` after the new image is loaded) | 110,192 |
+| Range invalidation, `userland_hle.cpp:2479` and `kernel.cpp:3075` | 8 |
+
+That is 110,200 repeats in 1.9 M emits, 5.8%. The repeats fall in two 16 MB regions of guest address space: 0x39 has
+94,445 (86%) and 0x2f has 15,627 (14%). On this device those regions hold the shared-cache libraries; that is inferred
+from the addresses and not checked against the mapping. An exec reset clears the runtime's native code slab, so the
+new image translates the same library code again.
+
+With `--shared-image-slab` (the machine-wide image slab, which survives an exec), the same probe at 500,000 emits:
+
+| Region or reason | Repeats |
+|---|---|
+| Exec reset | 15,816 |
+| Region 0x39 | 47 |
+| Region 0x2f | 15,767 |
+
+The image slab removes the 0x39 repeats. The 0x2f repeats remain, and their cause is not identified. The emit total for
+the slab boot is lower: the probe's last report was at 500,000 emits, against 1.9 M for the default boot to the same
+point in the boot.
+
+Footprint, boot CPU and idle CPU on clean `main` (no probe), two alternating rounds, host load 9 to 58:
+
+| Pair | Default MB | `--shared-image-slab` MB | Change |
+|---|---|---|---|
+| 1 | 2,885 | 1,615 | −44% |
+| 2 | 2,669 | 1,399 | −48% |
+
+The mean is 2,777 MB against 1,507 MB, −46%. CPU to the SpringBoard spawn was 54.2 and 54.4 s by default against 29.8 and
+35.0 s with the flag, about 38% less. The wall-clock boot times were 55 and 65 s by default and 30 and 41 s with the
+flag, with load averages at launch of 40 and 12 against 11 and 10, so they are not comparable. Idle CPU was 0.37 and
+0.71 cores by default and 1.32 and 0.51 with the flag, over 11 to 13 s windows; that does not settle a difference.
+
+The flag is opt-in, and this commit does not change the default. Making it the default changes the memory sharing of
+every boot, which is a product decision, and the idle CPU has no clean reading yet.
+
+The reverse block index is now a sorted vector (patch `0011-Keep-the-reverse-block-index-in-a-sorted-vector.patch`). Its
+`std::map` node was 48 B a block, and a vector entry is 16 B plus the spare capacity, about 25 to 30 B a block saved, or
+about 2% of the 1,419 B of bookkeeping per block. The dynarmic suite passes (47 test cases, 200,561 assertions). A sanity
+boot reaches SpringBoard with a footprint of 2,697 MB, inside the default range above, so the saving is too small to
+show in single boots.
+
+`block_entries` stays at the default 0.5 load factor. It holds 65,536 buckets for 17,072 blocks, about 1.6 MB or 92 B a
+block at 24 B a bucket. A maximum load factor of 0.9 would halve that, but the map is the lookup for every link and
+native-slab find, and robin-hood probes lengthen at 0.9. That lookup cost needs measuring before the change is made.
+
+Not done: the cause of the 0x2f repeats, the default for `--shared-image-slab`, the `block_entries` load factor, and a
+quiet-host repeat of the footprint and boot pairs.

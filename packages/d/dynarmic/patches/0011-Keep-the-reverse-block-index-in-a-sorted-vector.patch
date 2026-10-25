@@ -1,0 +1,93 @@
+diff --git a/src/dynarmic/backend/arm64/address_space.cpp b/src/dynarmic/backend/arm64/address_space.cpp
+index 07c5ba86..b0c6cb4e 100644
+--- a/src/dynarmic/backend/arm64/address_space.cpp
++++ b/src/dynarmic/backend/arm64/address_space.cpp
+@@ -25,6 +25,12 @@ namespace {
+ 
+ constexpr float block_info_max_load_factor = 0.9f;
+ 
++auto ReverseUpperBound(const std::vector<std::pair<CodePtr, IR::LocationDescriptor>>& entries, CodePtr host_pc) {
++    return std::upper_bound(entries.begin(), entries.end(), host_pc, [](CodePtr pc, const auto& entry) {
++        return pc < entry.first;
++    });
++}
++
+ EmittedBlockInfo StoredBlockInfo(const EmittedBlockInfo& emitted) {
+     return EmittedBlockInfo{emitted.entry_point, emitted.size, {}, emitted.block_relocations, emitted.fastmem_patch_info};
+ }
+@@ -64,7 +70,7 @@ CodePtr AddressSpace::Get(IR::LocationDescriptor descriptor) {
+ }
+ 
+ std::optional<IR::LocationDescriptor> AddressSpace::ReverseGetLocation(CodePtr host_pc) {
+-    if (auto iter = reverse_block_entries.upper_bound(host_pc); iter != reverse_block_entries.begin()) {
++    if (auto iter = ReverseUpperBound(reverse_block_entries, host_pc); iter != reverse_block_entries.begin()) {
+         // upper_bound locates the first value greater than host_pc, so we need to decrement
+         --iter;
+         return iter->second;
+@@ -73,7 +79,7 @@ std::optional<IR::LocationDescriptor> AddressSpace::ReverseGetLocation(CodePtr h
+ }
+ 
+ CodePtr AddressSpace::ReverseGetEntryPoint(CodePtr host_pc) {
+-    if (auto iter = reverse_block_entries.upper_bound(host_pc); iter != reverse_block_entries.begin()) {
++    if (auto iter = ReverseUpperBound(reverse_block_entries, host_pc); iter != reverse_block_entries.begin()) {
+         // upper_bound locates the first value greater than host_pc, so we need to decrement
+         --iter;
+         return iter->first;
+@@ -113,7 +119,7 @@ void AddressSpace::InvalidateBasicBlocks(const tsl::robin_set<IR::LocationDescri
+ 
+ void AddressSpace::ClearCache() {
+     decltype(block_entries){}.swap(block_entries);
+-    reverse_block_entries.clear();
++    decltype(reverse_block_entries){}.swap(reverse_block_entries);
+     decltype(block_infos){}.swap(block_infos);
+     block_infos.max_load_factor(block_info_max_load_factor);
+     decltype(block_references){}.swap(block_references);
+@@ -146,7 +152,10 @@ AddressSpace::RetiredCodeStats AddressSpace::RetireCodeRange(CodePtr begin, Code
+ 
+     UnprotectCodeMemory();
+ 
+-    auto iter = reverse_block_entries.lower_bound(begin);
++    auto iter = std::lower_bound(reverse_block_entries.begin(), reverse_block_entries.end(), begin, [](const auto& entry, CodePtr pc) {
++        return entry.first < pc;
++    });
++    const auto first = iter;
+     while (iter != reverse_block_entries.end() && iter->first < end) {
+         const CodePtr entry_point = iter->first;
+         const IR::LocationDescriptor descriptor = iter->second;
+@@ -177,8 +186,9 @@ AddressSpace::RetiredCodeStats AddressSpace::RetireCodeRange(CodePtr begin, Code
+             block_infos.erase(block_info);
+         }
+ 
+-        iter = reverse_block_entries.erase(iter);
++        ++iter;
+     }
++    reverse_block_entries.erase(first, iter);
+ 
+     ProtectCodeMemory();
+ 
+@@ -224,7 +234,11 @@ EmittedBlockInfo AddressSpace::EmitBlock(IR::Block& block) {
+     EmittedBlockInfo block_info = EmitArm64(code, block, GetEmitConfig(), fastmem_manager);
+ 
+     ASSERT(block_entries.insert({location, block_info.entry_point}).second);
+-    ASSERT(reverse_block_entries.insert({block_info.entry_point, location}).second);
++    const auto reverse_position = std::lower_bound(reverse_block_entries.begin(), reverse_block_entries.end(), block_info.entry_point, [](const auto& entry, CodePtr pc) {
++        return entry.first < pc;
++    });
++    ASSERT(reverse_position == reverse_block_entries.end() || reverse_position->first != block_info.entry_point);
++    reverse_block_entries.insert(reverse_position, {block_info.entry_point, location});
+     ASSERT(block_infos.insert({block_info.entry_point, StoredBlockInfo(block_info)}).second);
+ 
+     Link(block_info);
+diff --git a/src/dynarmic/backend/arm64/address_space.h b/src/dynarmic/backend/arm64/address_space.h
+index f799d057..023af98f 100644
+--- a/src/dynarmic/backend/arm64/address_space.h
++++ b/src/dynarmic/backend/arm64/address_space.h
+@@ -115,7 +115,7 @@ protected:
+     // A IR::LocationDescriptor will have one current CodePtr.
+     // However, there can be multiple other CodePtrs which are older, previously invalidated blocks.
+     tsl::robin_map<IR::LocationDescriptor, CodePtr> block_entries;
+-    std::map<CodePtr, IR::LocationDescriptor> reverse_block_entries;
++    std::vector<std::pair<CodePtr, IR::LocationDescriptor>> reverse_block_entries;
+     tsl::robin_map<CodePtr, EmittedBlockInfo> block_infos;
+     tsl::robin_map<IR::LocationDescriptor, std::vector<CodePtr>> block_references;
+ 
