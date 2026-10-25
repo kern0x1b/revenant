@@ -658,6 +658,10 @@ class INIntent
 class INIntentResolutionResult
 class INInteraction
 class INMessage
+class INObject
+class INObjectCollection
+class INObjectResolutionResult
+class INObjectSection
 class INParameter
 class INPaymentMethod
 class INPerson
@@ -15967,6 +15971,37 @@ member INMessage -reaction
 member INMessage -setReaction:
 member INMessage -setSticker:
 member INMessage -sticker
+member INObject +supportsSecureCoding
+member INObject -copyWithZone:
+member INObject -encodeWithCoder:
+member INObject -hash
+member INObject -initWithCoder:
+member INObject -initWithIdentifier:displayString:
+member INObject -initWithIdentifier:displayString:pronunciationHint:
+member INObject -initWithIdentifier:displayString:pronunciationHint:subtitleString:displayImage:
+member INObject -initWithIdentifier:displayString:subtitleString:displayImage:
+member INObject -isEqual:
+member INObject -spokenPhrase
+member INObject -vocabularyIdentifier
+member INObjectCollection +supportsSecureCoding
+member INObjectCollection -allItems
+member INObjectCollection -copyWithZone:
+member INObjectCollection -encodeWithCoder:
+member INObjectCollection -hash
+member INObjectCollection -initWithCoder:
+member INObjectCollection -initWithItems:
+member INObjectCollection -initWithSections:
+member INObjectCollection -isEqual:
+member INObjectResolutionResult +confirmationRequiredWithObjectToConfirm:
+member INObjectResolutionResult +disambiguationWithObjectsToDisambiguate:
+member INObjectResolutionResult +successWithResolvedObject:
+member INObjectSection +supportsSecureCoding
+member INObjectSection -copyWithZone:
+member INObjectSection -encodeWithCoder:
+member INObjectSection -hash
+member INObjectSection -initWithCoder:
+member INObjectSection -initWithTitle:items:
+member INObjectSection -isEqual:
 member INParameter +parameterForClass:keyPath:
 member INParameter +supportsSecureCoding
 member INParameter -copyWithZone:
