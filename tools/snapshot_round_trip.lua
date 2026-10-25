@@ -56,7 +56,6 @@ local function parse(...)
     if not tonumber(options.time_scale) then
         raise("--time-scale must be a number\n" .. USAGE)
     end
-    -- The emulator runs from the save directory, so a relative path to it would not resolve there.
     options.emulator = path.absolute(options.emulator)
     options.work = path.absolute(options.work)
     if not options.save_ticks or not options.ticks or options.save_ticks <= 0 or
