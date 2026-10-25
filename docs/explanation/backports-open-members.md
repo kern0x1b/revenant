@@ -329,9 +329,9 @@ and it exits with status 0. So the emulator needs no change for this trap; the t
 No device daemon was run to compare. The launch took a long boot under load: SpringBoard checked in 570 to 800 host
 seconds after boot at a load of about 100, so `launch` needs `-s` and `-t` raised on a busy machine.
 
-## Emulate cases are not in `./xmakew test`
+## Emulate cases are not in `./xmakew test -P .`
 
 The emulate cases under `toolchain/tests/emulate/` (`install`, `launchd`, `output`, `pin-leak`, `baseline`, `fontapp`) run
-by hand, as `docs/reference/toolchain/tests.md` says, and are not xmake tests. Registering them in `./xmakew test` is a
+by hand, as `docs/reference/toolchain/tests.md` says, and are not xmake tests. Registering them in `./xmakew test -P .` is a
 separate job: each needs a booted firmware image for minutes, so the registration has to say which device and release it
 boots and where a CI slot for it comes from. Until then the cases are the record of what the emulator is checked against.
