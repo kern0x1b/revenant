@@ -10,10 +10,10 @@ local USAGE = [[usage: ./xmakew l tools/snapshot_round_trip.lua --rootfs DIR [--
 
 Saves a snapshot at --save-ticks, boots the save's clone cold to --ticks, restores the saved
 snapshot on a second clone to --ticks, and requires the cold and restored snapshots to be
-identical. The save and the cold run share one clone and so one device key store: the key
-store is random per device state, and the clone's dyld shared cache ctime is guest-visible,
-so two clones of the same rootfs would not match byte for byte. Without --binary the guest
-boots launchd. The check is skipped without --rootfs. --save-ticks and --ticks must be
+identical. Each run boots its own clone of the rootfs. The device key store is random per
+device state, so the cold and the restored runs take the save's key store. The guest sees the
+image's file times, not the clone's host times, so every clone of one image is interchangeable.
+Without --binary the guest boots launchd. The check is skipped without --rootfs. --save-ticks and --ticks must be
 multiples of 2^20 and --save-ticks below --ticks. Clones use cp -c, so this runs on macOS.]]
 
 local flags = {
@@ -95,6 +95,12 @@ local function boot(options, directory, label, ticks, extra)
     return log
 end
 
+local function share_key_store(from, to)
+    local key_store = path.join(to, ".emulator-device-state", "rootfs")
+    os.mkdir(key_store)
+    os.cp(path.join(from, ".emulator-device-state", "rootfs", "key-store-v1.key"), path.join(key_store, "key-store-v1.key"))
+end
+
 local function require_marker(log, marker)
     local text = io.readfile(log)
     if not text:find(marker, 1, true) then
@@ -153,15 +159,16 @@ function main(...)
     boot(options, save, "save", options.save_ticks, {"--snapshot-out", save_snapshot})
     require_marker(path.join(save, "save.log"), "[snapshot] written")
 
-    local cold_snapshot = path.join(save, "cold.snap")
-    local cold_log = boot(options, save, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
+    local cold = path.join(work, "cold")
+    clone(options.rootfs, cold)
+    share_key_store(save, cold)
+    local cold_snapshot = path.join(cold, "cold.snap")
+    local cold_log = boot(options, cold, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
     require_marker(cold_log, "[snapshot] written")
 
     local restore = path.join(work, "restore")
     clone(options.rootfs, restore)
-    local key_store = path.join(restore, ".emulator-device-state", "rootfs")
-    os.mkdir(key_store)
-    os.cp(path.join(save, ".emulator-device-state", "rootfs", "key-store-v1.key"), path.join(key_store, "key-store-v1.key"))
+    share_key_store(save, restore)
     local restored_snapshot = path.join(restore, "restored.snap")
     local restore_log = boot(options, restore, "restore", options.ticks,
         {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
