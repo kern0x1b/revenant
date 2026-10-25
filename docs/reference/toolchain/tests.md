@@ -41,7 +41,8 @@ tests behind `webkit_host_tests`) are declared by the platform, not by the defau
 that define them. The fixtures of `tests/emulate/` and `tests/swiftui/` are built for a device and are not xmake tests
 yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
 `install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
-its probe line), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
+its probe line), `baseline` (a UIKit string drawn with and without `NSBaselineOffsetAttributeName` lands at two heights,
+so the run says whether the system honours the attribute), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
 that hangs), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
 limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
 are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
