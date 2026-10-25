@@ -56,6 +56,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Load average and interface records](explanation/emulator/load-average-and-link-sysctl.md) | the `vm.loadavg` and `net.link.generic` answers, and what is not modelled |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
+| [Fatal-fault report](reference/emulator/fault-report.md) | the fields of the fatal line and the fault words, and how their addresses are named |
 | [Guest tests](reference/emulator/guest-tests.md) | the guest programs that check what only a running guest shows |
 | [Graphics](reference/emulator/graphics.md) | the shader limits, the Vulkan driver path and the Core Image path |
 | [Third-party](reference/emulator/third-party.md) | what is bundled or linked, and under which license |
