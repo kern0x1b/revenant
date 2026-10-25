@@ -1918,11 +1918,18 @@ class RevenantSCNAnimations
 class RevenantSCNArchivedColor
 class RevenantSCNArchivedColorSpace
 class RevenantSCNArchivedData
+class RevenantSCNClock
 class RevenantSCNCoding
 class RevenantSCNDraw
+class RevenantSCNHit
+class RevenantSCNJitter
+class RevenantSCNJitterBuffers
 class RevenantSCNMesh
+class RevenantSCNPicker
 class RevenantSCNRenderEngine
 class RevenantSCNShaderProgram
+class RevenantSCNSoundEngine
+class RevenantSCNStream
 class RevenantSCNTexture
 class RevenantSKWeakReference
 class RevenantSafariPage
@@ -2045,10 +2052,13 @@ class RevenantWebURLProtocol
 class RevenantZoomRamp
 class RevenantZoomSampleRelay
 class SCNAction
+class SCNAudioPlayer
+class SCNAudioSource
 class SCNCamera
 class SCNGeometry
 class SCNGeometryElement
 class SCNGeometrySource
+class SCNHitTestResult
 class SCNLight
 class SCNMaterial
 class SCNMaterialProperty
@@ -3730,6 +3740,9 @@ enum SCNActionTimingModeEaseOut
 enum SCNActionTimingModeLinear
 enum SCNBlendModeAlpha
 enum SCNGeometryPrimitiveTypePolygon
+enum SCNHitTestSearchModeAll
+enum SCNHitTestSearchModeAny
+enum SCNHitTestSearchModeClosest
 enum SCNRenderingAPIOpenGLES2
 enum SFAuthenticationErrorCanceledLogin
 enum SFSafariViewControllerDismissButtonStyleCancel
@@ -4615,9 +4628,19 @@ function RevenantSCNActionCubicProgress
 function RevenantSCNActionEase
 function RevenantSCNActionShortestAngle
 function RevenantSCNActionTimingPoints
+function RevenantSCNBoxInFrustum
+function RevenantSCNExpandBox
+function RevenantSCNFrustumPlanes
+function RevenantSCNGeometryBounds
 function RevenantSCNProjectPoint
 function RevenantSCNProjectionMatrix
+function RevenantSCNRayHitsBox
+function RevenantSCNRayHitsTriangle
+function RevenantSCNReadIndex
+function RevenantSCNReadVector
+function RevenantSCNRowTransform
 function RevenantSCNUnprojectPoint
+function RevenantSCNWorldBox
 function RevenantSecKeyECCarries
 function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
@@ -25570,7 +25593,7 @@ member RevenantSCNActionRun -applyProgress:elapsed:onNode:
 member RevenantSCNActionRun -captureStartOnNode:
 member RevenantSCNActionRun -easedProgress:
 member RevenantSCNActionRun -initWithAction:key:completion:time:
-member RevenantSCNAnimations +evaluateScene:atTime:
+member RevenantSCNAnimations +evaluateScene:atTime:listener:
 member RevenantSCNAnimations -addAnimation:forKey:
 member RevenantSCNAnimations -animationForKey:
 member RevenantSCNAnimations -animationKeys
@@ -25600,6 +25623,11 @@ member RevenantSCNArchivedData -initWithCoder:
 member RevenantSCNArchivedData -length
 member RevenantSCNArchivedData -mutableBytes
 member RevenantSCNArchivedData -setLength:
+member RevenantSCNClock -init
+member RevenantSCNClock -isPlaying
+member RevenantSCNClock -sceneTimeAtWallTime:
+member RevenantSCNClock -setPlaying:atWallTime:
+member RevenantSCNClock -setSceneTime:atWallTime:
 member RevenantSCNCoding +colorWithLinearWhite:
 member RevenantSCNCoding +currentSourceURL
 member RevenantSCNCoding +decodeArrayOfClass:coder:forKey:
@@ -25616,6 +25644,26 @@ member RevenantSCNCoding +markFound:forKey:onObject:
 member RevenantSCNCoding +popSourceURL
 member RevenantSCNCoding +pushSourceURL:
 member RevenantSCNCoding +wasFound:onObject:
+member RevenantSCNJitter +offsetForFrame:x:y:
+member RevenantSCNJitter +sampleCount
+member RevenantSCNJitter +weightForAccumulated:
+member RevenantSCNJitterBuffers -accumulateSampleWithWeight:
+member RevenantSCNJitterBuffers -bindSampleFramebuffer
+member RevenantSCNJitterBuffers -deleteTargets
+member RevenantSCNJitterBuffers -dispose
+member RevenantSCNJitterBuffers -drawQuad
+member RevenantSCNJitterBuffers -init
+member RevenantSCNJitterBuffers -isUsable
+member RevenantSCNJitterBuffers -prepareDraw
+member RevenantSCNJitterBuffers -presentToFramebuffer:
+member RevenantSCNJitterBuffers -resizeToWidth:height:
+member RevenantSCNPicker -acceptsDistance:
+member RevenantSCNPicker -hitsUnderNode:
+member RevenantSCNPicker -initWithOrigin:direction:options:
+member RevenantSCNPicker -pointAt:point:
+member RevenantSCNPicker -recordNode:geometryIndex:faceIndex:distance:world:local:localNormal:worldNormal:matrix:texcoords:
+member RevenantSCNPicker -testGeometry:node:world:
+member RevenantSCNPicker -visit:
 member RevenantSCNRenderEngine +defaultPointOfViewInScene:
 member RevenantSCNRenderEngine -applySampling:
 member RevenantSCNRenderEngine -dealloc
@@ -25626,6 +25674,7 @@ member RevenantSCNRenderEngine -linearTextures
 member RevenantSCNRenderEngine -materialBlends:
 member RevenantSCNRenderEngine -meshFor:
 member RevenantSCNRenderEngine -pathForContents:
+member RevenantSCNRenderEngine -prepareObject:shouldAbortBlock:
 member RevenantSCNRenderEngine -programForModel:textured:bordered:lockedAmbient:lights:count:mesh:
 member RevenantSCNRenderEngine -projectPoint:
 member RevenantSCNRenderEngine -purgeUnused
@@ -25633,6 +25682,28 @@ member RevenantSCNRenderEngine -renderScene:pointOfView:width:height:
 member RevenantSCNRenderEngine -surveyScene:
 member RevenantSCNRenderEngine -textureFor:sRGB:hasAlpha:
 member RevenantSCNRenderEngine -unprojectPoint:
+member RevenantSCNSoundEngine +decodeURL:channels:sampleRate:frames:
+member RevenantSCNSoundEngine +deleteBuffer:
+member RevenantSCNSoundEngine +deleteSource:
+member RevenantSCNSoundEngine +isActive
+member RevenantSCNSoundEngine +newBuffer:channels:sampleRate:
+member RevenantSCNSoundEngine +newSourceWithBuffer:relative:
+member RevenantSCNSoundEngine +nodeEngine
+member RevenantSCNSoundEngine +prepare
+member RevenantSCNSoundEngine +probeURL:sampleRate:frames:
+member RevenantSCNSoundEngine +procedureNamed:
+member RevenantSCNSoundEngine +setListenerWorld:atTime:
+member RevenantSCNSoundEngine +setSource:position:velocity:
+member RevenantSCNSoundEngine +setSource:reverbSend:
+member RevenantSCNSoundEngine +supportsReverb
+member RevenantSCNStream -dealloc
+member RevenantSCNStream -dispose
+member RevenantSCNStream -fillBuffer:loops:
+member RevenantSCNStream -initWithURL:channels:
+member RevenantSCNStream -isExhaustedOnSource:
+member RevenantSCNStream -primeSource:loops:
+member RevenantSCNStream -readFrames:intoBytes:loops:
+member RevenantSCNStream -refillSource:loops:
 member RevenantSafariPage -dealloc
 member RevenantSafariPage -initWithURL:
 member RevenantSafariPage -initialURL
@@ -26207,6 +26278,7 @@ member SCNAction +hide
 member SCNAction +moveBy:duration:
 member SCNAction +moveByX:y:z:duration:
 member SCNAction +moveTo:duration:
+member SCNAction +playAudioSource:waitForCompletion:
 member SCNAction +removeFromParentNode
 member SCNAction +repeatAction:count:
 member SCNAction +repeatActionForever:
@@ -26228,6 +26300,7 @@ member SCNAction +waitForDuration:withRange:
 member SCNAction -copyWithZone:
 member SCNAction -duration
 member SCNAction -init
+member SCNAction -revenantAudioSource
 member SCNAction -revenantAxisAngle
 member SCNAction -revenantBlock
 member SCNAction -revenantChildren
@@ -26241,6 +26314,7 @@ member SCNAction -revenantRepeatsForever
 member SCNAction -revenantScalar
 member SCNAction -revenantShortestUnitArc
 member SCNAction -revenantVector
+member SCNAction -revenantWaitsForCompletion
 member SCNAction -reversedAction
 member SCNAction -setDuration:
 member SCNAction -setSpeed:
@@ -26249,6 +26323,43 @@ member SCNAction -setTimingMode:
 member SCNAction -speed
 member SCNAction -timingFunction
 member SCNAction -timingMode
+member SCNAudioPlayer +audioPlayerWithAVAudioNode:
+member SCNAudioPlayer +audioPlayerWithSource:
+member SCNAudioPlayer -applyMixToSource:
+member SCNAudioPlayer -initWithAVAudioNode:
+member SCNAudioPlayer -initWithSource:
+member SCNAudioPlayer -revenantDidFinishPlayback
+member SCNAudioPlayer -revenantIsPlaying
+member SCNAudioPlayer -revenantIsSpatial
+member SCNAudioPlayer -revenantSource
+member SCNAudioPlayer -revenantStartOnNode:
+member SCNAudioPlayer -revenantStop
+member SCNAudioPlayer -revenantUpdateWithWorld:time:
+member SCNAudioSource +audioSourceNamed:
+member SCNAudioSource +supportsSecureCoding
+member SCNAudioSource -copyWithZone:
+member SCNAudioSource -dealloc
+member SCNAudioSource -encodeWithCoder:
+member SCNAudioSource -initWithCoder:
+member SCNAudioSource -initWithFileNamed:
+member SCNAudioSource -initWithURL:
+member SCNAudioSource -isPositional
+member SCNAudioSource -load
+member SCNAudioSource -loops
+member SCNAudioSource -rate
+member SCNAudioSource -revenantBufferForSpatial:
+member SCNAudioSource -revenantData
+member SCNAudioSource -revenantDuration
+member SCNAudioSource -revenantURL
+member SCNAudioSource -reverbBlend
+member SCNAudioSource -setLoops:
+member SCNAudioSource -setPositional:
+member SCNAudioSource -setRate:
+member SCNAudioSource -setReverbBlend:
+member SCNAudioSource -setShouldStream:
+member SCNAudioSource -setVolume:
+member SCNAudioSource -shouldStream
+member SCNAudioSource -volume
 member SCNCamera +camera
 member SCNCamera +supportsSecureCoding
 member SCNCamera -copyWithZone:
@@ -26279,6 +26390,9 @@ member SCNGeometrySource +geometrySourceWithData:semantic:vectorCount:floatCompo
 member SCNGeometrySource +supportsSecureCoding
 member SCNGeometrySource -encodeWithCoder:
 member SCNGeometrySource -initWithCoder:
+member SCNHitTestResult +revenantResultWithNode:geometryIndex:faceIndex:localCoordinates:worldCoordinates:localNormal:worldNormal:modelTransform:textureCoordinates:
+member SCNHitTestResult -boneNode
+member SCNHitTestResult -textureCoordinatesWithMappingChannel:
 member SCNLight +light
 member SCNLight +supportsSecureCoding
 member SCNLight -copyWithZone:
@@ -26314,14 +26428,17 @@ member SCNMaterialProperty -revenantModelValueForKeyPath:
 member SCNMaterialProperty -revenantPresentedContentsTransform
 member SCNMaterialProperty -setContents:
 member SCNNode +node
+member SCNNode +nodeWithGeometry:
 member SCNNode +supportsSecureCoding
 member SCNNode -actionForKey:
 member SCNNode -actionKeys
 member SCNNode -addAnimation:forKey:
+member SCNNode -addAudioPlayer:
 member SCNNode -addChildNode:
 member SCNNode -addParticleSystem:
 member SCNNode -animationForKey:
 member SCNNode -animationKeys
+member SCNNode -audioPlayers
 member SCNNode -childNodeWithName:recursively:
 member SCNNode -childNodes
 member SCNNode -clone
@@ -26342,8 +26459,10 @@ member SCNNode -presentationNode
 member SCNNode -removeActionForKey:
 member SCNNode -removeAllActions
 member SCNNode -removeAllAnimations
+member SCNNode -removeAllAudioPlayers
 member SCNNode -removeAllParticleSystems
 member SCNNode -removeAnimationForKey:
+member SCNNode -removeAudioPlayer:
 member SCNNode -removeFromParentNode
 member SCNNode -removeParticleSystem:
 member SCNNode -resumeAnimationForKey:
@@ -26352,7 +26471,9 @@ member SCNNode -revenantModelValueForKeyPath:
 member SCNNode -revenantPresentedOpacity
 member SCNNode -revenantPresentedTransform
 member SCNNode -revenantPresentedWorldTransform
+member SCNNode -revenantRemoveFinishedAudioPlayer:
 member SCNNode -revenantStepActionsAtTime:
+member SCNNode -revenantUpdateAudioAtTime:
 member SCNNode -rotation
 member SCNNode -runAction:
 member SCNNode -runAction:completionHandler:
@@ -26406,8 +26527,13 @@ member SCNPhysicsWorld -updateCollisionPairs
 member SCNPlane +planeWithWidth:height:
 member SCNPlane +supportsSecureCoding
 member SCNPlane -encodeWithCoder:
+member SCNPlane -geometryElements
+member SCNPlane -geometrySources
+member SCNPlane -geometrySourcesForSemantic:
 member SCNPlane -init
 member SCNPlane -initWithCoder:
+member SCNPlane -revenantElement
+member SCNPlane -revenantSources
 member SCNScene +scene
 member SCNScene +sceneWithURL:options:error:
 member SCNScene +supportsSecureCoding
@@ -26420,41 +26546,77 @@ member SCNScene -lightingEnvironment
 member SCNScene -revenantSourceURL
 member SCNScene -setAttribute:forKey:
 member SCNView +layerClass
+member SCNView -audioEngine
+member SCNView -audioEnvironmentNode
+member SCNView -audioListener
+member SCNView -autoenablesDefaultLighting
+member SCNView -colorPixelFormat
 member SCNView -commandQueue
 member SCNView -context
 member SCNView -currentRenderCommandEncoder
+member SCNView -currentRenderPassDescriptor
+member SCNView -currentViewport
 member SCNView -dealloc
+member SCNView -debugOptions
 member SCNView -delegate
+member SCNView -depthPixelFormat
 member SCNView -device
 member SCNView -didMoveToWindow
 member SCNView -eaglContext
+member SCNView -hitTest:options:
 member SCNView -initWithCoder:
 member SCNView -initWithFrame:
 member SCNView -initWithFrame:options:
 member SCNView -isJitteringEnabled
+member SCNView -isNodeInsideFrustum:withPointOfView:
+member SCNView -isPlaying
+member SCNView -isTemporalAntialiasingEnabled
 member SCNView -layoutSubviews
+member SCNView -loops
+member SCNView -nodesInsideFrustumWithPointOfView:
+member SCNView -overlaySKScene
 member SCNView -pointOfView
 member SCNView -preferredFramesPerSecond
+member SCNView -prepareObject:shouldAbortBlock:
+member SCNView -prepareObjects:withCompletionHandler:
+member SCNView -presentScene:withTransition:incomingPointOfView:completionHandler:
 member SCNView -projectPoint:
 member SCNView -renderingAPI
 member SCNView -revenantClear
 member SCNView -revenantDeleteFramebuffer
 member SCNView -revenantDisplayLinkFired:
 member SCNView -revenantDrawFrame
+member SCNView -revenantDrawJitteredScene:pointOfView:width:height:time:framebuffer:
 member SCNView -revenantPrepareDrawable
-member SCNView -revenantRenderAtTime:width:height:
+member SCNView -revenantRenderAtTime:width:height:framebuffer:
 member SCNView -revenantSetContext:
 member SCNView -revenantSetUp
 member SCNView -revenantUpdateDisplayLink
+member SCNView -revenantUpdateStatisticsAtTime:
 member SCNView -scene
+member SCNView -sceneTime
+member SCNView -setAudioListener:
+member SCNView -setAutoenablesDefaultLighting:
+member SCNView -setDebugOptions:
 member SCNView -setDelegate:
 member SCNView -setEaglContext:
 member SCNView -setJitteringEnabled:
+member SCNView -setLoops:
+member SCNView -setOverlaySKScene:
+member SCNView -setPlaying:
 member SCNView -setPointOfView:
 member SCNView -setPreferredFramesPerSecond:
 member SCNView -setScene:
+member SCNView -setSceneTime:
+member SCNView -setShowsStatistics:
+member SCNView -setTemporalAntialiasingEnabled:
+member SCNView -setUsesReverseZ:
+member SCNView -showsStatistics
 member SCNView -snapshot
+member SCNView -stencilPixelFormat
 member SCNView -unprojectPoint:
+member SCNView -usesReverseZ
+member SCNView -workingColorSpace
 member SFAuthenticationSession -cancel
 member SFAuthenticationSession -init
 member SFAuthenticationSession -initWithURL:callbackURLScheme:completionHandler:
@@ -32713,6 +32875,7 @@ protocol RevenantVoiceServicesListing
 protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
 protocol RevenantWebView
+protocol SCNSceneRenderer
 protocol SCNSceneRendererDelegate
 protocol SFSafariViewControllerDelegate
 protocol SKSceneDelegate
@@ -33378,6 +33541,14 @@ protocol_member PKPushRegistryDelegate -pushRegistry:didInvalidatePushTokenForTy
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:
 protocol_member PKPushRegistryDelegate -pushRegistry:didUpdatePushCredentials:forType:
+protocol_member SCNSceneRenderer -hitTest:options:
+protocol_member SCNSceneRenderer -isNodeInsideFrustum:withPointOfView:
+protocol_member SCNSceneRenderer -nodesInsideFrustumWithPointOfView:
+protocol_member SCNSceneRenderer -prepareObject:shouldAbortBlock:
+protocol_member SCNSceneRenderer -prepareObjects:withCompletionHandler:
+protocol_member SCNSceneRenderer -presentScene:withTransition:incomingPointOfView:completionHandler:
+protocol_member SCNSceneRenderer -projectPoint:
+protocol_member SCNSceneRenderer -unprojectPoint:
 protocol_member SCNSceneRendererDelegate -renderer:didApplyAnimationsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didApplyConstraintsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didRenderScene:atTime:
