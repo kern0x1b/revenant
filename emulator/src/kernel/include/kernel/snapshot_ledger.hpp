@@ -213,29 +213,14 @@ inline constexpr std::array<std::string_view, 201> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 107> open_members {
+inline constexpr std::array<std::string_view, 89> open_members {
     "kss.active_springboard_alert_items",
-    "kss.ambient_light_sensor",
-    "kss.apple_key_store_available",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
     "kss.application_scene_context_owners",
     "kss.application_scene_transforms",
     "kss.baseband_device_state",
-    "kss.darwin_abi",
-    "kss.darwin_kernel_identity",
-    "kss.device_board_config",
-    "kss.device_cpu_type",
-    "kss.device_hardware_model",
-    "kss.device_model_number",
-    "kss.device_product_type",
-    "kss.device_ram_bytes",
-    "kss.display_geometry",
     "kss.effaceable_storage_available",
-    "kss.effaceable_storage_blob",
-    "kss.external_framebuffer",
-    "kss.framebuffer_service_class",
-    "kss.graphics_services_capability_memory",
     "kss.hfs_named_attribute_overrides",
     "kss.hid_event_queue",
     "kss.iokit_camera_accelerator_connections",
@@ -252,7 +237,6 @@ inline constexpr std::array<std::string_view, 107> open_members {
     "kss.mach_port_objects",
     "kss.mach_port_set_links_by_member",
     "kss.mach_port_set_preposts",
-    "kss.native_hid_touch_events",
     "kss.pending_application_event_launches",
     "kss.pending_bootstrap_retries",
     "kss.pending_foreground_transition_input_completion",
@@ -264,8 +248,6 @@ inline constexpr std::array<std::string_view, 107> open_members {
     "kss.surface_transport_port_leases",
     "kss.task_special_ports",
     "kss.task_thread_port_objects",
-    "kss.user_interface_geometry",
-    "kss.virtual_effaceable_storage_available",
     "ck.dyld_shared_cache_",
     "ck.bpf_descriptors_",
     "ck.kernel_control_endpoints_",
@@ -323,8 +305,26 @@ inline constexpr std::array<std::string_view, 107> open_members {
     "mem.file_page_cache_",
 };
 
-inline constexpr std::array<std::string_view, 1> wired_members {
+inline constexpr std::array<std::string_view, 19> wired_members {
     "hid.state_",
+    "kss.ambient_light_sensor",
+    "kss.apple_key_store_available",
+    "kss.darwin_abi",
+    "kss.darwin_kernel_identity",
+    "kss.device_board_config",
+    "kss.device_cpu_type",
+    "kss.device_hardware_model",
+    "kss.device_model_number",
+    "kss.device_product_type",
+    "kss.device_ram_bytes",
+    "kss.display_geometry",
+    "kss.effaceable_storage_blob",
+    "kss.external_framebuffer",
+    "kss.framebuffer_service_class",
+    "kss.graphics_services_capability_memory",
+    "kss.native_hid_touch_events",
+    "kss.user_interface_geometry",
+    "kss.virtual_effaceable_storage_available",
 };
 
 inline constexpr std::array<std::string_view, 28> refused_members {
