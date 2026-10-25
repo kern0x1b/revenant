@@ -99,7 +99,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
@@ -110,7 +110,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Build or fetch the package
         env:

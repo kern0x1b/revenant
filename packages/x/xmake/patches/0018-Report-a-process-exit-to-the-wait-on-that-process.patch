@@ -1,0 +1,133 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 12:00:00 +0200
+Subject: [PATCH] Report a process exit to the wait on that process
+
+The posix process poller reaped with waitpid(-1), so an exit that no wait was
+pending on was taken from the system and dropped: a process:wait that started
+after such an exit read its child as still running. The poller now polls each
+registered process with waitpid(pid), under its lock, so an exit stays in the
+system until the wait on that process takes it. The process lists are changed
+under the same lock, and an exit kept for a process whose wait was removed is
+kept for the next wait on that pid.
+
+Self-review: crutches left
+
+Changes-build-output: no
+
+---
+  src/tbox/platform/posix/poller_process.c | 50 ++++++++++++++++++++++++++------
+  1 file changed, 41 insertions(+), 9 deletions(-)
+
+diff --git a/core/src/tbox/tbox/src/tbox/platform/posix/poller_process.c b/core/src/tbox/tbox/src/tbox/platform/posix/poller_process.c
+index 40b512b..1676f9f 100644
+--- a/core/src/tbox/tbox/src/tbox/platform/posix/poller_process.c
++++ b/core/src/tbox/tbox/src/tbox/platform/posix/poller_process.c
+@@ -127,19 +127,19 @@ static tb_int_t tb_poller_process_loop(tb_cpointer_t priv)
+         // interrupted? continue to wait
+         tb_check_continue(wait != 0);
+ 
+-        tb_int_t  result = -1;
+         tb_bool_t has_exited = tb_false;
+-        do
++        tb_spinlock_enter(&poller->lock);
++        tb_for_all (tb_hash_map_item_ref_t, item, poller->processes_data)
+         {
+-            // poll processes
++            tb_int_t pid = (tb_int_t)(tb_long_t)item->name;
+             tb_int_t status = -1;
+-            result = waitpid(-1, &status, WNOHANG | WUNTRACED);
++            tb_int_t result = waitpid(pid, &status, WNOHANG | WUNTRACED);
+ 
+             // trace
+             tb_trace_d("process: finished: %d, status: %d", result, status);
+ 
+             // has exited process?
+-            if (result != 0 && result != -1)
++            if (result == pid)
+             {
+                 /* get status, only get 8bits retval
+                  *
+@@ -153,13 +153,11 @@ static tb_int_t tb_poller_process_loop(tb_cpointer_t priv)
+                 object_event.pid = result;
+ 
+                 // save the process status
+-                tb_spinlock_enter(&poller->lock);
+                 tb_vector_insert_tail(poller->processes_status, &object_event);
+                 has_exited = tb_true;
+-                tb_spinlock_leave(&poller->lock);
+             }
+-
+-        } while (result != 0 && result != -1);
++        }
++        tb_spinlock_leave(&poller->lock);
+ 
+         // has exited child processes? notify the main poller to poll them
+         if (has_exited)
+@@ -337,7 +335,24 @@ static tb_bool_t tb_poller_process_insert(tb_poller_process_ref_t self, tb_proce
+     tb_poller_processes_data_t procdata;
+     procdata.process = process;
+     procdata.priv    = priv;
++    tb_spinlock_enter(&poller->lock);
+     tb_hash_map_insert(poller->processes_data, tb_i2p(pid), &procdata);
++    tb_spinlock_leave(&poller->lock);
++
++    tb_bool_t kept = tb_false;
++    tb_spinlock_enter(&poller->lock);
++    tb_for_all (tb_poller_processes_status_t*, object_event, poller->processes_status)
++    {
++        if (object_event->pid == pid)
++        {
++            kept = tb_true;
++            break;
++        }
++    }
++    tb_spinlock_leave(&poller->lock);
++    if (kept && poller->main_poller && poller->main_poller->spak)
++        poller->main_poller->spak(poller->main_poller);
++
+     return tb_true;
+ }
+ static tb_bool_t tb_poller_process_modify(tb_poller_process_ref_t self, tb_process_ref_t process, tb_cpointer_t priv)
+@@ -354,6 +369,7 @@ static tb_bool_t tb_poller_process_modify(tb_poller_process_ref_t self, tb_proce
+     tb_trace_d("process: modify pid: %d with priv: %p", pid, priv);
+ 
+     // modify the user private data of this process
++    tb_spinlock_enter(&poller->lock);
+     if (tb_hash_map_find(poller->processes_data, tb_i2p(pid)) != tb_iterator_tail(poller->processes_data))
+     {
+         tb_poller_processes_data_t procdata;
+@@ -361,6 +377,7 @@ static tb_bool_t tb_poller_process_modify(tb_poller_process_ref_t self, tb_proce
+         procdata.priv    = priv;
+         tb_hash_map_insert(poller->processes_data, tb_i2p(pid), &procdata);
+     }
++    tb_spinlock_leave(&poller->lock);
+     return tb_true;
+ }
+ static tb_bool_t tb_poller_process_remove(tb_poller_process_ref_t self, tb_process_ref_t process)
+@@ -377,7 +394,9 @@ static tb_bool_t tb_poller_process_remove(tb_poller_process_ref_t self, tb_proce
+     tb_trace_d("process: remove pid: %d", pid);
+ 
+     // remove this process and the user private data
++    tb_spinlock_enter(&poller->lock);
+     tb_hash_map_remove(poller->processes_data, tb_i2p(pid));
++    tb_spinlock_leave(&poller->lock);
+     return tb_true;
+ }
+ static tb_bool_t tb_poller_process_wait_prepare(tb_poller_process_ref_t self)
+@@ -432,6 +451,12 @@ static tb_long_t tb_poller_process_wait_poll(tb_poller_process_ref_t self, tb_po
+             func((tb_poller_ref_t)poller->main_poller, &object, object_event->status, proc_data->priv);
+             wait++;
+         }
++        else
++        {
++            tb_spinlock_enter(&poller->lock);
++            tb_vector_insert_tail(poller->processes_status, object_event);
++            tb_spinlock_leave(&poller->lock);
++        }
+     }
+ 
+     // trace
+-- 
+2.54.0 (Apple Git-157)
+

@@ -91,6 +91,8 @@ public:
     [[nodiscard]] HostSocketResult shutdown(std::uint32_t how);
     [[nodiscard]] bool readable() const;
     [[nodiscard]] bool writable() const;
+    [[nodiscard]] bool loopback_for(
+        std::span<const std::byte> darwin_address = { }) const;
 
     [[nodiscard]] HostNetworkPolicy policy() const { return policy_; }
     [[nodiscard]] std::uint32_t darwin_family() const { return darwin_family_; }
@@ -114,6 +116,7 @@ private:
     std::uint32_t darwin_type_ { };
     std::atomic<StreamState> stream_state_ { StreamState::Initial };
     std::optional<std::vector<std::byte>> presented_peer_address_;
+    mutable std::optional<bool> connected_peer_loopback_;
     bool presents_virtual_local_ipv4_address_ { };
     bool receive_destination_address_ { };
     bool receive_interface_ { };

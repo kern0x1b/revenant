@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "RevenantDimension.h"
+#import "../revenant_alias.h"
 
 static Class revenant_dimension_kind(NSUnit *unit)
 {
@@ -11,7 +12,12 @@ static Class revenant_dimension_kind(NSUnit *unit)
     return kind;
 }
 
-@implementation NSMeasurement
+REVENANT_ALIAS_STATE(NSMeasurement, NSObject,
+    NSUnit *_unit;
+    double _doubleValue;
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSMeasurement) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {

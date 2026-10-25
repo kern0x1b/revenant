@@ -35,6 +35,9 @@ Not covered: an on_test that runs xmake in a child process sees the
 active version, the pin lives only in the installing process.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  tests/actions/addon/test.lua                  | 100 +++++++++++-------
  xmake/core/package/addon.lua                  |   6 +-

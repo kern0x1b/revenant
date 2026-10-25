@@ -292,6 +292,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 }
             }
         }
+        hfs_metadata_.invalidate_xattrs();
         if (error) {
             bsd_error(cpu, bsd_support::darwin_filesystem_error(error));
             return;
@@ -534,6 +535,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 }
                 std::ofstream create { host,
                     std::ios::binary | std::ios::trunc };
+                hfs_metadata_.invalidate_xattrs();
                 if (!create) {
                     bsd_error(cpu, darwin::error::io);
                     return;
@@ -770,6 +772,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 shared_state_->filesystem_mutex
             };
             std::filesystem::create_symlink(*target, host, error);
+            hfs_metadata_.invalidate_xattrs();
         }
         if (error) {
             bsd_error(cpu, bsd_support::darwin_filesystem_error(error));
@@ -903,6 +906,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             }
         }
         if (renamed) {
+            hfs_metadata_.invalidate_xattrs();
             if (source_is_directory) {
                 shared_state_->guest_file_generation_registry
                     ->publish_subtree_rename(source, destination);
@@ -958,7 +962,9 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 return;
             }
             error.clear();
-            if (!std::filesystem::create_directory(host, error)) {
+            const auto created = std::filesystem::create_directory(host, error);
+            hfs_metadata_.invalidate_xattrs();
+            if (!created) {
                 bsd_error(
                     cpu, error == std::errc::permission_denied ? 13U : 5U);
                 return;

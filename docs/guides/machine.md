@@ -20,7 +20,8 @@ Everything under `~/.revenant` that is not `cache` is data, and no clean touches
 | --- | --- | --- |
 | `dyld` | `toolchain/modules/apple/firmware.lua` | the shared caches and libraries of each iOS release, taken out of decrypted firmware |
 | `firmware` | `toolchain/modules/apple/firmware.lua` and the `firmware` plugin | the firmware catalog, the root file systems, a download that resumes |
-| `emulator` | the emulator's image commands | golden images that took a first boot to make |
+| `emulator` | the emulator's image commands | golden images that took a first boot to make; `REVENANT_EMULATOR_ROOT` names another folder for all of it |
+| `emulator-slots` | `toolchain/modules/emulator.lua`, on every emulator start | the lock files that bound how many emulators run at once on this machine; removing a lock file that is held lets a second emulator start, so it is not a cache |
 | `devices` | `toolchain/modules/device.lua` | which run holds which device |
 | `cache-index` | `toolchain/tools/cache_index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
 | `corpus` | the corpus tools | data read from applications and devices; `REVENANT_CORPUS_ROOT` names another place |
@@ -87,11 +88,46 @@ changes exactly when those files do:
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
+| `dynarmic` | `recipe` | the recipe; its patches are in the build hash, see below |
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
 package's key and its digest configs; run it before and after a change to see what the change rebuilds.
+
+The build hash has three more terms, one for the xmake that builds the packages, one for the addons a build runs
+under, and one for each package's own patches.
+
+The first covers revenant's xmake patches. Each patch in `packages/x/xmake/patches` declares in its header whether it
+can change what a build produces, with `Changes-build-output: yes` or `no`; `xmakew` takes the xmake
+commit and the patches that say `yes` and writes the digest to `share/xmake/revenant-patch-set` beside the binary,
+and patch `0020` folds it into every variant of the hash. A patch marked `yes` moves every package's key once, so an
+unmarked patch moves none. A binary without the file refuses to compute a build hash. No patch is marked now: the
+addon patches `0001` to `0003` and `0005` to `0007` change which addon version a build loads, which the second term
+keys, and `0015` publishes an install under its generation path, which is the store's design and the same for every
+build with a key; the others change locks, job counts, warnings, process waits, manifest checks, exports, fetches, the
+Lua parser or the keys, and no build output.
+
+The second term, from patch `0022`, covers the addons a build runs under. A package's recipes run the code of the addon
+version the project pins: the installed addons which the process pins are in the hash, by name and version, for
+example `revenant@v0.8.10` for a project that locks that release. An addon from a folder of the project, as this
+repository's `xmake.lua` declares revenant (`add_addons("revenant", {sourcedir = "toolchain"})`), has no version and
+adds nothing, and a process which pins nothing keeps its keys. Two versions of one addon therefore build two installs.
+A project which locks an installed addon moves its keys once; a normal build of this repository loads the folder and
+moves none.
+
+The third term covers each package's own patches: the sha256 of every patch the package applies at its version, in
+order, from patch `0021`. A package with patches moves when one changes, and a package without patches does not.
+Before this term, two recipes at one version
+with different patches shared one install, and the second project got the first one's patched files. The source
+directory was never the cause: a git checkout is reset and its patches are applied again for each install.
+
+At the latest version the packages with patches are `boringssl`, `combine`, `dynarmic`, `farmdec`, `ffmpeg`, `ldid`,
+`openssl`, `rellume`, `swiftshader`, `webkit` and `xmake`. `iphoneos-sdk`'s patch applies to 16.4 only. `llvm`, `swift`,
+`swift-runtime` and `libcxx` declare no `add_patches`, so the term leaves their keys alone.
+`toolchain/tests/addon/patch_set_test.lua` checks the digest against the recipe's marked patches, the moves and the
+refusal, the per-package term, including a patch declared without a sha256, and the addon term: a pinned version moves
+the key, an installed addon which nothing pins and a folder of the project do not.
 
 Two requests for one package build it once: xmake locks each package's cache folder while it fetches or
 installs, and checks again after the lock whether the package is installed (patch `0009` does the same for a
@@ -109,5 +145,20 @@ than returning old files. A consumer that keeps a generation's path, such as a C
 once the grace has passed after two installs of the package. The hour is the longest CI run on main, 48 minutes, with
 margin; a read longer than the grace is not protected. Export copies the files the link names (patch `0016`), and
 import publishes them the same way, so an exported package imports whole.
+
+The emulator's golden images under `golden.noindex` follow the same design (`toolchain/modules/generations.lua`). That
+module is a copy of the store's design in its own words, not shared code: the store's code is methods of xmake's package
+instances, which a toolchain module cannot call, so the two are kept to one design by the tests rather than by one
+implementation. Two things differ on purpose. A golden image's build lock `<name>.build.lock` goes with its name once
+nothing of the name is left; a session that was blocked on the old lock file when it went can build the same golden
+image once more, and since each build holds its generation's lock from its start to its publish, a sweep does not remove
+that build's generation, and the publish stays atomic, so no reader sees a partial image. A real golden folder from
+before generations keeps its reader lock, `<name>.lock`, which moves aside with the folder, so a reader that holds it
+keeps it.
+
+Two crutches are left in the store generation work. A process that dies between the fetch that validates a staged
+install and the fetch after its publish leaves the generation path in the detect cache until the next install of that
+package (patch `0017`). The store race test (`toolchain/tests/addon/store_race_test.lua`) reads the include and library
+folders only, so the bindir, rpath and pkgconfig paths of a package have no test.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).

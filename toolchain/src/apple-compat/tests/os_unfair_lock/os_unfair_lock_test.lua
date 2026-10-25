@@ -11,13 +11,16 @@ end
 
 function main()
     local dir = path.absolute(os.scriptdir())
-    local backports = path.absolute(path.join(dir, "..", ".."))
-    local source = path.join(backports, "src", "Dispatch", "os_unfair_lock.c")
+    local compat = path.absolute(path.join(dir, "..", ".."))
+    local sources = {}
+    for _, name in ipairs({"lock", "trylock", "unlock", "assert_owner", "assert_not_owner"}) do
+        table.insert(sources, path.join(compat, "src", "os_unfair_lock_" .. name .. ".c"))
+    end
     local test = path.join(dir, "os_unfair_lock_test.c")
-    local out = workspace.run("backports-dispatch")
+    local out = workspace.run("apple-compat-dispatch")
     local apple, ours = path.join(out, "apple"), path.join(out, "ours")
     os.vrunv("xcrun", {"clang", "-O1", "-o", apple, test, "-lpthread"})
-    os.vrunv("xcrun", {"clang", "-O1", "-o", ours, test, source, "-lpthread"})
+    os.vrunv("xcrun", table.join({"clang", "-O1", "-I", path.join(compat, "include"), "-o", ours, test}, sources, {"-lpthread"}))
     local expected = os.iorunv(apple)
     local actual = os.iorunv(ours)
     assert(actual == expected, "os_unfair_lock differs from the host's:\n" .. expected .. "---\n" .. actual)

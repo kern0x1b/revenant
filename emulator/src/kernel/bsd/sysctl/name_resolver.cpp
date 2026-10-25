@@ -58,6 +58,8 @@ namespace {
             readable | string_type, "A" },
         NamedObject { "hw.model", control_hardware, hardware_model,
             readable | string_type, "A" },
+        NamedObject { "vm.loadavg", control_vm, vm_loadavg,
+            readable | structure_type, "S,loadavg" },
         NamedObject { "hw.ncpu", control_hardware, 3 },
         NamedObject { "hw.byteorder", control_hardware, 4 },
         NamedObject { "hw.physmem", control_hardware, 5 },

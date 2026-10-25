@@ -49,7 +49,7 @@ Inside revenant, `./xmakew` stands for `xmake`. The port's `xmake.lua` includes 
 Run these from the port's directory, after configuring it (`xmake f -p iphoneos -a armv7 -y`), because `install` copies packages from the store:
 
 - `xmake emulate install`: the port's packages into the emulated image, and registers its apps with SpringBoard.
-- `xmake emulate run COMMAND`: runs COMMAND in a fresh clone of the image. The verdict is pass, fail, crash, timeout or boot-blocked. Daemons (`@addon/revenant/daemon`, no `UIApplicationMain`) are what `run` is for.
+- `xmake emulate run COMMAND`: runs COMMAND in a fresh clone of the image. The verdict is pass, fail, crash, timeout or boot-blocked. Daemons (`@addon/revenant/daemon`, no `UIApplicationMain`) are what `run` is for. The run boots without SpringBoard (its LaunchDaemon plist is removed from the clone) and with the default 128 MB JIT cache per process; `launch` keeps both. The measurements are in `docs/reference/emulator/performance.md`.
 - `xmake emulate launch BUNDLE-ID [tap X Y | drag X1 Y1 X2 Y2 | home | until-exit] ...`: installs, registers and launches the app through SpringBoard, prints its stdout and stderr, and writes `app-N.png` snapshots: one once the app is frontmost and settled, one after each step.
 - `xmake emulate debug COMMAND`: COMMAND as the first guest process, under the debugger.
 - `xmake emulate log [TEXT]`: what the last run left, filtered.

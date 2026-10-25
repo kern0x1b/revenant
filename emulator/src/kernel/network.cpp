@@ -70,6 +70,8 @@ namespace kernel_network {
             result.ipv6_address = interface.ipv6_address;
             result.ipv6_netmask = interface.ipv6_netmask;
         }
+        result.counters = interface.counters;
+        result.up_time_nanoseconds = interface.up_time_nanoseconds;
         return result;
     }
 }
@@ -187,6 +189,9 @@ bool CompatibilityKernel::receive_socket_message(
         const auto received = udp->second->receive(receive_capacity);
         if (!received)
             return false;
+        count_interface_traffic(
+            darwin::network::darwin_address_is_loopback(received->source_address),
+            false, received->bytes.size(), false);
 
         std::size_t source_offset = 0;
         for (const auto& iovec : iovecs) {
@@ -284,6 +289,9 @@ bool CompatibilityKernel::receive_socket_message(
         const auto received = host->second->receive(receive_capacity);
         if (received.status == HostSocketStatus::WouldBlock)
             return false;
+        count_interface_traffic(host->second->loopback_for(received.address),
+            false, received.transferred,
+            received.status == HostSocketStatus::Error);
         if (received.status == HostSocketStatus::Error) {
             bsd_error(cpu, received.darwin_error);
             return true;
@@ -632,6 +640,9 @@ bool CompatibilityKernel::receive_socket_bytes(Cpu& cpu, std::uint32_t fd,
         const auto received = host->second->receive(size);
         if (received.status == HostSocketStatus::WouldBlock)
             return false;
+        count_interface_traffic(host->second->loopback_for(received.address),
+            false, received.transferred,
+            received.status == HostSocketStatus::Error);
         if (received.status == HostSocketStatus::Error) {
             bsd_error(cpu, received.darwin_error);
             return true;
@@ -654,6 +665,9 @@ bool CompatibilityKernel::receive_socket_bytes(Cpu& cpu, std::uint32_t fd,
         const auto received = udp->second->receive(size);
         if (!received)
             return false;
+        count_interface_traffic(
+            darwin::network::darwin_address_is_loopback(received->source_address),
+            false, received->bytes.size(), false);
         if (!memory_.copy_in(address, received->bytes) ||
             !copy_socket_address(source_address, source_length_address,
                 received->source_address)) {

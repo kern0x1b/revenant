@@ -309,6 +309,78 @@ std::vector<std::byte> make_route_interface_list(
     return result;
 }
 
+std::vector<std::byte> make_ifmibdata(const InterfaceSnapshot& interface)
+{
+    constexpr std::size_t name_offset = 0;
+    constexpr std::size_t flags_offset = 20;
+    constexpr std::size_t data_offset = 52;
+    constexpr std::size_t if_data_type_offset = data_offset;
+    constexpr std::size_t if_data_addrlen_offset = data_offset + 3;
+    constexpr std::size_t if_data_hdrlen_offset = data_offset + 4;
+    constexpr std::size_t if_data_mtu_offset = data_offset + 8;
+    constexpr std::size_t if_data_baudrate_offset = data_offset + 16;
+    constexpr std::size_t name_capacity = 15;
+    constexpr std::size_t ethernet_header_length = 14;
+
+    std::vector<std::byte> record(ifmibdata_size);
+    const auto name_length = std::min(interface.name.size(), name_capacity);
+    std::transform(interface.name.begin(),
+        interface.name.begin() + static_cast<std::ptrdiff_t>(name_length),
+        record.begin() + static_cast<std::ptrdiff_t>(name_offset),
+        [](char character) { return static_cast<std::byte>(character); });
+    put32(record, flags_offset, interface.flags);
+    const auto ethernet = interface.type == interface_type_ethernet;
+    record[if_data_type_offset] = static_cast<std::byte>(interface.type);
+    record[if_data_addrlen_offset] =
+        static_cast<std::byte>(std::min<std::size_t>(
+            interface.link_address_length, interface.link_address.size()));
+    record[if_data_hdrlen_offset] = static_cast<std::byte>(
+        ethernet ? ethernet_header_length : std::size_t { 0 });
+    put32(record, if_data_mtu_offset, interface.mtu);
+    const auto baudrate = ethernet ? std::uint64_t { ethernet_baudrate }
+                                   : std::uint64_t { 0 };
+    put32(record, if_data_baudrate_offset,
+        static_cast<std::uint32_t>(baudrate));
+    put32(record, if_data_baudrate_offset + 4U,
+        static_cast<std::uint32_t>(baudrate >> 32U));
+    const auto put64 = [&record](std::size_t offset, std::uint64_t value) {
+        put32(record, offset, static_cast<std::uint32_t>(value));
+        put32(record, offset + 4U, static_cast<std::uint32_t>(value >> 32U));
+    };
+    put64(data_offset + 24U, interface.counters.input_packets);
+    put64(data_offset + 32U, interface.counters.input_errors);
+    put64(data_offset + 40U, interface.counters.output_packets);
+    put64(data_offset + 48U, interface.counters.output_errors);
+    put64(data_offset + 64U, interface.counters.input_bytes);
+    put64(data_offset + 72U, interface.counters.output_bytes);
+    constexpr std::uint64_t nanoseconds_per_second = 1'000'000'000U;
+    put32(record, data_offset + 120U,
+        static_cast<std::uint32_t>(
+            interface.up_time_nanoseconds / nanoseconds_per_second));
+    put32(record, data_offset + 124U,
+        static_cast<std::uint32_t>(
+            (interface.up_time_nanoseconds % nanoseconds_per_second) / 1000U));
+    return record;
+}
+
+bool darwin_address_is_loopback(std::span<const std::byte> address)
+{
+    if (address.size() < 2)
+        return false;
+    const auto family = std::to_integer<std::uint32_t>(address[1]);
+    if (family == address_family_inet && address.size() >= 8) {
+        return std::to_integer<std::uint8_t>(address[4]) == 127;
+    }
+    if (family == address_family_inet6 && address.size() >= 24) {
+        for (std::size_t index = 8; index < 23; ++index) {
+            if (address[index] != std::byte { 0 })
+                return false;
+        }
+        return address[23] == std::byte { 1 };
+    }
+    return false;
+}
+
 std::vector<std::byte> make_network_event_data(
     const InterfaceSnapshot& interface)
 {

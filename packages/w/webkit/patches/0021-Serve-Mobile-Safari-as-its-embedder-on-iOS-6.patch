@@ -753,7 +753,7 @@ index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942
      [[[webView() _UIKitDelegateForwarder] asyncForwarder] webViewDidEndOverflowScroll:webView()];
  }
  
-@@ -279,10 +390,19 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+@@ -279,10 +390,18 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
          m_formNotificationSuppressions = 0;
  }
  
@@ -765,7 +765,6 @@ index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942
 +    if (m_formNotificationSuppressions > 0)
 +        return;
 +
-+    //
 +    bool canBeTypedInto = is<WebCore::HTMLTextFormControlElement>(element)
 +        || is<WebCore::HTMLSelectElement>(element)
 +        || element.hasEditableStyle();
@@ -776,7 +775,7 @@ index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942
  }
  
  void WebChromeClientIOS::elementDidBlur(WebCore::Element& element)
-@@ -311,7 +431,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+@@ -311,7 +430,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
  
  void WebChromeClientIOS::didFlushCompositingLayers()
  {
@@ -788,7 +787,7 @@ index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942
  }
  
  bool WebChromeClientIOS::fetchCustomFixedPositionLayoutRect(IntRect& rect)
-@@ -332,6 +456,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+@@ -332,6 +455,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
  
  void WebChromeClientIOS::addOrUpdateScrollingLayer(Node* node, PlatformLayer* scrollingLayer, PlatformLayer* contentsLayer, const IntSize& scrollSize, bool allowHorizontalScrollbar, bool allowVerticalScrollbar)
  {
@@ -800,7 +799,7 @@ index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942
      DOMNode *domNode = kit(node);
  
      [[[webView() _UIKitDelegateForwarder] asyncForwarder] webView:webView() didCreateOrUpdateScrollingLayer:scrollingLayer withContentsLayer:contentsLayer scrollSize:[NSValue valueWithSize:scrollSize] forNode:domNode
-@@ -340,6 +469,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+@@ -340,6 +468,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
  
  void WebChromeClientIOS::removeScrollingLayer(Node* node, PlatformLayer* scrollingLayer, PlatformLayer* contentsLayer)
  {

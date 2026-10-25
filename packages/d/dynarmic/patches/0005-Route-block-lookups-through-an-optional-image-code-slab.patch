@@ -1,0 +1,125 @@
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index 9f3a125..d56d79f 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -833,6 +833,9 @@ struct Jit::Impl final {
+             native_code_slab = this->conf.native_code_slab;
+             native_code_slab_shared = true;
+         }
++        image_code_slab = this->conf.image_native_code_slab != nullptr
++                            ? this->conf.image_native_code_slab
++                            : native_code_slab;
+         if (this->conf.lookup_link) {
+             this->conf.lookup_link->store(
+                 reinterpret_cast<u64>(this),
+@@ -950,21 +953,22 @@ struct Jit::Impl final {
+             return PortableIREmitOutcome::EmitFailed;
+         }
+         NativeCodeSlab::BlockDescriptor existing;
+-        auto generation = native_code_slab->generation();
+-        if (native_code_slab->find_block(
++        auto* slab = SlabFor(block.Location().Value());
++        auto generation = slab->generation();
++        if (slab->find_block(
+                 block.Location().Value(), generation, existing)) {
+             return PortableIREmitOutcome::AlreadyPresent;
+         }
+ 
+-        if (native_code_slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
++        if (slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
+             recycle_native_slab = true;
+             invalidate_entire_cache = true;
+             PerformRequestedCacheInvalidation(HaltReason::CacheInvalidation);
+-            generation = native_code_slab->generation();
++            generation = slab->generation();
+         }
+         NativeCodeSlab::BlockDescriptor emitted;
+         try {
+-            native_code_slab->ensure_memory_committed(
++            slab->ensure_memory_committed(
+                 MINIMUM_REMAINING_CODESIZE);
+             emitted = EmitToSlab(block, generation);
+         } catch (...) {
+@@ -1133,6 +1137,13 @@ private:
+         return this_.GetCurrentBlock(this_.active_generation);
+     }
+ 
++    NativeCodeSlab* SlabFor(u64 location_descriptor) const {
++        const auto pc = A32::LocationDescriptor{IR::LocationDescriptor{location_descriptor}}.PC();
++        return pc >= conf.image_code_begin && pc < conf.image_code_end
++                 ? image_code_slab
++                 : native_code_slab;
++    }
++
+     IR::LocationDescriptor GetCurrentLocation() const {
+         return jit_state.GetLocationDescriptor();
+     }
+@@ -1150,7 +1161,7 @@ private:
+     }
+ 
+     NativeCodeSlab::BlockDescriptor EmitToSlab(IR::Block& block, std::uint64_t generation) {
+-        return native_code_slab->impl->emit(block, generation, jit_interface->is_executing);
++        return SlabFor(block.Location().Value())->impl->emit(block, generation, jit_interface->is_executing);
+     }
+ 
+     NativeCodeSlab::BlockDescriptor ReturnFromRunCodeDescriptor(std::uint64_t generation) const {
+@@ -1161,7 +1172,8 @@ private:
+     NativeCodeSlab::BlockDescriptor GetBasicBlock(
+         IR::LocationDescriptor descriptor, std::uint64_t generation) {
+         NativeCodeSlab::BlockDescriptor block;
+-        if (native_code_slab->find_block(
++        auto* slab = SlabFor(descriptor.Value());
++        if (slab->find_block(
+                 descriptor.Value(), generation, block)) {
+             if (jit_interface->is_executing && conf.native_code_block_lookup_callback != nullptr) {
+                 conf.native_code_block_lookup_callback(
+@@ -1206,7 +1218,7 @@ private:
+             }
+         }
+ 
+-        if (native_code_slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
++        if (slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
+             complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
+             request_capacity_recycle();
+             return ReturnFromRunCodeDescriptor(generation);
+@@ -1214,7 +1226,7 @@ private:
+ 
+         if (portable_artifact != nullptr) {
+             try {
+-                native_code_slab->ensure_memory_committed(
++                slab->ensure_memory_committed(
+                     MINIMUM_REMAINING_CODESIZE);
+             } catch (...) {
+                 complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
+@@ -1243,7 +1255,7 @@ private:
+             }
+         }
+ 
+-        native_code_slab->ensure_memory_committed(
++        slab->ensure_memory_committed(
+             MINIMUM_REMAINING_CODESIZE);
+         IR::Block ir_block = TranslateBlock(descriptor);
+         auto emitted = EmitToSlab(ir_block, generation);
+@@ -1317,6 +1329,7 @@ private:
+     A32JitState jit_state;
+     std::unique_ptr<NativeCodeSlab> owned_native_code_slab;
+     NativeCodeSlab* native_code_slab{};
++    NativeCodeSlab* image_code_slab{};
+     bool native_code_slab_shared{};
+     std::uint64_t active_generation{};
+ 
+diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
+index 0edb514..41a55b7 100644
+--- a/src/dynarmic/interface/A32/config.h
++++ b/src/dynarmic/interface/A32/config.h
+@@ -177,6 +177,10 @@ struct UserConfig {
+     // blocks while retaining executor-local state and dispatch tables.
+     NativeCodeSlab* native_code_slab = nullptr;
+ 
++    NativeCodeSlab* image_native_code_slab = nullptr;
++    std::uint32_t image_code_begin = 0;
++    std::uint32_t image_code_end = 0;
++
+     // Optional executor-owned indirection used by generated host callbacks.
+     // The link must remain alive for the Jit and contain a UserCallbacks*
+     // compatible with callbacks. Backends that do not support it continue to

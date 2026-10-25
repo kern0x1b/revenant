@@ -981,7 +981,7 @@ index 15c8b43bb3f5bbbbaf868aef29a5d43a163a0c92..3f242a055af98fecd7750c453abc202b
  ALLOW_DEPRECATED_DECLARATIONS_END
  #endif // PLATFORM(IOS_FAMILY)
  
-@@ -810,9 +874,15 @@ void ImageDecoderCG::setData(const FragmentedSharedBuffer& data, bool allDataRec
+@@ -810,9 +874,13 @@ void ImageDecoderCG::setData(const FragmentedSharedBuffer& data, bool allDataRec
      // We use FragmentedSharedBuffer's ability to wrap itself inside CFData to get around this, ensuring that ImageIO is
      // really looking at the FragmentedSharedBuffer.
      CGImageSourceUpdateData(m_nativeDecoder.get(), contiguousData->createCFData().get(), allDataReceived);
@@ -990,8 +990,6 @@ index 15c8b43bb3f5bbbbaf868aef29a5d43a163a0c92..3f242a055af98fecd7750c453abc202b
      m_uti = decodeUTI(contiguousData.get());
      m_isXBitmapImage = m_uti == "public.xbitmap-image"_s;
 +
-+    // JPEG does not support alpha transparency.
-+    // FIXME: Could return false for other non-transparent image formats.
 +    m_hasAlpha = !m_uti.isEmpty() && m_uti != "public.jpeg"_s;
 +
 +    clearCachedProperties();
