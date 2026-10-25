@@ -19,6 +19,7 @@ struct CompatibilityKernelSnapshot {
         const CompatibilityKernel& kernel);
     static std::vector<std::string> populated_memory(
         const AddressSpace& memory);
+    static void add_pending_timer(CompatibilityKernel& kernel);
 };
 
 namespace {
@@ -30,6 +31,11 @@ void note(std::vector<std::string>& out, std::string_view name, const T& value)
         out.emplace_back(name);
 }
 
+}
+
+void CompatibilityKernelSnapshot::add_pending_timer(CompatibilityKernel& kernel)
+{
+    kernel.pending_timers_.emplace(1U, PendingTimer { });
 }
 
 std::vector<std::string> CompatibilityKernelSnapshot::populated_members(

@@ -23,6 +23,7 @@ struct CompatibilityKernelSnapshot {
         const CompatibilityKernel& kernel);
     static std::vector<std::string> populated_memory(
         const AddressSpace& memory);
+    static void add_pending_timer(CompatibilityKernel& kernel);
 };
 
 }
@@ -186,6 +187,32 @@ constexpr std::array<std::string_view, 1> wired_members {
     "hid.state_",
 };
 
+constexpr std::array<std::string_view, 23> refused_members {
+    "ck.aio_completions_",
+    "ck.host_sockets_",
+    "ck.pending_baseband_writes_",
+    "ck.pending_flocks_",
+    "ck.pending_host_accepts_",
+    "ck.pending_host_connects_",
+    "ck.pending_host_writes_",
+    "ck.pending_io_poll_cache_",
+    "ck.pending_kevents_",
+    "ck.pending_mach_receives_",
+    "ck.pending_polls_",
+    "ck.pending_psynch_waits_",
+    "ck.pending_record_locks_",
+    "ck.pending_recvmsgs_",
+    "ck.pending_selects_",
+    "ck.pending_semaphore_waits_",
+    "ck.pending_signal_suspends_",
+    "ck.pending_socket_reads_",
+    "ck.pending_timers_",
+    "ck.pending_unix_accepts_",
+    "ck.pending_waits_",
+    "ck.scheduler_handoffs_",
+    "ck.scheduler_yields_",
+};
+
 int failures = 0;
 std::size_t checked = 0;
 
@@ -195,12 +222,62 @@ void check_accounted(const std::string& name)
     const std::string_view view { name };
     if (std::ranges::find(saved_members, view) != saved_members.end() ||
         std::ranges::find(open_members, view) != open_members.end() ||
-        std::ranges::find(wired_members, view) != wired_members.end()) {
+        std::ranges::find(wired_members, view) != wired_members.end() ||
+        std::ranges::find(refused_members, view) != refused_members.end()) {
         return;
     }
     std::cerr << "FAIL: populated member " << name
               << " has no serializer and no named refusal\n";
     ++failures;
+}
+
+struct Machine {
+    AddressSpace memory;
+    std::ostringstream log;
+    Output output { log };
+    CompatibilityKernel kernel { memory, output };
+};
+
+void check(bool condition, const std::string& what)
+{
+    if (condition)
+        return;
+    std::cerr << "FAIL: " << what << '\n';
+    ++failures;
+}
+
+bool save_refuses(CompatibilityKernel& kernel, const std::string& member)
+{
+    emulator::snapshot::Writer out;
+    try {
+        kernel.save_kernel_bookkeeping(out);
+    } catch (const emulator::snapshot::RefusedError& error) {
+        return std::string { error.what() }.find(member) != std::string::npos;
+    }
+    return false;
+}
+
+void check_live_continuation_is_refused()
+{
+    Machine populated;
+    CompatibilityKernelSnapshot::add_pending_timer(populated.kernel);
+    check(save_refuses(populated.kernel, "ck.pending_timers_"),
+        "a pending timer makes the bookkeeping save refuse by name");
+
+    Machine empty;
+    emulator::snapshot::Writer empty_out;
+    empty.kernel.save_kernel_bookkeeping(empty_out);
+    const auto bytes = empty_out.bytes();
+    CompatibilityKernelSnapshot::add_pending_timer(empty.kernel);
+    emulator::snapshot::Reader in { bytes };
+    bool rejected = false;
+    try {
+        empty.kernel.load_kernel_bookkeeping(in);
+    } catch (const emulator::snapshot::FormatError&) {
+        rejected = true;
+    }
+    check(rejected,
+        "loading bookkeeping into a kernel with a pending timer throws FormatError");
 }
 
 }
@@ -211,6 +288,7 @@ int main()
     std::ostringstream log;
     Output output { log };
     CompatibilityKernel kernel { memory, output };
+    check_live_continuation_is_refused();
     for (const auto& name :
         CompatibilityKernelSnapshot::populated_members(kernel)) {
         check_accounted(name);
@@ -222,7 +300,7 @@ int main()
         check_accounted(std::string { name });
     }
     if (failures != 0) {
-        std::cerr << failures << " populated members are unaccounted\n";
+        std::cerr << failures << " checks failed\n";
         return 1;
     }
     std::cout << "kernel snapshot probe checks passed: " << checked
@@ -230,6 +308,7 @@ int main()
               << emulator::booted_populated_members.size()
               << " booted members, ledger has "
               << saved_members.size() << " saved, " << open_members.size()
-              << " open and " << wired_members.size() << " wired entries\n";
+              << " open, " << wired_members.size() << " wired and "
+              << refused_members.size() << " refused entries\n";
     return 0;
 }
