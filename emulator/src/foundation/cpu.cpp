@@ -1227,6 +1227,7 @@ private:
         std::uint64_t translation_nanoseconds,
         const Dynarmic::IR::Block* optimized_block) noexcept
     {
+        performance_counters().record_translation_compile(translation_nanoseconds);
         maybe_check_host_yield(
             0U, translation_nanoseconds >=
                     static_cast<std::uint64_t>(

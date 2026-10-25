@@ -990,6 +990,8 @@ std::optional<PerformanceSnapshot> PerformanceCounters::end_display_window()
         diagnostic_work_baseline.scheduler_quantum_expirations);
     result.translation_blocks_shared_region =
         translation_blocks_shared_region_.load(std::memory_order_relaxed);
+    result.translation_compile_nanoseconds =
+        translation_compile_nanoseconds_.load(std::memory_order_relaxed);
     result.translation_blocks =
         diagnostic_delta(translation_blocks_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.translation_blocks);
@@ -1579,6 +1581,13 @@ void PerformanceCounters::record_scheduler_quantum_expiry()
 void PerformanceCounters::record_translation_block()
 {
     add_if_enabled(translation_blocks_, enabled_);
+}
+
+void PerformanceCounters::record_translation_compile(std::uint64_t nanoseconds)
+{
+    if (enabled_)
+        translation_compile_nanoseconds_.fetch_add(
+            nanoseconds, std::memory_order_relaxed);
 }
 
 void PerformanceCounters::record_translation_block_shared_region()
@@ -2862,6 +2871,8 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
         translation_blocks_.load(std::memory_order_relaxed);
     result.translation_blocks_shared_region =
         translation_blocks_shared_region_.load(std::memory_order_relaxed);
+    result.translation_compile_nanoseconds =
+        translation_compile_nanoseconds_.load(std::memory_order_relaxed);
     result.cpu_executions = cpu_executions_.load(std::memory_order_relaxed);
     result.cpu_ticks = cpu_ticks_.load(std::memory_order_relaxed);
     result.svc_calls = svc_calls_.load(std::memory_order_relaxed);
@@ -3338,6 +3349,7 @@ std::string format_performance_summary(const PerformanceSnapshot& snapshot)
          << " scheduler-quantum-expired="
          << snapshot.scheduler_quantum_expirations
          << " translation-blocks=" << snapshot.translation_blocks
+         << " translation-compile-ns=" << snapshot.translation_compile_nanoseconds
          << " translation-blocks-shared-region="
          << snapshot.translation_blocks_shared_region
          << " cpu-exec=" << snapshot.cpu_executions
