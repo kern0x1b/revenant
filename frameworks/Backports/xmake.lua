@@ -322,6 +322,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("missing_class_binding")
         add_tests("scenekit_audio")
         add_tests("scenekit_render")
+        add_tests("scenekit_members")
         add_tests("alias_public_name")
         add_tests("alias_system_class")
         on_test(function (target, opt)
@@ -405,6 +406,7 @@ local SCENEKIT_TESTS = {
     action_math = {"RevenantSCNActionMath.m"},
     clock = {"RevenantSCNClock.m"},
     jitter = {"RevenantSCNJitter.m"},
+    picking = {"RevenantSCNGeometry.m"},
     action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
     audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
 }

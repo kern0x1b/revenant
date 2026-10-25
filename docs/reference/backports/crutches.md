@@ -99,12 +99,14 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the emulator run above (positive and negative modes of the case) and host tests of the same paths (`audio_test.m`, `action_run_test.m`).
 - Removed by: a run on a real iPhone 4S with the mute switch set and other audio playing.
 
-### C17. SCNView adopts SCNSceneRenderer, and 21 of its 64 members raise
+### C17. SCNView adopts SCNSceneRenderer; two members raise, and three properties store their value without effect
 
-- Stands in for: the rest of SCNSceneRenderer on a GLES view. The four Telegram files (PremiumUI, PremiumCoin, PremiumStar, GiftAvatar) call none of these members; they use the protocol as a type, the delegate callbacks, and `isJitteringEnabled`, which is implemented natively (C20). The other members are Metal, SpriteKit, ray picking, or GPU features the GLES renderer does not have.
-- Gaps: `presentScene:withTransition:incomingPointOfView:completionHandler:`, `hitTest:options:`, `isNodeInsideFrustum:withPointOfView:`, `nodesInsideFrustumWithPointOfView:`, `prepareObject:shouldAbortBlock:`, `prepareObjects:withCompletionHandler:`, and the properties `loops`, `autoenablesDefaultLighting`, `temporalAntialiasingEnabled`, `showsStatistics`, `debugOptions`, `overlaySKScene`, `usesReverseZ`, `workingColorSpace`, `currentRenderPassDescriptor`, `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat`, `audioEnvironmentNode` and `currentViewport`. Each raises `NSInternalInconsistencyException` naming the member, so a call is loud and `respondsToSelector:` answers yes.
-- Measurement: the members test (`lowered_members_test.lua`) passes with the list regenerated; the library compiles against the armv7 iOS 6.0 SDK with no diagnostics for the stubs. The stubs are not run by any test.
-- Removed by: a native implementation of each member on the GLES renderer, or a decision to drop the adoption and the stubs.
+- Stands in for: the members of SCNSceneRenderer that have no GLES counterpart. Implemented natively: `hitTest:options:` (CPU ray picking against the triangles of the scene, with the search modes, back-face culling, bounding boxes, category masks and texture coordinates per channel), `isNodeInsideFrustum:withPointOfView:` and `nodesInsideFrustumWithPointOfView:` (world bounds against the frustum of the point of view), `prepareObject:shouldAbortBlock:` and `prepareObjects:withCompletionHandler:` (build the GL meshes and textures of an object ahead of a frame), `presentScene:withTransition:incomingPointOfView:completionHandler:`, `showsStatistics` (an FPS label over the view), `temporalAntialiasingEnabled` (the accumulation of C20 while the frame is still), `autoenablesDefaultLighting` (the renderer's implicit light, off by default as on iOS), `currentViewport` (the size of the last render), `workingColorSpace` (the device RGB space the GLES output is in), and `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat` and `currentRenderPassDescriptor`, which are Metal objects: a GLES view has no Metal device, so they answer invalid or nil, as `device` does. The Telegram files call none of these members except `isJitteringEnabled` (C20).
+- Still raises: `overlaySKScene` and `audioEnvironmentNode`. Their classes are absent from the 6.1.3 image: the dyld shared cache of `iPhone4,1/6.1.3_10B329` has no `SKScene` string and no `AVAudioEnvironmentNode` string (nor `AVAudioEngine`, which is backported over AUGraph), and the image has no `SpriteKit.framework`. Each raises `NSInternalInconsistencyException` naming the member.
+- Stored, with no effect yet: `loops` (defaults YES; there is no scene timeline to loop at, C18) and `debugOptions` (kept, but no debug geometry is drawn). `usesReverseZ` always reads NO: the GLES renderer keeps the normal depth range, and setting YES is reported once and ignored.
+- Gaps: `hitTest` tests triangle elements only, and `boneNode` is nil (no skinning). `showsStatistics` shows the frame rate only. `temporalAntialiasingEnabled` accumulates the samples of C20 while the frame is still; Apple's reprojection is not modelled. `autoenablesDefaultLighting` lights every draw in the scene uniformly, not from a light placed at the camera.
+- Measurement: the host test `tests/SceneKit/picking_test.m` (ray against triangle and box, back faces, frustum planes and box containment, index and vertex reads). The runtime case `tests/runtime/cases/scenekit_members.m` checks each implemented member on the 6.1.3 emulator, including a hit at the centre of the plane and none at a corner, frustum containment, preparation, presentation completion, the statistics label, `projectPoint:` at the centre of the view, and lighting that is off by default. It is registered but has not run on the emulator yet; the iOS device configuration does not complete on this branch (see the report that accompanies this change). Not measured on a real device.
+- Removed by: a passing run of `scenekit_members`, and for the two raising members, a 6.1.3 image that has the class (none does) or a decision to drop the members.
 
 ### C18. sceneTime and playing run on a wall clock with an offset
 
@@ -122,7 +124,7 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 
 ### C20. Jittering accumulates up to eight samples while the frame does not change
 
-- Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable.
+- Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable. `temporalAntialiasingEnabled` (C17) uses the same accumulation while the frame is still.
 - Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The accumulation is a mix shader between two ping-pong textures, not blending, because blending with `GL_CONSTANT_ALPHA` drew nothing on the emulator. The GLES path is not run on a real device.
 - Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). On the 6.1.3 emulator, the render case (C21) gives 75 intermediate edge pixels with jittering and none without, and an identical centre. A real device is not measured.
 - Removed by: a device run that renders a still scene with jittering on and off and compares its edges, and a check of the animated case.
@@ -134,12 +136,12 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the runtime case `scenekit_render` passes on the 6.1.3 emulator (483.8 host s at time scale 10). The plain snapshot has 492 opaque pixels and the jittered one 455; the edges have 0 and 75 intermediate pixels, and the centre differs by 0.
 - Removed by: the same case passing on a real 6.1.3 device.
 
-### C22. Late audio buffers are counted, not reported
+### C22. Late audio buffers are counted and logged, not replayed
 
-- Stands in for: the device's report of an underrun. When an IO proc callback runs late, `CoreAudioHle` skips the grid points it missed and adds them to `underruns` in the IO proc registration (`io_proc_timeline_after`). Nothing prints or returns the count, so neither the guest nor the log shows the underrun.
-- Gaps: the missed buffers are not replayed, so the guest hears them as a gap.
-- Measurement: `emulator/tests/unit/io_proc_timeline_test.cpp`: delayed callbacks record underruns, every grid point is either played or an underrun, and the negative control shows the old schedule drifting off the grid.
-- Removed by: reporting the count where the guest or the log can read it, or delivering the due buffers to catch up.
+- Stands in for: the device's catch-up of late audio. When an IO proc callback runs late, `CoreAudioHle` skips the grid points it missed (`io_proc_timeline_after`) and adds them to `underruns` in the IO proc registration. The count is printed as `underruns=` on the existing `[coreaudio-device] io-proc` lines, next to `callbacks=`: the periodic line and the remove, stop and native-stop lines.
+- Gaps: the missed buffers are not replayed, so the guest hears them as a gap; the count is in the log, not returned to the guest.
+- Measurement: `emulator/tests/unit/io_proc_timeline_test.cpp`: delayed callbacks record underruns, every grid point is either played or an underrun, and the negative control shows the old schedule drifting off the grid. The log field is not yet read back by a run.
+- Removed by: delivering the due buffers to catch up, or a guest-visible count.
 
 ## Removed
 
