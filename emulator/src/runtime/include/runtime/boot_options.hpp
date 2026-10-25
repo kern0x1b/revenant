@@ -52,6 +52,7 @@ struct BootOptions {
     bool report_performance { };
     std::optional<std::uint64_t> ticks;
     std::optional<std::size_t> cores;
+    bool test_concurrent_threads { };
     std::optional<std::size_t> jit_cache_bytes;
     std::optional<std::size_t> jit_cache_budget_bytes;
     std::optional<std::size_t> image_slab_bytes;

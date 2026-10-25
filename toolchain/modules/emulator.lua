@@ -255,9 +255,9 @@ function debugged(opt)
     os.tryrm(log)
     os.tryrm(errors)
     local port = opt.port or (12000 + os.getpid() % 2000)
-    local argv = {"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
-                  "--display", "headless", "--gles-backend", "software", "--network", opt.network or "isolated",
-                  "--binary", opt.guest, "--gdb", tostring(port)}
+    local argv = table.join({"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
+                             "--display", "headless", "--gles-backend", "software", "--network", opt.network or "isolated",
+                             "--binary", opt.guest, "--gdb", tostring(port)}, core_arguments(opt))
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do
         table.insert(envs, name .. "=" .. value)
@@ -1022,6 +1022,33 @@ function launch_driver(opt)
     return driver
 end
 
+function boot_expired(now, started, progressed, deadline, slowdown)
+    local factor = slowdown or 1
+    if now - progressed > deadline * factor * 1000 then
+        return "stalled"
+    end
+    if now - started > deadline * 10 * factor * 1000 then
+        return "deadline"
+    end
+    return nil
+end
+
+function host_slowdown()
+    local cores = os.cpuinfo("ncpu")
+    local load = machine_load()
+    if load == nil or cores == nil or cores <= 0 then
+        return 1
+    end
+    return math.max(1, load / cores)
+end
+
+function core_arguments(opt)
+    if opt.cores == nil then
+        return {}
+    end
+    return {"--cores", tostring(opt.cores)}
+end
+
 function boot(opt)
     local run = opt.run
     os.mkdir(run)
@@ -1031,12 +1058,15 @@ function boot(opt)
     os.tryrm(log)
     os.tryrm(errors)
     local scale = opt.scale or TIME_SCALE
-    local argv = {"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
-                  "--display", "headless", "--gles-backend", "software", "--control-stdin",
-                  "--network", opt.network or "isolated", "--frame-output", frame,
-                  "--time-scale", tostring(scale)}
+    local argv = table.join({"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
+                             "--display", "headless", "--gles-backend", "software", "--control-stdin",
+                             "--network", opt.network or "isolated", "--frame-output", frame,
+                             "--time-scale", tostring(scale)}, core_arguments(opt))
     if opt.perf then
         table.insert(argv, "--perf-summary")
+    end
+    if opt.test_concurrent then
+        table.insert(argv, "--test-concurrent-threads")
     end
     local input, control = pipe.openpair("BB")
     local envs = {}
@@ -1046,6 +1076,8 @@ function boot(opt)
     directory(opt.tmpdir)
     directory(opt.cache)
     local started = os.mclock()
+    local progressed = started
+    local slowdown, checked = host_slowdown(), started
     local proc = process.openv(opt.emulator, argv, {stdin = input, stdout = log, stderr = errors, envs = envs})
     input:close()
     local state, offset, reason = {}, 0, "deadline"
@@ -1058,6 +1090,9 @@ function boot(opt)
             local chunk = handle:read("a") or ""
             handle:close()
             offset = offset + #chunk
+            if #chunk > 0 then
+                progressed = os.mclock()
+            end
             pending = pending .. chunk
             for line in pending:gmatch("([^\n]*)\n") do
                 scan(state, line)
@@ -1074,7 +1109,12 @@ function boot(opt)
             reason = "reached"
             break
         end
-        if os.mclock() - started > opt.deadline * 1000 then
+        if os.mclock() - checked > 30000 then
+            slowdown, checked = host_slowdown(), os.mclock()
+        end
+        local expired = boot_expired(os.mclock(), started, progressed, opt.deadline, slowdown)
+        if expired then
+            reason = expired
             break
         end
     end
@@ -1367,8 +1407,9 @@ function golden(opt)
                 return state.springboard and (state.migrated or not migrates)
             end}))
             if booted.reason ~= "reached" then
-                raise("%s %s did not get past %s within %d seconds; the emulator log is %s", opt.identifier, opt.build,
-                      milestone(booted.state), opt.deadline, booted.log)
+                raise("%s %s did not get past %s: the emulator %s (-t %d seconds); the emulator log is %s", opt.identifier, opt.build,
+                      milestone(booted.state), booted.reason == "stalled" and "wrote nothing for that long" or "ran past its whole-boot limit",
+                      opt.deadline, booted.log)
             end
             json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
             generations.publish(published, staging)

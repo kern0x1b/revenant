@@ -1227,6 +1227,7 @@ private:
         std::uint64_t translation_nanoseconds,
         const Dynarmic::IR::Block* optimized_block) noexcept
     {
+        performance_counters().record_translation_compile(translation_nanoseconds);
         maybe_check_host_yield(
             0U, translation_nanoseconds >=
                     static_cast<std::uint64_t>(
@@ -1326,6 +1327,21 @@ public:
         write(address, value, &AddressSpace::write64);
     }
 
+    void bind_exclusive_monitor(
+        Dynarmic::ExclusiveMonitor& monitor, std::size_t processor)
+    {
+        exclusive_monitor_ = &monitor;
+        exclusive_processor_ = processor;
+    }
+
+    void drop_exclusive_state()
+    {
+        if (jit_ != nullptr)
+            jit_->ClearExclusiveState();
+        if (exclusive_monitor_ != nullptr)
+            exclusive_monitor_->ClearProcessor(exclusive_processor_);
+    }
+
     void MemoryReadExclusive(std::uint32_t address, std::size_t size) override
     {
         memory_.track_exclusive_access(address, size);
@@ -1382,6 +1398,7 @@ public:
 
     void CallSVC(std::uint32_t immediate) override
     {
+        drop_exclusive_state();
         performance_counters().record_svc();
         ++svc_calls_;
         svc_ = immediate;
@@ -1960,6 +1977,8 @@ private:
     AddressSpace& memory_;
     const ArmCpuModel& cpu_model_;
     Cpu* owner_ { };
+    Dynarmic::ExclusiveMonitor* exclusive_monitor_ { };
+    std::size_t exclusive_processor_ { };
     std::uint32_t process_id_ { };
     Dynarmic::A32::Jit* jit_ { };
     std::uint64_t ticks_remaining_ { };
@@ -2435,6 +2454,7 @@ public:
         ensure_jit();
         jit_->ClearExclusiveState();
         monitor_.ClearProcessor(processor_id_);
+        callbacks_->drop_exclusive_state();
     }
 
     void set_translation_profile(std::shared_ptr<JitTranslationProfile> profile,
@@ -2958,6 +2978,7 @@ private:
 
     void ensure_jit()
     {
+        callbacks_->bind_exclusive_monitor(monitor_, processor_id_);
         if (jit_) {
             return;
         }

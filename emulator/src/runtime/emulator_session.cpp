@@ -383,6 +383,7 @@ void EmulatorSession::run()
     const auto guest_ticks_per_second = cpu_model->ticks_per_second();
     GuestTickClock guest_tick_clock { guest_ticks_per_second };
     const auto explicit_processor_count = options.cores;
+    const auto test_concurrent_threads = options.test_concurrent_threads;
     const auto guest_processor_count =
         explicit_processor_count.value_or(default_processor_count);
     if (guest_processor_count == 0 ||
@@ -1505,6 +1506,13 @@ void EmulatorSession::run()
             iokit_abi::display_vsync::period_absolute_time) } };
     GuestParallelismPolicy guest_parallelism_policy { guest_ticks_per_second };
     LoopCarriedState loop_state;
+    const auto pin_to_slot = [&scheduler, test_concurrent_threads,
+                                 guest_processor_count](
+                                 XnuThreadId thread, std::size_t slot) {
+        if (test_concurrent_threads)
+            static_cast<void>(scheduler.bind_thread(
+                thread, slot % guest_processor_count));
+    };
     std::optional<std::uint32_t> display_urgent_process;
     std::optional<XnuThreadId> display_inflight_callback_thread;
     std::optional<std::chrono::steady_clock::time_point>
@@ -1617,7 +1625,7 @@ void EmulatorSession::run()
             configure_cpu(index);
         }
         runtime.kernel->set_thread_create_handler(
-            [runtime_ptr, &scheduler, configure_cpu](
+            [runtime_ptr, &scheduler, &pin_to_slot, configure_cpu](
                 const std::array<std::uint32_t, 16>& registers,
                 std::uint32_t cpsr) -> std::optional<std::size_t> {
                 const auto allocate_slot =
@@ -1637,6 +1645,9 @@ void EmulatorSession::run()
                         runtime_ptr->allocated[index] = false;
                         return std::nullopt;
                     }
+                    pin_to_slot(XnuThreadId { runtime_ptr->kernel->process().pid,
+                                    static_cast<std::uint32_t>(index) },
+                        index);
                     return index;
                 };
                 for (std::size_t index = 1; index < runtime_ptr->cpus->size();
@@ -1849,6 +1860,7 @@ void EmulatorSession::run()
             static_cast<void>(
                 scheduler.register_thread(XnuThreadId { child_pid, 0 },
                     child->kernel->process().thread_base_priority));
+            pin_to_slot(XnuThreadId { child_pid, 0 }, 0);
             observe_runtime_jit_memory_counted(*child);
             runtime_index.insert(*child);
             runtimes.push_back(std::move(child));
@@ -2150,6 +2162,7 @@ void EmulatorSession::run()
     static_cast<void>(scheduler.register_thread(
         XnuThreadId { initial_runtime->kernel->process().pid, 0 },
         initial_runtime->kernel->process().thread_base_priority));
+    pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
     initial_cpu.registers()[13] = process.stack_pointer;
     initial_cpu.registers()[15] = process.entry_point;
     initial_cpu.set_cpsr(0x10);
@@ -3536,8 +3549,8 @@ void EmulatorSession::run()
             ++processor) {
             if (bounded_execution && reservable_ticks == 0)
                 break;
-            const auto scheduled =
-                scheduler.choose_next(processor, preferred_thread);
+            const auto scheduled = scheduler.choose_next(processor,
+                test_concurrent_threads ? std::nullopt : preferred_thread);
             if (scheduled) {
                 if (loop_state.scheduler_handoff_thread &&
                     *loop_state.scheduler_handoff_thread == scheduled->thread) {
@@ -3603,13 +3616,13 @@ void EmulatorSession::run()
                         std::min(reservable_ticks, scheduled->tick_budget);
                 }
                 if (scheduled_batch.size() == 1U &&
-                    guest_processor_count > 1U &&
+                    guest_processor_count > 1U && !test_concurrent_threads &&
                     guest_parallelism_policy.should_serialize(
                         scheduled->thread)) {
                     break;
                 }
             }
-            if (preferred_thread)
+            if (preferred_thread && !test_concurrent_threads)
                 break;
         }
 
@@ -3728,11 +3741,12 @@ void EmulatorSession::run()
 
         const auto parallel_guest_batch =
             prepared_slices.size() > 1U &&
-            std::none_of(prepared_slices.begin(), prepared_slices.end(),
-                [&guest_parallelism_policy](const auto& prepared) {
-                    return guest_parallelism_policy.should_serialize(
-                        prepared.scheduled.thread);
-                });
+            (test_concurrent_threads ||
+                std::none_of(prepared_slices.begin(), prepared_slices.end(),
+                    [&guest_parallelism_policy](const auto& prepared) {
+                        return guest_parallelism_policy.should_serialize(
+                            prepared.scheduled.thread);
+                    }));
         for (auto& prepared : prepared_slices) {
             prepared.deferred_svc = parallel_guest_batch;
             prepared.execution.cpu->set_svc_dispatch_mode(
@@ -3742,14 +3756,9 @@ void EmulatorSession::run()
                 prepared.scheduled.thread.thread);
         }
 
-        if (guest_processor_count == 1 && !prepared_slices.empty() &&
-            loop_state.last_serial_thread !=
-                std::optional<XnuThreadId> {
-                    prepared_slices.front().scheduled.thread }) {
-            prepared_slices.front().execution.cpu->clear_exclusive_state(
-                prepared_slices.front().scheduled.processor);
-            loop_state.last_serial_thread =
-                prepared_slices.front().scheduled.thread;
+        for (auto& prepared : prepared_slices) {
+            prepared.execution.cpu->clear_exclusive_state(
+                prepared.scheduled.processor);
         }
         if (parallel_guest_batch) {
             std::vector<GuestExecutionRequest*> execution_requests;
@@ -3868,6 +3877,9 @@ void EmulatorSession::run()
                     failure << " r" << std::dec << index << "=0x" << std::hex
                             << registers[index];
                 output.line(failure.str());
+                for (const auto& line : runtime.kernel->fault_word_report(
+                         *runtime.memory, registers))
+                    output.line(line);
             }
             auto completion = XnuSliceCompletion::Continue;
             bool scheduler_completed = false;
@@ -3950,6 +3962,9 @@ void EmulatorSession::run()
                         XnuThreadId { runtime.kernel->process().pid,
                             static_cast<std::uint32_t>(pending.processor) },
                         runtime.kernel->process().thread_base_priority));
+                    pin_to_slot(XnuThreadId { runtime.kernel->process().pid,
+                                    static_cast<std::uint32_t>(pending.processor) },
+                        pending.processor);
                     scheduler_completed = true;
                 } catch (const std::exception& error) {
                     output.line("[process] exec failed pid=" +
