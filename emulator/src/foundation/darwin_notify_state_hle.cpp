@@ -16,30 +16,30 @@
 namespace emulator {
 namespace {
 
-    constexpr std::string_view libsystem_image { "/usr/lib/libSystem.B.dylib" };
     constexpr std::string_view libsystem_notify_image {
         "/usr/lib/system/libsystem_notify.dylib"
     };
+    constexpr std::uint32_t notify_status_failed = 1'000'000U;
 
 }
 
 DarwinNotifyStateHle::DarwinNotifyStateHle(UserlandHleRegistry& registry)
 {
-    registry.register_function(std::string { libsystem_image },
+    registry.register_function(std::string { libsystem_notify_image },
         "__notify_lib_init",
         [this](UserlandHleCall& call) { initialize(call); });
-    registry.register_function(std::string { libsystem_image },
+    registry.register_function(std::string { libsystem_notify_image },
         "_notify_register_mach_port",
         [this](UserlandHleCall& call) { register_mach_port(call); });
-    registry.register_function(std::string { libsystem_image },
+    registry.register_function(std::string { libsystem_notify_image },
         "_notify_register_check",
         [this](UserlandHleCall& call) { register_check(call); });
-    registry.register_function(std::string { libsystem_image }, "_notify_check",
-        [this](UserlandHleCall& call) { check(call); });
-    registry.register_function(std::string { libsystem_image },
+    registry.register_function(std::string { libsystem_notify_image },
+        "_notify_check", [this](UserlandHleCall& call) { check(call); });
+    registry.register_function(std::string { libsystem_notify_image },
         "_notify_get_state",
         [this](UserlandHleCall& call) { get_state(call); });
-    registry.register_function(std::string { libsystem_image },
+    registry.register_function(std::string { libsystem_notify_image },
         "_notify_cancel", [this](UserlandHleCall& call) { cancel(call); });
     registry.register_function(std::string { libsystem_notify_image },
         "_notify_post", [this](UserlandHleCall& call) { post(call); });
@@ -141,7 +141,6 @@ void DarwinNotifyStateHle::initialize(UserlandHleCall& call)
         provider_query = native_server_provider_query_;
     }
     if (!native_server_ready() && provider_query && provider_query()) {
-        constexpr std::uint32_t notify_status_failed = 1'000'000U;
         call.set_return(notify_status_failed);
         return;
     }
@@ -174,7 +173,7 @@ void DarwinNotifyStateHle::register_mach_port(UserlandHleCall& call)
     }
     const auto server_ready = native_server_ready();
     if (bootstrap_aware && !server_ready) {
-        call.set_return(1);
+        call.set_return(notify_status_failed);
         return;
     }
     if (!has_provider) {
@@ -213,14 +212,14 @@ void DarwinNotifyStateHle::register_check(UserlandHleCall& call)
     const auto server_ready = native_server_ready();
     if (bootstrap_aware && !server_ready) {
         if (!has_provider) {
-            call.set_return(1);
+            call.set_return(notify_status_failed);
             return;
         }
         const auto token = allocate_virtual_token();
         if (!call.write32(token_address, token)) {
             std::lock_guard lock { mutex_ };
             virtual_tokens_.erase(token);
-            call.set_return(1);
+            call.set_return(notify_status_failed);
             return;
         }
         record_registration(*name, token, call.process_id(), 0);
@@ -266,7 +265,7 @@ void DarwinNotifyStateHle::get_state(UserlandHleCall& call)
                     call.write32(state_address + sizeof(std::uint32_t),
                         static_cast<std::uint32_t>(state >> 32U))
                 ? 0U
-                : 1U);
+                : notify_status_failed);
         return;
     }
     if (!provider || state_address == 0) {
@@ -302,7 +301,9 @@ void DarwinNotifyStateHle::check(UserlandHleCall& call)
         return;
     }
     call.set_return(
-        changed_address != 0 && call.write32(changed_address, 0U) ? 0U : 1U);
+        changed_address != 0 && call.write32(changed_address, 0U)
+            ? 0U
+            : notify_status_failed);
 }
 
 void DarwinNotifyStateHle::cancel(UserlandHleCall& call)
