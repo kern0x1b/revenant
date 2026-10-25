@@ -5151,6 +5151,27 @@ void Cpu::clear_exclusive_state(std::size_t execution_slot)
     execution_pool_->clear_exclusive_state(execution_slot);
 }
 
+void save_exclusive_monitor(
+    snapshot::Writer& out, Dynarmic::ExclusiveMonitor& monitor)
+{
+    monitor.Clear();
+    snapshot::save(out,
+        static_cast<std::uint64_t>(monitor.GetProcessorCount()));
+}
+
+void load_exclusive_monitor(
+    snapshot::Reader& in, Dynarmic::ExclusiveMonitor& monitor)
+{
+    std::uint64_t processor_count { };
+    snapshot::load(in, processor_count);
+    if (processor_count != monitor.GetProcessorCount()) {
+        throw snapshot::FormatError {
+            "exclusive monitor processor count differs from the wiring"
+        };
+    }
+    monitor.Clear();
+}
+
 CpuCluster::CpuCluster(std::size_t processor_count, AddressSpace& memory)
     : CpuCluster { processor_count, processor_count, memory }
 {

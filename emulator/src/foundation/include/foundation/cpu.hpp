@@ -182,6 +182,11 @@ class CpuExecutionPool;
 class JitExecutor;
 class JitCallbacks;
 
+void save_exclusive_monitor(
+    snapshot::Writer& out, Dynarmic::ExclusiveMonitor& monitor);
+void load_exclusive_monitor(
+    snapshot::Reader& in, Dynarmic::ExclusiveMonitor& monitor);
+
 class Cpu {
 public:
     using SvcHandler = std::function<void(Cpu&, std::uint32_t)>;
