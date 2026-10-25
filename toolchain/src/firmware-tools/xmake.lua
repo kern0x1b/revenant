@@ -1,3 +1,7 @@
+if get_config("component") == "firmware-tools" and not is_plat("iphoneos") then
+    add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
+    return
+end
 if get_config("component") ~= "" or is_plat("iphoneos") then
     return
 end
