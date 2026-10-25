@@ -24,14 +24,11 @@ diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
 index eee2972..19326db 100644
 --- a/xmake/core/package/package.lua
 +++ b/xmake/core/package/package.lua
-@@ -821,11 +821,15 @@ function _instance:use_external_includes()
+@@ -821,11 +821,12 @@ function _instance:use_external_includes()
      return external
  end
  
 --- get the filelock of the whole package directory
-+-- get the filelock of the install directory: the instances of one package
-+-- that install into the same directory share it, so one of them waits for
-+-- the other instead of installing into the directory at the same time
  function _instance:filelock()
      local filelock = self._FILELOCK
      if filelock == nil then

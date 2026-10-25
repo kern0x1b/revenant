@@ -1444,7 +1444,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
          complexIterator.advance(from, nullptr, GlyphIterationStyle::IncludePartialGlyphs, nullptr);
          offsetBeforeRange = complexIterator.runWidthSoFar();
          complexIterator.advance(to, nullptr, GlyphIterationStyle::IncludePartialGlyphs, nullptr);
-@@ -306,16 +327,26 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
+@@ -306,16 +327,24 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
      if (!run.length())
          return 0;
  
@@ -1462,14 +1462,12 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
 +        return *memoizedCodePath;
 +    };
 +
-+    // The simple path can optimize the case where glyph overflow is not observable.
 +    if (glyphOverflow && !glyphOverflow->computeBounds) {
 +        auto path = codePathToUse();
 +        if (path != CodePath::Complex && path != CodePath::SimpleWithGlyphOverflow)
              glyphOverflow = nullptr;
      }
  
-+    // The complex path is more restrictive about returning fallback fonts than the simple path, so we need an explicit test to make their behaviors match.
 +    if constexpr (!canReturnFallbackFontsForComplexText()) {
 +        if (fallbackFonts && codePathToUse() != CodePath::Complex)
 +            fallbackFonts = nullptr;
@@ -1478,7 +1476,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      auto* cacheEntry = fonts()->glyphGeometryCache().add(run, { }, TextShapingContext { *this });
      bool callerNeedsFallbackFonts = fallbackFonts;
      bool canUseFallbackFontCacheEntry = !callerNeedsFallbackFonts && !run.rtl();
-@@ -338,7 +369,7 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
+@@ -338,7 +367,7 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
      if (!fallbackFonts)
          fallbackFonts = &localFallbackFonts;
  
@@ -1487,7 +1485,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      bool hasFallbackFonts = !fallbackFonts->isEmptyIgnoringNullReferences();
  
      if (cacheEntry) {
-@@ -355,7 +386,7 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
+@@ -355,7 +384,7 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
  float FontCascade::width(CodePath codePathToUse, const TextRun& run, SingleThreadWeakHashSet<const Font>* fallbackFonts, GlyphOverflow* glyphOverflow) const
  {
      if (shouldUseComplexTextController(codePathToUse)) {
@@ -1496,7 +1494,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
          if (glyphOverflow) {
              glyphOverflow->top = std::max<double>(glyphOverflow->top, -controller.minGlyphBoundingBoxY() - (glyphOverflow->computeBounds ? 0 : metricsOfPrimaryFont().ascent()));
              glyphOverflow->bottom = std::max<double>(glyphOverflow->bottom, controller.maxGlyphBoundingBoxY() - (glyphOverflow->computeBounds ? 0 : metricsOfPrimaryFont().descent()));
-@@ -383,6 +414,19 @@ NEVER_INLINE float FontCascade::widthForSimpleTextSlow(StringView text, TextDire
+@@ -383,6 +412,19 @@ NEVER_INLINE float FontCascade::widthForSimpleTextSlow(StringView text, TextDire
  #if PLATFORM(GTK) || PLATFORM(WPE)
      TextRun run { text, 0, 0, ExpansionBehavior::defaultBehavior(), textDirection, false, false };
      float result = width(CodePath::Simple, run);
@@ -1516,7 +1514,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
  #else
      GlyphBuffer glyphBuffer;
      Ref font = primaryFont();
-@@ -583,7 +627,7 @@ Vector<LayoutRect> FontCascade::characterSelectionRectsForText(const TextRun& ru
+@@ -583,7 +625,7 @@ Vector<LayoutRect> FontCascade::characterSelectionRectsForText(const TextRun& ru
      bool rtl = run.rtl();
  
      // FIXME: We could further optimize this by using the simple text codepath when applicable.
@@ -1525,7 +1523,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      controller.advance(from);
  
      return Vector<LayoutRect>(to - from, [&](size_t i) {
-@@ -672,8 +716,12 @@ bool FontCascade::shouldDisableFontSubpixelAntialiasingForTesting()
+@@ -672,8 +714,12 @@ bool FontCascade::shouldDisableFontSubpixelAntialiasingForTesting()
  
  bool FontCascade::canHandleRunAsSimpleText(const TextRun& run, unsigned from, unsigned to) const
  {
@@ -1540,7 +1538,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      return !((enableKerning() || requiresShaping()) && (from || to != run.length()));
  #else
      UNUSED_PARAM(run);
-@@ -737,10 +785,17 @@ FontCascade::CodePath FontCascade::characterRangeCodePath(std::span<const char16
+@@ -737,10 +783,17 @@ FontCascade::CodePath FontCascade::characterRangeCodePath(std::span<const char16
      // are not 'combining', but still need to go to the complex path.
      // Alternatively, we may as well consider binary search over a sorted
      // list of ranges.
@@ -1560,7 +1558,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
          auto c = span[i];
          if (c == zeroWidthJoiner && previousCharacterIsEmojiGroupCandidate)
              return CodePath::Complex;
-@@ -1526,7 +1581,7 @@ TextShapingResult FontCascade::layoutComplexText(const TextRun& run, unsigned fr
+@@ -1526,7 +1579,7 @@ TextShapingResult FontCascade::layoutComplexText(const TextRun& run, unsigned fr
  {
      TextShapingResult result;
  
@@ -1569,7 +1567,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      GlyphBuffer glyphBufferForStartingIndex;
      controller.advance(from, &glyphBufferForStartingIndex);
      float widthBeforeSegment = controller.runWidthSoFar();
-@@ -1571,22 +1626,29 @@ inline bool NODELETE shouldDrawIfLoading(const Font& font, FontCascade::CustomFo
+@@ -1571,22 +1624,29 @@ inline bool NODELETE shouldDrawIfLoading(const Font& font, FontCascade::CustomFo
  void FontCascade::drawGlyphBuffer(GraphicsContext& context, const GlyphBuffer& glyphBuffer, FloatPoint& point, CustomFontNotReadyAction customFontNotReadyAction) const
  {
      ASSERT(glyphBuffer.isFlattened());
@@ -1607,7 +1605,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
              startPoint.setX(nextX);
              startPoint.setY(nextY);
          }
-@@ -1595,10 +1657,7 @@ void FontCascade::drawGlyphBuffer(GraphicsContext& context, const GlyphBuffer& g
+@@ -1595,10 +1655,7 @@ void FontCascade::drawGlyphBuffer(GraphicsContext& context, const GlyphBuffer& g
          nextGlyph++;
      }
  
@@ -1619,7 +1617,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      point.setX(nextX);
  }
  
-@@ -1678,7 +1737,7 @@ void FontCascade::adjustSelectionRectForSimpleText(const TextRun& run, LayoutRec
+@@ -1678,7 +1735,7 @@ void FontCascade::adjustSelectionRectForSimpleText(const TextRun& run, LayoutRec
  
  void FontCascade::adjustSelectionRectForComplexText(const TextRun& run, LayoutRect& selectionRect, unsigned from, unsigned to) const
  {
@@ -1628,7 +1626,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      controller.advance(from);
      float beforeWidth = controller.runWidthSoFar();
      controller.advance(to);
-@@ -1750,7 +1809,7 @@ int FontCascade::offsetForPositionForSimpleText(const TextRun& run, float x, boo
+@@ -1750,7 +1807,7 @@ int FontCascade::offsetForPositionForSimpleText(const TextRun& run, float x, boo
  
  int FontCascade::offsetForPositionForComplexText(const TextRun& run, float x, bool includePartialGlyphs) const
  {
@@ -1637,7 +1635,7 @@ index 3a82e5eaffe1d8717b5ede3fb849f93cb0bc7343..951dede15f57f8579b85c1061e4056a9
      return controller.offsetForPosition(x, includePartialGlyphs);
  }
  
-@@ -1900,7 +1959,11 @@ Vector<FloatSegment> FontCascade::lineSegmentsForIntersectionsWithRect(const Tex
+@@ -1900,7 +1957,11 @@ Vector<FloatSegment> FontCascade::lineSegmentsForIntersectionsWithRect(const Tex
      if (isLoadingCustomFonts())
          return result;
  
@@ -1703,13 +1701,12 @@ index c7e14646c763f14927240bf08cb98b4436d5fb43..834cd129de56a47da49bef2ecd1f5a65
  void FontCascadeFonts::GlyphPageCacheEntry::setGlyphDataForCharacter(char32_t character, GlyphData glyphData)
  {
      ASSERT(!glyphDataForCharacter(character).isValid());
-@@ -544,13 +557,31 @@ GlyphData FontCascadeFonts::glyphDataForCharacter(char32_t c, const FontCascadeD
+@@ -544,13 +557,30 @@ GlyphData FontCascadeFonts::glyphDataForCharacter(char32_t c, const FontCascadeD
  
      const unsigned pageNumber = GlyphPage::pageNumberForCodePoint(c);
  
 -    auto& cacheEntry = m_cachedPages[resolvedEmojiPolicy].ensure(pageNumber, [&] {
 -        // Initialize cache with a full page of glyph mappings from a single font.
-+    // Initialize cache with a full page of glyph mappings from a single font.
 +    auto makePageCacheEntry = [&] {
          return GlyphPageCacheEntry { glyphPageFromFontRanges(pageNumber, realizeFallbackRangesAt(description, fontSelector, 0)) };
 -    }).iterator->value;
@@ -1739,7 +1736,7 @@ index c7e14646c763f14927240bf08cb98b4436d5fb43..834cd129de56a47da49bef2ecd1f5a65
          // No glyph, resolve per-character.
          ASSERT(variant == FontVariant::Normal);
          glyphData = glyphDataForVariant(c, description, fontSelector, variant, resolvedEmojiPolicy);
-@@ -571,6 +602,14 @@ void FontCascadeFonts::pruneSystemFallbacks()
+@@ -571,6 +601,14 @@ void FontCascadeFonts::pruneSystemFallbacks()
              return keyAndValue.value.isMixedFont();
          });
      }
@@ -2761,7 +2758,7 @@ index 1430a5ff231fdcbe15298bc21c768134fb71c415..348497d2be5f44a30d18f83640e96dd1
 +#endif
  
 -        width = currentRangeFont->widthForGlyph(glyph, Font::SyntheticBoldInclusion::Exclude); // We apply synthetic bold after shaping, in applyCSSVisibilityRules().
-+        width = currentRangeFont.widthForGlyph(glyph, Font::SyntheticBoldInclusion::Exclude); // We apply synthetic bold after shaping, in applyCSSVisibilityRules().
++        width = currentRangeFont.widthForGlyph(glyph, Font::SyntheticBoldInclusion::Exclude);
          advanceInternalState.widthOfCurrentFontRange += width;
  
          if (FontCascade::treatAsSpace(characterToWrite))
@@ -4391,16 +4388,11 @@ index eb4e1ca8b4cb3a80e866ac6e00509862a6eb9ccb..daf199dbbf79f8c6a34b17410058be99
  
      WAKWindow *m_window { nullptr };
  
-@@ -178,7 +183,12 @@ private:
+@@ -178,7 +183,7 @@ private:
  
      std::optional<FloatRect> m_overrideVisibleRect;
  
 -    IntSize m_tileSize { 512, 512 };
-+    //
-+    //
-+    //
-+    //
-+    //
 +    IntSize m_tileSize { 320, 320 };
      
      TilingMode m_tilingMode { Normal };
@@ -4687,12 +4679,10 @@ index 5cc2cc5eeac6a141ff8a5893cfbdd9b97708f48d..0aa7533df1aa313ffffdda1d5b1510b8
      return m_tilingMode == Zooming || m_tilingMode == Panning || m_tilingMode == ScrollToTop || m_tilingMode == Disabled; 
  }
  
-@@ -767,8 +883,57 @@ static bool shouldRepaintInPieces(const CGRect& dirtyRect, CGSRegionObj dirtyReg
+@@ -767,8 +883,53 @@ static bool shouldRepaintInPieces(const CGRect& dirtyRect, CGSRegionObj dirtyReg
          m_tileCreationTimer.startOneShot(0_s);
  }
  
-+//
-+//
 +extern "C" { int g_webkitIOS6PendingDrawWork = 1; }
 +extern "C" { unsigned g_webkitIOS6PaintsRefusedForLayout = 0; }
 +
@@ -4707,8 +4697,6 @@ index 5cc2cc5eeac6a141ff8a5893cfbdd9b97708f48d..0aa7533df1aa313ffffdda1d5b1510b8
 +    return milliseconds / 1000.0;
 +}
 +
-+//
-+//
 +bool LegacyTileCache::mainThreadMustWaitForEngine()
 +{
 +    static const double mustWaitAfter = webkitIOS6EngineIntervalFromEnvironment("WEBKIT_IOS6_ENGINE_MUST_WAIT_MS", 0.15);
@@ -4745,7 +4733,7 @@ index 5cc2cc5eeac6a141ff8a5893cfbdd9b97708f48d..0aa7533df1aa313ffffdda1d5b1510b8
      // This will trigger document relayout if needed.
      [[m_window contentView] viewWillDraw];
  
-@@ -776,6 +941,11 @@ static bool shouldRepaintInPieces(const CGRect& dirtyRect, CGSRegionObj dirtyReg
+@@ -776,6 +937,11 @@ static bool shouldRepaintInPieces(const CGRect& dirtyRect, CGSRegionObj dirtyReg
          Locker locker { m_tileMutex };
          flushSavedDisplayRects();
      }
@@ -5135,7 +5123,7 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
          return adjustedRect;
      int pixels = adjustedRect.width() * adjustedRect.height();
      if (adjustedRect.width() != rect.width())
-@@ -406,30 +471,34 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
+@@ -406,30 +471,30 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
      return intersection(adjustedRect, bounds);
  }
  
@@ -5151,10 +5139,6 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
      IntRect coverRect = visibleRect;
      centerGrid = false;
 +
-+    //
-+    //
-+    //
-+    //
 +    static const int verticalScreens = [] -> int {
 +        if (const char* override = getenv("WEBKIT_IOS6_TILE_COVERAGE_HALVES")) {
 +            int value = atoi(override);
@@ -5184,7 +5168,7 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
      double horizontalBias = 1.0;
      double leftwardBias = 1.0;
      double rightwardBias = 1.0;
-@@ -460,51 +529,100 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
+@@ -460,51 +525,96 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
          break;
      }
  
@@ -5202,9 +5186,6 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
 +    };
 +}
 +
-+// The "distance" calculated here is used to pick which tile to cache next. The idea is to create those
-+// closest to the current viewport first so the user is more likely to see already rendered content we she
-+// scrolls. The calculation is weighted to prefer vertical and downward direction.
 +double LegacyTileGrid::tileDistance2(const IntRect& visibleRect, const IntRect& tileRect, const TileDistanceMetrics& metrics)
 +{
 +    if (visibleRect.intersects(tileRect))
@@ -5255,7 +5236,6 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
  
      // If tile size is bigger than the view, centering minimizes the painting needed to cover the screen.
 -    // This is especially useful after zooming 
-+    // This is especially useful after zooming
      centerGrid = centerGrid || !tileCount();
      if (centerGrid)
 -        centerTileGridOrigin(visibleRect);
@@ -5298,7 +5278,7 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
              if (distance > shortestDistance)
                  continue;
              if (distance < shortestDistance) {
-@@ -525,7 +643,7 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
+@@ -525,7 +635,7 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
      // Even if we don't create any tiles, we should still drop distant tiles
      // in case coverRect got smaller.
      double keepDistance = std::min(shortestDistance, coveredDistance);
@@ -5307,7 +5287,7 @@ index eabe864b78bcb75ea0bc3a83164d3907296ac8e7..2da4adbd221d38baee78a2b0356ac9d1
          return;
  
      ASSERT(pendingTileCount >= tilesToCreateCount);
-@@ -533,10 +651,21 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
+@@ -533,10 +643,21 @@ IntRect rect(index.x() * m_tileSize.width() - (m_origin.x() ? m_tileSize.width()
          return;
  
      for (size_t n = 0; n < tilesToCreateCount; ++n)
@@ -6509,7 +6489,7 @@ index 69773a87a2fbc4f19565a7a2a7049d73eea67f21..ebaa8b630ed5d59e404743d7bab8593b
 +#if defined(WEBKIT_IOS6)
 +    if (data.size() > static_cast<size_t>(std::numeric_limits<int>::max()))
 +        return SQLITE_TOOBIG;
-+    return sqlite3_bind_blob(statement, index, data.data(), static_cast<int>(data.size()), destructor); // NOLINT
++    return sqlite3_bind_blob(statement, index, data.data(), static_cast<int>(data.size()), destructor);
 +#elif PLATFORM(PLAYSTATION)
      return sqlite3_bind_blob(statement, index, data.data(), data.size(), destructor); // NOLINT
  #else
