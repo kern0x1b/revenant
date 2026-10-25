@@ -5,6 +5,7 @@
 #include "foundation/address_space.hpp"
 #include "foundation/output.hpp"
 #include "kernel/kernel.hpp"
+#include "kernel_snapshot_booted_members.hpp"
 
 #include <algorithm>
 #include <array>
@@ -113,7 +114,21 @@ constexpr std::array<std::string_view, 77> saved_members {
     "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 45> open_members {
+constexpr std::array<std::string_view, 59> open_members {
+    "ck.dyld_shared_cache_attempted_",
+    "ck.dyld_shared_cache_path_",
+    "ck.mapping_trace_count_",
+    "hle.installed_calls_",
+    "hle.installed_symbol_thumb_",
+    "hle.installed_symbols_",
+    "hle.loaded_images_",
+    "hle.shared_cache_data_symbols_",
+    "hle.shared_hle_plan_",
+    "hle.shared_hle_plan_architecture_",
+    "hle.shared_hle_plan_registration_generation_",
+    "kss.mach_queues",
+    "kss.mach_semaphores",
+    "pthread.registration_",
     "hid.state_",
     "coreaudio.service_",
     "coreaudio.buffer_frame_size_",
@@ -192,12 +207,17 @@ int main()
     for (const auto& name : CompatibilityKernelSnapshot::populated_memory(memory)) {
         check_accounted(name);
     }
+    for (const auto name : emulator::booted_populated_members) {
+        check_accounted(std::string { name });
+    }
     if (failures != 0) {
         std::cerr << failures << " populated members are unaccounted\n";
         return 1;
     }
     std::cout << "kernel snapshot probe checks passed: " << checked
-              << " populated members checked, ledger has "
+              << " populated members checked, "
+              << emulator::booted_populated_members.size()
+              << " booted members, ledger has "
               << saved_members.size() << " saved and " << open_members.size()
               << " open entries\n";
     return 0;
