@@ -25,7 +25,8 @@ Neither run reached a drawn SpringBoard, so neither measures a snapshot at "Spri
 
 - The emulator's own ready signal is `did-finish-launching pid=N SpringBoard` in `/private/var/revenant/events.log`,
   written by `revenant-inject.dylib`. A plain boot's rootfs has no `/private/var/revenant` at all, so that signal is
-  unavailable outside the test harness. The only SpringBoard signal a plain boot logs is the spawn line.
+  unavailable outside the test harness. A plain boot logs the spawn line and, since Stage 0, the finished-startup
+  milestone (see Stage 0 results).
 - Both runs stayed on the logo. Checked right after run 1 ended, the host had 33,000 free pages of 1.57 million, so it
   had been swapping, and run 1's guest stalled on Mach requests. Run 2 was sampled too early to tell whether it would
   have finished.
@@ -173,13 +174,53 @@ emulator beyond the qemu ideas above.
 
 ## Stages
 
-The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. None
-has been built.
+The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
+is built (see its results below). Stages 1 to 4 have not been started.
 
 - **Stage 0: measurement.** Define the ready point for a plain boot: a settled display that is not the logo, or the
   control channel's `settle` (`docs/reference/emulator/control-surface.md`) on a non-logo frame. Add a counter of
   materialized guest pages by backing kind to `--perf-summary`, which splits the malloc figure into guest and host.
   Measure on a migrated rootfs. Touches the page counters and the perf summary; a small change. Risk: low.
+  Built in `74c580bee` (counters, milestone, tests) and `23f3de3b7` (the notify hooks, below). Measured on the plain
+  rootfs, not a migrated one.
+
+### Stage 0 results
+
+The ready point is `[boot] milestone=springboard-finished-startup`, logged when SpringBoard posts
+`com.apple.springboard.finishedstartup`. The hook is `_notify_post` in `libsystem_notify.dylib`, where that symbol is
+defined. The notify HLE does not record it on its own: `publish()` logs nothing, and the notify hooks had been
+registered under `libSystem.B.dylib`, which installs none of them. Five of the six
+registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` still
+installs under neither image, so the provider-initializer guard it was written for (`27048fc11`) is inactive.
+
+Plain boots, with the milestone reached in some and not others:
+
+| run | window | milestone (s after launch) | spawns | notify posts | materialized pages |
+|---|---|---|---|---|---|
+| before, six hooks dead | 1202 s | 668 | 84 | 411 | 1,052,203 |
+| after, six hooks live (1) | 1203 s | not reached | 74 | 101 | 1,015,378 |
+| after, six hooks live (2) | 1804 s | 1466 | 84 | 396 | 1,088,970 |
+| plain, earlier build, six hooks dead (3) | 1800 s | not reached | 76 | not logged | 945,063 |
+
+Run 3 was a concise log, so it has no post count. The same build as run 3 reached the milestone at 1218 s in an earlier
+run. The SpringBoard spawn moved from 116 s (before) to 161 s (after 1) to 337 s (after 2), so the host's load sets the
+timing and a window of 20 to 30 minutes can miss the milestone. The before run and after 2 spawned the same 83
+programs, and their notify names differed only by three now-playing names that appeared in the before run.
+
+Materialized pages by backing kind (a page mapping, counted per address space, so a backing shared by several
+processes counts once for each):
+
+| run | anonymous | file-cached | copy-on-write-possible | shared-writable |
+|---|---|---|---|---|
+| before, 20 min, 60 processes | 30,052 | 812,966 | 326 | 208,859 |
+| after (2), 30 min, 62 processes | 30,954 | 839,314 | 343 | 218,359 |
+
+File-cached pages are clean copies of file content that a snapshot can name by file instead of saving. Anonymous and
+shared-writable pages are the bytes a snapshot must save: about 30,000 anonymous pages (about 120 MiB) and about 210,000
+shared-writable pages (about 0.8 GiB). The shared-writable figure is an upper bound, since a shared object can appear in
+several processes. So Stage 0's answer to the open question below is that the guest state to save is under 1 GiB at
+20 to 30 minutes, well below the malloc figure of the earlier 30-second sample (2.2 GB written). The rest of that malloc
+figure is host bookkeeping per page.
 - **Stage 1: daemons only.** Snapshot a machine that runs the `run` profile, which has no SpringBoard, no SDL, no GL and
   no audio, so it holds only memory, CPU, scheduler, kernel tables, the clock and the rootfs. Restore into a new
   process, check the Mach services and the processes match, and measure the size, the save, the restore and the
