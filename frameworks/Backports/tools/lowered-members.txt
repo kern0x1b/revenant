@@ -262,6 +262,9 @@ class CIPDF417CodeDescriptor
 class CIQRCodeDescriptor
 class CIQRCodeFeature
 class CIRectangleFeature
+class CIRenderDestination
+class CIRenderInfo
+class CIRenderTask
 class CITextFeature
 class CKAcceptSharesOperation
 class CKAllowedSharingOptions
@@ -12579,6 +12582,7 @@ member CIContext -clearCaches
 member CIContext -createCGImage:fromRect:format:colorSpace:deferred:
 member CIContext -revenant_representationOfImage:format:colorSpace:type:
 member CIContext -revenant_writeRepresentationOfImage:toURL:format:colorSpace:type:error:
+member CIContext -startTaskToRender:toDestination:error:
 member CIContext -writeJPEGRepresentationOfImage:toURL:colorSpace:options:error:
 member CIContext -writePNGRepresentationOfImage:toURL:format:colorSpace:options:error:
 member CIContext -writeTIFFRepresentationOfImage:toURL:format:colorSpace:options:error:
@@ -12663,6 +12667,18 @@ member CIRectangleFeature -initWithRevenantBounds:topLeft:topRight:bottomLeft:bo
 member CIRectangleFeature -topLeft
 member CIRectangleFeature -topRight
 member CIRectangleFeature -type
+member CIRenderDestination -colorSpace
+member CIRenderDestination -dealloc
+member CIRenderDestination -initWithBitmapData:width:height:bytesPerRow:format:
+member CIRenderDestination -initWithMTLTexture:commandBuffer:
+member CIRenderDestination -initWithWidth:height:pixelFormat:commandBuffer:mtlTextureProvider:
+member CIRenderDestination -revenant_applyDefaults
+member CIRenderDestination -revenant_renderImage:context:error:
+member CIRenderDestination -setColorSpace:
+member CIRenderInfo -initWithKernelExecutionTime:passCount:pixelsProcessed:
+member CIRenderInfo -kernelCompileTime
+member CIRenderTask -initWithInfo:
+member CIRenderTask -waitUntilCompletedAndReturnError:
 member CITextFeature -bottomLeft
 member CITextFeature -bottomRight
 member CITextFeature -bounds
