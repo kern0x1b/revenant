@@ -489,6 +489,11 @@ local function property_getter(declaration)
     return declaration:match("getter%s*=%s*([%a_][%w_]*)")
 end
 
+local function property_sign(declaration)
+    local attributes = declaration:match("%(([^)]*)%)")
+    return attributes and attributes:find("%f[%w_]class%f[^%w_]") and "+" or "-"
+end
+
 local function property_name(declaration)
     local text = declaration:gsub("%b()", "")
     local name = nil
@@ -688,7 +693,7 @@ local function lowering_of(text, implemented, declarations)
                 local declaration = text:sub(mark + 1, declared_end)
                 local name = property_name(declaration)
                 local getter = property_getter(declaration) or name
-                local sign = declaration:find("%(%s*class") and "+" or "-"
+                local sign = property_sign(declaration)
                 if name and (members[sign .. getter] or members[sign .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
@@ -737,7 +742,7 @@ local function lowering_of(text, implemented, declarations)
                 local declaration = text:sub(mark + 1, declared_end)
                 local property = property_name(declaration)
                 local getter = property_getter(declaration) or property
-                local sign = declaration:find("%(%s*class") and "+" or "-"
+                local sign = property_sign(declaration)
                 if property and (members[sign .. getter] or members[sign .. property]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
@@ -860,70 +865,6 @@ local function corpus_of(src)
     return corpora[src]
 end
 
-local function usage_index(corpus, keyed, unary)
-    local index, sets, count = {}, {}, 0
-    for statement in corpus:gmatch("[^;]+") do
-        local bracket = statement:find("[", 1, true) or statement:find("@selector", 1, true) or statement:find(".", 1, true)
-        local found = nil
-        for token in statement:gmatch("[%a_][%w_]*:?") do
-            local hit
-            if token:sub(-1) == ":" then
-                hit = keyed[token]
-            else
-                hit = bracket and unary[token]
-            end
-            if hit then
-                found = found or {}
-                found[token] = true
-            end
-        end
-        if found then
-            count = count + 1
-            sets[count] = found
-            for token in pairs(found) do
-                index[token] = index[token] or {}
-                table.insert(index[token], count)
-            end
-        end
-    end
-    return {index = index, sets = sets}
-end
-
-local function usage_of(usage, selector)
-    local parts = {}
-    if selector:find(":", 1, true) then
-        for part in selector:gmatch("[%w_]+:") do
-            table.insert(parts, part)
-        end
-    else
-        parts[1] = selector
-    end
-    local rarest = nil
-    for _, part in ipairs(parts) do
-        local ids = usage.index[part]
-        if not ids then
-            return false
-        end
-        if not rarest or #ids < #usage.index[rarest] then
-            rarest = part
-        end
-    end
-    for _, id in ipairs(usage.index[rarest]) do
-        local set = usage.sets[id]
-        local all = true
-        for _, part in ipairs(parts) do
-            if not set[part] then
-                all = false
-                break
-            end
-        end
-        if all then
-            return true
-        end
-    end
-    return false
-end
-
 local function method_keys(block)
     local keys, at = {}, 1
     while true do
@@ -949,7 +890,7 @@ local function method_keys(block)
         local name = property_name(declaration)
         if name then
             local getter = property_getter(declaration) or name
-            table.insert(keys, {key = (declaration:find("%(%s*class") and "+" or "-") .. getter, selector = getter})
+            table.insert(keys, {key = property_sign(declaration) .. getter, selector = getter})
         end
         at = mark + 1
     end
@@ -971,6 +912,92 @@ local function protocol_blocks(sdk, names)
         end
     end
     return blocks
+end
+
+local function add_to(map, key, value)
+    map[key] = map[key] or {}
+    map[key][value] = true
+end
+
+local function protocol_names(text, at)
+    local window = text:sub(at, at + 800)
+    local open = window:find("<", 1, true)
+    if not open or window:sub(1, open - 1):find("[{;@]") then
+        return {}
+    end
+    local names = {}
+    for name in window:sub(open + 1, (window:find(">", open, true) or #window + 1) - 1):gmatch("[%w_]+") do
+        table.insert(names, name)
+    end
+    return names
+end
+
+local function declarations_in(text, conformance)
+    for at in text:gmatch("()@interface%s") do
+        local window = text:sub(at, at + 300)
+        local class, after = window:match("^@interface%s+([%w_]+)%s*%(%s*[%w_]*%s*%)()")
+        if class then
+            for _, name in ipairs(protocol_names(text, at + after - 1)) do
+                add_to(conformance.direct, class, name)
+            end
+        else
+            local head, super
+            head, super, after = window:match("^@interface%s+([%w_]+)%s*:%s*([%w_]+)()")
+            if head then
+                conformance.supers[head] = super
+                for _, name in ipairs(protocol_names(text, at + after - 1)) do
+                    add_to(conformance.direct, head, name)
+                end
+            end
+        end
+    end
+    for at in text:gmatch("()@protocol%s") do
+        local name, after = text:match("^@protocol%s+([%w_]+)()", at)
+        if name then
+            for _, parent in ipairs(protocol_names(text, after)) do
+                add_to(conformance.parents, name, parent)
+            end
+        end
+    end
+end
+
+local function conformance_of(sdk, src)
+    local conformance = {supers = {}, direct = {}, parents = {}}
+    for _, framework in ipairs(os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))) do
+        for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
+            declarations_in(io.readfile(file), conformance)
+        end
+    end
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        for _, pattern in ipairs({"**.h", "**.m", "**.mm"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                declarations_in(io.readfile(file), conformance)
+            end
+        end
+    end
+    return conformance
+end
+
+local function protocols_of(conformance, class)
+    local names, found, seen = {}, {}, {}
+    local current = class
+    while current and not seen[current] do
+        seen[current] = true
+        for name in pairs(conformance.direct[current] or {}) do
+            table.insert(names, name)
+        end
+        current = conformance.supers[current]
+    end
+    while #names > 0 do
+        local name = table.remove(names)
+        if not found[name] then
+            found[name] = true
+            for parent in pairs(conformance.parents[name] or {}) do
+                table.insert(names, parent)
+            end
+        end
+    end
+    return found
 end
 
 function protocol_status(src, sdk, folders)
@@ -1001,39 +1028,40 @@ function protocol_status(src, sdk, folders)
         candidates[name] = true
     end
     local blocks = protocol_blocks(sdk, candidates)
-    local methods, keyed, unary = {}, {}, {}
+    local methods = {}
     for name in pairs(candidates) do
         methods[name] = blocks[name] and method_keys(blocks[name]) or {}
-        for _, method in ipairs(methods[name]) do
-            if method.selector:find(":", 1, true) then
-                for part in method.selector:gmatch("[%w_]+:") do
-                    keyed[part] = true
-                end
-            else
-                unary[method.selector] = true
+    end
+    local implementers = {}
+    for _, found in pairs(folders) do
+        for class, class_members in pairs(found.classes) do
+            for key in pairs(class_members) do
+                add_to(implementers, key, class)
             end
         end
     end
-    local usage = usage_index(corpus, keyed, unary)
-    local implemented_any = {}
-    for _, found in pairs(folders) do
-        for _, class_members in pairs(found.classes) do
-            for key in pairs(class_members) do
-                implemented_any[key:sub(2)] = true
-            end
+    local conformance = conformance_of(sdk, src)
+    local conforming = {}
+    local function conforms(class, name)
+        if not conforming[class] then
+            conforming[class] = protocols_of(conformance, class)
         end
+        return conforming[class][name]
     end
     local status = {backed = {}, uncalled = {}, members = {}}
     for name in pairs(candidates) do
-        local members, used = {}, false
+        local members, implements = {}, false
         for _, method in ipairs(methods[name]) do
-            if implemented_any[method.selector] or usage_of(usage, method.selector) then
-                members[method.key] = true
-                used = true
+            for class in pairs(implementers[method.key] or {}) do
+                if conforms(class, name) then
+                    members[method.key] = true
+                    implements = true
+                    break
+                end
             end
         end
         status.members[name] = members
-        if adopted[name] or defined[name] or used then
+        if adopted[name] or defined[name] or implements then
             status.backed[name] = true
         elseif typed[name] and blocks[name] then
             status.uncalled[name] = true

@@ -242,7 +242,11 @@ function main()
     io.writefile(protocol_header, table.concat({
         "@protocol SampleEnvironment <NSObject>",
         "@property (nonatomic, readonly) SampleTraits *traits API_AVAILABLE(ios(8.0));",
+        "@property (nonatomic, class, readonly) BOOL shared API_AVAILABLE(ios(8.0));",
         "- (void)traitsDidChange:(SampleTraits *)previous API_AVAILABLE(ios(8.0));",
+        "- (void)prepare API_AVAILABLE(ios(8.0));",
+        "- (void)reset API_AVAILABLE(ios(8.0));",
+        "- (void)track API_AVAILABLE(ios(8.0));",
         "@end",
         "",
     }, "\n"))
@@ -258,16 +262,56 @@ function main()
         "{",
         "    return nil;",
         "}",
+        "+ (BOOL)shared",
+        "{",
+        "    return YES;",
+        "}",
+        "- (void)prepare",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    os.mkdir(path.join(protocol_src, "Other"))
+    io.writefile(path.join(protocol_src, "Other", "SampleOther.h"), table.concat({
+        "@interface SampleOther : NSObject <SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Other", "SampleOther.m"), table.concat({
+        "@implementation SampleOther",
+        "- (void)reset",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleUnrelated.m"), table.concat({
+        "@implementation SampleUnrelated",
+        "- (void)traitsDidChange:(SampleTraits *)previous",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleUse.m"), table.concat({
+        "@implementation SampleUse",
+        "- (void)run:(SampleView *)view",
+        "{",
+        "    [view track];",
+        "}",
         "@end",
         "",
     }, "\n"))
     local status = lowered.protocol_status(protocol_src, protocol_sdk)
-    assert(status.members.SampleEnvironment and status.members.SampleEnvironment["-traits"] and not status.members.SampleEnvironment["-traitsDidChange:"],
-           "a protocol property Backports implements is a protocol member, and an unimplemented selector is not:\n" .. tostring(status.members.SampleEnvironment))
-    local protocol_text = io.readfile(protocol_header)
-    local protocol_lowered = lowered.lower_header(protocol_text, {classes = {}, functions = {}, globals = {}, protocols = {SampleEnvironment = true},
-                                                                  protocol_members = {SampleEnvironment = status.members.SampleEnvironment}})
-    assert(count(protocol_lowered, "AVAILABLE") == 1 and protocol_lowered:find("traitsDidChange:(SampleTraits *)previous API_AVAILABLE", 1, true)
-           and not protocol_lowered:find("traits API_AVAILABLE", 1, true),
-           "an implemented protocol property loses its availability, and the unimplemented selector keeps it:\n" .. protocol_lowered)
+    local members = status.members.SampleEnvironment
+    assert(members["-traits"] and members["+shared"] and members["-prepare"] and members["-reset"] and not members["-traitsDidChange:"] and not members["-track"],
+           "a protocol member is lowered when a class that conforms to the protocol implements it, in any folder, and not otherwise")
+    local protocol_lowered = lowered.lower_header(io.readfile(protocol_header), {classes = {}, functions = {}, globals = {}, protocols = {SampleEnvironment = true},
+                                                                                protocol_members = {SampleEnvironment = members}})
+    assert(count(protocol_lowered, "AVAILABLE") == 2 and protocol_lowered:find("traitsDidChange:(SampleTraits *)previous API_AVAILABLE", 1, true)
+           and protocol_lowered:find("track API_AVAILABLE", 1, true) and not protocol_lowered:find("traits API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("shared API_AVAILABLE", 1, true) and not protocol_lowered:find("prepare API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("reset API_AVAILABLE", 1, true),
+           "an implemented protocol member loses its availability, and a member Backports does not implement keeps it:\n" .. protocol_lowered)
 end
