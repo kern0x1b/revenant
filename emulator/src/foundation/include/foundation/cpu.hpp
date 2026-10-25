@@ -301,6 +301,8 @@ public:
         return *cpus_.at(index);
     }
     [[nodiscard]] std::optional<std::size_t> add_cpu();
+    void save_state(snapshot::Writer& out);
+    void load_state(snapshot::Reader& in);
     void set_process_id(std::uint32_t process_id);
     void set_jit_code_cache_size(std::size_t bytes);
     void prepare_primary_execution_resource();

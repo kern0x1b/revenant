@@ -5172,6 +5172,40 @@ void load_exclusive_monitor(
     monitor.Clear();
 }
 
+void CpuCluster::save_state(snapshot::Writer& out)
+{
+    snapshot::save(out, static_cast<std::uint64_t>(cpus_.size()));
+    for (const auto& cpu : cpus_) {
+        if (cpu->active_executor_ != nullptr)
+            throw snapshot::RefusedError { "cpu.active_executor" };
+        cpu->state_.save(out);
+    }
+    save_exclusive_monitor(out, monitor_);
+}
+
+void CpuCluster::load_state(snapshot::Reader& in)
+{
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    if (count > capacity()) {
+        throw snapshot::FormatError {
+            "snapshot holds more processors than the restored cluster can hold"
+        };
+    }
+    if (cpus_.size() > count) {
+        throw snapshot::FormatError {
+            "restored cluster already has more processors than the snapshot"
+        };
+    }
+    while (cpus_.size() < count) {
+        if (!add_cpu())
+            throw snapshot::FormatError { "cannot add a snapshot processor" };
+    }
+    for (const auto& cpu : cpus_)
+        cpu->state_.load(in);
+    load_exclusive_monitor(in, monitor_);
+}
+
 CpuCluster::CpuCluster(std::size_t processor_count, AddressSpace& memory)
     : CpuCluster { processor_count, processor_count, memory }
 {

@@ -54,6 +54,13 @@ target("emulator_foundation_cpu_thread_state_snapshot_test")
     add_deps("emulator_foundation")
     add_tests("foundation.cpu_thread_state_snapshot")
 
+target("emulator_foundation_cpu_cluster_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/cpu_cluster_snapshot_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("foundation.cpu_cluster_snapshot")
+
 target("emulator_foundation_exclusive_monitor_snapshot_test")
     set_kind("binary")
     set_default(false)
