@@ -1288,5 +1288,8 @@ int main(int argc, char** argv)
     } catch (const std::exception& error) {
         std::cerr << "emulator: " << error.what() << '\n';
         return 1;
+    } catch (...) {
+        std::cerr << "emulator: unknown error, not a std::exception\n";
+        return 1;
     }
 }

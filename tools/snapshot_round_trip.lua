@@ -56,6 +56,9 @@ local function parse(...)
     if not tonumber(options.time_scale) then
         raise("--time-scale must be a number\n" .. USAGE)
     end
+    -- The emulator runs from the save directory, so a relative path to it would not resolve there.
+    options.emulator = path.absolute(options.emulator)
+    options.work = path.absolute(options.work)
     if not options.save_ticks or not options.ticks or options.save_ticks <= 0 or
         options.save_ticks >= options.ticks or options.save_ticks % ALIGNMENT ~= 0 or
         options.ticks % ALIGNMENT ~= 0 then
@@ -90,7 +93,9 @@ local function boot(options, directory, label, ticks, extra)
     local status = os.execv(options.emulator, arguments, {try = true, curdir = directory,
         envs = {TMPDIR = tmp}, stdout = log, stderr = log .. ".err"})
     if status ~= 0 then
-        raise("%s exited with %s, see %s", label, tostring(status), log)
+        local reason = io.readfile(log .. ".err") or ""
+        raise("%s exited with %s running %s in %s, see %s and %s\n%s", label, tostring(status),
+            options.emulator, directory, log, log .. ".err", reason:sub(-4000))
     end
     return log
 end
