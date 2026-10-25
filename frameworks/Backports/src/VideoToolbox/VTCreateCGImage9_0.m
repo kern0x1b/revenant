@@ -6,57 +6,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
 #import <VideoToolbox/VideoToolbox.h>
-
-static uint8_t RevenantVTClamp(int value)
-{
-    return value < 0 ? 0 : value > 255 ? 255 : (uint8_t)value;
-}
-
-static int RevenantVTRoundQ10(int value)
-{
-    return (value + 512) >> 10;
-}
-
-static void RevenantVTConvertBiPlanar(uint8_t *out, size_t rowBytes, const uint8_t *luma, size_t lumaStride, const uint8_t *chroma, size_t chromaStride, size_t width, size_t height, BOOL fullRange, BOOL bt709)
-{
-    for (size_t row = 0; row < height; row++) {
-        for (size_t column = 0; column < width; column++) {
-            const int Y = luma[row * lumaStride + column];
-            const uint8_t *pair = chroma + (row / 2) * chromaStride + (column / 2) * 2;
-            const int Cb = pair[0] - 128;
-            const int Cr = pair[1] - 128;
-            int red, green, blue;
-            if (fullRange) {
-                const int scaled = Y << 10;
-                if (bt709) {
-                    red = scaled + 1613 * Cr;
-                    green = scaled - 192 * Cb - 479 * Cr;
-                    blue = scaled + 1900 * Cb;
-                } else {
-                    red = scaled + 1436 * Cr;
-                    green = scaled - 352 * Cb - 731 * Cr;
-                    blue = scaled + 1814 * Cb;
-                }
-            } else {
-                const int scaled = (Y - 16) * 1192;
-                if (bt709) {
-                    red = scaled + 1836 * Cr;
-                    green = scaled - 218 * Cb - 546 * Cr;
-                    blue = scaled + 2163 * Cb;
-                } else {
-                    red = scaled + 1634 * Cr;
-                    green = scaled - 401 * Cb - 833 * Cr;
-                    blue = scaled + 2065 * Cb;
-                }
-            }
-            uint8_t *pixel = out + row * rowBytes + column * 4;
-            pixel[0] = RevenantVTClamp(RevenantVTRoundQ10(blue));
-            pixel[1] = RevenantVTClamp(RevenantVTRoundQ10(green));
-            pixel[2] = RevenantVTClamp(RevenantVTRoundQ10(red));
-            pixel[3] = 255;
-        }
-    }
-}
+#import "VTConvertBiPlanar.h"
 
 static BOOL RevenantVTIsBT709(CVPixelBufferRef pixelBuffer)
 {
@@ -87,10 +37,14 @@ OSStatus VTCreateCGImageFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, CFDictio
     if (CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly) != kCVReturnSuccess)
         return kVTParameterErr;
     if (biPlanar) {
-        RevenantVTConvertBiPlanar(pixels.mutableBytes, rowBytes,
-                                  CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0), CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0),
-                                  CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1), CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1),
-                                  width, height, fullRange, RevenantVTIsBT709(pixelBuffer));
+#if defined(__ARM_NEON)
+        RevenantVTConvertBiPlanarNEON(pixels.mutableBytes, rowBytes,
+#else
+        RevenantVTConvertBiPlanarScalar(pixels.mutableBytes, rowBytes,
+#endif
+                                      CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0), CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0),
+                                      CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1), CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1),
+                                      width, height, fullRange, RevenantVTIsBT709(pixelBuffer));
     } else {
         const uint8_t *source = CVPixelBufferGetBaseAddress(pixelBuffer);
         const size_t sourceStride = CVPixelBufferGetBytesPerRow(pixelBuffer);

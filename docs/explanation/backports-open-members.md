@@ -90,10 +90,12 @@ What is open:
 What exists, from `frameworks/Backports/src/VideoToolbox/VTCreateCGImage9_0.m` and `VTIsHardwareDecodeSupported11_0.m`:
 
 - `VTCreateCGImageFromCVPixelBuffer` converts 8-bit bi-planar 4:2:0 NV12 (video and full range) and 32BGRA and 32ARGB to a
-  `CGImage` in sRGB. The matrix (BT.601 or BT.709) is read from `kCVImageBufferYCbCrMatrixKey`. The NV12 path is scalar C in
-  Q10 fixed point with nearest chroma. The host oracle `tests/VideoToolbox/conversion_test.m` runs the same seeded frames
-  through macOS and the backport: NV12 within 1 per channel in all four range and matrix cases, and 32BGRA and 32ARGB
-  exactly on valid premultiplied pixels. The check count is 21.
+  `CGImage` in sRGB. The matrix (BT.601 or BT.709) is read from `kCVImageBufferYCbCrMatrixKey`. The NV12 path is Q10 fixed
+  point with nearest chroma, in two forms in `src/VideoToolbox/VTConvertBiPlanar.c`: a scalar reference and a NEON path
+  (`vld2`, `vmlal`) that is used where the compiler defines `__ARM_NEON`. The host oracle `tests/VideoToolbox/conversion_test.m`
+  runs the same seeded frames through macOS and the backport: NV12 within 1 per channel in all four range and matrix cases,
+  and 32BGRA and 32ARGB exactly on valid premultiplied pixels. It also checks NEON against scalar bit for bit at widths that
+  exercise the tail (1, 15, 16, 17, 37, 1920). The check count is 45.
 - `VTIsHardwareDecodeSupported` answers for H.264 only. It creates a 320 by 240 format description with a 29-byte `avcC`
   and a decompression session that requires hardware acceleration, then reports whether the session was created. The
   oracle `tests/VideoToolbox/hardware_test.m` checks H.264 against macOS (both report yes), and HEVC and AV1 as no.
@@ -102,11 +104,12 @@ What exists, from `frameworks/Backports/src/VideoToolbox/VTCreateCGImage9_0.m` a
 
 What is open:
 
-- Bit depth: 10-bit bi-planar input is refused with `kVTPixelTransferNotSupportedErr`. macOS converts it, so the oracle
-  asserts the refusal rather than a match. Telegram's calls take 8-bit formats.
-- Speed: the conversion is scalar C. `vImage` has no YUV-to-ARGB conversion in the 6.1.3 export table, and no NEON path
-  is written. The per-frame time on the A5 is not measured.
-- Colour space: every image is tagged sRGB. A buffer's own colour attachments are not read.
+- 10-bit refused: 10-bit bi-planar input returns `kVTPixelTransferNotSupportedErr`. macOS converts it, so the oracle asserts
+  the refusal rather than a match. Telegram's calls take 8-bit formats.
+- Speed: on the host, 1920x1080 NV12 video range BT.709, 100 frames: scalar 33.1 Mpix/s, NEON 234.3 Mpix/s. The A5 is not
+  measured. `vImage` has no YUV-to-ARGB conversion in the 6.1.3 export table, so the NEON path is the only fast path.
+- sRGB without the buffer's colour attachments: every image is tagged sRGB. A buffer's own colour attachments (primaries,
+  transfer function) are not read, only the matrix.
 - Hardware: the H.264 check is verified on the host only. The session with the hardware requirement has not been run on an
   A5 device, so the device answer is unknown until it is. HEVC and AV1 report no by design: the A5 has no hardware decoder
   for either, and Telegram asks only about AV1.

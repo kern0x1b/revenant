@@ -4645,6 +4645,8 @@ function RevenantSpotlightDefaultItems
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTypedNode
+function RevenantVTConvertBiPlanarNEON
+function RevenantVTConvertBiPlanarScalar
 function SCNMatrix4EqualToMatrix4
 function SCNMatrix4FromGLKMatrix4
 function SCNMatrix4Invert
@@ -32875,8 +32877,6 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UIWindowSceneDelegate
 protocol UNUserNotificationCenterDelegate
-protocol VTFrameProcessorConfiguration
-protocol VTFrameProcessorParameters
 protocol WKNavigationDelegate
 protocol WKScriptMessageHandler
 protocol WKURLSchemeHandler
