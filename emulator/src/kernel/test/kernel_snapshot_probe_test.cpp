@@ -33,7 +33,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 47> saved_members {
+constexpr std::array<std::string_view, 71> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -81,22 +81,17 @@ constexpr std::array<std::string_view, 47> saved_members {
     "ck.pending_event_processors_",
     "ck.pending_event_poll_deadline_",
     "ck.local_timer_deadline_cache_",
-};
-
-constexpr std::array<std::string_view, 74> open_members {
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
-    "kss.kernel_events",
     "kss.next_route_message_identifier",
     "kss.next_route_socket_identifier",
     "kss.next_mach_object",
-    "kss.mach_kernel_send_rights",
     "kss.next_mach_wait_queue_sequence",
-    "kss.task_port_pids",
     "kss.mach_queue_generation",
     "kss.kernel_event_generation",
     "kss.shared_timer_deadline_cache_generation",
+    "kss.shared_timer_deadline_cache",
     "kss.shared_timer_deadline_cache_valid",
     "kss.io_event_generation",
     "kss.next_graphics_input_sequence",
@@ -107,10 +102,16 @@ constexpr std::array<std::string_view, 74> open_members {
     "kss.next_foreground_layer_sequence",
     "kss.next_clock_alarm",
     "kss.next_keybag_handle",
-    "kss.key_store",
     "kss.wifi_service_available",
     "kss.next_socket_pair",
     "kss.next_shared_memory_object",
+};
+
+constexpr std::array<std::string_view, 51> open_members {
+    "kss.kernel_events",
+    "kss.mach_kernel_send_rights",
+    "kss.task_port_pids",
+    "kss.key_store",
     "kss.processes",
     "kss.process_kevent_states",
     "hid.state_",

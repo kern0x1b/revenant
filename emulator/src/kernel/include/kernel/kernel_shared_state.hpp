@@ -47,6 +47,7 @@
 #include "foundation/device_security_profile.hpp"
 #include "foundation/display_geometry.hpp"
 #include "foundation/file_page_cache.hpp"
+#include "foundation/snapshot_io.hpp"
 #include "filesystem/hfs_metadata.hpp"
 #include "kernel/iokit_abi.hpp"
 #include "kernel/kernel_mach_task_identity.hpp"
@@ -1700,6 +1701,9 @@ struct KernelSharedState {
         foreground_transition_snapshot->terminal =
             foreground_transition_timestamp_locked();
     }
+
+    void save_scalar_state(snapshot::Writer& out) const;
+    void load_scalar_state(snapshot::Reader& in);
 
     std::mutex mach_mutex;
     std::shared_ptr<bsd::sandbox::Extensions> sandbox_extensions;

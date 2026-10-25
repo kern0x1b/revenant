@@ -102,6 +102,13 @@ target("emulator_kernel_bookkeeping_snapshot_test")
     add_deps("emulator_kernel")
     add_tests("kernel.bookkeeping_snapshot")
 
+target("emulator_kernel_shared_state_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/kernel_shared_state_snapshot_test.cpp")
+    add_deps("emulator_kernel")
+    add_tests("kernel.shared_state_snapshot")
+
 target("emulator_kernel_snapshot_probe_test")
     set_kind("binary")
     set_default(false)
@@ -113,7 +120,7 @@ target("emulator_kernel")
     set_kind("static")
     add_files("kernel.cpp", "commpage.cpp", "hid_event_system_hle.cpp", "hid_event_transaction.cpp",
               "hid_switch_query.cpp", "clock.cpp", "iokit.cpp", "iokit/diagnostic_data.cpp", "vnode_watch.cpp",
-              "kevent_timer.cpp", "kernel_snapshot.cpp", "network.cpp")
+              "kevent_timer.cpp", "kernel_snapshot.cpp", "kernel_shared_state_snapshot.cpp", "network.cpp")
     add_files("bsd/dispatch.cpp", "bsd/platform.cpp", "bsd/pthread_runtime.cpp", "bsd/psynch_runtime.cpp",
               "bsd/psynch.cpp", "bsd/aio.cpp", "bsd/audit_session.cpp", "bsd/guarded_file.cpp", "bsd/fileport.cpp",
               "bsd/process.cpp", "bsd/posix_semaphore.cpp", "bsd/filesystem.cpp", "bsd/descriptor_lifecycle.cpp",
