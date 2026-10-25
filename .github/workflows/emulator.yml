@@ -19,6 +19,10 @@ on:
         description: For snapshot, the CPU ticks the snapshot is saved at, a multiple of 1048576 below ticks
         type: string
         default: "1048576"
+      negative_control:
+        description: For snapshot, add one executed tick to the restore and expect the comparison to report a difference
+        type: boolean
+        default: false
       control:
         description: The branch or commit of origin the control emulator is built from, for measure
         type: string
@@ -154,13 +158,38 @@ jobs:
         timeout-minutes: 90
         run: ./xmakew test -P . repository/layout repository/comments_check 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' --output-on-failure
 
+      - name: Perturb the restore for the negative control
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        run: |
+          perl -0pi -e 's/(loop_state\.executed_ticks = restored_snapshot->header\.ticks;)/$1 loop_state.executed_ticks += 1;/' emulator/src/runtime/emulator_session.cpp
+          grep -q 'executed_ticks += 1;' emulator/src/runtime/emulator_session.cpp
+
+      - name: Rebuild the perturbed emulator
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 60
+        run: ./xmakew build -P . emulator
+
       - name: Round trip a snapshot through save, cold and restore
-        if: inputs.job == 'snapshot'
+        if: inputs.job == 'snapshot' && !inputs.negative_control
         timeout-minutes: 200
         run: |
           out="$RUNNER_TEMP/out"
           mkdir -p "$out"
           ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
+
+      - name: Expect the comparison to fail on the perturbed restore
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          if ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" > "$out/comparison.txt" 2>&1; then
+            cat "$out/comparison.txt"
+            echo "negative control: the comparison passed on a perturbed restore" >&2
+            exit 1
+          fi
+          cat "$out/comparison.txt"
+          grep -q 'snapshots differ in' "$out/comparison.txt"
 
       - name: Build the control emulator from the control ref
         if: inputs.job == 'measure'
