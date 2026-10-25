@@ -161,6 +161,7 @@ jobs:
           mkdir -p "$out" "$boot"
           cp -c -R "$ROOTFS" "$boot/rootfs"
           build/macosx/arm64/release/emulator boot --rootfs "$boot/rootfs" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$TICKS" --perf-summary --output "$out/perf-summary.txt" 2> "$out/boot.log"
+          chmod -R u+w "$boot"
           rm -rf "$boot"
           df -h /
 
@@ -182,6 +183,7 @@ jobs:
               clone="$scratch/$side-$round"
               cp -c -R "$ROOTFS" "$clone"
               /usr/bin/time -l -o "$out/time-$side-$round.txt" "$bin" boot --rootfs "$clone" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$TICKS" --perf-summary --output "$out/perf-$side-$round.txt" 2> "$out/boot-$side-$round.log"
+              chmod -R u+w "$clone"
               rm -rf "$clone"
               awk -v round="$round" -v side="$side" '
                 $2 == "real" { real = $1; user = $3; sys = $5 }
@@ -204,7 +206,9 @@ jobs:
 
       - name: Delete the scratch of the run
         if: always()
-        run: rm -rf "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"
+        run: |
+          chmod -R u+w "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" 2>/dev/null || true
+          rm -rf "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"
 
       - name: Measure the disk
         if: always()
