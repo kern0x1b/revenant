@@ -607,6 +607,7 @@ void CoreAudioHle::complete_io_proc(UserlandHleCall& call,
         call.output().line(
             "[coreaudio-device] io-proc pid=" + std::to_string(process_id) +
             " callbacks=" + std::to_string(registration->callback_count) +
+            " underruns=" + std::to_string(registration->underruns) +
             " bytes=" + std::to_string(byte_count) +
             " peak=" + std::to_string(registration->peak_since_report) +
             " gain=" + std::to_string(applied_gain) +
@@ -1128,7 +1129,9 @@ void CoreAudioHle::remove_io_proc(UserlandHleCall& call)
     }
     call.output().line("[coreaudio-device] io-proc remove pid=" +
                        std::to_string(call.process_id()) + " callbacks=" +
-                       std::to_string(registration->second.callback_count));
+                       std::to_string(registration->second.callback_count) +
+                       " underruns=" +
+                       std::to_string(registration->second.underruns));
     if (registration->second.processor)
         retired_io_proc_threads_.push_back(*registration->second.processor);
     io_procs_.erase(registration);
@@ -1228,7 +1231,9 @@ void CoreAudioHle::stop_io(UserlandHleCall& call)
         call.output().line("[coreaudio-device] native-io-proc stop pid=" +
                            std::to_string(call.process_id()) + " id=" +
                            std::to_string(call.argument(1)) + " callbacks=" +
-                           std::to_string(registration->second.callback_count));
+                           std::to_string(registration->second.callback_count) +
+                           " underruns=" +
+                           std::to_string(registration->second.underruns));
         call.set_return(0);
         return;
     }
@@ -1245,7 +1250,9 @@ void CoreAudioHle::stop_io(UserlandHleCall& call)
     }
     call.output().line("[coreaudio-device] io-proc stop pid=" +
                        std::to_string(call.process_id()) + " callbacks=" +
-                       std::to_string(registration->second.callback_count));
+                       std::to_string(registration->second.callback_count) +
+                       " underruns=" +
+                       std::to_string(registration->second.underruns));
     call.set_return(0);
 }
 
