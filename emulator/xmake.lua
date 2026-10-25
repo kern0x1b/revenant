@@ -78,16 +78,21 @@ rule("emulator.glsl")
     on_load(function (target)
         target:add("includedirs", path.join(target:autogendir(), "shaders"))
     end)
-    on_buildcmd_file(function (target, batchcmds, sourcefile, opt)
+    before_build(function (target)
         local compiler = target:dep("emulator_glsl_to_spirv"):targetfile()
-        local output = path.join(target:autogendir(), "shaders", path.filename(sourcefile) .. ".inc")
-        batchcmds:show_progress(opt.progress, "${color.build.object}compiling.glsl %s", sourcefile)
-        batchcmds:mkdir(path.directory(output))
-        batchcmds:vrunv(compiler, {path.extension(sourcefile):sub(2), sourcefile, output})
-        batchcmds:add_depfiles(sourcefile, compiler)
-        batchcmds:set_depmtime(os.mtime(output))
-        batchcmds:set_depcache(target:dependfile(output))
+        local outdir = path.join(target:autogendir(), "shaders")
+        os.mkdir(outdir)
+        for _, sourcefile in ipairs(target:sourcefiles()) do
+            local extension = path.extension(sourcefile)
+            local output = path.join(outdir, path.filename(sourcefile) .. ".inc")
+            if (extension == ".vert" or extension == ".frag") and
+                (not os.isfile(output) or os.mtime(output) < os.mtime(sourcefile) or os.mtime(output) < os.mtime(compiler)) then
+                cprint("${color.build.object}compiling.glsl %s", sourcefile)
+                os.vrunv(compiler, {path.extension(sourcefile):sub(2), sourcefile, output})
+            end
+        end
     end)
+    on_buildcmd_file(function () end)
 rule_end()
 
 set_plat("macosx")
