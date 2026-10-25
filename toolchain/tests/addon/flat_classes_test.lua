@@ -63,5 +63,32 @@ function failures(arguments)
     if bound:find("(from Foundation)", 1, true) or not bound:find("(dynamically looked up)", 1, true) then
         table.insert(found, "the app's NSURLComponents reference binds to Foundation instead of the flat namespace: " .. bound)
     end
+    local dyld = import("dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules", "apple"), anonymous = true})
+    local outside_source = path.join(output, "outside.c")
+    io.writefile(outside_source, "extern char OBJC_CLASS_$_RevenantNotFlat;\nvoid *keep __attribute__((used)) = &OBJC_CLASS_$_RevenantNotFlat;\nint main(void) { return 0; }\n")
+    local outside_object = path.join(output, "outside.o")
+    local outside = path.join(output, "outside")
+    local outside_log = path.join(output, "outside.log")
+    local outside_built = os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-c", outside_source, "-o", outside_object}),
+                                   {try = true, stdout = outside_log, stderr = outside_log})
+    local outside_linked = outside_built == 0 and os.execv(arguments.clang, table.join(ios6(arguments.sdk), {outside_object, "-framework", "Foundation",
+                                   "-Xlinker", "-U", "-Xlinker", "_OBJC_CLASS_$_RevenantNotFlat", "-o", outside}),
+                                   {try = true, stdout = outside_log, stderr = outside_log})
+    if outside_linked ~= 0 then
+        table.insert(found, "the probe with a flat-bound class outside the table did not link: " .. (io.readfile(outside_log) or ""))
+        return found
+    end
+    local cachefile = path.join(workspace.home(), "dyld", "6.0", "dyld_shared_cache_armv7")
+    local reported = {}
+    for _, entry in ipairs((dyld.missing_imports(cachefile, {app, outside}, output))) do
+        table.insert(reported, entry[1] .. " " .. entry[2])
+    end
+    local text = table.concat(reported, "\n")
+    if not text:find("outside _OBJC_CLASS_$_RevenantNotFlat", 1, true) then
+        table.insert(found, "a flat-bound class outside the table passed the install check: " .. text)
+    end
+    if text:find("NSURLComponents", 1, true) then
+        table.insert(found, "a flat-bound class in the table was reported missing: " .. text)
+    end
     return found
 end
