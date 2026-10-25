@@ -420,7 +420,7 @@ index d8e7594cbfbd5f76cec9b4ee4eee04d9381f4133..ed360da4f931563c9e492a7e0d86bc14
 +            int64_t firstValue = cases[start].caseValue();
 +            int64_t lastValue = cases[end - 1].caseValue();
 +            if ((lastValue - firstValue + 1) / (end - start) < densityLimit) {
-+                size_t tableSize = lastValue - firstValue + 1 + 1; // + 1 for fallthrough
++                size_t tableSize = lastValue - firstValue + 1 + 1;
 +                Value* index = before->appendNew<Value>(m_proc, Sub, m_origin, child, before->appendIntConstant(m_proc, m_origin, type, firstValue));
                  Value* fallthroughIndex = before->appendIntConstant(m_proc, m_origin, type, tableSize - 1);
                  index = before->appendNew<B3::Value>(m_proc, Select, m_origin, before->appendNew<Value>(m_proc, AboveEqual, m_origin, index, fallthroughIndex), fallthroughIndex, index);
@@ -494,11 +494,10 @@ diff --git a/Source/JavaScriptCore/b3/B3LowerToAir.cpp b/Source/JavaScriptCore/b
 index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75ba9f1a659 100644
 --- a/Source/JavaScriptCore/b3/B3LowerToAir.cpp
 +++ b/Source/JavaScriptCore/b3/B3LowerToAir.cpp
-@@ -29,6 +29,24 @@
+@@ -29,6 +29,23 @@
  
  #if ENABLE(B3_JIT)
  
-+// On Windows, there's macros for these which interfere with the opcodes
 +#pragma push_macro("RotateLeft32")
 +#pragma push_macro("RotateLeft64")
 +#pragma push_macro("RotateRight32")
@@ -519,7 +518,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
  #include "AirBlockInsertionSet.h"
  #include "AirCCallSpecial.h"
  #include "AirCCallingConvention.h"
-@@ -67,25 +85,6 @@
+@@ -67,25 +84,6 @@
  #include <wtf/Scope.h>
  #include <wtf/StdLibExtras.h>
  
@@ -545,7 +544,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
  #if !ASSERT_ENABLED
  IGNORE_RETURN_TYPE_WARNINGS_BEGIN
  #endif
-@@ -561,7 +560,7 @@ private:
+@@ -561,7 +559,7 @@ private:
      }
  
      template<IsLegalOffset Int>
@@ -554,7 +553,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
      {
          if (shl->opcode() != Shl)
              return std::nullopt;
-@@ -578,7 +577,7 @@ private:
+@@ -578,7 +576,7 @@ private:
          if (!isRepresentableAs<int32_t>(bigScale))
              return std::nullopt;
          unsigned scale = static_cast<int32_t>(bigScale);
@@ -563,7 +562,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              return std::nullopt;
          return scale;
      }
-@@ -607,7 +606,7 @@ private:
+@@ -607,7 +605,7 @@ private:
              Value* right = address->child(1);
  
              auto tryIndex = [&] (Value* index, Value* base) -> Arg {
@@ -572,7 +571,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
                  if (!scale)
                      return Arg();
                  if (m_locked.contains(index->child(0)) || m_locked.contains(base))
-@@ -621,7 +620,7 @@ private:
+@@ -621,7 +619,7 @@ private:
                  return result;
  
              if (m_locked.contains(left) || m_locked.contains(right)
@@ -581,7 +580,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
                  return fallback();
  
              if (isMergeableValue(left, ZExt32) || isMergeableValue(left, SExt32))
-@@ -636,7 +635,7 @@ private:
+@@ -636,7 +634,7 @@ private:
              // amount is greater than 1, then there isn't really anything smart that we could do here.
              // We avoid using baseless indexes because their encoding isn't particularly efficient.
              if (m_locked.contains(left) || !address->child(1)->isInt32(1)
@@ -590,7 +589,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
                  return fallback();
  
              return indexArg(tmp(left), left, 1, offset);
-@@ -654,15 +653,10 @@ private:
+@@ -654,15 +652,10 @@ private:
              // Why don't we need to check m_locked for the WasmAddressValue itself? It is purely used for address computation,
              // which is different from the other operations. And we already know that numUses(address) is below the threshold.
              // If we ensure that all use of WasmAddress gets indexArg form, we do not need to have WasmAddressValue's instruction actually.
@@ -608,7 +607,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
          }
  
          default:
-@@ -1156,6 +1150,12 @@ private:
+@@ -1156,6 +1149,12 @@ private:
          append(opcode, tmp(right), result);
      }
  
@@ -621,7 +620,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
      template<Air::Opcode opcode32, Air::Opcode opcode64>
      void appendShift(Value* value, Value* amount)
      {
-@@ -1323,6 +1323,7 @@ private:
+@@ -1323,6 +1322,7 @@ private:
              }
              break;
          case Width64:
@@ -629,7 +628,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              switch (bank) {
              case GP:
                  return Move;
-@@ -1331,7 +1332,7 @@ private:
+@@ -1331,7 +1331,7 @@ private:
              }
              break;
          case Width128:
@@ -638,7 +637,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              RELEASE_ASSERT(bank == FP);
              return MoveVector;
          }
-@@ -1674,9 +1675,34 @@ private:
+@@ -1674,9 +1674,34 @@ private:
          }
  
          Tmp maskTmp = m_code.newTmp(FP);
@@ -676,7 +675,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
  
          Tmp vectorTmp = m_code.newTmp(FP);
  
-@@ -1695,14 +1721,14 @@ private:
+@@ -1695,14 +1720,14 @@ private:
  
      // Kept for debugging: emits a runtime print of the given values.
      template<typename... Arguments>
@@ -693,7 +692,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
      {
          auto printList = Printer::makePrintRecordList(arguments...);
          auto printSpecial = static_cast<Air::PrintSpecial*>(m_code.addSpecial(makeUnique<Air::PrintSpecial>(printList)));
-@@ -1820,11 +1846,6 @@ private:
+@@ -1820,11 +1845,6 @@ private:
                  break;
              }
              case ValueRep::LateRegister:
@@ -705,7 +704,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              case ValueRep::Register: {
                  stackmap->earlyClobbered().remove(value.rep().reg());
                  Tmp dstTmp = Tmp(value.rep().reg());
-@@ -3316,7 +3337,7 @@ private:
+@@ -3316,7 +3336,7 @@ private:
          }
          
          auto tryShl = [&] (Value* shl, Value* other) -> bool {
@@ -714,7 +713,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              if (!scale)
                  return false;
              if (!canBeInternal(shl))
-@@ -4089,35 +4110,6 @@ private:
+@@ -4089,35 +4109,6 @@ private:
              if (tryAppendMultiplyWithExtend())
                  return;
  
@@ -750,7 +749,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              appendBinOp<Mul32, Mul64, MulDouble, MulFloat, Commutative>(left, right);
              return;
          }
-@@ -6085,7 +6077,7 @@ private:
+@@ -6085,7 +6076,7 @@ private:
  
          case B3::CCall: {
              CCallValue* cCall = m_value->as<CCallValue>();
@@ -759,7 +758,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
              if (deferToAfterRegAlloc) {
                  m_procedure.setUsesColdCCall(true);
  
-@@ -6198,8 +6190,12 @@ private:
+@@ -6198,8 +6189,12 @@ private:
                  break;
              case Int64:
                  append(Move, cCallResult(m_code, cCall, 0), resultDst0);
@@ -772,7 +771,7 @@ index 138d3f9ab5aa74ac64ccda20e7bcb52b12c2d2fb..143b2269aaa943f48e7f352cebe1d75b
                  append(MoveVector, cCallResult(m_code, cCall, 0), resultDst0);
                  break;
              }
-@@ -6862,6 +6858,8 @@ IGNORE_RETURN_TYPE_WARNINGS_END
+@@ -6862,6 +6857,8 @@ IGNORE_RETURN_TYPE_WARNINGS_END
  
  WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
  
@@ -3582,18 +3581,17 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
  
      if (argumentCount < BankInfo::numberOfArgumentRegisters) {
          for (unsigned i = 0; i < registerCount; i++)
-@@ -53,8 +55,9 @@ void marshallCCallArgumentImpl(Vector<Arg>& result, unsigned& argumentCount, Val
+@@ -53,8 +55,8 @@ void marshallCCallArgumentImpl(Vector<Arg>& result, unsigned& argumentCount, Val
      }
  
      unsigned slotSize, slotAlignment;
 -    if (isARM64() && isDarwin()) {
 +    if ((isARM64() && isDarwin()) || isARM_THUMB2()) {
          // Arguments are packed to their natural alignment.
-+        //
          slotSize = bytesForWidth(cCallArgumentRegisterWidth(childType));
  
          // but the logical stack slot uses the natural alignment of the argument
-@@ -108,11 +111,18 @@ size_t cCallResultCount(Code& code, CCallValue* value)
+@@ -108,11 +110,18 @@ size_t cCallResultCount(Code& code, CCallValue* value)
      switch (value->type().kind()) {
      case Void:
          return 0;
@@ -3613,7 +3611,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
          ASSERT(code.proc().typeAtOffset(value->type(), 1) == pointerType());
          return 2;
      default:
-@@ -120,12 +130,24 @@ size_t cCallResultCount(Code& code, CCallValue* value)
+@@ -120,12 +129,24 @@ size_t cCallResultCount(Code& code, CCallValue* value)
  
      }
  }
@@ -3638,7 +3636,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
      case Tuple:
          RELEASE_ASSERT_NOT_REACHED();
      default:
-@@ -135,6 +157,11 @@ size_t cCallArgumentRegisterCount(Type type)
+@@ -135,6 +156,11 @@ size_t cCallArgumentRegisterCount(Type type)
  
  Width cCallArgumentRegisterWidth(Type type)
  {
@@ -3650,7 +3648,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
      return widthForType(type);
  }
  
-@@ -147,6 +174,8 @@ Tmp cCallResult(Code& code, CCallValue* value, unsigned index)
+@@ -147,6 +173,8 @@ Tmp cCallResult(Code& code, CCallValue* value, unsigned index)
      case Int32:
          return Tmp(GPRInfo::returnValueGPR);
      case Int64:
@@ -3659,7 +3657,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
          return Tmp(GPRInfo::returnValueGPR);
      case Float:
      case Double:
-@@ -155,7 +184,10 @@ Tmp cCallResult(Code& code, CCallValue* value, unsigned index)
+@@ -155,7 +183,10 @@ Tmp cCallResult(Code& code, CCallValue* value, unsigned index)
      case Tuple:
          ASSERT_UNUSED(code, code.proc().resultCount(value->type()) == 2);
          // We only support functions that return each parameter in its own register for now.
@@ -3671,7 +3669,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
          ASSERT(code.proc().typeAtOffset(value->type(), 1) == registerType());
          return index ? Tmp(GPRInfo::returnValueGPR2) : Tmp(GPRInfo::returnValueGPR);
      case V128:
-@@ -182,17 +214,37 @@ Inst buildCCall(Code& code, Value* origin, const Vector<Arg>& arguments)
+@@ -182,17 +213,37 @@ Inst buildCCall(Code& code, Value* origin, const Vector<Arg>& arguments)
      return Inst(Patch, origin, WTF::move(args));
  }
  
@@ -3716,7 +3714,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
  }
  
  Value* ArgumentValueList::makeCCallValue(B3::BasicBlock* block, size_t idx) const
-@@ -215,7 +267,11 @@ Value* ArgumentValueList::makeCCallValue(B3::BasicBlock* block, size_t idx) cons
+@@ -215,7 +266,11 @@ Value* ArgumentValueList::makeCCallValue(B3::BasicBlock* block, size_t idx) cons
  
      case Int64:
          RELEASE_ASSERT(argCount == sizeof(uint64_t) / sizeof(uintptr_t));
@@ -3728,7 +3726,7 @@ index b867ddf00a0e29fb69eabdb38243289290f94543..d571c3189c8abb2fc01bd6cb299241f7
  
      default:
          RELEASE_ASSERT_NOT_REACHED();
-@@ -233,6 +289,15 @@ ArgumentValueList computeCCallArguments(Procedure& procedure, B3::BasicBlock* bl
+@@ -233,6 +288,15 @@ ArgumentValueList computeCCallArguments(Procedure& procedure, B3::BasicBlock* bl
  
      for (auto type : types) {
          argUnderlyingCounts.append(underlyingArgs.size());
@@ -3985,14 +3983,13 @@ diff --git a/Source/JavaScriptCore/b3/air/AirLowerStackArgs.cpp b/Source/JavaScr
 index 84335336f9ca270553b921d1d8f17c9abbf72895..5d8e51f83ca6926b07df406e1c679d750fc4ae3c 100644
 --- a/Source/JavaScriptCore/b3/air/AirLowerStackArgs.cpp
 +++ b/Source/JavaScriptCore/b3/air/AirLowerStackArgs.cpp
-@@ -39,15 +39,13 @@ void lowerStackArgs(Code& code)
+@@ -39,15 +39,12 @@ void lowerStackArgs(Code& code)
  {
      PhaseScope phaseScope(code, "lowerStackArgs"_s);
      
 -    // Now we need to deduce how much argument area we need. We always reserve the conservative
 -    // register bytes for Bank::FP because CallArgs do not record which bank they are.
 -    unsigned conservativeCallArgBytes = code.usesSIMD() ? conservativeRegisterBytes(Bank::FP) : conservativeRegisterBytesWithoutVectors(Bank::FP);
-+    // Now we need to deduce how much argument area we need.
      for (BasicBlock* block : code) {
          for (Inst& inst : *block) {
              for (Arg& arg : inst.args()) {
@@ -4003,7 +4000,7 @@ index 84335336f9ca270553b921d1d8f17c9abbf72895..5d8e51f83ca6926b07df406e1c679d75
                  }
              }
          }
-@@ -99,6 +97,9 @@ void lowerStackArgs(Code& code)
+@@ -99,6 +96,9 @@ void lowerStackArgs(Code& code)
                  insertionSet.insert(insertionIndex, Add64, inst.origin, Air::Tmp(MacroAssembler::stackPointerRegister), tmp);
                  result = Arg::addr(tmp, 0);
                  return result;
@@ -4013,7 +4010,7 @@ index 84335336f9ca270553b921d1d8f17c9abbf72895..5d8e51f83ca6926b07df406e1c679d75
  #elif CPU(X86_64)
                  UNUSED_PARAM(insertionIndex);
                  // Can't happen on x86: immediates are always big enough for frame size.
-@@ -182,19 +183,6 @@ void lowerStackArgs(Code& code)
+@@ -182,19 +182,6 @@ void lowerStackArgs(Code& code)
                  // Fall through to handle remainder of the original or modified inst, including potential ZDef handling.
              }
  
@@ -4033,7 +4030,7 @@ index 84335336f9ca270553b921d1d8f17c9abbf72895..5d8e51f83ca6926b07df406e1c679d75
              inst.forEachArg(
                  [&] (Arg& arg, Arg::Role role, Bank, Width width) {
                      switch (arg.kind()) {
-@@ -216,7 +204,7 @@ void lowerStackArgs(Code& code)
+@@ -216,7 +203,7 @@ void lowerStackArgs(Code& code)
                              Air::Opcode storeOpcode = Move32;
                              Air::Arg::Kind operandKind = Arg::ZeroReg;
                              Air::Arg operand = Arg::zeroReg();
@@ -4042,7 +4039,7 @@ index 84335336f9ca270553b921d1d8f17c9abbf72895..5d8e51f83ca6926b07df406e1c679d75
                              Air::Opcode storeOpcode = Move32;
                              Air::Arg::Kind operandKind = Arg::Imm;
                              Air::Arg operand = Arg::imm(0);
-@@ -248,4 +236,3 @@ void lowerStackArgs(Code& code)
+@@ -248,4 +235,3 @@ void lowerStackArgs(Code& code)
  } } } // namespace JSC::B3::Air
  
  #endif // ENABLE(B3_JIT)
@@ -5746,15 +5743,12 @@ diff --git a/Source/JavaScriptCore/b3/testb3.h b/Source/JavaScriptCore/b3/testb3
 index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e272813f0c 100644
 --- a/Source/JavaScriptCore/b3/testb3.h
 +++ b/Source/JavaScriptCore/b3/testb3.h
-@@ -226,6 +226,28 @@ struct ArgumentTweaker {
+@@ -226,6 +226,25 @@ struct ArgumentTweaker {
      }
  };
  
 +#if CPU(ARM_THUMB2)
 +
-+//
-+//
-+//
 +
 +struct FrankenFloat {
 +    float real;
@@ -5775,7 +5769,7 @@ index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e2
  template <typename T>
  using TweakedArgument = typename ArgumentTweaker<T>::Result;
  
-@@ -1138,14 +1160,6 @@ void testMulArgDouble(double);
+@@ -1138,14 +1157,6 @@ void testMulArgDouble(double);
  void testMulArgsDouble(double, double);
  void testMulNegArgsDouble();
  void testMulNegArgsFloat();
@@ -5790,7 +5784,7 @@ index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e2
  void testCallSimpleDouble(double, double);
  void testCallSimpleFloat(float, float);
  void testCallFunctionWithHellaDoubleArguments();
-@@ -1202,7 +1216,6 @@ void testSwitchSameCaseAsDefault();
+@@ -1202,7 +1213,6 @@ void testSwitchSameCaseAsDefault();
  void testSwitchChillDiv(unsigned degree, unsigned gap);
  void testSwitchTargettingSameBlock();
  void testSwitchTargettingSameBlockFoldPathConstant();
@@ -5798,7 +5792,7 @@ index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e2
  void testTruncFold(int64_t value);
  void testZExt32(int32_t value);
  void testZExt32Fold(int32_t value);
-@@ -1278,8 +1291,6 @@ void testLICMWritesPinned();
+@@ -1278,8 +1288,6 @@ void testLICMWritesPinned();
  void testLICMControlDependent();
  void testLICMControlDependentNotBackwardsDominant();
  void testLICMControlDependentSideExits();
@@ -5807,7 +5801,7 @@ index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e2
  void testLICMReadsPinnedWritesPinned();
  void testLICMReadsWritesDifferentHeaps();
  void testLICMReadsWritesOverlappingHeaps();
-@@ -1288,9 +1299,6 @@ void testDepend32();
+@@ -1288,9 +1296,6 @@ void testDepend32();
  void testDepend64();
  void testWasmBoundsCheck(unsigned offset);
  void testWasmAddress();
@@ -5817,7 +5811,7 @@ index d7f5871c732f5f1264439beaa0be687765dbba01..09625eebce077953b347951d6132c4e2
  void testFastTLSLoad();
  void testFastTLSStore();
  void testDoubleLiteralComparison(double, double);
-@@ -1549,7 +1557,6 @@ void testVectorShlByOne();
+@@ -1549,7 +1554,6 @@ void testVectorShlByOne();
  // SIMD vector shift by immediate
  void testVectorShlImmediate();
  void testVectorShrImmediate();
@@ -8035,7 +8029,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
 +
 +        static_assert(JSMap::Helper::EntrySize == 3);
 +        LValue multiplied = m_out.add(entry, m_out.shl(entry, m_out.constInt32(1)));
-+        LValue entryInButterfly = m_out.add(m_out.add(m_out.constInt32(JSMap::Helper::hashTableStartIndex() - JSMap::Helper::EntrySize), m_out.add(bucketCount, multiplied)), /* value offset */ m_out.constInt32(1));
++        LValue entryInButterfly = m_out.add(m_out.add(m_out.constInt32(JSMap::Helper::hashTableStartIndex() - JSMap::Helper::EntrySize), m_out.add(bucketCount, multiplied)),  m_out.constInt32(1));
 +        LValue value = m_out.load64(m_out.baseIndex(m_heaps.indexedContiguousProperties, butterfly, m_out.zeroExtPtr(entryInButterfly)));
 +        setJSValue(value);
      }
@@ -8643,7 +8637,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          LValue length;
          if (auto stringLength = tryGetConstantStringLength(m_node->child1()))
              length = m_out.constInt32(*stringLength);
-@@ -21252,45 +20878,26 @@ IGNORE_CLANG_WARNINGS_END
+@@ -21252,45 +20878,25 @@ IGNORE_CLANG_WARNINGS_END
              length = m_out.load32(impl, m_heaps.StringImpl_length);
          LValue buffer = m_out.loadPtr(impl, m_heaps.StringImpl_data);
          ValueFromBlock fastResult = m_out.anchor(string);
@@ -8691,7 +8685,6 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
 -        emitScanForCharacterNeedingConversion(is16Bit, loop16Top, loop16Body, slowPath, false);
 +        m_out.appendTo(loopBody, slowPath);
 +
-+        // https://bugs.webkit.org/show_bug.cgi?id=174924
 +        LValue byte = m_out.load8ZeroExt32(m_out.baseIndex(m_heaps.characters8, buffer, m_out.zeroExtPtr(index)));
 +        LValue isInvalidAsciiRange = m_out.bitAnd(byte, m_out.constInt32(~0x7F));
 +        LValue isLowerCase = m_out.belowOrEqual(m_out.sub(byte, m_out.constInt32('a')), m_out.constInt32('z' - 'a'));
@@ -8705,7 +8698,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          ValueFromBlock slowResult = m_out.anchor(vmCall(pointerType(), operationToUpperCase, weakPointer(globalObject), string, slowPathIndex));
          m_out.jump(continuation);
  
-@@ -21303,21 +20910,26 @@ IGNORE_CLANG_WARNINGS_END
+@@ -21303,21 +20909,26 @@ IGNORE_CLANG_WARNINGS_END
          JSGlobalObject* globalObject = m_graph.globalObjectFor(m_origin.semantic);
          LBasicBlock notRope = m_out.newBlock();
          LBasicBlock is8Bit = m_out.newBlock();
@@ -8737,7 +8730,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          LValue length;
          if (auto stringLength = tryGetConstantStringLength(m_node->child1()))
              length = m_out.constInt32(*stringLength);
-@@ -21325,45 +20937,26 @@ IGNORE_CLANG_WARNINGS_END
+@@ -21325,45 +20936,25 @@ IGNORE_CLANG_WARNINGS_END
              length = m_out.load32(impl, m_heaps.StringImpl_length);
          LValue buffer = m_out.loadPtr(impl, m_heaps.StringImpl_data);
          ValueFromBlock fastResult = m_out.anchor(string);
@@ -8785,7 +8778,6 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
 -        emitScanForCharacterNeedingConversion(is16Bit, loop16Top, loop16Body, slowPath, false);
 +        m_out.appendTo(loopBody, slowPath);
 +
-+        // https://bugs.webkit.org/show_bug.cgi?id=174924
 +        LValue byte = m_out.load8ZeroExt32(m_out.baseIndex(m_heaps.characters8, buffer, m_out.zeroExtPtr(index)));
 +        LValue isInvalidAsciiRange = m_out.bitAnd(byte, m_out.constInt32(~0x7F));
 +        LValue isUpperCase = m_out.belowOrEqual(m_out.sub(byte, m_out.constInt32('A')), m_out.constInt32('Z' - 'A'));
@@ -8799,7 +8791,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          ValueFromBlock slowResult = m_out.anchor(vmCall(pointerType(), operationToLowerCase, weakPointer(globalObject), string, slowPathIndex));
          m_out.jump(continuation);
  
-@@ -21742,7 +21335,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -21742,7 +21333,7 @@ IGNORE_CLANG_WARNINGS_END
                  Vector<FPRReg> fpScratch;
                  Vector<SnippetParams::Value> regs;
  
@@ -8808,7 +8800,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                  regs.append(SnippetParams::Value(params[1].gpr(), baseConstant));
                  if (domJIT->requireGlobalObject)
                      regs.append(SnippetParams::Value(params[2].gpr(), globalObjectConstant));
-@@ -22239,79 +21832,106 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22239,79 +21830,106 @@ IGNORE_CLANG_WARNINGS_END
          setDouble(vmCall(Double, operationDateNow));
      }
  
@@ -8949,7 +8941,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                  return m_out.sub(year, m_out.constInt32(1900));
              });
              break;
-@@ -22321,23 +21941,6 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22321,23 +21939,6 @@ IGNORE_CLANG_WARNINGS_END
          }
      }
  
@@ -8973,7 +8965,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
      void compileDateSet()
      {
          LValue base = lowDateObject(m_node->child1());
-@@ -22345,8 +21948,6 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22345,8 +21946,6 @@ IGNORE_CLANG_WARNINGS_END
          LValue time = m_out.add(m_out.doubleTrunc(arg), m_out.constDouble(0));
          LValue result = m_out.select(m_out.doubleGreaterThanOrUnordered(m_out.doubleAbs(arg), m_out.constDouble(WTF::maxECMAScriptTime)), m_out.constDouble(PNaN), time);
          m_out.storeDouble(result, base, m_heaps.DateInstance_internalNumber);
@@ -8982,7 +8974,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          setDouble(result);
      }
  
-@@ -22533,7 +22134,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22533,7 +22132,7 @@ IGNORE_CLANG_WARNINGS_END
                  }
              }
              restore();
@@ -8991,7 +8983,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
              jit.loadPtr(CCallHelpers::Address(GPRInfo::returnValueGPR, JSGlobalObject::offsetOfGlobalThis()), GPRInfo::returnValueGPR);
              params.code().emitEpilogue(jit);
  
-@@ -22864,8 +22465,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22864,8 +22463,8 @@ IGNORE_CLANG_WARNINGS_END
                      exceptionHandle->scheduleExitCreation(params)->jumps(jit);
  
                  auto generator = Box<BinaryArithOpGenerator>::create(
@@ -9002,7 +8994,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                      params.fpScratch(0), params.fpScratch(1), params.gpScratch(0),
                      scratchFPRUsage == NeedScratchFPR ? params.fpScratch(2) : InvalidFPRReg);
  
-@@ -22919,7 +22520,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22919,7 +22518,7 @@ IGNORE_CLANG_WARNINGS_END
          patchpoint->append(m_numberTag, ValueRep::lateReg(GPRInfo::numberTagRegister));
          RefPtr<PatchpointExceptionHandle> exceptionHandle =
              preparePatchpointForExceptions(patchpoint);
@@ -9011,7 +9003,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          patchpoint->clobber(RegisterSet::macroClobberedGPRs());
          patchpoint->resultConstraints = { ValueRep::SomeEarlyRegister };
          State* state = &m_ftlState;
-@@ -22931,17 +22532,9 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22931,17 +22530,9 @@ IGNORE_CLANG_WARNINGS_END
                  Box<CCallHelpers::JumpList> exceptions =
                      exceptionHandle->scheduleExitCreation(params)->jumps(jit);
  
@@ -9032,7 +9024,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
                  generator->generateFastPath(jit);
                  generator->endJumpList().link(&jit);
-@@ -22998,8 +22591,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -22998,8 +22589,8 @@ IGNORE_CLANG_WARNINGS_END
                      exceptionHandle->scheduleExitCreation(params)->jumps(jit);
  
                  auto generator = Box<JITRightShiftGenerator>::create(
@@ -9043,7 +9035,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                      params.fpScratch(0), params.gpScratch(0), shiftType);
  
                  generator->generateFastPath(jit);
-@@ -23989,17 +23582,9 @@ IGNORE_CLANG_WARNINGS_END
+@@ -23989,17 +23580,9 @@ IGNORE_CLANG_WARNINGS_END
              return;
          }
  
@@ -9061,7 +9053,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          LBasicBlock slowBlock = m_out.newBlock();
  
          m_out.branch(isRopeString(string, edge), rarely(isRopeBlock), usually(hasImplBlock));
-@@ -24020,55 +23605,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -24020,55 +23603,8 @@ IGNORE_CLANG_WARNINGS_END
              rarely(slowBlock), usually(is8BitBlock));
  
          m_out.appendTo(is8BitBlock, isRopeBlock);
@@ -9118,7 +9110,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
          // FIXME: We should propagate branch weight data to the cases of this switch.
          // https://bugs.webkit.org/show_bug.cgi?id=144368
-@@ -24077,7 +23615,16 @@ IGNORE_CLANG_WARNINGS_END
+@@ -24077,7 +23613,16 @@ IGNORE_CLANG_WARNINGS_END
          for (DFG::SwitchCase myCase : data->cases)
              cases.append(StringSwitchCase(myCase.value.stringImpl(), lowBlock(myCase.target.block)));
          std::sort(cases.begin(), cases.end());
@@ -9136,7 +9128,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
          m_out.appendTo(slowBlock, lastNext);
          switchStringSlow(data, string);
-@@ -24704,15 +24251,14 @@ IGNORE_CLANG_WARNINGS_END
+@@ -24704,15 +24249,14 @@ IGNORE_CLANG_WARNINGS_END
          }
  #endif
  
@@ -9155,7 +9147,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                  rarely(slowPath), usually(continuation));
  
              LBasicBlock lastNext = m_out.appendTo(slowPath, continuation);
-@@ -24725,7 +24271,6 @@ IGNORE_CLANG_WARNINGS_END
+@@ -24725,7 +24269,6 @@ IGNORE_CLANG_WARNINGS_END
  
          if (hasSensibleDoubleToInt())
              return sensibleDoubleToInt32(doubleValue);
@@ -9163,7 +9155,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
          auto doubleToInt32WithLimits = [&](LValue doubleValue, double low, double high, bool isSigned = true) {
              LBasicBlock greatEnough = m_out.newBlock();
-@@ -26238,13 +25783,6 @@ IGNORE_CLANG_WARNINGS_END
+@@ -26238,13 +25781,6 @@ IGNORE_CLANG_WARNINGS_END
          return m_out.testIsZeroPtr(m_out.loadPtr(string, m_heaps.JSString_value), m_out.constIntPtr(JSString::isRopeInPointer));
      }
  
@@ -9177,7 +9169,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
      LValue isNotSymbol(LValue cell, SpeculatedType type = SpecFullTop)
      {
          if (LValue proven = isProvenValue(type & SpecCell, ~SpecSymbol))
-@@ -26734,21 +26272,12 @@ IGNORE_CLANG_WARNINGS_END
+@@ -26734,21 +26270,12 @@ IGNORE_CLANG_WARNINGS_END
          if (!m_interpreter.needsTypeCheck(edge, SpecStringIdent | ~SpecString))
              return;
  
@@ -9199,7 +9191,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          m_interpreter.filter(edge, SpecStringIdent | ~SpecString);
      }
  
-@@ -27119,8 +26648,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27119,8 +26646,8 @@ IGNORE_CLANG_WARNINGS_END
          CallSiteIndex callSiteIndex = m_ftlState.jitCode->common.codeOrigins->addCodeOrigin(codeOrigin);
          m_out.store32(
              m_out.constInt32(callSiteIndex.bits()),
@@ -9210,7 +9202,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
          m_out.storePtr(m_callFrame, m_out.absolute(&vm().topCallFrame));
  #endif
      }
-@@ -27184,7 +26713,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27184,7 +26711,7 @@ IGNORE_CLANG_WARNINGS_END
              exception = m_out.load64(m_vmValue, m_heaps.VM_exception);
  
          if (Options::useExceptionFuzz()) {
@@ -9219,7 +9211,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
              m_out.storePtr(m_callFrame, m_out.absolute(&vm().topCallFrame));
  #endif
              m_out.call(Void, m_out.operation(operationExceptionFuzz), weakPointer(globalObject));
-@@ -27282,7 +26811,11 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27282,7 +26809,11 @@ IGNORE_CLANG_WARNINGS_END
                  }
              }
          }
@@ -9232,7 +9224,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
      }
  
      void appendOSRExit(
-@@ -27380,7 +26913,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27380,7 +26911,7 @@ IGNORE_CLANG_WARNINGS_END
              [=](CCallHelpers& jit, const B3::StackmapGenerationParams&) {
                  // Since we no longer use any registers, we can just use the macro scratch register freely. We will just jump to the thunk.
                  AllowMacroScratchRegisterUsage allowScratch(jit);
@@ -9241,7 +9233,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                  jit.jumpThunk(CodeLocationLabel(state->vm().getCTIStub(CommonJITThunkID::ThrowOutOfMemoryError).retaggedCode<NoPtrTag>()));
              });
      }
-@@ -27422,9 +26955,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27422,9 +26953,8 @@ IGNORE_CLANG_WARNINGS_END
                  }
              });
  
@@ -9253,7 +9245,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
              Availability availability = availabilityMap.m_locals[i];
  
-@@ -27438,9 +26970,8 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27438,9 +26968,8 @@ IGNORE_CLANG_WARNINGS_END
              ExitValue exitValue = exitValueForAvailability(arguments, map, availability);
              if (exitValue.hasIndexInStackmapLocations())
                  exitValue.adjustStackmapLocationsIndexByOffset(offsetOfExitArgumentsInStackmapLocations);
@@ -9264,7 +9256,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
  
          for (auto& heapPair : availabilityMap.m_heap) {
              Node* node = heapPair.key.base();
-@@ -27458,7 +26989,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27458,7 +26987,7 @@ IGNORE_CLANG_WARNINGS_END
  
          if (verboseCompilationEnabled()) [[unlikely]] {
              WTF::dataFile().atomically([&](auto&) {
@@ -9273,7 +9265,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
                  if (!exitDescriptor->m_materializations.isEmpty()) {
                      dataLogLn("        Materializations:");
                      for (ExitTimeObjectMaterialization* materialization : exitDescriptor->m_materializations)
-@@ -27768,13 +27299,13 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27768,13 +27297,13 @@ IGNORE_CLANG_WARNINGS_END
      {
          return m_out.address(base, m_heaps.variables[operand.virtualRegister().offset()], offset);
      }
@@ -9291,7 +9283,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
      }
      TypedPointer addressFor(Operand operand, ptrdiff_t offset = 0)
      {
-@@ -27786,21 +27317,21 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27786,21 +27315,21 @@ IGNORE_CLANG_WARNINGS_END
              return addressFor(m_captured, operand, offset);
          return addressFor(m_callFrame, operand, offset);
      }
@@ -9321,7 +9313,7 @@ index bec712e6670e59630fa1e6ae3985f3b234d99dfa..4b67b203eaf9c9a929571b65294f017a
      }
  
      AbstractValue abstractValue(Node* node)
-@@ -27863,10 +27394,7 @@ IGNORE_CLANG_WARNINGS_END
+@@ -27863,10 +27392,7 @@ IGNORE_CLANG_WARNINGS_END
          unsigned nodeIndex = node ? node->index() : UINT_MAX;
  #if !ASSERT_ENABLED
          auto nodeOp = node ? node->op() : LastNodeType;
@@ -10813,7 +10805,7 @@ index dafef6f38b638eb6e2caf6683a6eb098fa67aaab..1a8e9da1c936aafc31c92618bfe2c26e
 +#else
 +    unboxDouble(scrutineeRegs.tagGPR(), scrutineeRegs.payloadGPR(), fpRegT0);
 +#endif
-+    branchConvertDoubleToInt32(fpRegT0, scrutineeRegs.payloadGPR(), failureCases, fpRegT1, /* shouldCheckNegativeZero */ false);
++    branchConvertDoubleToInt32(fpRegT0, scrutineeRegs.payloadGPR(), failureCases, fpRegT1,  false);
      jump().linkTo(dispatch, this);
      addJump(failureCases, defaultOffset);
  
@@ -12740,7 +12732,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      LOG_INSTRUCTION("AnyConvertExtern", reference, RESULT(result));
      return { };
-@@ -3236,27 +3198,16 @@ PartialResult BBQJIT::addI32Extend8S(Value operand, Value& result)
+@@ -3236,27 +3198,15 @@ PartialResult BBQJIT::addI32Extend8S(Value operand, Value& result)
  
  [[nodiscard]] PartialResult BBQJIT::addRefFunc(FunctionSpaceIndex index, Value& result)
  {
@@ -12760,7 +12752,6 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
 -            jit.move(GPRInfo::returnValueGPR, resultGPR);
 -        } });
 -    }
-+    // FIXME: Emit this inline <https://bugs.webkit.org/show_bug.cgi?id=198506>.
 +    TypeKind returnType = TypeKind::Ref;
  
 -    result = topValue(TypeKind::Ref);
@@ -12776,7 +12767,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      return { };
  }
  
-@@ -3267,38 +3218,8 @@ void BBQJIT::emitEntryTierUpCheck()
+@@ -3267,38 +3217,8 @@ void BBQJIT::emitEntryTierUpCheck()
  
  #if ENABLE(WEBASSEMBLY_OMGJIT)
      static_assert(GPRInfo::nonPreservedNonArgumentGPR0 == wasmScratchGPR);
@@ -12816,7 +12807,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      MacroAssembler::Label tierUpResume = m_jit.label();
      addLatePath(origin(), [tierUp, tierUpResume](BBQJIT& generator, CCallHelpers& jit) {
          tierUp.link(&jit);
-@@ -3334,10 +3255,16 @@ void BBQJIT::emitEntryTierUpCheck()
+@@ -3334,10 +3254,16 @@ void BBQJIT::emitEntryTierUpCheck()
      JIT_COMMENT(m_jit, "Store boxed JIT callee");
      m_jit.move(CCallHelpers::TrustedImmPtr(CalleeBits::boxNativeCallee(&m_callee)), wasmScratchGPR);
      static_assert(CallFrameSlot::codeBlock + 1 == CallFrameSlot::callee);
@@ -12835,7 +12826,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      // Because we compile in a single pass, we always need to pessimistically check for stack underflow/overflow.
      static_assert(wasmScratchGPR == GPRInfo::nonPreservedNonArgumentGPR0);
-@@ -3345,6 +3272,9 @@ void BBQJIT::emitEntryTierUpCheck()
+@@ -3345,6 +3271,9 @@ void BBQJIT::emitEntryTierUpCheck()
  
      MacroAssembler::JumpList overflow;
      JIT_COMMENT(m_jit, "Stack overflow check");
@@ -12845,7 +12836,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      overflow.append(m_jit.branchPtr(CCallHelpers::LessThan, wasmScratchGPR, CCallHelpers::Address(GPRInfo::wasmContextInstancePointer, JSWebAssemblyInstance::offsetOfSoftStackLimit())));
      overflow.linkThunk(CodeLocationLabel<JITThunkPtrTag>(Thunks::singleton().stub(throwStackOverflowFromWasmThunkGenerator).code()), &m_jit);
  
-@@ -3365,7 +3295,7 @@ void BBQJIT::emitEntryTierUpCheck()
+@@ -3365,7 +3294,7 @@ void BBQJIT::emitEntryTierUpCheck()
  
      LocalOrTempIndex i = 0;
      for (; i < m_arguments.size(); ++i)
@@ -12854,7 +12845,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      // Zero all locals that aren't initialized by arguments.
      enum class ClearMode { Zero, JSNull };
-@@ -3436,13 +3366,19 @@ void BBQJIT::emitEntryTierUpCheck()
+@@ -3436,13 +3365,19 @@ void BBQJIT::emitEntryTierUpCheck()
  
      JIT_COMMENT(m_jit, "initialize locals");
      for (; i < m_locals.size(); ++i) {
@@ -12875,7 +12866,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          case TypeKind::V128:
              clear(ClearMode::Zero, type, m_locals[i]);
              break;
-@@ -3495,7 +3431,13 @@ MacroAssembler::Label BBQJIT::addLoopOSREntrypoint()
+@@ -3495,7 +3430,13 @@ MacroAssembler::Label BBQJIT::addLoopOSREntrypoint()
  
      m_jit.move(CCallHelpers::TrustedImmPtr(CalleeBits::boxNativeCallee(&m_callee)), wasmScratchGPR);
      static_assert(CallFrameSlot::codeBlock + 1 == CallFrameSlot::callee);
@@ -12890,7 +12881,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      // Because tiering up code materializes BaselineData, this is always non nullptr.
      m_jit.loadPtr(Address(GPRInfo::wasmContextInstancePointer, JSWebAssemblyInstance::offsetOfBaselineData(m_info, m_functionIndex)), GPRInfo::jitDataRegister);
-@@ -3511,7 +3453,12 @@ MacroAssembler::Label BBQJIT::addLoopOSREntrypoint()
+@@ -3511,7 +3452,12 @@ MacroAssembler::Label BBQJIT::addLoopOSREntrypoint()
      // The loop_osr slow path should have already checked that we have enough space. We have already destroyed the ipint stack, and unwind will see the BBQ catch
      // since we already replaced callee. So, we just assert that this case doesn't happen to avoid reading a corrupted frame from the bbq catch handler.
      MacroAssembler::JumpList overflow;
@@ -12903,7 +12894,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      overflow.linkThunk(CodeLocationLabel<JITThunkPtrTag>(Thunks::singleton().stub(crashDueToBBQStackOverflowGenerator).code()), &m_jit);
  
      // This operation shuffles around values on the stack, until everything is in the right place. Then,
-@@ -3579,6 +3526,10 @@ B3::Type BBQJIT::toB3Type(TypeKind kind)
+@@ -3579,6 +3525,10 @@ B3::Type BBQJIT::toB3Type(TypeKind kind)
  
  B3::ValueRep BBQJIT::toB3Rep(Location location)
  {
@@ -12914,7 +12905,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      if (location.isRegister())
          return B3::ValueRep(location.isGPR() ? Reg(location.asGPR()) : Reg(location.asFPR()));
      if (location.isStack())
-@@ -3620,13 +3571,13 @@ StackMap BBQJIT::makeStackMap(const ControlData& data, std::span<const TypedExpr
+@@ -3620,13 +3570,13 @@ StackMap BBQJIT::makeStackMap(const ControlData& data, std::span<const TypedExpr
  
      for (size_t i = 0; i < m_parser->controlStack().size(); ++i) {
          for (const TypedExpression& expr : m_parser->enclosedSliceOf(i))
@@ -12931,7 +12922,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      RELEASE_ASSERT(stackMapIndex == numElements);
      m_osrEntryScratchBufferSize = std::max(m_osrEntryScratchBufferSize, BBQCallee::extraOSRValuesForLoopIndex + numElements);
-@@ -3745,7 +3696,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
+@@ -3745,7 +3695,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
      const auto& blockSignature = data.signature();
      while (expressionStack.size() < blockSignature.argumentCount()) {
          Type type = blockSignature.argumentType(expressionStack.size());
@@ -12940,7 +12931,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      }
  
      dataElse.startBlock(*this, expressionStack);
-@@ -3773,7 +3724,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
+@@ -3773,7 +3723,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
      Stack expressionStack;
      const auto& functionSignature = dataElse.signature();
      for (unsigned i = 0; i < functionSignature.argumentCount(); i ++)
@@ -12949,7 +12940,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      dataElse.startBlock(*this, expressionStack);
      data = dataElse;
      return { };
-@@ -3955,7 +3906,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
+@@ -3955,7 +3905,7 @@ void BBQJIT::emitLoopTierUpCheckAndOSREntryData(const ControlData& data, std::sp
  
      ++m_callSiteIndex;
      if (m_profiledCallee.hasExceptionHandlers()) {
@@ -12958,7 +12949,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          flushRegisters();
      }
      m_jit.move(GPRInfo::wasmContextInstancePointer, GPRInfo::argumentGPR0);
-@@ -3968,7 +3919,7 @@ void BBQJIT::prepareForExceptions()
+@@ -3968,7 +3918,7 @@ void BBQJIT::prepareForExceptions()
  {
      ++m_callSiteIndex;
      if (m_profiledCallee.hasExceptionHandlers()) {
@@ -12967,7 +12958,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          flushRegistersForException();
      }
  }
-@@ -3988,7 +3939,7 @@ void BBQJIT::prepareForExceptions()
+@@ -3988,7 +3938,7 @@ void BBQJIT::prepareForExceptions()
          Vector<Location, 8> returnLocationsForShuffle;
          for (unsigned i = 0; i < wasmCallInfo.results.size(); ++i) {
              returnValuesForShuffle.append(returnValues[offset + i]);
@@ -12976,7 +12967,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          }
          emitShuffle(returnValuesForShuffle, returnLocationsForShuffle);
          LOG_INSTRUCTION("Return", returnLocationsForShuffle);
-@@ -4077,18 +4028,20 @@ void BBQJIT::prepareForExceptions()
+@@ -4077,18 +4027,20 @@ void BBQJIT::prepareForExceptions()
      // Flush everything below the top N values.
      currentControlData().flushAtBlockBoundary(*this, defaultTarget.targetLocations().size(), results, true);
  
@@ -13005,7 +12996,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          m_jit.addPtr(TrustedImmPtr(jumpTable->span().data()), wasmScratchGPR);
          m_jit.farJump(Address(wasmScratchGPR), JSSwitchPtrTag);
  
-@@ -4105,26 +4058,24 @@ void BBQJIT::prepareForExceptions()
+@@ -4105,26 +4057,24 @@ void BBQJIT::prepareForExceptions()
              }
              return label;
          });
@@ -13040,7 +13031,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              ASSERT(index < targets.size());
              currentControlData().addExit(*this, targets[index]->targetLocations(), results);
              targets[index]->addBranch(m_jit.jump());
-@@ -4160,7 +4111,7 @@ void BBQJIT::prepareForExceptions()
+@@ -4160,7 +4110,7 @@ void BBQJIT::prepareForExceptions()
          unsigned offset = enclosedStack.size() - returnCount;
          for (unsigned i = 0; i < returnCount; ++i) {
              Type type = blockSignature.returnType(i);
@@ -13049,7 +13040,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          }
          unbindAllRegisters();
      }
-@@ -4404,13 +4355,15 @@ void BBQJIT::saveValuesAcrossCallAndPassArguments(const Args& arguments, const C
+@@ -4404,13 +4354,15 @@ void BBQJIT::saveValuesAcrossCallAndPassArguments(const Args& arguments, const C
      // careful.
      for (size_t i = 0; i < callInfo.params.size(); ++i) {
          auto type = signature.argumentType(i);
@@ -13066,7 +13057,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              if (!binding.toValue().isNone())
                  flushValue(binding.toValue());
          }
-@@ -4421,7 +4374,7 @@ void BBQJIT::saveValuesAcrossCallAndPassArguments(const Args& arguments, const C
+@@ -4421,7 +4373,7 @@ void BBQJIT::saveValuesAcrossCallAndPassArguments(const Args& arguments, const C
      parameterLocations.reserveInitialCapacity(callInfo.params.size());
      for (unsigned i = 0; i < callInfo.params.size(); i++) {
          auto type = signature.argumentType(i);
@@ -13075,7 +13066,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          parameterLocations.append(parameterLocation);
      }
  
-@@ -4439,7 +4392,7 @@ template<size_t N>
+@@ -4439,7 +4391,7 @@ template<size_t N>
  void BBQJIT::returnValuesFromCall(Vector<Value, N>& results, const RTT& functionType, const CallInformation& callInfo)
  {
      for (size_t i = 0; i < callInfo.results.size(); i ++) {
@@ -13084,7 +13075,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          Location returnLocation = Location::fromArgumentLocation(callInfo.results[i], result.type());
          if (returnLocation.isRegister()) {
              RegisterBinding currentBinding;
-@@ -4447,6 +4400,8 @@ void BBQJIT::returnValuesFromCall(Vector<Value, N>& results, const RTT& function
+@@ -4447,6 +4399,8 @@ void BBQJIT::returnValuesFromCall(Vector<Value, N>& results, const RTT& function
                  currentBinding = bindingFor(returnLocation.asGPR());
              else if (returnLocation.isFPR())
                  currentBinding = bindingFor(returnLocation.asFPR());
@@ -13093,7 +13084,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              // There's no way to preserve an abritrary scratch over a call so we shouldn't try to do so.
              ASSERT(!currentBinding.isScratch());
          } else {
-@@ -4516,7 +4471,7 @@ void BBQJIT::emitTailCall(FunctionSpaceIndex functionIndexSpace, const RTT& sign
+@@ -4516,7 +4470,7 @@ void BBQJIT::emitTailCall(FunctionSpaceIndex functionIndexSpace, const RTT& sign
      m_jit.loadPtr(Address(MacroAssembler::framePointerRegister), callerFramePointer);
      resolvedArguments.append(Value::pinned(pointerType(), Location::fromStack(sizeof(Register))));
      parameterLocations.append(Location::fromStack(tailCallStackOffsetFromFP + Checked<int>(sizeof(Register))));
@@ -13102,7 +13093,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      m_jit.loadPairPtr(MacroAssembler::framePointerRegister, callerFramePointer, MacroAssembler::linkRegister);
  #else
      UNUSED_PARAM(callerFramePointer);
-@@ -4540,7 +4495,7 @@ void BBQJIT::emitTailCall(FunctionSpaceIndex functionIndexSpace, const RTT& sign
+@@ -4540,7 +4494,7 @@ void BBQJIT::emitTailCall(FunctionSpaceIndex functionIndexSpace, const RTT& sign
          case ValueLocation::Kind::GPRRegister:
          case ValueLocation::Kind::FPRRegister: {
              auto type = signature.argumentType(i);
@@ -13111,7 +13102,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              break;
          }
          case ValueLocation::Kind::StackArgument:
-@@ -4679,7 +4634,9 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
+@@ -4679,7 +4633,9 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
          // Do a context switch if needed.
          Jump isSameInstanceBefore = m_jit.branchPtr(RelationalCondition::Equal, wasmScratchGPR, GPRInfo::wasmContextInstancePointer);
          m_jit.move(wasmScratchGPR, GPRInfo::wasmContextInstancePointer);
@@ -13121,7 +13112,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          isSameInstanceBefore.link(m_jit);
      } else {
          JumpList profilingDone;
-@@ -4688,7 +4645,9 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
+@@ -4688,7 +4644,9 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
          m_jit.loadPtr(CCallHelpers::Address(importableFunction, WasmToWasmImportableFunction::offsetOfTargetInstance()), m_jit.scratchRegister());
          Jump isSameInstanceBefore = m_jit.branchPtr(RelationalCondition::Equal, m_jit.scratchRegister(), GPRInfo::wasmContextInstancePointer);
          m_jit.move(m_jit.scratchRegister(), GPRInfo::wasmContextInstancePointer);
@@ -13131,7 +13122,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          m_jit.loadPtr(CCallHelpers::Address(GPRInfo::jitDataRegister, safeCast<int32_t>(BaselineData::offsetOfData() + sizeof(CallProfile) * callProfileIndex + CallProfile::offsetOfBoxedCallee())), wasmScratchGPR);
          m_jit.orPtr(TrustedImm32(CallProfile::Megamorphic), wasmScratchGPR);
          updateProfile.append(m_jit.jump());
-@@ -4699,8 +4658,7 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
+@@ -4699,8 +4657,7 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
          profilingDone.append(m_jit.branchTestPtr(CCallHelpers::NonZero, m_jit.scratchRegister(), TrustedImm32(CallProfile::Megamorphic)));
  
          updateProfile.append(m_jit.branchTestPtr(CCallHelpers::Zero, m_jit.scratchRegister()));
@@ -13141,7 +13132,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          m_jit.nearCallThunk(CodeLocationLabel<JITThunkPtrTag>(Thunks::singleton().stub(callPolymorphicCalleeGenerator).code()));
          afterCall.append(m_jit.jump());
  
-@@ -4762,7 +4720,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4762,7 +4719,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
          Jump isSameInstance = m_jit.branchPtr(RelationalCondition::Equal, wasmScratchGPR, GPRInfo::wasmContextInstancePointer);
          emitRestoreInstanceFrameIfNeeded(m_jit, GPRInfo::wasmContextInstancePointer, callerStackSize, m_frameSize, topSourceOffsetFromFP, wasmScratchGPR, wasmBaseMemoryPointer);
          m_jit.loadPtr(CCallHelpers::Address(importableFunction, WasmToWasmImportableFunction::offsetOfTargetInstance()), GPRInfo::wasmContextInstancePointer);
@@ -13151,7 +13142,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          isSameInstance.link(m_jit);
      }
  
-@@ -4787,7 +4747,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4787,7 +4746,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
  
      resolvedArguments.append(Value::pinned(pointerType(), Location::fromStack(sizeof(Register))));
      parameterLocations.append(Location::fromStack(tailCallStackOffsetFromFP + Checked<int>(sizeof(Register))));
@@ -13160,7 +13151,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      auto preserved = callingConvention.argumentGPRs();
      preserved.add(importableFunction, IgnoreVectors);
      if constexpr (isARM64E())
-@@ -4816,7 +4776,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4816,7 +4775,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
          case ValueLocation::Kind::GPRRegister:
          case ValueLocation::Kind::FPRRegister: {
              auto type = signature.argumentType(i);
@@ -13169,7 +13160,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              break;
          }
          case ValueLocation::Kind::StackArgument:
-@@ -4844,7 +4804,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4844,7 +4803,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
      m_jit.loadPtr(Address(MacroAssembler::framePointerRegister, tailCallStackOffsetFromFP), wasmScratchGPR);
      m_jit.addPtr(TrustedImm32(tailCallStackOffsetFromFP + Checked<int>(sizeof(Register))), MacroAssembler::framePointerRegister, MacroAssembler::stackPointerRegister);
      m_jit.move(wasmScratchGPR, MacroAssembler::framePointerRegister);
@@ -13178,7 +13169,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      m_jit.addPtr(TrustedImm32(tailCallStackOffsetFromFP + Checked<int>(sizeof(CallerFrameAndPC))), MacroAssembler::framePointerRegister, MacroAssembler::stackPointerRegister);
      m_jit.move(callerFramePointer, MacroAssembler::framePointerRegister);
  #else
-@@ -4891,7 +4851,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4891,7 +4850,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
              ASSERT(tableIndex < m_info.tableCount());
  
              auto& tableInformation = m_info.table(tableIndex);
@@ -13187,7 +13178,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
                  if (!tableIndex)
                      m_jit.loadPtr(Address(GPRInfo::wasmContextInstancePointer, JSWebAssemblyInstance::offsetOfCachedTable0Buffer()), callableFunctionBuffer);
                  else {
-@@ -4915,9 +4875,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4915,9 +4874,7 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
              ASSERT(calleeIndexLocation.isGPR());
  
              JIT_COMMENT(m_jit, "Check the index we are looking for is valid");
@@ -13198,7 +13189,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
              // Neither callableFunctionBuffer nor wasmScratchGPR are used before any of these
              // are def'd below, so we can reuse the registers and save some pressure.
-@@ -4929,6 +4887,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4929,6 +4886,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
                  m_jit.zeroExtend32ToWord(calleeIndexLocation.asGPR(), calleeIndexLocation.asGPR());
  #if CPU(ARM64)
                  m_jit.addLeftShift64(callableFunctionBuffer, calleeIndexLocation.asGPR(), TrustedImm32(getLSBSet(sizeof(FuncRefTable::Function))), importableFunction);
@@ -13208,7 +13199,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  #else
                  m_jit.lshiftPtr(TrustedImm32(getLSBSet(sizeof(FuncRefTable::Function))), calleeIndexLocation.asGPR());
                  m_jit.addPtr(callableFunctionBuffer, calleeIndexLocation.asGPR(), importableFunction);
-@@ -4937,6 +4898,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
+@@ -4937,6 +4897,9 @@ void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRRe
                  m_jit.move(TrustedImmPtr(sizeof(FuncRefTable::Function)), importableFunction);
  #if CPU(ARM64)
                  m_jit.multiplyAddZeroExtend32(calleeIndexLocation.asGPR(), importableFunction, callableFunctionBuffer, importableFunction);
@@ -13218,7 +13209,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  #else
                  m_jit.zeroExtend32ToWord(calleeIndexLocation.asGPR(), calleeIndexLocation.asGPR());
                  m_jit.mul64(calleeIndexLocation.asGPR(), importableFunction);
-@@ -5001,22 +4965,10 @@ WasmOrigin BBQJIT::origin()
+@@ -5001,22 +4964,10 @@ WasmOrigin BBQJIT::origin()
          break;
      }
      ASSERT(isValidOpType(static_cast<uint8_t>(opcodeOrigin.opcode())));
@@ -13245,7 +13236,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  }
  
  ALWAYS_INLINE void BBQJIT::willParseOpcode()
-@@ -5032,7 +4984,10 @@ ALWAYS_INLINE void BBQJIT::willParseOpcode()
+@@ -5032,7 +4983,10 @@ ALWAYS_INLINE void BBQJIT::willParseOpcode()
          break;
      }
  
@@ -13257,7 +13248,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      m_gprAllocator.assertAllValidRegistersAreUnlocked();
      m_fprAllocator.assertAllValidRegistersAreUnlocked();
-@@ -5056,7 +5011,10 @@ ALWAYS_INLINE void BBQJIT::willParseOpcode()
+@@ -5056,7 +5010,10 @@ ALWAYS_INLINE void BBQJIT::willParseOpcode()
  
  ALWAYS_INLINE void BBQJIT::willParseExtendedOpcode()
  {
@@ -13269,7 +13260,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      m_gprAllocator.assertAllValidRegistersAreUnlocked();
      m_fprAllocator.assertAllValidRegistersAreUnlocked();
-@@ -5088,7 +5046,11 @@ BBQJIT::Jump BBQJIT::emitFusedBranchCompareBranch(OpType opType, ExpressionType,
+@@ -5088,7 +5045,11 @@ BBQJIT::Jump BBQJIT::emitFusedBranchCompareBranch(OpType opType, ExpressionType,
      case OpType::I32Eqz:
          return m_jit.branchTest32(ResultCondition::NonZero, operandLocation.asGPR());
      case OpType::I64Eqz:
@@ -13281,7 +13272,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      default:
          RELEASE_ASSERT_NOT_REACHED_WITH_MESSAGE("Op type '%s' is not a unary comparison and should not have been fused.\n", makeString(opType).characters());
      }
-@@ -5146,7 +5108,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
+@@ -5146,7 +5107,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
  
          if (operandLocation.isGPR())
              liveScratchGPRs.add(operandLocation.asGPR(), IgnoreVectors);
@@ -13293,7 +13284,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              liveScratchFPRs.add(operandLocation.asFPR(), operand.type() == TypeKind::V128 ? Width128 : Width64);
      }
      if (!liveScratchFPRs.contains(scratches.fpr(0), IgnoreVectors))
-@@ -5256,11 +5221,19 @@ static MacroAssembler::Jump emitBranchI32(CCallHelpers& jit, MacroAssembler::Rel
+@@ -5256,11 +5220,19 @@ static MacroAssembler::Jump emitBranchI32(CCallHelpers& jit, MacroAssembler::Rel
  
  static MacroAssembler::Jump emitBranchI64(CCallHelpers& jit, MacroAssembler::RelationalCondition condition, Value left, Location leftLocation, Value right, Location rightLocation)
  {
@@ -13313,7 +13304,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  }
  
  static MacroAssembler::Jump emitBranchF32(CCallHelpers& jit, MacroAssembler::DoubleCondition condition, Value, Location leftLocation, Value, Location rightLocation)
-@@ -5403,7 +5376,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
+@@ -5403,7 +5375,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
              emitMove(left, leftLocation = Location::fromFPR(wasmScratchFPR));
          if (leftLocation.isGPR())
              liveScratchGPRs.add(leftLocation.asGPR(), IgnoreVectors);
@@ -13325,7 +13316,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              liveScratchFPRs.add(leftLocation.asFPR(), left.type() == TypeKind::V128 ? Width128 : Width64);
  
          if (!right.isConst())
-@@ -5412,7 +5388,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
+@@ -5412,7 +5387,10 @@ PartialResult BBQJIT::addFusedBranchCompare(OpType opType, ControlType& target,
              emitMove(right, rightLocation = Location::fromFPR(wasmScratchFPR));
          if (rightLocation.isGPR())
              liveScratchGPRs.add(rightLocation.asGPR(), IgnoreVectors);
@@ -13337,7 +13328,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
              liveScratchFPRs.add(rightLocation.asFPR(), right.type() == TypeKind::V128 ? Width128 : Width64);
      }
      consume(left);
-@@ -5596,6 +5575,9 @@ void BBQJIT::setLRUKey(Location location, LocalOrTempIndex key)
+@@ -5596,6 +5574,9 @@ void BBQJIT::setLRUKey(Location location, LocalOrTempIndex key)
          m_gprAllocator.setSpillHint(location.asGPR(), key);
      } else if (location.isFPR()) {
          m_fprAllocator.setSpillHint(location.asFPR(), key);
@@ -13347,7 +13338,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      }
  }
  
-@@ -5617,8 +5599,15 @@ Location BBQJIT::allocateWithHint(Value value, Location hint)
+@@ -5617,8 +5598,15 @@ Location BBQJIT::allocateWithHint(Value value, Location hint)
      Location result;
      if (value.isFloat())
          result = Location::fromFPR(m_fprAllocator.allocate(*this, RegisterBinding::fromValue(value), nextLRUKey(), hint.isFPR() ? hint.asFPR() : InvalidFPRReg));
@@ -13364,7 +13355,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
  
      if (value.isLocal())
          currentControlData().touch(value.asLocal());
-@@ -5712,6 +5701,13 @@ Location BBQJIT::bind(Value value, Location loc)
+@@ -5712,6 +5700,13 @@ Location BBQJIT::bind(Value value, Location loc)
              if (m_fprAllocator.freeRegisters().contains(loc.asFPR(), Width::Width128))
                  m_fprAllocator.bind(loc.asFPR(), RegisterBinding::fromValue(value), std::nullopt);
              ASSERT(bindingFor(loc.asFPR()) == RegisterBinding::fromValue(value));
@@ -13378,7 +13369,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
          } else {
              if (m_gprAllocator.freeRegisters().contains(loc.asGPR(), IgnoreVectors))
                  m_gprAllocator.bind(loc.asGPR(), RegisterBinding::fromValue(value), std::nullopt);
-@@ -5740,6 +5736,10 @@ void BBQJIT::unbind(Value value, Location loc)
+@@ -5740,6 +5735,10 @@ void BBQJIT::unbind(Value value, Location loc)
          m_fprAllocator.unbind(loc.asFPR());
      else if (loc.isGPR())
          m_gprAllocator.unbind(loc.asGPR());
@@ -13389,7 +13380,7 @@ index 9b82a34a4dc76fa77030a479be457abe3b3a8d99..a9c0a5cabb52011a9a6d779d09e9a1f0
      if (value.isLocal())
          m_locals[value.asLocal()] = m_localSlots[value.asLocal()];
      else if (value.isTemp())
-@@ -5803,74 +5803,9 @@ void BBQJIT::emitArrayGetPayload(StorageType type, GPRReg arrayGPR, GPRReg paylo
+@@ -5803,74 +5802,9 @@ void BBQJIT::emitArrayGetPayload(StorageType type, GPRReg arrayGPR, GPRReg paylo
      m_jit.addPtr(MacroAssembler::TrustedImm32(JSWebAssemblyArray::alignedOffsetOfData(type.elementSize())), arrayGPR, payloadGPR);
  }
  
@@ -15040,12 +15031,12 @@ index c4ea5b8244feca92a01308663b25b4147bc7f3f3..32156c7dc652f21aaf006cf7641a8768
      });
  
      return staticJSCallingConvention;
-@@ -48,7 +48,60 @@ const WasmCallingConvention& wasmCallingConvention()
+@@ -48,7 +48,59 @@ const WasmCallingConvention& wasmCallingConvention()
      static LazyNeverDestroyed<WasmCallingConvention> staticWasmCallingConvention;
      static std::once_flag staticWasmCallingConventionFlag;
      std::call_once(staticWasmCallingConventionFlag, [] () {
 -        // One value per GPR.
-+#if USE(JSVALUE64) // One value per GPR
++#if USE(JSVALUE64)
 +        constexpr unsigned numberOfArgumentJSRs = GPRInfo::numberOfArgumentRegisters;
 +#elif USE(JSVALUE32_64)
 +        constexpr unsigned numberOfArgumentJSRs = GPRInfo::numberOfArgumentRegisters / 2;
@@ -15079,7 +15070,6 @@ index c4ea5b8244feca92a01308663b25b4147bc7f3f3..32156c7dc652f21aaf006cf7641a8768
 +        for (Reg reg : scratch)
 +            scratchGPRs.append(reg.gpr());
 +
-+        // Need at least one JSValue and an additional GPR
 +#if USE(JSVALUE64)
 +        RELEASE_ASSERT(scratchGPRs.size() >= 2);
 +#elif USE(JSVALUE32_64)
@@ -15102,7 +15092,7 @@ index c4ea5b8244feca92a01308663b25b4147bc7f3f3..32156c7dc652f21aaf006cf7641a8768
          constexpr unsigned numberOfArgumentGPRs = GPRInfo::numberOfArgumentRegisters;
          Vector<GPRReg> gprArgumentRegisters(numberOfArgumentGPRs);
          for (unsigned i = 0; i < numberOfArgumentGPRs; ++i)
-@@ -63,23 +116,24 @@ const WasmCallingConvention& wasmCallingConvention()
+@@ -63,23 +115,24 @@ const WasmCallingConvention& wasmCallingConvention()
          scratch.exclude(RegisterSet::macroClobberedGPRs());
          scratch.exclude(RegisterSet::reservedHardwareRegisters());
          scratch.exclude(RegisterSet::stackRegisters());
@@ -16044,7 +16034,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
              if (type == B3::Int32)
                  argument = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Trunc, Origin(), argument);
          } else if (rep.location.isFPR()) {
-@@ -1727,69 +1701,19 @@ auto OMGIRGenerator::addRefIsNull(ExpressionType value, ExpressionType& result)
+@@ -1727,69 +1701,18 @@ auto OMGIRGenerator::addRefIsNull(ExpressionType value, ExpressionType& result)
  
  auto OMGIRGenerator::addTableGet(unsigned tableIndex, ExpressionType index, ExpressionType& result) -> PartialResult
  {
@@ -16104,7 +16094,6 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
 -        m_currentBlock->appendNew<UpsilonValue>(m_proc, origin(), called, phi);
 -        m_currentBlock->appendNewControlValue(m_proc, Jump, origin(), continuation);
 -        continuation->addPredecessor(m_currentBlock);
-+    // FIXME: Emit this inline <https://bugs.webkit.org/show_bug.cgi?id=198506>.
 +    Value* resultValue = callWasmOperation(m_currentBlock, toB3Type(Types::Externref), operationGetWasmTableElement,
 +        instanceValue(), constant(Int32, tableIndex), get(index));
 +    {
@@ -16124,7 +16113,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      return { };
  }
  
-@@ -1797,7 +1721,7 @@ auto OMGIRGenerator::addTableSet(unsigned tableIndex, ExpressionType index, Expr
+@@ -1797,7 +1720,7 @@ auto OMGIRGenerator::addTableSet(unsigned tableIndex, ExpressionType index, Expr
  {
      // FIXME: Emit this inline <https://bugs.webkit.org/show_bug.cgi?id=198506>.
      auto shouldThrow = callWasmOperation(m_currentBlock, B3::Int32, operationSetWasmTableElement,
@@ -16133,7 +16122,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      {
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
              m_currentBlock->appendNew<Value>(m_proc, Equal, origin(), shouldThrow, constant(Int32, 0)));
-@@ -1812,28 +1736,9 @@ auto OMGIRGenerator::addTableSet(unsigned tableIndex, ExpressionType index, Expr
+@@ -1812,28 +1735,8 @@ auto OMGIRGenerator::addTableSet(unsigned tableIndex, ExpressionType index, Expr
  
  auto OMGIRGenerator::addRefFunc(FunctionSpaceIndex index, ExpressionType& result) -> PartialResult
  {
@@ -16159,13 +16148,12 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
 -
 -    m_currentBlock = continuation;
 -    result = push(phi);
-+    // FIXME: Emit this inline <https://bugs.webkit.org/show_bug.cgi?id=198506>.
 +    result = push(callWasmOperation(m_currentBlock, wasmRefType(), operationWasmRefFunc,
 +        instanceValue(), constant(toB3Type(Types::I32), index)));
      TRACE_VALUE(Wasm::Types::Funcref, get(result), "ref_func ", index);
      return { };
  }
-@@ -1858,7 +1763,7 @@ auto OMGIRGenerator::addTableInit(unsigned elementIndex, unsigned tableIndex, Ex
+@@ -1858,7 +1761,7 @@ auto OMGIRGenerator::addTableInit(unsigned elementIndex, unsigned tableIndex, Ex
          instanceValue(),
          constant(Int32, elementIndex),
          constant(Int32, tableIndex),
@@ -16174,7 +16162,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      {
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
-@@ -1883,34 +1788,25 @@ auto OMGIRGenerator::addElemDrop(unsigned elementIndex) -> PartialResult
+@@ -1883,34 +1786,24 @@ auto OMGIRGenerator::addElemDrop(unsigned elementIndex) -> PartialResult
  
  auto OMGIRGenerator::addTableSize(unsigned tableIndex, ExpressionType& result) -> PartialResult
  {
@@ -16185,7 +16173,6 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
 -
 -    auto* length32 = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, Int32, origin(), table, safeCast<int32_t>(Table::offsetOfLength()));
 -    m_heaps.decorateMemory(&m_heaps.WasmTable_length, length32);
-+    // FIXME: Emit this inline <https://bugs.webkit.org/show_bug.cgi?id=198506>.
 +    result = push(callWasmOperation(m_currentBlock, toB3Type(Types::I32), operationGetWasmTableSize,
 +        instanceValue(), constant(Int32, tableIndex)));
  
@@ -16215,7 +16202,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      {
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
-@@ -1926,14 +1822,12 @@ auto OMGIRGenerator::addTableFill(unsigned tableIndex, ExpressionType offset, Ex
+@@ -1926,14 +1819,12 @@ auto OMGIRGenerator::addTableFill(unsigned tableIndex, ExpressionType offset, Ex
  
  auto OMGIRGenerator::addTableCopy(unsigned dstTableIndex, unsigned srcTableIndex, ExpressionType dstOffset, ExpressionType srcOffset, ExpressionType length) -> PartialResult
  {
@@ -16231,7 +16218,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      {
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
-@@ -2179,7 +2073,7 @@ auto OMGIRGenerator::emitIndirectCall(Value* calleeInstance, Value* calleeCode,
+@@ -2179,7 +2070,7 @@ auto OMGIRGenerator::emitIndirectCall(Value* calleeInstance, Value* calleeCode,
  auto OMGIRGenerator::addGrowMemory(ExpressionType delta, ExpressionType& result, uint8_t memoryIndex) -> PartialResult
  {
      result = push(callWasmOperation(m_currentBlock, m_info.memory(memoryIndex).addressType().asB3TypeKind(), operationGrowMemory,
@@ -16240,7 +16227,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      restoreWebAssemblyGlobalState(m_info.memories, instanceValue(), m_currentBlock);
  
-@@ -2213,13 +2107,14 @@ auto OMGIRGenerator::addCurrentMemory(ExpressionType& result, uint8_t memoryInde
+@@ -2213,13 +2104,14 @@ auto OMGIRGenerator::addCurrentMemory(ExpressionType& result, uint8_t memoryInde
  
  auto OMGIRGenerator::addMemoryFill(ExpressionType dstAddress, ExpressionType target, ExpressionType count, uint8_t memoryIndex) -> PartialResult
  {
@@ -16261,7 +16248,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      if (!memoryIndex) {
          auto* memorySize = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, pointerType(), origin(), instanceValue(), safeCast<int32_t>(JSWebAssemblyInstance::offsetOfCachedMemory0Size()));
          m_heaps.decorateMemory(&m_heaps.JSWebAssemblyInstance_cachedMemory0Size, memorySize);
-@@ -2250,16 +2145,22 @@ void OMGIRGenerator::emitMemoryFill(Value* dstAddressValue, Value* targetValue,
+@@ -2250,16 +2142,22 @@ void OMGIRGenerator::emitMemoryFill(Value* dstAddressValue, Value* targetValue,
              });
          }
      }
@@ -16286,7 +16273,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      {
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
-@@ -2275,15 +2176,16 @@ auto OMGIRGenerator::addMemoryInit(unsigned dataSegmentIndex, ExpressionType dst
+@@ -2275,15 +2173,16 @@ auto OMGIRGenerator::addMemoryInit(unsigned dataSegmentIndex, ExpressionType dst
  
  auto OMGIRGenerator::addMemoryCopy(ExpressionType dstAddress, ExpressionType srcAddress, ExpressionType count, uint8_t dstMemoryIndex, uint8_t srcMemoryIndex) -> PartialResult
  {
@@ -16311,7 +16298,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      if (!dstMemoryIndex && !srcMemoryIndex) {
          auto* memorySize = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, pointerType(), origin(), instanceValue(), safeCast<int32_t>(JSWebAssemblyInstance::offsetOfCachedMemory0Size()));
          m_heaps.decorateMemory(&m_heaps.JSWebAssemblyInstance_cachedMemory0Size, memorySize);
-@@ -2325,6 +2227,8 @@ void OMGIRGenerator::emitMemoryCopy(Value* dstAddressValue, Value* srcAddressVal
+@@ -2325,6 +2224,8 @@ void OMGIRGenerator::emitMemoryCopy(Value* dstAddressValue, Value* srcAddressVal
              });
          }
      }
@@ -16320,7 +16307,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  }
  
  auto OMGIRGenerator::addDataDrop(unsigned dataSegmentIndex) -> PartialResult
-@@ -2442,7 +2346,7 @@ auto OMGIRGenerator::getGlobal(uint32_t index, ExpressionType& result) -> Partia
+@@ -2442,7 +2343,7 @@ auto OMGIRGenerator::getGlobal(uint32_t index, ExpressionType& result) -> Partia
      switch (global.bindingMode) {
      case Wasm::GlobalInformation::BindingMode::EmbeddedInInstance: {
          auto* value = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, toB3Type(global.type), origin(), instanceValue(), safeCast<int32_t>(JSWebAssemblyInstance::offsetOfGlobal(m_info, index)));
@@ -16329,7 +16316,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          case TypeKind::I32:
              m_heaps.decorateMemory(&m_heaps.JSWebAssemblyInstance_embeddedGlobals_i32[index], value);
              break;
-@@ -2497,7 +2401,7 @@ auto OMGIRGenerator::setGlobal(uint32_t index, ExpressionType value) -> PartialR
+@@ -2497,7 +2398,7 @@ auto OMGIRGenerator::setGlobal(uint32_t index, ExpressionType value) -> PartialR
      switch (global.bindingMode) {
      case Wasm::GlobalInformation::BindingMode::EmbeddedInInstance: {
          auto* store = m_currentBlock->appendNew<MemoryValue>(m_proc, Store, origin(), get(value), instanceValue(), safeCast<int32_t>(JSWebAssemblyInstance::offsetOfGlobal(m_info, index)));
@@ -16338,7 +16325,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          case TypeKind::I32:
              m_heaps.decorateMemory(&m_heaps.JSWebAssemblyInstance_embeddedGlobals_i32[index], store);
              break;
-@@ -2599,12 +2503,12 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
+@@ -2599,12 +2500,12 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
  
      if (!memoryIndex) {
          // m_mode is the mode used for memory 0
@@ -16353,7 +16340,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
                  B3::PatchpointValue* throwException = m_currentBlock->appendNew<B3::PatchpointValue>(m_proc, B3::Void, origin());
                  throwException->setGenerator([this, origin = this->origin()](CCallHelpers& jit, const B3::StackmapGenerationParams&) {
                      this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
-@@ -2618,7 +2522,7 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
+@@ -2618,7 +2519,7 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
          }
  
          case MemoryMode::Signaling: {
@@ -16362,7 +16349,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
              // We've virtually mapped 4GiB+redzone for this memory. Only the user-allocated pages are addressable, contiguously in range [0, current],
              // and everything above is mapped PROT_NONE. We don't need to perform any explicit bounds check in the 4GiB range because WebAssembly register
              // memory accesses are 32-bit. However WebAssembly register + offset accesses perform the addition in 64-bit which can push an access above
-@@ -2629,9 +2533,10 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
+@@ -2629,9 +2530,10 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
              // PROT_NONE region, but it's better if we use a smaller immediate because it can codegens better. We know that anything equal to or greater
              // than the declared 'maximum' will trap, so we can compare against that number. If there was no declared 'maximum' then we still know that
              // any access equal to or greater than 4GiB will trap, no need to add the redzone.
@@ -16375,7 +16362,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
                  m_currentBlock->appendNew<WasmBoundsCheckValue>(m_proc, origin(), pointer, lastLoadedOffset, maximum);
              }
              break;
-@@ -2645,7 +2550,9 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
+@@ -2645,7 +2547,9 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint64_
  
      // if memoryIndex != 0, force bounds checking
  
@@ -16386,7 +16373,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (offsetAndSizeOverflows) [[unlikely]] {
          B3::PatchpointValue* throwException = m_currentBlock->appendNew<B3::PatchpointValue>(m_proc, B3::Void, origin());
-@@ -2715,98 +2622,98 @@ inline uint32_t sizeOfLoadOp(LoadOpType op)
+@@ -2715,98 +2619,98 @@ inline uint32_t sizeOfLoadOp(LoadOpType op)
      RELEASE_ASSERT_NOT_REACHED();
  }
  
@@ -16502,7 +16489,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, value);
          return value;
      }
-@@ -2818,7 +2725,9 @@ auto OMGIRGenerator::load(LoadOpType op, ExpressionType pointerVar, ExpressionTy
+@@ -2818,7 +2722,9 @@ auto OMGIRGenerator::load(LoadOpType op, ExpressionType pointerVar, ExpressionTy
  {
      Value* pointer = get(pointerVar);
  
@@ -16513,7 +16500,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (offsetAndSizeOverflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -2854,7 +2763,7 @@ auto OMGIRGenerator::load(LoadOpType op, ExpressionType pointerVar, ExpressionTy
+@@ -2854,7 +2760,7 @@ auto OMGIRGenerator::load(LoadOpType op, ExpressionType pointerVar, ExpressionTy
          }
  
      } else
@@ -16522,7 +16509,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      return { };
  }
-@@ -2880,7 +2789,7 @@ inline uint32_t sizeOfStoreOp(StoreOpType op)
+@@ -2880,7 +2786,7 @@ inline uint32_t sizeOfStoreOp(StoreOpType op)
  }
  
  
@@ -16531,7 +16518,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      int32_t offset = fixupPointerPlusOffset(pointer, uoffset);
  
-@@ -2890,7 +2799,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
+@@ -2890,7 +2796,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
          [[fallthrough]];
  
      case StoreOpType::I32Store8: {
@@ -16540,7 +16527,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, store);
          return;
      }
-@@ -2900,7 +2809,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
+@@ -2900,7 +2806,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
          [[fallthrough]];
  
      case StoreOpType::I32Store16: {
@@ -16549,7 +16536,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, store);
          return;
      }
-@@ -2913,7 +2822,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
+@@ -2913,7 +2819,7 @@ inline void OMGIRGenerator::emitStoreOp(StoreOpType op, Value* pointer, Value* v
      case StoreOpType::I32Store:
      case StoreOpType::F32Store:
      case StoreOpType::F64Store: {
@@ -16558,7 +16545,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, store);
          return;
      }
-@@ -2926,8 +2835,9 @@ auto OMGIRGenerator::store(StoreOpType op, ExpressionType pointerVar, Expression
+@@ -2926,8 +2832,9 @@ auto OMGIRGenerator::store(StoreOpType op, ExpressionType pointerVar, Expression
      Value* pointer = get(pointerVar);
      Value* value = get(valueVar);
      ASSERT(pointer->type() == m_info.memory(memoryIndex).addressType());
@@ -16570,7 +16557,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (offsetAndSizeOverflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -2937,7 +2847,7 @@ auto OMGIRGenerator::store(StoreOpType op, ExpressionType pointerVar, Expression
+@@ -2937,7 +2844,7 @@ auto OMGIRGenerator::store(StoreOpType op, ExpressionType pointerVar, Expression
              this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
          });
      } else
@@ -16579,7 +16566,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      return { };
  }
-@@ -2965,7 +2875,7 @@ inline Value* OMGIRGenerator::sanitizeAtomicResult(ExtAtomicOpType op, Type valu
+@@ -2965,7 +2872,7 @@ inline Value* OMGIRGenerator::sanitizeAtomicResult(ExtAtomicOpType op, Type valu
          }
      };
  
@@ -16588,7 +16575,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      case TypeKind::I64: {
          if (accessWidth(op) == Width64)
              return result;
-@@ -2992,7 +2902,7 @@ Value* OMGIRGenerator::fixupPointerPlusOffsetForAtomicOps(ExtAtomicOpType op, Va
+@@ -2992,7 +2899,7 @@ Value* OMGIRGenerator::fixupPointerPlusOffsetForAtomicOps(ExtAtomicOpType op, Va
      return pointer;
  }
  
@@ -16597,7 +16584,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      pointer = fixupPointerPlusOffsetForAtomicOps(op, pointer, uoffset);
  
-@@ -3011,7 +2921,7 @@ inline Value* OMGIRGenerator::emitAtomicLoadOp(ExtAtomicOpType op, Type valueTyp
+@@ -3011,7 +2918,7 @@ inline Value* OMGIRGenerator::emitAtomicLoadOp(ExtAtomicOpType op, Type valueTyp
          break;
      }
  
@@ -16606,7 +16593,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, atomic);
      m_heaps.decorateFencedAccess(&m_heaps.WebAssemblyMemory, atomic);
      return sanitizeAtomicResult(op, valueType, atomic);
-@@ -3021,7 +2931,9 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
+@@ -3021,7 +2928,9 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
  {
      ASSERT(pointer.type().kind() == m_info.memory(memoryIndex).addressType().asB3TypeKind());
  
@@ -16617,7 +16604,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (overflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -3031,7 +2943,7 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
+@@ -3031,7 +2940,7 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
              this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
          });
  
@@ -16626,7 +16613,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          case TypeKind::I32:
              result = push(constant(Int32, 0));
              break;
-@@ -3043,19 +2955,19 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
+@@ -3043,19 +2952,19 @@ auto OMGIRGenerator::atomicLoad(ExtAtomicOpType op, Type valueType, ExpressionTy
              break;
          }
      } else {
@@ -16649,7 +16636,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, atomic);
      m_heaps.decorateFencedAccess(&m_heaps.WebAssemblyMemory, atomic);
  }
-@@ -3063,7 +2975,9 @@ inline void OMGIRGenerator::emitAtomicStoreOp(ExtAtomicOpType op, Type valueType
+@@ -3063,7 +2972,9 @@ inline void OMGIRGenerator::emitAtomicStoreOp(ExtAtomicOpType op, Type valueType
  auto OMGIRGenerator::atomicStore(ExtAtomicOpType op, Type valueType, ExpressionType pointer, ExpressionType value, uint64_t offset, uint8_t memoryIndex) -> PartialResult
  {
      ASSERT(pointer.type().kind() == m_info.memory(memoryIndex).addressType().asB3TypeKind());
@@ -16660,7 +16647,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (overflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -3073,13 +2987,13 @@ auto OMGIRGenerator::atomicStore(ExtAtomicOpType op, Type valueType, ExpressionT
+@@ -3073,13 +2984,13 @@ auto OMGIRGenerator::atomicStore(ExtAtomicOpType op, Type valueType, ExpressionT
              this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
          });
      } else {
@@ -16676,7 +16663,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      pointer = fixupPointerPlusOffsetForAtomicOps(op, pointer, uoffset);
  
-@@ -3147,7 +3061,7 @@ inline Value* OMGIRGenerator::emitAtomicBinaryRMWOp(ExtAtomicOpType op, Type val
+@@ -3147,7 +3058,7 @@ inline Value* OMGIRGenerator::emitAtomicBinaryRMWOp(ExtAtomicOpType op, Type val
      if (valueType.isI64() && accessWidth(op) != Width64)
          value = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Trunc, Origin(), value);
  
@@ -16685,7 +16672,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, atomic);
      m_heaps.decorateFencedAccess(&m_heaps.WebAssemblyMemory, atomic);
      return sanitizeAtomicResult(op, valueType, atomic);
-@@ -3157,7 +3071,9 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
+@@ -3157,7 +3068,9 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
  {
      ASSERT(pointer.type().kind() == m_info.memory(memoryIndex).addressType().asB3TypeKind());
  
@@ -16696,7 +16683,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (overflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -3167,7 +3083,7 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
+@@ -3167,7 +3080,7 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
              this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
          });
  
@@ -16705,7 +16692,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          case TypeKind::I32:
              result = push(constant(Int32, 0));
              break;
-@@ -3179,27 +3095,27 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
+@@ -3179,27 +3092,27 @@ auto OMGIRGenerator::atomicBinaryRMW(ExtAtomicOpType op, Type valueType, Express
              break;
          }
      } else {
@@ -16737,7 +16724,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      case TypeKind::I64: {
          switch (accessWidth) {
          case Width8:
-@@ -3245,7 +3161,7 @@ Value* OMGIRGenerator::emitAtomicCompareExchange(ExtAtomicOpType op, Type valueT
+@@ -3245,7 +3158,7 @@ Value* OMGIRGenerator::emitAtomicCompareExchange(ExtAtomicOpType op, Type valueT
          truncatedValue = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Trunc, Origin(), value);
      }
  
@@ -16746,7 +16733,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, atomic);
      m_heaps.decorateFencedAccess(&m_heaps.WebAssemblyMemory, atomic);
      return sanitizeAtomicResult(op, valueType, atomic);
-@@ -3264,16 +3180,16 @@ Value* OMGIRGenerator::emitAtomicCompareExchange(ExtAtomicOpType op, Type valueT
+@@ -3264,16 +3177,16 @@ Value* OMGIRGenerator::emitAtomicCompareExchange(ExtAtomicOpType op, Type valueT
  
      m_heaps.decorateWasmStructSet(structFieldHeap(definingRTT, fieldIndex), storeValue);
  
@@ -16767,7 +16754,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      if (overflows) [[unlikely]] {
          // FIXME: Even though this is provably out of bounds, it's not a validation error, so we have to handle it
-@@ -3283,7 +3199,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
+@@ -3283,7 +3196,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
              this->emitExceptionCheck(jit, origin, ExceptionType::OutOfBoundsMemoryAccess);
          });
  
@@ -16776,7 +16763,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          case TypeKind::I32:
              result = push(constant(Int32, 0));
              break;
-@@ -3295,7 +3211,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
+@@ -3295,7 +3208,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
              break;
          }
      } else {
@@ -16785,7 +16772,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      }
  
      return { };
-@@ -3303,7 +3219,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
+@@ -3303,7 +3216,7 @@ auto OMGIRGenerator::atomicCompareExchange(ExtAtomicOpType op, Type valueType, E
  
  auto OMGIRGenerator::atomicWait(ExtAtomicOpType op, ExpressionType pointerVar, ExpressionType valueVar, ExpressionType timeoutVar, ExpressionType& result, uint64_t offset, uint8_t memoryIndex) -> PartialResult
  {
@@ -16794,7 +16781,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      Value* value = get(valueVar);
      Value* timeout = get(timeoutVar);
      Value* resultValue = nullptr;
-@@ -3331,7 +3247,7 @@ auto OMGIRGenerator::atomicWait(ExtAtomicOpType op, ExpressionType pointerVar, E
+@@ -3331,7 +3244,7 @@ auto OMGIRGenerator::atomicWait(ExtAtomicOpType op, ExpressionType pointerVar, E
  auto OMGIRGenerator::atomicNotify(ExtAtomicOpType, ExpressionType pointer, ExpressionType count, ExpressionType& result, uint64_t offset, uint8_t memoryIndex) -> PartialResult
  {
      Value* resultValue = callWasmOperation(m_currentBlock, Int32, operationMemoryAtomicNotify,
@@ -16803,7 +16790,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      {
          result = push(resultValue);
          CheckValue* check = m_currentBlock->appendNew<CheckValue>(m_proc, Check, origin(),
-@@ -3764,7 +3680,6 @@ auto OMGIRGenerator::addArrayNew(TypeSignatureIndex typeIndex, ExpressionType si
+@@ -3764,7 +3677,6 @@ auto OMGIRGenerator::addArrayNew(TypeSignatureIndex typeIndex, ExpressionType si
      m_proc.setUsesWasmGCArrayAllocations();
  
      auto* array = m_currentBlock->appendNew<WasmArrayNewValue>(m_proc, origin(), wasmRefType(), Ref { rtt }, typeIndex.rawIndex(), allocatorsBaseOffset, instanceValue(), structureID, sizeValue, initValue);
@@ -16811,7 +16798,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      mutatorFence();
      result = push(array);
-@@ -3806,7 +3721,6 @@ auto OMGIRGenerator::addArrayNewDefault(TypeSignatureIndex typeIndex, Expression
+@@ -3806,7 +3718,6 @@ auto OMGIRGenerator::addArrayNewDefault(TypeSignatureIndex typeIndex, Expression
      m_proc.setUsesWasmGCArrayAllocations();
  
      auto* array = m_currentBlock->appendNew<WasmArrayNewValue>(m_proc, origin(), wasmRefType(), Ref { rtt }, typeIndex.rawIndex(), allocatorsBaseOffset, instanceValue(), structureID, sizeValue, initValue);
@@ -16819,7 +16806,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      mutatorFence();
      result = push(array);
-@@ -3840,7 +3754,6 @@ auto OMGIRGenerator::addArrayNewFixed(TypeSignatureIndex typeIndex, ArgumentList
+@@ -3840,7 +3751,6 @@ auto OMGIRGenerator::addArrayNewFixed(TypeSignatureIndex typeIndex, ArgumentList
      m_proc.setUsesWasmGCArrayAllocations();
  
      auto* object = m_currentBlock->appendNew<WasmArrayNewValue>(m_proc, origin(), wasmRefType(), Ref { rtt }, typeIndex.rawIndex(), allocatorsBaseOffset, instanceValue(), structureID, size);
@@ -16827,7 +16814,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      for (uint32_t i = 0; i < args.size(); ++i) {
          // Emit the array set code -- note that this omits the bounds check, since
-@@ -3852,52 +3765,18 @@ auto OMGIRGenerator::addArrayNewFixed(TypeSignatureIndex typeIndex, ArgumentList
+@@ -3852,52 +3762,18 @@ auto OMGIRGenerator::addArrayNewFixed(TypeSignatureIndex typeIndex, ArgumentList
      return { };
  }
  
@@ -16885,7 +16872,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  auto OMGIRGenerator::addArrayGet(ExtGCOpType arrayGetKind, TypeSignatureIndex typeIndex, TypedExpression arrayref, ExpressionType index, ExpressionType& result) -> PartialResult
  {
      auto arrayValue = get(arrayref);
-@@ -3982,9 +3861,7 @@ bool OMGIRGenerator::emitArraySetUncheckedWithoutWriteBarrier(TypeSignatureIndex
+@@ -3982,9 +3858,7 @@ bool OMGIRGenerator::emitArraySetUncheckedWithoutWriteBarrier(TypeSignatureIndex
          arrayref, indexValue, setValue, Ref { m_info.rtt(typeIndex) });
      m_heaps.decorateWasmArraySet(arrayElementHeap(elementType, indexValue), storeNode);
  
@@ -16896,7 +16883,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  }
  
  void OMGIRGenerator::emitArraySetUnchecked(TypeSignatureIndex typeIndex, Value* arrayref, Value* index, Value* setValue)
-@@ -4031,78 +3908,6 @@ auto OMGIRGenerator::addArrayLen(TypedExpression arrayref, ExpressionType& resul
+@@ -4031,78 +3905,6 @@ auto OMGIRGenerator::addArrayLen(TypedExpression arrayref, ExpressionType& resul
      return { };
  }
  
@@ -16975,7 +16962,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  auto OMGIRGenerator::addArrayFill(TypeSignatureIndex typeIndex, TypedExpression arrayref, ExpressionType offset, ExpressionType value, ExpressionType size) -> PartialResult
  {
      StorageType elementType;
-@@ -4113,75 +3918,62 @@ auto OMGIRGenerator::addArrayFill(TypeSignatureIndex typeIndex, TypedExpression
+@@ -4113,75 +3915,62 @@ auto OMGIRGenerator::addArrayFill(TypeSignatureIndex typeIndex, TypedExpression
      Value* valueValue = get(value);
      Value* sizeValue = get(size);
  
@@ -17089,7 +17076,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      return { };
  }
-@@ -4252,7 +4044,6 @@ auto OMGIRGenerator::addStructNew(TypeSignatureIndex typeIndex, ArgumentList& ar
+@@ -4252,7 +4041,6 @@ auto OMGIRGenerator::addStructNew(TypeSignatureIndex typeIndex, ArgumentList& ar
      m_proc.setUsesWasmGCStructAllocations();
  
      auto* structNew = m_currentBlock->appendNew<WasmStructNewValue>(m_proc, origin(), wasmRefType(), Ref { rtt }, typeIndex.rawIndex(), allocatorsBaseOffset, instanceValue(), structureID);
@@ -17097,7 +17084,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      for (uint32_t i = 0; i < args.size(); ++i) {
          bool needsWriteBarrier = emitStructSet(/* canTrap */ false, structNew, i, rtt, get(args[i]));
-@@ -4273,7 +4064,6 @@ auto OMGIRGenerator::addStructNewDefault(TypeSignatureIndex typeIndex, Expressio
+@@ -4273,7 +4061,6 @@ auto OMGIRGenerator::addStructNewDefault(TypeSignatureIndex typeIndex, Expressio
      m_proc.setUsesWasmGCStructAllocations();
  
      auto* structNew = m_currentBlock->appendNew<WasmStructNewValue>(m_proc, origin(), wasmRefType(), Ref { rtt }, typeIndex.rawIndex(), allocatorsBaseOffset, instanceValue(), structureID);
@@ -17105,7 +17092,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      for (StructFieldCount i = 0; i < rtt.fieldCount(); ++i) {
          Value* initValue;
-@@ -4366,10 +4156,10 @@ void OMGIRGenerator::emitRefTestOrCast(CastKind castKind, TypedExpression refere
+@@ -4366,10 +4153,10 @@ void OMGIRGenerator::emitRefTestOrCast(CastKind castKind, TypedExpression refere
  
      RefPtr<const Wasm::RTT> targetRTT;
      int32_t originalTypeIndex = toHeapType;
@@ -17118,7 +17105,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      }
  
      OptionSet<B3::WasmRefTypeCheckFlag> flags;
-@@ -4430,30 +4220,7 @@ void OMGIRGenerator::mutatorFence()
+@@ -4430,30 +4217,7 @@ void OMGIRGenerator::mutatorFence()
  
  auto OMGIRGenerator::addAnyConvertExtern(ExpressionType reference, ExpressionType& result) -> PartialResult
  {
@@ -17150,7 +17137,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      return { };
  }
  
-@@ -4536,28 +4303,28 @@ auto OMGIRGenerator::addSIMDShuffle(v128_t imm, ExpressionType a, ExpressionType
+@@ -4536,28 +4300,28 @@ auto OMGIRGenerator::addSIMDShuffle(v128_t imm, ExpressionType a, ExpressionType
      return { };
  }
  
@@ -17184,7 +17171,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      size_t byteSize;
  
-@@ -4595,14 +4362,14 @@ auto OMGIRGenerator::addSIMDLoadSplat(SIMDLaneOperation op, ExpressionType point
+@@ -4595,14 +4359,14 @@ auto OMGIRGenerator::addSIMDLoadSplat(SIMDLaneOperation op, ExpressionType point
  
      Value* ptr = emitCheckAndPreparePointer(get(pointerVariable), uoffset, byteSize, memoryIndex);
      int32_t offset = fixupPointerPlusOffset(ptr, uoffset);
@@ -17201,7 +17188,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      size_t byteSize;
      B3::Opcode loadOp;
-@@ -4639,14 +4406,14 @@ auto OMGIRGenerator::addSIMDLoadLane(SIMDLaneOperation op, ExpressionType pointe
+@@ -4639,14 +4403,14 @@ auto OMGIRGenerator::addSIMDLoadLane(SIMDLaneOperation op, ExpressionType pointe
  
      Value* ptr = emitCheckAndPreparePointer(get(pointerVariable), uoffset, byteSize, memoryIndex);
      int32_t offset = fixupPointerPlusOffset(ptr, uoffset);
@@ -17218,7 +17205,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      size_t byteSize;
      B3::Opcode storeOp;
-@@ -4684,13 +4451,13 @@ auto OMGIRGenerator::addSIMDStoreLane(SIMDLaneOperation op, ExpressionType point
+@@ -4684,13 +4448,13 @@ auto OMGIRGenerator::addSIMDStoreLane(SIMDLaneOperation op, ExpressionType point
      Value* ptr = emitCheckAndPreparePointer(get(pointerVariable), uoffset, byteSize, memoryIndex);
      int32_t offset = fixupPointerPlusOffset(ptr, uoffset);
      Value* laneValue = m_currentBlock->appendNew<SIMDValue>(m_proc, origin(), B3::VectorExtractLane, type, lane, byteSize < 4 ? SIMDSignMode::Unsigned : SIMDSignMode::None, laneIndex, get(vectorVariable));
@@ -17234,7 +17221,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      B3::Opcode loadOp = Load;
      size_t byteSize = 8;
-@@ -4727,14 +4494,14 @@ auto OMGIRGenerator::addSIMDLoadExtend(SIMDLaneOperation op, ExpressionType poin
+@@ -4727,14 +4491,14 @@ auto OMGIRGenerator::addSIMDLoadExtend(SIMDLaneOperation op, ExpressionType poin
  
      Value* ptr = emitCheckAndPreparePointer(get(pointerVariable), uoffset, byteSize, memoryIndex);
      int32_t offset = fixupPointerPlusOffset(ptr, uoffset);
@@ -17251,7 +17238,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      B3::Type loadType;
      unsigned byteSize;
-@@ -4757,7 +4524,7 @@ auto OMGIRGenerator::addSIMDLoadPad(SIMDLaneOperation op, ExpressionType pointer
+@@ -4757,7 +4521,7 @@ auto OMGIRGenerator::addSIMDLoadPad(SIMDLaneOperation op, ExpressionType pointer
  
      Value* ptr = emitCheckAndPreparePointer(get(pointerVariable), uoffset, byteSize, memoryIndex);
      int32_t offset = fixupPointerPlusOffset(ptr, uoffset);
@@ -17260,7 +17247,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      m_heaps.decorateMemory(&m_heaps.WebAssemblyMemory, memLoad);
      result = push(m_currentBlock->appendNew<SIMDValue>(m_proc, origin(), B3::VectorReplaceLane, B3::V128, lane, SIMDSignMode::None, idx,
          m_currentBlock->appendNew<Const128Value>(m_proc, origin(), v128_t { }),
-@@ -4788,123 +4555,6 @@ void OMGIRGenerator::connectValuesAtEntrypoint(unsigned& indexInBuffer, Value* p
+@@ -4788,123 +4552,6 @@ void OMGIRGenerator::connectValuesAtEntrypoint(unsigned& indexInBuffer, Value* p
      }
  };
  
@@ -17384,7 +17371,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpression> args, ControlType& block, uint32_t loopIndex) -> PartialResult
  {
      auto enclosingStack = m_parser->expressionStack();
-@@ -4912,13 +4562,6 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
+@@ -4912,13 +4559,6 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
      BasicBlock* body = m_proc.addBlock();
      BasicBlock* continuation = m_proc.addBlock();
  
@@ -17398,7 +17385,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      block = ControlData(m_proc, origin(), WTF::move(signature), BlockType::Loop, continuation, body);
  
      for (unsigned i = 0; i < block.signature().argumentCount(); ++i) {
-@@ -4930,7 +4573,7 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
+@@ -4930,7 +4570,7 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
          args[i] = TypedExpression(block.signature().argumentType(i), phi);
      }
  
@@ -17407,7 +17394,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      if (loopIndex == m_loopIndexForOSREntry) {
          // This must be kept in sync with BBQJIT::makeStackMap.
          dataLogLnIf(WasmOMGIRGeneratorInternal::verbose, "Setting up for OSR entry");
-@@ -4970,17 +4613,11 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
+@@ -4970,17 +4610,11 @@ auto OMGIRGenerator::addLoop(BlockSignature&& signature, std::span<TypedExpressi
  
          ASSERT(!m_proc.usesSIMD() || m_compilationMode == CompilationMode::OMGForOSREntryMode);
          *m_osrEntryScratchBufferSize = indexInBuffer;
@@ -17427,7 +17414,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      return { };
  }
  
-@@ -5106,8 +4743,6 @@ RefPtr<PatchpointExceptionHandle> OMGIRGenerator::preparePatchpointForExceptions
+@@ -5106,8 +4740,6 @@ RefPtr<PatchpointExceptionHandle> OMGIRGenerator::preparePatchpointForExceptions
      if (!mustSaveState)
          return nullptr;
  
@@ -17436,7 +17423,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      unsigned firstStackmapChildOffset = patch->numChildren();
      unsigned firstStackmapParamOffset = firstStackmapChildOffset + m_proc.resultCount(patch->type());
  
-@@ -5270,7 +4905,7 @@ auto OMGIRGenerator::addCatchToUnreachable(unsigned exceptionIndex, const RTT& s
+@@ -5270,7 +4902,7 @@ auto OMGIRGenerator::addCatchToUnreachable(unsigned exceptionIndex, const RTT& s
          Type type = signature.argumentType(i);
          Value* value = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, toB3Type(type), origin(), payload, safeCast<int32_t>(offset * sizeof(uint64_t)));
          results.append(push(value));
@@ -17445,7 +17432,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      }
      TRACE_CF("CATCH");
      return { };
-@@ -5360,13 +4995,13 @@ auto OMGIRGenerator::emitCatchTableImpl(ControlData& data, const ControlData::Tr
+@@ -5360,13 +4992,13 @@ auto OMGIRGenerator::emitCatchTableImpl(ControlData& data, const ControlData::Tr
              Type type = signature->argumentType(i);
              Value* value = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, toB3Type(type), origin(), buffer, safeCast<int32_t>(offset * sizeof(uint64_t)));
              resultStack.constructAndAppend(type, value);
@@ -17461,7 +17448,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      }
  
      auto& targetControl = m_parser->resolveControlRef(target.target).controlData;
-@@ -5508,7 +5143,6 @@ auto OMGIRGenerator::addReturn(const ControlData&, std::span<const TypedExpressi
+@@ -5508,7 +5140,6 @@ auto OMGIRGenerator::addReturn(const ControlData&, std::span<const TypedExpressi
          params.code().emitEpilogue(jit);
      });
      patch->effects.terminal = true;
@@ -17469,7 +17456,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      RELEASE_ASSERT(returnValues.size() >= wasmCallInfo.results.size());
      unsigned offset = returnValues.size() - wasmCallInfo.results.size();
-@@ -5716,10 +5350,7 @@ auto OMGIRGenerator::createCallPatchpoint(BasicBlock* block, const RTT& signatur
+@@ -5716,10 +5347,7 @@ auto OMGIRGenerator::createCallPatchpoint(BasicBlock* block, const RTT& signatur
      auto constrainedPatchArgs = createCallConstrainedArgs(block, wasmCalleeInfo, tmpArgs);
  
      advanceCallSiteIndex();
@@ -17481,7 +17468,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      patchpoint->effects.writesPinned = true;
      patchpoint->effects.readsPinned = true;
      patchpoint->clobberEarly(RegisterSet::macroClobberedGPRs());
-@@ -5730,7 +5361,7 @@ auto OMGIRGenerator::createCallPatchpoint(BasicBlock* block, const RTT& signatur
+@@ -5730,7 +5358,7 @@ auto OMGIRGenerator::createCallPatchpoint(BasicBlock* block, const RTT& signatur
      if (returnType != B3::Void) {
          Vector<B3::ValueRep, 1> resultConstraints;
          for (auto valueLocation : constrainedResultLocations) {
@@ -17490,7 +17477,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
                  // FIXME: Should these results be ColdAny? The argument in favor of Warm is that we have to move the values anyway so we might as well put in a register if that's what B3 wants
                  resultConstraints.append(B3::ValueRep::WarmAny);
              } else
-@@ -5948,7 +5579,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
+@@ -5948,7 +5576,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
  
          ShuffleLocation dst;
          if (dstParam.location.isGPR())
@@ -17499,7 +17486,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          else if (dstParam.location.isFPR())
              dst = ShuffleLocation::fromFPR(dstParam.location.fpr());
          else {
-@@ -6002,7 +5633,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
+@@ -6002,7 +5630,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
      {
          ShuffleEntry entry;
          entry.src = ShuffleLocation::fromStack(fpOffsetToSPOffset(CallFrame::returnPCOffset()));
@@ -17508,7 +17495,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
          ASSERT(!calleeSaves.find(MacroAssembler::linkRegister));
          entry.dst = ShuffleLocation::fromGPR(MacroAssembler::linkRegister);
  #else
-@@ -6208,7 +5839,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
+@@ -6208,7 +5836,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
  
      auto newSPAtPrologueOffsetFromSP = newFPOffsetFromSP + prologueStackPointerDelta();
  
@@ -17517,7 +17504,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
      // the return PC should already be in the linkRegister from the shuffle above.
      if (WasmOMGIRGeneratorInternal::verboseTailCalls) {
          jit.probeDebug([] (Probe::Context& context) {
-@@ -6253,7 +5884,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
+@@ -6253,7 +5881,7 @@ static inline void prepareForTailCallImpl(unsigned functionIndex, CCallHelpers&
                      auto src = arg.location;
                      dataLog("Arg ", i, " located at ", arg.location, " = ");
                      if (arg.location.isGPR())
@@ -17526,7 +17513,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
                      else if (arg.location.isFPR() && arg.width <= Width::Width64)
                          dataLog(context.fpr(arg.location.fpr()));
                      else if (arg.location.isFPR())
-@@ -6642,7 +6273,7 @@ auto OMGIRGenerator::emitDirectCall(unsigned callProfileIndex, FunctionSpaceInde
+@@ -6642,7 +6270,7 @@ auto OMGIRGenerator::emitDirectCall(unsigned callProfileIndex, FunctionSpaceInde
      return { };
  }
  
@@ -17535,7 +17522,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      if (callProfileIndex >= m_inlining->callSites().size())
          return { };
-@@ -6721,7 +6352,7 @@ auto OMGIRGenerator::addCallIndirect(unsigned callProfileIndex, unsigned tableIn
+@@ -6721,7 +6349,7 @@ auto OMGIRGenerator::addCallIndirect(unsigned callProfileIndex, unsigned tableIn
          ASSERT(tableIndex < m_info.tableCount());
          auto& tableInformation = m_info.table(tableIndex);
  
@@ -17544,7 +17531,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
              // The buffer is immutable & non-control-dependent since this table is not resizable / reaching to the maximum size.
              callableFunctionBufferLength = constant(B3::Int32, tableInformation.initial(), origin());
              if (!tableIndex) {
-@@ -6769,22 +6400,16 @@ auto OMGIRGenerator::addCallIndirect(unsigned callProfileIndex, unsigned tableIn
+@@ -6769,22 +6397,16 @@ auto OMGIRGenerator::addCallIndirect(unsigned callProfileIndex, unsigned tableIn
          }
      }
  
@@ -17569,7 +17556,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  
      BasicBlock* continuation = m_proc.addBlock();
  
-@@ -7056,7 +6681,7 @@ static bool shouldDumpIRFor(uint32_t functionIndex)
+@@ -7056,7 +6678,7 @@ static bool shouldDumpIRFor(uint32_t functionIndex)
      return dumpAllowlist->shouldDumpWasmFunction(functionIndex);
  }
  
@@ -17578,7 +17565,7 @@ index c042cd74a522adb10701540f5d9d1bfac983d16e..8f5fc60793a0585202b5f17164b65b25
  {
      CompilerTimingScope totalScope("B3"_s, "Total OMG compilation"_s);
  
-@@ -7101,6 +6726,8 @@ std::expected<std::unique_ptr<InternalFunction>, String> parseAndCompileOMG(Comp
+@@ -7101,6 +6723,8 @@ std::expected<std::unique_ptr<InternalFunction>, String> parseAndCompileOMG(Comp
      
      procedure.setOptLevel(Options::wasmOMGOptimizationLevel());
  
@@ -17779,7 +17766,7 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
      // materializeImportJSCell and store
      *access.operator()<uint64_t>(calleeFrame, CallFrameSlot::callee * sizeof(Register)) = JSValue::encode(importableFunction->importFunction.get());
 -    *access.operator()<uint32_t>(calleeFrame, CallFrameSlot::argumentCountIncludingThis * static_cast<int>(sizeof(Register)) + LowWordOffset) = argCount + 1; // including this = +1
-+    *access.operator()<uint32_t>(calleeFrame, CallFrameSlot::argumentCountIncludingThis * static_cast<int>(sizeof(Register)) + PayloadOffset) = argCount + 1; // including this = +1
++    *access.operator()<uint32_t>(calleeFrame, CallFrameSlot::argumentCountIncludingThis * static_cast<int>(sizeof(Register)) + PayloadOffset) = argCount + 1;
  
      OPERATION_RETURN(scope);
  }
@@ -18053,7 +18040,7 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
  JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRetrieveAndClearExceptionIfCatchable, ThrownExceptionInfo, (JSWebAssemblyInstance* instance))
  {
      VM& vm = instance->vm();
-@@ -1696,6 +1741,28 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRetrieveAndClearExceptionIfCatcha
+@@ -1696,6 +1741,25 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRetrieveAndClearExceptionIfCatcha
  
      return { JSValue::encode(thrownValue), jumpTarget };
  }
@@ -18071,9 +18058,6 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
 +    Exception* exception = throwScope.exception();
 +    *thrownValue = JSValue::encode(exception->value());
 +
-+    // We want to clear the exception here rather than in the catch prologue
-+    // JIT code because clearing it also entails clearing a bit in an Atomic
-+    // bit field in VMTraps.
 +    (void)throwScope.tryClearException();
 +
 +    return jumpTarget;
@@ -18082,7 +18066,7 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
  
  JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmArrayNew, EncodedJSValue, (JSWebAssemblyInstance* instance, uint32_t typeIndex, uint32_t size, uint64_t value))
  {
-@@ -1753,66 +1820,31 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmArrayNewEmpty, EncodedJSValue, (J
+@@ -1753,66 +1817,31 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmArrayNewEmpty, EncodedJSValue, (J
      return JSValue::encode(array);
  }
  
@@ -18163,7 +18147,7 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
      return toUCPUStrictInt32(arrayInitElem(instance, dst, dstOffset, srcElementIndex, srcOffset, size));
  }
  
-@@ -1832,8 +1864,8 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRefTest, UCPUStrictInt32, (JSWebA
+@@ -1832,8 +1861,8 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRefTest, UCPUStrictInt32, (JSWebA
      int32_t truth = shouldNegate ? 0 : 1;
      int32_t falsity = shouldNegate ? 1 : 0;
  
@@ -18174,7 +18158,7 @@ index d7625c8111dc2b6b0e58933b9405e9ef19b09d92..1fd82855f460c275f07a5e4d0c49deb8
          return toUCPUStrictInt32(result ? truth : falsity);
      }
  
-@@ -1844,8 +1876,8 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRefTest, UCPUStrictInt32, (JSWebA
+@@ -1844,8 +1873,8 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRefTest, UCPUStrictInt32, (JSWebA
  
  JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmRefCast, EncodedJSValue, (JSWebAssemblyInstance* instance, EncodedJSValue reference, uint32_t allowNull, int32_t heapType))
  {
@@ -18282,7 +18266,7 @@ index b60697f4f55a690d64969cc801ae406d3a873496..11290e69716568a1f47a435a95622afa
  MacroAssemblerCodeRef<JITThunkPtrTag> catchInWasmThunkGenerator(const AbstractLocker&)
  {
      CCallHelpers jit;
-@@ -283,6 +284,61 @@ MacroAssemblerCodeRef<JITThunkPtrTag> catchInWasmThunkGenerator(const AbstractLo
+@@ -283,6 +284,56 @@ MacroAssemblerCodeRef<JITThunkPtrTag> catchInWasmThunkGenerator(const AbstractLo
      LinkBuffer linkBuffer(jit, GLOBAL_THUNK_ID, LinkBuffer::Profile::WasmThunk);
      return FINALIZE_WASM_CODE(linkBuffer, JITThunkPtrTag, "catchInWasmThunk"_s, "Wasm catch runway");
  }
@@ -18296,8 +18280,6 @@ index b60697f4f55a690d64969cc801ae406d3a873496..11290e69716568a1f47a435a95622afa
 +    auto isWasmCallee = jit.branch32(CCallHelpers::Equal, GPRInfo::regT3, CCallHelpers::TrustedImm32(JSValue::NativeCalleeTag));
 +    CCallHelpers::JumpList isJSCallee;
 +    {
-+        // FIXME: Handling precise allocations in WasmOMGIRGenerator catch entrypoints might be unnecessary
-+        // https://bugs.webkit.org/show_bug.cgi?id=231213
 +        auto preciseAllocationCase = jit.branchTestPtr(CCallHelpers::NonZero, GPRInfo::regT0, CCallHelpers::TrustedImm32(PreciseAllocation::halfAlignment));
 +        jit.andPtr(CCallHelpers::TrustedImmPtr(MarkedBlock::blockMask), GPRInfo::regT0);
 +        jit.loadPtr(CCallHelpers::Address(GPRInfo::regT0, MarkedBlock::offsetOfHeader + MarkedBlock::Header::offsetOfVM()), GPRInfo::regT0);
@@ -18324,9 +18306,6 @@ index b60697f4f55a690d64969cc801ae406d3a873496..11290e69716568a1f47a435a95622afa
 +    constexpr int32_t resultSpace = WTF::roundUpToMultipleOf<stackAlignmentBytes()>(static_cast<int32_t>(sizeof(EncodedJSValue)));
 +    jit.subPtr(CCallHelpers::TrustedImm32(resultSpace), MacroAssembler::stackPointerRegister);
 +
-+    // So, this is calling a function. This means that we clobber all caller-save registers!
-+    // Is it safe? Yes. OMG / BBQ(Air) generates stackmap for values with the patchpoint which says "this is function call". Thus, stackmap must hold
-+    // StackSlots / Registers which are not these caller-save registers. So, clobbering these registers here does not break the stackmap restoration.
 +    jit.prepareWasmCallOperation(GPRInfo::wasmContextInstancePointer);
 +    jit.setupArguments<decltype(operationWasmRetrieveAndClearExceptionIfCatchable)>(GPRInfo::wasmContextInstancePointer, MacroAssembler::stackPointerRegister);
 +    jit.callOperation<OperationPtrTag>(operationWasmRetrieveAndClearExceptionIfCatchable);
@@ -18344,7 +18323,7 @@ index b60697f4f55a690d64969cc801ae406d3a873496..11290e69716568a1f47a435a95622afa
  
  #if ENABLE(WEBASSEMBLY_OMGJIT)
  
-@@ -344,7 +400,6 @@ MacroAssemblerCodeRef<JITThunkPtrTag> Thunks::stub(ThunkGenerator generator)
+@@ -344,7 +395,6 @@ MacroAssemblerCodeRef<JITThunkPtrTag> Thunks::stub(ThunkGenerator generator)
  
  MacroAssemblerCodeRef<JITThunkPtrTag> Thunks::stub(const AbstractLocker& locker, ThunkGenerator generator)
  {
@@ -19748,16 +19727,15 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
  class WebAssemblyModuleRecord;
  
  namespace Wasm {
-@@ -73,7 +70,7 @@ class BaselineData;
+@@ -73,7 +70,6 @@ class BaselineData;
  }
  
  // The layout of a JSWebAssemblyInstance is
 -//     { struct JSWebAssemblyInstance }[ WasmMemoryBaseAndSize ][ WasmOrJSImportableFunctionCallLinkInfo ][ Wasm::Table* ][ Global::Value ][ Wasm::BaselineData* ][ WebAssemblyGCStructure* ][ Allocator* ][ WriteBarrier<Unknown> function wrappers ]
-+//     { struct JSWebAssemblyInstance }[ WasmMemoryBaseAndSize ][ WasmOrJSImportableFunctionCallLinkInfo ][ Wasm::Table* ][ Global::Value ][ Wasm::BaselineData* ][ WebAssemblyGCStructure* ][ Allocator* ]
  // in a compound TrailingArray-like format.
  class JSWebAssemblyInstance final : public JSNonFinalObject {
      friend class LLIntOffsetsExtractor;
-@@ -127,6 +124,7 @@ public:
+@@ -127,6 +123,7 @@ public:
              m_cachedMemory0Size = m_memories[i]->memory().size();
              m_wasmMemory = value->memory();
          }
@@ -19765,7 +19743,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
          m_memories[i]->memory().registerInstance(*this);
      }
  
-@@ -140,7 +138,6 @@ public:
+@@ -140,7 +137,6 @@ public:
          // If there are zero memories then there will be space for a dummy memory (handled in constructor)
  
          m_memories[0].set(vm, this, value);
@@ -19773,7 +19751,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      }
  
      MemoryMode memory0Mode() const { return memory(0)->memory().mode(); }
-@@ -167,21 +164,18 @@ public:
+@@ -167,21 +163,18 @@ public:
          vm.writeBarrier(this, value);
      }
  
@@ -19798,7 +19776,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      static constexpr ptrdiff_t offsetOfSoftStackLimit() { return OBJECT_OFFSETOF(JSWebAssemblyInstance, m_stackMirror) + StackManager::Mirror::offsetOfSoftStackLimit(); }
  
      Wasm::Module& module() const { return m_module.get(); }
-@@ -197,8 +191,6 @@ public:
+@@ -197,8 +190,6 @@ public:
      bool copyDataSegment(JSWebAssemblyArray*, uint32_t segmentIndex, uint32_t offset, uint32_t lengthInBytes, uint8_t* values);
      void copyElementSegment(JSWebAssemblyArray*, const Wasm::Element& segment, uint32_t srcOffset, uint32_t length, uint64_t* values);
  
@@ -19807,7 +19785,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      bool isImportFunction(uint32_t functionIndex) const
      {
          return functionIndex < calleeGroup()->functionImportCount();
-@@ -222,34 +214,24 @@ public:
+@@ -222,34 +213,24 @@ public:
  
              // reload all of the cached base and size pointers
              for (unsigned i = 0; i < m_moduleInformation->memoryCount(); i++) {
@@ -19848,7 +19826,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      void updateCachedTable0();
  
      int32_t loadI32Global(unsigned i) const
-@@ -308,6 +290,7 @@ public:
+@@ -308,6 +289,7 @@ public:
      const BitVector& globalsToMark() LIFETIME_BOUND { return m_globalsToMark; }
      const BitVector& globalsToBinding() LIFETIME_BOUND { return m_globalsToBinding; }
      JSValue getFunctionWrapper(unsigned) const;
@@ -19856,7 +19834,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      void setFunctionWrapper(unsigned, JSValue);
      JSValue ensureFunctionWrapper(Wasm::FunctionSpaceIndex);
      void setBuiltinCalleeBits(uint32_t builtinID, CalleeBits calleeBits) { m_builtinCalleeBits[builtinID] = calleeBits; }
-@@ -323,13 +306,9 @@ public:
+@@ -323,13 +305,9 @@ public:
  
      static constexpr ptrdiff_t offsetOfCachedTable0Buffer() { return OBJECT_OFFSETOF(JSWebAssemblyInstance, m_cachedTable0Buffer); }
      static constexpr ptrdiff_t offsetOfCachedTable0Length() { return OBJECT_OFFSETOF(JSWebAssemblyInstance, m_cachedTable0Length); }
@@ -19872,7 +19850,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      static constexpr ptrdiff_t offsetOfCachedMemory0Size() { return OBJECT_OFFSETOF(JSWebAssemblyInstance, m_cachedMemory0Size); }
  
      // Tail accessors.
-@@ -339,17 +318,9 @@ public:
+@@ -339,17 +317,9 @@ public:
          return roundUpToMultipleOf<alignof(WasmMemoryBaseAndSize)>(sizeof(JSWebAssemblyInstance)) + sizeof(WasmMemoryBaseAndSize) * index;
      }
  
@@ -19891,7 +19869,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      }
  
      static ptrdiff_t offsetOfTable(const Wasm::ModuleInformation& info, unsigned index)
-@@ -377,14 +348,6 @@ public:
+@@ -377,14 +347,6 @@ public:
          return roundUpToMultipleOf<alignof(Allocator)>(offsetOfGCObjectStructureID(info, info.typeCount())) + sizeof(Allocator) * index;
      }
  
@@ -19906,7 +19884,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      static size_t offsetOfTargetInstance(const Wasm::ModuleInformation& info, size_t importFunctionNum) { return offsetOfImportFunctionInfo(info, importFunctionNum) + OBJECT_OFFSETOF(Wasm::WasmOrJSImportableFunctionCallLinkInfo, targetInstance); }
      static size_t offsetOfEntrypointLoadLocation(const Wasm::ModuleInformation& info, size_t importFunctionNum) { return offsetOfImportFunctionInfo(info, importFunctionNum) + OBJECT_OFFSETOF(Wasm::WasmOrJSImportableFunctionCallLinkInfo, entrypointLoadLocation); }
      static size_t offsetOfBoxedCallee(const Wasm::ModuleInformation& info, size_t importFunctionNum) { return offsetOfImportFunctionInfo(info, importFunctionNum) + OBJECT_OFFSETOF(Wasm::WasmOrJSImportableFunctionCallLinkInfo, boxedCallee); }
-@@ -394,7 +357,7 @@ public:
+@@ -394,7 +356,7 @@ public:
  
      std::span<WasmMemoryBaseAndSize> cachedMemoryBaseSizePairs()
      {
@@ -19915,7 +19893,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      }
  
      std::span<WasmOrJSImportableFunctionCallLinkInfo> importFunctionInfos()
-@@ -427,16 +390,6 @@ public:
+@@ -427,16 +389,6 @@ public:
          return unsafeMakeSpan<Allocator, MarkedSpace::numSizeClasses>(std::bit_cast<Allocator*>(std::bit_cast<uint8_t*>(this) + offsetOfAllocatorForGCObject(m_moduleInformation, 0)), MarkedSpace::numSizeClasses);
      }
  
@@ -19932,7 +19910,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      unsigned numImportFunctions() const { return m_numImportFunctions; }
      WasmOrJSImportableFunctionCallLinkInfo* importFunctionInfo(size_t importFunctionNum)
      {
-@@ -461,6 +414,12 @@ public:
+@@ -461,6 +413,12 @@ public:
      const Wasm::Tag& tag(unsigned i) const { return *m_tags[i]; }
      void setTag(unsigned, Ref<const Wasm::Tag>&&);
  
@@ -19945,7 +19923,7 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
      void* softStackLimit() const LIFETIME_BOUND { return m_stackMirror.softStackLimit(); }
  
      void setFaultPC(Wasm::ExceptionType exception, void* pc)
-@@ -482,7 +441,7 @@ private:
+@@ -482,7 +440,7 @@ private:
      void finishCreation(VM&);
  
      static size_t allocationSize(const Wasm::ModuleInformation&);
@@ -19954,14 +19932,14 @@ index 999f85cab44ed9f8eaa4b0682d9316147c5eec8a..652287e1928ae591830e487c55045560
  
      VM* const m_vm;
      WriteBarrier<JSWebAssemblyModule> m_jsModule;
-@@ -496,22 +455,17 @@ private:
+@@ -496,22 +454,17 @@ private:
      const Ref<const Wasm::ModuleInformation> m_moduleInformation;
      RefPtr<Wasm::InstanceAnchor> m_anchor;
      RefPtr<SourceProvider> m_sourceProvider;
 -    MemoryIsMemory64BitSet m_memoryIsMemory64Bits;
 -    uint64_t m_cachedMemory0Size { 0 }; // memory.size for memory 0, handled specially to avoid performance regressions
 +    bool m_cachedIsMemory64 { false };
-+    uint64_t m_cachedMemory0Size; // memory.size for memory 0, handled specially to avoid performance regressions
++    uint64_t m_cachedMemory0Size;
  
      RefPtr<Wasm::Memory> m_wasmMemory;
 +    CallFrame* m_temporaryCallFrame { nullptr };
@@ -20086,7 +20064,7 @@ index 30f5d2e3060939a283763e9d314dc639b6fd82f7..13556a78cc10f06949b7a01c19700a2a
                  if (argType.isI32()) {
 -                    jit.zeroExtend32ToWord(argReg, argReg); // Clear non-int32 and non-tag bits.
 -                    jit.boxInt32(argReg, argReg, DoNotHaveTagRegisters);
-+                    jit.zeroExtend32ToWord(argReg.payloadGPR(), argReg.payloadGPR()); // Clear non-int32 and non-tag bits.
++                    jit.zeroExtend32ToWord(argReg.payloadGPR(), argReg.payloadGPR());
 +                    jit.boxInt32(argReg.payloadGPR(), argReg, DoNotHaveTagRegisters);
                  }
                  jit.storeValue(argReg, calleeFrame.withOffset(calleeFrameOffset));

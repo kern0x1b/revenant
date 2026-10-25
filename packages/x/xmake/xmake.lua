@@ -18,18 +18,19 @@ package("xmake")
         {"0008-Take-the-job-count-from-a-jobserver-or-from-XMAKE_MA.patch", "f0c3be884782d29bbbc8d2cff6a4041999dca6f778e6b516352f9a6e81b91ff9"},
         {"0009-Build-a-package-once-when-two-processes-reinstall-it.patch", "0fb6b1b9c22a112246baf6d943221eab1c20800682ad77f181f432893550f777"},
         {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "bb13d7194abed2baedb2a36f71f0ee7366b9e4da5348fa9b8aca7804fbca8b69"},
-        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "d1d57269e8362e7992347a9b4c5b114ce2d99a67d805d2fae8571854b686373f"},
-        {"0012-Lock-a-package-by-its-install-directory.patch", "4a665ceff500cafcfc0e69e86757802462b778552af28846150dad8e930f3be0"},
+        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "29ec9f0d7c9780a2588f94d9f09fa199c64512b4ba1cb1296c8f41fad6357ff1"},
+        {"0012-Lock-a-package-by-its-install-directory.patch", "9c0e1f346fdc0a1074d9399da82eacb2bc530faa5d891e7b93ff1056ecbb91f1"},
         {"0013-An-install-folder-without-manifest.txt-is-not-installed.patch", "69fb887a95d4899b7ab97edd493a9de65178ea59cf15fe0363bf24364d6fba5b"},
         {"0014-A-query-for-an-install-folder-creates-no-folder.patch", "ebedfea351eeb54f513c1b675bf8026a9b6f228cd4357f5669fdea614dab1ebc"},
-        {"0015-Publish-an-install-by-swapping-a-link-to-its-generation.patch", "bf44ce37c8ea68285094fac95c7a8b56e2d8830d4d080efa07ff19f80e47d8b5"},
-        {"0016-Export-the-generation-a-published-install-links-to.patch", "b9073b12de1563b2a9b7a05d4fc0d943ae2ee93ab35138a881f7d1e1dbe2a170"},
-        {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "40f1377cd96f5fe66feb13390658f84e9127d1a4acf48643b10d54c343d3f4d6"},
-        {"0018-Report-a-process-exit-to-the-wait-on-that-process.patch", "45efce0489dd57a4ac0c430cbf6333d7a029107633ff2f955caab682598d8a61"},
-        {"0019-Read-the-inode-of-the-file-a-lock-holds.patch", "d3cd9eba5df146444db1a0f11ebf4d7592ae0ca562b1def31f779c51d1f11955"},
+        {"0015-Publish-an-install-by-swapping-a-link-to-its-generation.patch", "73ec38360d8884ed3c1c519e8eb0a7a4c6428204ed78788e89b06b659199601f"},
+        {"0016-Export-the-generation-a-published-install-links-to.patch", "7e082b042a19bb57e93624ef4b74b6f5225a5fa4b0f42e23d459b8e9942b7bfd"},
+        {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "065cfa83171102fcf00341faec8436a6734952e31ca86ab0b91233d8819699e8"},
+        {"0018-Report-a-process-exit-to-the-wait-on-that-process.patch", "1ef2c7ca8801715c801382f57aca53196c1f710ae2f562a1ed647c8bdf5eb075"},
+        {"0019-Read-the-inode-of-the-file-a-lock-holds.patch", "b1dba90d3ad55c8f051ceb0a822d26795f3d6d6aaa19dae30287febe677bea60"},
         {"0020-Fold-the-digest-of-the-xmake-patches-that-change-out.patch", "c3056f6b12d5197bb2d337948e7721ce88f679605b4d0480c6a706836408f4e2"},
         {"0021-Put-each-package-s-applied-patch-sha256-list-into-it.patch", "f7a636db5a95804ddf50dc56fd126142c4957b22e2942d7ebddd6e096aa50b07"},
-        {"0022-Put-the-addons-a-project-pins-into-a-package-s-hash.patch", "4fb047a4f1c30ed0911657e020bf3583cbc4aea6161daf4a2e7e5275830058f8"}}) do
+        {"0022-Put-the-addons-a-project-pins-into-a-package-s-hash.patch", "eacf01e49585dc1eeeefd5c83787a0b39165bf779f72b76af3e460683d7750f2"},
+        {"0023-Recheck-the-requires-when-a-required-package-s-recipe-or-patch-changes.patch", "f5432c5eb8b10a3760d505c74f972adf92d6157d7c5feaaff950fa1ae8bc3941"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 

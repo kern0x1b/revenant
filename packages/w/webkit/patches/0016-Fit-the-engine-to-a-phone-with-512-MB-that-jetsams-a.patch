@@ -956,7 +956,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  #endif
  
      [self _updateScreenScaleFromWindow];
-@@ -1852,6 +1909,91 @@ + (void)_releaseMemoryNow
+@@ -1852,6 +1909,90 @@ + (void)_releaseMemoryNow
      WebThreadRun(^{
          WebCore::releaseMemory(Critical::Yes, Synchronous::Yes);
      });
@@ -1017,7 +1017,6 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
 ++ (void)_reportMemoryBreakdown
 +{
 +    WebThreadRun(^{
-+        //
 +        auto statistics = WebCore::MemoryCache::singleton().getStatistics();
 +        double encodedMB = (statistics.images.size + statistics.cssStyleSheets.size + statistics.scripts.size
 +            + statistics.xslStyleSheets.size + statistics.fonts.size) / (1024.0 * 1024.0);
@@ -1048,7 +1047,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  - (void)_replaceCurrentHistoryItem:(WebHistoryItem *)item
-@@ -2168,11 +2310,13 @@ + (BOOL)_viewClass:(Class *)vClass andRepresentationClass:(Class *)rClass forMIM
+@@ -2168,11 +2309,13 @@ + (BOOL)_viewClass:(Class *)vClass andRepresentationClass:(Class *)rClass forMIM
      Class repClass = [[WebDataSource _repTypesAllowImageTypeOmission:YES] _webkit_objectForMIMEType:MIMEType];
  
  #if PLATFORM(IOS_FAMILY)
@@ -1063,7 +1062,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  #endif
          // Our optimization to avoid loading the plug-in DB and image types for the HTML case failed.
  
-@@ -2303,15 +2447,31 @@ - (NSUInteger)_renderTreeSize
+@@ -2303,15 +2446,31 @@ - (NSUInteger)_renderTreeSize
      return _private->page->renderTreeSize();
  }
  
@@ -1096,7 +1095,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
          return;
  
      WebThreadLock();
-@@ -2428,7 +2588,9 @@ - (void)_close
+@@ -2428,7 +2587,9 @@ - (void)_close
      if (!_private || _private->closed)
          return;
  
@@ -1106,7 +1105,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
      _private->inspectorController->willDestroyPage(*_private->page);
  
      [[NSNotificationCenter defaultCenter] postNotificationName:WebViewWillCloseNotification object:self];
-@@ -2646,12 +2808,16 @@ - (WebInspector *)inspector
+@@ -2646,12 +2807,16 @@ - (WebInspector *)inspector
  #if ENABLE(REMOTE_INSPECTOR)
  + (void)_enableRemoteInspector
  {
@@ -1123,7 +1122,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  + (void)_disableAutoStartRemoteInspector
-@@ -2661,22 +2827,36 @@ + (void)_disableAutoStartRemoteInspector
+@@ -2661,22 +2826,36 @@ + (void)_disableAutoStartRemoteInspector
  
  + (BOOL)_isRemoteInspectorEnabled
  {
@@ -1160,7 +1159,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  - (void)setShowingInspectorIndication:(BOOL)showing
-@@ -2703,7 +2883,9 @@ - (void)setShowingInspectorIndication:(BOOL)showing
+@@ -2703,7 +2882,9 @@ - (void)setShowingInspectorIndication:(BOOL)showing
  - (void)_setHostApplicationProcessIdentifier:(pid_t)pid auditToken:(audit_token_t)auditToken
  {
      RetainPtr<CFDataRef> auditData = adoptCF(CFDataCreate(nullptr, (const UInt8*)&auditToken, sizeof(auditToken)));
@@ -1170,7 +1169,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  #endif // PLATFORM(IOS_FAMILY)
  #endif // ENABLE(REMOTE_INSPECTOR)
-@@ -2854,14 +3036,25 @@ - (void)_preferencesChangedNotification:(NSNotification *)notification
+@@ -2854,14 +3035,25 @@ - (void)_preferencesChangedNotification:(NSNotification *)notification
  
  #if PLATFORM(IOS_FAMILY)
      } else {
@@ -1198,7 +1197,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
      }
  #endif
  }
-@@ -2915,6 +3108,8 @@ - (void)_preferencesChanged:(WebPreferences *)preferences
+@@ -2915,6 +3107,8 @@ - (void)_preferencesChanged:(WebPreferences *)preferences
      settings.setBackForwardCacheExpirationInterval(Seconds { [preferences _backForwardCacheExpirationInterval] });
      settings.setPitchCorrectionAlgorithm(static_cast<WebCore::MediaPlayerEnums::PitchCorrectionAlgorithm>([preferences _pitchCorrectionAlgorithm]));
  
@@ -1207,7 +1206,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
      // FIXME: Add a way to have a preference check multiple different keys.
      settings.setDeveloperExtrasEnabled([preferences developerExtrasEnabled]);
  
-@@ -3741,6 +3936,16 @@ - (void)_restorePlugInsFromCache
+@@ -3741,6 +3935,16 @@ - (void)_restorePlugInsFromCache
      [self _locked_recursivelyPerformPlugInSelector:@selector(restorePluginsFromCache) inFrame:[self mainFrame]];
  }
  
@@ -1224,7 +1223,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  - (BOOL)_setMediaLayer:(CALayer*)layer forPluginView:(NSView*)pluginView
  {
      WebThreadLock();
-@@ -3920,6 +4125,13 @@ - (void)_synchronizeCustomFixedPositionLayoutRect
+@@ -3920,6 +4124,13 @@ - (void)_synchronizeCustomFixedPositionLayoutRect
  
      if (auto* mainFrame = core([self mainFrame]))
          mainFrame->view()->setCustomFixedPositionLayoutRect(newRect);
@@ -1238,7 +1237,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  - (void)_setCustomFixedPositionLayoutRectInWebThread:(CGRect)rect synchronize:(BOOL)synchronize
-@@ -3981,7 +4193,7 @@ + (void)_doNotStartObservingNetworkReachability
+@@ -3981,7 +4192,7 @@ + (void)_doNotStartObservingNetworkReachability
  }
  #endif // PLATFORM(IOS_FAMILY)
  
@@ -1247,7 +1246,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  
  - (NSArray *)_touchEventRegions
  {
-@@ -4023,7 +4235,7 @@ - (NSArray *)_touchEventRegions
+@@ -4023,7 +4234,7 @@ - (NSArray *)_touchEventRegions
      }).autorelease();
  }
  
@@ -1256,7 +1255,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  
  // For backwards compatibility with the WebBackForwardList API, we honor both
  // a per-WebView and a per-preferences setting for whether to use the back/forward cache.
-@@ -4271,7 +4483,11 @@ - (void)_updateActiveState
+@@ -4271,7 +4482,11 @@ - (void)_updateActiveState
  {
      if (_private && _private->page)
  #if PLATFORM(IOS_FAMILY)
@@ -1269,7 +1268,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  #else
          _private->page->focusController().setActive([[self window] _hasKeyAppearance]);
  #endif
-@@ -4384,6 +4600,60 @@ + (void)_removeAllUserContentFromGroup:(NSString *)groupName
+@@ -4384,6 +4599,60 @@ + (void)_removeAllUserContentFromGroup:(NSString *)groupName
      viewGroup->userContentController().removeAllUserContent();
  }
  
@@ -1330,7 +1329,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  - (void)_forceRepaintForTesting
  {
      [self _updateRendering];
-@@ -4747,10 +5017,12 @@ - (void)_documentScaleChanged
+@@ -4747,10 +5016,12 @@ - (void)_documentScaleChanged
      if (WebNodeHighlight *currentHighlight = [self currentNodeHighlight])
          [currentHighlight setNeedsDisplay];
  
@@ -1343,7 +1342,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  - (BOOL)_wantsTelephoneNumberParsing
-@@ -4917,6 +5189,12 @@ - (instancetype)initWithTarget:(id)target defaultTarget:(id)defaultTarget
+@@ -4917,6 +5188,12 @@ - (instancetype)initWithTarget:(id)target defaultTarget:(id)defaultTarget
      _defaultTarget = defaultTarget;
  #if PLATFORM(IOS_FAMILY)
      _asyncForwarder = [[_WebSafeAsyncForwarder alloc] initWithForwarder:self];
@@ -1356,7 +1355,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  #endif
      return self;
  }
-@@ -4944,6 +5222,15 @@ - (void)forwardInvocation:(NSInvocation *)invocation
+@@ -4944,6 +5221,15 @@ - (void)forwardInvocation:(NSInvocation *)invocation
  {
  #if PLATFORM(IOS_FAMILY)
      if (WebThreadIsCurrent()) {
@@ -1372,7 +1371,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
          [invocation retainArguments];
          WebThreadCallDelegate(invocation);
          return;
-@@ -8340,6 +8627,16 @@ - (void)insertText:(NSString *)text
+@@ -8340,6 +8626,16 @@ - (void)insertText:(NSString *)text
      [self _performResponderOperation:_cmd with:text];
  }
  
@@ -1389,7 +1388,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  - (NSDictionary *)typingAttributes
  {
      if (auto* coreFrame = core([self _selectedOrMainFrame]))
-@@ -8586,6 +8883,17 @@ + (void)_setCacheModel:(WebCacheModel)cacheModel
+@@ -8586,6 +8882,17 @@ + (void)_setCacheModel:(WebCacheModel)cacheModel
      // Don't shrink a big disk cache, since that would cause churn.
      nsurlCacheDiskCapacity = std::max(nsurlCacheDiskCapacity, [nsurlCache diskCapacity]);
  
@@ -1407,7 +1406,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
      auto& memoryCache = WebCore::MemoryCache::singleton();
      memoryCache.setCapacities(cacheMinDeadCapacity, cacheMaxDeadCapacity, cacheTotalCapacity);
      memoryCache.setDeadDecodedDataDeletionInterval(deadDecodedDataDeletionInterval);
-@@ -8593,7 +8901,9 @@ + (void)_setCacheModel:(WebCacheModel)cacheModel
+@@ -8593,7 +8900,9 @@ + (void)_setCacheModel:(WebCacheModel)cacheModel
      auto& pageCache = WebCore::BackForwardCache::singleton();
      pageCache.setMaxSize(pageCacheSize);
  #if PLATFORM(IOS_FAMILY)
@@ -1417,7 +1416,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
      CFURLCacheRef cfCache;
      if ((cfCache = [nsurlCache _CFURLCache]))
          CFURLCacheSetMemoryCapacity(cfCache, nsurlCacheMemoryCapacity);
-@@ -8617,6 +8927,13 @@ + (WebCacheModel)_cacheModel
+@@ -8617,6 +8926,13 @@ + (WebCacheModel)_cacheModel
      return s_cacheModel;
  }
  
@@ -1431,7 +1430,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  #if !PLATFORM(IOS_FAMILY)
  - (void)_openFrameInNewWindowFromMenu:(NSMenuItem *)sender
  {
-@@ -8839,10 +9156,17 @@ - (void)_didCompleteRenderingFrame
+@@ -8839,10 +9155,17 @@ - (void)_didCompleteRenderingFrame
  - (BOOL)_flushCompositingChanges
  {
      auto* frame = [self _mainCoreFrame];
@@ -1452,7 +1451,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
  }
  
  #if PLATFORM(IOS_FAMILY)
-@@ -9869,6 +10193,11 @@ void WebInstallMemoryPressureHandler(void)
+@@ -9869,6 +10192,11 @@ void WebInstallMemoryPressureHandler(void)
          static std::once_flag onceFlag;
          std::call_once(onceFlag, [] {
              auto& memoryPressureHandler = MemoryPressureHandler::singleton();
@@ -1464,7 +1463,7 @@ index 7a8f9a1877283b79724ce938949a6a63ee3e7281..7cd71a951ce50dba68b3f4f41e335613
              memoryPressureHandler.setLowMemoryHandler([] (Critical critical, Synchronous synchronous) {
  #if PLATFORM(IOS_FAMILY)
                  WebThreadRun(^{
-@@ -9879,6 +10208,9 @@ void WebInstallMemoryPressureHandler(void)
+@@ -9879,6 +10207,9 @@ void WebInstallMemoryPressureHandler(void)
  #endif
              });
              memoryPressureHandler.install();

@@ -4177,12 +4177,10 @@ diff --git a/Source/JavaScriptCore/assembler/LinkBuffer.cpp b/Source/JavaScriptC
 index 5504e076c8c0f45c49205bb1720bfa7718633a0f..0fba0f274fae93c7dcdced5cae2a190796c49084 100644
 --- a/Source/JavaScriptCore/assembler/LinkBuffer.cpp
 +++ b/Source/JavaScriptCore/assembler/LinkBuffer.cpp
-@@ -275,11 +275,18 @@ private:
+@@ -275,11 +275,16 @@ private:
  
  static ALWAYS_INLINE void recordLinkOffsets(AssemblerData& assemblerData, int32_t regionStart, int32_t regionEnd, int32_t offset)
  {
-+    //
-+    //
 +    const int32_t slotMask = ~static_cast<int32_t>(sizeof(int32_t) - 1);
 +    const int32_t slotStart = regionStart & slotMask;
 +    const int32_t slotEnd = regionEnd & slotMask;
@@ -4199,7 +4197,7 @@ index 5504e076c8c0f45c49205bb1720bfa7718633a0f..0fba0f274fae93c7dcdced5cae2a1907
      int32_t* offsets = reinterpret_cast_ptr<int32_t*>(assemblerData.buffer());
      while (ptr < end)
          offsets[ptr++] = offset;
-@@ -405,7 +412,7 @@ void LinkBuffer::copyCompactAndLinkCode(MacroAssembler& macroAssembler, JITCompi
+@@ -405,7 +410,7 @@ void LinkBuffer::copyCompactAndLinkCode(MacroAssembler& macroAssembler, JITCompi
  
  
      recordLinkOffsets(m_assemblerStorage, readPtr, initialSize, readPtr - writePtr);
@@ -4208,7 +4206,7 @@ index 5504e076c8c0f45c49205bb1720bfa7718633a0f..0fba0f274fae93c7dcdced5cae2a1907
      for (unsigned i = 0; i < jumpCount; ++i) {
          auto& linkRecord = jumpsToLink[i];
          uint8_t* location = codeOutData + linkRecord.from();
-@@ -490,6 +497,8 @@ void LinkBuffer::linkCode(MacroAssembler& macroAssembler, JITCompilationEffort e
+@@ -490,6 +495,8 @@ void LinkBuffer::linkCode(MacroAssembler& macroAssembler, JITCompilationEffort e
      RELEASE_ASSERT(roundUpToMultipleOf<Assembler::instructionSize>(code) == code);
  #endif
      performJITMemcpy<jitMemcpyRepatch>(code, buffer.data(), buffer.codeSize());
@@ -4217,7 +4215,7 @@ index 5504e076c8c0f45c49205bb1720bfa7718633a0f..0fba0f274fae93c7dcdced5cae2a1907
  #elif CPU(ARM64)
      copyCompactAndLinkCode<uint32_t>(macroAssembler, effort);
  #endif // !ENABLE(BRANCH_COMPACTION)
-@@ -576,8 +585,7 @@ void LinkBuffer::performFinalization()
+@@ -576,8 +583,7 @@ void LinkBuffer::performFinalization()
      
      s_profileCummulativeLinkedSizes[static_cast<unsigned>(m_profile)] += m_size;
      s_profileCummulativeLinkedCounts[static_cast<unsigned>(m_profile)]++;
@@ -4227,7 +4225,7 @@ index 5504e076c8c0f45c49205bb1720bfa7718633a0f..0fba0f274fae93c7dcdced5cae2a1907
  }
  
  #if DUMP_LINK_STATISTICS
-@@ -602,6 +610,24 @@ void LinkBuffer::dumpLinkStatistics(void* code, size_t initializeSize, size_t fi
+@@ -602,6 +608,24 @@ void LinkBuffer::dumpLinkStatistics(void* code, size_t initializeSize, size_t fi
  #if DUMP_CODE
  void LinkBuffer::dumpCode(void* code, size_t size)
  {
@@ -14798,7 +14796,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      void toBigInt64(GPRReg cellGPR, GPRReg destGPR)
      {
          ASSERT(noOverlap(cellGPR, destGPR));
-@@ -674,69 +1024,175 @@ public:
+@@ -674,69 +1024,173 @@ public:
          neg64(destGPR);
          doneCases.link(this);
      }
@@ -14888,7 +14886,6 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
 +#endif
 +    }
 +
-+    // Note that this function does not respect MasqueradesAsUndefined.
 +    Jump branchIfUndefined(JSValueRegs regs)
 +    {
 +#if USE(JSVALUE64)
@@ -14909,7 +14906,6 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
 -    void isNull(GPRReg valueGPR, GPRReg dst)
-+    // Note that this function does not respect MasqueradesAsUndefined.
 +    Jump branchIfNotUndefined(JSValueRegs regs)
      {
 -        compare64(Equal, valueGPR, TrustedImm32(JSValue::ValueNull), dst);
@@ -14980,7 +14976,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      Jump branchIfTrue(GPRReg gpr)
      {
          return branch64(Equal, gpr, TrustedImm64(JSValue::encode(jsBoolean(true))));
-@@ -756,11 +1212,16 @@ public:
+@@ -756,11 +1210,16 @@ public:
      {
          return branch64(NotEqual, gpr, TrustedImm64(JSValue::encode(jsBoolean(false))));
      }
@@ -14997,7 +14993,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      Jump branchIfFastTypedArray(GPRReg baseGPR);
-@@ -786,52 +1247,27 @@ public:
+@@ -786,52 +1245,27 @@ public:
          return branchTestPtr(Zero, stringImplGPR, TrustedImm32(JSString::isRopeInPointer));
      }
  
@@ -15064,7 +15060,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      static Address addressForByteOffset(ptrdiff_t byteOffset)
-@@ -858,40 +1294,40 @@ public:
+@@ -858,40 +1292,40 @@ public:
          return addressFor(operand.virtualRegister());
      }
  
@@ -15117,7 +15113,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      // Access to our fixed callee CallFrame.
-@@ -907,24 +1343,24 @@ public:
+@@ -907,24 +1341,24 @@ public:
          return calleeFrameSlot(virtualRegisterForArgumentIncludingThis(argument));
      }
  
@@ -15150,7 +15146,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      static Address calleeFrameCallerFrame()
-@@ -966,6 +1402,9 @@ public:
+@@ -966,6 +1400,9 @@ public:
  #elif CPU(X86_64)
              GPRInfo::regT6,
              GPRInfo::regT7,
@@ -15160,7 +15156,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
  #elif CPU(RISCV64)
              GPRInfo::regT6,
              GPRInfo::regT7,
-@@ -997,6 +1436,16 @@ public:
+@@ -997,6 +1434,16 @@ public:
      {
      }
  
@@ -15177,7 +15173,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      template<typename... Regs>
      static void constructRegisterSet(RegisterSet& set, GPRReg reg, Regs... args)
      {
-@@ -1046,6 +1495,7 @@ public:
+@@ -1046,6 +1493,7 @@ public:
      void purifyNaN(FPRReg, FPRReg);
  
      // These methods convert between doubles, and doubles boxed and JSValues.
@@ -15185,7 +15181,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      GPRReg boxDouble(FPRReg fpr, GPRReg gpr, TagRegistersMode mode = HaveTagRegisters)
      {
          moveDoubleTo64(fpr, gpr);
-@@ -1072,9 +1522,22 @@ public:
+@@ -1072,9 +1520,22 @@ public:
          jitAssertIsJSDouble(gpr);
          return unboxDoubleWithoutAssertions(gpr, resultGPR, fpr, mode);
      }
@@ -15210,7 +15206,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      Jump isStrictInt52(GPRReg valueGPR, GPRReg scratchGPR)
-@@ -1147,6 +1610,7 @@ public:
+@@ -1147,6 +1608,7 @@ public:
  
          doneCases.link(this);
      }
@@ -15218,7 +15214,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
  
  #if USE(BIGINT32)
      void unboxBigInt32(GPRReg src, GPRReg dest)
-@@ -1166,34 +1630,107 @@ public:
+@@ -1166,34 +1628,107 @@ public:
      }
  #endif
  
@@ -15333,7 +15329,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      }
  
      void callExceptionFuzz(VM&, GPRReg exceptionReg);
-@@ -1269,7 +1806,7 @@ public:
+@@ -1269,7 +1804,7 @@ public:
      void emitLoadStructure(RegisterID cell, RegisterID dest);
      void emitNonNullDecodeZeroExtendedStructureID(RegisterID source, RegisterID dest);
      void emitLoadStructure(VM&, RegisterID source, RegisterID dest);
@@ -15342,7 +15338,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      void emitEncodeStructureID(RegisterID source, RegisterID dest);
  
      void emitStoreStructureWithTypeInfo(TrustedImmPtr structure, RegisterID dest, RegisterID)
-@@ -1280,8 +1817,12 @@ public:
+@@ -1280,8 +1815,12 @@ public:
      void emitStoreStructureWithTypeInfo(RegisterID structure, RegisterID dest, RegisterID scratch)
      {
          // Store the StructureID
@@ -15355,7 +15351,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          // Store all the info flags using a single 32-bit wide load and store.
          load32(MacroAssembler::Address(structure, Structure::indexingModeIncludingHistoryOffset()), scratch);
          store32(scratch, MacroAssembler::Address(dest, JSCell::indexingTypeAndMiscOffset()));
-@@ -1395,7 +1936,7 @@ public:
+@@ -1395,7 +1934,7 @@ public:
      // case. It is passed the unlinked jump to the slow case.
      template<typename Functor, typename SlowPathFunctor>
      void emitTypeOf(
@@ -15364,7 +15360,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          const SlowPathFunctor& slowPathFunctor)
      {
          // Implements the following branching structure:
-@@ -1432,28 +1973,30 @@ public:
+@@ -1432,28 +1971,30 @@ public:
          // We should change the order of type detection based on this frequency.
          // https://bugs.webkit.org/show_bug.cgi?id=192650
          
@@ -15401,7 +15397,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          functor(TypeofType::BigInt, false);
  
          notHeapBigInt.link(this);
-@@ -1461,20 +2004,20 @@ public:
+@@ -1461,20 +2002,20 @@ public:
          
          notCell.link(this);
  
@@ -15426,7 +15422,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          functor(TypeofType::BigInt, false);
          notBigInt32.link(this);
  #endif
-@@ -1488,8 +2031,10 @@ public:
+@@ -1488,8 +2029,10 @@ public:
      void makeSpaceOnStackForCCall();
      void reclaimSpaceOnStackForCCall();
  
@@ -15437,7 +15433,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
  
      // Call this if you know that the value held in allocatorGPR is non-null. This DOES NOT mean
      // that allocator is non-null; allocator can be null as a signal that we don't know what the
-@@ -1553,6 +2098,7 @@ public:
+@@ -1553,6 +2096,7 @@ public:
          storePtr(TrustedImmPtr(nullptr), Address(resultGPR, JSObject::butterflyOffset()));
      }
  
@@ -15445,7 +15441,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      template<typename StructureType>
      void emitAllocateJSBigInt64(VM& vm, GPRReg resultGPR, GPRReg valueGPR, GPRReg scratchGPR1, GPRReg scratchGPR2, StructureType structure, bool isSigned, JumpList& slowCases)
      {
-@@ -1585,18 +2131,19 @@ public:
+@@ -1585,18 +2129,19 @@ public:
  
          done.link(this);
      }
@@ -15469,7 +15465,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
      
      void emitInitializeInlineStorage(GPRReg baseGPR, unsigned inlineCapacity, GPRReg scratchGPR)
      {
-@@ -1620,7 +2167,9 @@ public:
+@@ -1620,7 +2165,9 @@ public:
          emitFillStorageWithJSEmpty(butterflyGPR, initialOffset, outOfLineCapacity, scratchGPR);
      }
  
@@ -15479,7 +15475,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
  
  #if ENABLE(WEBASSEMBLY)
      void storeWasmContextInstance(GPRReg src);
-@@ -1630,6 +2179,7 @@ public:
+@@ -1630,6 +2177,7 @@ public:
      {
          if (!count)
              return;
@@ -15487,7 +15483,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          unsigned pairCount = count >> 1;
          unsigned pairIndex = 0;
          ASSERT(JSValue::encode(JSValue()) == 0);
-@@ -1644,10 +2194,16 @@ public:
+@@ -1644,10 +2192,16 @@ public:
              storePair64(emptyValueGPR, emptyValueGPR, baseGPR, TrustedImm32(initialOffset + pairIndex * 2 * sizeof(EncodedJSValue)));
          if (count & 1)
              store64(emptyValueGPR, Address(baseGPR, initialOffset + pairIndex * 2 * sizeof(EncodedJSValue)));
@@ -15504,7 +15500,7 @@ index a9df37cfef1523181982cb1a48833fa3dd0be23f..8672381c94b3dd56a9684eae79edd0fe
          unsigned pairCount = count >> 1;
          unsigned pairIndex = 0;
          move(TrustedImm64(std::bit_cast<int64_t>(PNaN)), scratchGPR);
-@@ -1655,10 +2211,15 @@ public:
+@@ -1655,10 +2209,15 @@ public:
              storePair64(scratchGPR, scratchGPR, baseGPR, TrustedImm32(initialOffset + pairIndex * 2 * sizeof(double)));
          if (count & 1)
              store64(scratchGPR, Address(baseGPR, initialOffset + pairIndex * 2 * sizeof(double)));
@@ -16353,7 +16349,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      {
          using InfoType = InfoTypeForReg<RegType>;
          unsigned numArgRegisters = InfoType::numberOfArgumentRegisters;
-@@ -337,79 +394,274 @@ private:
+@@ -337,79 +394,272 @@ private:
              return;
          }
  
@@ -16508,8 +16504,6 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
 +            pokeWideArgument<OperationType>(argSourceRegs, payload.gpr(), TrustedImm32(JSValue::CellTag), args...);
 +    }
 +
-+    //
-+    //
 +    template<typename OperationType, unsigned numGPRArgs, unsigned numGPRSources, unsigned numFPRArgs, unsigned numFPRSources, unsigned numCrossSources, unsigned extraGPRArgs, unsigned nonArgGPRs, unsigned extraPoke, typename... Args>
 +        requires std::same_as<CURRENT_ARGUMENT_TYPE, EncodedJSValue>
 +    void setupArgumentsImpl(ArgCollection<numGPRArgs, numGPRSources, numFPRArgs, numFPRSources, numCrossSources, extraGPRArgs, nonArgGPRs, extraPoke> argSourceRegs, JSValueRegs arg, Args... args)
@@ -16648,7 +16642,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
          if (currentArgCount < numArgRegisters) {
              setupArgumentsImpl<OperationType>(argSourceRegs.addGPRArg(), args...);
              arg.materialize(*this, GPRInfo::toArgumentRegister(currentArgCount));
-@@ -417,7 +669,7 @@ private:
+@@ -417,7 +667,7 @@ private:
          }
  
  
@@ -16657,7 +16651,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
          setupArgumentsImpl<OperationType>(argSourceRegs.addGPRArg(), args...);
      }
  
-@@ -469,12 +721,14 @@ private:
+@@ -469,12 +719,14 @@ private:
      }
  
      // Base case; set up the argument registers.
@@ -16674,7 +16668,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
          static_assert(gprArgsCount<TraitsType>(std::make_index_sequence<TraitsType::arity>()) == numGPRArgs);
          static_assert(fprArgsCount<TraitsType>(std::make_index_sequence<TraitsType::arity>()) == numFPRArgs);
  
-@@ -484,17 +738,21 @@ private:
+@@ -484,17 +736,21 @@ private:
          shuffleRegisters<FPRReg, numFPRSources>(clampArrayToSize<numFPRSources, FPRReg>(argSourceRegs.fprSources), clampArrayToSize<numFPRSources, FPRReg>(argSourceRegs.fprDestinations));
      }
  
@@ -16698,7 +16692,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
              setupArgumentsImpl<OperationType>(argSourceRegs, args...);
          }
  
-@@ -509,19 +767,19 @@ public:
+@@ -509,19 +765,19 @@ public:
      template<typename OperationType, typename... Args>
      ALWAYS_INLINE void setupArguments(Args... args)
      {
@@ -16721,7 +16715,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      }
  
      void setupResults(GPRReg destA, GPRReg destB = InvalidGPRReg)
-@@ -545,10 +803,24 @@ public:
+@@ -545,10 +801,24 @@ public:
              swap(destA, destB);
      }
      
@@ -16748,7 +16742,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      }
  
      void jumpToExceptionHandler(VM& vm)
-@@ -559,6 +831,7 @@ public:
+@@ -559,6 +829,7 @@ public:
          farJump(GPRInfo::regT1, ExceptionHandlerPtrTag);
      }
  
@@ -16756,7 +16750,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      template<typename T>
      requires (isExceptionOperationResult<T>)
      static constexpr GPRReg operationExceptionRegister()
-@@ -569,6 +842,18 @@ public:
+@@ -569,6 +840,18 @@ public:
          else
              return GPRInfo::returnValueGPR2;
      }
@@ -16775,7 +16769,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
  
      template<typename T>
      requires (!isExceptionOperationResult<T>)
-@@ -599,7 +884,7 @@ public:
+@@ -599,7 +882,7 @@ public:
              GPRReg oldFrameSizeGPR = temp2;
              {
                  GPRReg argCountGPR = oldFrameSizeGPR;
@@ -16784,7 +16778,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
  
                  {
                      GPRReg numParametersGPR = temp1;
-@@ -627,7 +912,7 @@ public:
+@@ -627,7 +910,7 @@ public:
              // The new frame size is just the number of arguments plus the
              // frame header size, aligned
              ASSERT(newFrameSizeGPR != newFramePointer);
@@ -16793,7 +16787,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
                  newFrameSizeGPR);
              add32(TrustedImm32(stackAlignmentRegisters() + CallFrame::headerSizeInRegisters - 1), newFrameSizeGPR);
              and32(TrustedImm32(-stackAlignmentRegisters()), newFrameSizeGPR);
-@@ -637,7 +922,7 @@ public:
+@@ -637,7 +920,7 @@ public:
  
          // We don't need the current frame beyond this point. Masquerade as our
          // caller.
@@ -16802,7 +16796,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
          loadPtr(Address(framePointerRegister, CallFrame::returnPCOffset()), linkRegister);
          subPtr(TrustedImm32(2 * sizeof(void*)), newFrameSizeGPR);
  #if CPU(ARM64E)
-@@ -674,7 +959,7 @@ public:
+@@ -674,7 +957,7 @@ public:
          return calleeFrame.withOffset(CallFrameSlot::callee * static_cast<int>(sizeof(Register)))
              // calleeFrame is from the caller's perspective
              .withOffset(-safeCast<int>(sizeof(CallerFrameAndPC)))
@@ -16811,7 +16805,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
              .withOffset(offset);
      }
  
-@@ -684,7 +969,14 @@ public:
+@@ -684,7 +967,14 @@ public:
      {
          JIT_COMMENT(*this, "< Store Callee's wasm callee");
          auto addr = CCallHelpers::addressOfCalleeCalleeFromCallerPerspective(offset);
@@ -16826,7 +16820,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      }
  
      void storeWasmCalleeToCalleeCallFrame(CalleeBits boxedCallee)
-@@ -697,7 +989,15 @@ public:
+@@ -697,7 +987,15 @@ public:
      {
          JIT_COMMENT(*this, "Store Callee's wasm callee");
          auto addr = CCallHelpers::addressOfCalleeCalleeFromCallerPerspective(offset);
@@ -16842,7 +16836,7 @@ index 24fcc79aeea725ad0da368e552d41337f5d36dfb..b8087c32915e3b2ccfffe27d2f8f1dfb
      }
  
      // These operations clobber all volatile registers. They assume that there is room on the top of
-@@ -706,9 +1006,9 @@ public:
+@@ -706,9 +1004,9 @@ public:
  
  private:
      template <typename CodeBlockType>
@@ -17112,21 +17106,19 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
      ASSERT(recovery.isInJSStack());
      setOld(recovery.virtualRegister(), cachedRecovery);
      return cachedRecovery;
-@@ -347,7 +381,12 @@ void CallFrameShuffler::prepareForTailCall()
+@@ -347,7 +381,10 @@ void CallFrameShuffler::prepareForTailCall()
      m_oldFrameBase = MacroAssembler::stackPointerRegister;
      m_oldFrameOffset = numLocals();
      m_newFrameBase = acquireGPR();
 -#if CPU(ARM64) || CPU(RISCV64)
 +#if CPU(ARM_THUMB2)
-+    // We load the frame pointer and link register
 +
-+    // sp will point to head1 since the callee's prologue pushes
 +    m_newFrameOffset = -1;
 +#elif CPU(ARM64) || CPU(RISCV64)
      // We load the frame pointer and link register manually. We
      // could ask the algorithm to load the link register for us
      // (which would allow for its use as an extra temporary), but
-@@ -377,7 +416,7 @@ void CallFrameShuffler::prepareForTailCall()
+@@ -377,7 +414,7 @@ void CallFrameShuffler::prepareForTailCall()
      // old frame (taking into account an argument count higher than
      // the number of parameters), then substracting to it the aligned
      // new frame size (adjusted).
@@ -17135,7 +17127,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
      MacroAssembler::Jump argumentCountOK =
          m_jit.branch32(MacroAssembler::BelowOrEqual, m_newFrameBase,
              MacroAssembler::TrustedImm32(m_numParameters));
-@@ -398,7 +437,7 @@ void CallFrameShuffler::prepareForTailCall()
+@@ -398,7 +435,7 @@ void CallFrameShuffler::prepareForTailCall()
          m_newFrameBase);
  
      // We load the link register manually for architectures that have one
@@ -17144,7 +17136,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
      m_jit.loadPtr(MacroAssembler::Address(MacroAssembler::framePointerRegister, CallFrame::returnPCOffset()),
          MacroAssembler::linkRegister);
  #if CPU(ARM64E)
-@@ -435,7 +474,7 @@ bool CallFrameShuffler::tryWrites(CachedRecovery& cachedRecovery)
+@@ -435,7 +472,7 @@ bool CallFrameShuffler::tryWrites(CachedRecovery& cachedRecovery)
          && cachedRecovery.targets().size() == 1
          && newAsOld(cachedRecovery.targets()[0]) == cachedRecovery.recovery().virtualRegister()) {
          cachedRecovery.clearTargets();
@@ -17153,7 +17145,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
              clearCachedRecovery(cachedRecovery.recovery());
          return true;
      }
-@@ -461,7 +500,7 @@ bool CallFrameShuffler::tryWrites(CachedRecovery& cachedRecovery)
+@@ -461,7 +498,7 @@ bool CallFrameShuffler::tryWrites(CachedRecovery& cachedRecovery)
      if (verbose)
          dataLog("\n");
      cachedRecovery.clearTargets();
@@ -17162,7 +17154,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
          clearCachedRecovery(cachedRecovery.recovery());
  
      return true;
-@@ -502,7 +541,7 @@ bool CallFrameShuffler::performSafeWrites()
+@@ -502,7 +539,7 @@ bool CallFrameShuffler::performSafeWrites()
                  }
                  continue;
              }
@@ -17171,7 +17163,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
                  if (verbose) {
                      dataLog("   - ", cachedRecovery->recovery(), " writes to NEW ", reg,
                          " but is also needed in registers.\n");
-@@ -540,7 +579,7 @@ bool CallFrameShuffler::performSafeWrites()
+@@ -540,7 +577,7 @@ bool CallFrameShuffler::performSafeWrites()
                      continue;
  
                  ASSERT(hasOnlySafeWrites(*cachedRecovery)
@@ -17180,7 +17172,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
                      && cachedRecovery->wantedFPR() == InvalidFPRReg);
                  if (!tryWrites(*cachedRecovery))
                      stillFailing.append(failed);
-@@ -606,7 +645,7 @@ void CallFrameShuffler::prepareAny()
+@@ -606,7 +643,7 @@ void CallFrameShuffler::prepareAny()
          }
  
          if (canLoadAndBox(*cachedRecovery) && hasOnlySafeWrites(*cachedRecovery)
@@ -17189,7 +17181,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
              && cachedRecovery->wantedFPR() == InvalidFPRReg) {
              emitLoad(*cachedRecovery);
              emitBox(*cachedRecovery);
-@@ -654,8 +693,10 @@ void CallFrameShuffler::prepareAny()
+@@ -654,8 +691,10 @@ void CallFrameShuffler::prepareAny()
          ASSERT_UNUSED(writesOK, writesOK);
      }
  
@@ -17200,7 +17192,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
  
      // Handle 2) by loading all registers. We don't have to do any
      // writes, since they have been taken care of above.
-@@ -671,8 +712,10 @@ void CallFrameShuffler::prepareAny()
+@@ -671,8 +710,10 @@ void CallFrameShuffler::prepareAny()
          ASSERT(cachedRecovery->targets().isEmpty());
      }
  
@@ -17211,7 +17203,7 @@ index 5b312433b8dfc38f8b573f44811dd6c300198d94..c0e8dfa9850dba552aac12f430d61bc7
  
      // At this point, we have read everything we cared about from the
      // stack, and written everything we had to to the stack.
-@@ -694,8 +737,12 @@ void CallFrameShuffler::prepareAny()
+@@ -694,8 +735,12 @@ void CallFrameShuffler::prepareAny()
          dataLog("   * Storing the argument count into ", VirtualRegister { CallFrameSlot::argumentCountIncludingThis }, "\n");
      RELEASE_ASSERT(m_numPassedArgs != UINT_MAX);
  
@@ -17951,7 +17943,7 @@ index 707b06d438d405f4fce33dff5a809dd1ee173eae..90971c84c8e4faca09dc1690df3fe607
  
      // Temporary registers.
      // xmm15 is use by the MacroAssembler as fpTempRegister.
-@@ -129,6 +129,83 @@ public:
+@@ -129,6 +129,80 @@ public:
  
  #endif // CPU(X86_64)
  
@@ -17964,7 +17956,6 @@ index 707b06d438d405f4fce33dff5a809dd1ee173eae..90971c84c8e4faca09dc1690df3fe607
 +
 +    static constexpr unsigned numberOfArgumentRegisters = 8;
 +
-+    // Temporary registers.
 +    static constexpr FPRReg fpRegT0 = ARMRegisters::d0;
 +    static constexpr FPRReg fpRegT1 = ARMRegisters::d1;
 +    static constexpr FPRReg fpRegT2 = ARMRegisters::d2;
@@ -17980,20 +17971,18 @@ index 707b06d438d405f4fce33dff5a809dd1ee173eae..90971c84c8e4faca09dc1690df3fe607
 +    static constexpr FPRReg fpRegCS4 = ARMRegisters::d12;
 +    static constexpr FPRReg fpRegCS5 = ARMRegisters::d13;
 +
-+    static constexpr FPRReg returnValueFPR = ARMRegisters::d0; // fpRegT0
-+    static constexpr FPRReg argumentFPR0 = ARMRegisters::d0; // fpRegT0
-+    static constexpr FPRReg argumentFPR1 = ARMRegisters::d1; // fpRegT1
-+    static constexpr FPRReg argumentFPR2 = ARMRegisters::d2; // fpRegT2
-+    static constexpr FPRReg argumentFPR3 = ARMRegisters::d3; // fpRegT3
-+    static constexpr FPRReg argumentFPR4 = ARMRegisters::d4; // fpRegT4
-+    static constexpr FPRReg argumentFPR5 = ARMRegisters::d5; // fpRegT5
-+    static constexpr FPRReg argumentFPR6 = ARMRegisters::d6; // fpRegT6
-+    static constexpr FPRReg argumentFPR7 = ARMRegisters::d7; // fpRegT7
++    static constexpr FPRReg returnValueFPR = ARMRegisters::d0;
++    static constexpr FPRReg argumentFPR0 = ARMRegisters::d0;
++    static constexpr FPRReg argumentFPR1 = ARMRegisters::d1;
++    static constexpr FPRReg argumentFPR2 = ARMRegisters::d2;
++    static constexpr FPRReg argumentFPR3 = ARMRegisters::d3;
++    static constexpr FPRReg argumentFPR4 = ARMRegisters::d4;
++    static constexpr FPRReg argumentFPR5 = ARMRegisters::d5;
++    static constexpr FPRReg argumentFPR6 = ARMRegisters::d6;
++    static constexpr FPRReg argumentFPR7 = ARMRegisters::d7;
 +
 +    static constexpr FPRReg nonPreservedNonArgumentFPR0 = ARMRegisters::d14;
 +
-+    // FPRReg mapping is direct, the machine regsiter numbers can
-+    // be used directly as indices into the FPR RegisterBank.
 +    static_assert(ARMRegisters::d0 == 0);
 +    static_assert(ARMRegisters::d1 == 1);
 +    static_assert(ARMRegisters::d2 == 2);
@@ -18378,7 +18367,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
  
  #if CPU(X86_64)
  #define NUMBER_OF_ARGUMENT_REGISTERS 6u
-@@ -231,6 +463,106 @@ static_assert(GPRInfo::returnValueGPR2 == X86Registers::edx);
+@@ -231,6 +463,103 @@ static_assert(GPRInfo::returnValueGPR2 == X86Registers::edx);
  
  #endif // CPU(X86_64)
  
@@ -18392,7 +18381,6 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +    static constexpr unsigned numberOfRegisters = 10;
 +    static constexpr unsigned numberOfArgumentRegisters = NUMBER_OF_ARGUMENT_REGISTERS;
 +
-+    // Temporary registers.
 +    static constexpr GPRReg regT0 = ARMRegisters::r0;
 +    static constexpr GPRReg regT1 = ARMRegisters::r1;
 +    static constexpr GPRReg regT2 = ARMRegisters::r2;
@@ -18402,9 +18390,8 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +    static constexpr GPRReg regT6 = ARMRegisters::r8;
 +    static constexpr GPRReg regT7 = ARMRegisters::r9;
 +    static constexpr GPRReg regCS0 = ARMRegisters::r10;
-+    static constexpr GPRReg regCS1 = ARMRegisters::r11; // jitData / IPIntPC
++    static constexpr GPRReg regCS1 = ARMRegisters::r11;
 +
-+    // These registers match the baseline JIT.
 +    static constexpr GPRReg callFrameRegister = ARMRegisters::fp;
 +    static constexpr GPRReg jitDataRegister = regCS1;
 +    static constexpr GPRReg wasmIPIntPCRegister = regCS1;
@@ -18417,14 +18404,13 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +    static constexpr GPRReg regWA2 = ARMRegisters::r2;
 +    static constexpr GPRReg regWA3 = ARMRegisters::r3;
 +
-+    // These constants provide the names for the general purpose argument & return value registers.
-+    static constexpr GPRReg argumentGPR0 = ARMRegisters::r0; // regT0
-+    static constexpr GPRReg argumentGPR1 = ARMRegisters::r1; // regT1
-+    static constexpr GPRReg argumentGPR2 = ARMRegisters::r2; // regT2
-+    static constexpr GPRReg argumentGPR3 = ARMRegisters::r3; // regT3
-+    static constexpr GPRReg nonArgGPR0 = ARMRegisters::r4; // regT4
-+    static constexpr GPRReg returnValueGPR = ARMRegisters::r0; // regT0
-+    static constexpr GPRReg returnValueGPR2 = ARMRegisters::r1; // regT1
++    static constexpr GPRReg argumentGPR0 = ARMRegisters::r0;
++    static constexpr GPRReg argumentGPR1 = ARMRegisters::r1;
++    static constexpr GPRReg argumentGPR2 = ARMRegisters::r2;
++    static constexpr GPRReg argumentGPR3 = ARMRegisters::r3;
++    static constexpr GPRReg nonArgGPR0 = ARMRegisters::r4;
++    static constexpr GPRReg returnValueGPR = ARMRegisters::r0;
++    static constexpr GPRReg returnValueGPR2 = ARMRegisters::r1;
 +    static constexpr GPRReg nonPreservedNonReturnGPR = ARMRegisters::r5;
 +    static constexpr GPRReg nonPreservedNonArgumentGPR0 = ARMRegisters::r5;
 +    static constexpr GPRReg nonPreservedNonArgumentGPR1 = ARMRegisters::r4;
@@ -18485,7 +18471,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
  #if CPU(ARM64)
  #define NUMBER_OF_ARGUMENT_REGISTERS 8u
  // Callee Saves includes x19..x28 and FP registers q8..q15
-@@ -518,9 +850,39 @@ public:
+@@ -518,9 +847,38 @@ public:
  
  #endif // CPU(RISCV64)
  
@@ -18493,7 +18479,6 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 -// accumulator register for passing results of one opcode to the next. Hence:
 +class JSRInfo {
 +public:
-+    // Temporary registers.
 +#if USE(JSVALUE64)
 +    static constexpr JSValueRegs jsRegT10 { GPRInfo::regT0 };
 +    static constexpr JSValueRegs jsRegT32 { GPRInfo::regT2 };
@@ -18527,7 +18512,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
  
  // We use this hack to get the GPRInfo from the GPRReg type in templates because our code is bad and we should feel bad..
  constexpr GPRInfo toInfoFromReg(GPRReg) { return GPRInfo(); }
-@@ -569,6 +931,18 @@ class NoOverlapImpl {
+@@ -569,6 +927,18 @@ class NoOverlapImpl {
          return noOverlapImpl(usedGPR, usedFPR | mask, args...);
      }
  
@@ -18546,7 +18531,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
      // NoResultTag case, this happens from templates
      template<typename... Args>
      static constexpr bool noOverlapImpl(uint64_t usedGPR, uint64_t usedFPR, NoResultTag, Args... args)
-@@ -601,26 +975,125 @@ class PreferredArgumentImpl {
+@@ -601,26 +971,121 @@ class PreferredArgumentImpl {
          return sizeof(typename FunctionTraits<OperationType>::template ArgumentType<ArgNum>);
      }
  
@@ -18566,7 +18551,6 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +        }
 +    }
 +#elif USE(JSVALUE32_64)
-+    //
 +    static constexpr bool wideArgumentSkipsOddRegister(GPRReg first, GPRReg second, GPRReg third)
 +    {
 +#if OS(DARWIN)
@@ -18586,8 +18570,8 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +        static_assert(sizeOfCurrentArg <= 8, "Don't know how to handle large arguments");
 +        if constexpr (!Index) {
 +            if constexpr (sizeOfCurrentArg <= 4) {
-+                UNUSED_PARAM(second); // Otherwise warning due to constexpr
-+                UNUSED_PARAM(third); // Otherwise warning due to constexpr
++                UNUSED_PARAM(second);
++                UNUSED_PARAM(third);
 +                return JSValueRegs::payloadOnly(first);
 +            } else if (wideArgumentSkipsOddRegister(first, second, third)) {
 +                return JSValueRegs { third, second };
@@ -18596,7 +18580,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +            }
 +        } else {
 +            if constexpr(sizeOfCurrentArg <= 4) {
-+                UNUSED_PARAM(first); // Otherwise warning due to constexpr
++                UNUSED_PARAM(first);
 +                return pickJSR<OperationType, ArgNum, Index - 1>(second, third, rest...);
 +            } else if (wideArgumentSkipsOddRegister(first, second, third)) {
 +                return pickJSR<OperationType, ArgNum, Index - 1>(first, rest...);
@@ -18613,13 +18597,13 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
 +        static_assert(sizeOfCurrentArg <= 8, "Don't know how to handle large arguments");
 +        if constexpr (!Index) {
 +            if constexpr (sizeOfCurrentArg <= 4) {
-+                UNUSED_PARAM(second); // Otherwise warning due to constexpr
++                UNUSED_PARAM(second);
 +                return JSValueRegs::payloadOnly(first);
 +            } else
 +                return JSValueRegs { second, first };
 +        } else {
 +            if constexpr(sizeOfCurrentArg <= 4) {
-+                UNUSED_PARAM(first); // Otherwise warning due to constexpr
++                UNUSED_PARAM(first);
 +                return pickJSR<OperationType, ArgNum, Index - 1>(second);
 +            } else
 +                RELEASE_ASSERT_NOT_REACHED_WITH_MESSAGE("Out of registers");
@@ -18651,9 +18635,6 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
              GPRInfo::argumentGPR3, GPRInfo::argumentGPR4, GPRInfo::argumentGPR5);
 +#elif USE(JSVALUE32_64)
 +#if CPU(ARM_THUMB2)
-+        //
-+        //
-+        //
 +        return pickJSR<OperationType, ArgNum>(
 +            GPRInfo::argumentGPR0, GPRInfo::argumentGPR1,
 +            GPRInfo::argumentGPR2, GPRInfo::argumentGPR3,
@@ -18677,7 +18658,7 @@ index ee7abde8486a58b9c68b23bfa530261396a1c4bd..922e3bb6af452e27141d346bb39f45c7
      }
  };
  
-@@ -637,12 +1110,40 @@ constexpr GPRReg preferredArgumentGPR()
+@@ -637,12 +1102,40 @@ constexpr GPRReg preferredArgumentGPR()
      return PreferredArgumentImpl::preferredArgumentGPR<OperationType, ArgNum>();
  }
  
@@ -20906,7 +20887,7 @@ index 26bcd0c03632c1cd7d76e093821cec4cdb09b7aa..914c61ecab7cec62a2c5357b9ca4378b
  
 -    constexpr GPRReg nextGPR = baseGPR; // Used as temporary register
 -    emitGetVirtualRegister(bytecode.m_next, nextGPR);
-+    constexpr JSValueRegs nextJSR = baseJSR; // Used as temporary register
++    constexpr JSValueRegs nextJSR = baseJSR;
 +    emitGetVirtualRegister(bytecode.m_next, nextJSR);
      JumpList genericCases;
 -    genericCases.append(branchIfNotCell(nextGPR));
@@ -21055,7 +21036,7 @@ index 26bcd0c03632c1cd7d76e093821cec4cdb09b7aa..914c61ecab7cec62a2c5357b9ca4378b
  
 -    constexpr GPRReg nextGPR = baseGPR; // Used as temporary register
 -    emitGetVirtualRegister(bytecode.m_next, nextGPR);
-+    constexpr JSValueRegs nextJSR = baseJSR; // Used as temporary register
++    constexpr JSValueRegs nextJSR = baseJSR;
 +    emitGetVirtualRegister(bytecode.m_next, nextJSR);
      JumpList genericCases;
 -    genericCases.append(branchIfNotCell(nextGPR));
@@ -22436,7 +22417,7 @@ index d677bf533458bebc8e7b580d243f10a681a45b11..e4ee8ff7a77bbad110970dca84fe8ca3
 +#if USE(JSVALUE64)
 +    emitGetVirtualRegister(src, JSValueRegs { dst });
 +#elif USE(JSVALUE32_64)
-+    ASSERT(m_bytecodeIndex); // This method should only be called during hot/cold path generation, so that m_bytecodeIndex is set.
++    ASSERT(m_bytecodeIndex);
 +    if (src.isConstant()) {
 +        if (m_profiledCodeBlock->isConstantOwnedByUnlinkedCodeBlock(src))
 +            move(Imm32(m_unlinkedCodeBlock->getConstant(src).payload()), dst);
@@ -22452,7 +22433,7 @@ index d677bf533458bebc8e7b580d243f10a681a45b11..e4ee8ff7a77bbad110970dca84fe8ca3
 +#if USE(JSVALUE32_64)
 +ALWAYS_INLINE void JIT::emitGetVirtualRegisterTag(VirtualRegister src, RegisterID dst)
 +{
-+    ASSERT(m_bytecodeIndex); // This method should only be called during hot/cold path generation, so that m_bytecodeIndex is set.
++    ASSERT(m_bytecodeIndex);
 +    if (src.isConstant()) {
 +        if (m_profiledCodeBlock->isConstantOwnedByUnlinkedCodeBlock(src))
 +            move(Imm32(m_unlinkedCodeBlock->getConstant(src).tag()), dst);
@@ -22567,7 +22548,7 @@ diff --git a/Source/JavaScriptCore/jit/JITLeftShiftGenerator.cpp b/Source/JavaSc
 index 6134c5670fb9bdf4e4385016041d238a5e867402..da5bdc826d7f003c61f66d7a9afdf97756157013 100644
 --- a/Source/JavaScriptCore/jit/JITLeftShiftGenerator.cpp
 +++ b/Source/JavaScriptCore/jit/JITLeftShiftGenerator.cpp
-@@ -32,25 +32,61 @@ namespace JSC {
+@@ -32,25 +32,59 @@ namespace JSC {
  
  void JITLeftShiftGenerator::generateFastPath(CCallHelpers& jit)
  {
@@ -22585,12 +22566,10 @@ index 6134c5670fb9bdf4e4385016041d238a5e867402..da5bdc826d7f003c61f66d7a9afdf977
  
 +#if USE(JSVALUE32_64)
 +    if (m_rightOperand.isConstInt32()) {
-+        // Try to do (intVar << intConstant).
 +        m_slowPathJumpList.append(jit.branchIfNotInt32(m_left));
 +        jit.moveValueRegs(m_left, m_result);
 +        jit.lshift32(CCallHelpers::Imm32(m_rightOperand.asConstInt32()), m_result.payloadGPR());
 +    } else {
-+        // Try to do (intConstant << intVar) or (intVar << intVar).
 +        m_slowPathJumpList.append(jit.branchIfNotInt32(m_right));
 +
 +        GPRReg rightOperandGPR = m_right.payloadGPR();
@@ -22814,7 +22793,7 @@ index d75ddc0a778f80b1719e504ea3d575b8c65b840b..941b8fa6ef6c6fe3618574999a259637
  
          done.link(&jit);
 -        jit.sub64(GPRInfo::numberTagRegister, m_result); // Box the double.
-+        jit.sub64(GPRInfo::numberTagRegister, m_result.payloadGPR()); // Box the double.
++        jit.sub64(GPRInfo::numberTagRegister, m_result.payloadGPR());
 +#else
 +        jit.boxDouble(m_leftFPR, m_result);
 +        CCallHelpers::JumpList notNegativeZero;
@@ -23389,7 +23368,7 @@ index 204eeaa61fa0e90ea635ee1ed4ed3ebcc8251c3b..8be07c5825c19789f284085a6a00a7ad
      CCallHelpers jit;
  
 -    using BaselineJITRegisters::JFalse::valueGPR; // Incoming
-+    using BaselineJITRegisters::JFalse::valueJSR; // Incoming
++    using BaselineJITRegisters::JFalse::valueJSR;
      constexpr GPRReg scratch1GPR = regT1;
 -    constexpr GPRReg scratch2GPR = regT3;
 +    constexpr GPRReg scratch2GPR = regT5;
@@ -23600,7 +23579,7 @@ index 204eeaa61fa0e90ea635ee1ed4ed3ebcc8251c3b..8be07c5825c19789f284085a6a00a7ad
      CCallHelpers jit;
  
 -    using BaselineJITRegisters::JTrue::valueGPR; // Incoming
-+    using BaselineJITRegisters::JTrue::valueJSR; // Incoming
++    using BaselineJITRegisters::JTrue::valueJSR;
      constexpr GPRReg scratch1GPR = regT1;
 -    constexpr GPRReg scratch2GPR = regT3;
 +    constexpr GPRReg scratch2GPR = regT5;
@@ -23664,7 +23643,7 @@ index 204eeaa61fa0e90ea635ee1ed4ed3ebcc8251c3b..8be07c5825c19789f284085a6a00a7ad
  
      using BaselineJITRegisters::Throw::globalObjectGPR;
 -    using BaselineJITRegisters::Throw::thrownValueGPR; // Incoming
-+    using BaselineJITRegisters::Throw::thrownValueJSR; // Incoming
++    using BaselineJITRegisters::Throw::thrownValueJSR;
      using BaselineJITRegisters::Throw::bytecodeOffsetGPR; // Incoming
  
  #if NUMBER_OF_CALLEE_SAVES_REGISTERS > 0
@@ -23934,7 +23913,7 @@ index 204eeaa61fa0e90ea635ee1ed4ed3ebcc8251c3b..8be07c5825c19789f284085a6a00a7ad
 +#else
 +    unboxDouble(jsRegT10.tagGPR(), jsRegT10.payloadGPR(), fpRegT0);
 +#endif
-+    branchConvertDoubleToInt32(fpRegT0, jsRegT10.payloadGPR(), failureCases, fpRegT1, /* shouldCheckNegativeZero */ false);
++    branchConvertDoubleToInt32(fpRegT0, jsRegT10.payloadGPR(), failureCases, fpRegT1,  false);
      jump().linkTo(dispatch, this);
      addJump(failureCases, defaultOffset);
  }
@@ -26374,7 +26353,7 @@ diff --git a/Source/JavaScriptCore/jit/JITRightShiftGenerator.cpp b/Source/JavaS
 index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a62f2e5aaf 100644
 --- a/Source/JavaScriptCore/jit/JITRightShiftGenerator.cpp
 +++ b/Source/JavaScriptCore/jit/JITRightShiftGenerator.cpp
-@@ -33,32 +33,109 @@ namespace JSC {
+@@ -33,32 +33,105 @@ namespace JSC {
  void JITRightShiftGenerator::generateFastPath(CCallHelpers& jit)
  {
      ASSERT(m_scratchGPR != InvalidGPRReg);
@@ -26407,9 +26386,8 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
 -            jit.boxInt32(m_result, m_result);
 +                jit.urshift32(CCallHelpers::Imm32(shiftAmount), m_result.payloadGPR());
 +        }
-+        m_endJumpList.append(jit.jump()); // Terminate the above case before emitting more code.
++        m_endJumpList.append(jit.jump());
 +
-+        // Try to do (doubleVar >> intConstant).
 +        notInt.link(&jit);
 +
 +        m_slowPathJumpList.append(jit.branchIfNotNumber(m_left, m_scratchGPR));
@@ -26427,7 +26405,6 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
 +        return;
 +    }
 +
-+    // Try to do (intConstant >> intVar) or (intVar >> intVar).
 +    m_slowPathJumpList.append(jit.branchIfNotInt32(m_right));
 +
 +    GPRReg rightOperandGPR = m_right.payloadGPR();
@@ -26452,9 +26429,8 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
 +    if (m_leftOperand.isConstInt32())
 +        return;
 +
-+    m_endJumpList.append(jit.jump()); // Terminate the above case before emitting more code.
++    m_endJumpList.append(jit.jump());
 +
-+    // Try to do (doubleVar >> intVar).
 +    leftNotInt.link(&jit);
 +
 +    m_slowPathJumpList.append(jit.branchIfNotNumber(m_left, m_scratchGPR));
@@ -26468,7 +26444,6 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
 +    jit.boxInt32(m_scratchGPR, m_result);
 +#else
 +    if (m_rightOperand.isConstInt32()) {
-+        // Try to do (intVar >> intConstant).
 +        CCallHelpers::Jump notInt = jit.branchIfNotInt32(m_left);
 +
 +        int32_t shiftAmount = m_rightOperand.asConstInt32() & 0x1f;
@@ -26492,7 +26467,7 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
  #if CPU(ARM64)
          if (MacroAssemblerARM64::supportsDoubleToInt32ConversionUsingJavaScriptSemantics())
              jit.convertDoubleToInt32UsingJavaScriptSemantics(m_leftFPR, m_scratchGPR);
-@@ -82,25 +159,25 @@ void JITRightShiftGenerator::generateFastPath(CCallHelpers& jit)
+@@ -82,25 +155,25 @@ void JITRightShiftGenerator::generateFastPath(CCallHelpers& jit)
  
      if (m_leftOperand.isConstInt32()) {
          if (m_shiftType == SignedShift)
@@ -26526,7 +26501,7 @@ index 4ab4280560bfa6aea839a796985b724eb7829c24..c67e4a3c0a921d1f0de7165f86e124a6
  #if CPU(ARM64)
      if (MacroAssemblerARM64::supportsDoubleToInt32ConversionUsingJavaScriptSemantics())
          jit.convertDoubleToInt32UsingJavaScriptSemantics(m_leftFPR, m_scratchGPR);
-@@ -111,10 +188,11 @@ void JITRightShiftGenerator::generateFastPath(CCallHelpers& jit)
+@@ -111,10 +184,11 @@ void JITRightShiftGenerator::generateFastPath(CCallHelpers& jit)
      }
  
      if (m_shiftType == SignedShift)
@@ -26879,7 +26854,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
  #include <wtf/PackedRefPtr.h>
  #include <wtf/RecursiveLockAdapter.h>
  #include <wtf/TZoneMalloc.h>
-@@ -55,11 +53,23 @@ class Signature;
+@@ -55,11 +53,22 @@ class Signature;
  class VM;
  class NativeExecutable;
  
@@ -26888,7 +26863,6 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
 -// needing VM state fails to compile here instead of silently baking one VM's state into code that
 -// another VM runs.
 -#define JSC_FOR_EACH_VM_INDEPENDENT_COMMON_THUNK(macro) \
-+// List up super common stubs so that we initialize them eagerly.
 +#define JSC_FOR_EACH_COMMON_THUNK(macro) \
 +    macro(HandleException, handleExceptionGenerator) \
 +    macro(CheckException, checkExceptionGenerator) \
@@ -26908,7 +26882,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
      macro(PolymorphicThunk, polymorphicThunk) \
      macro(PolymorphicThunkForClosure, polymorphicThunkForClosure) \
      macro(PolymorphicTopTierThunk, polymorphicTopTierThunk) \
-@@ -68,10 +78,19 @@ class NativeExecutable;
+@@ -68,10 +77,19 @@ class NativeExecutable;
      macro(GetByIdLoadOwnPropertyHandler, getByIdLoadOwnPropertyHandler) \
      macro(GetByIdLoadPrototypePropertyHandler, getByIdLoadPrototypePropertyHandler) \
      macro(GetByIdMissHandler, getByIdMissHandler) \
@@ -26928,7 +26902,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
      macro(PutByIdStrictSetterHandler, putByIdStrictSetterHandler) \
      macro(PutByIdSloppySetterHandler, putByIdSloppySetterHandler) \
      macro(InByIdHitHandler, inByIdHitHandler) \
-@@ -84,15 +103,31 @@ class NativeExecutable;
+@@ -84,15 +102,31 @@ class NativeExecutable;
      macro(GetByValWithStringLoadOwnPropertyHandler, getByValWithStringLoadOwnPropertyHandler) \
      macro(GetByValWithStringLoadPrototypePropertyHandler, getByValWithStringLoadPrototypePropertyHandler) \
      macro(GetByValWithStringMissHandler, getByValWithStringMissHandler) \
@@ -26960,7 +26934,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
      macro(PutByValWithSymbolStrictSetterHandler, putByValWithSymbolStrictSetterHandler) \
      macro(PutByValWithSymbolSloppySetterHandler, putByValWithSymbolSloppySetterHandler) \
      macro(InByValWithStringHitHandler, inByValWithStringHitHandler) \
-@@ -120,86 +155,26 @@ class NativeExecutable;
+@@ -120,86 +154,26 @@ class NativeExecutable;
      macro(GetByValWithFalseKeyLoadPrototypePropertyHandler, getByValWithFalseKeyLoadPrototypePropertyHandler) \
      macro(GetByValWithFalseKeyMissHandler, getByValWithFalseKeyMissHandler) \
      macro(PutByValWithUndefinedKeyReplaceHandler, putByValWithUndefinedKeyReplaceHandler) \
@@ -27050,7 +27024,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
  enum class CommonJITThunkID : uint8_t {
  #define JSC_DEFINE_COMMON_JIT_THUNK_ID(name, func) name,
  JSC_FOR_EACH_COMMON_THUNK(JSC_DEFINE_COMMON_JIT_THUNK_ID)
-@@ -207,13 +182,6 @@ JSC_FOR_EACH_COMMON_THUNK(JSC_DEFINE_COMMON_JIT_THUNK_ID)
+@@ -207,13 +181,6 @@ JSC_FOR_EACH_COMMON_THUNK(JSC_DEFINE_COMMON_JIT_THUNK_ID)
  };
  
  #define JSC_COUNT_COMMON_JIT_THUNK_ID(name, func) + 1
@@ -27064,7 +27038,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
  static constexpr unsigned numberOfCommonThunkIDs = 0 JSC_FOR_EACH_COMMON_THUNK(JSC_COUNT_COMMON_JIT_THUNK_ID);
  #undef JSC_COUNT_COMMON_JIT_THUNK_ID
  
-@@ -232,7 +200,8 @@ public:
+@@ -232,7 +199,8 @@ public:
      CodePtr<JITThunkPtrTag> ctiInternalFunctionCall(VM&);
      CodePtr<JITThunkPtrTag> ctiInternalFunctionConstruct(VM&);
  
@@ -27074,7 +27048,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
      MacroAssemblerCodeRef<JITThunkPtrTag> ctiStub(VM&, ThunkGenerator);
      MacroAssemblerCodeRef<JITThunkPtrTag> ctiSlowPathFunctionStub(VM&, SlowPathFunction);
  
-@@ -246,10 +215,8 @@ private:
+@@ -246,10 +214,8 @@ private:
      template <typename GenerateThunk>
      MacroAssemblerCodeRef<JITThunkPtrTag> ctiStubImpl(ThunkGenerator key, GenerateThunk);
  
@@ -27086,7 +27060,7 @@ index 302eecb371d3a355af588f0ecb3c359aac772bae..ca9bdd3d6f1f0aa99f99c4610536d120
      struct Entry {
          PackedRefPtr<ExecutableMemoryHandle> handle;
          bool needsCrossModifyingCodeFence;
-@@ -290,21 +257,7 @@ private:
+@@ -290,21 +256,7 @@ private:
  
      using WeakNativeExecutableSet = UncheckedKeyHashSet<Weak<NativeExecutable>, WeakNativeExecutableHash>;
  
@@ -27461,7 +27435,7 @@ index 507bc8e74f09248550ca46ea763d1b6c4cbd8adf..127cb64e146c6fce5b2afafcd2a724b2
  template<typename T>
  concept shouldZeroExtendInExceptionResult = sizeof(T) < sizeof(UCPURegister) && std::is_integral_v<T>;
  
-@@ -157,6 +159,117 @@ ALWAYS_INLINE T makeOperationResult(Scope& scope, T result)
+@@ -157,6 +159,114 @@ ALWAYS_INLINE T makeOperationResult(Scope& scope, T result)
      RELEASE_AND_RETURN(scope, result);
  }
  
@@ -27479,8 +27453,6 @@ index 507bc8e74f09248550ca46ea763d1b6c4cbd8adf..127cb64e146c6fce5b2afafcd2a724b2
 +template<typename OperationType>
 +concept OperationHasResult = FunctionTraits<OperationType>::hasResult && !std::is_same_v<typename FunctionTraits<OperationType>::ResultType, ExceptionOperationResult<void>>;
 +
-+// Note we need this because e.g. `requires (!OperationHasResult<int>)` will pass the requirement as the SFINAE in `OperationHasResult<int>`
-+// means the concept returns false and the `!` makes it true.
 +template<typename OperationType>
 +concept OperationIsVoid = !FunctionTraits<OperationType>::hasResult || std::is_same_v<typename FunctionTraits<OperationType>::ResultType, ExceptionOperationResult<void>>;
 +
@@ -27496,7 +27468,6 @@ index 507bc8e74f09248550ca46ea763d1b6c4cbd8adf..127cb64e146c6fce5b2afafcd2a724b2
 +template<typename T>
 +concept isExceptionOperationResult = IsExceptionOperationResult<T>::value;
 +
-+// Note: We always return an exception in a register if the operation's return type is void on all platforms (assuming it throws).
 +template<typename T>
 +using OperationReturnType = std::conditional_t<(assertNotOperationSignature<T> && (std::is_same_v<T, void> || canMakeExceptionOperationResult<T>)), ExceptionOperationResult<T>, T>;
 +
@@ -27696,8 +27667,8 @@ index 8f0193ea4b82bf095f063f05bf8543d87b8723c1..71b1bf2d0f06892b7424e91105f07336
      registers.add(GPRInfo::regCS6); // MC
      registers.add(GPRInfo::regCS7); // PB
 +#elif CPU(ARM)
-+    registers.add(GPRInfo::regCS0); // MC
-+    registers.add(GPRInfo::regCS1); // PB
++    registers.add(GPRInfo::regCS0);
++    registers.add(GPRInfo::regCS1);
  #else
  #error Unsupported architecture.
  #endif
