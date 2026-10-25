@@ -508,7 +508,7 @@ With `--shared-image-slab` (the machine-wide image slab, which survives an exec)
 | Region 0x39 | 47 |
 | Region 0x2f | 15,767 |
 
-The image slab removes the 0x39 repeats. The 0x2f repeats remain, and their cause is not identified. The emit total for
+The image slab removes the 0x39 repeats. The 0x2f repeats remain; the section at the end of this file identifies them as dyld. The emit total for
 the slab boot is lower: the probe's last report was at 500,000 emits, against 1.9 M for the default boot to the same
 point in the boot.
 
@@ -524,8 +524,7 @@ The mean is 2,777 MB against 1,507 MB, −46%. CPU to the SpringBoard spawn was 
 flag, with load averages at launch of 40 and 12 against 11 and 10, so they are not comparable. Idle CPU was 0.37 and
 0.71 cores by default and 1.32 and 0.51 with the flag, over 11 to 13 s windows; that does not settle a difference.
 
-The flag is opt-in, and this commit does not change the default. Making it the default changes the memory sharing of
-every boot, which is a product decision, and the idle CPU has no clean reading yet.
+The flag was opt-in when this was measured. The default changes in the section at the end of this file.
 
 The reverse block index is now a sorted vector (patch `0011-Keep-the-reverse-block-index-in-a-sorted-vector.patch`). Its
 `std::map` node was 48 B a block, and a vector entry is 16 B plus the spare capacity, about 25 to 30 B a block saved, or
@@ -537,5 +536,54 @@ show in single boots.
 block at 24 B a bucket. A maximum load factor of 0.9 would halve that, but the map is the lookup for every link and
 native-slab find, and robin-hood probes lengthen at 0.9. That lookup cost needs measuring before the change is made.
 
-Not done: the cause of the 0x2f repeats, the default for `--shared-image-slab`, the `block_entries` load factor, and a
-quiet-host repeat of the footprint and boot pairs.
+## The shared image slab is the default, and the 0x2f repeats are dyld, measured 2026-10-25
+
+`--shared-image-slab` is now the default, and `--no-shared-image-slab` turns the machine-wide image slab off.
+`--image-slab-mib` still needs the slab, so only `--no-shared-image-slab` makes it fail.
+
+The slab publishes translations by guest address and does not record which process made them. That is sound only while
+every process that runs an address runs the same bytes there. A process can break that: copy-on-write detaches a page
+it writes, and the userland HLE writes trampolines and continuation SVCs into guest memory (`userland_hle.cpp`). Before
+the flip, `emulator/tests/unit/image_slab_test.cpp` showed the hole. A process that writes its private copy of a shared
+page and invalidates it publishes that code into the slab, and a clean process then runs it. With the rule below
+disabled, the test fails with `clean.run() is 7, expected 1`.
+
+The rule: an `ExecutionContext` that invalidates a range inside the image region is private from then on. Its Jit is
+built without the machine slab, and the Jit is rebuilt at the next run boundary (`service_pending_shared_invalidation`).
+Clean processes keep the slab. The test checks that a process runs the new code after an exec and a copy-on-write
+write and invalidate, that a clean process still runs the original bytes after another process wrote, and that the
+writer does not grow the slab. The machine-wide invalidation still happens on every write. Not covered: mprotect and
+unmap reach the same `request_cache_range` call (`kernel.cpp:2989`, `3075`, `3101`), and the test calls that function
+rather than the kernel path.
+
+Results:
+
+- The suite (`./xmakew test -P .`) ran 177 tests: 176 passed, including `emulator_image_slab_test` and
+  `emulator_machine_image_region_test`. One failed: `toolchain_light/compat_test`, a host libdispatch cancellation
+  probe. It timed out once and failed on a timing measurement the second time. Nothing in this change is in its build,
+  and it was not checked on `main`.
+- A boot with the default prints `[jit] image-slab-mib=shared`. SpringBoard finished starting after 66 s wall (52.6 s
+  of CPU at spawn) at load 25, and after 246 s at load 22 to 33. The footprint at the default was not measured:
+  `vmmap` and `footprint` did not return in two attempts. The paired numbers above (2,777 MB by default and 1,507 MB
+  with the flag) are the footprint evidence, since the default takes that path.
+
+The 0x2f repeats. A probe tagged each repeat by reason, by 1 MiB region and by 64 KiB page (dynarmic patch 0012, reverted
+by hand). In the default boot, the first 2.5 M emits held 17,449 repeats. SpringBoard was not reached within 900 s at
+load 20 to 25, so the probe covers the boot before it:
+
+| Reason or place | Repeats |
+|---|---|
+| Clear (the exec reset) | 17,435 of 17,449 |
+| Region 0x2f | 17,360 |
+| Page 0x2fe10000 | 12,781 |
+| Page 0x2fe00000 | 4,579 |
+
+The boot log has `[loader] dyld_entry=0x2fe01028`. So the 0x2f repeats are dyld, mapped at 0x2fe00000. On the classic
+layout the shared region starts at 0x30000000, so the image slab does not cover dyld. Each exec clears the native slab
+(`emulator_session.cpp:3913`), and every process retranslates dyld: about 0.7% of emits in this boot.
+
+Candidate fix, not done: put dyld's mapping in the image region, or in a second region. dyld is a file mapping, so it
+needs the same copy-on-write rule as the shared cache. The layout is in `darwin_address_layout.hpp`.
+
+Not done: dyld in the image region (the candidate above), the `block_entries` load factor, and a quiet-host repeat of
+the footprint and boot pairs.
