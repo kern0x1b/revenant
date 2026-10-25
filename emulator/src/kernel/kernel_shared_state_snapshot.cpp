@@ -7,6 +7,7 @@
 #include "foundation/snapshot_io.hpp"
 
 #include <atomic>
+#include <string>
 
 namespace emulator {
 
@@ -58,6 +59,142 @@ KernelSharedState::ProcessKeventState load_kevent_state(snapshot::Reader& in)
     snapshot::load(in, state.exit_generation);
     snapshot::load(in, state.wait_status);
     return state;
+}
+
+void save_display_geometry(snapshot::Writer& out, const DisplayGeometry& geometry)
+{
+    snapshot::save(out, geometry.width);
+    snapshot::save(out, geometry.height);
+}
+
+DisplayGeometry load_display_geometry(snapshot::Reader& in)
+{
+    DisplayGeometry geometry;
+    snapshot::load(in, geometry.width);
+    snapshot::load(in, geometry.height);
+    return geometry;
+}
+
+void save_application_display(
+    snapshot::Writer& out, const ApplicationDisplay& display)
+{
+    snapshot::save(out, display.kind);
+    save_display_geometry(out, display.logical_geometry);
+}
+
+ApplicationDisplay load_application_display(snapshot::Reader& in)
+{
+    ApplicationDisplay display;
+    snapshot::load(in, display.kind);
+    display.logical_geometry = load_display_geometry(in);
+    return display;
+}
+
+void save_core_animation_abi(
+    snapshot::Writer& out, const CoreAnimationRemoteAbi& abi)
+{
+    snapshot::save(out, std::string { abi.name });
+    snapshot::save(out, abi.inline_transaction_message);
+    snapshot::save(out, abi.out_of_line_transaction_message);
+    snapshot::save(out, abi.render_server_port_rendezvous);
+}
+
+CoreAnimationRemoteAbi load_core_animation_abi(snapshot::Reader& in)
+{
+    std::string name;
+    snapshot::load(in, name);
+    CoreAnimationRemoteAbi abi;
+    if (name == core_animation_transaction_v1_name) {
+        abi.name = core_animation_transaction_v1_name;
+    } else if (name == core_animation_render_server_v1_name) {
+        abi.name = core_animation_render_server_v1_name;
+    } else {
+        throw snapshot::FormatError {
+            "snapshot names an unknown Core Animation ABI"
+        };
+    }
+    snapshot::load(in, abi.inline_transaction_message);
+    snapshot::load(in, abi.out_of_line_transaction_message);
+    snapshot::load(in, abi.render_server_port_rendezvous);
+    return abi;
+}
+
+void save_process_record(
+    snapshot::Writer& out, const KernelSharedState::ProcessRecord& record)
+{
+    snapshot::save(out, record.parent_pid);
+    snapshot::save(out, record.process_group);
+    snapshot::save(out, record.uid);
+    snapshot::save(out, record.effective_uid);
+    snapshot::save(out, record.gid);
+    snapshot::save(out, record.effective_gid);
+    snapshot::save(out, record.nice_value);
+    snapshot::save(out, record.exit_status);
+    snapshot::save(out, record.termination_signal);
+    snapshot::save(out, record.exited);
+    snapshot::save(out, record.pid_suspended);
+    snapshot::save(out, record.signal_stopped);
+    snapshot::save(out, record.command);
+    snapshot::save(out, record.executable_path);
+    snapshot::save(out, record.arguments);
+    snapshot::save(out, record.environment);
+    snapshot::save(out, record.graphics_input_abi);
+    snapshot::save(out, record.code_signature_entitlements);
+    snapshot::save(out, record.core_animation_remote_abi.has_value());
+    if (record.core_animation_remote_abi)
+        save_core_animation_abi(out, *record.core_animation_remote_abi);
+    snapshot::save(out, record.display_orientation);
+    save_application_display(out, record.application_display);
+    snapshot::save(out, record.incarnation);
+    snapshot::save(out, record.parent_incarnation);
+    snapshot::save(out, record.start_wall_nanoseconds);
+    snapshot::save(out, record.executable_uuid);
+    snapshot::save(out, record.audit_identity_version);
+    snapshot::save(out, record.memory_status.priority);
+    snapshot::save(out, record.memory_status.user_data);
+    snapshot::save(out, record.importance_donor);
+    snapshot::save(out, record.dyld_all_image_info_address);
+    snapshot::save(out, record.dyld_all_image_info_size);
+}
+
+KernelSharedState::ProcessRecord load_process_record(snapshot::Reader& in)
+{
+    KernelSharedState::ProcessRecord record;
+    snapshot::load(in, record.parent_pid);
+    snapshot::load(in, record.process_group);
+    snapshot::load(in, record.uid);
+    snapshot::load(in, record.effective_uid);
+    snapshot::load(in, record.gid);
+    snapshot::load(in, record.effective_gid);
+    snapshot::load(in, record.nice_value);
+    snapshot::load(in, record.exit_status);
+    snapshot::load(in, record.termination_signal);
+    snapshot::load(in, record.exited);
+    snapshot::load(in, record.pid_suspended);
+    snapshot::load(in, record.signal_stopped);
+    snapshot::load(in, record.command);
+    snapshot::load(in, record.executable_path);
+    snapshot::load(in, record.arguments);
+    snapshot::load(in, record.environment);
+    snapshot::load(in, record.graphics_input_abi);
+    snapshot::load(in, record.code_signature_entitlements);
+    bool has_core_animation_abi { };
+    snapshot::load(in, has_core_animation_abi);
+    if (has_core_animation_abi)
+        record.core_animation_remote_abi = load_core_animation_abi(in);
+    snapshot::load(in, record.display_orientation);
+    record.application_display = load_application_display(in);
+    snapshot::load(in, record.incarnation);
+    snapshot::load(in, record.parent_incarnation);
+    snapshot::load(in, record.start_wall_nanoseconds);
+    snapshot::load(in, record.executable_uuid);
+    snapshot::load(in, record.audit_identity_version);
+    snapshot::load(in, record.memory_status.priority);
+    snapshot::load(in, record.memory_status.user_data);
+    snapshot::load(in, record.importance_donor);
+    snapshot::load(in, record.dyld_all_image_info_address);
+    snapshot::load(in, record.dyld_all_image_info_size);
+    return record;
 }
 
 }
@@ -150,6 +287,28 @@ void KernelSharedState::load_port_and_event_tables(snapshot::Reader& in)
         snapshot::load(in, pid);
         if (!process_kevent_states.emplace(pid, load_kevent_state(in)).second)
             throw snapshot::FormatError { "snapshot repeats a kevent state" };
+    }
+}
+
+void KernelSharedState::save_process_table(snapshot::Writer& out) const
+{
+    snapshot::save(out, static_cast<std::uint64_t>(processes.size()));
+    for (const auto& [pid, record] : processes) {
+        snapshot::save(out, pid);
+        save_process_record(out, record);
+    }
+}
+
+void KernelSharedState::load_process_table(snapshot::Reader& in)
+{
+    std::uint64_t process_count { };
+    snapshot::load(in, process_count);
+    processes.clear();
+    for (std::uint64_t index = 0; index < process_count; ++index) {
+        std::uint32_t pid { };
+        snapshot::load(in, pid);
+        if (!processes.emplace(pid, load_process_record(in)).second)
+            throw snapshot::FormatError { "snapshot repeats a process" };
     }
 }
 

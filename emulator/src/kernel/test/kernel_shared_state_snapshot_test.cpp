@@ -4,7 +4,10 @@
 
 #include "kernel/kernel_shared_state.hpp"
 
+#include "foundation/application_display.hpp"
+#include "foundation/display_geometry.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "graphics/core_animation_remote_abi.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -16,6 +19,7 @@
 
 namespace {
 
+using emulator::CoreAnimationRemoteAbi;
 using emulator::KernelSharedState;
 namespace snapshot = emulator::snapshot;
 using emulator::snapshot::FormatError;
@@ -170,6 +174,97 @@ void repeated_kevent_state_is_refused()
     expect(threw, "a repeated kevent state is refused with FormatError");
 }
 
+void populate_processes(KernelSharedState& state)
+{
+    KernelSharedState::ProcessRecord record;
+    record.parent_pid = 1;
+    record.process_group = 42;
+    record.uid = 501;
+    record.effective_uid = 501;
+    record.gid = 20;
+    record.effective_gid = 20;
+    record.nice_value = -4;
+    record.pid_suspended = true;
+    record.command = "Snapshot";
+    record.executable_path = "/Applications/Snapshot.app/Snapshot";
+    record.arguments = { "Snapshot", "--check" };
+    record.environment = { "HOME=/var/mobile" };
+    record.graphics_input_abi = KernelSharedState::GraphicsInputAbi::Darwin11_0;
+    record.code_signature_entitlements = { std::byte { 1 }, std::byte { 2 } };
+    record.core_animation_remote_abi = CoreAnimationRemoteAbi {
+        emulator::core_animation_transaction_v1_name, 0x41U, 0x42U, false
+    };
+    record.display_orientation = emulator::DisplayOrientation::LandscapeRight;
+    record.application_display = emulator::ApplicationDisplay {
+        emulator::ApplicationDisplayMode::IPhoneCompatibility1x,
+        emulator::DisplayGeometry { 320, 480 }
+    };
+    record.incarnation = 9;
+    record.parent_incarnation = 3;
+    record.start_wall_nanoseconds = 1'000'000'000ULL;
+    record.executable_uuid[0] = std::byte { 0x5a };
+    record.audit_identity_version = 4;
+    record.memory_status.priority = 5;
+    record.memory_status.user_data = 9;
+    record.importance_donor = true;
+    record.dyld_all_image_info_address = 0x1000;
+    record.dyld_all_image_info_size = 0x40;
+    state.processes.emplace(42, record);
+
+    KernelSharedState::ProcessRecord helper;
+    helper.command = "helper";
+    state.processes.emplace(43, helper);
+}
+
+std::vector<std::byte> save_processes(const KernelSharedState& state)
+{
+    Writer out;
+    state.save_process_table(out);
+    return out.bytes();
+}
+
+void round_trip_restores_the_processes()
+{
+    KernelSharedState source;
+    populate_processes(source);
+    const auto bytes = save_processes(source);
+
+    KernelSharedState restored;
+    expect(save_processes(restored) != bytes,
+        "a fresh state saves its processes differently from the populated one");
+    Reader in { bytes };
+    restored.load_process_table(in);
+    expect(in.at_end(), "the process stream is consumed");
+    expect(restored.processes.size() == 2, "both processes are restored");
+    expect(restored.processes.at(42).command == "Snapshot",
+        "a process command is restored");
+    const auto& abi = restored.processes.at(42).core_animation_remote_abi;
+    expect(abi && abi->name == emulator::core_animation_transaction_v1_name,
+        "the Core Animation ABI is restored by its name");
+    expect(save_processes(restored) == bytes,
+        "saving the restored processes reproduces the same stream");
+}
+
+void unknown_core_animation_abi_is_refused()
+{
+    KernelSharedState source;
+    KernelSharedState::ProcessRecord record;
+    record.core_animation_remote_abi =
+        CoreAnimationRemoteAbi { "core-animation-unknown", 0U, 0U, false };
+    source.processes.emplace(7, record);
+    const auto stream = save_processes(source);
+    KernelSharedState restored;
+    bool threw = false;
+    try {
+        Reader in { stream };
+        restored.load_process_table(in);
+    } catch (const FormatError&) {
+        threw = true;
+    }
+    expect(threw,
+        "an unknown Core Animation ABI name is refused with FormatError");
+}
+
 }
 
 int main()
@@ -178,6 +273,8 @@ int main()
     truncated_stream_is_a_format_error();
     round_trip_restores_the_tables();
     repeated_kevent_state_is_refused();
+    round_trip_restores_the_processes();
+    unknown_core_animation_abi_is_refused();
     if (failures != 0) {
         std::cerr << failures << " kernel shared state snapshot checks failed\n";
         return 1;
