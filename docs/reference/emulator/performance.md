@@ -202,3 +202,41 @@ main thread's busy samples move to the kernel's event loop: `descriptor_readable
 The cache assumes the emulator owns the rootfs while it runs. A host write by another process during a boot is not
 seen until the emulator writes under the same path. The test is `emulator/src/filesystem/test/metadata_cache_test.cpp`
 (`filesystem.metadata_cache`).
+
+## Why guest memory accesses leave the inline page table, measured 2026-10-25
+
+The window is `perf-begin idle` at 60 s after the SpringBoard spawn and `perf-end` 20 s later, one cold boot,
+quit after the window. Each guest load and store that reaches a
+memory callback is counted once, by the reason the page table did not serve it (`AddressSpace::jit_slow_path_reason`,
+evaluated before the access). Two boots:
+
+| reason | boot 1, 20 s window | boot 2, 20 s window |
+|---|---|---|
+| all memory callbacks | 76,283,053 | 14,025,124 |
+| parallel-checked (the JIT holds the checked tables) | not split out | 13,934,970 (99.4%) |
+| other, not split out | 75,320,885 | 0 |
+| exclusive (LDREX, STREX, track) | 375,554 | 69,152 |
+| shared-write (shared backing or shared writable page) | 430,281 | 550 |
+| misaligned | 151,057 | 20,049 |
+| unbacked (page not materialized) | 1,949 | 254 |
+| reservation-write, file-or-cow, code-write, table-disabled, unmapped | under 3,400 each, 0 for code-write, table-disabled, unmapped | under 100 each |
+| process CPU over the window | 9.2 s | 2.2 s |
+
+The table is never disabled in either boot (`jit-page-table-disables=0`). `disable_jit_write_page_table` has no caller.
+`disable_jit_page_table` is reached only through `Cpu::set_memory_write_watchpoint`, which runs only with
+`--watch-address`.
+
+The boots differ in guest work, so the counts are not a fixed-work comparison: boot 1 spent 4 times the CPU in its
+window. The split is the stable part: almost every callback comes from the checked tables.
+
+The checked tables are chosen when the JIT is built. `set_parallel_access(guest_processor_count > 1)` runs before the
+CPUs are created (`runtime/emulator_session.cpp:569`, `:1784`), and then `AddressSpace::jit_read_page_table` and
+`jit_write_page_table` return an empty static table instead of the populated one (`address_space.cpp:223–254`). The
+commit that introduced that choice is `d91976a92` ("Scope direct JIT access to serialized guest execution"); its
+message is the title only. The populated tables already exclude the pages that parallel execution cannot read or
+write directly (`refresh_jit_page_locked`), so the choice is about what the rest of the design guarantees: a direct
+store does not pass through `release_exclusive_write_tracking_locked`, so an exclusive reservation held on another
+core would not see it, and a direct access does not hold the lock that serializes mapping changes.
+
+Moving the 2-core guest onto the populated tables is therefore a change to the cross-core memory model, not a cache
+tweak, and it is not made here. The 5× target needs that decision first.

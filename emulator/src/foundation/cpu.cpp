@@ -1265,8 +1265,28 @@ public:
         return value;
     }
 
+    static_assert(static_cast<std::size_t>(
+                      AddressSpace::JitSlowPathReason::Count) ==
+                  memory_callback_reason_count);
+    void note_memory_callback(
+        std::uint32_t address, std::size_t size, bool write)
+    {
+        if (!performance_counters().enabled())
+            return;
+        performance_counters().record_memory_callback(static_cast<std::size_t>(
+            memory_.jit_slow_path_reason(address, size, write)));
+    }
+    void note_exclusive_callback()
+    {
+        if (!performance_counters().enabled())
+            return;
+        performance_counters().record_memory_callback(static_cast<std::size_t>(
+            AddressSpace::JitSlowPathReason::Exclusive));
+    }
+
     std::uint8_t MemoryRead8(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint8_t), false);
         const auto value = memory_.read8(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(address, sizeof(std::uint8_t), MemoryPermission::Read);
@@ -1277,6 +1297,7 @@ public:
     }
     std::uint16_t MemoryRead16(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint16_t), false);
         const auto value = memory_.read16(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1288,6 +1309,7 @@ public:
     }
     std::uint32_t MemoryRead32(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint32_t), false);
         const auto value = memory_.read32(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1299,6 +1321,7 @@ public:
     }
     std::uint64_t MemoryRead64(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint64_t), false);
         const auto value = memory_.read64(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1343,6 +1366,7 @@ public:
 
     void MemoryReadExclusive(std::uint32_t address, std::size_t size) override
     {
+        note_exclusive_callback();
         memory_.track_exclusive_access(address, size);
     }
 
@@ -1906,6 +1930,7 @@ private:
     template <typename T, typename Member>
     void write(std::uint32_t address, T value, Member member)
     {
+        note_memory_callback(address, sizeof(T), true);
         if (!(memory_.*member)(address, value)) {
             memory_fault(address, sizeof(T), MemoryPermission::Write);
         } else {
@@ -1916,6 +1941,7 @@ private:
     template <typename T, typename Member>
     T swap(std::uint32_t address, T value, Member member)
     {
+        note_memory_callback(address, sizeof(T), true);
         const auto previous = (memory_.*member)(address, value);
         if (!previous) {
             memory_fault(address, sizeof(T),
@@ -1930,6 +1956,7 @@ private:
     bool write_exclusive(
         std::uint32_t address, T value, T expected, Member member)
     {
+        note_exclusive_callback();
         const auto written = (memory_.*member)(address, expected, value);
         if (written)
             notify_memory_write(address, sizeof(T), value);
@@ -5096,6 +5123,7 @@ void Cpu::set_memory_write_watchpoint(
     std::uint32_t address, MemoryWriteHandler handler)
 {
     if (handler && execution_pool_) {
+        performance_counters().record_jit_page_table_disable();
         execution_pool_->disable_jit_page_table();
     }
     memory_write_watch_address_ = address;

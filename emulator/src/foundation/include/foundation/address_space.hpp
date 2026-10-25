@@ -113,6 +113,22 @@ public:
     [[nodiscard]] std::uint8_t** jit_write_page_table();
     void disable_jit_page_table();
     void disable_jit_write_page_table();
+    enum class JitSlowPathReason : std::size_t {
+        Exclusive,
+        Misaligned,
+        TableDisabled,
+        Unbacked,
+        CodeWrite,
+        ReservationWrite,
+        FileOrCopyOnWrite,
+        SharedWrite,
+        Unmapped,
+        ParallelChecked,
+        Other,
+        Count,
+    };
+    [[nodiscard]] JitSlowPathReason jit_slow_path_reason(
+        std::uint32_t address, std::size_t size, bool write) const;
     void track_exclusive_access(std::uint32_t address, std::size_t size);
     void clear_exclusive_access_tracking();
     void synchronize_shared_write_tracking();

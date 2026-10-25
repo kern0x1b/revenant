@@ -273,6 +273,44 @@ void AddressSpace::disable_jit_write_page_table()
     exclusive_write_tracking_active_.store(false, std::memory_order_release);
 }
 
+AddressSpace::JitSlowPathReason AddressSpace::jit_slow_path_reason(
+    std::uint32_t address, std::size_t size, bool write) const
+{
+    if (size > 1U && (address & static_cast<std::uint32_t>(size - 1U)) != 0U)
+        return JitSlowPathReason::Misaligned;
+    auto lock = read_lock();
+    const auto base = page_base(address);
+    const auto flags = page_permission_locked(base / page_size);
+    constexpr auto read_required = static_cast<std::uint8_t>(
+        mapped_page_flag | permission_bits(MemoryPermission::Read));
+    constexpr auto write_required = static_cast<std::uint8_t>(
+        read_required | permission_bits(MemoryPermission::Write));
+    const auto required = write ? write_required : read_required;
+    if ((flags & required) != required)
+        return JitSlowPathReason::Unmapped;
+    if (write ? !jit_write_page_table_enabled_ : !jit_page_table_enabled_)
+        return JitSlowPathReason::TableDisabled;
+    if (write && tracks_write_locked(base, page_size))
+        return JitSlowPathReason::CodeWrite;
+    if (write && exclusive_write_tracked_pages_.contains(base))
+        return JitSlowPathReason::ReservationWrite;
+    const auto* page = find_page_locked(base);
+    if (page == nullptr || !page->backing)
+        return JitSlowPathReason::Unbacked;
+    const bool tracking = page->backing->shared_write_tracking_enabled();
+    const bool shared = write
+        ? tracking || (parallel_access_ && page->shared_writable)
+        : parallel_access_ && (tracking || page->shared_writable);
+    if (shared)
+        return JitSlowPathReason::SharedWrite;
+    if (write &&
+        (page->file_cached ||
+            (page->copy_on_write_possible && !page->shared_writable)))
+        return JitSlowPathReason::FileOrCopyOnWrite;
+    return parallel_access_ ? JitSlowPathReason::ParallelChecked
+                            : JitSlowPathReason::Other;
+}
+
 void AddressSpace::track_exclusive_access(
     std::uint32_t address, std::size_t size)
 {
