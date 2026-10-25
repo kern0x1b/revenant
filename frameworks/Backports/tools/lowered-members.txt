@@ -1920,9 +1920,11 @@ class RevenantSCNArchivedData
 class RevenantSCNClock
 class RevenantSCNCoding
 class RevenantSCNDraw
+class RevenantSCNHit
 class RevenantSCNJitter
 class RevenantSCNJitterBuffers
 class RevenantSCNMesh
+class RevenantSCNPicker
 class RevenantSCNRenderEngine
 class RevenantSCNShaderProgram
 class RevenantSCNSoundEngine
@@ -2055,6 +2057,7 @@ class SCNCamera
 class SCNGeometry
 class SCNGeometryElement
 class SCNGeometrySource
+class SCNHitTestResult
 class SCNLight
 class SCNMaterial
 class SCNMaterialProperty
@@ -3133,9 +3136,19 @@ function RevenantSCNActionCubicProgress
 function RevenantSCNActionEase
 function RevenantSCNActionShortestAngle
 function RevenantSCNActionTimingPoints
+function RevenantSCNBoxInFrustum
+function RevenantSCNExpandBox
+function RevenantSCNFrustumPlanes
+function RevenantSCNGeometryBounds
 function RevenantSCNProjectPoint
 function RevenantSCNProjectionMatrix
+function RevenantSCNRayHitsBox
+function RevenantSCNRayHitsTriangle
+function RevenantSCNReadIndex
+function RevenantSCNReadVector
+function RevenantSCNRowTransform
 function RevenantSCNUnprojectPoint
+function RevenantSCNWorldBox
 function RevenantSecKeyECCarries
 function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
@@ -23336,6 +23349,13 @@ member RevenantSCNJitterBuffers -isUsable
 member RevenantSCNJitterBuffers -prepareDraw
 member RevenantSCNJitterBuffers -presentToFramebuffer:
 member RevenantSCNJitterBuffers -resizeToWidth:height:
+member RevenantSCNPicker -acceptsDistance:
+member RevenantSCNPicker -hitsUnderNode:
+member RevenantSCNPicker -initWithOrigin:direction:options:
+member RevenantSCNPicker -pointAt:point:
+member RevenantSCNPicker -recordNode:geometryIndex:faceIndex:distance:world:local:localNormal:worldNormal:matrix:texcoords:
+member RevenantSCNPicker -testGeometry:node:world:
+member RevenantSCNPicker -visit:
 member RevenantSCNRenderEngine +defaultPointOfViewInScene:
 member RevenantSCNRenderEngine -applySampling:
 member RevenantSCNRenderEngine -dealloc
@@ -23346,6 +23366,7 @@ member RevenantSCNRenderEngine -linearTextures
 member RevenantSCNRenderEngine -materialBlends:
 member RevenantSCNRenderEngine -meshFor:
 member RevenantSCNRenderEngine -pathForContents:
+member RevenantSCNRenderEngine -prepareObject:shouldAbortBlock:
 member RevenantSCNRenderEngine -programForModel:textured:bordered:lockedAmbient:lights:count:mesh:
 member RevenantSCNRenderEngine -projectPoint:
 member RevenantSCNRenderEngine -purgeUnused
@@ -24061,6 +24082,9 @@ member SCNGeometrySource +geometrySourceWithData:semantic:vectorCount:floatCompo
 member SCNGeometrySource +supportsSecureCoding
 member SCNGeometrySource -encodeWithCoder:
 member SCNGeometrySource -initWithCoder:
+member SCNHitTestResult +revenantResultWithNode:geometryIndex:faceIndex:localCoordinates:worldCoordinates:localNormal:worldNormal:modelTransform:textureCoordinates:
+member SCNHitTestResult -boneNode
+member SCNHitTestResult -textureCoordinatesWithMappingChannel:
 member SCNLight +light
 member SCNLight +supportsSecureCoding
 member SCNLight -copyWithZone:
@@ -24260,6 +24284,7 @@ member SCNView -revenantRenderAtTime:width:height:framebuffer:
 member SCNView -revenantSetContext:
 member SCNView -revenantSetUp
 member SCNView -revenantUpdateDisplayLink
+member SCNView -revenantUpdateStatisticsAtTime:
 member SCNView -scene
 member SCNView -sceneTime
 member SCNView -setAudioListener:

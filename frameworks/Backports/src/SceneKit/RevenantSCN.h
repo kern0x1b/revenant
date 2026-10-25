@@ -55,7 +55,9 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 @property (nonatomic, assign) int lastRenderHeight;
 @property (nonatomic, assign) float jitterX;
 @property (nonatomic, assign) float jitterY;
+@property (nonatomic, assign) BOOL autoenablesDefaultLighting;
 - (void)renderScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height;
+- (BOOL)prepareObject:(id)object shouldAbortBlock:(BOOL (^)(void))block;
 + (SCNNode *)defaultPointOfViewInScene:(SCNScene *)scene;
 @end
 

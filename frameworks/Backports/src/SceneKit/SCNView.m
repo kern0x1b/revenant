@@ -38,6 +38,14 @@ static void revenant_unsupported(const char *member)
     NSTimeInterval _jitterTime;
     SCNScene *_jitterScene;
     SCNNode *_jitterPointOfView;
+    BOOL _loops;
+    BOOL _autoenablesDefaultLighting;
+    BOOL _temporalAntialiasingEnabled;
+    BOOL _showsStatistics;
+    UILabel *_statisticsLabel;
+    NSUInteger _statisticsFrames;
+    CFTimeInterval _statisticsStart;
+    SCNDebugOptions _debugOptions;
 }
 
 + (Class)layerClass
@@ -69,6 +77,7 @@ static void revenant_unsupported(const char *member)
 - (void)revenantSetUp
 {
     _clock = [[RevenantSCNClock alloc] init];
+    _loops = YES;
     self.contentScaleFactor = [UIScreen mainScreen].scale;
     CAEAGLLayer *layer = (CAEAGLLayer *)self.layer;
     layer.opaque = NO;
@@ -96,6 +105,7 @@ static void revenant_unsupported(const char *member)
     [self revenantDeleteFramebuffer];
     _context = context;
     _renderer = context ? [[RevenantSCNRenderEngine alloc] initWithContext:context] : nil;
+    _renderer.autoenablesDefaultLighting = _autoenablesDefaultLighting;
 }
 
 - (void)revenantDeleteFramebuffer
@@ -199,7 +209,7 @@ static void revenant_unsupported(const char *member)
     if (scene && [delegate respondsToSelector:@selector(renderer:willRenderScene:atTime:)]) {
         [delegate renderer:self willRenderScene:scene atTime:time];
     }
-    if (_jitteringEnabled && scene) {
+    if ((_jitteringEnabled || _temporalAntialiasingEnabled) && scene) {
         [self revenantDrawJitteredScene:scene pointOfView:_pointOfView width:width height:height time:time framebuffer:framebuffer];
     } else {
         [self revenantClear];
@@ -257,8 +267,27 @@ static void revenant_unsupported(const char *member)
         [self revenantRenderAtTime:[_clock sceneTimeAtWallTime:CACurrentMediaTime()] width:_drawableWidth height:_drawableHeight framebuffer:_framebuffer];
         glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
+        [self revenantUpdateStatisticsAtTime:CACurrentMediaTime()];
     }
     [EAGLContext setCurrentContext:previous];
+}
+
+- (void)revenantUpdateStatisticsAtTime:(CFTimeInterval)now
+{
+    if (!_showsStatistics || _statisticsLabel == nil) {
+        return;
+    }
+    if (_statisticsStart == 0) {
+        _statisticsStart = now;
+    }
+    _statisticsFrames++;
+    CFTimeInterval elapsed = now - _statisticsStart;
+    if (elapsed >= 0.5) {
+        _statisticsLabel.text = [NSString stringWithFormat:@"%.0f fps", _statisticsFrames / elapsed];
+        _statisticsFrames = 0;
+        _statisticsStart = now;
+    }
+    _statisticsLabel.frame = CGRectMake(4, CGRectGetHeight(self.bounds) - 20, 120, 16);
 }
 
 - (void)revenantDisplayLinkFired:(CADisplayLink *)link
@@ -461,91 +490,105 @@ static void revenant_unsupported(const char *member)
 
 - (void)presentScene:(SCNScene *)scene withTransition:(SKTransition *)transition incomingPointOfView:(nullable SCNNode *)pointOfView completionHandler:(nullable void (^)(void))completionHandler
 {
-    revenant_unsupported("presentScene:withTransition:incomingPointOfView:completionHandler:");
-}
-
-- (NSArray<SCNHitTestResult *> *)hitTest:(CGPoint)point options:(nullable NSDictionary<SCNHitTestOption, id> *)options
-{
-    revenant_unsupported("hitTest:options:");
-    return nil;
-}
-
-- (BOOL)isNodeInsideFrustum:(SCNNode *)node withPointOfView:(SCNNode *)pointOfView
-{
-    revenant_unsupported("isNodeInsideFrustum:withPointOfView:");
-    return NO;
-}
-
-- (NSArray<SCNNode *> *)nodesInsideFrustumWithPointOfView:(SCNNode *)pointOfView
-{
-    revenant_unsupported("nodesInsideFrustumWithPointOfView:");
-    return nil;
+    self.scene = scene;
+    if (pointOfView) {
+        _pointOfView = pointOfView;
+    }
+    if (completionHandler) {
+        dispatch_async(dispatch_get_main_queue(), completionHandler);
+    }
 }
 
 - (BOOL)prepareObject:(id)object shouldAbortBlock:(nullable NS_NOESCAPE BOOL (^)(void))block
 {
-    revenant_unsupported("prepareObject:shouldAbortBlock:");
-    return NO;
+    if (_context == nil) {
+        return NO;
+    }
+    EAGLContext *previous = [EAGLContext currentContext];
+    [EAGLContext setCurrentContext:_context];
+    BOOL prepared = [_renderer prepareObject:object shouldAbortBlock:block];
+    [EAGLContext setCurrentContext:previous];
+    return prepared;
 }
 
 - (void)prepareObjects:(NSArray *)objects withCompletionHandler:(nullable void (^)(BOOL success))completionHandler
 {
-    revenant_unsupported("prepareObjects:withCompletionHandler:");
+    BOOL success = YES;
+    for (id object in objects) {
+        success = [self prepareObject:object shouldAbortBlock:nil] && success;
+    }
+    if (completionHandler) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completionHandler(success);
+        });
+    }
 }
 
 - (BOOL)loops
 {
-    revenant_unsupported("loops");
-    return NO;
+    return _loops;
 }
 
 - (void)setLoops:(BOOL)loops
 {
-    revenant_unsupported("loops");
+    _loops = loops;
 }
 
 - (BOOL)autoenablesDefaultLighting
 {
-    revenant_unsupported("autoenablesDefaultLighting");
-    return NO;
+    return _autoenablesDefaultLighting;
 }
 
 - (void)setAutoenablesDefaultLighting:(BOOL)autoenablesDefaultLighting
 {
-    revenant_unsupported("autoenablesDefaultLighting");
+    _autoenablesDefaultLighting = autoenablesDefaultLighting;
+    _renderer.autoenablesDefaultLighting = autoenablesDefaultLighting;
 }
 
 - (BOOL)isTemporalAntialiasingEnabled
 {
-    revenant_unsupported("temporalAntialiasingEnabled");
-    return NO;
+    return _temporalAntialiasingEnabled;
 }
 
 - (void)setTemporalAntialiasingEnabled:(BOOL)temporalAntialiasingEnabled
 {
-    revenant_unsupported("temporalAntialiasingEnabled");
+    _temporalAntialiasingEnabled = temporalAntialiasingEnabled;
+    _jitterKeyValid = NO;
 }
 
 - (BOOL)showsStatistics
 {
-    revenant_unsupported("showsStatistics");
-    return NO;
+    return _showsStatistics;
 }
 
 - (void)setShowsStatistics:(BOOL)showsStatistics
 {
-    revenant_unsupported("showsStatistics");
+    _showsStatistics = showsStatistics;
+    if (showsStatistics) {
+        if (_statisticsLabel == nil) {
+            _statisticsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+            _statisticsLabel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.5];
+            _statisticsLabel.textColor = [UIColor whiteColor];
+            _statisticsLabel.font = [UIFont systemFontOfSize:11];
+            _statisticsLabel.text = @"fps";
+            [self addSubview:_statisticsLabel];
+        }
+    } else {
+        [_statisticsLabel removeFromSuperview];
+        _statisticsLabel = nil;
+        _statisticsFrames = 0;
+        _statisticsStart = 0;
+    }
 }
 
 - (SCNDebugOptions)debugOptions
 {
-    revenant_unsupported("debugOptions");
-    return 0;
+    return _debugOptions;
 }
 
 - (void)setDebugOptions:(SCNDebugOptions)debugOptions
 {
-    revenant_unsupported("debugOptions");
+    _debugOptions = debugOptions;
 }
 
 - (SKScene *)overlaySKScene
@@ -561,42 +604,42 @@ static void revenant_unsupported(const char *member)
 
 - (BOOL)usesReverseZ
 {
-    revenant_unsupported("usesReverseZ");
     return NO;
 }
 
 - (void)setUsesReverseZ:(BOOL)usesReverseZ
 {
-    revenant_unsupported("usesReverseZ");
+    if (usesReverseZ) {
+        revenant_say_once_for(@"scenekit reverse z", @"SceneKit: this GLES renderer keeps the normal depth range, so usesReverseZ stays NO");
+    }
 }
 
 - (CGColorSpaceRef)workingColorSpace
 {
-    revenant_unsupported("workingColorSpace");
-    return NULL;
+    static CGColorSpaceRef space = NULL;
+    if (space == NULL) {
+        space = CGColorSpaceCreateDeviceRGB();
+    }
+    return space;
 }
 
 - (MTLRenderPassDescriptor *)currentRenderPassDescriptor
 {
-    revenant_unsupported("currentRenderPassDescriptor");
     return nil;
 }
 
 - (MTLPixelFormat)colorPixelFormat
 {
-    revenant_unsupported("colorPixelFormat");
     return MTLPixelFormatInvalid;
 }
 
 - (MTLPixelFormat)depthPixelFormat
 {
-    revenant_unsupported("depthPixelFormat");
     return MTLPixelFormatInvalid;
 }
 
 - (MTLPixelFormat)stencilPixelFormat
 {
-    revenant_unsupported("stencilPixelFormat");
     return MTLPixelFormatInvalid;
 }
 
@@ -608,8 +651,7 @@ static void revenant_unsupported(const char *member)
 
 - (CGRect)currentViewport
 {
-    revenant_unsupported("currentViewport");
-    return CGRectZero;
+    return CGRectMake(0, 0, _renderer.lastRenderWidth, _renderer.lastRenderHeight);
 }
 
 @end
