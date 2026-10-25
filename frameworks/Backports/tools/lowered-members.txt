@@ -1790,6 +1790,7 @@ class RevenantMenuHost
 class RevenantMenuTrigger
 class RevenantMeshBufferZoneState
 class RevenantMetal4CommandQueue
+class RevenantMetalBinaryArchive
 class RevenantMetalBinding
 class RevenantMetalBlitEncoder
 class RevenantMetalBuffer
@@ -3219,6 +3220,9 @@ enum MTLArgumentTypeSampler
 enum MTLArgumentTypeTexture
 enum MTLArgumentTypeThreadgroupMemory
 enum MTLAttributeFormatFloat3
+enum MTLBinaryArchiveErrorInternalError
+enum MTLBinaryArchiveErrorInvalidFile
+enum MTLBinaryArchiveErrorUnexpectedElement
 enum MTLBindingTypeBuffer
 enum MTLBindingTypeObjectPayload
 enum MTLBindingTypeTexture
@@ -24813,6 +24817,13 @@ member RevenantMetal4CommandQueue -updateBufferMappings:heap:operations:count:
 member RevenantMetal4CommandQueue -updateTextureMappings:heap:operations:count:
 member RevenantMetal4CommandQueue -waitForDrawable:
 member RevenantMetal4CommandQueue -waitForEvent:value:
+member RevenantMetalBinaryArchive -addComputePipelineFunctionsWithDescriptor:error:
+member RevenantMetalBinaryArchive -addPipeline:error:
+member RevenantMetalBinaryArchive -addRenderPipelineFunctionsWithDescriptor:error:
+member RevenantMetalBinaryArchive -device
+member RevenantMetalBinaryArchive -initWithDevice:descriptor:error:
+member RevenantMetalBinaryArchive -loadFromURL:error:
+member RevenantMetalBinaryArchive -serializeToURL:error:
 member RevenantMetalBinding -type
 member RevenantMetalBlitEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
 member RevenantMetalBlitEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:
@@ -24944,6 +24955,7 @@ member RevenantMetalDevice -isLowPower
 member RevenantMetalDevice -isRemovable
 member RevenantMetalDevice -maxThreadsPerThreadgroup
 member RevenantMetalDevice -name
+member RevenantMetalDevice -newBinaryArchiveWithDescriptor:error:
 member RevenantMetalDevice -newBufferWithBytes:length:options:
 member RevenantMetalDevice -newBufferWithLength:options:
 member RevenantMetalDevice -newCommandQueue
@@ -32641,6 +32653,7 @@ protocol MTKViewDelegate
 protocol MTL4BinaryFunction
 protocol MTL4CommandQueue
 protocol MTLAccelerationStructureCommandEncoder
+protocol MTLBinaryArchive
 protocol MTLBinding
 protocol MTLBlitCommandEncoder
 protocol MTLBuffer
@@ -32653,6 +32666,7 @@ protocol MTLComputePipelineState
 protocol MTLDepthStencilState
 protocol MTLDevice
 protocol MTLDrawable
+protocol MTLDynamicLibrary
 protocol MTLFunction
 protocol MTLFunctionLog
 protocol MTLFunctionLogDebugLocation
@@ -33079,6 +33093,10 @@ protocol_member MTLAccelerationStructureCommandEncoder -updateFence:
 protocol_member MTLAccelerationStructureCommandEncoder -useHeap:
 protocol_member MTLAccelerationStructureCommandEncoder -useHeaps:count:
 protocol_member MTLAccelerationStructureCommandEncoder -waitForFence:
+protocol_member MTLBinaryArchive -addComputePipelineFunctionsWithDescriptor:error:
+protocol_member MTLBinaryArchive -addRenderPipelineFunctionsWithDescriptor:error:
+protocol_member MTLBinaryArchive -device
+protocol_member MTLBinaryArchive -serializeToURL:error:
 protocol_member MTLBinding -type
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:
@@ -33171,6 +33189,7 @@ protocol_member MTLDevice -isLowPower
 protocol_member MTLDevice -isRemovable
 protocol_member MTLDevice -maxThreadsPerThreadgroup
 protocol_member MTLDevice -name
+protocol_member MTLDevice -newBinaryArchiveWithDescriptor:error:
 protocol_member MTLDevice -newBufferWithBytes:length:options:
 protocol_member MTLDevice -newBufferWithLength:options:
 protocol_member MTLDevice -newCommandQueue
@@ -33202,6 +33221,7 @@ protocol_member MTLDrawable -addPresentedHandler:
 protocol_member MTLDrawable -present
 protocol_member MTLDrawable -presentAfterMinimumDuration:
 protocol_member MTLDrawable -presentAtTime:
+protocol_member MTLDynamicLibrary -serializeToURL:error:
 protocol_member MTLFunction -device
 protocol_member MTLFunction -functionConstantsDictionary
 protocol_member MTLFunction -functionType
