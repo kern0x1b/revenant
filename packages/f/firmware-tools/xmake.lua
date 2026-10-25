@@ -23,9 +23,9 @@ package("firmware-tools")
             "option(\"component\", {type = \"string\", default = \"\"})",
             "includes(\"" .. import("@addon.revenant.data", {anonymous = true}).src("firmware-tools") .. "\")",
             ""}, "\n"))
-        os.vrunv(os.programfile(), {"f", "-p", "macosx", "-a", "arm64", "-m", "release", "-y"}, {curdir = project})
-        os.vrunv(os.programfile(), {"build", "-y", "revenant-firmware"}, {curdir = project})
-        os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "revenant-firmware"}, {curdir = project})
+        os.vrunv(os.programfile(), {"f", "-P", project, "-p", "macosx", "-a", "arm64", "-m", "release", "-y"}, {curdir = project})
+        os.vrunv(os.programfile(), {"build", "-P", project, "-y", "revenant-firmware"}, {curdir = project})
+        os.vrunv(os.programfile(), {"install", "-P", project, "-y", "-o", package:installdir(), "revenant-firmware"}, {curdir = project})
         os.vcp(import("@addon.revenant.data", {anonymous = true}).licence(), package:installdir("licenses"))
     end)
 

@@ -85,7 +85,7 @@ local function sdk_in(installdir, version)
 end
 
 local function installdir_of(scratch, requirement)
-    local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
+    local output = os.iorunv(os.programfile(), {"require", "-P", scratch, "--info", "--format=json"}, {curdir = scratch})
     local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
     local entries = start and json.decode(output:sub(start)) or {}
     for _, entry in ipairs(entries) do
@@ -107,7 +107,7 @@ function package_of(requirement, install)
         function ()
             local folder = installdir_of(scratch, requirement)
             if install and not (folder and os.isfile(path.join(folder, "manifest.txt"))) then
-                os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
+                os.execv(os.programfile(), {"require", "-P", scratch, "-y"}, {curdir = scratch})
                 folder = installdir_of(scratch, requirement)
             end
             return folder

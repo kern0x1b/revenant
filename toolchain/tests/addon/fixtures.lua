@@ -127,6 +127,6 @@ function repository(folder)
 end
 
 function build(at, mode)
-    os.vrunv(os.programfile(), table.join({"f", "-p", "iphoneos", "-a", "armv7", "-y"}, mode and {"-m", mode} or {}), {curdir = at})
-    os.vrunv(os.programfile(), {"build", "-y"}, {curdir = at})
+    os.vrunv(os.programfile(), table.join({"f", "-P", at, "-p", "iphoneos", "-a", "armv7", "-y"}, mode and {"-m", mode} or {}), {curdir = at})
+    os.vrunv(os.programfile(), {"build", "-P", at, "-y"}, {curdir = at})
 end
