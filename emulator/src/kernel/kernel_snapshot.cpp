@@ -386,6 +386,7 @@ void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const
     mbx2d_hle_.save(out);
     opengles_hle_.save(out);
     core_audio_hle_.save(out);
+    snapshot::save(out, shared_state_->launchd_job_catalog.has_value());
 }
 
 void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
@@ -407,6 +408,16 @@ void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
     mbx2d_hle_.load(in);
     opengles_hle_.load(in);
     core_audio_hle_.load(in);
+    bool launchd_job_catalog_loaded { };
+    snapshot::load(in, launchd_job_catalog_loaded);
+    if (dyld_shared_cache_attempted_)
+        static_cast<void>(dyld_shared_cache_for(dyld_shared_cache_path_));
+    if (launchd_job_catalog_loaded) {
+        std::call_once(shared_state_->launchd_job_catalog_once, [this] {
+            shared_state_->launchd_job_catalog =
+                LaunchdJobCatalog::load(rootfs_);
+        });
+    }
 }
 
 }

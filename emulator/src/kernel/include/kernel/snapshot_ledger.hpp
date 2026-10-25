@@ -232,7 +232,7 @@ inline constexpr std::array<std::string_view, 220> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 40> open_members {
+inline constexpr std::array<std::string_view, 38> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
@@ -249,7 +249,6 @@ inline constexpr std::array<std::string_view, 40> open_members {
     "kss.iokit_interest_notifications",
     "kss.iokit_multitouch_hid_connections",
     "kss.latest_application_scene_transform",
-    "kss.launchd_job_catalog_once",
     "kss.mach_dead_name_notifications",
     "kss.mach_notifications",
     "kss.mach_port_set_links_by_member",
@@ -263,7 +262,6 @@ inline constexpr std::array<std::string_view, 40> open_members {
     "kss.suppress_future_application_fullscreen_surface_processes",
     "kss.suppressed_application_fullscreen_surface_publications",
     "kss.surface_transport_port_leases",
-    "ck.dyld_shared_cache_",
     "ck.bpf_descriptors_",
     "ck.kernel_control_endpoints_",
     "ck.route_socket_states_",
@@ -275,7 +273,10 @@ inline constexpr std::array<std::string_view, 40> open_members {
     "wifi.event_broker_",
 };
 
-inline constexpr std::array<std::string_view, 49> wired_members {
+inline constexpr std::array<std::string_view, 52> wired_members {
+    "ck.dyld_shared_cache_",
+    "kss.launchd_job_catalog",
+    "kss.launchd_job_catalog_once",
     "mem.jit_read_page_table_",
     "mem.jit_write_page_table_",
     "mem.direct_jit_write_pages_",
