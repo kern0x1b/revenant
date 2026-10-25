@@ -1259,6 +1259,7 @@ public:
 
     std::optional<std::uint32_t> MemoryReadCode(std::uint32_t address) override
     {
+        memory_.publish_code_page(address);
         const auto value = memory_.read32(address, MemoryPermission::Execute);
         if (!value) {
             memory_fault(address, 4, MemoryPermission::Execute);
@@ -2265,6 +2266,9 @@ public:
             static_cast<std::uint32_t>(execution_slot_),
             single_step ? 1U : ticks };
         const std::unique_lock lock { execution_mutex_ };
+        const AddressSpace::GuestQuiescence::SliceScope slice {
+            memory_.guest_quiescence()
+        };
         diagnostics.checkpoint(PerfLatencyKind::CpuRunLockWait);
         memory_.synchronize_shared_write_tracking();
         diagnostics.checkpoint(PerfLatencyKind::CpuRunSharedWriteSync);
