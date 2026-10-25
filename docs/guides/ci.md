@@ -1,11 +1,17 @@
 # Continuous checks
 
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. Its three jobs run in parallel, all on `macos-26`. On a branch push,
-`backports` and `swift` run only when the branch changes a file outside `docs/`, `emulator/`, `recompiler/`,
-`toolchain/tests/emulate/` and Markdown, as an `ubuntu-latest` job named `changes` decides from the diff against the
-merge base with `main`: those folders never reach the native builds, and a public repository runs five macOS jobs at a
-time. A push to `main` and a dispatch run all three. Each selects Xcode 26.6
+`gh workflow run check.yml --ref <branch>`. All of its jobs run on `macos-26`. An `ubuntu-latest` job named `changes`
+decides from the diff against the merge base with `main` which of them a branch push needs, and a public repository
+runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
+
+- a change that touches only `docs/` or a Markdown file at the top of the repository runs `repository` alone, which is
+  `./xmakew test -P . 'repository/*'`: the layout and documentation checks that read those files;
+- `checks` runs for every other change;
+- `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
+  `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
+
+A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
 choose a runner, so each job keeps its own `runs-on`.
 
@@ -92,6 +98,11 @@ caches it creates are in place. The first run after a change to a cache key crea
 | --- | --- | --- | --- | --- | --- |
 | baseline, `40044072531` | 14 min | 27 | 9 min 55 s | 7 min 40 s | 9 min 12 s |
 | after, `40046661803` | 4 min 12 s | 10 | 4 min 12 s | 3 min 34 s | 2 min 13 s |
+
+Before the gating, a push that changed only documentation still ran `checks` and `package` in full. Measured on
+`40185450738` (a documentation-only change) the `checks` tests took 705 s and `package` took 1205 s, of which its
+SwiftUI demo configure took 7 min 27 s and its build 11 min 18 s, so about 25 macOS minutes for a change that only
+the repository checks read. Since the gating, such a push runs the `repository` job alone.
 
 The baseline `checks` job spent 5 min 11 s in the firmware-tools configure, which installs nothing on a store hit: the
 time is in the iOS configure itself, in a stretch where xmake prints nothing for about ten minutes on a host. The

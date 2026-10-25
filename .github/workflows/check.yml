@@ -22,26 +22,85 @@ jobs:
     timeout-minutes: 5
     outputs:
       native: ${{ steps.diff.outputs.native }}
+      docs: ${{ steps.diff.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Decide whether the change reaches the native builds
+      - name: Decide which jobs the change reaches
         id: diff
         run: |
           if [ "$GITHUB_REF" = refs/heads/main ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
             echo "native=true" >> "$GITHUB_OUTPUT"
+            echo "docs=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           base=$(git merge-base origin/main HEAD)
-          if git diff --name-only "$base" HEAD | grep -qvE '^(docs/|emulator/|recompiler/|toolchain/tests/emulate/)|\.md$'; then
+          git diff --name-only "$base" HEAD > "$RUNNER_TEMP/changed.txt"
+          if grep -qvE '^(docs/|emulator/|recompiler/|toolchain/tests/emulate/)|\.md$' "$RUNNER_TEMP/changed.txt"; then
             echo "native=true" >> "$GITHUB_OUTPUT"
           else
             echo "native=false" >> "$GITHUB_OUTPUT"
           fi
+          if grep -qvE '^docs/|^[^/]+\.md$' "$RUNNER_TEMP/changed.txt"; then
+            echo "docs=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  repository:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/revenant-setup
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          restore-keys: |
+            xmake-global-checks-${{ runner.os }}-
+
+      - name: Install the packages
+        id: configure
+        timeout-minutes: 30
+        run: |
+          ./xmakew f -P . -y --emulator_vulkan=n 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run the repository checks
+        run: ./xmakew test -P . 'repository/*' --output-on-failure
+
+      - name: Save the package store
+        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   checks:
+    needs: changes
+    if: needs.changes.outputs.docs != 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -330,6 +389,8 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   package:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 120
     steps:
@@ -382,7 +443,7 @@ jobs:
 
       - name: Configure the SwiftUI demo's component
         timeout-minutes: 45
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo --emulator_vulkan=n -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Key the package store under the configuration that installed it
         id: keys
