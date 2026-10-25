@@ -1,0 +1,61 @@
+From 32eeba1040214c27f09459f6c7808895e11e0972 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 06:09:15 +0100
+Subject: [PATCH] Seed the register allocator's generator once per thread
+
+Each block the arm64 backend emitted built a std::random_device and seeded a
+std::mt19937 for its register allocator, and the seeding was a large share of
+the cost of a short block. The generator only picks which free host register
+to evict, so one generator per emitting thread keeps that choice random and
+pays the seeding once.
+
+Self-review: changes only the generator's lifetime; the choice it makes is the
+same kind of random choice as before.
+---
+ src/dynarmic/backend/arm64/reg_alloc.cpp | 5 +++++
+ src/dynarmic/backend/arm64/reg_alloc.h   | 6 ++++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/src/dynarmic/backend/arm64/reg_alloc.cpp b/src/dynarmic/backend/arm64/reg_alloc.cpp
+index fedee02..e1f0c08 100644
+--- a/src/dynarmic/backend/arm64/reg_alloc.cpp
++++ b/src/dynarmic/backend/arm64/reg_alloc.cpp
+@@ -441,6 +441,11 @@ int RegAlloc::AllocateRegister(const std::array<HostLocInfo, 32>& regs, const st
+     return candidates[dis(rand_gen)];
+ }
+ 
++std::mt19937& RegAlloc::thread_rand_gen() {
++    thread_local std::mt19937 gen{std::random_device{}()};
++    return gen;
++}
++
+ void RegAlloc::SpillGpr(int index) {
+     ASSERT(!gprs[index].locked && !gprs[index].realized);
+     if (gprs[index].values.empty()) {
+diff --git a/src/dynarmic/backend/arm64/reg_alloc.h b/src/dynarmic/backend/arm64/reg_alloc.h
+index 3a2d538..220f9d9 100644
+--- a/src/dynarmic/backend/arm64/reg_alloc.h
++++ b/src/dynarmic/backend/arm64/reg_alloc.h
+@@ -158,7 +158,7 @@ public:
+     using ArgumentInfo = std::array<Argument, IR::max_arg_count>;
+ 
+     explicit RegAlloc(oaknut::CodeGenerator& code, FpsrManager& fpsr_manager, std::vector<int> gpr_order, std::vector<int> fpr_order)
+-            : code{code}, fpsr_manager{fpsr_manager}, gpr_order{gpr_order}, fpr_order{fpr_order}, rand_gen{std::random_device{}()} {}
++            : code{code}, fpsr_manager{fpsr_manager}, gpr_order{gpr_order}, fpr_order{fpr_order}, rand_gen{thread_rand_gen()} {}
+ 
+     ArgumentInfo GetArgumentInfo(IR::Inst* inst);
+     bool WasValueDefined(IR::Inst* inst) const;
+@@ -333,7 +333,9 @@ private:
+     HostLocInfo flags;
+     std::array<HostLocInfo, SpillCount> spills;
+ 
+-    mutable std::mt19937 rand_gen;
++    static std::mt19937& thread_rand_gen();
++
++    std::mt19937& rand_gen;
+ 
+     tsl::robin_set<const IR::Inst*> defined_insts;
+ };
+-- 
+2.54.0 (Apple Git-157)
+

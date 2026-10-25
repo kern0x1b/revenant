@@ -22,6 +22,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <unordered_map>
 #include <vector>
 
 namespace emulator::hfs {
@@ -187,6 +188,25 @@ private:
     std::size_t collisions_ { };
 };
 
+class XattrCache {
+public:
+    using Value = std::optional<std::vector<std::byte>>;
+
+    [[nodiscard]] std::uint64_t epoch() const;
+    [[nodiscard]] std::optional<Value> find(const std::string& key) const;
+    void store(std::string key, Value value, std::uint64_t epoch);
+    void invalidate();
+
+private:
+    struct Entry {
+        std::uint64_t epoch { };
+        Value value;
+    };
+    mutable std::mutex mutex_;
+    std::unordered_map<std::string, Entry> entries_;
+    std::uint64_t epoch_ { };
+};
+
 class MetadataProvider {
 public:
     explicit MetadataProvider(std::filesystem::path root,
@@ -199,6 +219,7 @@ public:
     bool remove_name(
         const std::filesystem::path& path, std::error_code& error) const;
     void forget(const GuestIdTable::Identity& identity) const;
+    void invalidate_xattrs() const;
 
     [[nodiscard]] std::optional<Metadata> query(
         const std::filesystem::path& path, bool follow_symlink,
@@ -225,6 +246,17 @@ public:
 private:
     std::filesystem::path root_;
     std::shared_ptr<GuestIdTable> guest_ids_;
+    std::shared_ptr<XattrCache> xattrs_ { std::make_shared<XattrCache>() };
+
+    [[nodiscard]] std::optional<std::vector<std::byte>> read_xattr(
+        const std::filesystem::path& path, std::string_view name,
+        bool follow) const;
+    [[nodiscard]] std::optional<std::uint32_t> numeric_xattr(
+        const std::filesystem::path& path, std::string_view name,
+        bool follow) const;
+    [[nodiscard]] std::optional<std::uint32_t> inherited_identity(
+        const std::filesystem::path& root, const std::filesystem::path& path,
+        std::string_view name) const;
 };
 
 }

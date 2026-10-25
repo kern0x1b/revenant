@@ -1,0 +1,4 @@
+Package: org.revenant.emulatormonitorcounter
+Name: emulator exclusive counter probe
+Architecture: iphoneos-arm
+Description: Two guest threads each add to one shared counter with an ldrex/strex loop, so the final count is exact only when the emulated exclusive monitor fails every store that lost a race.

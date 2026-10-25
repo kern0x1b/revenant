@@ -32,6 +32,7 @@
 #include "foundation/load_average.hpp"
 #include "network/apple80211_event_stream.hpp"
 #include "network/apple80211_hle.hpp"
+#include "network/host_readiness.hpp"
 #include "media/audio.hpp"
 #include "media/audio_toolbox_hle.hpp"
 #include "media/core_audio_hle.hpp"
@@ -205,6 +206,9 @@ public:
     {
         thread_create_handler_ = std::move(handler);
     }
+    [[nodiscard]] std::vector<std::string> fault_word_report(
+        const AddressSpace& memory,
+        const std::array<std::uint32_t, 16>& registers);
     void set_thread_terminate_handler(ThreadTerminateHandler handler)
     {
         thread_terminate_handler_ = std::move(handler);
@@ -732,8 +736,8 @@ private:
         const KeventRegistration& registration, std::size_t processor,
         bool waking_blocked_receiver);
     bool deliver_pending_io_locked(Cpu& cpu);
-    [[nodiscard]] bool pending_io_poll_required_locked(
-        std::size_t processor) const;
+    [[nodiscard]] bool pending_io_poll_required_locked(std::size_t processor,
+        std::optional<std::uint64_t> deadline) const;
     void remember_pending_io_not_ready_locked(std::size_t processor,
         std::uint64_t io_generation, std::uint64_t mach_generation);
     [[nodiscard]] std::optional<std::uint64_t>
@@ -790,8 +794,10 @@ private:
     export_descriptor(std::uint32_t fd) const;
     [[nodiscard]] std::optional<std::uint32_t> import_descriptor(
         const KernelSharedState::DescriptorTransfer& transfer);
-    [[nodiscard]] bool descriptor_readable(std::uint32_t fd) const;
-    [[nodiscard]] bool descriptor_writable(std::uint32_t fd) const;
+    [[nodiscard]] bool descriptor_readable(std::uint32_t fd,
+        const HostReadinessProbe* host_readiness = nullptr) const;
+    [[nodiscard]] bool descriptor_writable(std::uint32_t fd,
+        const HostReadinessProbe* host_readiness = nullptr) const;
     [[nodiscard]] bool descriptor_requires_host_poll(
         std::uint32_t fd) const;
     [[nodiscard]] bool descriptor_requires_host_poll(std::uint32_t fd,
