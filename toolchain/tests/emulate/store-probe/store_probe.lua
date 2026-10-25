@@ -3,7 +3,7 @@ local here = path.absolute(os.scriptdir())
 local root = path.absolute(path.join(here, "..", "..", "..", ".."))
 local PROGRAM = "storeprobe"
 
-function main(device, release, cores)
+function main(device, release, cores, concurrent)
     device = device or "iPhone4,1"
     release = release or "6.1.3"
     local out = runs.folder("emulate-store-probe")
@@ -28,6 +28,9 @@ function main(device, release, cores)
     local argv = {"emulate", "-d", device, "-r", release, "-s", "240", "-t", "1500"}
     if cores then
         table.insert(argv, "--cores=" .. tostring(cores))
+    end
+    if concurrent then
+        table.insert(argv, "--test-concurrent-threads")
     end
     table.join2(argv, {"run", path.join("/usr/libexec", PROGRAM)})
     local ran = xmake(argv, run, {try = true})

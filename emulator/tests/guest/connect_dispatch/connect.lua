@@ -3,7 +3,7 @@ local here = path.absolute(os.scriptdir())
 local root = path.absolute(path.join(here, "..", "..", "..", ".."))
 local PROGRAM = "emulatorconnectdispatch"
 
-function main(device, release)
+function main(device, release, cores)
     device = device or "iPhone4,1"
     release = release or "6.1.3"
     local out = runs.folder("emulator-connect-dispatch")
@@ -26,8 +26,12 @@ function main(device, release)
     xmake({"emulate", "-d", device, "-r", release, "install"}, path.join(out, "install.log"))
 
     local run = path.join(out, "run.log")
-    local ran = xmake({"emulate", "-d", device, "-r", release, "-n", "loopback", "-s", "240", "-t", "1500", "run", path.join("/usr/libexec", PROGRAM)},
-                      run, {try = true})
+    local argv = {"emulate", "-d", device, "-r", release, "-n", "loopback", "-s", "240", "-t", "1500"}
+    if cores then
+        table.insert(argv, "--cores=" .. tostring(cores))
+    end
+    table.join2(argv, {"run", path.join("/usr/libexec", PROGRAM)})
+    local ran = xmake(argv, run, {try = true})
     local lines = {}
     for _, line in ipairs(runs.lines(run)) do
         if line:startswith("connect_writable ") then
