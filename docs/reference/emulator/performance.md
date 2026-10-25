@@ -108,5 +108,97 @@ machine's slots. The count is `emulator.capacity_of(cores, megabytes)`. Its cons
 the matched pairs above, pair 1 (load 10) and pair 2 (load 32): CPU was 231.4 s over 240.5 s of wall time and 443.6 s
 over 601.3 s, so one core is the upper figure, and the peak footprint was 4.7 GiB in both pairs, rounded up to 4800 MB.
 The constants in `toolchain/modules/emulator.lua` are one core and 4800 MB per emulator, with 2 cores and 4096 MB kept
-for the system and builds. On the measured machine (12 cores, 24 GB) that is 4 slots. This sizing does not yet use
-samples of where an emulator's threads wait under load; that measurement is pending.
+for the system and builds. On the measured machine (12 cores, 24 GB) that is 4 slots. The samples of where an
+emulator's threads wait under load are in the next section. They show a booted emulator's main thread busy about
+three-quarters of the time after SpringBoard, which is consistent with one core per emulator and leaves the constants
+unchanged.
+
+## Where an emulator's time goes under load
+
+Three `sample` windows of 10 s each on one boot of the golden-sample image, under host load of 55 to 128 on 12 cores,
+on 2026-10-24. The binary was the package's `emulator boot`, built from the checkout and stripped:
+
+- early: installd startup, about 3:50 into the boot;
+- springboard: 18 s after the SpringBoard spawn;
+- idle: 60 s after the SpringBoard spawn, with the boot still running.
+
+A thread is busy in a sample when its top frame is not a host wait (`__psynch_cvwait`, `mach_msg`, `poll` and the
+like). Across all threads, 96.5%, 96.8% and 96.6% of the samples are waits, so most threads sleep. The main thread
+(`com.apple.main-thread`) is busy in 30% of its samples early, 75% after SpringBoard and 77% at idle. Its busy samples
+split as follows, as a share of the main thread's busy samples:
+
+| Group | early | springboard | idle |
+|---|---|---|---|
+| JIT compile (Dynarmic, symbolized) | 41% | 19% | 7% |
+| Translated guest code (JIT region) | 7% | 15% | 21% |
+| Emulator code with no symbol | 36% | 41% | 42% |
+| File and memory syscalls | 0.1% | 8% | 18% |
+| Other host syscalls | 0.7% | 2% | 1% |
+| malloc, new/delete, TLS | 8% | 6% | 5% |
+| Other libraries | 6% | 8% | 6% |
+
+The two unnamed worker threads are busy 32% to 33% of their samples early, mostly in JIT compile and translated code,
+and 5% to 8% after SpringBoard. The other threads were never busy in these windows. The `mach_msg2_trap` samples are on
+one of these worker threads, not the main thread.
+
+Caveats:
+
+- Each point is one 10 s window. Under load a busy thread can be runnable but not running, so the busy share is an
+  upper bound on CPU use.
+- The package binary hid its local symbols, so the 36% to 42% in "emulator code with no symbol" is split in the next
+  section, which uses a build with debug information.
+- The early window overlaps installd's startup, so it shows that phase, not steady state.
+- The file and memory syscall share at idle is mostly `getxattr`. Every `getxattr` in the emulator is in
+  `filesystem/hfs_metadata.cpp`, which reads the guest's metadata from host xattrs on each stat.
+
+### The unsymbolized bucket, resolved
+
+A build with `-g` keeps the local symbols that the package build hides, so the same kind of sample names the functions.
+One boot of that build, before the metadata cache below, gives the main thread's busy samples by group:
+
+| Group | springboard | idle |
+|---|---|---|
+| Translated guest code (JIT region) | 14% | 34% |
+| Memory translation (`AddressSpace`, guest loads and stores) | 10% | 32% |
+| File and metadata syscalls | 7% | 15% |
+| JIT compile (Dynarmic) | 29% | 4% |
+| malloc, free, copies, TLS, locks | 12% | 6% |
+| Other emulator code | 17% | 4% |
+| Dispatch and block lookup | 5% | 3% |
+| HLE and kernel emulation | 3% | 2% |
+| Other host syscalls and libraries | 2% | 1% |
+
+Memory translation is the largest emulator group at idle: `AddressSpace::read_integer` and `write_integer` (1,117
+samples together), `JitCallbacks::MemoryRead32` and `MemoryWrite32`, and the page-tracking functions behind them. HLE
+and dispatch are each 2% to 5% of the main thread's busy time. The two worker threads are busy 4% to 23% of their
+samples and do not change the picture.
+
+Grouping: "translated guest code" is the frames in the JIT region; "JIT compile" is `Dynarmic::IR`, `Optimization`,
+`Frontend` and the arm64 register allocator and emitter; "memory translation" is `emulator::AddressSpace` and the
+`JitCallbacks` memory callbacks; "HLE and kernel" is `CompatibilityKernel`, `XnuScheduler` and the kernel's event
+loop; "dispatch" is the block cache and `GuestExecutionPolicy`. The waits are excluded from the busy shares.
+
+### The metadata cache: getxattr at idle
+
+Each guest `stat` reads the guest's metadata from host xattrs: a file's mode, owner, group, flags, catalog id, dates
+and Finder info, and the owner and group of every ancestor when the file has none. Before the cache, that was 3,354
+`getxattr` calls a second at idle: 33,542 in a 10 s window. The `MetadataProvider` now keeps the results per host path
+and name, and drops them on the emulator's own writes under the rootfs: a link, a create, a symlink, a directory, a
+rename and any removal through `remove_name`. The same window after the change made 614 calls, about 61 a second.
+
+| Measure | before | after |
+|---|---|---|
+| `getxattr` calls a second at idle | 3,354 | 61 |
+| `getxattr` top-of-stack samples at idle (10 s) | 587 | 19 |
+| Process CPU over an 11 s idle window | 70% of a core | 51% of a core |
+
+The CPU row is one window per boot, under host load of 55 to 128, and the two boots did different guest work: translated
+guest code was 1,943 idle samples before and 543 after, and the main thread was busy 55% of its springboard samples
+before and 84% after. So the cache's saving is the `getxattr` count, not the CPU figure. After the change, the idle
+main thread's busy samples move to the kernel's event loop: `descriptor_readable`, `pending_io_deadline_locked` and
+`collect_ready_kevents` and the rest of that group take 1,091 samples (28% of its busy time) against 88 before, and
+`poll` is the largest wait.
+
+The cache assumes the emulator owns the rootfs while it runs. A host write by another process during a boot is not
+seen until the emulator writes under the same path. The test is `emulator/src/filesystem/test/metadata_cache_test.cpp`
+(`filesystem.metadata_cache`).
