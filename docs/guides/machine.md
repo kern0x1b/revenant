@@ -92,8 +92,11 @@ changes exactly when those files do:
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
 
-A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each large
-package's key and its digest configs; run it before and after a change to see what the change rebuilds.
+A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each package's
+version and the key its prebuilt archive is released under, `prebuilt-<package>-<key>`. The key is computed by
+`prebuilt.key` in `toolchain/modules/prebuilt.lua`, the function that fetches and archives the package, and it follows
+the project's configuration: configure as CI does before asking for `swift-runtime` or `libcxx`, with
+`./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y`. Run it before and after a change to see what the change rebuilds.
 
 The build hash has three more terms, one for the xmake that builds the packages, one for the addons a build runs
 under, and one for each package's own patches.
