@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
 #include "media/pcm_sample_format.hpp"
 
 #include <array>
@@ -54,6 +55,9 @@ public:
     void io_proc_schedule_failed(
         std::uint32_t process_id, bool native, std::uint32_t io_proc_id);
     [[nodiscard]] std::vector<std::size_t> take_retired_io_proc_threads();
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     void device_property_info(UserlandHleCall& call);

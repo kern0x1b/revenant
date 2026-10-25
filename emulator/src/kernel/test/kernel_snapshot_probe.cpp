@@ -36,6 +36,10 @@ void CompatibilityKernelSnapshot::perturb_bookkeeping(CompatibilityKernel& kerne
     registration.thread_start = 0x1000U;
     registration.pthread_size = 4096U;
     kernel.pthread_runtime_.restore_registration(registration);
+    kernel.mobile_framebuffer_hle_.next_swap_id_ = 9U;
+    kernel.mbx2d_hle_.next_surface_ = 0x0002'0005U;
+    kernel.opengles_hle_.next_framebuffer_ = 5U;
+    kernel.core_audio_hle_.buffer_frame_size_ = 512U;
 }
 
 }

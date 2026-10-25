@@ -382,6 +382,10 @@ void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const
     darwin_notify_state_hle_.save(out);
     hid_event_system_hle_.save(out);
     userland_hle_.save(out);
+    mobile_framebuffer_hle_.save(out);
+    mbx2d_hle_.save(out);
+    opengles_hle_.save(out);
+    core_audio_hle_.save(out);
 }
 
 void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
@@ -399,6 +403,10 @@ void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
     darwin_notify_state_hle_.load(in);
     hid_event_system_hle_.load(in);
     userland_hle_.load(in);
+    mobile_framebuffer_hle_.load(in);
+    mbx2d_hle_.load(in);
+    opengles_hle_.load(in);
+    core_audio_hle_.load(in);
 }
 
 }
