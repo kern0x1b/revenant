@@ -33,7 +33,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 30> saved_members {
+constexpr std::array<std::string_view, 47> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -64,9 +64,6 @@ constexpr std::array<std::string_view, 30> saved_members {
     "wifi.state_",
     "wifi.access_points_",
     "wifi.link_state_",
-};
-
-constexpr std::array<std::string_view, 88> open_members {
     "ck.guest_working_directory_",
     "ck.process_image_",
     "ck.thread_ports_",
@@ -81,6 +78,12 @@ constexpr std::array<std::string_view, 88> open_members {
     "ck.local_timer_deadline_cache_valid_",
     "ck.virtual_processor_count_",
     "ck.next_load_average_sample_",
+    "ck.pending_event_processors_",
+    "ck.pending_event_poll_deadline_",
+    "ck.local_timer_deadline_cache_",
+};
+
+constexpr std::array<std::string_view, 74> open_members {
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
