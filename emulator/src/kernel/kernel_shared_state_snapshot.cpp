@@ -385,6 +385,10 @@ void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const
 {
     snapshot::save(out, mach_kernel_send_rights);
     snapshot::save(out, task_port_pids);
+    mach_namespaces.save(out);
+    mach_port_objects.save(out);
+    snapshot::save(out, task_special_ports);
+    snapshot::save(out, task_thread_port_objects);
     snapshot::save(out, static_cast<std::uint64_t>(kernel_events.size()));
     for (const auto& event : kernel_events)
         save_kernel_event(out, event);
@@ -400,6 +404,10 @@ void KernelSharedState::load_port_and_event_tables(snapshot::Reader& in)
 {
     snapshot::load(in, mach_kernel_send_rights);
     snapshot::load(in, task_port_pids);
+    mach_namespaces.load(in);
+    mach_port_objects.load(in);
+    snapshot::load(in, task_special_ports);
+    snapshot::load(in, task_thread_port_objects);
     std::uint64_t event_count { };
     snapshot::load(in, event_count);
     kernel_events.clear();

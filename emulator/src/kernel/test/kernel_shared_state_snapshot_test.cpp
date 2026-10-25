@@ -241,6 +241,12 @@ void populate_tables(KernelSharedState& state)
         KernelSharedState::ProcessKeventState { 3, 4, 5 });
     state.process_kevent_states.emplace(9,
         KernelSharedState::ProcessKeventState { 6, 0, 0 });
+    state.mach_namespaces.create_task(0x400);
+    state.mach_namespaces.install(0x400, 0x10001, 0x20100,
+        emulator::xnu::ipc::type_mask(emulator::xnu::ipc::Right::Send), 2);
+    state.mach_port_objects.create(0x20100, 0x400);
+    state.task_special_ports = { { 1, { { 4, 0x20101 } } } };
+    state.task_thread_port_objects = { { 0x400, { { 0x501, 0x20102 } } } };
 }
 
 std::vector<std::byte> save_tables(const KernelSharedState& state)
@@ -266,6 +272,14 @@ void round_trip_restores_the_tables()
         "both kernel events are restored");
     expect(restored.process_kevent_states.at(7).exec_generation == 3,
         "a kevent state is restored");
+    expect(restored.mach_namespaces.resolve(0x400, 0x10001) == 0x20100,
+        "a Mach name is restored with its object");
+    expect(restored.mach_port_objects.contains(0x20100),
+        "a Mach port object is restored");
+    expect(restored.task_special_ports.at(1).at(4) == 0x20101,
+        "a task special port is restored");
+    expect(restored.task_thread_port_objects.at(0x400).at(0x501) == 0x20102,
+        "a thread port object is restored");
     expect(save_tables(restored) == bytes,
         "saving the restored tables reproduces the same stream");
 }

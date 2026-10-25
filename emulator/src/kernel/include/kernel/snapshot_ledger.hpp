@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 214> saved_members {
+inline constexpr std::array<std::string_view, 218> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -220,13 +220,17 @@ inline constexpr std::array<std::string_view, 214> saved_members {
     "kss.next_shared_memory_object",
     "kss.mach_kernel_send_rights",
     "kss.task_port_pids",
+    "kss.mach_namespaces",
+    "kss.mach_port_objects",
+    "kss.task_special_ports",
+    "kss.task_thread_port_objects",
     "kss.kernel_events",
     "kss.process_kevent_states",
     "kss.processes",
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 50> open_members {
+inline constexpr std::array<std::string_view, 46> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
@@ -245,9 +249,7 @@ inline constexpr std::array<std::string_view, 50> open_members {
     "kss.latest_application_scene_transform",
     "kss.launchd_job_catalog_once",
     "kss.mach_dead_name_notifications",
-    "kss.mach_namespaces",
     "kss.mach_notifications",
-    "kss.mach_port_objects",
     "kss.mach_port_set_links_by_member",
     "kss.mach_port_set_preposts",
     "kss.pending_application_event_launches",
@@ -259,8 +261,6 @@ inline constexpr std::array<std::string_view, 50> open_members {
     "kss.suppress_future_application_fullscreen_surface_processes",
     "kss.suppressed_application_fullscreen_surface_publications",
     "kss.surface_transport_port_leases",
-    "kss.task_special_ports",
-    "kss.task_thread_port_objects",
     "ck.dyld_shared_cache_",
     "ck.bpf_descriptors_",
     "ck.kernel_control_endpoints_",

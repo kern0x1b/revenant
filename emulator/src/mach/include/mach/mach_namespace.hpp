@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -97,6 +99,9 @@ public:
     [[nodiscard]] std::vector<NamedEntry> mark_object_dead(MachObject object);
     bool remove_type(TaskId task, MachName name, MachTypeMask type);
     bool deallocate(TaskId task, MachName name);
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     struct Space {
