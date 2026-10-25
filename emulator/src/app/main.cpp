@@ -1107,6 +1107,7 @@ void boot(const std::vector<std::string>& args, Output& output)
             JitWorkPolicy::maximum_native_slab_bytes() / bytes_per_mebibyte));
     }
     options.report_performance = flag(args, "--perf-summary");
+    options.test_concurrent_threads = flag(args, "--test-concurrent-threads");
     if (const auto value = option(args, "--ticks"))
         options.ticks = std::stoull(*value);
     if (const auto value = option(args, "--cores"))

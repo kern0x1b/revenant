@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorconnectdispatch
+Name: emulator concurrent connect probe with libdispatch sources
+Architecture: iphoneos-arm
+Description: A program that starts many nonblocking connects to a loopback listener and waits, through libdispatch sources, for every socket to report writable, to find connects the emulated kernel never reports.

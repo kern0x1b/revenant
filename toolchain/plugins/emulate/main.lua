@@ -25,6 +25,18 @@ local function timing()
     return "scaled"
 end
 
+local function cores()
+    local value = option.get("cores")
+    if value == nil then
+        return nil
+    end
+    local count = tonumber(value)
+    if count == nil or count ~= math.floor(count) or count < 1 or count > 64 then
+        raise("xmake emulate --cores takes a whole number from 1 to 64, not %s", tostring(value))
+    end
+    return count
+end
+
 local function network()
     if option.get("network") then
         return option.get("network")
@@ -69,7 +81,8 @@ local function context()
     return {emulator = program, emulator_hash = path.filename(emulator_package:installdir()), guest = guest:installdir(), tool = tool,
             icd = path.join(swiftshader:installdir(), "share", "vulkan", "icd.d", "vk_swiftshader_icd.json"),
             identifier = chosen.identifier, version = chosen.version, build = chosen.build, image = image,
-            deadline = tonumber(option.get("timeout")), network = network()}
+            deadline = tonumber(option.get("timeout")), network = network(), cores = cores(),
+            test_concurrent = option.get("test-concurrent-threads") and true or nil}
 end
 
 local function booter(ctx)
@@ -79,6 +92,8 @@ local function booter(ctx)
             function ()
                 return true, emulator.boot(table.join(opt, {
                     scale = tonumber(option.get("scale")) or emulator.TIME_SCALE,
+                    cores = ctx.cores,
+                    test_concurrent = ctx.test_concurrent,
                     cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
                     tmpdir = path.join(emulator.root(), "tmp.noindex")}))
             end,

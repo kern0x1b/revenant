@@ -1,0 +1,4 @@
+Package: org.revenant.emulatestoreprobe
+Name: emulator exclusive store probe
+Architecture: iphoneos-arm
+Description: One thread loads a word exclusively while another processor stores the same value to it; the exclusive store must then fail, as ARM requires, and the probe counts the stores that succeed instead.

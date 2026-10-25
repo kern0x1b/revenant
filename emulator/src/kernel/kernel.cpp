@@ -14,6 +14,8 @@
 #include "bsd/security/extensions.hpp"
 #include "foundation/application_display.hpp"
 #include "foundation/application_path.hpp"
+#include "foundation/fault_dump.hpp"
+#include "foundation/guest_image_table.hpp"
 #include "device_state/darwin_kernel_identity.hpp"
 #include "foundation/rootfs_path_resolver.hpp"
 
@@ -95,6 +97,9 @@ std::size_t CompatibilityKernel::bootstrap_checked_in_service_count() const
 
 namespace {
 
+    constexpr std::string_view springboard_finished_startup_notification_name {
+        "com.apple.springboard.finishedstartup"
+    };
     constexpr std::uint32_t carry_flag = 1U << 29U;
     constexpr std::uint32_t ebadf = 9;
     constexpr std::uint32_t efault = 14;
@@ -514,6 +519,16 @@ void CompatibilityKernel::configure_darwin_notify_state()
             message.sender_pid = 0;
             state->enqueue_mach_message_locked(
                 *destination, std::move(message));
+        });
+    darwin_notify_state_hle_.set_post_observer(
+        [this](std::string_view name, std::uint32_t process_id) {
+            output_.line("[notify] post pid=" + std::to_string(process_id) +
+                         " name=" + std::string { name });
+            if (name != springboard_finished_startup_notification_name)
+                return;
+            output_.line("[boot] milestone=springboard-finished-startup pid=" +
+                         std::to_string(process_id) + " host-ms=" +
+                         std::to_string(host_unix_milliseconds()));
         });
 }
 
@@ -1427,7 +1442,8 @@ bool CompatibilityKernel::deliver_pending_event(Cpu& cpu)
         delivered = deliver_pending_mach_if_ready_locked(cpu, true);
         if (delivered)
             note_timer_deadline_transition();
-    } else if (pending_io_poll_required_locked(processor)) {
+    } else if (pending_io_poll_required_locked(
+                   processor, pending_io_deadline_locked(processor))) {
         const auto io_generation =
             shared_state_->io_event_generation_snapshot();
         const auto mach_generation =
@@ -1483,12 +1499,12 @@ CompatibilityKernel::pending_event_poll_candidates()
     std::optional<std::uint64_t> next_deadline;
     bool requires_host_probe = false;
     for (const auto processor : pending_event_processors_) {
+        const auto deadline = pending_io_deadline_locked(processor);
         if (pending_mach_receives_.contains(processor) ||
-            pending_io_poll_required_locked(processor)) {
+            pending_io_poll_required_locked(processor, deadline)) {
             processors.push_back(processor);
         }
-        if (const auto deadline = pending_io_deadline_locked(processor);
-            deadline && *deadline > guest_now &&
+        if (deadline && *deadline > guest_now &&
             (!next_deadline || *deadline < *next_deadline)) {
             next_deadline = deadline;
         }
@@ -1540,7 +1556,7 @@ void CompatibilityKernel::refresh_pending_event_processor_locked(
 }
 
 bool CompatibilityKernel::pending_io_poll_required_locked(
-    std::size_t processor) const
+    std::size_t processor, std::optional<std::uint64_t> deadline) const
 {
     const auto cached = pending_io_poll_cache_.find(processor);
     if (cached == pending_io_poll_cache_.end())
@@ -1551,8 +1567,7 @@ bool CompatibilityKernel::pending_io_poll_required_locked(
             shared_state_->mach_queue_generation_snapshot()) {
         return true;
     }
-    if (const auto deadline = pending_io_deadline_locked(processor);
-        deadline && shared_state_->clock.now() >= *deadline) {
+    if (deadline && shared_state_->clock.now() >= *deadline) {
         return true;
     }
     return cached->second.host_probe_required &&
@@ -2558,6 +2573,38 @@ void CompatibilityKernel::schedule_due_audio_io(std::uint64_t deadline)
     }
     core_audio_hle_.io_proc_thread_scheduled(callback->process_id,
         callback->native, callback->io_proc_id, *processor);
+}
+
+std::vector<std::string> CompatibilityKernel::fault_word_report(
+    const AddressSpace& memory, const std::array<std::uint32_t, 16>& registers)
+{
+    std::uint32_t all_image_info_address { };
+    {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        if (auto record = shared_state_->processes.find(process_.pid);
+            record != shared_state_->processes.end())
+            all_image_info_address = record->second.dyld_all_image_info_address;
+    }
+    const auto images = all_image_info_address != 0U
+                            ? read_guest_image_table(memory,
+                                  all_image_info_address)
+                            : GuestImageTable { };
+    return describe_fault_words(
+        registers,
+        [&memory](std::uint32_t address) { return memory.read32(address); },
+        [&images](std::uint32_t address) -> std::string {
+            const auto* image = images.find(address);
+            if (image == nullptr)
+                return { };
+            const auto slash = image->path.rfind('/');
+            const auto name = slash == std::string::npos
+                                  ? image->path
+                                  : image->path.substr(slash + 1);
+            char offset[16];
+            std::snprintf(offset, sizeof offset, "+0x%x",
+                address - image->load_address);
+            return name + offset;
+        });
 }
 
 void CompatibilityKernel::inject_wifi_driver_event(

@@ -25,7 +25,8 @@ Neither run reached a drawn SpringBoard, so neither measures a snapshot at "Spri
 
 - The emulator's own ready signal is `did-finish-launching pid=N SpringBoard` in `/private/var/revenant/events.log`,
   written by `revenant-inject.dylib`. A plain boot's rootfs has no `/private/var/revenant` at all, so that signal is
-  unavailable outside the test harness. The only SpringBoard signal a plain boot logs is the spawn line.
+  unavailable outside the test harness. A plain boot logs the spawn line and, since Stage 0, the finished-startup
+  milestone (see Stage 0 results).
 - Both runs stayed on the logo. Checked right after run 1 ended, the host had 33,000 free pages of 1.57 million, so it
   had been swapping, and run 1's guest stalled on Mach requests. Run 2 was sampled too early to tell whether it would
   have finished.
@@ -171,15 +172,114 @@ The Light Touch project and its qemu-ios fork were read on GitHub on 2026-10-24,
 `savevm` and migration. Its `JIT-SNAPSHOTS.md` covers statistics, not machine snapshots, so it adds no design for this
 emulator beyond the qemu ideas above.
 
+## Serialisation design, from the code
+
+Scope is the `run` profile (`docs/reference/emulator/performance.md`, "Run profile"): a boot without SpringBoard, whose
+clone has the SpringBoard LaunchDaemon removed. It holds launchd and its daemons, and the runner writes `results/verdict.json`. A snapshot
+is taken at a scheduler point the machine reaches itself (quiescence, below), never in the middle of an instruction.
+
+The unit is one `Runtime` per guest process (`src/runtime/process.hpp:131`: `memory` (AddressSpace), `cpus`
+(CpuCluster), `kernel` (CompatibilityKernel)), plus the state the kernels share: `KernelSharedState`
+(`src/kernel/include/kernel/kernel_shared_state.hpp`, 1,727 lines), the virtual clock, and the host-side objects.
+
+Each row names an owner, where it lives, what it holds, and what the snapshot does with it. Save means written as data.
+Rebuild means recomputed at restore from the rootfs or the device configuration. Refuse means the snapshot is not taken
+while the state exists.
+
+| owner | where | holds | treatment |
+|---|---|---|---|
+| pages | `AddressSpace::Page` (`src/foundation/include/foundation/address_space.hpp:255`), `GuestPageBacking` (`file_page_cache.hpp:229`) | 4 KiB bytes of each materialised page, write generation, flags `file_cached`, `shared_writable`, `copy_on_write_possible` | save anonymous and shared-writable bytes. Name file-cached pages by their `RuntimeBackingGeneration` (`file_page_cache.hpp:36`: backing path, `GuestFileGeneration`, `ContentIdentity`), offset and size, and read them back from the file |
+| mappings | `AddressSpace` regions, `FileMapping` (`address_space.hpp:264`), permission chunks | ranges, permissions, file offsets | save ranges and permissions; rebuild file mappings from the file key |
+| shared backings | `shared_ptr<GuestPageBacking>` referenced by pages in one or more processes | one backing, several referrers | save each backing once under an identity; pages refer to the identity |
+| CPU | `CpuThreadState` (`cpu.hpp:154`): 16 registers, 64 extension registers, cpsr, fpscr, `cthread_self` | per-thread registers | save all five. The JIT save and load (`cpu.cpp:3061`, `3085`) copy only the first four, so `cthread_self` is written explicitly. The exclusive monitor is cleared on restore (`Cpu::clear_exclusive_state`). Translated code is not state |
+| scheduler | `XnuScheduler` (`src/mach/include/mach/xnu_scheduler.hpp`): `threads_` (307), `process_threads_` (310), `processor_run_queues_` (306), counts `runnable_count_`, `waiting_count_`, `active_timeshare_count_` (314–316) | thread records, queue order, counts | save the records and queue order; recompute the counts on restore and check them against the saved ones |
+| clock | `VirtualClock` (`virtual_clock.hpp:15`): `now_`, `wall_time_offset_` | guest time | save both. The pacer (`RealtimePacer`, `realtime_pacer.hpp:24`, with its initial host time at line 46) is rebuilt at restore. Deadlines held in host time convert to guest time |
+| per-process kernel tables | `CompatibilityKernel` (`kernel.hpp:80`), members at 844–1024 | descriptors (`file_descriptors_` 885, `file_offsets_` 890, `file_status_flags_` 893, `descriptor_flags_` 894, `descriptor_guards_` 895, `virtual_descriptors_` 897, `duplicated_descriptors_` 921), signals (`signal_actions_` 933, `thread_signal_masks_` 934, `pending_signals_` 942, `alternate_signal_stacks_` 950), kqueues (`kqueues_` 929), socket options and names (`socket_options_` 920, `bound_socket_names_` 914), `random_state_` (962), `guest_working_directory_` (880), `process_image_` (882) | save the plain data. The maps keyed by id keep their keys. A descriptor that names a host file reopens at restore from its path, offset and flags, and the restore fails if the file key has changed |
+| host network objects | `host_sockets_` (905), `virtual_udp_sockets_` (911), `unix_listener_states_` (917), `route_socket_states_` (927), `pending_host_connects_` (999) and the other host pending maps | host descriptors and operations in flight | refuse while any exists. The `[loader]` line prints `network=` from the host network policy (`emulator_session.cpp:2155`); the policy in force for the `run` profile is the first thing to measure |
+| handlers | `CompatibilityKernel` handler members, `kernel.hpp:966–990` (19 in all, from `thread_create_handler_` to `mapped_executable_handler_` and the rest) | callbacks into the session | not saved. The session rewires them at restore, in the order spawn uses |
+| blocked operations | `pending_waits_` (993), `pending_mach_receives_` (994), `pending_kevents_`, `pending_recvmsgs_`, `pending_timers_`, `pending_semaphore_waits_`, `pending_psynch_waits_`, `pending_polls_`, `pending_selects_` and the rest through line 1024 | what each blocked thread waits for | save waits on guest state (a timer, a Mach receive, a semaphore, a psynch wait) as kind and deadline. Refuse waits that depend on host state |
+| Mach IPC | `spaces_` (`mach_namespace.hpp:113`: per-task names and rights), `objects_` (`mach_port_object.hpp:165`), `mach_queues` of `MachMessage` (`kernel_shared_state.hpp:1150`, struct at 442), `mach_semaphores` (1318), `mach_memory_entries` (1322) | names, rights, queued messages, semaphores, memory entries | save all of it. Port ids and names keep their values |
+| shared kernel state | `KernelSharedState`: `processes` (`std::map<std::uint32_t, ProcessRecord>`, line 1412; `ProcessRecord` at 537: uid, gid, command, executable path, arguments, environment, entitlements, incarnation), `bootstrap_checked_in_services` (1239), `psynch_runtime` (1417), `MachMemoryObject` (937) | per-machine tables | save the tables that carry state. Rebuild derived data (the launchd job catalog, device strings, Darwin identity) from the rootfs and the configuration |
+| notify bus | `DarwinNotifyStateHle` (`darwin_notify_state_hle.hpp`): `SharedBus` `registrations` (71–73, shared through `bus_`, line 88), `token_names_` (78), `virtual_tokens_` (79), `next_virtual_token_` (80) | (process, token) keys with name and port; virtual tokens | save the registrations as (process, token, name, port) and the token tables. Providers and the dispatcher are callbacks, rebuilt at restore |
+| graphics, HID, audio, UI | `KernelSharedState`: `hid_event_queue` (369), `graphics_services_capability_memory` (377), foreground transitions (about 815–830), touch transform (897); `DisplayState` (`graphics/include/graphics/display.hpp:57`), `WifiState` (`network/include/network/wifi_state.hpp:65`), `AudioService` (`media/include/media/audio.hpp:87`) | display, touch, audio and foreground state | not saved. Refuse while a transition or an input is pending. Rebuild the rest from the configuration |
+| IOKit | `IOKitService` and `IOKitRegistryProperty` (`kernel_shared_state.hpp:580`, 620), connection states from `IOKitConnection` (648) on | registry and connection state | rebuild the registry from the device model. Save connection state |
+| device state | lockdown `data_ark.plist` (`device_state/lockdown_state.cpp:237`, applied at boot in `EmulatorSession::run` at `emulator_session.cpp:264` and reapplied at shutdown at line 5051), `baseband_device_state` (`kernel_shared_state.hpp:1376`), `KeyStore` (forward-declared at line 68) | files and host state | the files stay in the rootfs and are not part of the snapshot. The keybag and key store are proposed for a later stage |
+| translation | JIT caches and the artifact store (`foundation/jit_artifact.cpp`), with `--jit-artifact-disk-mib` at 256 MiB by default (`src/app/main.cpp:651–657`) | native code | not saved. A restored run reuses the disk artifacts by default; measure with and without |
+| host | rootfs path, dyld cache, host threads, display presenter, host network | host-only | rebuild |
+
+Quiescence. A snapshot is taken at a scheduler point where every saved category is in a serialisable state and every
+refused category is empty. The session names the first refused category it finds, and a refused snapshot is not written.
+
+Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
+content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
+rejects a section it does not know. Pages are written as address, flags and a backing index, with each backing's 4 KiB
+written once. Identities keep the values the guest sees (pids, port names, thread ids, descriptors). Host pointers are
+never written.
+
+Restore. Validate the header and refuse on any mismatch in build, device or rootfs identity. Rebuild the host objects,
+create the processes and address spaces, load the pages and mappings, load the CPUs and the scheduler, load the kernel
+tables, rewire the handlers, and restart the clock and the pacer at the saved guest time. Restore starts from quiescence,
+so nothing is in flight.
+
+Round-trip test. (1) Cold boot of the `run` profile to the runner's verdict, recording the results and the `[process]`
+lines after the snapshot point. (2) Cold boot to the snapshot point, take the snapshot, continue to the verdict. (3)
+Restore the snapshot, continue to the verdict. The oracle is that the verdict and results of (1), (2) and (3) are equal,
+and that the `[process]` lines after the snapshot point match. Timing is cold to verdict against restore to verdict, in
+wall time and CPU time, with the translation cache empty and then with the disk artifacts present.
+
+Not yet settled, to measure before code: how many entries each pending map holds at a quiescent point of the `run`
+profile; whether host network objects exist there; how long a restore takes for about 1 million pages, of which about
+0.9 GiB are anonymous or shared-writable.
+
 ## Stages
 
-The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. None
-has been built.
+The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
+is built (see its results below). Stages 1 to 4 have not been started.
 
 - **Stage 0: measurement.** Define the ready point for a plain boot: a settled display that is not the logo, or the
   control channel's `settle` (`docs/reference/emulator/control-surface.md`) on a non-logo frame. Add a counter of
   materialized guest pages by backing kind to `--perf-summary`, which splits the malloc figure into guest and host.
   Measure on a migrated rootfs. Touches the page counters and the perf summary; a small change. Risk: low.
+  Built in `74c580bee` (counters, milestone, tests) and `23f3de3b7` (the notify hooks, below). Measured on the plain
+  rootfs, not a migrated one.
+
+### Stage 0 results
+
+The ready point is `[boot] milestone=springboard-finished-startup`, logged when SpringBoard posts
+`com.apple.springboard.finishedstartup`. The hook is `_notify_post` in `libsystem_notify.dylib`, where that symbol is
+defined. The notify HLE does not record it on its own: `publish()` logs nothing, and the notify hooks had been
+registered under `libSystem.B.dylib`, which installs none of them. Five of the six
+registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` still
+installs under neither image, so the provider-initializer guard it was written for (`27048fc11`) is inactive.
+
+Plain boots, with the milestone reached in some and not others:
+
+| run | window | milestone (s after launch) | spawns | notify posts | materialized pages |
+|---|---|---|---|---|---|
+| before, six hooks dead | 1202 s | 668 | 84 | 411 | 1,052,203 |
+| after, six hooks live (1) | 1203 s | not reached | 74 | 101 | 1,015,378 |
+| after, six hooks live (2) | 1804 s | 1466 | 84 | 396 | 1,088,970 |
+| plain, earlier build, six hooks dead (3) | 1800 s | not reached | 76 | not logged | 945,063 |
+
+Run 3 was a concise log, so it has no post count. The same build as run 3 reached the milestone at 1218 s in an earlier
+run. The SpringBoard spawn moved from 116 s (before) to 161 s (after 1) to 337 s (after 2), so the host's load sets the
+timing and a window of 20 to 30 minutes can miss the milestone. The before run and after 2 spawned the same 83
+programs, and their notify names differed only by three now-playing names that appeared in the before run.
+
+Materialized pages by backing kind (a page mapping, counted per address space, so a backing shared by several
+processes counts once for each):
+
+| run | anonymous | file-cached | copy-on-write-possible | shared-writable |
+|---|---|---|---|---|
+| before, 20 min, 60 processes | 30,052 | 812,966 | 326 | 208,859 |
+| after (2), 30 min, 62 processes | 30,954 | 839,314 | 343 | 218,359 |
+
+File-cached pages are clean copies of file content that a snapshot can name by file instead of saving. Anonymous and
+shared-writable pages are the bytes a snapshot must save: about 30,000 anonymous pages (about 120 MiB) and about 210,000
+shared-writable pages (about 0.8 GiB). The shared-writable figure is an upper bound, since a shared object can appear in
+several processes. So Stage 0's answer to the open question below is that the guest state to save is under 1 GiB at
+20 to 30 minutes, well below the malloc figure of the earlier 30-second sample (2.2 GB written). The rest of that malloc
+figure is host bookkeeping per page.
 - **Stage 1: daemons only.** Snapshot a machine that runs the `run` profile, which has no SpringBoard, no SDL, no GL and
   no audio, so it holds only memory, CPU, scheduler, kernel tables, the clock and the rootfs. Restore into a new
   process, check the Mach services and the processes match, and measure the size, the save, the restore and the

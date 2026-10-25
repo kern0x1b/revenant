@@ -1114,10 +1114,8 @@ HostSocketResult HostSocket::shutdown(std::uint32_t how)
 
 bool HostSocket::readable() const
 {
-    if (darwin_type_ == darwin_socket_stream &&
-        stream_state_.load(std::memory_order_relaxed) == StreamState::Initial) {
+    if (!readable_polls())
         return false;
-    }
     pollfd descriptor { descriptor_, POLLIN, 0 };
     return ::poll(&descriptor, 1, 0) > 0 &&
            (descriptor.revents & (POLLIN | POLLHUP | POLLERR)) != 0;
@@ -1125,14 +1123,25 @@ bool HostSocket::readable() const
 
 bool HostSocket::writable() const
 {
-    if (darwin_type_ == darwin_socket_stream) {
-        const auto state = stream_state_.load(std::memory_order_relaxed);
-        if (state == StreamState::Initial || state == StreamState::Listening)
-            return false;
-    }
+    if (!writable_polls())
+        return false;
     pollfd descriptor { descriptor_, POLLOUT, 0 };
     return ::poll(&descriptor, 1, 0) > 0 &&
            (descriptor.revents & (POLLOUT | POLLHUP | POLLERR)) != 0;
+}
+
+bool HostSocket::readable_polls() const
+{
+    return darwin_type_ != darwin_socket_stream ||
+           stream_state_.load(std::memory_order_relaxed) != StreamState::Initial;
+}
+
+bool HostSocket::writable_polls() const
+{
+    if (darwin_type_ != darwin_socket_stream)
+        return true;
+    const auto state = stream_state_.load(std::memory_order_relaxed);
+    return state != StreamState::Initial && state != StreamState::Listening;
 }
 
 }
