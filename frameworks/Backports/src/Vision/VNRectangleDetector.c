@@ -7,6 +7,8 @@
 #endif
 
 typedef struct { int x; int y; } Point;
+typedef struct { float x; float y; } FloatPoint;
+typedef struct { float nx; float ny; float offset; } FittedLine;
 
 static int rectangle_compare(const void *left, const void *right)
 {
@@ -31,15 +33,6 @@ static float distance(Point a, Point b)
     return sqrtf(x * x + y * y);
 }
 
-static float dot_angle(Point a, Point b, Point c)
-{
-    float ax = a.x - b.x, ay = a.y - b.y, cx = c.x - b.x, cy = c.y - b.y;
-    float denominator = sqrtf((ax * ax + ay * ay) * (cx * cx + cy * cy));
-    if (denominator == 0)
-        return 1;
-    return fabsf((ax * cx + ay * cy) / denominator);
-}
-
 static unsigned char gradient(const uint8_t *image, size_t width, size_t height, size_t stride, size_t x, size_t y)
 {
     const uint8_t *p = image + y * stride + x;
@@ -50,7 +43,14 @@ static unsigned char gradient(const uint8_t *image, size_t width, size_t height,
     return (unsigned char)fminf(255, sqrtf((float)(gx * gx + gy * gy)) / 4.0f);
 }
 
-static void make_edge_row(const uint8_t *image, uint8_t *edge, size_t width, size_t y, unsigned low_threshold, unsigned high_threshold)
+static void sobel(const uint8_t *image, size_t stride, size_t x, size_t y, int *gx, int *gy)
+{
+    const uint8_t *p = image + y * stride + x;
+    *gx = -p[-(int)stride - 1] + p[-(int)stride + 1] - 2 * p[-1] + 2 * p[1] - p[(int)stride - 1] + p[(int)stride + 1];
+    *gy = -p[-(int)stride - 1] - 2 * p[-(int)stride] - p[-(int)stride + 1] + p[(int)stride - 1] + 2 * p[(int)stride] + p[(int)stride + 1];
+}
+
+static void make_edge_row(const uint8_t *image, uint8_t *magnitude_map, uint8_t *edge, size_t width, size_t y, unsigned low_threshold, unsigned high_threshold)
 {
     size_t x = 1;
 #if defined(__ARM_NEON__)
@@ -67,6 +67,7 @@ static void make_edge_row(const uint8_t *image, uint8_t *edge, size_t width, siz
         int16x8_t gy = vaddq_s16(vsubq_s16(bl, tl), vaddq_s16(vshlq_n_s16(vsubq_s16(bc, tc), 1), vsubq_s16(br, tr)));
         uint16x8_t magnitude = vshrq_n_u16(vaddq_u16(vreinterpretq_u16_s16(vabsq_s16(gx)), vreinterpretq_u16_s16(vabsq_s16(gy))), 2);
         uint8x8_t value = vqmovn_u16(magnitude);
+        vst1_u8(magnitude_map + y * width + x, value);
         uint8x8_t low = vand_u8(vcge_u8(value, vdup_n_u8((uint8_t)low_threshold)), vdup_n_u8(1));
         uint8x8_t high = vand_u8(vcge_u8(value, vdup_n_u8((uint8_t)high_threshold)), vdup_n_u8(1));
         vst1_u8(edge + y * width + x, vadd_u8(low, high));
@@ -75,8 +76,147 @@ static void make_edge_row(const uint8_t *image, uint8_t *edge, size_t width, siz
     for (; x + 1 < width; ++x)
     {
         unsigned value = gradient(image, width, width, width, x, y);
+        magnitude_map[y * width + x] = (uint8_t)value;
         edge[y * width + x] = value >= high_threshold ? 2 : value >= low_threshold ? 1 : 0;
     }
+}
+
+static float bilinear(const uint8_t *image, size_t width, size_t height, float x, float y)
+{
+    if (x < 1 || y < 1 || x >= width - 2 || y >= height - 2)
+        return 0;
+    size_t left = (size_t)x, top = (size_t)y;
+    float fx = x - left, fy = y - top;
+    float a = image[top * width + left], b = image[top * width + left + 1];
+    float c = image[(top + 1) * width + left], d = image[(top + 1) * width + left + 1];
+    return (a + (b - a) * fx) + ((c + (d - c) * fx) - (a + (b - a) * fx)) * fy;
+}
+
+static FloatPoint subpixel_edge(const uint8_t *gray, const uint8_t *magnitude, size_t width, size_t height, Point point)
+{
+    int gx, gy;
+    sobel(gray, width, (size_t)point.x, (size_t)point.y, &gx, &gy);
+    float norm = sqrtf((float)gx * gx + (float)gy * gy);
+    FloatPoint result = {(float)point.x, (float)point.y};
+    if (norm < 1)
+        return result;
+    float nx = gx / norm, ny = gy / norm;
+    float center = magnitude[(size_t)point.y * width + (size_t)point.x];
+    float before = bilinear(magnitude, width, height, point.x - nx, point.y - ny);
+    float after = bilinear(magnitude, width, height, point.x + nx, point.y + ny);
+    float denominator = before - 2 * center + after;
+    if (fabsf(denominator) < 0.001f)
+        return result;
+    float offset = 0.5f * (before - after) / denominator;
+    if (offset < -0.5f) offset = -0.5f;
+    if (offset > 0.5f) offset = 0.5f;
+    result.x += offset * nx;
+    result.y += offset * ny;
+    return result;
+}
+
+static int fit_side(const Point *points, const FloatPoint *edge, size_t count, FloatPoint start, FloatPoint end, FittedLine *line)
+{
+    float dx = end.x - start.x, dy = end.y - start.y;
+    float length = sqrtf(dx * dx + dy * dy);
+    if (length < 8)
+        return 0;
+    float mean_x = 0, mean_y = 0;
+    size_t used = 0;
+    for (size_t i = 0; i < count; ++i) {
+        float px = points[i].x - start.x, py = points[i].y - start.y;
+        float along = (px * dx + py * dy) / length;
+        float across = fabsf(px * dy - py * dx) / length;
+        if (along < -4 || along > length + 4 || across > 6)
+            continue;
+        mean_x += edge[i].x;
+        mean_y += edge[i].y;
+        ++used;
+    }
+    if (used < 8)
+        return 0;
+    mean_x /= used;
+    mean_y /= used;
+    float xx = 0, yy = 0, xy = 0;
+    for (size_t i = 0; i < count; ++i) {
+        float px = points[i].x - start.x, py = points[i].y - start.y;
+        float along = (px * dx + py * dy) / length;
+        float across = fabsf(px * dy - py * dx) / length;
+        if (along < -4 || along > length + 4 || across > 6)
+            continue;
+        float x = edge[i].x - mean_x, y = edge[i].y - mean_y;
+        xx += x * x;
+        yy += y * y;
+        xy += x * y;
+    }
+    float angle = 0.5f * atan2f(2 * xy, xx - yy);
+    line->nx = -sinf(angle);
+    line->ny = cosf(angle);
+    line->offset = line->nx * mean_x + line->ny * mean_y;
+    return 1;
+}
+
+static int intersect_lines(FittedLine a, FittedLine b, FloatPoint *point)
+{
+    float determinant = a.nx * b.ny - a.ny * b.nx;
+    if (fabsf(determinant) < 0.05f)
+        return 0;
+    point->x = (a.offset * b.ny - a.ny * b.offset) / determinant;
+    point->y = (a.nx * b.offset - a.offset * b.nx) / determinant;
+    return isfinite(point->x) && isfinite(point->y);
+}
+
+static int refine_quad(const Point *points, const FloatPoint *edge, size_t count, Point quad[4], FloatPoint refined[4])
+{
+    FloatPoint corners[4];
+    for (int i = 0; i < 4; ++i)
+        corners[i] = (FloatPoint){(float)quad[i].x, (float)quad[i].y};
+    FittedLine lines[4];
+    for (int i = 0; i < 4; ++i)
+        if (!fit_side(points, edge, count, corners[i], corners[(i + 1) & 3], &lines[i]))
+            return 0;
+    for (int i = 0; i < 4; ++i) {
+        if (!intersect_lines(lines[(i + 3) & 3], lines[i], &refined[i]))
+            return 0;
+        float dx = refined[i].x - corners[i].x, dy = refined[i].y - corners[i].y;
+        if (dx * dx + dy * dy > 196)
+            return 0;
+    }
+    return 1;
+}
+
+static float distance_float(FloatPoint a, FloatPoint b)
+{
+    float x = a.x - b.x, y = a.y - b.y;
+    return sqrtf(x * x + y * y);
+}
+
+static float area_quad_float(FloatPoint q[4])
+{
+    float area = 0;
+    for (int i = 0; i < 4; ++i)
+        area += q[i].x * q[(i + 1) & 3].y - q[(i + 1) & 3].x * q[i].y;
+    return fabsf(area) * 0.5f;
+}
+
+static float dot_angle_float(FloatPoint a, FloatPoint b, FloatPoint c)
+{
+    float ax = a.x - b.x, ay = a.y - b.y, cx = c.x - b.x, cy = c.y - b.y;
+    float denominator = sqrtf((ax * ax + ay * ay) * (cx * cx + cy * cy));
+    return denominator < 0.001f ? 1 : fabsf((ax * cx + ay * cy) / denominator);
+}
+
+static void order_corners_float(FloatPoint q[4])
+{
+    int start = 0;
+    float best = q[0].x + q[0].y;
+    for (int i = 1; i < 4; ++i) {
+        float score = q[i].x + q[i].y;
+        if (score < best) { best = score; start = i; }
+    }
+    FloatPoint ordered[4] = {q[0], q[1], q[2], q[3]};
+    for (int i = 0; i < 4; ++i)
+        q[i] = ordered[(start + i) & 3];
 }
 
 static size_t make_hull(Point *points, size_t count, Point *hull)
@@ -149,27 +289,6 @@ static float side_support(const uint8_t *edge, size_t width, size_t height, size
     return (float)found / (samples + 1);
 }
 
-static float area_quad(Point q[4])
-{
-    float area = 0;
-    for (int i = 0; i < 4; ++i)
-        area += (float)q[i].x * q[(i + 1) & 3].y - (float)q[(i + 1) & 3].x * q[i].y;
-    return fabsf(area) * 0.5f;
-}
-
-static void order_corners(Point q[4])
-{
-    int start = 0;
-    float best = q[0].x + q[0].y;
-    for (int i = 1; i < 4; ++i) {
-        float score = q[i].x + q[i].y;
-        if (score < best) { best = score; start = i; }
-    }
-    Point ordered[4] = {q[0], q[1], q[2], q[3]};
-    for (int i = 0; i < 4; ++i)
-        q[i] = ordered[(start + i) & 3];
-}
-
 size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width, size_t source_height, size_t row_bytes,
                                       RevenantVisionRectangleOptions options,
                                       RevenantVisionRectangle *output, size_t capacity)
@@ -180,11 +299,12 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
     size_t width = (source_width + scale - 1) / scale, height = (source_height + scale - 1) / scale;
     if (width < 16 || height < 16 || width > SIZE_MAX / height)
         return 0;
-    uint8_t *gray = malloc(width * height), *edge = calloc(width * height, 1), *seen = calloc(width * height, 1);
+    uint8_t *gray = malloc(width * height), *magnitude = calloc(width * height, 1), *edge = calloc(width * height, 1), *seen = calloc(width * height, 1);
     size_t *queue = malloc(width * height * sizeof(size_t));
     Point *points = malloc(width * height * sizeof(Point)), *hull = malloc(width * height * sizeof(Point));
-    if (!gray || !edge || !seen || !queue || !points || !hull) {
-        free(gray); free(edge); free(seen); free(queue); free(points); free(hull);
+    FloatPoint *subpixel = malloc(width * height * sizeof(FloatPoint));
+    if (!gray || !magnitude || !edge || !seen || !queue || !points || !hull || !subpixel) {
+        free(gray); free(magnitude); free(edge); free(seen); free(queue); free(points); free(hull); free(subpixel);
         return SIZE_MAX;
     }
     for (size_t y = 0; y < height; ++y)
@@ -192,7 +312,7 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
             gray[y * width + x] = source[(y * scale) * row_bytes + x * scale];
     unsigned low_threshold = 18, high_threshold = 48;
     for (size_t y = 1; y + 1 < height; ++y)
-        make_edge_row(gray, edge, width, y, low_threshold, high_threshold);
+        make_edge_row(gray, magnitude, edge, width, y, low_threshold, high_threshold);
     size_t edge_tail = 0;
     for (size_t i = 0; i < width * height; ++i)
         if (edge[i] == 2) queue[edge_tail++] = i;
@@ -235,22 +355,27 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
         if (hull_count < 4)
             continue;
         Point q[4]; choose_quad(hull, hull_count, q);
+        for (size_t i = 0; i < count; ++i)
+            subpixel[i] = subpixel_edge(gray, magnitude, width, height, points[i]);
+        FloatPoint refined[4];
+        if (!refine_quad(points, subpixel, count, q, refined))
+            for (int i = 0; i < 4; ++i) refined[i] = (FloatPoint){q[i].x, q[i].y};
         int unique = 1;
         for (int i = 0; i < 4; ++i)
             for (int j = i + 1; j < 4; ++j)
                 if (q[i].x == q[j].x && q[i].y == q[j].y) unique = 0;
-        float area = area_quad(q);
+        float area = area_quad_float(refined);
         if (!unique || area < min_area)
             continue;
         float sides[4], min_side = INFINITY, max_side = 0;
-        for (int i = 0; i < 4; ++i) { sides[i] = distance(q[i], q[(i + 1) & 3]); if (sides[i] < min_side) min_side = sides[i]; if (sides[i] > max_side) max_side = sides[i]; }
+        for (int i = 0; i < 4; ++i) { sides[i] = distance_float(refined[i], refined[(i + 1) & 3]); if (sides[i] < min_side) min_side = sides[i]; if (sides[i] > max_side) max_side = sides[i]; }
         float aspect = min_side / max_side;
         if (aspect < options.minimum_aspect_ratio || aspect > options.maximum_aspect_ratio)
             continue;
         float angle_limit = sinf(options.quadrature_tolerance * 0.01745329252f);
         int angles = 1;
         for (int i = 0; i < 4; ++i)
-            if (dot_angle(q[(i + 3) & 3], q[i], q[(i + 1) & 3]) > angle_limit) angles = 0;
+            if (dot_angle_float(refined[(i + 3) & 3], refined[i], refined[(i + 1) & 3]) > angle_limit) angles = 0;
         if (!angles)
             continue;
         float confidence = 0;
@@ -258,11 +383,11 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
             confidence += side_support(edge, width, height, width, q[i], q[(i + 1) & 3]) * 0.25f;
         if (confidence < options.minimum_confidence)
             continue;
-        order_corners(q);
+        order_corners_float(refined);
         RevenantVisionRectangle candidate;
         for (int i = 0; i < 4; ++i) {
-            candidate.corners[i].x = (float)q[i].x * scale / source_width;
-            candidate.corners[i].y = 1.0f - (float)q[i].y * scale / source_height;
+            candidate.corners[i].x = (refined[i].x * scale + 0.5f) / source_width;
+            candidate.corners[i].y = 1.0f - (refined[i].y * scale + 0.5f) / source_height;
         }
         candidate.confidence = confidence;
         candidate.aspect_ratio = aspect;
@@ -287,6 +412,6 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
     qsort(output, found, sizeof(RevenantVisionRectangle), rectangle_compare);
     if (options.maximum_observations && found > options.maximum_observations)
         found = options.maximum_observations;
-    free(gray); free(edge); free(seen); free(queue); free(points); free(hull);
+    free(gray); free(magnitude); free(edge); free(seen); free(queue); free(points); free(hull); free(subpixel);
     return found;
 }

@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     size_t count = detect(one, width, height, options(4), result, 8);
     check((count == 1) != negative);
     float rotated_error = corner_error(result[0], rotated, width, height);
-    check(rotated_error <= 12.0f);
+    check(rotated_error <= 0.5f);
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, one.data(), one.size(), NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
     CGImageRef image = CGImageCreate(width, height, 8, 8, width, colorSpace, kCGImageAlphaNone, provider, NULL, false, kCGRenderingIntentDefault);
@@ -138,7 +138,8 @@ int main(int argc, char **argv)
         mappedResult.corners[i].x = (float)(mapped.points[i].x / width);
         mappedResult.corners[i].y = (float)(mapped.points[i].y / height);
     }
-    check(corner_error(mappedResult, rotated, width, height) <= 12.0f);
+    float mapped_error = corner_error(mappedResult, rotated, width, height);
+    check(mapped_error <= 1.25f);
     CGImageRelease(image);
     CGColorSpaceRelease(colorSpace);
     CGDataProviderRelease(provider);
@@ -155,7 +156,7 @@ int main(int argc, char **argv)
     count = detect(perspective, width, height, options(4), result, 8);
     check(count == 1);
     float perspective_error = corner_error(result[0], card, width, height);
-    check(perspective_error <= 12.0f);
+    check(perspective_error <= 0.5f);
 
     auto noise = fixture(width, height, NULL, 0, true);
     count = detect(noise, width, height, options(4), result, 8);
@@ -184,6 +185,6 @@ int main(int argc, char **argv)
     const int iterations = 300;
     for (int i = 0; i < iterations; ++i) detect(one, width, height, timingOptions, result, 8);
     auto elapsed = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count() / iterations;
-    std::printf("rectangle-corner-error-max-px=%.2f\n", std::max(rotated_error, perspective_error));
+    std::printf("rectangle-corner-error-max-px=%.2f\n", std::max({rotated_error, perspective_error, mapped_error}));
     std::printf("rectangle-host-640x480-ms-per-frame=%.3f\n", elapsed);
 }
