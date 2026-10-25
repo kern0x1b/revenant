@@ -149,9 +149,22 @@ Measured with `toolchain/tests/emulate/baseline` (`./xmakew l -P . toolchain/tes
 on an iPhone 4S, iOS 6.1.3: "Hxg" at 24 pt drawn with `drawAtPoint:` into a bitmap has the same ink box with and without a
 6 pt `NSBaselineOffsetAttributeName` (top 33, bottom 56, left 21, right 62, 390 ink pixels), so the shift is 0. The control,
 the plain string drawn 6 points higher, shifts by 6, so the measurement sees a shift. iOS 6 UIKit string drawing ignores the
-attribute. The backport is to make it honoured in its text paths, and that is not done yet.
+attribute. The backport now honours it in `drawAtPoint:` (`frameworks/Backports/src/UIKit/NSAttributedString+BaselineOffset7.m`):
+the probe with the backport linked shifts the same ink by 6 points (top 33 to 39, 390 ink pixels, `shift=6 ink-equal=1`),
+the same as the control. On the host, `frameworks/Backports/tests/baseline_offset_oracle_test.lua` compares the replacement
+with macOS's own drawing, which honours the attribute: plain and offset text match pixel for pixel, and an offset that is
+not applied is detected. This covers single-line `drawAtPoint:` only. Runs are drawn one by one at their own font's
+top, so a mix of fonts in one line is not aligned on a shared baseline, and `drawInRect:` and the layout classes are not
+covered yet.
 
 The probe's first runs trapped in `[UIFont systemFontOfSize:]`: ARM exception 8 at 0x311150d4, a `udf #254` in
 CoreFoundation's trap stub, which `_CFRuntimeCreateInstance` calls through a callback slot after `_GSFontCreateWithName`
 loads a type ID that is still 0. `GSFontGetTypeID()` returned 0 until `GSInitialize()` ran, and then 257. The probe never
 ran `GSInitialize`, which `UIApplicationMain` runs in an app. The probe now runs it first.
+
+## Emulate cases are not in `./xmakew test`
+
+The emulate cases under `toolchain/tests/emulate/` (`install`, `launchd`, `output`, `pin-leak`, `baseline`, `fontapp`) run
+by hand, as `docs/reference/toolchain/tests.md` says, and are not xmake tests. Registering them in `./xmakew test` is a
+separate job: each needs a booted firmware image for minutes, so the registration has to say which device and release it
+boots and where a CI slot for it comes from. Until then the cases are the record of what the emulator is checked against.
