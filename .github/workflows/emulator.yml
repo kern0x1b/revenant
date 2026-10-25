@@ -207,8 +207,12 @@ jobs:
       - name: Delete the scratch of the run
         if: always()
         run: |
-          chmod -R u+w "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" 2>/dev/null || true
-          rm -rf "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"
+          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"; do
+            if [ -e "$scratch" ]; then
+              chmod -R u+w "$scratch"
+              rm -rf "$scratch"
+            fi
+          done
 
       - name: Measure the disk
         if: always()
