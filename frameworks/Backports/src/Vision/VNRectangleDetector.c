@@ -1,4 +1,5 @@
 #include "VNRectangleDetector.h"
+#include "VNRectangleDetectorInternal.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,6 +80,8 @@ static void make_edge_row(const uint8_t *image, uint8_t *magnitude_map, uint8_t 
         uint8x8_t high = vand_u8(vcge_u8(value, vdup_n_u8((uint8_t)high_threshold)), vdup_n_u8(1));
         vst1_u8(edge + y * width + x, vadd_u8(low, high));
     }
+#else
+    (void)scalar_only;
 #endif
     for (; x + 1 < width; ++x)
         make_edge_pixel(image, magnitude_map, edge, width, height, x, y, low_threshold, high_threshold);
@@ -98,9 +101,14 @@ static void make_edge_map(const uint8_t *gray, size_t width, size_t height, unsi
     }
 }
 
-void RevenantVisionEdgeMap(const uint8_t *gray, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold, uint8_t *magnitude, uint8_t *edge, int scalar_only)
+void RevenantVisionEdgeMap(const uint8_t *gray, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold, uint8_t *magnitude, uint8_t *edge)
 {
-    make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, scalar_only);
+    make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, 0);
+}
+
+void RevenantVisionEdgeMapScalar(const uint8_t *gray, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold, uint8_t *magnitude, uint8_t *edge)
+{
+    make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, 1);
 }
 
 static float bilinear(const uint8_t *image, size_t width, size_t height, float x, float y)
@@ -138,6 +146,13 @@ static FloatPoint subpixel_edge(const uint8_t *gray, const uint8_t *magnitude, s
     return result;
 }
 
+static int on_side(Point point, FloatPoint start, float dx, float dy, float length)
+{
+    float px = point.x - start.x, py = point.y - start.y;
+    float along = px * dx + py * dy, across = fabsf(px * dy - py * dx);
+    return along >= -4 * length && along <= length * (length + 4) && across <= 6 * length;
+}
+
 static int fit_side(const Point *points, const FloatPoint *edge, size_t count, FloatPoint start, FloatPoint end, FittedLine *line)
 {
     float dx = end.x - start.x, dy = end.y - start.y;
@@ -147,10 +162,7 @@ static int fit_side(const Point *points, const FloatPoint *edge, size_t count, F
     float mean_x = 0, mean_y = 0;
     size_t used = 0;
     for (size_t i = 0; i < count; ++i) {
-        float px = points[i].x - start.x, py = points[i].y - start.y;
-        float along = (px * dx + py * dy) / length;
-        float across = fabsf(px * dy - py * dx) / length;
-        if (along < -4 || along > length + 4 || across > 6)
+        if (!on_side(points[i], start, dx, dy, length))
             continue;
         mean_x += edge[i].x;
         mean_y += edge[i].y;
@@ -162,10 +174,7 @@ static int fit_side(const Point *points, const FloatPoint *edge, size_t count, F
     mean_y /= used;
     float xx = 0, yy = 0, xy = 0;
     for (size_t i = 0; i < count; ++i) {
-        float px = points[i].x - start.x, py = points[i].y - start.y;
-        float along = (px * dx + py * dy) / length;
-        float across = fabsf(px * dy - py * dx) / length;
-        if (along < -4 || along > length + 4 || across > 6)
+        if (!on_side(points[i], start, dx, dy, length))
             continue;
         float x = edge[i].x - mean_x, y = edge[i].y - mean_y;
         xx += x * x;
@@ -312,6 +321,34 @@ static float side_support(const uint8_t *edge, size_t width, size_t height, size
     return (float)found / (samples + 1);
 }
 
+static void block_average_row(const uint8_t *source, size_t row_bytes, size_t source_width, size_t source_height, size_t scale, size_t width, size_t y, uint8_t *out)
+{
+    size_t y0 = y * scale, y1 = y0 + scale < source_height ? y0 + scale : source_height;
+    size_t x = 0;
+#if defined(__ARM_NEON__)
+    if (scale == 2 && y1 - y0 == 2) {
+        const uint8_t *top = source + y0 * row_bytes, *bottom = top + row_bytes;
+        for (; x + 16 <= width && 2 * x + 32 <= source_width; x += 16) {
+            uint8x16x2_t a = vld2q_u8(top + 2 * x), b = vld2q_u8(bottom + 2 * x);
+            uint16x8_t low = vaddq_u16(vaddl_u8(vget_low_u8(a.val[0]), vget_low_u8(a.val[1])), vaddl_u8(vget_low_u8(b.val[0]), vget_low_u8(b.val[1])));
+            uint16x8_t high = vaddq_u16(vaddl_u8(vget_high_u8(a.val[0]), vget_high_u8(a.val[1])), vaddl_u8(vget_high_u8(b.val[0]), vget_high_u8(b.val[1])));
+            low = vaddq_u16(low, vdupq_n_u16(2));
+            high = vaddq_u16(high, vdupq_n_u16(2));
+            vst1q_u8(out + x, vcombine_u8(vshrn_n_u16(low, 2), vshrn_n_u16(high, 2)));
+        }
+    }
+#endif
+    for (; x < width; ++x) {
+        size_t x0 = x * scale, x1 = x0 + scale < source_width ? x0 + scale : source_width;
+        unsigned sum = 0;
+        for (size_t sy = y0; sy < y1; ++sy)
+            for (size_t sx = x0; sx < x1; ++sx)
+                sum += source[sy * row_bytes + sx];
+        unsigned count = (unsigned)((y1 - y0) * (x1 - x0));
+        out[x] = (uint8_t)((sum + count / 2) / count);
+    }
+}
+
 size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width, size_t source_height, size_t row_bytes,
                                       RevenantVisionRectangleOptions options,
                                       RevenantVisionRectangle *output, size_t capacity)
@@ -330,18 +367,8 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
         free(gray); free(magnitude); free(edge); free(seen); free(queue); free(points); free(hull); free(subpixel);
         return SIZE_MAX;
     }
-    for (size_t y = 0; y < height; ++y) {
-        size_t y0 = y * scale, y1 = y0 + scale < source_height ? y0 + scale : source_height;
-        for (size_t x = 0; x < width; ++x) {
-            size_t x0 = x * scale, x1 = x0 + scale < source_width ? x0 + scale : source_width;
-            unsigned sum = 0;
-            for (size_t sy = y0; sy < y1; ++sy)
-                for (size_t sx = x0; sx < x1; ++sx)
-                    sum += source[sy * row_bytes + sx];
-            unsigned count = (unsigned)((y1 - y0) * (x1 - x0));
-            gray[y * width + x] = (uint8_t)((sum + count / 2) / count);
-        }
-    }
+    for (size_t y = 0; y < height; ++y)
+        block_average_row(source, row_bytes, source_width, source_height, scale, width, y, gray + y * width);
     unsigned low_threshold = 18, high_threshold = 48;
     make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, 0);
     size_t edge_tail = 0;

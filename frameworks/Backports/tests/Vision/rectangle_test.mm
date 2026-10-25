@@ -1,4 +1,5 @@
 #import "VNRectangleDetector.h"
+#import "VNRectangleDetectorInternal.h"
 #import "VNRectangleImage.h"
 #import <Vision/Vision.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -177,8 +178,8 @@ int main(int argc, char **argv)
     auto edgeImage = fixture(edgeWidth, edgeHeight, &small, 1, false);
     std::vector<uint8_t> neonMagnitude(edgeWidth * edgeHeight), neonEdge(edgeWidth * edgeHeight);
     std::vector<uint8_t> scalarMagnitude(edgeWidth * edgeHeight), scalarEdge(edgeWidth * edgeHeight);
-    RevenantVisionEdgeMap(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, neonMagnitude.data(), neonEdge.data(), 0);
-    RevenantVisionEdgeMap(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, scalarMagnitude.data(), scalarEdge.data(), 1);
+    RevenantVisionEdgeMap(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, neonMagnitude.data(), neonEdge.data());
+    RevenantVisionEdgeMapScalar(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, scalarMagnitude.data(), scalarEdge.data());
     check(neonMagnitude == scalarMagnitude);
     check(neonEdge == scalarEdge);
     check(std::count(neonEdge.begin(), neonEdge.end(), 2) > 0);

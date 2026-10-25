@@ -29,9 +29,6 @@ typedef struct {
     size_t maximum_observations;
 } RevenantVisionRectangleOptions;
 
-void RevenantVisionEdgeMap(const uint8_t *luminance, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold,
-                           uint8_t *magnitude, uint8_t *edge, int scalar_only);
-
 size_t RevenantVisionDetectRectangles(const uint8_t *luminance, size_t width, size_t height, size_t row_bytes,
                                       RevenantVisionRectangleOptions options,
                                       RevenantVisionRectangle *output, size_t capacity);
