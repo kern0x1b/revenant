@@ -7,6 +7,7 @@
 #include "foundation/snapshot_io.hpp"
 
 #include <filesystem>
+#include <map>
 #include <string>
 
 namespace emulator {
@@ -56,6 +57,8 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     refuse_if_populated("ck.pending_waits_", pending_waits_);
     refuse_if_populated("ck.scheduler_handoffs_", scheduler_handoffs_);
     refuse_if_populated("ck.scheduler_yields_", scheduler_yields_);
+    refuse_if_populated("ck.regular_file_open_descriptions_", regular_file_open_descriptions_);
+    refuse_if_populated("ck.baseband_open_descriptions_", baseband_open_descriptions_);
     snapshot::save(out, guest_working_directory_.string());
     snapshot::save(out, process_image_);
     snapshot::save(out, thread_ports_);
@@ -98,6 +101,28 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, next_display_scanout_deadline_);
     snapshot::save(out, vm_purgable_states_);
     snapshot::save(out, apple80211_scan_delivered_);
+    std::map<std::uint32_t, std::string> file_paths;
+    for (const auto& [fd, path] : file_descriptors_)
+        file_paths.emplace(fd, path.string());
+    snapshot::save(out, file_paths);
+    snapshot::save(out, file_offsets_);
+    snapshot::save(out, file_status_flags_);
+    snapshot::save(out, descriptor_flags_);
+    snapshot::save(out, duplicated_descriptors_);
+    snapshot::save(out, posix_semaphore_descriptors_);
+    const std::map<std::uint32_t, std::string> virtual_names {
+        virtual_descriptors_.begin(), virtual_descriptors_.end()
+    };
+    snapshot::save(out, virtual_names);
+    snapshot::save(out, static_cast<std::uint64_t>(descriptor_guards_.size()));
+    for (const auto& [fd, guard] : descriptor_guards_) {
+        snapshot::save(out, fd);
+        snapshot::save(out, guard.identifier);
+        snapshot::save(out, guard.flags);
+    }
+    snapshot::save(out, bound_socket_names_);
+    snapshot::save(out, listening_sockets_);
+    snapshot::save(out, virtual_block_descriptors_);
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -125,6 +150,8 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     reject_if_populated("ck.pending_waits_", pending_waits_);
     reject_if_populated("ck.scheduler_handoffs_", scheduler_handoffs_);
     reject_if_populated("ck.scheduler_yields_", scheduler_yields_);
+    reject_if_populated("ck.regular_file_open_descriptions_", regular_file_open_descriptions_);
+    reject_if_populated("ck.baseband_open_descriptions_", baseband_open_descriptions_);
     std::string guest_working_directory;
     snapshot::load(in, guest_working_directory);
     guest_working_directory_ = std::filesystem::path { guest_working_directory };
@@ -176,6 +203,34 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, next_display_scanout_deadline_);
     snapshot::load(in, vm_purgable_states_);
     snapshot::load(in, apple80211_scan_delivered_);
+    std::map<std::uint32_t, std::string> file_paths;
+    snapshot::load(in, file_paths);
+    file_descriptors_.clear();
+    for (const auto& [fd, path] : file_paths)
+        file_descriptors_.emplace(fd, std::filesystem::path { path });
+    snapshot::load(in, file_offsets_);
+    snapshot::load(in, file_status_flags_);
+    snapshot::load(in, descriptor_flags_);
+    snapshot::load(in, duplicated_descriptors_);
+    snapshot::load(in, posix_semaphore_descriptors_);
+    std::map<std::uint32_t, std::string> virtual_names;
+    snapshot::load(in, virtual_names);
+    virtual_descriptors_.clear();
+    virtual_descriptors_.insert(virtual_names.begin(), virtual_names.end());
+    descriptor_guards_.clear();
+    std::uint64_t guard_count { };
+    snapshot::load(in, guard_count);
+    for (std::uint64_t index = 0; index < guard_count; ++index) {
+        std::uint32_t fd { };
+        DarwinFileGuard guard { };
+        snapshot::load(in, fd);
+        snapshot::load(in, guard.identifier);
+        snapshot::load(in, guard.flags);
+        descriptor_guards_.emplace(fd, guard);
+    }
+    snapshot::load(in, bound_socket_names_);
+    snapshot::load(in, listening_sockets_);
+    snapshot::load(in, virtual_block_descriptors_);
 }
 
 }

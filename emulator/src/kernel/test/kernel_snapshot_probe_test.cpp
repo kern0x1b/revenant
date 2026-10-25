@@ -35,7 +35,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 103> saved_members {
+constexpr std::array<std::string_view, 114> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -109,6 +109,17 @@ constexpr std::array<std::string_view, 103> saved_members {
     "ck.next_display_scanout_deadline_",
     "ck.vm_purgable_states_",
     "ck.apple80211_scan_delivered_",
+    "ck.file_descriptors_",
+    "ck.file_offsets_",
+    "ck.file_status_flags_",
+    "ck.descriptor_flags_",
+    "ck.duplicated_descriptors_",
+    "ck.posix_semaphore_descriptors_",
+    "ck.virtual_descriptors_",
+    "ck.descriptor_guards_",
+    "ck.bound_socket_names_",
+    "ck.listening_sockets_",
+    "ck.virtual_block_descriptors_",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
@@ -141,14 +152,11 @@ constexpr std::array<std::string_view, 103> saved_members {
     "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 62> open_members {
+constexpr std::array<std::string_view, 59> open_members {
     "ck.dyld_shared_cache_",
     "ck.process_",
     "ck.load_average_",
     "ck.offline_serial_state_",
-    "ck.regular_file_open_descriptions_",
-    "ck.baseband_open_descriptions_",
-    "ck.virtual_block_descriptors_",
     "ck.bpf_descriptors_",
     "ck.kernel_control_endpoints_",
     "ck.route_socket_states_",
@@ -210,7 +218,7 @@ constexpr std::array<std::string_view, 1> wired_members {
     "hid.state_",
 };
 
-constexpr std::array<std::string_view, 23> refused_members {
+constexpr std::array<std::string_view, 25> refused_members {
     "ck.aio_completions_",
     "ck.host_sockets_",
     "ck.pending_baseband_writes_",
@@ -234,6 +242,8 @@ constexpr std::array<std::string_view, 23> refused_members {
     "ck.pending_waits_",
     "ck.scheduler_handoffs_",
     "ck.scheduler_yields_",
+    "ck.regular_file_open_descriptions_",
+    "ck.baseband_open_descriptions_",
 };
 
 int failures = 0;
