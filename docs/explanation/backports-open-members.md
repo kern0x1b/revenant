@@ -120,3 +120,63 @@ passed in 88 local runs: 18 before the failure, 30 in a plain loop, and 40 under
 names the first file it failed on, with its text, whether it exists, and the state of the install's link, so the next
 occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
 path of patch 0015, and main's xmake was not run in the loop.
+
+## Emulator crutches (exclusive monitor and libdispatch trap)
+
+These are not backport members. They are emulator items from the libdispatch connect investigation on branch
+`work/dynarmic-decoder`, written here so that nobody reads an open item as fixed.
+
+Exclusive monitor. Commit `adb67ad64` had two parts, and they were separated:
+
+- Kept: each processor's exclusive state is cleared at the start of each slice and on each SVC. The clear comes from
+  XNU's return to user mode: `return_to_user_now` in `osfmk/arm/locore.s` runs `clrex` on every return to user space,
+  and a thread that was switched out resumes through it. The copy checked is the `master` mirror at
+  `https://gitea.com/matteyeux/darwin-xnu` (line 1922), not the iOS 6.1.3 kernel. The copy has no `clrex` in its
+  context-switch routine, so the citation is the return path, not the switch. Cost: a counter on the clear path and the
+  process's CPU time over the same golden boot, three repeats each with and without the clear (the switch was a
+  temporary variable, not committed). The boots made 0.63 to 0.80 million clears (per slice and per SVC). CPU time,
+  user plus system, with the clear: 420.6, 367.3 and 402.8 s, mean 396.9. Without it: 353.8, 408.1 and 391.5 s, mean
+  384.5. The difference, 12.4 s or 3.2%, has a standard error near 22 s, so it is not distinguishable from noise. The
+  wall times ran 372 to 487 s with the host at load 13 on 12 cores, so they do not isolate the clear. One no-clear
+  boot printed no counter line; the other two no-clear boots skipped every clear.
+- Reverted: the write generation check and the write tracking on reserved pages. The commit's premise was that the
+  resolver-backed monitor does not see plain writes. On the tree before that change, a pinned store probe shows the
+  premise false for two or more processors: with the other thread storing to the reserved word, 2000 of 2000 rounds had
+  the store-exclusive fail (0 leaked); with the store removed as a negative control, 1989 of 2000 succeeded. The reason
+  is in the shared memory: with more than one processor `AddressSpace::set_parallel_access(true)` is on, so every write
+  goes through `reservation_invalidation_required_locked` and `invalidate_reservation_identity`, and the reservation key
+  is that identity. The commit stays in history to restore it, but nothing in this tree needs it. Its write-tracking
+  cost was therefore not measured.
+
+Crutches that remain:
+
+- The pin: under `--test-concurrent-threads`, each thread is bound with `bind_thread` to its slot modulo the core count
+  at registration. Placement is not logged, so the pinned result rests on that code path, not on a logged placement.
+- Only one and two cores were run.
+- The store probe's strex fails in every concurrent round by design, because the writer stores each round. The
+  negative control is what shows that the failures come from the store.
+
+Libdispatch trap. Resolved as a probe fault, not an emulator fault.
+
+- The trapping object is `writes[0]` of `emulator/tests/guest/connect_writable_dispatch.c`. The fatal `r0` equals its
+  address in every trap run.
+- Class: its first word is the vtable at `0x3ae41ec4` in libdispatch's `__DATA`. Its `do_type` is `0x00020001` and its
+  `do_kind` is `"kevent-source"`, which is `DISPATCH_SOURCE_KEVENT_TYPE` in `src/object_internal.h` of libdispatch-228.23.
+- Type: the kevent behind `ds_dkev` (`ds_dkev` is at offset 64 of `dispatch_source_s`) has ident 11, the probe's
+  descriptor, filter -2 (`EVFILT_WRITE`), and flags `0x85` (`EV_ADD|EV_ENABLE|EV_DISPATCH`). The source is a write
+  source.
+- State at the trap: `do_suspend_cnt` (offset 28) is 1, the locked bit with a count of zero. The probe's cleanup
+  resumed the source a second time, so libdispatch trapped on the over-resume. The trap PC `0x392a2e3c` is in a
+  stripped helper at `0x392a2e04`, before `_dispatch_resume` at `0x392a4f94`.
+- The fixed probe passes on two and on one core: 20 rounds, 0 connections not writable, and 0 deliveries after cancel.
+  Per round the writable events were 32 to 73, and the most for one connection was 3. A writable socket re-arms its
+  write source on each handler return, so repeats are expected; no event arrives after the source is cancelled.
+- Not done: the emulator does not log kevent returns for an ident. The per-connection counts come from the probe.
+
+Fault dump. `foundation/fault_dump` describes the guest words at a fatal fault: the eight words at each register
+that points into mapped memory, and the four words at the address in the first word, with the image and offset of each
+word. The unit test `emulator_fault_dump_test` passes. The first trap runs printed no `[fault-words]` lines because the
+concise output filter drops every bracketed line that is not on its allowlist, and this prefix was not on it. With the
+prefix added, the forced libdispatch fault on one core logs the words: `r0` points at the trapping object, whose first
+word is the vtable `0x3ae41ec4`. Labels cover only an image's text, so the vtable word is unlabelled, and the report
+gives image and offset, not dyld-cache symbol names. Symbol names are open.
