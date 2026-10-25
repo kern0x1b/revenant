@@ -235,4 +235,38 @@ function main()
     local device_lowered = lowered.lower_header(device_sample, device)
     assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
            "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
+
+    local photos_source = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h")
+    local photos_lowered = lowered.lower_header(io.readfile(photos_source), {markers = lowered.region_markers(sdk), classes = {}, functions = {},
+                                                                              globals = {PHImageContentModeAspectFill = true, PHImageContentModeDefault = true}, protocols = {}})
+    local photos_enum = photos_lowered:match("typedef NS_ENUM%(NSInteger, PHImageContentMode%) %b{}")
+    assert(photos_enum and not photos_enum:find("API_AVAILABLE", 1, true),
+           "an availability marker sits inside the enum whose constant is lowered:\n" .. photos_lowered)
+    local photos_probe = path.join(probes, "photos.m")
+    io.writefile(photos_probe, table.concat({
+        "#import <Photos/PhotosTypes.h>",
+        "",
+        "NSInteger revenantPhotosProbe(void)",
+        "{",
+        "    return PHImageContentModeAspectFill + PHImageContentModeDefault;",
+        "}",
+        "",
+    }, "\n"))
+    local photos_ok, photos_compiling = compiles(sdk, vfs, photos_probe, path.join(probes, "photos.log"))
+    assert(photos_ok, "the lowered PhotosTypes.h does not compile at iOS 6.0:\n" .. photos_compiling)
+
+    local webview_probe = path.join(probes, "webview.m")
+    io.writefile(webview_probe, table.concat({
+        "#import <UIKit/UIKit.h>",
+        "",
+        "void revenantWebViewProbe(UIWebView *web, id<UIWebViewDelegate> delegate, NSURLRequest *request)",
+        "{",
+        "    UIWebViewNavigationType type = UIWebViewNavigationTypeLinkClicked;",
+        "    (void)type;",
+        "    (void)[delegate webView:web shouldStartLoadWithRequest:request navigationType:UIWebViewNavigationTypeOther];",
+        "}",
+        "",
+    }, "\n"))
+    local webview_ok, webview_compiling = compiles(sdk, vfs, webview_probe, path.join(probes, "webview.log"))
+    assert(webview_ok, "the lowered UIKit headers do not declare UIWebViewNavigationType for iOS 6.0:\n" .. webview_compiling)
 end
