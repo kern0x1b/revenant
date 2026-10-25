@@ -19,6 +19,7 @@
 
 #include <sys/mman.h>
 
+#include "foundation/content_identity.hpp"
 #include "foundation/performance.hpp"
 
 namespace emulator {
@@ -131,6 +132,21 @@ namespace {
             cursor = region->end;
         }
         return regions;
+    }
+
+    std::optional<ContentIdentity> mapped_range_identity(
+        const std::filesystem::path& path, std::uint64_t file_offset,
+        std::uint64_t length)
+    {
+        std::error_code error;
+        const auto file_size = std::filesystem::file_size(path, error);
+        if (error)
+            return std::nullopt;
+        const auto available = file_size > file_offset
+                                   ? static_cast<std::uint64_t>(file_size -
+                                         file_offset)
+                                   : std::uint64_t { 0 };
+        return sha256_file(path, file_offset, std::min(length, available));
     }
 
     void save_mapping_regions(snapshot::Writer& out,
@@ -680,37 +696,26 @@ void AddressSpace::save(snapshot::Writer& out) const
     if (!mapping_leases_.empty())
         throw snapshot::RefusedError { "memory.mapping_leases" };
 
-    std::map<std::uint32_t, std::shared_ptr<const GuestPageBacking>> contents;
-    for (const auto& [address, page] : *pages_) {
+    std::vector<const std::pair<const std::uint32_t, Page>*> resident;
+    for (const auto& entry : *pages_) {
+        const auto& page = entry.second;
         if (page.shared_writable)
             throw snapshot::RefusedError { "memory.shared_writable" };
         if (page.file_writeback)
             throw snapshot::RefusedError { "memory.file_writeback" };
         if (page.backing) {
-            contents.emplace(address, page.backing);
+            resident.push_back(&entry);
         } else if (page.write_generation != 0 || page.file_writeback_capable) {
             throw snapshot::RefusedError { "memory.page_without_backing" };
         }
     }
-    for (const auto& [first, mapping] : file_mappings_) {
-        for (std::uint64_t base = first; base < mapping.end;
-            base += page_size) {
-            const auto address = static_cast<std::uint32_t>(base);
-            if (contents.contains(address) ||
-                !vm_map_.accessible(address,
-                    static_cast<std::uint64_t>(address) + page_size,
-                    MemoryPermission::None)) {
-                continue;
-            }
-            const auto file_offset = mapping.file_offset + (base - first);
-            const auto byte_count =
-                static_cast<std::uint32_t>(std::min<std::uint64_t>(page_size,
-                    mapping.backing->end_offset - file_offset));
-            auto backing = file_page_cache_->load_page(
-                mapping.backing, file_offset, byte_count);
-            backing->materialize();
-            contents.emplace(address, std::move(backing));
-        }
+    std::vector<ContentIdentity> file_identities;
+    for (const auto& [address, mapping] : file_mappings_) {
+        const auto identity = mapped_range_identity(mapping.backing->path,
+            mapping.file_offset, mapping.end - address);
+        if (!identity)
+            throw snapshot::RefusedError { "memory.file_mapping_unreadable" };
+        file_identities.push_back(*identity);
     }
 
     snapshot::save(out, parallel_access_);
@@ -724,16 +729,29 @@ void AddressSpace::save(snapshot::Writer& out) const
     snapshot::save(out, next_mapping_lease_token_);
     save_mapping_regions(out, mapping_regions(vm_map_));
     save_mapping_regions(out, mapping_regions(translation_profile_map_));
-    snapshot::save(out, static_cast<std::uint64_t>(contents.size()));
-    for (const auto& [address, backing] : contents) {
-        const auto page = pages_->find(address);
-        const bool tracked = page != pages_->end();
-        backing->materialize();
+    snapshot::save(out, static_cast<std::uint64_t>(file_identities.size()));
+    std::size_t identity_index = 0;
+    for (const auto& [address, mapping] : file_mappings_) {
         snapshot::save(out, address);
-        out.raw(backing->bytes);
-        snapshot::save(out,
-            tracked ? page->second.write_generation : std::uint64_t { });
-        snapshot::save(out, tracked && page->second.file_writeback_capable);
+        snapshot::save(out, mapping.end);
+        snapshot::save(out, mapping.file_offset);
+        snapshot::save(out, mapping.backing->path.string());
+        snapshot::save(out, file_identities[identity_index++].digest);
+    }
+    snapshot::save(out, static_cast<std::uint64_t>(resident.size()));
+    for (const auto* entry : resident) {
+        const auto& [address, page] = *entry;
+        const bool stored = !page.file_cached;
+        snapshot::save(out, address);
+        snapshot::save(out, stored);
+        if (stored) {
+            page.backing->materialize();
+            out.raw(page.backing->bytes);
+        }
+        snapshot::save(out, page.write_generation);
+        snapshot::save(out, page.file_writeback_capable);
+        snapshot::save(out, page.file_cached);
+        snapshot::save(out, page.copy_on_write_possible);
     }
 }
 
@@ -763,30 +781,102 @@ void AddressSpace::load(snapshot::Reader& in)
         translation_profile_map_.map_or(
             region.address, region.end, region.permissions, region.inheritance);
     }
+    std::uint64_t file_mapping_count { };
+    snapshot::load(in, file_mapping_count);
+    for (std::uint64_t index = 0; index < file_mapping_count; ++index) {
+        std::uint32_t address { };
+        std::uint64_t end { };
+        std::uint64_t file_offset { };
+        std::string path;
+        ContentIdentity identity;
+        snapshot::load(in, address);
+        snapshot::load(in, end);
+        snapshot::load(in, file_offset);
+        snapshot::load(in, path);
+        snapshot::load(in, identity.digest);
+        const auto next = file_mappings_.lower_bound(address);
+        const bool overlaps_next =
+            next != file_mappings_.end() && next->first < end;
+        const bool overlaps_previous = next != file_mappings_.begin() &&
+                                       std::prev(next)->second.end > address;
+        if (end <= address || end > guest_address_limit ||
+            address % page_size != 0 || end % page_size != 0 ||
+            file_offset % page_size != 0 ||
+            !vm_map_.accessible(address, end, MemoryPermission::None) ||
+            overlaps_next || overlaps_previous) {
+            throw snapshot::FormatError { "snapshot holds a bad file mapping" };
+        }
+        const std::filesystem::path file_path { path };
+        const auto actual = mapped_range_identity(
+            file_path, file_offset, end - address);
+        if (!actual || *actual != identity) {
+            throw snapshot::FormatError {
+                "file mapping changed since the snapshot: " + path
+            };
+        }
+        const auto backing = file_page_cache_->open_mapping(file_path,
+            file_offset, static_cast<std::uint32_t>(end - address));
+        if (!backing) {
+            throw snapshot::FormatError {
+                "file mapping cannot be reopened: " + path
+            };
+        }
+        file_mappings_.emplace(address, FileMapping { end, file_offset, *backing });
+    }
+
     std::uint64_t page_record_count { };
     snapshot::load(in, page_record_count);
     for (std::uint64_t index = 0; index < page_record_count; ++index) {
         std::uint32_t address { };
         snapshot::load(in, address);
-        const auto bytes = in.raw(page_size);
+        bool stored { };
+        snapshot::load(in, stored);
+        const auto bytes = stored ? in.raw(page_size)
+                                  : std::span<const std::byte> { };
         std::uint64_t write_generation { };
         bool file_writeback_capable { };
+        bool file_cached { };
+        bool copy_on_write_possible { };
         snapshot::load(in, write_generation);
         snapshot::load(in, file_writeback_capable);
+        snapshot::load(in, file_cached);
+        snapshot::load(in, copy_on_write_possible);
         if (address % page_size != 0 ||
             !vm_map_.accessible(address,
                 static_cast<std::uint64_t>(address) + page_size,
                 MemoryPermission::None)) {
             throw snapshot::FormatError { "snapshot page is not mapped" };
         }
+        if (stored == file_cached)
+            throw snapshot::FormatError { "snapshot page has no contents" };
         const auto [page, inserted] = pages_->try_emplace(address);
         if (!inserted)
             throw snapshot::FormatError { "snapshot repeats a page" };
-        page->second.backing = std::make_shared<GuestPageBacking>();
-        std::copy(
-            bytes.begin(), bytes.end(), page->second.backing->bytes.begin());
+        if (stored) {
+            page->second.backing = std::make_shared<GuestPageBacking>();
+            std::copy(bytes.begin(), bytes.end(),
+                page->second.backing->bytes.begin());
+        } else {
+            const auto* mapping = find_file_mapping_locked(address);
+            if (mapping == nullptr)
+                throw snapshot::FormatError { "snapshot file page is unmapped" };
+            const auto mapping_start = static_cast<std::uint64_t>(
+                std::prev(file_mappings_.upper_bound(address))->first);
+            const auto page_file_offset =
+                mapping->file_offset +
+                (static_cast<std::uint64_t>(address) - mapping_start);
+            const auto byte_count =
+                static_cast<std::uint32_t>(std::min<std::uint64_t>(page_size,
+                    mapping->backing->end_offset - page_file_offset));
+            auto backing = file_page_cache_->load_page(
+                mapping->backing, page_file_offset, byte_count);
+            backing->materialize();
+            page->second.backing = std::move(backing);
+        }
         page->second.write_generation = write_generation;
         page->second.file_writeback_capable = file_writeback_capable;
+        page->second.file_cached = file_cached;
+        page->second.copy_on_write_possible = copy_on_write_possible;
         cache_page_locked(address, page->second);
     }
     executable_content_generation_.store(

@@ -26,6 +26,8 @@ using emulator::snapshot::RefusedError;
 using emulator::snapshot::Reader;
 using emulator::snapshot::Writer;
 
+constexpr std::size_t guest_page_size = 0x1000;
+
 int failures = 0;
 
 void expect(bool condition, const std::string& what)
@@ -167,22 +169,95 @@ void shared_writable_page_is_refused()
         "the refusal names memory.shared_writable");
 }
 
-void file_mapping_is_restored_with_its_bytes()
+std::filesystem::path test_file_path()
 {
-    const auto path = std::filesystem::temp_directory_path() /
-                      "address_space_snapshot_test.bin";
-    const auto file = patterned(0x2000, 0x3c);
-    {
-        std::ofstream output(path, std::ios::binary);
-        output.write(reinterpret_cast<const char*>(file.data()),
-            static_cast<std::streamsize>(file.size()));
-    }
+    return std::filesystem::temp_directory_path() /
+           "address_space_snapshot_test.bin";
+}
+
+std::vector<std::byte> write_test_file(
+    const std::filesystem::path& path, std::uint8_t seed)
+{
+    const auto file = patterned(0x2000, seed);
+    std::ofstream output(path, std::ios::binary | std::ios::trunc);
+    output.write(reinterpret_cast<const char*>(file.data()),
+        static_cast<std::streamsize>(file.size()));
+    return file;
+}
+
+std::vector<std::byte> read_test_file(const std::filesystem::path& path)
+{
+    std::ifstream input(path, std::ios::binary);
+    std::vector<std::byte> bytes;
+    char value = 0;
+    while (input.get(value))
+        bytes.push_back(static_cast<std::byte>(value));
+    return bytes;
+}
+
+void clean_file_pages_come_back_from_the_file()
+{
+    const auto path = test_file_path();
+    const auto file = write_test_file(path, 0x3c);
     AddressSpace source;
     expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
         "map the file read-only");
-    const auto restored = load_space(save_space(source));
+    expect(source.read_bytes(0x30000, 0x2000) == file,
+        "the source reads the file");
+    const auto bytes = save_space(source);
+    expect(bytes.size() < guest_page_size,
+        "clean file pages are not stored in the snapshot");
+    const auto restored = load_space(bytes);
     expect(restored->read_bytes(0x30000, 0x2000) == file,
-        "a file-backed region keeps its bytes");
+        "a file-backed region reads its file after restore");
+    expect(restored->materialized_page_counts().file_cached ==
+            source.materialized_page_counts().file_cached,
+        "file-cached pages stay file-cached");
+    expect(save_space(*restored) == bytes,
+        "saving the restored file mapping reproduces the same stream");
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+}
+
+void changed_file_is_refused_on_restore()
+{
+    const auto path = test_file_path();
+    static_cast<void>(write_test_file(path, 0x3c));
+    AddressSpace source;
+    expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
+        "map the file read-only");
+    const auto bytes = save_space(source);
+    static_cast<void>(write_test_file(path, 0x4d));
+    bool threw = false;
+    try {
+        static_cast<void>(load_space(bytes));
+    } catch (const FormatError&) {
+        threw = true;
+    }
+    expect(threw, "a file that changed since the snapshot is refused");
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+}
+
+void written_file_page_is_stored_and_the_file_is_untouched()
+{
+    const auto path = test_file_path();
+    const auto file = write_test_file(path, 0x5e);
+    AddressSpace source;
+    expect(source.map_file(0x40000, 0x2000,
+               MemoryPermission::Read | MemoryPermission::Write, path, 0),
+        "map the file writable");
+    expect(source.write32(0x40000, 0xcafebabeU), "write the first page");
+    const auto bytes = save_space(source);
+    expect(bytes.size() >= guest_page_size,
+        "the written page is stored in the snapshot");
+    const auto restored = load_space(bytes);
+    expect(restored->read32(0x40000) == 0xcafebabeU,
+        "the written page keeps its contents");
+    expect(restored->read_bytes(0x41000, 0x1000) ==
+            std::vector<std::byte>(file.begin() + 0x1000, file.end()),
+        "the untouched page is read from the file");
+    expect(read_test_file(path) == file, "the file on disk is not written");
     std::error_code ignored;
     std::filesystem::remove(path, ignored);
 }
@@ -214,7 +289,9 @@ int main()
     round_trip_keeps_contents_and_regions();
     restored_space_is_independent_and_writable();
     shared_writable_page_is_refused();
-    file_mapping_is_restored_with_its_bytes();
+    clean_file_pages_come_back_from_the_file();
+    changed_file_is_refused_on_restore();
+    written_file_page_is_stored_and_the_file_is_untouched();
     truncated_stream_is_a_format_error();
     if (failures != 0) {
         std::cerr << failures << " address space snapshot checks failed\n";
