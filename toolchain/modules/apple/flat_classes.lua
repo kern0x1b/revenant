@@ -68,5 +68,9 @@ function flat_symbols()
 end
 
 function app_link_flags(sdk, out)
-    return link_flags(stub_directory(sdk, out))
+    local flags = {"-F", stub_directory(sdk, out)}
+    for _, name in ipairs(class_names()) do
+        table.insert(flags, "-Wl,-U,_OBJC_CLASS_$_" .. name)
+    end
+    return flags
 end
