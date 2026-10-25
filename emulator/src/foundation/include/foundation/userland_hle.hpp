@@ -25,6 +25,7 @@
 
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/content_identity.hpp"
+#include "foundation/snapshot_io.hpp"
 
 namespace emulator {
 
@@ -186,6 +187,8 @@ public:
 
     void reset_mappings();
     void inherit_mappings(const UserlandHleRegistry& parent);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     friend class UserlandHleCall;
@@ -357,6 +360,7 @@ private:
 
     void prepare_shared_cache_data_symbols(
         const DyldSharedCache& cache, ArmArchitectureVersion architecture);
+    [[nodiscard]] std::vector<std::byte> wiring_identity() const;
 
     AddressSpace& memory_;
     Output& output_;

@@ -61,6 +61,13 @@ target("emulator_foundation_exclusive_monitor_snapshot_test")
     add_deps("emulator_foundation")
     add_tests("foundation.exclusive_monitor_snapshot")
 
+target("emulator_foundation_userland_hle_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/userland_hle_snapshot_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("foundation.userland_hle_snapshot")
+
 target("emulator_foundation_address_space_snapshot_test")
     set_kind("binary")
     set_default(false)

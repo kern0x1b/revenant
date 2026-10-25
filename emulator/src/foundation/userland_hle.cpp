@@ -2857,4 +2857,186 @@ void UserlandHleRegistry::inherit_mappings(const UserlandHleRegistry& parent)
     pending_thread_callbacks_.clear();
 }
 
+std::vector<std::byte> UserlandHleRegistry::wiring_identity() const
+{
+    snapshot::Writer out;
+    snapshot::save(out, static_cast<std::uint64_t>(registrations_.size()));
+    for (const auto& registration : registrations_) {
+        snapshot::save(out, registration.id);
+        snapshot::save(out, registration.image_suffix);
+        snapshot::save(out, registration.symbol);
+        snapshot::save(out, registration.prefix);
+        snapshot::save(out, registration.virtual_address);
+        snapshot::save(out, registration.objc_instance_method);
+        snapshot::save(out, registration.objc_class_method);
+        snapshot::save(out, static_cast<bool>(registration.handler));
+    }
+    snapshot::save(out, guest_functions_);
+    snapshot::save(out, guest_data_symbols_);
+    snapshot::save(
+        out, static_cast<std::uint64_t>(shared_cache_data_symbols_.size()));
+    for (const auto& symbol : shared_cache_data_symbols_) {
+        snapshot::save(out, symbol.cache_path);
+        snapshot::save(out, symbol.file_offset);
+        snapshot::save(out, symbol.symbol);
+    }
+    return out.bytes();
+}
+
+void UserlandHleRegistry::save(snapshot::Writer& out) const
+{
+    if (!pending_continuations_.empty())
+        throw snapshot::RefusedError { "userland.pending_continuations" };
+    if (!deferred_guest_calls_.empty())
+        throw snapshot::RefusedError { "userland.deferred_guest_calls" };
+    if (!pending_thread_callbacks_.empty())
+        throw snapshot::RefusedError { "userland.thread_callbacks" };
+
+    const auto wiring = wiring_identity();
+    snapshot::save(out, static_cast<std::uint64_t>(wiring.size()));
+    out.raw(wiring);
+    snapshot::save(out, registration_generation_);
+
+    snapshot::save(out, shared_hle_plan_ != nullptr);
+    if (shared_hle_plan_) {
+        snapshot::save(out, shared_hle_plan_generation_identity_.digest);
+        snapshot::save(out, shared_hle_plan_architecture_);
+        snapshot::save(out, shared_hle_plan_registration_generation_);
+    }
+
+    snapshot::save(out, static_cast<std::uint64_t>(installed_calls_.size()));
+    for (const auto& [address, call] : installed_calls_) {
+        snapshot::save(out, address);
+        snapshot::save(out, call.id);
+        snapshot::save(out, call.symbol);
+        snapshot::save(out, call.thumb);
+        snapshot::save(out, call.original);
+        snapshot::save(out, call.prefix_arguments);
+    }
+    snapshot::save(out, static_cast<std::uint64_t>(callable_aliases_.size()));
+    for (const auto& [key, address] : callable_aliases_) {
+        snapshot::save(out, std::get<0>(key));
+        snapshot::save(out, std::get<1>(key));
+        snapshot::save(out, std::get<2>(key));
+        snapshot::save(out, address);
+    }
+    snapshot::save(out, installed_symbols_);
+    snapshot::save(out, installed_symbol_thumb_);
+    snapshot::save(out, loaded_images_);
+    snapshot::save(out, interned_strings_);
+    snapshot::save(out, string_page_);
+    snapshot::save(out, string_cursor_);
+    snapshot::save(out, data_pages_);
+    snapshot::save(out, data_cursor_);
+    snapshot::save(out, persistent_trampolines_);
+    snapshot::save(out, persistent_trampoline_cursor_);
+    snapshot::save(out, available_continuation_trampolines_);
+    snapshot::save(out, continuation_trampoline_cursor_);
+    snapshot::save(out, thread_callback_return_address_);
+    snapshot::save(out, traced_symbols_);
+}
+
+void UserlandHleRegistry::load(snapshot::Reader& in)
+{
+    if (!pending_continuations_.empty() || !deferred_guest_calls_.empty() ||
+        !pending_thread_callbacks_.empty()) {
+        throw snapshot::FormatError { "userland registry has pending calls" };
+    }
+
+    const auto wiring = wiring_identity();
+    std::uint64_t wiring_size { };
+    snapshot::load(in, wiring_size);
+    if (wiring_size != wiring.size())
+        throw snapshot::FormatError {
+            "userland registrations differ from the wiring"
+        };
+    const auto saved_wiring = in.raw(wiring.size());
+    if (!std::equal(saved_wiring.begin(), saved_wiring.end(), wiring.begin(),
+            wiring.end())) {
+        throw snapshot::FormatError {
+            "userland registrations differ from the wiring"
+        };
+    }
+    snapshot::load(in, registration_generation_);
+
+    bool has_plan { };
+    snapshot::load(in, has_plan);
+    if (has_plan != (shared_hle_plan_ != nullptr))
+        throw snapshot::FormatError { "shared HLE plan differs from the wiring" };
+    if (has_plan) {
+        ContentIdentity identity;
+        ArmArchitectureVersion architecture { };
+        std::uint64_t plan_registration_generation { };
+        snapshot::load(in, identity.digest);
+        snapshot::load(in, architecture);
+        snapshot::load(in, plan_registration_generation);
+        if (identity != shared_hle_plan_generation_identity_ ||
+            architecture != shared_hle_plan_architecture_ ||
+            plan_registration_generation !=
+                shared_hle_plan_registration_generation_) {
+            throw snapshot::FormatError {
+                "shared HLE plan differs from the wiring"
+            };
+        }
+    }
+
+    installed_calls_.clear();
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    for (std::uint64_t index = 0; index < count; ++index) {
+        std::uint32_t address { };
+        InstalledCall call;
+        snapshot::load(in, address);
+        snapshot::load(in, call.id);
+        snapshot::load(in, call.symbol);
+        snapshot::load(in, call.thumb);
+        snapshot::load(in, call.original);
+        snapshot::load(in, call.prefix_arguments);
+        if (find_registration(call.id) == nullptr)
+            throw snapshot::FormatError {
+                "snapshot installed call has no registration"
+            };
+        if (!installed_calls_.emplace(address, std::move(call)).second)
+            throw snapshot::FormatError { "snapshot repeats an installed call" };
+    }
+
+    callable_aliases_.clear();
+    snapshot::load(in, count);
+    for (std::uint64_t index = 0; index < count; ++index) {
+        std::uint16_t id { };
+        std::string symbol;
+        std::uint8_t prefix_arguments { };
+        std::uint32_t address { };
+        snapshot::load(in, id);
+        snapshot::load(in, symbol);
+        snapshot::load(in, prefix_arguments);
+        snapshot::load(in, address);
+        if (find_registration(id) == nullptr)
+            throw snapshot::FormatError {
+                "snapshot callable alias has no registration"
+            };
+        if (!callable_aliases_
+                 .emplace(std::tuple { id, std::move(symbol), prefix_arguments },
+                     address)
+                 .second) {
+            throw snapshot::FormatError { "snapshot repeats a callable alias" };
+        }
+    }
+
+    snapshot::load(in, installed_symbols_);
+    snapshot::load(in, installed_symbol_thumb_);
+    snapshot::load(in, loaded_images_);
+    snapshot::load(in, interned_strings_);
+    snapshot::load(in, string_page_);
+    snapshot::load(in, string_cursor_);
+    snapshot::load(in, data_pages_);
+    snapshot::load(in, data_cursor_);
+    snapshot::load(in, persistent_trampolines_);
+    snapshot::load(in, persistent_trampoline_cursor_);
+    snapshot::load(in, available_continuation_trampolines_);
+    snapshot::load(in, continuation_trampoline_cursor_);
+    snapshot::load(in, thread_callback_return_address_);
+    snapshot::load(in, traced_symbols_);
+}
+
 }
