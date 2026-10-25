@@ -25,6 +25,7 @@
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/guest_exclusive_address_resolver.hpp"
 #include "foundation/jit_work_signal.hpp"
+#include "foundation/snapshot_io.hpp"
 
 namespace emulator {
 
@@ -157,6 +158,24 @@ struct CpuThreadState {
     std::uint32_t cpsr { };
     std::uint32_t fpscr { };
     std::optional<std::uint32_t> cthread_self;
+
+    void save(snapshot::Writer& out) const
+    {
+        snapshot::save(out, registers);
+        snapshot::save(out, extension_registers);
+        snapshot::save(out, cpsr);
+        snapshot::save(out, fpscr);
+        snapshot::save(out, cthread_self);
+    }
+
+    void load(snapshot::Reader& in)
+    {
+        snapshot::load(in, registers);
+        snapshot::load(in, extension_registers);
+        snapshot::load(in, cpsr);
+        snapshot::load(in, fpscr);
+        snapshot::load(in, cthread_self);
+    }
 };
 
 class CpuExecutionPool;
