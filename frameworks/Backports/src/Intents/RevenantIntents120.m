@@ -3,6 +3,7 @@
 #define INObjectSection INObjectSectionRevenant
 #define INObjectCollection INObjectCollectionRevenant
 #define INObjectResolutionResult INObjectResolutionResultRevenant
+#define INIntentResolutionResult INIntentResolutionResultRevenant
 #endif
 
 #import <Intents/Intents.h>
