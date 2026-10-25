@@ -17,7 +17,7 @@ build products (objects, archives, Mach-O images), and nothing in it is specific
 `--source` may be given more than once, and so may `--files`, `--product`, `--runtime` and `--component`. `--files` names
 a list of source files, one path per line; a source tree is walked for its files, and a list names exactly the files to
 scan. A product is a `.o`, a `.a`, a Mach-O image, or a folder of them. `--objects` is the folder of the Backports
-objects, `build/.objs` by default, which the build above writes. `--runtime` names the libraries of a Swift runtime an
+objects, `build/.objs` by default; the objects it holds are read with the sources (see below). `--runtime` names the libraries of a Swift runtime an
 iOS 6.1.3 device does not ship, and `--component` the libraries of a revenant component that implements API for it. A
 provider library supplies the types of the module its file name names (`libCombine.a` supplies `Combine`, and
 `libswiftFoundation.dylib` supplies `Foundation`), so a definition that a library makes for another module's type is not
@@ -39,10 +39,17 @@ ships it.
 ## What the classes mean
 
 Every referenced item gets one status, in this order. `present` means iOS 6.1.3 has it. `backported` means iOS 6.1.3 does
-not have it, and a Backports object or a `--component` library implements it. `runtime` means iOS 6.1.3 does not have it,
+not have it, and a Backports source or object implements it, or a `--component` library does. `runtime` means iOS 6.1.3 does not have it,
 and a `--runtime` library provides it: the Swift overlay types that revenant's Swift runtime ships. `missing` means none
 of these holds. An item absent from the SDK is not counted: it is the app's own code or a private API, and the summary
 counts those apart. `items.tsv` names the source of each status in its `via` column.
+
+The Backports set is read from the tree, not only from the build. The lowered member list,
+`frameworks/Backports/tools/lowered-members.txt`, names every class, C function, global variable, protocol and member that
+the sources lower, and it is read whether or not the tree is built. Every folder of `frameworks/Backports/src` is a
+framework the Backports provide, and the `public` Swift types declared in those folders are backported types. The objects
+of `--objects` add what the first two do not name. A component whose sources are in the tree is read the same way
+(`frameworks/SwiftUI/src`), and its framework and types are counted as `component`.
 
 The iOS 6.1.3 system is the dyld shared cache under `~/.revenant/dyld/6.1.3`, read through `apple.dyld`. Classes, C
 functions and global variables are checked there, by the cache's export table, which holds the exports of every library
@@ -109,7 +116,12 @@ a true occurrence and a `super` call to an application class in its first lines,
 - A framework counts as present when the cache has a library under its own install name. A framework whose iOS 6.1.3
   code sits in another library is reported missing. A framework is provided by a component or the runtime only when the
   library is given with `--component` or `--runtime`.
-- A component that is not built or installed on the machine is not measured, and its items are reported missing.
+- A component that is not built or installed on the machine is not measured, and its items are reported missing. Combine
+  is one: its source is the upstream package `packages/c/combine`, which xmake fetches, so its items stay missing until a
+  built library is given with `--component`.
+- Member gaps are reported only where the receiver's class is known: an Objective-C message to a class or to a variable
+  declared with a class type. A Swift member access is a candidate, and a candidate's name can match a class that is not
+  the receiver, so the candidates are not counted as gaps.
 - Text matches to names the scanned sources do not declare. A name that is declared outside the scanned trees (a
   generated file, a folder not given with `--source` or `--files`) is counted as the SDK's name.
 

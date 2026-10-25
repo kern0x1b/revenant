@@ -1,3 +1,7 @@
+local function availability_floor_flags(version)
+    return version and {"-Xfrontend", "-application-availability-floor", "-Xfrontend", version} or {}
+end
+
 rule("swift")
     add_deps("@self/apple-ios")
     set_extensions(".swift")
@@ -122,6 +126,7 @@ rule("swift")
                 end
             end
 
+            local floor = table.wrap(target:values("swift.application_floor"))[1]
             if target:pkg("swift-runtime") then
                 local modules, plugins = {}, {}
                 for _, dependency in ipairs(target:orderpkgs()) do
@@ -161,7 +166,8 @@ rule("swift")
                     symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                     prefix_map = os.projectdir() .. "=/port",
                     has_main = has_main
-                }), modules, plugins, table.wrap(target:values("swift.flags")), emitted, {"-c"}, sourcebatch.sourcefiles, {"-o", objectfile})
+                }), modules, plugins, table.wrap(target:values("swift.flags")), availability_floor_flags(floor), emitted, {"-c"},
+                                    sourcebatch.sourcefiles, {"-o", objectfile})
                 depend.on_changed(function ()
                     progress.show(jobopt.progress, "${color.build.object}compiling.swift %s", target:name())
                     os.mkdir(path.directory(objectfile))
@@ -183,7 +189,8 @@ rule("swift")
                 symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                 prefix_map = os.projectdir() .. "=/port",
                 has_main = has_main
-            }), table.wrap(target:values("swift.flags")), {"-emit-bc"}, sourcebatch.sourcefiles, {"-o", bitcode})
+            }), table.wrap(target:values("swift.flags")), availability_floor_flags(floor), {"-emit-bc"}, sourcebatch.sourcefiles,
+                                    {"-o", bitcode})
             local codegen = table.join(table.wrap(toolchain:get("cxflags")), swift.codegen_flags({optimize = target:get("optimize")}),
                                        {"-c", bitcode, "-o", objectfile})
             depend.on_changed(function ()

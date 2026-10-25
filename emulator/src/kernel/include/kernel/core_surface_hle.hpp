@@ -14,8 +14,10 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <vector>
 
+#include "graphics/surface_attributes.hpp"
 #include "graphics/surface_transport_abi.hpp"
 
 namespace emulator {
@@ -73,6 +75,9 @@ private:
         std::uint32_t imported_mapping_size { };
         std::uint64_t imported_mapping_lease_token { };
         std::vector<std::uint32_t> lock_options;
+        SurfaceUseCount use_count;
+        SurfaceAttributes attributes;
+        std::uint64_t generation { };
     };
     struct CreateRequest {
         std::uint32_t dictionary { };
@@ -121,9 +126,28 @@ private:
     void release_imported_mapping(AddressSpace& memory, std::uint32_t base,
         std::uint32_t size, std::uint64_t mapping_lease_token);
     [[nodiscard]] Buffer* find(std::uint32_t client);
+    [[nodiscard]] Buffer* find(std::uint32_t client, std::uint64_t generation);
+    struct GuestCall {
+        std::string_view symbol;
+        std::uint32_t argument;
+    };
+    using AttributeFound = std::function<void(
+        UserlandHleCall&, std::optional<std::size_t>)>;
+    void find_attribute(UserlandHleCall& call, std::uint32_t client,
+        std::uint64_t generation, std::uint32_t key, std::size_t index,
+        AttributeFound found);
+    void run_guest_calls(UserlandHleCall& call, std::vector<GuestCall> calls,
+        std::size_t index, std::function<void(UserlandHleCall&)> finish);
+    void copy_attribute(UserlandHleCall& call, std::uint32_t client,
+        std::uint64_t generation, std::uint32_t key);
+    void set_attribute(UserlandHleCall& call, std::uint32_t client,
+        std::uint64_t generation, std::uint32_t key, std::uint32_t value);
+    void remove_attribute(UserlandHleCall& call, std::uint32_t client,
+        std::uint64_t generation, std::uint32_t key);
     void submit(Buffer& buffer, UserlandHleCall& call);
 
     std::map<std::uint32_t, Buffer> buffers_;
+    std::uint64_t next_buffer_generation_ { };
     std::map<std::pair<std::uint32_t, surface_transport::Kind>, std::uint32_t>
         clients_by_id_;
     std::map<std::uint32_t, std::vector<std::uint32_t>> free_client_buffers_;

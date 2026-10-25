@@ -1,0 +1,146 @@
+diff --git a/include/swift/AST/AvailabilityConstraint.h b/include/swift/AST/AvailabilityConstraint.h
+index 8b075234..859124c1 100644
+--- a/include/swift/AST/AvailabilityConstraint.h
++++ b/include/swift/AST/AvailabilityConstraint.h
+@@ -247,6 +247,9 @@ std::optional<AvailabilityConstraint> getAvailabilityConstraintForDeclInDomain(
+     AvailabilityDomain domain,
+     AvailabilityConstraintFlags flags = std::nullopt);
+ 
++AvailabilityContext availabilityContextForReference(
++    const Decl *decl, const AvailabilityContext &context);
++
+ /// Computes the set of constraints that indicate whether a decl is "runtime
+ /// unavailable" (can never be reached at runtime) and adds the domain for each
+ /// of those constraints to the \p domains vector.
+diff --git a/include/swift/Basic/LangOptions.h b/include/swift/Basic/LangOptions.h
+index 41b3afd1..5cc467bf 100644
+--- a/include/swift/Basic/LangOptions.h
++++ b/include/swift/Basic/LangOptions.h
+@@ -176,6 +176,8 @@ namespace swift {
+     /// deployment target.
+     llvm::VersionTuple MinimumInliningTargetVersion;
+ 
++    std::optional<llvm::VersionTuple> ApplicationAvailabilityFloor;
++
+     /// The alternate name to use for the entry point instead of main.
+     std::optional<std::string> entryPointFunctionName;
+ 
+diff --git a/include/swift/Option/FrontendOptions.td b/include/swift/Option/FrontendOptions.td
+index 1ef13d03..1dfed881 100644
+--- a/include/swift/Option/FrontendOptions.td
++++ b/include/swift/Option/FrontendOptions.td
+@@ -1362,6 +1362,12 @@ def target_sdk_version : Separate<["-"], "target-sdk-version">,
+ def target_variant_sdk_version : Separate<["-"], "target-variant-sdk-version">,
+   HelpText<"The version of target variant SDK used for compilation">;
+ 
++def application_availability_floor
++  : Separate<["-"], "application-availability-floor">,
++  MetaVarName<"<version>">, Flags<[FrontendOption, ModuleInterfaceOption]>,
++  HelpText<"Check references to declarations outside the system modules as "
++           "if the deployment target were at least this version">;
++
+ def target_sdk_name : Separate<["-"], "target-sdk-name">,
+   HelpText<"Canonical name of the target SDK used for compilation">;
+ 
+diff --git a/lib/AST/AvailabilityConstraint.cpp b/lib/AST/AvailabilityConstraint.cpp
+index 3ca09973..b23b8e56 100644
+--- a/lib/AST/AvailabilityConstraint.cpp
++++ b/lib/AST/AvailabilityConstraint.cpp
+@@ -14,6 +14,7 @@
+ #include "swift/AST/ASTContext.h"
+ #include "swift/AST/AvailabilityContext.h"
+ #include "swift/AST/Decl.h"
++#include "swift/AST/Module.h"
+ 
+ using namespace swift;
+ 
+@@ -365,6 +366,24 @@ swift::getAvailabilityConstraintsForDecl(const Decl *decl,
+   return constraints;
+ }
+ 
++AvailabilityContext
++swift::availabilityContextForReference(const Decl *decl,
++                                       const AvailabilityContext &context) {
++  auto &ctx = decl->getASTContext();
++  auto floorVersion = ctx.LangOpts.ApplicationAvailabilityFloor;
++  if (!floorVersion || decl->getModuleContext()->isSystemModule())
++    return context;
++
++  auto domain = ctx.getTargetAvailabilityDomain();
++  if (!domain.supportsContextRefinement())
++    return context;
++
++  auto floored = context;
++  floored.constrainWithAvailabilityRange(AvailabilityRange(*floorVersion),
++                                         domain, ctx);
++  return floored;
++}
++
+ std::optional<AvailabilityConstraint>
+ swift::getAvailabilityConstraintForDeclInDomain(
+     const Decl *decl, const AvailabilityContext &context,
+diff --git a/lib/Frontend/CompilerInvocation.cpp b/lib/Frontend/CompilerInvocation.cpp
+index 933165c9..8f92722a 100644
+--- a/lib/Frontend/CompilerInvocation.cpp
++++ b/lib/Frontend/CompilerInvocation.cpp
+@@ -1748,6 +1748,9 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
+   if (auto vers = parseVersionArg(OPT_target_variant_sdk_version))
+     Opts.VariantSDKVersion = *vers;
+ 
++  if (auto vers = parseVersionArg(OPT_application_availability_floor))
++    Opts.ApplicationAvailabilityFloor = *vers;
++
+   // Get the SDK name.
+   if (Arg *A = Args.getLastArg(options::OPT_target_sdk_name)) {
+     Opts.SDKName = A->getValue();
+diff --git a/lib/Sema/TypeCheckAvailability.cpp b/lib/Sema/TypeCheckAvailability.cpp
+index 3f9989d5..d8b8b990 100644
+--- a/lib/Sema/TypeCheckAvailability.cpp
++++ b/lib/Sema/TypeCheckAvailability.cpp
+@@ -1723,7 +1723,8 @@ void swift::diagnoseOverrideOfUnavailableDecl(ValueDecl *override,
+   // recomputing it.
+   ExportContext where = ExportContext::forDeclSignature(override);
+   auto constraint =
+-      getAvailabilityConstraintsForDecl(base, where.getAvailability())
++      getAvailabilityConstraintsForDecl(
++          base, availabilityContextForReference(base, where.getAvailability()))
+           .getPrimaryConstraint();
+   if (!constraint)
+     return;
+@@ -1864,9 +1865,9 @@ swift::getUnsatisfiedAvailabilityConstraint(const Decl *decl,
+     flags |= AvailabilityConstraintFlag::
+         AllowUniversallyUnavailableInCompatibleContexts;
+ 
++  auto context = AvailabilityContext::forLocation(referenceLoc, referenceDC);
+   return getAvailabilityConstraintsForDecl(
+-             decl, AvailabilityContext::forLocation(referenceLoc, referenceDC),
+-             flags)
++             decl, availabilityContextForReference(decl, context), flags)
+       .getPrimaryConstraint();
+ }
+ 
+@@ -3078,7 +3079,8 @@ bool swift::diagnoseDeclAvailability(const ValueDecl *D, SourceRange R,
+   auto &ctx = DC->getASTContext();
+ 
+   auto constraint =
+-      getAvailabilityConstraintsForDecl(D, Where.getAvailability())
++      getAvailabilityConstraintsForDecl(
++          D, availabilityContextForReference(D, Where.getAvailability()))
+           .getPrimaryConstraint();
+ 
+   if (constraint) {
+diff --git a/lib/Sema/TypeCheckProtocol.cpp b/lib/Sema/TypeCheckProtocol.cpp
+index bcff53d8..23f36a16 100644
+--- a/lib/Sema/TypeCheckProtocol.cpp
++++ b/lib/Sema/TypeCheckProtocol.cpp
+@@ -2042,7 +2042,9 @@ checkWitnessAvailability(const ValueDecl *requirement, const ValueDecl *witness,
+   flags |= AvailabilityConstraintFlag::
+       AllowUniversallyUnavailableInCompatibleContexts;
+ 
+-  return getAvailabilityConstraintsForDecl(witness, requiredContext, flags)
++  return getAvailabilityConstraintsForDecl(
++             witness, availabilityContextForReference(witness, requiredContext),
++             flags)
+       .getPrimaryConstraint();
+ }
+ 

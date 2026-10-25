@@ -1,11 +1,17 @@
 # Continuous checks
 
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. Its three jobs run in parallel, all on `macos-26`. On a branch push,
-`backports` and `swift` run only when the branch changes a file outside `docs/`, `emulator/`, `recompiler/`,
-`toolchain/tests/emulate/` and Markdown, as an `ubuntu-latest` job named `changes` decides from the diff against the
-merge base with `main`: those folders never reach the native builds, and a public repository runs five macOS jobs at a
-time. A push to `main` and a dispatch run all three. Each selects Xcode 26.6
+`gh workflow run check.yml --ref <branch>`. All of its jobs but one run on `macos-26`: an `ubuntu-latest` job named `changes`
+decides from the diff against the merge base with `main` which of them a branch push needs, and a public repository
+runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
+
+- a change that touches only `docs/` or a Markdown file at the top of the repository runs `repository` alone, which is
+  `./xmakew test -P . 'repository/*'`: the layout and documentation checks that read those files;
+- `checks` runs for every other change;
+- `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
+  `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
+
+A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
 choose a runner, so each job keeps its own `runs-on`.
 
@@ -93,8 +99,56 @@ caches it creates are in place. The first run after a change to a cache key crea
 | baseline, `40044072531` | 14 min | 27 | 9 min 55 s | 7 min 40 s | 9 min 12 s |
 | after, `40046661803` | 4 min 12 s | 10 | 4 min 12 s | 3 min 34 s | 2 min 13 s |
 
+Before the gating, a push that changed only documentation still ran `checks` and `package` in full. Measured on
+`40185450738` (a documentation-only change) the `checks` tests took 705 s and `package` took 1205 s, of which its
+SwiftUI demo configure took 7 min 27 s and its build 11 min 18 s, so about 25 macOS minutes for a change that only
+the repository checks read. Since the gating, such a push runs the `repository` job alone.
+
 The baseline `checks` job spent 5 min 11 s in the firmware-tools configure, which installs nothing on a store hit: the
 time is in the iOS configure itself, in a stretch where xmake prints nothing for about ten minutes on a host. The
 change skips that configure when the inventory is cached, and `swift` skips it on a dyld hit, which removes it from
 both jobs on a warm push. The first run after the change to the inventory and objects keys, `40045244974`, ran the
 configure and the Backports build once; those entries are now cached.
+
+## The emulator workflow
+
+`.github/workflows/emulator.yml` runs the emulator on a runner, so boots, snapshots and measurements never fill a
+local disk. It is dispatched by hand on `macos-26` and nothing else runs it: a worker dispatches a job, waits for it
+once, and reads back the log and the numbers. GitHub dispatches only a workflow that is on the default branch, so
+a branch's own edit to the workflow runs only after it is merged; a branch that is not merged yet cannot be dispatched.
+
+Dispatch, wait once, and read the result, with the branch and the job:
+
+```
+gh workflow run emulator.yml --ref <branch> -f job=boot
+run=$(gh run list --workflow emulator.yml --branch <branch> --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch "$run" --interval 600 --exit-status
+gh run download "$run" --name "emulator-boot-$run" --dir "$HOME/.revenant/cache/ci/$run"
+```
+
+The download is scratch: delete it when the task ends. A run is watched once, with that one command. A rerun is
+dispatched again, never polled in a loop.
+
+The jobs, chosen by `job`:
+
+- `boot` boots the iPhone 4S on iOS 6.1.3 with `--time-scale 10 --perf-summary`, bounded by `ticks` CPU ticks (default
+  `4000000000`, the bound of the boots in [the performance reference](../reference/emulator/performance.md)). The perf
+  summary is `perf-summary.txt` and the emulator's stderr is `boot.log`.
+- `measure` builds the emulator of `control` (a branch or a commit of `origin`, default `main`) in a worktree of the
+  runner, then runs `rounds` pairs of boots of the control and of the branch, alternating which one goes first in each
+  round. `measurement.md` has one row per boot: real, user and system seconds from `/usr/bin/time -l`, maximum RSS and
+  peak footprint in MB. The table is also on the run's summary page, and each boot keeps its perf summary and log.
+
+The runner builds the emulator in release and takes the firmware it boots from `./xmakew firmware`: the iOS 6.1.3 shared
+cache (key `dyld-shared-cache-6.1.3-armv7-v1`) and the root filesystem of the iPhone 4S (key
+`firmware-rootfs-6.1.3-iphone4-1-v1`), under `~/.revenant/dyld/6.1.3` and `~/.revenant/firmware/rootfs/iPhone4,1`.
+A boot clones the root filesystem, since the emulator writes its device state beside the one it boots.
+
+The artifact `emulator-<job>-<run>` holds the logs, the perf summaries, the measurement table and any crash report of
+the emulator. No run uploads the root filesystem or a snapshot. The steps print `df -h /` as they go, and the last
+step measures the caches, so a run's disk use is read from its log.
+
+The `snapshot` job (a save at N ticks, a restore and a comparison) and the `app` job (a guest bundle from an artifact)
+are not in the workflow. The emulator has no restore of a machine state, only the design in
+[the snapshot explanation](../explanation/emulator/snapshot.md), and `xmake emulate` installs only the packages of the
+project's own targets, not a `.deb` from an artifact.

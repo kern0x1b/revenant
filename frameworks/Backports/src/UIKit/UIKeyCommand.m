@@ -99,6 +99,16 @@ static NSString *revenant_modifier_text(NSInteger flags)
     return _modifierFlags;
 }
 
+- (NSString *)discoverabilityTitle
+{
+    return [super discoverabilityTitle];
+}
+
+- (void)setDiscoverabilityTitle:(NSString *)discoverabilityTitle
+{
+    [super setDiscoverabilityTitle:discoverabilityTitle];
+}
+
 - (id)copyWithZone:(NSZone *)zone
 {
     UIKeyCommand *copy = [super copyWithZone:zone];
