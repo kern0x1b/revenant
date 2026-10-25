@@ -299,19 +299,39 @@ names the first file it failed on, with its text, whether it exists, and the sta
 occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
 path of patch 0015, and main's xmake was not run in the loop.
 
-## baselineOffset on iOS 6: not measured yet
+## baselineOffset on iOS 6: ignored by UIKit string drawing (measured)
 
 The constant `NSBaselineOffsetAttributeName` is in the 6.1.3 image as `_NSBaselineOffsetAttributeName`, and its SDK mark
 is lowered in `toolchain/modules/apple/lowered.lua`. The 6.1.3 image exports no CoreText baseline-offset key
 (`_kCTBaselineOffsetAttributeName` is absent), while it exports the font, kern, stroke, underline, foreground-colour and
-font-feature keys. So the CoreText layer of iOS 6 has no attribute that carries the offset. That is the reason to expect
-iOS 6 string drawing to ignore the attribute. It is an inference from the export list and not a measurement.
+font-feature keys.
 
-The probe `toolchain/tests/emulate/baseline` draws "Hxg" at 24 pt with and without a 6 pt offset and prints the ink box
-of each. It has not produced a result. On `iPhone4,1` 6.1.3, `[UIFont systemFontOfSize:]` traps with ARM exception 8, an
-undefined instruction, at 0x311150d4 in the system libraries, before the first draw. The trap happens with and without
-`[UIApplication sharedApplication]` first. The address is not yet mapped to a library.
+Measured with `toolchain/tests/emulate/baseline` (`./xmakew l -P . toolchain/tests/emulate/baseline/baseline.lua iPhone4,1 6.1.3`)
+on an iPhone 4S, iOS 6.1.3: "Hxg" at 24 pt drawn with `drawAtPoint:` into a bitmap has the same ink box with and without a
+6 pt `NSBaselineOffsetAttributeName` (top 33, bottom 56, left 21, right 62, 390 ink pixels), so the shift is 0. The control,
+the plain string drawn 6 points higher, shifts by 6, so the measurement sees a shift. iOS 6 UIKit string drawing ignores the
+attribute. The backport now honours it in `drawAtPoint:` (`frameworks/Backports/src/UIKit/NSAttributedString+BaselineOffset7.m`):
+the probe with the backport linked shifts the same ink by 6 points (top 33 to 39, 390 ink pixels, `shift=6 ink-equal=1`),
+the same as the control. On the host, `frameworks/Backports/tests/baseline_offset_oracle_test.lua` compares the replacement
+with macOS's own drawing, which honours the attribute: plain and offset text match pixel for pixel, and an offset that is
+not applied is detected. This covers single-line `drawAtPoint:` only. Runs are drawn one by one at their own font's
+top, so a mix of fonts in one line is not aligned on a shared baseline, and `drawInRect:` and the layout classes are not
+covered yet.
 
-Open: map 0x311150d4 to its library with the cache reader in `toolchain/modules/apple/dyld.lua`, and decide whether the trap
-is an emulator gap or the daemon context. Once the probe runs, its result decides whether the backport's text paths must
-apply the offset themselves.
+The probe's first runs trapped in `[UIFont systemFontOfSize:]`: ARM exception 8 at 0x311150d4, a `udf #254` in
+CoreFoundation's trap stub, which `_CFRuntimeCreateInstance` calls through a callback slot after `_GSFontCreateWithName`
+loads a type ID that is still 0. `GSFontGetTypeID()` returned 0 until `GSInitialize()` ran, and then 257. The probe never
+ran `GSInitialize`, which `UIApplicationMain` runs in an app. The probe now runs it first.
+
+An app that `UIApplicationMain` launches does not trap. `toolchain/tests/emulate/fontapp` installs one, has SpringBoard
+start it on iPhone4,1 6.1.3, and the app's `[UIFont systemFontOfSize:24]` returns a font: its output has `FONT-APP-DONE`
+and it exits with status 0. So the emulator needs no change for this trap; the trap is the precondition the probe skipped.
+No device daemon was run to compare. The launch took a long boot under load: SpringBoard checked in 570 to 800 host
+seconds after boot at a load of about 100, so `launch` needs `-s` and `-t` raised on a busy machine.
+
+## Emulate cases are not in `./xmakew test`
+
+The emulate cases under `toolchain/tests/emulate/` (`install`, `launchd`, `output`, `pin-leak`, `baseline`, `fontapp`) run
+by hand, as `docs/reference/toolchain/tests.md` says, and are not xmake tests. Registering them in `./xmakew test` is a
+separate job: each needs a booted firmware image for minutes, so the registration has to say which device and release it
+boots and where a CI slot for it comes from. Until then the cases are the record of what the emulator is checked against.
