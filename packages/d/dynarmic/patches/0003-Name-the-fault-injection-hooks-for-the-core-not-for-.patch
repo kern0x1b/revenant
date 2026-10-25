@@ -231,12 +231,11 @@ index 73232f4..ae8cb88 100644
  };
  
  class NativeCodeSlab final {
-@@ -176,7 +178,7 @@ public:
+@@ -176,7 +178,6 @@ public:
       * execution is stopped.
       */
      void GeneratePortableIR(std::uint64_t location_descriptor);
 -    // iLEMU portable-IR patch state: GeneratePortableIR-v1.
-+    // portable-IR patch state: GeneratePortableIR-v1.
  
      /**
       * Emits a previously optimized IR block without translating guest code.
@@ -244,21 +243,18 @@ diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/co
 index e0d192a..0edb514 100644
 --- a/src/dynarmic/interface/A32/config.h
 +++ b/src/dynarmic/interface/A32/config.h
-@@ -100,7 +100,7 @@ struct UserCallbacks : public TranslateCallbacks {
+@@ -100,7 +100,6 @@ struct UserCallbacks : public TranslateCallbacks {
      // IR that a backend would otherwise emit. The default lets existing
      // portable-IR consumers share their completed-translation handler.
      virtual void PortableIRGenerated(
 -            // iLEMU portable-IR patch state: PortableIRGenerated-v1.
-+            // portable-IR patch state: PortableIRGenerated-v1.
              std::uint64_t location_descriptor,
              std::uint64_t translation_nanoseconds,
              const Dynarmic::IR::Block& block) noexcept {
-@@ -230,6 +230,10 @@ struct UserConfig {
+@@ -230,6 +229,8 @@ struct UserConfig {
      size_t processor_id = 0;
      ExclusiveMonitor* global_monitor = nullptr;
  
-+    /// Count return stack buffer predictions and FastDispatchHint exits in the emitted code (arm64).
-+    /// Each counted event costs a few instructions, so this is for runs that report counters.
 +    bool dispatch_counters = false;
 +
      /// Select the architecture version to use.

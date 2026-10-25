@@ -218,15 +218,12 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
          m_jit.emitFunctionPrologue();
  #elif CPU(ARM64)
          // JITCage code is doing prologue and epilogue in thunk.
-@@ -6922,11 +6967,15 @@ class YarrGenerator final : public YarrJITInfo {
+@@ -6922,11 +6967,12 @@ class YarrGenerator final : public YarrJITInfo {
              size_t stackSizeForCalleeSaves = WTF::roundUpToMultipleOf<stackAlignmentBytes()>(m_calleeSaves.registerCount() * sizeof(UCPURegister));
  #if CPU(X86_64) || CPU(ARM64)
              m_jit.subPtr(GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(stackSizeForCalleeSaves), MacroAssembler::stackPointerRegister);
 +            m_jit.emitSaveCalleeSavesFor(&m_calleeSaves);
  #else
-+            //
-+            //
-+            //
 +            m_jit.emitSaveCalleeSavesFor(&m_calleeSaves);
              m_jit.subPtr(GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(stackSizeForCalleeSaves), m_regs.regT0);
              m_jit.move(m_regs.regT0, MacroAssembler::stackPointerRegister);
@@ -235,7 +232,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
          }
      }
  
-@@ -6938,7 +6987,7 @@ class YarrGenerator final : public YarrJITInfo {
+@@ -6938,7 +6984,7 @@ class YarrGenerator final : public YarrJITInfo {
          }
  
          m_jit.emitRestoreCalleeSavesFor(&m_calleeSaves);
@@ -244,7 +241,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
          m_jit.emitFunctionEpilogue();
  #elif CPU(ARM64)
          // JITCage code is doing prologue and epilogue in thunk.
-@@ -7098,6 +7147,20 @@ public:
+@@ -7098,6 +7144,20 @@ public:
      {
          MacroAssembler::Label startOfMainCode;
  
@@ -265,7 +262,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
  #if ENABLE(YARR_JIT_UNICODE_CAN_INCREMENT_INDEX_FOR_NON_BMP)
          // A zero minimum-size alternative (e.g. /aa|\B/u) can match in the middle of a surrogate pair, so it must not be skipped.
          if (m_decodeSurrogatePairs && m_executionMode != ExecutionMode::InlineTest && !m_pattern.multiline() && !m_pattern.m_containsBOL && !m_pattern.m_containsLookbehinds && !m_pattern.m_containsModifiers && m_pattern.m_body->m_minimumSize) {
-@@ -7142,8 +7205,14 @@ public:
+@@ -7142,8 +7202,14 @@ public:
              functionChecks<YarrCodeBlock::YarrJITCode16>();
              functionChecks<YarrCodeBlock::YarrJITCodeMatchOnly8>();
              functionChecks<YarrCodeBlock::YarrJITCodeMatchOnly16>();
@@ -280,7 +277,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
              MacroAssembler::Jump stackOk = m_jit.branchPtr(MacroAssembler::BelowOrEqual, MacroAssembler::Address(matchingContext, MatchingContextHolder::offsetOfStackLimit()), m_regs.regT0);
  
              // Exceeded stack limit, punt to the interpreter.
-@@ -7678,6 +7747,7 @@ private:
+@@ -7678,6 +7744,7 @@ private:
      SubjectSampler m_sampler;
  };
  
@@ -288,7 +285,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
  static MacroAssemblerCodeRef<JITThunkPtrTag> tryReadUnicodeCharSlowThunkGenerator(VM&)
  {
      CCallHelpers jit(nullptr);
-@@ -7690,7 +7760,9 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> tryReadUnicodeCharSlowThunkGenerato
+@@ -7690,7 +7757,9 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> tryReadUnicodeCharSlowThunkGenerato
  
      return FINALIZE_THUNK(patchBuffer, JITThunkPtrTag, "Yarr tryReadUnicodeChar"_s, "YARR tryReadUnicodeChar thunk");
  }
@@ -298,7 +295,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
  static MacroAssemblerCodeRef<JITThunkPtrTag> areCanonicallyEquivalentThunkGenerator(VM&)
  {
      CCallHelpers jit(nullptr);
-@@ -7772,12 +7844,89 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> areCanonicallyEquivalentThunkGenera
+@@ -7772,12 +7841,89 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> areCanonicallyEquivalentThunkGenera
  
      return FINALIZE_THUNK(patchBuffer, JITThunkPtrTag, "Yarr areCanonicallyEquivalent", "YARR areCanonicallyEquivalent call");
  }
@@ -388,7 +385,7 @@ index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330
  static void dumpCompileFailure(JITFailureReason failure)
  {
      switch (failure) {
-@@ -7808,6 +7957,10 @@ void jitCompile(YarrPattern& pattern, StringView patternString, CharSize charSiz
+@@ -7808,6 +7954,10 @@ void jitCompile(YarrPattern& pattern, StringView patternString, CharSize charSiz
      YarrJITDefaultRegisters jitRegisters;
      YarrGenerator<YarrJITDefaultRegisters>(masm, vm, &codeBlock, jitRegisters, pattern, patternString, charSize, mode, sampleString).compile(codeBlock);
  

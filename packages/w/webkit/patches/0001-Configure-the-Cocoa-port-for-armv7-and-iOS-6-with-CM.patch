@@ -3847,7 +3847,7 @@ diff --git a/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp b/Sourc
 index 9467bf0131369aba726693ebce92e1c83cc1363f..7878f22e6b751611fb87d81991f1512c8449bd26 100644
 --- a/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp
 +++ b/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp
-@@ -25,20 +25,9 @@
+@@ -25,20 +25,8 @@
  
  #import "LegacySocketProvider.h"
  
@@ -3864,13 +3864,12 @@ index 9467bf0131369aba726693ebce92e1c83cc1363f..7878f22e6b751611fb87d81991f1512c
 -    return nullptr;
 -}
 -#else
-+//
  #import "WebSocketChannel.h"
 +#import <WebCore/EmptyClients.h>
  #import <WebCore/WebTransportSession.h>
  #import <wtf/CompletionHandler.h>
  
-@@ -46,7 +35,6 @@ RefPtr<WebCore::ThreadableWebSocketChannel> LegacySocketProvider::createWebSocke
+@@ -46,7 +34,6 @@ RefPtr<WebCore::ThreadableWebSocketChannel> LegacySocketProvider::createWebSocke
  {
      return WebCore::WebSocketChannel::create(document, client, *this);
  }
