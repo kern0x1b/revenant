@@ -34,7 +34,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 85> saved_members {
+constexpr std::array<std::string_view, 95> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -90,6 +90,16 @@ constexpr std::array<std::string_view, 85> saved_members {
     "ck.pending_event_processors_",
     "ck.pending_event_poll_deadline_",
     "ck.local_timer_deadline_cache_",
+    "ck.dyld_shared_cache_attempted_",
+    "ck.dyld_shared_cache_path_",
+    "ck.timer_trace_count_",
+    "ck.port_status_trace_count_",
+    "ck.thread_trace_count_",
+    "ck.mapping_trace_count_",
+    "ck.socket_payload_trace_count_",
+    "ck.semaphore_wait_trace_count_",
+    "ck.psynch_trace_count_",
+    "ck.baseband_io_trace_count_",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
@@ -122,10 +132,7 @@ constexpr std::array<std::string_view, 85> saved_members {
     "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 50> open_members {
-    "ck.dyld_shared_cache_attempted_",
-    "ck.dyld_shared_cache_path_",
-    "ck.mapping_trace_count_",
+constexpr std::array<std::string_view, 47> open_members {
     "kss.mach_queues",
     "kss.mach_semaphores",
     "pthread.registration_",

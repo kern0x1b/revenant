@@ -30,6 +30,16 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, pending_event_poll_observed_);
     snapshot::save(out, local_timer_deadline_cache_);
     snapshot::save(out, local_timer_deadline_cache_valid_);
+    snapshot::save(out, dyld_shared_cache_path_.string());
+    snapshot::save(out, dyld_shared_cache_attempted_);
+    snapshot::save(out, timer_trace_count_);
+    snapshot::save(out, port_status_trace_count_);
+    snapshot::save(out, thread_trace_count_);
+    snapshot::save(out, mapping_trace_count_);
+    snapshot::save(out, socket_payload_trace_count_);
+    snapshot::save(out, semaphore_wait_trace_count_);
+    snapshot::save(out, psynch_trace_count_);
+    snapshot::save(out, baseband_io_trace_count_);
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -53,6 +63,18 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, pending_event_poll_observed_);
     snapshot::load(in, local_timer_deadline_cache_);
     snapshot::load(in, local_timer_deadline_cache_valid_);
+    std::string dyld_shared_cache_path;
+    snapshot::load(in, dyld_shared_cache_path);
+    dyld_shared_cache_path_ = std::filesystem::path { dyld_shared_cache_path };
+    snapshot::load(in, dyld_shared_cache_attempted_);
+    snapshot::load(in, timer_trace_count_);
+    snapshot::load(in, port_status_trace_count_);
+    snapshot::load(in, thread_trace_count_);
+    snapshot::load(in, mapping_trace_count_);
+    snapshot::load(in, socket_payload_trace_count_);
+    snapshot::load(in, semaphore_wait_trace_count_);
+    snapshot::load(in, psynch_trace_count_);
+    snapshot::load(in, baseband_io_trace_count_);
 }
 
 }
