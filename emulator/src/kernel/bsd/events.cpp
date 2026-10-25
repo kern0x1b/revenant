@@ -2611,9 +2611,9 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 foundation::encode_user32_loadavg(load_average()));
             return;
         }
-        if (*mib0 == darwin::sysctl::control_net &&
+        if (registers[1] == 5 && *mib0 == darwin::sysctl::control_net &&
             *mib1 == darwin::network::link_protocol_family && *mib2 == 0 &&
-            *mib3 == darwin::network::ifmib_system && registers[1] == 5 &&
+            *mib3 == darwin::network::ifmib_system &&
             memory_.read32(registers[0] + 16U) ==
                 darwin::network::ifmib_ifcount) {
             std::uint32_t highest_index = 0;
@@ -2629,9 +2629,9 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             write_read_only_bytes(bytes);
             return;
         }
-        if (*mib0 == darwin::sysctl::control_net &&
+        if (registers[1] == 6 && *mib0 == darwin::sysctl::control_net &&
             *mib1 == darwin::network::link_protocol_family && *mib2 == 0 &&
-            *mib3 == darwin::network::ifmib_ifdata && registers[1] == 6) {
+            *mib3 == darwin::network::ifmib_ifdata) {
             const auto index = memory_.read32(registers[0] + 16U);
             const auto selector = memory_.read32(registers[0] + 20U);
             if (!index || !selector) {
