@@ -409,10 +409,6 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
-      - name: Key the Backports objects as the backports job keys them
-        id: objects_keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-
       - name: Key the Backports facts by the SDK, the compiler and the Xcode build
         id: facts_keys
         run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -425,6 +421,10 @@ jobs:
           restore-keys: |
             xmake-global-package-${{ runner.os }}-
 
+      - name: Key the demo's objects by every input they are built from
+        id: objects_keys_all
+        run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/cache/restore@v4
         id: objects
         with:
@@ -432,7 +432,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.objects_keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - uses: actions/cache/restore@v4
         id: dyld
@@ -484,6 +484,15 @@ jobs:
           name: swiftui-packages
           path: build/*.deb
           if-no-files-found: error
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - name: Save the package store
         if: steps.lookup.outputs.cache-hit != 'true'
