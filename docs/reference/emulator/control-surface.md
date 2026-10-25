@@ -69,7 +69,8 @@ The emulator itself also dumps `threads` of any process that dies on a signal.
 * There is no host-side syslog: the guest's own syslogd/ASL write into the rootfs. The launchd
   vproc log appears as `[launchd-log] pid=1 ... message=...`.
 * Emulator-detected crashes: `[cpu] fatal pid= pc= lr= fault= access= size=`, then
-  `[process] exit pid= status=0 signal=11` and a `[control] thread ...` dump.
+  `[process] exit pid= status=0 signal=11` and a `[control] thread ...` dump. The fields of the fatal line and
+  the `[fault-words]` lines that follow it, and how each address is named, are in `fault-report.md`.
 
 ## Milestones without screenshots
 

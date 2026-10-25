@@ -1,0 +1,202 @@
+diff --git a/src/dynarmic/backend/arm64/address_space.cpp b/src/dynarmic/backend/arm64/address_space.cpp
+index fc112cea..07c5ba86 100644
+--- a/src/dynarmic/backend/arm64/address_space.cpp
++++ b/src/dynarmic/backend/arm64/address_space.cpp
+@@ -3,6 +3,7 @@
+  * SPDX-License-Identifier: 0BSD
+  */
+ 
++#include <algorithm>
+ #include <cstdio>
+ 
+ #include <mcl/bit_cast.hpp>
+@@ -20,6 +21,25 @@
+ 
+ namespace Dynarmic::Backend::Arm64 {
+ 
++namespace {
++
++constexpr float block_info_max_load_factor = 0.9f;
++
++EmittedBlockInfo StoredBlockInfo(const EmittedBlockInfo& emitted) {
++    return EmittedBlockInfo{emitted.entry_point, emitted.size, {}, emitted.block_relocations, emitted.fastmem_patch_info};
++}
++
++const std::vector<BlockRelocation>* FindBlockRelocations(const EmittedBlockInfo& info, const IR::LocationDescriptor& descriptor) {
++    for (const auto& [target, relocations] : info.block_relocations) {
++        if (target == descriptor) {
++            return &relocations;
++        }
++    }
++    return nullptr;
++}
++
++}
++
+ AddressSpace::AddressSpace(size_t code_cache_size)
+         : code_cache_size(code_cache_size)
+         , mem(code_cache_size)
+@@ -31,6 +51,7 @@ AddressSpace::AddressSpace(size_t code_cache_size)
+     exception_handler.SetFastmemCallback([this](u64 host_pc) {
+         return FastmemCallback(host_pc);
+     });
++    block_infos.max_load_factor(block_info_max_load_factor);
+ }
+ 
+ AddressSpace::~AddressSpace() = default;
+@@ -91,10 +112,11 @@ void AddressSpace::InvalidateBasicBlocks(const tsl::robin_set<IR::LocationDescri
+ }
+ 
+ void AddressSpace::ClearCache() {
+-    block_entries.clear();
++    decltype(block_entries){}.swap(block_entries);
+     reverse_block_entries.clear();
+-    block_infos.clear();
+-    block_references.clear();
++    decltype(block_infos){}.swap(block_infos);
++    block_infos.max_load_factor(block_info_max_load_factor);
++    decltype(block_references){}.swap(block_references);
+     pending_block_relinks.clear();
+     code.set_offset(prelude_info.end_of_prelude);
+ }
+@@ -145,8 +167,9 @@ AddressSpace::RetiredCodeStats AddressSpace::RetireCodeRange(CodePtr begin, Code
+         if (block_info != block_infos.end()) {
+             for (const auto& [target_descriptor, relocations] : block_info->second.block_relocations) {
+                 if (auto references = block_references.find(target_descriptor); references != block_references.end()) {
+-                    references.value().erase(entry_point);
+-                    if (references->second.empty()) {
++                    auto& referrers = references.value();
++                    referrers.erase(std::remove(referrers.begin(), referrers.end(), entry_point), referrers.end());
++                    if (referrers.empty()) {
+                         block_references.erase(references);
+                     }
+                 }
+@@ -202,7 +225,7 @@ EmittedBlockInfo AddressSpace::EmitBlock(IR::Block& block) {
+ 
+     ASSERT(block_entries.insert({location, block_info.entry_point}).second);
+     ASSERT(reverse_block_entries.insert({block_info.entry_point, location}).second);
+-    ASSERT(block_infos.insert({block_info.entry_point, block_info}).second);
++    ASSERT(block_infos.insert({block_info.entry_point, StoredBlockInfo(block_info)}).second);
+ 
+     Link(block_info);
+     if (defer_block_relinks) {
+@@ -362,8 +385,8 @@ void AddressSpace::Link(EmittedBlockInfo& block_info) {
+         }
+     }
+ 
+-    for (auto [target_descriptor, list] : block_info.block_relocations) {
+-        block_references[target_descriptor].insert(block_info.entry_point);
++    for (const auto& [target_descriptor, list] : block_info.block_relocations) {
++        block_references[target_descriptor].push_back(block_info.entry_point);
+         LinkBlockLinks(block_info.entry_point, Get(target_descriptor), list);
+     }
+ }
+@@ -398,12 +421,16 @@ void AddressSpace::LinkBlockLinks(const CodePtr entry_point, const CodePtr targe
+ }
+ 
+ void AddressSpace::RelinkForDescriptor(IR::LocationDescriptor target_descriptor, CodePtr target_ptr) {
+-    for (auto code_ptr : block_references[target_descriptor]) {
++    const auto references = block_references.find(target_descriptor);
++    if (references == block_references.end()) {
++        return;
++    }
++    for (auto code_ptr : references.value()) {
+         if (auto block_iter = block_infos.find(code_ptr); block_iter != block_infos.end()) {
+             const EmittedBlockInfo& block_info = block_iter->second;
+ 
+-            if (auto relocation_iter = block_info.block_relocations.find(target_descriptor); relocation_iter != block_info.block_relocations.end()) {
+-                LinkBlockLinks(block_info.entry_point, target_ptr, relocation_iter->second);
++            if (const auto* relocations = FindBlockRelocations(block_info, target_descriptor)) {
++                LinkBlockLinks(block_info.entry_point, target_ptr, *relocations);
+             }
+ 
+             mem.invalidate(reinterpret_cast<u32*>(block_info.entry_point), block_info.size);
+@@ -425,8 +452,12 @@ FakeCall AddressSpace::FastmemCallback(u64 host_pc) {
+             goto fail;
+         }
+ 
+-        const auto patch_entry = block_info->second.fastmem_patch_info.find(host_ptr - entry_point);
+-        if (patch_entry == block_info->second.fastmem_patch_info.end()) {
++        const auto& fastmem_patches = block_info->second.fastmem_patch_info;
++        const auto offset = host_ptr - entry_point;
++        const auto patch_entry = std::find_if(fastmem_patches.begin(), fastmem_patches.end(), [offset](const auto& entry) {
++            return entry.first == offset;
++        });
++        if (patch_entry == fastmem_patches.end()) {
+             goto fail;
+         }
+ 
+diff --git a/src/dynarmic/backend/arm64/address_space.h b/src/dynarmic/backend/arm64/address_space.h
+index 58052f0f..f799d057 100644
+--- a/src/dynarmic/backend/arm64/address_space.h
++++ b/src/dynarmic/backend/arm64/address_space.h
+@@ -117,7 +117,7 @@ protected:
+     tsl::robin_map<IR::LocationDescriptor, CodePtr> block_entries;
+     std::map<CodePtr, IR::LocationDescriptor> reverse_block_entries;
+     tsl::robin_map<CodePtr, EmittedBlockInfo> block_infos;
+-    tsl::robin_map<IR::LocationDescriptor, tsl::robin_set<CodePtr>> block_references;
++    tsl::robin_map<IR::LocationDescriptor, std::vector<CodePtr>> block_references;
+ 
+     bool defer_block_relinks = false;
+     tsl::robin_set<IR::LocationDescriptor> pending_block_relinks;
+diff --git a/src/dynarmic/backend/arm64/emit_arm64.cpp b/src/dynarmic/backend/arm64/emit_arm64.cpp
+index d9ef96ba..72a1d2af 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64.cpp
+@@ -272,8 +272,18 @@ void EmitRelocation(oaknut::CodeGenerator& code, EmitContext& ctx, LinkTarget li
+     code.NOP();
+ }
+ 
++std::vector<BlockRelocation>& BlockRelocationsFor(EmittedBlockInfo& info, const IR::LocationDescriptor& descriptor) {
++    for (auto& [target, relocations] : info.block_relocations) {
++        if (target == descriptor) {
++            return relocations;
++        }
++    }
++    info.block_relocations.emplace_back(descriptor, std::vector<BlockRelocation>{});
++    return info.block_relocations.back().second;
++}
++
+ void EmitBlockLinkRelocation(oaknut::CodeGenerator& code, EmitContext& ctx, const IR::LocationDescriptor& descriptor, BlockRelocationType type) {
+-    ctx.ebi.block_relocations[descriptor].emplace_back(BlockRelocation{code.xptr<CodePtr>() - ctx.ebi.entry_point, type});
++    BlockRelocationsFor(ctx.ebi, descriptor).emplace_back(BlockRelocation{code.xptr<CodePtr>() - ctx.ebi.entry_point, type});
+     switch (type) {
+     case BlockRelocationType::Branch:
+         code.NOP();
+diff --git a/src/dynarmic/backend/arm64/emit_arm64.h b/src/dynarmic/backend/arm64/emit_arm64.h
+index 4fe79c23..9260a3c4 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64.h
++++ b/src/dynarmic/backend/arm64/emit_arm64.h
+@@ -105,8 +105,8 @@ struct EmittedBlockInfo {
+     CodePtr entry_point;
+     size_t size;
+     std::vector<Relocation> relocations;
+-    tsl::robin_map<IR::LocationDescriptor, std::vector<BlockRelocation>> block_relocations;
+-    tsl::robin_map<std::ptrdiff_t, FastmemPatchInfo> fastmem_patch_info;
++    std::vector<std::pair<IR::LocationDescriptor, std::vector<BlockRelocation>>> block_relocations;
++    std::vector<std::pair<std::ptrdiff_t, FastmemPatchInfo>> fastmem_patch_info;
+ };
+ 
+ struct EmitConfig {
+diff --git a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
+index 981119ba..167bd4d4 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
+@@ -596,7 +596,7 @@ void FastmemEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx, IR::In
+     const auto fastmem_location = EmitMemoryLdr<bitsize>(code, Rvalue->index(), Xbase, Xoffset, ordered, ShouldExt32(ctx));
+ 
+     ctx.deferred_emits.emplace_back([&code, &ctx, inst, marker, Xaddr = *Xaddr, Rvalue = *Rvalue, ordered, fallback, end, fastmem_location] {
+-        ctx.ebi.fastmem_patch_info.emplace(
++        ctx.ebi.fastmem_patch_info.emplace_back(
+             fastmem_location - ctx.ebi.entry_point,
+             FastmemPatchInfo{
+                 .marker = marker,
+@@ -648,7 +648,7 @@ void FastmemEmitWriteMemory(oaknut::CodeGenerator& code, EmitContext& ctx, IR::I
+     const auto fastmem_location = EmitMemoryStr<bitsize>(code, Rvalue->index(), Xbase, Xoffset, ordered, ShouldExt32(ctx));
+ 
+     ctx.deferred_emits.emplace_back([&code, &ctx, inst, marker, Xaddr = *Xaddr, Rvalue = *Rvalue, ordered, fallback, end, fastmem_location] {
+-        ctx.ebi.fastmem_patch_info.emplace(
++        ctx.ebi.fastmem_patch_info.emplace_back(
+             fastmem_location - ctx.ebi.entry_point,
+             FastmemPatchInfo{
+                 .marker = marker,

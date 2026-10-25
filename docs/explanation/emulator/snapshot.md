@@ -227,9 +227,91 @@ Restore the snapshot, continue to the verdict. The oracle is that the verdict an
 and that the `[process]` lines after the snapshot point match. Timing is cold to verdict against restore to verdict, in
 wall time and CPU time, with the translation cache empty and then with the disk artifacts present.
 
-Not yet settled, to measure before code: how many entries each pending map holds at a quiescent point of the `run`
-profile; whether host network objects exist there; how long a restore takes for about 1 million pages, of which about
-0.9 GiB are anonymous or shared-writable.
+Measured, the pending state of a `run`-profile boot (`--verbose --perf-summary`, counts taken at quit, not at a defined
+quiescent point). Each cell is the largest count in any runtime, then the number of runtimes with a non-zero count, at a
+120 s window (21 processes) and a 600 s window (63 processes):
+
+| map | 120 s | 600 s |
+|---|---|---|
+| `pending_waits_` | 0 | 0 |
+| `pending_mach_receives_` | 1 / 7 | 10 / 39 |
+| `pending_kevents_` | 0 | 2 / 57 |
+| `pending_semaphore_waits_` | 1 / 1 | 3 / 19 |
+| `pending_psynch_waits_` | 0 | 4 / 3 |
+| `pending_signal_suspends_` | 0 | 1 / 11 |
+| `pending_selects_` | 1 / 1 | 1 / 4 |
+| `pending_io_poll_cache_` | 2 / 1 | 7 / 60 |
+| `pending_event_processors_` | 2 / 8 | 17 / 62 |
+| `host_sockets_` | 3 / 1 | 3 / 2 |
+| `unix_listener_states_` | 11 / 20 | 11 / 7 |
+| `virtual_udp_sockets_`, `route_socket_states_`, host connects, accepts and writes, baseband writes, flocks, record locks, polls, timers, recvmsgs, socket reads, unix accepts | 0 | 0 |
+| `kqueues_` | 2 / 21 | 5 / 63 |
+| `file_descriptors_` | 0 | 12 / 19 |
+| `virtual_descriptors_` | 35 / 21 | 80 / 63 |
+| `thread_pending_signals_` | 3 / 20 | 19 / 63 |
+
+Reading: no runtime ever held a `pending_waits_` entry, and the host connect, accept and write maps and the baseband
+writes stayed empty. Mach receives, kevent, semaphore and psynch waits, signal suspends, io-poll caches and event
+processors are non-zero in a running guest, so a snapshot must save them as guest-state waits or wait for them to drain.
+Host sockets are present in one or two runtimes, so the host-network refusal in the table will fire on a `run` boot
+unless those sockets are closed first. These counts are at quit; the quiescent point is still undefined.
+
+Still open: whether a quiescent point exists where the waits and host sockets above are empty, and how long a restore
+takes for about 1 million pages, of which about 0.9 GiB are anonymous or shared-writable.
+
+## Loop state in run(), classified
+
+`EmulatorSession::run` (`src/runtime/emulator_session.cpp:186`) keeps its scheduling state in locals. The scheduler loop
+starts at line 2783 and its teardown is at about 5047. A local is listed here when it is declared before the loop and is
+read or written inside it, or inside a lambda defined before the loop that the loop calls. Save means written to the
+snapshot. Rebuild means set from the configuration, the rootfs or the restored kernels. Refuse means the snapshot is not
+taken while the value is set.
+
+| local | declared | holds | treatment |
+|---|---|---|---|
+| `scheduler` | 1482 | `XnuScheduler`: thread records, run queues, counts (owner in the table above) | save with the scheduler owner |
+| `last_serial_thread` | 1493 | the thread that ran last in the serial slice order | save |
+| `scheduler_handoff_thread` | 1494 | the explicit handoff target the dispatch policy reads | save |
+| `display_urgent_process` | 1495 | the process that holds a realtime display lease | refuse while set |
+| `display_urgent_thread`, `display_urgent_receiver_thread`, `display_yielded_thread` | 1496 to 1498 | guest thread ids of the display callback | refuse while a callback is in flight; save otherwise |
+| `display_inflight_callback_thread` | 1499 | the callback in flight | refuse while set |
+| `display_inflight_callback_sequence` | 1500 | the sequence of the callback in flight | save (0 at quiescence) |
+| `display_callback_pending_reported` | 1507 | whether the pending-callback line was printed | rebuild as false; it gates a print only |
+| `diagnostic_svc_spin_thread`, `_calls`, `_report_at` | 1508 to 1510 | counters for the spin report | rebuild; they gate a print only |
+| `diagnostic_display_yield_count` | 1511 | count of display yields, capped at 32 by the check at 3991 | save; the cap changes scheduling |
+| `remaining_ticks` | 2159 | ticks left in a bounded run | save the tick count at the snapshot; the restored bound is the cold bound minus that count |
+| `consumed_ticks`, `stopped_pid`, `stopped_cpu`, `stopped_result` | 2160 to 2163 | the values reported at exit | not state; recomputed at exit |
+| `hard_stop`, `initial_failure` | 2164, 2165 | exit conditions | refuse while set |
+| `gdb_server`, `debug_request` | 2166, 2167 | a debugger attached to the session | refuse while attached |
+| `realtime_pacer` | 2194 | host-time pacing | rebuild |
+| `display_performance_window`, `display_clock_window` | 2255, 2264 | host-side display timing windows | rebuild (reset) |
+| `display_scanout_owner` | 2265 | `Runtime*` of the scanout owner, a host pointer | rebuild from the foreground process |
+| `observed_display_submissions`, `last_display_submission` | 2295, 2297 | host-time display observation | rebuild (reset) |
+| `transition_process` | 2305 (lambda) | the destination of a foreground transition | refuse while a transition is pending |
+| `last_jit_quota_refresh`, `latest_host_memory_budget`, `pressure_reclamation_applied` | 2461 to 2463 | JIT memory pacing | rebuild |
+| `guest_idle_since` | 2464 | host time since the guest went idle | rebuild (reset) |
+| `guest_timer_overshoot_samples`, `_total_nanoseconds`, `_max_nanoseconds` | 2465 to 2467 | timer measurements | rebuild (zero) |
+| `observed_guest_timer_deadline` | 2468 | cached next guest deadline | rebuild from the kernels' timers |
+| `guest_deadlines` | 2469 | per-process deadlines, upserted from `timer_deadline_snapshot()` (2474 to 2489) | rebuild by the same refresh after restore |
+| `executed_time_clock`, `executed_ticks_since_catch_up` | 2519, 2520 | guest tick accounting and catch-up | save the tick counter; rebuild the clock from `guest_ticks_per_second` |
+| `last_interactive_host_activity` | 2763 | host time of the last input | rebuild |
+| `interaction_generation` | 2764 | input generation counter, starts at 1 | save |
+| `input_receiver_process` | 2765 | the process that receives input | save; refuse while input is pending |
+| `pending_touch_input_completion`, `pending_button_input_completion` | 495, 496 | input in flight | refuse while set |
+| `touch_replay`, `live_control`, `live_button_scheduler`, `live_touch_scheduler` | 471 to 474 | input replay and the control channel | refuse while a replay is active; rebuild otherwise |
+| `display_presenter`, `frame_file_presenter` | 469, 470 | host display output | rebuild |
+| `runtimes`, `runtime_index` | 621, 683 | the processes; the pid index over them | `runtimes` is the per-process owner; rebuild the index |
+| `jit_code_cache_governor`, `runtime_reaper`, `runtime_jit_memory`, `host_resources`, `artifact_compaction_*` | 593 to 771 | JIT and host work | not saved; rebuild |
+| `jit_work_signal` | 1095 | the work signal shared with the JIT | rebuild |
+| `baseband_output_path`, `baseband_capture_stream`, `baseband_capture_bytes` | 549 to 551 | host output for baseband capture | rebuild; the byte count is output only |
+| `debug_target` | 1481 | the debugger adapter over `runtimes` | rebuild |
+| `guest_execution_policy`, `guest_dispatch_policy`, `guest_parallelism_policy` | 1486 to 1492 | policies built from the configuration | rebuild |
+| `options`, `host`, `device`, `darwin_abi`, `rootfs`, `session_catalog`, `activation`, `lockdown_capabilities`, `guest_architecture`, `guest_ticks_per_second`, `guest_processor_count`, `profile_*` | 191 to 372 | configuration and host objects | rebuild; the header identity check covers them |
+| `initial_runtime`, `catalog_maintenance` | 1474, 1475 | pointer to the initial process; host catalog maintenance | rebuild |
+
+The scan is approximate. It found the names used in the loop body and followed the lambdas defined before the loop that
+the loop calls, by hand. A name used only inside such a lambda and not listed here is a gap. The round-trip oracle and its
+negative control are the check for a missed field, not this table.
 
 ## Stages
 
@@ -249,8 +331,12 @@ The ready point is `[boot] milestone=springboard-finished-startup`, logged when 
 `com.apple.springboard.finishedstartup`. The hook is `_notify_post` in `libsystem_notify.dylib`, where that symbol is
 defined. The notify HLE does not record it on its own: `publish()` logs nothing, and the notify hooks had been
 registered under `libSystem.B.dylib`, which installs none of them. Five of the six
-registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` still
-installs under neither image, so the provider-initializer guard it was written for (`27048fc11`) is inactive.
+registrations were dead for that reason; `23f3de3b7` moves them to `libsystem_notify.dylib`. `__notify_lib_init` is not
+exported, but it is a local symbol of that image. The 6.1.3 cache holds the local symbols in its main file (header
+`localSymbolsOffset` 0x0c985000, `localSymbolsSize` 0x01ee15ff), so the earlier note that it had none was wrong. Reading
+them needed two fixes: `apple.dyld` assumed 16-byte entries for the 32-bit cache (the entries are 12 bytes), and the
+emulator's image symbols came only from the stripped `LC_SYMTAB`. With both, the guard installs (`functions=7` on every
+`libsystem_notify` line) and the provider-initializer guard from `27048fc11` is active.
 
 Plain boots, with the milestone reached in some and not others:
 

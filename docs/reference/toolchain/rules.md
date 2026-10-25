@@ -10,7 +10,7 @@ The target rules and the values each one reads, the settings a port sets for the
 | `@addon/revenant/daemon` | an executable in `/usr/libexec` | `revenant.install`, `revenant.libraries`; its LaunchDaemons plist through `add_installfiles` |
 | `@addon/revenant/app` | `Name.app` | `app.plist-file`, `app.plist`, `app.resources`, `app.frameworks`, `app.url-scheme` |
 | `@addon/revenant/library` | a shared library an application bundles | the values on any target below; checked, stripped, signed and import-checked with the bundle |
-| `@addon/revenant/swift` | added beside one of the rules above | `swift.module` (default the target's name), `swift.flags` |
+| `@addon/revenant/swift` | added beside one of the rules above | `swift.module` (default the target's name), `swift.flags`, `swift.application_floor` (a version such as `15`: a reference to a declaration outside the system modules is checked as if the deployment target were at least that version; system declarations are still checked against the deployment target) |
 | `@addon/revenant/rust` | a Rust staticlib for armv7 on iOS 6.0, built by cargo | `rust.crate` (the folder with its `Cargo.toml` and `Cargo.lock`, relative to the project), `rust.library` (the crate's `[lib]` name; default the target's name, with `-` as `_`), `rust.package` (the `-p` package of a workspace), `rust.features` (the exact feature set; the default features are off), `rust.rustflags` (rustc flags, added to `RUSTFLAGS`) |
 | `@addon/revenant/check` | a project check | `check.*`, see below |
 

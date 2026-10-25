@@ -348,10 +348,6 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
-      - name: Key the package store
-        id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-
       - name: Key the Backports objects as the backports job keys them
         id: objects_keys
         run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -360,7 +356,9 @@ jobs:
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-package-${{ runner.os }}-latest
+          restore-keys: |
+            xmake-global-package-${{ runner.os }}-
 
       - uses: actions/cache/restore@v4
         id: objects
@@ -386,6 +384,17 @@ jobs:
         timeout-minutes: 45
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
+      - name: Key the package store under the configuration that installed it
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: lookup
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          lookup-only: true
+
       - name: Build the demo and package it with its platform package
         timeout-minutes: 60
         run: ./xmakew deb -P . SwiftUIDemo 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
@@ -400,7 +409,7 @@ jobs:
           if-no-files-found: error
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true'
+        if: steps.lookup.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
@@ -433,15 +442,11 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
-      - name: Key the package store
-        id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-
       - uses: actions/cache/restore@v4
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-${{ runner.os }}-latest
           restore-keys: |
             xmake-global-${{ runner.os }}-
 
@@ -481,6 +486,10 @@ jobs:
             echo "installed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Key the package store under the configuration that installed it
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - name: Build the Swift targets
         timeout-minutes: 20
         run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit swiftAuthenticationServices 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
@@ -490,7 +499,7 @@ jobs:
         run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@storekit revenant@authenticationservices revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true' && (steps.firmware-tools.outputs.installed == 'true' || steps.configure-swift.outputs.installed == 'true')
+        if: steps.firmware-tools.outputs.installed == 'true' || steps.configure-swift.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global

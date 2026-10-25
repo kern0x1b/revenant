@@ -229,6 +229,8 @@ enum class PerfSchedulerPreemptionKind : std::uint8_t {
     Urgent,
 };
 
+inline constexpr std::size_t memory_callback_reason_count = 11;
+
 struct PerformanceSnapshot {
     std::uint64_t jit_instances { };
     std::uint64_t jit_live_instances { };
@@ -287,6 +289,10 @@ struct PerformanceSnapshot {
     std::uint64_t translation_blocks { };
     std::uint64_t translation_blocks_shared_region { };
     std::uint64_t translation_compile_nanoseconds { };
+    std::uint64_t memory_callbacks { };
+    std::array<std::uint64_t, memory_callback_reason_count>
+        memory_callback_reasons { };
+    std::uint64_t jit_page_table_disables { };
     std::uint64_t cpu_executions { };
     std::uint64_t cpu_ticks { };
     std::uint64_t svc_calls { };
@@ -466,6 +472,8 @@ public:
     void record_translation_block();
     void record_translation_block_shared_region();
     void record_translation_compile(std::uint64_t nanoseconds);
+    void record_memory_callback(std::size_t reason);
+    void record_jit_page_table_disable();
     void record_cpu_execution(std::uint64_t ticks);
     void record_svc();
     void record_page_miss();
@@ -666,6 +674,10 @@ private:
     std::atomic<std::uint64_t> translation_blocks_ { };
     std::atomic<std::uint64_t> translation_blocks_shared_region_ { };
     std::atomic<std::uint64_t> translation_compile_nanoseconds_ { };
+    std::atomic<std::uint64_t> memory_callbacks_ { };
+    std::array<std::atomic<std::uint64_t>, memory_callback_reason_count>
+        memory_callback_reasons_ { };
+    std::atomic<std::uint64_t> jit_page_table_disables_ { };
     std::atomic<std::uint64_t> cpu_executions_ { };
     std::atomic<std::uint64_t> cpu_ticks_ { };
     std::atomic<std::uint64_t> svc_calls_ { };
