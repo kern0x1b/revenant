@@ -209,7 +209,7 @@ inline constexpr std::array<std::string_view, 197> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 112> open_members {
+inline constexpr std::array<std::string_view, 111> open_members {
     "kss.active_springboard_alert_items",
     "kss.ambient_light_sensor",
     "kss.apple_key_store_available",
@@ -258,7 +258,6 @@ inline constexpr std::array<std::string_view, 112> open_members {
     "kss.suppress_future_application_fullscreen_surface_processes",
     "kss.suppressed_application_fullscreen_surface_publications",
     "kss.surface_transport_port_leases",
-    "kss.task_exception_type_count",
     "kss.task_special_ports",
     "kss.task_thread_port_objects",
     "kss.user_interface_geometry",

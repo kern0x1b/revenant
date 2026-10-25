@@ -23,13 +23,12 @@ namespace {
 template <typename T>
 void note(std::vector<std::string>& out, std::string_view name, const T& value)
 {
-    if (!snapshot::is_default(value))
+    if constexpr (requires { snapshot::is_default(value); }) {
+        if (!snapshot::is_default(value))
+            out.emplace_back(name);
+    } else {
         out.emplace_back(name);
-}
-
-void list(std::vector<std::string>& out, std::string_view name)
-{
-    out.emplace_back(name);
+    }
 }
 
 }
@@ -40,21 +39,21 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     std::vector<std::string> out;
     note(out, "ck.dyld_shared_cache_attempted_", kernel.dyld_shared_cache_attempted_);
     note(out, "ck.dyld_shared_cache_path_", kernel.dyld_shared_cache_path_);
-    list(out, "ck.dyld_shared_cache_");
-    list(out, "ck.process_");
-    list(out, "ck.load_average_");
-    list(out, "ck.offline_serial_state_");
-    list(out, "ck.regular_file_open_descriptions_");
-    list(out, "ck.baseband_open_descriptions_");
-    list(out, "ck.virtual_block_descriptors_");
-    list(out, "ck.bpf_descriptors_");
-    list(out, "ck.kernel_control_endpoints_");
-    list(out, "ck.route_socket_states_");
-    list(out, "ck.socket_options_");
-    list(out, "ck.unix_listener_states_");
-    list(out, "ck.virtual_udp_sockets_");
-    list(out, "ck.wifi_driver_event_streams_");
-    list(out, "ck.directory_entries_cache_");
+    note(out, "ck.dyld_shared_cache_", kernel.dyld_shared_cache_);
+    note(out, "ck.process_", kernel.process_);
+    note(out, "ck.load_average_", kernel.load_average_);
+    note(out, "ck.offline_serial_state_", kernel.offline_serial_state_);
+    note(out, "ck.regular_file_open_descriptions_", kernel.regular_file_open_descriptions_);
+    note(out, "ck.baseband_open_descriptions_", kernel.baseband_open_descriptions_);
+    note(out, "ck.virtual_block_descriptors_", kernel.virtual_block_descriptors_);
+    note(out, "ck.bpf_descriptors_", kernel.bpf_descriptors_);
+    note(out, "ck.kernel_control_endpoints_", kernel.kernel_control_endpoints_);
+    note(out, "ck.route_socket_states_", kernel.route_socket_states_);
+    note(out, "ck.socket_options_", kernel.socket_options_);
+    note(out, "ck.unix_listener_states_", kernel.unix_listener_states_);
+    note(out, "ck.virtual_udp_sockets_", kernel.virtual_udp_sockets_);
+    note(out, "ck.wifi_driver_event_streams_", kernel.wifi_driver_event_streams_);
+    note(out, "ck.directory_entries_cache_", kernel.directory_entries_cache_);
     note(out, "ck.guest_working_directory_", kernel.guest_working_directory_);
     note(out, "ck.process_image_", kernel.process_image_);
     note(out, "ck.file_descriptors_", kernel.file_descriptors_);
@@ -266,59 +265,58 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "kss.processes", shared.processes);
     note(out, "kss.process_kevent_states", shared.process_kevent_states);
     note(out, "kss.sandbox_extensions", shared.sandbox_extensions);
-    list(out, "kss.active_springboard_alert_items");
-    list(out, "kss.ambient_light_sensor");
-    list(out, "kss.apple_key_store_available");
-    list(out, "kss.application_fullscreen_surface_publications");
-    list(out, "kss.application_launch_attempts");
-    list(out, "kss.application_scene_context_owners");
-    list(out, "kss.application_scene_transforms");
-    list(out, "kss.baseband_device_state");
-    list(out, "kss.darwin_abi");
-    list(out, "kss.darwin_kernel_identity");
-    list(out, "kss.device_board_config");
-    list(out, "kss.device_cpu_type");
-    list(out, "kss.device_hardware_model");
-    list(out, "kss.device_model_number");
-    list(out, "kss.device_product_type");
-    list(out, "kss.device_ram_bytes");
-    list(out, "kss.display_geometry");
-    list(out, "kss.effaceable_storage_available");
-    list(out, "kss.effaceable_storage_blob");
-    list(out, "kss.external_framebuffer");
-    list(out, "kss.framebuffer_service_class");
-    list(out, "kss.graphics_services_capability_memory");
-    list(out, "kss.hfs_named_attribute_overrides");
-    list(out, "kss.hid_event_queue");
-    list(out, "kss.iokit_camera_accelerator_connections");
-    list(out, "kss.iokit_display_connections");
-    list(out, "kss.iokit_display_vsync_deadlines");
-    list(out, "kss.iokit_graphics_connections");
-    list(out, "kss.iokit_interest_notifications");
-    list(out, "kss.iokit_multitouch_hid_connections");
-    list(out, "kss.latest_application_scene_transform");
-    list(out, "kss.launchd_job_catalog_once");
-    list(out, "kss.mach_dead_name_notifications");
-    list(out, "kss.mach_namespaces");
-    list(out, "kss.mach_notifications");
-    list(out, "kss.mach_port_objects");
-    list(out, "kss.mach_port_set_links_by_member");
-    list(out, "kss.mach_port_set_preposts");
-    list(out, "kss.native_hid_touch_events");
-    list(out, "kss.pending_application_event_launches");
-    list(out, "kss.pending_bootstrap_retries");
-    list(out, "kss.pending_foreground_transition_input_completion");
-    list(out, "kss.route_table");
-    list(out, "kss.socket_pair_ancillary");
-    list(out, "kss.socket_pair_buffers");
-    list(out, "kss.suppress_future_application_fullscreen_surface_processes");
-    list(out, "kss.suppressed_application_fullscreen_surface_publications");
-    list(out, "kss.surface_transport_port_leases");
-    list(out, "kss.task_exception_type_count");
-    list(out, "kss.task_special_ports");
-    list(out, "kss.task_thread_port_objects");
-    list(out, "kss.user_interface_geometry");
-    list(out, "kss.virtual_effaceable_storage_available");
+    note(out, "kss.active_springboard_alert_items", shared.active_springboard_alert_items);
+    note(out, "kss.ambient_light_sensor", shared.ambient_light_sensor);
+    note(out, "kss.apple_key_store_available", shared.apple_key_store_available);
+    note(out, "kss.application_fullscreen_surface_publications", shared.application_fullscreen_surface_publications);
+    note(out, "kss.application_launch_attempts", shared.application_launch_attempts);
+    note(out, "kss.application_scene_context_owners", shared.application_scene_context_owners);
+    note(out, "kss.application_scene_transforms", shared.application_scene_transforms);
+    note(out, "kss.baseband_device_state", shared.baseband_device_state);
+    note(out, "kss.darwin_abi", shared.darwin_abi);
+    note(out, "kss.darwin_kernel_identity", shared.darwin_kernel_identity);
+    note(out, "kss.device_board_config", shared.device_board_config);
+    note(out, "kss.device_cpu_type", shared.device_cpu_type);
+    note(out, "kss.device_hardware_model", shared.device_hardware_model);
+    note(out, "kss.device_model_number", shared.device_model_number);
+    note(out, "kss.device_product_type", shared.device_product_type);
+    note(out, "kss.device_ram_bytes", shared.device_ram_bytes);
+    note(out, "kss.display_geometry", shared.display_geometry);
+    note(out, "kss.effaceable_storage_available", shared.effaceable_storage_available);
+    note(out, "kss.effaceable_storage_blob", shared.effaceable_storage_blob);
+    note(out, "kss.external_framebuffer", shared.external_framebuffer);
+    note(out, "kss.framebuffer_service_class", shared.framebuffer_service_class);
+    note(out, "kss.graphics_services_capability_memory", shared.graphics_services_capability_memory);
+    note(out, "kss.hfs_named_attribute_overrides", shared.hfs_named_attribute_overrides);
+    note(out, "kss.hid_event_queue", shared.hid_event_queue);
+    note(out, "kss.iokit_camera_accelerator_connections", shared.iokit_camera_accelerator_connections);
+    note(out, "kss.iokit_display_connections", shared.iokit_display_connections);
+    note(out, "kss.iokit_display_vsync_deadlines", shared.iokit_display_vsync_deadlines);
+    note(out, "kss.iokit_graphics_connections", shared.iokit_graphics_connections);
+    note(out, "kss.iokit_interest_notifications", shared.iokit_interest_notifications);
+    note(out, "kss.iokit_multitouch_hid_connections", shared.iokit_multitouch_hid_connections);
+    note(out, "kss.latest_application_scene_transform", shared.latest_application_scene_transform);
+    note(out, "kss.launchd_job_catalog_once", shared.launchd_job_catalog_once);
+    note(out, "kss.mach_dead_name_notifications", shared.mach_dead_name_notifications);
+    note(out, "kss.mach_namespaces", shared.mach_namespaces);
+    note(out, "kss.mach_notifications", shared.mach_notifications);
+    note(out, "kss.mach_port_objects", shared.mach_port_objects);
+    note(out, "kss.mach_port_set_links_by_member", shared.mach_port_set_links_by_member);
+    note(out, "kss.mach_port_set_preposts", shared.mach_port_set_preposts);
+    note(out, "kss.native_hid_touch_events", shared.native_hid_touch_events);
+    note(out, "kss.pending_application_event_launches", shared.pending_application_event_launches);
+    note(out, "kss.pending_bootstrap_retries", shared.pending_bootstrap_retries);
+    note(out, "kss.pending_foreground_transition_input_completion", shared.pending_foreground_transition_input_completion);
+    note(out, "kss.route_table", shared.route_table);
+    note(out, "kss.socket_pair_ancillary", shared.socket_pair_ancillary);
+    note(out, "kss.socket_pair_buffers", shared.socket_pair_buffers);
+    note(out, "kss.suppress_future_application_fullscreen_surface_processes", shared.suppress_future_application_fullscreen_surface_processes);
+    note(out, "kss.suppressed_application_fullscreen_surface_publications", shared.suppressed_application_fullscreen_surface_publications);
+    note(out, "kss.surface_transport_port_leases", shared.surface_transport_port_leases);
+    note(out, "kss.task_special_ports", shared.task_special_ports);
+    note(out, "kss.task_thread_port_objects", shared.task_thread_port_objects);
+    note(out, "kss.user_interface_geometry", shared.user_interface_geometry);
+    note(out, "kss.virtual_effaceable_storage_available", shared.virtual_effaceable_storage_available);
     note(out, "clock.now", shared.clock.now());
     note(out, "clock.wall_time", shared.clock.wall_time());
 

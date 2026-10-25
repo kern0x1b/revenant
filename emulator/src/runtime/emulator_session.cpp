@@ -4718,6 +4718,8 @@ void EmulatorSession::run()
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
     catalog_maintenance.publish_stable(*initial_runtime->kernel);
     host_resources.wait_idle();
+    if (bounded_execution)
+        host.session_stopped(*initial_runtime->kernel, *initial_runtime->memory);
     if (artifact_compaction_task && artifact_compaction_record &&
         artifact_compaction_record->state() ==
             ArtifactCompactionTaskState::Queued &&
