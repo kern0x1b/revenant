@@ -98,6 +98,14 @@ version and the key its prebuilt archive is released under, `prebuilt-<package>-
 the project's configuration: configure as CI does before asking for `swift-runtime` or `libcxx`, with
 `./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y`. Run it before and after a change to see what the change rebuilds.
 
+`swift` is outside `swift-runtime`'s key, although `swift-runtime` is built with it. `swift-runtime` takes `swift` as a
+host, private dependency (`packages/s/swift-runtime/xmake.lua`), and the key hashes only library dependencies, which for
+`swift-runtime` are `apple-compat` and `libcxx`. Its digest covers its own recipe and sources, not `swift`'s. Both pin the
+same version, 6.4.0, and a swiftmodule is accepted only by the compiler whose version string it carries, so a swift
+change that leaves serialization and the runtime ABI alone leaves what `swift-runtime` builds where it was. A swift patch
+that changes serialization or the runtime ABI would bring `swift` in: `swift-runtime` would then take `swift` as a
+library dependency, so its archive moves with the compiler it was built for.
+
 The build hash has three more terms, one for the xmake that builds the packages, one for the addons a build runs
 under, and one for each package's own patches.
 
