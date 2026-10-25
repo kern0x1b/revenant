@@ -274,11 +274,13 @@ package("swift-runtime")
         timed("darwin")
 
         local foundation_links = {}
+        local foundation_cache = path.join(generated, "module-cache-lowered")
+        os.mkdir(foundation_cache)
 
         local function build_overlay(name, overlay_sources, links, objects, opt)
             local module = path.join(install, name .. ".swiftmodule")
             os.mkdir(module)
-            local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name, "-module-cache-path", module_cache,
+            local flags = table.join({"-target", triple, "-resource-dir", resources, "-module-name", name, "-module-cache-path", opt and opt.module_cache or module_cache,
                                       "-parse-as-library", "-swift-version", "5", "-O", "-wmo",
                                       "-Xfrontend", "-disable-implicit-string-processing-module-import",
                                       "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}, use_ld,
@@ -396,7 +398,7 @@ package("swift-runtime")
                 "UUID.swift"}), {presentation_intent}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
-                          {concurrency = true,
+                          {concurrency = true, module_cache = foundation_cache,
                            extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
                                           "-enable-experimental-feature", "BuiltinModule",
                                           "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
