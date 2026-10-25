@@ -25,6 +25,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
+
 namespace emulator {
 
 namespace xnu::scheduler {
@@ -217,6 +219,8 @@ public:
     {
         return scheduler_tick_;
     }
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     using ReadyQueue = std::list<XnuThreadId>;
@@ -301,6 +305,12 @@ private:
     void apply_failsafe(XnuThreadId thread, ThreadRecord& record);
     void release_failsafe(XnuThreadId thread, ThreadRecord& record);
     [[nodiscard]] std::uint32_t timeshare_quanta() const;
+    static void save_thread_record(
+        snapshot::Writer& out, const ThreadRecord& record);
+    [[nodiscard]] static ThreadRecord load_thread_record(snapshot::Reader& in);
+    static void save_run_queue(snapshot::Writer& out, const RunQueue& run_queue);
+    void load_run_queue(snapshot::Reader& in,
+        std::optional<std::size_t> processor, RunQueue& run_queue);
 
     RunQueue processor_set_run_queue_;
     std::vector<RunQueue> processor_run_queues_;

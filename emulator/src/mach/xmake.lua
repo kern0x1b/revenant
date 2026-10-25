@@ -11,3 +11,10 @@ target("emulator_mach")
     add_files("guest_dispatch_policy.cpp", "guest_execution_policy.cpp", "guest_parallelism_policy.cpp",
               "mach_namespace.cpp", "xnu_scheduler.cpp")
     add_deps("emulator_foundation", "emulator_xnu_adapter", {public = true})
+
+target("emulator_mach_xnu_scheduler_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/xnu_scheduler_snapshot_test.cpp")
+    add_deps("emulator_mach")
+    add_tests("mach.xnu_scheduler_snapshot")
