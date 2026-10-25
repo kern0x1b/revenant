@@ -25,4 +25,8 @@ void save_session_state(snapshot::Writer& out,
     const XnuScheduler& scheduler, const LoopCarriedState& loop_state,
     std::uint32_t next_pid);
 
+void load_session_state(snapshot::Reader& in,
+    runtime_detail::Runtime& initial, XnuScheduler& scheduler,
+    LoopCarriedState& loop_state, std::uint32_t& next_pid);
+
 }

@@ -39,4 +39,25 @@ void save_session_state(snapshot::Writer& out,
     initial.kernel->save_snapshot(out);
 }
 
+void load_session_state(snapshot::Reader& in,
+    runtime_detail::Runtime& initial, XnuScheduler& scheduler,
+    LoopCarriedState& loop_state, std::uint32_t& next_pid)
+{
+    loop_state = load_loop_carried_state(in);
+    scheduler.load(in);
+    snapshot::load(in, next_pid);
+    std::uint64_t slot_count { };
+    snapshot::load(in, slot_count);
+    if (slot_count != initial.allocated.size())
+        throw snapshot::FormatError { "snapshot names a different guest thread slot count" };
+    for (std::size_t index = 0; index < initial.allocated.size(); ++index) {
+        bool allocated { };
+        snapshot::load(in, allocated);
+        initial.allocated[index] = allocated;
+    }
+    initial.memory->load(in);
+    initial.cpus->load_state(in);
+    initial.kernel->load_snapshot(in);
+}
+
 }

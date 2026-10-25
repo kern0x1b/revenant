@@ -568,6 +568,32 @@ void EmulatorSession::run()
     device.baseband.transport = baseband_input_path ? BasebandTransport::Virtual
                                                     : device.baseband.transport;
 
+    std::optional<SessionSnapshot> restored_snapshot;
+    if (options.snapshot_input) {
+        std::ifstream file { *options.snapshot_input, std::ios::binary };
+        if (!file)
+            throw std::runtime_error { "cannot open snapshot: " + *options.snapshot_input };
+        const auto size = std::filesystem::file_size(*options.snapshot_input);
+        std::vector<std::byte> bytes(size);
+        file.read(reinterpret_cast<char*>(bytes.data()),
+            static_cast<std::streamsize>(size));
+        if (!file)
+            throw std::runtime_error { "cannot read snapshot: " + *options.snapshot_input };
+        restored_snapshot = decode_session_snapshot(bytes);
+        const auto& header = restored_snapshot->header;
+        if (header.device != std::string { device.identity.product_type })
+            throw std::runtime_error { "snapshot device " + header.device +
+                                       " does not match the device " +
+                                       std::string { device.identity.product_type } };
+        if (header.binary != binary)
+            throw std::runtime_error { "snapshot binary " + header.binary +
+                                       " does not match the binary " + binary };
+        if (header.ticks >= *ticks_option)
+            throw std::invalid_argument { "--ticks must exceed the snapshot's " +
+                                          std::to_string(header.ticks) + " ticks" };
+        require_rootfs_identity(header, rootfs,
+            host_cache / "rootfs-manifest-digests.bin");
+    }
     auto initial_memory = std::make_unique<AddressSpace>();
     initial_memory->set_parallel_access(guest_processor_count > 1);
     ProcessLoader loader { rootfs, *initial_memory, guest_architecture,
@@ -1471,9 +1497,11 @@ void EmulatorSession::run()
         boot_pixels = BootLogo::placeholder(device.screen.panel);
         output.marker("[boot] logo-source=built-in-placeholder");
     }
-    initial->kernel->initialize_boot_display(std::move(boot_pixels));
-    if (display_presenter)
-        display_presenter->flush_presentation();
+    if (!restored_snapshot) {
+        initial->kernel->initialize_boot_display(std::move(boot_pixels));
+        if (display_presenter)
+            display_presenter->flush_presentation();
+    }
     initial->allocated.assign(initial_guest_thread_slots, false);
     Runtime* initial_runtime = initial.get();
     CatalogMaintenance catalog_maintenance {
@@ -2146,27 +2174,38 @@ void EmulatorSession::run()
     };
     configure_runtime(*initial_runtime);
 
-    auto& initial_cpu = initial_runtime->cpus->cpu(0);
-    initial_runtime->allocated[0] = true;
-    static_cast<void>(scheduler.register_thread(
-        XnuThreadId { initial_runtime->kernel->process().pid, 0 },
-        initial_runtime->kernel->process().thread_base_priority));
-    pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
-    initial_cpu.registers()[13] = process.stack_pointer;
-    initial_cpu.registers()[15] = process.entry_point;
-    initial_cpu.set_cpsr(0x10);
+    if (restored_snapshot) {
+        snapshot::Reader in { restored_snapshot->body };
+        load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
+        if (!in.at_end())
+            throw snapshot::FormatError { "snapshot has bytes after the session state" };
+        loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
+        output.line("[snapshot] restored=" + *options.snapshot_input +
+                    " saved-ticks=" + std::to_string(restored_snapshot->header.ticks) +
+                    " remaining-ticks=" + std::to_string(loop_state.remaining_ticks));
+    } else {
+        auto& initial_cpu = initial_runtime->cpus->cpu(0);
+        initial_runtime->allocated[0] = true;
+        static_cast<void>(scheduler.register_thread(
+            XnuThreadId { initial_runtime->kernel->process().pid, 0 },
+            initial_runtime->kernel->process().thread_base_priority));
+        pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
+        initial_cpu.registers()[13] = process.stack_pointer;
+        initial_cpu.registers()[15] = process.entry_point;
+        initial_cpu.set_cpsr(0x10);
 
-    {
-        std::ostringstream message;
-        message << "[loader] main=0x" << std::hex << process.main_header
-                << " dyld_entry=0x" << process.entry_point << " sp=0x"
-                << process.stack_pointer << std::dec
-                << " processors=" << guest_processor_count
-                << " network=" << host_network_policy_name(network_policy)
-                << '\n';
-        output.write(message.str());
+        {
+            std::ostringstream message;
+            message << "[loader] main=0x" << std::hex << process.main_header
+                    << " dyld_entry=0x" << process.entry_point << " sp=0x"
+                    << process.stack_pointer << std::dec
+                    << " processors=" << guest_processor_count
+                    << " network=" << host_network_policy_name(network_policy)
+                    << '\n';
+            output.write(message.str());
+        }
+        loop_state.remaining_ticks = ticks;
     }
-    loop_state.remaining_ticks = ticks;
     std::uint64_t consumed_ticks = 0;
     std::uint32_t stopped_pid = 1;
     std::size_t stopped_cpu = 0;

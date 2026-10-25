@@ -66,6 +66,7 @@ struct BootOptions {
     std::uint64_t startup_profile_budget_us { 4'000 };
     std::optional<std::string> frame_output;
     std::optional<std::string> snapshot_output;
+    std::optional<std::string> snapshot_input;
     std::optional<std::filesystem::path> boot_logo;
     std::optional<std::string> touch_replay;
     std::optional<std::uint16_t> gdb_port;
