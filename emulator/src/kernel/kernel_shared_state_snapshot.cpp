@@ -227,6 +227,24 @@ void KernelSharedState::save_scalar_state(snapshot::Writer& out) const
     snapshot::save(out, wifi_service_available);
     snapshot::save(out, next_socket_pair);
     snapshot::save(out, next_shared_memory_object);
+    snapshot::save(out, apple_key_store_service);
+    snapshot::save(out, baseband_service);
+    snapshot::save(out, camera_sensor_service);
+    snapshot::save(out, default_processor_set_control_object);
+    snapshot::save(out, default_processor_set_name_object);
+    snapshot::save(out, effaceable_storage_service);
+    snapshot::save(out, external_framebuffer_service);
+    snapshot::save(out, jpeg_accelerator_service);
+    snapshot::save(out, keybag_device_tree_defaults_service);
+    snapshot::save(out, keybag_device_tree_options_service);
+    snapshot::save(out, mobile_file_integrity_service);
+    snapshot::save(out, mobile_framebuffer_service);
+    snapshot::save(out, multitouch_hid_service);
+    snapshot::save(out, serial_multiplexer_service);
+    snapshot::save(out, wifi_interface_service);
+    snapshot::save(out, wifi_service);
+    snapshot::save(out, active_application_event_object);
+    snapshot::save(out, pending_application_event_object);
 }
 
 void KernelSharedState::load_scalar_state(snapshot::Reader& in)
@@ -255,6 +273,24 @@ void KernelSharedState::load_scalar_state(snapshot::Reader& in)
     snapshot::load(in, wifi_service_available);
     snapshot::load(in, next_socket_pair);
     snapshot::load(in, next_shared_memory_object);
+    snapshot::load(in, apple_key_store_service);
+    snapshot::load(in, baseband_service);
+    snapshot::load(in, camera_sensor_service);
+    snapshot::load(in, default_processor_set_control_object);
+    snapshot::load(in, default_processor_set_name_object);
+    snapshot::load(in, effaceable_storage_service);
+    snapshot::load(in, external_framebuffer_service);
+    snapshot::load(in, jpeg_accelerator_service);
+    snapshot::load(in, keybag_device_tree_defaults_service);
+    snapshot::load(in, keybag_device_tree_options_service);
+    snapshot::load(in, mobile_file_integrity_service);
+    snapshot::load(in, mobile_framebuffer_service);
+    snapshot::load(in, multitouch_hid_service);
+    snapshot::load(in, serial_multiplexer_service);
+    snapshot::load(in, wifi_interface_service);
+    snapshot::load(in, wifi_service);
+    snapshot::load(in, active_application_event_object);
+    snapshot::load(in, pending_application_event_object);
 }
 
 void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const

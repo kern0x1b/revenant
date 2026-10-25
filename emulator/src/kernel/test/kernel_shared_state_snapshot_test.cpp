@@ -64,6 +64,24 @@ void populate(KernelSharedState& state)
     state.wifi_service_available = true;
     state.next_socket_pair = 28;
     state.next_shared_memory_object = 29;
+    state.apple_key_store_service = 40;
+    state.baseband_service = 41;
+    state.camera_sensor_service = 42;
+    state.default_processor_set_control_object = 43;
+    state.default_processor_set_name_object = 44;
+    state.effaceable_storage_service = 45;
+    state.external_framebuffer_service = 46;
+    state.jpeg_accelerator_service = 47;
+    state.keybag_device_tree_defaults_service = 48;
+    state.keybag_device_tree_options_service = 49;
+    state.mobile_file_integrity_service = 50;
+    state.mobile_framebuffer_service = 51;
+    state.multitouch_hid_service = 52;
+    state.serial_multiplexer_service = 53;
+    state.wifi_interface_service = 54;
+    state.wifi_service = 55;
+    state.active_application_event_object = 56;
+    state.pending_application_event_object = 57;
 }
 
 std::vector<std::byte> save_scalars(const KernelSharedState& state)
@@ -89,6 +107,7 @@ void round_trip_restores_the_scalars()
     expect(restored.mach_queue_generation.load() == 15,
         "an atomic generation is restored");
     expect(restored.wifi_service_available, "the wifi flag is restored");
+    expect(restored.wifi_service == 55, "the wifi service id is restored");
     expect(save_scalars(restored) == bytes,
         "saving the restored state reproduces the same stream");
 }

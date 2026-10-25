@@ -35,7 +35,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 117> saved_members {
+constexpr std::array<std::string_view, 135> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -123,6 +123,24 @@ constexpr std::array<std::string_view, 117> saved_members {
     "ck.system_event_filters_",
     "ck.system_event_next_identifiers_",
     "ck.scheduled_wifi_driver_events_",
+    "kss.apple_key_store_service",
+    "kss.baseband_service",
+    "kss.camera_sensor_service",
+    "kss.default_processor_set_control_object",
+    "kss.default_processor_set_name_object",
+    "kss.effaceable_storage_service",
+    "kss.external_framebuffer_service",
+    "kss.jpeg_accelerator_service",
+    "kss.keybag_device_tree_defaults_service",
+    "kss.keybag_device_tree_options_service",
+    "kss.mobile_file_integrity_service",
+    "kss.mobile_framebuffer_service",
+    "kss.multitouch_hid_service",
+    "kss.serial_multiplexer_service",
+    "kss.wifi_interface_service",
+    "kss.wifi_service",
+    "kss.active_application_event_object",
+    "kss.pending_application_event_object",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
