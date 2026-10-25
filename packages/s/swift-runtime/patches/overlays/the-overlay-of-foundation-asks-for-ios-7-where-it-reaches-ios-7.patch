@@ -338,43 +338,38 @@ diff --git a/stdlib/public/Darwin/Foundation/URLComponents.swift b/stdlib/public
 index 9c7c545..32d0b40 100644
 --- a/stdlib/public/Darwin/Foundation/URLComponents.swift
 +++ b/stdlib/public/Darwin/Foundation/URLComponents.swift
-@@ -15,6 +15,7 @@
+@@ -15,6 +15,6 @@
  /// A structure designed to parse URLs based on RFC 3986 and to construct URLs from their constituent parts. 
  /// 
  /// Its behavior differs subtly from the `URL` struct, which conforms to older RFCs. However, you can easily obtain a `URL` based on the contents of a `URLComponents` or vice versa.
-+@available(macOS 10.9, iOS 7.0, *)
  public struct URLComponents : ReferenceConvertible, Hashable, Equatable, _MutableBoxing {
      public typealias ReferenceType = NSURLComponents
      
-@@ -308,6 +309,7 @@ public struct URLComponents : ReferenceConvertible, Hashable, Equatable, _Mutabl
+@@ -308,6 +308,6 @@ public struct URLComponents : ReferenceConvertible, Hashable, Equatable, _Mutabl
      }
  }
  
-+@available(macOS 10.9, iOS 7.0, *)
  extension URLComponents : CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
      
      public var description: String {
-@@ -343,6 +345,7 @@ extension URLComponents : CustomStringConvertible, CustomDebugStringConvertible,
+@@ -343,6 +343,6 @@ extension URLComponents : CustomStringConvertible, CustomDebugStringConvertible,
      }
  }
  
-+@available(macOS 10.9, iOS 7.0, *)
  extension URLComponents : _ObjectiveCBridgeable {
      public static func _getObjectiveCType() -> Any.Type {
          return NSURLComponents.self
-@@ -371,6 +374,7 @@ extension URLComponents : _ObjectiveCBridgeable {
+@@ -371,6 +371,6 @@ extension URLComponents : _ObjectiveCBridgeable {
      }
  }
  
-+@available(macOS 10.9, iOS 7.0, *)
  extension NSURLComponents : _HasCustomAnyHashableRepresentation {
      // Must be @nonobjc to avoid infinite recursion during bridging.
      @nonobjc
-@@ -477,6 +481,7 @@ extension NSURLQueryItem : _HasCustomAnyHashableRepresentation {
+@@ -477,6 +477,6 @@ extension NSURLQueryItem : _HasCustomAnyHashableRepresentation {
      }
  }
  
-+@available(macOS 10.9, iOS 7.0, *)
  extension URLComponents : Codable {
      private enum CodingKeys : Int, CodingKey {
          case scheme

@@ -27,11 +27,11 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the armv7 iOS 6.0 typecheck compiles them with CI's compiler. Their bodies have not been run on an iOS 6 device.
 - Removed by: a device run.
 
-### C6. Reduced check for the two weak classes in the lowering test
+### C6. Reduced check for the weak class NSDateInterval in the lowering test
 
-- Stands in for: a compile-time check of the members of `NSDateInterval` and `NSURLComponents`. Both classes keep their class-level guard by design (the guard table records them as weak imports), so the IMPLEMENTED probe refers to them through `id` receivers.
+- Stands in for: a compile-time check of the members of `NSDateInterval`. The class keeps its class-level guard by design (the guard table records it as a weak import), so the IMPLEMENTED probe refers to it through an `id` receiver. `NSURLComponents` no longer keeps its guard: its alias exports the class, and the apple-ios rule links every binary against the flat-class stubs, so its reference is strong.
 - Measurement: the rest of the probe still checks typed receivers and the lowered headers at armv7 iOS 6.0.
-- Removed by: the export dependency for these classes (the Backports library that exports them, linked into the runtime); the probe then returns to typed receivers.
+- Removed by: the export dependency for `NSDateInterval` (the Backports library that exports it, linked into the runtime); the probe then returns to typed receivers.
 
 ### C7. Export dependency for weak classes and UIFocusSystem: pending
 
