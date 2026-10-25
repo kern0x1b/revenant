@@ -2,7 +2,7 @@
 #import <Security/Security.h>
 
 const CFStringRef kSecAttrAccessControl = CFSTR("accc");
-const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR("akpu");
+const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR("aku");
 const CFStringRef kSecUseOperationPrompt = CFSTR("u_OpPrompt");
 const CFStringRef kSecUseNoAuthenticationUI = CFSTR("u_NoAuthUI");
 const CFStringRef kSecSharedPassword = CFSTR("spwd");

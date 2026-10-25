@@ -81,6 +81,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   naming what it lacks when that is missing. The host checks of `agent-skills/` are in the `repository` group: the
   copied-text check and the credential-leak check, run on fixtures. Its `tests/check.lua` and `tests/run.lua` drive the
   paid scenario harness and are not part of the run.
+  The run uses the configuration stored in the checkout. A device configure (`./xmakew f -p iphoneos -a armv7 ...`) stays
+  until it is cleared, and then the host test groups are not defined: `./xmakew test` prints `nothing to test` and exits 0,
+  which is not a pass. Before a host run, `./xmakew show -P .` must print `plat: macosx`; if it does not, run
+  `./xmakew f -P . -c` first.
 - Lua files under `tools/` and `toolchain/modules/` are snake_case, as xmake's own module files are (`find_tool.lua`):
   `frameworks/SwiftUI/tools/api_surface.lua`, `toolchain/tools/cache_index/`. The names of the data a tool writes, such as
   `.cache/cache-index`, are not file names, and keep their spelling.

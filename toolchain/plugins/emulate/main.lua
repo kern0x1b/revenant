@@ -261,10 +261,6 @@ local function launch(ctx, identifier, steps)
                                    seconds, last ~= "" and last or "none")
         end
         raise("SpringBoard did not launch %s %s: %s; the emulator log is %s", identifier, where, reason, booted.log)
-    elseif driver.failure == "exited" then
-        raise("%s ended %s %s; the emulator log is %s", identifier,
-              driver.exit.signal ~= 0 and string.format("on signal %d", driver.exit.signal) or string.format("with status %d", driver.exit.status),
-              where, booted.log)
     elseif not driver.application then
         raise("%s was %s, and no process of %s ever started %s; the emulator log is %s", identifier,
               driver.phase == "launching" and "never launched" or "launched", application, where, booted.log)
@@ -272,7 +268,17 @@ local function launch(ctx, identifier, steps)
         raise("%s ran, and the run ended (%s) %s before its %d steps were taken; the emulator log is %s", identifier,
               booted.reason, where, #steps, booted.log)
     end
+    local ended = driver.exit
+    if ended and emulator.exit_code(ended) ~= 0 then
+        cprint("${bright red}%s${clear} ended %s %s; the command exits with the same status, and the emulator log is %s", identifier,
+               ended.signal ~= 0 and string.format("on signal %d", ended.signal) or string.format("with status %d", ended.status),
+               where, booted.log)
+        os.exit(emulator.exit_code(ended))
+    end
     cprint("${bright green}launched${clear} %s as pid %s %s, %d snapshot(s)", identifier, driver.application.pid, where, #driver.shots)
+    if ended and not driver.held then
+        cprint("${bright green}ended${clear} %s with status 0 before the run's steps were taken", identifier)
+    end
     if instructions then
         cprint("${dim}launch: %d guest instructions from the spawn to the first settled frame", instructions)
     end

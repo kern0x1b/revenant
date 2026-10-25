@@ -933,6 +933,13 @@ function parse_steps(words)
     return steps
 end
 
+function exit_code(exit)
+    if exit.signal ~= 0 then
+        return 128 + exit.signal
+    end
+    return exit.status
+end
+
 function launch_driver(opt)
     local driver = {phase = "launching", shots = {}, step = 0, unlocks = 0}
     local clock = opt.clock or os.mclock
@@ -1013,6 +1020,7 @@ function launch_driver(opt)
         elseif driver.phase == "holding" then
             if driver.application and (state.exits or {})[driver.application.pid] then
                 driver.held, driver.held_seconds = "exited", running()
+                driver.exit = state.exits[driver.application.pid]
                 settle(state, send)
             elseif running() >= opt.seconds then
                 driver.held, driver.held_seconds = "deadline", running()

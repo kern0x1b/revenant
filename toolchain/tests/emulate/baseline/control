@@ -1,0 +1,5 @@
+Package: org.revenant.emulatebaseline
+Name: emulate baseline offset probe
+Architecture: iphoneos-arm
+Description: A program that draws one attributed string with and without NSBaselineOffsetAttributeName through UIKit
+ into a bitmap, and prints where the ink of each lands, so a run shows whether the system honours the attribute.

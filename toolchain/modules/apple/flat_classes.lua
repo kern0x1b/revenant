@@ -13,6 +13,8 @@ local STUBBED = {
     },
 }
 
+local EXPORTED = {NSURLComponents = true, NSURLQueryItem = true}
+
 function class_names()
     local names, seen = {}, {}
     for _, entry in ipairs(STUBBED) do
@@ -21,6 +23,16 @@ function class_names()
                 seen[name] = true
                 table.insert(names, name)
             end
+        end
+    end
+    return names
+end
+
+function weak_class_names()
+    local names = {}
+    for _, name in ipairs(class_names()) do
+        if not EXPORTED[name] then
+            table.insert(names, name)
         end
     end
     return names
@@ -43,6 +55,22 @@ function link_flags(out)
     local flags = {"-F", out}
     for _, name in ipairs(class_names()) do
         table.join2(flags, {"-Xlinker", "-U", "-Xlinker", "_OBJC_CLASS_$_" .. name})
+    end
+    return flags
+end
+
+function flat_symbols()
+    local symbols = {}
+    for _, name in ipairs(class_names()) do
+        symbols["_OBJC_CLASS_$_" .. name] = true
+    end
+    return symbols
+end
+
+function app_link_flags(sdk, out)
+    local flags = {"-F", stub_directory(sdk, out)}
+    for _, name in ipairs(class_names()) do
+        table.insert(flags, "-Wl,-U,_OBJC_CLASS_$_" .. name)
     end
     return flags
 end

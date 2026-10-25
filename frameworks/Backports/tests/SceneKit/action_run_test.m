@@ -1,6 +1,24 @@
 #import "../Foundation/check.h"
 #import <SceneKit/SceneKit.h>
 #import "../../src/SceneKit/RevenantSCNActions.h"
+#import "../../src/SceneKit/RevenantSCNAudio.h"
+#import "wave_file.h"
+#import <AVFoundation/AVFoundation.h>
+
+static NSMutableArray<SCNAudioPlayer *> *revenant_added_players;
+
+@interface RevenantFakeNode : SCNNode
+@end
+
+@implementation RevenantFakeNode
+
+- (void)addAudioPlayer:(SCNAudioPlayer *)player
+{
+    [revenant_added_players addObject:player];
+    [player revenantStartOnNode:nil];
+}
+
+@end
 #include <math.h>
 
 static BOOL revenant_close(double value, double expected)
@@ -17,6 +35,11 @@ static BOOL revenant_advance(RevenantSCNActionRun *run, SCNNode *node, NSTimeInt
 {
     NSTimeInterval leftover = 0;
     return [run advanceBy:dt onNode:node leftover:&leftover];
+}
+
+static void revenant_expect_near(const char *name, double value, double expected, double tolerance)
+{
+    revenant_check(fabs(value - expected) <= tolerance, name, [NSString stringWithFormat:@"%g is not %g", value, expected]);
 }
 
 static void revenant_expect_number(const char *name, double value, double expected)
@@ -269,6 +292,25 @@ int main(int argc, char **argv)
         revenant_expect_number("sequence waits before the move when a random wait is in it", node.position.x, 0);
         revenant_advance(run, node, 1.8);
         revenant_expect_number("sequence with a random wait completes its move", node.position.x, 1);
+
+        NSURL *clipURL = revenant_write_wave(@"scenekit_action_test.wav", 0.1);
+        SCNAudioSource *clip = [[SCNAudioSource alloc] initWithURL:clipURL];
+        SCNAction *spoken = [SCNAction playAudioSource:clip waitForCompletion:YES];
+        revenant_expect_near("play audio that waits lasts as long as the audio", spoken.duration, 0.1, 0.02);
+        SCNAction *silent = [SCNAction playAudioSource:clip waitForCompletion:NO];
+        revenant_expect_near("play audio that does not wait completes at once", silent.duration, 0, 1e-6);
+        SCNAction *reversedSpoken = spoken.reversedAction;
+        revenant_check(reversedSpoken.revenantKind == RevenantSCNActionKindPlayAudio, "reversed play audio is the same action", @"the kind changed");
+        revenant_expect_near("reversed play audio keeps its length", reversedSpoken.duration, 0.1, 0.02);
+
+        revenant_added_players = [NSMutableArray array];
+        RevenantFakeNode *fake = [RevenantFakeNode node];
+        run = revenant_run(spoken, nil);
+        revenant_check(!revenant_advance(run, fake, 0.05), "play audio runs while the audio plays", @"play audio ended early");
+        revenant_check(revenant_added_players.count == 1, "play audio adds one player to its node", @"no player was added");
+        revenant_check([revenant_added_players.firstObject revenantIsPlaying], "the node's player is playing", @"the player is not playing");
+        revenant_check(revenant_advance(run, fake, 0.1), "play audio that waits ends with the audio", @"play audio is still running");
+        [[NSFileManager defaultManager] removeItemAtURL:clipURL error:NULL];
 
         revenant_check(revenant_negative ? NO : YES, "negative control", @"the negative control is inverted");
     }

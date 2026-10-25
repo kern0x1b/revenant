@@ -947,6 +947,14 @@ local function launch_step(emulator, folder, found)
     if driver.held ~= "exited" then
         table.insert(found, "an application that ended is what the hold reports even when the budget is spent too, held " .. tostring(driver.held))
     end
+    if not driver.exit or driver.exit.status ~= 0 then
+        table.insert(found, "a hold that ends keeps the application's exit for the launch command's status, exit " .. tostring(driver.exit))
+    end
+    local codes = {emulator.exit_code({status = 0, signal = 0}), emulator.exit_code({status = 3, signal = 0}),
+                   emulator.exit_code({status = 0, signal = 9})}
+    if codes[1] ~= 0 or codes[2] ~= 3 or codes[3] ~= 137 then
+        table.insert(found, "a launch command ends with the application's status, or 128 plus the signal that ended it, read " .. table.concat(codes, ","))
+    end
     local refused = fixtures.refusal(function ()
         emulator.launch_driver({results = results, run = "/run", application = "/Applications/Probe.app", steps = {"until-exit"}})
     end)

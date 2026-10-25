@@ -27,5 +27,21 @@ function failures(opt)
     if not text:find('{"-plugin-path", folder}', 1, true) then
         table.insert(found, "a collected plugin directory must reach the compiler as -plugin-path, which is what a #externalMacro's module: name is resolved against")
     end
+    local runtime = io.readfile(path.join(opt.modules, "..", "..", "packages", "s", "swift-runtime", "xmake.lua"))
+    if not runtime:find("compiler:version_str() ~= package:version_str()", 1, true) then
+        table.insert(found, "a swift-runtime must be built with the compiler of its own Swift version, and a mismatch must stop the install")
+    end
+    local digest = import("digest", {rootdir = opt.modules, anonymous = true})
+    for _, folder in ipairs({"packages/s/swift-runtime", "packages/s/swift-embedded"}) do
+        local inputs = {}
+        for _, recipe in ipairs(digest.recipes()) do
+            if recipe.folder == folder then
+                inputs = recipe.inputs
+            end
+        end
+        if not table.contains(inputs, "packages/s/swift/xmake.lua") or not table.contains(inputs, "packages/s/swift/patches/**.patch") then
+            table.insert(found, folder .. " is built by the compiler of the swift package, so its digest must name the recipe and patches of packages/s/swift: a changed compiler then gives a new install, rather than one that keeps the compiler it replaced")
+        end
+    end
     return found
 end

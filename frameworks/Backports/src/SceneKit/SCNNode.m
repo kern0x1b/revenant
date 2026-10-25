@@ -17,6 +17,7 @@
     SCNNode *_presentation;
     BOOL _isPresentation;
     RevenantSCNAnimations *_animations;
+    NSMutableArray<SCNAudioPlayer *> *_audioPlayers;
     NSMutableArray<RevenantSCNActionRun *> *_actionRuns;
 }
 
@@ -38,6 +39,13 @@
 + (instancetype)node
 {
     return [[self alloc] init];
+}
+
++ (instancetype)nodeWithGeometry:(SCNGeometry *)geometry
+{
+    SCNNode *node = [self node];
+    node.geometry = geometry;
+    return node;
 }
 
 @synthesize name = _name;
@@ -468,6 +476,59 @@
     return self->_particleSystems.count ? [self->_particleSystems copy] : nil;
 }
 
+#pragma mark SCNAudioSupport
+
+- (void)addAudioPlayer:(SCNAudioPlayer *)player
+{
+    if (self->_audioPlayers == nil) {
+        self->_audioPlayers = [NSMutableArray array];
+    }
+    [self->_audioPlayers addObject:player];
+    [player revenantStartOnNode:self];
+}
+
+- (void)removeAudioPlayer:(SCNAudioPlayer *)player
+{
+    if ([self->_audioPlayers containsObject:player]) {
+        [self->_audioPlayers removeObject:player];
+        [player revenantStop];
+    }
+}
+
+- (void)removeAllAudioPlayers
+{
+    for (SCNAudioPlayer *player in self->_audioPlayers) {
+        [player revenantStop];
+    }
+    [self->_audioPlayers removeAllObjects];
+}
+
+- (NSArray<SCNAudioPlayer *> *)audioPlayers
+{
+    return self->_audioPlayers ? [self->_audioPlayers copy] : @[];
+}
+
+- (void)revenantRemoveFinishedAudioPlayer:(SCNAudioPlayer *)player
+{
+    [self->_audioPlayers removeObject:player];
+}
+
+- (void)revenantUpdateAudioAtTime:(CFTimeInterval)now
+{
+    if (self->_audioPlayers.count == 0) {
+        return;
+    }
+    SCNMatrix4 world = [self revenantPresentedWorldTransform];
+    for (NSUInteger index = 0; index < self->_audioPlayers.count;) {
+        NSUInteger count = self->_audioPlayers.count;
+        [self->_audioPlayers[index] revenantUpdateWithWorld:world time:now];
+        if (self->_audioPlayers.count == count) {
+            index++;
+        }
+    }
+}
+
+
 #pragma mark SCNActionable
 
 - (BOOL)hasActions
@@ -561,5 +622,6 @@
         completion();
     }
 }
+
 
 @end

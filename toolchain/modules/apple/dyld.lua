@@ -3,6 +3,8 @@ import("macho")
 import("compat")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
+local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
+local FLAT_SYMBOLS = flat_classes.flat_symbols()
 
 local caches = {}
 
@@ -999,7 +1001,7 @@ function missing_imports(cachefile, binaries, root)
                         local elsewhere = (cache.exports[symbol.name] or own[symbol.name]) and ", which only another library exports" or ""
                         table.insert(missing, {named(entry.binary), string.format("%s (bound to %s%s)", symbol.name, library, elsewhere)})
                     end
-                elseif not own[symbol.name] and not cache.exports[symbol.name] then
+                elseif not own[symbol.name] and not cache.exports[symbol.name] and not (symbol.ordinal == 0xFE and FLAT_SYMBOLS[symbol.name]) then
                     table.insert(missing, {named(entry.binary), symbol.name})
                 end
             end
