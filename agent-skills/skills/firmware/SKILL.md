@@ -17,21 +17,21 @@ project directory after the skill `install` wrote the pin and the `apple-ios` in
 
 ## Where things land
 
-Under `~/.revenant` (or `$REVENANT_HOME` if the user set it):
+Under `.cache` (or `$REVENANT_CACHE` if the user set it):
 
 | What | Path | Size (armv7, iOS 6) |
 | --- | --- | --- |
-| a release's shared cache | `~/.revenant/dyld/<release>/dyld_shared_cache_<arch>` | about 230 MB |
+| a release's shared cache | `.cache/dyld/<release>/dyld_shared_cache_<arch>` | about 230 MB |
 | its selectors and classes | beside it: `selectors_<arch>.txt`, `classes_<arch>.json` | a few MB |
-| a release before 3.1 (no cache) | `~/.revenant/dyld/<release>/libraries_<arch>/` | |
-| a device's root filesystem | `~/.revenant/firmware/rootfs/<device>/<version>_<build>/` | about 1.2 GB |
-| the firmware catalog | `~/.revenant/firmware/catalog.json` | small |
+| a release before 3.1 (no cache) | `.cache/dyld/<release>/libraries_<arch>/` | |
+| a device's root filesystem | `.cache/firmware/rootfs/<device>/<version>_<build>/` | about 1.2 GB |
+| the firmware catalog | `.cache/firmware/catalog.json` | small |
 
 Downloads: the catalog comes from api.ipsw.me and theapplewiki.com; the firmware itself from
 Apple's servers. Only the system image inside the IPSW is downloaded, by byte ranges; for an
 armv7 iOS 6 firmware the whole IPSW is 0.8–0.9 GB, so plan for up to that per release. The
 system images of iOS 2 to 9 are decrypted with the keys theapplewiki publishes, then mounted with
-`hdiutil` to copy the files out. Temporary work goes to `~/.revenant/firmware/work/` and is removed.
+`hdiutil` to copy the files out. Temporary work goes to `.cache/firmware/work/` and is removed.
 
 ## 1. See what is held
 
@@ -40,7 +40,7 @@ xmake firmware list
 ```
 
 One line per release: the release, then the architectures whose libraries are held, e.g.
-`6.0  armv7 armv7s`. For root filesystems: `ls ~/.revenant/firmware/rootfs/<device>/`.
+`6.0  armv7 armv7s`. For root filesystems: `ls .cache/firmware/rootfs/<device>/`.
 
 ## 2. The libraries for the import check
 
@@ -52,7 +52,7 @@ xmake firmware -y --arch=armv7 fetch 6.0 > .logs/firmware-6.0.log 2>&1
 ```
 
 How to know it worked: the last line is
-`<home>/.revenant/dyld/6.0/dyld_shared_cache_armv7: iOS 6.0 for armv7`. When the release is already
+`.cache/dyld/6.0/dyld_shared_cache_armv7: iOS 6.0 for armv7`. When the release is already
 held, it prints that line at once and downloads nothing.
 
 - A universal app (`armv7` and `arm64`) is checked per slice: the arm64 slice reads 7.0, so fetch
@@ -71,7 +71,7 @@ xmake firmware -y --device=iPhone3,1 rootfs 6.0 > .logs/rootfs-iPhone3,1-6.0.log
 ```
 
 How to know it worked: the last line is
-`<home>/.revenant/firmware/rootfs/iPhone3,1/6.0_10A403: iPhone3,1 iOS 6.0 (10A403)`. It takes the
+`.cache/firmware/rootfs/iPhone3,1/6.0_10A403: iPhone3,1 iOS 6.0 (10A403)`. It takes the
 device's earliest firmware not older than the release, so the folder name says which build it
 really is. A pair already unpacked prints its line at once.
 
@@ -106,7 +106,7 @@ Then follow the skill `project`.
 
 ## Traps
 
-- Copying a `dyld_shared_cache` from a jailbroken device into `~/.revenant/dyld` → fetch it with
+- Copying a `dyld_shared_cache` from a jailbroken device into `.cache/dyld` → fetch it with
   `xmake firmware`. Reason: a cache taken from a running device holds pointers the device slid;
   The toolchain refuses it and says to fetch the release from the firmware.
 - Putting a cache, a root filesystem, an extracted library or an SDK header into the project, a
@@ -114,8 +114,8 @@ Then follow the skill `project`.
 - Running `xmake firmware` outside the project → run it where `xmake.lua` has the pin and the
   `apple-ios` include. Reason: the task comes from the addon the project pins, and it needs the
   project's `revenant-firmware` tool (`the project requires no firmware-tools` otherwise).
-- Deleting `~/.revenant` to "refresh" it → do not; a held release never changes. Every project on
+- Deleting `.cache` to "refresh" it → do not; a held release never changes. Every project on
   the machine reads the same files, and the emulator keeps its booted images under
-  `~/.revenant/emulator/`, which would be rebuilt from scratch.
+  `.cache/emulator/`, which would be rebuilt from scratch.
 - Fetching every release "to be safe" → fetch the lowest release per architecture and the
   device/release pairs to check. Each release is another download of up to a gigabyte.

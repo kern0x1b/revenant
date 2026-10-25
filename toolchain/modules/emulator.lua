@@ -7,6 +7,7 @@ import("gdb")
 import("apple.firmware")
 import("byteorder")
 import("generations")
+import("cache")
 
 RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
@@ -67,6 +68,10 @@ function root()
         return override
     end
     return path.join(path.directory(dyld.root()), "emulator")
+end
+
+function host_cache(identifier, build)
+    return path.join(root(), "cache.noindex", identifier .. "_" .. build)
 end
 
 function profiles(emulator)
@@ -308,6 +313,7 @@ end
 function clone(source, destination)
     remove(destination)
     os.mkdir(path.directory(destination))
+    cache.reserve(cache.bytes_of(source), "an emulator image cloned from " .. source)
     os.vrunv("cp", {"-c", "-R", source, destination})
 end
 

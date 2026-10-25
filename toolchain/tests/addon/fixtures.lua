@@ -59,9 +59,7 @@ function edited(source, destination, position, value)
 end
 
 function scratch()
-    local folder = os.tmpfile() .. ".dir"
-    os.mkdir(folder)
-    return folder
+    return import("@addon.revenant.workspace", {anonymous = true}).fresh("tests")
 end
 
 function empty_repository(folder)

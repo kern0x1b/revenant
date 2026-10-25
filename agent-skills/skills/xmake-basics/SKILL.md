@@ -1,6 +1,6 @@
 ---
 name: xmake-basics
-description: Reference for how an old-iOS app project drives xmake 3.1.2 with the revenant addon — where xmake keeps the configuration, the build and the packages, which the toolchain rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Revenant's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, REVENANT_HOME, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
+description: Reference for how an old-iOS app project drives xmake 3.1.2 with the revenant addon — where xmake keeps the configuration, the build and the packages, which the toolchain rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Revenant's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, REVENANT_CACHE, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
 ---
 
 Derived from the `xmake-basics`, `xmake-targets`, `xmake-commands` and `xmake-env-vars` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
@@ -118,8 +118,8 @@ Commands the revenant addon adds, and the skill for each:
 `xmake show -l envs` lists the `XMAKE_*` variables xmake documents, with their current values.
 
 - `XMAKE_COLORTERM=nocolor` — plain text in logs you will read or `grep`.
-- `REVENANT_HOME` — where the toolchain keeps the release libraries, firmware, root filesystems, emulator
-  images and device state (default `~/.revenant`). Set it only to move that data to another disk,
+- `REVENANT_CACHE` — where the toolchain keeps the release libraries, firmware, root filesystems, emulator
+  images and device state (default `.cache`). Set it only to move that data to another disk,
   and then the same way for every command.
 - `XMAKE_PROFILE=stuck` — traces what a hanging command runs (skill `xmake-troubleshooting`).
 - `XMAKE_GLOBALDIR`, `XMAKE_PKG_INSTALLDIR`, `XMAKE_PKG_CACHEDIR` — **leave unset.** They move the

@@ -44,7 +44,7 @@ and a `--runtime` library provides it: the Swift overlay types that revenant's S
 of these holds. An item absent from the SDK is not counted: it is the app's own code or a private API, and the summary
 counts those apart. `items.tsv` names the source of each status in its `via` column.
 
-The iOS 6.1.3 system is the dyld shared cache under `~/.revenant/dyld/6.1.3`, read through `apple.dyld`. Classes, C
+The iOS 6.1.3 system is the dyld shared cache under `.cache/dyld/6.1.3`, read through `apple.dyld`. Classes, C
 functions and global variables are checked there, by the cache's export table, which holds the exports of every library
 in it: a symbol counts as present when some library on iOS 6.1.3 exports it, whichever framework the SDK names as its
 owner. The cache wins over the SDK's annotation: a class the cache exports is present even when its SDK declaration says

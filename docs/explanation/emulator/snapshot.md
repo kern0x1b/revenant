@@ -13,7 +13,7 @@ by one; every other entry was read at the line given.
 
 The Mac has 12 cores and 24 GiB. Its load average was 30 to 37 during both runs, from other workers' boots and builds, so
 the times below are not idle-machine times. The binary is a release build of `main` at `1ae465470`. The rootfs is
-iPhone4,1 on 6.1.3 (10B329): an APFS clone of the pristine firmware in `~/.revenant/firmware`, booted fresh with an
+iPhone4,1 on 6.1.3 (10B329): an APFS clone of the pristine firmware in `.cache/firmware`, booted fresh with an
 empty host cache, from a rootfs that had never booted.
 
 | run | `--time-scale` | SpringBoard spawned (`spawn-setexec`, emulator host clock from launch) | sampled at | physical footprint | written (dirty + swapped) | dirty | display |
@@ -147,7 +147,7 @@ stopped and a calendar that is correct only if the offset is.
 - **Restore time, first run.** Unmeasured. It is the translation of the code that runs after the restore. A cold
   boot translates 2.25 million blocks and spends 56 to 79 s on translation, so a restore that runs much of the same code
   pays a large part of that. Stage 3 removes it; Stage 1 measures it.
-- **Disk.** About 2.5 GB per snapshot. Ten firmware and device pairs would be 25 GB under `~/.revenant`.
+- **Disk.** About 2.5 GB per snapshot. Ten firmware and device pairs would be 25 GB under `.cache`.
 
 The comparison with a cold boot is 58 to 112 s on this Mac, depending on load and time scale, against a restore of
 about 4 s plus whatever translation the first run needs.

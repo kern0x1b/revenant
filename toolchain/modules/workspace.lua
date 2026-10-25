@@ -1,10 +1,10 @@
 import("core.base.json")
+import("cache")
 
 local SDK_VERSION = "26.2"
 local SDK_VARIABLE = "REVENANT_GEN_SDK"
 local CORPUS_VARIABLE = "REVENANT_CORPUS_ROOT"
 local TASK_VARIABLE = "REVENANT_TASK"
-local HOME_VARIABLE = "REVENANT_HOME"
 
 local resolved = {}
 
@@ -13,15 +13,7 @@ function root()
 end
 
 function home()
-    local named = os.getenv(HOME_VARIABLE)
-    if named and named ~= "" then
-        return named
-    end
-    local value = os.getenv("HOME")
-    if not value or value == "" then
-        raise("workspace: HOME is not set, so there is no $HOME/.revenant to keep revenant's data in")
-    end
-    return path.join(value, ".revenant")
+    return cache.root()
 end
 
 function task()
@@ -42,8 +34,8 @@ function task()
     end
 end
 
-function cache()
-    return path.join(home(), "cache")
+function scratch()
+    return path.join(home(), "scratch")
 end
 
 local function ensure(folder)
@@ -55,7 +47,7 @@ local function ensure(folder)
 end
 
 function run(...)
-    local folder = path.join(cache(), task(), ...)
+    local folder = path.join(scratch(), task(), ...)
     ensure(folder)
     if not os.isdir(folder) then
         raise("workspace: cannot create %s", folder)

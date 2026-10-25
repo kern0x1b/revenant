@@ -2,6 +2,7 @@ import("core.base.json")
 import("utils.progress")
 import("dyld")
 import("macho")
+import("cache", {rootdir = path.join(os.scriptdir(), "..")})
 
 PLATFORMS = {
     armv6 = {"s5l8720x", "s5l8900x"},
@@ -15,6 +16,7 @@ PLATFORMS = {
 CATALOG = "https://api.ipsw.me/v4"
 KEYS = "https://theapplewiki.com/api.php"
 CACHE_FOLDER = "System/Library/Caches/com.apple.dyld"
+ROOTFS_EXPANSION = 3
 PRODUCTS = {"iPhone", "iPad", "iPod"}
 LIBRARY_FOLDERS = {"usr/lib", "System/Library/Frameworks", "System/Library/PrivateFrameworks"}
 
@@ -608,6 +610,7 @@ function fetch(architecture, minimum, opt)
             function ()
                 firmware.tool = tool
                 cprint("${bright}fetching iOS %s for %s from %s %s${clear} (%s)", release, architecture, firmware.identifier, firmware.build, firmware.url)
+                cache.reserve(firmware.size or 0, "the iOS " .. release .. " firmware for " .. architecture)
                 os.mkdir(work)
                 local members = zip_members(firmware.url)
                 local harvested = {}
@@ -757,6 +760,7 @@ function rootfs(identifier, minimum, opt)
     end
     firmware.tool = assert(opt.tool, "unpacking firmware needs the revenant-firmware tool")
     cprint("${bright}unpacking the root filesystem of %s %s (%s)${clear} from %s", firmware.identifier, firmware.version, firmware.build, firmware.url)
+    cache.reserve(ROOTFS_EXPANSION * (firmware.size or 0), "the root filesystem of " .. firmware.identifier .. " " .. firmware.version)
     local work = path.join(home(), "firmware", "work", firmware.identifier .. "_" .. firmware.build)
     local staging = folder .. ".partial"
     if os.isfile(path.join(staging, "System", "Library", "CoreServices", "SystemVersion.plist")) then
