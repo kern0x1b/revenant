@@ -1,7 +1,7 @@
 # Continuous checks
 
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. All of its jobs run on `macos-26`. An `ubuntu-latest` job named `changes`
+`gh workflow run check.yml --ref <branch>`. All of its jobs but one run on `macos-26`: an `ubuntu-latest` job named `changes`
 decides from the diff against the merge base with `main` which of them a branch push needs, and a public repository
 runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
 
