@@ -19,8 +19,6 @@ NSString *revenant_url_host_text(NSString *string, NSRange range);
 NSString *revenant_url_host_escaped(NSString *host);
 NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
 
-// What the URL spelled and macOS keeps in the string even where it has no number: the port, "0080" or the colon of an empty
-// port, and the host with its labels written in punycode.
 @interface NSURLComponents (RevenantRawText)
 - (NSString *)revenantPortText;
 - (NSString *)revenantHostText;
@@ -90,8 +88,6 @@ static BOOL revenant_url_valid_scheme(const unichar *characters, NSUInteger star
     return YES;
 }
 
-// A registered name takes what its grammar allows and a valid escape; the parser also takes non-ASCII characters, which
-// macOS writes as UTF-8 escapes and converts to IDNA when it composes the string.
 static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start, NSUInteger end, BOOL international)
 {
     if (start >= end)
@@ -227,7 +223,6 @@ BOOL revenant_url_valid(RevenantURLPart part, NSString *string)
     return valid;
 }
 
-// Writes a code point as the escapes of its UTF-8 bytes.
 static void revenant_url_utf8(uint32_t code, NSMutableString *result)
 {
     uint8_t bytes[4];
@@ -255,9 +250,6 @@ static void revenant_url_utf8(uint32_t code, NSMutableString *result)
         [result appendFormat:@"%%%02X", bytes[index]];
 }
 
-// What macOS writes for a component: a character in the component's set stays as it is, sub-delimiters and unreserved characters
-// always do, and everything else becomes the escapes of its UTF-8 bytes. The escapes already in the component stay only if every
-// '%' in it starts one; a component with a '%' that starts none has each '%' written as %25.
 static NSString *revenant_url_escape(const unichar *characters, NSUInteger start, NSUInteger end, const char *allowed)
 {
     BOOL escapes = YES;
@@ -337,7 +329,6 @@ static uint32_t *revenant_url_code_points(NSString *text, NSUInteger *count)
     return points;
 }
 
-// RFC 3492 with macOS's base, tmin and tmax.
 static uint32_t revenant_punycode_adapt(uint32_t delta, uint32_t points, BOOL first)
 {
     delta = first ? delta / 700 : delta / 2;
@@ -397,8 +388,6 @@ static NSString *revenant_punycode(const uint32_t *points, NSUInteger count)
     return output;
 }
 
-// One label of the host as macOS writes it in the string: a label with no non-ASCII character is kept as it is, and any other
-// is mapped (compatibility forms, lowercase) and then written in punycode.
 static NSString *revenant_url_label(NSString *label)
 {
     NSString *decoded = label;
@@ -422,7 +411,6 @@ static NSString *revenant_url_label(NSString *label)
     return result;
 }
 
-// The host as macOS's string shows it: each label mapped as above, from what the URL spelled.
 NSString *revenant_url_host_text(NSString *string, NSRange range)
 {
     if (range.location == NSNotFound)
@@ -433,7 +421,6 @@ NSString *revenant_url_host_text(NSString *string, NSRange range)
     return [labels componentsJoinedByString:@"."];
 }
 
-// RFC 3492, the inverse of revenant_punycode. Nil when the text is not punycode.
 static NSString *revenant_punycode_decode(NSString *text)
 {
     NSUInteger length = text.length;
@@ -498,8 +485,6 @@ static NSString *revenant_punycode_decode(NSString *text)
     return result;
 }
 
-// The host as macOS's percentEncodedHost shows it: each punycode label decoded and written as the escapes of its UTF-8 bytes,
-// every other label as it is.
 NSString *revenant_url_host_escaped(NSString *host)
 {
     if (!host)

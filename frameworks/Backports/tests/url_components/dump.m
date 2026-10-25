@@ -1,8 +1,5 @@
 #import <Foundation/Foundation.h>
 
-// Prints what NSURLComponents makes of each line of the corpus file, one tab-separated row per line. The same source is
-// built twice: against macOS Foundation alone (the oracle) and against the backport's NSURLComponents, so the two outputs
-// can be compared row by row. A line that does not parse prints "nil" in place of the row's fields.
 static NSString *field(NSString *value)
 {
     return value ? value : @"(nil)";

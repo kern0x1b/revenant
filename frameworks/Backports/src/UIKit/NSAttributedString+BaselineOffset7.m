@@ -6,13 +6,8 @@
 #import <AppKit/AppKit.h>
 #endif
 
-// iOS 6's string drawing ignores NSBaselineOffsetAttributeName: the probe in tests/emulate/baseline measures the same ink box
-// with and without the offset. The replacement below draws each run of the string on its own, moved by its offset, and
-// draws runs without an offset through the system's implementation, which is kept here so the replacement can call it.
 IMP revenant_baseline_draw_at_point_original = NULL;
 
-// A positive offset raises the text. UIKit's coordinates run down from the top, so raising is a smaller y; the host's
-// AppKit coordinates run up, so it is a larger one.
 #if TARGET_OS_IPHONE
 static const CGFloat revenant_baseline_direction = -1;
 #else

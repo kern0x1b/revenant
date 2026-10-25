@@ -251,8 +251,6 @@ local function launch(ctx, identifier, steps)
         raise("%s ran, and the run ended (%s) %s before its %d steps were taken; the emulator log is %s", identifier,
               booted.reason, where, #steps, booted.log)
     end
-    -- An application that exits with status 0 is a success, whether it exits during the steps or before them. Any other
-    -- exit makes the command exit with the same status, so a script can tell it from a clean run.
     local ended = driver.exit
     if ended and emulator.exit_code(ended) ~= 0 then
         cprint("${bright red}%s${clear} ended %s %s; the command exits with the same status, and the emulator log is %s", identifier,

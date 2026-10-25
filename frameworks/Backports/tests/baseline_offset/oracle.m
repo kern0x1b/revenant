@@ -2,8 +2,6 @@
 #import <objc/runtime.h>
 #include <string.h>
 
-// The drawing the backport replaces, kept by the replacement, and the replacement itself, which is what -drawAtPoint: now
-// calls. On the host, the kept implementation is macOS's own, which honours NSBaselineOffsetAttributeName, so it is the oracle.
 extern IMP revenant_baseline_draw_at_point_original;
 
 static const NSInteger width = 240;

@@ -8,8 +8,6 @@ function main(device, release)
     local here = path.absolute(os.scriptdir())
     local out = runs.folder("emulate-fontapp")
     os.mkdir(out)
-    -- The baseline case's emulator root already holds iPhone4,1 10B329's golden image. A root of its own starts that image's
-    -- first-boot build, which the load refused and left as a 0-byte build.lock, so this case runs on the baseline's root.
     os.setenv("REVENANT_EMULATOR_ROOT", path.join(runs.folder("emulate-baseline"), "emulator"))
 
     local function xmake(args, log, opt)
@@ -23,9 +21,6 @@ function main(device, release)
     xmake({"emulate", "-d", device, "-r", release, "install"}, path.join(out, "install.log"))
 
     local log = path.join(out, "launch.log")
-    -- -t covers the whole boot. -s is the launcher's wait for SpringBoard's server port, in guest seconds. Under load
-    -- 100 SpringBoard checked in 570-800 host seconds after boot; before that the launcher never calls SpringBoard, so
-    -- its -1 is its initial value, not a refusal (emulatefontapp-62c8ce43).
     local ran = xmake({"emulate", "-d", device, "-r", release, "-s", "1500", "-t", "3600", "launch", BUNDLE, "until-exit"}, log, {try = true})
     local text = io.readfile(log)
     for line in text:gmatch("[^\n]+") do

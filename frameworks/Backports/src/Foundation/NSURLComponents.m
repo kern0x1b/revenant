@@ -19,7 +19,6 @@ NSString *revenant_url_component(NSString *string, NSRange range, RevenantURLPar
 NSString *revenant_url_host_text(NSString *string, NSRange range);
 NSString *revenant_url_compose(id components, NSRange *ranges);
 
-// macOS writes a colon in the first segment of a path with no scheme or authority as %3A, so the path cannot read as a scheme.
 static NSString *revenant_url_path_escaping_colon(NSString *path)
 {
     if (!path)
@@ -30,8 +29,6 @@ static NSString *revenant_url_path_escaping_colon(NSString *path)
     return [first stringByAppendingString:[path substringFromIndex:end]];
 }
 
-// The port and host text as the URL spelled them. They are associated objects rather than ivars because the host build declares
-// the class's ivars only through its properties, and these have none.
 static const char revenant_port_text_key;
 static const char revenant_host_text_key;
 

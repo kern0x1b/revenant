@@ -37,7 +37,6 @@ local function corpus_of(file)
     return urls
 end
 
--- Each dump row starts with its index and a tab; the rest of the row is what the comparison reads.
 local function rows_of(output, count)
     local rows = {}
     for _, line in ipairs(lines_of(output)) do
@@ -55,7 +54,6 @@ local function dump(program, file)
     return rows_of(os.iorunv(program, {file}), #corpus_of(file))
 end
 
--- Returns the URLs whose rows differ from the oracle's.
 local function compare(oracle, backport, urls)
     local differing = {}
     for index, url in ipairs(urls) do
@@ -85,7 +83,6 @@ function main()
     assert(#differing == 0, "the backport's NSURLComponents disagrees with macOS on " .. #differing .. " URLs:\n  "
         .. table.concat(differing, "\n  "))
 
-    -- Negative control: the same URLs with a path appended must not compare equal to macOS's rows for the originals.
     local mutated = path.join(work, "mutated.txt")
     local changed = {}
     for _, url in ipairs(urls) do

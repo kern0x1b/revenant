@@ -1,7 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// Asks for the system font from inside UIApplicationMain's launch, the way an app does, and prints
-// what it got. A process that dies here has lost the font path; one that prints FONT-APP-DONE has not.
 @interface FontAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 

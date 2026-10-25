@@ -927,7 +927,6 @@ function parse_steps(words)
     return steps
 end
 
--- The status a launch command ends with: the application's own exit status, or 128 plus the signal that ended it.
 function exit_code(exit)
     if exit.signal ~= 0 then
         return 128 + exit.signal
