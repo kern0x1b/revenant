@@ -942,7 +942,7 @@ local function declarations_in(text, conformance)
             end
         else
             local head, super
-            head, super, after = window:match("^@interface%s+([%w_]+)%s*:%s*([%w_]+)()")
+            head, super, after = window:match("^@interface%s+([%w_]+)%s*<?[^:{;@]*:%s*([%w_]+)()")
             if head then
                 conformance.supers[head] = super
                 for _, name in ipairs(protocol_names(text, at + after - 1)) do
@@ -1000,6 +1000,30 @@ local function protocols_of(conformance, class)
     return found
 end
 
+local function covered_of(conformance)
+    local covered, classes = {}, {}
+    for class in pairs(conformance.direct) do
+        classes[class] = true
+    end
+    for class in pairs(conformance.supers) do
+        classes[class] = true
+    end
+    for class in pairs(classes) do
+        local ancestors, current = {}, class
+        while current and not ancestors[current] do
+            ancestors[current] = true
+            current = conformance.supers[current]
+        end
+        for name in pairs(protocols_of(conformance, class)) do
+            covered[name] = covered[name] or {}
+            for ancestor in pairs(ancestors) do
+                covered[name][ancestor] = true
+            end
+        end
+    end
+    return covered
+end
+
 function protocol_status(src, sdk, folders)
     folders = folders or implemented_in(src)
     local adopted = {}
@@ -1040,20 +1064,13 @@ function protocol_status(src, sdk, folders)
             end
         end
     end
-    local conformance = conformance_of(sdk, src)
-    local conforming = {}
-    local function conforms(class, name)
-        if not conforming[class] then
-            conforming[class] = protocols_of(conformance, class)
-        end
-        return conforming[class][name]
-    end
+    local covered = covered_of(conformance_of(sdk, src))
     local status = {backed = {}, uncalled = {}, members = {}}
     for name in pairs(candidates) do
         local members, implements = {}, false
         for _, method in ipairs(methods[name]) do
             for class in pairs(implementers[method.key] or {}) do
-                if conforms(class, name) then
+                if covered[name] and covered[name][class] then
                     members[method.key] = true
                     implements = true
                     break

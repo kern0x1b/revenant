@@ -247,12 +247,14 @@ function main()
         "- (void)prepare API_AVAILABLE(ios(8.0));",
         "- (void)reset API_AVAILABLE(ios(8.0));",
         "- (void)track API_AVAILABLE(ios(8.0));",
+        "- (void)rewind API_AVAILABLE(ios(8.0));",
+        "- (void)pause API_AVAILABLE(ios(8.0));",
         "@end",
         "",
     }, "\n"))
     os.mkdir(path.join(protocol_src, "Sample"))
     io.writefile(path.join(protocol_src, "Sample", "SampleView.h"), table.concat({
-        "@interface SampleView : NSObject <SampleEnvironment>",
+        "@interface SampleView : SampleBase <SampleEnvironment>",
         "@end",
         "",
     }, "\n"))
@@ -303,15 +305,38 @@ function main()
         "@end",
         "",
     }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleBase.m"), table.concat({
+        "@implementation SampleBase",
+        "- (void)rewind",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_sdk, "System", "Library", "Frameworks", "Sample.framework", "Headers", "SampleGenericKit.h"), table.concat({
+        "@interface SampleGeneric<ItemType> : NSObject<SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleGeneric.m"), table.concat({
+        "@implementation SampleGeneric",
+        "- (void)pause",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
     local status = lowered.protocol_status(protocol_src, protocol_sdk)
     local members = status.members.SampleEnvironment
-    assert(members["-traits"] and members["+shared"] and members["-prepare"] and members["-reset"] and not members["-traitsDidChange:"] and not members["-track"],
-           "a protocol member is lowered when a class that conforms to the protocol implements it, in any folder, and not otherwise")
+    assert(members["-traits"] and members["+shared"] and members["-prepare"] and members["-reset"] and members["-rewind"] and members["-pause"]
+           and not members["-traitsDidChange:"] and not members["-track"],
+           "a protocol member is lowered when a class that conforms to the protocol implements it, directly, through a superclass, or in any folder, and not otherwise")
     local protocol_lowered = lowered.lower_header(io.readfile(protocol_header), {classes = {}, functions = {}, globals = {}, protocols = {SampleEnvironment = true},
                                                                                 protocol_members = {SampleEnvironment = members}})
     assert(count(protocol_lowered, "AVAILABLE") == 2 and protocol_lowered:find("traitsDidChange:(SampleTraits *)previous API_AVAILABLE", 1, true)
            and protocol_lowered:find("track API_AVAILABLE", 1, true) and not protocol_lowered:find("traits API_AVAILABLE", 1, true)
            and not protocol_lowered:find("shared API_AVAILABLE", 1, true) and not protocol_lowered:find("prepare API_AVAILABLE", 1, true)
-           and not protocol_lowered:find("reset API_AVAILABLE", 1, true),
+           and not protocol_lowered:find("reset API_AVAILABLE", 1, true) and not protocol_lowered:find("rewind API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("pause API_AVAILABLE", 1, true),
            "an implemented protocol member loses its availability, and a member Backports does not implement keeps it:\n" .. protocol_lowered)
 end
