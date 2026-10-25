@@ -3997,6 +3997,7 @@ enum UNNotificationSettingDisabled
 enum UNNotificationSettingEnabled
 enum UNNotificationSettingNotSupported
 enum UNShowPreviewsSettingWhenAuthenticated
+enum VNErrorUnsupportedRequest
 enum VNErrorUnsupportedRevision
 enum WKAudiovisualMediaTypeAll
 enum WKAudiovisualMediaTypeNone
