@@ -232,7 +232,7 @@ inline constexpr std::array<std::string_view, 220> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 44> open_members {
+inline constexpr std::array<std::string_view, 40> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
@@ -273,13 +273,13 @@ inline constexpr std::array<std::string_view, 44> open_members {
     "ck.wifi_driver_event_streams_",
     "ck.directory_entries_cache_",
     "wifi.event_broker_",
+};
+
+inline constexpr std::array<std::string_view, 49> wired_members {
     "mem.jit_read_page_table_",
     "mem.jit_write_page_table_",
     "mem.direct_jit_write_pages_",
     "mem.file_page_cache_",
-};
-
-inline constexpr std::array<std::string_view, 45> wired_members {
     "hid.state_",
     "kss.ambient_light_sensor",
     "kss.apple_key_store_available",

@@ -82,6 +82,13 @@ target("emulator_foundation_address_space_snapshot_test")
     add_deps("emulator_foundation")
     add_tests("foundation.address_space_snapshot")
 
+target("emulator_foundation_jit_page_restore_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/jit_page_restore_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("foundation.jit_page_restore")
+
 target("emulator_foundation_darwin_notify_snapshot_test")
     set_kind("binary")
     set_default(false)
