@@ -386,3 +386,97 @@ So the code-cache bound is not the cut. Reaching 30% needs one of two changes, a
   boot-time and idle-CPU limits measured on a quiet host, which this machine was not.
 
 The choice between them is the coordinator's. The per-owner resident bytes are still unmeasured.
+
+The next section takes the first of the two: the per-block bookkeeping.
+
+## Per-block bookkeeping: measured 2026-10-25
+
+The live-block table above put 72% of the malloc heap under Dynarmic's block translation. A stats build (an environment
+flag, not committed) printed the containers of one address space each time it had translated another 20,000 blocks. The
+checkpoint below is the one with 17,072 live blocks, from the build before the change, with the default robin_map load
+factor of 0.5:
+
+| Structure | Bytes | Per block |
+|---|---|---|
+| `block_infos` buckets (65,536 slots of 208 B) | 13.63 MB | 798 B |
+| `block_references` (20,707 descriptors, 26,140 referrers) | 6.22 MB | 364 B |
+| Emit-time relocations (142,371 entries of 16 B) | 2.28 MB | 133 B |
+| `block_relocations` (26,508 entries) | 2.10 MB | 123 B |
+| Code, for comparison | 6.78 MB | 397 B |
+
+The bookkeeping came to 1,419 B a block against 397 B of code. The `block_entries` map was sized the same way and was not
+changed here.
+
+The IR is not kept after emit. In the default path `translation_completed` returns before any artifact is published or
+recorded, unless artifact publication is on (`emulator/src/foundation/cpu.cpp`, the early return near line 1237). The IR
+block is a local of the translate-and-emit call and is freed on return. Persistence is off, so there was nothing to
+drop here.
+
+Retranslation, per address space. At each checkpoint the stats build counted unique guest descriptors against all
+translations:
+
+| Translations in the address space | Unique descriptors | Repeats |
+|---|---|---|
+| 20,000 (9 samples) | 18,070 to 18,844 | 6% to 10% |
+| 40,000 (4 samples) | 37,784 to 38,822 | 3% to 6% |
+| 60,000 (1 sample) | 57,916 | 3.5% |
+
+No sample had a retirement (`retired=0`), so these repeats did not come from `RetireCodeRange`. The source of the repeats
+is not identified. The boot-wide unique count was not taken, so the 2.28 M translations per boot have no matching unique
+count here, and no retranslation saving is claimed.
+
+The change (patch `0010-Keep-the-per-block-bookkeeping-compact.patch`, in `packages/d/dynarmic/patches/`):
+
+- `block_infos` stores a copy of the emitted info without the emit-time relocation list.
+- `block_references` holds a vector of entry points per descriptor, not a set. `RetireCodeRange` removes an entry point
+  with `std::remove` and drops the descriptor when its list is empty.
+- `block_relocations` and the fastmem patch list are vectors, not per-block maps.
+- `ClearCache` swaps each container for an empty one, so the buckets are released. `block_infos` uses a 0.9 maximum
+  load factor.
+- `Link` no longer checks for a duplicate referrer (a block links each target once, and `std::remove` already removes
+  every copy). `RelinkForDescriptor` no longer inserts an empty entry for a descriptor with no referrers.
+
+The dynarmic patch was measured in alternating boots against the control. The control is `main` with dynarmic patches 1
+to 9. Each boot ran `run-footprint-v2.sh`: the SpringBoard spawn, then 60 s, then a 10 to 19 s idle window. The host load
+is the load average at launch.
+
+Footprint, MB (`footprint`, dirty plus compressed):
+
+| Pair | Control | Compact | Change |
+|---|---|---|---|
+| A, round 1 (load 5.6, earlier build with the duplicate check) | 4,723 | 3,104 | −34% |
+| A, round 2 (load 4.7, earlier build with the duplicate check) | 4,571 | 2,551 | −44% |
+| B, round 1 (load 15 to 16, final build) | 3,540 | 2,382 | −33% |
+| B, round 2 (load 17 to 39, final build) | 2,842 | 1,715 | −40% |
+
+The final build (set B) averages 3,191 MB against 2,049 MB, −36%. Both final pairs are past the −30% target. Two pairs
+per build are too few to bound the spread, so the number needs a repeat on a quiet host.
+
+Boot, the SpringBoard spawn:
+
+| Pair | Control wall s (CPU s at spawn) | Compact wall s (CPU s at spawn) | Load at start |
+|---|---|---|---|
+| A, round 1 | 40 (39.9) | 35 (35.7) | 5.6 |
+| A, round 2 | 35 (35.6) | 50 (50.5) | 4.7 |
+| B, round 1 | 111 (65.6) | 132 (70.3) | 15.0 |
+| B, round 2 | 208 (72.7) | 182 (62.1) | 17.3 |
+
+Within the control build the wall-clock time runs from 35 s to 208 s, so it follows the host load. The CPU at spawn is
+steadier. The final build averages 66.2 s against 69.1 s for the control. The earlier build with the duplicate check
+(set A) averaged 43.1 s against 37.8 s, a rise of about 5 s that the final build does not show. Two pairs cannot tell
+whether that rise was real.
+
+Idle CPU, cores over the idle window:
+
+| Pair | Control | Compact |
+|---|---|---|
+| A, rounds 1 and 2 | 0.90, 0.81 | 0.91, 0.73 |
+| B, rounds 1 and 2 | 0.56, 0.18 | 0.25, 0.25 |
+
+Within one build the idle CPU ranges from 0.18 to 0.91 cores, so these pairs do not separate the builds, and nothing
+here shows a rise.
+
+The dynarmic suite passes with the patch: 47 test cases and 200,561 assertions, built with
+`DYNARMIC_ENABLE_TEST_EMIT_FAILURE=ON` (the fault-injection hooks, so the emit-failure paths run).
+
+Not done: the retranslation source, the `block_entries` map, and a quiet-host repeat of the footprint and boot pairs.
