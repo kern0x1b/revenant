@@ -42,7 +42,8 @@ public:
 };
 
 [[nodiscard]] ContentIdentity rootfs_manifest_identity(
-    const std::filesystem::path& rootfs);
+    const std::filesystem::path& rootfs,
+    const std::filesystem::path& cache_file = {});
 
 [[nodiscard]] std::vector<std::byte> encode_session_snapshot(
     const SessionSnapshot& snapshot);
@@ -51,6 +52,7 @@ public:
     std::span<const std::byte> bytes);
 
 void require_rootfs_identity(const SessionSnapshotHeader& header,
-    const std::filesystem::path& rootfs);
+    const std::filesystem::path& rootfs,
+    const std::filesystem::path& cache_file = {});
 
 }

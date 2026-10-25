@@ -151,6 +151,37 @@ void manifest_follows_the_tree_not_the_timestamps(const fs::path& root)
         "a changed symlink target changes the manifest");
 }
 
+void same_size_edit_with_restored_timestamp_is_caught(const fs::path& root)
+{
+    const auto rootfs = make_rootfs(root);
+    const auto file = rootfs / "usr" / "bin" / "minimal";
+    const auto cache = root / "manifest.cache";
+    const auto before = emulator::rootfs_manifest_identity(rootfs, cache);
+    expect(fs::exists(cache), "the manifest cache is written");
+
+    const auto timestamp = fs::last_write_time(file);
+    write_file(file, "minimal gueSt");
+    fs::last_write_time(file, timestamp);
+    expect(emulator::rootfs_manifest_identity(rootfs, cache) !=
+            before,
+        "a same-size edit with its timestamp restored is caught through the cache");
+    expect(emulator::rootfs_manifest_identity(rootfs) ==
+            emulator::rootfs_manifest_identity(rootfs, cache),
+        "the cached manifest matches an uncached one");
+}
+
+void corrupt_manifest_cache_is_ignored(const fs::path& root)
+{
+    const auto rootfs = make_rootfs(root);
+    const auto cache = root / "manifest.cache";
+    const auto expected = emulator::rootfs_manifest_identity(rootfs);
+    write_file(cache, "not a cache");
+    expect(emulator::rootfs_manifest_identity(rootfs, cache) == expected,
+        "a corrupt manifest cache is ignored");
+    expect(emulator::rootfs_manifest_identity(rootfs, cache) == expected,
+        "a manifest cache rewritten after corruption is used again");
+}
+
 void refuses_a_changed_rootfs(const fs::path& root)
 {
     const auto rootfs = make_rootfs(root);
@@ -179,6 +210,8 @@ int main()
     round_trip_restores_the_header_and_body(rootfs);
     rejects_foreign_and_damaged_streams(rootfs);
     manifest_follows_the_tree_not_the_timestamps(root / "timestamps");
+    same_size_edit_with_restored_timestamp_is_caught(root / "same-size");
+    corrupt_manifest_cache_is_ignored(root / "corrupt");
     refuses_a_changed_rootfs(root / "changed");
 
     fs::remove_all(root);
