@@ -277,3 +277,112 @@ core would not see it, and a direct access does not hold the lock that serialize
 
 Moving the 2-core guest onto the populated tables is therefore a change to the cross-core memory model, not a cache
 tweak, and it is not made here. The 5× target needs that decision first.
+
+## Measured on 2026-10-25
+
+### Poll calls per pass: a native microbenchmark
+
+The guest-level probe did not finish: under a host load of about 25 its boot stalled, and the run hit its 1800 s limit
+before a verdict. The numbers here come from a native loop, `emulator_network_host_readiness_bench`
+(`emulator/src/network/test/host_readiness_bench.cpp`). It holds N loopback TCP listeners, connects one client to the
+first, and runs passes at a 1 ms pause for 10 s, once with one `poll(2)` per socket and once with `HostReadinessProbe`.
+Every mode reported one ready socket per pass. The poll counts come from the `xattrcount.dylib` interposer, which counts
+the calls each second. The CPU is `getrusage` over the window. Two runs on one machine:
+
+| N | mode | polls a second (run 1 / run 2) | passes a second (run 1 / run 2) | CPU ms a second (run 1 / run 2) |
+|---|---|---|---|---|
+| 1 | one poll per socket | 673 / 670 | 669.5 / 666.3 | 2.9 / 4.2 |
+| 1 | batched | 674 / 670 | 669.0 / 665.0 | 3.1 / 4.8 |
+| 8 | one poll per socket | 5,127 / 5,058 | 637.3 / 627.3 | 11.9 / 16.7 |
+| 8 | batched | 668 / 670 | 663.2 / 665.4 | 11.3 / 6.6 |
+| 32 | one poll per socket | 16,629 / 17,454 | 518.0 / 544.1 | 59.4 / 43.9 |
+| 32 | batched | 401 / 668 | 400.3 / 664.3 | 16.0 / 10.3 |
+
+One poll per socket costs N polls a pass, so its poll count grows with N, about 670 × N a second. The batch stays at one
+poll a pass. At N=32 it cuts CPU from 44 to 59 ms a second down to 10 to 16. At N=1 the two modes make the same call and
+the CPU is the same within noise. At N=8 the CPU runs disagree (11.9 against 11.3, and 16.7 against 6.6), so this loop
+shows no saving there. Batched N=32 passed about 400 times a second in run 1 and about 665 in run 2, under the same load.
+That cause is not identified. The poll-count claim holds in this loop. The guest's CPU under a real kqueue wait is not
+measured.
+
+### Memory at idle SpringBoard: the baseline
+
+One boot of the HEAD binary (`e35247ec8`, batched poll, no memory change) under `run-footprint.sh`: time scale 10, the
+SpringBoard spawn 40 s after launch, and a snapshot 60 s after that. Over the 11 s idle window the process used 8.44 s of
+CPU, 77% of a core, and its RSS was 2.07 GiB. The host was shared with other builds (load average 22.6 at 10:06).
+
+`footprint` counts dirty pages, and those include the pages the macOS memory compressor holds:
+
+| Category | Dirty MB | Regions |
+|---|---|---|
+| Malloc Large | 2,388 | 240 |
+| Malloc Small | 1,713 | 443 |
+| Untagged (anonymous `mmap`: guest memory, the JIT code cache, renderer buffers) | 722 | 193 |
+| Malloc Metadata | 11 | 31 |
+| Everything else (`__DATA`, stacks, the kernel page table) | 9 in total | |
+| Total physical footprint | 4,843 | 3,765 |
+
+`mapped file` is 102 MB clean, which the footprint does not count. In `vmmap`, the writable regions were 4.7 GB written,
+of which 2.1 GB was resident and 2.7 GB swapped out (compressed). The default malloc zone held 15.0 million live blocks,
+3.7 GB allocated, 1.7 GB resident and 2.2 GB swapped out. The boot log shows
+`Vulkan unavailable` (no `libvk_swiftshader.dylib`), so the renderer was the reference one, and no SwiftShader memory
+is in this boot.
+
+### Where the malloc heap's live blocks are
+
+A boot with `MallocStackLogging=1` (a separate boot, footprint 4.5 GB) lists the live allocations with their stacks.
+The table groups the single allocations under 16 MB by the innermost emulator frame. These are virtual sizes of live
+blocks, not resident bytes. The 1,072 MiB of `clear_jit_page_table_locked` are the JIT page tables, which are `mmap`ed
+and not malloc heap, so they are left out of the shares. Sizes are MiB:
+
+| Owner (innermost emulator frame) | MiB | Share of 3,105 MiB |
+|---|---|---|
+| Dynarmic block translation, unnamed frames under `EmitBlock`, `Link` and `GetCurrentBlockThunk` (9.95 M blocks) | 2,248 | 72% |
+| `FilePageCache::load_page` | 182 | 6% |
+| `MachOImage::parse` | 150 | 5% |
+| `Dynarmic::Backend::Arm64::AddressSpace::EmitBlock` | 107 | 3% |
+| `AddressSpace::fault_file_pages` | 93 | 3% |
+| `AddressSpace::writable_backing_locked` | 59 | 2% |
+| `AddressSpace::copy_in_batch` | 57 | 2% |
+| `hfs::MetadataProvider::read_xattr` | 40 | 1% |
+| Everything else | 170 | 5% |
+
+The largest single blocks, 1 to 16 MB each, sit under the same unnamed Dynarmic frames. They are growing containers,
+including the `BlockRangeInformation::AddRange` interval index that Dynarmic uses for cache invalidation.
+
+### The memory cut: the code-cache bound, measured
+
+The target was a 30% smaller footprint, about 1.45 GB of the 4.84 GB, with no rise in boot time or idle CPU. The target is
+not reached, and the default is unchanged.
+
+The JIT code cache is sized adaptively (`adaptive_jit_code_cache_size` in `runtime/resource_policy.cpp`), which chose
+128 MB on this host. `--jit-cache-mib` overrides it. Two pairs of boots of the HEAD build, alternating sizes, with the
+same script (`run-footprint-jit.sh`): the SpringBoard spawn, then 60 s, then the idle window. The host load average was 7
+to 9 at each launch.
+
+| Run | cache | boot s | RSS MB | idle CPU s over 11 s | footprint MB | Malloc Large MB | Malloc Small MB |
+|---|---|---|---|---|---|---|---|
+| 1 | 64 MB | 50 | 660 | 9.08 | 4,357 | 2,088 | 1,563 |
+| 1 | 128 MB | 40 | 998 | 8.72 | 4,375 | 2,107 | 1,572 |
+| 2 | 64 MB | 45 | 930 | 9.05 | 4,185 | 1,986 | 1,537 |
+| 2 | 128 MB | 50 | 751 | 8.33 | 4,408 | 2,102 | 1,609 |
+
+- Going from 128 MB to 64 MB lowered the mean footprint by about 120 MB, 2.7%, and the malloc categories by about 3%. That
+  is far from 30%.
+- The 64 MB runs used about 0.5 s more idle CPU in the 11 s window (9.07 against 8.53 on average). Two runs each cannot
+  separate that from load. Boot time did not show a difference (47.5 s against 45 s on average).
+- The 128 MB runs in this window (4,375 and 4,408 MB) are the matched baseline. The 09:53 baseline of 4,843 MB has the same
+  config and sat about 10% higher. The footprint moves that much between windows, so only matched runs compare. The
+  split moved too: the sweep runs had 0.36 to 0.54 GB resident and 3.6 to 3.9 GB swapped out, against 2.1 GB and 2.7 GB in
+  the baseline.
+- Halving the cache moved the footprint by about 3%, so the footprint does not scale with the cache size. The sweep was
+  not stack-logged, so which owner stayed the same was not measured.
+
+So the code-cache bound is not the cut. Reaching 30% needs one of two changes, and neither is in this commit:
+
+- Dynarmic's per-block bookkeeping (the `BlockRangeInformation` interval index, the patch vectors and the 1 to 16 MB
+  containers under `EmitBlock` and `Link`) made smaller or sparser. This is a backend change with a boot-time measurement.
+- A translation cache with usage-based eviction in the backend. Each eviction costs a retranslation, so it needs the
+  boot-time and idle-CPU limits measured on a quiet host, which this machine was not.
+
+The choice between them is the coordinator's. The per-owner resident bytes are still unmeasured.
