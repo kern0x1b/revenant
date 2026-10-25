@@ -44,6 +44,7 @@ namespace {
             "[perf-artifact]",
             "[perf-artifact-validation]",
             "[perf-jit-profile]",
+            "[perf-memory-pages]",
             "[perf-block]",
             "[perf-block-top]",
             "[perf-block-image]",

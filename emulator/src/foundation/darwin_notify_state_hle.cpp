@@ -17,6 +17,9 @@ namespace emulator {
 namespace {
 
     constexpr std::string_view libsystem_image { "/usr/lib/libSystem.B.dylib" };
+    constexpr std::string_view libsystem_notify_image {
+        "/usr/lib/system/libsystem_notify.dylib"
+    };
 
 }
 
@@ -38,6 +41,8 @@ DarwinNotifyStateHle::DarwinNotifyStateHle(UserlandHleRegistry& registry)
         [this](UserlandHleCall& call) { get_state(call); });
     registry.register_function(std::string { libsystem_image },
         "_notify_cancel", [this](UserlandHleCall& call) { cancel(call); });
+    registry.register_function(std::string { libsystem_notify_image },
+        "_notify_post", [this](UserlandHleCall& call) { post(call); });
 }
 
 DarwinNotifyStateHle::~DarwinNotifyStateHle() { reset(); }
@@ -78,6 +83,12 @@ void DarwinNotifyStateHle::set_notification_dispatcher(
     dispatcher_ = std::move(dispatcher);
 }
 
+void DarwinNotifyStateHle::set_post_observer(PostObserver observer)
+{
+    std::lock_guard lock { mutex_ };
+    post_observer_ = std::move(observer);
+}
+
 void DarwinNotifyStateHle::inherit_state(const DarwinNotifyStateHle& parent)
 {
     std::scoped_lock lock { mutex_, parent.mutex_ };
@@ -97,6 +108,18 @@ void DarwinNotifyStateHle::publish(std::string_view name)
     }
     for (const auto& notify : notifications)
         notify();
+}
+
+void DarwinNotifyStateHle::observe_post(
+    std::string_view name, std::uint32_t process_id)
+{
+    PostObserver observer;
+    {
+        std::lock_guard lock { mutex_ };
+        observer = post_observer_;
+    }
+    if (observer)
+        observer(name, process_id);
 }
 
 void DarwinNotifyStateHle::reset()
@@ -122,6 +145,13 @@ void DarwinNotifyStateHle::initialize(UserlandHleCall& call)
         call.set_return(notify_status_failed);
         return;
     }
+    call.resume_original_persistently();
+}
+
+void DarwinNotifyStateHle::post(UserlandHleCall& call)
+{
+    if (const auto name = call.string_argument(0))
+        observe_post(*name, call.process_id());
     call.resume_original_persistently();
 }
 

@@ -51,6 +51,29 @@ struct AddressSpaceWriteStats {
     std::uint64_t copy_on_write_detaches { };
 };
 
+struct MaterializedPageCounts {
+    std::uint64_t anonymous { };
+    std::uint64_t file_cached { };
+    std::uint64_t copy_on_write_possible { };
+    std::uint64_t shared_writable { };
+
+    [[nodiscard]] std::uint64_t total() const noexcept
+    {
+        return anonymous + file_cached + copy_on_write_possible +
+               shared_writable;
+    }
+
+    MaterializedPageCounts& operator+=(
+        const MaterializedPageCounts& other) noexcept
+    {
+        anonymous += other.anonymous;
+        file_cached += other.file_cached;
+        copy_on_write_possible += other.copy_on_write_possible;
+        shared_writable += other.shared_writable;
+        return *this;
+    }
+};
+
 struct FileMappingBatchContext {
     std::shared_ptr<GuestFileBacking> backing;
 };
@@ -219,6 +242,7 @@ public:
     [[nodiscard]] std::size_t mapped_page_count() const;
     [[nodiscard]] std::size_t resident_page_count() const;
     [[nodiscard]] std::size_t shared_page_count() const;
+    [[nodiscard]] MaterializedPageCounts materialized_page_counts() const;
     [[nodiscard]] std::size_t cached_file_mapping_count() const;
     [[nodiscard]] std::size_t cached_file_page_count() const;
     [[nodiscard]] FilePageCacheStats file_page_cache_stats() const;

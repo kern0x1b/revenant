@@ -33,6 +33,8 @@ public:
         std::uint32_t port_name, std::uint32_t token)>;
     using NativeServerReadyQuery = std::function<bool()>;
     using NativeServerProviderQuery = std::function<bool()>;
+    using PostObserver = std::function<void(
+        std::string_view name, std::uint32_t process_id)>;
 
     explicit DarwinNotifyStateHle(UserlandHleRegistry& registry);
     ~DarwinNotifyStateHle();
@@ -42,12 +44,15 @@ public:
     void set_native_server_provider_query(NativeServerProviderQuery query);
     void set_provider(std::string name, StateProvider provider);
     void set_notification_dispatcher(NotificationDispatcher dispatcher);
+    void set_post_observer(PostObserver observer);
     void inherit_state(const DarwinNotifyStateHle& parent);
     void publish(std::string_view name);
+    void observe_post(std::string_view name, std::uint32_t process_id);
     void reset();
 
 private:
     void initialize(UserlandHleCall& call);
+    void post(UserlandHleCall& call);
     void register_mach_port(UserlandHleCall& call);
     void register_check(UserlandHleCall& call);
     void check(UserlandHleCall& call);
@@ -79,6 +84,7 @@ private:
     NativeServerReadyQuery native_server_ready_query_;
     NativeServerProviderQuery native_server_provider_query_;
     NotificationDispatcher dispatcher_;
+    PostObserver post_observer_;
     std::shared_ptr<SharedBus> bus_ { std::make_shared<SharedBus>() };
     std::set<RegistrationKey> owned_registrations_;
 };
