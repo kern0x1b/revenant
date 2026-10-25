@@ -2876,7 +2876,9 @@ std::vector<std::byte> UserlandHleRegistry::wiring_identity() const
     snapshot::save(
         out, static_cast<std::uint64_t>(shared_cache_data_symbols_.size()));
     for (const auto& symbol : shared_cache_data_symbols_) {
-        snapshot::save(out, symbol.cache_path);
+        const auto cache_file =
+            std::filesystem::path { symbol.cache_path }.filename();
+        snapshot::save(out, cache_file.generic_string());
         snapshot::save(out, symbol.file_offset);
         snapshot::save(out, symbol.symbol);
     }
@@ -2898,11 +2900,6 @@ void UserlandHleRegistry::save(snapshot::Writer& out) const
     snapshot::save(out, registration_generation_);
 
     snapshot::save(out, shared_hle_plan_ != nullptr);
-    if (shared_hle_plan_) {
-        snapshot::save(out, shared_hle_plan_generation_identity_.digest);
-        snapshot::save(out, shared_hle_plan_architecture_);
-        snapshot::save(out, shared_hle_plan_registration_generation_);
-    }
 
     snapshot::save(out, static_cast<std::uint64_t>(installed_calls_.size()));
     for (const auto& [address, call] : installed_calls_) {
@@ -2963,22 +2960,6 @@ void UserlandHleRegistry::load(snapshot::Reader& in)
     snapshot::load(in, has_plan);
     if (has_plan != (shared_hle_plan_ != nullptr))
         throw snapshot::FormatError { "shared HLE plan differs from the wiring" };
-    if (has_plan) {
-        ContentIdentity identity;
-        ArmArchitectureVersion architecture { };
-        std::uint64_t plan_registration_generation { };
-        snapshot::load(in, identity.digest);
-        snapshot::load(in, architecture);
-        snapshot::load(in, plan_registration_generation);
-        if (identity != shared_hle_plan_generation_identity_ ||
-            architecture != shared_hle_plan_architecture_ ||
-            plan_registration_generation !=
-                shared_hle_plan_registration_generation_) {
-            throw snapshot::FormatError {
-                "shared HLE plan differs from the wiring"
-            };
-        }
-    }
 
     installed_calls_.clear();
     std::uint64_t count { };

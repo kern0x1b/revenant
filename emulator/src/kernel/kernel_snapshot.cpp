@@ -30,6 +30,17 @@ void reject_if_populated(const char* member, const Container& container)
         };
 }
 
+std::string rootfs_relative_path(
+    const std::filesystem::path& path, const std::filesystem::path& rootfs)
+{
+    if (path.empty())
+        return {};
+    const auto relative = path.lexically_relative(rootfs);
+    if (relative.empty() || *relative.begin() == "..")
+        throw snapshot::RefusedError { "ck.dyld_shared_cache_path_" };
+    return relative.generic_string();
+}
+
 void save_pthread_registration(snapshot::Writer& out,
     const std::optional<DarwinPthreadRegistration>& registration)
 {
@@ -179,7 +190,7 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, pending_event_poll_observed_);
     snapshot::save(out, local_timer_deadline_cache_);
     snapshot::save(out, local_timer_deadline_cache_valid_);
-    snapshot::save(out, dyld_shared_cache_path_.string());
+    snapshot::save(out, rootfs_relative_path(dyld_shared_cache_path_, rootfs_));
     snapshot::save(out, dyld_shared_cache_attempted_);
     snapshot::save(out, timer_trace_count_);
     snapshot::save(out, port_status_trace_count_);
@@ -290,7 +301,9 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, local_timer_deadline_cache_valid_);
     std::string dyld_shared_cache_path;
     snapshot::load(in, dyld_shared_cache_path);
-    dyld_shared_cache_path_ = std::filesystem::path { dyld_shared_cache_path };
+    dyld_shared_cache_path_ = dyld_shared_cache_path.empty()
+        ? std::filesystem::path {}
+        : rootfs_ / dyld_shared_cache_path;
     snapshot::load(in, dyld_shared_cache_attempted_);
     snapshot::load(in, timer_trace_count_);
     snapshot::load(in, port_status_trace_count_);
@@ -403,6 +416,8 @@ void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
     wifi_state_->load(in);
     darwin_notify_state_hle_.load(in);
     hid_event_system_hle_.load(in);
+    if (dyld_shared_cache_attempted_)
+        static_cast<void>(dyld_shared_cache_for(dyld_shared_cache_path_));
     userland_hle_.load(in);
     mobile_framebuffer_hle_.load(in);
     mbx2d_hle_.load(in);
@@ -410,8 +425,6 @@ void CompatibilityKernel::load_snapshot(snapshot::Reader& in)
     core_audio_hle_.load(in);
     bool launchd_job_catalog_loaded { };
     snapshot::load(in, launchd_job_catalog_loaded);
-    if (dyld_shared_cache_attempted_)
-        static_cast<void>(dyld_shared_cache_for(dyld_shared_cache_path_));
     if (launchd_job_catalog_loaded) {
         std::call_once(shared_state_->launchd_job_catalog_once, [this] {
             shared_state_->launchd_job_catalog =

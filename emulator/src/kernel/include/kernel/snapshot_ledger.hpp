@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 223> saved_members {
+inline constexpr std::array<std::string_view, 221> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -28,8 +28,6 @@ inline constexpr std::array<std::string_view, 223> saved_members {
     "hle.loaded_images_",
     "hle.shared_cache_data_symbols_",
     "hle.shared_hle_plan_",
-    "hle.shared_hle_plan_architecture_",
-    "hle.shared_hle_plan_registration_generation_",
     "mem.parallel_access_",
     "mem.first_region",
     "mem.resident_pages",
@@ -273,7 +271,7 @@ inline constexpr std::array<std::string_view, 35> open_members {
     "wifi.event_broker_",
 };
 
-inline constexpr std::array<std::string_view, 52> wired_members {
+inline constexpr std::array<std::string_view, 54> wired_members {
     "ck.dyld_shared_cache_",
     "kss.launchd_job_catalog",
     "kss.launchd_job_catalog_once",
@@ -326,6 +324,8 @@ inline constexpr std::array<std::string_view, 52> wired_members {
     "layerkit.scene_coordinator_",
     "layerkit.shared_state_",
     "coreaudio.service_",
+    "hle.shared_hle_plan_architecture_",
+    "hle.shared_hle_plan_registration_generation_",
 };
 
 inline constexpr std::array<std::string_view, 28> refused_members {
