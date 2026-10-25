@@ -5,7 +5,7 @@
 target("emulator_runtime")
     set_kind("static")
     add_files("boot_options.cpp", "emulator_session.cpp", "realtime_pacer.cpp", "resource_policy.cpp", "loop_carried_state.cpp", "session_snapshot.cpp",
-              "session_catalog.cpp", "session_diagnostics.cpp", "input/live_button_scheduler.cpp",
+              "session_state.cpp", "session_catalog.cpp", "session_diagnostics.cpp", "input/live_button_scheduler.cpp",
               "input/live_touch_scheduler.cpp")
     add_deps("emulator_foundation", "emulator_device_state", "emulator_graphics", "emulator_network", {public = true})
     add_deps("emulator_kernel", "emulator_debug", "emulator_crypto")

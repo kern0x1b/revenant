@@ -22,6 +22,8 @@
 #include "runtime/loop_carried_state.hpp"
 #include "runtime/realtime_pacer.hpp"
 #include "runtime/session_host.hpp"
+#include "runtime/session_snapshot.hpp"
+#include "runtime/session_state.hpp"
 #include "session_catalog.hpp"
 #include "session_debugger.hpp"
 #include "session_diagnostics.hpp"
@@ -4718,6 +4720,44 @@ void EmulatorSession::run()
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
     catalog_maintenance.publish_stable(*initial_runtime->kernel);
     host_resources.wait_idle();
+    if (options.snapshot_output) {
+        if (!bounded_execution)
+            throw std::invalid_argument { "--snapshot-out needs --ticks" };
+        if (display_inflight_callback_deadline ||
+            display_urgent_lease_deadline || display_callback_pending_since)
+            throw snapshot::RefusedError { "run.display_callback_deadline" };
+        if (display_urgent_process || display_inflight_callback_thread)
+            throw snapshot::RefusedError { "run.display_urgent_callback" };
+        if (diagnostic_svc_spin_thread)
+            throw snapshot::RefusedError { "run.diagnostic_svc_spin" };
+        if (hard_stop || loop_state.remaining_ticks != 0)
+            throw snapshot::RefusedError { "run.stopped_before_ticks" };
+        snapshot::Writer body;
+        save_session_state(body, *initial_runtime, runtimes.size(), scheduler,
+            loop_state, next_pid);
+        SessionSnapshot snapshot;
+        snapshot.header.device = std::string { device.identity.product_type };
+        snapshot.header.binary = binary;
+        snapshot.header.ticks = *ticks_option;
+        snapshot.header.rootfs_manifest = rootfs_manifest_identity(
+            rootfs, host_cache / "rootfs-manifest-digests.bin");
+        snapshot.body = std::move(body.bytes());
+        const auto encoded = encode_session_snapshot(snapshot);
+        const auto& target = *options.snapshot_output;
+        const auto partial = target + ".partial";
+        {
+            std::ofstream file { partial, std::ios::binary };
+            file.write(reinterpret_cast<const char*>(encoded.data()),
+                static_cast<std::streamsize>(encoded.size()));
+            file.close();
+            if (!file)
+                throw std::runtime_error { "cannot write snapshot: " + target };
+        }
+        std::filesystem::rename(partial, target);
+        output.line("[snapshot] written=" + target +
+                    " bytes=" + std::to_string(encoded.size()) +
+                    " ticks=" + std::to_string(*ticks_option));
+    }
     if (bounded_execution)
         host.session_stopped(*initial_runtime->kernel, *initial_runtime->memory);
     if (artifact_compaction_task && artifact_compaction_record &&

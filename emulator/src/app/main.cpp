@@ -90,7 +90,7 @@ std::string usage()
            "[--shared-cache GUEST_PATH] [--thumb]\n"
            "  emulator boot --rootfs DIR [--device PROFILE] [--ios-build CODE] "
            "[--binary /sbin/launchd] [--guest-command COMMAND] [--ticks N] "
-           "[--census-output FILE] "
+           "[--census-output FILE] [--snapshot-out FILE] "
            "[--cores N] [--jit-cache-mib 8..512] "
            "[--jit-cache-budget-mib 256..4096] "
            "[--watch-address ADDR] [--gdb PORT] "
@@ -1159,6 +1159,9 @@ void boot(const std::vector<std::string>& args, Output& output)
             "--census-output needs --ticks, which sets the tick it is taken at"
         };
     }
+    options.snapshot_output = option(args, "--snapshot-out");
+    if (options.snapshot_output && !options.ticks)
+        throw std::runtime_error { "--snapshot-out needs --ticks" };
     DesktopHost host { census_output ? std::filesystem::path { *census_output }
                                      : std::filesystem::path { } };
     EmulatorSession session { std::move(options), host, output };
