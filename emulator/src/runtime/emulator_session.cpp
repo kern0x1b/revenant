@@ -19,6 +19,7 @@
 #include "resource_policy.hpp"
 #include "runtime/live_button_scheduler.hpp"
 #include "runtime/live_touch_scheduler.hpp"
+#include "runtime/loop_carried_state.hpp"
 #include "runtime/realtime_pacer.hpp"
 #include "runtime/session_host.hpp"
 #include "session_catalog.hpp"
@@ -182,20 +183,6 @@ namespace {
     };
 
 }
-
-struct LoopCarriedState {
-    std::optional<XnuThreadId> last_serial_thread;
-    std::optional<XnuThreadId> scheduler_handoff_thread;
-    std::optional<XnuThreadId> display_urgent_thread;
-    std::optional<XnuThreadId> display_urgent_receiver_thread;
-    std::optional<XnuThreadId> display_yielded_thread;
-    std::uint64_t display_inflight_callback_sequence { };
-    std::uint64_t diagnostic_display_yield_count { };
-    std::uint64_t remaining_ticks { };
-    std::uint64_t executed_ticks_since_catch_up { };
-    std::uint64_t interaction_generation { 1U };
-    std::optional<std::uint32_t> input_receiver_process;
-};
 
 void EmulatorSession::run()
 {
