@@ -1,4 +1,5 @@
 #import "RevenantVision.h"
+#import "VNRectangleImage.h"
 #import "RevenantVisionImage.h"
 #import "VNBarcodeDecoder.h"
 #import <CoreImage/CoreImage.h>
@@ -166,6 +167,8 @@ static NSError *revenant_vision_failure(VNRequest *request)
         return revenant_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support %@Revision%lu", NSStringFromClass(cls), NSStringFromClass(cls), (unsigned long)request.revision]);
     if ([request isKindOfClass:[VNDetectContoursRequest class]])
         return nil;
+    if ([request isKindOfClass:[VNDetectRectanglesRequest class]])
+        return nil;
     if ([request isKindOfClass:[VNDetectFaceRectanglesRequest class]])
         return nil;
     if ([request isKindOfClass:[VNDetectBarcodesRequest class]])
@@ -265,6 +268,20 @@ static BOOL revenant_vision_perform(id image, CGImagePropertyOrientation orienta
         if (!failure && [request isKindOfClass:[VNDetectFaceRectanglesRequest class]]) {
             NSArray *observations = revenant_vision_faces(image, orientation, request.revision, &failure);
             if (failure) {
+                succeeded = NO;
+                first = first ?: failure;
+            } else {
+                [(VNRequest *)request revenant_setResults:observations];
+            }
+            if (request.completionHandler)
+                request.completionHandler(request, failure);
+            continue;
+        }
+        if (!failure && [request isKindOfClass:[VNDetectRectanglesRequest class]]) {
+            NSError *detectorError = nil;
+            NSArray *observations = RevenantVisionRectangles(image, orientation, request, &detectorError);
+            if (detectorError) {
+                failure = revenant_vision_error(VNErrorOperationFailed, detectorError.localizedDescription);
                 succeeded = NO;
                 first = first ?: failure;
             } else {

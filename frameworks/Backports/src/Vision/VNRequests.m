@@ -142,6 +142,19 @@ static NSArray<NSNumber *> *revenant_vision_revisions(Class cls)
     return self;
 }
 
+- (float)minimumAspectRatio { return _minimumAspectRatio; }
+- (void)setMinimumAspectRatio:(float)value { _minimumAspectRatio = value; }
+- (float)maximumAspectRatio { return _maximumAspectRatio; }
+- (void)setMaximumAspectRatio:(float)value { _maximumAspectRatio = value; }
+- (float)quadratureTolerance { return _quadratureTolerance; }
+- (void)setQuadratureTolerance:(float)value { _quadratureTolerance = value; }
+- (float)minimumSize { return _minimumSize; }
+- (void)setMinimumSize:(float)value { _minimumSize = value; }
+- (float)minimumConfidence { return _minimumConfidence; }
+- (void)setMinimumConfidence:(float)value { _minimumConfidence = value; }
+- (NSUInteger)maximumObservations { return _maximumObservations; }
+- (void)setMaximumObservations:(NSUInteger)value { _maximumObservations = value; }
+
 @end
 
 @implementation VNDetectBarcodesRequest {

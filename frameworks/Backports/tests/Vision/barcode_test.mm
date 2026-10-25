@@ -4,6 +4,7 @@
 #import <ZXing/BarcodeFormat.h>
 #import <ZXing/MultiFormatWriter.h>
 #include <cmath>
+#include <cstring>
 #include <cstdint>
 #include <cstdlib>
 #include <string>
@@ -14,6 +15,8 @@ static void check(bool value)
     if (!value)
         std::abort();
 }
+
+static bool negative_control;
 
 static void check_point(NSArray *point)
 {
@@ -41,7 +44,7 @@ static void check_barcode(ZXing::BarcodeFormat format, NSString *symbology, cons
                                                     @[@"VNBarcodeSymbologyQR", @"VNBarcodeSymbologyPDF417"], &error);
     CGImageRelease(image);
     check(error == nil);
-    check(observations.count > 0);
+    check((observations.count > 0) != negative_control);
     NSDictionary *observation = observations[0];
     check([observation[@"payload"] isEqualToString:[NSString stringWithUTF8String:payload.c_str()]]);
     check([observation[@"symbology"] isEqualToString:symbology]);
@@ -61,8 +64,9 @@ static void check_barcode(ZXing::BarcodeFormat format, NSString *symbology, cons
     check(std::abs([corners[3][1] doubleValue] - y) < 0.01);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    negative_control = argc > 1 && std::strcmp(argv[1], "--negative") == 0;
     check_barcode(ZXing::BarcodeFormat::QRCode, @"VNBarcodeSymbologyQR", "revenant-qr-fixture", 256, 256);
     check_barcode(ZXing::BarcodeFormat::PDF417, @"VNBarcodeSymbologyPDF417", "revenant-pdf417-fixture", 320, 160);
 }
