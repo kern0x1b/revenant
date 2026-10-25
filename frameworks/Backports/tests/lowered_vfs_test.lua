@@ -14,4 +14,42 @@ function main()
     local header = io.readfile(lock)
     assert(header:find("#define OS_UNFAIR_LOCK_AVAILABILITY", 1, true), "os/lock.h lost the OS_UNFAIR_LOCK_AVAILABILITY define")
     assert(header:find("__API_AVAILABLE(macos(10.12), ios(10.0)", 1, true) == nil, "os/lock.h still carries the iOS 10 availability")
+    local frameworks = path.join(out, "System", "Library", "Frameworks")
+    local interface = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSURL.h"))
+    assert(interface:find("API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0))\n@interface NSURLComponents", 1, true), "the weak class NSURLComponents lost its iOS 7 guard: a flat class stays weak only while its guard is there")
+    local property = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIInterface.h")):match("[^\n]*UIColor %*systemBackgroundColor[^\n]*")
+    assert(property and not property:find("ios(13.0)", 1, true) and property:find("API_UNAVAILABLE(tvos, watchos)", 1, true), "the class property systemBackgroundColor keeps its iOS 13 introduction or loses the other platforms' attributes")
+    local constant = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "NSAttributedString.h")):match("[^\n]*const NSAttachmentAttributeName[^\n]*")
+    assert(constant and not constant:find("ios(7.0)", 1, true), "the extern constant NSAttachmentAttributeName keeps its iOS 7 introduction")
+    local weight = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIFontDescriptor.h")):match("[^\n]*const UIFontWeight UIFontWeightRegular[^\n]*")
+    assert(weight and not weight:find("ios(8.2)", 1, true), "the extern constant UIFontWeightRegular keeps its iOS 8.2 introduction")
+    local set = lowered.read_all_members()
+    local declared = lowered.lower_swift_text("@available(macOS 10.9, iOS 7.0, *)\npublic struct URLComponents {\n}\n", lowered.swift_names(set), {}, {})
+    assert(declared:find("@available(macOS 10.9, iOS 7.0, *)\npublic struct URLComponents", 1, true), "the Swift declaration of the flat class URLComponents lost its iOS 7 guard")
+    local exif = io.readfile(path.join(frameworks, "ImageIO.framework", "Headers", "CGImageMetadata.h")):match("[^\n]*kCGImageMetadataNamespaceExifEX[^\n]*")
+    assert(exif and not exif:find("IMAGEIO_AVAILABLE_STARTING", 1, true), "the ImageIO extern kCGImageMetadataNamespaceExifEX keeps its IMAGEIO_AVAILABLE_STARTING introduction")
+    local linearized = io.readfile(path.join(frameworks, "CoreGraphics.framework", "Headers", "CGPDFContext.h")):match("CG_EXTERN const CFStringRef kCGPDFContextCreateLinearizedPDF[^;]*;")
+    assert(linearized and not linearized:find("CG_AVAILABLE", 1, true), "the CoreGraphics extern kCGPDFContextCreateLinearizedPDF keeps the CG_AVAILABLE_STARTING it declares on the next line")
+    local cloudkit = io.readfile(path.join(frameworks, "CloudKit.framework", "Headers", "CKError.h"))
+    local _, begins = cloudkit:gsub("API_AVAILABLE_BEGIN", "")
+    local _, ends = cloudkit:gsub("API_AVAILABLE_END", "")
+    assert(begins == ends, "CKError.h has " .. begins .. " API_AVAILABLE_BEGIN and " .. ends .. " API_AVAILABLE_END: a region's start and end must be removed together")
+    assert(cloudkit:match("API_AVAILABLE_END%s+CK_EXTERN NSString %* const CKErrorDomain;"), "CKErrorDomain is lowered, so its declaration must sit outside the iOS 8 region: the region closes before it")
+    local utcore = io.readfile(path.join(out, "System", "Library", "Frameworks", "UniformTypeIdentifiers.framework", "Headers", "UTCoreTypes.h"))
+    local declared = utcore:find("UT_EXPORT UTType *const UTTypeImage NS_REFINED_FOR_SWIFT;", 1, true)
+    assert(declared, "the lowered UTCoreTypes.h lost the declaration of UTTypeImage")
+    assert(utcore:sub(1, declared):match(".*(UT_AVAILABLE_%u+)") == "UT_AVAILABLE_END", "UTTypeImage is lowered, so the region of UTCoreTypes.h must close before its declaration")
+    assert(utcore:find("UT_AVAILABLE_BEGIN", declared, true), "the region of UTCoreTypes.h must reopen after the lowered UTTypeImage, for the constants Backports do not define")
+    local partial = lowered.lower_header(table.concat({
+        "UT_AVAILABLE_BEGIN",
+        "UT_EXPORT UTType *const DefinedThing NS_REFINED_FOR_SWIFT;",
+        "UT_EXPORT UTType *const UndefinedThing NS_REFINED_FOR_SWIFT;",
+        "UT_AVAILABLE_END",
+        ""
+    }, "\n"), {globals = {DefinedThing = true}, functions = {}, classes = {}, protocols = {}, protocol_members = {}, types = {},
+        markers = {begin = {UT_AVAILABLE_BEGIN = "API_AVAILABLE_BEGIN(macos(11.0), ios(14.0))"}, ends = {UT_AVAILABLE_END = true}}})
+    local undefined = partial:find("UndefinedThing", 1, true)
+    assert(partial:sub(1, undefined):match(".*(UT_AVAILABLE_%u+)") == "UT_AVAILABLE_BEGIN", "UndefinedThing, which Backports do not define, must still sit in the iOS 14 region")
+    local defined = partial:find("DefinedThing", 1, true)
+    assert(partial:sub(1, defined):match(".*(UT_AVAILABLE_%u+)") == "UT_AVAILABLE_END", "DefinedThing is lowered, so the region must close before its declaration")
 end

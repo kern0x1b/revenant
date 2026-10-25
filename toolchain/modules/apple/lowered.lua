@@ -6,6 +6,66 @@ local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous
 
 local MEMBERS = {
     {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeNone API_AVAILABLE(macos(10.13.2), ios(11.2)) = kLABiometryTypeNone,",
+            replace = "LABiometryTypeNone = kLABiometryTypeNone,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryNone API_DEPRECATED_WITH_REPLACEMENT(\"LABiometryTypeNone\", macos(10.13, 10.13.2), ios(11.0, 11.2)) = LABiometryTypeNone,",
+            replace = "",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeFaceID API_AVAILABLE(macos(10.15)) = kLABiometryTypeFaceID,",
+            replace = "LABiometryTypeFaceID = kLABiometryTypeFaceID,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "LABiometryTypeOpticID API_AVAILABLE(visionos(1.0), ios(17.0), macos(14.0)) = kLABiometryTypeOpticID,",
+            replace = "LABiometryTypeOpticID = kLABiometryTypeOpticID,",
+        },
+    },
+    {
+        member = "LABiometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LABiometryType.h",
+            find = "} API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            replace = "};",
+        },
+    },
+    {
+        member = "LAContext biometryType",
+        header = {
+            name = "LocalAuthentication",
+            directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
+            file = "LAContext.h",
+            find = "@property (nonatomic, readonly) LABiometryType biometryType API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            replace = "@property (nonatomic, readonly) LABiometryType biometryType;",
+        },
+    },
+    {
         member = "os_unfair_lock",
         header = {
             name = "os",
@@ -304,6 +364,106 @@ local function statement_end(text, at)
     return stop or text:find("\n", at, true) or #text
 end
 
+local function trimmed_of_markers(text, start, stop, markers)
+    markers = markers or {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+    local moved = start
+    for name, body in pairs(markers.begin) do
+        local at = start
+        while true do
+            local marker_start, marker_stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not marker_start or marker_start > stop then
+                break
+            end
+            local last = marker_stop
+            if body == false then
+                local _, paren_stop = text:find("^%s*%b()", marker_stop + 1)
+                last = paren_stop or marker_stop
+            end
+            moved = math.max(moved, last + 1)
+            at = marker_stop + 1
+        end
+    end
+    for name in pairs(markers.ends) do
+        local at = start
+        while true do
+            local marker_start, marker_stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not marker_start or marker_start > stop then
+                break
+            end
+            moved = math.max(moved, marker_stop + 1)
+            at = marker_stop + 1
+        end
+    end
+    return moved, stop
+end
+
+local LITERAL_MARKERS = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+
+local function present_names(text, names)
+    local words = {}
+    for word in text:gmatch("[%w_]*AVAILABLE[%w_]*") do
+        words[word] = true
+    end
+    local present = {}
+    for name, body in pairs(names) do
+        if words[name] then
+            present[name] = body
+        end
+    end
+    return present
+end
+
+local function earliest_marker(text, names, position, begins)
+    local best = nil
+    for name, body in pairs(names) do
+        local at = position
+        while true do
+            local start, stop = text:find("%f[%w_]" .. name .. "%f[^%w_]", at)
+            if not start or (best and start >= best.start) then
+                break
+            end
+            local found = nil
+            if not in_directive(text, start) then
+                if not begins then
+                    found = {start = start, stop = stop, text = text:sub(start, stop)}
+                elseif body == false then
+                    local _, paren = text:find("^%s*%b()", stop + 1)
+                    if paren then
+                        found = {start = start, stop = paren, text = text:sub(start, paren)}
+                    end
+                else
+                    found = {start = start, stop = stop, text = body}
+                end
+            end
+            if found then
+                best = found
+                break
+            end
+            at = stop + 1
+        end
+    end
+    return best
+end
+
+local function regions_of(text, markers)
+    markers = markers or LITERAL_MARKERS
+    local begins, ends = present_names(text, markers.begin), present_names(text, markers.ends)
+    local regions, position = {}, 1
+    while true do
+        local begin = earliest_marker(text, begins, position, true)
+        if not begin then
+            return regions
+        end
+        local ending = earliest_marker(text, ends, begin.stop + 1, false)
+        if not ending then
+            return regions
+        end
+        table.insert(regions, {start = begin.start, stop = begin.stop, ends_start = ending.start, ends_stop = ending.stop,
+            text = begin.text, begin_text = text:sub(begin.start, begin.stop), end_text = text:sub(ending.start, ending.stop)})
+        position = ending.stop + 1
+    end
+end
+
 local function merged_ranges(ranges)
     table.sort(ranges, function (a, b)
         if a.start ~= b.start then
@@ -314,10 +474,12 @@ local function merged_ranges(ranges)
     local merged = {}
     for _, range in ipairs(ranges) do
         local last = merged[#merged]
-        if last and range.start <= last.stop then
+        if last and range.start <= last.stop and not range.remove and not last.remove then
             last.stop = math.max(last.stop, range.stop)
+            last.before = last.before or range.before
+            last.after = last.after or range.after
         else
-            table.insert(merged, {start = range.start, stop = range.stop})
+            table.insert(merged, {start = range.start, stop = range.stop, remove = range.remove, before = range.before, after = range.after})
         end
     end
     return merged
@@ -401,9 +563,18 @@ local function apply_ranges(text, merged)
         if segment:find("\n%s*#") then
             raise("a backported declaration spans a preprocessor line: %s", excerpt)
         end
-        local lowered = without_availability(segment)
-        if #availability(lowered) > 0 then
-            raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
+        local lowered
+        if range.remove then
+            lowered = ""
+        else
+            if segment:find("API_AVAILABLE_BEGIN", 1, true) then
+                raise("a backported declaration spans the start of an availability region: %s", excerpt)
+            end
+            lowered = without_availability(segment)
+            if #availability(lowered) > 0 then
+                raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
+            end
+            lowered = (range.before or "") .. lowered .. (range.after or "")
         end
         if lowered ~= segment then
             table.insert(edits, {start = range.start, stop = range.stop, text = lowered})
@@ -431,7 +602,29 @@ local function constant_end(text, at)
     return #text
 end
 
-local function lowering_of(text, implemented)
+local function class_spans(text)
+    local spans = {}
+    for position in text:gmatch("()@interface%f[^%w_]") do
+        table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+    end
+    for position in text:gmatch("()@protocol%f[^%w_]") do
+        if not text:match("^[^;\n]*;", position) then
+            table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+        end
+    end
+    return spans
+end
+
+local function overlaps_any(range, spans)
+    for _, span in ipairs(spans) do
+        if range.start <= span.stop and range.stop >= span.start then
+            return true
+        end
+    end
+    return false
+end
+
+local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
     for position, word in text:gmatch("()([%a_][%w_]*)") do
@@ -444,9 +637,13 @@ local function lowering_of(text, implemented)
         end
     end
     local ranges = {}
-    local function lower(start, stop)
+    local markers = implemented.markers
+    local function lower(start, stop, remove)
+        if not remove then
+            start, stop = trimmed_of_markers(text, start, stop, markers)
+        end
         if stop >= start then
-            table.insert(ranges, {start = start, stop = stop})
+            table.insert(ranges, {start = start, stop = stop, remove = remove})
         end
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
@@ -491,7 +688,8 @@ local function lowering_of(text, implemented)
                 local declaration = text:sub(mark + 1, declared_end)
                 local name = property_name(declaration)
                 local getter = property_getter(declaration) or name
-                if name and (members["-" .. getter] or members["-" .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
+                local sign = declaration:find("%(%s*class") and "+" or "-"
+                if name and (members[sign .. getter] or members[sign .. name] or members["-set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -539,7 +737,8 @@ local function lowering_of(text, implemented)
                 local declaration = text:sub(mark + 1, declared_end)
                 local property = property_name(declaration)
                 local getter = property_getter(declaration) or property
-                if property and (members["-" .. getter] or members["-" .. property]) then
+                local sign = declaration:find("%(%s*class") and "+" or "-"
+                if property and (members[sign .. getter] or members[sign .. property]) then
                     for _, piece in ipairs(pieces_of(text, mark + 1, declared_end)) do
                         lower(piece[1], piece[2])
                     end
@@ -553,6 +752,9 @@ local function lowering_of(text, implemented)
         if hit.kind == "global" then
             local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
+            if first then
+                first = trimmed_of_markers(text, first, start, markers)
+            end
             local last = first and statement_end(text, stop)
             local segment = first and text:sub(first, last) or ""
             if first and not segment:find("\n%s*#") and not segment:find("{", 1, true) and not segment:find("API_AVAILABLE_BEGIN", 1, true) then
@@ -573,10 +775,34 @@ local function lowering_of(text, implemented)
         end
     end
     if implemented.types then
-        for _, declaration in ipairs(typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations or typedef_declarations(text)) do
             if declaration.annotated and declaration.name and implemented.types[declaration.name] then
                 for _, piece in ipairs(pieces_of(text, declaration.start, declaration.stop)) do
                     lower(piece[1], piece[2])
+                end
+            end
+        end
+    end
+    local spans = nil
+    for _, region in ipairs(regions_of(text, implemented.markers)) do
+        if ios_later(region.text) then
+            spans = spans or class_spans(text)
+            local inside, whole = {}, false
+            for _, range in ipairs(ranges) do
+                if not range.remove and range.start > region.stop and range.stop < region.ends_start then
+                    if overlaps_any(range, spans) then
+                        whole = true
+                    end
+                    table.insert(inside, range)
+                end
+            end
+            if whole then
+                lower(region.start, region.stop, true)
+                lower(region.ends_start, region.ends_stop, true)
+            else
+                for _, range in ipairs(inside) do
+                    range.before = "\n" .. region.end_text .. "\n"
+                    range.after = "\n" .. region.begin_text .. "\n"
                 end
             end
         end
@@ -826,7 +1052,7 @@ function serialize(set, header)
         table.insert(lines, "function " .. name)
     end
     for name in pairs(set.globals) do
-        table.insert(lines, "global " .. name)
+        table.insert(lines, ((set.enums or {})[name] and "enum " or "global ") .. name)
     end
     for name in pairs(set.protocols) do
         table.insert(lines, "protocol " .. name)
@@ -842,7 +1068,7 @@ function serialize(set, header)
 end
 
 function parse(text)
-    local set = {classes = {}, functions = {}, globals = {}, protocols = {}, protocol_members = {}, types = {}}
+    local set = {classes = {}, functions = {}, globals = {}, enums = {}, protocols = {}, protocol_members = {}, types = {}}
     for line in text:gmatch("[^\n]+") do
         if not line:find("^#") then
             local kind, first, second = line:match("^(%S+) (%S+) ?(%S*)$")
@@ -855,6 +1081,9 @@ function parse(text)
                 set.functions[first] = true
             elseif kind == "global" then
                 set.globals[first] = true
+            elseif kind == "enum" then
+                set.globals[first] = true
+                set.enums[first] = true
             elseif kind == "protocol" then
                 set.protocols[first] = true
                 set.protocol_members[first] = set.protocol_members[first] or {}
@@ -885,12 +1114,36 @@ end
 
 local function framework_headers(sdk)
     local files = {}
-    for _, framework in ipairs(frameworks_in(path.join(sdk, "System", "Library", "Frameworks"), {})) do
+    local frameworks = frameworks_in(path.join(sdk, "System", "Library", "Frameworks"), {})
+    frameworks_in(path.join(sdk, "System", "Library", "SubFrameworks"), frameworks)
+    for _, framework in ipairs(frameworks) do
         for _, file in ipairs(os.files(path.join(framework, "Headers", "*.h"))) do
             table.insert(files, file)
         end
     end
     return files
+end
+
+local markers_cache = {}
+
+function region_markers(sdk)
+    if markers_cache[sdk] then
+        return markers_cache[sdk]
+    end
+    local markers = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+    for _, file in ipairs(framework_headers(sdk)) do
+        local text = io.readfile(file)
+        if text:find("API_AVAILABLE_", 1, true) then
+            for name, body in text:gmatch("#%s*define%s+([%w_]+)%s+(API_AVAILABLE_BEGIN%b())") do
+                markers.begin[name] = body
+            end
+            for name in text:gmatch("#%s*define%s+([%w_]+)%s+API_AVAILABLE_END%f[^%w_]") do
+                markers.ends[name] = true
+            end
+        end
+    end
+    markers_cache[sdk] = markers
+    return markers
 end
 
 local function member_headers(sdk)
@@ -903,6 +1156,35 @@ local function member_headers(sdk)
     return changed
 end
 
+local function names_of(set)
+    local names = {classes = set.classes or {}, protocols = set.protocols or {}, words = {}}
+    for _, field in ipairs({"globals", "functions", "types"}) do
+        for name in pairs(set[field] or {}) do
+            names.words[name] = true
+        end
+    end
+    return names
+end
+
+local function mentions(text, names)
+    for class in text:gmatch("@interface%s+([%w_]+)") do
+        if names.classes[class] then
+            return true
+        end
+    end
+    for protocol in text:gmatch("@protocol%s+([%w_]+)") do
+        if names.protocols[protocol] then
+            return true
+        end
+    end
+    for word in text:gmatch("[%a_][%w_]*") do
+        if names.words[word] then
+            return true
+        end
+    end
+    return false
+end
+
 local function lowered_types(sdk, set)
     local changed = member_headers(sdk)
     local declared, queue, queued = {}, {}, {}
@@ -912,13 +1194,17 @@ local function lowered_types(sdk, set)
             table.insert(queue, name)
         end
     end
+    local names = names_of(set)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
-        local _, used = lowering_of(text, set)
-        for key in pairs(used) do
-            enqueue(key:sub(2))
+        local declarations = typedef_declarations(text)
+        if mentions(text, names) then
+            local _, used = lowering_of(text, set, declarations)
+            for key in pairs(used) do
+                enqueue(key:sub(2))
+            end
         end
-        for _, declaration in ipairs(typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations) do
             if declaration.name then
                 declared[declaration.name] = declared[declaration.name] or {}
                 table.insert(declared[declaration.name], declaration)
@@ -957,12 +1243,18 @@ local function identifiers_in(src)
     return used
 end
 
-function members_of(src, sdk)
+function members_of(src, sdk, intros)
     local folders = implemented_in(src)
     local set = union_of(folders)
     local used = identifiers_in(src)
-    for name in pairs(later_constants(sdk)) do
-        if used[name] then
+    local defined = constants_defined_in(src)
+    set.enums = {}
+    for name, found in pairs(intros or {}) do
+        local later = found.intro ~= nil and found.intro > 6000
+        if later and found.kind == "enum" and used[name] then
+            set.globals[name] = true
+            set.enums[name] = true
+        elseif later and found.kind == "extern" and defined[name] then
             set.globals[name] = true
         end
     end
@@ -1051,7 +1343,7 @@ function read_all_members()
     return set
 end
 
-local function ios_later(text)
+function ios_later(text)
     local major, minor = nil, nil
     for found_major, found_minor in text:gmatch("%f[%w_]ios%(%s*(%d+)%.?(%d*)") do
         major, minor = tonumber(found_major), tonumber(found_minor) or 0
@@ -1062,19 +1354,69 @@ local function ios_later(text)
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
 end
 
-function later_constants(sdk)
-    local found = {}
-    for _, file in ipairs(framework_headers(sdk)) do
-        for line in io.readfile(file):gmatch("[^\n]*") do
-            if line:find("AVAILABLE", 1, true) and not line:find("UNAVAILABLE", 1, true) and ios_later(line) then
-                local name = line:match("%*%s*const%s+([%a_][%w_]*)") or line:match("^%s*([%a_][%w_]*)%s+[%w_]*AVAILABLE")
-                if name and line:find("=", 1, true) and not line:find("const", 1, true) then
-                    found[name] = true
+local function digest_of(base, files)
+    local parts = {}
+    for _, file in ipairs(files) do
+        table.insert(parts, path.relative(file, base) .. "=" .. hash.sha256(file))
+    end
+    return hash.strhash128(table.concat(parts, "\n"))
+end
+
+local function members_key(src, sdk)
+    local sdk_files = table.join(framework_headers(sdk))
+    for _, entry in ipairs(MEMBERS) do
+        table.insert(sdk_files, path.join(directory_of(sdk, entry.header), entry.header.file))
+    end
+    byteorder.sort(sdk_files)
+    local src_files = os.files(path.join(src, "**"))
+    byteorder.sort(src_files)
+    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+    local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
+    local tools = {path.join(src, "..", "tools", "facts.lua"), path.join(src, "..", "tools", "ast.lua"), path.join(src, "..", "tools", "sdk.lua")}
+    return hash.strhash128(table.concat({
+        "generator=" .. digest_of(MODULE_DIR, generator),
+        "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
+        "tools=" .. digest_of(path.join(src, ".."), tools),
+        "device=" .. hash.sha256(device_members_file()),
+        "src=" .. digest_of(src, src_files),
+        "sdk=" .. digest_of(sdk, sdk_files),
+    }, "\n"))
+end
+
+function members_text(src, sdk, intros)
+    local folder = path.join(workspace.cache(), "lowered-members")
+    local final = path.join(folder, members_key(src, sdk) .. ".txt")
+    local cached = os.isfile(final) and try {function () return io.readfile(final) end}
+    if cached then
+        return cached
+    end
+    local text = serialize(members_of(src, sdk, intros))
+    os.mkdir(folder)
+    for _, stale in ipairs(os.files(path.join(folder, "*.txt"))) do
+        os.tryrm(stale)
+    end
+    local partial = final .. "." .. tostring(os.time()) .. ".partial"
+    io.writefile(partial, text)
+    os.mv(partial, final)
+    return text
+end
+
+function constants_defined_in(src)
+    local defined = {}
+    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
+        for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                for line in io.readfile(file):gmatch("[^\n]*") do
+                    local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
+                        or line:match("^[%a_][%w_]*%s*%*%s*([%a_][%w_]*)%s*[;=]")
+                    if name then
+                        defined[name] = true
+                    end
                 end
             end
         end
     end
-    return found
+    return defined
 end
 
 local function released_keys(released, class, cache)
@@ -1171,18 +1513,19 @@ local function input_digest(sdk, text)
     return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
 end
 
-function overlay(sdk, out, set)
+function overlay(sdk, out, set, subtrees)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
-    local key = table.concat({sdk, out, hash.strhash128(text)}, "|")
+    local mapped = subtrees or VFS_SUBTREES
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ",")}, "|")
     if built[key] then
         return built[key]
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text)
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ","))
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members())
+        vfs = build_overlay(sdk, out, set or read_all_members(), mapped)
         io.writefile(stamp, digest)
     end
     built[key] = vfs
@@ -1196,11 +1539,38 @@ local function system_include_relative(file, sdk)
     end
 end
 
+VFS_SUBTREES = {}
+
+VFS_FILES = {}
+
+local function lowered_apinotes(text, set)
+    local functions = set.functions or {}
+    local current = nil
+    local lines = {}
+    for line in text:gmatch("[^\n]+") do
+        local name = line:match("^%- Name: (%S+)")
+        if name then
+            current = name
+        end
+        if current and functions[current] and line:match("^  SwiftName:") then
+            line = line:gsub("__(%w+):", "%1:")
+        end
+        table.insert(lines, line)
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function vfs_subtree(relative, subtrees)
+    local head = relative and relative:match("^([^/]+)")
+    return head ~= nil and (subtrees or VFS_SUBTREES)[head] == true
+end
+
 function include_directory(out)
     return path.join(out, "include")
 end
 
-function build_overlay(sdk, out, set)
+function build_overlay(sdk, out, set, subtrees)
+    set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(include_directory(out), "simd", "math.h")
     os.mkdir(path.directory(simd))
@@ -1225,24 +1595,44 @@ function build_overlay(sdk, out, set)
             changed[file] = lowered
         end
     end
+    for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
+        for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, set)
+            if lowered ~= text then
+                changed[file] = lowered
+            end
+        end
+    end
+    local notes = path.join(sdk, "usr", "include", "os.apinotes")
+    if os.isfile(notes) then
+        changed[notes] = lowered_apinotes(io.readfile(notes), set)
+    end
     local roots = {}
+    local file_roots = {}
     for file, text in pairs(changed) do
         local relative = system_include_relative(file, sdk)
         if relative then
             local copy = path.join(include_directory(out), relative)
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
-        else
+        end
+        if not relative or vfs_subtree(relative, subtrees) or VFS_FILES[relative] then
             local copy = path.join(out, path.relative(file, sdk))
             os.mkdir(path.directory(copy))
             write_if_changed(copy, text)
-            local dir = path.directory(file)
-            roots[dir] = roots[dir] or {}
-            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+            if VFS_FILES[relative] then
+                table.insert(file_roots, string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], file, copy))
+            else
+                local dir = path.directory(file)
+                roots[dir] = roots[dir] or {}
+                table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+            end
         end
     end
     for dir in pairs(roots) do
-        if system_include_relative(dir, sdk) or dir == path.join(sdk, "usr", "include") then
+        local relative = system_include_relative(dir, sdk)
+        if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end
@@ -1255,6 +1645,10 @@ function build_overlay(sdk, out, set)
     for _, dir in ipairs(dirs) do
         byteorder.sort(roots[dir])
         table.insert(entries, string.format([[    {"name": "%s", "type": "directory", "contents": [%s]}]], dir, table.concat(roots[dir], ", ")))
+    end
+    byteorder.sort(file_roots)
+    for _, root in ipairs(file_roots) do
+        table.insert(entries, "    " .. root)
     end
     local vfs = path.join(out, "vfs.yaml")
     write_if_changed(vfs, string.format([[

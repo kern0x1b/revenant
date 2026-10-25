@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 
 NSString *const NSAttachmentAttributeName = @"NSAttachment";
+NSString *const NSLinkAttributeName = @"NSLink";
 
 @implementation NSAttributedString (RevenantAttachments9)
 

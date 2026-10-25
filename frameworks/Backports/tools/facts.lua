@@ -157,6 +157,32 @@ function objc_facts(sdk, name, version)
     return state.rows
 end
 
+function constant_intros(sdk)
+    local intros = {}
+    local function note(name, intro, kind)
+        if name and (intros[name] == nil or intros[name].intro == nil) then
+            intros[name] = {intro = intro, kind = kind}
+        end
+    end
+    for _, name in ipairs(sdkfiles.framework_names(sdk)) do
+        local umbrella = sdkfiles.umbrella_header(sdk, name)
+        if umbrella ~= nil then
+            local text = os.iorunv(CLANG, {"-target", target_of(sdkfiles.sdk_version(sdk)), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
+                "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella})
+            ast.scan(lines_of(text), function (top)
+                if top.kind == "VarDecl" and top.name and top.flags.extern then
+                    note(top.name, ast.ios_intro(top), "extern")
+                elseif top.kind == "EnumDecl" then
+                    for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
+                        note(child.name, ast.ios_intro(child) or ast.ios_intro(top), "enum")
+                    end
+                end
+            end)
+        end
+    end
+    return intros
+end
+
 function swift_facts(sdk, name, version, scratch)
     local output = path.join(scratch, name .. ".json")
     os.execv(digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
