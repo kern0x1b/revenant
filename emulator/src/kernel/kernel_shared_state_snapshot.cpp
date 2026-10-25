@@ -20,6 +20,46 @@ void load_atomic(snapshot::Reader& in, std::atomic<T>& value)
     value.store(loaded);
 }
 
+void save_kernel_event(
+    snapshot::Writer& out, const KernelSharedState::KernelEvent& event)
+{
+    snapshot::save(out, event.identifier);
+    snapshot::save(out, event.vendor);
+    snapshot::save(out, event.event_class);
+    snapshot::save(out, event.event_subclass);
+    snapshot::save(out, event.event_code);
+    snapshot::save(out, event.bytes);
+}
+
+KernelSharedState::KernelEvent load_kernel_event(snapshot::Reader& in)
+{
+    KernelSharedState::KernelEvent event;
+    snapshot::load(in, event.identifier);
+    snapshot::load(in, event.vendor);
+    snapshot::load(in, event.event_class);
+    snapshot::load(in, event.event_subclass);
+    snapshot::load(in, event.event_code);
+    snapshot::load(in, event.bytes);
+    return event;
+}
+
+void save_kevent_state(
+    snapshot::Writer& out, const KernelSharedState::ProcessKeventState& state)
+{
+    snapshot::save(out, state.exec_generation);
+    snapshot::save(out, state.exit_generation);
+    snapshot::save(out, state.wait_status);
+}
+
+KernelSharedState::ProcessKeventState load_kevent_state(snapshot::Reader& in)
+{
+    KernelSharedState::ProcessKeventState state;
+    snapshot::load(in, state.exec_generation);
+    snapshot::load(in, state.exit_generation);
+    snapshot::load(in, state.wait_status);
+    return state;
+}
+
 }
 
 void KernelSharedState::save_scalar_state(snapshot::Writer& out) const
@@ -76,6 +116,41 @@ void KernelSharedState::load_scalar_state(snapshot::Reader& in)
     snapshot::load(in, wifi_service_available);
     snapshot::load(in, next_socket_pair);
     snapshot::load(in, next_shared_memory_object);
+}
+
+void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const
+{
+    snapshot::save(out, mach_kernel_send_rights);
+    snapshot::save(out, task_port_pids);
+    snapshot::save(out, static_cast<std::uint64_t>(kernel_events.size()));
+    for (const auto& event : kernel_events)
+        save_kernel_event(out, event);
+    snapshot::save(
+        out, static_cast<std::uint64_t>(process_kevent_states.size()));
+    for (const auto& [pid, state] : process_kevent_states) {
+        snapshot::save(out, pid);
+        save_kevent_state(out, state);
+    }
+}
+
+void KernelSharedState::load_port_and_event_tables(snapshot::Reader& in)
+{
+    snapshot::load(in, mach_kernel_send_rights);
+    snapshot::load(in, task_port_pids);
+    std::uint64_t event_count { };
+    snapshot::load(in, event_count);
+    kernel_events.clear();
+    for (std::uint64_t index = 0; index < event_count; ++index)
+        kernel_events.push_back(load_kernel_event(in));
+    std::uint64_t kevent_count { };
+    snapshot::load(in, kevent_count);
+    process_kevent_states.clear();
+    for (std::uint64_t index = 0; index < kevent_count; ++index) {
+        std::uint32_t pid { };
+        snapshot::load(in, pid);
+        if (!process_kevent_states.emplace(pid, load_kevent_state(in)).second)
+            throw snapshot::FormatError { "snapshot repeats a kevent state" };
+    }
 }
 
 }

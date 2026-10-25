@@ -8,13 +8,16 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdint>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
 namespace {
 
 using emulator::KernelSharedState;
+namespace snapshot = emulator::snapshot;
 using emulator::snapshot::FormatError;
 using emulator::snapshot::Reader;
 using emulator::snapshot::Writer;
@@ -102,12 +105,79 @@ void truncated_stream_is_a_format_error()
     expect(threw, "a truncated scalar stream throws FormatError");
 }
 
+void populate_tables(KernelSharedState& state)
+{
+    state.mach_kernel_send_rights = { { 0x100, 2 }, { 0x200, 3 } };
+    state.task_port_pids = { { 0x300, 7 } };
+    state.kernel_events.push_back(KernelSharedState::KernelEvent { 1, 2, 3, 4, 5,
+        { std::byte { 0xaa }, std::byte { 0xbb } } });
+    state.kernel_events.push_back(KernelSharedState::KernelEvent { 6, 7, 8, 9, 10, { } });
+    state.process_kevent_states.emplace(7,
+        KernelSharedState::ProcessKeventState { 3, 4, 5 });
+    state.process_kevent_states.emplace(9,
+        KernelSharedState::ProcessKeventState { 6, 0, 0 });
+}
+
+std::vector<std::byte> save_tables(const KernelSharedState& state)
+{
+    Writer out;
+    state.save_port_and_event_tables(out);
+    return out.bytes();
+}
+
+void round_trip_restores_the_tables()
+{
+    KernelSharedState source;
+    populate_tables(source);
+    const auto bytes = save_tables(source);
+
+    KernelSharedState restored;
+    expect(save_tables(restored) != bytes,
+        "a fresh state saves its tables differently from the populated one");
+    Reader in { bytes };
+    restored.load_port_and_event_tables(in);
+    expect(in.at_end(), "the table stream is consumed");
+    expect(restored.kernel_events.size() == 2,
+        "both kernel events are restored");
+    expect(restored.process_kevent_states.at(7).exec_generation == 3,
+        "a kevent state is restored");
+    expect(save_tables(restored) == bytes,
+        "saving the restored tables reproduces the same stream");
+}
+
+void repeated_kevent_state_is_refused()
+{
+    Writer out;
+    snapshot::save(out, std::map<std::uint32_t, std::uint32_t> { });
+    snapshot::save(out, std::map<std::uint32_t, std::uint32_t> { });
+    snapshot::save(out, std::uint64_t { 0 });
+    snapshot::save(out, std::uint64_t { 2 });
+    for (int index = 0; index < 2; ++index) {
+        snapshot::save(out, std::uint32_t { 7 });
+        snapshot::save(out, std::uint64_t { 1 });
+        snapshot::save(out, std::uint64_t { 2 });
+        snapshot::save(out, std::uint32_t { 3 });
+    }
+    const auto stream = out.bytes();
+    KernelSharedState restored;
+    bool threw = false;
+    try {
+        Reader in { stream };
+        restored.load_port_and_event_tables(in);
+    } catch (const FormatError&) {
+        threw = true;
+    }
+    expect(threw, "a repeated kevent state is refused with FormatError");
+}
+
 }
 
 int main()
 {
     round_trip_restores_the_scalars();
     truncated_stream_is_a_format_error();
+    round_trip_restores_the_tables();
+    repeated_kevent_state_is_refused();
     if (failures != 0) {
         std::cerr << failures << " kernel shared state snapshot checks failed\n";
         return 1;

@@ -1704,6 +1704,8 @@ struct KernelSharedState {
 
     void save_scalar_state(snapshot::Writer& out) const;
     void load_scalar_state(snapshot::Reader& in);
+    void save_port_and_event_tables(snapshot::Writer& out) const;
+    void load_port_and_event_tables(snapshot::Reader& in);
 
     std::mutex mach_mutex;
     std::shared_ptr<bsd::sandbox::Extensions> sandbox_extensions;
