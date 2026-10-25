@@ -31,6 +31,11 @@ void note(std::vector<std::string>& out, std::string_view name, const T& value)
         out.emplace_back(name);
 }
 
+void list(std::vector<std::string>& out, std::string_view name)
+{
+    out.emplace_back(name);
+}
+
 }
 
 void CompatibilityKernelSnapshot::add_pending_timer(CompatibilityKernel& kernel)
@@ -44,6 +49,21 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     std::vector<std::string> out;
     note(out, "ck.dyld_shared_cache_attempted_", kernel.dyld_shared_cache_attempted_);
     note(out, "ck.dyld_shared_cache_path_", kernel.dyld_shared_cache_path_);
+    list(out, "ck.dyld_shared_cache_");
+    list(out, "ck.process_");
+    list(out, "ck.load_average_");
+    list(out, "ck.offline_serial_state_");
+    list(out, "ck.regular_file_open_descriptions_");
+    list(out, "ck.baseband_open_descriptions_");
+    list(out, "ck.virtual_block_descriptors_");
+    list(out, "ck.bpf_descriptors_");
+    list(out, "ck.kernel_control_endpoints_");
+    list(out, "ck.route_socket_states_");
+    list(out, "ck.socket_options_");
+    list(out, "ck.unix_listener_states_");
+    list(out, "ck.virtual_udp_sockets_");
+    list(out, "ck.wifi_driver_event_streams_");
+    list(out, "ck.directory_entries_cache_");
     note(out, "ck.guest_working_directory_", kernel.guest_working_directory_);
     note(out, "ck.process_image_", kernel.process_image_);
     note(out, "ck.file_descriptors_", kernel.file_descriptors_);

@@ -133,7 +133,22 @@ constexpr std::array<std::string_view, 95> saved_members {
     "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 47> open_members {
+constexpr std::array<std::string_view, 62> open_members {
+    "ck.dyld_shared_cache_",
+    "ck.process_",
+    "ck.load_average_",
+    "ck.offline_serial_state_",
+    "ck.regular_file_open_descriptions_",
+    "ck.baseband_open_descriptions_",
+    "ck.virtual_block_descriptors_",
+    "ck.bpf_descriptors_",
+    "ck.kernel_control_endpoints_",
+    "ck.route_socket_states_",
+    "ck.socket_options_",
+    "ck.unix_listener_states_",
+    "ck.virtual_udp_sockets_",
+    "ck.wifi_driver_event_streams_",
+    "ck.directory_entries_cache_",
     "kss.mach_queues",
     "kss.mach_semaphores",
     "pthread.registration_",
