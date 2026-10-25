@@ -162,6 +162,12 @@ CoreFoundation's trap stub, which `_CFRuntimeCreateInstance` calls through a cal
 loads a type ID that is still 0. `GSFontGetTypeID()` returned 0 until `GSInitialize()` ran, and then 257. The probe never
 ran `GSInitialize`, which `UIApplicationMain` runs in an app. The probe now runs it first.
 
+An app that `UIApplicationMain` launches does not trap. `toolchain/tests/emulate/fontapp` installs one, has SpringBoard
+start it on iPhone4,1 6.1.3, and the app's `[UIFont systemFontOfSize:24]` returns a font: its output has `FONT-APP-DONE`
+and it exits with status 0. So the emulator needs no change for this trap; the trap is the precondition the probe skipped.
+No device daemon was run to compare. The launch took a long boot under load: SpringBoard checked in 570 to 800 host
+seconds after boot at a load of about 100, so `launch` needs `-s` and `-t` raised on a busy machine.
+
 ## Emulate cases are not in `./xmakew test`
 
 The emulate cases under `toolchain/tests/emulate/` (`install`, `launchd`, `output`, `pin-leak`, `baseline`, `fontapp`) run
