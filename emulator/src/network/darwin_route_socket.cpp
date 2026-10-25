@@ -587,4 +587,40 @@ std::vector<Entry> Table::snapshot() const
     return entries_;
 }
 
+void Table::save(snapshot::Writer& out) const
+{
+    std::lock_guard lock { mutex_ };
+    snapshot::save(out, static_cast<std::uint64_t>(entries_.size()));
+    for (const auto& entry : entries_) {
+        snapshot::save(out, entry.family);
+        snapshot::save(out, entry.interface_index);
+        snapshot::save(out, entry.flags);
+        snapshot::save(out, entry.destination);
+        snapshot::save(out, entry.gateway);
+        snapshot::save(out, entry.netmask);
+        snapshot::save(out, entry.interface_name);
+        snapshot::save(out, entry.origin);
+    }
+}
+
+void Table::load(snapshot::Reader& in)
+{
+    std::lock_guard lock { mutex_ };
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    entries_.clear();
+    for (std::uint64_t index = 0; index < count; ++index) {
+        Entry entry;
+        snapshot::load(in, entry.family);
+        snapshot::load(in, entry.interface_index);
+        snapshot::load(in, entry.flags);
+        snapshot::load(in, entry.destination);
+        snapshot::load(in, entry.gateway);
+        snapshot::load(in, entry.netmask);
+        snapshot::load(in, entry.interface_name);
+        snapshot::load(in, entry.origin);
+        entries_.push_back(std::move(entry));
+    }
+}
+
 }

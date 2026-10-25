@@ -11,6 +11,7 @@
 #include "foundation/touch_input.hpp"
 #include "graphics/core_animation_remote_abi.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -19,6 +20,7 @@
 #include <random>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace {
@@ -157,6 +159,23 @@ void populate_service_tables(KernelSharedState& state)
     state.surface_transport_surface_ports = { { 41, 42 } };
     state.shared_memory_objects = { { "shared", "/tmp/shared" } };
     state.volatile_shared_memory_backings = { "/tmp/volatile" };
+    emulator::darwin::route::Entry route;
+    route.family = 2;
+    route.interface_index = 4;
+    route.flags = 7U;
+    route.destination = { std::byte { 10 }, std::byte { 0 }, std::byte { 0 }, std::byte { 1 } };
+    route.interface_name = "en0";
+    route.origin = emulator::darwin::route::Entry::Origin::Interface;
+    const std::array<emulator::darwin::route::Entry, 1> replacements { route };
+    static_cast<void>(state.route_table.replace_interface_routes("en0", 2, replacements));
+    state.hid_event_queue.open(
+        emulator::HidEventQueue::Consumer { 40, 1, 2, true });
+    static_cast<void>(state.hid_event_queue.enqueue(emulator::HidEventQueue::Event {
+        emulator::TouchInput { emulator::TouchPhase::Down, 1.5F, 2.5F }, 77, 3 }));
+    static_cast<void>(state.hid_event_queue.enqueue(emulator::HidEventQueue::Event {
+        emulator::HidEventQueue::KeyboardInput { 7, 4, true }, 78 }));
+    static_cast<void>(state.hid_event_queue.enqueue(emulator::HidEventQueue::Event {
+        emulator::HidEventQueue::Acceleration { 0.5F, -0.25F, 9.0F }, 79 }));
 }
 
 void round_trip_restores_the_service_tables()
@@ -173,10 +192,26 @@ void round_trip_restores_the_service_tables()
     expect(in.at_end(), "the service table stream is consumed");
     expect(restored.shared_memory_objects.at("shared") == "/tmp/shared",
         "a shared memory path is restored");
+    expect(restored.route_table.snapshot().size() == 1 &&
+            restored.route_table.snapshot().front().interface_name == "en0",
+        "a route table entry is restored");
     Writer again;
     restored.save_service_tables(again);
     expect(again.bytes() == bytes,
         "saving the restored service tables reproduces the same stream");
+    const auto consumer = restored.hid_event_queue.consumer();
+    expect(consumer && consumer->process == 40 && consumer->keyboard_events,
+        "the HID consumer is restored");
+    const auto touch = restored.hid_event_queue.take(40, 1);
+    expect(touch && touch->timestamp == 77 && touch->identity == 3 &&
+            std::get<emulator::TouchInput>(touch->input).y == 2.5F,
+        "the first HID event keeps its touch input");
+    const auto key = restored.hid_event_queue.take(40, 1);
+    expect(key && std::get<emulator::HidEventQueue::KeyboardInput>(key->input).usage == 4,
+        "the second HID event keeps its keyboard input");
+    const auto motion = restored.hid_event_queue.take(40, 1);
+    expect(motion && std::get<emulator::HidEventQueue::Acceleration>(motion->input).z == 9.0F,
+        "the third HID event keeps its acceleration");
 }
 
 void refused_host_wake_is_named()

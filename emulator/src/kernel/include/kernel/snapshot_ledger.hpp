@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 220> saved_members {
+inline constexpr std::array<std::string_view, 222> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -224,6 +224,8 @@ inline constexpr std::array<std::string_view, 220> saved_members {
     "kss.mach_port_objects",
     "kss.task_special_ports",
     "kss.task_thread_port_objects",
+    "kss.route_table",
+    "kss.hid_event_queue",
     "kss.mach_queues",
     "kss.mach_semaphores",
     "kss.kernel_events",
@@ -232,7 +234,7 @@ inline constexpr std::array<std::string_view, 220> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 38> open_members {
+inline constexpr std::array<std::string_view, 36> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
@@ -241,7 +243,6 @@ inline constexpr std::array<std::string_view, 38> open_members {
     "kss.baseband_device_state",
     "kss.effaceable_storage_available",
     "kss.hfs_named_attribute_overrides",
-    "kss.hid_event_queue",
     "kss.iokit_camera_accelerator_connections",
     "kss.iokit_display_connections",
     "kss.iokit_display_vsync_deadlines",
@@ -256,7 +257,6 @@ inline constexpr std::array<std::string_view, 38> open_members {
     "kss.pending_application_event_launches",
     "kss.pending_bootstrap_retries",
     "kss.pending_foreground_transition_input_completion",
-    "kss.route_table",
     "kss.socket_pair_ancillary",
     "kss.socket_pair_buffers",
     "kss.suppress_future_application_fullscreen_surface_processes",

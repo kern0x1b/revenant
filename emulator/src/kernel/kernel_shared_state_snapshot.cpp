@@ -672,6 +672,8 @@ void KernelSharedState::save_service_tables(snapshot::Writer& out) const
     for (const auto& path : volatile_shared_memory_backings)
         volatile_paths.insert(path.string());
     snapshot::save(out, volatile_paths);
+    route_table.save(out);
+    hid_event_queue.save(out);
 }
 
 void KernelSharedState::load_service_tables(snapshot::Reader& in)
@@ -711,6 +713,8 @@ void KernelSharedState::load_service_tables(snapshot::Reader& in)
     volatile_shared_memory_backings.clear();
     for (const auto& path : volatile_paths)
         volatile_shared_memory_backings.insert(std::filesystem::path { path });
+    route_table.load(in);
+    hid_event_queue.load(in);
 }
 
 void KernelSharedState::save_key_store_identity(snapshot::Writer& out) const
