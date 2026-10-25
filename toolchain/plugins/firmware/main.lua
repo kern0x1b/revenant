@@ -26,8 +26,9 @@ function main()
         raise("xmake firmware takes fetch, rootfs, classes, extract or list, not %s", tostring(action))
     end
     local release = option.get("release") or raise("xmake firmware fetch needs the release")
-    task.run("config", {}, {disable_dump = true})
-    local architecture = option.get("arch") or config.arch()
+    config.load()
+    local architecture = option.get("arch") or config.get("arch") or raise("xmake firmware fetch needs --arch or a configured architecture")
+    task.run("config", {plat = "macosx", component = "firmware-tools"}, {disable_dump = true})
     local tool = project.required_package("firmware-tools")
     if not tool then
         raise("the project requires no firmware-tools; includes(\"@addon/revenant/apple-ios\") provides it")
