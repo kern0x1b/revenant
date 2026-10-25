@@ -1,5 +1,6 @@
 #import "RevenantVision.h"
 #import "RevenantVisionImage.h"
+#import "VNBarcodeDecoder.h"
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 
@@ -17,6 +18,10 @@
 
 @interface VNRequest (RevenantResults)
 - (void)revenant_setResults:(NSArray *)results;
+@end
+
+@interface VNBarcodeObservation (RevenantBarcodeConstruction)
++ (instancetype)revenant_observationWithPayload:(NSString *)payload symbology:(VNBarcodeSymbology)symbology boundingBox:(CGRect)boundingBox topLeft:(CGPoint)topLeft topRight:(CGPoint)topRight bottomRight:(CGPoint)bottomRight bottomLeft:(CGPoint)bottomLeft requestRevision:(NSUInteger)revision;
 @end
 
 @interface VNCoreMLModel (RevenantRequest)
@@ -163,6 +168,8 @@ static NSError *revenant_vision_failure(VNRequest *request)
         return nil;
     if ([request isKindOfClass:[VNDetectFaceRectanglesRequest class]])
         return nil;
+    if ([request isKindOfClass:[VNDetectBarcodesRequest class]])
+        return nil;
     if ([request isKindOfClass:[VNCoreMLRequest class]] && ![(VNCoreMLRequest *)request model])
         return revenant_vision_error(VNErrorOperationFailed, @"The model does not have a valid input feature of type image");
     return revenant_vision_error(VNErrorUnsupportedRequest, [NSString stringWithFormat:@"%@ is not supported on this release", NSStringFromClass(cls)]);
@@ -257,6 +264,45 @@ static BOOL revenant_vision_perform(id image, CGImagePropertyOrientation orienta
         }
         if (!failure && [request isKindOfClass:[VNDetectFaceRectanglesRequest class]]) {
             NSArray *observations = revenant_vision_faces(image, orientation, request.revision, &failure);
+            if (failure) {
+                succeeded = NO;
+                first = first ?: failure;
+            } else {
+                [(VNRequest *)request revenant_setResults:observations];
+            }
+            if (request.completionHandler)
+                request.completionHandler(request, failure);
+            continue;
+        }
+        if (!failure && [request isKindOfClass:[VNDetectBarcodesRequest class]]) {
+            VNDetectBarcodesRequest *barcodeRequest = (VNDetectBarcodesRequest *)request;
+            NSArray *supported = [VNDetectBarcodesRequest supportedSymbologies];
+            for (VNBarcodeSymbology symbology in barcodeRequest.symbologies) {
+                if (![supported containsObject:symbology]) {
+                    failure = revenant_vision_error(VNErrorUnsupportedRequest,
+                                                    [NSString stringWithFormat:@"barcode symbology %@ is not supported on this release", symbology]);
+                    break;
+                }
+            }
+            NSError *decodeFailure = nil;
+            NSArray *decoded = failure ? nil : RevenantVisionBarcodes(image, orientation, barcodeRequest.symbologies, &decodeFailure);
+            if (!failure && decodeFailure)
+                failure = revenant_vision_error(VNErrorInvalidImage, decodeFailure.localizedDescription);
+            NSMutableArray *observations = decoded ? [NSMutableArray arrayWithCapacity:decoded.count] : nil;
+            for (NSDictionary *item in decoded) {
+                NSArray *bounds = item[@"bounds"];
+                NSArray *corners = item[@"corners"];
+                VNBarcodeObservation *observation = [VNBarcodeObservation revenant_observationWithPayload:item[@"payload"]
+                                                                                                  symbology:item[@"symbology"]
+                                                                                                boundingBox:CGRectMake([bounds[0] doubleValue], [bounds[1] doubleValue], [bounds[2] doubleValue], [bounds[3] doubleValue])
+                                                                                                      topLeft:CGPointMake([corners[0][0] doubleValue], [corners[0][1] doubleValue])
+                                                                                                     topRight:CGPointMake([corners[1][0] doubleValue], [corners[1][1] doubleValue])
+                                                                                                  bottomRight:CGPointMake([corners[2][0] doubleValue], [corners[2][1] doubleValue])
+                                                                                                   bottomLeft:CGPointMake([corners[3][0] doubleValue], [corners[3][1] doubleValue])
+                                                                                              requestRevision:request.revision];
+                if (observation)
+                    [observations addObject:observation];
+            }
             if (failure) {
                 succeeded = NO;
                 first = first ?: failure;

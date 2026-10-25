@@ -38,12 +38,12 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - The runtime's UIKit overlay imports `_OBJC_CLASS_$_UIFocusSystem` weakly (guard table, `UIKit.swift:398`); Telegram's `UIKitRuntimeUtils` needs the class unguarded.
 - Removal: the runtime links the Backports UIKit library that exports the class, so the load check's exports include it. Pending implementation.
 
-### C8. Vision requests with no iOS 6 image-analysis engine
+### C8. Vision requests beyond iOS 6 image-analysis engines
 
-- Stands in for: `VNDetectRectanglesRequest`, `VNDetectBarcodesRequest`, `VNRecognizeTextRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, and `VNGenerateForegroundInstanceMaskRequest`.
-- Why: iOS 6 Core Image has face detection, which `VNDetectFaceRectanglesRequest` uses. It has no rectangle, barcode, OCR, built-in image-classification, or subject-segmentation engine. The app only performs these Vision requests inside iOS 11 or later availability checks.
-- Behavior: unsupported request execution completes with `VNErrorUnsupportedRequest` in `VNErrorDomain`, matching Vision's unsupported-request error instead of returning an empty successful result.
-- Measurement: the Backports contract test checks that the face request uses Core Image and that unsupported requests select the named Vision error. No image-analysis accuracy comparison against Apple's Vision has been run.
+- Stands in for: `VNDetectRectanglesRequest`, `VNRecognizeTextRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
+- Why: iOS 6 Core Image has face detection, but no rectangle, OCR, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented.
+- Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
+- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison against Apple's Vision has been run.
 - Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
 
 ## Removed

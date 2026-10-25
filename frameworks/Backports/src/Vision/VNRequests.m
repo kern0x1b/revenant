@@ -150,10 +150,7 @@ static NSArray<NSNumber *> *revenant_vision_revisions(Class cls)
 
 + (NSArray *)supportedSymbologies
 {
-    return @[VNBarcodeSymbologyAztec, VNBarcodeSymbologyCode128, VNBarcodeSymbologyCode39, VNBarcodeSymbologyCode39Checksum, VNBarcodeSymbologyCode39FullASCII,
-             VNBarcodeSymbologyCode39FullASCIIChecksum, VNBarcodeSymbologyCode93, VNBarcodeSymbologyCode93i, VNBarcodeSymbologyDataMatrix, VNBarcodeSymbologyEAN13,
-             VNBarcodeSymbologyEAN8, VNBarcodeSymbologyI2of5, VNBarcodeSymbologyI2of5Checksum, VNBarcodeSymbologyITF14, VNBarcodeSymbologyPDF417,
-             VNBarcodeSymbologyQR, VNBarcodeSymbologyUPCE];
+    return @[VNBarcodeSymbologyPDF417, VNBarcodeSymbologyQR];
 }
 
 - (instancetype)initWithCompletionHandler:(VNRequestCompletionHandler)completionHandler
