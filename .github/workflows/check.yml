@@ -409,9 +409,9 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
-      - name: Key the Backports objects as the backports job keys them
-        id: objects_keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Key the Backports facts by the SDK, the compiler and the Xcode build
+        id: facts_keys
+        run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$'; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
@@ -421,6 +421,10 @@ jobs:
           restore-keys: |
             xmake-global-package-${{ runner.os }}-
 
+      - name: Key the demo's objects by every input they are built from
+        id: objects_keys_all
+        run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$'; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/cache/restore@v4
         id: objects
         with:
@@ -428,7 +432,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.objects_keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
+          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - uses: actions/cache/restore@v4
         id: dyld
@@ -441,9 +445,21 @@ jobs:
         timeout-minutes: 20
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
+      - uses: actions/cache/restore@v4
+        id: facts
+        with:
+          path: build/generated/backports
+          key: backports-facts-${{ runner.os }}-${{ steps.facts_keys.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
+
       - name: Configure the SwiftUI demo's component
         timeout-minutes: 45
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo --emulator_vulkan=n -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.facts.outputs.cache-hit != 'true'
+        with:
+          path: build/generated/backports
+          key: backports-facts-${{ runner.os }}-${{ steps.facts_keys.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
 
       - name: Key the package store under the configuration that installed it
         id: keys
@@ -468,6 +484,15 @@ jobs:
           name: swiftui-packages
           path: build/*.deb
           if-no-files-found: error
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - name: Save the package store
         if: steps.lookup.outputs.cache-hit != 'true'
