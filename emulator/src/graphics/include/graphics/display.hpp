@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "foundation/display_geometry.hpp"
+#include "foundation/snapshot_io.hpp"
 
 namespace emulator {
 
@@ -75,6 +76,8 @@ public:
     void set_powered_on(bool powered_on);
     void present(std::uint32_t owner_process_id = 0);
     bool clear_if_owner(std::uint32_t owner_process_id);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
     [[nodiscard]] DisplayFrame snapshot() const;
     [[nodiscard]] std::uint64_t presented_frames() const;

@@ -265,6 +265,47 @@ bool DisplayState::clear_if_owner(std::uint32_t owner_process_id)
     return true;
 }
 
+void DisplayState::save(snapshot::Writer& out) const
+{
+    std::lock_guard lock { mutex_ };
+    if (host_surface_ || surface_reader_ || surface_content_revision_reader_)
+        throw snapshot::RefusedError { "display.host_surface" };
+    snapshot::save(out, geometry_.width);
+    snapshot::save(out, geometry_.height);
+    snapshot::save(out, pixels_);
+    snapshot::save(out, surface_content_generation_);
+    snapshot::save(out, content_owner_process_id_);
+    snapshot::save(out, sequence_);
+    snapshot::save(out, content_revision_);
+    snapshot::save(out, powered_on_);
+    snapshot::save(out, content_orientation_);
+}
+
+void DisplayState::load(snapshot::Reader& in)
+{
+    std::lock_guard lock { mutex_ };
+    std::uint32_t width { };
+    std::uint32_t height { };
+    snapshot::load(in, width);
+    snapshot::load(in, height);
+    if (width != geometry_.width || height != geometry_.height)
+        throw snapshot::FormatError { "display geometry differs from the wiring" };
+    std::vector<std::uint32_t> pixels;
+    snapshot::load(in, pixels);
+    if (pixels.size() != geometry_.pixel_count())
+        throw snapshot::FormatError { "display pixels differ from the geometry" };
+    pixels_ = std::move(pixels);
+    host_surface_.reset();
+    surface_reader_ = { };
+    surface_content_revision_reader_ = { };
+    snapshot::load(in, surface_content_generation_);
+    snapshot::load(in, content_owner_process_id_);
+    snapshot::load(in, sequence_);
+    snapshot::load(in, content_revision_);
+    snapshot::load(in, powered_on_);
+    snapshot::load(in, content_orientation_);
+}
+
 DisplayFrame DisplayState::snapshot() const
 {
     std::function<std::vector<std::uint32_t>()> reader;

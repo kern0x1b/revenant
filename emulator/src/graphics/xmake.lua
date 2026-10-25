@@ -27,3 +27,10 @@ target("emulator_graphics")
         end
         target:add("includedirs", target:autogendir())
     end)
+
+target("emulator_graphics_display_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/display_snapshot_test.cpp")
+    add_deps("emulator_graphics")
+    add_tests("graphics.display_snapshot")
