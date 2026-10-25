@@ -1335,7 +1335,6 @@ public:
 
     void drop_exclusive_state()
     {
-        exclusive_generation_.reset();
         if (jit_ != nullptr)
             jit_->ClearExclusiveState();
         if (exclusive_monitor_ != nullptr)
@@ -1345,8 +1344,6 @@ public:
     void MemoryReadExclusive(std::uint32_t address, std::size_t size) override
     {
         memory_.track_exclusive_access(address, size);
-        exclusive_generation_ =
-            memory_.range_write_generation(address, size).value_or(0U);
     }
 
     std::uint8_t MemorySwap8(std::uint32_t address, std::uint8_t value) override
@@ -1933,8 +1930,7 @@ private:
     bool write_exclusive(
         std::uint32_t address, T value, T expected, Member member)
     {
-        const auto written =
-            (memory_.*member)(address, expected, value, exclusive_generation_);
+        const auto written = (memory_.*member)(address, expected, value);
         if (written)
             notify_memory_write(address, sizeof(T), value);
         return written;
@@ -1982,7 +1978,6 @@ private:
     Cpu* owner_ { };
     Dynarmic::ExclusiveMonitor* exclusive_monitor_ { };
     std::size_t exclusive_processor_ { };
-    std::optional<std::uint64_t> exclusive_generation_;
     std::uint32_t process_id_ { };
     Dynarmic::A32::Jit* jit_ { };
     std::uint64_t ticks_remaining_ { };

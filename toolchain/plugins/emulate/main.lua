@@ -81,7 +81,8 @@ local function context()
     return {emulator = program, emulator_hash = path.filename(emulator_package:installdir()), guest = guest:installdir(), tool = tool,
             icd = path.join(swiftshader:installdir(), "share", "vulkan", "icd.d", "vk_swiftshader_icd.json"),
             identifier = chosen.identifier, version = chosen.version, build = chosen.build, image = image,
-            deadline = tonumber(option.get("timeout")), network = network(), cores = cores()}
+            deadline = tonumber(option.get("timeout")), network = network(), cores = cores(),
+            test_concurrent = option.get("test-concurrent-threads") and true or nil}
 end
 
 local function booter(ctx)
@@ -92,6 +93,7 @@ local function booter(ctx)
                 return true, emulator.boot(table.join(opt, {
                     scale = tonumber(option.get("scale")) or emulator.TIME_SCALE,
                     cores = ctx.cores,
+                    test_concurrent = ctx.test_concurrent,
                     cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
                     tmpdir = path.join(emulator.root(), "tmp.noindex")}))
             end,
