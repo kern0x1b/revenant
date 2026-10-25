@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 221> saved_members {
+inline constexpr std::array<std::string_view, 223> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -93,6 +93,8 @@ inline constexpr std::array<std::string_view, 221> saved_members {
     "ck.signal_actions_",
     "ck.disabled_thread_signals_",
     "ck.alternate_signal_stacks_",
+    "ck.pending_mach_receives_",
+    "ck.pending_semaphore_waits_",
     "ck.pending_signals_",
     "ck.last_delivered_graphics_inputs_",
     "ck.next_display_scanout_deadline_",
@@ -328,7 +330,7 @@ inline constexpr std::array<std::string_view, 54> wired_members {
     "hle.shared_hle_plan_registration_generation_",
 };
 
-inline constexpr std::array<std::string_view, 28> refused_members {
+inline constexpr std::array<std::string_view, 27> refused_members {
     "ck.aio_completions_",
     "ck.host_sockets_",
     "ck.pending_baseband_writes_",
@@ -338,13 +340,11 @@ inline constexpr std::array<std::string_view, 28> refused_members {
     "ck.pending_host_writes_",
     "ck.pending_io_poll_cache_",
     "ck.pending_kevents_",
-    "ck.pending_mach_receives_",
     "ck.pending_polls_",
     "ck.pending_psynch_waits_",
     "ck.pending_record_locks_",
     "ck.pending_recvmsgs_",
     "ck.pending_selects_",
-    "ck.pending_semaphore_waits_",
     "ck.pending_signal_suspends_",
     "ck.pending_socket_reads_",
     "ck.pending_timers_",
@@ -357,6 +357,7 @@ inline constexpr std::array<std::string_view, 28> refused_members {
     "ck.kqueues_",
     "ck.socket_pair_endpoints_",
     "kss.host_display_hardware_wake_pending",
+    "kss.mach_fileports",
 };
 
 }

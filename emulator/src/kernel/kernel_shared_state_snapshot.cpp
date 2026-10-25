@@ -544,6 +544,8 @@ void KernelSharedState::load_scalar_state(snapshot::Reader& in)
 
 void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const
 {
+    if (!mach_fileports.empty())
+        throw snapshot::RefusedError { "kss.mach_fileports" };
     snapshot::save(out, mach_kernel_send_rights);
     snapshot::save(out, task_port_pids);
     mach_namespaces.save(out);

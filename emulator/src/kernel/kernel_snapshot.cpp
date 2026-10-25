@@ -72,6 +72,64 @@ std::optional<DarwinPthreadRegistration> load_pthread_registration(
     return registration;
 }
 
+void save_pending_mach_receive(
+    snapshot::Writer& out, const PendingMachReceive& receive)
+{
+    snapshot::save(out, receive.message_address);
+    snapshot::save(out, receive.receive_size);
+    snapshot::save(out, receive.receive_name);
+    snapshot::save(out, receive.options);
+    snapshot::save(out, static_cast<std::uint64_t>(receive.processor));
+    snapshot::save(out, receive.deadline);
+    snapshot::save(out, receive.receive_object);
+    snapshot::save(out, receive.receive_is_port_set);
+    snapshot::save(out, receive.observed_queue_generation);
+    snapshot::save(out, receive.wait_queue_sequence);
+    snapshot::save(out, receive.started);
+    snapshot::save(out, receive.awaited_request);
+}
+
+PendingMachReceive load_pending_mach_receive(snapshot::Reader& in)
+{
+    PendingMachReceive receive;
+    snapshot::load(in, receive.message_address);
+    snapshot::load(in, receive.receive_size);
+    snapshot::load(in, receive.receive_name);
+    snapshot::load(in, receive.options);
+    std::uint64_t processor { };
+    snapshot::load(in, processor);
+    receive.processor = static_cast<std::size_t>(processor);
+    snapshot::load(in, receive.deadline);
+    snapshot::load(in, receive.receive_object);
+    snapshot::load(in, receive.receive_is_port_set);
+    snapshot::load(in, receive.observed_queue_generation);
+    snapshot::load(in, receive.wait_queue_sequence);
+    snapshot::load(in, receive.started);
+    snapshot::load(in, receive.awaited_request);
+    return receive;
+}
+
+void save_pending_semaphore_wait(
+    snapshot::Writer& out, const PendingSemaphoreWait& wait)
+{
+    snapshot::save(out, wait.semaphore);
+    snapshot::save(out, static_cast<std::uint64_t>(wait.processor));
+    snapshot::save(out, wait.deadline);
+    snapshot::save(out, wait.bsd_result);
+}
+
+PendingSemaphoreWait load_pending_semaphore_wait(snapshot::Reader& in)
+{
+    PendingSemaphoreWait wait;
+    snapshot::load(in, wait.semaphore);
+    std::uint64_t processor { };
+    snapshot::load(in, processor);
+    wait.processor = static_cast<std::size_t>(processor);
+    snapshot::load(in, wait.deadline);
+    snapshot::load(in, wait.bsd_result);
+    return wait;
+}
+
 void save_process_context(snapshot::Writer& out, const ProcessContext& process)
 {
     snapshot::save(out, process.pid);
@@ -155,13 +213,11 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     refuse_if_populated("ck.pending_host_writes_", pending_host_writes_);
     refuse_if_populated("ck.pending_io_poll_cache_", pending_io_poll_cache_);
     refuse_if_populated("ck.pending_kevents_", pending_kevents_);
-    refuse_if_populated("ck.pending_mach_receives_", pending_mach_receives_);
     refuse_if_populated("ck.pending_polls_", pending_polls_);
     refuse_if_populated("ck.pending_psynch_waits_", pending_psynch_waits_);
     refuse_if_populated("ck.pending_record_locks_", pending_record_locks_);
     refuse_if_populated("ck.pending_recvmsgs_", pending_recvmsgs_);
     refuse_if_populated("ck.pending_selects_", pending_selects_);
-    refuse_if_populated("ck.pending_semaphore_waits_", pending_semaphore_waits_);
     refuse_if_populated("ck.pending_signal_suspends_", pending_signal_suspends_);
     refuse_if_populated("ck.pending_socket_reads_", pending_socket_reads_);
     refuse_if_populated("ck.pending_timers_", pending_timers_);
@@ -249,6 +305,18 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     save_process_context(out, process_);
     offline_serial_state_.save(out);
     save_pthread_registration(out, pthread_runtime_.registration());
+    snapshot::save(
+        out, static_cast<std::uint64_t>(pending_mach_receives_.size()));
+    for (const auto& [processor, receive] : pending_mach_receives_) {
+        snapshot::save(out, static_cast<std::uint64_t>(processor));
+        save_pending_mach_receive(out, receive);
+    }
+    snapshot::save(
+        out, static_cast<std::uint64_t>(pending_semaphore_waits_.size()));
+    for (const auto& [processor, wait] : pending_semaphore_waits_) {
+        snapshot::save(out, static_cast<std::uint64_t>(processor));
+        save_pending_semaphore_wait(out, wait);
+    }
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -262,13 +330,11 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     reject_if_populated("ck.pending_host_writes_", pending_host_writes_);
     reject_if_populated("ck.pending_io_poll_cache_", pending_io_poll_cache_);
     reject_if_populated("ck.pending_kevents_", pending_kevents_);
-    reject_if_populated("ck.pending_mach_receives_", pending_mach_receives_);
     reject_if_populated("ck.pending_polls_", pending_polls_);
     reject_if_populated("ck.pending_psynch_waits_", pending_psynch_waits_);
     reject_if_populated("ck.pending_record_locks_", pending_record_locks_);
     reject_if_populated("ck.pending_recvmsgs_", pending_recvmsgs_);
     reject_if_populated("ck.pending_selects_", pending_selects_);
-    reject_if_populated("ck.pending_semaphore_waits_", pending_semaphore_waits_);
     reject_if_populated("ck.pending_signal_suspends_", pending_signal_suspends_);
     reject_if_populated("ck.pending_socket_reads_", pending_socket_reads_);
     reject_if_populated("ck.pending_timers_", pending_timers_);
@@ -378,6 +444,34 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     load_process_context(in, process_);
     offline_serial_state_.load(in);
     pthread_runtime_.restore_registration(load_pthread_registration(in));
+    std::uint64_t mach_receive_count { };
+    snapshot::load(in, mach_receive_count);
+    pending_mach_receives_.clear();
+    for (std::uint64_t index = 0; index < mach_receive_count; ++index) {
+        std::uint64_t processor { };
+        snapshot::load(in, processor);
+        auto receive = load_pending_mach_receive(in);
+        const auto inserted = pending_mach_receives_.emplace(
+            static_cast<std::size_t>(processor), std::move(receive));
+        if (!inserted.second)
+            throw snapshot::FormatError {
+                "ck.pending_mach_receives_ repeats a processor"
+            };
+    }
+    std::uint64_t semaphore_wait_count { };
+    snapshot::load(in, semaphore_wait_count);
+    pending_semaphore_waits_.clear();
+    for (std::uint64_t index = 0; index < semaphore_wait_count; ++index) {
+        std::uint64_t processor { };
+        snapshot::load(in, processor);
+        auto wait = load_pending_semaphore_wait(in);
+        const auto inserted = pending_semaphore_waits_.emplace(
+            static_cast<std::size_t>(processor), std::move(wait));
+        if (!inserted.second)
+            throw snapshot::FormatError {
+                "ck.pending_semaphore_waits_ repeats a processor"
+            };
+    }
 }
 
 void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const
