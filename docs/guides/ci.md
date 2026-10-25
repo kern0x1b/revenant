@@ -138,6 +138,9 @@ The jobs, chosen by `job`:
   runner, then runs `rounds` pairs of boots of the control and of the branch, alternating which one goes first in each
   round. `measurement.md` has one row per boot: real, user and system seconds from `/usr/bin/time -l`, maximum RSS and
   peak footprint in MB. The table is also on the run's summary page, and each boot keeps its perf summary and log.
+- `probe` runs the libdispatch connect probe (`emulator/tests/guest/connect_dispatch`) on the iPhone 4S with two guest
+  cores and then with one. Each run keeps its log in `probe-cores-2` or `probe-cores-1` of the artifact, and the step
+  prints the `connect_writable` lines. The step fails when the probe exits non-zero or prints nothing.
 
 The runner builds the emulator in release and takes the firmware it boots from the revenant `firmware` task: the iOS 6.1.3 shared
 cache (key `dyld-shared-cache-6.1.3-armv7-v1`) and the root filesystem of the iPhone 4S (key
