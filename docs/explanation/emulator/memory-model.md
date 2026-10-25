@@ -54,14 +54,34 @@ repeats, so they do not show the saving yet.
 4. Code. A write to translated code keeps the callback, because the write entry of a tracked page is null. The idle
    window had no code writes, so this costs nothing measured.
 
-## Open decisions
+## Decisions
 
-- Code publication. A direct store that loaded its write entry before the page became code can land after the
-  translation was made, which leaves a stale translation. Closing it needs the other cores to leave the JIT before
-  a page becomes code. The options are a quiescence wait at publication, which must run without the address-space
-  lock or it can deadlock, or accepting and documenting the window. This blocks the code step.
-- The ABA window in step 2. Accept and document it, or send the stores next to a reservation through the callback,
-  which brings back callbacks.
+1. Code publication: quiescence, no accepted window. A direct store that loaded its write entry before a page
+   became code can land after the translation was made, which would leave a stale translation. So before a page
+   becomes code, every other guest core reaches a safe point (a block boundary) and acknowledges. The wait runs
+   without the address-space lock held, so a core that is waiting for that lock can still reach its safe point.
+   Cost per publication: not measured yet. The calibration counts callbacks, translation blocks and CPU per
+   window, but not publications (a page's first translation), so it cannot give the cost. The code step adds a
+   publication counter and a timer around the wait, and records the numbers here. The expected bound is one guest
+   slice of each other core, if a core reaches a block boundary when its slice ends. The code step checks that
+   assumption before it relies on it.
+
+2. ABA window: accepted, with the difference documented. Guest synchronization is value-based: the generation
+   check from `adb67ad64` stays, and the store-exclusive also compares the value. A store sequence that writes A,
+   then B, then A to a reserved granule between the load-exclusive and the store-exclusive makes the
+   store-exclusive succeed here. On ARM the same sequence fails it, because the architecture clears the monitor on
+   another observer's write to the reserved address whatever value that write carries. So the premise that the
+   difference is not observable on real hardware does not hold for this sequence. The decision accepts the
+   difference anyway. No callbacks are added for these stores.
+
+   Recorded risk: a reference-count update written as load-exclusive, compare, store-exclusive commits a value from
+   a stale read when the count goes A, B, A in that window. libdispatch's refcount has that shape. The connect
+   probe in `bd31c5b51` hits a libdispatch refcount trap on two cores (old count 1, over-release). Its cause is not
+   proven there: it could be a race in the shared monitor, or a libdispatch behaviour that the emulator exposes.
+   The code step runs that probe on two cores and on one core and records both results here. A trap on two cores
+   that the code step does not remove means this decision is wrong for libdispatch and must be reopened.
+   The 69,152 exclusive callbacks in the `counted2` idle window (14.0 M callbacks, two cores) show that
+   load-exclusive is not rare.
 
 ## Verification
 
