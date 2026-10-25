@@ -138,19 +138,20 @@ names the first file it failed on, with its text, whether it exists, and the sta
 occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
 path of patch 0015, and main's xmake was not run in the loop.
 
-## baselineOffset on iOS 6: not measured yet
+## baselineOffset on iOS 6: ignored by UIKit string drawing (measured)
 
 The constant `NSBaselineOffsetAttributeName` is in the 6.1.3 image as `_NSBaselineOffsetAttributeName`, and its SDK mark
 is lowered in `toolchain/modules/apple/lowered.lua`. The 6.1.3 image exports no CoreText baseline-offset key
 (`_kCTBaselineOffsetAttributeName` is absent), while it exports the font, kern, stroke, underline, foreground-colour and
-font-feature keys. So the CoreText layer of iOS 6 has no attribute that carries the offset. That is the reason to expect
-iOS 6 string drawing to ignore the attribute. It is an inference from the export list and not a measurement.
+font-feature keys.
 
-The probe `toolchain/tests/emulate/baseline` draws "Hxg" at 24 pt with and without a 6 pt offset and prints the ink box
-of each. It has not produced a result. On `iPhone4,1` 6.1.3, `[UIFont systemFontOfSize:]` traps with ARM exception 8, an
-undefined instruction, at 0x311150d4 in the system libraries, before the first draw. The trap happens with and without
-`[UIApplication sharedApplication]` first. The address is not yet mapped to a library.
+Measured with `toolchain/tests/emulate/baseline` (`./xmakew l -P . toolchain/tests/emulate/baseline/baseline.lua iPhone4,1 6.1.3`)
+on an iPhone 4S, iOS 6.1.3: "Hxg" at 24 pt drawn with `drawAtPoint:` into a bitmap has the same ink box with and without a
+6 pt `NSBaselineOffsetAttributeName` (top 33, bottom 56, left 21, right 62, 390 ink pixels), so the shift is 0. The control,
+the plain string drawn 6 points higher, shifts by 6, so the measurement sees a shift. iOS 6 UIKit string drawing ignores the
+attribute. The backport is to make it honoured in its text paths, and that is not done yet.
 
-Open: map 0x311150d4 to its library with the cache reader in `toolchain/modules/apple/dyld.lua`, and decide whether the trap
-is an emulator gap or the daemon context. Once the probe runs, its result decides whether the backport's text paths must
-apply the offset themselves.
+The probe's first runs trapped in `[UIFont systemFontOfSize:]`: ARM exception 8 at 0x311150d4, a `udf #254` in
+CoreFoundation's trap stub, which `_CFRuntimeCreateInstance` calls through a callback slot after `_GSFontCreateWithName`
+loads a type ID that is still 0. `GSFontGetTypeID()` returned 0 until `GSInitialize()` ran, and then 257. The probe never
+ran `GSInitialize`, which `UIApplicationMain` runs in an app. The probe now runs it first.
