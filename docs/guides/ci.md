@@ -1,11 +1,17 @@
 # Continuous checks
 
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. Its three jobs run in parallel, all on `macos-26`. On a branch push,
-`backports` and `swift` run only when the branch changes a file outside `docs/`, `emulator/`, `recompiler/`,
-`toolchain/tests/emulate/` and Markdown, as an `ubuntu-latest` job named `changes` decides from the diff against the
-merge base with `main`: those folders never reach the native builds, and a public repository runs five macOS jobs at a
-time. A push to `main` and a dispatch run all three. Each selects Xcode 26.6
+`gh workflow run check.yml --ref <branch>`. All of its jobs run on `macos-26`. An `ubuntu-latest` job named `changes`
+decides from the diff against the merge base with `main` which of them a branch push needs, and a public repository
+runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
+
+- a change that touches only `docs/` or a Markdown file at the top of the repository runs `repository` alone, which is
+  `./xmakew test -P . 'repository/*'`: the layout and documentation checks that read those files;
+- `checks` runs for every other change;
+- `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
+  `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
+
+A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
 choose a runner, so each job keeps its own `runs-on`.
 
