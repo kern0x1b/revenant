@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "foundation/file_page_cache.hpp"
+#include "foundation/snapshot_io.hpp"
 
 namespace emulator {
 
@@ -138,6 +139,8 @@ public:
     void reset();
     void inherit_state(const SurfaceStore& parent);
     void share_registry(const SurfaceStore& peer);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
     [[nodiscard]] std::uint32_t allocate_identifier();
     [[nodiscard]] std::uint64_t publication_watermark() const;
     [[nodiscard]] bool publish(AddressSpace& memory, Backing backing);
