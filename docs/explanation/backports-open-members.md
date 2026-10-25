@@ -166,8 +166,10 @@ Libdispatch trap. Resolved as a probe fault, not an emulator fault.
   descriptor, filter -2 (`EVFILT_WRITE`), and flags `0x85` (`EV_ADD|EV_ENABLE|EV_DISPATCH`). The source is a write
   source.
 - State at the trap: `do_suspend_cnt` (offset 28) is 1, the locked bit with a count of zero. The probe's cleanup
-  resumed the source a second time, so libdispatch trapped on the over-resume. The trap PC `0x392a2e3c` is in a
-  stripped helper at `0x392a2e04`, before `_dispatch_resume` at `0x392a4f94`.
+  resumed the source a second time, so libdispatch trapped on the over-resume. The trap PC `0x392a2e3c` is in
+  `_dispatch_resume$VARIANT$up` (`+0x3a`), the copy of `_dispatch_resume` at `0x392a2e04`. That is not the exported
+  `_dispatch_resume` at `0x392a4f94`; the earlier note that called it a stripped helper was a symbol-table gap, closed
+  by the local-symbol reader.
 - The fixed probe passes on two and on one core: 20 rounds, 0 connections not writable, and 0 deliveries after cancel.
   Per round the writable events were 32 to 73, and the most for one connection was 3. A writable socket re-arms its
   write source on each handler return, so repeats are expected; no event arrives after the source is cancelled.
@@ -178,5 +180,10 @@ that points into mapped memory, and the four words at the address in the first w
 word. The unit test `emulator_fault_dump_test` passes. The first trap runs printed no `[fault-words]` lines because the
 concise output filter drops every bracketed line that is not on its allowlist, and this prefix was not on it. With the
 prefix added, the forced libdispatch fault on one core logs the words: `r0` points at the trapping object, whose first
-word is the vtable `0x3ae41ec4`. Labels cover only an image's text, so the vtable word is unlabelled, and the report
-gives image and offset, not dyld-cache symbol names. Symbol names are open.
+word is the vtable, labelled `libdispatch.dylib`__dispatch_source_vtable`. Each word that lands in a dyld cache image
+is labelled with the image and the nearest symbol at or below it in the section that holds it, as `image`symbol+0xNN`.
+The lookup finds the image from its segments, so data such as a vtable is labelled too. The trap PC is labelled
+`libdispatch.dylib`_dispatch_resume$VARIANT$up+0x3a`. The exports come from the image's own symbol table, and the
+locals from the cache's local-symbol region, so no export-trie reader was needed. A word with no symbol in its section
+below it keeps the image and offset from the guest's image table. Named symbols are nearest-below, not sized, so a
+label with a large offset means the section has no closer symbol, not that the word belongs to that symbol.
