@@ -117,6 +117,13 @@ target("emulator_machine_image_region_test")
     add_deps("emulator_foundation")
     add_tests("machine_image_region")
 
+target("emulator_image_slab_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("tests/unit/image_slab_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("image_slab")
+
 target("emulator_load_average_test")
     set_kind("binary")
     set_default(false)
