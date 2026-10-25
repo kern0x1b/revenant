@@ -259,6 +259,60 @@ unless those sockets are closed first. These counts are at quit; the quiescent p
 Still open: whether a quiescent point exists where the waits and host sockets above are empty, and how long a restore
 takes for about 1 million pages, of which about 0.9 GiB are anonymous or shared-writable.
 
+## Loop state in run(), classified
+
+`EmulatorSession::run` (`src/runtime/emulator_session.cpp:186`) keeps its scheduling state in locals. The scheduler loop
+starts at line 2783 and its teardown is at about 5047. A local is listed here when it is declared before the loop and is
+read or written inside it, or inside a lambda defined before the loop that the loop calls. Save means written to the
+snapshot. Rebuild means set from the configuration, the rootfs or the restored kernels. Refuse means the snapshot is not
+taken while the value is set.
+
+| local | declared | holds | treatment |
+|---|---|---|---|
+| `scheduler` | 1482 | `XnuScheduler`: thread records, run queues, counts (owner in the table above) | save with the scheduler owner |
+| `last_serial_thread` | 1493 | the thread that ran last in the serial slice order | save |
+| `scheduler_handoff_thread` | 1494 | the explicit handoff target the dispatch policy reads | save |
+| `display_urgent_process` | 1495 | the process that holds a realtime display lease | refuse while set |
+| `display_urgent_thread`, `display_urgent_receiver_thread`, `display_yielded_thread` | 1496 to 1498 | guest thread ids of the display callback | refuse while a callback is in flight; save otherwise |
+| `display_inflight_callback_thread` | 1499 | the callback in flight | refuse while set |
+| `display_inflight_callback_sequence` | 1500 | the sequence of the callback in flight | save (0 at quiescence) |
+| `display_callback_pending_reported` | 1507 | whether the pending-callback line was printed | rebuild as false; it gates a print only |
+| `diagnostic_svc_spin_thread`, `_calls`, `_report_at` | 1508 to 1510 | counters for the spin report | rebuild; they gate a print only |
+| `diagnostic_display_yield_count` | 1511 | count of display yields, capped at 32 by the check at 3991 | save; the cap changes scheduling |
+| `remaining_ticks` | 2159 | ticks left in a bounded run | save the tick count at the snapshot; the restored bound is the cold bound minus that count |
+| `consumed_ticks`, `stopped_pid`, `stopped_cpu`, `stopped_result` | 2160 to 2163 | the values reported at exit | not state; recomputed at exit |
+| `hard_stop`, `initial_failure` | 2164, 2165 | exit conditions | refuse while set |
+| `gdb_server`, `debug_request` | 2166, 2167 | a debugger attached to the session | refuse while attached |
+| `realtime_pacer` | 2194 | host-time pacing | rebuild |
+| `display_performance_window`, `display_clock_window` | 2255, 2264 | host-side display timing windows | rebuild (reset) |
+| `display_scanout_owner` | 2265 | `Runtime*` of the scanout owner, a host pointer | rebuild from the foreground process |
+| `observed_display_submissions`, `last_display_submission` | 2295, 2297 | host-time display observation | rebuild (reset) |
+| `transition_process` | 2305 (lambda) | the destination of a foreground transition | refuse while a transition is pending |
+| `last_jit_quota_refresh`, `latest_host_memory_budget`, `pressure_reclamation_applied` | 2461 to 2463 | JIT memory pacing | rebuild |
+| `guest_idle_since` | 2464 | host time since the guest went idle | rebuild (reset) |
+| `guest_timer_overshoot_samples`, `_total_nanoseconds`, `_max_nanoseconds` | 2465 to 2467 | timer measurements | rebuild (zero) |
+| `observed_guest_timer_deadline` | 2468 | cached next guest deadline | rebuild from the kernels' timers |
+| `guest_deadlines` | 2469 | per-process deadlines, upserted from `timer_deadline_snapshot()` (2474 to 2489) | rebuild by the same refresh after restore |
+| `executed_time_clock`, `executed_ticks_since_catch_up` | 2519, 2520 | guest tick accounting and catch-up | save the tick counter; rebuild the clock from `guest_ticks_per_second` |
+| `last_interactive_host_activity` | 2763 | host time of the last input | rebuild |
+| `interaction_generation` | 2764 | input generation counter, starts at 1 | save |
+| `input_receiver_process` | 2765 | the process that receives input | save; refuse while input is pending |
+| `pending_touch_input_completion`, `pending_button_input_completion` | 495, 496 | input in flight | refuse while set |
+| `touch_replay`, `live_control`, `live_button_scheduler`, `live_touch_scheduler` | 471 to 474 | input replay and the control channel | refuse while a replay is active; rebuild otherwise |
+| `display_presenter`, `frame_file_presenter` | 469, 470 | host display output | rebuild |
+| `runtimes`, `runtime_index` | 621, 683 | the processes; the pid index over them | `runtimes` is the per-process owner; rebuild the index |
+| `jit_code_cache_governor`, `runtime_reaper`, `runtime_jit_memory`, `host_resources`, `artifact_compaction_*` | 593 to 771 | JIT and host work | not saved; rebuild |
+| `jit_work_signal` | 1095 | the work signal shared with the JIT | rebuild |
+| `baseband_output_path`, `baseband_capture_stream`, `baseband_capture_bytes` | 549 to 551 | host output for baseband capture | rebuild; the byte count is output only |
+| `debug_target` | 1481 | the debugger adapter over `runtimes` | rebuild |
+| `guest_execution_policy`, `guest_dispatch_policy`, `guest_parallelism_policy` | 1486 to 1492 | policies built from the configuration | rebuild |
+| `options`, `host`, `device`, `darwin_abi`, `rootfs`, `session_catalog`, `activation`, `lockdown_capabilities`, `guest_architecture`, `guest_ticks_per_second`, `guest_processor_count`, `profile_*` | 191 to 372 | configuration and host objects | rebuild; the header identity check covers them |
+| `initial_runtime`, `catalog_maintenance` | 1474, 1475 | pointer to the initial process; host catalog maintenance | rebuild |
+
+The scan is approximate. It found the names used in the loop body and followed the lambdas defined before the loop that
+the loop calls, by hand. A name used only inside such a lambda and not listed here is a gap. The round-trip oracle and its
+negative control are the check for a missed field, not this table.
+
 ## Stages
 
 The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
