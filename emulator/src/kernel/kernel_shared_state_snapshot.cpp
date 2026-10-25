@@ -9,6 +9,7 @@
 
 #include <array>
 #include <atomic>
+#include <bit>
 #include <string>
 
 namespace emulator {
@@ -21,6 +22,18 @@ void load_atomic(snapshot::Reader& in, std::atomic<T>& value)
     T loaded { };
     snapshot::load(in, loaded);
     value.store(loaded);
+}
+
+void save_float(snapshot::Writer& out, float value)
+{
+    snapshot::save(out, std::bit_cast<std::uint32_t>(value));
+}
+
+void load_float(snapshot::Reader& in, float& value)
+{
+    std::uint32_t bits { };
+    snapshot::load(in, bits);
+    value = std::bit_cast<float>(bits);
 }
 
 void save_kernel_event(
@@ -203,6 +216,8 @@ KernelSharedState::ProcessRecord load_process_record(snapshot::Reader& in)
 
 void KernelSharedState::save_scalar_state(snapshot::Writer& out) const
 {
+    if (host_display_hardware_wake_pending)
+        throw snapshot::RefusedError { "kss.host_display_hardware_wake_pending" };
     snapshot::save(out, hostname);
     snapshot::save(out, desired_vnodes);
     snapshot::save(out, next_kernel_event_identifier);
@@ -245,6 +260,41 @@ void KernelSharedState::save_scalar_state(snapshot::Writer& out) const
     snapshot::save(out, wifi_service);
     snapshot::save(out, active_application_event_object);
     snapshot::save(out, pending_application_event_object);
+    snapshot::save(out, springboard_active_touch_begin_sequence);
+    snapshot::save(out, springboard_enqueued_active_touch_begin_sequence);
+    snapshot::save(out, springboard_enqueued_last_touch_begin_sequence);
+    snapshot::save(out, springboard_enqueued_last_touch_end_sequence);
+    save_float(out, springboard_enqueued_last_touch_end_x);
+    save_float(out, springboard_enqueued_last_touch_end_y);
+    snapshot::save(out, springboard_last_consumed_touch_sequence);
+    snapshot::save(out, springboard_last_touch_begin_sequence);
+    snapshot::save(out, springboard_pending_launch_touch_sequence);
+    snapshot::save(out, springboard_unlock_touch_active);
+    snapshot::save(out, springboard_unlock_touch_begin_sequence);
+    snapshot::save(out, springboard_unlock_touch_end_sequence);
+    save_float(out, springboard_unlock_touch_end_x);
+    save_float(out, springboard_unlock_touch_end_y);
+    snapshot::save(out, springboard_unlock_touch_pending);
+    save_float(out, springboard_unlock_touch_start_x);
+    save_float(out, springboard_unlock_touch_start_y);
+    snapshot::save(out, springboard_lock_screen_active);
+    snapshot::save(out, active_application_layer_sequence);
+    snapshot::save(out, last_home_launch_barrier_sequence);
+    snapshot::save(out, display_vsync_last_delivered_deadline);
+    snapshot::save(out, display_vsync_pulse_count);
+    snapshot::save(out, host_display_current_lock_down_sequence);
+    snapshot::save(out, host_display_wake_after_lock_sequence);
+    snapshot::save(out, host_display_wake_power_on_acknowledged);
+    snapshot::save(out, iokit_display_vsync_registration_generation);
+    snapshot::save(out, system_keybag_handle);
+    snapshot::save(out, application_touch_suspended);
+    snapshot::save(out, requested_display_power_state);
+    snapshot::save(out, suspended_application_scene_process_id);
+    snapshot::save(out, foreground_application_attempt_process_id);
+    snapshot::save(out, pending_application_handoff_process_id);
+    snapshot::save(out, interrupted_home_exit_lock_sequence);
+    snapshot::save(out, security_level.load());
+    snapshot::save(out, task_for_pid_groups);
 }
 
 void KernelSharedState::load_scalar_state(snapshot::Reader& in)
@@ -291,6 +341,41 @@ void KernelSharedState::load_scalar_state(snapshot::Reader& in)
     snapshot::load(in, wifi_service);
     snapshot::load(in, active_application_event_object);
     snapshot::load(in, pending_application_event_object);
+    snapshot::load(in, springboard_active_touch_begin_sequence);
+    snapshot::load(in, springboard_enqueued_active_touch_begin_sequence);
+    snapshot::load(in, springboard_enqueued_last_touch_begin_sequence);
+    snapshot::load(in, springboard_enqueued_last_touch_end_sequence);
+    load_float(in, springboard_enqueued_last_touch_end_x);
+    load_float(in, springboard_enqueued_last_touch_end_y);
+    snapshot::load(in, springboard_last_consumed_touch_sequence);
+    snapshot::load(in, springboard_last_touch_begin_sequence);
+    snapshot::load(in, springboard_pending_launch_touch_sequence);
+    snapshot::load(in, springboard_unlock_touch_active);
+    snapshot::load(in, springboard_unlock_touch_begin_sequence);
+    snapshot::load(in, springboard_unlock_touch_end_sequence);
+    load_float(in, springboard_unlock_touch_end_x);
+    load_float(in, springboard_unlock_touch_end_y);
+    snapshot::load(in, springboard_unlock_touch_pending);
+    load_float(in, springboard_unlock_touch_start_x);
+    load_float(in, springboard_unlock_touch_start_y);
+    snapshot::load(in, springboard_lock_screen_active);
+    snapshot::load(in, active_application_layer_sequence);
+    snapshot::load(in, last_home_launch_barrier_sequence);
+    snapshot::load(in, display_vsync_last_delivered_deadline);
+    snapshot::load(in, display_vsync_pulse_count);
+    snapshot::load(in, host_display_current_lock_down_sequence);
+    snapshot::load(in, host_display_wake_after_lock_sequence);
+    snapshot::load(in, host_display_wake_power_on_acknowledged);
+    snapshot::load(in, iokit_display_vsync_registration_generation);
+    snapshot::load(in, system_keybag_handle);
+    snapshot::load(in, application_touch_suspended);
+    snapshot::load(in, requested_display_power_state);
+    snapshot::load(in, suspended_application_scene_process_id);
+    snapshot::load(in, foreground_application_attempt_process_id);
+    snapshot::load(in, pending_application_handoff_process_id);
+    snapshot::load(in, interrupted_home_exit_lock_sequence);
+    load_atomic(in, security_level);
+    snapshot::load(in, task_for_pid_groups);
 }
 
 void KernelSharedState::save_port_and_event_tables(snapshot::Writer& out) const

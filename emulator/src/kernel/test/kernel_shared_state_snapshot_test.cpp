@@ -82,6 +82,41 @@ void populate(KernelSharedState& state)
     state.wifi_service = 55;
     state.active_application_event_object = 56;
     state.pending_application_event_object = 57;
+    state.springboard_active_touch_begin_sequence = 60;
+    state.springboard_enqueued_active_touch_begin_sequence = 61;
+    state.springboard_enqueued_last_touch_begin_sequence = 62;
+    state.springboard_enqueued_last_touch_end_sequence = 63;
+    state.springboard_enqueued_last_touch_end_x = 1.5F;
+    state.springboard_enqueued_last_touch_end_y = 2.5F;
+    state.springboard_last_consumed_touch_sequence = 64;
+    state.springboard_last_touch_begin_sequence = 65;
+    state.springboard_pending_launch_touch_sequence = 66;
+    state.springboard_unlock_touch_active = true;
+    state.springboard_unlock_touch_begin_sequence = 67;
+    state.springboard_unlock_touch_end_sequence = 68;
+    state.springboard_unlock_touch_end_x = 3.5F;
+    state.springboard_unlock_touch_end_y = 4.5F;
+    state.springboard_unlock_touch_pending = true;
+    state.springboard_unlock_touch_start_x = 5.5F;
+    state.springboard_unlock_touch_start_y = 6.5F;
+    state.springboard_lock_screen_active = false;
+    state.active_application_layer_sequence = 69;
+    state.last_home_launch_barrier_sequence = 70;
+    state.display_vsync_last_delivered_deadline = 71;
+    state.display_vsync_pulse_count = 72;
+    state.host_display_current_lock_down_sequence = 73;
+    state.host_display_wake_after_lock_sequence = 74;
+    state.host_display_wake_power_on_acknowledged = true;
+    state.iokit_display_vsync_registration_generation = 75;
+    state.system_keybag_handle = 76;
+    state.application_touch_suspended = true;
+    state.requested_display_power_state = 77;
+    state.suspended_application_scene_process_id = 78;
+    state.foreground_application_attempt_process_id = 79;
+    state.pending_application_handoff_process_id = 80;
+    state.interrupted_home_exit_lock_sequence = 81;
+    state.security_level = 82;
+    state.task_for_pid_groups = { 83, 84 };
 }
 
 std::vector<std::byte> save_scalars(const KernelSharedState& state)
@@ -89,6 +124,20 @@ std::vector<std::byte> save_scalars(const KernelSharedState& state)
     Writer out;
     state.save_scalar_state(out);
     return out.bytes();
+}
+
+void refused_host_wake_is_named()
+{
+    KernelSharedState state;
+    state.host_display_hardware_wake_pending = true;
+    bool refused = false;
+    try {
+        save_scalars(state);
+    } catch (const snapshot::RefusedError& error) {
+        refused = std::string { error.what() }.find(
+                      "kss.host_display_hardware_wake_pending") != std::string::npos;
+    }
+    expect(refused, "a pending host wake refuses the scalar save by name");
 }
 
 void round_trip_restores_the_scalars()
@@ -355,6 +404,7 @@ void key_store_identity_is_checked_on_restore()
 int main()
 {
     round_trip_restores_the_scalars();
+    refused_host_wake_is_named();
     truncated_stream_is_a_format_error();
     round_trip_restores_the_tables();
     repeated_kevent_state_is_refused();

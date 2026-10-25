@@ -35,7 +35,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 135> saved_members {
+constexpr std::array<std::string_view, 170> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -141,6 +141,41 @@ constexpr std::array<std::string_view, 135> saved_members {
     "kss.wifi_service",
     "kss.active_application_event_object",
     "kss.pending_application_event_object",
+    "kss.springboard_active_touch_begin_sequence",
+    "kss.springboard_enqueued_active_touch_begin_sequence",
+    "kss.springboard_enqueued_last_touch_begin_sequence",
+    "kss.springboard_enqueued_last_touch_end_sequence",
+    "kss.springboard_enqueued_last_touch_end_x",
+    "kss.springboard_enqueued_last_touch_end_y",
+    "kss.springboard_last_consumed_touch_sequence",
+    "kss.springboard_last_touch_begin_sequence",
+    "kss.springboard_pending_launch_touch_sequence",
+    "kss.springboard_unlock_touch_active",
+    "kss.springboard_unlock_touch_begin_sequence",
+    "kss.springboard_unlock_touch_end_sequence",
+    "kss.springboard_unlock_touch_end_x",
+    "kss.springboard_unlock_touch_end_y",
+    "kss.springboard_unlock_touch_pending",
+    "kss.springboard_unlock_touch_start_x",
+    "kss.springboard_unlock_touch_start_y",
+    "kss.springboard_lock_screen_active",
+    "kss.active_application_layer_sequence",
+    "kss.last_home_launch_barrier_sequence",
+    "kss.display_vsync_last_delivered_deadline",
+    "kss.display_vsync_pulse_count",
+    "kss.host_display_current_lock_down_sequence",
+    "kss.host_display_wake_after_lock_sequence",
+    "kss.host_display_wake_power_on_acknowledged",
+    "kss.iokit_display_vsync_registration_generation",
+    "kss.system_keybag_handle",
+    "kss.application_touch_suspended",
+    "kss.requested_display_power_state",
+    "kss.suspended_application_scene_process_id",
+    "kss.foreground_application_attempt_process_id",
+    "kss.pending_application_handoff_process_id",
+    "kss.interrupted_home_exit_lock_sequence",
+    "kss.security_level",
+    "kss.task_for_pid_groups",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
@@ -292,7 +327,7 @@ constexpr std::array<std::string_view, 1> wired_members {
     "hid.state_",
 };
 
-constexpr std::array<std::string_view, 27> refused_members {
+constexpr std::array<std::string_view, 28> refused_members {
     "ck.aio_completions_",
     "ck.host_sockets_",
     "ck.pending_baseband_writes_",
@@ -320,6 +355,7 @@ constexpr std::array<std::string_view, 27> refused_members {
     "ck.baseband_open_descriptions_",
     "ck.kqueues_",
     "ck.socket_pair_endpoints_",
+    "kss.host_display_hardware_wake_pending",
 };
 
 int failures = 0;
