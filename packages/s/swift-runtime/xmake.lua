@@ -65,6 +65,9 @@ package("swift-runtime")
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local compat = import("@addon.revenant.apple.compat", {anonymous = true})
         local compiler = assert(package:dep("swift"), "the runtime is built with revenant@swift")
+        if compiler:version_str() ~= package:version_str() then
+            raise("swift-runtime %s is built with the compiler of Swift %s: a runtime and the compiler it is built with name one Swift version", package:version_str(), compiler:version_str())
+        end
         local libcxx = assert(package:dep("libcxx"), "the runtime links the C++ runtime of revenant@libcxx")
         local shims = assert(package:dep("apple-compat"), "the runtime takes what the release lacks from revenant@apple-compat")
         local toolchain = cmake.toolchain(package)
