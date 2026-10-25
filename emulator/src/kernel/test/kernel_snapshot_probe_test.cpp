@@ -34,7 +34,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 77> saved_members {
+constexpr std::array<std::string_view, 85> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -47,6 +47,14 @@ constexpr std::array<std::string_view, 77> saved_members {
     "hle.registration_generation_",
     "hle.persistent_trampoline_cursor_",
     "hle.continuation_trampoline_cursor_",
+    "hle.installed_calls_",
+    "hle.installed_symbol_thumb_",
+    "hle.installed_symbols_",
+    "hle.loaded_images_",
+    "hle.shared_cache_data_symbols_",
+    "hle.shared_hle_plan_",
+    "hle.shared_hle_plan_architecture_",
+    "hle.shared_hle_plan_registration_generation_",
     "mem.parallel_access_",
     "mem.first_region",
     "mem.resident_pages",
@@ -114,22 +122,13 @@ constexpr std::array<std::string_view, 77> saved_members {
     "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 59> open_members {
+constexpr std::array<std::string_view, 50> open_members {
     "ck.dyld_shared_cache_attempted_",
     "ck.dyld_shared_cache_path_",
     "ck.mapping_trace_count_",
-    "hle.installed_calls_",
-    "hle.installed_symbol_thumb_",
-    "hle.installed_symbols_",
-    "hle.loaded_images_",
-    "hle.shared_cache_data_symbols_",
-    "hle.shared_hle_plan_",
-    "hle.shared_hle_plan_architecture_",
-    "hle.shared_hle_plan_registration_generation_",
     "kss.mach_queues",
     "kss.mach_semaphores",
     "pthread.registration_",
-    "hid.state_",
     "coreaudio.service_",
     "coreaudio.buffer_frame_size_",
     "coreaudio.next_native_io_proc_id_",
@@ -176,6 +175,10 @@ constexpr std::array<std::string_view, 59> open_members {
     "mem.file_page_cache_",
 };
 
+constexpr std::array<std::string_view, 1> wired_members {
+    "hid.state_",
+};
+
 int failures = 0;
 std::size_t checked = 0;
 
@@ -184,7 +187,8 @@ void check_accounted(const std::string& name)
     ++checked;
     const std::string_view view { name };
     if (std::ranges::find(saved_members, view) != saved_members.end() ||
-        std::ranges::find(open_members, view) != open_members.end()) {
+        std::ranges::find(open_members, view) != open_members.end() ||
+        std::ranges::find(wired_members, view) != wired_members.end()) {
         return;
     }
     std::cerr << "FAIL: populated member " << name
@@ -218,7 +222,7 @@ int main()
               << " populated members checked, "
               << emulator::booted_populated_members.size()
               << " booted members, ledger has "
-              << saved_members.size() << " saved and " << open_members.size()
-              << " open entries\n";
+              << saved_members.size() << " saved, " << open_members.size()
+              << " open and " << wired_members.size() << " wired entries\n";
     return 0;
 }
