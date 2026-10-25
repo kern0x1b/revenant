@@ -95,6 +95,9 @@ std::size_t CompatibilityKernel::bootstrap_checked_in_service_count() const
 
 namespace {
 
+    constexpr std::string_view springboard_finished_startup_notification_name {
+        "com.apple.springboard.finishedstartup"
+    };
     constexpr std::uint32_t carry_flag = 1U << 29U;
     constexpr std::uint32_t ebadf = 9;
     constexpr std::uint32_t efault = 14;
@@ -514,6 +517,16 @@ void CompatibilityKernel::configure_darwin_notify_state()
             message.sender_pid = 0;
             state->enqueue_mach_message_locked(
                 *destination, std::move(message));
+        });
+    darwin_notify_state_hle_.set_post_observer(
+        [this](std::string_view name, std::uint32_t process_id) {
+            output_.line("[notify] post pid=" + std::to_string(process_id) +
+                         " name=" + std::string { name });
+            if (name != springboard_finished_startup_notification_name)
+                return;
+            output_.line("[boot] milestone=springboard-finished-startup pid=" +
+                         std::to_string(process_id) + " host-ms=" +
+                         std::to_string(host_unix_milliseconds()));
         });
 }
 

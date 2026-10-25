@@ -4694,6 +4694,8 @@ void EmulatorSession::run()
     PerformanceSnapshot stopped_guest;
     FilePageCacheStats file_cache_stats;
     std::uint64_t file_page_cache_bytes { };
+    MaterializedPageCounts materialized_pages;
+    std::size_t materialized_processes { };
     host_resources.set_next_deadline(std::nullopt);
     host_resources.wait_idle();
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
@@ -4741,6 +4743,10 @@ void EmulatorSession::run()
             static_cast<std::uint64_t>(
                 initial_runtime->memory->cached_file_page_count()) *
             AddressSpace::page_size;
+        materialized_processes = runtimes.size();
+        for (const auto& runtime : runtimes)
+            materialized_pages +=
+                runtime->memory->materialized_page_counts();
     }
     catalog_maintenance.report_watch_stats();
     output.line(
@@ -5606,6 +5612,16 @@ void EmulatorSession::run()
             " touched-pages=" + std::to_string(write_stats.touched_pages) +
             " copy-on-write-detaches=" +
             std::to_string(write_stats.copy_on_write_detaches));
+        output.line(
+            "[perf-memory-pages] processes=" +
+            std::to_string(materialized_processes) +
+            " materialized=" + std::to_string(materialized_pages.total()) +
+            " anonymous=" + std::to_string(materialized_pages.anonymous) +
+            " file-cached=" + std::to_string(materialized_pages.file_cached) +
+            " copy-on-write-possible=" +
+            std::to_string(materialized_pages.copy_on_write_possible) +
+            " shared-writable=" +
+            std::to_string(materialized_pages.shared_writable));
         auto final_snapshot = performance_counters().snapshot();
         final_snapshot.jit_live_instances = stopped_guest.jit_live_instances;
         final_snapshot.jit_code_cache_bytes =

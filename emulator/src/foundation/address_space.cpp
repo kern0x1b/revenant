@@ -2235,6 +2235,26 @@ std::size_t AddressSpace::shared_page_count() const
         }));
 }
 
+MaterializedPageCounts AddressSpace::materialized_page_counts() const
+{
+    auto lock = read_lock();
+    MaterializedPageCounts counts { };
+    for (const auto& entry : *pages_) {
+        const auto& page = entry.second;
+        if (!page.backing)
+            continue;
+        if (page.shared_writable)
+            ++counts.shared_writable;
+        else if (page.file_cached)
+            ++counts.file_cached;
+        else if (page.copy_on_write_possible)
+            ++counts.copy_on_write_possible;
+        else
+            ++counts.anonymous;
+    }
+    return counts;
+}
+
 std::size_t AddressSpace::cached_file_mapping_count() const
 {
     auto lock = read_lock();
