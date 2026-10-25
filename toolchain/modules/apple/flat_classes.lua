@@ -58,3 +58,7 @@ function link_flags(out)
     end
     return flags
 end
+
+function app_link_flags(sdk, out)
+    return link_flags(stub_directory(sdk, out))
+end
