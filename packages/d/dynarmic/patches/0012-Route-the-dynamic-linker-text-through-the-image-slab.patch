@@ -1,0 +1,69 @@
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index 09f6b69b..c75779e3 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -836,7 +836,7 @@ struct Jit::Impl final {
+         image_code_slab = this->conf.image_native_code_slab != nullptr
+                             ? this->conf.image_native_code_slab
+                             : native_code_slab;
+-        image_slab_enabled = image_code_slab != native_code_slab && this->conf.image_code_end > this->conf.image_code_begin;
++        image_slab_enabled = image_code_slab != native_code_slab && (this->conf.image_code_end > this->conf.image_code_begin || this->conf.image_code_second_end > this->conf.image_code_second_begin);
+         if (image_slab_enabled) {
+             auto image_config = this->conf;
+             if (this->conf.image_code_cache_size != 0) {
+@@ -1171,19 +1171,30 @@ private:
+         return this_.GetCurrentBlock(this_.active_generation);
+     }
+ 
++    bool InImageCode(std::uint32_t pc) const {
++        return (pc >= conf.image_code_begin && pc < conf.image_code_end) || (pc >= conf.image_code_second_begin && pc < conf.image_code_second_end);
++    }
++
++    bool TouchesImageCode(std::uint32_t lower, std::uint32_t upper) const {
++        return (upper >= conf.image_code_begin && lower < conf.image_code_end) || (upper >= conf.image_code_second_begin && lower < conf.image_code_second_end);
++    }
++
+     NativeCodeSlab* SlabFor(u64 location_descriptor) const {
+         const auto pc = A32::LocationDescriptor{IR::LocationDescriptor{location_descriptor}}.PC();
+-        return image_slab_enabled && pc >= conf.image_code_begin && pc < conf.image_code_end
++        return image_slab_enabled && InImageCode(pc)
+                  ? image_code_slab
+                  : native_code_slab;
+     }
+ 
+     NativeCodeSlab* SlabForBlock(const IR::Block& block) const {
+         const auto slab = SlabFor(block.Location().Value());
+-        if (slab == native_code_slab || A32::LocationDescriptor{block.EndLocation()}.PC() <= conf.image_code_end) {
++        if (slab == native_code_slab) {
+             return slab;
+         }
+-        return native_code_slab;
++        const auto pc = A32::LocationDescriptor{block.Location()}.PC();
++        const auto end = A32::LocationDescriptor{block.EndLocation()}.PC();
++        const auto range_end = pc >= conf.image_code_begin && pc < conf.image_code_end ? conf.image_code_end : conf.image_code_second_end;
++        return end <= range_end ? slab : native_code_slab;
+     }
+ 
+     IR::LocationDescriptor GetCurrentLocation() const {
+@@ -1371,7 +1382,7 @@ private:
+                 if (!invalidate_entire_cache) {
+                     native_code_slab->invalidate_cache_range(lower, length);
+                 }
+-                if (image_slab_enabled && upper >= conf.image_code_begin && lower < conf.image_code_end) {
++                if (image_slab_enabled && TouchesImageCode(lower, upper)) {
+                     image_code_slab->invalidate_cache_range(lower, length);
+                 }
+             }
+diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
+index 7b2d3b94..57a2d4b1 100644
+--- a/src/dynarmic/interface/A32/config.h
++++ b/src/dynarmic/interface/A32/config.h
+@@ -179,6 +179,8 @@ struct UserConfig {
+     NativeCodeSlab* image_native_code_slab = nullptr;
+     std::uint32_t image_code_begin = 0;
+     std::uint32_t image_code_end = 0;
++    std::uint32_t image_code_second_begin = 0;
++    std::uint32_t image_code_second_end = 0;
+     size_t image_code_cache_size = 0;
+ 
+     // Optional executor-owned indirection used by generated host callbacks.
