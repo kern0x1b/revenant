@@ -192,6 +192,7 @@ public:
 
 private:
     friend class UserlandHleCall;
+    friend struct CompatibilityKernelSnapshot;
 
     struct Registration {
         std::uint16_t id { };

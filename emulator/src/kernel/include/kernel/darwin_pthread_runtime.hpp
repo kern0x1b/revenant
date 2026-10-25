@@ -50,6 +50,8 @@ struct DarwinWorkqueueWorker {
 };
 
 class DarwinPthreadRuntime {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     static constexpr std::uint32_t maximum_pthread_size = 64U * 1024U;
     static constexpr std::uint32_t maximum_workqueue_priority_count = 4U;

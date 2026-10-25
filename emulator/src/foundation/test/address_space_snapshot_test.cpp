@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -262,6 +263,75 @@ void written_file_page_is_stored_and_the_file_is_untouched()
     std::filesystem::remove(path, ignored);
 }
 
+template <typename T>
+void write_little_endian(std::vector<std::byte>& bytes, std::size_t offset,
+    T value)
+{
+    for (std::size_t index = 0; index < sizeof(T); ++index)
+        bytes[offset + index] = static_cast<std::byte>(value >> (index * 8U));
+}
+
+template <typename T>
+T read_little_endian(const std::vector<std::byte>& bytes, std::size_t offset)
+{
+    T value { };
+    for (std::size_t index = 0; index < sizeof(T); ++index) {
+        value |= static_cast<T>(static_cast<std::uint8_t>(bytes[offset + index]))
+                 << (index * 8U);
+    }
+    return value;
+}
+
+void move_second_file_mapping(std::vector<std::byte>& bytes,
+    const std::filesystem::path& path, std::uint32_t address,
+    std::uint64_t end)
+{
+    std::vector<std::byte> needle;
+    for (const char character : path.string())
+        needle.push_back(static_cast<std::byte>(character));
+    const auto first = std::search(
+        bytes.begin(), bytes.end(), needle.begin(), needle.end());
+    if (first == bytes.end())
+        throw std::logic_error { "the stream holds no file mapping record" };
+    const auto second = std::search(
+        first + 1, bytes.end(), needle.begin(), needle.end());
+    if (second == bytes.end())
+        throw std::logic_error { "the stream holds one file mapping record" };
+    const auto name = static_cast<std::size_t>(second - bytes.begin());
+    if (name < 28U ||
+        read_little_endian<std::uint64_t>(bytes, name - 8U) != needle.size()) {
+        throw std::logic_error { "the file mapping record layout changed" };
+    }
+    write_little_endian(bytes, name - 28U, address);
+    write_little_endian(bytes, name - 24U, end);
+}
+
+void overlapping_file_mapping_is_refused_on_restore()
+{
+    const auto path = test_file_path();
+    static_cast<void>(write_test_file(path, 0x6b));
+    AddressSpace source;
+    expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
+        "map the first file range");
+    expect(source.map_file(0x32000, 0x2000, MemoryPermission::Read, path, 0),
+        "map the second file range");
+    auto bytes = save_space(source);
+    move_second_file_mapping(bytes, path, 0x31000, 0x33000);
+    bool threw = false;
+    std::string message;
+    try {
+        static_cast<void>(load_space(bytes));
+    } catch (const FormatError& error) {
+        threw = true;
+        message = error.what();
+    }
+    expect(threw, "an overlapping file mapping is refused");
+    expect(message == "snapshot holds a bad file mapping",
+        "the refusal names the bad file mapping");
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+}
+
 void truncated_stream_is_a_format_error()
 {
     AddressSpace source;
@@ -292,6 +362,7 @@ int main()
     clean_file_pages_come_back_from_the_file();
     changed_file_is_refused_on_restore();
     written_file_page_is_stored_and_the_file_is_untouched();
+    overlapping_file_mapping_is_refused_on_restore();
     truncated_stream_is_a_format_error();
     if (failures != 0) {
         std::cerr << failures << " address space snapshot checks failed\n";

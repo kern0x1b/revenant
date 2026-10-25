@@ -56,6 +56,8 @@ struct DisplayFrame {
 };
 
 class DisplayState {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using Presenter = std::function<void(DisplayFrame)>;
     using OrientationResolver =

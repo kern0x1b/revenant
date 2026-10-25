@@ -31,6 +31,8 @@ class UserlandHleRegistry;
 class SurfaceStore;
 
 class MobileFramebufferHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     MobileFramebufferHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,

@@ -29,6 +29,8 @@ enum class DarwinNotifyStateAbi : std::uint8_t {
 };
 
 class DarwinNotifyStateHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using StateProvider = std::function<std::uint64_t()>;
     using NotificationDispatcher = std::function<void(std::uint32_t process_id,

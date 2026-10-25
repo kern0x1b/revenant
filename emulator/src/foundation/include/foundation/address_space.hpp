@@ -82,6 +82,8 @@ struct FileMappingBatchContext {
 [[nodiscard]] AddressSpaceWriteStats address_space_write_stats() noexcept;
 
 class AddressSpace {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using MappingRegion = VmMap::MappingRegion;
     static constexpr std::uint32_t page_size = guest_memory_page_size;

@@ -22,6 +22,8 @@ class UserlandHleRegistry;
 struct KernelSharedState;
 
 class HidEventSystemHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     explicit HidEventSystemHle(UserlandHleRegistry& registry);
     void set_shared_state(std::shared_ptr<KernelSharedState> state);

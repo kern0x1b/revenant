@@ -27,6 +27,8 @@ class UserlandHleCall;
 class UserlandHleRegistry;
 
 class CoreAudioHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     struct ScheduledIoProc {
         std::uint32_t process_id { };

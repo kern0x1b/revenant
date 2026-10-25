@@ -30,6 +30,8 @@ class UserlandHleCall;
 class UserlandHleRegistry;
 
 class CoreSurfaceHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using CreateSurfacePortHandler =
         std::function<std::uint32_t(std::uint32_t, std::uint32_t)>;

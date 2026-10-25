@@ -95,6 +95,13 @@ target("emulator_kernel_hid_snapshot_test")
     add_deps("emulator_kernel")
     add_tests("kernel.hid_event_system_snapshot")
 
+target("emulator_kernel_snapshot_probe_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/kernel_snapshot_probe.cpp", "test/kernel_snapshot_probe_test.cpp")
+    add_deps("emulator_kernel")
+    add_tests("kernel.snapshot_probe")
+
 target("emulator_kernel")
     set_kind("static")
     add_files("kernel.cpp", "commpage.cpp", "hid_event_system_hle.cpp", "hid_event_transaction.cpp",

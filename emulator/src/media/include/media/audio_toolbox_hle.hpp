@@ -12,6 +12,8 @@ namespace emulator {
 class UserlandHleRegistry;
 
 class AudioToolboxHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     explicit AudioToolboxHle(UserlandHleRegistry& registry);
 

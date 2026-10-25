@@ -107,6 +107,8 @@ constexpr std::uint32_t surface_bytes_per_pixel(std::uint32_t pixel_format)
 }
 
 class SurfaceStore {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     struct CpuSynchronizationOptions {
         bool avoid_sync { };

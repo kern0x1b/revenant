@@ -29,6 +29,8 @@ struct KernelSharedState;
 class PresentationTracker;
 
 class Mbx2dHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     Mbx2dHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,

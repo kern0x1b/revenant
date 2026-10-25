@@ -64,6 +64,8 @@ struct WifiSnapshot {
 };
 
 class WifiState {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     WifiState();
     explicit WifiState(std::vector<VirtualAccessPoint> access_points);

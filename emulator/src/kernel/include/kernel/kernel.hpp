@@ -510,6 +510,7 @@ public:
     }
 
 private:
+    friend struct CompatibilityKernelSnapshot;
     struct CreatedGuestThread {
         std::size_t processor { };
         std::uint32_t port_name { };

@@ -12,6 +12,8 @@ namespace emulator {
 class UserlandHleRegistry;
 
 class CoreMediaHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     explicit CoreMediaHle(UserlandHleRegistry& registry);
 

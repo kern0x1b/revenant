@@ -41,6 +41,8 @@ class SurfaceStore;
 struct KernelSharedState;
 
 class OpenGlesHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     OpenGlesHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,

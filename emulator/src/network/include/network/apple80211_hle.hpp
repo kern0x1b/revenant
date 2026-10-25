@@ -38,6 +38,8 @@ namespace apple80211_abi {
 }
 
 class Apple80211Hle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using StateChangedHandler =
         std::function<void(const WifiSnapshot&, const WifiSnapshot&)>;
