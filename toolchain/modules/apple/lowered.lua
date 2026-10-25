@@ -6,6 +6,77 @@ local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous
 
 local MEMBERS = {
     {
+        member = "UIPointerStyle",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
+            replace = "+ (instancetype)systemPointerStyle;",
+        },
+    },
+    {
+        member = "UIPointerStyle",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)styleWithShape:(UIPointerShape *)shape constrainedAxes:(UIAxis)axes NS_REFINED_FOR_SWIFT;",
+            replace = "+ (instancetype)styleWithShape:(UIPointerShape *)shape constrainedAxes:(UIAxis)axes NS_SWIFT_NAME(init(revenantShape:constrainedAxes:));",
+        },
+    },
+    {
+        member = "UIPointerEffect",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)effectWithPreview:(UITargetedPreview *)preview;",
+            replace = table.concat({
+                "+ (instancetype)automaticEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(automatic(_:));",
+                "+ (instancetype)highlightEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(highlight(_:));",
+                "+ (instancetype)liftEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(lift(_:));",
+                "+ (instancetype)effectWithPreview:(UITargetedPreview *)preview;",
+            }, "\n"),
+        },
+    },
+    {
+        member = "UIPointerEffect",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "} API_AVAILABLE(ios(13.4)) API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
+            replace = table.concat({
+                "} API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
+                "",
+                "@interface UIPointerEffect (RevenantHover)",
+                "+ (instancetype)hoverEffectWithPreview:(UITargetedPreview *)preview preferredTintMode:(UIPointerEffectTintMode)mode prefersShadow:(BOOL)shadow prefersScaledContent:(BOOL)scaled NS_SWIFT_NAME(hover(_:preferredTintMode:prefersShadow:prefersScaledContent:));",
+                "@end",
+            }, "\n"),
+        },
+    },
+    {
+        member = "CGPathCreateWithRoundedRect",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGPath.h",
+            find = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform)\n    API_AVAILABLE(macos(10.9), ios(7.0));",
+            replace = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform);",
+        },
+    },
+    {
+        member = "NSBaselineOffsetAttributeName",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0));",
+            replace = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName;",
+        },
+    },
+    {
         member = "LABiometryType",
         header = {
             name = "LocalAuthentication",
@@ -1543,6 +1614,8 @@ VFS_SUBTREES = {}
 
 VFS_FILES = {}
 
+INCLUDED_FILES = {["compression.h"] = true}
+
 local function lowered_apinotes(text, set)
     local functions = set.functions or {}
     local current = nil
@@ -1597,6 +1670,16 @@ function build_overlay(sdk, out, set, subtrees)
     end
     for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
         for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, set)
+            if lowered ~= text then
+                changed[file] = lowered
+            end
+        end
+    end
+    for name in pairs(INCLUDED_FILES) do
+        local file = path.join(sdk, "usr", "include", name)
+        if name:match("%.h$") and os.isfile(file) then
             local text = changed[file] or io.readfile(file)
             local lowered = lowering_of(text, set)
             if lowered ~= text then

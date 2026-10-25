@@ -20,3 +20,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0012](0012-one-backports-package.md) | One package for every Backports library, depending on the shared packages it names | `toolchain_packages/backports_package_test` |
 | [0013](0013-upstream-builds-keep-their-python.md) | An upstream's own build keeps its own tooling; ours is Lua | `repository/layout` (no tracked `.py` or shell files) |
 | [0014](0014-performance-is-a-requirement.md) | Speed and memory on the A5 are part of correctness; claims are measurements | not enforced (a benchmark group is the check it needs) |
+| [0015](0015-urlcomponents-follows-the-sdk-it-is-linked-against.md) | NSURLComponents parses as macOS does: the lenient grammar the 26.2-linked apps get | `frameworks/Backports/tests/url_components_oracle_test.lua` (run by hand; not in a group yet) |

@@ -5792,7 +5792,10 @@ function revenant_unit_written
 function revenant_unit_written_name
 function revenant_unit_written_short
 function revenant_unsupported
+function revenant_url_component
 function revenant_url_compose
+function revenant_url_host_escaped
+function revenant_url_host_text
 function revenant_url_parse
 function revenant_url_valid
 function revenant_uttype_catalogue_add
@@ -9062,7 +9065,9 @@ global UIFontDescriptorTextStyleAttribute
 global UIFontDescriptorTraitsAttribute
 global UIFontDescriptorVisibleNameAttribute
 global UIFontFeatureSelectorIdentifierKey
+global UIFontFeatureSelectorIdentifierKey_ForNewSwiftAPI
 global UIFontFeatureTypeIdentifierKey
+global UIFontFeatureTypeIdentifierKey_ForNewSwiftAPI
 global UIFontSlantTrait
 global UIFontSymbolicTrait
 global UIFontTextStyleBody
@@ -22749,6 +22754,8 @@ member NSURLComponents -rangeOfPort
 member NSURLComponents -rangeOfQuery
 member NSURLComponents -rangeOfScheme
 member NSURLComponents -rangeOfUser
+member NSURLComponents -revenantHostText
+member NSURLComponents -revenantPortText
 member NSURLComponents -scheme
 member NSURLComponents -setFragment:
 member NSURLComponents -setHost:
@@ -29055,6 +29062,8 @@ member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
 member UIImageView -preferredSymbolConfiguration
 member UIImageView -setPreferredSymbolConfiguration:
+member UIImageView -setTintColor:
+member UIImageView -tintColor
 member UIImpactFeedbackGenerator +feedbackGeneratorWithStyle:forView:
 member UIImpactFeedbackGenerator -impactOccurred
 member UIImpactFeedbackGenerator -impactOccurredAtLocation:
@@ -29121,6 +29130,7 @@ member UIKeyCommand -allowsAutomaticLocalization
 member UIKeyCommand -allowsAutomaticMirroring
 member UIKeyCommand -copyWithZone:
 member UIKeyCommand -description
+member UIKeyCommand -discoverabilityTitle
 member UIKeyCommand -encodeWithCoder:
 member UIKeyCommand -hash
 member UIKeyCommand -init
@@ -29130,6 +29140,7 @@ member UIKeyCommand -isEqual:
 member UIKeyCommand -modifierFlags
 member UIKeyCommand -setAllowsAutomaticLocalization:
 member UIKeyCommand -setAllowsAutomaticMirroring:
+member UIKeyCommand -setDiscoverabilityTitle:
 member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -followsUndockedKeyboard
@@ -29759,7 +29770,11 @@ member UIPointerAccessory -orientationMatchesAngle
 member UIPointerAccessory -position
 member UIPointerAccessory -setOrientationMatchesAngle:
 member UIPointerAccessory -shape
+member UIPointerEffect +automaticEffectWithPreview:
 member UIPointerEffect +effectWithPreview:
+member UIPointerEffect +highlightEffectWithPreview:
+member UIPointerEffect +hoverEffectWithPreview:preferredTintMode:prefersShadow:prefersScaledContent:
+member UIPointerEffect +liftEffectWithPreview:
 member UIPointerEffect -copyWithZone:
 member UIPointerEffect -description
 member UIPointerEffect -hash
@@ -29817,6 +29832,7 @@ member UIPointerShape -revenant_path
 member UIPointerStyle +hiddenPointerStyle
 member UIPointerStyle +styleWithEffect:shape:
 member UIPointerStyle +styleWithShape:constrainedAxes:
+member UIPointerStyle +systemPointerStyle
 member UIPointerStyle -accessories
 member UIPointerStyle -copyWithZone:
 member UIPointerStyle -description
@@ -34403,7 +34419,6 @@ type UIPasteboardOption
 type UIPencilInteractionPhase
 type UIPencilPreferredAction
 type UIPointerAccessoryPosition
-type UIPointerEffectTintMode
 type UIPreferredPresentationStyle
 type UIPressPhase
 type UIPressType

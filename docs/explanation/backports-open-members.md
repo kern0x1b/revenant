@@ -112,6 +112,23 @@ Open:
   inputs in `tests/Network/mapping/main.swift` (the host's answers for one recorded state, and documented cases), and the
   live path only against invariants in `tests/Network/live/main.swift`.
 
+## Selectors Display calls through the delegates
+
+The respondsToSelector check was asked for as a generator change: count a selector that a class sends through
+`respondsToSelector:` as a protocol member. Two of Display's errors are the selectors that prompted it, and the probe
+on the lowered iOS 6 SDK settles both without that change:
+
+- `scrollViewDidChangeAdjustedContentInset:` on `UIScrollViewDelegate` implements without a diagnostic under
+  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`. The lowered header no longer marks the protocol member,
+  so no generator change is needed for it.
+- `accessibilityAttributedScrollStatusForScrollView:` on `UIScrollView` is in `lowered-members.txt` and implemented in
+  `RevenantIOS11.m`, but the cached overlay the probe reads does not declare it, so the probe reports "no visible
+  @interface". Display's error is the Swift declaration's iOS 11 mark, which the UIKit Swift overlay carries, not the ObjC
+  header. The fix is in the overlay, not the generator.
+
+Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
+re-checked with the next Display build.
+
 ## Open, not fixed: a read race in the package store test
 
 `toolchain_light/store_test` failed once on CI (run 40119837571, on the golden-stable branch at 76332140e): a reader
@@ -120,3 +137,20 @@ passed in 88 local runs: 18 before the failure, 30 in a plain loop, and 40 under
 names the first file it failed on, with its text, whether it exists, and the state of the install's link, so the next
 occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
 path of patch 0015, and main's xmake was not run in the loop.
+
+## baselineOffset on iOS 6: not measured yet
+
+The constant `NSBaselineOffsetAttributeName` is in the 6.1.3 image as `_NSBaselineOffsetAttributeName`, and its SDK mark
+is lowered in `toolchain/modules/apple/lowered.lua`. The 6.1.3 image exports no CoreText baseline-offset key
+(`_kCTBaselineOffsetAttributeName` is absent), while it exports the font, kern, stroke, underline, foreground-colour and
+font-feature keys. So the CoreText layer of iOS 6 has no attribute that carries the offset. That is the reason to expect
+iOS 6 string drawing to ignore the attribute. It is an inference from the export list and not a measurement.
+
+The probe `toolchain/tests/emulate/baseline` draws "Hxg" at 24 pt with and without a 6 pt offset and prints the ink box
+of each. It has not produced a result. On `iPhone4,1` 6.1.3, `[UIFont systemFontOfSize:]` traps with ARM exception 8, an
+undefined instruction, at 0x311150d4 in the system libraries, before the first draw. The trap happens with and without
+`[UIApplication sharedApplication]` first. The address is not yet mapped to a library.
+
+Open: map 0x311150d4 to its library with the cache reader in `toolchain/modules/apple/dyld.lua`, and decide whether the trap
+is an emulator gap or the daemon context. Once the probe runs, its result decides whether the backport's text paths must
+apply the offset themselves.

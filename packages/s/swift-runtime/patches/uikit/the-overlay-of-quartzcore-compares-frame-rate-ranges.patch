@@ -1,0 +1,15 @@
+--- a/stdlib/public/Darwin/QuartzCore/NSValue.swift.gyb
++++ b/stdlib/public/Darwin/QuartzCore/NSValue.swift.gyb
+@@ -19,3 +19,12 @@
+ 
+ ${ ObjectiveCBridgeableImplementationForNSValue("CATransform3D") }
+ 
++
++// CAFrameRateRange is an imported C struct, which Swift does not compare by itself. The SDK's overlay compares it through
++// CAFrameRateRangeIsEqualToRange, a function of iOS 15 that the port's iOS 6 image does not export, so the three fields are
++// compared here, the fields that the function compares.
++extension CAFrameRateRange: Equatable {
++    public static func == (lhs: CAFrameRateRange, rhs: CAFrameRateRange) -> Bool {
++        return lhs.minimum == rhs.minimum && lhs.maximum == rhs.maximum && lhs.preferred == rhs.preferred
++    }
++}

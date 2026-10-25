@@ -15,7 +15,35 @@ typedef NS_ENUM(NSUInteger, RevenantURLPart) {
 
 BOOL revenant_url_parse(NSString *string, NSRange *ranges);
 BOOL revenant_url_valid(RevenantURLPart part, NSString *string);
+NSString *revenant_url_component(NSString *string, NSRange range, RevenantURLPart part);
+NSString *revenant_url_host_text(NSString *string, NSRange range);
 NSString *revenant_url_compose(id components, NSRange *ranges);
+
+// macOS writes a colon in the first segment of a path with no scheme or authority as %3A, so the path cannot read as a scheme.
+static NSString *revenant_url_path_escaping_colon(NSString *path)
+{
+    if (!path)
+        return nil;
+    NSRange slash = [path rangeOfString:@"/"];
+    NSUInteger end = slash.location == NSNotFound ? path.length : slash.location;
+    NSString *first = [[path substringToIndex:end] stringByReplacingOccurrencesOfString:@":" withString:@"%3A"];
+    return [first stringByAppendingString:[path substringFromIndex:end]];
+}
+
+// The port and host text as the URL spelled them. They are associated objects rather than ivars because the host build declares
+// the class's ivars only through its properties, and these have none.
+static const char revenant_port_text_key;
+static const char revenant_host_text_key;
+
+static void revenant_url_set_port_text(id components, NSString *text)
+{
+    objc_setAssociatedObject(components, &revenant_port_text_key, text, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+static void revenant_url_set_host_text(id components, NSString *text)
+{
+    objc_setAssociatedObject(components, &revenant_host_text_key, text, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
 
 static NSString *revenant_url_substring(NSString *string, NSRange range)
 {
@@ -84,13 +112,16 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
         return nil;
     if ((self = [self init])) {
         _scheme = revenant_url_substring(URLString, ranges[RevenantURLScheme]);
-        _percentEncodedUser = revenant_url_substring(URLString, ranges[RevenantURLUser]);
-        _percentEncodedPassword = revenant_url_substring(URLString, ranges[RevenantURLPassword]);
-        _percentEncodedHost = revenant_url_substring(URLString, ranges[RevenantURLHost]);
-        _port = revenant_url_port(revenant_url_substring(URLString, ranges[RevenantURLPort]));
-        _percentEncodedPath = revenant_url_substring(URLString, ranges[RevenantURLPath]);
-        _percentEncodedQuery = revenant_url_substring(URLString, ranges[RevenantURLQuery]);
-        _percentEncodedFragment = revenant_url_substring(URLString, ranges[RevenantURLFragment]);
+        _percentEncodedUser = revenant_url_component(URLString, ranges[RevenantURLUser], RevenantURLUser);
+        _percentEncodedPassword = revenant_url_component(URLString, ranges[RevenantURLPassword], RevenantURLPassword);
+        _percentEncodedHost = revenant_url_component(URLString, ranges[RevenantURLHost], RevenantURLHost);
+        revenant_url_set_host_text(self, revenant_url_host_text(URLString, ranges[RevenantURLHost]));
+        NSString *portText = revenant_url_substring(URLString, ranges[RevenantURLPort]);
+        revenant_url_set_port_text(self, portText);
+        _port = revenant_url_port(portText);
+        _percentEncodedPath = revenant_url_component(URLString, ranges[RevenantURLPath], RevenantURLPath);
+        _percentEncodedQuery = revenant_url_component(URLString, ranges[RevenantURLQuery], RevenantURLQuery);
+        _percentEncodedFragment = revenant_url_component(URLString, ranges[RevenantURLFragment], RevenantURLFragment);
     }
     return self;
 }
@@ -103,6 +134,8 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     copy->_percentEncodedPassword = _percentEncodedPassword;
     copy->_percentEncodedHost = _percentEncodedHost;
     copy->_port = _port;
+    revenant_url_set_port_text(copy, self.revenantPortText);
+    revenant_url_set_host_text(copy, self.revenantHostText);
     copy->_percentEncodedPath = _percentEncodedPath;
     copy->_percentEncodedQuery = _percentEncodedQuery;
     copy->_percentEncodedFragment = _percentEncodedFragment;
@@ -161,6 +194,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 - (void)setHost:(NSString *)host
 {
     _percentEncodedHost = [host stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+    revenant_url_set_host_text(self, nil);
 }
 
 - (NSNumber *)port
@@ -173,6 +207,11 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     if (port && port.longLongValue < 0)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: negative port number", [self class], NSStringFromSelector(_cmd)];
     _port = port ? [NSNumber numberWithLongLong:port.longLongValue] : nil;
+    revenant_url_set_port_text(self, nil);
+}
+- (NSString *)revenantPortText
+{
+    return objc_getAssociatedObject(self, &revenant_port_text_key);
 }
 
 - (NSString *)path
@@ -182,7 +221,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPath:(NSString *)path
 {
-    _percentEncodedPath = [path stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]];
+    _percentEncodedPath = revenant_url_path_escaping_colon([path stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]]);
 }
 
 - (NSString *)query
@@ -239,6 +278,11 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     if (percentEncodedHost)
         revenant_url_require(revenant_url_valid(RevenantURLHost, percentEncodedHost), self, _cmd, @"percentEncodedHost");
     _percentEncodedHost = [percentEncodedHost copy];
+    revenant_url_set_host_text(self, nil);
+}
+- (NSString *)revenantHostText
+{
+    return objc_getAssociatedObject(self, &revenant_host_text_key);
 }
 
 - (NSString *)percentEncodedPath
