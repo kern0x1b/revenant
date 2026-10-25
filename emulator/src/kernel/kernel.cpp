@@ -14,6 +14,8 @@
 #include "bsd/security/extensions.hpp"
 #include "foundation/application_display.hpp"
 #include "foundation/application_path.hpp"
+#include "foundation/fault_dump.hpp"
+#include "foundation/guest_image_table.hpp"
 #include "device_state/darwin_kernel_identity.hpp"
 #include "foundation/rootfs_path_resolver.hpp"
 
@@ -2571,6 +2573,38 @@ void CompatibilityKernel::schedule_due_audio_io(std::uint64_t deadline)
     }
     core_audio_hle_.io_proc_thread_scheduled(callback->process_id,
         callback->native, callback->io_proc_id, *processor);
+}
+
+std::vector<std::string> CompatibilityKernel::fault_word_report(
+    const AddressSpace& memory, const std::array<std::uint32_t, 16>& registers)
+{
+    std::uint32_t all_image_info_address { };
+    {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        if (auto record = shared_state_->processes.find(process_.pid);
+            record != shared_state_->processes.end())
+            all_image_info_address = record->second.dyld_all_image_info_address;
+    }
+    const auto images = all_image_info_address != 0U
+                            ? read_guest_image_table(memory,
+                                  all_image_info_address)
+                            : GuestImageTable { };
+    return describe_fault_words(
+        registers,
+        [&memory](std::uint32_t address) { return memory.read32(address); },
+        [&images](std::uint32_t address) -> std::string {
+            const auto* image = images.find(address);
+            if (image == nullptr)
+                return { };
+            const auto slash = image->path.rfind('/');
+            const auto name = slash == std::string::npos
+                                  ? image->path
+                                  : image->path.substr(slash + 1);
+            char offset[16];
+            std::snprintf(offset, sizeof offset, "+0x%x",
+                address - image->load_address);
+            return name + offset;
+        });
 }
 
 void CompatibilityKernel::inject_wifi_driver_event(

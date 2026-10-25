@@ -10,6 +10,10 @@ target("emulator_foundation_block_profile")
     set_kind("static")
     add_files("block_profile.cpp")
 
+target("emulator_foundation_fault_dump")
+    set_kind("static")
+    add_files("fault_dump.cpp")
+
 target("emulator_foundation")
     set_kind("static")
     add_files("address_space.cpp", "application_display.cpp", "arm_cpu_model.cpp",
@@ -22,7 +26,8 @@ target("emulator_foundation")
               "jit_work_policy.cpp", "jit_work_scheduler.cpp", "macho.cpp", "output.cpp", "performance.cpp",
               "process_loader.cpp", "rootfs_path_resolver.cpp", "scene_coordinator.cpp", "userland_hle.cpp",
               "virtual_clock.cpp")
-    add_deps("emulator_xnu_adapter", "emulator_foundation_memory", "emulator_foundation_block_profile", {public = true})
+    add_deps("emulator_xnu_adapter", "emulator_foundation_memory", "emulator_foundation_block_profile",
+             "emulator_foundation_fault_dump", {public = true})
     add_packages("dynarmic", "boost", {public = true})
     add_packages("libplist")
     add_defines("REVENANT_EMULATOR_HAS_LIBPLIST=1")

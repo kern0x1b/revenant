@@ -205,6 +205,9 @@ public:
     {
         thread_create_handler_ = std::move(handler);
     }
+    [[nodiscard]] std::vector<std::string> fault_word_report(
+        const AddressSpace& memory,
+        const std::array<std::uint32_t, 16>& registers);
     void set_thread_terminate_handler(ThreadTerminateHandler handler)
     {
         thread_terminate_handler_ = std::move(handler);
