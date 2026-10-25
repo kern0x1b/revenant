@@ -18,3 +18,5 @@ NSString *const UIFontWidthTrait = @"NSCTFontProportionTrait";
 NSString *const UIFontSlantTrait = @"NSCTFontSlantTrait";
 NSString *const UIFontFeatureTypeIdentifierKey = @"CTFeatureTypeIdentifier";
 NSString *const UIFontFeatureSelectorIdentifierKey = @"CTFeatureSelectorIdentifier";
+NSString *const UIFontFeatureTypeIdentifierKey_ForNewSwiftAPI = @"CTFeatureTypeIdentifier";
+NSString *const UIFontFeatureSelectorIdentifierKey_ForNewSwiftAPI = @"CTFeatureSelectorIdentifier";

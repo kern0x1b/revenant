@@ -6,6 +6,77 @@ local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous
 
 local MEMBERS = {
     {
+        member = "UIPointerStyle",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
+            replace = "+ (instancetype)systemPointerStyle;",
+        },
+    },
+    {
+        member = "UIPointerStyle",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)styleWithShape:(UIPointerShape *)shape constrainedAxes:(UIAxis)axes NS_REFINED_FOR_SWIFT;",
+            replace = "+ (instancetype)styleWithShape:(UIPointerShape *)shape constrainedAxes:(UIAxis)axes NS_SWIFT_NAME(init(revenantShape:constrainedAxes:));",
+        },
+    },
+    {
+        member = "UIPointerEffect",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "+ (instancetype)effectWithPreview:(UITargetedPreview *)preview;",
+            replace = table.concat({
+                "+ (instancetype)automaticEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(automatic(_:));",
+                "+ (instancetype)highlightEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(highlight(_:));",
+                "+ (instancetype)liftEffectWithPreview:(UITargetedPreview *)preview NS_SWIFT_NAME(lift(_:));",
+                "+ (instancetype)effectWithPreview:(UITargetedPreview *)preview;",
+            }, "\n"),
+        },
+    },
+    {
+        member = "UIPointerEffect",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIPointerStyle.h",
+            find = "} API_AVAILABLE(ios(13.4)) API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
+            replace = table.concat({
+                "} API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
+                "",
+                "@interface UIPointerEffect (RevenantHover)",
+                "+ (instancetype)hoverEffectWithPreview:(UITargetedPreview *)preview preferredTintMode:(UIPointerEffectTintMode)mode prefersShadow:(BOOL)shadow prefersScaledContent:(BOOL)scaled NS_SWIFT_NAME(hover(_:preferredTintMode:prefersShadow:prefersScaledContent:));",
+                "@end",
+            }, "\n"),
+        },
+    },
+    {
+        member = "CGPathCreateWithRoundedRect",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGPath.h",
+            find = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform)\n    API_AVAILABLE(macos(10.9), ios(7.0));",
+            replace = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform);",
+        },
+    },
+    {
+        member = "NSBaselineOffsetAttributeName",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0));",
+            replace = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName;",
+        },
+    },
+    {
         member = "LABiometryType",
         header = {
             name = "LocalAuthentication",
@@ -190,6 +261,13 @@ local function selector_of(declaration)
     return text:match("^%s*[%-%+]%s*([%a_][%w_]*)")
 end
 
+function global_of(line)
+    if line:match("^[%a_]") and not line:match("^static") and line:match("const[^=;(]-[%a_][%w_]*%s*=") then
+        return line:match("const[^=;(]-([%a_][%w_]*)%s*=")
+    end
+    return nil
+end
+
 local function scan_source(file, found)
     local container, pending = nil, nil
     for line in io.readfile(file):gmatch("[^\n]*") do
@@ -208,8 +286,8 @@ local function scan_source(file, found)
             if name then
                 found.functions[name] = true
             end
-        elseif not container and line:match("const%s+[%a_][%w_]*%s*=") then
-            found.globals[line:match("const%s+([%a_][%w_]*)%s*=")] = true
+        elseif not container and global_of(line) then
+            found.globals[global_of(line)] = true
         end
         if pending and (pending:find("{", 1, true) or pending:find(";", 1, true)) then
             local selector = selector_of(pending)
@@ -225,8 +303,11 @@ local function scan_adoption(file, found)
     for line in io.readfile(file):gmatch("[^\n]*") do
         local list = line:match("^@interface%s+[%w_]+[^<]*<([^>]+)>")
         if list then
+            local class = line:match("^@interface%s+([%w_]+)")
             for name in list:gmatch("[%w_]+") do
                 found.protocols[name] = true
+                found.adopters[name] = found.adopters[name] or {}
+                found.adopters[name][class] = true
             end
         end
     end
@@ -235,7 +316,7 @@ end
 local function implemented_in(src)
     local folders = {}
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
-        local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
+        local found = {classes = {}, functions = {}, globals = {}, protocols = {}, adopters = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 scan_source(file, found)
@@ -624,6 +705,73 @@ local function overlaps_any(range, spans)
     return false
 end
 
+local function matching_brace(text, open)
+    local depth = 0
+    for position = open, #text do
+        local char = text:sub(position, position)
+        if char == "{" then
+            depth = depth + 1
+        elseif char == "}" then
+            depth = depth - 1
+            if depth == 0 then
+                return position
+            end
+        end
+    end
+    return #text
+end
+
+local function blank(text)
+    return (text:gsub("[^\n]", " "))
+end
+
+local function enum_body_at(text, at)
+    local start, position = nil, 1
+    while true do
+        local keyword = text:find("%f[%w_]typedef%f[^%w_]", position)
+        if not keyword or keyword > at then
+            break
+        end
+        start = keyword
+        position = keyword + 1
+    end
+    if not start then
+        return nil
+    end
+    local stop = statement_close(text, start)
+    local open = text:find("{", start, true)
+    if not open or open > stop or at < open then
+        return nil
+    end
+    local close = matching_brace(text, open)
+    if at > close then
+        return nil
+    end
+    local head = text:sub(start, open - 1):gsub("%s+", " ")
+    if not (head:find("NS_[%u_]*ENUM") or head:find("NS_OPTIONS") or head:find("%f[%w_]enum%f[^%w_]")) then
+        raise("a backported declaration sits in the body of %s, which an availability region spans: the region cannot be split inside it", head)
+    end
+    return {start = start, stop = stop, open = open, close = close}
+end
+
+local function enumerators_in(text, body)
+    local masked = text:sub(body.open + 1, body.close - 1)
+    masked = masked:gsub("//[^\n]*", blank):gsub("/%*.-%*/", blank):gsub("\n%s*#[^\n]*", blank)
+    local found = {}
+    for at, name in masked:gmatch("()([%a_][%w_]*)") do
+        local before = masked:sub(1, at - 1)
+        local previous = before:match("(%S)%s*$")
+        local _, opened = before:gsub("{", "")
+        local _, closed = before:gsub("}", "")
+        local _, open_parens = before:gsub("%(", "")
+        local _, close_parens = before:gsub("%)", "")
+        if opened == closed and open_parens == close_parens and (previous == nil or previous == ",") then
+            table.insert(found, {name = name, start = body.open + at})
+        end
+    end
+    return found
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -783,7 +931,7 @@ local function lowering_of(text, implemented, declarations)
             end
         end
     end
-    local spans = nil
+    local spans, splits = nil, {}
     for _, region in ipairs(regions_of(text, implemented.markers)) do
         if ios_later(region.text) then
             spans = spans or class_spans(text)
@@ -800,12 +948,44 @@ local function lowering_of(text, implemented, declarations)
                 lower(region.start, region.stop, true)
                 lower(region.ends_start, region.ends_stop, true)
             else
+                local bodies = {}
                 for _, range in ipairs(inside) do
-                    range.before = "\n" .. region.end_text .. "\n"
-                    range.after = "\n" .. region.begin_text .. "\n"
+                    local body = enum_body_at(text, range.start)
+                    if body then
+                        bodies[body.start] = body
+                    else
+                        range.before = "\n" .. region.end_text .. "\n"
+                        range.after = "\n" .. region.begin_text .. "\n"
+                    end
+                end
+                for _, body in pairs(bodies) do
+                    if body.start <= region.stop or body.stop >= region.ends_start then
+                        raise("an availability region starts or ends inside the enum body at offset %d: the region cannot be split there", body.start)
+                    end
+                    local gate = region.text:match("%b()")
+                    if not gate then
+                        raise("the availability region %s has no arguments", region.text)
+                    end
+                    table.insert(splits, {start = body.start, stop = body.start - 1, before = "\n" .. region.end_text .. "\n"})
+                    table.insert(splits, {start = body.stop + 1, stop = body.stop, after = "\n" .. region.begin_text .. "\n"})
+                    for _, enumerator in ipairs(enumerators_in(text, body)) do
+                        local backported = false
+                        for _, range in ipairs(inside) do
+                            if enumerator.start >= range.start and enumerator.start <= range.stop then
+                                backported = true
+                            end
+                        end
+                        if not backported and #availability(text:sub(enumerator.start, constant_end(text, enumerator.start))) == 0 then
+                            local at = enumerator.start + #enumerator.name
+                            table.insert(splits, {start = at, stop = at - 1, before = " API_AVAILABLE" .. gate})
+                        end
+                    end
                 end
             end
         end
+    end
+    for _, split in ipairs(splits) do
+        table.insert(ranges, split)
     end
     local merged = merged_ranges(ranges)
     local uses = {}
@@ -929,7 +1109,7 @@ local function method_keys(block)
     while true do
         local mark = block:find("\n[%-%+]%s*%(", at)
         if not mark then
-            return keys
+            break
         end
         local _, stop = block:find(";", mark + 1, true)
         local declaration = block:sub(mark + 1, stop or #block)
@@ -939,6 +1119,23 @@ local function method_keys(block)
         end
         at = mark + 1
     end
+    at = 1
+    while true do
+        local mark = block:find("\n@property", at, true)
+        if not mark then
+            break
+        end
+        local declared_end = statement_end(block, mark + 1)
+        local declaration = block:sub(mark + 1, declared_end)
+        local property = property_name(declaration)
+        if property then
+            local attributes = declaration:match("^%s*@property%s*(%b())") or ""
+            local getter = property_getter(declaration) or property
+            table.insert(keys, {key = (attributes:find("class", 1, true) and "+" or "-") .. getter, selector = getter, property = true})
+        end
+        at = mark + 1
+    end
+    return keys
 end
 
 local function protocol_blocks(sdk, names)
@@ -957,6 +1154,27 @@ local function protocol_blocks(sdk, names)
         end
     end
     return blocks
+end
+
+local function adopters_of(folders, name)
+    local classes = {}
+    for _, found in pairs(folders) do
+        for class in pairs(found.adopters[name] or {}) do
+            classes[class] = true
+        end
+    end
+    return classes
+end
+
+local function adopter_implements(folders, classes, key)
+    for _, found in pairs(folders) do
+        for class in pairs(classes) do
+            if found.classes[class] and found.classes[class][key] then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 function protocol_status(src, sdk, folders)
@@ -1013,7 +1231,13 @@ function protocol_status(src, sdk, folders)
     for name in pairs(candidates) do
         local members, used = {}, false
         for _, method in ipairs(methods[name]) do
-            if implemented_any[method.selector] or usage_of(usage, method.selector) then
+            local implemented
+            if method.property then
+                implemented = adopter_implements(folders, adopters_of(folders, name), method.key)
+            else
+                implemented = implemented_any[method.selector] or usage_of(usage, method.selector)
+            end
+            if implemented then
                 members[method.key] = true
                 used = true
             end
@@ -1326,7 +1550,7 @@ end
 function read_all_members()
     local set = merge_sets(read_members(), read_device_members())
     set.weak_classes = {}
-    for _, name in ipairs(flat_classes.class_names()) do
+    for _, name in ipairs(flat_classes.weak_class_names()) do
         set.weak_classes[name] = true
     end
     for _, rows in pairs(runtime_guards.guards()) do
@@ -1408,6 +1632,7 @@ function constants_defined_in(src)
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 for line in io.readfile(file):gmatch("[^\n]*") do
                     local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
+                        or line:match("const%s+[%w_]+%s*%*%s*([%a_][%w_]*)%s*=")
                         or line:match("^[%a_][%w_]*%s*%*%s*([%a_][%w_]*)%s*[;=]")
                     if name then
                         defined[name] = true
@@ -1541,7 +1766,9 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {}
+VFS_FILES = {["os/lock.h"] = true}
+
+LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
 local function lowered_apinotes(text, set)
     local functions = set.functions or {}
@@ -1597,6 +1824,16 @@ function build_overlay(sdk, out, set, subtrees)
     end
     for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
         for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            local text = changed[file] or io.readfile(file)
+            local lowered = lowering_of(text, set)
+            if lowered ~= text then
+                changed[file] = lowered
+            end
+        end
+    end
+    for name in pairs(LOWERED_FILES) do
+        local file = path.join(sdk, "usr", "include", name)
+        if name:match("%.h$") and os.isfile(file) then
             local text = changed[file] or io.readfile(file)
             local lowered = lowering_of(text, set)
             if lowered ~= text then

@@ -1,4 +1,6 @@
 #import "RevenantSCNActions.h"
+#import <AVFoundation/AVFoundation.h>
+#import "RevenantSCNAudio.h"
 
 @implementation SCNAction
 {
@@ -12,6 +14,8 @@
     NSUInteger _repeatCount;
     BOOL _repeatsForever;
     BOOL _containsRandom;
+    SCNAudioSource *_audioSource;
+    BOOL _waitsForAudio;
     RevenantSCNActionBlock _block;
     RevenantSCNActionCustomBlock _customBlock;
     dispatch_queue_t _queue;
@@ -52,6 +56,17 @@
 {
     return _containsRandom;
 }
+
+- (SCNAudioSource *)revenantAudioSource
+{
+    return _audioSource;
+}
+
+- (BOOL)revenantWaitsForCompletion
+{
+    return _waitsForAudio;
+}
+
 
 - (RevenantSCNActionKind)revenantKind
 {
@@ -116,6 +131,8 @@
 - (NSTimeInterval)duration
 {
     switch (_kind) {
+        case RevenantSCNActionKindPlayAudio:
+            return _waitsForAudio ? [_audioSource revenantDuration] : 0;
         case RevenantSCNActionKindSequence: {
             NSTimeInterval total = 0;
             for (SCNAction *child in _children) {
@@ -191,6 +208,8 @@
     copy->_repeatCount = _repeatCount;
     copy->_repeatsForever = _repeatsForever;
     copy->_containsRandom = _containsRandom;
+    copy->_audioSource = _audioSource;
+    copy->_waitsForAudio = _waitsForAudio;
     copy->_block = _block;
     copy->_customBlock = _customBlock;
     copy->_queue = _queue;
@@ -329,6 +348,14 @@
 + (SCNAction *)waitForDuration:(NSTimeInterval)sec
 {
     return [self revenantActionOfKind:RevenantSCNActionKindWait duration:sec];
+}
+
++ (SCNAction *)playAudioSource:(SCNAudioSource *)source waitForCompletion:(BOOL)wait
+{
+    SCNAction *action = [self revenantActionOfKind:RevenantSCNActionKindPlayAudio duration:0];
+    action->_audioSource = source;
+    action->_waitsForAudio = wait;
+    return action;
 }
 
 + (SCNAction *)waitForDuration:(NSTimeInterval)sec withRange:(NSTimeInterval)durationRange

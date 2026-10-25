@@ -145,6 +145,30 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     return [[self alloc] initRevenantWithPreview:preview];
 }
 
++ (instancetype)automaticEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [UIPointerEffect effectWithPreview:preview];
+}
+
++ (instancetype)highlightEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [[UIPointerHighlightEffect alloc] initRevenantWithPreview:preview];
+}
+
++ (instancetype)liftEffectWithPreview:(UITargetedPreview *)preview
+{
+    return [[UIPointerLiftEffect alloc] initRevenantWithPreview:preview];
+}
+
++ (instancetype)hoverEffectWithPreview:(UITargetedPreview *)preview preferredTintMode:(UIPointerEffectTintMode)mode prefersShadow:(BOOL)shadow prefersScaledContent:(BOOL)scaled
+{
+    UIPointerHoverEffect *effect = [[UIPointerHoverEffect alloc] initRevenantWithPreview:preview];
+    effect.preferredTintMode = mode;
+    effect.prefersShadow = shadow;
+    effect.prefersScaledContent = scaled;
+    return effect;
+}
+
 - (instancetype)initRevenantWithPreview:(UITargetedPreview *)preview
 {
     if ((self = [super init]))
@@ -290,6 +314,11 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     return [[self alloc] initRevenantWithType:0 effect:nil shape:nil axes:(UIAxis)0];
 }
 
++ (instancetype)systemPointerStyle
+{
+    return [[self alloc] initRevenantWithType:3 effect:nil shape:nil axes:(UIAxis)0];
+}
+
 - (instancetype)initRevenantWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes
 {
     struct objc_super parent = {self, class_getSuperclass([UIPointerStyle class])};
@@ -352,7 +381,7 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
 
 - (NSString *)description
 {
-    NSString *type = _type == 0 ? @"hidden" : _type == 1 ? @"content effect" : @"shape";
+    NSString *type = _type == 0 ? @"hidden" : _type == 1 ? @"content effect" : _type == 3 ? @"system" : @"shape";
     return [NSString stringWithFormat:@"<%@: %p; type = %@>", [self class], self, type];
 }
 

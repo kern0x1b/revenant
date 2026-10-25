@@ -1,10 +1,21 @@
 #import "RevenantSCN.h"
+#import "RevenantSCNClock.h"
+#import "RevenantSCNJitter.h"
+#import "RevenantSCNJitterBuffers.h"
 #import "RevenantSCNMath.h"
 #import "../RevenantSayOnce.h"
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/QuartzCore.h>
+
+static void revenant_unsupported(const char *member)
+{
+    [NSException raise:NSInternalInconsistencyException format:@"SCNView: %s is not supported by this SceneKit backport", member];
+}
+
+@interface SCNView () <SCNSceneRenderer>
+@end
 
 @implementation SCNView
 {
@@ -15,9 +26,26 @@
     CADisplayLink *_displayLink;
     SCNScene *_scene;
     SCNNode *_pointOfView;
+    SCNNode *_audioListener;
     __weak id<SCNSceneRendererDelegate> _delegate;
     NSInteger _preferredFramesPerSecond;
     BOOL _jitteringEnabled;
+    RevenantSCNClock *_clock;
+    RevenantSCNJitterBuffers *_jitter;
+    NSUInteger _jitterFrame;
+    NSUInteger _jitterAccumulated;
+    BOOL _jitterKeyValid;
+    NSTimeInterval _jitterTime;
+    SCNScene *_jitterScene;
+    SCNNode *_jitterPointOfView;
+    BOOL _loops;
+    BOOL _autoenablesDefaultLighting;
+    BOOL _temporalAntialiasingEnabled;
+    BOOL _showsStatistics;
+    UILabel *_statisticsLabel;
+    NSUInteger _statisticsFrames;
+    CFTimeInterval _statisticsStart;
+    SCNDebugOptions _debugOptions;
 }
 
 + (Class)layerClass
@@ -48,6 +76,8 @@
 
 - (void)revenantSetUp
 {
+    _clock = [[RevenantSCNClock alloc] init];
+    _loops = YES;
     self.contentScaleFactor = [UIScreen mainScreen].scale;
     CAEAGLLayer *layer = (CAEAGLLayer *)self.layer;
     layer.opaque = NO;
@@ -75,20 +105,26 @@
     [self revenantDeleteFramebuffer];
     _context = context;
     _renderer = context ? [[RevenantSCNRenderEngine alloc] initWithContext:context] : nil;
+    _renderer.autoenablesDefaultLighting = _autoenablesDefaultLighting;
 }
 
 - (void)revenantDeleteFramebuffer
 {
-    if (_context == nil || _framebuffer == 0) {
+    if (_context == nil) {
         return;
     }
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
-    glDeleteFramebuffers(1, &_framebuffer);
-    glDeleteRenderbuffers(1, &_colorBuffer);
-    glDeleteRenderbuffers(1, &_depthBuffer);
-    _framebuffer = _colorBuffer = _depthBuffer = 0;
-    _drawableWidth = _drawableHeight = 0;
+    [_jitter dispose];
+    _jitter = nil;
+    _jitterKeyValid = NO;
+    if (_framebuffer) {
+        glDeleteFramebuffers(1, &_framebuffer);
+        glDeleteRenderbuffers(1, &_colorBuffer);
+        glDeleteRenderbuffers(1, &_depthBuffer);
+        _framebuffer = _colorBuffer = _depthBuffer = 0;
+        _drawableWidth = _drawableHeight = 0;
+    }
     [EAGLContext setCurrentContext:previous];
 }
 
@@ -151,7 +187,7 @@
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-- (void)revenantRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height
+- (void)revenantRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height framebuffer:(GLuint)framebuffer
 {
     id<SCNSceneRendererDelegate> delegate = _delegate;
     SCNScene *scene = _scene;
@@ -159,7 +195,7 @@
         [delegate renderer:self updateAtTime:time];
     }
     if (scene) {
-        [RevenantSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime()];
+        [RevenantSCNAnimations evaluateScene:scene atTime:time listener:_audioListener ?: _pointOfView];
     }
     if ([delegate respondsToSelector:@selector(renderer:didApplyAnimationsAtTime:)]) {
         [delegate renderer:self didApplyAnimationsAtTime:time];
@@ -173,11 +209,51 @@
     if (scene && [delegate respondsToSelector:@selector(renderer:willRenderScene:atTime:)]) {
         [delegate renderer:self willRenderScene:scene atTime:time];
     }
-    [self revenantClear];
-    [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
+    if ((_jitteringEnabled || _temporalAntialiasingEnabled) && scene) {
+        [self revenantDrawJitteredScene:scene pointOfView:_pointOfView width:width height:height time:time framebuffer:framebuffer];
+    } else {
+        [self revenantClear];
+        [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
+        _jitterKeyValid = NO;
+    }
     if (scene && [delegate respondsToSelector:@selector(renderer:didRenderScene:atTime:)]) {
         [delegate renderer:self didRenderScene:scene atTime:time];
     }
+}
+
+- (void)revenantDrawJitteredScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height time:(NSTimeInterval)time framebuffer:(GLuint)framebuffer
+{
+    if (_jitter == nil) {
+        _jitter = [[RevenantSCNJitterBuffers alloc] init];
+    }
+    if (![_jitter isUsable]) {
+        [self revenantClear];
+        [_renderer renderScene:scene pointOfView:pointOfView width:width height:height];
+        return;
+    }
+    [_jitter resizeToWidth:width height:height];
+    if (!_jitterKeyValid || time != _jitterTime || scene != _jitterScene || pointOfView != _jitterPointOfView) {
+        _jitterAccumulated = 0;
+        _jitterTime = time;
+        _jitterScene = scene;
+        _jitterPointOfView = pointOfView;
+        _jitterKeyValid = YES;
+    }
+    if (_jitterAccumulated < [RevenantSCNJitter sampleCount]) {
+        float x = 0, y = 0;
+        [RevenantSCNJitter offsetForFrame:_jitterFrame x:&x y:&y];
+        [_jitter bindSampleFramebuffer];
+        [self revenantClear];
+        _renderer.jitterX = x;
+        _renderer.jitterY = y;
+        [_renderer renderScene:scene pointOfView:pointOfView width:width height:height];
+        _renderer.jitterX = 0;
+        _renderer.jitterY = 0;
+        [_jitter accumulateSampleWithWeight:[RevenantSCNJitter weightForAccumulated:_jitterAccumulated]];
+        _jitterAccumulated++;
+    }
+    _jitterFrame++;
+    [_jitter presentToFramebuffer:framebuffer];
 }
 
 - (void)revenantDrawFrame
@@ -188,11 +264,30 @@
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
     if ([self revenantPrepareDrawable]) {
-        [self revenantRenderAtTime:CACurrentMediaTime() width:_drawableWidth height:_drawableHeight];
+        [self revenantRenderAtTime:[_clock sceneTimeAtWallTime:CACurrentMediaTime()] width:_drawableWidth height:_drawableHeight framebuffer:_framebuffer];
         glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
+        [self revenantUpdateStatisticsAtTime:CACurrentMediaTime()];
     }
     [EAGLContext setCurrentContext:previous];
+}
+
+- (void)revenantUpdateStatisticsAtTime:(CFTimeInterval)now
+{
+    if (!_showsStatistics || _statisticsLabel == nil) {
+        return;
+    }
+    if (_statisticsStart == 0) {
+        _statisticsStart = now;
+    }
+    _statisticsFrames++;
+    CFTimeInterval elapsed = now - _statisticsStart;
+    if (elapsed >= 0.5) {
+        _statisticsLabel.text = [NSString stringWithFormat:@"%.0f fps", _statisticsFrames / elapsed];
+        _statisticsFrames = 0;
+        _statisticsStart = now;
+    }
+    _statisticsLabel.frame = CGRectMake(4, CGRectGetHeight(self.bounds) - 20, 120, 16);
 }
 
 - (void)revenantDisplayLinkFired:(CADisplayLink *)link
@@ -244,7 +339,7 @@
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
     UIImage *image = nil;
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        [self revenantRenderAtTime:0 width:width height:height];
+        [self revenantRenderAtTime:0 width:width height:height framebuffer:framebuffer];
         NSMutableData *pixels = [NSMutableData dataWithLength:(NSUInteger)(width * height * 4)];
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.mutableBytes);
         NSMutableData *flipped = [NSMutableData dataWithLength:pixels.length];
@@ -286,6 +381,16 @@
     return _pointOfView;
 }
 
+- (SCNNode *)audioListener
+{
+    return _audioListener;
+}
+
+- (void)setAudioListener:(SCNNode *)audioListener
+{
+    _audioListener = audioListener;
+}
+
 - (void)setPointOfView:(SCNNode *)pointOfView
 {
     _pointOfView = pointOfView;
@@ -320,9 +425,7 @@
 - (void)setJitteringEnabled:(BOOL)jitteringEnabled
 {
     _jitteringEnabled = jitteringEnabled;
-    if (jitteringEnabled) {
-        revenant_say_once_for(@"scenekit jittering", @"SceneKit: SCNView keeps jitteringEnabled, but a still scene is not refined by jittered frames yet");
-    }
+    _jitterKeyValid = NO;
 }
 
 - (EAGLContext *)eaglContext
@@ -358,6 +461,197 @@
 - (id<MTLCommandQueue>)commandQueue
 {
     return nil;
+}
+
+- (NSTimeInterval)sceneTime
+{
+    return [_clock sceneTimeAtWallTime:CACurrentMediaTime()];
+}
+
+- (void)setSceneTime:(NSTimeInterval)sceneTime
+{
+    [_clock setSceneTime:sceneTime atWallTime:CACurrentMediaTime()];
+}
+
+- (BOOL)isPlaying
+{
+    return [_clock isPlaying];
+}
+
+- (void)setPlaying:(BOOL)playing
+{
+    [_clock setPlaying:playing atWallTime:CACurrentMediaTime()];
+}
+
+- (AVAudioEngine *)audioEngine
+{
+    return [RevenantSCNSoundEngine nodeEngine];
+}
+
+- (void)presentScene:(SCNScene *)scene withTransition:(SKTransition *)transition incomingPointOfView:(nullable SCNNode *)pointOfView completionHandler:(nullable void (^)(void))completionHandler
+{
+    self.scene = scene;
+    if (pointOfView) {
+        _pointOfView = pointOfView;
+    }
+    if (completionHandler) {
+        dispatch_async(dispatch_get_main_queue(), completionHandler);
+    }
+}
+
+- (BOOL)prepareObject:(id)object shouldAbortBlock:(nullable NS_NOESCAPE BOOL (^)(void))block
+{
+    if (_context == nil) {
+        return NO;
+    }
+    EAGLContext *previous = [EAGLContext currentContext];
+    [EAGLContext setCurrentContext:_context];
+    BOOL prepared = [_renderer prepareObject:object shouldAbortBlock:block];
+    [EAGLContext setCurrentContext:previous];
+    return prepared;
+}
+
+- (void)prepareObjects:(NSArray *)objects withCompletionHandler:(nullable void (^)(BOOL success))completionHandler
+{
+    BOOL success = YES;
+    for (id object in objects) {
+        success = [self prepareObject:object shouldAbortBlock:nil] && success;
+    }
+    if (completionHandler) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completionHandler(success);
+        });
+    }
+}
+
+- (BOOL)loops
+{
+    return _loops;
+}
+
+- (void)setLoops:(BOOL)loops
+{
+    _loops = loops;
+}
+
+- (BOOL)autoenablesDefaultLighting
+{
+    return _autoenablesDefaultLighting;
+}
+
+- (void)setAutoenablesDefaultLighting:(BOOL)autoenablesDefaultLighting
+{
+    _autoenablesDefaultLighting = autoenablesDefaultLighting;
+    _renderer.autoenablesDefaultLighting = autoenablesDefaultLighting;
+}
+
+- (BOOL)isTemporalAntialiasingEnabled
+{
+    return _temporalAntialiasingEnabled;
+}
+
+- (void)setTemporalAntialiasingEnabled:(BOOL)temporalAntialiasingEnabled
+{
+    _temporalAntialiasingEnabled = temporalAntialiasingEnabled;
+    _jitterKeyValid = NO;
+}
+
+- (BOOL)showsStatistics
+{
+    return _showsStatistics;
+}
+
+- (void)setShowsStatistics:(BOOL)showsStatistics
+{
+    _showsStatistics = showsStatistics;
+    if (showsStatistics) {
+        if (_statisticsLabel == nil) {
+            _statisticsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+            _statisticsLabel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.5];
+            _statisticsLabel.textColor = [UIColor whiteColor];
+            _statisticsLabel.font = [UIFont systemFontOfSize:11];
+            _statisticsLabel.text = @"fps";
+            [self addSubview:_statisticsLabel];
+        }
+    } else {
+        [_statisticsLabel removeFromSuperview];
+        _statisticsLabel = nil;
+        _statisticsFrames = 0;
+        _statisticsStart = 0;
+    }
+}
+
+- (SCNDebugOptions)debugOptions
+{
+    return _debugOptions;
+}
+
+- (void)setDebugOptions:(SCNDebugOptions)debugOptions
+{
+    _debugOptions = debugOptions;
+}
+
+- (SKScene *)overlaySKScene
+{
+    revenant_unsupported("overlaySKScene");
+    return nil;
+}
+
+- (void)setOverlaySKScene:(SKScene *)overlaySKScene
+{
+    revenant_unsupported("overlaySKScene");
+}
+
+- (BOOL)usesReverseZ
+{
+    return NO;
+}
+
+- (void)setUsesReverseZ:(BOOL)usesReverseZ
+{
+    if (usesReverseZ) {
+        revenant_say_once_for(@"scenekit reverse z", @"SceneKit: this GLES renderer keeps the normal depth range, so usesReverseZ stays NO");
+    }
+}
+
+- (CGColorSpaceRef)workingColorSpace
+{
+    static CGColorSpaceRef space = NULL;
+    if (space == NULL) {
+        space = CGColorSpaceCreateDeviceRGB();
+    }
+    return space;
+}
+
+- (MTLRenderPassDescriptor *)currentRenderPassDescriptor
+{
+    return nil;
+}
+
+- (MTLPixelFormat)colorPixelFormat
+{
+    return MTLPixelFormatInvalid;
+}
+
+- (MTLPixelFormat)depthPixelFormat
+{
+    return MTLPixelFormatInvalid;
+}
+
+- (MTLPixelFormat)stencilPixelFormat
+{
+    return MTLPixelFormatInvalid;
+}
+
+- (AVAudioEnvironmentNode *)audioEnvironmentNode
+{
+    revenant_unsupported("audioEnvironmentNode");
+    return nil;
+}
+
+- (CGRect)currentViewport
+{
+    return CGRectMake(0, 0, _renderer.lastRenderWidth, _renderer.lastRenderHeight);
 }
 
 @end

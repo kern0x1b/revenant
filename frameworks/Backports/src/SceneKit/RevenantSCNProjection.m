@@ -3,6 +3,7 @@
 #import <SceneKit/SceneKit.h>
 
 #import "RevenantSCN.h"
+#import "RevenantSCNGeometry.h"
 #include "RevenantSCNMath.h"
 
 static BOOL RevenantSCNProjectable(SCNNode *pointOfView, int width, int height)
@@ -17,9 +18,9 @@ SCNVector3 RevenantSCNProjectPoint(SCNNode *pointOfView, int width, int height, 
     }
     SCNMatrix4 view = RevenantSCNMatrixInvert([pointOfView revenantPresentedWorldTransform]);
     float world[4] = {point.x, point.y, point.z, 1}, eye[4];
-    RevenantSCNMatrixMultiplyVector(view, world, eye);
+    RevenantSCNRowTransform(view, world, eye);
     float clip[4];
-    RevenantSCNMatrixMultiplyVector(RevenantSCNProjectionMatrix(pointOfView, width, height), eye, clip);
+    RevenantSCNRowTransform(RevenantSCNProjectionMatrix(pointOfView, width, height), eye, clip);
     if (fabsf(clip[3]) < 1e-6f) {
         return point;
     }
@@ -37,13 +38,12 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
     float ndcY = point.y / (float)height * 2 - 1;
     float ndcZ = point.z * 2 - 1;
     float screen[4] = {ndcX, ndcY, ndcZ, 1}, eye[4];
-    RevenantSCNMatrixMultiplyVector(RevenantSCNProjectionMatrix(pointOfView, width, height), screen, eye);
+    RevenantSCNRowTransform(RevenantSCNMatrixInvert(RevenantSCNProjectionMatrix(pointOfView, width, height)), screen, eye);
     if (fabsf(eye[3]) < 1e-6f) {
         return point;
     }
     float clip[4] = {eye[0] / eye[3], eye[1] / eye[3], eye[2] / eye[3], 1}, world[4];
-    RevenantSCNMatrixMultiplyVector(RevenantSCNMatrixInvert([pointOfView revenantPresentedWorldTransform]),
-                                  clip, world);
+    RevenantSCNRowTransform([pointOfView revenantPresentedWorldTransform], clip, world);
     if (fabsf(world[3]) < 1e-6f) {
         return point;
     }

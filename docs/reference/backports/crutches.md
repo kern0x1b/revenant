@@ -27,16 +27,121 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the armv7 iOS 6.0 typecheck compiles them with CI's compiler. Their bodies have not been run on an iOS 6 device.
 - Removed by: a device run.
 
-### C6. Reduced check for the two weak classes in the lowering test
+### C6. Reduced check for the weak class NSDateInterval in the lowering test
 
-- Stands in for: a compile-time check of the members of `NSDateInterval` and `NSURLComponents`. Both classes keep their class-level guard by design (the guard table records them as weak imports), so the IMPLEMENTED probe refers to them through `id` receivers.
+- Stands in for: a compile-time check of the members of `NSDateInterval`. The class keeps its class-level guard by design (the guard table records it as a weak import), so the IMPLEMENTED probe refers to it through an `id` receiver. `NSURLComponents` no longer keeps its guard: its alias exports the class, and the apple-ios rule links every binary against the flat-class stubs, so its reference is strong.
 - Measurement: the rest of the probe still checks typed receivers and the lowered headers at armv7 iOS 6.0.
-- Removed by: the export dependency for these classes (the Backports library that exports them, linked into the runtime); the probe then returns to typed receivers.
+- Removed by: the export dependency for `NSDateInterval` (the Backports library that exports it, linked into the runtime); the probe then returns to typed receivers.
 
 ### C7. Export dependency for weak classes and UIFocusSystem: pending
 
 - The runtime's UIKit overlay imports `_OBJC_CLASS_$_UIFocusSystem` weakly (guard table, `UIKit.swift:398`); Telegram's `UIKitRuntimeUtils` needs the class unguarded.
 - Removal: the runtime links the Backports UIKit library that exports the class, so the load check's exports include it. Pending implementation.
+
+### SceneKit audio (branch work/scenekit-audio)
+
+### C8. Reverb is a dry and wet split on the ASA send
+
+- Stands in for: the reverb of AVAudioEnvironmentNode. The dry gain is `volume × (1 − reverbBlend)` and the send level of the ASA reverb is `reverbBlend`; a blend of zero applies neither and needs no ASA.
+- Gaps: the wet level of ASA is not calibrated against AVAudioEnvironmentNode's reverb, so an equal blend gives equal dry and wet gains here, not equal loudness there.
+- Measurement: host readback of `AL_GAIN` and the `rvsl` send at blends 0, 0.25 and 0.5 (`tests/SceneKit/audio_test.m`).
+- Removed by: a listening comparison on the device against AVAudioEnvironmentNode at the same blend.
+
+### C9. Distance is OpenAL's clamped inverse law with AVAudioEnvironmentNode's defaults
+
+- Stands in for: AVAudioEnvironmentNode's inverse distance model (reference distance 1, maximum distance 100000, rolloff factor 1). OpenAL's clamped inverse law is the same formula, set per source.
+- Gaps: not compared with Apple's output on the device.
+- Measurement: host readback of the three source parameters, and a falloff ratio between 0.15 and 0.35 for 1 m against 4 m.
+- Removed by: a device comparison of the falloff against AVAudioEnvironmentNode.
+
+### C10. Custom AVAudioNode players are attached without spatialisation
+
+- Stands in for: SceneKit placing a custom node in its environment. The node is connected to the main mixer of a shared `AVAudioEngine`.
+- Gaps: a custom node is not positioned from its node's transform nor from the listener, and `didFinishPlayback` is never called for it, because the node decides when its audio ends.
+- Measurement: host attach on start and detach on stop (`audio_test.m`). The device is not measured for custom nodes.
+- Removed by: an environment node that positions custom nodes, and an end notification for them.
+
+### C11. `audioNode` is nil for players built from a source
+
+- Stands in for: the internal AVAudioPlayerNode that SceneKit uses for a source player. The player plays through the OpenAL source instead, so there is no node to return.
+- Measurement: host check that a source player has no node and a node player returns its node.
+- Removed by: a source player that plays through an AVAudioPlayerNode, or a documented decision to keep `audioNode` nil.
+
+### C12. The engine behind custom nodes is the Backports AUGraph lowering
+
+- Stands in for: `AVAudioEngine` (iOS 8). The Backports build it on an AUGraph in `AVFoundationBackports`.
+- Gaps: the lowering is unverified on iOS 6.1.3. Start, connect and attach run through the AUGraph on the device, and only the host (Apple's engine) has run them.
+- Measurement: host attach, connect and detach with Apple's `AVAudioEngine` (`audio_test.m`).
+- Removed by: a device run of a custom node playing through the engine.
+
+### C13. Archives carry the URL of the source
+
+- Stands in for: SceneKit's archive. A macOS archive of a source made with `initWithURL:` stores `url` as nil; the keys are otherwise the same as ours (`loops`, `positional`, `rate`, `reverbBlend`, `shouldStream`, `url`, `volume`).
+- Gaps: our archive keeps the URL, so a source decoded from it plays. Apple's archive of the same source decodes to a source with no URL, which cannot play.
+- Measurement: host check that the archive keys equal the macOS keys, and that flags and values survive a round trip (`audio_test.m`).
+- Removed by: a decision to match Apple's nil `url`, or to keep the URL as the only way to play after decode.
+
+### C14. Velocity is a finite difference of positions
+
+- Kept by the coordinator's decision: SceneKit has no velocity of its own, so the velocity is the difference between the last two positions, and zero for the first sample. Listed here so the choice is visible; it is not a stand-in.
+
+### C15. Reverb needs the ASA procedures when the blend is above zero
+
+- Stands in for: the reverb of AVAudioEnvironmentNode, through the ASA send of OpenAL (`alcASASetSource`, `rvsl`). A blend of zero needs no ASA.
+- Gaps: the ASA procedures are not exported from `OpenAL.framework` on 6.1.3 (checked against the image: `_alcASASetSource`, `_alcASASetListener` and `_alcASAGetSource` are absent as exports). They are resolved at run time with `alcGetProcAddress`, and a device without them raises `NSInternalInconsistencyException` on a start with a blend above zero. Whether the procedures resolve on 6.1.3 has not been measured on a device.
+- Measurement: host readback of the send through `alcASAGetSource` (`audio_test.m`). On the 6.1.3 emulator the runtime case `scenekit_audio` reports `ALC_EXT_ASA` present and the three procedures non-NULL from `alcGetProcAddress` (C16). A real device is not measured.
+- Removed by: that report on a real 6.1.3 device.
+
+### C16. The OpenAL device path, the audio session and streaming are not run on iOS 6.1.3
+
+- Stands in for: the output path of AVAudioSession and AVAudioPlayer, which SceneKit uses on the device. The OpenAL device, the ExtAudioFile decode, source playback and stream playback run only on the macOS host.
+- Gaps: no AVAudioSession category is set, so output follows the default session (mute switch, other audio). On the 6.1.3 emulator (iPhone4,1, time scale 10) the runtime case `tests/runtime/cases/scenekit_audio.m` passes its positive mode: OpenAL opens an output device, `ALC_EXT_ASA` is present, the three ASA procedures resolve through `alcGetProcAddress`, ExtAudioFile decodes the 2 s tone at 8000 Hz, a source and a stream start and finish on their own. The last emulator run with the grid schedule finished the 2 s tone at 2.79 guest seconds and the 2 s stream at 1.76, measured with the guest clock, so the tone's margin in the 3 s window is about 0.2 s. An earlier run under host load stalled: the kernel cached the IO proc deadline while a callback was in flight and did not refresh it after completion, so the wakeup was lost. The kernel now reads that deadline on every check, and the IO proc keeps the grid of its start time (C22). Under host load this has not been measured since the fix. Nothing has run on a real device.
+- Measurement: the emulator run above (positive and negative modes of the case) and host tests of the same paths (`audio_test.m`, `action_run_test.m`).
+- Removed by: a run on a real iPhone 4S with the mute switch set and other audio playing.
+
+### C17. SCNView adopts SCNSceneRenderer; two members raise, and three properties store their value without effect
+
+- Stands in for: the members of SCNSceneRenderer that have no GLES counterpart. Implemented natively: `hitTest:options:` (CPU ray picking against the triangles of the scene, with the search modes, back-face culling, bounding boxes, category masks and texture coordinates per channel), `isNodeInsideFrustum:withPointOfView:` and `nodesInsideFrustumWithPointOfView:` (world bounds against the frustum of the point of view), `prepareObject:shouldAbortBlock:` and `prepareObjects:withCompletionHandler:` (build the GL meshes and textures of an object ahead of a frame), `presentScene:withTransition:incomingPointOfView:completionHandler:`, `showsStatistics` (an FPS label over the view), `temporalAntialiasingEnabled` (the accumulation of C20 while the frame is still), `autoenablesDefaultLighting` (the renderer's implicit light, off by default as on iOS), `currentViewport` (the size of the last render), `workingColorSpace` (the device RGB space the GLES output is in), and `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat` and `currentRenderPassDescriptor`, which are Metal objects: a GLES view has no Metal device, so they answer invalid or nil, as `device` does. The Telegram files call none of these members except `isJitteringEnabled` (C20).
+- Still raises: `overlaySKScene` and `audioEnvironmentNode`. Their classes are absent from the 6.1.3 image: the dyld shared cache of `iPhone4,1/6.1.3_10B329` has no `SKScene` string and no `AVAudioEnvironmentNode` string (nor `AVAudioEngine`, which is backported over AUGraph), and the image has no `SpriteKit.framework`. Each raises `NSInternalInconsistencyException` naming the member.
+- Stored, with no effect yet: `loops` (defaults YES; there is no scene timeline to loop at, C18) and `debugOptions` (kept, but no debug geometry is drawn). `usesReverseZ` always reads NO: the GLES renderer keeps the normal depth range, and setting YES is reported once and ignored.
+- Gaps: `hitTest` tests triangle elements only, and `boneNode` is nil (no skinning). `showsStatistics` shows the frame rate only. `temporalAntialiasingEnabled` accumulates the samples of C20 while the frame is still; Apple's reprojection is not modelled. `autoenablesDefaultLighting` lights every draw in the scene uniformly, not from a light placed at the camera.
+- Measurement: the host test `tests/SceneKit/picking_test.m` (ray against triangle and box, back faces, frustum planes and box containment, index and vertex reads). The runtime case `tests/runtime/cases/scenekit_members.m` checks each implemented member on the 6.1.3 emulator, including a hit at the centre of the plane and none at a corner, frustum containment, preparation, presentation completion, the statistics label, `projectPoint:` at the centre of the view, and lighting that is off by default. It is registered but has not run on the emulator yet; the iOS device configuration does not complete on this branch (see the report that accompanies this change). Not measured on a real device.
+- Removed by: a passing run of `scenekit_members`, and for the two raising members, a 6.1.3 image that has the class (none does) or a decision to drop the members.
+
+### C18. sceneTime and playing run on a wall clock with an offset
+
+- Stands in for: SceneKit's scene timeline. `sceneTime` is the wall time plus an offset while playing, and it is held while `playing` is NO; `setSceneTime:` sets it, and the frame's animations and delegate callbacks use it.
+- Gaps: there is no timeline, so `loops` has no meaning here and raises (C17). The offset model holds the time across pauses and sets it on the wall clock; SceneKit's own timeline has durations and a scene-wide clock we do not model.
+- Measurement: host tests of `RevenantSCNClock` (`tests/SceneKit/clock_test.m`): defaults, set while playing and paused, resume from the held time, and repeated pauses.
+- Removed by: a scene timeline with durations, replacing the wall clock.
+
+### C19. audioEngine is the engine of custom audio nodes only
+
+- Stands in for: the engine SceneKit uses for its audio. `SCNView.audioEngine` returns the shared `AVAudioEngine` that custom `AVAudioNode` players attach to (C10, C12). Source players play through OpenAL and are not on this engine, so attaching to it does not affect them.
+- Gaps: a caller that expects SceneKit's own engine to hold every player finds only the custom ones.
+- Measurement: the node attach test (`audio_test.m`); not measured on the device.
+- Removed by: moving source players onto the same engine, or documenting the split as the intended API.
+
+### C20. Jittering accumulates up to eight samples while the frame does not change
+
+- Stands in for: the jittering of SCNView, which SceneKit performs asynchronously and automatically to reduce aliasing. Here each frame renders one sample of an eight-sample Halton sequence (the projection is shifted by up to half a pixel in clip space) and blends it into an accumulation buffer with weight 1/(n+1). The accumulated image is drawn to the drawable. `temporalAntialiasingEnabled` (C17) uses the same accumulation while the frame is still.
+- Gaps: the accumulation restarts whenever the sceneTime, the scene or the point of view changes, so an animated frame is one jittered sample and shows the shift rather than a refined edge. Apple's timing and its sample count are not known. The buffers are RGBA8, so the average drifts by up to one level per step. The accumulation is a mix shader between two ping-pong textures, not blending, because blending with `GL_CONSTANT_ALPHA` drew nothing on the emulator. The GLES path is not run on a real device.
+- Measurement: host test of the sample range, the eight-frame period, the weights and the mean of a running average (`tests/SceneKit/jitter_test.m`). On the 6.1.3 emulator, the render case (C21) gives 75 intermediate edge pixels with jittering and none without, and an identical centre. A real device is not measured.
+- Removed by: a device run that renders a still scene with jittering on and off and compares its edges, and a check of the animated case.
+
+### C21. The GLES draw path drew no geometry on the emulator (resolved)
+
+- Stands in for: nothing now. Before the fix, a snapshot of an `SCNView` with an `SCNPlane` on the 6.1.3 emulator (iPhone4,1, renderer on) was entirely clear, with and without jittering. Three causes, all in our code: `SCNPlane` had no vertex sources or elements, so the renderer had nothing to draw; the jitter path read `GL_FRAMEBUFFER_BINDING`, which the emulator's GLES does not support (it returns 0 and sets `GL_INVALID_ENUM`), so it presented to framebuffer 0; and the accumulation blended with `GL_CONSTANT_ALPHA`, which gave zeros. The framebuffer is now passed in, the plane builds a grid of positions, normals and texture coordinates with triangle indices, and the accumulation is a mix shader between two ping-pong textures.
+- Gaps: the emulator's GLES 2 path passes its own guest test `gles2` with the renderer on (76 of 76) once the guest is linked with the project's ld64; the Apple default linker produced binaries that trap with SIGILL on the emulator. The renderer there is SwiftShader, so no device GPU is checked.
+- Measurement: the runtime case `scenekit_render` passes on the 6.1.3 emulator (483.8 host s at time scale 10). The plain snapshot has 492 opaque pixels and the jittered one 455; the edges have 0 and 75 intermediate pixels, and the centre differs by 0.
+- Removed by: the same case passing on a real 6.1.3 device.
+
+### C22. Late audio buffers are counted and logged, not replayed
+
+- Stands in for: the device's catch-up of late audio. When an IO proc callback runs late, `CoreAudioHle` skips the grid points it missed (`io_proc_timeline_after`) and adds them to `underruns` in the IO proc registration. The count is printed as `underruns=` on the existing `[coreaudio-device] io-proc` lines, next to `callbacks=`: the periodic line and the remove, stop and native-stop lines.
+- Gaps: the missed buffers are not replayed, so the guest hears them as a gap; the count is in the log, not returned to the guest.
+- Measurement: `emulator/tests/unit/io_proc_timeline_test.cpp`: delayed callbacks record underruns, every grid point is either played or an underrun, and the negative control shows the old schedule drifting off the grid. The log field is not yet read back by a run.
+- Removed by: delivering the due buffers to catch up, or a guest-visible count.
 
 ## Removed
 

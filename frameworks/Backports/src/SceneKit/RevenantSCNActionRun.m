@@ -59,6 +59,9 @@ static SCNVector3 revenant_offset(SCNVector3 base, SCNVector3 delta, CGFloat pro
     _startOrientation = node.orientation;
     _startOpacity = node.opacity;
     _runDuration = _action.duration;
+    if (_action.revenantKind == RevenantSCNActionKindPlayAudio && _action.revenantAudioSource) {
+        [node addAudioPlayer:[SCNAudioPlayer audioPlayerWithSource:_action.revenantAudioSource]];
+    }
     if (_action.revenantKind == RevenantSCNActionKindWaitRandom) {
         double unit = (double)arc4random_uniform(1000001) / 1000000.0;
         _runDuration = MAX(_action.duration + _action.revenantScalar * (unit - 0.5), 0);

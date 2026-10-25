@@ -45,6 +45,10 @@ rule("apple-ios")
         end
         target:add("values", "swift.flags", "-vfsoverlay", overlay)
         target:add("values", "swift.flags", "-Xcc", "-I" .. include)
+        local flat = import("@self.apple.flat_classes")
+        local flat_flags = flat.app_link_flags(sdk, path.join(os.projectdir(), "build", "generated", "flat-stubs"))
+        target:add("ldflags", flat_flags, {force = true})
+        target:add("shflags", flat_flags, {force = true})
         local symbols = target:values("apple.compat")
         if symbols then
             local compat = target:pkg("apple-compat")
