@@ -1442,7 +1442,8 @@ bool CompatibilityKernel::deliver_pending_event(Cpu& cpu)
         delivered = deliver_pending_mach_if_ready_locked(cpu, true);
         if (delivered)
             note_timer_deadline_transition();
-    } else if (pending_io_poll_required_locked(processor)) {
+    } else if (pending_io_poll_required_locked(
+                   processor, pending_io_deadline_locked(processor))) {
         const auto io_generation =
             shared_state_->io_event_generation_snapshot();
         const auto mach_generation =
@@ -1498,12 +1499,12 @@ CompatibilityKernel::pending_event_poll_candidates()
     std::optional<std::uint64_t> next_deadline;
     bool requires_host_probe = false;
     for (const auto processor : pending_event_processors_) {
+        const auto deadline = pending_io_deadline_locked(processor);
         if (pending_mach_receives_.contains(processor) ||
-            pending_io_poll_required_locked(processor)) {
+            pending_io_poll_required_locked(processor, deadline)) {
             processors.push_back(processor);
         }
-        if (const auto deadline = pending_io_deadline_locked(processor);
-            deadline && *deadline > guest_now &&
+        if (deadline && *deadline > guest_now &&
             (!next_deadline || *deadline < *next_deadline)) {
             next_deadline = deadline;
         }
@@ -1555,7 +1556,7 @@ void CompatibilityKernel::refresh_pending_event_processor_locked(
 }
 
 bool CompatibilityKernel::pending_io_poll_required_locked(
-    std::size_t processor) const
+    std::size_t processor, std::optional<std::uint64_t> deadline) const
 {
     const auto cached = pending_io_poll_cache_.find(processor);
     if (cached == pending_io_poll_cache_.end())
@@ -1566,8 +1567,7 @@ bool CompatibilityKernel::pending_io_poll_required_locked(
             shared_state_->mach_queue_generation_snapshot()) {
         return true;
     }
-    if (const auto deadline = pending_io_deadline_locked(processor);
-        deadline && shared_state_->clock.now() >= *deadline) {
+    if (deadline && shared_state_->clock.now() >= *deadline) {
         return true;
     }
     return cached->second.host_probe_required &&

@@ -202,3 +202,40 @@ main thread's busy samples move to the kernel's event loop: `descriptor_readable
 The cache assumes the emulator owns the rootfs while it runs. A host write by another process during a boot is not
 seen until the emulator writes under the same path. The test is `emulator/src/filesystem/test/metadata_cache_test.cpp`
 (`filesystem.metadata_cache`).
+
+### The kqueue event loop at idle: one host poll per pass
+
+While a thread waits in `kevent` on a host-backed socket, the session probes the host every 1 ms. Each probe calls
+`collect_ready_kevents`, which asked `descriptor_readable` about every registration, and a host socket's `readable()` is
+one `poll(2)` of its own. So a pass costs one host call per host-backed registration. The probe's deadline and host
+requirement are also recomputed, once in each of two or three places per processor.
+
+The base boot (`emulator-after`, the cache build) has the costs above. Its idle sample has `collect_ready_kevents` at
+1,038 of 6,446 main-thread samples, 987 of them on the host `poll` line, and `poll` ran 95 times a second. The deadline
+and host-requirement scans are 1 to 2% of the main thread's samples (`pending_event_poll_candidates` 79), so a deadline
+heap would not change the cost, and no heap was built.
+
+The change asks the host once per pass: `HostReadinessProbe` (`emulator/src/network/host_readiness.cpp`) polls every
+host-backed read or write registration of the queue in one `poll(2)` with a zero timeout, and `descriptor_readable` and
+`descriptor_writable` take its answer. A socket that `readable()` would not poll (a stream still in its initial state,
+or a listener for writes) is not requested, so it gets the same answer as before. The deadline is computed once per
+processor per pass. The test is `emulator/src/network/test/host_readiness_test.cpp` (`network.host_readiness`): it
+checks each batched answer against one `poll` per descriptor, the unrequested and closed descriptors, and a hangup.
+
+The boot pair does not measure the saving. The base boot had host-backed kqueue waits and the batch boot had none:
+
+| Measure | base (`emulator-after`) | batch (this change) |
+|---|---|---|
+| Window | 14 s, one boot | 11 s, another boot |
+| `getxattr` a second | 195 | 547 |
+| `poll` a second | 95 | 0 |
+| `collect_ready_kevents`, main-thread samples (10 s) | 1,038 | 59 |
+| Host-backed registrations polled per pass | not counted | 0 (156,400 passes over the boot) |
+
+The batch boot's guest did different work, so the count drop is the workload, not the change. Its 156,400 passes made
+no host request, so the batched path never ran in it. The reduction from one poll per host registration to one per pass
+follows from the code, and the unit test checks that the answers are unchanged, but no boot in this pair shows it. A
+boot that waits on a host socket is needed to measure it. Under the host load of 55 to 128 this boot ran in, the base
+boot's 987 samples over about 950 polls work out to about 1 ms a call. A `poll` with a zero timeout does little compute,
+so that time is most likely the thread waiting for a CPU inside the call. That is an inference from the samples, not
+something the counts show.
