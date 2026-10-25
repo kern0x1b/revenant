@@ -929,13 +929,27 @@ local function method_keys(block)
     while true do
         local mark = block:find("\n[%-%+]%s*%(", at)
         if not mark then
-            return keys
+            break
         end
         local _, stop = block:find(";", mark + 1, true)
         local declaration = block:sub(mark + 1, stop or #block)
         local selector = selector_of(declaration)
         if selector then
             table.insert(keys, {key = declaration:match("^([%-%+])") .. selector, selector = selector})
+        end
+        at = mark + 1
+    end
+    at = 1
+    while true do
+        local mark = block:find("\n@property", at, true)
+        if not mark then
+            return keys
+        end
+        local declaration = block:sub(mark + 1, statement_end(block, mark + 1))
+        local name = property_name(declaration)
+        if name then
+            local getter = property_getter(declaration) or name
+            table.insert(keys, {key = (declaration:find("%(%s*class") and "+" or "-") .. getter, selector = getter})
         end
         at = mark + 1
     end

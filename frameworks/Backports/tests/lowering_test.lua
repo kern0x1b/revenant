@@ -235,4 +235,39 @@ function main()
     local device_lowered = lowered.lower_header(device_sample, device)
     assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
            "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
+    local protocol_sdk = path.join(out, "protocol-sdk")
+    local protocol_src = path.join(out, "protocol-src")
+    local protocol_header = path.join(protocol_sdk, "System", "Library", "Frameworks", "Sample.framework", "Headers", "SampleEnvironment.h")
+    os.mkdir(path.directory(protocol_header))
+    io.writefile(protocol_header, table.concat({
+        "@protocol SampleEnvironment <NSObject>",
+        "@property (nonatomic, readonly) SampleTraits *traits API_AVAILABLE(ios(8.0));",
+        "- (void)traitsDidChange:(SampleTraits *)previous API_AVAILABLE(ios(8.0));",
+        "@end",
+        "",
+    }, "\n"))
+    os.mkdir(path.join(protocol_src, "Sample"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleView.h"), table.concat({
+        "@interface SampleView : NSObject <SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleView.m"), table.concat({
+        "@implementation SampleView (Environment)",
+        "- (SampleTraits *)traits",
+        "{",
+        "    return nil;",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    local status = lowered.protocol_status(protocol_src, protocol_sdk)
+    assert(status.members.SampleEnvironment and status.members.SampleEnvironment["-traits"] and not status.members.SampleEnvironment["-traitsDidChange:"],
+           "a protocol property Backports implements is a protocol member, and an unimplemented selector is not:\n" .. tostring(status.members.SampleEnvironment))
+    local protocol_text = io.readfile(protocol_header)
+    local protocol_lowered = lowered.lower_header(protocol_text, {classes = {}, functions = {}, globals = {}, protocols = {SampleEnvironment = true},
+                                                                  protocol_members = {SampleEnvironment = status.members.SampleEnvironment}})
+    assert(count(protocol_lowered, "AVAILABLE") == 1 and protocol_lowered:find("traitsDidChange:(SampleTraits *)previous API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("traits API_AVAILABLE", 1, true),
+           "an implemented protocol property loses its availability, and the unimplemented selector keeps it:\n" .. protocol_lowered)
 end

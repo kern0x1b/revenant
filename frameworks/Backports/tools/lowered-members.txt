@@ -32641,6 +32641,8 @@ protocol AVPictureInPictureControllerDelegate
 protocol AVPlayerViewControllerDelegate
 protocol AVQueuedSampleBufferRendering
 protocol AVSpeechSynthesizerDelegate
+protocol AVVideoCompositionInstruction
+protocol AXDataAxisDescriptor
 protocol AXMathExpressionProvider
 protocol CAAction
 protocol CAAnimationDelegate
@@ -32654,14 +32656,18 @@ protocol CLLocationManagerDelegate
 protocol CNChangeHistoryEventVisitor
 protocol CNKeyDescriptor
 protocol CPInterfaceControllerDelegate
+protocol CPListTemplateItem
 protocol CPSearchTemplateDelegate
 protocol CXCallObserverDelegate
 protocol CXProviderDelegate
+protocol EAGLDrawable
+protocol GCDevice
 protocol GKRandom
 protocol HMAccessoryDelegate
 protocol HMHomeDelegate
 protocol HMHomeManagerDelegate
 protocol INEditMessageIntentHandling
+protocol INSpeakable
 protocol INUIAddVoiceShortcutButtonDelegate
 protocol INUIAddVoiceShortcutViewControllerDelegate
 protocol INUIEditVoiceShortcutViewControllerDelegate
@@ -32691,6 +32697,7 @@ protocol MTKViewDelegate
 protocol MTL4BinaryFunction
 protocol MTL4CommandQueue
 protocol MTLAccelerationStructureCommandEncoder
+protocol MTLBinaryArchive
 protocol MTLBinding
 protocol MTLBlitCommandEncoder
 protocol MTLBuffer
@@ -32700,9 +32707,12 @@ protocol MTLCommandBuffer
 protocol MTLCommandQueue
 protocol MTLComputeCommandEncoder
 protocol MTLComputePipelineState
+protocol MTLCounterSampleBuffer
 protocol MTLDepthStencilState
 protocol MTLDevice
 protocol MTLDrawable
+protocol MTLDynamicLibrary
+protocol MTLFence
 protocol MTLFunction
 protocol MTLFunctionLog
 protocol MTLFunctionLogDebugLocation
@@ -32710,6 +32720,7 @@ protocol MTLHeap
 protocol MTLLibrary
 protocol MTLLogContainer
 protocol MTLObjectPayloadBinding
+protocol MTLRasterizationRateMap
 protocol MTLRenderCommandEncoder
 protocol MTLRenderPipelineState
 protocol MTLResource
@@ -32788,6 +32799,7 @@ protocol SKSceneDelegate
 protocol SRSensorReaderDelegate
 protocol UIActionSheetDelegate
 protocol UIActivityItemSource
+protocol UIActivityItemsConfigurationProviding
 protocol UIActivityItemsConfigurationReading
 protocol UIAdaptivePresentationControllerDelegate
 protocol UIAlertViewDelegate
@@ -32827,11 +32839,13 @@ protocol UIDynamicItem
 protocol UIEditMenuInteractionAnimating
 protocol UIFindInteractionDelegate
 protocol UIFocusEnvironment
+protocol UIFocusItem
 protocol UIFontPickerViewControllerDelegate
 protocol UIGestureRecognizerDelegate
 protocol UIImagePickerControllerDelegate
 protocol UIInteraction
 protocol UILargeContentViewerInteractionDelegate
+protocol UILargeContentViewerItem
 protocol UILayoutSupport
 protocol UIMenuBuilder
 protocol UIMutableTraits
@@ -32843,6 +32857,7 @@ protocol UIPageControlTimerProgressDelegate
 protocol UIPasteConfigurationSupporting
 protocol UIPopoverControllerDelegate
 protocol UIPopoverPresentationControllerDelegate
+protocol UIPreviewActionItem
 protocol UISceneDelegate
 protocol UISearchBarDelegate
 protocol UISearchControllerDelegate
@@ -32864,11 +32879,15 @@ protocol UITableViewDropPlaceholderContext
 protocol UITextDocumentProxy
 protocol UITextDragDelegate
 protocol UITextDragRequest
+protocol UITextDraggable
 protocol UITextDropDelegate
 protocol UITextDropRequest
+protocol UITextDroppable
 protocol UITextFieldDelegate
 protocol UITextInput
 protocol UITextInteractionDelegate
+protocol UITextSearching
+protocol UITimingCurveProvider
 protocol UITraitChangeObservable
 protocol UITraitChangeRegistration
 protocol UITraitDefinition
@@ -32892,11 +32911,13 @@ protocol WKURLSchemeHandler
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
+protocol_member ARTrackable -isTracked
 protocol_member ASAuthorizationControllerDelegate -authorizationController:didCompleteWithError:
 protocol_member ASWebAuthenticationPresentationContextProviding -presentationAnchorForWebAuthenticationSession:
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
 protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
 protocol_member AVAudioMixing -destinationForMixer:bus:
+protocol_member AVAudioMixing -volume
 protocol_member AVCaptureAudioDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
 protocol_member AVCaptureDataOutputSynchronizerDelegate -dataOutputSynchronizer:didOutputSynchronizedDataCollection:
 protocol_member AVCapturePhotoCaptureDelegate -captureOutput:didCapturePhotoForResolvedSettings:
@@ -32912,6 +32933,7 @@ protocol_member AVCapturePhotoCaptureDelegate -captureOutput:willCapturePhotoFor
 protocol_member AVCaptureVideoDataOutputSampleBufferDelegate -captureOutput:didDropSampleBuffer:fromConnection:
 protocol_member AVCaptureVideoDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
 protocol_member AVContentKeyRecipient -contentKeySession:didProvideContentKey:
+protocol_member AVContentKeyRecipient -mayRequireContentKeysForMediaDataProcessing
 protocol_member AVContentKeySessionDelegate -contentKeySession:contentKeyRequest:didFailWithError:
 protocol_member AVContentKeySessionDelegate -contentKeySession:contentKeyRequestDidSucceed:
 protocol_member AVContentKeySessionDelegate -contentKeySession:didProvideContentKeyRequest:
@@ -32934,14 +32956,19 @@ protocol_member AVPlayerViewControllerDelegate -playerViewControllerWillStartPic
 protocol_member AVPlayerViewControllerDelegate -playerViewControllerWillStopPictureInPicture:
 protocol_member AVQueuedSampleBufferRendering -enqueueSampleBuffer:
 protocol_member AVQueuedSampleBufferRendering -flush
+protocol_member AVQueuedSampleBufferRendering -isReadyForMoreMediaData
 protocol_member AVQueuedSampleBufferRendering -requestMediaDataWhenReadyOnQueue:usingBlock:
 protocol_member AVQueuedSampleBufferRendering -stopRequestingMediaData
+protocol_member AVQueuedSampleBufferRendering -timebase
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didCancelSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didContinueSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didFinishSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didPauseSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:didStartSpeechUtterance:
 protocol_member AVSpeechSynthesizerDelegate -speechSynthesizer:willSpeakRangeOfSpeechString:utterance:
+protocol_member AVVideoCompositionInstruction -timeRange
+protocol_member AXDataAxisDescriptor -attributedTitle
+protocol_member AXDataAxisDescriptor -title
 protocol_member AXMathExpressionProvider -accessibilityMathExpression
 protocol_member CAAction -runActionForKey:object:arguments:
 protocol_member CAAnimationDelegate -animationDidStart:
@@ -32951,6 +32978,8 @@ protocol_member CALayerDelegate -displayLayer:
 protocol_member CALayerDelegate -drawLayer:inContext:
 protocol_member CALayerDelegate -layerWillDraw:
 protocol_member CALayerDelegate -layoutSublayersOfLayer:
+protocol_member CAMetalDrawable -layer
+protocol_member CAMetalDrawable -texture
 protocol_member CBCentralManagerDelegate -centralManager:didConnectPeripheral:
 protocol_member CBCentralManagerDelegate -centralManager:didDisconnectPeripheral:error:
 protocol_member CBCentralManagerDelegate -centralManager:didDiscoverPeripheral:advertisementData:RSSI:
@@ -32989,6 +33018,9 @@ protocol_member CPInterfaceControllerDelegate -templateDidAppear:animated:
 protocol_member CPInterfaceControllerDelegate -templateDidDisappear:animated:
 protocol_member CPInterfaceControllerDelegate -templateWillAppear:animated:
 protocol_member CPInterfaceControllerDelegate -templateWillDisappear:animated:
+protocol_member CPListTemplateItem -isEnabled
+protocol_member CPListTemplateItem -text
+protocol_member CPListTemplateItem -userInfo
 protocol_member CPSearchTemplateDelegate -searchTemplate:updatedSearchText:completionHandler:
 protocol_member CPSearchTemplateDelegate -searchTemplateSearchButtonPressed:
 protocol_member CXCallObserverDelegate -callObserver:callChanged:
@@ -33006,6 +33038,11 @@ protocol_member CXProviderDelegate -provider:performStartCallAction:
 protocol_member CXProviderDelegate -provider:timedOutPerformingAction:
 protocol_member CXProviderDelegate -providerDidBegin:
 protocol_member CXProviderDelegate -providerDidReset:
+protocol_member EAGLDrawable -drawableProperties
+protocol_member GCDevice -handlerQueue
+protocol_member GCDevice -physicalInputProfile
+protocol_member GCDevice -productCategory
+protocol_member GCDevice -vendorName
 protocol_member GKRandom -nextBool
 protocol_member GKRandom -nextInt
 protocol_member GKRandom -nextIntWithUpperBound:
@@ -33054,6 +33091,10 @@ protocol_member HMHomeManagerDelegate -homeManagerDidUpdatePrimaryHome:
 protocol_member INEditMessageIntentHandling -confirmEditMessage:completion:
 protocol_member INEditMessageIntentHandling -handleEditMessage:completion:
 protocol_member INEditMessageIntentHandling -resolveEditedContentForEditMessage:withCompletion:
+protocol_member INSpeakable -identifier
+protocol_member INSpeakable -pronunciationHint
+protocol_member INSpeakable -spokenPhrase
+protocol_member INSpeakable -vocabularyIdentifier
 protocol_member INUIAddVoiceShortcutButtonDelegate -presentAddVoiceShortcutViewController:forAddVoiceShortcutButton:
 protocol_member INUIAddVoiceShortcutViewControllerDelegate -addVoiceShortcutViewController:didFinishWithVoiceShortcut:error:
 protocol_member INUIAddVoiceShortcutViewControllerDelegate -addVoiceShortcutViewControllerDidCancel:
@@ -33065,25 +33106,42 @@ protocol_member INUnsendMessagesIntentHandling -confirmUnsendMessages:completion
 protocol_member INUnsendMessagesIntentHandling -handleUnsendMessages:completion:
 protocol_member MDLAssetResolver -canResolveAssetNamed:
 protocol_member MDLAssetResolver -resolveAssetNamed:
+protocol_member MDLMeshBuffer -allocator
 protocol_member MDLMeshBuffer -fillData:offset:
+protocol_member MDLMeshBuffer -length
 protocol_member MDLMeshBuffer -map
+protocol_member MDLMeshBuffer -type
+protocol_member MDLMeshBuffer -zone
 protocol_member MDLMeshBufferAllocator -newBuffer:type:
 protocol_member MDLMeshBufferAllocator -newBufferFromZone:data:type:
 protocol_member MDLMeshBufferAllocator -newBufferFromZone:length:type:
 protocol_member MDLMeshBufferAllocator -newBufferWithData:type:
 protocol_member MDLMeshBufferAllocator -newZone:
 protocol_member MDLMeshBufferAllocator -newZoneForBuffersWithSize:andType:
+protocol_member MDLMeshBufferZone -allocator
+protocol_member MDLMeshBufferZone -capacity
 protocol_member MDLObjectContainerComponent -addObject:
+protocol_member MDLObjectContainerComponent -count
 protocol_member MDLObjectContainerComponent -objectAtIndexedSubscript:
+protocol_member MDLObjectContainerComponent -objects
 protocol_member MDLObjectContainerComponent -removeObject:
 protocol_member MDLTransformComponent +globalTransformWithObject:atTime:
+protocol_member MDLTransformComponent -keyTimes
 protocol_member MDLTransformComponent -localTransformAtTime:
+protocol_member MDLTransformComponent -matrix
+protocol_member MDLTransformComponent -maximumTime
+protocol_member MDLTransformComponent -minimumTime
+protocol_member MDLTransformComponent -resetsTransform
 protocol_member MDLTransformComponent -setLocalTransform:
 protocol_member MDLTransformComponent -setLocalTransform:forTime:
 protocol_member MDLTransformOp -IsInverseOp
 protocol_member MDLTransformOp -double4x4AtTime:
 protocol_member MDLTransformOp -float4x4AtTime:
+protocol_member MDLTransformOp -name
+protocol_member MKAnnotation -coordinate
 protocol_member MKAnnotation -setCoordinate:
+protocol_member MKAnnotation -subtitle
+protocol_member MKAnnotation -title
 protocol_member MKLocalSearchCompleterDelegate -completer:didFailWithError:
 protocol_member MKLocalSearchCompleterDelegate -completerDidUpdateResults:
 protocol_member MKLookAroundViewControllerDelegate -lookAroundViewControllerDidDismissFullScreen:
@@ -33101,15 +33159,23 @@ protocol_member MKMapViewDelegate -mapView:viewForOverlay:
 protocol_member MKMapViewDelegate -mapViewDidChangeVisibleRegion:
 protocol_member MKMapViewDelegate -mapViewDidFinishRenderingMap:fullyRendered:
 protocol_member MKMapViewDelegate -mapViewWillStartRenderingMap:
+protocol_member MKOverlay -boundingMapRect
 protocol_member MKOverlay -canReplaceMapContent
+protocol_member MKOverlay -coordinate
+protocol_member MLBatchProvider -count
 protocol_member MLBatchProvider -featuresAtIndex:
+protocol_member MLFeatureProvider -featureNames
 protocol_member MLFeatureProvider -featureValueForName:
 protocol_member MLWritable -writeToURL:error:
 protocol_member MTKViewDelegate -drawInMTKView:
+protocol_member MTL4BinaryFunction -functionType
+protocol_member MTL4BinaryFunction -name
 protocol_member MTL4CommandQueue -addResidencySet:
 protocol_member MTL4CommandQueue -addResidencySets:count:
 protocol_member MTL4CommandQueue -copyBufferMappingsFromBuffer:toBuffer:operations:count:
 protocol_member MTL4CommandQueue -copyTextureMappingsFromTexture:toTexture:operations:count:
+protocol_member MTL4CommandQueue -device
+protocol_member MTL4CommandQueue -label
 protocol_member MTL4CommandQueue -removeResidencySet:
 protocol_member MTL4CommandQueue -removeResidencySets:count:
 protocol_member MTL4CommandQueue -signalDrawable:
@@ -33122,6 +33188,12 @@ protocol_member MTLAccelerationStructureCommandEncoder -updateFence:
 protocol_member MTLAccelerationStructureCommandEncoder -useHeap:
 protocol_member MTLAccelerationStructureCommandEncoder -useHeaps:count:
 protocol_member MTLAccelerationStructureCommandEncoder -waitForFence:
+protocol_member MTLBinaryArchive -device
+protocol_member MTLBinaryArchive -label
+protocol_member MTLBinding -access
+protocol_member MTLBinding -index
+protocol_member MTLBinding -name
+protocol_member MTLBinding -type
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size:
@@ -33141,19 +33213,39 @@ protocol_member MTLBlitCommandEncoder -waitForFence:
 protocol_member MTLBuffer -addDebugMarker:range:
 protocol_member MTLBuffer -contents
 protocol_member MTLBuffer -didModifyRange:
+protocol_member MTLBuffer -gpuAddress
+protocol_member MTLBuffer -length
 protocol_member MTLBuffer -removeAllDebugMarkers
+protocol_member MTLBufferBinding -bufferAlignment
+protocol_member MTLBufferBinding -bufferDataSize
+protocol_member MTLBufferBinding -bufferDataType
+protocol_member MTLBufferBinding -bufferPointerType
+protocol_member MTLBufferBinding -bufferStructType
 protocol_member MTLCaptureScope -beginScope
+protocol_member MTLCaptureScope -commandQueue
+protocol_member MTLCaptureScope -device
 protocol_member MTLCaptureScope -endScope
+protocol_member MTLCaptureScope -label
+protocol_member MTLCommandBuffer -GPUEndTime
+protocol_member MTLCommandBuffer -GPUStartTime
 protocol_member MTLCommandBuffer -accelerationStructureCommandEncoder
 protocol_member MTLCommandBuffer -accelerationStructureCommandEncoderWithDescriptor:
 protocol_member MTLCommandBuffer -addCompletedHandler:
 protocol_member MTLCommandBuffer -addScheduledHandler:
 protocol_member MTLCommandBuffer -blitCommandEncoder
 protocol_member MTLCommandBuffer -blitCommandEncoderWithDescriptor:
+protocol_member MTLCommandBuffer -commandQueue
 protocol_member MTLCommandBuffer -commit
 protocol_member MTLCommandBuffer -computeCommandEncoder
 protocol_member MTLCommandBuffer -computeCommandEncoderWithDescriptor:
+protocol_member MTLCommandBuffer -device
 protocol_member MTLCommandBuffer -enqueue
+protocol_member MTLCommandBuffer -error
+protocol_member MTLCommandBuffer -errorOptions
+protocol_member MTLCommandBuffer -kernelEndTime
+protocol_member MTLCommandBuffer -kernelStartTime
+protocol_member MTLCommandBuffer -label
+protocol_member MTLCommandBuffer -logs
 protocol_member MTLCommandBuffer -popDebugGroup
 protocol_member MTLCommandBuffer -presentDrawable:
 protocol_member MTLCommandBuffer -presentDrawable:afterMinimumDuration:
@@ -33162,6 +33254,8 @@ protocol_member MTLCommandBuffer -pushDebugGroup:
 protocol_member MTLCommandBuffer -renderCommandEncoderWithDescriptor:
 protocol_member MTLCommandBuffer -resourceStateCommandEncoder
 protocol_member MTLCommandBuffer -resourceStateCommandEncoderWithDescriptor:
+protocol_member MTLCommandBuffer -retainedReferences
+protocol_member MTLCommandBuffer -status
 protocol_member MTLCommandBuffer -waitUntilCompleted
 protocol_member MTLCommandBuffer -waitUntilScheduled
 protocol_member MTLCommandQueue -addResidencySet:
@@ -33169,10 +33263,13 @@ protocol_member MTLCommandQueue -addResidencySets:count:
 protocol_member MTLCommandQueue -commandBuffer
 protocol_member MTLCommandQueue -commandBufferWithDescriptor:
 protocol_member MTLCommandQueue -commandBufferWithUnretainedReferences
+protocol_member MTLCommandQueue -device
 protocol_member MTLCommandQueue -insertDebugCaptureBoundary
+protocol_member MTLCommandQueue -label
 protocol_member MTLCommandQueue -removeResidencySet:
 protocol_member MTLCommandQueue -removeResidencySets:count:
 protocol_member MTLComputeCommandEncoder -dispatchThreadgroups:threadsPerThreadgroup:
+protocol_member MTLComputeCommandEncoder -dispatchType
 protocol_member MTLComputeCommandEncoder -memoryBarrierWithScope:
 protocol_member MTLComputeCommandEncoder -setBuffer:offset:atIndex:
 protocol_member MTLComputeCommandEncoder -setBytes:length:atIndex:
@@ -33182,6 +33279,28 @@ protocol_member MTLComputeCommandEncoder -updateFence:
 protocol_member MTLComputeCommandEncoder -useHeap:
 protocol_member MTLComputeCommandEncoder -useHeaps:count:
 protocol_member MTLComputeCommandEncoder -waitForFence:
+protocol_member MTLComputePipelineState -device
+protocol_member MTLComputePipelineState -gpuResourceID
+protocol_member MTLComputePipelineState -label
+protocol_member MTLComputePipelineState -maxTotalThreadsPerThreadgroup
+protocol_member MTLComputePipelineState -reflection
+protocol_member MTLComputePipelineState -requiredThreadsPerThreadgroup
+protocol_member MTLComputePipelineState -shaderValidation
+protocol_member MTLComputePipelineState -supportIndirectCommandBuffers
+protocol_member MTLComputePipelineState -threadExecutionWidth
+protocol_member MTLCounterSampleBuffer -device
+protocol_member MTLCounterSampleBuffer -label
+protocol_member MTLCounterSampleBuffer -sampleCount
+protocol_member MTLDepthStencilState -device
+protocol_member MTLDepthStencilState -gpuResourceID
+protocol_member MTLDepthStencilState -label
+protocol_member MTLDevice -currentAllocatedSize
+protocol_member MTLDevice -hasUnifiedMemory
+protocol_member MTLDevice -isHeadless
+protocol_member MTLDevice -isLowPower
+protocol_member MTLDevice -isRemovable
+protocol_member MTLDevice -maxThreadsPerThreadgroup
+protocol_member MTLDevice -name
 protocol_member MTLDevice -newBufferWithBytes:length:options:
 protocol_member MTLDevice -newBufferWithLength:options:
 protocol_member MTLDevice -newCommandQueue
@@ -33205,21 +33324,60 @@ protocol_member MTLDevice -newSamplerStateWithDescriptor:
 protocol_member MTLDevice -newSharedEvent
 protocol_member MTLDevice -newSharedEventWithHandle:
 protocol_member MTLDevice -newTextureWithDescriptor:
+protocol_member MTLDevice -registryID
 protocol_member MTLDevice -supportsFamily:
 protocol_member MTLDevice -supportsFeatureSet:
 protocol_member MTLDevice -supportsTextureSampleCount:
 protocol_member MTLDrawable -addPresentedHandler:
+protocol_member MTLDrawable -drawableID
 protocol_member MTLDrawable -present
 protocol_member MTLDrawable -presentAfterMinimumDuration:
 protocol_member MTLDrawable -presentAtTime:
+protocol_member MTLDrawable -presentedTime
+protocol_member MTLDynamicLibrary -device
+protocol_member MTLDynamicLibrary -installName
+protocol_member MTLDynamicLibrary -label
+protocol_member MTLFence -device
+protocol_member MTLFence -label
+protocol_member MTLFunction -device
+protocol_member MTLFunction -functionConstantsDictionary
+protocol_member MTLFunction -functionType
+protocol_member MTLFunction -label
+protocol_member MTLFunction -name
 protocol_member MTLFunction -newArgumentEncoderWithBufferIndex:
 protocol_member MTLFunction -newArgumentEncoderWithBufferIndex:reflection:
+protocol_member MTLFunction -options
+protocol_member MTLFunction -patchControlPointCount
+protocol_member MTLFunction -patchType
+protocol_member MTLFunction -stageInputAttributes
+protocol_member MTLFunction -vertexAttributes
+protocol_member MTLFunctionLog -debugLocation
+protocol_member MTLFunctionLog -encoderLabel
+protocol_member MTLFunctionLog -function
+protocol_member MTLFunctionLog -type
+protocol_member MTLFunctionLogDebugLocation -column
+protocol_member MTLFunctionLogDebugLocation -functionName
+protocol_member MTLFunctionLogDebugLocation -line
+protocol_member MTLHeap -cpuCacheMode
+protocol_member MTLHeap -currentAllocatedSize
+protocol_member MTLHeap -device
+protocol_member MTLHeap -hazardTrackingMode
+protocol_member MTLHeap -label
 protocol_member MTLHeap -maxAvailableSizeWithAlignment:
 protocol_member MTLHeap -newBufferWithLength:options:
 protocol_member MTLHeap -newBufferWithLength:options:offset:
 protocol_member MTLHeap -newTextureWithDescriptor:
 protocol_member MTLHeap -newTextureWithDescriptor:offset:
+protocol_member MTLHeap -resourceOptions
 protocol_member MTLHeap -setPurgeableState:
+protocol_member MTLHeap -size
+protocol_member MTLHeap -storageMode
+protocol_member MTLHeap -type
+protocol_member MTLHeap -usedSize
+protocol_member MTLLibrary -device
+protocol_member MTLLibrary -functionNames
+protocol_member MTLLibrary -installName
+protocol_member MTLLibrary -label
 protocol_member MTLLibrary -newFunctionWithDescriptor:completionHandler:
 protocol_member MTLLibrary -newFunctionWithDescriptor:error:
 protocol_member MTLLibrary -newFunctionWithName:
@@ -33227,6 +33385,12 @@ protocol_member MTLLibrary -newFunctionWithName:constantValues:completionHandler
 protocol_member MTLLibrary -newFunctionWithName:constantValues:error:
 protocol_member MTLLibrary -newIntersectionFunctionWithDescriptor:completionHandler:
 protocol_member MTLLibrary -newIntersectionFunctionWithDescriptor:error:
+protocol_member MTLLibrary -type
+protocol_member MTLObjectPayloadBinding -objectPayloadAlignment
+protocol_member MTLObjectPayloadBinding -objectPayloadDataSize
+protocol_member MTLRasterizationRateMap -device
+protocol_member MTLRasterizationRateMap -label
+protocol_member MTLRasterizationRateMap -layerCount
 protocol_member MTLRenderCommandEncoder -drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:
 protocol_member MTLRenderCommandEncoder -drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:
 protocol_member MTLRenderCommandEncoder -drawPrimitives:vertexStart:vertexCount:
@@ -33249,20 +33413,67 @@ protocol_member MTLRenderCommandEncoder -setTriangleFillMode:
 protocol_member MTLRenderCommandEncoder -setVertexBuffer:offset:atIndex:
 protocol_member MTLRenderCommandEncoder -setVertexBytes:length:atIndex:
 protocol_member MTLRenderCommandEncoder -setViewport:
+protocol_member MTLRenderCommandEncoder -tileHeight
+protocol_member MTLRenderCommandEncoder -tileWidth
 protocol_member MTLRenderCommandEncoder -useHeap:
 protocol_member MTLRenderCommandEncoder -useHeap:stages:
 protocol_member MTLRenderCommandEncoder -useHeaps:count:
 protocol_member MTLRenderCommandEncoder -useHeaps:count:stages:
+protocol_member MTLRenderPipelineState -device
+protocol_member MTLRenderPipelineState -gpuResourceID
+protocol_member MTLRenderPipelineState -imageblockSampleLength
+protocol_member MTLRenderPipelineState -label
+protocol_member MTLRenderPipelineState -maxTotalThreadgroupsPerMeshGrid
+protocol_member MTLRenderPipelineState -maxTotalThreadsPerMeshThreadgroup
+protocol_member MTLRenderPipelineState -maxTotalThreadsPerObjectThreadgroup
+protocol_member MTLRenderPipelineState -maxTotalThreadsPerThreadgroup
+protocol_member MTLRenderPipelineState -reflection
+protocol_member MTLRenderPipelineState -requiredThreadsPerMeshThreadgroup
+protocol_member MTLRenderPipelineState -requiredThreadsPerObjectThreadgroup
+protocol_member MTLRenderPipelineState -shaderValidation
+protocol_member MTLRenderPipelineState -supportIndirectCommandBuffers
+protocol_member MTLRenderPipelineState -threadgroupSizeMatchesTileSize
+protocol_member MTLResource -allocatedSize
+protocol_member MTLResource -cpuCacheMode
+protocol_member MTLResource -device
+protocol_member MTLResource -hazardTrackingMode
+protocol_member MTLResource -heap
+protocol_member MTLResource -heapOffset
 protocol_member MTLResource -isAliasable
+protocol_member MTLResource -label
 protocol_member MTLResource -makeAliasable
+protocol_member MTLResource -resourceOptions
 protocol_member MTLResource -setPurgeableState:
+protocol_member MTLResource -storageMode
 protocol_member MTLResourceStateCommandEncoder -updateFence:
 protocol_member MTLResourceStateCommandEncoder -waitForFence:
+protocol_member MTLSamplerState -device
+protocol_member MTLSamplerState -gpuResourceID
+protocol_member MTLSamplerState -label
 protocol_member MTLSharedEvent -newSharedEventHandle
 protocol_member MTLSharedEvent -notifyListener:atValue:block:
+protocol_member MTLSharedEvent -signaledValue
 protocol_member MTLSharedEvent -waitUntilSignaledValue:timeoutMS:
+protocol_member MTLTexture -arrayLength
+protocol_member MTLTexture -buffer
+protocol_member MTLTexture -depth
 protocol_member MTLTexture -getBytes:bytesPerRow:fromRegion:mipmapLevel:
+protocol_member MTLTexture -gpuResourceID
+protocol_member MTLTexture -height
+protocol_member MTLTexture -isFramebufferOnly
+protocol_member MTLTexture -mipmapLevelCount
+protocol_member MTLTexture -pixelFormat
 protocol_member MTLTexture -replaceRegion:mipmapLevel:withBytes:bytesPerRow:
+protocol_member MTLTexture -sampleCount
+protocol_member MTLTexture -textureType
+protocol_member MTLTexture -usage
+protocol_member MTLTexture -width
+protocol_member MTLTextureBinding -arrayLength
+protocol_member MTLTextureBinding -isDepthTexture
+protocol_member MTLTextureBinding -textureDataType
+protocol_member MTLTextureBinding -textureType
+protocol_member MTLThreadgroupBinding -threadgroupMemoryAlignment
+protocol_member MTLThreadgroupBinding -threadgroupMemoryDataSize
 protocol_member MXMetricManagerSubscriber -didReceiveDiagnosticPayloads:
 protocol_member MXMetricManagerSubscriber -didReceiveMetricPayloads:
 protocol_member NFCNDEFReaderSessionDelegate -readerSession:didDetectNDEFs:
@@ -33272,17 +33483,40 @@ protocol_member NFCReaderSessionDelegate -readerSession:didInvalidateWithError:
 protocol_member NFCReaderSessionDelegate -readerSessionDidBecomeActive:
 protocol_member NSCoding -encodeWithCoder:
 protocol_member NSCoding -initWithCoder:
+protocol_member NSCollectionLayoutContainer -contentInsets
+protocol_member NSCollectionLayoutContainer -contentSize
+protocol_member NSCollectionLayoutContainer -effectiveContentInsets
+protocol_member NSCollectionLayoutContainer -effectiveContentSize
+protocol_member NSCollectionLayoutEnvironment -container
+protocol_member NSCollectionLayoutEnvironment -traitCollection
+protocol_member NSCollectionLayoutVisibleItem -alpha
+protocol_member NSCollectionLayoutVisibleItem -bounds
+protocol_member NSCollectionLayoutVisibleItem -center
+protocol_member NSCollectionLayoutVisibleItem -frame
+protocol_member NSCollectionLayoutVisibleItem -indexPath
+protocol_member NSCollectionLayoutVisibleItem -isHidden
+protocol_member NSCollectionLayoutVisibleItem -name
+protocol_member NSCollectionLayoutVisibleItem -representedElementCategory
+protocol_member NSCollectionLayoutVisibleItem -representedElementKind
+protocol_member NSCollectionLayoutVisibleItem -transform
+protocol_member NSCollectionLayoutVisibleItem -transform3D
+protocol_member NSCollectionLayoutVisibleItem -zIndex
 protocol_member NSCopying -copyWithZone:
 protocol_member NSFastEnumeration -countByEnumeratingWithState:objects:count:
 protocol_member NSItemProviderReading +objectWithItemProviderData:typeIdentifier:error:
+protocol_member NSItemProviderReading +readableTypeIdentifiersForItemProvider
 protocol_member NSItemProviderWriting +itemProviderVisibilityForRepresentationWithTypeIdentifier:
+protocol_member NSItemProviderWriting +writableTypeIdentifiersForItemProvider
 protocol_member NSItemProviderWriting -itemProviderVisibilityForRepresentationWithTypeIdentifier:
 protocol_member NSItemProviderWriting -loadDataWithTypeIdentifier:forItemProviderCompletionHandler:
+protocol_member NSItemProviderWriting -writableTypeIdentifiersForItemProvider
 protocol_member NSMutableCopying -mutableCopyWithZone:
+protocol_member NSSecureCoding +supportsSecureCoding
 protocol_member NSStreamDelegate -stream:handleEvent:
 protocol_member NSTextContentManagerDelegate -textContentManager:shouldEnumerateTextElement:options:
 protocol_member NSTextContentStorageDelegate -textContentStorage:textParagraphWithRange:
 protocol_member NSTextLocation -compare:
+protocol_member NSTextSelectionDataSource -documentRange
 protocol_member NSTextSelectionDataSource -lineFragmentRangeForPoint:inContainerAtLocation:
 protocol_member NSTextSelectionDataSource -locationFromLocation:withOffset:
 protocol_member NSTextSelectionDataSource -offsetFromLocation:toLocation:
@@ -33363,10 +33597,13 @@ protocol_member UIActionSheetDelegate -actionSheet:willDismissWithButtonIndex:
 protocol_member UIActionSheetDelegate -didPresentActionSheet:
 protocol_member UIActivityItemSource -activityViewController:itemForActivityType:
 protocol_member UIActivityItemSource -activityViewControllerPlaceholderItem:
+protocol_member UIActivityItemsConfigurationProviding -activityItemsConfiguration
 protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationMetadataForItemAtIndex:key:
 protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationMetadataForKey:
 protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationPreviewForItemAtIndex:intent:suggestedSize:
 protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationSupportsInteraction:
+protocol_member UIActivityItemsConfigurationReading -applicationActivitiesForActivityItemsConfiguration
+protocol_member UIActivityItemsConfigurationReading -itemProvidersForActivityItemsConfiguration
 protocol_member UIAdaptivePresentationControllerDelegate -adaptivePresentationStyleForPresentationController:
 protocol_member UIAdaptivePresentationControllerDelegate -presentationController:viewControllerForAdaptivePresentationStyle:
 protocol_member UIAdaptivePresentationControllerDelegate -presentationControllerDidAttemptToDismiss:
@@ -33387,6 +33624,8 @@ protocol_member UIApplicationDelegate -application:openURL:options:
 protocol_member UIApplicationDelegate -application:openURL:sourceApplication:annotation:
 protocol_member UIApplicationDelegate -application:shouldRestoreApplicationState:
 protocol_member UIApplicationDelegate -application:shouldSaveApplicationState:
+protocol_member UIApplicationDelegate -window
+protocol_member UICGFloatTraitDefinition -defaultValue
 protocol_member UICalendarSelectionMultiDateDelegate -multiDateSelection:canDeselectDate:
 protocol_member UICalendarSelectionMultiDateDelegate -multiDateSelection:canSelectDate:
 protocol_member UICalendarSelectionMultiDateDelegate -multiDateSelection:didDeselectDate:
@@ -33418,9 +33657,13 @@ protocol_member UICollectionViewDragDelegate -collectionView:dragSessionIsRestri
 protocol_member UICollectionViewDragDelegate -collectionView:dragSessionWillBegin:
 protocol_member UICollectionViewDragDelegate -collectionView:itemsForAddingToDragSession:atIndexPath:point:
 protocol_member UICollectionViewDragDelegate -collectionView:itemsForBeginningDragSession:atIndexPath:
+protocol_member UICollectionViewDropCoordinator -destinationIndexPath
 protocol_member UICollectionViewDropCoordinator -dropItem:intoItemAtIndexPath:rect:
 protocol_member UICollectionViewDropCoordinator -dropItem:toItemAtIndexPath:
 protocol_member UICollectionViewDropCoordinator -dropItem:toTarget:
+protocol_member UICollectionViewDropCoordinator -items
+protocol_member UICollectionViewDropCoordinator -proposal
+protocol_member UICollectionViewDropCoordinator -session
 protocol_member UICollectionViewDropDelegate -collectionView:canHandleDropSession:
 protocol_member UICollectionViewDropDelegate -collectionView:dropPreviewParametersForItemAtIndexPath:
 protocol_member UICollectionViewDropDelegate -collectionView:dropSessionDidEnd:
@@ -33428,8 +33671,12 @@ protocol_member UICollectionViewDropDelegate -collectionView:dropSessionDidEnter
 protocol_member UICollectionViewDropDelegate -collectionView:dropSessionDidExit:
 protocol_member UICollectionViewDropDelegate -collectionView:dropSessionDidUpdate:withDestinationIndexPath:
 protocol_member UICollectionViewDropDelegate -collectionView:performDropWithCoordinator:
+protocol_member UICollectionViewDropItem -dragItem
+protocol_member UICollectionViewDropItem -previewSize
+protocol_member UICollectionViewDropItem -sourceIndexPath
 protocol_member UICollectionViewDropPlaceholderContext -commitInsertionWithDataSourceUpdates:
 protocol_member UICollectionViewDropPlaceholderContext -deletePlaceholder
+protocol_member UICollectionViewDropPlaceholderContext -dragItem
 protocol_member UICollectionViewDropPlaceholderContext -setNeedsCellUpdate
 protocol_member UICollisionBehaviorDelegate -collisionBehavior:beganContactForItem:withBoundaryIdentifier:atPoint:
 protocol_member UICollisionBehaviorDelegate -collisionBehavior:beganContactForItem:withItem:atPoint:
@@ -33443,16 +33690,21 @@ protocol_member UIConfigurationState -initWithTraitCollection:
 protocol_member UIConfigurationState -objectForKeyedSubscript:
 protocol_member UIConfigurationState -setCustomState:forKey:
 protocol_member UIConfigurationState -setObject:forKeyedSubscript:
+protocol_member UIConfigurationState -traitCollection
 protocol_member UIContentConfiguration -makeContentView
 protocol_member UIContentConfiguration -updatedConfigurationForState:
+protocol_member UIContentContainer -preferredContentSize
 protocol_member UIContentContainer -preferredContentSizeDidChangeForChildContentContainer:
 protocol_member UIContentContainer -sizeForChildContentContainer:withParentContainerSize:
 protocol_member UIContentContainer -systemLayoutFittingSizeDidChangeForChildContentContainer:
 protocol_member UIContentContainer -viewWillTransitionToSize:withTransitionCoordinator:
 protocol_member UIContentContainer -willTransitionToTraitCollection:withTransitionCoordinator:
+protocol_member UIContentSizeCategoryAdjusting -adjustsFontForContentSizeCategory
+protocol_member UIContentView -configuration
 protocol_member UIContentView -supportsConfiguration:
 protocol_member UIContextMenuInteractionAnimating -addAnimations:
 protocol_member UIContextMenuInteractionAnimating -addCompletion:
+protocol_member UIContextMenuInteractionAnimating -previewViewController
 protocol_member UIContextMenuInteractionDelegate -contextMenuInteraction:configurationForMenuAtLocation:
 protocol_member UIContextMenuInteractionDelegate -contextMenuInteraction:previewForDismissingMenuWithConfiguration:
 protocol_member UIContextMenuInteractionDelegate -contextMenuInteraction:previewForHighlightingMenuWithConfiguration:
@@ -33488,14 +33740,25 @@ protocol_member UIDropInteractionDelegate -dropInteraction:sessionDidEnter:
 protocol_member UIDropInteractionDelegate -dropInteraction:sessionDidExit:
 protocol_member UIDropInteractionDelegate -dropInteraction:sessionDidUpdate:
 protocol_member UIDropSession -loadObjectsOfClass:completion:
+protocol_member UIDropSession -localDragSession
 protocol_member UIDynamicAnimatorDelegate -dynamicAnimatorDidPause:
 protocol_member UIDynamicAnimatorDelegate -dynamicAnimatorWillResume:
+protocol_member UIDynamicItem -bounds
+protocol_member UIDynamicItem -center
+protocol_member UIDynamicItem -transform
 protocol_member UIEditMenuInteractionAnimating -addAnimations:
 protocol_member UIEditMenuInteractionAnimating -addCompletion:
 protocol_member UIFindInteractionDelegate -findInteraction:didBeginFindSession:
 protocol_member UIFindInteractionDelegate -findInteraction:didEndFindSession:
 protocol_member UIFindInteractionDelegate -findInteraction:sessionForView:
+protocol_member UIFocusEnvironment -parentFocusEnvironment
+protocol_member UIFocusEnvironment -preferredFocusEnvironments
+protocol_member UIFocusEnvironment -preferredFocusedView
 protocol_member UIFocusEnvironment -updateFocusIfNeeded
+protocol_member UIFocusItem -canBecomeFocused
+protocol_member UIFocusItem -focusEffect
+protocol_member UIFocusItem -focusGroupPriority
+protocol_member UIFocusItem -frame
 protocol_member UIFontPickerViewControllerDelegate -fontPickerViewControllerDidCancel:
 protocol_member UIGestureRecognizerDelegate -gestureRecognizer:shouldReceiveTouch:
 protocol_member UIGestureRecognizerDelegate -gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:
@@ -33503,10 +33766,20 @@ protocol_member UIGestureRecognizerDelegate -gestureRecognizerShouldBegin:
 protocol_member UIImagePickerControllerDelegate -imagePickerController:didFinishPickingMediaWithInfo:
 protocol_member UIImagePickerControllerDelegate -imagePickerControllerDidCancel:
 protocol_member UIInteraction -didMoveToView:
+protocol_member UIInteraction -view
 protocol_member UIInteraction -willMoveToView:
 protocol_member UILargeContentViewerInteractionDelegate -largeContentViewerInteraction:didEndOnItem:atPoint:
 protocol_member UILargeContentViewerInteractionDelegate -largeContentViewerInteraction:itemAtPoint:
 protocol_member UILargeContentViewerInteractionDelegate -viewControllerForLargeContentViewerInteraction:
+protocol_member UILargeContentViewerItem -largeContentImage
+protocol_member UILargeContentViewerItem -largeContentImageInsets
+protocol_member UILargeContentViewerItem -largeContentTitle
+protocol_member UILargeContentViewerItem -scalesLargeContentImage
+protocol_member UILargeContentViewerItem -showsLargeContentViewer
+protocol_member UILayoutSupport -bottomAnchor
+protocol_member UILayoutSupport -heightAnchor
+protocol_member UILayoutSupport -length
+protocol_member UILayoutSupport -topAnchor
 protocol_member UIMenuBuilder -insertElements:afterActionForIdentifier:
 protocol_member UIMenuBuilder -insertElements:afterCommandForAction:propertyList:
 protocol_member UIMenuBuilder -insertElements:afterMenuForIdentifier:
@@ -33520,16 +33793,40 @@ protocol_member UIMenuBuilder -removeCommandForAction:propertyList:
 protocol_member UIMenuBuilder -replaceActionForIdentifier:withElements:
 protocol_member UIMenuBuilder -replaceCommandForAction:propertyList:withElements:
 protocol_member UIMenuBuilder -replaceMenuForIdentifier:withElements:
+protocol_member UIMenuBuilder -system
+protocol_member UIMutableTraits -accessibilityContrast
+protocol_member UIMutableTraits -activeAppearance
+protocol_member UIMutableTraits -displayGamut
+protocol_member UIMutableTraits -displayScale
+protocol_member UIMutableTraits -forceTouchCapability
+protocol_member UIMutableTraits -horizontalSizeClass
+protocol_member UIMutableTraits -imageDynamicRange
+protocol_member UIMutableTraits -layoutDirection
+protocol_member UIMutableTraits -legibilityWeight
+protocol_member UIMutableTraits -listEnvironment
 protocol_member UIMutableTraits -objectForTrait:
+protocol_member UIMutableTraits -preferredContentSizeCategory
+protocol_member UIMutableTraits -resolvesNaturalAlignmentWithBaseWritingDirection
+protocol_member UIMutableTraits -sceneCaptureState
 protocol_member UIMutableTraits -setCGFloatValue:forTrait:
 protocol_member UIMutableTraits -setNSIntegerValue:forTrait:
 protocol_member UIMutableTraits -setObject:forTrait:
+protocol_member UIMutableTraits -splitViewControllerLayoutEnvironment
+protocol_member UIMutableTraits -tabAccessoryEnvironment
+protocol_member UIMutableTraits -toolbarItemPresentationSize
+protocol_member UIMutableTraits -typesettingLanguage
+protocol_member UIMutableTraits -userInterfaceIdiom
+protocol_member UIMutableTraits -userInterfaceLevel
+protocol_member UIMutableTraits -userInterfaceStyle
 protocol_member UIMutableTraits -valueForCGFloatTrait:
 protocol_member UIMutableTraits -valueForNSIntegerTrait:
+protocol_member UIMutableTraits -verticalSizeClass
+protocol_member UINSIntegerTraitDefinition -defaultValue
 protocol_member UINavigationControllerDelegate -navigationController:animationControllerForOperation:fromViewController:toViewController:
 protocol_member UINavigationControllerDelegate -navigationController:interactionControllerForAnimationController:
 protocol_member UINavigationControllerDelegate -navigationControllerPreferredInterfaceOrientationForPresentation:
 protocol_member UINavigationControllerDelegate -navigationControllerSupportedInterfaceOrientations:
+protocol_member UIObjectTraitDefinition -defaultValue
 protocol_member UIPageControlProgressDelegate -pageControlProgress:initialProgressForPage:
 protocol_member UIPageControlTimerProgressDelegate -pageControlTimerProgress:shouldAdvanceToPage:
 protocol_member UIPageControlTimerProgressDelegate -pageControlTimerProgressDidChange:
@@ -33542,6 +33839,7 @@ protocol_member UIPopoverPresentationControllerDelegate -popoverPresentationCont
 protocol_member UIPopoverPresentationControllerDelegate -popoverPresentationControllerDidDismissPopover:
 protocol_member UIPopoverPresentationControllerDelegate -popoverPresentationControllerShouldDismissPopover:
 protocol_member UIPopoverPresentationControllerDelegate -prepareForPopoverPresentation:
+protocol_member UIPreviewActionItem -title
 protocol_member UISceneDelegate -scene:openURLContexts:
 protocol_member UISceneDelegate -scene:restoreInteractionStateWithUserActivity:
 protocol_member UISceneDelegate -scene:willConnectToSession:options:
@@ -33561,8 +33859,15 @@ protocol_member UISearchControllerDelegate -presentSearchController:
 protocol_member UISearchControllerDelegate -willDismissSearchController:
 protocol_member UISearchControllerDelegate -willPresentSearchController:
 protocol_member UISearchResultsUpdating -updateSearchResultsForSearchController:
+protocol_member UISearchSuggestion -iconImage
+protocol_member UISearchSuggestion -localizedAttributedSuggestion
+protocol_member UISearchSuggestion -localizedDescription
+protocol_member UISearchSuggestion -localizedSuggestion
+protocol_member UISearchSuggestion -representedObject
 protocol_member UIShapeProvider -resolvedShapeInContext:
 protocol_member UISheetPresentationControllerDelegate -sheetPresentationControllerDidChangeSelectedDetentIdentifier:
+protocol_member UISheetPresentationControllerDetentResolutionContext -containerTraitCollection
+protocol_member UISheetPresentationControllerDetentResolutionContext -maximumDetentValue
 protocol_member UISplitViewControllerDelegate -primaryViewControllerForCollapsingSplitViewController:
 protocol_member UISplitViewControllerDelegate -splitViewController:collapseSecondaryViewController:ontoPrimaryViewController:
 protocol_member UISplitViewControllerDelegate -splitViewController:didHideColumn:
@@ -33578,6 +33883,7 @@ protocol_member UISplitViewControllerDelegate -targetDisplayModeForActionInSplit
 protocol_member UIStateRestoring -applicationFinishedRestoringState
 protocol_member UIStateRestoring -decodeRestorableStateWithCoder:
 protocol_member UIStateRestoring -encodeRestorableStateWithCoder:
+protocol_member UIStateRestoring -restorationParent
 protocol_member UITableViewDataSource -numberOfSectionsInTableView:
 protocol_member UITableViewDataSource -tableView:canEditRowAtIndexPath:
 protocol_member UITableViewDataSource -tableView:cellForRowAtIndexPath:
@@ -33605,9 +33911,13 @@ protocol_member UITableViewDragDelegate -tableView:dragSessionIsRestrictedToDrag
 protocol_member UITableViewDragDelegate -tableView:dragSessionWillBegin:
 protocol_member UITableViewDragDelegate -tableView:itemsForAddingToDragSession:atIndexPath:point:
 protocol_member UITableViewDragDelegate -tableView:itemsForBeginningDragSession:atIndexPath:
+protocol_member UITableViewDropCoordinator -destinationIndexPath
 protocol_member UITableViewDropCoordinator -dropItem:intoRowAtIndexPath:rect:
 protocol_member UITableViewDropCoordinator -dropItem:toRowAtIndexPath:
 protocol_member UITableViewDropCoordinator -dropItem:toTarget:
+protocol_member UITableViewDropCoordinator -items
+protocol_member UITableViewDropCoordinator -proposal
+protocol_member UITableViewDropCoordinator -session
 protocol_member UITableViewDropDelegate -tableView:canHandleDropSession:
 protocol_member UITableViewDropDelegate -tableView:dropPreviewParametersForRowAtIndexPath:
 protocol_member UITableViewDropDelegate -tableView:dropSessionDidEnd:
@@ -33615,9 +33925,18 @@ protocol_member UITableViewDropDelegate -tableView:dropSessionDidEnter:
 protocol_member UITableViewDropDelegate -tableView:dropSessionDidExit:
 protocol_member UITableViewDropDelegate -tableView:dropSessionDidUpdate:withDestinationIndexPath:
 protocol_member UITableViewDropDelegate -tableView:performDropWithCoordinator:
+protocol_member UITableViewDropItem -dragItem
+protocol_member UITableViewDropItem -previewSize
+protocol_member UITableViewDropItem -sourceIndexPath
 protocol_member UITableViewDropPlaceholderContext -commitInsertionWithDataSourceUpdates:
 protocol_member UITableViewDropPlaceholderContext -deletePlaceholder
+protocol_member UITableViewDropPlaceholderContext -dragItem
 protocol_member UITextDocumentProxy -adjustTextPositionByCharacterOffset:
+protocol_member UITextDocumentProxy -documentContextAfterInput
+protocol_member UITextDocumentProxy -documentContextBeforeInput
+protocol_member UITextDocumentProxy -documentIdentifier
+protocol_member UITextDocumentProxy -documentInputMode
+protocol_member UITextDocumentProxy -selectedText
 protocol_member UITextDocumentProxy -setMarkedText:selectedRange:
 protocol_member UITextDocumentProxy -unmarkText
 protocol_member UITextDragDelegate -textDraggableView:dragPreviewForLiftingItem:session:
@@ -33625,6 +33944,12 @@ protocol_member UITextDragDelegate -textDraggableView:dragSessionDidEnd:withOper
 protocol_member UITextDragDelegate -textDraggableView:dragSessionWillBegin:
 protocol_member UITextDragDelegate -textDraggableView:itemsForDrag:
 protocol_member UITextDragDelegate -textDraggableView:willAnimateLiftWithAnimator:session:
+protocol_member UITextDragRequest -dragRange
+protocol_member UITextDragRequest -dragSession
+protocol_member UITextDragRequest -existingItems
+protocol_member UITextDragRequest -isSelected
+protocol_member UITextDragRequest -suggestedItems
+protocol_member UITextDraggable -textDragDelegate
 protocol_member UITextDropDelegate -textDroppableView:dropSessionDidEnd:
 protocol_member UITextDropDelegate -textDroppableView:dropSessionDidEnter:
 protocol_member UITextDropDelegate -textDroppableView:dropSessionDidExit:
@@ -33632,31 +33957,50 @@ protocol_member UITextDropDelegate -textDroppableView:previewForDroppingAllItems
 protocol_member UITextDropDelegate -textDroppableView:proposalForDrop:
 protocol_member UITextDropDelegate -textDroppableView:willBecomeEditableForDrop:
 protocol_member UITextDropDelegate -textDroppableView:willPerformDrop:
+protocol_member UITextDropRequest -dropPosition
+protocol_member UITextDropRequest -dropSession
+protocol_member UITextDropRequest -isSameView
+protocol_member UITextDropRequest -suggestedProposal
+protocol_member UITextDroppable -textDropDelegate
 protocol_member UITextFieldDelegate -textField:editMenuForCharactersInRanges:suggestedActions:
 protocol_member UITextFieldDelegate -textField:shouldChangeCharactersInRanges:replacementString:
 protocol_member UITextFieldDelegate -textFieldDidChangeSelection:
 protocol_member UITextFieldDelegate -textFieldDidEndEditing:
 protocol_member UITextFieldDelegate -textFieldDidEndEditing:reason:
+protocol_member UITextInput -beginningOfDocument
 protocol_member UITextInput -closestPositionToPoint:
 protocol_member UITextInput -editMenuForTextRange:suggestedActions:
+protocol_member UITextInput -endOfDocument
 protocol_member UITextInput -firstRectForRange:
+protocol_member UITextInput -inputDelegate
+protocol_member UITextInput -isEditable
 protocol_member UITextInput -offsetFromPosition:toPosition:
 protocol_member UITextInput -positionFromPosition:offset:
 protocol_member UITextInput -replaceRange:withAttributedText:
 protocol_member UITextInput -replaceRange:withText:
+protocol_member UITextInput -selectedTextRange
 protocol_member UITextInput -setMarkedText:selectedRange:
 protocol_member UITextInput -textInRange:
 protocol_member UITextInput -textRangeFromPosition:toPosition:
+protocol_member UITextInput -tokenizer
 protocol_member UITextInput -unmarkText
 protocol_member UITextInput -willDismissEditMenuWithAnimator:
 protocol_member UITextInput -willPresentEditMenuWithAnimator:
 protocol_member UITextInteractionDelegate -interactionDidEnd:
 protocol_member UITextInteractionDelegate -interactionShouldBegin:atPoint:
 protocol_member UITextInteractionDelegate -interactionWillBegin:
+protocol_member UITextSearching -selectedTextRange
+protocol_member UITimingCurveProvider -cubicTimingParameters
+protocol_member UITimingCurveProvider -springTimingParameters
+protocol_member UITimingCurveProvider -timingCurveType
 protocol_member UITraitChangeObservable -registerForTraitChanges:withAction:
 protocol_member UITraitChangeObservable -registerForTraitChanges:withHandler:
 protocol_member UITraitChangeObservable -registerForTraitChanges:withTarget:action:
 protocol_member UITraitChangeObservable -unregisterForTraitChanges:
+protocol_member UITraitDefinition -affectsColorAppearance
+protocol_member UITraitDefinition -identifier
+protocol_member UITraitDefinition -name
+protocol_member UITraitEnvironment -traitCollection
 protocol_member UITraitEnvironment -traitCollectionDidChange:
 protocol_member UITraitOverrides -containsTrait:
 protocol_member UITraitOverrides -removeTrait:
@@ -33665,18 +34009,43 @@ protocol_member UIViewControllerAnimatedTransitioning -animationEnded:
 protocol_member UIViewControllerAnimatedTransitioning -transitionDuration:
 protocol_member UIViewControllerContextTransitioning -cancelInteractiveTransition
 protocol_member UIViewControllerContextTransitioning -completeTransition:
+protocol_member UIViewControllerContextTransitioning -containerView
 protocol_member UIViewControllerContextTransitioning -finalFrameForViewController:
 protocol_member UIViewControllerContextTransitioning -finishInteractiveTransition
 protocol_member UIViewControllerContextTransitioning -initialFrameForViewController:
+protocol_member UIViewControllerContextTransitioning -isAnimated
+protocol_member UIViewControllerContextTransitioning -isInteractive
 protocol_member UIViewControllerContextTransitioning -pauseInteractiveTransition
+protocol_member UIViewControllerContextTransitioning -presentationStyle
+protocol_member UIViewControllerContextTransitioning -targetTransform
+protocol_member UIViewControllerContextTransitioning -transitionWasCancelled
 protocol_member UIViewControllerContextTransitioning -updateInteractiveTransition:
 protocol_member UIViewControllerContextTransitioning -viewControllerForKey:
 protocol_member UIViewControllerContextTransitioning -viewForKey:
+protocol_member UIViewControllerInteractiveTransitioning -completionCurve
+protocol_member UIViewControllerInteractiveTransitioning -completionSpeed
 protocol_member UIViewControllerInteractiveTransitioning -startInteractiveTransition:
+protocol_member UIViewControllerInteractiveTransitioning -wantsInteractiveStart
+protocol_member UIViewControllerPreviewing -delegate
+protocol_member UIViewControllerPreviewing -previewingGestureRecognizerForFailureRelationship
+protocol_member UIViewControllerPreviewing -sourceRect
+protocol_member UIViewControllerPreviewing -sourceView
 protocol_member UIViewControllerTransitionCoordinator -animateAlongsideTransition:completion:
 protocol_member UIViewControllerTransitionCoordinator -animateAlongsideTransitionInView:animation:completion:
 protocol_member UIViewControllerTransitionCoordinator -notifyWhenInteractionChangesUsingBlock:
 protocol_member UIViewControllerTransitionCoordinator -notifyWhenInteractionEndsUsingBlock:
+protocol_member UIViewControllerTransitionCoordinatorContext -completionCurve
+protocol_member UIViewControllerTransitionCoordinatorContext -completionVelocity
+protocol_member UIViewControllerTransitionCoordinatorContext -containerView
+protocol_member UIViewControllerTransitionCoordinatorContext -initiallyInteractive
+protocol_member UIViewControllerTransitionCoordinatorContext -isAnimated
+protocol_member UIViewControllerTransitionCoordinatorContext -isCancelled
+protocol_member UIViewControllerTransitionCoordinatorContext -isInteractive
+protocol_member UIViewControllerTransitionCoordinatorContext -isInterruptible
+protocol_member UIViewControllerTransitionCoordinatorContext -percentComplete
+protocol_member UIViewControllerTransitionCoordinatorContext -presentationStyle
+protocol_member UIViewControllerTransitionCoordinatorContext -targetTransform
+protocol_member UIViewControllerTransitionCoordinatorContext -transitionDuration
 protocol_member UIViewControllerTransitionCoordinatorContext -viewControllerForKey:
 protocol_member UIViewControllerTransitionCoordinatorContext -viewForKey:
 protocol_member UIViewControllerTransitioningDelegate -animationControllerForDismissedController:
@@ -33689,11 +34058,23 @@ protocol_member UIWebViewDelegate -webView:shouldStartLoadWithRequest:navigation
 protocol_member UIWebViewDelegate -webViewDidFinishLoad:
 protocol_member UIWebViewDelegate -webViewDidStartLoad:
 protocol_member UIWindowSceneDelegate -preferredWindowingControlStyleForScene:
+protocol_member UIWindowSceneDelegate -window
 protocol_member UIWindowSceneDelegate -windowScene:didUpdateCoordinateSpace:interfaceOrientation:traitCollection:
 protocol_member UIWindowSceneDelegate -windowScene:didUpdateEffectiveGeometry:
 protocol_member UNUserNotificationCenterDelegate -userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:
 protocol_member UNUserNotificationCenterDelegate -userNotificationCenter:openSettingsForNotification:
 protocol_member UNUserNotificationCenterDelegate -userNotificationCenter:willPresentNotification:withCompletionHandler:
+protocol_member VTFrameProcessorConfiguration +isSupported
+protocol_member VTFrameProcessorConfiguration +maximumDimensions
+protocol_member VTFrameProcessorConfiguration +minimumDimensions
+protocol_member VTFrameProcessorConfiguration -destinationPixelBufferAttributes
+protocol_member VTFrameProcessorConfiguration -frameSupportedPixelFormats
+protocol_member VTFrameProcessorConfiguration -nextFrameCount
+protocol_member VTFrameProcessorConfiguration -previousFrameCount
+protocol_member VTFrameProcessorConfiguration -sourcePixelBufferAttributes
+protocol_member VTFrameProcessorParameters -destinationFrame
+protocol_member VTFrameProcessorParameters -destinationFrames
+protocol_member VTFrameProcessorParameters -sourceFrame
 protocol_member WKNavigationDelegate -webView:decidePolicyForNavigationAction:decisionHandler:
 protocol_member WKNavigationDelegate -webView:didCommitNavigation:
 protocol_member WKNavigationDelegate -webView:didFailProvisionalNavigation:withError:
@@ -33706,6 +34087,7 @@ protocol_member WKURLSchemeTask -didFailWithError:
 protocol_member WKURLSchemeTask -didFinish
 protocol_member WKURLSchemeTask -didReceiveData:
 protocol_member WKURLSchemeTask -didReceiveResponse:
+protocol_member WKURLSchemeTask -request
 type ARBlendShapeLocation
 type AREnvironmentTexturing
 type ARFrameSemantics
@@ -34083,6 +34465,8 @@ type MTLBlitOption
 type MTLCPUCacheMode
 type MTLCaptureDestination
 type MTLColorWriteMask
+type MTLCommandBufferErrorOption
+type MTLCommandBufferStatus
 type MTLCommonCounter
 type MTLCommonCounterSet
 type MTLCompareFunction
@@ -34091,8 +34475,11 @@ type MTLCurveBasis
 type MTLCurveEndCaps
 type MTLCurveType
 type MTLDataType
+type MTLDispatchType
 type MTLFeatureSet
+type MTLFunctionLogType
 type MTLFunctionOptions
+type MTLFunctionType
 type MTLGPUFamily
 type MTLHazardTrackingMode
 type MTLHeapType
@@ -34460,6 +34847,7 @@ type UITextFieldDidEndEditingReason
 type UITextItemContentType
 type UITextSearchMatchMethod
 type UITextViewBorderStyle
+type UITimingCurveType
 type UITouchProperties
 type UITouchType
 type UITrait
