@@ -20816,6 +20816,7 @@ member NSAsynchronousFetchRequest -revenantExecuteInContext:error:
 member NSAsynchronousFetchRequest -setEstimatedResultCount:
 member NSAsynchronousFetchResult -fetchRequest
 member NSAsynchronousFetchResult -finalResult
+member NSAttributedString +load
 member NSAttributedString +localizedAttributedStringWithFormat:
 member NSAttributedString +localizedAttributedStringWithFormat:context:
 member NSAttributedString +localizedAttributedStringWithFormat:options:
@@ -33541,14 +33542,41 @@ protocol_member PKPushRegistryDelegate -pushRegistry:didInvalidatePushTokenForTy
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:
 protocol_member PKPushRegistryDelegate -pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:
 protocol_member PKPushRegistryDelegate -pushRegistry:didUpdatePushCredentials:forType:
+protocol_member SCNSceneRenderer -audioEngine
+protocol_member SCNSceneRenderer -audioEnvironmentNode
+protocol_member SCNSceneRenderer -audioListener
+protocol_member SCNSceneRenderer -autoenablesDefaultLighting
+protocol_member SCNSceneRenderer -colorPixelFormat
+protocol_member SCNSceneRenderer -commandQueue
+protocol_member SCNSceneRenderer -context
+protocol_member SCNSceneRenderer -currentRenderCommandEncoder
+protocol_member SCNSceneRenderer -currentRenderPassDescriptor
+protocol_member SCNSceneRenderer -currentViewport
+protocol_member SCNSceneRenderer -debugOptions
+protocol_member SCNSceneRenderer -delegate
+protocol_member SCNSceneRenderer -depthPixelFormat
+protocol_member SCNSceneRenderer -device
 protocol_member SCNSceneRenderer -hitTest:options:
+protocol_member SCNSceneRenderer -isJitteringEnabled
 protocol_member SCNSceneRenderer -isNodeInsideFrustum:withPointOfView:
+protocol_member SCNSceneRenderer -isPlaying
+protocol_member SCNSceneRenderer -isTemporalAntialiasingEnabled
+protocol_member SCNSceneRenderer -loops
 protocol_member SCNSceneRenderer -nodesInsideFrustumWithPointOfView:
+protocol_member SCNSceneRenderer -overlaySKScene
+protocol_member SCNSceneRenderer -pointOfView
 protocol_member SCNSceneRenderer -prepareObject:shouldAbortBlock:
 protocol_member SCNSceneRenderer -prepareObjects:withCompletionHandler:
 protocol_member SCNSceneRenderer -presentScene:withTransition:incomingPointOfView:completionHandler:
 protocol_member SCNSceneRenderer -projectPoint:
+protocol_member SCNSceneRenderer -renderingAPI
+protocol_member SCNSceneRenderer -scene
+protocol_member SCNSceneRenderer -sceneTime
+protocol_member SCNSceneRenderer -showsStatistics
+protocol_member SCNSceneRenderer -stencilPixelFormat
 protocol_member SCNSceneRenderer -unprojectPoint:
+protocol_member SCNSceneRenderer -usesReverseZ
+protocol_member SCNSceneRenderer -workingColorSpace
 protocol_member SCNSceneRendererDelegate -renderer:didApplyAnimationsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didApplyConstraintsAtTime:
 protocol_member SCNSceneRendererDelegate -renderer:didRenderScene:atTime:
@@ -34527,6 +34555,7 @@ type SCNBlendMode
 type SCNDebugOptions
 type SCNGeometryPrimitiveType
 type SCNLightAreaType
+type SCNRenderingAPI
 type SFSafariViewControllerDismissButtonStyle
 type SFSpeechRecognizerAuthorizationStatus
 type SKSceneScaleMode
