@@ -206,9 +206,9 @@ package("swift")
         io.writefile(path.join(floor, "plain.swift"), "import Display\nfunc use() { displayApi() }\n")
         local transcript = path.join(floor, "transcript.txt")
         local function run(argv)
-            local ok = os.execv(frontend, table.join({"-frontend", "-parse-stdlib", "-target", "armv7-apple-ios6.0"}, argv),
-                                {stdout = transcript, stderr = transcript, try = true})
-            return ok, io.readfile(transcript)
+            local status = os.execv(frontend, table.join({"-frontend", "-parse-stdlib", "-target", "armv7-apple-ios6.0"}, argv),
+                                    {stdout = transcript, stderr = transcript, try = true})
+            return status == 0, io.readfile(transcript)
         end
         local emitted, text = run({"-emit-module", "-module-name", "Sdk", "-emit-module-path", path.join(system, "Sdk.swiftmodule"),
                                    path.join(system, "Sdk.swift")})
