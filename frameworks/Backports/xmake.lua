@@ -273,6 +273,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
         add_includedirs(path.join(RUNTIME, "app"))
+        add_deps("RevenantInterposeProbe")
         add_mflags("-fobjc-arc")
         if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
             add_linkdirs(RUNTIME_LIBS)
@@ -290,6 +291,14 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "probe", "weak_probe.c"))
         add_frameworks("Foundation")
+    target_end()
+
+    target("RevenantInterposeProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "interpose_probe.c"))
+        add_shflags("-Wl,-install_name,/usr/lib/revenant/org.revenant.backports/libRevenantInterposeProbe.dylib", {force = true})
     target_end()
 
     target("RevenantMissingProbe")
@@ -314,11 +323,15 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("missing_class_binding")
         add_tests("keybag_lock_state")
         add_tests("iosurface_surface")
+        add_tests("interpose_launch", {should_fail = true})
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
             for _, failure in ipairs(failures) do
                 cprint("${red}%s: %s", case, failure)
+            end
+            if opt.should_fail then
+                return #failures > 0 and failures[1]:find("^the check must pass", 1) ~= nil
             end
             return #failures == 0
         end)

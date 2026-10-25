@@ -125,9 +125,9 @@ here; a Swift error text and the exact typecheck command are what would settle i
   and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
   - The passcode predicate. The 6.1.3 MobileKeyBag exports `MKBGetDeviceLockState` and `MKBDeviceUnlockedSinceBoot`, and
     its strings name no passcode key, so the return code that means "a passcode is set" is not known from the cache. A
-    measurement with and without a passcode, on a device or the emulator, settles it. The case `keybag_lock_state` expects
-    3 on a fresh image, but it has no result yet: the runtime driver runs on this host did not return for it, and the
-    lock it waits on is shared with other worktrees' runs.
+    measurement with and without a passcode settles it. On the 6.1.3 emulator without a passcode, the case
+    `keybag_lock_state` reads 3 from `MKBGetDeviceLockState` and passes, so 3 means no passcode is set. The value for a
+    set passcode is still unmeasured.
   - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
     defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
     and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.
@@ -157,10 +157,19 @@ here; a Swift error text and the exact typecheck command are what would settle i
 - IOSurface: 40 of the SDK's functions are forwarded to the system's private `IOSurface` library, and each one is in the
   iOS 6.1.3 export table. Six component functions and `IOSurfaceGetSubsampling`, `IOSurfaceAllowsPixelSizeCasting` and
   `IOSurfaceSetOwnershipIdentity` are not wrapped, because iOS 6.1.3 does not export them. A wrapper that cannot find a symbol
-  aborts with the name. The case `iosurface_surface` runs the host oracle's operations on the 6.1.3 emulator, but it has no
-  result yet, for the same reason as the keybag case. `xmake emulate` needs the revenant addon, and
+  aborts with the name. The case `iosurface_surface` runs the host oracle's operations on the 6.1.3 emulator and passes:
+  the CoreSurface HLE keeps per-surface attribute values (`SetValue`, `CopyValue`, `RemoveValue`) and the use count
+  (`IncrementUseCount`, `DecrementUseCount`, `GetUseCount`, `IsInUse`), and the unit test `surface_attributes` checks the
+  list and the count. `xmake emulate` needs the revenant addon, and
   installing `revenant v0.8.17` fails on this host with a package-name mismatch. The in-repo emulate fixtures configure
   the whole package set first, which pulls swift and webkit, and the rules forbid building swift here.
+- dyld `__interpose` from a launch-linked dylib: measured on the 6.1.3 emulator, not a fact about iOS 6 in general. The
+  probe `interpose_probe.c` is loaded at launch with its `__DATA,__interpose` section present, and it replaces `getppid`.
+  The main executable's `getppid()` still returns the real value (11), not the replacement's 4242. So a launch-linked
+  tuple does not redirect the main executable's calls on this path, and the SecItemAdd wrapper cannot depend on it. The
+  cause is not determined: it could be the main executable's binding, or the emulator's loader. The case
+  `interpose_launch` is registered with `should_fail`, so it is reported as an expected failure, and it becomes a failure
+  if the redirect starts to work.
 - Deferred, not implemented: `MPSImageBilinearScale`, `MTLBinaryArchive` and `CIRenderDestination`. The Metal backport
   renders through GL framebuffers (`RevenantMetalEncoder.m`), and it has 84 files. `glGetProgramBinary` and
   `glProgramBinary` are stubs that report an error (`src/OpenGLES/ES3Functions.m`), so there is no compiled program to

@@ -38,6 +38,9 @@ function main()
     os.execv(broken, {}, {stdout = broken .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host Network program printed nothing")
+    if expected ~= got then
+        os.execv("diff", {"-u", host .. ".out", backport .. ".out"}, {try = true})
+    end
     assert(expected == got, "the backport Network differs from the host in " .. out)
     assert(io.readfile(broken .. ".out") ~= expected, "the negative control with usesInterfaceType answering false matched the host in " .. out)
 end
