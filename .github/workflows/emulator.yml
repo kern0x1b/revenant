@@ -85,6 +85,32 @@ jobs:
           fi
 
       - uses: actions/cache/restore@v4
+        if: inputs.job == 'probe'
+        id: dyld60
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v2
+
+      - name: Fetch the iOS 6.0 armv7 shared cache the probe's guest package is configured against
+        if: inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/save@v4
+        if: success() && inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v2
+
+      - name: Write the iOS 6.0 inventory from the shared cache
+        if: inputs.job == 'probe'
+        timeout-minutes: 30
+        run: |
+          if [ ! -f "$HOME/.revenant/dyld/6.0/classes_armv7.json" ]; then
+            ./xmakew firmware -P . -y --arch=armv7 classes 6.0
+          fi
+
+      - uses: actions/cache/restore@v4
         id: dyld
         with:
           path: ~/.revenant/dyld/6.1.3
