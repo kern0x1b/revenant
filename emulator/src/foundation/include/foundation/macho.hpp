@@ -161,6 +161,7 @@ public:
     }
 
     [[nodiscard]] const MachSymbol* find_symbol(std::string_view name) const;
+    void add_local_symbols(std::vector<MachSymbol> locals);
     [[nodiscard]] const MachStub* find_stub(std::uint32_t address) const;
     [[nodiscard]] std::optional<std::uint16_t> read_vm_u16(
         std::uint32_t address) const;
@@ -181,6 +182,7 @@ private:
         std::string_view class_name, std::string_view selector,
         bool class_method, const VmStringResolver& external_string) const;
     [[nodiscard]] std::span<const std::byte> byte_span() const noexcept;
+    void rebuild_symbol_file_locations();
 
     std::filesystem::path path_;
     std::shared_ptr<const std::vector<std::byte>> bytes_;
