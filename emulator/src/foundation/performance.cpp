@@ -767,6 +767,15 @@ bool PerformanceCounters::begin_display_window()
             std::memory_order_relaxed);
     diagnostic_work_baseline.translation_blocks =
         translation_blocks_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.memory_callbacks =
+        memory_callbacks_.load(std::memory_order_relaxed);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        diagnostic_work_baseline.memory_callback_reasons[reason] =
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed);
+    }
+    diagnostic_work_baseline.jit_page_table_disables =
+        jit_page_table_disables_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_executions =
         cpu_executions_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_ticks =
@@ -995,6 +1004,18 @@ std::optional<PerformanceSnapshot> PerformanceCounters::end_display_window()
     result.translation_blocks =
         diagnostic_delta(translation_blocks_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.translation_blocks);
+    result.memory_callbacks = diagnostic_delta(
+        memory_callbacks_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.memory_callbacks);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        result.memory_callback_reasons[reason] = diagnostic_delta(
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed),
+            diagnostic_work_baseline.memory_callback_reasons[reason]);
+    }
+    result.jit_page_table_disables = diagnostic_delta(
+        jit_page_table_disables_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.jit_page_table_disables);
     result.cpu_executions =
         diagnostic_delta(cpu_executions_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.cpu_executions);
@@ -1593,6 +1614,17 @@ void PerformanceCounters::record_translation_compile(std::uint64_t nanoseconds)
 void PerformanceCounters::record_translation_block_shared_region()
 {
     add_if_enabled(translation_blocks_shared_region_, enabled_);
+}
+
+void PerformanceCounters::record_memory_callback(std::size_t reason)
+{
+    add_if_enabled(memory_callbacks_, enabled_);
+    add_if_enabled(memory_callback_reasons_[reason], enabled_);
+}
+
+void PerformanceCounters::record_jit_page_table_disable()
+{
+    add_if_enabled(jit_page_table_disables_, enabled_);
 }
 
 void PerformanceCounters::record_cpu_execution(std::uint64_t ticks)
@@ -2873,6 +2905,14 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
         translation_blocks_shared_region_.load(std::memory_order_relaxed);
     result.translation_compile_nanoseconds =
         translation_compile_nanoseconds_.load(std::memory_order_relaxed);
+    result.memory_callbacks = memory_callbacks_.load(std::memory_order_relaxed);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        result.memory_callback_reasons[reason] =
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed);
+    }
+    result.jit_page_table_disables =
+        jit_page_table_disables_.load(std::memory_order_relaxed);
     result.cpu_executions = cpu_executions_.load(std::memory_order_relaxed);
     result.cpu_ticks = cpu_ticks_.load(std::memory_order_relaxed);
     result.svc_calls = svc_calls_.load(std::memory_order_relaxed);
@@ -3276,6 +3316,25 @@ void append_diagnostic_process_summary(std::ostringstream& text,
     }
 }
 
+namespace {
+std::string memory_callback_summary(const PerformanceSnapshot& snapshot)
+{
+    constexpr std::array<std::string_view, memory_callback_reason_count> names {
+        "exclusive", "misaligned", "table-disabled", "unbacked", "code-write",
+        "reservation-write", "file-or-cow", "shared-write", "unmapped",
+        "parallel-checked", "other"
+    };
+    std::ostringstream text;
+    text << " memory-callbacks=" << snapshot.memory_callbacks
+         << " jit-page-table-disables=" << snapshot.jit_page_table_disables;
+    for (std::size_t reason = 0; reason < names.size(); ++reason) {
+        text << " memory-" << names[reason] << '='
+             << snapshot.memory_callback_reasons[reason];
+    }
+    return text.str();
+}
+}
+
 std::string format_performance_summary(const PerformanceSnapshot& snapshot)
 {
     std::uint64_t fallback_total = 0;
@@ -3350,6 +3409,7 @@ std::string format_performance_summary(const PerformanceSnapshot& snapshot)
          << snapshot.scheduler_quantum_expirations
          << " translation-blocks=" << snapshot.translation_blocks
          << " translation-compile-ns=" << snapshot.translation_compile_nanoseconds
+         << memory_callback_summary(snapshot)
          << " translation-blocks-shared-region="
          << snapshot.translation_blocks_shared_region
          << " cpu-exec=" << snapshot.cpu_executions
@@ -3507,6 +3567,7 @@ std::string format_display_performance_summary(
     text << std::fixed << std::setprecision(2)
          << "[perf-display] label=" << label
          << " cpu-ticks=" << snapshot.cpu_ticks
+         << memory_callback_summary(snapshot)
          << " guest-submit=" << snapshot.display_submissions << " guest-fps="
          << frames_per_second(snapshot.display_submissions,
                 snapshot.display_first_nanoseconds,
