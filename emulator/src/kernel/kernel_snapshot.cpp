@@ -59,6 +59,8 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     refuse_if_populated("ck.scheduler_yields_", scheduler_yields_);
     refuse_if_populated("ck.regular_file_open_descriptions_", regular_file_open_descriptions_);
     refuse_if_populated("ck.baseband_open_descriptions_", baseband_open_descriptions_);
+    refuse_if_populated("ck.kqueues_", kqueues_);
+    refuse_if_populated("ck.socket_pair_endpoints_", socket_pair_endpoints_);
     snapshot::save(out, guest_working_directory_.string());
     snapshot::save(out, process_image_);
     snapshot::save(out, thread_ports_);
@@ -123,6 +125,13 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, bound_socket_names_);
     snapshot::save(out, listening_sockets_);
     snapshot::save(out, virtual_block_descriptors_);
+    snapshot::save(out, system_event_filters_);
+    snapshot::save(out, system_event_next_identifiers_);
+    snapshot::save(out, static_cast<std::uint64_t>(scheduled_wifi_driver_events_.size()));
+    for (const auto& [deadline, event] : scheduled_wifi_driver_events_) {
+        snapshot::save(out, deadline);
+        snapshot::save(out, event);
+    }
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -152,6 +161,8 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     reject_if_populated("ck.scheduler_yields_", scheduler_yields_);
     reject_if_populated("ck.regular_file_open_descriptions_", regular_file_open_descriptions_);
     reject_if_populated("ck.baseband_open_descriptions_", baseband_open_descriptions_);
+    reject_if_populated("ck.kqueues_", kqueues_);
+    reject_if_populated("ck.socket_pair_endpoints_", socket_pair_endpoints_);
     std::string guest_working_directory;
     snapshot::load(in, guest_working_directory);
     guest_working_directory_ = std::filesystem::path { guest_working_directory };
@@ -231,6 +242,18 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, bound_socket_names_);
     snapshot::load(in, listening_sockets_);
     snapshot::load(in, virtual_block_descriptors_);
+    snapshot::load(in, system_event_filters_);
+    snapshot::load(in, system_event_next_identifiers_);
+    scheduled_wifi_driver_events_.clear();
+    std::uint64_t scheduled_event_count { };
+    snapshot::load(in, scheduled_event_count);
+    for (std::uint64_t index = 0; index < scheduled_event_count; ++index) {
+        std::uint64_t deadline { };
+        std::uint32_t event { };
+        snapshot::load(in, deadline);
+        snapshot::load(in, event);
+        scheduled_wifi_driver_events_.emplace(deadline, event);
+    }
 }
 
 }

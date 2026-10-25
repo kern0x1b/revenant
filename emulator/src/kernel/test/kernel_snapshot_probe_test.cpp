@@ -35,7 +35,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 114> saved_members {
+constexpr std::array<std::string_view, 117> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -120,6 +120,9 @@ constexpr std::array<std::string_view, 114> saved_members {
     "ck.bound_socket_names_",
     "ck.listening_sockets_",
     "ck.virtual_block_descriptors_",
+    "ck.system_event_filters_",
+    "ck.system_event_next_identifiers_",
+    "ck.scheduled_wifi_driver_events_",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
@@ -218,7 +221,7 @@ constexpr std::array<std::string_view, 1> wired_members {
     "hid.state_",
 };
 
-constexpr std::array<std::string_view, 25> refused_members {
+constexpr std::array<std::string_view, 27> refused_members {
     "ck.aio_completions_",
     "ck.host_sockets_",
     "ck.pending_baseband_writes_",
@@ -244,6 +247,8 @@ constexpr std::array<std::string_view, 25> refused_members {
     "ck.scheduler_yields_",
     "ck.regular_file_open_descriptions_",
     "ck.baseband_open_descriptions_",
+    "ck.kqueues_",
+    "ck.socket_pair_endpoints_",
 };
 
 int failures = 0;
