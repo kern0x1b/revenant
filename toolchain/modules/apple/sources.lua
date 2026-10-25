@@ -10,6 +10,18 @@ local languages = {
 
 local per_language = {c = "cflags", ["objective-c"] = "mflags", ["c++"] = "cxxflags", ["objective-c++"] = "mxxflags"}
 
+function collect(name, root, patterns)
+    local files = {}
+    for _, pattern in ipairs(table.wrap(patterns)) do
+        local matched = os.files(path.join(root, pattern))
+        if #matched == 0 then
+            raise("%s compiles %s, which matches no file", name, pattern)
+        end
+        table.join2(files, matched)
+    end
+    return files
+end
+
 function static(package, opt)
     local toolchain = assert(package:toolchains(), package:name() .. " is built for apple-ios without the apple-ios toolchain")[1]
     toolchain:load()
@@ -24,14 +36,7 @@ function static(package, opt)
     end
     local from_deps = opt.deps and deps.flags(package, opt.deps ~= true and opt.deps or nil) or {cflags = {}, cxxflags = {}}
     table.join2(common, from_deps.cflags)
-    local files = {}
-    for _, pattern in ipairs(table.wrap(opt.files)) do
-        local matched = os.files(path.join(root, pattern))
-        if #matched == 0 then
-            raise("%s compiles %s, which matches no file", package:name(), pattern)
-        end
-        table.join2(files, matched)
-    end
+    local files = collect(package:name(), root, opt.files)
     local objects = {}
     for index, file in ipairs(files) do
         objects[index] = path.join(builddir, path.relative(file, root):gsub("[/\\]", "_") .. ".o")
