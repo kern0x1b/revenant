@@ -27,17 +27,14 @@ function main(device, release)
     -- 100 SpringBoard checked in 570-800 host seconds after boot; before that the launcher never calls SpringBoard, so
     -- its -1 is its initial value, not a refusal (emulatefontapp-62c8ce43).
     local ran = xmake({"emulate", "-d", device, "-r", release, "-s", "1500", "-t", "3600", "launch", BUNDLE, "until-exit"}, log, {try = true})
-    -- `until-exit` makes the command fail on any app exit, status 0 included (toolchain/plugins/emulate/main.lua), so the
-    -- log decides, not the command's result.
-    print("the launch command returned " .. tostring(ran))
     local text = io.readfile(log)
     for line in text:gmatch("[^\n]+") do
         if line:find("FONT-APP", 1, true) then
             print(line)
         end
     end
-    if not text:find("FONT-APP-DONE", 1, true) then
-        print("the app did not finish its font call; the log is " .. log)
+    if ran ~= 0 or not text:find("FONT-APP-DONE", 1, true) then
+        print("the app did not finish its font call with status 0 (the launch returned " .. tostring(ran) .. "); the log is " .. log)
         os.exit(1)
     end
     print("FONT-APP started and got its system font on " .. device .. " iOS " .. release)
