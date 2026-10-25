@@ -95,8 +95,13 @@ Exclusive monitor. Commit `adb67ad64` had two parts, and they were separated:
   XNU's return to user mode: `return_to_user_now` in `osfmk/arm/locore.s` runs `clrex` on every return to user space,
   and a thread that was switched out resumes through it. The copy checked is the `master` mirror at
   `https://gitea.com/matteyeux/darwin-xnu` (line 1922), not the iOS 6.1.3 kernel. The copy has no `clrex` in its
-  context-switch routine, so the citation is the return path, not the switch. Cost: one golden boot took 392.8 s on the
-  current tree under load; no before number was kept, so the cost of this clear is not measured.
+  context-switch routine, so the citation is the return path, not the switch. Cost: a counter on the clear path and the
+  process's CPU time over the same golden boot, three repeats each with and without the clear (the switch was a
+  temporary variable, not committed). The boots made 0.63 to 0.80 million clears (per slice and per SVC). CPU time,
+  user plus system, with the clear: 420.6, 367.3 and 402.8 s, mean 396.9. Without it: 353.8, 408.1 and 391.5 s, mean
+  384.5. The difference, 12.4 s or 3.2%, has a standard error near 22 s, so it is not distinguishable from noise. The
+  wall times ran 372 to 487 s with the host at load 13 on 12 cores, so they do not isolate the clear. One no-clear
+  boot printed no counter line; the other two no-clear boots skipped every clear.
 - Reverted: the write generation check and the write tracking on reserved pages. The commit's premise was that the
   resolver-backed monitor does not see plain writes. On the tree before that change, a pinned store probe shows the
   premise false for two or more processors: with the other thread storing to the reserved word, 2000 of 2000 rounds had
@@ -133,6 +138,8 @@ Libdispatch trap. Resolved as a probe fault, not an emulator fault.
 
 Fault dump. `foundation/fault_dump` describes the guest words at a fatal fault: the eight words at each register
 that points into mapped memory, and the four words at the address in the first word, with the image and offset of each
-word. The unit test `emulator_fault_dump_test` passes, and the fatal-fault path calls it. In the trap runs it printed
-no `[fault-words]` lines, although the emulator binary contains the code. The cause is not found, and no dyld-cache
-symbol names are printed, so the trap object was read from the probe instead. Open.
+word. The unit test `emulator_fault_dump_test` passes. The first trap runs printed no `[fault-words]` lines because the
+concise output filter drops every bracketed line that is not on its allowlist, and this prefix was not on it. With the
+prefix added, the forced libdispatch fault on one core logs the words: `r0` points at the trapping object, whose first
+word is the vtable `0x3ae41ec4`. Labels cover only an image's text, so the vtable word is unlabelled, and the report
+gives image and offset, not dyld-cache symbol names. Symbol names are open.
