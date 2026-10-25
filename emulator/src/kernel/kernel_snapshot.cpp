@@ -83,6 +83,21 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, semaphore_wait_trace_count_);
     snapshot::save(out, psynch_trace_count_);
     snapshot::save(out, baseband_io_trace_count_);
+    snapshot::save(out, signal_actions_);
+    snapshot::save(out, disabled_thread_signals_);
+    snapshot::save(out, static_cast<std::uint64_t>(alternate_signal_stacks_.size()));
+    for (const auto& [key, stack] : alternate_signal_stacks_) {
+        snapshot::save(out, key);
+        snapshot::save(out, stack.base);
+        snapshot::save(out, stack.size);
+        snapshot::save(out, stack.disabled);
+        snapshot::save(out, stack.active);
+    }
+    snapshot::save(out, pending_signals_);
+    snapshot::save(out, last_delivered_graphics_inputs_);
+    snapshot::save(out, next_display_scanout_deadline_);
+    snapshot::save(out, vm_purgable_states_);
+    snapshot::save(out, apple80211_scan_delivered_);
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -141,6 +156,26 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, semaphore_wait_trace_count_);
     snapshot::load(in, psynch_trace_count_);
     snapshot::load(in, baseband_io_trace_count_);
+    snapshot::load(in, signal_actions_);
+    snapshot::load(in, disabled_thread_signals_);
+    alternate_signal_stacks_.clear();
+    std::uint64_t alternate_signal_stack_count { };
+    snapshot::load(in, alternate_signal_stack_count);
+    for (std::uint64_t index = 0; index < alternate_signal_stack_count; ++index) {
+        std::size_t key { };
+        AlternateSignalStack stack;
+        snapshot::load(in, key);
+        snapshot::load(in, stack.base);
+        snapshot::load(in, stack.size);
+        snapshot::load(in, stack.disabled);
+        snapshot::load(in, stack.active);
+        alternate_signal_stacks_.emplace(key, stack);
+    }
+    snapshot::load(in, pending_signals_);
+    snapshot::load(in, last_delivered_graphics_inputs_);
+    snapshot::load(in, next_display_scanout_deadline_);
+    snapshot::load(in, vm_purgable_states_);
+    snapshot::load(in, apple80211_scan_delivered_);
 }
 
 }

@@ -35,7 +35,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 95> saved_members {
+constexpr std::array<std::string_view, 103> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -101,6 +101,14 @@ constexpr std::array<std::string_view, 95> saved_members {
     "ck.semaphore_wait_trace_count_",
     "ck.psynch_trace_count_",
     "ck.baseband_io_trace_count_",
+    "ck.signal_actions_",
+    "ck.disabled_thread_signals_",
+    "ck.alternate_signal_stacks_",
+    "ck.pending_signals_",
+    "ck.last_delivered_graphics_inputs_",
+    "ck.next_display_scanout_deadline_",
+    "ck.vm_purgable_states_",
+    "ck.apple80211_scan_delivered_",
     "kss.hostname",
     "kss.desired_vnodes",
     "kss.next_kernel_event_identifier",
