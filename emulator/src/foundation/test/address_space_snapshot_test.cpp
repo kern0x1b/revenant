@@ -1,0 +1,225 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+#include "foundation/address_space.hpp"
+#include "foundation/snapshot_io.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace {
+
+using emulator::AddressSpace;
+using emulator::MemoryPermission;
+using emulator::VmInheritance;
+using emulator::snapshot::FormatError;
+using emulator::snapshot::RefusedError;
+using emulator::snapshot::Reader;
+using emulator::snapshot::Writer;
+
+int failures = 0;
+
+void expect(bool condition, const std::string& what)
+{
+    if (condition)
+        return;
+    std::cerr << "FAIL: " << what << '\n';
+    ++failures;
+}
+
+std::vector<std::byte> save_space(const AddressSpace& space)
+{
+    Writer out;
+    space.save(out);
+    return out.bytes();
+}
+
+std::unique_ptr<AddressSpace> load_space(const std::vector<std::byte>& bytes)
+{
+    auto space = std::make_unique<AddressSpace>();
+    Reader in { bytes };
+    space->load(in);
+    expect(in.at_end(), "the address space stream is consumed");
+    return space;
+}
+
+std::vector<std::byte> patterned(std::size_t size, std::uint8_t seed)
+{
+    std::vector<std::byte> bytes(size);
+    for (std::size_t index = 0; index < size; ++index)
+        bytes[index] = static_cast<std::byte>(seed + index * 7U);
+    return bytes;
+}
+
+bool same_region(const std::optional<AddressSpace::MappingRegion>& expected,
+    const std::optional<AddressSpace::MappingRegion>& actual)
+{
+    if (!expected || !actual)
+        return !expected && !actual;
+    return expected->address == actual->address && expected->end == actual->end &&
+           expected->permissions == actual->permissions &&
+           expected->inheritance == actual->inheritance;
+}
+
+void round_trip_keeps_contents_and_regions()
+{
+    AddressSpace source;
+    const auto read_write = MemoryPermission::Read | MemoryPermission::Write;
+    const auto read_execute = MemoryPermission::Read | MemoryPermission::Execute;
+    expect(source.map(0x1000, 0x4000, read_write), "map the data region");
+    expect(source.map(0x10000, 0x2000, read_write), "map the code region");
+    expect(source.map(0x20000, 0x1000, read_write), "map the untouched region");
+    const auto data = patterned(0x4000, 0x11);
+    const auto code = patterned(0x2000, 0x5a);
+    expect(source.copy_in(0x1000, data), "write the data region");
+    expect(source.copy_in(0x10000, code), "write the code region");
+    expect(source.protect(0x1000, 0x1000, MemoryPermission::Read),
+        "make the first data page read-only");
+    expect(source.protect(0x10000, 0x2000, read_execute),
+        "make the code region executable");
+    expect(source.inherit(0x10000, 0x2000, VmInheritance::Share),
+        "share the code region on fork");
+    source.mark_translation_profile_stable(0x10000, 0x2000);
+
+    const auto bytes = save_space(source);
+    const auto restored = load_space(bytes);
+
+    expect(restored->read_bytes(0x1000, 0x4000) == data,
+        "data region bytes survive the round trip");
+    expect(restored->read_bytes(0x10000, 0x2000) == code,
+        "code region bytes survive the round trip");
+    const auto untouched = restored->read_bytes(0x20000, 0x1000);
+    expect(untouched && std::all_of(untouched->begin(), untouched->end(),
+                            [](std::byte value) { return value == std::byte { }; }),
+        "an unwritten region reads as zeros");
+    expect(!restored->mapped(0x6000), "the gap stays unmapped");
+    expect(restored->mapping_region_count() == source.mapping_region_count(),
+        "the region count survives the round trip");
+    for (const std::uint32_t probe : { 0x0U, 0x1000U, 0x2000U, 0x5000U,
+             0x10000U, 0x12000U, 0x20000U, 0x21000U }) {
+        expect(same_region(source.mapping_region_at_or_after(probe),
+                   restored->mapping_region_at_or_after(probe)),
+            "region at or after the probe address matches");
+    }
+    expect(!restored->accessible(0x1000, 1, MemoryPermission::Write),
+        "a read-only page stays read-only");
+    expect(restored->accessible(0x1000, 1, MemoryPermission::Read),
+        "a read-only page stays readable");
+    expect(restored->accessible(0x10000, 1, MemoryPermission::Execute),
+        "an executable region stays executable");
+    expect(restored->translation_profile_stable(0x10000, 0x2000),
+        "the translation profile stays stable");
+    expect(restored->executable_content_generation() ==
+            source.executable_content_generation(),
+        "the executable content generation survives");
+    expect(restored->translation_profile_mapping_generation() ==
+            source.translation_profile_mapping_generation(),
+        "the translation profile generation survives");
+    expect(save_space(*restored) == bytes,
+        "saving the restored space reproduces the same stream");
+}
+
+void restored_space_is_independent_and_writable()
+{
+    AddressSpace source;
+    expect(source.map(0x1000, 0x1000,
+               MemoryPermission::Read | MemoryPermission::Write),
+        "map the page");
+    expect(source.write32(0x1000, 0x01020304U), "seed the page");
+    const auto restored = load_space(save_space(source));
+
+    expect(source.write32(0x1000, 0xaabbccddU), "write the source page");
+    expect(restored->read32(0x1000) == 0x01020304U,
+        "the restored page is not aliased to the source");
+    expect(restored->write32(0x1004, 0x55667788U),
+        "the restored page accepts writes");
+    expect(restored->read32(0x1004) == 0x55667788U,
+        "the restored write is visible");
+}
+
+void shared_writable_page_is_refused()
+{
+    AddressSpace space;
+    expect(space.map(0x1000, 0x1000,
+               MemoryPermission::Read | MemoryPermission::Write),
+        "map the page");
+    const auto shared = space.share_pages(0x1000, 0x1000);
+    expect(shared.has_value(), "share the page");
+    bool refused = false;
+    std::string member;
+    try {
+        static_cast<void>(save_space(space));
+    } catch (const RefusedError& error) {
+        refused = true;
+        member = error.member();
+    }
+    expect(refused, "a shared writable page is refused");
+    expect(member == "memory.shared_writable",
+        "the refusal names memory.shared_writable");
+}
+
+void file_mapping_is_restored_with_its_bytes()
+{
+    const auto path = std::filesystem::temp_directory_path() /
+                      "address_space_snapshot_test.bin";
+    const auto file = patterned(0x2000, 0x3c);
+    {
+        std::ofstream output(path, std::ios::binary);
+        output.write(reinterpret_cast<const char*>(file.data()),
+            static_cast<std::streamsize>(file.size()));
+    }
+    AddressSpace source;
+    expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
+        "map the file read-only");
+    const auto restored = load_space(save_space(source));
+    expect(restored->read_bytes(0x30000, 0x2000) == file,
+        "a file-backed region keeps its bytes");
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+}
+
+void truncated_stream_is_a_format_error()
+{
+    AddressSpace source;
+    expect(source.map(0x1000, 0x2000,
+               MemoryPermission::Read | MemoryPermission::Write),
+        "map the region");
+    expect(source.copy_in(0x1000, patterned(0x2000, 0x21)),
+        "write the region");
+    const auto bytes = save_space(source);
+    const std::vector<std::byte> truncated { bytes.begin(),
+        bytes.begin() + static_cast<std::ptrdiff_t>(bytes.size() / 2) };
+    bool threw = false;
+    try {
+        static_cast<void>(load_space(truncated));
+    } catch (const FormatError&) {
+        threw = true;
+    }
+    expect(threw, "a truncated address space throws FormatError");
+}
+
+}
+
+int main()
+{
+    round_trip_keeps_contents_and_regions();
+    restored_space_is_independent_and_writable();
+    shared_writable_page_is_refused();
+    file_mapping_is_restored_with_its_bytes();
+    truncated_stream_is_a_format_error();
+    if (failures != 0) {
+        std::cerr << failures << " address space snapshot checks failed\n";
+        return 1;
+    }
+    std::cout << "address space snapshot checks passed\n";
+    return 0;
+}

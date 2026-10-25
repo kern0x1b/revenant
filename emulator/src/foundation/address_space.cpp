@@ -116,6 +116,58 @@ namespace {
             bytes.end(), identity.digest.begin(), identity.digest.end());
     }
 
+    constexpr std::uint64_t guest_address_limit = std::uint64_t { 1 } << 32U;
+
+    std::vector<VmMap::MappingRegion> mapping_regions(const VmMap& map)
+    {
+        std::vector<VmMap::MappingRegion> regions;
+        std::uint64_t cursor = 0;
+        while (cursor < guest_address_limit) {
+            const auto region =
+                map.region_at_or_after(static_cast<std::uint32_t>(cursor));
+            if (!region)
+                break;
+            regions.push_back(*region);
+            cursor = region->end;
+        }
+        return regions;
+    }
+
+    void save_mapping_regions(snapshot::Writer& out,
+        const std::vector<VmMap::MappingRegion>& regions)
+    {
+        snapshot::save(out, static_cast<std::uint64_t>(regions.size()));
+        for (const auto& region : regions) {
+            snapshot::save(out, region.address);
+            snapshot::save(out, region.end);
+            snapshot::save(out, region.permissions);
+            snapshot::save(out, region.inheritance);
+        }
+    }
+
+    std::vector<VmMap::MappingRegion> load_mapping_regions(
+        snapshot::Reader& in)
+    {
+        std::uint64_t count { };
+        snapshot::load(in, count);
+        std::vector<VmMap::MappingRegion> regions;
+        for (std::uint64_t index = 0; index < count; ++index) {
+            VmMap::MappingRegion region;
+            snapshot::load(in, region.address);
+            snapshot::load(in, region.end);
+            snapshot::load(in, region.permissions);
+            snapshot::load(in, region.inheritance);
+            if (region.end <= region.address ||
+                region.end > guest_address_limit ||
+                region.address % AddressSpace::page_size != 0 ||
+                region.end % AddressSpace::page_size != 0) {
+                throw snapshot::FormatError { "snapshot holds a bad region" };
+            }
+            regions.push_back(region);
+        }
+        return regions;
+    }
+
 }
 
 struct AddressSpace::JitPageTableStorage {
@@ -614,6 +666,142 @@ void AddressSpace::clear()
     write_tracked_pages_.clear();
     mapping_leases_.clear();
     bump_executable_content_generation_locked();
+}
+
+void AddressSpace::save(snapshot::Writer& out) const
+{
+    auto lock = read_lock();
+    if (!tracked_write_ranges_.empty())
+        throw snapshot::RefusedError { "memory.tracked_write_ranges" };
+    if (!write_tracked_pages_.empty())
+        throw snapshot::RefusedError { "memory.write_tracked_pages" };
+    if (!exclusive_write_tracked_pages_.empty())
+        throw snapshot::RefusedError { "memory.exclusive_write_tracking" };
+    if (!mapping_leases_.empty())
+        throw snapshot::RefusedError { "memory.mapping_leases" };
+
+    std::map<std::uint32_t, std::shared_ptr<const GuestPageBacking>> contents;
+    for (const auto& [address, page] : *pages_) {
+        if (page.shared_writable)
+            throw snapshot::RefusedError { "memory.shared_writable" };
+        if (page.file_writeback)
+            throw snapshot::RefusedError { "memory.file_writeback" };
+        if (page.backing) {
+            contents.emplace(address, page.backing);
+        } else if (page.write_generation != 0 || page.file_writeback_capable) {
+            throw snapshot::RefusedError { "memory.page_without_backing" };
+        }
+    }
+    for (const auto& [first, mapping] : file_mappings_) {
+        for (std::uint64_t base = first; base < mapping.end;
+            base += page_size) {
+            const auto address = static_cast<std::uint32_t>(base);
+            if (contents.contains(address) ||
+                !vm_map_.accessible(address,
+                    static_cast<std::uint64_t>(address) + page_size,
+                    MemoryPermission::None)) {
+                continue;
+            }
+            const auto file_offset = mapping.file_offset + (base - first);
+            const auto byte_count =
+                static_cast<std::uint32_t>(std::min<std::uint64_t>(page_size,
+                    mapping.backing->end_offset - file_offset));
+            auto backing = file_page_cache_->load_page(
+                mapping.backing, file_offset, byte_count);
+            backing->materialize();
+            contents.emplace(address, std::move(backing));
+        }
+    }
+
+    snapshot::save(out, parallel_access_);
+    snapshot::save(out, jit_page_table_enabled_);
+    snapshot::save(out, jit_write_page_table_enabled_);
+    snapshot::save(out, write_generation_);
+    snapshot::save(out,
+        executable_content_generation_.load(std::memory_order_acquire));
+    snapshot::save(out,
+        translation_profile_mapping_generation_.load(std::memory_order_acquire));
+    snapshot::save(out, next_mapping_lease_token_);
+    save_mapping_regions(out, mapping_regions(vm_map_));
+    save_mapping_regions(out, mapping_regions(translation_profile_map_));
+    snapshot::save(out, static_cast<std::uint64_t>(contents.size()));
+    for (const auto& [address, backing] : contents) {
+        const auto page = pages_->find(address);
+        const bool tracked = page != pages_->end();
+        backing->materialize();
+        snapshot::save(out, address);
+        out.raw(backing->bytes);
+        snapshot::save(out,
+            tracked ? page->second.write_generation : std::uint64_t { });
+        snapshot::save(out, tracked && page->second.file_writeback_capable);
+    }
+}
+
+void AddressSpace::load(snapshot::Reader& in)
+{
+    clear();
+    auto lock = write_lock();
+    bool parallel_access { };
+    bool jit_page_table_enabled { };
+    bool jit_write_page_table_enabled { };
+    std::uint64_t executable_content_generation { };
+    std::uint64_t translation_profile_mapping_generation { };
+    snapshot::load(in, parallel_access);
+    snapshot::load(in, jit_page_table_enabled);
+    snapshot::load(in, jit_write_page_table_enabled);
+    snapshot::load(in, write_generation_);
+    snapshot::load(in, executable_content_generation);
+    snapshot::load(in, translation_profile_mapping_generation);
+    snapshot::load(in, next_mapping_lease_token_);
+    for (const auto& region : load_mapping_regions(in)) {
+        vm_map_.map_or(
+            region.address, region.end, region.permissions, region.inheritance);
+        add_page_permissions_locked(
+            region.address, region.end, region.permissions);
+    }
+    for (const auto& region : load_mapping_regions(in)) {
+        translation_profile_map_.map_or(
+            region.address, region.end, region.permissions, region.inheritance);
+    }
+    std::uint64_t page_record_count { };
+    snapshot::load(in, page_record_count);
+    for (std::uint64_t index = 0; index < page_record_count; ++index) {
+        std::uint32_t address { };
+        snapshot::load(in, address);
+        const auto bytes = in.raw(page_size);
+        std::uint64_t write_generation { };
+        bool file_writeback_capable { };
+        snapshot::load(in, write_generation);
+        snapshot::load(in, file_writeback_capable);
+        if (address % page_size != 0 ||
+            !vm_map_.accessible(address,
+                static_cast<std::uint64_t>(address) + page_size,
+                MemoryPermission::None)) {
+            throw snapshot::FormatError { "snapshot page is not mapped" };
+        }
+        const auto [page, inserted] = pages_->try_emplace(address);
+        if (!inserted)
+            throw snapshot::FormatError { "snapshot repeats a page" };
+        page->second.backing = std::make_shared<GuestPageBacking>();
+        std::copy(
+            bytes.begin(), bytes.end(), page->second.backing->bytes.begin());
+        page->second.write_generation = write_generation;
+        page->second.file_writeback_capable = file_writeback_capable;
+        cache_page_locked(address, page->second);
+    }
+    executable_content_generation_.store(
+        executable_content_generation, std::memory_order_release);
+    translation_profile_mapping_generation_.store(
+        translation_profile_mapping_generation, std::memory_order_release);
+    parallel_access_ = parallel_access;
+    jit_page_table_enabled_ = jit_page_table_enabled;
+    jit_write_page_table_enabled_ = jit_write_page_table_enabled;
+    if (jit_read_page_table_ || jit_write_page_table_) {
+        for (const auto& [address, page] : *pages_) {
+            static_cast<void>(page);
+            refresh_jit_page_locked(address);
+        }
+    }
 }
 
 AddressSpace::ProtectResult AddressSpace::protect_with_result(

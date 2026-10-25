@@ -24,6 +24,7 @@
 
 #include "foundation/file_page_cache.hpp"
 #include "foundation/memory_permission.hpp"
+#include "foundation/snapshot_io.hpp"
 #include "foundation/vm_map.hpp"
 
 namespace emulator {
@@ -146,6 +147,8 @@ public:
     [[nodiscard]] FileSyncResult synchronize_file_mappings(
         std::uint32_t address, std::uint32_t size, bool synchronous);
     void clear();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
     struct ProtectResult {
         bool succeeded { };
         bool executable_permissions_changed { };
