@@ -33,28 +33,35 @@ static float distance(Point a, Point b)
     return sqrtf(x * x + y * y);
 }
 
-static unsigned char gradient(const uint8_t *image, size_t width, size_t height, size_t stride, size_t x, size_t y)
+static void sobel(const uint8_t *image, size_t width, size_t height, size_t x, size_t y, int *gx, int *gy)
 {
-    const uint8_t *p = image + y * stride + x;
-    int gx = -p[-(int)stride - 1] + p[-(int)stride + 1] - 2 * p[-1] + 2 * p[1] - p[(int)stride - 1] + p[(int)stride + 1];
-    int gy = -p[-(int)stride - 1] - 2 * p[-(int)stride] - p[-(int)stride + 1] + p[(int)stride - 1] + 2 * p[(int)stride] + p[(int)stride + 1];
-    (void)width;
-    (void)height;
-    return (unsigned char)fminf(255, sqrtf((float)(gx * gx + gy * gy)) / 4.0f);
+    size_t left = x ? x - 1 : x, right = x + 1 < width ? x + 1 : x;
+    size_t up = y ? y - 1 : y, down = y + 1 < height ? y + 1 : y;
+    const uint8_t *top = image + up * width, *middle = image + y * width, *bottom = image + down * width;
+    *gx = -top[left] + top[right] - 2 * middle[left] + 2 * middle[right] - bottom[left] + bottom[right];
+    *gy = -top[left] - 2 * top[x] - top[right] + bottom[left] + 2 * bottom[x] + bottom[right];
 }
 
-static void sobel(const uint8_t *image, size_t stride, size_t x, size_t y, int *gx, int *gy)
+static unsigned gradient(const uint8_t *image, size_t width, size_t height, size_t x, size_t y)
 {
-    const uint8_t *p = image + y * stride + x;
-    *gx = -p[-(int)stride - 1] + p[-(int)stride + 1] - 2 * p[-1] + 2 * p[1] - p[(int)stride - 1] + p[(int)stride + 1];
-    *gy = -p[-(int)stride - 1] - 2 * p[-(int)stride] - p[-(int)stride + 1] + p[(int)stride - 1] + 2 * p[(int)stride] + p[(int)stride + 1];
+    int gx, gy;
+    sobel(image, width, height, x, y, &gx, &gy);
+    int magnitude = (abs(gx) + abs(gy)) >> 2;
+    return magnitude < 255 ? (unsigned)magnitude : 255;
 }
 
-static void make_edge_row(const uint8_t *image, uint8_t *magnitude_map, uint8_t *edge, size_t width, size_t y, unsigned low_threshold, unsigned high_threshold)
+static void make_edge_pixel(const uint8_t *image, uint8_t *magnitude_map, uint8_t *edge, size_t width, size_t height, size_t x, size_t y, unsigned low_threshold, unsigned high_threshold)
+{
+    unsigned value = gradient(image, width, height, x, y);
+    magnitude_map[y * width + x] = (uint8_t)value;
+    edge[y * width + x] = value >= high_threshold ? 2 : value >= low_threshold ? 1 : 0;
+}
+
+static void make_edge_row(const uint8_t *image, uint8_t *magnitude_map, uint8_t *edge, size_t width, size_t height, size_t y, unsigned low_threshold, unsigned high_threshold, int scalar_only)
 {
     size_t x = 1;
 #if defined(__ARM_NEON__)
-    for (; x + 8 < width; x += 8) {
+    for (; !scalar_only && x + 8 < width; x += 8) {
         int16x8_t tl = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(image + (y - 1) * width + x - 1)));
         int16x8_t tr = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(image + (y - 1) * width + x + 1)));
         int16x8_t ml = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(image + y * width + x - 1)));
@@ -74,28 +81,44 @@ static void make_edge_row(const uint8_t *image, uint8_t *magnitude_map, uint8_t 
     }
 #endif
     for (; x + 1 < width; ++x)
-    {
-        unsigned value = gradient(image, width, width, width, x, y);
-        magnitude_map[y * width + x] = (uint8_t)value;
-        edge[y * width + x] = value >= high_threshold ? 2 : value >= low_threshold ? 1 : 0;
+        make_edge_pixel(image, magnitude_map, edge, width, height, x, y, low_threshold, high_threshold);
+}
+
+static void make_edge_map(const uint8_t *gray, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold, uint8_t *magnitude, uint8_t *edge, int scalar_only)
+{
+    for (size_t y = 0; y < height; ++y) {
+        if (y == 0 || y + 1 == height) {
+            for (size_t x = 0; x < width; ++x)
+                make_edge_pixel(gray, magnitude, edge, width, height, x, y, low_threshold, high_threshold);
+            continue;
+        }
+        make_edge_pixel(gray, magnitude, edge, width, height, 0, y, low_threshold, high_threshold);
+        make_edge_row(gray, magnitude, edge, width, height, y, low_threshold, high_threshold, scalar_only);
+        make_edge_pixel(gray, magnitude, edge, width, height, width - 1, y, low_threshold, high_threshold);
     }
+}
+
+void RevenantVisionEdgeMap(const uint8_t *gray, size_t width, size_t height, unsigned low_threshold, unsigned high_threshold, uint8_t *magnitude, uint8_t *edge, int scalar_only)
+{
+    make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, scalar_only);
 }
 
 static float bilinear(const uint8_t *image, size_t width, size_t height, float x, float y)
 {
-    if (x < 1 || y < 1 || x >= width - 2 || y >= height - 2)
-        return 0;
+    x = fminf(fmaxf(x, 0), (float)(width - 1));
+    y = fminf(fmaxf(y, 0), (float)(height - 1));
     size_t left = (size_t)x, top = (size_t)y;
+    size_t right = left + 1 < width ? left + 1 : left, bottom = top + 1 < height ? top + 1 : top;
     float fx = x - left, fy = y - top;
-    float a = image[top * width + left], b = image[top * width + left + 1];
-    float c = image[(top + 1) * width + left], d = image[(top + 1) * width + left + 1];
+    float a = image[top * width + left], b = image[top * width + right];
+    float c = image[bottom * width + left], d = image[bottom * width + right];
     return (a + (b - a) * fx) + ((c + (d - c) * fx) - (a + (b - a) * fx)) * fy;
 }
 
 static FloatPoint subpixel_edge(const uint8_t *gray, const uint8_t *magnitude, size_t width, size_t height, Point point)
 {
     int gx, gy;
-    sobel(gray, width, (size_t)point.x, (size_t)point.y, &gx, &gy);
+    sobel(gray, width, height, (size_t)point.x, (size_t)point.y, &gx, &gy);
     float norm = sqrtf((float)gx * gx + (float)gy * gy);
     FloatPoint result = {(float)point.x, (float)point.y};
     if (norm < 1)
@@ -307,12 +330,20 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
         free(gray); free(magnitude); free(edge); free(seen); free(queue); free(points); free(hull); free(subpixel);
         return SIZE_MAX;
     }
-    for (size_t y = 0; y < height; ++y)
-        for (size_t x = 0; x < width; ++x)
-            gray[y * width + x] = source[(y * scale) * row_bytes + x * scale];
+    for (size_t y = 0; y < height; ++y) {
+        size_t y0 = y * scale, y1 = y0 + scale < source_height ? y0 + scale : source_height;
+        for (size_t x = 0; x < width; ++x) {
+            size_t x0 = x * scale, x1 = x0 + scale < source_width ? x0 + scale : source_width;
+            unsigned sum = 0;
+            for (size_t sy = y0; sy < y1; ++sy)
+                for (size_t sx = x0; sx < x1; ++sx)
+                    sum += source[sy * row_bytes + sx];
+            unsigned count = (unsigned)((y1 - y0) * (x1 - x0));
+            gray[y * width + x] = (uint8_t)((sum + count / 2) / count);
+        }
+    }
     unsigned low_threshold = 18, high_threshold = 48;
-    for (size_t y = 1; y + 1 < height; ++y)
-        make_edge_row(gray, magnitude, edge, width, y, low_threshold, high_threshold);
+    make_edge_map(gray, width, height, low_threshold, high_threshold, magnitude, edge, 0);
     size_t edge_tail = 0;
     for (size_t i = 0; i < width * height; ++i)
         if (edge[i] == 2) queue[edge_tail++] = i;
@@ -386,8 +417,8 @@ size_t RevenantVisionDetectRectangles(const uint8_t *source, size_t source_width
         order_corners_float(refined);
         RevenantVisionRectangle candidate;
         for (int i = 0; i < 4; ++i) {
-            candidate.corners[i].x = (refined[i].x * scale + 0.5f) / source_width;
-            candidate.corners[i].y = 1.0f - (refined[i].y * scale + 0.5f) / source_height;
+            candidate.corners[i].x = (refined[i].x + 0.5f) * scale / source_width;
+            candidate.corners[i].y = 1.0f - (refined[i].y + 0.5f) * scale / source_height;
         }
         candidate.confidence = confidence;
         candidate.aspect_ratio = aspect;

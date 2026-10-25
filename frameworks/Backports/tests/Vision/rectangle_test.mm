@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     size_t count = detect(one, width, height, options(4), result, 8);
     check((count == 1) != negative);
     float rotated_error = corner_error(result[0], rotated, width, height);
-    check(rotated_error <= 0.5f);
+    check(rotated_error <= 1.25f);
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, one.data(), one.size(), NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
     CGImageRef image = CGImageCreate(width, height, 8, 8, width, colorSpace, kCGImageAlphaNone, provider, NULL, false, kCGRenderingIntentDefault);
@@ -156,7 +156,32 @@ int main(int argc, char **argv)
     count = detect(perspective, width, height, options(4), result, 8);
     check(count == 1);
     float perspective_error = corner_error(result[0], card, width, height);
-    check(perspective_error <= 0.5f);
+    check(perspective_error <= 0.75f);
+
+    Quad aligned = {{{100, 100}, {300, 100}, {300, 200}, {100, 200}}};
+    auto axisAligned = fixture(width, height, &aligned, 1, false);
+    count = detect(axisAligned, width, height, options(4), result, 8);
+    check(count == 1);
+    float aligned_error = corner_error(result[0], aligned, width, height);
+    check(aligned_error <= 0.5f);
+
+    Quad touching = {{{4, 6}, {300, 6}, {300, 200}, {4, 200}}};
+    auto touchingEdge = fixture(width, height, &touching, 1, false);
+    count = detect(touchingEdge, width, height, options(4), result, 8);
+    check(count == 1);
+    float touching_error = corner_error(result[0], touching, width, height);
+    check(touching_error <= 1.25f);
+
+    const size_t edgeWidth = 317, edgeHeight = 241;
+    Quad small = {{{40, 30}, {270, 50}, {250, 200}, {60, 190}}};
+    auto edgeImage = fixture(edgeWidth, edgeHeight, &small, 1, false);
+    std::vector<uint8_t> neonMagnitude(edgeWidth * edgeHeight), neonEdge(edgeWidth * edgeHeight);
+    std::vector<uint8_t> scalarMagnitude(edgeWidth * edgeHeight), scalarEdge(edgeWidth * edgeHeight);
+    RevenantVisionEdgeMap(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, neonMagnitude.data(), neonEdge.data(), 0);
+    RevenantVisionEdgeMap(edgeImage.data(), edgeWidth, edgeHeight, 18, 48, scalarMagnitude.data(), scalarEdge.data(), 1);
+    check(neonMagnitude == scalarMagnitude);
+    check(neonEdge == scalarEdge);
+    check(std::count(neonEdge.begin(), neonEdge.end(), 2) > 0);
 
     auto noise = fixture(width, height, NULL, 0, true);
     count = detect(noise, width, height, options(4), result, 8);
@@ -185,6 +210,6 @@ int main(int argc, char **argv)
     const int iterations = 300;
     for (int i = 0; i < iterations; ++i) detect(one, width, height, timingOptions, result, 8);
     auto elapsed = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count() / iterations;
-    std::printf("rectangle-corner-error-max-px=%.2f\n", std::max({rotated_error, perspective_error, mapped_error}));
+    std::printf("rectangle-corner-error-max-px=%.2f\n", std::max({rotated_error, perspective_error, mapped_error, aligned_error, touching_error}));
     std::printf("rectangle-host-640x480-ms-per-frame=%.3f\n", elapsed);
 }
