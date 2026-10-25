@@ -893,32 +893,7 @@ MachOImage MachOImage::parse(const std::filesystem::path& path,
             extract_code_signature_entitlements(
                 bytes, code_signature->first, code_signature->second);
     }
-    image.symbol_file_locations_.reserve(image.symbols_.size());
-    for (std::size_t index = 0; index < image.symbols_.size(); ++index) {
-        const auto& symbol = image.symbols_[index];
-        if (symbol.value == 0U)
-            continue;
-        const auto segment = std::find_if(image.segments_.begin(),
-            image.segments_.end(), [&](const MachSegment& candidate) {
-                return symbol.value >= candidate.vm_address &&
-                       symbol.value - candidate.vm_address <
-                           candidate.file_size;
-            });
-        if (segment == image.segments_.end())
-            continue;
-        image.symbol_file_locations_.push_back(
-            MachSymbolFileLocation { static_cast<std::uint32_t>(index),
-                static_cast<std::uint64_t>(segment->file_offset) +
-                    (symbol.value - segment->vm_address) });
-    }
-    std::sort(image.symbol_file_locations_.begin(),
-        image.symbol_file_locations_.end(),
-        [](const MachSymbolFileLocation& left,
-            const MachSymbolFileLocation& right) {
-            if (left.file_offset != right.file_offset)
-                return left.file_offset < right.file_offset;
-            return left.symbol_index < right.symbol_index;
-        });
+    image.rebuild_symbol_file_locations();
     return image;
 }
 
@@ -945,6 +920,52 @@ const MachSymbol* MachOImage::find_symbol(std::string_view name) const
     const auto it = std::find_if(symbols_.begin(), symbols_.end(),
         [name](const MachSymbol& symbol) { return symbol.name == name; });
     return it == symbols_.end() ? nullptr : &*it;
+}
+
+void MachOImage::add_local_symbols(std::vector<MachSymbol> locals)
+{
+    std::set<std::string> names;
+    for (const auto& symbol : symbols_)
+        names.insert(symbol.name);
+    auto added = false;
+    for (auto& symbol : locals) {
+        if (!names.insert(symbol.name).second)
+            continue;
+        symbols_.push_back(std::move(symbol));
+        added = true;
+    }
+    if (added)
+        rebuild_symbol_file_locations();
+}
+
+void MachOImage::rebuild_symbol_file_locations()
+{
+    symbol_file_locations_.clear();
+    symbol_file_locations_.reserve(symbols_.size());
+    for (std::size_t index = 0; index < symbols_.size(); ++index) {
+        const auto& symbol = symbols_[index];
+        if (symbol.value == 0U)
+            continue;
+        const auto segment = std::find_if(segments_.begin(), segments_.end(),
+            [&](const MachSegment& candidate) {
+                return symbol.value >= candidate.vm_address &&
+                       symbol.value - candidate.vm_address <
+                           candidate.file_size;
+            });
+        if (segment == segments_.end())
+            continue;
+        symbol_file_locations_.push_back(
+            MachSymbolFileLocation { static_cast<std::uint32_t>(index),
+                static_cast<std::uint64_t>(segment->file_offset) +
+                    (symbol.value - segment->vm_address) });
+    }
+    std::sort(symbol_file_locations_.begin(), symbol_file_locations_.end(),
+        [](const MachSymbolFileLocation& left,
+            const MachSymbolFileLocation& right) {
+            if (left.file_offset != right.file_offset)
+                return left.file_offset < right.file_offset;
+            return left.symbol_index < right.symbol_index;
+        });
 }
 
 const MachStub* MachOImage::find_stub(std::uint32_t address) const
