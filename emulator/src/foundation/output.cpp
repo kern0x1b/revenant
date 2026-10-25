@@ -22,6 +22,7 @@ namespace {
             "[clock]",
             "[process]",
             "[cpu] fatal",
+            "[fault-words]",
             "[time]",
             "[signal]",
             "[mach] stalled",
