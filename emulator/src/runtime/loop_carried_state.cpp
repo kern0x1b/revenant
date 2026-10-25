@@ -44,6 +44,7 @@ void save_loop_carried_state(
     snapshot::save(out, state.display_inflight_callback_sequence);
     snapshot::save(out, state.diagnostic_display_yield_count);
     snapshot::save(out, state.remaining_ticks);
+    snapshot::save(out, state.executed_ticks);
     snapshot::save(out, state.executed_ticks_since_catch_up);
     snapshot::save(out, state.interaction_generation);
     snapshot::save(out, state.input_receiver_process);
@@ -60,6 +61,7 @@ LoopCarriedState load_loop_carried_state(snapshot::Reader& in)
     snapshot::load(in, state.display_inflight_callback_sequence);
     snapshot::load(in, state.diagnostic_display_yield_count);
     snapshot::load(in, state.remaining_ticks);
+    snapshot::load(in, state.executed_ticks);
     snapshot::load(in, state.executed_ticks_since_catch_up);
     snapshot::load(in, state.interaction_generation);
     snapshot::load(in, state.input_receiver_process);

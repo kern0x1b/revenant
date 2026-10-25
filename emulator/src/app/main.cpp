@@ -1162,6 +1162,12 @@ void boot(const std::vector<std::string>& args, Output& output)
     options.snapshot_output = option(args, "--snapshot-out");
     if (options.snapshot_output && !options.ticks)
         throw std::runtime_error { "--snapshot-out needs --ticks" };
+    if (options.snapshot_output &&
+        *options.ticks % bounded_tick_alignment != 0)
+        throw std::runtime_error {
+            "--snapshot-out needs --ticks to be a multiple of " +
+            std::to_string(bounded_tick_alignment)
+        };
     options.snapshot_input = option(args, "--snapshot-in");
     if (options.snapshot_input && !options.ticks)
         throw std::runtime_error {

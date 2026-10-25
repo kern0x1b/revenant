@@ -19,6 +19,9 @@
 
 namespace emulator {
 
+inline constexpr std::uint64_t bounded_tick_alignment = std::uint64_t { 1 }
+    << 20;
+
 enum class JitProfileMode : std::uint8_t {
     Adaptive,
     Off,

@@ -49,6 +49,7 @@ std::vector<std::byte> save_space(const AddressSpace& space)
 std::unique_ptr<AddressSpace> load_space(const std::vector<std::byte>& bytes)
 {
     auto space = std::make_unique<AddressSpace>();
+    space->set_backing_root(std::filesystem::temp_directory_path());
     Reader in { bytes };
     space->load(in);
     expect(in.at_end(), "the address space stream is consumed");
@@ -201,6 +202,7 @@ void clean_file_pages_come_back_from_the_file()
     const auto path = test_file_path();
     const auto file = write_test_file(path, 0x3c);
     AddressSpace source;
+    source.set_backing_root(std::filesystem::temp_directory_path());
     expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
         "map the file read-only");
     expect(source.read_bytes(0x30000, 0x2000) == file,
@@ -225,6 +227,7 @@ void changed_file_is_refused_on_restore()
     const auto path = test_file_path();
     static_cast<void>(write_test_file(path, 0x3c));
     AddressSpace source;
+    source.set_backing_root(std::filesystem::temp_directory_path());
     expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
         "map the file read-only");
     const auto bytes = save_space(source);
@@ -245,6 +248,7 @@ void written_file_page_is_stored_and_the_file_is_untouched()
     const auto path = test_file_path();
     const auto file = write_test_file(path, 0x5e);
     AddressSpace source;
+    source.set_backing_root(std::filesystem::temp_directory_path());
     expect(source.map_file(0x40000, 0x2000,
                MemoryPermission::Read | MemoryPermission::Write, path, 0),
         "map the file writable");
@@ -287,7 +291,9 @@ void move_second_file_mapping(std::vector<std::byte>& bytes,
     std::uint64_t end)
 {
     std::vector<std::byte> needle;
-    for (const char character : path.string())
+    const auto relative =
+        path.lexically_relative(std::filesystem::temp_directory_path());
+    for (const char character : relative.string())
         needle.push_back(static_cast<std::byte>(character));
     const auto first = std::search(
         bytes.begin(), bytes.end(), needle.begin(), needle.end());
@@ -311,6 +317,7 @@ void overlapping_file_mapping_is_refused_on_restore()
     const auto path = test_file_path();
     static_cast<void>(write_test_file(path, 0x6b));
     AddressSpace source;
+    source.set_backing_root(std::filesystem::temp_directory_path());
     expect(source.map_file(0x30000, 0x2000, MemoryPermission::Read, path, 0),
         "map the first file range");
     expect(source.map_file(0x32000, 0x2000, MemoryPermission::Read, path, 0),

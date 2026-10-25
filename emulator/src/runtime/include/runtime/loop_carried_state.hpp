@@ -24,6 +24,7 @@ struct LoopCarriedState {
     std::uint64_t display_inflight_callback_sequence { };
     std::uint64_t diagnostic_display_yield_count { };
     std::uint64_t remaining_ticks { };
+    std::uint64_t executed_ticks { };
     std::uint64_t executed_ticks_since_catch_up { };
     std::uint64_t interaction_generation { 1U };
     std::optional<std::uint32_t> input_receiver_process;

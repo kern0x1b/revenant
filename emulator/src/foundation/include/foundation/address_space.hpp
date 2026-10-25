@@ -97,6 +97,7 @@ public:
         std::shared_ptr<GuestFileGenerationRegistry> generation_registry);
 
     void set_parallel_access(bool enabled);
+    void set_backing_root(std::filesystem::path root);
     class ExclusiveAccess {
     public:
         explicit ExclusiveAccess(AddressSpace& memory);
@@ -383,6 +384,7 @@ private:
 
     mutable std::mutex mutex_;
     bool parallel_access_ { true };
+    std::filesystem::path backing_root_;
     VmMap vm_map_;
     VmMap translation_profile_map_;
     std::shared_ptr<PageMap> pages_ { std::make_shared<PageMap>() };

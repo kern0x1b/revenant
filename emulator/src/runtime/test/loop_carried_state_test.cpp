@@ -39,6 +39,7 @@ LoopCarriedState populated_state()
     state.display_inflight_callback_sequence = 11;
     state.diagnostic_display_yield_count = 12;
     state.remaining_ticks = 13;
+    state.executed_ticks = 18;
     state.executed_ticks_since_catch_up = 14;
     state.interaction_generation = 15;
     state.input_receiver_process = 16U;

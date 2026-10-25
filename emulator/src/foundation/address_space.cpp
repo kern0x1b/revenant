@@ -25,6 +25,17 @@
 namespace emulator {
 namespace {
 
+    std::string backing_relative_path(
+        const std::filesystem::path& path, const std::filesystem::path& root)
+    {
+        if (root.empty())
+            throw snapshot::RefusedError { "mem.file_mappings" };
+        const auto relative = path.lexically_relative(root);
+        if (relative.empty() || *relative.begin() == "..")
+            throw snapshot::RefusedError { "mem.file_mappings" };
+        return relative.generic_string();
+    }
+
     std::atomic<std::uint64_t> write_batch_calls { };
     std::atomic<std::uint64_t> write_batch_operations { };
     std::atomic<std::uint64_t> write_batch_failures { };
@@ -263,6 +274,11 @@ std::uint64_t AddressSpace::exclusive_reservation_key(
     } catch (...) {
     }
     return static_cast<std::uint64_t>(address & exclusive_granule_mask);
+}
+
+void AddressSpace::set_backing_root(std::filesystem::path root)
+{
+    backing_root_ = std::move(root);
 }
 
 void AddressSpace::set_parallel_access(bool enabled)
@@ -735,7 +751,8 @@ void AddressSpace::save(snapshot::Writer& out) const
         snapshot::save(out, address);
         snapshot::save(out, mapping.end);
         snapshot::save(out, mapping.file_offset);
-        snapshot::save(out, mapping.backing->path.string());
+        snapshot::save(out,
+            backing_relative_path(mapping.backing->path, backing_root_));
         snapshot::save(out, file_identities[identity_index++].digest);
     }
     snapshot::save(out, static_cast<std::uint64_t>(resident.size()));
@@ -806,7 +823,7 @@ void AddressSpace::load(snapshot::Reader& in)
             overlaps_next || overlaps_previous) {
             throw snapshot::FormatError { "snapshot holds a bad file mapping" };
         }
-        const std::filesystem::path file_path { path };
+        const auto file_path = backing_root_ / path;
         const auto actual = mapped_range_identity(
             file_path, file_offset, end - address);
         if (!actual || *actual != identity) {

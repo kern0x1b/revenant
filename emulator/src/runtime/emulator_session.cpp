@@ -596,6 +596,7 @@ void EmulatorSession::run()
     }
     auto initial_memory = std::make_unique<AddressSpace>();
     initial_memory->set_parallel_access(guest_processor_count > 1);
+    initial_memory->set_backing_root(rootfs);
     ProcessLoader loader { rootfs, *initial_memory, guest_architecture,
         session_catalog.index(), darwin_abi.initial_apple_vector_abi, darwin_abi.address_layout };
     std::vector<std::string> initial_environment {
@@ -2179,6 +2180,7 @@ void EmulatorSession::run()
         load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
         if (!in.at_end())
             throw snapshot::FormatError { "snapshot has bytes after the session state" };
+        loop_state.executed_ticks = restored_snapshot->header.ticks;
         loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
         output.line("[snapshot] restored=" + *options.snapshot_input +
                     " saved-ticks=" + std::to_string(restored_snapshot->header.ticks) +
@@ -3677,7 +3679,6 @@ void EmulatorSession::run()
                            guest_ticks_per_second));
             }
         }
-        auto batch_ticks = loop_state.remaining_ticks;
         const auto host_slice_now = std::chrono::steady_clock::now();
         const auto host_control_deadline = next_host_control_deadline();
         const auto host_control_delay =
@@ -3686,6 +3687,9 @@ void EmulatorSession::run()
                           duration_cast<std::chrono::nanoseconds>(
                               *host_control_deadline - host_slice_now) }
                 : std::nullopt;
+        auto batch_ticks = std::min(loop_state.remaining_ticks,
+            bounded_tick_alignment -
+                loop_state.executed_ticks % bounded_tick_alignment);
         const auto display_deadline_delay =
             realtime_pacer && display_vsync_deadline
                 ? std::optional<std::chrono::nanoseconds> { realtime_pacer
@@ -3875,6 +3879,7 @@ void EmulatorSession::run()
             stopped_result = result;
             consumed_ticks += result.ticks_consumed;
             if (bounded_execution) {
+                loop_state.executed_ticks += result.ticks_consumed;
                 loop_state.remaining_ticks -=
                     std::min(loop_state.remaining_ticks, result.ticks_consumed);
             }
@@ -4777,7 +4782,7 @@ void EmulatorSession::run()
         SessionSnapshot snapshot;
         snapshot.header.device = std::string { device.identity.product_type };
         snapshot.header.binary = binary;
-        snapshot.header.ticks = *ticks_option;
+        snapshot.header.ticks = loop_state.executed_ticks;
         snapshot.header.rootfs_manifest = rootfs_manifest_identity(
             rootfs, host_cache / "rootfs-manifest-digests.bin");
         snapshot.body = std::move(body.bytes());
@@ -4795,7 +4800,7 @@ void EmulatorSession::run()
         std::filesystem::rename(partial, target);
         output.line("[snapshot] written=" + target +
                     " bytes=" + std::to_string(encoded.size()) +
-                    " ticks=" + std::to_string(*ticks_option));
+                    " ticks=" + std::to_string(loop_state.executed_ticks));
     }
     if (bounded_execution)
         host.session_stopped(*initial_runtime->kernel, *initial_runtime->memory);
