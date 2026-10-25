@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 222> saved_members {
+inline constexpr std::array<std::string_view, 223> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -226,6 +226,7 @@ inline constexpr std::array<std::string_view, 222> saved_members {
     "kss.task_thread_port_objects",
     "kss.route_table",
     "kss.hid_event_queue",
+    "kss.baseband_device_state",
     "kss.mach_queues",
     "kss.mach_semaphores",
     "kss.kernel_events",
@@ -234,13 +235,12 @@ inline constexpr std::array<std::string_view, 222> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 36> open_members {
+inline constexpr std::array<std::string_view, 35> open_members {
     "kss.active_springboard_alert_items",
     "kss.application_fullscreen_surface_publications",
     "kss.application_launch_attempts",
     "kss.application_scene_context_owners",
     "kss.application_scene_transforms",
-    "kss.baseband_device_state",
     "kss.effaceable_storage_available",
     "kss.hfs_named_attribute_overrides",
     "kss.iokit_camera_accelerator_connections",

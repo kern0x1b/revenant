@@ -674,6 +674,7 @@ void KernelSharedState::save_service_tables(snapshot::Writer& out) const
     snapshot::save(out, volatile_paths);
     route_table.save(out);
     hid_event_queue.save(out);
+    baseband_device_state.save(out);
 }
 
 void KernelSharedState::load_service_tables(snapshot::Reader& in)
@@ -715,6 +716,7 @@ void KernelSharedState::load_service_tables(snapshot::Reader& in)
         volatile_shared_memory_backings.insert(std::filesystem::path { path });
     route_table.load(in);
     hid_event_queue.load(in);
+    baseband_device_state.load(in);
 }
 
 void KernelSharedState::save_key_store_identity(snapshot::Writer& out) const

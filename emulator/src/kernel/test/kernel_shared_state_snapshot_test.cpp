@@ -18,6 +18,7 @@
 #include <iostream>
 #include <map>
 #include <random>
+#include <span>
 #include <string>
 #include <utility>
 #include <variant>
@@ -539,6 +540,54 @@ void key_store_identity_is_checked_on_restore()
 
 }
 
+void round_trip_restores_the_baseband_state()
+{
+    KernelSharedState source;
+    auto& baseband = source.baseband_device_state;
+    baseband.set_modem_control_bits(3U);
+    baseband.set_h5_transport_mode(true);
+    baseband.set_minimum_receive_bytes(4U);
+    baseband.set_receive_eof(true);
+    baseband.set_transmit_capture_enabled(true);
+    const std::array<std::byte, 2> received { std::byte { 0x41 }, std::byte { 0x42 } };
+    baseband.enqueue_receive(received);
+    static_cast<void>(baseband.register_mux_channel("ipc"));
+    Writer out;
+    source.save_service_tables(out);
+    const auto bytes = out.bytes();
+
+    KernelSharedState restored;
+    Reader in { bytes };
+    restored.load_service_tables(in);
+    expect(in.at_end(), "the baseband state stream is consumed");
+    expect(restored.baseband_device_state.pending_receive_bytes() == 2U,
+        "queued baseband receive bytes are restored");
+    expect(restored.baseband_device_state.receive_eof(),
+        "the baseband receive end of file is restored");
+    expect(restored.baseband_device_state.modem_control_bits() == 3U,
+        "the baseband modem control bits are restored");
+    Writer again;
+    restored.save_service_tables(again);
+    expect(again.bytes() == bytes,
+        "saving the restored baseband state reproduces the same stream");
+}
+
+void host_transmit_sink_is_refused_by_name()
+{
+    KernelSharedState state;
+    state.baseband_device_state.set_transmit_sink(
+        [](std::span<const std::byte>) { return true; });
+    bool refused = false;
+    try {
+        Writer out;
+        state.save_service_tables(out);
+    } catch (const snapshot::RefusedError& error) {
+        refused = std::string { error.what() }.find(
+                      "kss.baseband_device_state.transmit_sink") != std::string::npos;
+    }
+    expect(refused, "a baseband host transmit sink is refused by name");
+}
+
 int main()
 {
     round_trip_restores_the_scalars();
@@ -546,6 +595,8 @@ int main()
     truncated_stream_is_a_format_error();
     round_trip_restores_the_tables();
     round_trip_restores_the_service_tables();
+    round_trip_restores_the_baseband_state();
+    host_transmit_sink_is_refused_by_name();
     repeated_kevent_state_is_refused();
     round_trip_restores_the_processes();
     unknown_core_animation_abi_is_refused();

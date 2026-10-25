@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -22,6 +24,9 @@ public:
         std::uint32_t channel, std::span<const std::byte> bytes);
     void reset();
     void reset(std::uint32_t channel);
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     std::map<std::uint32_t, std::string> lines_;

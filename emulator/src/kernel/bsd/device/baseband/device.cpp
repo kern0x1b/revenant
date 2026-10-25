@@ -670,6 +670,101 @@ bool State::transmit_sink_failed() const
     return transmit_sink_failed_;
 }
 
+void State::save(snapshot::Writer& out) const
+{
+    const std::lock_guard lock { mutex_ };
+    if (transmit_sink_)
+        throw snapshot::RefusedError { "kss.baseband_device_state.transmit_sink" };
+    if (exclusive_owner_)
+        throw snapshot::RefusedError { "kss.baseband_device_state.exclusive_owner" };
+    if (offline_response_deadline_ != std::chrono::steady_clock::time_point { })
+        throw snapshot::RefusedError { "kss.baseband_device_state.offline_response_deadline" };
+    for (const auto& [channel, state] : channels_) {
+        if (!state.scheduled_receive_queue.empty())
+            throw snapshot::RefusedError { "kss.baseband_device_state.scheduled_receive" };
+    }
+    snapshot::save(out, available_);
+    snapshot::save(out, transmit_queue_writable_);
+    snapshot::save(out, dynamic_channels_available_);
+    snapshot::save(out, exclusive_);
+    snapshot::save(out, next_open_token_);
+    snapshot::save(out, h5_transport_mode_);
+    snapshot::save(out, modem_control_bits_);
+    snapshot::save(out, receive_queue_configuration_);
+    snapshot::save(out, receive_queue_configured_);
+    snapshot::save(out, anonymous_mux_channel_capacity_);
+    snapshot::save(out, next_anonymous_mux_channel_);
+    snapshot::save(out, mux_channels_);
+    snapshot::save(out, mux_network_interfaces_);
+    snapshot::save(out, next_mux_channel_);
+    snapshot::save(out, attributes_.input_flags);
+    snapshot::save(out, attributes_.output_flags);
+    snapshot::save(out, attributes_.control_flags);
+    snapshot::save(out, attributes_.local_flags);
+    snapshot::save(out, attributes_.control_characters);
+    snapshot::save(out, attributes_.input_speed);
+    snapshot::save(out, attributes_.output_speed);
+    snapshot::save(out, static_cast<std::uint64_t>(channels_.size()));
+    for (const auto& [channel, state] : channels_) {
+        snapshot::save(out, channel);
+        snapshot::save(out, state.receive_queue);
+        snapshot::save(out, state.minimum_receive_bytes);
+    }
+    snapshot::save(out, receive_eof_);
+    snapshot::save(out, transmitted_);
+    snapshot::save(out, transmit_sink_failed_);
+    snapshot::save(out, transmit_capture_enabled_);
+    snapshot::save(out, offline_control_enabled_);
+    offline_control_.save(out);
+}
+
+void State::load(snapshot::Reader& in)
+{
+    const std::lock_guard lock { mutex_ };
+    snapshot::load(in, available_);
+    snapshot::load(in, transmit_queue_writable_);
+    snapshot::load(in, dynamic_channels_available_);
+    snapshot::load(in, exclusive_);
+    snapshot::load(in, next_open_token_);
+    snapshot::load(in, h5_transport_mode_);
+    snapshot::load(in, modem_control_bits_);
+    snapshot::load(in, receive_queue_configuration_);
+    snapshot::load(in, receive_queue_configured_);
+    snapshot::load(in, anonymous_mux_channel_capacity_);
+    snapshot::load(in, next_anonymous_mux_channel_);
+    snapshot::load(in, mux_channels_);
+    snapshot::load(in, mux_network_interfaces_);
+    snapshot::load(in, next_mux_channel_);
+    snapshot::load(in, attributes_.input_flags);
+    snapshot::load(in, attributes_.output_flags);
+    snapshot::load(in, attributes_.control_flags);
+    snapshot::load(in, attributes_.local_flags);
+    snapshot::load(in, attributes_.control_characters);
+    snapshot::load(in, attributes_.input_speed);
+    snapshot::load(in, attributes_.output_speed);
+    std::uint64_t channel_count { };
+    snapshot::load(in, channel_count);
+    channels_.clear();
+    for (std::uint64_t index = 0; index < channel_count; ++index) {
+        std::uint32_t channel { };
+        snapshot::load(in, channel);
+        ChannelState state;
+        snapshot::load(in, state.receive_queue);
+        snapshot::load(in, state.minimum_receive_bytes);
+        if (!channels_.emplace(channel, std::move(state)).second)
+            throw snapshot::FormatError { "snapshot repeats a baseband channel" };
+    }
+    snapshot::load(in, receive_eof_);
+    snapshot::load(in, transmitted_);
+    snapshot::load(in, transmit_sink_failed_);
+    snapshot::load(in, transmit_capture_enabled_);
+    snapshot::load(in, offline_control_enabled_);
+    offline_control_.load(in);
+    exclusive_owner_.reset();
+    transmit_sink_ = { };
+    offline_response_deadline_ = { };
+}
+
 bool is_mux_channel_path(std::string_view candidate)
 {
     return numeric_suffix(candidate).has_value();
