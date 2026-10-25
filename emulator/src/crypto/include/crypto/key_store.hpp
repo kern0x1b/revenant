@@ -26,6 +26,7 @@ public:
     KeyStore(const KeyStore&) = delete;
     KeyStore& operator=(const KeyStore&) = delete;
 
+    [[nodiscard]] std::optional<std::array<std::byte, 32>> identity() const;
     [[nodiscard]] std::optional<std::vector<std::byte>> wrap(
         std::uint32_t key_class, std::span<const std::byte> key) const;
     [[nodiscard]] std::optional<std::vector<std::byte>> unwrap(

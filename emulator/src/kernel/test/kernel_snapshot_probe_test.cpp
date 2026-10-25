@@ -33,7 +33,7 @@ using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
 
-constexpr std::array<std::string_view, 76> saved_members {
+constexpr std::array<std::string_view, 77> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -110,10 +110,10 @@ constexpr std::array<std::string_view, 76> saved_members {
     "kss.kernel_events",
     "kss.process_kevent_states",
     "kss.processes",
+    "kss.key_store",
 };
 
-constexpr std::array<std::string_view, 46> open_members {
-    "kss.key_store",
+constexpr std::array<std::string_view, 45> open_members {
     "hid.state_",
     "coreaudio.service_",
     "coreaudio.buffer_frame_size_",

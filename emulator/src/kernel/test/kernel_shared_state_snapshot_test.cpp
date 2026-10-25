@@ -4,6 +4,7 @@
 
 #include "kernel/kernel_shared_state.hpp"
 
+#include "crypto/key_store.hpp"
 #include "foundation/application_display.hpp"
 #include "foundation/display_geometry.hpp"
 #include "foundation/snapshot_io.hpp"
@@ -11,9 +12,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <map>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -265,6 +267,70 @@ void unknown_core_animation_abi_is_refused()
         "an unknown Core Animation ABI name is refused with FormatError");
 }
 
+std::vector<std::byte> save_key_store(const KernelSharedState& state)
+{
+    Writer out;
+    state.save_key_store_identity(out);
+    return out.bytes();
+}
+
+bool key_store_load_throws(
+    KernelSharedState& state, const std::vector<std::byte>& bytes)
+{
+    Reader in { bytes };
+    try {
+        state.load_key_store_identity(in);
+    } catch (const FormatError&) {
+        return true;
+    }
+    return false;
+}
+
+void key_store_identity_is_checked_on_restore()
+{
+    std::random_device device;
+    const auto root = std::filesystem::temp_directory_path() /
+        ("kernel-key-store-" + std::to_string(device()));
+    const auto first = emulator::KeyStore::open(root / "first" / "state");
+    const auto same = emulator::KeyStore::open(root / "first" / "state");
+    const auto other = emulator::KeyStore::open(root / "other" / "state");
+    expect(first && same && other, "three key stores open");
+
+    KernelSharedState source;
+    source.key_store = first;
+    const auto bytes = save_key_store(source);
+
+    KernelSharedState matching;
+    matching.key_store = same;
+    Reader in { bytes };
+    matching.load_key_store_identity(in);
+    expect(in.at_end(), "the key store identity is consumed");
+    expect(save_key_store(matching) == bytes,
+        "the same key store file restores the same identity");
+
+    KernelSharedState mismatched;
+    mismatched.key_store = other;
+    expect(key_store_load_throws(mismatched, bytes),
+        "a different key store file is refused with FormatError");
+
+    KernelSharedState absent;
+    expect(key_store_load_throws(absent, bytes),
+        "a saved key store with no wiring is refused with FormatError");
+
+    KernelSharedState bare_source;
+    const auto bare_bytes = save_key_store(bare_source);
+    KernelSharedState bare_restored;
+    expect(!key_store_load_throws(bare_restored, bare_bytes),
+        "no key store on either side restores");
+
+    KernelSharedState wired;
+    wired.key_store = first;
+    expect(key_store_load_throws(wired, bare_bytes),
+        "a wired key store with no saved one is refused with FormatError");
+
+    std::filesystem::remove_all(root);
+}
+
 }
 
 int main()
@@ -275,6 +341,7 @@ int main()
     repeated_kevent_state_is_refused();
     round_trip_restores_the_processes();
     unknown_core_animation_abi_is_refused();
+    key_store_identity_is_checked_on_restore();
     if (failures != 0) {
         std::cerr << failures << " kernel shared state snapshot checks failed\n";
         return 1;

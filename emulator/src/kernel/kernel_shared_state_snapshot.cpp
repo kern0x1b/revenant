@@ -4,8 +4,10 @@
 
 #include "kernel/kernel_shared_state.hpp"
 
+#include "crypto/key_store.hpp"
 #include "foundation/snapshot_io.hpp"
 
+#include <array>
 #include <atomic>
 #include <string>
 
@@ -310,6 +312,40 @@ void KernelSharedState::load_process_table(snapshot::Reader& in)
         if (!processes.emplace(pid, load_process_record(in)).second)
             throw snapshot::FormatError { "snapshot repeats a process" };
     }
+}
+
+void KernelSharedState::save_key_store_identity(snapshot::Writer& out) const
+{
+    snapshot::save(out, key_store != nullptr);
+    if (!key_store)
+        return;
+    const auto identity = key_store->identity();
+    if (!identity)
+        throw snapshot::RefusedError { "kss.key_store" };
+    snapshot::save(out, *identity);
+}
+
+void KernelSharedState::load_key_store_identity(snapshot::Reader& in)
+{
+    bool present { };
+    snapshot::load(in, present);
+    if (!present) {
+        if (key_store)
+            throw snapshot::FormatError {
+                "snapshot has no key store but the wiring does"
+            };
+        return;
+    }
+    std::array<std::byte, 32> saved { };
+    snapshot::load(in, saved);
+    if (!key_store)
+        throw snapshot::FormatError {
+            "snapshot has a key store but the wiring does not"
+        };
+    if (key_store->identity() != saved)
+        throw snapshot::FormatError {
+            "snapshot key store differs from the wiring"
+        };
 }
 
 }
