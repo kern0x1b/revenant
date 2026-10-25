@@ -214,6 +214,8 @@ public:
 
     [[nodiscard]] std::optional<std::uint32_t> table_id(std::uint64_t device,
         std::uint64_t inode, const std::filesystem::path& path) const;
+    [[nodiscard]] std::uint32_t guest_path_id(
+        const std::filesystem::path& path) const;
     [[nodiscard]] std::optional<GuestIdTable::Identity> last_link_identity(
         const std::filesystem::path& path) const;
     bool remove_name(
