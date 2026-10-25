@@ -139,7 +139,7 @@ The jobs, chosen by `job`:
   round. `measurement.md` has one row per boot: real, user and system seconds from `/usr/bin/time -l`, maximum RSS and
   peak footprint in MB. The table is also on the run's summary page, and each boot keeps its perf summary and log.
 
-The runner builds the emulator in release and takes the firmware it boots from `./xmakew firmware`: the iOS 6.1.3 shared
+The runner builds the emulator in release and takes the firmware it boots from the revenant `firmware` task: the iOS 6.1.3 shared
 cache (key `dyld-shared-cache-6.1.3-armv7-v1`) and the root filesystem of the iPhone 4S (key
 `firmware-rootfs-6.1.3-iphone4-1-v1`), under `~/.revenant/dyld/6.1.3` and `~/.revenant/firmware/rootfs/iPhone4,1`.
 A boot clones the root filesystem, since the emulator writes its device state beside the one it boots.
