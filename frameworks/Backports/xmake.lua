@@ -98,6 +98,7 @@ local LIBRARIES = {
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
     {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
+    {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -251,7 +252,7 @@ else
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
                                   network = "network_test.lua", networktls = "network_tls_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
-                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua",
+                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua"})
 end
 
@@ -271,12 +272,13 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
         add_includedirs(path.join(RUNTIME, "app"))
+        add_deps("RevenantInterposeProbe")
         add_mflags("-fobjc-arc")
         if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
         add_syslinks("objc")
@@ -288,6 +290,14 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "probe", "weak_probe.c"))
         add_frameworks("Foundation")
+    target_end()
+
+    target("RevenantInterposeProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "interpose_probe.c"))
+        add_shflags("-Wl,-install_name,/usr/lib/revenant/org.revenant.backports/libRevenantInterposeProbe.dylib", {force = true})
     target_end()
 
     target("RevenantMissingProbe")
@@ -319,6 +329,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("screenshot_notification")
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
+        add_tests("keybag_lock_state")
+        add_tests("iosurface_surface")
+        add_tests("interpose_launch", {should_fail = true})
         add_tests("alias_public_name")
         add_tests("alias_system_class")
         on_test(function (target, opt)
@@ -326,6 +339,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
             for _, failure in ipairs(failures) do
                 cprint("${red}%s: %s", case, failure)
+            end
+            if opt.should_fail then
+                return #failures > 0 and failures[1]:find("^the check must pass", 1) ~= nil
             end
             return #failures == 0
         end)

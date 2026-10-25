@@ -1,0 +1,93 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sun, 25 Oct 2026 10:00:00 +0200
+Subject: [PATCH] Recheck the requires when a required package's recipe or patch changes
+
+A required package is read from its recipe and its patches, but the requirement the project saved kept the
+install folder of its last install, so a changed patch went unseen until the configuration was cleaned. The
+requirement now records the sha256 of the recipe and of the patch files it was installed from, and a configure
+rechecks the requires whenever one of those files differs.
+
+Changes-build-output: no
+---
+ .../action/require/impl/register_packages.lua      |   26 ++++++++++++++++++++
+ xmake/actions/config/main.lua                      |   15 ++++++++++++
+ 2 files changed, 41 insertions(+)
+
+diff --git a/xmake/modules/private/action/require/impl/register_packages.lua b/xmake/modules/private/action/require/impl/register_packages.lua
+index 64d447f..e340006 100644
+--- a/xmake/modules/private/action/require/impl/register_packages.lua
++++ b/xmake/modules/private/action/require/impl/register_packages.lua
+@@ -97,6 +97,31 @@ function _register_required_package_base(instance, required_package)
+     end
+ end
+ 
++function _register_required_package_sources(instance, required_package)
++    if instance:is_system() or instance:is_thirdparty() then
++        return
++    end
++    local scriptdir = instance:scriptdir()
++    local files = {}
++    if scriptdir then
++        table.insert(files, path.join(scriptdir, "xmake.lua"))
++    end
++    for _, patch in ipairs(instance:patches() or {}) do
++        local file = patch.url
++        if scriptdir and not os.isfile(file) then
++            file = path.join(scriptdir, file)
++        end
++        table.insert(files, file)
++    end
++    local sources = {}
++    for _, file in ipairs(files) do
++        if os.isfile(file) then
++            sources[file] = hash.sha256(file)
++        end
++    end
++    required_package:set("sources", sources)
++end
++
+ -- register the required local package
+ function _register_required_package(instance, required_package)
+ 
+@@ -110,6 +135,7 @@ function _register_required_package(instance, required_package)
+         -- add packages info with all dependencies
+         local envs = {}
+         _register_required_package_base(instance, required_package)
++        _register_required_package_sources(instance, required_package)
+         _register_required_package_libs(instance, required_package)
+         _register_required_package_envs(instance, envs)
+         for _, dep in ipairs(instance:librarydeps()) do
+diff --git a/xmake/actions/config/main.lua b/xmake/actions/config/main.lua
+index 9901975..65731b6 100644
+--- a/xmake/actions/config/main.lua
++++ b/xmake/actions/config/main.lua
+@@ -64,6 +64,17 @@ function _host_changed()
+     return os.host() ~= config.read("host")
+ end
+ 
++function _requires_sources_changed()
++    for _, required_package in pairs(project.required_packages()) do
++        for file, digest in pairs(required_package:get("sources") or {}) do
++            if not os.isfile(file) or hash.sha256(file) ~= digest then
++                return true
++            end
++        end
++    end
++    return false
++end
++
+ -- need check
+ function _need_check(changed)
+ 
+@@ -93,6 +104,10 @@ function _need_check(changed)
+         changed = true
+     end
+ 
++    if not changed then
++        changed = _requires_sources_changed()
++    end
++
+     -- Has xmake been updated? force to check config again
+     -- we need to clean the dirty config cache of the old version
+     if not changed then

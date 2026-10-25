@@ -523,11 +523,10 @@ index 2c260fa9ddfe93c0180e2f6c946ba08900151f63..c5d4c4137ab57ae5b679b4291bb4ed3b
  @class WebView;
  
  typedef NS_ENUM(NSInteger, WebFixedPositionAnchorEdge) {
-@@ -39,8 +39,9 @@ typedef NS_ENUM(NSInteger, WebFixedPositionAnchorEdge) {
+@@ -39,8 +39,8 @@ typedef NS_ENUM(NSInteger, WebFixedPositionAnchorEdge) {
  // Encapsulates page content that needs to be repositioned during scrolling,
  // like position:fixed layers.
  // Can be called without taking the WebThread lock.
-+//
  
 -@interface WebFixedPositionContent : NSObject
 +@interface WebFixedPositionContent : CALayer
@@ -563,7 +562,7 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
  #import <wtf/HashMap.h>
  #import <wtf/NeverDestroyed.h>
  #import <wtf/RetainPtr.h>
-@@ -100,10 +106,76 @@ - (void)dealloc
+@@ -100,10 +106,72 @@ - (void)dealloc
  
  - (void)scrollOrZoomChanged:(CGRect)positionedObjectsRect
  {
@@ -585,8 +584,6 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
 +    BOOL offsetChanged = positionedObjectsRect.origin.y != lastReportedOffset;
 +    lastReportedOffset = positionedObjectsRect.origin.y;
 +
-+    //
-+    //
 +    static CFAbsoluteTime lastToldThePage;
 +    CFAbsoluteTime nowTelling = offsetChanged ? CFAbsoluteTimeGetCurrent() : lastToldThePage;
 +    if (offsetChanged && nowTelling - lastToldThePage > 0.25) {
@@ -601,8 +598,6 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
 +        });
 +    }
 +
-+    //
-+    //
 +
      Locker locker { webFixedPositionContentDataLock };
  
@@ -642,7 +637,7 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
          CALayer *layer = it->key.get();
          ViewportConstrainedLayerData* constraintData = it->value.get();
          const ViewportConstraints& constraints = *(constraintData->m_viewportConstraints.get());
-@@ -113,12 +185,67 @@ - (void)scrollOrZoomChanged:(CGRect)positionedObjectsRect
+@@ -113,12 +181,64 @@ - (void)scrollOrZoomChanged:(CGRect)positionedObjectsRect
              auto& fixedConstraints = downcast<FixedPositionViewportConstraints>(constraints);
  
              auto layerPosition = fixedConstraints.viewportRelativeLayerPosition(positionedObjectsRect);
@@ -653,7 +648,6 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
 -            CGPoint newPosition = CGPointMake(layerPosition.x() - constraints.alignmentOffset().width() + anchorPoint.x * layerBounds.size.width,
 -                layerPosition.y() - constraints.alignmentOffset().height() + anchorPoint.y * layerBounds.size.height);
 +
-+            //
 +            CGPoint parentOffset = CGPointZero;
 +            if (CALayer *superlayer = [layer superlayer])
 +                parentOffset = [superlayer frame].origin;
@@ -661,8 +655,6 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
 +            CGPoint newPosition = CGPointMake(layerPosition.x() - parentOffset.x - constraints.alignmentOffset().width() + anchorPoint.x * layerBounds.size.width,
 +                layerPosition.y() - parentOffset.y - constraints.alignmentOffset().height() + anchorPoint.y * layerBounds.size.height);
 +
-+            //
-+            //
 +
              [layer setPosition:newPosition];
 +
@@ -713,7 +705,7 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
              break;
          }
          case ViewportConstraints::StickyPositionConstraint: {
-@@ -128,13 +255,22 @@ - (void)scrollOrZoomChanged:(CGRect)positionedObjectsRect
+@@ -128,13 +248,22 @@ - (void)scrollOrZoomChanged:(CGRect)positionedObjectsRect
  
              CGRect layerBounds = [layer bounds];
              CGPoint anchorPoint = [layer anchorPoint];
@@ -738,7 +730,7 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
  }
  
  - (void)overflowScrollPositionForLayer:(CALayer *)scrollLayer changedTo:(CGPoint)scrollPosition
-@@ -154,19 +290,27 @@ - (void)overflowScrollPositionForLayer:(CALayer *)scrollLayer changedTo:(CGPoint
+@@ -154,19 +283,27 @@ - (void)overflowScrollPositionForLayer:(CALayer *)scrollLayer changedTo:(CGPoint
  
              CGRect layerBounds = [layer bounds];
              CGPoint anchorPoint = [layer anchorPoint];
@@ -769,7 +761,7 @@ index 26093c995c48ceac0baa9a1c26ff0fcd30f3db4d..3ce496fe8f8a8b5e4d19f3cd4af7d2f8
      });
  }
  
-@@ -185,6 +329,7 @@ - (void)setViewportConstrainedLayers:(WTF::HashMap<CALayer *, std::unique_ptr<We
+@@ -185,6 +322,7 @@ - (void)setViewportConstrainedLayers:(WTF::HashMap<CALayer *, std::unique_ptr<We
  
          _private->m_viewportConstrainedLayers.set(layer, WTF::move(layerData));
      }
@@ -6346,15 +6338,7 @@ index ae93fc5edb695e4e253616702838a56e23fad665..181a31188cb5124ff17ca9e8372391e3
  
  #if PLATFORM(IOS_FAMILY)
  #import "WebUIKitDelegate.h"
-@@ -1595,6 +1611,7 @@ - (void)viewWillDraw
-     // So check if the data source is nil before calling [self _isTopHTMLView], this can be removed
-     // once the FIXME in _isTopHTMLView is fixed.
-     if (_private->dataSource && [self _isTopHTMLView]) {
-+        //
-         [self _web_updateLayoutAndStyleIfNeededRecursive];
-         [[self _webView] _flushCompositingChanges];
-     }
-@@ -6064,19 +6081,19 @@ - (BOOL)_handleEditingKeyEvent:(WebCore::KeyboardEvent *)wcEvent
+@@ -6064,19 +6080,19 @@ - (BOOL)_handleEditingKeyEvent:(WebCore::KeyboardEvent *)wcEvent
          switch ([s characterAtIndex:0]) {
          case NSBackspaceCharacter:
          case NSDeleteCharacter:

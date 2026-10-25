@@ -1,5 +1,7 @@
 local tools = path.absolute(path.join(os.scriptdir(), "..", "tools"))
 local scanner = import("demand_scan", {rootdir = tools, anonymous = true})
+local implemented = import("implemented", {rootdir = tools, anonymous = true})
+local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
 
 local function keys_of(list)
     local out = {}
@@ -88,4 +90,15 @@ function main()
     expect("pragma and warning text is not code", {tostring(has(directives.words, "Handle")),
         tostring(has(directives.words, "Platform"))}, {"false", "false"})
     expect("a call on the app's own method is a message", {tostring(#directives.messages >= 1)}, {"true"})
+
+    local src = path.absolute(path.join(os.scriptdir(), "..", "src"))
+    local none = path.join(data, "no-objects")
+    local registry = implemented.registry(none, src, lowered.read_members())
+    expect("a lowered class is implemented without built objects", {tostring(registry.lowered["class||MTLTextureDescriptor"])},
+        {"true"})
+    expect("a source folder is a framework row", {tostring(registry.Metal ~= nil)}, {"true"})
+    expect("a Swift declaration in src is implemented", {tostring(implemented.swift_types(src).NWConnection)}, {"true"})
+    local empty = implemented.registry(none, src, lowered.parse("class Fake\n"))
+    expect("the negative control does not invent a lowered class", {tostring(empty.lowered["class||MTLTextureDescriptor"])},
+        {"nil"})
 end

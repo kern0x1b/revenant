@@ -40,7 +40,7 @@ public struct NWInterface: Hashable, CustomDebugStringConvertible {
         case UInt8(IFT_CELLULAR):
             return .cellular
         case UInt8(IFT_ETHER):
-            return name.hasPrefix("en") ? .wifi : .wiredEthernet
+            return isWiFiInterface(name) ? .wifi : .wiredEthernet
         default:
             break
         }
@@ -69,3 +69,21 @@ public struct NWInterface: Hashable, CustomDebugStringConvertible {
         hasher.combine(name)
     }
 }
+
+#if os(macOS)
+import SystemConfiguration
+
+private func isWiFiInterface(_ name: String) -> Bool {
+    guard let interfaces = SCNetworkInterfaceCopyAll() as? [SCNetworkInterface] else {
+        return false
+    }
+    return interfaces.contains { interface in
+        (SCNetworkInterfaceGetBSDName(interface) as String?) == name
+            && (SCNetworkInterfaceGetInterfaceType(interface) as String?) == (kSCNetworkInterfaceTypeIEEE80211 as String)
+    }
+}
+#else
+private func isWiFiInterface(_ name: String) -> Bool {
+    name.hasPrefix("en")
+}
+#endif

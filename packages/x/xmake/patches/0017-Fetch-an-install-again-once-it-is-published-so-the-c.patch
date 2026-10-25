@@ -15,20 +15,20 @@ Changes-build-output: no
  1 file changed, 2 insertions(+)
 
 diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
-index 3585732..bd26d54 100644
+index 105a31c..1552130 100644
 --- a/xmake/modules/private/action/require/impl/actions/install.lua
 +++ b/xmake/modules/private/action/require/impl/actions/install.lua
-@@ -633,6 +633,7 @@ function main(package)
+@@ -629,6 +629,7 @@ function main(package)
+                 test(package)
  
-                 -- publish the install: readers get it whole, or the one it replaces
                  package:staging_publish()
 +                fetchinfo = package:fetch({force = true})
              end
  
              -- leave the package environments
-@@ -675,6 +676,7 @@ function main(package)
+@@ -670,6 +671,7 @@ function main(package)
+                     errorfile = path.join(installdir_failed, "logs", "install.txt")
                  end
-                 -- nothing was published, so the published install stays as it was
                  package:staging_abort()
 +                package:fetch({force = true})
  

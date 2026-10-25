@@ -10,7 +10,8 @@ package("dynarmic")
                      "0004-Invalidate-only-the-emitted-prelude-when-a-code-cache-is-created.patch",
                      "0005-Route-block-lookups-through-an-optional-image-code-slab.patch",
                      "0006-Share-guest-code-blocks-in-a-machine-wide-image-slab.patch",
-                     "0007-Size-the-machine-image-slab-separately.patch"}
+                     "0007-Size-the-machine-image-slab-separately.patch",
+                     "0008-Set-the-cache-invalidation-flags-under-their-lock.patch"}
     add_urls("https://github.com/MC-XiaoXiao/dynarmic.git")
     add_versions("6.7.0", commit)
 

@@ -432,12 +432,11 @@ index fd5e28d27864adb4751d9d17791f816b3ec846ab..c78bd664bafdf49a14ba1b16146fad17
      }
  };
  
-@@ -537,24 +540,25 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+@@ -537,24 +540,24 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
  }
  
  #if ENABLE(TOUCH_EVENTS)
 -static PlatformTouchPoint::TouchPhaseType convertTouchPhase(NSNumber *touchPhaseNumber)
-+//
 +static PlatformTouchPoint::State convertTouchPhase(NSNumber *touchPhaseNumber)
  {
      WebEventTouchPhaseType touchPhase = static_cast<WebEventTouchPhaseType>([touchPhaseNumber unsignedIntValue]);
@@ -465,7 +464,7 @@ index fd5e28d27864adb4751d9d17791f816b3ec846ab..c78bd664bafdf49a14ba1b16146fad17
  }
  
  static PlatformEvent::Type touchEventType(WebEvent *event)
-@@ -574,26 +578,29 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+@@ -574,26 +577,29 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
      }
  }
      
@@ -502,7 +501,7 @@ index fd5e28d27864adb4751d9d17791f816b3ec846ab..c78bd664bafdf49a14ba1b16146fad17
      }
  };
  
-@@ -605,34 +612,22 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+@@ -605,34 +611,22 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
          m_modifiers = modifiersForEvent(event);
          m_timestamp = MonotonicTime::fromRawSeconds(event.timestamp);
  

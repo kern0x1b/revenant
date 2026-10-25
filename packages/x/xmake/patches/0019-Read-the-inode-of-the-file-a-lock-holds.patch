@@ -25,17 +25,15 @@ diff --git a/core/src/tbox/tbox/src/tbox/platform/bsd/filelock.c b/core/src/tbox
 index 06e7f13..81e72d9 100644
 --- a/core/src/tbox/tbox/src/tbox/platform/bsd/filelock.c
 +++ b/core/src/tbox/tbox/src/tbox/platform/bsd/filelock.c
-@@ -79,6 +79,15 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
+@@ -79,6 +79,13 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
      tb_assert_and_check_return_val(path, tb_null);
      return tb_filelock_init_impl(tb_file_init(path, mode), tb_true);
  }
 +tb_file_ref_t tb_filelock_file(tb_filelock_ref_t self)
 +{
-+    // check
 +    tb_filelock_t* lock = (tb_filelock_t*)self;
 +    tb_assert_and_check_return_val(lock, tb_null);
 +
-+    // the file the lock locks
 +    return lock->file;
 +}
  tb_void_t tb_filelock_exit(tb_filelock_ref_t self)
@@ -45,16 +43,10 @@ diff --git a/core/src/tbox/tbox/src/tbox/platform/filelock.h b/core/src/tbox/tbo
 index 86b26cf..3309402 100644
 --- a/core/src/tbox/tbox/src/tbox/platform/filelock.h
 +++ b/core/src/tbox/tbox/src/tbox/platform/filelock.h
-@@ -101,6 +101,14 @@ tb_bool_t           tb_filelock_enter_try(tb_filelock_ref_t lock, tb_size_t mode
+@@ -101,6 +101,8 @@ tb_bool_t           tb_filelock_enter_try(tb_filelock_ref_t lock, tb_size_t mode
   */
  tb_bool_t           tb_filelock_leave(tb_filelock_ref_t lock);
  
-+/*! the file of the file lock
-+ *
-+ * @param lock      the file lock
-+ *
-+ * @return          the file reference the lock locks
-+ */
 +tb_file_ref_t       tb_filelock_file(tb_filelock_ref_t lock);
 +
  /* //////////////////////////////////////////////////////////////////////////////////////
@@ -64,17 +56,15 @@ diff --git a/core/src/tbox/tbox/src/tbox/platform/posix/filelock.c b/core/src/tb
 index 7fa138e..e8ffa67 100644
 --- a/core/src/tbox/tbox/src/tbox/platform/posix/filelock.c
 +++ b/core/src/tbox/tbox/src/tbox/platform/posix/filelock.c
-@@ -75,6 +75,15 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
+@@ -75,6 +75,13 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
      tb_assert_and_check_return_val(path, tb_null);
      return tb_filelock_init_impl(tb_file_init(path, mode), tb_true);
  }
 +tb_file_ref_t tb_filelock_file(tb_filelock_ref_t self)
 +{
-+    // check
 +    tb_filelock_t* lock = (tb_filelock_t*)self;
 +    tb_assert_and_check_return_val(lock, tb_null);
 +
-+    // the file the lock locks
 +    return lock->file;
 +}
  tb_void_t tb_filelock_exit(tb_filelock_ref_t self)
@@ -84,17 +74,15 @@ diff --git a/core/src/tbox/tbox/src/tbox/platform/windows/filelock.c b/core/src/
 index 20c7947..8d56b5d 100644
 --- a/core/src/tbox/tbox/src/tbox/platform/windows/filelock.c
 +++ b/core/src/tbox/tbox/src/tbox/platform/windows/filelock.c
-@@ -75,6 +75,15 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
+@@ -75,6 +75,13 @@ tb_filelock_ref_t tb_filelock_init_from_path(tb_char_t const* path, tb_size_t mo
      tb_assert_and_check_return_val(path, tb_null);
      return tb_filelock_init_impl(tb_file_init(path, mode), tb_true);
  }
 +tb_file_ref_t tb_filelock_file(tb_filelock_ref_t self)
 +{
-+    // check
 +    tb_filelock_t* lock = (tb_filelock_t*)self;
 +    tb_assert_and_check_return_val(lock, tb_null);
 +
-+    // the file the lock locks
 +    return lock->file;
 +}
  tb_void_t tb_filelock_exit(tb_filelock_ref_t self)
@@ -122,11 +110,10 @@ diff --git a/core/src/xmake/engine.c b/core/src/xmake/engine.c
 diff --git a/xmake/core/base/io.lua b/xmake/core/base/io.lua
 --- a/xmake/core/base/io.lua
 +++ b/xmake/core/base/io.lua
-@@ -353,6 +353,15 @@
+@@ -353,6 +353,14 @@
      return self._LOCK
  end
  
-+-- the inode of the file the lock holds, which is the file its path named when the lock was opened
 +function _filelock:inode()
 +    local ok, errors = self:_ensure_opened()
 +    if not ok then
@@ -142,7 +129,7 @@ diff --git a/core/src/xmake/io/filelock_inode.c b/core/src/xmake/io/filelock_ino
 new file mode 100644
 --- /dev/null
 +++ b/core/src/xmake/io/filelock_inode.c
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,49 @@
 +/*!A cross-platform build utility based on Lua
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,32 +154,21 @@ new file mode 100644
 + */
 +#define TB_TRACE_MODULE_NAME "filelock_inode"
 +#define TB_TRACE_MODULE_DEBUG (0)
-+/* //////////////////////////////////////////////////////////////////////////////////////
-+ * includes
-+ */
 +#include "prefix.h"
 +#if !(defined(TB_CONFIG_OS_WINDOWS) && !defined(TB_COMPILER_LIKE_UNIX))
 +#    include <sys/stat.h>
 +#endif
-+/* //////////////////////////////////////////////////////////////////////////////////////
-+ * interfaces
-+ */
-+// io.filelock_inode(lock): the inode of the file the lock holds, or nil when it cannot be read
 +tb_int_t xm_io_filelock_inode(lua_State *lua) {
 +    tb_assert_and_check_return_val(lua, 0);
-+    // check lock?
 +    if (!xm_lua_ispointer(lua, 1)) {
 +        lua_pushnil(lua);
 +        return 1;
 +    }
-+    // get lock
 +    tb_filelock_ref_t lock = (tb_filelock_ref_t)xm_lua_topointer(lua, 1);
 +    tb_check_return_val(lock, 0);
 +#if defined(TB_CONFIG_OS_WINDOWS) && !defined(TB_COMPILER_LIKE_UNIX)
-+    // windows has no inode of a file
 +    lua_pushnil(lua);
 +#else
-+    // the lock keeps its file open, so the inode of the descriptor is the inode of the file the lock locks
 +    struct stat info;
 +    tb_int_t fd = tb_file2fd(tb_filelock_file(lock));
 +    if (fd >= 0 && fstat(fd, &info) == 0) {
