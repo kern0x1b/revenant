@@ -76,7 +76,7 @@ jobs:
         id: dyld
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - uses: actions/cache/restore@v4
         id: inventory-cache
@@ -107,7 +107,7 @@ jobs:
         if: steps.dyld.outputs.cache-hit != 'true'
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Write the iOS 6.0 inventory from the shared cache
         if: steps.inventory.outputs.present != 'true'
@@ -375,7 +375,7 @@ jobs:
         id: dyld
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: steps.dyld.outputs.cache-hit != 'true'
@@ -449,7 +449,7 @@ jobs:
         id: dyld
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Install the firmware tools through the Backports configuration
         id: firmware-tools
@@ -470,7 +470,7 @@ jobs:
         if: steps.dyld.outputs.cache-hit != 'true'
         with:
           path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          key: dyld-shared-cache-6.0-armv7-v2
 
       - name: Configure the Swift component
         id: configure-swift
