@@ -16,13 +16,10 @@ diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
 index 0752b21..6d6ad7a 100644
 --- a/xmake/core/package/package.lua
 +++ b/xmake/core/package/package.lua
-@@ -1844,6 +1844,22 @@ local function _patchset_digest()
+@@ -1844,6 +1844,19 @@ local function _patchset_digest()
      return digest ~= "" and digest or nil
  end
  
-+-- the installed addons which the process pins, e.g. revenant@v0.8.10: the recipes of a package run
-+-- the code of the addon version that the project locks, so another version is another build.
-+-- An addon from a folder of the project has no version, so it adds nothing.
 +local function _addons_for_buildhash()
 +    local addons = addon.addons()
 +    local terms = {}
@@ -39,7 +36,7 @@ index 0752b21..6d6ad7a 100644
  -- get the build hash
  function _instance:buildhash()
      local buildhash = self._BUILDHASH
-@@ -1918,6 +1934,10 @@ function _instance:buildhash()
+@@ -1918,6 +1931,10 @@ function _instance:buildhash()
                  end
                  str = str .. "_" .. table.concat(shas, "_")
              end

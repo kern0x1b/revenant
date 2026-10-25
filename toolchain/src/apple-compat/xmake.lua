@@ -46,3 +46,11 @@ target("apple-compat")
             end
         end
     end)
+    add_tests("os_unfair_lock")
+    on_test(function (target, opt)
+        local ok = os.execv(os.programfile(), {"l", "-P", path.join(SRC, "..", "..", ".."), path.join(SRC, "tests", "os_unfair_lock", "os_unfair_lock_test.lua")}, {try = true, curdir = path.join(SRC, "..", "..", "..")})
+        if ok ~= 0 then
+            opt.errors = "os_unfair_lock failed"
+        end
+        return ok == 0
+    end)

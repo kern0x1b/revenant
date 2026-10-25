@@ -19,7 +19,7 @@ index b3855d4..6c1d94a 100644
    new_localvarliteral(ls, "(for state)");
    new_localvarliteral(ls, "(for state)");
 -  new_varkind(ls, varname, RDKCONST);  /* control variable */
-+  new_varkind(ls, varname, VDKREG);  /* control variable */
++  new_varkind(ls, varname, VDKREG);
    checknext(ls, '=');
    exp1(ls);  /* initial value */
    checknext(ls, ',');
@@ -28,7 +28,7 @@ index b3855d4..6c1d94a 100644
    new_localvarliteral(ls, "(for state)");  /* state */
    new_localvarliteral(ls, "(for state)");  /* closing var. (after swap) */
 -  new_varkind(ls, indexname, RDKCONST);  /* control variable */
-+  new_varkind(ls, indexname, VDKREG);  /* control variable */
++  new_varkind(ls, indexname, VDKREG);
    /* other declared variables */
    while (testnext(ls, ',')) {
      new_localvar(ls, str_checkname(ls));
