@@ -93,4 +93,20 @@ void VirtualClock::advance_to(std::uint64_t deadline)
                                      std::memory_order_relaxed)) { }
 }
 
+void VirtualClock::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, now());
+    snapshot::save(out, wall_time_offset_.load(std::memory_order_relaxed));
+}
+
+void VirtualClock::load(snapshot::Reader& in)
+{
+    std::uint64_t now_value { };
+    std::int64_t offset { };
+    snapshot::load(in, now_value);
+    snapshot::load(in, offset);
+    now_.store(now_value, std::memory_order_relaxed);
+    wall_time_offset_.store(offset, std::memory_order_relaxed);
+}
+
 }

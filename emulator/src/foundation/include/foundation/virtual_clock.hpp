@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+
 #include <atomic>
 #include <cstdint>
 
@@ -28,6 +30,8 @@ public:
     void synchronize_wall_time(std::uint64_t unix_time_nanoseconds);
     std::uint64_t tick(std::uint64_t increment);
     void advance_to(std::uint64_t deadline);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     std::atomic_uint64_t now_;
