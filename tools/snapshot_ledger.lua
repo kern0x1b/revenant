@@ -1,7 +1,7 @@
 local root = path.absolute(path.directory(os.scriptdir()))
 
-local PROBE = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_probe.cpp")
-local LEDGER = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_probe_test.cpp")
+local PROBE = path.join(root, "emulator", "src", "kernel", "snapshot_census.cpp")
+local LEDGER = path.join(root, "emulator", "src", "kernel", "include", "kernel", "snapshot_ledger.hpp")
 local BOOTED = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_booted_members.hpp")
 
 local USAGE = [[usage: ./xmakew l tools/snapshot_ledger.lua [check]

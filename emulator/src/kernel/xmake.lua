@@ -120,7 +120,8 @@ target("emulator_kernel")
     set_kind("static")
     add_files("kernel.cpp", "commpage.cpp", "hid_event_system_hle.cpp", "hid_event_transaction.cpp",
               "hid_switch_query.cpp", "clock.cpp", "iokit.cpp", "iokit/diagnostic_data.cpp", "vnode_watch.cpp",
-              "kevent_timer.cpp", "kernel_snapshot.cpp", "kernel_shared_state_snapshot.cpp", "network.cpp")
+              "kevent_timer.cpp", "kernel_snapshot.cpp", "kernel_shared_state_snapshot.cpp", "snapshot_census.cpp",
+              "network.cpp")
     add_files("bsd/dispatch.cpp", "bsd/platform.cpp", "bsd/pthread_runtime.cpp", "bsd/psynch_runtime.cpp",
               "bsd/psynch.cpp", "bsd/aio.cpp", "bsd/audit_session.cpp", "bsd/guarded_file.cpp", "bsd/fileport.cpp",
               "bsd/process.cpp", "bsd/posix_semaphore.cpp", "bsd/filesystem.cpp", "bsd/descriptor_lifecycle.cpp",
