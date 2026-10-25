@@ -12,6 +12,9 @@ installs again.
 
 Self-review: clean
 Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  xmake/core/package/package.lua | 11 +++++++----
  1 file changed, 7 insertions(+), 4 deletions(-)

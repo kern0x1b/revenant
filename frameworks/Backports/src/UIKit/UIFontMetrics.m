@@ -1,4 +1,7 @@
 #import <UIKit/UIKit.h>
+#import "../revenant_alias.h"
+
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 static CGFloat revenant_rounded_to_scale(CGFloat value, CGFloat scale)
 {
@@ -18,19 +21,20 @@ static CGFloat revenant_scale_for_text_style(UIFontTextStyle textStyle, UITraitC
     return preferred.pointSize / base.pointSize;
 }
 
-@implementation UIFontMetrics
-{
+REVENANT_ALIAS_STATE(UIFontMetrics, NSObject,
     UIFontTextStyle _revenantTextStyle;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(UIFontMetrics) (RevenantBackport)
 
 + (UIFontMetrics *)defaultMetrics
 {
-    return [[self alloc] initForTextStyle:UIFontTextStyleBody];
+    return (UIFontMetrics *)[[self alloc] initForTextStyle:UIFontTextStyleBody];
 }
 
 + (UIFontMetrics *)metricsForTextStyle:(UIFontTextStyle)textStyle
 {
-    return [[self alloc] initForTextStyle:textStyle];
+    return (UIFontMetrics *)[[self alloc] initForTextStyle:textStyle];
 }
 
 - (instancetype)initForTextStyle:(UIFontTextStyle)textStyle

@@ -1,21 +1,23 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
-@implementation NSOrderedCollectionChange {
-@private
+REVENANT_ALIAS_STATE(NSOrderedCollectionChange, NSObject,
     id _object;
     NSCollectionChangeType _changeType;
     NSUInteger _index;
     NSUInteger _associatedIndex;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSOrderedCollectionChange) (RevenantBackport)
 
 + (NSOrderedCollectionChange *)changeWithObject:(id)object type:(NSCollectionChangeType)type index:(NSUInteger)index
 {
-    return [[self alloc] initWithObject:object type:type index:index associatedIndex:NSNotFound];
+    return (NSOrderedCollectionChange *)[[self alloc] initWithObject:object type:type index:index associatedIndex:NSNotFound];
 }
 
 + (NSOrderedCollectionChange *)changeWithObject:(id)object type:(NSCollectionChangeType)type index:(NSUInteger)index associatedIndex:(NSUInteger)associatedIndex
 {
-    return [[self alloc] initWithObject:object type:type index:index associatedIndex:associatedIndex];
+    return (NSOrderedCollectionChange *)[[self alloc] initWithObject:object type:type index:index associatedIndex:associatedIndex];
 }
 
 - (id)init

@@ -1,4 +1,11 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
+
+REVENANT_ALIAS_STATE(NSISO8601DateFormatter, NSFormatter,
+    CFDateFormatterRef _formatter;
+    NSTimeZone *_timeZone;
+    NSISO8601DateFormatOptions _formatOptions;
+)
 
 static NSString *revenant_without_offset_colon(NSString *written)
 {
@@ -108,7 +115,7 @@ NSString *revenant_iso8601_pattern(NSISO8601DateFormatOptions options)
                                       time];
 }
 
-@implementation NSISO8601DateFormatter
+@implementation REVENANT_ALIAS_CLASS(NSISO8601DateFormatter) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {
@@ -118,7 +125,7 @@ NSString *revenant_iso8601_pattern(NSISO8601DateFormatOptions options)
 + (NSString *)stringFromDate:(NSDate *)date timeZone:(NSTimeZone *)timeZone
                formatOptions:(NSISO8601DateFormatOptions)formatOptions
 {
-    NSISO8601DateFormatter *formatter = [[self alloc] init];
+    NSISO8601DateFormatter *formatter = (NSISO8601DateFormatter *)[[self alloc] init];
     formatter.timeZone = timeZone;
     formatter.formatOptions = formatOptions;
     return [formatter stringFromDate:date];

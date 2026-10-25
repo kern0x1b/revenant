@@ -17,6 +17,7 @@ using DeviceMonotonicTime = std::uint64_t;
 
 enum class DeviceTimePolicy : std::uint8_t {
     DeterministicExecution,
+    FastForwardIdle,
     HostMappedInteractive,
 };
 

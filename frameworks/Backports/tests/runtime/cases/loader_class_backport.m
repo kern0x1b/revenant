@@ -4,8 +4,12 @@
 
 static NSString *revenant_image_of(Class cls)
 {
-    const char *image = class_getImageName(cls);
-    return image ? [NSString stringWithUTF8String:image] : @"";
+    for (Class current = cls; current; current = class_getSuperclass(current)) {
+        const char *image = class_getImageName(current);
+        if (image)
+            return [NSString stringWithUTF8String:image];
+    }
+    return @"";
 }
 
 static BOOL revenant_contains(NSString *text, NSString *part)

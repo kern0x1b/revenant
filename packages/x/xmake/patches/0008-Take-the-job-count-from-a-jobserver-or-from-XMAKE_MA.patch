@@ -31,6 +31,9 @@ becomes a client of a GNU make jobserver when MAKEFLAGS names one with
 - make, autoconf and CMake's Makefile builds run make with -j set to
   the tokens they hold, because the make of macOS is 3.81 and reads no
   FIFO.
+
+Changes-build-output: no
+
 ---
  core/src/xmake/engine.c                       |  8 ++
  core/src/xmake/io/jobserver.c                 | 67 ++++++++++++++

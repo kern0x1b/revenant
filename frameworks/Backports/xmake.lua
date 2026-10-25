@@ -103,7 +103,6 @@ local LIBRARIES = {
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "DispatchBackports", folder = "Dispatch", frameworks = {}, libraries = {}, archives = {}, system = {}},
 }
 
 if is_plat("iphoneos") then
@@ -254,7 +253,7 @@ else
                                   network = "network_test.lua", networktls = "network_tls_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -279,7 +278,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("FoundationBackports", "UIKitBackports", "IOSurfaceBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
         add_syslinks("objc")
@@ -310,11 +309,20 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_shflags("-Wl,-U,_OBJC_CLASS_$_RevenantNoSuchClass", {force = true})
     target_end()
 
+    target("RevenantSystemProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "system_stand_in.m"))
+        add_frameworks("Foundation")
+        add_shflags("-install_name", INSTALL_FOLDER .. "/libRevenantSystemProbe.dylib", "-Wno-incompatible-sysroot", {force = true})
+    target_end()
+
     target("backports_runtime")
         set_kind("phony")
         set_default(false)
         set_group("device")
-        add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe")
+        add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe", "RevenantSystemProbe")
         add_packages("emulator-guest")
         add_tests("foundation_url_components")
         add_tests("loader_class_backport")
@@ -324,6 +332,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("keybag_lock_state")
         add_tests("iosurface_surface")
         add_tests("interpose_launch", {should_fail = true})
+        add_tests("alias_public_name")
+        add_tests("alias_system_class")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)

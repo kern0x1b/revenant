@@ -8,22 +8,29 @@ package("xmake")
     add_versions("2026.10.17", "8158c5da2ec3d5e4bd6b8a83e376319e948120d0")
 
     for _, patch in ipairs({
-        {"0001-Lock-the-installed-addon-version-a-project-declares.patch", "512127d7739dc1fcbb78513bb508e502edfdd9218ae32146d018ec9483064ce1"},
-        {"0002-Keep-the-active-addon-version-when-a-project-install.patch", "1f0432e379084362d866aa7b7325d60d91fb5d87a8ad27fdc4a5ec24296edf31"},
-        {"0003-Let-the-child-processes-of-an-addon-install-see-its-.patch", "3c0740516a62e1aa74fa8f381675818755e199377317c88db81915a84c8a26b7"},
-        {"0004-Warn-when-the-inherited-addon-pins-cannot-be-read.patch", "bea4356d8812c2eb6f284720b4592b2ea6dee24d986fd4f45aabe9a183c998ac"},
-        {"0005-Activate-an-addon-which-a-project-declares-without-a.patch", "23738f076d027100c61c0fa94ccc820f95e1e28de7280bab75d42e209961a93a"},
-        {"0006-Keep-a-project-s-addon-pin-strict-fall-back-only-for.patch", "d084001099fd0d33040ffe20127d38ad4c0ba790a37cc7aa5fff0556bd4ba0ab"},
-        {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "cd99e18ad9599d0c793a437cd9a315f86f273ac08f738b1391a56e8818ae94a1"},
-        {"0008-Take-the-job-count-from-a-jobserver-or-from-XMAKE_MA.patch", "bde5d35a476c49a7e3782485f4148a4ed86806a34bf2c4de95dd352658b0dc6d"},
-        {"0009-Build-a-package-once-when-two-processes-reinstall-it.patch", "6672dfa17742337d83a5eb3a59018d4458a24d92bea6567568f58fecab2ae72f"},
-        {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "5add9a04d3290347faafc247532505e34b156145496ed0671bcc06b3d12c34f0"},
-        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "083b6f89badad1771829937450f38a6a30ae3f6e1c2269a0d593212bdeda3f7a"},
-        {"0012-Lock-a-package-by-its-install-directory.patch", "5331acb3411a8da76bd1d543ebc28206e01b03acadcc7566db46a9c52c0a125a"},
-        {"0013-An-install-folder-without-manifest.txt-is-not-installed.patch", "37779e9abfcefb1592d79138ea64347695761fa1592cb04f4bfd5a3418801859"},
-        {"0014-A-query-for-an-install-folder-creates-no-folder.patch", "c17c3b2c45dcbc834c8ebca4be6135b6d594b77728827fb8ffe02465c5b532da"},
-        {"0015-Publish-an-install-by-swapping-a-link-to-its-generation.patch", "2820d32683c836c01e14127fcd73bfa0c347ec51346a8be5f13561d4cfa53336"},
-        {"0016-Export-the-generation-a-published-install-links-to.patch", "df795248a49d2417c68acb649df50ff2db93959b48c925b90b02d0fb7d078213"}}) do
+        {"0001-Lock-the-installed-addon-version-a-project-declares.patch", "b4f8eb1e4e0ca57b5578a9878f1b2133a4380d43ab97454aacd293afcdbc40ad"},
+        {"0002-Keep-the-active-addon-version-when-a-project-install.patch", "6d15aa35375e2396a33c39c3d6a7ca9f0c0642f56853db9eb2bc73df57a961ff"},
+        {"0003-Let-the-child-processes-of-an-addon-install-see-its-.patch", "7544b7105f7929944586a37cce09687b7ca8daefa37627ea4a11555517e1d9c3"},
+        {"0004-Warn-when-the-inherited-addon-pins-cannot-be-read.patch", "aedbf2690b256d857afd26c61b36054447c72ce1331f2f278934aae82cb10386"},
+        {"0005-Activate-an-addon-which-a-project-declares-without-a.patch", "ec9969032ef7def64ef4c0ad0cce36046664eba0532fa3bad85f573e9019da54"},
+        {"0006-Keep-a-project-s-addon-pin-strict-fall-back-only-for.patch", "85ec3f5423254a435a8ac2be37181fe845cfa1aa1bc06c3dd7377429c5f44ff3"},
+        {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "cd9ecb8cbd5247e8fac8c2765527c9f291f2dc3ba9f1c83bd4b8772e8120e335"},
+        {"0008-Take-the-job-count-from-a-jobserver-or-from-XMAKE_MA.patch", "f0c3be884782d29bbbc8d2cff6a4041999dca6f778e6b516352f9a6e81b91ff9"},
+        {"0009-Build-a-package-once-when-two-processes-reinstall-it.patch", "0fb6b1b9c22a112246baf6d943221eab1c20800682ad77f181f432893550f777"},
+        {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "bb13d7194abed2baedb2a36f71f0ee7366b9e4da5348fa9b8aca7804fbca8b69"},
+        {"0011-Name-the-read-only-variable-kind-VDKREG-in-the-Lua-p.patch", "29ec9f0d7c9780a2588f94d9f09fa199c64512b4ba1cb1296c8f41fad6357ff1"},
+        {"0012-Lock-a-package-by-its-install-directory.patch", "9c0e1f346fdc0a1074d9399da82eacb2bc530faa5d891e7b93ff1056ecbb91f1"},
+        {"0013-An-install-folder-without-manifest.txt-is-not-installed.patch", "69fb887a95d4899b7ab97edd493a9de65178ea59cf15fe0363bf24364d6fba5b"},
+        {"0014-A-query-for-an-install-folder-creates-no-folder.patch", "ebedfea351eeb54f513c1b675bf8026a9b6f228cd4357f5669fdea614dab1ebc"},
+        {"0015-Publish-an-install-by-swapping-a-link-to-its-generation.patch", "73ec38360d8884ed3c1c519e8eb0a7a4c6428204ed78788e89b06b659199601f"},
+        {"0016-Export-the-generation-a-published-install-links-to.patch", "7e082b042a19bb57e93624ef4b74b6f5225a5fa4b0f42e23d459b8e9942b7bfd"},
+        {"0017-Fetch-an-install-again-once-it-is-published-so-the-c.patch", "065cfa83171102fcf00341faec8436a6734952e31ca86ab0b91233d8819699e8"},
+        {"0018-Report-a-process-exit-to-the-wait-on-that-process.patch", "1ef2c7ca8801715c801382f57aca53196c1f710ae2f562a1ed647c8bdf5eb075"},
+        {"0019-Read-the-inode-of-the-file-a-lock-holds.patch", "b1dba90d3ad55c8f051ceb0a822d26795f3d6d6aaa19dae30287febe677bea60"},
+        {"0020-Fold-the-digest-of-the-xmake-patches-that-change-out.patch", "c3056f6b12d5197bb2d337948e7721ce88f679605b4d0480c6a706836408f4e2"},
+        {"0021-Put-each-package-s-applied-patch-sha256-list-into-it.patch", "f7a636db5a95804ddf50dc56fd126142c4957b22e2942d7ebddd6e096aa50b07"},
+        {"0022-Put-the-addons-a-project-pins-into-a-package-s-hash.patch", "eacf01e49585dc1eeeefd5c83787a0b39165bf779f72b76af3e460683d7750f2"},
+        {"0023-Recheck-the-requires-when-a-required-package-s-recipe-or-patch-changes.patch", "f5432c5eb8b10a3760d505c74f972adf92d6157d7c5feaaff950fa1ae8bc3941"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 

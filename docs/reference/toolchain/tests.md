@@ -24,9 +24,9 @@ prints each failure and fails. Run one target with `./xmakew test -P . 'toolchai
 `toolchain_device` and `recompiler_device` are outside the default run by declaration: without `--tests=device` they
 are not in the project, so `./xmakew test -P .` does not see them. `swift_test` reads the system libraries of a firmware
 release held under `~/.revenant/dyld`, and when they are not held it fails and names
-`./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` runs its own xmake addon install and then a queue step that
-runs the xmake task `queue`; the heavy job pool removed that task, so the step fails and names it, and the other checks
-of the suite pass.
+`./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` checks its own xmake addon install: the addon lands in
+the store the run names, and the machine's own addons are left alone. The `emulate` tests under `toolchain/tests/emulate`
+set `REVENANT_EMULATOR_ROOT` to a folder of their run, so they write no golden image to the machine's emulator folder.
 
 `macho_test` builds its encrypted armv7 image with the packaged ld64 and the packaged iPhone OS SDK, and adds the
 `LC_ENCRYPTION_INFO` command itself, in the header's padding, as the system linker of older Xcode versions writes it:
@@ -41,8 +41,14 @@ tests behind `webkit_host_tests`) are declared by the platform, not by the defau
 that define them. The fixtures of `tests/emulate/` and `tests/swiftui/` are built for a device and are not xmake tests
 yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
 `install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
-its probe line), and `output` (a program's stdout and stderr reach the host, through a run that ends and through one
-that hangs). Their scratch folders are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+its probe line), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
+that hangs), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
+limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
+are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+
+The emulate cases are not in CI's light budget: each one boots a firmware image on the emulator for minutes, and a cold
+emulator store builds the emulator first, so they run by hand with the command above. What needs no emulator run is in
+`light`: `emulator_source_test` checks the emulator's sources digest, its locale independence, and that the recipe and addon use it.
 
 `optimisation_test` compiles `tests/data/optimisation/codegen.c` with the packaged clang for armv7 and reads the assembly of
 each function. It pins the code-generation misses that [the optimisation explanation](../../explanation/toolchain/optimisation.md#codegen)

@@ -1,6 +1,12 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
-@implementation NSUnitConverterLinear
+REVENANT_ALIAS_STATE(NSUnitConverterLinear, NSUnitConverter,
+    double _coefficient;
+    double _constant;
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSUnitConverterLinear) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
 {

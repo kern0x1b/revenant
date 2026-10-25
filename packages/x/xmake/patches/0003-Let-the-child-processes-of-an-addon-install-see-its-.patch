@@ -24,6 +24,9 @@ test_autofetch_keep_active_version fails there ("a child process sees
 2.0.0 while installing 1.0.0!").
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  tests/actions/addon/test.lua                  |  5 +++-
  xmake/core/package/addon.lua                  | 24 ++++++++++++++-----

@@ -93,8 +93,11 @@ void revenantProbe(NSURL *url)
 ]=]
 
 local function compiles(sdk, vfs, source, log)
+    local cache = path.join(path.directory(log), "module-cache")
+    os.mkdir(cache)
     local code = os.execv("xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc",
                                     "-Werror=unguarded-availability-new", "-Werror=unguarded-availability",
+                                    "-fmodules-cache-path=" .. cache,
                                     "-ivfsoverlay", vfs, "-c", source, "-o", log .. ".o"},
                           {try = true, stdout = log, stderr = log})
     return code == 0, io.readfile(log) or ""

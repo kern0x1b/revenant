@@ -102,7 +102,8 @@ member stands on something weaker than a host oracle, or on an assumption a devi
   `CGRectValue` to the macOS names. The empty attachment is not compared, because AppKit returns a 32 by 32 placeholder
   icon there and the iOS documentation says zero.
 - NWPath `usesInterfaceType:` (`src/Network/NWPathMonitor.swift`): the interface comes from the flags and the interface
-  names. On a Mac whose `en0` is wired, the host answers wired and the backport answers wifi. `NWConnection`'s path is the
+  names. On macOS the backport takes an interface's type from SystemConfiguration, so a Mac whose `en0` is wired answers wired,
+  as the host does. CI's Xcode 26.6 runner is that case; the backport had answered wifi there before. `NWConnection`'s path is the
   default route, not the connection's own route, so a loopback connection reports wifi where Apple reports loopback.
   The Swift code is not built for armv7 here; the swift job builds it.
 
@@ -243,3 +244,40 @@ Caveats for the queue:
   `--component` library is built here. `Translation`, `TranslationSession` and the iOS 17 classes are not in the tree.
 - The `Metal`, `MetalKit`, `MetalPerformanceShaders`, `CoreML` and `SceneKit` rows are now backported by their folders, but
   their protocols and some classes are still missing; those are the rows above, not the framework rows.
+
+## The system-class path of the alias proxies
+
+What exists: the 13 classes of the alias pattern (`REVENANT_ALIAS_STATE` in `frameworks/Backports/src/revenant_alias.h`)
+register their public name from the proxy's `+load` where the system has no class, and `attach.c` reparents the proxy to
+the system class where it has one. On the 6.1.3 emulator, `alias_public_name` checks that each of the 12 public names is
+registered once under its own name, and `alias_system_class` checks that a class of that name present before the loader
+is the one `[NSPersonNameComponents class]` answers with, and that Backports registers no second class. Both pass in one
+emulator run (`backports_runtime`, four cases, about 175 s).
+
+Open:
+
+- No run on the device. The iPhone 4S on 9.3.6 is the release where NSURLComponents, NSURLQueryItem and
+  NSPersonNameComponents collide. No alias case has run on it.
+- No iOS 7 to 9 image. `alias_system_class` uses a stand-in `NSPersonNameComponents` that `frameworks/Backports/tests/runtime/probe/system_stand_in.m`
+  creates, not the system's class. The emulator's Darwin table maps the build prefixes `10` and `11` (iOS 6 and 7); iOS 8
+  and 9 are refused. No iOS 7 firmware was fetched. The first real check is NSURLComponents on iOS 7, and the first
+  reparent onto a real system class has not run anywhere.
+- The reparent path (`revenant_reparent`) keeps the proxy as a subclass of NSObject and logs when the layouts differ.
+  That fallback has not been seen on a real system class.
+- `revenant_adopt_methods` adds backport methods to the system class where it lacks them. Whether an adopted method's
+  ivar offsets match the system class's layout is not checked on a real system class.
+- The `network` package has no prebuilt install or pack path, so consumers build it from source. Its key moved with the
+  swift-runtime digest, and nothing is dispatched for it.
+- The Network host test compares the Swift Network framework's live path state with the backport's. That state depends on
+  the machine's interfaces, so the comparison is limited to deterministic output. The path mapping is checked from fixed
+  inputs in `tests/Network/mapping/main.swift` (the host's answers for one recorded state, and documented cases), and the
+  live path only against invariants in `tests/Network/live/main.swift`.
+
+## Open, not fixed: a read race in the package store test
+
+`toolchain_light/store_test` failed once on CI (run 40119837571, on the golden-stable branch at 76332140e): a reader
+saw an incomplete install in 1 of 308 reads while a forced reinstall replaced it. The cause is not known. The same test
+passed in 88 local runs: 18 before the failure, 30 in a plain loop, and 40 under six CPU-bound processes. The reader now
+names the first file it failed on, with its text, whether it exists, and the state of the install's link, so the next
+occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
+path of patch 0015, and main's xmake was not run in the loop.

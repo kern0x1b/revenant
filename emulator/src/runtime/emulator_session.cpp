@@ -67,6 +67,7 @@
 #include "device_state/network_preferences.hpp"
 #include "foundation/address_space.hpp"
 #include "foundation/cpu.hpp"
+#include "foundation/darwin_address_layout.hpp"
 #include "foundation/deadline_queue.hpp"
 #include "foundation/device_model.hpp"
 #include "graphics/display.hpp"
@@ -282,13 +283,31 @@ void EmulatorSession::run()
         device.identity.hardware_model_override =
             device.identity.activation_hardware_model;
     }
+    if (options.shared_image_slab) {
+        const auto bounds = darwin_address_bounds(
+            darwin_configuration.abi.address_layout);
+        set_machine_image_code_region(ImageCodeRegion {
+            options.rootfs.string() + "|" +
+                std::string { device.identity.product_type },
+            bounds.shared_region_base, bounds.shared_region_end,
+            options.image_slab_bytes.value_or(0U) });
+        output.line("[jit] image-slab-mib=" +
+                    (options.image_slab_bytes
+                            ? std::to_string(*options.image_slab_bytes /
+                                             1024U / 1024U)
+                            : std::string { "shared" }));
+    } else {
+        set_machine_image_code_region(ImageCodeRegion { });
+    }
     const auto ticks_option = options.ticks;
     const auto bounded_execution = ticks_option.has_value();
     const std::shared_ptr<hfs::GuestIdTable> guest_ids =
         bounded_execution ? std::make_shared<hfs::GuestIdTable>() : nullptr;
     const auto device_time_policy =
         bounded_execution ? DeviceTimePolicy::DeterministicExecution
-                          : DeviceTimePolicy::HostMappedInteractive;
+        : options.windowed || options.gdb_port.has_value()
+            ? DeviceTimePolicy::HostMappedInteractive
+            : DeviceTimePolicy::FastForwardIdle;
     const auto ticks = ticks_option ? *ticks_option
                                     : std::numeric_limits<std::uint64_t>::max();
     const bool disable_scheduler_preemption =
@@ -380,6 +399,8 @@ void EmulatorSession::run()
                 : adaptive_jit_code_cache_size(host.memory_budget_snapshot()));
     const auto jit_cache_budget = jit_code_cache_budget(
         options.jit_cache_budget_bytes, host.memory_budget_snapshot());
+    output.line("[boot] host-start-ms=" +
+                std::to_string(host_unix_milliseconds()));
     output.line("[jit] code-cache-mib=" +
                 std::to_string(configured_jit_code_cache_size / 1024U / 1024U));
     output.line(
@@ -2478,6 +2499,8 @@ void EmulatorSession::run()
                   << " (one guest second takes that many host seconds)";
             output.line(scale.str());
         }
+    }
+    if (device_time_policy != DeviceTimePolicy::DeterministicExecution) {
         const auto host_wall_time =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
@@ -2486,8 +2509,12 @@ void EmulatorSession::run()
             initial_runtime->kernel->set_wall_time(
                 static_cast<std::uint64_t>(host_wall_time));
         }
-        output.line("[clock] mode=virtual-rtc seed=host-once rate=realtime "
-                    "timezone=guest");
+        output.line(
+            realtime_pacer
+                ? "[clock] mode=virtual-rtc seed=host-once rate=realtime "
+                  "timezone=guest"
+                : "[clock] mode=virtual-rtc seed=host-once rate=fast-forward "
+                  "timezone=guest");
     }
     GuestTickClock executed_time_clock { guest_ticks_per_second };
     std::uint64_t executed_ticks_since_catch_up { };
@@ -2553,6 +2580,8 @@ void EmulatorSession::run()
             guest_ticks_per_second);
         scheduler.synchronize_time(scheduler_time);
         scheduler.set_realtime_clock_ticks(scheduler_time);
+        initial_runtime->kernel->sample_load_average(
+            scheduler.runnable_count());
     };
     const auto jit_work_observation_due =
         [&](std::chrono::steady_clock::time_point now, bool guest_quiet) {
@@ -4060,7 +4089,7 @@ void EmulatorSession::run()
         }
         if (realtime_pacer)
             executed_ticks_since_catch_up += scheduler_round_ticks;
-        if (device_time_policy == DeviceTimePolicy::DeterministicExecution) {
+        if (device_time_policy != DeviceTimePolicy::HostMappedInteractive) {
             scheduler.advance_time(scheduler_round_ticks);
             if (scheduler_round_ticks != 0) {
                 initial_runtime->kernel->advance_time_by(

@@ -42,7 +42,16 @@ local function context()
     if not is_host("macosx") or os.arch() ~= "arm64" then
         raise("xmake emulate runs on macOS arm64 hosts only, and this is %s %s", os.host(), os.arch())
     end
-    task.run("config", {}, {disable_dump = true})
+    local sources = import("sources", {rootdir = path.join(os.scriptdir(), "../../../packages/e/emulator/port"), anonymous = true})
+    local digest = sources.digest(path.join(os.scriptdir(), "../../.."))
+    local marker = path.join(os.projectdir(), "build", "emulator-sources")
+    if digest ~= nil and (not os.isfile(marker) or io.readfile(marker) ~= digest) then
+        task.run("config", {clean = true})
+        os.mkdir(path.directory(marker))
+        io.writefile(marker, digest)
+    else
+        task.run("config", {}, {disable_dump = true})
+    end
     local emulator_package = required("emulator")
     local guest = required("emulator-guest")
     local swiftshader = required("swiftshader")
@@ -87,16 +96,11 @@ local function booter(ctx)
     end
 end
 
-local function golden(ctx)
-    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
-    return emulator.golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}))
-end
-
 local function install(ctx)
     local written = packaging.write()
-    local base = golden(ctx)
+    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
     local rootfs = path.join(ctx.image, "rootfs")
-    emulator.clone_golden(base, rootfs)
+    emulator.clone_golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}), rootfs)
     local applications = {}
     for _, package in ipairs(written) do
         local placed = emulator.install_deb(package.deb, rootfs)
@@ -131,6 +135,7 @@ local function run(ctx, argv)
     emulator.clone(image, rootfs)
     local seconds = tonumber(option.get("seconds"))
     emulator.install_runner(rootfs, ctx.guest, argv, seconds, ctx.version)
+    emulator.lean_run(rootfs)
     local results = emulator.results(rootfs)
     local ok, result, booted, errors = try {
         function ()
@@ -140,7 +145,7 @@ local function run(ctx, argv)
             local reports = emulator.reports(rootfs)
             local verdict = emulator.verdict(boot.state, results, {frame = boot.frame, errors = boot.errors,
                                                                    scale = boot.scale, host_seconds = boot.seconds,
-                                                                   reports = reports})
+                                                                   reports = reports, lean = true})
             os.cp(results, path.join(folder, "results"))
             for _, report in ipairs(reports) do
                 os.cp(report.file, path.join(folder, "results", "reports", path.filename(report.file)))
