@@ -182,6 +182,10 @@ function runtime_flags(opt)
     return flags
 end
 
+function availability_floor_flags(version)
+    return version and {"-Xfrontend", "-application-availability-floor", "-Xfrontend", version} or {}
+end
+
 function codegen_flags(opt)
     local levels = {none = "-O0", smallest = "-Os"}
     return {opt.optimize and (levels[opt.optimize] or "-O2") or "-O0", "-x", "ir"}
