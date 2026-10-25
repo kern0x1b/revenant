@@ -598,16 +598,12 @@ std::optional<Metadata> MetadataProvider::query(
     result.modification_time =
         Timestamp { static_cast<std::int32_t>(status.st_mtim.tv_sec),
             static_cast<std::int32_t>(status.st_mtim.tv_nsec) };
-    result.change_time =
-        Timestamp { static_cast<std::int32_t>(status.st_ctim.tv_sec),
-            static_cast<std::int32_t>(status.st_ctim.tv_nsec) };
-    result.access_time =
-        Timestamp { static_cast<std::int32_t>(status.st_atim.tv_sec),
-            static_cast<std::int32_t>(status.st_atim.tv_nsec) };
+    result.change_time = result.modification_time;
+    result.access_time = result.modification_time;
     result.creation_time = parse_hfs_time(
         read_xattr(path, "user.hfsfuse.record.date_created", follow_symlink)
             .value_or(std::vector<std::byte> { }))
-                               .value_or(result.change_time);
+                               .value_or(result.modification_time);
     result.backup_time = parse_hfs_time(
         read_xattr(path, "user.hfsfuse.record.date_backedup", follow_symlink)
             .value_or(std::vector<std::byte> { }))
