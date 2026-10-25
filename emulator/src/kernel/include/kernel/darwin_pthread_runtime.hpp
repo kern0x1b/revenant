@@ -65,6 +65,11 @@ public:
     {
         return registration_;
     }
+    void restore_registration(
+        std::optional<DarwinPthreadRegistration> registration) noexcept
+    {
+        registration_ = registration;
+    }
     [[nodiscard]] bool open_workqueue(std::uint32_t processor_count,
         std::uint32_t priority_count) noexcept
     {

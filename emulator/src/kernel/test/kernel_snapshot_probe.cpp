@@ -32,6 +32,10 @@ void CompatibilityKernelSnapshot::perturb_bookkeeping(CompatibilityKernel& kerne
     auto attributes = kernel.offline_serial_state_.attributes();
     attributes.input_flags = 0x1234U;
     kernel.offline_serial_state_.set_attributes(attributes);
+    DarwinPthreadRegistration registration;
+    registration.thread_start = 0x1000U;
+    registration.pthread_size = 4096U;
+    kernel.pthread_runtime_.restore_registration(registration);
 }
 
 }

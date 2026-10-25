@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 200> saved_members {
+inline constexpr std::array<std::string_view, 201> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -53,6 +53,7 @@ inline constexpr std::array<std::string_view, 200> saved_members {
     "ck.process_",
     "ck.load_average_",
     "ck.offline_serial_state_",
+    "pthread.registration_",
     "ck.thread_ports_",
     "ck.thread_signal_masks_",
     "ck.thread_pending_signals_",
@@ -212,7 +213,7 @@ inline constexpr std::array<std::string_view, 200> saved_members {
     "kss.key_store",
 };
 
-inline constexpr std::array<std::string_view, 108> open_members {
+inline constexpr std::array<std::string_view, 107> open_members {
     "kss.active_springboard_alert_items",
     "kss.ambient_light_sensor",
     "kss.apple_key_store_available",
@@ -276,7 +277,6 @@ inline constexpr std::array<std::string_view, 108> open_members {
     "ck.directory_entries_cache_",
     "kss.mach_queues",
     "kss.mach_semaphores",
-    "pthread.registration_",
     "coreaudio.service_",
     "coreaudio.buffer_frame_size_",
     "coreaudio.next_native_io_proc_id_",

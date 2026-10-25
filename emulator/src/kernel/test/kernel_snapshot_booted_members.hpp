@@ -9,7 +9,7 @@
 
 namespace emulator {
 
-inline constexpr std::array<std::string_view, 162> booted_populated_members {
+inline constexpr std::array<std::string_view, 161> booted_populated_members {
     "ck.dyld_shared_cache_",
     "ck.dyld_shared_cache_attempted_",
     "ck.dyld_shared_cache_path_",
@@ -169,7 +169,6 @@ inline constexpr std::array<std::string_view, 162> booted_populated_members {
     "surface.scene_coordinator_",
     "surface.surfaces_",
     "wifi.access_points_",
-    "wifi.event_broker_",
     "wifi.link_state_",
     "wifi.state_",
 };

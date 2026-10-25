@@ -378,7 +378,10 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     const auto& wifi = kernel.apple80211_hle_;
     note(out, "wifi.state_", wifi.state_);
     note(out, "wifi.process_handles_", wifi.process_handles_);
-    note(out, "wifi.event_broker_", wifi.event_broker_);
+    if (wifi.event_broker_ &&
+        (!wifi.event_broker_->registrations.empty() ||
+            !wifi.event_broker_->pending_events.empty()))
+        out.emplace_back("wifi.event_broker_");
 
     const auto& surface = kernel.core_surface_hle_;
     note(out, "surface.buffers_", surface.buffers_);

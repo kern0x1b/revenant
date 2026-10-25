@@ -30,6 +30,37 @@ void reject_if_populated(const char* member, const Container& container)
         };
 }
 
+void save_pthread_registration(snapshot::Writer& out,
+    const std::optional<DarwinPthreadRegistration>& registration)
+{
+    snapshot::save(out, registration.has_value());
+    if (!registration)
+        return;
+    snapshot::save(out, registration->thread_start);
+    snapshot::save(out, registration->workqueue_thread_start);
+    snapshot::save(out, registration->pthread_size);
+    snapshot::save(out, registration->reserved);
+    snapshot::save(out, registration->target_concurrency);
+    snapshot::save(out, registration->dispatch_queue_offset);
+}
+
+std::optional<DarwinPthreadRegistration> load_pthread_registration(
+    snapshot::Reader& in)
+{
+    bool present { };
+    snapshot::load(in, present);
+    if (!present)
+        return std::nullopt;
+    DarwinPthreadRegistration registration;
+    snapshot::load(in, registration.thread_start);
+    snapshot::load(in, registration.workqueue_thread_start);
+    snapshot::load(in, registration.pthread_size);
+    snapshot::load(in, registration.reserved);
+    snapshot::load(in, registration.target_concurrency);
+    snapshot::load(in, registration.dispatch_queue_offset);
+    return registration;
+}
+
 void save_process_context(snapshot::Writer& out, const ProcessContext& process)
 {
     snapshot::save(out, process.pid);
@@ -206,6 +237,7 @@ void CompatibilityKernel::save_kernel_bookkeeping(snapshot::Writer& out) const
     snapshot::save(out, load_average_.fscale);
     save_process_context(out, process_);
     offline_serial_state_.save(out);
+    save_pthread_registration(out, pthread_runtime_.registration());
 }
 
 void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
@@ -332,6 +364,7 @@ void CompatibilityKernel::load_kernel_bookkeeping(snapshot::Reader& in)
     snapshot::load(in, load_average_.fscale);
     load_process_context(in, process_);
     offline_serial_state_.load(in);
+    pthread_runtime_.restore_registration(load_pthread_registration(in));
 }
 
 void CompatibilityKernel::save_snapshot(snapshot::Writer& out) const
