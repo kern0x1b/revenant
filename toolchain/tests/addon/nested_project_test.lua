@@ -3,8 +3,6 @@ import("fixtures")
 local SCANNED = {"packages", "toolchain", "frameworks", "emulator", "tools"}
 local VERBS = {"f", "build", "install", "require"}
 
--- What apple-compat's nested project requires, and nothing more: a nested configure installs each requirement inside a
--- package install, so one it does not need only adds a wait on that package's own dependencies (ldid brings libplist and openssl).
 local COMPAT_NEEDS = {"iphoneos-sdk", "ld64", "llvm"}
 local COMPAT_LISTING = [[
 import("core.project.config")
@@ -77,17 +75,17 @@ function failures(opt)
         "set_defaultplat(\"iphoneos\")",
         "set_defaultarchs(\"iphoneos|armv7\")",
         ""}, "\n"))
-    -- configured without installing anything (--require=n), so the requirements are the ones a real configure would name
     local configure_log = path.join(compat, "configure.log")
+    local envs = {XMAKE_CONFIGDIR = path.join(compat, "configdir")}
     local configured = os.execv(os.programfile(), {"f", "-P", compat, "-p", "iphoneos", "-a", "armv7", "-m", "release", "-y", "--require=n"},
-                                {try = true, stdout = configure_log, stderr = configure_log, curdir = compat})
+                                {try = true, stdout = configure_log, stderr = configure_log, curdir = compat, envs = envs})
     if configured ~= 0 then
         table.insert(found, "the nested apple-compat project must configure without installing, but xmake f exited with " .. tostring(configured) .. ": " .. io.readfile(configure_log))
     end
     local listing = path.join(compat, "listing.lua")
     io.writefile(listing, COMPAT_LISTING)
     local listed = {}
-    for line in os.iorunv(os.programfile(), {"l", "-P", compat, listing}):gmatch("[^\n]+") do
+    for line in os.iorunv(os.programfile(), {"l", "-P", compat, listing}, {curdir = compat, envs = envs}):gmatch("[^\n]+") do
         local name = line:match("^REQUIRE (.+)$")
         if name then
             table.insert(listed, name)

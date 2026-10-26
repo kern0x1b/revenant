@@ -9,8 +9,6 @@ local ld64 = {name = "ld64", version = "956.6"}
 local ldid = {name = "ldid", version = "2.1.5-procursus7+23.gaf86971"}
 local llvm = {name = "llvm", version = "23.1.3"}
 
--- apple-compat's nested project compiles its shims with the SDK and llvm, signs nothing and reads no firmware, so it
--- asks for ldid and firmware-tools no more than that: ldid alone would pull libplist and openssl into its configure.
 local compat_only = get_config("apple_compat_only")
 for _, tool in ipairs(compat_only and {sdk, ld64, llvm} or {sdk, ld64, ldid, llvm}) do
     add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name})
