@@ -417,6 +417,9 @@ jobs:
           restore-keys: |
             xmake-global-package-${{ runner.os }}-
 
+      - name: Update the package repositories for the keys
+        run: ./xmakew repo -u
+
       - name: Key the Backports facts by the SDK, the compiler and the Xcode build
         id: facts_keys
         run: |
