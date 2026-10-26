@@ -109,6 +109,13 @@ target("emulator_kernel_shared_state_snapshot_test")
     add_deps("emulator_kernel")
     add_tests("kernel.shared_state_snapshot")
 
+target("emulator_kernel_snapshot_ledger_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/snapshot_ledger_test.cpp")
+    add_deps("emulator_kernel")
+    add_tests("kernel.snapshot_ledger")
+
 target("emulator_kernel_snapshot_probe_test")
     set_kind("binary")
     set_default(false)
