@@ -27,6 +27,13 @@ so the firmware's own launchd, daemons and frameworks run unchanged on top.
 Persistent translations are keyed on the Dynarmic package's build fingerprint, so an artifact made by another core
 is never reused.
 
+## The guest environment
+
+XNU starts `launchd` with an empty environment (`load_init_program` passes `envp = 0`). `launchd` then sets `TMPDIR`,
+`SHELL`, `HOME`, `USER` and `LOGNAME` for each job from the job's `UserName` (`job_postfork_become_user` in launchd's
+`src/core.c`), so a `UserName=mobile` job sees `HOME=/var/mobile`. The emulator starts `launchd` with the same empty
+environment and sets none of these itself.
+
 ## Layout
 
 - `src/app/`: the verbs, the live control channel (`--control-stdin`), the SDL window; its headers are in `include/app/`.

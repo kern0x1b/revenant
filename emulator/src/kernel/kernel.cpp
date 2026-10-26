@@ -446,8 +446,7 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
             process_.exit_status,
             process_.termination_signal, process_.exited, false, false,
             "launchd", "/sbin/launchd", { "/sbin/launchd" },
-            { "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "HOME=/var/root",
-                "SHELL=/bin/sh" },
+            { },
             KernelSharedState::GraphicsInputAbi::Darwin9_0, { }, { },
             DisplayOrientation::Portrait, { }, 0U };
     shared_state_->processes[process_.pid].memory_status =
