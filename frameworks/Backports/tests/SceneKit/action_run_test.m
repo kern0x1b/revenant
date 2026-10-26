@@ -293,7 +293,8 @@ int main(int argc, char **argv)
         revenant_advance(run, node, 1.8);
         revenant_expect_number("sequence with a random wait completes its move", node.position.x, 1);
 
-        NSURL *clipURL = revenant_write_wave(@"scenekit_action_test.wav", 0.1);
+        NSString *fixtures = revenant_fixture_directory();
+        NSURL *clipURL = revenant_write_wave([fixtures stringByAppendingPathComponent:@"scenekit_action_test.wav"], 0.1);
         SCNAudioSource *clip = [[SCNAudioSource alloc] initWithURL:clipURL];
         SCNAction *spoken = [SCNAction playAudioSource:clip waitForCompletion:YES];
         revenant_expect_near("play audio that waits lasts as long as the audio", spoken.duration, 0.1, 0.02);
@@ -310,7 +311,7 @@ int main(int argc, char **argv)
         revenant_check(revenant_added_players.count == 1, "play audio adds one player to its node", @"no player was added");
         revenant_check([revenant_added_players.firstObject revenantIsPlaying], "the node's player is playing", @"the player is not playing");
         revenant_check(revenant_advance(run, fake, 0.1), "play audio that waits ends with the audio", @"play audio is still running");
-        [[NSFileManager defaultManager] removeItemAtURL:clipURL error:NULL];
+        [[NSFileManager defaultManager] removeItemAtPath:fixtures error:NULL];
 
         revenant_check(revenant_negative ? NO : YES, "negative control", @"the negative control is inverted");
     }

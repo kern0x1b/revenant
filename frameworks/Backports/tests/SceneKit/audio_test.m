@@ -117,8 +117,7 @@ int main(int argc, char **argv)
     @autoreleasepool {
         revenant_read_arguments(argc, argv);
         [RevenantSCNSoundEngine prepare];
-        NSString *fixtures = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
-        [[NSFileManager defaultManager] createDirectoryAtPath:fixtures withIntermediateDirectories:YES attributes:nil error:NULL];
+        NSString *fixtures = revenant_fixture_directory();
         NSURL *tone = revenant_write_tone([fixtures stringByAppendingPathComponent:@"scenekit_audio_tone.wav"], 2.0, 440);
         NSURL *clip = revenant_write_wave([fixtures stringByAppendingPathComponent:@"scenekit_audio_clip.wav"], 0.1);
 
