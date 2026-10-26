@@ -142,6 +142,12 @@ package("iphoneos-sdk")
             end
         end
 
+        local fold = stubs.fold_reexports(os.files(path.join(folder, "**.tbd")), stubs.inventory(io.readfile(path.join(additions, "inventory", "ios6.txt"))))
+        vprint("%d re-exports of libraries iOS 6 lacks folded into their umbrella stubs of %s", #fold.folded, folder)
+        for _, lost in ipairs(fold.lost) do
+            cprint("${color.warning}warning:${clear} %s keeps its re-export of %s, which iOS 6 lacks, because %s", lost[1], lost[2], lost[3])
+        end
+
         local extended = 0
         for _, stub in ipairs(table.join(os.files(path.join(libraries, "libSystem*.tbd")), os.files(path.join(libraries, "system", "*.tbd")))) do
             local text, count = io.readfile(stub):gsub("'%$ld%$hide%$os3%.0%$([%w_]+)'", function (symbol)

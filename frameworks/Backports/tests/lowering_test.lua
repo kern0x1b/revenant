@@ -235,4 +235,148 @@ function main()
     local device_lowered = lowered.lower_header(device_sample, device)
     assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
            "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
+    local protocol_sdk = path.join(out, "protocol-sdk")
+    local protocol_src = path.join(out, "protocol-src")
+    local protocol_header = path.join(protocol_sdk, "System", "Library", "Frameworks", "Sample.framework", "Headers", "SampleEnvironment.h")
+    os.mkdir(path.directory(protocol_header))
+    io.writefile(protocol_header, table.concat({
+        "@protocol SampleEnvironment <NSObject>",
+        "@property (nonatomic, readonly) SampleTraits *traits API_AVAILABLE(ios(8.0));",
+        "@property (nonatomic, class, readonly) BOOL shared API_AVAILABLE(ios(8.0));",
+        "- (void)traitsDidChange:(SampleTraits *)previous API_AVAILABLE(ios(8.0));",
+        "- (void)prepare API_AVAILABLE(ios(8.0));",
+        "- (void)reset API_AVAILABLE(ios(8.0));",
+        "- (void)track API_AVAILABLE(ios(8.0));",
+        "- (void)rewind API_AVAILABLE(ios(8.0));",
+        "- (void)pause API_AVAILABLE(ios(8.0));",
+        "@end",
+        "",
+    }, "\n"))
+    os.mkdir(path.join(protocol_src, "Sample"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleView.h"), table.concat({
+        "@interface SampleView : SampleBase <SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleView.m"), table.concat({
+        "@implementation SampleView (Environment)",
+        "- (SampleTraits *)traits",
+        "{",
+        "    return nil;",
+        "}",
+        "+ (BOOL)shared",
+        "{",
+        "    return YES;",
+        "}",
+        "- (void)prepare",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    os.mkdir(path.join(protocol_src, "Other"))
+    io.writefile(path.join(protocol_src, "Other", "SampleOther.h"), table.concat({
+        "@interface SampleOther : NSObject <SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Other", "SampleOther.m"), table.concat({
+        "@implementation SampleOther",
+        "- (void)reset",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleUnrelated.m"), table.concat({
+        "@implementation SampleUnrelated",
+        "- (void)traitsDidChange:(SampleTraits *)previous",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleUse.m"), table.concat({
+        "@implementation SampleUse",
+        "- (void)run:(SampleView *)view",
+        "{",
+        "    [view track];",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleBase.m"), table.concat({
+        "@implementation SampleBase",
+        "- (void)rewind",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_sdk, "System", "Library", "Frameworks", "Sample.framework", "Headers", "SampleGenericKit.h"), table.concat({
+        "@interface SampleGeneric<ItemType> : NSObject<SampleEnvironment>",
+        "@end",
+        "",
+    }, "\n"))
+    io.writefile(path.join(protocol_src, "Sample", "SampleGeneric.m"), table.concat({
+        "@implementation SampleGeneric",
+        "- (void)pause",
+        "{",
+        "}",
+        "@end",
+        "",
+    }, "\n"))
+    local status = lowered.protocol_status(protocol_src, protocol_sdk)
+    local members = status.members.SampleEnvironment
+    assert(members["-traits"] and members["+shared"] and members["-prepare"] and members["-reset"] and members["-rewind"] and members["-pause"]
+           and not members["-traitsDidChange:"] and not members["-track"],
+           "a protocol member is lowered when a class that conforms to the protocol implements it, directly, through a superclass, or in any folder, and not otherwise")
+    local protocol_lowered = lowered.lower_header(io.readfile(protocol_header), {classes = {}, functions = {}, globals = {}, protocols = {SampleEnvironment = true},
+                                                                                protocol_members = {SampleEnvironment = members}})
+    assert(count(protocol_lowered, "AVAILABLE") == 2 and protocol_lowered:find("traitsDidChange:(SampleTraits *)previous API_AVAILABLE", 1, true)
+           and protocol_lowered:find("track API_AVAILABLE", 1, true) and not protocol_lowered:find("traits API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("shared API_AVAILABLE", 1, true) and not protocol_lowered:find("prepare API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("reset API_AVAILABLE", 1, true) and not protocol_lowered:find("rewind API_AVAILABLE", 1, true)
+           and not protocol_lowered:find("pause API_AVAILABLE", 1, true),
+           "an implemented protocol member loses its availability, and a member Backports does not implement keeps it:\n" .. protocol_lowered)
+
+    local photos_source = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h")
+    local photos_lowered = lowered.lower_header(io.readfile(photos_source), {markers = lowered.region_markers(sdk), classes = {}, functions = {},
+                                                                              globals = {PHImageContentModeAspectFill = true}, protocols = {}})
+    local photos_enum = photos_lowered:match("typedef NS_ENUM%(NSInteger, PHImageContentMode%) %b{}")
+    assert(photos_enum and not photos_enum:find("API_AVAILABLE_BEGIN", 1, true) and not photos_enum:find("API_AVAILABLE_END", 1, true),
+           "an availability marker sits inside the enum whose constant is lowered:\n" .. photos_lowered)
+    assert(photos_enum:find("PHImageContentModeAspectFit API_AVAILABLE(", 1, true) and not photos_enum:find("PHImageContentModeAspectFill API_AVAILABLE", 1, true)
+           and photos_enum:find("PHImageContentModeDefault API_AVAILABLE(", 1, true),
+           "the constant Backports do not define keeps the region's availability, and the lowered constants lose it:\n" .. photos_enum)
+    local photos_probe = path.join(probes, "photos.m")
+    io.writefile(photos_probe, table.concat({
+        "#import <Photos/PhotosTypes.h>",
+        "",
+        "NSInteger revenantPhotosProbe(void)",
+        "{",
+        "    return PHImageContentModeAspectFill;",
+        "}",
+        "",
+    }, "\n"))
+    local photos_ok, photos_compiling = compiles(sdk, vfs, photos_probe, path.join(probes, "photos.log"))
+    assert(photos_ok, "the lowered PhotosTypes.h does not compile at iOS 6.0:\n" .. photos_compiling)
+    local photos_overlay = io.readfile(path.join(out, "overlay", "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h"))
+    assert(photos_overlay:find("PHImageContentModeDefault API_AVAILABLE(", 1, true),
+           "PHImageContentModeDefault is not implemented by Backports, so the overlay keeps its availability")
+
+    local webview_probe = path.join(probes, "webview.m")
+    io.writefile(webview_probe, table.concat({
+        "#import <UIKit/UIKit.h>",
+        "",
+        "void revenantWebViewProbe(UIWebView *web, id<UIWebViewDelegate> delegate, NSURLRequest *request)",
+        "{",
+        "    UIWebViewNavigationType type = UIWebViewNavigationTypeLinkClicked;",
+        "    (void)type;",
+        "    (void)[delegate webView:web shouldStartLoadWithRequest:request navigationType:UIWebViewNavigationTypeOther];",
+        "}",
+        "",
+    }, "\n"))
+    local webview_ok, webview_compiling = compiles(sdk, vfs, webview_probe, path.join(probes, "webview.log"))
+    assert(webview_ok, "the lowered UIKit headers do not declare UIWebViewNavigationType for iOS 6.0:\n" .. webview_compiling)
 end
