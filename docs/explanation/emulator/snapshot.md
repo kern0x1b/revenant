@@ -227,7 +227,7 @@ the kernel restores its owners in sequence. The Darwin notify state is the third
 `bus.registrations`, which the ledger refuses when populated but which the save still writes, so a refused-but-written
 member keeps its bytes in the list. The display state is the fourth: its two geometry words are saved rows, checked
 against the wiring on load, and its host surface is refused at save rather than written. The Core Audio state is the
-fifth: its two saved fields are its list, and its other census members are never written, so they stay census notes.
+fifth: its two saved fields are its list, and its other census members are never written, so they stay census notes. The HID event system is the sixth: its list holds the consumer process, the consumer processor and the accelerometer, whose `is_default` holds while it is stopped. Its `save` refuses a delivery in flight before it writes its own bytes; `hid.delivering_` stays a refused row, and the wired `hid.state_` stays a plain census note.
 
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader

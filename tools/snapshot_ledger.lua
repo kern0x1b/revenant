@@ -7,6 +7,7 @@ local DESCRIBED = {
     path.join(root, "emulator", "src", "foundation", "darwin_notify_state_hle.cpp"),
     path.join(root, "emulator", "src", "graphics", "display.cpp"),
     path.join(root, "emulator", "src", "media", "core_audio_hle.cpp"),
+    path.join(root, "emulator", "src", "kernel", "hid_event_system_hle.cpp"),
 }
 local LEDGER = path.join(root, "emulator", "src", "kernel", "include", "kernel", "snapshot_ledger.hpp")
 local BOOTED = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_booted_members.hpp")

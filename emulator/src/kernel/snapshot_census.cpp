@@ -350,8 +350,7 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "hle.traced_symbols_", hle.traced_symbols_);
 
     const auto& hid = kernel.hid_event_system_hle_;
-    note(out, "hid.consumer_process_", hid.consumer_process_);
-    note(out, "hid.consumer_processor_", hid.consumer_processor_);
+    snapshot::note_populated_members(out, hid, HidEventSystemHle::snapshot_members());
     note(out, "hid.delivering_", hid.delivering_);
     note(out, "hid.state_", hid.state_);
 
