@@ -212,7 +212,7 @@ jobs:
       - name: Run the snapshot gates and the unit tests of the snapshot code
         if: inputs.job == 'snapshot'
         timeout-minutes: 90
-        run: ./xmakew test -P . repository/layout repository/comments_check repository/snapshot_diff 'emulator_runtime_*/*''emulator_foundation_*/*' 'emulator_kernel_*/*' 'emulator_graphics_*/*' 'emulator_mach_*/*' 'emulator_network_*/*' --output-on-failure
+        run: ./xmakew test -P . repository/layout repository/comments_check repository/snapshot_diff 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' 'emulator_graphics_*/*' 'emulator_mach_*/*' 'emulator_network_*/*' --output-on-failure
 
       - name: Perturb the restore for the negative control
         if: inputs.job == 'snapshot' && inputs.negative_control
