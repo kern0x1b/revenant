@@ -60,6 +60,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
+
       - uses: ./.github/actions/revenant-setup
 
       - uses: actions/cache/restore@v4
@@ -88,6 +91,57 @@ jobs:
       - name: Run the repository checks
         run: ./xmakew test -P . 'repository/*' --output-on-failure
 
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
       - name: Save the package store
         if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
@@ -108,6 +162,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
 
       - uses: ./.github/actions/revenant-setup
 
@@ -195,6 +252,57 @@ jobs:
         id: tests
         run: ./xmakew test -P . --output-on-failure
 
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
       - name: Save the package store
         if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
@@ -215,6 +323,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
 
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
@@ -359,6 +470,58 @@ jobs:
       - name: Run the Backports tests
         timeout-minutes: 10
         run: ./xmakew test -P . "backports_uikit/*" --output-on-failure
+
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
       - name: Link the probe app against the Backports libraries
         timeout-minutes: 10
         run: |
