@@ -468,7 +468,10 @@ local function host_tests(folder, tests, library, frameworks, options)
                 add_defines(define)
             end
             add_tests("default")
-            add_tests("negative", {runargs = {"--negative"}, should_fail = true})
+            add_tests("negative", {runargs = {"--negative"}, expect_failure = true})
+            on_test(function (target, opt)
+                return import("@addon.revenant.host_test", {anonymous = true}).run(target, opt)
+            end)
         target_end()
     end
 end
