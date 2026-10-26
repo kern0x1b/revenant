@@ -4,27 +4,49 @@
 
 local ALIGNMENT = 1048576
 
-local USAGE = [[usage: ./xmakew l tools/snapshot_round_trip.lua --rootfs DIR [--emulator EMU] [--binary GUEST]
-                                                             [--save-ticks N] [--ticks N] [--time-scale S]
-                                                             [--work DIR]
+local USAGE = [==[usage: ./xmakew l tools/snapshot_round_trip.lua --rootfs DIR [--emulator EMU]
+                                                             [--binary GUEST] [--guest FILE]
+                                                             [--ios-build CODE]
+                                                             [--save-ticks N[,N...]] [--ticks N]
+                                                             [--time-scale S] [--work DIR]
 
-Saves a snapshot at --save-ticks, boots the save's clone cold to --ticks, restores the saved
-snapshot on a second clone to --ticks, and requires the cold and restored snapshots to be
-identical. Each run boots its own clone of the rootfs. The device key store is random per
-device state, so the cold and the restored runs take the save's key store. The guest sees the
-image's file times, not the clone's host times, so every clone of one image is interchangeable.
-Without --binary the guest boots launchd. The check is skipped without --rootfs. --save-ticks and --ticks must be
-multiples of 2^20 and --save-ticks below --ticks. Clones use cp -c, so this runs on macOS.]]
+For each save tick N, saves a snapshot at N, boots the save's clone cold to --ticks, restores the
+saved snapshot on a second clone to --ticks, and requires the cold and restored snapshots to be
+identical. The cold boot does not depend on N, so one cold boot serves every save tick. Each run
+boots its own clone of the rootfs. The device key store is random per device state, so every run
+takes the first save's key store. The guest sees the image's file times, not the clone's host
+times, so every clone of one image is interchangeable.
+
+--guest copies FILE into every clone at --binary, so a guest built apart from the rootfs runs in
+it. --ios-build names the iOS build of a rootfs that carries no firmware metadata. Without
+--binary the guest boots launchd. The check is skipped without --rootfs. The save ticks and
+--ticks must be multiples of 2^20, and every save tick below --ticks. Clones use cp -c, so this
+runs on macOS. Each boot is timed with /usr/bin/time: the cold boot runs from zero to --ticks,
+each restored boot from its save tick to --ticks, and each save from zero to its tick.]==]
 
 local flags = {
     ["--emulator"] = "emulator",
     ["--rootfs"] = "rootfs",
     ["--binary"] = "binary",
+    ["--guest"] = "guest",
+    ["--ios-build"] = "ios_build",
     ["--work"] = "work",
     ["--save-ticks"] = "save_ticks",
     ["--ticks"] = "ticks",
     ["--time-scale"] = "time_scale",
 }
+
+local function parse_ticks(text)
+    local values = {}
+    for item in text:gmatch("[^,]+") do
+        local value = tonumber(item)
+        if not value then
+            raise("--save-ticks names %s, which is not a number\n%s", item, USAGE)
+        end
+        values[#values + 1] = value
+    end
+    return values
+end
 
 local function parse(...)
     local arguments = {...}
@@ -51,58 +73,83 @@ local function parse(...)
         options[key] = arguments[index + 1]
         index = index + 2
     end
-    options.save_ticks = tonumber(options.save_ticks)
     options.ticks = tonumber(options.ticks)
+    options.save_ticks = parse_ticks(options.save_ticks)
     if not tonumber(options.time_scale) then
         raise("--time-scale must be a number\n" .. USAGE)
     end
+    if options.guest and not options.binary then
+        raise("--guest needs --binary, the path the guest runs at in the rootfs\n" .. USAGE)
+    end
     options.emulator = path.absolute(options.emulator)
     options.work = path.absolute(options.work)
-    if not options.save_ticks or not options.ticks or options.save_ticks <= 0 or
-        options.save_ticks >= options.ticks or options.save_ticks % ALIGNMENT ~= 0 or
-        options.ticks % ALIGNMENT ~= 0 then
-        raise("--save-ticks and --ticks must be multiples of %d with --save-ticks below --ticks", ALIGNMENT)
+    if not options.ticks or options.ticks <= 0 or options.ticks % ALIGNMENT ~= 0 then
+        raise("--ticks must be a multiple of %d\n%s", ALIGNMENT, USAGE)
+    end
+    for _, save in ipairs(options.save_ticks) do
+        if save <= 0 or save >= options.ticks or save % ALIGNMENT ~= 0 then
+            raise("every --save-ticks must be a multiple of %d below --ticks\n%s", ALIGNMENT, USAGE)
+        end
     end
     return options
 end
 
-local function clone(source, directory)
+local function clone(options, source, directory)
     os.mkdir(directory)
     local status = os.execv("cp", {"-c", "-R", source, path.join(directory, "rootfs")}, {try = true})
     if status ~= 0 then
         raise("cannot clone %s into %s", source, directory)
     end
-end
-
-local function boot(options, directory, label, ticks, extra)
-    local host_cache = path.join(directory, label .. "-host-cache")
-    local tmp = path.join(directory, label .. "-tmp")
-    local log = path.join(directory, label .. ".log")
-    os.mkdir(host_cache)
-    os.mkdir(tmp)
-    local arguments = {"boot", "--rootfs", path.join(directory, "rootfs"), "--device", "iPhone4,1",
-        "--host-cache", host_cache, "--display", "headless", "--gles-backend", "software",
-        "--time-scale", options.time_scale, "--ticks", tostring(ticks), "--verbose"}
-    if options.binary then
-        table.join2(arguments, {"--binary", options.binary})
+    if options.guest then
+        local guest = path.join(directory, "rootfs") .. options.binary
+        os.mkdir(path.directory(guest))
+        os.cp(options.guest, guest)
+        os.execv("chmod", {"755", guest})
     end
-    for _, argument in ipairs(extra) do
-        arguments[#arguments + 1] = argument
-    end
-    local status = os.execv(options.emulator, arguments, {try = true, curdir = directory,
-        envs = {TMPDIR = tmp}, stdout = log, stderr = log .. ".err"})
-    if status ~= 0 then
-        local reason = io.readfile(log .. ".err") or ""
-        raise("%s exited with %s running %s in %s, see %s and %s\n%s", label, tostring(status),
-            options.emulator, directory, log, log .. ".err", reason:sub(-4000))
-    end
-    return log
 end
 
 local function share_key_store(from, to)
     local key_store = path.join(to, ".emulator-device-state", "rootfs")
     os.mkdir(key_store)
     os.cp(path.join(from, ".emulator-device-state", "rootfs", "key-store-v1.key"), path.join(key_store, "key-store-v1.key"))
+end
+
+local function timing_of(file)
+    local text = io.readfile(file) or ""
+    local real, user, system = text:match("([%d%.]+) real%s+([%d%.]+) user%s+([%d%.]+) sys")
+    if not real then
+        raise("no timing in %s", file)
+    end
+    return {real = tonumber(real), cpu = tonumber(user) + tonumber(system)}
+end
+
+local function boot(options, directory, label, ticks, extra)
+    local host_cache = path.join(directory, label .. "-host-cache")
+    local tmp = path.join(directory, label .. "-tmp")
+    local log = path.join(directory, label .. ".log")
+    local timing = path.join(directory, label .. ".time")
+    os.mkdir(host_cache)
+    os.mkdir(tmp)
+    local arguments = {"-l", "-o", timing, options.emulator, "boot", "--rootfs", path.join(directory, "rootfs"),
+        "--device", "iPhone4,1", "--host-cache", host_cache, "--display", "headless", "--gles-backend", "software",
+        "--time-scale", options.time_scale, "--ticks", tostring(ticks), "--verbose"}
+    if options.binary then
+        table.join2(arguments, {"--binary", options.binary})
+    end
+    if options.ios_build then
+        table.join2(arguments, {"--ios-build", options.ios_build})
+    end
+    for _, argument in ipairs(extra) do
+        arguments[#arguments + 1] = argument
+    end
+    local status = os.execv("/usr/bin/time", arguments, {try = true, curdir = directory,
+        envs = {TMPDIR = tmp}, stdout = log, stderr = log .. ".err"})
+    if status ~= 0 then
+        local reason = io.readfile(log .. ".err") or ""
+        raise("%s exited with %s running %s in %s, see %s and %s\n%s", label, tostring(status),
+            options.emulator, directory, log, log .. ".err", reason:sub(-4000))
+    end
+    return log, timing_of(timing)
 end
 
 local function require_marker(log, marker)
@@ -112,23 +159,21 @@ local function require_marker(log, marker)
     end
 end
 
-local function compare(cold, restored)
-    local left = io.readfile(cold)
-    local right = io.readfile(restored)
-    if #left ~= #right then
-        raise("cold snapshot is %d bytes, restored is %d", #left, #right)
+local function compare(cold, restored, report)
+    local size = os.filesize(cold)
+    if size ~= os.filesize(restored) then
+        raise("cold and restored snapshots differ in size: %d and %d bytes", size, os.filesize(restored))
     end
-    local differing, first = 0, nil
-    for index = 1, #left do
-        if string.byte(left, index) ~= string.byte(right, index) then
-            differing = differing + 1
-            first = first or (index - 1)
-        end
+    local differences = report .. ".cmp"
+    local status = os.execv("cmp", {cold, restored}, {try = true, stdout = differences})
+    if status ~= 0 then
+        raise("cold and restored snapshots differ in content, see %s: %s", differences, io.readfile(differences) or "")
     end
-    if differing > 0 then
-        raise("cold and restored snapshots differ in %d bytes, first at offset %d", differing, first)
-    end
-    print(string.format("round trip: cold and restored snapshots are identical, %d bytes", #left))
+    return size
+end
+
+local function row(label, ticks, timing)
+    return string.format("| %s | %d | %.1f | %.1f |", label, ticks, timing.real, timing.cpu)
 end
 
 function main(...)
@@ -146,7 +191,10 @@ function main(...)
     if not os.isdir(options.rootfs) then
         raise("no root filesystem at %s", options.rootfs)
     end
-    if options.binary and not os.isfile(options.rootfs .. options.binary) then
+    if options.guest and not os.isfile(options.guest) then
+        raise("no guest at %s, build it first", options.guest)
+    end
+    if options.binary and not options.guest and not os.isfile(options.rootfs .. options.binary) then
         raise("%s has no guest binary %s", options.rootfs, options.binary)
     end
 
@@ -157,27 +205,57 @@ function main(...)
     end
     os.mkdir(work)
 
-    local save = path.join(work, "save")
-    clone(options.rootfs, save)
-    local save_snapshot = path.join(save, "session.snap")
-    boot(options, save, "save", options.save_ticks, {"--snapshot-out", save_snapshot})
-    require_marker(path.join(save, "save.log"), "[snapshot] written")
+    local first_tick = options.save_ticks[1]
+    local base = path.join(work, "save-" .. first_tick)
+    clone(options, options.rootfs, base)
+    local base_log, base_timing = boot(options, base, "save-" .. first_tick, first_tick,
+        {"--snapshot-out", path.join(base, "session.snap")})
+    require_marker(base_log, "[snapshot] written")
 
     local cold = path.join(work, "cold")
-    clone(options.rootfs, cold)
-    share_key_store(save, cold)
+    clone(options, options.rootfs, cold)
+    share_key_store(base, cold)
     local cold_snapshot = path.join(cold, "cold.snap")
-    local cold_log = boot(options, cold, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
+    local cold_log, cold_timing = boot(options, cold, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
     require_marker(cold_log, "[snapshot] written")
 
-    local restore = path.join(work, "restore")
-    clone(options.rootfs, restore)
-    share_key_store(save, restore)
-    local restored_snapshot = path.join(restore, "restored.snap")
-    local restore_log = boot(options, restore, "restore", options.ticks,
-        {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
-    require_marker(restore_log, "[snapshot] restored")
-    require_marker(restore_log, "[snapshot] written")
+    local rows = {
+        "| run | ticks | real s | cpu s |",
+        "|---|---|---|---|",
+        row("cold, 0 to --ticks", options.ticks, cold_timing),
+    }
+    for index, save_tick in ipairs(options.save_ticks) do
+        local save = path.join(work, "save-" .. save_tick)
+        local save_snapshot = path.join(save, "session.snap")
+        local save_timing
+        if index == 1 then
+            save_timing = base_timing
+        else
+            clone(options, options.rootfs, save)
+            share_key_store(base, save)
+            local save_log
+            save_log, save_timing = boot(options, save, "save-" .. save_tick, save_tick,
+                {"--snapshot-out", save_snapshot})
+            require_marker(save_log, "[snapshot] written")
+        end
 
-    compare(cold_snapshot, restored_snapshot)
+        local restore = path.join(work, "restore-" .. save_tick)
+        clone(options, options.rootfs, restore)
+        share_key_store(base, restore)
+        local restored_snapshot = path.join(restore, "restored.snap")
+        local restore_log, restore_timing = boot(options, restore, "restore-" .. save_tick, options.ticks,
+            {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
+        require_marker(restore_log, "[snapshot] restored")
+        require_marker(restore_log, "[snapshot] written")
+
+        local size = compare(cold_snapshot, restored_snapshot, path.join(work, "compare-" .. save_tick))
+        print(string.format("round trip: save at %d, cold and restored snapshots at %d are identical, %d bytes",
+            save_tick, options.ticks, size))
+        table.insert(rows, row("save, 0 to " .. save_tick, save_tick, save_timing))
+        table.insert(rows, row("restored, " .. save_tick .. " to --ticks", options.ticks - save_tick, restore_timing))
+    end
+    print("")
+    for _, line in ipairs(rows) do
+        print(line)
+    end
 end
