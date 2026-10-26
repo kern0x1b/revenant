@@ -51,7 +51,7 @@ framework the Backports provide, and the `public` Swift types declared in those 
 of `--objects` add what the first two do not name. A component whose sources are in the tree is read the same way
 (`frameworks/SwiftUI/src`), and its framework and types are counted as `component`.
 
-The iOS 6.1.3 system is the dyld shared cache under `~/.revenant/dyld/6.1.3`, read through `apple.dyld`. Classes, C
+The iOS 6.1.3 system is the dyld shared cache under `.cache/dyld/6.1.3`, read through `apple.dyld`. Classes, C
 functions and global variables are checked there, by the cache's export table, which holds the exports of every library
 in it: a symbol counts as present when some library on iOS 6.1.3 exports it, whichever framework the SDK names as its
 owner. The cache wins over the SDK's annotation: a class the cache exports is present even when its SDK declaration says

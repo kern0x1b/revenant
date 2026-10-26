@@ -1608,7 +1608,7 @@ local function members_key(src, sdk)
 end
 
 function members_text(src, sdk, intros)
-    local folder = path.join(workspace.cache(), "lowered-members")
+    local folder = path.join(workspace.scratch(), "lowered-members")
     local final = path.join(folder, members_key(src, sdk) .. ".txt")
     local cached = os.isfile(final) and try {function () return io.readfile(final) end}
     if cached then

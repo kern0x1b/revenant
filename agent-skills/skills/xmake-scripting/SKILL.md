@@ -87,7 +87,7 @@ file and line if an import or a call fails (skill `xmake-troubleshooting`).
 - Files: `io.readfile`, `io.writefile`, `io.gsub`. Copy with `os.cp`/`os.vcp`. Remove only what
   your own script wrote (`os.tryrm` on a path under `build/`).
 - Environment: `os.setenv` changes the xmake process and every command it starts. Never set
-  `XMAKE_GLOBALDIR`, `XMAKE_PKG_INSTALLDIR`, `XMAKE_PKG_CACHEDIR` or `REVENANT_HOME` there: they move
+  `XMAKE_GLOBALDIR`, `XMAKE_PKG_INSTALLDIR`, `XMAKE_PKG_CACHEDIR` or `REVENANT_CACHE` there: they move
   the shared store or Revenant's firmware and emulator data (skill `xmake-basics`). `REVENANT_RELEASE`
   is set by `xmake deb` itself (`v0.8.10:modules/packaging.lua:94`).
 

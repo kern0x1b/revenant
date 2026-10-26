@@ -134,7 +134,7 @@ local function code(text, spans)
 end
 
 function differing(files, rev)
-    local scratch = path.join(os.getenv("HOME"), ".revenant", "cache", "comments-verify")
+    local scratch = path.join(import("@addon.revenant.workspace", {anonymous = true}).scratch(), "comments-verify")
     os.tryrm(scratch)
     local differ = {}
     local luapairs = {}

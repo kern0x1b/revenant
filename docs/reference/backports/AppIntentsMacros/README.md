@@ -40,7 +40,7 @@ hand-checked expansion, not a diff against Apple's output.
 `@addon/revenant/macro`, not `rules/swift`: a plugin is compiled for the machine running the compiler
 and loaded with `-load-plugin-executable`, so it is neither a port target nor a device binary.
 
-**Use the shared store, `~/.revenant/cache/xmake-global`.** A run of mine set a private `XMAKE_GLOBALDIR` and the project
+**Use the shared store, `.cache/xmake-global`.** A run of mine set a private `XMAKE_GLOBALDIR` and the project
 then re-resolved the whole chain *from the network* into an empty store — the log of that run:
 
 ```

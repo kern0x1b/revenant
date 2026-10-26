@@ -21,7 +21,7 @@ function main(device, release)
 
     local configure = path.join(out, "configure.log")
     local install = path.join(out, "install.log")
-    os.execv(os.programfile(), {"f", "-p", "iphoneos", "-a", "armv7", "-y"},
+    os.execv(os.programfile(), {"f", "-P", here, "-p", "iphoneos", "-a", "armv7", "-y"},
              {curdir = here, stdout = configure, stderr = configure})
     os.execv(os.programfile(), {"emulate", "-d", device, "-r", release, "install"},
              {curdir = here, stdout = install, stderr = install})

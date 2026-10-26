@@ -73,7 +73,7 @@ local function resolve(label, folder, repo, toolchain_lua)
     local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder)}
     local log = path.join(run, "resolve.log")
     local ok, code = try {function ()
-        return true, os.execv(os.programfile(), {"f", "-c", "-y"}, {curdir = project, envs = envs, stdout = log, stderr = log, timeout = 60000, try = true})
+        return true, os.execv(os.programfile(), {"f", "-P", project, "-c", "-y"}, {curdir = project, envs = envs, stdout = log, stderr = log, timeout = 60000, try = true})
     end}
     local told = io.readfile(log) or ""
     return ok and code == 0, told:find("toolchain(\"apple-ios\"): not found", 1, true) ~= nil, told

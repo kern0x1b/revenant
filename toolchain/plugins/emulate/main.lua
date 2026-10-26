@@ -94,8 +94,8 @@ local function booter(ctx)
                     scale = tonumber(option.get("scale")) or emulator.TIME_SCALE,
                     cores = ctx.cores,
                     test_concurrent = ctx.test_concurrent,
-                    cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
-                    tmpdir = path.join(emulator.root(), "tmp.noindex")}))
+                    cache = emulator.host_cache(ctx.identifier, ctx.build),
+                    tmpdir = path.join(opt.run, "tmp")}))
             end,
             catch {
                 function (errors)
@@ -181,6 +181,7 @@ local function run(ctx, argv)
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
     if not ok then
         raise(errors)
@@ -236,6 +237,7 @@ local function launch(ctx, identifier, steps)
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
     for _, name in ipairs({"app.stdout", "app.stderr"}) do
         local file = path.join(folder, "results", name)
@@ -329,8 +331,8 @@ local function debug_command(ctx, command)
         function ()
             return emulator.debugged(table.join(ctx, {rootfs = rootfs, run = folder, guest = command,
                                                       architecture = config.arch(), network = network(),
-                                                      cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
-                                                      tmpdir = path.join(emulator.root(), "tmp.noindex")}))
+                                                      cache = emulator.host_cache(ctx.identifier, ctx.build),
+                                                      tmpdir = path.join(folder, "tmp")}))
         end,
         catch {
             function (errors)
@@ -363,6 +365,7 @@ local function debug_command(ctx, command)
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
 end
 

@@ -140,6 +140,13 @@ target("emulator_image_slab_test")
     add_deps("emulator_foundation")
     add_tests("image_slab")
 
+target("emulator_process_loader_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("tests/unit/process_loader_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("process_loader")
+
 target("emulator_load_average_test")
     set_kind("binary")
     set_default(false)

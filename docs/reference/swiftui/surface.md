@@ -18,7 +18,7 @@ reason.
 
 It is a host project of its own, `frameworks/SwiftUI/tests/surface/xmake.lua`, because the gate itself must stay Lua-only and
 fast: `./xmakew l -P . frameworks/SwiftUI/tools/api_surface.lua apple` builds it and writes the surface file,
-`apple-26-surface.tsv` in the run folder (`$HOME/.revenant/cache/<task>/swiftui/api/`), which `api_invented.lua`
+`apple-26-surface.tsv` in the run folder (`.cache/scratch/<task>/swiftui/api/`), which `api_invented.lua`
 reads.
 
 * `swift-syntax` — the toolchain's package `revenant@swift-syntax` (604.0.0, the tag that matches the 6.4
@@ -80,7 +80,7 @@ declare and this tree does not) and two bare `subscript` rows the old file names
 
 **The copy of Apple's framework is generated run output, and the authority is the SDK `surface_rows.lua sdk` reads.**
 `tools/api_surface.lua prepare` copies the 16.4 SDK's `SwiftUI.framework` into the run folder
-(`$HOME/.revenant/cache/<task>/swiftui/fw/`), outside the tree; nothing measured from it is a fact about this
+(`.cache/scratch/<task>/swiftui/fw/`), outside the tree; nothing measured from it is a fact about this
 repository. `surface_rows.lua sdk` and `surface_diff.lua` read the iOS 26.2 SDK that `toolchain/modules/workspace.lua` names
 (`sdk()`: revenant's `iphoneos-sdk 26.2` package, or the folder `REVENANT_GEN_SDK` names), `surface_diff.lua` for its
 `arm64e-apple-ios.swiftinterface` index. **A surface number is only comparable with another taken from the same

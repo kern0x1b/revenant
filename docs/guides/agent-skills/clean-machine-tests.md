@@ -21,7 +21,7 @@ From the revenant checkout:
 ./xmakew l -P . agent-skills/tests/run.lua [--runtime claude] [--hours N] list timer …   # or: all
 ```
 
-Run output goes under `$HOME/.revenant/cache/<task>/agent-skills/` (`toolchain/modules/workspace.lua`
+Run output goes under `.cache/scratch/<task>/agent-skills/` (`toolchain/modules/workspace.lua`
 names the task). For each scenario `run.lua`:
 
 1. makes a scratch directory `scratch.<random>` there, outside any repository, and in it a fresh
@@ -36,7 +36,7 @@ names the task). For each scenario `run.lua`:
 
 Shared on purpose, not isolated: the xmake package store (`XMAKE_GLOBALDIR` is the real home, so
 nothing is rebuilt into a private store) and Revenant's firmware, caches and emulator images
-(`REVENANT_HOME`). A guard in front of `xmake` refuses `--force` and `xmake emulate clean`.
+(`REVENANT_CACHE`). A guard in front of `xmake` refuses `--force` and `xmake emulate clean`.
 
 `run.lua` refuses to start unless `REVENANT_AGENT_SKILLS_ISOLATION_APPROVED=1` is set (the isolation is
 approved; the variable keeps an accidental run from starting it).

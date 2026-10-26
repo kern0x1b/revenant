@@ -290,6 +290,22 @@ on the lowered iOS 6 SDK settles both without that change:
 Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
 re-checked with the next Display build.
 
+## SceneKit: two members that raise on 6.1.3
+
+What exists: the rest of the SCNSceneRenderer members of `SCNView` are native, in `frameworks/Backports/src/SceneKit/SCNView.m`
+and `RevenantSCNPicking.m`. The list and what each one does are in C17 of `docs/reference/backports/crutches.md`.
+
+Open:
+
+- `overlaySKScene` (get and set) raises. SpriteKit is absent from the 6.1.3 image: the rootfs has no `SpriteKit.framework`,
+  and the dyld shared cache of `iPhone4,1/6.1.3_10B329` has no `SKScene` string. The member is typed with `SKScene`, so it
+  needs a SpriteKit backport, which is outside the SceneKit backport. Decision: whether SpriteKit is in scope, or the member
+  stays raising.
+- `audioEnvironmentNode` (get) raises. `AVAudioEnvironmentNode` is absent from the same cache, and so is `AVAudioEngine`;
+  the backport's engine is built over AUGraph (`RevenantSCNSoundEngine`). Source players do not go through this node (C19),
+  so a backport would only affect custom nodes. Decision: a backport of the node over an AudioUnit mixer, or the member
+  stays raising.
+
 ## Open, not fixed: a read race in the package store test
 
 `toolchain_light/store_test` failed once on CI (run 40119837571, on the golden-stable branch at 76332140e): a reader
