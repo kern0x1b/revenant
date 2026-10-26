@@ -80,7 +80,22 @@ local function listed(text, name)
     return text:find("[%s,%[']" .. name .. "'?[,%]%s]") ~= nil
 end
 
+local WRITTEN = {}
+
+local function stubs_present(out)
+    for _, entry in ipairs(STUBBED) do
+        if not os.isfile(path.join(out, entry.framework .. ".framework", entry.framework .. ".tbd")) then
+            return false
+        end
+    end
+    return true
+end
+
 function stub_directory(sdk, out)
+    local key = sdk .. "\n" .. out
+    if WRITTEN[key] and stubs_present(out) then
+        return out
+    end
     for _, entry in ipairs(STUBBED) do
         local folder = path.join(out, entry.framework .. ".framework")
         os.mkdir(folder)
@@ -92,6 +107,7 @@ function stub_directory(sdk, out)
         end
         io.writefile(path.join(folder, entry.framework .. ".tbd"), text)
     end
+    WRITTEN[key] = true
     return out
 end
 
