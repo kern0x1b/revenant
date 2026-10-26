@@ -88,18 +88,21 @@ end
 
 local function tools(device, settings)
     local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
+    -- The build output is unsigned. Only the installed copy carries the entitlements SpringBoard checks, so provision that.
+    local signed = path.join(out, "install", "usr", "libexec")
     local stamp = path.join(out, "guest-sources")
     local current = guest_stamp()
     local built = os.isfile(stamp) and io.readfile(stamp) == current
-        and os.isfile(path.join(out, "revenant-sblaunch")) and os.isfile(path.join(out, "revenant-shot"))
-        and os.isfile(path.join(out, "revenant-unlock"))
+        and os.isfile(path.join(signed, "revenant-sblaunch")) and os.isfile(path.join(signed, "revenant-shot"))
+        and os.isfile(path.join(signed, "revenant-unlock"))
     if not built then
         os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch", "revenant-shot", "revenant-unlock"})
+        os.vrunv(os.programfile(), {"install", "-P", os.projectdir(), "-o", path.join(out, "install"), "revenant-sblaunch", "revenant-shot", "revenant-unlock"})
         io.writefile(stamp, current)
     end
-    provision(device, settings, path.join(out, "revenant-sblaunch"), SBLAUNCH)
-    provision(device, settings, path.join(out, "revenant-shot"), SHOT)
-    provision(device, settings, path.join(out, "revenant-unlock"), UNLOCK)
+    provision(device, settings, path.join(signed, "revenant-sblaunch"), SBLAUNCH)
+    provision(device, settings, path.join(signed, "revenant-shot"), SHOT)
+    provision(device, settings, path.join(signed, "revenant-unlock"), UNLOCK)
     device.run(settings, "mkdir -p /var/revenant && chmod 777 /var/revenant")
 end
 
