@@ -340,6 +340,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("loader_class_backport")
         add_tests("flat_class_launch")
         add_tests("screenshot_notification")
+        add_tests("directory_attributes")
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
         add_tests("keybag_lock_state")
