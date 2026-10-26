@@ -8,6 +8,7 @@
 
 #include "foundation/address_space.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "foundation/virtual_clock.hpp"
 #include "kernel/snapshot_ledger.hpp"
 
@@ -316,8 +317,7 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "kss.task_thread_port_objects", shared.task_thread_port_objects);
     note(out, "kss.user_interface_geometry", shared.user_interface_geometry);
     note(out, "kss.virtual_effaceable_storage_available", shared.virtual_effaceable_storage_available);
-    note(out, "clock.now", shared.clock.now());
-    note(out, "clock.wall_time", shared.clock.wall_time());
+    snapshot::note_populated_members(out, shared.clock, VirtualClock::snapshot_members());
 
     const auto& hle = kernel.userland_hle_;
     note(out, "hle.registrations_", hle.registrations_);

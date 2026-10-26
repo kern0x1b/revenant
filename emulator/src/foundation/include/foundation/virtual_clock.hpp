@@ -8,7 +8,9 @@
 #pragma once
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 
@@ -32,6 +34,7 @@ public:
     void advance_to(std::uint64_t deadline);
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<VirtualClock>, 2>& snapshot_members();
 
 private:
     std::atomic_uint64_t now_;

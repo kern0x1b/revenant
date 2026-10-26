@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#include "foundation/virtual_clock.hpp"
 #include "kernel/snapshot_ledger.hpp"
 
 #include <cstddef>
@@ -76,6 +77,16 @@ void only_saved_and_wired_members_are_covered()
         "a member without a descriptor is not covered");
 }
 
+void every_clock_descriptor_is_a_saved_row()
+{
+    for (const auto& member : emulator::VirtualClock::snapshot_members()) {
+        const auto* row = find_member(member.name);
+        expect(row != nullptr && row->coverage == Coverage::saved,
+            "the clock member " + std::string { member.name } +
+                " has a saved ledger row");
+    }
+}
+
 void covered_members_pass_the_walk()
 {
     const std::vector<std::string> populated { "clock.now", "kss.launchd_job_catalog" };
@@ -119,6 +130,7 @@ int main()
     every_class_is_counted();
     coverage_follows_the_class();
     only_saved_and_wired_members_are_covered();
+    every_clock_descriptor_is_a_saved_row();
     covered_members_pass_the_walk();
     member_added_without_a_descriptor_fails_by_name();
     open_and_refused_members_fail_by_name();
