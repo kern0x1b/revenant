@@ -9,7 +9,7 @@ local LIMIT_VARIABLE = "REVENANT_CACHE_GB"
 local ARCHITECTURE = "armv7"
 local RELEASES = {"6.1.3", "6.0"}
 local BUILD_OUTPUTS = {".xmake", "build"}
-local ORDER = {generation = 1, package = 2, scratch = 3, build = 3}
+local ORDER = {generation = 1, source = 2, scratch = 3, build = 4, package = 5}
 local resolved = {}
 
 local function checkout_of(from)
@@ -82,6 +82,30 @@ local function kept_release(release)
     return table.contains(RELEASES, release)
 end
 
+local function packages_root(folder)
+    local dir = path.directory(folder)
+    while #dir > 1 do
+        if path.filename(dir) == "packages" then
+            return dir
+        end
+        dir = path.directory(dir)
+    end
+end
+
+local function prune_empty(folder)
+    local root = packages_root(folder)
+    if not root then
+        return
+    end
+    local dir = path.directory(folder)
+    while #dir > #root do
+        if os.execv("rmdir", {dir}, {try = true, stderr = os.nuldev()}) ~= 0 then
+            return
+        end
+        dir = path.directory(dir)
+    end
+end
+
 local function remove(members)
     for _, member in ipairs(members) do
         if os.islink(member) then
@@ -89,11 +113,23 @@ local function remove(members)
         else
             generations.discard(member)
         end
+        prune_empty(member)
     end
 end
 
+local function with_locks(members)
+    local found = {}
+    for _, member in ipairs(members) do
+        table.insert(found, member)
+        if os.isfile(member .. ".lock") then
+            table.insert(found, member .. ".lock")
+        end
+    end
+    return found
+end
+
 local function entry(base, folder, class, members)
-    return {folder = folder, class = class, name = path.relative(folder, base), members = members or {folder}}
+    return {folder = folder, class = class, name = path.relative(folder, base), members = with_locks(members or {folder})}
 end
 
 local function children(folder)
@@ -151,12 +187,23 @@ local function xmake_binaries(base, found)
     end
 end
 
+local function source_entries(base, found)
+    for _, folder in ipairs(os.dirs(path.join(base, "xmake-global", ".xmake", "cache", "packages", "*", "*", "*"))) do
+        table.insert(found, entry(base, folder, "source"))
+    end
+end
+
 local function xmake_store(base, found)
     package_entries(base, found)
+    source_entries(base, found)
     for _, folder in ipairs(children(path.join(base, "xmake-global", ".xmake"))) do
         local name = path.filename(folder)
         if name == "cache" then
-            table.insert(found, entry(base, folder, "scratch"))
+            for _, cached in ipairs(children(folder)) do
+                if path.filename(cached) ~= "packages" then
+                    table.insert(found, entry(base, cached, "scratch"))
+                end
+            end
         elseif name ~= "packages" then
             table.insert(found, entry(base, folder, "kept"))
         end
