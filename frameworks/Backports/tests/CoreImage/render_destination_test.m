@@ -260,10 +260,11 @@ int main(int argc, char **argv)
     CGLPixelFormatAttribute attributes[] = {kCGLPFAAccelerated, kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_Legacy, 0};
     CGLPixelFormatObj pixelFormat = NULL;
     GLint pixelFormatCount = 0;
-    CGLChoosePixelFormat(attributes, &pixelFormat, &pixelFormatCount);
+    CGLError chosen = CGLChoosePixelFormat(attributes, &pixelFormat, &pixelFormatCount);
     CGLContextObj cgl = NULL;
-    CGLCreateContext(pixelFormat, NULL, &cgl);
-    revenant_check(cgl != NULL, "the host creates an OpenGL context", @"CGLCreateContext");
+    CGLError created = chosen == kCGLNoError ? CGLCreateContext(pixelFormat, NULL, &cgl) : chosen;
+    if (!cgl)
+        printf("skip the OpenGL region checks: the host has no OpenGL context for an accelerated renderer, CGL error %d (%s)\n", created, CGLErrorString(created));
     if (cgl) {
         CGLSetCurrentContext(cgl);
         CIContext *glContext = [CIContext contextWithCGLContext:cgl pixelFormat:pixelFormat colorSpace:nil options:nil];

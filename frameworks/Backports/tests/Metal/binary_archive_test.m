@@ -25,7 +25,7 @@ static void revenant_compare_error(const char *name, NSError *host, NSError *bac
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
-    revenant_check(NSClassFromString(@"RevenantMetalBinaryArchive") != Nil, "the archive class is present", @"RevenantMetalBinaryArchive");
+    revenant_check((NSClassFromString(@"RevenantMetalBinaryArchive") != Nil) != revenant_negative, "the archive class is present", @"RevenantMetalBinaryArchive");
 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     revenant_check(device != nil, "the host has a Metal device", @"no device");
