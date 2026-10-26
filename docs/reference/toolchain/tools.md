@@ -42,3 +42,7 @@ The index is written to `.cache/cache-index/`: one file per release of the names
 
 `toolchain/tools/recipe_digests.lua` writes the `port/digest.lua` of every recipe from the recipe and the
 modules it runs, so a changed source is a changed package. It is run by hand, after a recipe's sources change.
+
+`toolchain/tools/sdk_inventory.lua` writes `toolchain/src/iphoneos-sdk/inventory/ios6.txt`, the install names that the iOS 6.0 and
+6.1.3 shared caches both hold, read from `.cache/dyld/<release>/`. Fetch both caches first with `./xmakew firmware -P . -a armv7 fetch RELEASE`.
+It is run by hand, when a release is added to the inventory.
