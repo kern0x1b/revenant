@@ -71,23 +71,26 @@ local function provision(device, settings, file, remote)
     device.run(settings, "chmod 755 " .. remote)
 end
 
-local function guest_sources()
-    local newest = 0
+local function guest_stamp()
+    local digests = {}
     for _, file in ipairs(os.files(path.join(os.projectdir(), "emulator", "src", "guest", "*"))) do
-        newest = math.max(newest, os.mtime(file))
+        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
-    return tostring(newest)
+    table.insert(digests, "daemon=" .. hash.sha256(path.join(os.projectdir(), "toolchain", "rules", "daemon", "xmake.lua")))
+    table.insert(digests, "sdk=" .. import("@addon.revenant.workspace", {anonymous = true}).sdk())
+    table.sort(digests)
+    return hash.strhash128(table.concat(digests, ";"))
 end
 
 local function tools(device, settings)
     local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
     local stamp = path.join(out, "guest-sources")
-    local sources = guest_sources()
-    local built = os.isfile(stamp) and io.readfile(stamp) == sources
+    local current = guest_stamp()
+    local built = os.isfile(stamp) and io.readfile(stamp) == current
         and os.isfile(path.join(out, "revenant-sblaunch")) and os.isfile(path.join(out, "revenant-shot"))
     if not built then
         os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch", "revenant-shot"})
-        io.writefile(stamp, sources)
+        io.writefile(stamp, current)
     end
     provision(device, settings, path.join(out, "revenant-sblaunch"), SBLAUNCH)
     provision(device, settings, path.join(out, "revenant-shot"), SHOT)
