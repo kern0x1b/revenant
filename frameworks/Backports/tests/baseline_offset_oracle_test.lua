@@ -2,15 +2,14 @@ local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SOURCE = path.join(BACKPORTS, "src", "UIKit", "NSAttributedString+BaselineOffset7.m")
 local ORACLE = path.join(TESTS, "baseline_offset", "oracle.m")
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local function clang()
     return os.iorunv("xcrun", {"--sdk", "macosx", "--find", "clang"}):trim()
 end
 
 function main()
-    local work = path.join(os.tmpdir(), "baseline-offset-oracle")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("baseline-offset-oracle")
     local program = path.join(work, "baseline_offset_oracle")
     local sdk = os.iorunv("xcrun", {"--sdk", "macosx", "--show-sdk-path"}):trim()
     os.vrunv(clang(), {"-isysroot", sdk, "-fobjc-arc", "-w", "-framework", "AppKit", "-framework", "Foundation", "-o", program, SOURCE, ORACLE})
