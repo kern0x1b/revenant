@@ -582,8 +582,41 @@ The boot log has `[loader] dyld_entry=0x2fe01028`. So the 0x2f repeats are dyld,
 layout the shared region starts at 0x30000000, so the image slab does not cover dyld. Each exec clears the native slab
 (`emulator_session.cpp:3913`), and every process retranslates dyld: about 0.7% of emits in this boot.
 
-Candidate fix, not done: put dyld's mapping in the image region, or in a second region. dyld is a file mapping, so it
-needs the same copy-on-write rule as the shared cache. The layout is in `darwin_address_layout.hpp`.
+The candidate fix, dyld in the image slab as a second range under the same copy-on-write rule, is measured in the next
+section.
 
-Not done: dyld in the image region (the candidate above), the `block_entries` load factor, and a quiet-host repeat of
-the footprint and boot pairs.
+Not done: the `block_entries` load factor, and a quiet-host repeat of the footprint and boot pairs.
+
+## dyld in the machine image slab, measured on CI 2026-10-26
+
+The branch puts dyld's `__TEXT` in the machine-wide image slab as a second range, under the same copy-on-write rule as the
+shared cache (dynarmic patch 0012; the emulator reads the range from `usr/lib/dyld`). While the slab is on, a process
+whose dynamic linker is not that system file is refused. Measured with `emulator.yml` job `measure`: branch `ac1d5f5ae`
+against `control=main`, two alternating rounds, on the GitHub macOS runner (run 40232911987). Each boot runs to 4·10⁹
+guest ticks, so the guest does the same work in every boot: `cpu-ticks` is 4,001,587,547 to 4,001,588,027 and each boot
+makes about 542k SVCs.
+
+| Build | Round | Real s | User s | Sys s | Max RSS MB | Peak footprint MB | Translated blocks | Translation compile s |
+|---|---|---|---|---|---|---|---|---|
+| control (main) | 1 | 209.6 | 195.0 | 19.5 | 2,368 | 3,055 | 2,276,890 | 50.05 |
+| branch | 1 | 201.3 | 187.7 | 18.4 | 2,326 | 3,011 | 2,226,861 | 46.93 |
+| branch | 2 | 177.2 | 172.8 | 15.2 | 2,534 | 3,006 | 2,226,849 | 42.03 |
+| control (main) | 2 | 198.7 | 190.2 | 17.9 | 2,427 | 3,061 | 2,276,875 | 47.32 |
+
+Means of the two boots per build, branch against control: real 189.3 s against 204.2 s (−7%), user 180.3 s against 192.6 s
+(−6%), peak footprint 3,008 MB against 3,058 MB (−2%), translated blocks 2,226,855 against 2,276,882 (−2.2%), translation
+compile 44.5 s against 48.7 s (−9%). The jit-cache bytes fall from 705.7 MB to 695.9 MB. The invalidation counts are the
+same in all four boots (43,792 shared, 82 full), so the workload is the same and the difference is in translation.
+
+Caveats:
+
+- Two pairs. Within the branch build, real time spans 177 s to 201 s, so the wall-clock gain is suggestive, not settled.
+  Both rounds point the same way on user time and on translation compile.
+- The boots stop at the tick budget, not at SpringBoard finish. CPU to SpringBoard was not measured on CI.
+- The CI output has no repeat tally, so the 17,449 repeats of the local probe have no after-number. Translated blocks is
+  the proxy.
+- The counter that fell, `translation-blocks-shared-region` (2,099,646 to 2,049,623), is the shared-region count, not a
+  dyld count. The counters don't split region 0x2f, so this run does not show which blocks were saved. A per-region tally
+  on CI would settle it.
+- The first measure dispatch (run 40228062638) stopped after its first control boot: the read-only dyld cache each boot
+  leaves in its rootfs clone made `rm -rf` fail. `emulator.yml` now makes each clone writable before removing it.
