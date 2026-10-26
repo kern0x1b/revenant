@@ -11,6 +11,7 @@
     NSString *_assetLocalIdentifier;
     NSString *_uniformTypeIdentifier;
     NSString *_originalFilename;
+    BOOL _locallyAvailable;
 }
 
 - (instancetype)initWithRevenantAsset:(PHAsset *)asset
@@ -23,6 +24,7 @@
     _assetLocalIdentifier = asset.localIdentifier;
     _uniformTypeIdentifier = representation.UTI;
     _originalFilename = representation.filename;
+    _locallyAvailable = asset.isLocallyAvailable;
     return self;
 }
 
@@ -44,6 +46,11 @@
 - (NSString *)originalFilename
 {
     return _originalFilename;
+}
+
+- (BOOL)isLocallyAvailable
+{
+    return _locallyAvailable;
 }
 
 + (NSArray<PHAssetResource *> *)assetResourcesForAsset:(PHAsset *)asset

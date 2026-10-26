@@ -103,8 +103,10 @@ namespace {
 
 }
 
-void CompatibilityKernel::dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys)
+void CompatibilityKernel::dispatch_bsd_nosys(
+    Cpu& cpu, std::uint32_t number, bool send_sigsys)
 {
+    trace_unknown(cpu, "BSD syscall", number);
     bsd_error(cpu, bsd_support::not_implemented);
     if (!send_sigsys)
         return;
@@ -140,7 +142,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case 322: {
         if (!darwin_abi_route_supported(legacy_iopolicysys_route,
                 shared_state_->darwin_abi.abi_epoch)) {
-            dispatch_bsd_nosys(cpu,
+            dispatch_bsd_nosys(cpu, number,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
             return;
         }
@@ -210,7 +212,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case 365:
         if (shared_state_->darwin_abi.stack_snapshot_abi ==
             DarwinStackSnapshotAbi::Unsupported) {
-            dispatch_bsd_nosys(cpu,
+            dispatch_bsd_nosys(cpu, number,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
             return;
         }
@@ -335,6 +337,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case 216:
     case 220:
     case 221:
+    case 222:
     case 344:
     case 338:
     case 339:
@@ -402,14 +405,14 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         if (number == 299U || number == 300U) {
             static_cast<void>(dispatch_bsd_shared_region(cpu, number));
         } else {
-            dispatch_bsd_nosys(cpu,
+            dispatch_bsd_nosys(cpu, number,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
         }
         return;
     case 438:
         if (shared_state_->darwin_abi.shared_region_abi !=
             DarwinSharedRegionAbi::FixedMappingsWithSlideInfoV1) {
-            dispatch_bsd_nosys(cpu,
+            dispatch_bsd_nosys(cpu, number,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
             return;
         }
@@ -477,8 +480,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         dispatch_bsd_fileport(cpu, number);
         return;
     default:
-        trace_unknown(cpu, "BSD syscall", number);
-        dispatch_bsd_nosys(cpu,
+        dispatch_bsd_nosys(cpu, number,
             shared_state_->darwin_abi.capabilities.send_sigsys);
         return;
     }

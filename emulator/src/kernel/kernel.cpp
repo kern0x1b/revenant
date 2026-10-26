@@ -446,8 +446,7 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
             process_.exit_status,
             process_.termination_signal, process_.exited, false, false,
             "launchd", "/sbin/launchd", { "/sbin/launchd" },
-            { "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "HOME=/var/root",
-                "SHELL=/bin/sh" },
+            { },
             KernelSharedState::GraphicsInputAbi::Darwin9_0, { }, { },
             DisplayOrientation::Portrait, { }, 0U };
     shared_state_->processes[process_.pid].memory_status =
@@ -3601,9 +3600,17 @@ void CompatibilityKernel::copy_kqueue_descriptor_state(
 void CompatibilityKernel::trace_unknown(
     Cpu& cpu, std::string kind, std::uint32_t number)
 {
+    {
+        constexpr std::size_t maximum_reported_unknown_calls = 4096;
+        const std::lock_guard lock { reported_unknown_mutex_ };
+        if (reported_unknown_calls_.size() >= maximum_reported_unknown_calls ||
+            !reported_unknown_calls_.emplace(process_.pid, kind, number).second)
+            return;
+    }
     std::ostringstream message;
-    message << "[kernel] unsupported " << kind << ' ' << number << " pc=0x"
-            << std::hex << cpu.registers()[15];
+    message << "[kernel] unsupported " << kind << ' ' << number
+            << " pid=" << process_.pid << " process=" << process_image_
+            << " pc=0x" << std::hex << cpu.registers()[15];
     for (std::size_t index = 0; index < 7; ++index) {
         message << " r" << std::dec << index << "=0x" << std::hex
                 << cpu.registers()[index];

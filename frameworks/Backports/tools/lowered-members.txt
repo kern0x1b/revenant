@@ -1886,6 +1886,8 @@ class RevenantPersonNameParts
 class RevenantPhotoOutput
 class RevenantPhotosAvailability
 class RevenantPhotosBlock
+class RevenantPhotosImageCache
+class RevenantPhotosImageCacheEntry
 class RevenantPhotosStore
 class RevenantPhotosThread
 class RevenantPhotosTransaction
@@ -3682,9 +3684,6 @@ enum PHAssetCollectionSubtypeAlbumRegular
 enum PHAssetCollectionSubtypeAlbumSyncedAlbum
 enum PHAssetCollectionSubtypeAlbumSyncedEvent
 enum PHAssetCollectionSubtypeAlbumSyncedFaces
-enum PHAssetCollectionSubtypeSmartAlbumAllHidden
-enum PHAssetCollectionSubtypeSmartAlbumBursts
-enum PHAssetCollectionSubtypeSmartAlbumFavorites
 enum PHAssetCollectionSubtypeSmartAlbumUserLibrary
 enum PHAssetCollectionSubtypeSmartAlbumVideos
 enum PHAssetCollectionTypeAlbum
@@ -3703,6 +3702,7 @@ enum PHAssetSourceTypeiTunesSynced
 enum PHImageContentModeAspectFill
 enum PHImageRequestOptionsResizeModeExact
 enum PHImageRequestOptionsResizeModeFast
+enum PHImageRequestOptionsVersionCurrent
 enum PHPhotosErrorAccessRestricted
 enum PHPhotosErrorAccessUserDenied
 enum PHPhotosErrorChangeNotSupported
@@ -3710,8 +3710,10 @@ enum PHPhotosErrorIdentifierNotFound
 enum PHPhotosErrorInternalError
 enum PHPhotosErrorInvalidResource
 enum PHPhotosErrorMissingResource
+enum PHPhotosErrorRequestNotSupportedForAsset
 enum PHPhotosErrorUserCancelled
 enum PHPickerConfigurationSelectionDefault
+enum PHVideoRequestOptionsVersionCurrent
 enum PKMerchantCapability3DS
 enum PKMerchantCapabilityCredit
 enum PKMerchantCapabilityDebit
@@ -4642,6 +4644,7 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
+function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
 function RevenantSCNActionCubicProgress
@@ -25013,6 +25016,7 @@ member PHAsset +revenant_result:options:
 member PHAsset -canPerformEditOperation:
 member PHAsset -hasAdjustments
 member PHAsset -initWithRevenantAsset:sourceType:
+member PHAsset -isLocallyAvailable
 member PHAsset -playbackStyle
 member PHAsset -revenant_asset
 member PHAsset -revenant_refetched
@@ -25080,6 +25084,7 @@ member PHAssetResource +assetResourcesForAsset:
 member PHAssetResource +assetResourcesForLivePhoto:
 member PHAssetResource -assetLocalIdentifier
 member PHAssetResource -initWithRevenantAsset:
+member PHAssetResource -isLocallyAvailable
 member PHAssetResource -originalFilename
 member PHAssetResource -type
 member PHAssetResource -uniformTypeIdentifier
@@ -25149,20 +25154,22 @@ member PHFetchResultChangeDetails -insertedIndexes
 member PHFetchResultChangeDetails -insertedObjects
 member PHFetchResultChangeDetails -removedIndexes
 member PHFetchResultChangeDetails -removedObjects
-member PHImageManager +cancelled
 member PHImageManager +defaultManager
 member PHImageManager +issue
-member PHImageManager +takeCancellation:
 member PHImageManager -cancelImageRequest:
+member PHImageManager -dealloc
+member PHImageManager -init
 member PHImageManager -requestAVAssetForVideo:options:resultHandler:
 member PHImageManager -requestExportSessionForVideo:options:exportPreset:resultHandler:
 member PHImageManager -requestImageDataAndOrientationForAsset:options:resultHandler:
 member PHImageManager -requestImageDataForAsset:options:resultHandler:
 member PHImageManager -requestImageForAsset:targetSize:contentMode:options:resultHandler:
+member PHImageManager -requestLivePhotoForAsset:targetSize:contentMode:options:resultHandler:
 member PHImageManager -requestPlayerItemForVideo:options:resultHandler:
+member PHImageManager -revenant_memoryWarning:
 member PHImageManager -revenant_request:synchronous:work:
-member PHImageManager -revenant_requestVideo:result:
-member PHImageManager -revenant_videoURL:
+member PHImageManager -revenant_requestVideo:options:result:
+member PHImageManager -revenant_videoURL:version:
 member PHImageRequestOptions -copyWithZone:
 member PHImageRequestOptions -init
 member PHObject -copyWithZone:
@@ -25245,6 +25252,7 @@ member PHPickerViewController -revenant_typeOfReferenceURL:
 member PHPickerViewController -setDelegate:
 member PHPickerViewController -viewDidAppear:
 member PHPickerViewController -viewDidLoad
+member PHVideoRequestOptions -copyWithZone:
 member PKAddPassesViewController +canAddPasses
 member PKAddPassesViewController -initWithIssuerData:signature:error:
 member PKAddPassesViewController -initWithPasses:
@@ -27157,6 +27165,22 @@ member RevenantPhotoOutput -supportedPhotoPixelFormatTypesForFileType:
 member RevenantPhotoOutput -supportedRawPhotoPixelFormatTypesForFileType:
 member RevenantPhotosAvailability -observers
 member RevenantPhotosBlock -run
+member RevenantPhotosImageCache -capacity
+member RevenantPhotosImageCache -count
+member RevenantPhotosImageCache -initWithCapacity:
+member RevenantPhotosImageCache -linkNewest:
+member RevenantPhotosImageCache -objectForKey:
+member RevenantPhotosImageCache -removeAllObjects
+member RevenantPhotosImageCache -removeEntry:
+member RevenantPhotosImageCache -removeObjectForKey:
+member RevenantPhotosImageCache -setObject:forKey:cost:
+member RevenantPhotosImageCache -totalCost
+member RevenantPhotosImageCache -unlink:
+member RevenantPhotosImageCacheEntry -cost
+member RevenantPhotosImageCacheEntry -key
+member RevenantPhotosImageCacheEntry -newer
+member RevenantPhotosImageCacheEntry -object
+member RevenantPhotosImageCacheEntry -older
 member RevenantPhotosStore +addAsset:toGroupWithURL:error:
 member RevenantPhotosStore +assetWithIdentifier:
 member RevenantPhotosStore +assetsInGroupWithURL:filter:

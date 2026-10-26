@@ -23,6 +23,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -549,7 +550,8 @@ private:
     guest_directory_of_descriptor(std::uint32_t descriptor, std::uint32_t& error) const;
     void dispatch_bsd_psynch(Cpu& cpu, std::uint32_t number);
     [[nodiscard]] bool service_bsd_workqueue(Cpu* requesting_cpu);
-    void dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys);
+    void dispatch_bsd_nosys(
+        Cpu& cpu, std::uint32_t number, bool send_sigsys);
     [[nodiscard]] std::optional<std::uint32_t> thread_object_for_processor(
         std::size_t processor) const;
     [[nodiscard]] std::optional<CreatedGuestThread> create_guest_thread(
@@ -684,6 +686,9 @@ private:
     [[nodiscard]] std::optional<std::filesystem::path> guest_path_of_host(
         const std::filesystem::path& host) const;
     [[nodiscard]] std::optional<std::uint32_t> current_thread_object() const;
+    void append_directory_entries(const std::filesystem::path& directory,
+        std::vector<DirectoryEntry>& entries,
+        std::error_code& directory_error) const;
     [[nodiscard]] std::optional<hfs::Metadata> query_hfs_metadata(
         const std::filesystem::path& path, bool follow_symlink,
         bool include_directory_entry_count = true) const;
@@ -887,6 +892,9 @@ private:
     static thread_local std::optional<std::size_t> syscall_processor_;
     std::string process_image_ { "/sbin/launchd" };
     ProcessContext process_;
+    std::mutex reported_unknown_mutex_;
+    std::set<std::tuple<std::uint32_t, std::string, std::uint32_t>>
+        reported_unknown_calls_;
     DarwinPthreadRuntime pthread_runtime_;
     std::map<std::uint32_t, std::filesystem::path> file_descriptors_;
     std::map<std::uint32_t, std::shared_ptr<bsd::RegularFileOpenDescription>>
