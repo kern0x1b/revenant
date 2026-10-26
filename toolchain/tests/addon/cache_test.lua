@@ -56,6 +56,21 @@ local function package_of(root, name)
     return path.join(root, "xmake-global", ".xmake", "packages", "t", name, "1.0", name)
 end
 
+local function source_of(root, name, bytes, stamp)
+    local package = path.join(root, "xmake-global", ".xmake", "cache", "packages", "2601", name:sub(1, 1), name)
+    file_of(path.join(package, "1.0", "source", "data"), bytes)
+    aged(package, stamp or RECENT)
+    return package
+end
+
+local function classes(list)
+    local found = {}
+    for _, listed in ipairs(list.evicted) do
+        table.insert(found, listed.class)
+    end
+    return table.concat(found, ",")
+end
+
 function failures(arguments)
     local found = {}
     local cache = import("cache", {rootdir = arguments.modules, anonymous = true})
@@ -114,12 +129,12 @@ function failures(arguments)
         table.insert(found, "the next generation goes before any unused package: " .. names(second, tree))
     end
     local third = cache.reserve(4.5 * MEGABYTE, "the third write", {root = tree, limit = CAP, builds = {}})
-    if names(third, tree) ~= "xmake-global/.xmake/packages/t/bbb/1.0/bbb" or exists(package) or exists(package .. ".g3") then
-        table.insert(found, "an unused package goes before any scratch, with its link and its generation: " .. names(third, tree))
+    if names(third, tree) ~= "scratch/old-task" or not exists(package) or not exists(package .. ".g3") then
+        table.insert(found, "scratch goes before an installed package, which keeps its link and its generation: " .. names(third, tree))
     end
-    local fourth = cache.reserve(5.5 * MEGABYTE, "the fourth write", {root = tree, limit = CAP, builds = {}})
-    if names(fourth, tree) ~= "scratch/old-task" or not exists(path.join(tree, "scratch", "new-task")) then
-        table.insert(found, "the least recently used scratch goes first, and recent scratch stays: " .. names(fourth, tree))
+    local fourth = cache.reserve(6.5 * MEGABYTE, "the fourth write", {root = tree, limit = CAP, builds = {}})
+    if names(fourth, tree) ~= "scratch/new-task" or not exists(package) then
+        table.insert(found, "the remaining scratch goes before the installed package: " .. names(fourth, tree))
     end
     if not os.isfile(path.join(tree, "dyld", "6.0", "dyld_shared_cache_armv7")) then
         table.insert(found, "the shared cache of a configured release is never evicted")
@@ -129,7 +144,7 @@ function failures(arguments)
     if not message or not message:find("an oversized write", 1, true) or not message:find("dyld/6.0", 1, true) then
         table.insert(found, "a write past the cap fails naming the write and the biggest entries: " .. tostring(message))
     end
-    if not os.isfile(path.join(tree, "dyld", "6.0", "dyld_shared_cache_armv7")) or not exists(path.join(tree, "scratch", "new-task")) then
+    if not os.isfile(path.join(tree, "dyld", "6.0", "dyld_shared_cache_armv7")) or not exists(package) then
         table.insert(found, "a write past the cap removed something before it failed")
     end
 
@@ -251,6 +266,42 @@ function failures(arguments)
     end
     if not scratch_cache then
         table.insert(found, "a host cache of an emulator image is scratch, so the cap can evict it")
+    end
+
+    local sources = path.join(folder, "sources")
+    file_of(path.join(sources, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
+    local installed = folder_of(package_of(sources, "bbb"), MEGABYTE, OLDEST)
+    local zlib = source_of(sources, "zlib", 2 * MEGABYTE, OLDER)
+    local png = source_of(sources, "png", 2 * MEGABYTE, RECENT)
+    local sourced = cache.reserve(4 * MEGABYTE, "a write beside the sources", {root = sources, limit = CAP, builds = {}})
+    if classes(sourced) ~= "source" or names(sourced, sources) ~= "xmake-global/.xmake/cache/packages/2601/z/zlib" or exists(zlib) or not exists(png) or not exists(installed) then
+        table.insert(found, "a source tree goes before an installed package, least recently used first: " .. names(sourced, sources))
+    end
+
+    local ordered = path.join(folder, "ordered")
+    file_of(path.join(ordered, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
+    local shipped = folder_of(package_of(ordered, "ccd"), 2 * MEGABYTE, OLDEST)
+    local scratch = folder_of(path.join(ordered, "scratch", "task"), 2 * MEGABYTE, OLDER)
+    local worked = path.join(folder, "worked")
+    local output = folder_of(path.join(worked, "build"), 3 * MEGABYTE, OLD)
+    local swept = cache.reserve(5 * MEGABYTE, "a write beside scratch and builds", {root = ordered, limit = CAP, builds = {{folder = output, worktree = worked}}})
+    if classes(swept) ~= "scratch,build" or exists(scratch) or exists(output) or not exists(shipped) then
+        table.insert(found, "scratch and build outputs go before an installed package: " .. classes(swept))
+    end
+
+    local last = path.join(folder, "last")
+    file_of(path.join(last, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
+    local lone = folder_of(package_of(last, "eee"), 3 * MEGABYTE, OLDEST)
+    local spare = folder_of(path.join(last, "scratch", "spare"), MEGABYTE, OLDER)
+    local origin = source_of(last, "origin", MEGABYTE, RECENT)
+    local unfit = fixtures.refusal(function () cache.reserve(9 * MEGABYTE, "a write past every entry", {root = last, limit = CAP, builds = {}}) end)
+    if not unfit or not unfit:find("a write past every entry", 1, true) or not exists(lone) or not exists(spare) or not exists(origin) then
+        table.insert(found, "a write that nothing can make room for removes no installed package: " .. tostring(unfit))
+    end
+    local every = cache.reserve(7.5 * MEGABYTE, "a write that needs every entry", {root = last, limit = CAP, builds = {}})
+    if classes(every) ~= "source,scratch,package" or exists(lone) or exists(origin) or exists(spare)
+       or not os.isfile(path.join(last, "dyld", "6.0", "dyld_shared_cache_armv7")) then
+        table.insert(found, "an installed package is evicted only after the source, scratch and build entries: " .. classes(every))
     end
 
     os.tryrm(folder)

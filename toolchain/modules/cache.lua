@@ -9,7 +9,7 @@ local LIMIT_VARIABLE = "REVENANT_CACHE_GB"
 local ARCHITECTURE = "armv7"
 local RELEASES = {"6.1.3", "6.0"}
 local BUILD_OUTPUTS = {".xmake", "build"}
-local ORDER = {generation = 1, package = 2, scratch = 3, build = 3}
+local ORDER = {generation = 1, source = 2, scratch = 3, build = 4, package = 5}
 local resolved = {}
 
 local function checkout_of(from)
@@ -151,12 +151,23 @@ local function xmake_binaries(base, found)
     end
 end
 
+local function source_entries(base, found)
+    for _, folder in ipairs(os.dirs(path.join(base, "xmake-global", ".xmake", "cache", "packages", "*", "*", "*"))) do
+        table.insert(found, entry(base, folder, "source"))
+    end
+end
+
 local function xmake_store(base, found)
     package_entries(base, found)
+    source_entries(base, found)
     for _, folder in ipairs(children(path.join(base, "xmake-global", ".xmake"))) do
         local name = path.filename(folder)
         if name == "cache" then
-            table.insert(found, entry(base, folder, "scratch"))
+            for _, cached in ipairs(children(folder)) do
+                if path.filename(cached) ~= "packages" then
+                    table.insert(found, entry(base, cached, "scratch"))
+                end
+            end
         elseif name ~= "packages" then
             table.insert(found, entry(base, folder, "kept"))
         end
