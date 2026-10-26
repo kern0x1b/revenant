@@ -473,13 +473,7 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     }
     if (fb.display_) {
         const auto& display = *fb.display_;
-        note(out, "display.pixels_", display.pixels_);
-        note(out, "display.surface_content_generation_", display.surface_content_generation_);
-        note(out, "display.content_owner_process_id_", display.content_owner_process_id_);
-        note(out, "display.sequence_", display.sequence_);
-        note(out, "display.content_revision_", display.content_revision_);
-        note(out, "display.powered_on_", display.powered_on_);
-        note(out, "display.content_orientation_", display.content_orientation_);
+        snapshot::note_populated_members(out, display, DisplayState::snapshot_members());
         note(out, "display.host_surface_", display.host_surface_);
     }
     if (wifi.state_)

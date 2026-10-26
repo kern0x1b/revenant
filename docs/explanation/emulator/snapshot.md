@@ -225,7 +225,8 @@ order, and its `load` checks the access points and the association inside the re
 stream can leave the members restored before the refusal set, as the clock and the other owners already can, because
 the kernel restores its owners in sequence. The Darwin notify state is the third: its list includes
 `bus.registrations`, which the ledger refuses when populated but which the save still writes, so a refused-but-written
-member keeps its bytes in the list.
+member keeps its bytes in the list. The display state is the fourth: its two geometry words are saved rows, checked
+against the wiring on load, and its host surface is refused at save rather than written.
 
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
