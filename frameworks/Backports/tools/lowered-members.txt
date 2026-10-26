@@ -141,6 +141,7 @@ class AVCaptureDeviceDiscoverySession
 class AVCaptureDeviceFormat
 class AVCaptureDeviceInput
 class AVCaptureManualExposureBracketedStillImageSettings
+class AVCaptureMetadataOutput
 class AVCaptureMultiCamSession
 class AVCaptureOutput
 class AVCapturePhoto
@@ -11907,6 +11908,8 @@ member AVCaptureManualExposureBracketedStillImageSettings +manualExposureSetting
 member AVCaptureManualExposureBracketedStillImageSettings -ISO
 member AVCaptureManualExposureBracketedStillImageSettings -description
 member AVCaptureManualExposureBracketedStillImageSettings -exposureDuration
+member AVCaptureMetadataOutput -rectOfInterest
+member AVCaptureMetadataOutput -setRectOfInterest:
 member AVCaptureMultiCamSession +isMultiCamSupported
 member AVCaptureMultiCamSession -init
 member AVCaptureOutput -isDeferredStartEnabled
@@ -12075,6 +12078,7 @@ member AVCaptureVideoDataOutput -recommendedVideoSettingsForAssetWriterWithOutpu
 member AVCaptureVideoPreviewLayer -isDeferredStartEnabled
 member AVCaptureVideoPreviewLayer -isDeferredStartSupported
 member AVCaptureVideoPreviewLayer -isPreviewing
+member AVCaptureVideoPreviewLayer -metadataOutputRectOfInterestForRect:
 member AVCaptureVideoPreviewLayer -setDeferredStartEnabled:
 member AVCaptureVideoPreviewLayer -setSessionWithNoConnection:
 member AVComposition -URLAssetInitializationOptions
