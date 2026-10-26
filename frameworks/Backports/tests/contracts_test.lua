@@ -15,6 +15,23 @@ local function contains(text, needle, label)
 end
 
 function main()
+    local photosPicker = source("src/Photos/PHPickerViewController14.m")
+    local photosResult = source("src/Photos/PHPickerResult14.m")
+    contains(photosPicker, "UIImagePickerControllerSourceTypePhotoLibrary", "the PhotosUI picker adapter")
+    contains(photosPicker, "availableMediaTypesForSourceType", "the PhotosUI picker adapter")
+    contains(photosPicker, "registerDataRepresentationForTypeIdentifier", "the PhotosUI image result")
+    contains(photosPicker, "registerFileRepresentationForTypeIdentifier", "the PhotosUI video result")
+    contains(photosPicker, "picker:didFinishPicking:", "the PhotosUI picker delegate")
+    contains(photosResult, "- (NSString *)assetIdentifier", "the PhotosUI result")
+
+    local visionHandlers = source("src/Vision/VNHandlers.m")
+    contains(visionHandlers, "#import <CoreImage/CoreImage.h>", "the Core Image Vision request implementation")
+    contains(visionHandlers, "VNErrorUnsupportedRequest", "unavailable Vision requests")
+    contains(visionHandlers, "is not supported on this release", "unavailable Vision request errors")
+    contains(visionHandlers, "CIDetectorTypeFace", "the iOS 6 Core Image face detector")
+    contains(visionHandlers, "VNDetectFaceRectanglesRequest", "the Vision face rectangle request")
+    contains(visionHandlers, "CIDetectorImageOrientation", "the Vision face request orientation")
+
     local vision = header("VisionKit", "VNDocumentCameraViewController.h")
     local visionImpl = source("src/VisionKit/VNDocumentCameraViewController.m")
     contains(vision, "isSupported", "the SDK VisionKit header")

@@ -28,7 +28,7 @@ Left out: the dark appearance, Display P3 renditions, size classes, device subty
     ./xmakew l -P . toolchain/tools/cache_index/first_rung.lua NAME...    name, a tab, the first held rung, or NONE
     ./xmakew l -P . toolchain/tools/cache_index/first_rung.lua --self-test
 
-The index is written to `$HOME/.revenant/cache-index/`: one file per release of the names it holds, and `first-rung.tsv.gz` for every name. "First" means the oldest held release that carries the name, on the ladder `dyld.held_ladder({"armv7","armv7s"})` gives in `modules/apple/dyld.lua`. The reading child runs under `nice -n 19`; a cold build reads the whole ladder once and takes a long time, so run it one at a time.
+The index is written to `.cache/cache-index/`: one file per release of the names it holds, and `first-rung.tsv.gz` for every name. "First" means the oldest held release that carries the name, on the ladder `dyld.held_ladder({"armv7","armv7s"})` gives in `modules/apple/dyld.lua`. The reading child runs under `nice -n 19`; a cold build reads the whole ladder once and takes a long time, so run it one at a time.
 
 ## order_file
 
@@ -42,3 +42,7 @@ The index is written to `$HOME/.revenant/cache-index/`: one file per release of 
 
 `toolchain/tools/recipe_digests.lua` writes the `port/digest.lua` of every recipe from the recipe and the
 modules it runs, so a changed source is a changed package. It is run by hand, after a recipe's sources change.
+
+`toolchain/tools/sdk_inventory.lua` writes `toolchain/src/iphoneos-sdk/inventory/ios6.txt`, the install names that the iOS 6.0 and
+6.1.3 shared caches both hold, read from `.cache/dyld/<release>/`. Fetch both caches first with `./xmakew firmware -P . -a armv7 fetch RELEASE`.
+It is run by hand, when a release is added to the inventory.

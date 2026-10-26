@@ -61,7 +61,7 @@ A bitcode route does not exist. Narrowing pointers during the lift (variant a) w
 | blockid (the A+ block bridge: a block in an NSArray, read and call from the guest, identity, a block as a dictionary key, surviving the release of the array, a host call of `enumerateObjectsUsingBlock:`) | **PASS** | `recompiler/tests/blockid/blockid.m`; run `blkid8`: stderr `blockid: PASS (failures=0)`. |
 | UIDemo (UIKit) | **PASS** | All the marks: `launched`, `selected 7`, `detail-appeared Row 7`, `animation-finished 1`, `ticks 10 Row 7`; 1346 redraws in about 2 minutes. The touches `tap 160 16` and `tap 100 86` were delivered to the guest `touchesEnded:` and came back through the weak delegate (a CGPoint by value). The `groupTableViewBackgroundColor` background is black on the frame; the cause was not investigated. |
 
-The imports of all three binaries were checked with the toolchain's `dyld.missing_imports` against `~/.revenant/dyld/6.0`: 0 missing out of 155,738 exports.
+The imports of all three binaries were checked with the toolchain's `dyld.missing_imports` against `.cache/dyld/6.0`: 0 missing out of 155,738 exports.
 The test selectors were checked against the iOS 6.0 selector list, which is not kept in the repository: all are present. So the tests check the translation, not the backports.
 
 ## 3. Lifters: state and measurement

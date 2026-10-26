@@ -5,9 +5,9 @@ a scratch worktree, against the packages as they are in the shared
 store. The probe that reads them ran in the same worktree and is not kept in the repository.
 
 The toolchain, resolved once: `revenant@swift 6.4.0` at
-`~/.revenant/cache/xmake-global/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
+`.cache/xmake-global/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
 (swift-6.4-RELEASE)`), and `revenant@swift-runtime 6.4.0` at
-`~/.revenant/cache/xmake-global/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
+`.cache/xmake-global/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
 (then `configs.backports = true` and `REVENANT_SWIFT_RUNTIME_BACKPORTS = "coredata"`; both were removed, and the runtime is plain, see [backports-loading](../../../explanation/backports-loading.md)).
 
 ## Macro plugins can be built on this toolchain

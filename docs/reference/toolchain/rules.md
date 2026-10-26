@@ -71,7 +71,7 @@ The rules run these where a binary is linked, before anything strips or signs it
 - **Weak imports.** A weak import of a symbol the checked release does not export is a warning naming the binary and the first twelve symbols (all of them under `xmake -v`). It is refused when the image is released, that is under `xmake deb`, in Revenant's guest programs, or with `REVENANT_RELEASE` set, unless the target waives `weak-imports` and says why every call is guarded. The symbols the compiler emits by itself (ARC entry points, the block runtime, emulated TLS, the wide atomics) are refused in every case; their list is `ARRIVED` in `modules/apple/compat.lua`.
 - **Selectors.** Each selector the binaries reference (`__objc_selrefs`) that neither they nor any class or protocol of the release implements is a warning. Methods of the build's own classes and categories count as implemented, and so do methods a runtime component adds at run time, declared in a `__DATA,__port_addsel` section.
 
-The import check reads the release's system libraries from `~/.revenant/dyld/<release>/`: `dyld_shared_cache_<arch>` and its subcaches, or `libraries_<arch>/` before iOS 3.1. It reads every cache format from iOS 3.1 to today. It uses the earliest release of the slice's architecture that is not older than `apple_minimum` (iOS 6.0 for an armv7 port at 6.0, iOS 7.0 for its arm64 slice). If those files are not held, the check offers to fetch them; see [commands](commands.md#firmware).
+The import check reads the release's system libraries from `.cache/dyld/<release>/`: `dyld_shared_cache_<arch>` and its subcaches, or `libraries_<arch>/` before iOS 3.1. It reads every cache format from iOS 3.1 to today. It uses the earliest release of the slice's architecture that is not older than `apple_minimum` (iOS 6.0 for an armv7 port at 6.0, iOS 7.0 for its arm64 slice). If those files are not held, the check offers to fetch them; see [commands](commands.md#firmware).
 
 ## Checks as targets
 
@@ -97,6 +97,6 @@ A check runs when a file it names is staged or changed, and on every run that is
 | `/Applications/<Name>.app` | an application; its `Frameworks` folder holds `app.frameworks` |
 | `/usr/share/doc/<Package>/` | the licences named by `revenant.licenses` |
 | `/System/Library/LaunchDaemons/` | in an emulated image, the only folder iOS 6's launchd reads |
-| `~/.revenant/dyld/<release>/` | the shared caches and library folders the import check reads |
-| `~/.revenant/firmware/` | the firmware catalogue, the fetched system images, and root filesystems unpacked by `xmake firmware rootfs` |
-| `~/.revenant/emulator/golden.noindex/` | golden images of emulated devices |
+| `.cache/dyld/<release>/` | the shared caches and library folders the import check reads |
+| `.cache/firmware/` | the firmware catalogue, the fetched system images, and root filesystems unpacked by `xmake firmware rootfs` |
+| `.cache/emulator/golden.noindex/` | golden images of emulated devices |

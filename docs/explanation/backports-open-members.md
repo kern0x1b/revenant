@@ -19,6 +19,10 @@ What exists, from `frameworks/Backports/src/Metal` (84 files):
   table `air2cpu_kernels` in the process, and a library without it refuses the kernel with error 20.
 - The refusals are loud: `dispatchThreadgroups` logs and refuses a dispatch with no pipeline state, an undeclared
   threadgroup block, or an empty dimension.
+- `MTLBinaryArchive` (`RevenantMetalBinaryArchive.m`, `MTLBinaryArchive14.m`): an archive file that stores the descriptors
+  of the render and compute pipelines added to it, in a property list, and reads them back. Its errors are in
+  `MTLBinaryArchiveDomain`. The host oracle `tests/Metal/binary_archive_test.m` checks the file and the errors against real
+  Metal (23 checks).
 
 What is missing:
 
@@ -37,6 +41,12 @@ What is missing:
   its own MSL at run time.
 - `MTLCommandQueue` completion: `RevenantMetalQueue.m` calls `glFinish` where a command buffer completes, so
   `waitUntilCompleted` waits for the whole GL queue. The cost of that on the device is not measured.
+- `MTLBinaryArchive` gives no speed-up. The archive stores pipeline descriptors, not compiled programs, because
+  `glGetProgramBinary` and `glProgramBinary` are stubs (`src/OpenGLES/ES3Functions.m`). A pipeline made from an archive
+  compiles again when it is created, so only the file format is backported.
+- `MTLBinaryArchive` has no tile or mesh pipelines. `addTileRenderPipelineFunctionsWithDescriptor:error:` and
+  `addMeshRenderPipelineFunctionsWithDescriptor:error:` are not implemented, and a call to either fails with an unrecognised
+  selector. The backport has no tile or mesh pipeline to add.
 
 Decisions still open:
 
@@ -45,6 +55,64 @@ Decisions still open:
 - Protocol definitions: hand-written like `QuartzCoreProtocols10.m`, or generated from the SDK header, with the same
   lowering as the methods. The generated form needs the protocol list to come from what the Backports classes conform
   to, which no tool derives yet.
+
+## CoreImage: `CIRenderDestination`
+
+What exists, from `frameworks/Backports/src/Graphics/CIRenderDestination11.m` and `CIContextRenderDestination11.m`:
+
+- Every destination initialiser: bitmap data, pixel buffer (32BGRA and RGBA), IOSurface (8-bit BGRA and RGBA), OpenGL
+  texture (`GL_TEXTURE_2D`, RGBA8), Metal texture and texture provider. The pixel buffer and IOSurface initialisers lock
+  the buffer only for the copy. The IOSurface initialiser calls the wrapper functions in `src/IOSurface/IOSurface11_0.m`,
+  whose symbols are in the iOS 6.1.3 export table (see the IOSurface paragraph above).
+- `startTaskToRender:toDestination:`, `startTaskToRender:fromRect:toDestination:atPoint:error:` and
+  `prepareRender:fromRect:toDestination:atPoint:error:`. The host oracle `tests/CoreImage/render_destination_test.m` checks
+  them against the macOS framework: the bitmap, pixel buffer, IOSurface and GL destinations over six region cases (flipped
+  and unflipped, with `atPoint` clipped and interior), the texture destination, the flipped, alpha-none and unpremultiplied
+  configurations, and `prepareRender` on a bitmap and on an R8 texture. The check count is 79.
+
+What is open:
+
+- The `CIContext` category in `CIContextRenderDestination11.m` is not compiled on the host, because macOS `CIContext` already
+  has these methods. The category forwards to the destination, and only the destination methods run in the oracle.
+- OpenGL: only `GL_TEXTURE_2D`. Any other target fails with error 5. The device path (`glTexSubImage2D` on OpenGL ES 2) builds,
+  but the oracle runs the CGL path on the host, and the device run is not done.
+- The IOSurface initialiser is not run on device. Its functions are in the 6.1.3 export table, so the open part is the run.
+- `atPoint` and `fromRect` are floored to whole pixels. The oracle uses whole numbers, so the fractional mapping is not measured.
+- Colour space: the destination defaults to sRGB. The SDK's pixel-buffer and IOSurface initialisers take the colour space
+  from the buffer's attributes, and the backport does not read them. Not measured against a non-sRGB buffer.
+- Unpremultiplied and alpha-none rendering need an 8-bit BGRA or RGBA destination. Premultiplied rendering also takes RGBAh
+  and RGBAf bitmaps, which the oracle does not cover.
+- `prepareRender` checks the destination's format and backing, and nothing else. It does not reserve or compile anything.
+  The oracle agrees with the host on the bitmap and R8 cases.
+
+## VideoToolbox: `VTCreateCGImageFromCVPixelBuffer` and `VTIsHardwareDecodeSupported`
+
+What exists, from `frameworks/Backports/src/VideoToolbox/VTCreateCGImage9_0.m` and `VTIsHardwareDecodeSupported11_0.m`:
+
+- `VTCreateCGImageFromCVPixelBuffer` converts 8-bit bi-planar 4:2:0 NV12 (video and full range) and 32BGRA and 32ARGB to a
+  `CGImage` in sRGB. The matrix (BT.601 or BT.709) is read from `kCVImageBufferYCbCrMatrixKey`. The NV12 path is Q10 fixed
+  point with nearest chroma, in two forms in `src/VideoToolbox/VTConvertBiPlanar.c`: a scalar reference and a NEON path
+  (`vld2`, `vmlal`) that is used where the compiler defines `__ARM_NEON`. The host oracle `tests/VideoToolbox/conversion_test.m`
+  runs the same seeded frames through macOS and the backport: NV12 within 1 per channel in all four range and matrix cases,
+  and 32BGRA and 32ARGB exactly on valid premultiplied pixels. It also checks NEON against scalar bit for bit at widths that
+  exercise the tail (1, 15, 16, 17, 37, 1920). The check count is 45.
+- `VTIsHardwareDecodeSupported` answers for H.264 only. It creates a 320 by 240 format description with a 29-byte `avcC`
+  and a decompression session that requires hardware acceleration, then reports whether the session was created. The
+  oracle `tests/VideoToolbox/hardware_test.m` checks H.264 against macOS (both report yes), and HEVC and AV1 as no.
+- The `kVTProfileLevel_H264_*` constants: the iOS 26.2 SDK and the macOS SDK declare the same 35 names. Those missing from the
+  6.1.3 export table are 14, and all 14 are already defined in Backports, so the missing set is empty.
+
+What is open:
+
+- 10-bit refused: 10-bit bi-planar input returns `kVTPixelTransferNotSupportedErr`. macOS converts it, so the oracle asserts
+  the refusal rather than a match. Telegram's calls take 8-bit formats.
+- Speed: on the host, 1920x1080 NV12 video range BT.709, 100 frames: scalar 33.1 Mpix/s, NEON 234.3 Mpix/s. The A5 is not
+  measured. `vImage` has no YUV-to-ARGB conversion in the 6.1.3 export table, so the NEON path is the only fast path.
+- sRGB without the buffer's colour attachments: every image is tagged sRGB. A buffer's own colour attachments (primaries,
+  transfer function) are not read, only the matrix.
+- Hardware: the H.264 check is verified on the host only. The session with the hardware requirement has not been run on an
+  A5 device, so the device answer is unknown until it is. HEVC and AV1 report no by design: the A5 has no hardware decoder
+  for either, and Telegram asks only about AV1.
 
 ## WebKit (`WK*`)
 
@@ -171,10 +239,8 @@ here; a Swift error text and the exact typecheck command are what would settle i
   cause is not determined: it could be the main executable's binding, or the emulator's loader. The case
   `interpose_launch` is registered with `should_fail`, so it is reported as an expected failure, and it becomes a failure
   if the redirect starts to work.
-- Deferred, not implemented: `MPSImageBilinearScale`, `MTLBinaryArchive` and `CIRenderDestination`. The Metal backport
-  renders through GL framebuffers (`RevenantMetalEncoder.m`), and it has 84 files. `glGetProgramBinary` and
-  `glProgramBinary` are stubs that report an error (`src/OpenGLES/ES3Functions.m`), so there is no compiled program to
-  archive. There is no CoreImage folder, and the MPS folder has 100 files and no bilinear scale.
+- Deferred, not implemented: `MPSImageBilinearScale`. The MPS folder has 100 files and no bilinear scale. `MTLBinaryArchive`
+  and `CIRenderDestination` are implemented; their gaps are under "Metal" and "CoreImage" above and below.
 
 ## Work queue: the unattempted Telegram modules
 
@@ -289,6 +355,22 @@ on the lowered iOS 6 SDK settles both without that change:
 
 Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
 re-checked with the next Display build.
+
+## SceneKit: two members that raise on 6.1.3
+
+What exists: the rest of the SCNSceneRenderer members of `SCNView` are native, in `frameworks/Backports/src/SceneKit/SCNView.m`
+and `RevenantSCNPicking.m`. The list and what each one does are in C17 of `docs/reference/backports/crutches.md`.
+
+Open:
+
+- `overlaySKScene` (get and set) raises. SpriteKit is absent from the 6.1.3 image: the rootfs has no `SpriteKit.framework`,
+  and the dyld shared cache of `iPhone4,1/6.1.3_10B329` has no `SKScene` string. The member is typed with `SKScene`, so it
+  needs a SpriteKit backport, which is outside the SceneKit backport. Decision: whether SpriteKit is in scope, or the member
+  stays raising.
+- `audioEnvironmentNode` (get) raises. `AVAudioEnvironmentNode` is absent from the same cache, and so is `AVAudioEngine`;
+  the backport's engine is built over AUGraph (`RevenantSCNSoundEngine`). Source players do not go through this node (C19),
+  so a backport would only affect custom nodes. Decision: a backport of the node over an AudioUnit mixer, or the member
+  stays raising.
 
 ## Open, not fixed: a read race in the package store test
 

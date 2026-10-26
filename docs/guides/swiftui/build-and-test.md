@@ -13,7 +13,7 @@
 - To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device -P .` (skill
   `device-session`).
 
-Run output (logs, pictures, API dumps, the copy of Apple's framework) goes under `$HOME/.revenant/cache/<task>/swiftui/`,
+Run output (logs, pictures, API dumps, the copy of Apple's framework) goes under `.cache/scratch/<task>/swiftui/`,
 never into the tree; `toolchain/modules/workspace.lua` names the task and the iOS 26.2 SDK the tools read.
 
 ## Build

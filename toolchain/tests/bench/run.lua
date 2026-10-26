@@ -19,7 +19,7 @@ local WORKLOADS = {
 }
 
 local function scratch(name)
-    return path.join(os.getenv("HOME"), ".revenant", "cache", path.filename(repository), "bench", name)
+    return path.join(import("@addon.revenant.workspace", {anonymous = true}).scratch(), path.filename(repository), "bench", name)
 end
 
 local function discard(folder)
@@ -60,7 +60,7 @@ local function boot(name, binary, folder)
     if not os.isexec(emulator) then
         raise("the emulator is not built: ./xmakew build -P . emulator")
     end
-    local firmware = path.join(os.getenv("HOME"), ".revenant", "firmware", "rootfs", device, release)
+    local firmware = path.join(import("@addon.revenant.workspace", {anonymous = true}).home(), "firmware", "rootfs", device, release)
     if not os.isdir(firmware) then
         raise("the %s %s root filesystem is not held: ./xmakew firmware -P . --device=%s rootfs 6.1.3", device, release, device)
     end

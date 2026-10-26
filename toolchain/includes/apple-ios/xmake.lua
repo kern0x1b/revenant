@@ -9,13 +9,16 @@ local ld64 = {name = "ld64", version = "956.6"}
 local ldid = {name = "ldid", version = "2.1.5-procursus7+23.gaf86971"}
 local llvm = {name = "llvm", version = "23.1.3"}
 
-for _, tool in ipairs({sdk, ld64, ldid, llvm}) do
+local compat_only = get_config("apple_compat_only")
+for _, tool in ipairs(compat_only and {sdk, ld64, llvm} or {sdk, ld64, ldid, llvm}) do
     add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name})
 end
 
 add_requireconfs("**.iphoneos-sdk", {override = true, version = sdk.version})
 
-add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
+if not compat_only then
+    add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
+end
 
 add_requireconfs("**.m4", {system = false})
 add_requireconfs("**.pkgconf", {system = false})

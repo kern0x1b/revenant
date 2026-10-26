@@ -105,6 +105,19 @@ namespace emulator {
 using namespace runtime_detail;
 namespace {
 
+    std::pair<std::uint32_t, std::uint32_t> dynamic_linker_text_range(
+        const std::filesystem::path& rootfs, ArmArchitectureVersion architecture)
+    {
+        const auto image = MachOImage::parse(
+            rootfs / "usr" / "lib" / "dyld", architecture);
+        for (const auto& segment : image.segments()) {
+            if (segment.name == "__TEXT")
+                return { segment.vm_address,
+                    segment.vm_address + segment.vm_size };
+        }
+        return { };
+    }
+
     std::uint64_t host_random_seed()
     {
         std::uint64_t seed = 0;
@@ -300,11 +313,13 @@ void EmulatorSession::run()
     if (options.shared_image_slab) {
         const auto bounds = darwin_address_bounds(
             darwin_configuration.abi.address_layout);
+        const auto [dyld_begin, dyld_end] = dynamic_linker_text_range(
+            options.rootfs, arm_architecture_for_model(device.processor.model));
         set_machine_image_code_region(ImageCodeRegion {
             options.rootfs.string() + "|" +
                 std::string { device.identity.product_type },
             bounds.shared_region_base, bounds.shared_region_end,
-            options.image_slab_bytes.value_or(0U) });
+            options.image_slab_bytes.value_or(0U), dyld_begin, dyld_end });
         output.line("[jit] image-slab-mib=" +
                     (options.image_slab_bytes
                             ? std::to_string(*options.image_slab_bytes /
