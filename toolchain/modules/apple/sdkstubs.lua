@@ -3,6 +3,9 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 local FAMILY_UMBRELLA = "/usr/lib/libSystem.B.dylib"
 local FAMILY_FOLDER = "/usr/lib/system/"
 local LISTS = {"symbols", "weak-symbols", "thread-local-symbols", "objc-classes", "objc-ivars", "objc-eh-types"}
+local WEAK_DEF = "weak-def-symbols"
+local FOLDED = table.join(LISTS, {WEAK_DEF})
+local V3_FOLDED = {"symbols", WEAK_DEF, "objc-classes", "objc-ivars", "objc-eh-types"}
 
 function documents(text)
     local found, current = {}, nil
@@ -49,8 +52,13 @@ function installed(installdir, version)
     return os.isfile(path.join(installdir, "manifest.txt")) and os.isfile(path.join(sdk, "SDKSettings.json"))
 end
 
+local function section_body(text, key)
+    local pattern = "\n" .. key:gsub("%-", "%%-") .. ":[ \t]*\n"
+    return text:match(pattern .. "(.-)\n%S") or text:match(pattern .. "(.*)$") or ""
+end
+
 function read(text)
-    local doc = {install = install(text), exports = {}}
+    local doc = {install = install(text), exports = {}, reexports = {}}
     doc.format = text:find("^%-%-%- !tapi%-tbd%-v3") and "v3" or "v4"
     local key = doc.format == "v3" and "archs" or "targets"
     doc.archs = architectures(text:match("\n" .. key .. ":%s*%[(.-)%]") or "")
@@ -72,11 +80,18 @@ function read(text)
     for _, entry in ipairs(doc.exports) do
         local body = table.concat(entry.lines)
         entry.lists = {}
-        for _, list in ipairs(LISTS) do
+        for _, list in ipairs(FOLDED) do
             local content = body:match("\n    " .. list:gsub("%-", "%%-") .. ":%s*%[(.-)%]")
             entry.lists[list] = content and names(content) or {}
         end
+        local kept = body:match("\n    re%-exports:%s*%[(.-)%]")
+        if kept then
+            table.insert(doc.reexports, {archs = entry.archs, libraries = names(kept)})
+        end
         entry.lines = nil
+    end
+    for targets, libraries in section_body(text, "reexported-libraries"):gmatch("targets:%s*%[(.-)%]%s*\n%s*libraries:%s*%[(.-)%]") do
+        table.insert(doc.reexports, {archs = architectures(targets), libraries = names(libraries)})
     end
     return doc
 end
@@ -103,7 +118,7 @@ end
 function exported(doc)
     local found = {}
     for _, entry in ipairs(doc.exports) do
-        for _, list in ipairs(LISTS) do
+        for _, list in ipairs(FOLDED) do
             for _, symbol in ipairs(entry.lists[list]) do
                 if not symbol:startswith("$ld$") then
                     found[symbol] = found[symbol] or {}
@@ -203,13 +218,13 @@ function add_markers(text, wanted)
     return put_entries(text, entries)
 end
 
-function add_symbols(text, wanted)
+function add_symbols(text, wanted, v3_lists)
     local doc = read(text)
     local have = exported(doc)
     local entries = {}
     for _, group in ipairs(wanted) do
         local archs = supported_archs(doc, group.archs)
-        if doc.format == "v3" and group.list ~= "symbols" then
+        if doc.format == "v3" and not table.contains(v3_lists or {"symbols"}, group.list) then
             archs = {}
         end
         local tokens = {}
@@ -250,7 +265,7 @@ function add_archs(text, wanted)
     return text:sub(1, at - 1) .. listed .. ", " .. table.concat(names, ", ") .. " ]" .. text:sub(close + 1)
 end
 
-function slice(doc, wanted)
+function slice(doc, wanted, lists)
     local groups, order = {}, {}
     for _, entry in ipairs(doc.exports) do
         local archs = {}
@@ -260,7 +275,7 @@ function slice(doc, wanted)
             end
         end
         if #archs > 0 then
-            for _, list in ipairs(LISTS) do
+            for _, list in ipairs(lists or LISTS) do
                 local key = list .. "\t" .. table.concat(archs, ",")
                 if not groups[key] then
                     groups[key] = {archs = archs, list = list, tokens = {}, seen = {}}
@@ -520,4 +535,219 @@ function dropped(older, doc)
         table.insert(wanted, groups[key])
     end
     return wanted
+end
+
+function inventory(text)
+    local found = {}
+    for line in text:gmatch("[^\n]+") do
+        if not line:startswith("#") then
+            found[line] = true
+        end
+    end
+    return found
+end
+
+local function common(list, other)
+    local found = {}
+    for _, item in ipairs(list) do
+        if table.contains(other, item) then
+            table.insert(found, item)
+        end
+    end
+    return found
+end
+
+local function gather(name, archs, docs, ios6, seen, groups, kept, lost)
+    local key = name .. "\t" .. table.concat(archs, ",")
+    if seen[key] then
+        return
+    end
+    seen[key] = true
+    table.join2(groups, slice(docs[name], archs, FOLDED))
+    for _, entry in ipairs(docs[name].reexports) do
+        local sub = common(entry.archs, archs)
+        if #sub > 0 then
+            for _, library in ipairs(entry.libraries) do
+                if ios6[library] then
+                    table.insert(kept, {archs = sub, library = library})
+                elseif docs[library] then
+                    gather(library, sub, docs, ios6, seen, groups, kept, lost)
+                else
+                    table.insert(lost, library)
+                end
+            end
+        end
+    end
+end
+
+local function drop_reexports(text, gone)
+    text = text:gsub("\n    re%-exports:%s*%[(.-)%]", function (list)
+        local kept = {}
+        for _, name in ipairs(names(list)) do
+            if not gone[name] then
+                table.insert(kept, name)
+            end
+        end
+        if #kept == 0 then
+            return ""
+        end
+        return "\n    re-exports:           [ " .. table.concat(kept, ", ") .. " ]"
+    end)
+    text = text:gsub("\n  %- targets:%s*%[(.-)%]%s*\n%s*libraries:%s*%[(.-)%]", function (targets, list)
+        local kept = {}
+        for _, name in ipairs(names(list)) do
+            if not gone[name] then
+                table.insert(kept, name)
+            end
+        end
+        if #kept == 0 then
+            return ""
+        end
+        return "\n  - targets:         [ " .. targets .. " ]\n    libraries:       [ " .. table.concat(kept, ", ") .. " ]"
+    end)
+    return (text:gsub("\nreexported%-libraries:[ \t]*\n(%S)", "\n%1"))
+end
+
+local function merged(groups)
+    local result, order, index = {}, {}, {}
+    for _, group in ipairs(groups) do
+        local key = group.list .. "\t" .. table.concat(group.archs, ",")
+        if not index[key] then
+            index[key] = {archs = group.archs, list = group.list, tokens = {}, seen = {}}
+            table.insert(order, key)
+        end
+        for _, token in ipairs(group.tokens) do
+            if not index[key].seen[token] then
+                index[key].seen[token] = true
+                table.insert(index[key].tokens, token)
+            end
+        end
+    end
+    for _, key in ipairs(order) do
+        table.insert(result, {archs = index[key].archs, list = index[key].list, tokens = index[key].tokens})
+    end
+    return result
+end
+
+local function add_kept(text, kept)
+    local doc = read(text)
+    local have, pending, order = {}, {}, {}
+    for _, entry in ipairs(doc.reexports) do
+        for _, library in ipairs(entry.libraries) do
+            for _, arch in ipairs(entry.archs) do
+                have[library .. "\t" .. arch] = true
+            end
+        end
+    end
+    for _, item in ipairs(kept) do
+        for _, arch in ipairs(item.archs) do
+            if not have[item.library .. "\t" .. arch] and #supported_archs(doc, {arch}) > 0 then
+                local key = item.library .. "\t" .. table.concat(item.archs, ",")
+                if not pending[key] then
+                    pending[key] = {library = item.library, archs = {}}
+                    table.insert(order, key)
+                end
+                table.insert(pending[key].archs, arch)
+            end
+        end
+    end
+    local entries = {}
+    for _, key in ipairs(order) do
+        local group = pending[key]
+        local listed = {}
+        for _, arch in ipairs(group.archs) do
+            table.insert(listed, arch .. (doc.format == "v3" and "" or "-ios"))
+        end
+        if doc.format == "v3" then
+            table.insert(entries, string.format("  - archs: [ %s ]\n    re-exports: [ %s ]\n", table.concat(listed, ", "), group.library))
+        else
+            table.insert(entries, string.format("  - targets: [ %s ]\n    libraries: [ %s ]\n", table.concat(listed, ", "), group.library))
+        end
+    end
+    if #entries == 0 then
+        return text
+    end
+    if doc.format == "v3" then
+        return put_entries(text, entries)
+    end
+    local at = text:find("\nreexported%-libraries:[ \t]*\n")
+    if at then
+        local after = text:find("\n", at + 1, true)
+        return text:sub(1, after) .. table.concat(entries) .. text:sub(after + 1)
+    end
+    local exports = text:find("\nexports:[ \t]*\n")
+    local ending = text:find("\n%.%.%.[ \t]*\n?$")
+    local at_index = exports or ending
+    local section_text = "reexported-libraries:\n" .. table.concat(entries)
+    if at_index then
+        return text:sub(1, at_index) .. section_text .. text:sub(at_index + 1)
+    end
+    return (text:sub(-1) == "\n" and text or text .. "\n") .. section_text
+end
+
+function fold_reexports(all, ios6)
+    local files, docs, parts_of, docs_of = {}, {}, {}, {}
+    for _, file in ipairs(all) do
+        if not file:find("/DriverKit/", 1, true) then
+            table.insert(files, file)
+        end
+    end
+    for _, file in ipairs(files) do
+        local parts = documents(io.readfile(file))
+        parts_of[file], docs_of[file] = parts, {}
+        for index, part in ipairs(parts) do
+            local doc = read(part)
+            docs_of[file][index] = doc
+            if doc.install and not docs[doc.install] then
+                docs[doc.install] = doc
+            end
+        end
+    end
+    local report = {folded = {}, lost = {}}
+    for _, file in ipairs(files) do
+        local parts, changed = parts_of[file], false
+        for index, part in ipairs(parts) do
+            local doc = docs_of[file][index]
+            local gone, groups, kept = {}, {}, {}
+            for _, entry in ipairs(doc.reexports) do
+                for _, library in ipairs(entry.libraries) do
+                    if not ios6[library] then
+                        local found, carried, lost = {}, {}, {}
+                        local reason
+                        if docs[library] then
+                            gather(library, entry.archs, docs, ios6, {}, found, carried, lost)
+                            found = merged(found)
+                            if #lost > 0 then
+                                reason = lost[1] .. " has no stub in the SDK to fold"
+                            end
+                            for _, group in ipairs(found) do
+                                if doc.format == "v3" and #group.tokens > 0 and not table.contains(V3_FOLDED, group.list) and not reason then
+                                    reason = "its " .. group.list .. " cannot be written into a v3 document"
+                                end
+                            end
+                        else
+                            reason = "the SDK has no stub for it to fold"
+                        end
+                        if reason then
+                            table.insert(report.lost, {doc.install, library, reason})
+                        else
+                            gone[library] = true
+                            table.join2(groups, found)
+                            table.join2(kept, carried)
+                        end
+                    end
+                end
+            end
+            if #table.keys(gone) > 0 then
+                part = add_kept(add_symbols(drop_reexports(part, gone), merged(groups), V3_FOLDED), kept)
+                parts[index] = part
+                changed = true
+                table.insert(report.folded, {doc.install, table.keys(gone)})
+            end
+        end
+        if changed then
+            io.writefile(file, table.concat(parts))
+        end
+    end
+    return report
 end

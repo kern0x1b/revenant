@@ -2,8 +2,8 @@ import("fixtures")
 
 function claim_failures(device, folder)
     local found = {}
-    local home, holder = os.getenv("REVENANT_HOME"), os.getenv("REVENANT_DEVICE_HOLDER")
-    os.setenv("REVENANT_HOME", path.join(folder, "home"))
+    local home, holder = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_DEVICE_HOLDER")
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     local phone = {host = "10.0.0.7", port = "22", password = "", udid = "abc123"}
     device.claim(phone, "first", 30)
     local errors = fixtures.refusal(function () device.claim(phone, "second", 30) end)
@@ -43,7 +43,7 @@ function claim_failures(device, folder)
     end
     os.setenv("REVENANT_DEVICE_HOLDER", "first")
     device.release(networked, "first")
-    for name, value in pairs({REVENANT_HOME = home or false, REVENANT_DEVICE_HOLDER = holder or false}) do
+    for name, value in pairs({REVENANT_CACHE = home or false, REVENANT_DEVICE_HOLDER = holder or false}) do
         if value then
             os.setenv(name, value)
         else

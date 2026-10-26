@@ -22,7 +22,7 @@ Telegram's reference tree (13.0.0) pins stable 1.96.1 for `wallet-engine` and `m
 
 ## What iOS 6 lacks
 
-The measured program is a staticlib that uses `std::thread`, `HashMap` (random seeds), `SystemTime`, `Instant`, a `thread_local!`, and `sin` and `cos`, linked into a C `main` for armv7 iOS 6.0. Checked against the iOS 6.0 armv7 dyld cache (`~/.revenant/dyld/6.0`), 13 non-weak imports are missing:
+The measured program is a staticlib that uses `std::thread`, `HashMap` (random seeds), `SystemTime`, `Instant`, a `thread_local!`, and `sin` and `cos`, linked into a C `main` for armv7 iOS 6.0. Checked against the iOS 6.0 armv7 dyld cache (`.cache/dyld/6.0`), 13 non-weak imports are missing:
 
 | Symbol | First release | Shim |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ The measured program is a staticlib that uses `std::thread`, `HashMap` (random s
 | `fclonefileat` | iOS 10.0 | new: `ENOTSUP`, so std copies with `fcopyfile` |
 | `sysdir_start_search_path_enumeration`, `sysdir_get_next_search_path_enumeration` | iOS 10.0 | new: the user domain's directories, from the SDK's `sysdir.h` |
 
-The first release was measured from the caches under `~/.revenant/dyld`: a symbol the 7.1.2 cache lacks and the 8.0 cache exports is an iOS 8 symbol, and the same for iOS 10 between 9.3.6 and 10.2.1. The SDK's availability macros agree for `sysdir_*` and `fclonefileat`.
+The first release was measured from the caches under `.cache/dyld`: a symbol the 7.1.2 cache lacks and the 8.0 cache exports is an iOS 8 symbol, and the same for iOS 10 between 9.3.6 and 10.2.1. The SDK's availability macros agree for `sysdir_*` and `fclonefileat`.
 
 The shims keep to what the release can do. iOS 6 has no descriptor-relative system call, and rebuilding a path from the descriptor (`F_GETPATH`) is not race-safe: a folder renamed between the two steps is followed. iOS 6 does have a per-thread working directory: `__pthread_fchdir` (system call 349) pins a descriptor's folder for the calling thread alone, and `__pthread_fchdir(-1)` returns that thread to the process's working directory. The stubs in `libsystem_kernel` of iOS 6.0 and 6.1.3 (armv7) and 6.1.4 (armv7s) make system calls 348 and 349, the 6.1.6 image exports the same names, and `libSystem` exports them too. So a call that takes a descriptor pins that folder for its one system call, runs with the name relative to it, and unpins. The folder stays the one the descriptor names even when it is renamed during the call, other threads keep the process's working directory, and no lock is held. The plain names and the `revenant_*` names share that code, `fdopendir` lists the folder the descriptor holds, and `remove_dir_all` of std works. Two different folders in one call (`renameat`, `linkat`) pin one of them, and the other folder's path is rebuilt before the call: from `F_GETPATH` for a descriptor, or from the process's working directory for `AT_FDCWD`. That leaves a race on the second folder only, since a path is followed. `AT_FDCWD` and absolute paths are direct calls. `linkat` with `AT_SYMLINK_FOLLOW` links the path it resolved, which is racy between resolving and linking, because `link()` takes no descriptor on this release. `linkat` without `AT_SYMLINK_FOLLOW` refuses a symbolic link, because `link()` on this release follows it and would make a different link. The emulator's system-call dispatch has no entry for 348 or 349, so a descriptor call under the emulator fails until it gains them.
 

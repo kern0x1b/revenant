@@ -191,7 +191,7 @@ function failures(opt)
     local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder)}
     local log = path.join(folder, "xmake.log")
     local function xmake(argv, extra)
-        return os.execv(os.programfile(), argv, {curdir = project, try = true, stdout = log, stderr = log,
+        return os.execv(os.programfile(), table.join(argv, {"-P", project}), {curdir = project, try = true, stdout = log, stderr = log,
                                                   envs = table.join(envs, extra or {})})
     end
 
@@ -225,7 +225,7 @@ function failures(opt)
                    {name = "cached", mode = "include", dir = include, stop = stop}}
     for _, spec in ipairs(specs) do
         local ready, readerlog = path.join(folder, spec.name .. ".ready"), path.join(folder, spec.name .. ".log")
-        local child = process.openv(os.programfile(), {"l", reader, spec.dir, spec.stop, ready, spec.mode},
+        local child = process.openv(os.programfile(), {"l", "-P", project, reader, spec.dir, spec.stop, ready, spec.mode},
                                     {envs = envs, stdout = readerlog, stderr = readerlog})
         children[spec.name] = {child = child, ready = ready, log = readerlog}
     end

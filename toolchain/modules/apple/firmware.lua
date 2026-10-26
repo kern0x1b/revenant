@@ -2,6 +2,7 @@ import("core.base.json")
 import("utils.progress")
 import("dyld")
 import("macho")
+import("cache", {rootdir = path.join(os.scriptdir(), "..")})
 
 PLATFORMS = {
     armv6 = {"s5l8720x", "s5l8900x"},
@@ -15,6 +16,7 @@ PLATFORMS = {
 CATALOG = "https://api.ipsw.me/v4"
 KEYS = "https://theapplewiki.com/api.php"
 CACHE_FOLDER = "System/Library/Caches/com.apple.dyld"
+ROOTFS_EXPANSION = 3
 PRODUCTS = {"iPhone", "iPad", "iPod"}
 LIBRARY_FOLDERS = {"usr/lib", "System/Library/Frameworks", "System/Library/PrivateFrameworks"}
 
@@ -505,6 +507,34 @@ function harvest(mount, release, firmware, architecture)
     return found
 end
 
+local DETACH_ATTEMPTS = 5
+
+local function detach_image(mount)
+    local errors = nil
+    for attempt = 1, DETACH_ATTEMPTS do
+        local detached = false
+        try {
+            function ()
+                os.vrunv("hdiutil", {"detach", mount})
+                detached = true
+            end,
+            catch {
+                function (raised)
+                    errors = tostring(raised)
+                end
+            }
+        }
+        if detached then
+            return
+        end
+        if attempt < DETACH_ATTEMPTS then
+            print("the image at %s is busy, detach attempt %d of %d failed, retrying", mount, attempt, DETACH_ATTEMPTS)
+            os.sleep(attempt * 500)
+        end
+    end
+    raise("%s", errors)
+end
+
 local function mount_and_harvest(image, release, architecture, firmware)
     local mount = image .. ".mount"
     os.mkdir(mount)
@@ -530,7 +560,7 @@ local function mount_and_harvest(image, release, architecture, firmware)
         },
         finally {
             function ()
-                os.vrunv("hdiutil", {"detach", mount})
+                detach_image(mount)
                 os.tryrm(mount)
             end
         }
@@ -608,6 +638,7 @@ function fetch(architecture, minimum, opt)
             function ()
                 firmware.tool = tool
                 cprint("${bright}fetching iOS %s for %s from %s %s${clear} (%s)", release, architecture, firmware.identifier, firmware.build, firmware.url)
+                cache.reserve(firmware.size or 0, "the iOS " .. release .. " firmware for " .. architecture)
                 os.mkdir(work)
                 local members = zip_members(firmware.url)
                 local harvested = {}
@@ -741,7 +772,7 @@ local function copy_tree(image, destination)
         end,
         finally {
             function ()
-                os.vrunv("hdiutil", {"detach", mount})
+                detach_image(mount)
                 os.tryrm(mount)
             end
         }
@@ -757,6 +788,7 @@ function rootfs(identifier, minimum, opt)
     end
     firmware.tool = assert(opt.tool, "unpacking firmware needs the revenant-firmware tool")
     cprint("${bright}unpacking the root filesystem of %s %s (%s)${clear} from %s", firmware.identifier, firmware.version, firmware.build, firmware.url)
+    cache.reserve(ROOTFS_EXPANSION * (firmware.size or 0), "the root filesystem of " .. firmware.identifier .. " " .. firmware.version)
     local work = path.join(home(), "firmware", "work", firmware.identifier .. "_" .. firmware.build)
     local staging = folder .. ".partial"
     if os.isfile(path.join(staging, "System", "Library", "CoreServices", "SystemVersion.plist")) then

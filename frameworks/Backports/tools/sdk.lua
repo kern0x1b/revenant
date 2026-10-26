@@ -95,7 +95,7 @@ function build_root()
 end
 
 function model_cache()
-    return path.join(workspace().home(), "cache", "backports", "modcache")
+    return path.join(workspace().scratch(), "backports", "modcache")
 end
 
 function cache_key(version)

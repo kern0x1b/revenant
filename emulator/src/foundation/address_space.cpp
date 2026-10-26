@@ -8,6 +8,7 @@
 #include "foundation/address_space.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <iterator>
 #include <limits>
@@ -197,6 +198,19 @@ namespace {
 
 }
 
+namespace {
+
+void store_jit_entry(std::uint8_t** entry, std::uint8_t* value) noexcept
+{
+    std::atomic_ref<std::uint8_t*> { *entry }.store(
+        value, std::memory_order_release);
+}
+
+std::atomic<std::uint64_t> next_guest_slice_serial { 1U };
+thread_local std::uint64_t current_guest_slice_serial { };
+
+}
+
 struct AddressSpace::JitPageTableStorage {
     static constexpr std::size_t byte_size =
         AddressSpace::page_count * sizeof(std::uint8_t*);
@@ -302,6 +316,131 @@ void AddressSpace::set_exclusive_write_observer(std::function<void()> observer)
     exclusive_write_observer_ = std::move(observer);
 }
 
+AddressSpace::GuestQuiescence::SliceScope::SliceScope(
+    GuestQuiescence& quiescence)
+    : quiescence_ { quiescence }
+    , serial_ { quiescence.enter() }
+    , previous_serial_ { current_guest_slice_serial }
+{
+    current_guest_slice_serial = serial_;
+}
+
+AddressSpace::GuestQuiescence::SliceScope::~SliceScope()
+{
+    current_guest_slice_serial = previous_serial_;
+    quiescence_.leave(serial_);
+}
+
+std::uint64_t AddressSpace::GuestQuiescence::enter()
+{
+    const auto serial =
+        next_guest_slice_serial.fetch_add(1U, std::memory_order_relaxed);
+    std::lock_guard lock { mutex_ };
+    slices_.emplace(serial, SliceState::Running);
+    return serial;
+}
+
+void AddressSpace::GuestQuiescence::leave(std::uint64_t serial) noexcept
+{
+    {
+        std::lock_guard lock { mutex_ };
+        slices_.erase(serial);
+    }
+    changed_.notify_all();
+}
+
+void AddressSpace::GuestQuiescence::wait()
+{
+    const auto self = current_guest_slice_serial;
+    std::unique_lock lock { mutex_ };
+    const auto set_self_state = [this, self](SliceState state) {
+        if (self == 0U)
+            return;
+        if (auto found = slices_.find(self); found != slices_.end())
+            found->second = state;
+    };
+    set_self_state(SliceState::Quiescing);
+    std::vector<std::uint64_t> pending;
+    for (const auto& [serial, state] : slices_) {
+        if (serial != self && state == SliceState::Running)
+            pending.push_back(serial);
+    }
+    changed_.notify_all();
+    changed_.wait(lock, [this, &pending] {
+        return std::ranges::none_of(pending, [this](std::uint64_t serial) {
+            const auto found = slices_.find(serial);
+            return found != slices_.end() &&
+                   found->second == SliceState::Running;
+        });
+    });
+    set_self_state(SliceState::Running);
+}
+
+void AddressSpace::publish_code_page(std::uint32_t address)
+{
+    if (!parallel_access_)
+        return;
+    const auto base = page_base(address);
+    {
+        auto lock = read_lock();
+        if (published_code_pages_.contains(base))
+            return;
+    }
+    {
+        auto lock = write_lock();
+        if (!published_code_pages_.insert(base).second)
+            return;
+        refresh_jit_page_locked(base);
+    }
+    const auto started = std::chrono::steady_clock::now();
+    guest_quiescence_.wait();
+    const auto waited = std::chrono::steady_clock::now() - started;
+    performance_counters().record_code_publication(
+        static_cast<std::uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(waited)
+                .count()));
+}
+
+void AddressSpace::reclaim_retired_backings()
+{
+    std::vector<std::shared_ptr<GuestPageBacking>> reclaimed;
+    {
+        auto lock = write_lock();
+        reclaimed.swap(retired_backings_);
+        for (const auto& backing : reclaimed)
+            backing->release_retired_reference();
+    }
+}
+
+AddressSpace::GuestQuiescence& AddressSpace::guest_quiescence() noexcept
+{
+    return guest_quiescence_;
+}
+
+void AddressSpace::retire_page_backing_locked(Page& page)
+{
+    if (!page.backing)
+        return;
+    if (parallel_access_)
+        push_retired_backing_locked(std::move(page.backing));
+    page.backing = nullptr;
+}
+
+void AddressSpace::push_retired_backing_locked(
+    std::shared_ptr<GuestPageBacking> backing)
+{
+    backing->hold_retired_reference();
+    retired_backings_.push_back(std::move(backing));
+}
+
+std::size_t AddressSpace::page_backing_owner_count_locked(
+    const std::shared_ptr<GuestPageBacking>& backing) const
+{
+    const auto references = static_cast<std::size_t>(backing.use_count());
+    const auto retired = backing->retired_reference_count();
+    return references > retired ? references - retired : 0U;
+}
+
 std::uint8_t** AddressSpace::jit_page_table() { return jit_write_page_table(); }
 
 std::uint8_t** AddressSpace::jit_read_page_table()
@@ -310,14 +449,6 @@ std::uint8_t** AddressSpace::jit_read_page_table()
     if (!jit_page_table_enabled_)
         return nullptr;
     ensure_jit_page_tables_locked();
-    bool direct_reads = !parallel_access_;
-#if defined(__x86_64__) || defined(_M_X64)
-    direct_reads = direct_reads || owns_exclusive_access();
-#endif
-    if (!direct_reads) {
-        static JitPageTableStorage checked_reads;
-        return checked_reads.entries();
-    }
     return jit_read_page_table_->entries();
 }
 
@@ -327,14 +458,6 @@ std::uint8_t** AddressSpace::jit_write_page_table()
     if (!jit_page_table_enabled_ || !jit_write_page_table_enabled_)
         return nullptr;
     ensure_jit_page_tables_locked();
-    bool direct_writes = !parallel_access_;
-#if defined(__x86_64__) || defined(_M_X64)
-    direct_writes = direct_writes || owns_exclusive_access();
-#endif
-    if (!direct_writes) {
-        static JitPageTableStorage checked_writes;
-        return checked_writes.entries();
-    }
     return jit_write_page_table_->entries();
 }
 
@@ -374,7 +497,8 @@ AddressSpace::JitSlowPathReason AddressSpace::jit_slow_path_reason(
         return JitSlowPathReason::Unmapped;
     if (write ? !jit_write_page_table_enabled_ : !jit_page_table_enabled_)
         return JitSlowPathReason::TableDisabled;
-    if (write && tracks_write_locked(base, page_size))
+    if (write && (tracks_write_locked(base, page_size) ||
+                     published_code_pages_.contains(base)))
         return JitSlowPathReason::CodeWrite;
     if (write && exclusive_write_tracked_pages_.contains(base))
         return JitSlowPathReason::ReservationWrite;
@@ -616,6 +740,7 @@ void AddressSpace::unmap_range_locked(
     auto page = pages_->lower_bound(address);
     while (page != pages_->end() && page->first < end) {
         uncache_page_locked(page->first);
+        retire_page_backing_locked(page->second);
         page = pages_->erase(page);
     }
     for (std::uint64_t base = address; base < end; base += page_size) {
@@ -685,6 +810,13 @@ void AddressSpace::clear()
             1U);
     vm_map_.clear();
     translation_profile_map_.clear();
+    if (parallel_access_) {
+        for (const auto& [address, page] : *pages_) {
+            static_cast<void>(address);
+            if (page.backing)
+                push_retired_backing_locked(page.backing);
+        }
+    }
     pages_ = std::make_shared<PageMap>();
     file_mappings_.clear();
     for (auto& chunk : page_lookup_)
@@ -1223,14 +1355,16 @@ void AddressSpace::share_pages_locked(std::uint32_t address, std::uint64_t end,
             page.backing = std::make_shared<GuestPageBacking>();
         } else if (page.file_cached ||
                    (page.copy_on_write_possible && !page.shared_writable &&
-                       page.backing.use_count() != 1)) {
-            page.backing = std::make_shared<GuestPageBacking>(*page.backing);
+                       page_backing_owner_count_locked(page.backing) != 1)) {
+            auto copy = std::make_shared<GuestPageBacking>(*page.backing);
+            retire_page_backing_locked(page);
+            page.backing = std::move(copy);
         }
         page.file_cached = false;
         page.shared_writable = true;
         page.copy_on_write_possible = false;
         if (tracks_write_locked(static_cast<std::uint32_t>(base), page_size)) {
-            tracked_backing_may_have_aliases |= page.backing.use_count() != 1;
+            tracked_backing_may_have_aliases |= page_backing_owner_count_locked(page.backing) != 1;
             if (page.backing->enable_shared_write_tracking())
                 ++tracking_transitions;
             has_tracked_shared_backing = true;
@@ -1464,6 +1598,7 @@ AddressSpace::Page& AddressSpace::ensure_page_locked(std::uint32_t address)
             auto backing = file_page_cache_->load_page(
                 mapping->backing, file_offset, byte_count);
             backing->materialize();
+            retire_page_backing_locked(page->second);
             page->second.backing = std::move(backing);
             page->second.file_cached = true;
             page->second.copy_on_write_possible = true;
@@ -1685,10 +1820,10 @@ void AddressSpace::refresh_jit_page_locked(std::uint32_t address)
             ? &jit_write_page_table_->entries()[base / page_size]
             : nullptr;
     if (read_entry)
-        *read_entry = nullptr;
+        store_jit_entry(read_entry, nullptr);
     if (write_entry) {
         if (*write_entry != nullptr) {
-            *write_entry = nullptr;
+            store_jit_entry(write_entry, nullptr);
             direct_jit_write_pages_.erase(base);
         }
     }
@@ -1705,7 +1840,7 @@ void AddressSpace::refresh_jit_page_locked(std::uint32_t address)
     if (read_entry && direct_read_safe &&
         (flags & read_required) == read_required && page != nullptr &&
         page->backing) {
-        *read_entry = jit_page_pointer(*page->backing, base);
+        store_jit_entry(read_entry, jit_page_pointer(*page->backing, base));
     }
 
     constexpr auto write_required = static_cast<std::uint8_t>(
@@ -1723,9 +1858,10 @@ void AddressSpace::refresh_jit_page_locked(std::uint32_t address)
         (page->copy_on_write_possible && !page->shared_writable)) {
         return;
     }
-    if (exclusive_write_tracked_pages_.contains(base))
+    if (exclusive_write_tracked_pages_.contains(base) ||
+        published_code_pages_.contains(base))
         return;
-    *write_entry = jit_page_pointer(*page->backing, base);
+    store_jit_entry(write_entry, jit_page_pointer(*page->backing, base));
     direct_jit_write_pages_.insert(base);
 }
 
@@ -1751,7 +1887,7 @@ void AddressSpace::invalidate_shared_write_jit_pages_locked()
         const auto* page = find_page_locked(*address);
         if (page && page->backing &&
             page->backing->shared_write_tracking_enabled()) {
-            entries[*address / page_size] = nullptr;
+            store_jit_entry(&entries[*address / page_size], nullptr);
             address = direct_jit_write_pages_.erase(address);
         } else {
             ++address;
@@ -1798,11 +1934,15 @@ GuestPageBacking& AddressSpace::writable_backing_locked(
     } else {
         if (page.file_cached ||
             (page.copy_on_write_possible && !page.shared_writable &&
-                page.backing.use_count() != 1)) {
-            if (performance_counters().enabled())
+                page_backing_owner_count_locked(page.backing) != 1)) {
+            if (performance_counters().enabled()) {
                 write_copy_on_write_detaches.fetch_add(
                     1, std::memory_order_relaxed);
-            page.backing = std::make_shared<GuestPageBacking>(*page.backing);
+                performance_counters().record_copy_on_write_detach();
+            }
+            auto copy = std::make_shared<GuestPageBacking>(*page.backing);
+            retire_page_backing_locked(page);
+            page.backing = std::move(copy);
         }
     }
     page.file_cached = false;
@@ -2562,9 +2702,11 @@ std::size_t AddressSpace::shared_page_count() const
     auto lock = read_lock();
     const auto shared_metadata = pages_.use_count() != 1;
     return static_cast<std::size_t>(std::count_if(
-        pages_->begin(), pages_->end(), [shared_metadata](const auto& entry) {
+        pages_->begin(), pages_->end(), [this, shared_metadata](const auto& entry) {
             return entry.second.backing &&
-                   (shared_metadata || entry.second.backing.use_count() != 1);
+                   (shared_metadata ||
+                       page_backing_owner_count_locked(entry.second.backing) !=
+                           1);
         }));
 }
 

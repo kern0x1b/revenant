@@ -15,11 +15,11 @@ local INSTALL = "usr/lib/revenant/org.revenant.backports"
 local shared = {}
 
 local function home_cache()
-    return path.join(os.getenv("HOME"), ".revenant", "cache", "runtime-tests")
+    return path.join(import("@addon.revenant.workspace", {anonymous = true}).scratch(), "runtime-tests")
 end
 
 local function firmware_root()
-    return path.join(os.getenv("HOME"), ".revenant", "firmware", "rootfs", DEVICE, RELEASE .. "_" .. BUILD)
+    return path.join(import("@addon.revenant.workspace", {anonymous = true}).home(), "firmware", "rootfs", DEVICE, RELEASE .. "_" .. BUILD)
 end
 
 local function emulator_program()
@@ -130,14 +130,16 @@ local function execute(program, firmware, libraries, app, guest, folder, saved)
     local booted = try {
         function ()
             return emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
-                                  cache = path.join(home_cache(), "host-cache"),
-                                  tmpdir = path.join(home_cache(), "tmp"), network = "isolated",
+                                  cache = emulator.host_cache(DEVICE, BUILD),
+                                  tmpdir = path.join(folder, "tmp"), network = "isolated",
                                   scale = emulator.TIME_SCALE, deadline = 900,
                                   stop = function () return os.isfile(verdict_file) end})
         end,
         catch {
             function (errors)
                 emulator.release(slot)
+                emulator.remove(rootfs)
+                emulator.remove(path.join(folder, "tmp"))
                 raise(errors)
             end
         }
@@ -151,6 +153,7 @@ local function execute(program, firmware, libraries, app, guest, folder, saved)
     os.cp(results, path.join(folder, "results"))
     io.writefile(path.join(folder, "app.stdout"), text)
     emulator.remove(rootfs)
+    emulator.remove(path.join(folder, "tmp"))
     local cases, finished = parse(text)
     local description = emulator.describe(verdict) .. "; the emulator log is " .. tostring(booted.log)
     if finished then
@@ -287,7 +290,7 @@ function failures(case, target)
     local values, failure = guarded(function ()
         local app = path.absolute(target:dep("backports_runtime_app"):targetfile())
         require_present(emulator_program(), "the emulator is not built: ./xmakew f -P . -p macosx -a arm64 -y, then ./xmakew build -P . emulator")
-        require_present(firmware_root(), string.format("the %s iOS %s root filesystem is not under ~/.revenant/firmware: ./xmakew firmware --device=%s rootfs %s",
+        require_present(firmware_root(), string.format("the %s iOS %s root filesystem is not in the cache's firmware folder: ./xmakew firmware --device=%s rootfs %s",
                                                       DEVICE, RELEASE, DEVICE, RELEASE))
         require_present(app, "the runtime app is not built: ./xmakew build -P . backports_runtime_app")
         local guest = target:pkg("emulator-guest")

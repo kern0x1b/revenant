@@ -12,7 +12,7 @@ local function write(file, text)
 end
 
 function main()
-    local root = path.join(os.getenv("HOME"), ".revenant", "cache", "runtime-fingerprint-test")
+    local root = path.join(import("@addon.revenant.workspace", {anonymous = true}).scratch(), "runtime-fingerprint-test")
     os.tryrm(root)
     local program = path.join(root, "emulator")
     local app = path.join(root, "app", "backports_runtime_app")

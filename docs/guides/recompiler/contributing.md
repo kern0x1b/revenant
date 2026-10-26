@@ -34,7 +34,7 @@ Rellume, farmdec and BlocksRuntime are packages of the package repository, pinne
 - Git is forward only, as the root `AGENTS.md` says.
 - **Git holds source only.** Run output (device crash logs and syslogs, screenshots, message traces, script output
   such as `report.txt`, `imports.txt` or `results.txt`, generated tables such as `*.absent.tsv`, survey dumps) goes to
-  `$HOME/.revenant/cache/<task>/`, never into a commit or the revenant tree, and is deleted when the task ends. Record
+  `.cache/scratch/<task>/`, never into a commit or the revenant tree, and is deleted when the task ends. Record
   the finding in a commit message, a facts line or a doc. Before committing, read `git status` and
   `git diff --cached --stat`: a new file that a script or a device wrote is not source.
 - Device identifiers (UDIDs, crash-log keys) and screenshots do not go even into scratch notes. Delete a screenshot
@@ -44,7 +44,7 @@ Rellume, farmdec and BlocksRuntime are packages of the package repository, pinne
 
 - Check a toolchain version only in an `XMAKE_GLOBALDIR` of your own. On xmake 3.1.1 every addon install becomes the machine's `active` version, so an install into the shared store
   changes it for every project.
-- The payload under `~/.revenant/cache/xmake-global/.xmake/addons` is never edited by hand: no copying files into it,
+- The payload under `.cache/xmake-global/.xmake/addons` is never edited by hand: no copying files into it,
   no `xmake addon --remove`.
 
 ## Devices and the emulator

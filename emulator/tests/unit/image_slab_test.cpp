@@ -15,6 +15,7 @@
 #include <cstring>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 using namespace emulator;
@@ -50,6 +51,9 @@ void check_equal(std::uint64_t actual, std::uint64_t expected,
 
 constexpr std::uint32_t code_begin = 0x30000000U;
 constexpr std::uint32_t code_end = 0x40000000U;
+constexpr std::uint32_t dyld_begin = 0x2fe00000U;
+constexpr std::uint32_t dyld_end = 0x2fe21000U;
+constexpr std::uint32_t stack_page = 0x2ffff000U;
 constexpr std::size_t page_bytes = 4096U;
 constexpr std::uint32_t svc_opcode = 0xEF000000U;
 constexpr std::uint32_t user_mode = 0x10U;
@@ -74,8 +78,9 @@ void store_program(std::vector<std::uint8_t>& page, std::uint32_t value)
 
 class Process final : public Dynarmic::A32::UserCallbacks {
 public:
-    explicit Process(Backing backing)
+    explicit Process(Backing backing, std::uint32_t base = code_begin)
         : backing_ { std::move(backing) }
+        , base_ { base }
         , context_ { std::make_unique<ExecutionContext>() }
     {
         const auto callbacks_cell = context_->create_link_cell();
@@ -101,8 +106,7 @@ public:
 
     void invalidate()
     {
-        static_cast<void>(context_->request_cache_range(
-            code_begin, page_bytes));
+        static_cast<void>(context_->request_cache_range(base_, page_bytes));
     }
 
     void exec()
@@ -122,7 +126,7 @@ public:
         service_machine_image_code_slab();
         jit_->ClearHalt();
         jit_->Regs()[0] = 0U;
-        jit_->Regs()[15] = code_begin;
+        jit_->Regs()[15] = base_;
         jit_->SetCpsr(user_mode);
         jit_->Run();
         return jit_->Regs()[0];
@@ -186,6 +190,8 @@ private:
             config.image_native_code_slab = jit_image_slab_;
             config.image_code_begin = region.begin;
             config.image_code_end = region.end;
+            config.image_code_second_begin = region.second_begin;
+            config.image_code_second_end = region.second_end;
             config.image_code_cache_size = region.cache_bytes;
         }
         jit_ = std::make_unique<Dynarmic::A32::Jit>(config);
@@ -195,19 +201,20 @@ private:
     T load(std::uint32_t vaddr) const
     {
         T value {};
-        if (vaddr >= code_begin && vaddr - code_begin + sizeof(T) <= page_bytes)
-            std::memcpy(&value, backing_->data() + (vaddr - code_begin), sizeof(T));
+        if (vaddr >= base_ && vaddr - base_ + sizeof(T) <= page_bytes)
+            std::memcpy(&value, backing_->data() + (vaddr - base_), sizeof(T));
         return value;
     }
 
     template <typename T>
     void store(std::uint32_t vaddr, T value)
     {
-        if (vaddr >= code_begin && vaddr - code_begin + sizeof(T) <= page_bytes)
-            std::memcpy(backing_->data() + (vaddr - code_begin), &value, sizeof(T));
+        if (vaddr >= base_ && vaddr - base_ + sizeof(T) <= page_bytes)
+            std::memcpy(backing_->data() + (vaddr - base_), &value, sizeof(T));
     }
 
     Backing backing_;
+    std::uint32_t base_;
     std::unique_ptr<ExecutionContext> context_;
     std::atomic<std::uint64_t>* callbacks_link_ { };
     std::atomic<std::uint64_t>* lookup_link_ { };
@@ -221,7 +228,7 @@ private:
 int main()
 {
     set_machine_image_code_region(ImageCodeRegion { "rootfs|iPhone4,1",
-        code_begin, code_end, 8U * mebibyte });
+        code_begin, code_end, 8U * mebibyte, dyld_begin, dyld_end });
 
     const auto shared = make_backing(std::vector<std::uint8_t>(page_bytes));
     store_program(*shared, 1);
@@ -272,6 +279,37 @@ int main()
     Process clean { shared };
     CHECK_EQ(clean.run(), 1U);
     CHECK(clean.image_slab_in_use());
+
+    const auto dyld_shared = make_backing(std::vector<std::uint8_t>(page_bytes));
+    store_program(*dyld_shared, 1);
+    Process dyld_reader { dyld_shared, dyld_begin };
+    const auto translated_before_dyld = machine_image_code_slab()->code_cache_used();
+    CHECK_EQ(dyld_reader.run(), 1U);
+    CHECK(dyld_reader.image_slab_in_use());
+    CHECK(machine_image_code_slab()->code_cache_used() > translated_before_dyld);
+    Process dyld_other { dyld_shared, dyld_begin };
+    CHECK_EQ(dyld_other.run(), 1U);
+    CHECK(dyld_other.image_slab_in_use());
+
+    Process dyld_writer { make_backing(*dyld_shared), dyld_begin };
+    dyld_writer.write_program(9);
+    dyld_writer.invalidate();
+    const auto translated_before_dyld_writer =
+        machine_image_code_slab()->code_cache_used();
+    CHECK_EQ(dyld_writer.run(), 9U);
+    CHECK(!dyld_writer.image_slab_in_use());
+    CHECK_EQ(machine_image_code_slab()->code_cache_used(),
+        translated_before_dyld_writer);
+    CHECK_EQ(dyld_other.run(), 1U);
+    CHECK(dyld_other.image_slab_in_use());
+
+    const auto stack_backing = make_backing(std::vector<std::uint8_t>(page_bytes));
+    store_program(*stack_backing, 3);
+    Process stack { stack_backing, stack_page };
+    const auto translated_before_stack = machine_image_code_slab()->code_cache_used();
+    CHECK_EQ(stack.run(), 3U);
+    CHECK_EQ(machine_image_code_slab()->code_cache_used(),
+        translated_before_stack);
 
     if (failures == 0)
         std::puts("image_slab_test: ok");

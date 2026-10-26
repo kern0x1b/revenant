@@ -33,7 +33,7 @@ function failures(opt)
         table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own sources, must build: " .. refused)
     else
         local out = path.join(folder, "install")
-        os.vrunv(os.programfile(), {"install", "-y", "-o", out}, {curdir = at})
+        os.vrunv(os.programfile(), {"install", "-P", at, "-y", "-o", out}, {curdir = at})
         local layout = path.join(out, "Library", "MobileSubstrate", "DynamicLibraries")
         if not os.isfile(path.join(layout, "revenant-callkit-screen.dylib")) then
             table.insert(found, "the callkit-screen tweak built but its dylib is not under Library/MobileSubstrate/DynamicLibraries")

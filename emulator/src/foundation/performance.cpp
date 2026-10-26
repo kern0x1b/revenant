@@ -776,6 +776,12 @@ bool PerformanceCounters::begin_display_window()
     }
     diagnostic_work_baseline.jit_page_table_disables =
         jit_page_table_disables_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.code_publications =
+        code_publications_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.code_publication_wait_ns =
+        code_publication_wait_ns_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.copy_on_write_detaches =
+        copy_on_write_detaches_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_executions =
         cpu_executions_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_ticks =
@@ -1016,6 +1022,15 @@ std::optional<PerformanceSnapshot> PerformanceCounters::end_display_window()
     result.jit_page_table_disables = diagnostic_delta(
         jit_page_table_disables_.load(std::memory_order_relaxed),
         diagnostic_work_baseline.jit_page_table_disables);
+    result.code_publications = diagnostic_delta(
+        code_publications_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.code_publications);
+    result.code_publication_wait_ns = diagnostic_delta(
+        code_publication_wait_ns_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.code_publication_wait_ns);
+    result.copy_on_write_detaches = diagnostic_delta(
+        copy_on_write_detaches_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.copy_on_write_detaches);
     result.cpu_executions =
         diagnostic_delta(cpu_executions_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.cpu_executions);
@@ -1625,6 +1640,17 @@ void PerformanceCounters::record_memory_callback(std::size_t reason)
 void PerformanceCounters::record_jit_page_table_disable()
 {
     add_if_enabled(jit_page_table_disables_, enabled_);
+}
+
+void PerformanceCounters::record_code_publication(std::uint64_t wait_ns)
+{
+    add_if_enabled(code_publications_, enabled_);
+    add_if_enabled(code_publication_wait_ns_, enabled_, wait_ns);
+}
+
+void PerformanceCounters::record_copy_on_write_detach()
+{
+    add_if_enabled(copy_on_write_detaches_, enabled_);
 }
 
 void PerformanceCounters::record_cpu_execution(std::uint64_t ticks)
@@ -2913,6 +2939,12 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
     }
     result.jit_page_table_disables =
         jit_page_table_disables_.load(std::memory_order_relaxed);
+    result.code_publications =
+        code_publications_.load(std::memory_order_relaxed);
+    result.code_publication_wait_ns =
+        code_publication_wait_ns_.load(std::memory_order_relaxed);
+    result.copy_on_write_detaches =
+        copy_on_write_detaches_.load(std::memory_order_relaxed);
     result.cpu_executions = cpu_executions_.load(std::memory_order_relaxed);
     result.cpu_ticks = cpu_ticks_.load(std::memory_order_relaxed);
     result.svc_calls = svc_calls_.load(std::memory_order_relaxed);
@@ -3326,7 +3358,10 @@ std::string memory_callback_summary(const PerformanceSnapshot& snapshot)
     };
     std::ostringstream text;
     text << " memory-callbacks=" << snapshot.memory_callbacks
-         << " jit-page-table-disables=" << snapshot.jit_page_table_disables;
+         << " jit-page-table-disables=" << snapshot.jit_page_table_disables
+         << " code-publications=" << snapshot.code_publications
+         << " code-publication-wait-ns=" << snapshot.code_publication_wait_ns
+         << " copy-on-write-detaches=" << snapshot.copy_on_write_detaches;
     for (std::size_t reason = 0; reason < names.size(); ++reason) {
         text << " memory-" << names[reason] << '='
              << snapshot.memory_callback_reasons[reason];

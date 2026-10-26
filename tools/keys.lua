@@ -1,4 +1,3 @@
-import("core.base.task")
 import("private.action.require.impl.package")
 
 local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
@@ -6,7 +5,6 @@ local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
 local HEAVY = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64"}
 
 function main(...)
-    task.run("config", {}, {disable_dump = true})
     local names = {...}
     if #names == 0 then
         names = HEAVY

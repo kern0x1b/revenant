@@ -8,7 +8,7 @@ measurement on this machine, and each row says what it measures. None is a time 
 - **Emulator**: `build/macosx/arm64/release/emulator` of the main checkout, built 2026-10-21; its sources under `emulator/`,
   `toolchain/` and `packages/` are unchanged between that checkout's main and this branch. A run is
   `emulator boot --rootfs CLONE --device iPhone4,1 --display headless --gles-backend software --binary /usr/local/bin/bench --ticks 20000000000 --perf-summary`
-  on a clone of `~/.revenant/firmware/rootfs/iPhone4,1/6.1.3_10B329`. The guest runs the program as pid 1, so no launchd
+  on a clone of `.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`. The guest runs the program as pid 1, so no launchd
   or SpringBoard work is in the count.
 - **cpu-ticks** is the guest instruction count of the whole run, with `--ticks` as a deterministic clock. Two runs of the
   same binary gave the same count (zlib baseline, 675,040,888 both times).

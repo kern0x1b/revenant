@@ -9,6 +9,7 @@
 
 #include <array>
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -117,6 +118,36 @@ public:
     [[nodiscard]] std::uint8_t** jit_write_page_table();
     void disable_jit_page_table();
     void disable_jit_write_page_table();
+    class GuestQuiescence {
+    public:
+        class SliceScope {
+        public:
+            explicit SliceScope(GuestQuiescence& quiescence);
+            ~SliceScope();
+            SliceScope(const SliceScope&) = delete;
+            SliceScope& operator=(const SliceScope&) = delete;
+
+        private:
+            GuestQuiescence& quiescence_;
+            std::uint64_t serial_;
+            std::uint64_t previous_serial_;
+        };
+
+        void wait();
+
+    private:
+        enum class SliceState : std::uint8_t { Running, Quiescing };
+
+        std::uint64_t enter();
+        void leave(std::uint64_t serial) noexcept;
+
+        std::mutex mutex_;
+        std::condition_variable changed_;
+        std::map<std::uint64_t, SliceState> slices_;
+    };
+    void publish_code_page(std::uint32_t address);
+    void reclaim_retired_backings();
+    [[nodiscard]] GuestQuiescence& guest_quiescence() noexcept;
     enum class JitSlowPathReason : std::size_t {
         Exclusive,
         Misaligned,
@@ -352,9 +383,13 @@ private:
         std::size_t local_transitions, bool backing_may_have_aliases);
     void invalidate_shared_write_jit_pages_locked();
     void clear_jit_page_table_locked();
+    void retire_page_backing_locked(Page& page);
+    void push_retired_backing_locked(std::shared_ptr<GuestPageBacking> backing);
+    [[nodiscard]] std::size_t page_backing_owner_count_locked(
+        const std::shared_ptr<GuestPageBacking>& backing) const;
     [[nodiscard]] static std::byte read_byte_locked(
         const Page* page, std::uint32_t offset);
-    [[nodiscard]] static GuestPageBacking& writable_backing_locked(
+    [[nodiscard]] GuestPageBacking& writable_backing_locked(
         Page& page, bool* jit_eligibility_changed = nullptr);
     [[nodiscard]] bool reservation_invalidation_required_locked(
         const Page& page) const noexcept;
@@ -397,6 +432,9 @@ private:
     std::unique_ptr<JitPageTableStorage> jit_read_page_table_;
     std::unique_ptr<JitPageTableStorage> jit_write_page_table_;
     std::unordered_set<std::uint32_t> direct_jit_write_pages_;
+    std::unordered_set<std::uint32_t> published_code_pages_;
+    std::vector<std::shared_ptr<GuestPageBacking>> retired_backings_;
+    GuestQuiescence guest_quiescence_;
     bool jit_page_table_enabled_ { };
     bool jit_write_page_table_enabled_ { true };
     std::unordered_map<std::uint32_t, std::uint64_t>

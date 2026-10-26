@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  REVENANT_CACHE: ${{ github.workspace }}/.cache
+
 concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -53,7 +56,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.docs == 'true'
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -62,13 +65,13 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
           restore-keys: |
             xmake-global-checks-${{ runner.os }}-
@@ -89,13 +92,13 @@ jobs:
         if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   checks:
@@ -111,13 +114,13 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
           restore-keys: |
             xmake-global-checks-${{ runner.os }}-
@@ -134,19 +137,19 @@ jobs:
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v2
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - uses: actions/cache/restore@v4
         id: inventory-cache
         with:
-          path: ~/.revenant/dyld/6.0/classes_armv7.json
-          key: dyld-inventory-6.0-armv7-v1-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
+          path: .cache/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v2-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
 
       - name: Check whether the iOS 6.0 inventory is cached
         id: inventory
         run: |
-          if [ -f "$HOME/.revenant/dyld/6.0/classes_armv7.json" ]; then
+          if [ -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
@@ -165,8 +168,8 @@ jobs:
       - uses: actions/cache/save@v4
         if: steps.dyld.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v2
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Write the iOS 6.0 inventory from the shared cache
         if: steps.inventory.outputs.present != 'true'
@@ -179,14 +182,14 @@ jobs:
         run: ./xmakew f -P . -y --emulator_vulkan=n
 
       - name: Assert the iOS 6.0 inventory is in place
-        run: test -f "$HOME/.revenant/dyld/6.0/classes_armv7.json"
+        run: test -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json"
 
       - name: Save the iOS 6.0 inventory
         if: steps.inventory.outputs.present != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/dyld/6.0/classes_armv7.json
-          key: dyld-inventory-6.0-armv7-v1-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
+          path: .cache/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v2-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
 
       - name: Run the tests
         id: tests
@@ -196,13 +199,13 @@ jobs:
         if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   backports:
@@ -221,17 +224,22 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
           restore-keys: |
             xmake-global-${{ runner.os }}-
@@ -295,8 +303,8 @@ jobs:
       - name: Show the package logs when the configure failed
         if: failure()
         run: |
-          find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
-          for f in $(find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
+          find "$REVENANT_CACHE/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
+          for f in $(find "$REVENANT_CACHE/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
             echo "== $f"
             tail -30 "$f"
           done
@@ -305,7 +313,7 @@ jobs:
         if: steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - name: Save the generated skeleton
@@ -385,7 +393,7 @@ jobs:
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   package:
@@ -406,39 +414,49 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
-
-      - name: Key the Backports facts by the SDK, the compiler and the Xcode build
-        id: facts_keys
-        run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$'; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-package-${{ runner.os }}-latest
           restore-keys: |
             xmake-global-package-${{ runner.os }}-
 
+      - name: Update the package repositories for the keys
+        run: ./xmakew repo -u
+
+      - name: Key the Backports facts by the SDK, the compiler and the Xcode build
+        id: facts_keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$({ cat "$RUNNER_TEMP/key-lines.txt"; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - name: Key the demo's objects by every input they are built from
         id: objects_keys_all
-        run: echo "hash=$({ ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$'; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$({ cat "$RUNNER_TEMP/key-lines.txt"; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: objects
         with:
-          path: |
-            build/.objs
-            build/.deps
-            build/iphoneos
-          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
+          path: build
+          key: swiftui-demo-objects-v2-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v2
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: steps.dyld.outputs.cache-hit != 'true'
@@ -463,12 +481,17 @@ jobs:
 
       - name: Key the package store under the configuration that installed it
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: lookup
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
           lookup-only: true
 
@@ -485,26 +508,27 @@ jobs:
           path: build/*.deb
           if-no-files-found: error
 
+      - name: Keep the package out of the objects cache
+        if: success() && steps.objects.outputs.cache-hit != 'true'
+        run: rm -f build/*.deb
+
       - uses: actions/cache/save@v4
         if: success() && steps.objects.outputs.cache-hit != 'true'
         with:
-          path: |
-            build/.objs
-            build/.deps
-            build/iphoneos
-          key: swiftui-demo-objects-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
+          path: build
+          key: swiftui-demo-objects-v2-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
 
       - name: Save the package store
         if: steps.lookup.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   swift:
@@ -525,13 +549,13 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-latest
           restore-keys: |
             xmake-global-${{ runner.os }}-
@@ -539,8 +563,8 @@ jobs:
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v2
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Install the firmware tools through the Backports configuration
         id: firmware-tools
@@ -560,8 +584,8 @@ jobs:
       - uses: actions/cache/save@v4
         if: steps.dyld.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v2
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Configure the Swift component
         id: configure-swift
@@ -574,25 +598,30 @@ jobs:
 
       - name: Key the package store under the configuration that installed it
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: Build the Swift targets
         timeout-minutes: 20
         run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit swiftAuthenticationServices 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Install the Swift packages through their wrappers
-        timeout-minutes: 20
+        timeout-minutes: 40
         run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@storekit revenant@authenticationservices revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
         if: steps.firmware-tools.outputs.installed == 'true' || steps.configure-swift.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

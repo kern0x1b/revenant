@@ -27,7 +27,7 @@ A check that the port cannot meet is waived by name, with the reason, and the re
 
 ## Import checks need the release's libraries
 
-The import check reads the system libraries of a release from `~/.revenant/dyld/<release>/`. When they are not held, the check offers to fetch them, and `-y` accepts:
+The import check reads the system libraries of a release from `.cache/dyld/<release>/`. When they are not held, the check offers to fetch them, and `-y` accepts:
 
     xmake firmware fetch 6.1.3                # the shared cache for the release, by hand
     xmake firmware list                       # what is held

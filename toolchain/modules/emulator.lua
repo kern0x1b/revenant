@@ -7,6 +7,7 @@ import("gdb")
 import("apple.firmware")
 import("byteorder")
 import("generations")
+import("cache")
 
 RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
@@ -67,6 +68,10 @@ function root()
         return override
     end
     return path.join(path.directory(dyld.root()), "emulator")
+end
+
+function host_cache(identifier, build)
+    return path.join(root(), "cache.noindex", identifier .. "_" .. build)
 end
 
 function profiles(emulator)
@@ -308,6 +313,7 @@ end
 function clone(source, destination)
     remove(destination)
     os.mkdir(path.directory(destination))
+    cache.reserve(cache.bytes_of(source), "an emulator image cloned from " .. source)
     os.vrunv("cp", {"-c", "-R", source, destination})
 end
 
@@ -1224,13 +1230,14 @@ function clone_golden(opt, destination)
         local folder = golden(opt)
         local lock = generations.hold(folder)
         if os.isfile(path.join(folder, "golden.json")) then
-            local ok, errors = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) return false, caught end}}
+            local failure
+            local ok = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) failure = caught end}}
             generations.release(lock)
             if ok then
                 return
             end
             if os.isfile(path.join(folder, "golden.json")) then
-                raise(errors)
+                raise("%s", tostring(failure))
             end
             os.tryrm(destination)
         else
@@ -1397,8 +1404,8 @@ function golden(opt)
     end
     directory(parent)
     local lock = generations.take(published .. ".build.lock")
-    local built, staging, staged
-    local ok, errors = try {
+    local built, staging, staged, failure
+    local ok = try {
         function ()
             current = generations.resolve(published)
             if current and os.isfile(path.join(current, "golden.json")) then
@@ -1430,17 +1437,17 @@ function golden(opt)
         end,
         catch {
             function (caught)
+                failure = caught
                 if staging then
                     generations.abort(published, staging, staged)
                 end
-                return false, caught
             end
         }
     }
     lock:unlock()
     lock:close()
     if not ok then
-        raise(errors)
+        raise("%s", tostring(failure))
     end
     return built
 end
