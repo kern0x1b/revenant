@@ -1,5 +1,6 @@
 local BACKPORTS = "./usr/lib/revenant/org.revenant.backports/"
 local LINKED = {"libUIKitBackports.dylib", "libCoreDataBackports.dylib"}
+local RUNTIME = {["libc++.1.dylib"] = true, ["libc++abi.1.dylib"] = true}
 local APPLICATION = {"./Applications/SwiftUIDemo.app/SwiftUIDemo", "./Applications/SwiftUIDemo.app/Info.plist"}
 
 local function single(dir, name)
@@ -63,10 +64,15 @@ function main(dir, demo, platform)
     local files = members(platform_listing)
     local count = 0
     for entry in pairs(files) do
-        if not (entry:startswith(BACKPORTS) and entry:sub(#BACKPORTS + 1):match("^lib%w+Backports%.dylib$")) then
-            raise("%s carries %s, and it may carry only the Backports libraries under %s", platform, entry, BACKPORTS)
+        local name = entry:startswith(BACKPORTS) and entry:sub(#BACKPORTS + 1)
+        if name and name:match("^lib%w+Backports%.dylib$") then
+            count = count + 1
+        elseif not (name and RUNTIME[name]) then
+            raise("%s carries %s, and it may carry only the Backports libraries and the C++ runtime they link under %s", platform, entry, BACKPORTS)
         end
-        count = count + 1
+    end
+    if (files[BACKPORTS .. "libc++.1.dylib"] ~= nil) ~= (files[BACKPORTS .. "libc++abi.1.dylib"] ~= nil) then
+        raise("%s carries only half of the C++ runtime: libc++ and libc++abi go together", platform)
     end
     for _, library in ipairs(LINKED) do
         if not files[BACKPORTS .. library] then

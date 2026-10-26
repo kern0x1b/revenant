@@ -233,8 +233,24 @@ function backports_deb(signer)
         raise("target(%s) signs the Backports package, and carries no ldid to sign it with: add_packages(\"ldid\") to it, or a rule that adds it", signer:name())
     end
     local all, identities = shared_packages(signer)
-    return backports_package.ensure({targets = project_backports(), ldid = ldid(signer), packages = all, provided = identities,
+    local targets = project_backports()
+    return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
+                                     runtime = backports_runtime(targets),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
+end
+
+function backports_runtime(targets)
+    local linked
+    for _, target in ipairs(targets) do
+        local package = target:pkg("libcxx")
+        if package then
+            if linked and linked:installdir() ~= package:installdir() then
+                raise("the Backports libraries link two C++ runtimes, %s and %s; the package carries one", linked:installdir(), package:installdir())
+            end
+            linked = package
+        end
+    end
+    return linked and backports_package.carried_runtime(linked) or {}
 end
 
 function backport_package(target)

@@ -30,6 +30,9 @@ on:
 permissions:
   contents: read
 
+env:
+  REVENANT_CACHE: ${{ github.workspace }}/.cache
+
 concurrency:
   group: emulator-${{ inputs.job }}-${{ github.ref_name }}
   cancel-in-progress: false
@@ -68,13 +71,13 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-emulator-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua') }}
           restore-keys: |
             xmake-global-emulator-${{ runner.os }}-
@@ -103,7 +106,7 @@ jobs:
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.1.3
+          path: .cache/dyld/6.1.3
           key: dyld-shared-cache-6.1.3-armv7-v1
 
       - name: Fetch the iOS 6.1.3 armv7 shared cache
@@ -114,13 +117,13 @@ jobs:
       - uses: actions/cache/save@v4
         if: success() && steps.dyld.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/dyld/6.1.3
+          path: .cache/dyld/6.1.3
           key: dyld-shared-cache-6.1.3-armv7-v1
 
       - uses: actions/cache/restore@v4
         id: rootfs
         with:
-          path: ~/.revenant/firmware/rootfs/iPhone4,1
+          path: .cache/firmware/rootfs/iPhone4,1
           key: firmware-rootfs-6.1.3-iphone4-1-v1
 
       - name: Unpack the iOS 6.1.3 root filesystem of the iPhone 4S
@@ -130,7 +133,7 @@ jobs:
 
       - name: Name the root filesystem the boot clones
         run: |
-          rootfs=$(ls -d "$HOME/.revenant/firmware/rootfs/iPhone4,1/6.1.3_"* | head -n 1)
+          rootfs=$(ls -d "$REVENANT_CACHE/firmware/rootfs/iPhone4,1/6.1.3_"* | head -n 1)
           if [ -z "$rootfs" ] || [ ! -d "$rootfs" ]; then
             echo "no iOS 6.1.3 root filesystem for iPhone4,1" >&2
             exit 1
@@ -142,7 +145,7 @@ jobs:
       - uses: actions/cache/save@v4
         if: success() && steps.rootfs.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/firmware/rootfs/iPhone4,1
+          path: .cache/firmware/rootfs/iPhone4,1
           key: firmware-rootfs-6.1.3-iphone4-1-v1
 
       - name: Configure the emulator for release
@@ -240,7 +243,7 @@ jobs:
         if: always()
         run: |
           df -h /
-          du -sh "$HOME/.revenant/dyld" "$HOME/.revenant/firmware" "$HOME/.revenant/cache" "$GITHUB_WORKSPACE/build" 2>/dev/null || true
+          du -sh "$REVENANT_CACHE" "$GITHUB_WORKSPACE/build" 2>/dev/null || true
 
       - name: Keep the logs, the performance summaries and the measurements
         if: always()
@@ -254,11 +257,11 @@ jobs:
       - uses: actions/cache/save@v4
         if: always() && steps.store.outputs.cache-hit != 'true' && steps.configure.outcome == 'success' && steps.configure.outputs.installed == 'true'
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-emulator-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

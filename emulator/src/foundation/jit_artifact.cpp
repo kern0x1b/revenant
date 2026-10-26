@@ -5404,12 +5404,18 @@ namespace {
     std::shared_ptr<Dynarmic::A32::NativeCodeSlab> machine_image_slab;
     std::vector<std::shared_ptr<Dynarmic::A32::NativeCodeSlab>> retired_image_slabs;
 
+    bool intersects_image_range(std::uint32_t begin, std::uint32_t end,
+        std::uint32_t address, std::size_t length)
+    {
+        const auto last = static_cast<std::uint64_t>(address) + length;
+        return length != 0U && end > begin && address < end && last > begin;
+    }
+
     bool intersects_machine_image_region(
         const ImageCodeRegion& region, std::uint32_t address, std::size_t length)
     {
-        const auto last = static_cast<std::uint64_t>(address) + length;
-        return length != 0U && region.end > region.begin &&
-               address < region.end && last > region.begin;
+        return intersects_image_range(region.begin, region.end, address, length) ||
+               intersects_image_range(region.second_begin, region.second_end, address, length);
     }
 
     bool request_machine_image_cache_range(

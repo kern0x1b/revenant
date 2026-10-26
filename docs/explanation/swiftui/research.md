@@ -21,7 +21,7 @@ The recommended first step is section 8.
 
 ### 2.1 What it consists of (facts from the firmware caches, the toolchain module `apple.dyld`)
 
-Verified on the local caches in `~/.revenant/dyld` (the analysis scripts and their output are not kept in the repository).
+Verified on the local caches in `.cache/dyld` (the analysis scripts and their output are not kept in the repository).
 
 - **SwiftUI has never had an armv7 slice.** None of the 32-bit caches, up to the last 32-bit release 10.3.4, contains
   the `SwiftUI` or `Combine` images. In 16.0 and 18.0 the cache is arm64e only (26 caches). SwiftUI appeared in iOS 13,

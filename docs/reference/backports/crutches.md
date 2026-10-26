@@ -103,7 +103,7 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 
 - Stands in for: the members of SCNSceneRenderer that have no GLES counterpart. Implemented natively: `hitTest:options:` (CPU ray picking against the triangles of the scene, with the search modes, back-face culling, bounding boxes, category masks and texture coordinates per channel), `isNodeInsideFrustum:withPointOfView:` and `nodesInsideFrustumWithPointOfView:` (world bounds against the frustum of the point of view), `prepareObject:shouldAbortBlock:` and `prepareObjects:withCompletionHandler:` (build the GL meshes and textures of an object ahead of a frame), `presentScene:withTransition:incomingPointOfView:completionHandler:`, `showsStatistics` (an FPS label over the view), `temporalAntialiasingEnabled` (the accumulation of C20 while the frame is still), `autoenablesDefaultLighting` (the renderer's implicit light, off by default as on iOS), `currentViewport` (the size of the last render), `workingColorSpace` (the device RGB space the GLES output is in), and `colorPixelFormat`, `depthPixelFormat`, `stencilPixelFormat` and `currentRenderPassDescriptor`, which are Metal objects: a GLES view has no Metal device, so they answer invalid or nil, as `device` does. The Telegram files call none of these members except `isJitteringEnabled` (C20).
 - Still raises: `overlaySKScene` and `audioEnvironmentNode`. Their classes are absent from the 6.1.3 image: the dyld shared cache of `iPhone4,1/6.1.3_10B329` has no `SKScene` string and no `AVAudioEnvironmentNode` string (nor `AVAudioEngine`, which is backported over AUGraph), and the image has no `SpriteKit.framework`. Each raises `NSInternalInconsistencyException` naming the member.
-- Stored, with no effect yet: `loops` (defaults YES; there is no scene timeline to loop at, C18) and `debugOptions` (kept, but no debug geometry is drawn). `usesReverseZ` always reads NO: the GLES renderer keeps the normal depth range, and setting YES is reported once and ignored.
+- Stored, with no effect yet: `loops` (defaults YES; there is no scene timeline to loop at, C18; C23) and `debugOptions` (kept, but no debug geometry is drawn; C24). `usesReverseZ` always reads NO: the GLES renderer keeps the normal depth range, and setting YES is reported once and ignored.
 - Gaps: `hitTest` tests triangle elements only, and `boneNode` is nil (no skinning). `showsStatistics` shows the frame rate only. `temporalAntialiasingEnabled` accumulates the samples of C20 while the frame is still; Apple's reprojection is not modelled. `autoenablesDefaultLighting` lights every draw in the scene uniformly, not from a light placed at the camera.
 - Measurement: the host test `tests/SceneKit/picking_test.m` (ray against triangle and box, back faces, frustum planes and box containment, index and vertex reads). The runtime case `tests/runtime/cases/scenekit_members.m` checks each implemented member on the 6.1.3 emulator, including a hit at the centre of the plane and none at a corner, frustum containment, preparation, presentation completion, the statistics label, `projectPoint:` at the centre of the view, and lighting that is off by default. It is registered but has not run on the emulator yet; the iOS device configuration does not complete on this branch (see the report that accompanies this change). Not measured on a real device.
 - Removed by: a passing run of `scenekit_members`, and for the two raising members, a 6.1.3 image that has the class (none does) or a decision to drop the members.
@@ -143,6 +143,28 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: `emulator/tests/unit/io_proc_timeline_test.cpp`: delayed callbacks record underruns, every grid point is either played or an underrun, and the negative control shows the old schedule drifting off the grid. The log field is not yet read back by a run.
 - Removed by: delivering the due buffers to catch up, or a guest-visible count.
 
+### C23. loops is stored and has no effect
+
+- Stands in for: `SCNSceneRenderer.loops`, which restarts playback when the scene timeline reaches its end. The clock has no timeline end (C18): `sceneTime` is a wall clock with an offset, and nothing in the backport marks where the animations' content ends.
+- Gaps: the value reads back as it was set and defaults to YES, as Apple's does, but playback never reaches an end, so neither YES nor NO changes anything.
+- Measurement: the runtime case `scenekit_members` reads `loops` back after setting it to NO and to YES. The effect is not measured, because there is no effect.
+- Removed by: a scene timeline whose end is the last animation's end, so that NO stops `playing` there and YES wraps `sceneTime` to the start; a test that runs an animation past its end with `loops` set each way.
+
+### C24. debugOptions is stored and draws no debug geometry
+
+- Stands in for: the `SCNDebugOptions` overlays: wireframe, bounding boxes, physics shapes, light extents, skeletons and cameras. The value is kept and read back; no debug geometry is drawn, and `SCNDebugOptionRenderAsWireframe` does not change the image.
+- Gaps: every option is a no-op. `RenderAsWireframe` and `ShowWireframe` could be drawn on the GLES renderer with `GL_LINES` over the triangle indices of each element, which the renderer already holds.
+- Measurement: the runtime case `scenekit_members` reads back `SCNDebugOptionShowWireframe` after it is set. No image is compared.
+- Removed by: drawing `RenderAsWireframe` and `ShowWireframe` on the GLES renderer, with a snapshot test that the wireframe image differs from the solid one; or documenting each remaining option as unsupported, with the member answering NO for it.
+
+### C25. Vision requests beyond iOS 6 image-analysis engines
+
+- Stands in for: `VNDetectRectanglesRequest`, `VNRecognizeTextRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
+- Why: iOS 6 Core Image has face detection, but no rectangle, OCR, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented.
+- Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
+- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison against Apple's Vision has been run.
+- Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
+>
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install

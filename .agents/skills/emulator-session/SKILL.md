@@ -16,11 +16,11 @@ From the top of revenant:
 - Options to `./xmakew f`: `--emulator_sdl=y` for a window (`--display sdl`), `--emulator_vulkan` (on by default), `--emulator_lto`.
 - `EMU profile --list` lists the device profiles, `EMU profile --device iPhone4,1` shows one.
 
-A root filesystem comes from `./xmakew firmware --device=iPhone4,1 rootfs 6.1.3`, unpacked under `$HOME/.revenant/firmware/rootfs/<device>/<version>_<build>`. Boot a clone, never the shared tree, since the emulator writes `.emulator-device-state` beside the rootfs it boots:
+A root filesystem comes from `./xmakew firmware --device=iPhone4,1 rootfs 6.1.3`, unpacked under `.cache/firmware/rootfs/<device>/<version>_<build>`. Boot a clone, never the shared tree, since the emulator writes `.emulator-device-state` beside the rootfs it boots:
 
-    run=$HOME/.revenant/cache/<task>/boot
+    run=.cache/scratch/<task>/boot
     mkdir -p "$run"
-    cp -c -R "$HOME/.revenant/firmware/rootfs/iPhone4,1/<version>_<build>" "$run/rootfs"
+    cp -c -R ".cache/firmware/rootfs/iPhone4,1/<version>_<build>" "$run/rootfs"
     perl -e 'alarm 300; exec @ARGV' EMU boot --rootfs "$run/rootfs" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 > "$run/boot.log" 2>&1
 
 - `--time-scale 10` is required. At 1 the guest's watchdogs expire, and iOS 6.1.3 loses SpringBoard every 100 s to a mediaserverd timeout.
@@ -65,7 +65,7 @@ Launching an app:
 - Steps are in points, portrait, status bar included: 320x480 on an iPhone, 768x1024 on an iPad. A view at y in its controller is at y + 20 on the screen.
 - `until-exit` holds the app until it ends, then takes one more frame. That frame is the screen after SpringBoard takes it back, so the app's own frame is the one before it. Use it for an app that produces its result over time, such as the SwiftUI snapshot bundle. The hold ends at `held: exited`, or at `held: deadline` when the `-s` budget ran out while the app still ran. For `deadline` raise `-s` and `-t` together (`-t` must cover `-s` times the scale). Never read `deadline` as success.
 - A pass says the app ran and drew, not that it drew the right thing. Look at the snapshot.
-- The run folder is under `~/.revenant/emulator/images.noindex/`, and the log line names it. Copy what you need into `$HOME/.revenant/cache/<task>/`. Files the app writes under `/var/revenant` come out in the run folder.
+- The run folder is under `.cache/emulator/images.noindex/`, and the log line names it. Copy what you need into `.cache/scratch/<task>/`. Files the app writes under `/var/revenant` come out in the run folder.
 
 `xmake emulate clean` removes this port's images and also the emulator's shared `tmp.noindex` and `cache.noindex`, so every port's next run starts cold. `--all` removes every port's images and golden images. Each run also removes images unused for 24 hours (`--prune-hours`).
 

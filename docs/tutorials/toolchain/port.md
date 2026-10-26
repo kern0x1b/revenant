@@ -64,7 +64,7 @@ An application that runs on more than one architecture names them:
 
 `xmake deb` builds each slice for the release its architecture first runs, merges the bundles itself (every file
 but a `.plist` has to be the same in every slice), and checks the merged binaries. Pin `MinimumOSVersion` in the
-plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
+plist. A slice built without its shared cache under `.cache/dyld` is said to be unchecked.
 
 ## Frameworks and runtimes
 

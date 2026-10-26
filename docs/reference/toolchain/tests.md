@@ -23,7 +23,7 @@ prints each failure and fails. Run one target with `./xmakew test -P . 'toolchai
 
 `toolchain_device` and `recompiler_device` are outside the default run by declaration: without `--tests=device` they
 are not in the project, so `./xmakew test -P .` does not see them. `swift_test` reads the system libraries of a firmware
-release held under `~/.revenant/dyld`, and when they are not held it fails and names
+release held under `.cache/dyld`, and when they are not held it fails and names
 `./xmakew firmware -P . --arch=<arch> fetch <release>`. `emulator_test` checks its own xmake addon install: the addon lands in
 the store the run names, and the machine's own addons are left alone. The `emulate` tests under `toolchain/tests/emulate`
 set `REVENANT_EMULATOR_ROOT` to a folder of their run, so they write no golden image to the machine's emulator folder.
@@ -45,7 +45,7 @@ its probe line), `baseline` (a UIKit string drawn with and without `NSBaselineOf
 so the run says whether the system honours the attribute), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
 that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
 limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
-are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
+are `.cache/scratch/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
 
 The emulate cases are not in CI's light budget: each one boots a firmware image on the emulator for minutes, and a cold
 emulator store builds the emulator first, so they run by hand with the command above. What needs no emulator run is in

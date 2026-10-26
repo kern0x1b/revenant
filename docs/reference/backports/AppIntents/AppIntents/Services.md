@@ -8,7 +8,7 @@ and what a caller reads back. Nothing here pretends to have drawn, indexed, phon
 
 These are services, not frameworks: a daemon the release does not run, reached over XPC. The port
 cannot run them, and a caller that wants one installs the handler the module names. Measured:
-`~/.revenant/dyld/6.1.3/` holds no `Siri`, `Shortcuts`, `knowledge` or `chronod` image, and the release's
+`.cache/dyld/6.1.3/` holds no `Siri`, `Shortcuts`, `knowledge` or `chronod` image, and the release's
 own `SpringBoard` has no `SBIntents` class - the surfaces a shortcut would be reached through are all
 of iOS 9 and later.
 

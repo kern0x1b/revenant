@@ -8,23 +8,33 @@
 #include "foundation/process_loader.hpp"
 
 #include "foundation/executable_catalog.hpp"
+#include "foundation/jit_artifact.hpp"
 #include "foundation/rootfs_path_resolver.hpp"
 
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 #include <vector>
 
 namespace emulator {
 namespace {
+
+    bool same_file(const std::filesystem::path& left,
+        const std::filesystem::path& right)
+    {
+        std::error_code error;
+        return std::filesystem::equivalent(left, right, error) && !error;
+    }
 
     constexpr std::uint32_t stack_size = 0x00100000U;
     constexpr std::size_t maximum_interpreter_line = 256;
@@ -182,6 +192,14 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
         parse_catalogued(host_path(*executable.dynamic_linker()));
     if (!dynamic_linker.entry_point()) {
         throw std::runtime_error { "dynamic linker lacks LC_UNIXTHREAD" };
+    }
+    if (machine_image_code_slab() != nullptr &&
+        !same_file(host_path(*executable.dynamic_linker()),
+            rootfs_ / "usr" / "lib" / "dyld")) {
+        throw std::runtime_error {
+            "the shared image slab runs only the system dynamic linker; "
+            "start with --no-shared-image-slab to run this executable"
+        };
     }
     FileMappingBatchContext executable_mapping_context;
     executable.map_into(memory_, &executable_mapping_context);

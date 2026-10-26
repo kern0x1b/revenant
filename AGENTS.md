@@ -47,9 +47,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   other's folder. The layout is checked by `./xmakew test -P . repository/layout`.
 - A change that spans components is one series in revenant, one commit per component it touches.
 - Nothing but the project lives in the revenant folder: no scratch, logs, notes or run output. Apart from the root
-  `build/` and `.xmake/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
+  `build/`, `.xmake/` and `.cache/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
   only, `.claude/worktrees/<task>/`; git ignores that folder (`.gitignore`). Scratch goes to
-  `$HOME/.revenant/cache/<task>/` and is deleted when the task ends.
+  `.cache/scratch/<task>/` of the main checkout, which every worktree shares, and is deleted when the task ends.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
@@ -68,10 +68,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, and are not copied into `.agents/`. The `xmake-*` skills of `agent-skills/` are derived from those upstream skills and rewritten for the toolchain: `agent-skills/THIRD-PARTY.md` maps each one to its upstream skills and to the commit they were taken from.
   `agent-skills/` is the plugin `agent-skills` of the revenant marketplace (`.claude-plugin/marketplace.json`).
 - xmake at the top is always `./xmakew`, the pinned and patched xmake of `packages/x/xmake` (built into
-  `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
+  `.cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
-  Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
-  `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
+  Its package store is `.cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
+  `.cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back. The whole of `.cache` is capped at
+  15 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
+  shows what is there. It is in `docs/guides/machine.md`.
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
@@ -85,7 +87,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `./xmakew f -P . -c` first.
 - Lua files under `tools/` and `toolchain/modules/` are snake_case, as xmake's own module files are (`find_tool.lua`):
   `frameworks/SwiftUI/tools/api_surface.lua`, `toolchain/tools/cache_index/`. The names of the data a tool writes, such as
-  `~/.revenant/cache-index`, are not file names, and keep their spelling.
+  `.cache/cache-index`, are not file names, and keep their spelling.
 - Speed and memory on the A5 (iPhone 4S, iPad 2) are part of correctness ([0014](docs/explanation/decisions/0014-performance-is-a-requirement.md)):
   what we write or generate is efficient by design and aims to beat Apple's own code where Apple never tuned it for
   the A5; a change on a hot path carries a before and after measurement; compiler optimisations the A5 needs are

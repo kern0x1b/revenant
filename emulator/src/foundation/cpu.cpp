@@ -3026,6 +3026,8 @@ private:
             config.image_native_code_slab = jit_image_slab_;
             config.image_code_begin = image_region.begin;
             config.image_code_end = image_region.end;
+            config.image_code_second_begin = image_region.second_begin;
+            config.image_code_second_end = image_region.second_end;
             config.image_code_cache_size = image_region.cache_bytes;
         }
         config.callbacks_link = runtime_link_cell_address_;

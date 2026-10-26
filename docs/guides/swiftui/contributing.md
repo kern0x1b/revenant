@@ -29,7 +29,7 @@ named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with t
   (`docs/reference/swiftui/ledger.md`) with `tools/coverage.lua` as its checker, and the rest under `docs/*/swiftui/`.
 - `tools/` — every script of this folder, in Lua, run with `./xmakew l -P . frameworks/SwiftUI/tools/<script>` from the top of
   revenant; `tools/lib/tree.lua` names the folders they read and the run folder they write
-  (`$HOME/.revenant/cache/<task>/swiftui/`, from `toolchain/modules/workspace.lua`).
+  (`.cache/scratch/<task>/swiftui/`, from `toolchain/modules/workspace.lua`).
 - `xmake.lua` — the targets of this member in the revenant project (the top `xmake.lua` of revenant includes it):
   `SwiftUI` on Combine's `Combine`; the demo `SwiftUIDemo` and `SwiftUISnapshots`, the same demo sources whose
   Info.plist carries `SwiftUISnapshots` so it renders the scenarios; `SwiftUITests` and `SwiftUIProbe`, daemons; each a

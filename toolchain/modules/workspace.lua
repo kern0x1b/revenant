@@ -1,10 +1,10 @@
 import("core.base.json")
+import("cache")
 
 local SDK_VERSION = "26.2"
 local SDK_VARIABLE = "REVENANT_GEN_SDK"
 local CORPUS_VARIABLE = "REVENANT_CORPUS_ROOT"
 local TASK_VARIABLE = "REVENANT_TASK"
-local HOME_VARIABLE = "REVENANT_HOME"
 
 local resolved = {}
 
@@ -13,15 +13,7 @@ function root()
 end
 
 function home()
-    local named = os.getenv(HOME_VARIABLE)
-    if named and named ~= "" then
-        return named
-    end
-    local value = os.getenv("HOME")
-    if not value or value == "" then
-        raise("workspace: HOME is not set, so there is no $HOME/.revenant to keep revenant's data in")
-    end
-    return path.join(value, ".revenant")
+    return cache.root()
 end
 
 function task()
@@ -42,8 +34,8 @@ function task()
     end
 end
 
-function cache()
-    return path.join(home(), "cache")
+function scratch()
+    return path.join(home(), "scratch")
 end
 
 local function ensure(folder)
@@ -55,7 +47,7 @@ local function ensure(folder)
 end
 
 function run(...)
-    local folder = path.join(cache(), task(), ...)
+    local folder = path.join(scratch(), task(), ...)
     ensure(folder)
     if not os.isdir(folder) then
         raise("workspace: cannot create %s", folder)
@@ -93,7 +85,7 @@ local function sdk_in(installdir, version)
 end
 
 local function installdir_of(scratch, requirement)
-    local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
+    local output = os.iorunv(os.programfile(), {"require", "-P", scratch, "--info", "--format=json"}, {curdir = scratch})
     local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
     local entries = start and json.decode(output:sub(start)) or {}
     for _, entry in ipairs(entries) do
@@ -115,7 +107,7 @@ function package_of(requirement, install)
         function ()
             local folder = installdir_of(scratch, requirement)
             if install and not (folder and os.isfile(path.join(folder, "manifest.txt"))) then
-                os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
+                os.execv(os.programfile(), {"require", "-P", scratch, "-y"}, {curdir = scratch})
                 folder = installdir_of(scratch, requirement)
             end
             return folder

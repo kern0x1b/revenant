@@ -27,20 +27,20 @@ function failures(opt)
     local workspace = import("workspace", {rootdir = opt.modules, anonymous = true})
     local found = {}
     local revenant = path.directory(path.directory(path.absolute(opt.modules)))
-    local cache = workspace.cache()
+    local cache = workspace.scratch()
 
     if workspace.root() ~= revenant then
         table.insert(found, "root() is the checkout the module sits in: " .. workspace.root() .. " against " .. revenant)
     end
-    local home = os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant")
-    if workspace.home() ~= home or cache ~= path.join(home, "cache") then
-        table.insert(found, "home() is REVENANT_HOME or $HOME/.revenant, and cache() is under it: " .. workspace.home())
+    local helper = import("cache", {rootdir = opt.modules, anonymous = true})
+    if workspace.home() ~= helper.root() or cache ~= path.join(workspace.home(), "scratch") then
+        table.insert(found, "home() is the cache root, and scratch() is the scratch folder under it: " .. workspace.home())
     end
 
     local task = "revenant-workspace-test-" .. tostring(os.time()) .. "-" .. tostring(math.random(1000000))
     local folder = with_env("REVENANT_TASK", task, function () return workspace.run("one", "two") end)
     if folder ~= path.join(cache, task, "one", "two") or not os.isdir(folder) then
-        table.insert(found, "run() makes $HOME/.revenant/cache/<REVENANT_TASK>/<path>: " .. tostring(folder))
+        table.insert(found, "run() makes <cache>/scratch/<REVENANT_TASK>/<path>: " .. tostring(folder))
     end
     local first = with_env("REVENANT_TASK", task, function () return workspace.fresh("scratch") end)
     local second = with_env("REVENANT_TASK", task, function () return workspace.fresh("scratch") end)
