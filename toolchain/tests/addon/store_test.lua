@@ -19,7 +19,7 @@ package("fakeinstall")
 
 local READER = [[
 local function read(file)
-    local text = nil
+    local text, failure = nil, nil
     try
     {
         function ()
@@ -27,23 +27,28 @@ local function read(file)
         end,
         catch
         {
-            function ()
-                text = nil
+            function (errors)
+                failure = tostring(errors)
             end
         }
     }
-    return text
+    return text, failure
 end
 
 local function complete(dir)
     if not os.isdir(dir) then
         return false, "missing " .. dir .. " link " .. tostring(os.islink(dir))
     end
+    local target = os.islink(dir) and os.readlink(dir)
+    if not target then
+        return false, dir .. " is not a link to a generation"
+    end
+    local generation = path.join(path.directory(dir), target)
     for index = 1, 40 do
-        local file = path.join(dir, "payload", string.format("part-%02d", index))
-        local text = read(file)
+        local file = path.join(generation, "payload", string.format("part-%02d", index))
+        local text, failure = read(file)
         if not text or not (text:match("^old x+\n$") or text:match("^new x+\n$")) then
-            return false, file .. " text " .. (text and string.format("%q", text:sub(1, 40)) or "nil") .. " isfile " .. tostring(os.isfile(file)) .. " link " .. tostring(os.islink(dir) and os.readlink(dir))
+            return false, file .. " text " .. (text and string.format("%q", text:sub(1, 40)) or "nil") .. " error " .. tostring(failure) .. " isfile " .. tostring(os.isfile(file)) .. " link " .. tostring(os.islink(dir) and os.readlink(dir)) .. " generation " .. generation .. " generation exists " .. tostring(os.isdir(generation))
         end
     end
     return true

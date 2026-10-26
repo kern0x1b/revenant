@@ -14,6 +14,34 @@ local function output(program, argv)
     return text:trim()
 end
 
+local DETACH_ATTEMPTS = 5
+
+local function detach_volume(volume)
+    local errors = nil
+    for attempt = 1, DETACH_ATTEMPTS do
+        local detached = false
+        try {
+            function ()
+                os.vrunv("hdiutil", {"detach", "-quiet", volume})
+                detached = true
+            end,
+            catch {
+                function (raised)
+                    errors = tostring(raised)
+                end
+            }
+        }
+        if detached then
+            return true
+        end
+        if attempt < DETACH_ATTEMPTS then
+            print("the image at %s is busy, detach attempt %d of %d failed, retrying", volume, attempt, DETACH_ATTEMPTS)
+            os.sleep(attempt * 500)
+        end
+    end
+    return false, errors
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
@@ -102,6 +130,7 @@ function failures(opt)
     os.vrunv("hdiutil", {"create", "-quiet", "-size", "40m", "-fs", "HFS+", "-volname", "revenant", "-type", "UDIF", hfs})
     os.mkdir(volume)
     os.vrunv("hdiutil", {"attach", "-quiet", "-nobrowse", "-mountpoint", volume, hfs})
+    io.writefile(path.join(volume, ".metadata_never_index"), "")
     local failure = nil
     try {
         function ()
@@ -127,18 +156,7 @@ function failures(opt)
         },
         finally {
             function ()
-                local detached, detach = false, nil
-                try {
-                    function ()
-                        os.vrunv("hdiutil", {"detach", "-quiet", volume})
-                        detached = true
-                    end,
-                    catch {
-                        function (raised)
-                            detach = tostring(raised)
-                        end
-                    }
-                }
+                local detached, detach = detach_volume(volume)
                 if not detached then
                     local holders = output("lsof", {"-n", "-P", "+D", volume})
                     local services = {}
