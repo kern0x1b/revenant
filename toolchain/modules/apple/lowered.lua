@@ -279,6 +279,8 @@ local function scan_source(file, found)
             container = nil
         elseif container and not pending and line:match("^[%-%+]%s*%(") then
             pending = line
+        elseif container and not pending and line:match("^%s*@synthesize%s+[%a_]") then
+            found.classes[container]["-" .. line:match("^%s*@synthesize%s+([%a_][%w_]*)")] = true
         elseif pending then
             pending = pending .. " " .. line
         elseif not container and line:match("^[%a_]") and not line:match("^static") and not line:match("^typedef") and not line:match(";%s*$") and not line:match("^[%a_][%w_]*%s*%(") then
