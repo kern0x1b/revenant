@@ -13,7 +13,7 @@ local light = {"assets_extract_test", "binding_test", "cache_test", "checkout_te
                "data_test", "keys_test", "locale_order_test", "lock_test", "nested_project_test", "rust_test", "sdk_rule_test", "sdk_store_test", "sdkstubs_test", "retention_test", "store_race_test", "store_test", "swift_rule_test", "workspace_test"}
 
 local packaged = {"architectures_test", "atomics_test", "backports_package_test", "blocks_test", "carried_test", "checks_test", "device_test",
-                  "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
+                  "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "lowered_link_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
                   "optimisation_test", "order_file_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "weak_test"}
 
 local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "port_test", "swift_test", "tweak_test"}

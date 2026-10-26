@@ -123,5 +123,55 @@ function failures(opt)
     for _, g in ipairs(dropped_regrouped) do regrouped_by_list[g.list] = g end
     expect("a symbol regrouped under arm64 only is not counted as dropped",
            table.concat((regrouped_by_list.symbols or {tokens = {}}).tokens, " "), "__Unwind_SjLj_Resume")
+
+    local ios6 = stubs.inventory("# held by iOS 6\n/usr/lib/libP.dylib\n")
+    expect("a comment of the inventory is no install name", ios6["# held by iOS 6"] and "listed" or "not", "not")
+    expect("an install name of the inventory is listed", ios6["/usr/lib/libP.dylib"] and "listed" or "not", "listed")
+
+    local folder = import("fixtures").scratch()
+    local umbrella = table.concat({
+        "--- !tapi-tbd-v3\n", "archs:                 [ armv7, armv7s, arm64, arm64e ]\n", "platform:              ios\n",
+        "install-name:          /usr/lib/libU.dylib\n", "exports:\n",
+        "  - archs:                [ armv7, armv7s, arm64, arm64e ]\n",
+        "    re-exports:           [ /usr/lib/libM.dylib, /usr/lib/libP.dylib, /usr/lib/libN.dylib ]\n",
+        "    symbols:              [ _own ]\n",
+        "  - archs:                [ armv7 ]\n", "    re-exports:           [ /usr/lib/libN.dylib ]\n", "...\n"})
+    local library = table.concat({
+        "--- !tapi-tbd-v3\n", "archs:                 [ armv7, armv7s, arm64, arm64e ]\n", "platform:              ios\n",
+        "install-name:          /usr/lib/libM.dylib\n", "exports:\n",
+        "  - archs:                [ armv7, armv7s, arm64, arm64e ]\n",
+        "    symbols:              [ _m_func, _m_shared ]\n",
+        "    weak-def-symbols:     [ _m_weak ]\n",
+        "  - archs:                [ arm64 ]\n", "    objc-classes:         [ MClass ]\n", "...\n"})
+    local legacy = table.concat({
+        "--- !tapi-tbd\n", "tbd-version:     4\n", "targets:         [ armv7-ios, arm64-ios ]\n",
+        "install-name:    '/usr/lib/libV.dylib'\n", "reexported-libraries:\n",
+        "  - targets:         [ armv7-ios ]\n", "    libraries:       [ '/usr/lib/libM.dylib' ]\n",
+        "exports:\n", "  - targets:         [ armv7-ios, arm64-ios ]\n", "    symbols:         [ _v ]\n", "...\n"})
+    io.writefile(path.join(folder, "U.tbd"), umbrella)
+    io.writefile(path.join(folder, "M.tbd"), library)
+    io.writefile(path.join(folder, "V.tbd"), legacy)
+    local report = stubs.fold_reexports({path.join(folder, "U.tbd"), path.join(folder, "M.tbd"), path.join(folder, "V.tbd")}, ios6)
+    local folded = stubs.read(io.readfile(path.join(folder, "U.tbd")))
+    local exported = stubs.exported(folded)
+    expect("a folded symbol exports from the umbrella for armv7", exported._m_func and exported._m_func.armv7 or false, true)
+    expect("a folded weak definition exports from the umbrella", exported._m_weak and exported._m_weak.armv7 or false, true)
+    expect("a folded class exports from the umbrella for arm64", exported.MClass and exported.MClass.arm64 or false, true)
+    expect("a folded class is not exported for armv7, where the library had none", exported.MClass and exported.MClass.armv7 or false, false)
+    expect("the umbrella's own export is kept", exported._own and exported._own.armv7 or false, true)
+    local kept = {}
+    for _, entry in ipairs(folded.reexports) do
+        table.insert(kept, table.concat(entry.libraries, ","))
+    end
+    expect("the re-exports left are those of libraries iOS 6 has, and of one with no stub", table.concat(kept, ";"), "/usr/lib/libP.dylib,/usr/lib/libN.dylib;/usr/lib/libN.dylib")
+    expect("a library with no stub in the SDK is kept and reported", report.lost[1][1] .. " " .. report.lost[1][2] .. " " .. report.lost[1][3],
+           "/usr/lib/libU.dylib /usr/lib/libN.dylib the SDK has no stub for it to fold")
+    expect("the folded umbrellas", #report.folded, 2)
+    local v4 = stubs.read(io.readfile(path.join(folder, "V.tbd")))
+    local v4_exported = stubs.exported(v4)
+    expect("a v4 umbrella takes the folded symbol for armv7", v4_exported._m_func and v4_exported._m_func.armv7 or false, true)
+    expect("a v4 umbrella loses its re-export section once it is empty", #v4.reexports, 0)
+    expect("a v4 umbrella keeps its own export for both", v4_exported._v and v4_exported._v.arm64 or false, true)
+    os.tryrm(folder)
     return found
 end
