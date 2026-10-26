@@ -2,7 +2,7 @@
 
 The emulator answers `getdirentriesattr` in `emulator/src/kernel/bsd/filesystem.cpp` (`case 222`), packing each entry with
 `hfs::MetadataProvider::pack_attributes` and sizing batches with `MetadataProvider::fixed_block_size`. The source it follows is
-XNU `xnu-2050.18.24`, fetched into `~/.revenant/cache/photos-alassets/xnu` as `bsd/vfs/vfs_syscalls.c`, `bsd/hfs/hfs_attrlist.c`,
+XNU `xnu-2050.18.24` (`apple-oss-distributions/xnu`): `bsd/vfs/vfs_syscalls.c`, `bsd/hfs/hfs_attrlist.c`,
 `bsd/hfs/hfs.h`, `bsd/hfs/hfs_catalog.h` and `bsd/sys/attr.h`.
 
 ## Matched
