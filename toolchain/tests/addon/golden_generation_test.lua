@@ -36,10 +36,11 @@ function main(mode, modules, root, firmware, folder, count)
         local problem = nil
         if mode == "install" then
             local destination = path.join(folder, tostring(index), "rootfs")
-            local ok, errors = try {function () emulator.clone_golden(opt, destination) return true end,
-                                    catch {function (caught) return false, caught end}}
+            local failure
+            local ok = try {function () emulator.clone_golden(opt, destination) return true end,
+                            catch {function (caught) failure = caught end}}
             if not ok then
-                problem = "the install raised: " .. tostring(errors)
+                problem = "the install raised: " .. tostring(failure)
             else
                 local whole_copy, file = whole(destination)
                 if not whole_copy then
@@ -221,6 +222,13 @@ function failures(opt)
         if not os.islink(published) or not current or not whole(path.join(current, "rootfs")) then
             table.insert(found, "the current generation is not the published one after the replaced one was swept")
         end
+    end
+
+    local stalled = table.join(golden, {identifier = "stalled", boot = function () return {reason = "stalled", seconds = 1, state = {}, log = "none"} end})
+    local raised = nil
+    try {function () emulator.golden(stalled) end, catch {function (caught) raised = caught end}}
+    if not tostring(raised):find("did not get past", 1, true) then
+        table.insert(found, "a golden image whose boot stalled raised " .. tostring(raised) .. " instead of the text of its failure")
     end
 
     local racer = path.join(folder, "racer.lua")

@@ -56,7 +56,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.docs == 'true'
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -229,7 +229,12 @@ jobs:
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
@@ -593,7 +598,12 @@ jobs:
 
       - name: Key the package store under the configuration that installed it
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: Build the Swift targets
         timeout-minutes: 20
