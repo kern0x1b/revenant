@@ -31,6 +31,13 @@ target("emulator_runtime_session_snapshot_test")
     add_deps("emulator_runtime")
     add_tests("runtime.session_snapshot")
 
+target("emulator_runtime_session_state_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/session_state_test.cpp")
+    add_deps("emulator_runtime")
+    add_tests("runtime.session_state")
+
 target("emulator_runtime_bounded_slice_rule_test")
     set_kind("binary")
     set_default(false)

@@ -12,13 +12,18 @@
 
 namespace emulator {
 
+void require_single_process(std::size_t runtime_count)
+{
+    if (runtime_count != 1)
+        throw snapshot::RefusedError { "runtime.children" };
+}
+
 void save_session_state(snapshot::Writer& out,
     runtime_detail::Runtime& initial, std::size_t runtime_count,
     const XnuScheduler& scheduler, const LoopCarriedState& loop_state,
     std::uint32_t next_pid)
 {
-    if (runtime_count != 1)
-        throw snapshot::RefusedError { "runtime.children" };
+    require_single_process(runtime_count);
     if (initial.pending_exec)
         throw snapshot::RefusedError { "runtime.pending_exec" };
     if (!initial.precompile_tasks.empty())

@@ -20,6 +20,8 @@ namespace runtime_detail {
 struct Runtime;
 }
 
+void require_single_process(std::size_t runtime_count);
+
 void save_session_state(snapshot::Writer& out,
     runtime_detail::Runtime& initial, std::size_t runtime_count,
     const XnuScheduler& scheduler, const LoopCarriedState& loop_state,
