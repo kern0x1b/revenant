@@ -58,7 +58,8 @@ within each group, and stopping as soon as the write fits:
 4. the build outputs of each worktree;
 5. installed packages, last, and only when the groups before them cannot make room.
 
-An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
+An evicted entry takes its lock files with it, and each folder of the package store that it leaves empty, so that nothing
+is left for xmake to take for an install. An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
 If the write still does not fit once nothing more can go, it fails before anything is removed. The message names the
 write, the cap, and the five biggest entries.
 

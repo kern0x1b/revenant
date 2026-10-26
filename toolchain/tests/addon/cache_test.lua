@@ -304,6 +304,27 @@ function failures(arguments)
         table.insert(found, "an installed package is evicted only after the source, scratch and build entries: " .. classes(every))
     end
 
+    local left = path.join(folder, "left")
+    file_of(path.join(left, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
+    local leaving = package_of(left, "ggg")
+    folder_of(leaving .. ".g1", MEGABYTE, OLDEST)
+    file_of(leaving .. ".g1.lock", 0)
+    folder_of(leaving .. ".g2", MEGABYTE, OLD)
+    file_of(leaving .. ".g2.lock", 0)
+    os.execv("ln", {"-s", "ggg.g2", leaving})
+    file_of(leaving .. ".lock", 0)
+    local gone = cache.reserve(7.5 * MEGABYTE, "a write that evicts a package", {root = left, limit = CAP, builds = {}})
+    local remnants = {}
+    for _, item in ipairs({leaving, leaving .. ".g1", leaving .. ".g2", leaving .. ".lock", leaving .. ".g1.lock", leaving .. ".g2.lock",
+                           path.join(left, "xmake-global", ".xmake", "packages", "t", "ggg")}) do
+        if exists(item) then
+            table.insert(remnants, path.relative(item, left))
+        end
+    end
+    if classes(gone) ~= "generation,package" or #remnants > 0 or not os.isfile(path.join(left, "dyld", "6.0", "dyld_shared_cache_armv7")) then
+        table.insert(found, "an evicted package leaves no published path, generation, lock or empty folder: " .. classes(gone) .. " " .. table.concat(remnants, ","))
+    end
+
     os.tryrm(folder)
     return found
 end

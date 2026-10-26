@@ -82,6 +82,30 @@ local function kept_release(release)
     return table.contains(RELEASES, release)
 end
 
+local function packages_root(folder)
+    local dir = path.directory(folder)
+    while #dir > 1 do
+        if path.filename(dir) == "packages" then
+            return dir
+        end
+        dir = path.directory(dir)
+    end
+end
+
+local function prune_empty(folder)
+    local root = packages_root(folder)
+    if not root then
+        return
+    end
+    local dir = path.directory(folder)
+    while #dir > #root do
+        if os.execv("rmdir", {dir}, {try = true, stderr = os.nuldev()}) ~= 0 then
+            return
+        end
+        dir = path.directory(dir)
+    end
+end
+
 local function remove(members)
     for _, member in ipairs(members) do
         if os.islink(member) then
@@ -89,11 +113,23 @@ local function remove(members)
         else
             generations.discard(member)
         end
+        prune_empty(member)
     end
 end
 
+local function with_locks(members)
+    local found = {}
+    for _, member in ipairs(members) do
+        table.insert(found, member)
+        if os.isfile(member .. ".lock") then
+            table.insert(found, member .. ".lock")
+        end
+    end
+    return found
+end
+
 local function entry(base, folder, class, members)
-    return {folder = folder, class = class, name = path.relative(folder, base), members = members or {folder}}
+    return {folder = folder, class = class, name = path.relative(folder, base), members = with_locks(members or {folder})}
 end
 
 local function children(folder)
