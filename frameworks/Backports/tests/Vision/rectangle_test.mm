@@ -33,7 +33,7 @@ static void check_at(bool value, int line)
 {
     if (!value) {
         std::fprintf(stderr, "rectangle test failure at line %d\n", line);
-        std::abort();
+        std::exit(1);
     }
 }
 
