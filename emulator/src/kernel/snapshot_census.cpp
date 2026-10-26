@@ -356,11 +356,7 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "hid.state_", hid.state_);
 
     const auto& notify = kernel.darwin_notify_state_hle_;
-    note(out, "notify.providers_", notify.providers_);
-    note(out, "notify.token_names_", notify.token_names_);
-    note(out, "notify.virtual_tokens_", notify.virtual_tokens_);
-    note(out, "notify.next_virtual_token_", notify.next_virtual_token_);
-    note(out, "notify.owned_registrations_", notify.owned_registrations_);
+    snapshot::note_populated_members(out, notify, DarwinNotifyStateHle::snapshot_members());
     note(out, "notify.bus_", notify.bus_);
 
     const auto& coreaudio = kernel.core_audio_hle_;
@@ -488,9 +484,6 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     }
     if (wifi.state_)
         snapshot::note_populated_members(out, *wifi.state_, WifiState::snapshot_members());
-    if (notify.bus_) {
-        note(out, "bus.registrations", notify.bus_->registrations);
-    }
     return out;
 }
 

@@ -223,7 +223,9 @@ and `load` run through that list and write the same 16 bytes as before; the cens
 from the same list. The Wi-Fi state is the second: `WifiState::snapshot_members()` lists its seven members in save
 order, and its `load` checks the access points and the association inside the restore of each member. A refused
 stream can leave the members restored before the refusal set, as the clock and the other owners already can, because
-the kernel restores its owners in sequence.
+the kernel restores its owners in sequence. The Darwin notify state is the third: its list includes
+`bus.registrations`, which the ledger refuses when populated but which the save still writes, so a refused-but-written
+member keeps its bytes in the list.
 
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader

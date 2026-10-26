@@ -19,7 +19,7 @@ struct MemberDescriptor {
     Coverage coverage;
 };
 
-inline constexpr std::array<MemberDescriptor, 446> members {{
+inline constexpr std::array<MemberDescriptor, 447> members {{
     {"clock.now", Coverage::saved},
     {"clock.wall_time", Coverage::saved},
     {"display.pixels_", Coverage::saved},
@@ -50,6 +50,7 @@ inline constexpr std::array<MemberDescriptor, 446> members {{
     {"mem.next_mapping_lease_token_", Coverage::saved},
     {"mem.translation_profile_map_", Coverage::saved},
     {"notify.providers_", Coverage::saved},
+    {"notify.abi_", Coverage::saved},
     {"notify.next_virtual_token_", Coverage::saved},
     {"notify.bus_", Coverage::saved},
     {"surface.display_", Coverage::saved},

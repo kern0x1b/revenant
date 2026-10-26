@@ -4,6 +4,7 @@ local PROBE = path.join(root, "emulator", "src", "kernel", "snapshot_census.cpp"
 local DESCRIBED = {
     path.join(root, "emulator", "src", "foundation", "virtual_clock.cpp"),
     path.join(root, "emulator", "src", "network", "wifi_state.cpp"),
+    path.join(root, "emulator", "src", "foundation", "darwin_notify_state_hle.cpp"),
 }
 local LEDGER = path.join(root, "emulator", "src", "kernel", "include", "kernel", "snapshot_ledger.hpp")
 local BOOTED = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_booted_members.hpp")
@@ -18,6 +19,14 @@ list.]]
 local function names_in(text)
     local found = {}
     for name in text:gmatch('"([%a][%w_]*%.[%w_]+)"') do
+        found[#found + 1] = name
+    end
+    return found
+end
+
+local function descriptor_names(text)
+    local found = {}
+    for name in text:gmatch('{"([%a][%w_]*%.[%w_]+)",') do
         found[#found + 1] = name
     end
     return found
@@ -81,11 +90,13 @@ function main(...)
     local open = coverage_names(ledger, "open")
     local wired = coverage_names(ledger, "wired")
     local refused = coverage_names(ledger, "refused")
-    local sources = io.readfile(PROBE)
+    local probe_names = names_in(io.readfile(PROBE))
     for _, file in ipairs(DESCRIBED) do
-        sources = sources .. io.readfile(file)
+        for _, name in ipairs(descriptor_names(io.readfile(file))) do
+            probe_names[#probe_names + 1] = name
+        end
     end
-    local probe = set_of(names_in(sources))
+    local probe = set_of(probe_names)
     local booted = array_names(io.readfile(BOOTED), "booted_populated_members")
 
     local accounted = {}
