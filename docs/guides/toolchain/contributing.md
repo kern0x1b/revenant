@@ -53,12 +53,12 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 
 - **The shared package store.** Wrong: `xmake require --force`, `xrepo install --force`, deleting anything under the
   store, or a private `XMAKE_GLOBALDIR` to pick up a changed recipe or patch. Right: build normally.
-  `./xmakew` points `XMAKE_GLOBALDIR` at `$HOME/.revenant/cache/xmake-global`. Reason: the packages that matter
+  `./xmakew` points `XMAKE_GLOBALDIR` at `.cache/xmake-global`. Reason: the packages that matter
   (`llvm`, `swift-runtime`, `libcxx`, `swift`) hash their sources, patches and definition into a
   digest (`packages/s/swift-runtime/xmake.lua`, `packages/s/swift-runtime/port/digest.lua`), so a changed
   backport or patch is already a different package with its own install path. A private store re-resolves the whole
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
-  of its own: `./xmakew build -P . ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.
+  of its own: `./xmakew build -P . ... > ".cache/scratch/<task>/build.log" 2>&1`.
 
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any
@@ -89,7 +89,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   `set_values("revenant.libraries", "<the alias add_requires gave the package>")`. Reason: `verify_placed` in
   `modules/apple/platform.lua` takes the plain, weak-linked path while `revenant.libraries` is empty, and that path
   does not recognise the backport dylib as build-provided. Related: `@addon/revenant/*` resolves to a version-pinned
-  copy under `~/.revenant/cache/xmake-global/.xmake/addons/revenant/<version>/`, not to the working tree, so an
+  copy under `.cache/xmake-global/.xmake/addons/revenant/<version>/`, not to the working tree, so an
   uncommitted edit under `modules/` reaches a build only once it is committed.
 
 - **`+load` in a backport.** Wrong: expecting `+load` to see a method that the library's categories add, or replacing
@@ -125,7 +125,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 
 - **A working copy installed as the addon.** Wrong: a scratch project with `add_addons("revenant")` whose
   `add_repositories` points at a worktree or clone, run against the shared store
-  `~/.revenant/cache/xmake-global`. Right: test a package or a module
+  `.cache/xmake-global`. Right: test a package or a module
   with a `XMAKE_GLOBALDIR` of its own. Reason: on xmake 3.1.1 every addon install
   becomes the machine's active version, and every new project then locks that copy instead of the version it declares.
 
@@ -137,7 +137,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   had exited, and a `wait(0)` on it blocked for good. Right: wait for the child with `process:wait` after its work is
   done, and check its status. Reason: the posix poller reaped every child with `waitpid(-1)` and dropped the exits that
   no wait was pending on; patch `0018` polls each registered process by its own pid, so an exit stays until its wait
-  takes it. Measured with the probes in `~/.revenant/cache/emu-lean/golden-probe/` (`wait3`, `reap2` to `reap4`): a child
+  takes it. Measured with the probes in `.cache/emu-lean/golden-probe/` (`wait3`, `reap2` to `reap4`): a child
   that exits before its wait starts returned 1 only when it was the first such child, and 0 for each later one; a child
   that exits while another child is waited on returned 0 to its own later wait. With the patch every such wait returns 1
   with the child's status, and `toolchain/tests/addon/process_wait_test.lua` checks those cases. The racers of

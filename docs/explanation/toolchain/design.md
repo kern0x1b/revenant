@@ -36,7 +36,7 @@ Each check has a name, so a port that cannot meet one says so, with a reason, ra
 
 ## Why the import check fetches firmware
 
-The check needs the release's libraries, and the SDK does not contain them. The `firmware` verb fetches only the system image of the release from Apple's servers, reads the shared cache out of it, and keeps the result under `~/.revenant/dyld/`. Those files cannot be made again from the repository, so they are fetched once and kept, and a missing one is offered for fetch rather than guessed.
+The check needs the release's libraries, and the SDK does not contain them. The `firmware` verb fetches only the system image of the release from Apple's servers, reads the shared cache out of it, and keeps the result under `.cache/dyld/`. Those files cannot be made again from the repository, so they are fetched once and kept, and a missing one is offered for fetch rather than guessed.
 
 ## Why there is an emulator
 

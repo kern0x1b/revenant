@@ -45,8 +45,8 @@ end
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local home = os.getenv("REVENANT_HOME")
-    os.setenv("REVENANT_HOME", path.join(folder, "home"))
+    local home = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     local firmware = import("apple.firmware", {rootdir = opt.modules, anonymous = true})
     local dyld = import("apple.dyld", {rootdir = opt.modules, anonymous = true})
     local held = path.join(dyld.root(), "9.9", "dyld_shared_cache_armv7")
@@ -218,7 +218,7 @@ function failures(opt)
         table.insert(found, "the libraries of a held cache come from the firmware of any architecture that carries it: " .. tostring(errors))
     end
 
-    os.setenv("REVENANT_HOME", home or nil)
+    os.setenv("REVENANT_CACHE", home or nil)
     os.tryrm(folder)
     return found
 end

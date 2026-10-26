@@ -39,14 +39,14 @@ by a list of names.
 Four caches make a warm run quick:
 
 - the pinned xmake binary, keyed by `xmakew` and `packages/x/xmake`;
-- the package store `~/.revenant/cache/xmake-global`. The backports job keys it by the output of
+- the package store `.cache/xmake-global`. The backports job keys it by the output of
   `./xmakew l -P . tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. The checks job
   keys its own store by the files that decide what it installs: the xmake recipes of the packages, the third-party
   packages the default tests build, `toolchain/modules/prebuilt.lua`, and the component files that declare requirements.
   A store is restored by its exact key, or else by the newest store with the same prefix (`restore-keys`), so xmake
   installs only the packages whose own build hash is new. A store is saved only when the configure log shows an install,
   so a warm run writes nothing back, and a store is saved after the configure has succeeded, never half-made;
-- the iOS 6.0 inventory `~/.revenant/dyld/6.0/classes_armv7.json`, keyed by the firmware code that writes it
+- the iOS 6.0 inventory `.cache/dyld/6.0/classes_armv7.json`, keyed by the firmware code that writes it
   (`toolchain/plugins/firmware`, `objc.lua`, `dyld.lua` and `firmware.lua`). While it is present the checks job skips the
   Backports configure that installs the firmware tools, which takes five minutes or more. The swift job runs that
   configure only when the dyld cache misses, since only the `fetch` needs the tool;
@@ -83,7 +83,7 @@ The latest run of a branch holds its artifact even when its `checks` job is red:
 
 ```
 run=$(gh run list --workflow check.yml --branch <branch> --limit 1 --json databaseId --jq '.[0].databaseId')
-gh run download "$run" --name backports-libraries --dir "$HOME/.revenant/cache/ci/$run"
+gh run download "$run" --name backports-libraries --dir ".cache/scratch/ci/$run"
 ```
 
 The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job reached
@@ -124,7 +124,7 @@ Dispatch, wait once, and read the result, with the branch and the job:
 gh workflow run emulator.yml --ref <branch> -f job=boot
 run=$(gh run list --workflow emulator.yml --branch <branch> --limit 1 --json databaseId --jq '.[0].databaseId')
 gh run watch "$run" --interval 600 --exit-status
-gh run download "$run" --name "emulator-boot-$run" --dir "$HOME/.revenant/cache/ci/$run"
+gh run download "$run" --name "emulator-boot-$run" --dir ".cache/scratch/ci/$run"
 ```
 
 The download is scratch: delete it when the task ends. A run is watched once, with that one command. A rerun is
@@ -142,7 +142,7 @@ The jobs, chosen by `job`:
 
 The runner builds the emulator in release and takes the firmware it boots from the revenant `firmware` task: the iOS 6.1.3 shared
 cache (key `dyld-shared-cache-6.1.3-armv7-v1`) and the root filesystem of the iPhone 4S (key
-`firmware-rootfs-6.1.3-iphone4-1-v1`), under `~/.revenant/dyld/6.1.3` and `~/.revenant/firmware/rootfs/iPhone4,1`.
+`firmware-rootfs-6.1.3-iphone4-1-v1`), under `.cache/dyld/6.1.3` and `.cache/firmware/rootfs/iPhone4,1`.
 A boot clones the root filesystem, since the emulator writes its device state beside the one it boots.
 
 The artifact `emulator-<job>-<run>` holds the logs, the perf summaries, the measurement table and any crash report of

@@ -45,7 +45,7 @@ a member uses another's target with `add_deps`. `./xmakew f -P . -y && ./xmakew`
 build -P . <target>` one target, `./xmakew test -P .` the tests.
 
 `xmakew` is the xmake of revenant: the first run builds the xmake pinned in `packages/x/xmake` (its url,
-commit and patches, read from that recipe) into `~/.revenant/cache/xmake/<key>`, the key being made of the commit and
+commit and patches, read from that recipe) into `.cache/xmake/<key>`, the key being made of the commit and
 the patches' checksums, and every run executes that build with its arguments. It needs only `sh`, `git`, `make` and
 a C compiler, and builds again when the recipe changes.
 
@@ -83,7 +83,7 @@ to `toolchain/`, also in the xmake processes a build starts. `./xmakew f -P . -p
 uses (`addon(revenant): <checkout>/toolchain`).
 
 ```
-./xmakew f -P . -p iphoneos -a armv7 -o $HOME/.revenant/cache/<task>/build && ./xmakew
+./xmakew f -P . -p iphoneos -a armv7 -o .cache/scratch/<task>/build && ./xmakew
 ```
 
 Stock xmake does not know `sourcedir` in `add_addons` and would fetch and install the toolchain from the repository instead,

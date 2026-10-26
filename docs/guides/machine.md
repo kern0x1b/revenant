@@ -1,32 +1,89 @@
 # The machine: one cache, one clean
 
-How a build uses this machine's disk, and how to give it back.
+How a build uses this machine's disk, what the cache holds and how it is capped, and how to give space back.
 
-## One root for everything a build can make again
+## One folder, one cap
 
-Everything a build can make again lives under `~/.revenant/cache`:
+Everything revenant writes outside its sources goes under one folder, `.cache` in the main checkout. Every worktree of
+the checkout uses that folder: `toolchain/modules/cache.lua` finds the checkout from any worktree with
+`git rev-parse --git-common-dir`, and git ignores `.cache` (`.gitignore`). `REVENANT_CACHE` names another folder for all
+of it, and `./xmakew` exports the folder it uses, so each tool and test it runs reads the same one.
 
-| Folder | What it is | Who writes it |
+The folder is capped at 15 GB, and the cap counts the build outputs as well: each `build/` and `.xmake/` that git ignores,
+in the main checkout, in every worktree, and in every framework of each. `REVENANT_CACHE_GB` sets the cap in decimal
+gigabytes. The size is counted with `du`, which counts an APFS clone at its full size although the clone takes no room;
+the count can be above what the disk holds, so a write can be refused that would fit.
+
+Each folder falls in one of these classes. Only the first three can be evicted, and only to make room for a write:
+
+| Folder | What it is | Class |
 | --- | --- | --- |
-| `xmake/<key>` | the pinned and patched xmake, one folder per pin and patch set | `xmakew` |
-| `xmake-global/.xmake` | the package store (`packages`), the package sources and build folders (`cache`), the repositories | xmake, through `XMAKE_GLOBALDIR`, which `xmakew` sets |
-| `<task>` | scratch of one task, deleted when the task ends | the task |
+| `xmake/<key>` | the pinned and patched xmake, one folder per pin and patch set | kept |
+| `xmake/<key>.build.*`, `xmake/<key>.log` | xmake's build folders and logs from `xmakew` | scratch |
+| `xmake-global/.xmake/packages` | the package store: a package's folder, its link `<hash>`, and its install generations `<hash>.g<token>` | package, generation |
+| `xmake-global/.xmake/cache` | the package sources and build folders | scratch |
+| the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to `.cache/xmake-global` | kept |
+| `scratch/<task>` | the scratch of one task, written by the task and deleted when it ends | scratch |
+| `dyld/<release>` | the shared caches and libraries of each iOS release, taken out of decrypted firmware; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
+| `firmware/rootfs/<device>/<release>_<build>` | root file systems; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
+| `firmware/work` | extraction work | scratch |
+| the rest of `firmware` | the firmware catalogue and downloads that resume | kept |
+| `emulator/images.noindex/<owner>/<identifier>_<build>` | emulator images cloned from a golden root file system | scratch |
+| `<worktree>/build`, `<worktree>/.xmake`, `<worktree>/frameworks/*/build` | the build outputs of each worktree, which git ignores | build, evicted like scratch |
+| `emulator/cache.noindex/<device>_<build>` | the host cache of one emulator image, shared by every run of that image | scratch |
+| `emulator/tmp.noindex` | TMPDIR folders left by older runs; runs now keep theirs in their run folder | scratch |
+| the rest of `emulator`, including `golden.noindex` | golden images, which took a first boot to make | kept |
+| `emulator-slots` | the lock files that bound how many emulators run at once; a held lock file must stay | kept |
+| `devices` | which run holds which device | kept |
+| `cache-index` | the index of `dyld`, which its readers find beside it | kept |
+| `corpus` | data read from applications and devices | kept |
 
-## The data that is not a cache
+`REVENANT_EMULATOR_ROOT` and `REVENANT_CORPUS_ROOT` name folders elsewhere for the emulator and the corpus; those folders
+are not counted in the cap.
 
-Everything under `~/.revenant` that is not `cache` is data, and no clean touches it:
+## When a write does not fit
 
-| Folder | What writes it | Why it is not a cache |
-| --- | --- | --- |
-| `dyld` | `toolchain/modules/apple/firmware.lua` | the shared caches and libraries of each iOS release, taken out of decrypted firmware |
-| `firmware` | `toolchain/modules/apple/firmware.lua` and the `firmware` plugin | the firmware catalog, the root file systems, a download that resumes |
-| `emulator` | the emulator's image commands | golden images that took a first boot to make; `REVENANT_EMULATOR_ROOT` names another folder for all of it |
-| `emulator-slots` | `toolchain/modules/emulator.lua`, on every emulator start | the lock files that bound how many emulators run at once on this machine; removing a lock file that is held lets a second emulator start, so it is not a cache |
-| `devices` | `toolchain/modules/device.lua` | which run holds which device |
-| `cache-index` | `toolchain/tools/cache_index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
-| `corpus` | the corpus tools | data read from applications and devices; `REVENANT_CORPUS_ROOT` names another place |
+Before a large write, the code that makes it reserves its bytes first: a prebuilt download (its `Content-Length`), a
+prebuilt install (the size it unpacks to, from `xz --robot -l`), a firmware download (the firmware's size, for each
+attempt), a root file system (three times the firmware, since the image expands), and an emulator clone (the size of the
+image it copies, a conservative figure since a clone takes no room).
 
-A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only time.
+If the write would take the cache past the cap, entries are evicted whole, in this order, least recently used first
+within each group:
+
+1. package generations that are not their package's current install;
+2. packages;
+3. scratch.
+
+An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
+If the write still does not fit once nothing more can go, it fails before anything is removed. The message names the
+write, the cap, and the five biggest entries.
+
+The package store keeps at most one previous generation of each package, and the firmware keeps only 6.1.3 and 6.0, and
+only armv7 within them. The daily sweep and `tools/cache.lua prune` remove what is beyond that.
+
+## A build and an emulator run
+
+Before a build starts (`./xmakew f -P .`, `build`, `rebuild`, `test`, `install`, `run`, `package`, `deb`), `xmakew` runs
+`tools/cache.lua guard`. It reserves the room the build is expected to add: the size its worktree's build outputs had
+after the last build, less what is there now, and 2 GB before the first build. A build that cannot get that room
+does not start. After the build, `tools/cache.lua record` stores the worktree's build-output size for the next guard. A
+build that grows beyond its reservation is caught at its next start.
+
+An emulator run clones the golden root file system, which reserves the full size of the image first, so a run whose
+clone would pass the cap does not start. Its TMPDIR is `tmp` inside its run folder. When the run ends, pass or fail,
+its root file system clone, its TMPDIR and its runtime folders are removed, unless `--keep` is given; the run folder
+keeps its results and verdict. `emulator.remove` makes the files writable before it removes them, and a removal that
+fails raises.
+
+## Status and prune
+
+    ./xmakew l -P . tools/cache.lua status
+    ./xmakew l -P . tools/cache.lua prune [--dry-run]
+
+`status` prints the folder, the cap, what is used, and each entry with its size, class, last use, and `(in use)` when a
+process has files open in it. `prune` removes the package generations beyond the one previous, and the firmware the
+configured releases do not need.
 
 ## One clean
 
@@ -36,9 +93,9 @@ A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only 
 
 | Level | Removes | Keeps |
 | --- | --- | --- |
-| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders and logs | the package store, the xmake binaries |
-| `--packages` | the same and the package store | the xmake binaries |
-| `--all` | everything under `~/.revenant/cache`; the xmake binaries are built again on the next `./xmakew` | nothing |
+| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders and logs | the package store, the xmake binaries, the kept folders |
+| `--packages` | the same and the package store | the xmake binaries, the kept folders |
+| `--all` | everything under `.cache`, the kept folders included; the xmake binaries are built again on the next `./xmakew` | nothing |
 
 Only ignored and untracked build folders are removed: `git check-ignore` decides.
 
@@ -48,16 +105,17 @@ Only ignored and untracked build folders are removed: `git check-ignore` decides
 
     ./xmakew l -P . tools/clean.lua --scratch [--dry-run]
 
-The sweep is `--scratch`, and it is safe while workers run. It removes a folder `cache/<name>` only when all three hold:
+The sweep is `--scratch`, and it is safe while workers run. It removes a folder `scratch/<name>` only when all three hold:
 
 - no live worktree is named after it: the names come from `git worktree list` of the checkout, and the checkout's own
   name is always kept;
 - nothing in it was modified in the last 7 days (`find -mtime`);
 - no process has a file open in it (`lsof -F n` lists every open path once, and the folder is matched against them).
 
-It never touches `cache/xmake` or `cache/xmake-global` (the binaries, the package store and its locks), nor the data
-folders under `~/.revenant`. If `lsof` fails, nothing is removed. The sweep records its run in `cache/.scratch-swept`,
-and the wrapper runs the sweep again only when that file is more than a day old.
+In the same run it removes the package generations beyond the one previous, and the firmware the configured releases do
+not need (`tools/cache.lua prune`), with the same open-file check. It touches nothing else: not the xmake binaries, the
+package store and its locks, or the kept folders. If `lsof` fails, nothing is removed. The sweep records its run in
+`.cache/.scratch-swept`, and the wrapper runs the sweep again only when that file is more than a day old.
 
 Seven days: a paused task, a weekend, or a worker that has come back to a branch keeps its scratch; a folder that no
 live worktree names and that nothing has touched for a week is rebuilt in minutes if it is needed again.

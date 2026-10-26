@@ -81,7 +81,7 @@ xmake firmware -y --arch=armv7 classes 6.0
 
 It fetches the libraries of the earliest armv7 release not older than the one named, if they are
 not held yet (skill `firmware`), and writes `classes_armv7.json` beside them, under
-`~/.revenant/dyld/<release>/` (`$REVENANT_HOME/dyld/<release>/` if `REVENANT_HOME` is set; `-o FILE`
+`.cache/dyld/<release>/` (`$REVENANT_CACHE/dyld/<release>/` if `REVENANT_CACHE` is set; `-o FILE`
 writes it elsewhere). It prints `<path>: the Objective-C classes of iOS <release> for armv7`. The
 file maps every Objective-C class of the release to its `superclass`, `image`, `instance` and
 `class` method names and `protocols`. Methods are inherited: walk `superclass` until you find the

@@ -37,7 +37,7 @@ function main(release)
     local triple = (os.getenv("REVENANT_SWIFT_ARCH") or "armv7") .. "-apple-ios" .. release
     local harness = os.scriptdir()
     local sources = path.absolute(path.join(harness, "..", "..", "..", "src", "SwiftData"))
-    local out = os.getenv("REVENANT_SWIFTDATA_OUT") or path.join(os.getenv("HOME"), ".revenant", "cache", "swiftdata-build", release)
+    local out = os.getenv("REVENANT_SWIFTDATA_OUT") or path.join(import("@addon.revenant.workspace", {anonymous = true}).scratch(), "swiftdata-build", release)
     os.mkdir(out)
     local values = {}
     for _, name in ipairs(REQUIRED) do

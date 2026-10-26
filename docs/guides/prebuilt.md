@@ -73,10 +73,10 @@ that archive would not work under another one.
 | Input | On CI | Consequence |
 | --- | --- | --- |
 | The iPhoneOS SDK (`iphoneos-sdk`) | downloaded from the same GitHub releases as on a machine | works; the SDK itself is never put in an archive, since Apple's licence does not allow that |
-| Firmware and `~/.revenant/dyld` (`frameworks/Backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | the Backports targets, and `swift-runtime` with `backports`, are not built on CI |
+| Firmware and `.cache/dyld` (`frameworks/Backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | the Backports targets, and `swift-runtime` with `backports`, are not built on CI |
 | The host Xcode or Command Line Tools | the runner's Xcode, not this machine's | not part of the key: an archive built with another host clang is used under the same key. LLVM and Swift do not link against the host's C++ library in a way a newer macOS breaks, but that is not verified |
 | Time and disk | a GitHub-hosted job ends after 6 hours, and the runner has a fixed number of cores and a fixed disk | not measured on `macos-26`: Swift's ten source checkouts and its build may need more disk or time than a hosted runner has, and then need a larger runner or a self-hosted one; LLVM with two targets may fit |
-| `~/.revenant/cache` | empty on each run | the pinned xmake and the store are built again on each run; `actions/cache` could keep them |
+| `.cache` | empty on each run | the pinned xmake and the store are built again on each run; `actions/cache` could keep them |
 
 ## Releasing a package
 

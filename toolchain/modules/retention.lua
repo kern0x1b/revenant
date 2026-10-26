@@ -1,10 +1,6 @@
 local RETENTION_DAYS = 7
 local STAMP = ".scratch-swept"
 
-function cache_root(home)
-    return path.join(home, ".revenant", "cache")
-end
-
 function free_kib(folder)
     local row = nil
     for line in os.iorunv("df", {"-k", folder}):gmatch("[^\n]+") do
@@ -29,11 +25,10 @@ function worktree_names(checkout)
     return names
 end
 
-function candidates(home)
+function candidates(root)
     local folders = {}
-    for _, entry in ipairs(os.dirs(path.join(cache_root(home), "*"))) do
-        local name = path.filename(entry)
-        if name:sub(1, 5) ~= "xmake" and name:sub(1, 1) ~= "." and not os.islink(entry) then
+    for _, entry in ipairs(os.dirs(path.join(root, "scratch", "*"))) do
+        if not os.islink(entry) then
             table.insert(folders, entry)
         end
     end
@@ -87,11 +82,10 @@ function held(folder, paths)
     return false
 end
 
-function sweep(home, options)
+function sweep(root, options)
     local days = options.days or RETENTION_DAYS
     local live = options.live or worktree_names(options.checkout)
     local report = {removed = {}, kept = {}, freed_kib = 0}
-    local root = cache_root(home)
     os.mkdir(root)
     local paths = open_paths()
     if not paths then
@@ -102,7 +96,7 @@ function sweep(home, options)
         return report
     end
     local before = free_kib(root)
-    for _, folder in ipairs(candidates(home)) do
+    for _, folder in ipairs(candidates(root)) do
         local name = path.filename(folder)
         if live[name] then
             table.insert(report.kept, {folder = folder, why = "a live worktree is named after it"})
