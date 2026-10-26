@@ -38,7 +38,7 @@ Local files go under `.cache/scratch/<task>/`, not into the checkout.
 ## Snapshots
 
 - The screen: `./xmakew device run 'sleep 8; /usr/bin/shot >/dev/null 2>&1'`, then `scp` `/tmp/screenshot.png`. `shot` always writes `/tmp/screenshot.png`, whatever path it is given. A page that loads slowly needs 15 to 30 s before the shot.
-- SwiftUI demo: `./xmakew build SwiftUIDemo` first, then `./xmakew l frameworks/SwiftUI/tools/device.lua shots [--live | --gesture] SCENARIO...`. It installs the demo into `/Applications`, launches it through `/private/var/tmp/sblaunch`, and fetches each scenario's picture: `--live` the real screen, `--gesture` the screen after the scenario's touches. Pictures go to `.cache/scratch/<task>/swiftui/device-shots/`.
+- SwiftUI demo: `./xmakew build SwiftUIDemo` first, then `./xmakew l frameworks/SwiftUI/tools/device.lua shots [--live | --gesture] SCENARIO...`. It builds the launcher `revenant-sblaunch` (the `emulator-guest` component, configured and restored around the build), copies it to `/usr/libexec` when its SHA-256 differs, creates `/var/revenant`, installs the demo into `/Applications`, launches it through the launcher, and fetches each scenario's picture: `--live` the real screen, `--gesture` the screen after the scenario's touches. Pictures go to `.cache/scratch/<task>/swiftui/device-shots/`.
 - Crash report: `./xmakew l frameworks/SwiftUI/tools/device.lua crash [REPORT.plist]` fetches `LatestCrash-SwiftUIDemo.plist` (or reads REPORT) and symbolicates it against the built demo.
 
 ## Is it alive?

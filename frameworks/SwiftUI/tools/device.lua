@@ -11,7 +11,8 @@ local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/device.lua ACTION ...
 
 local BUNDLE = "space.kern0x1b.swiftui.demo"
 local LOG = "/var/tmp/swiftui-demo.log"
-local SBLAUNCH = "/private/var/tmp/sblaunch"
+local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
+local LAUNCHER_COMPONENT = "emulator-guest"
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -57,11 +58,42 @@ local function shot(device, settings, file)
     end
 end
 
+local function configure(component)
+    os.vrunv(os.programfile(), {"f", "-P", os.projectdir(), "-p", "iphoneos", "-a", "armv7", "-y", "--component=" .. component})
+end
+
+local function launcher(device, settings)
+    import("core.project.config")
+    config.load()
+    local previous = config.get("component") or ""
+    if previous ~= LAUNCHER_COMPONENT then
+        configure(LAUNCHER_COMPONENT)
+    end
+    local built = try { function ()
+        os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch"})
+        return true
+    end }
+    if previous ~= LAUNCHER_COMPONENT then
+        configure(previous)
+    end
+    local file = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release", "revenant-sblaunch")
+    if not built or not os.isfile(file) then
+        raise("the launcher revenant-sblaunch did not build: it is the target of the %s component", LAUNCHER_COMPONENT)
+    end
+    local current = (on_device(device, settings, "sha256sum " .. SBLAUNCH .. " | cut -d' ' -f1") or ""):match("%x+")
+    if current ~= hash.sha256(file) then
+        device.copy(settings, file, "/var/tmp/revenant-sblaunch")
+        device.run(settings, "mv /var/tmp/revenant-sblaunch " .. SBLAUNCH)
+    end
+    device.run(settings, "chmod 755 " .. SBLAUNCH .. " && mkdir -p /var/revenant && chmod 777 /var/revenant")
+end
+
 local function install(device, settings)
     local app = tree.demo()
     if not os.isdir(app) then
         raise("%s does not exist: build it first, ./xmakew build -P . SwiftUIDemo", app)
     end
+    launcher(device, settings)
     local scratch = tree.fresh("device-install")
     local archive = path.join(scratch, "swiftui-demo.tgz")
     os.execv("tar", {"czf", archive, "-C", path.directory(app), path.filename(app)}, {envs = {COPYFILE_DISABLE = "1"}})
