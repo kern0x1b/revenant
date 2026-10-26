@@ -11,7 +11,8 @@ local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/device.lua ACTION ...
 
 local BUNDLE = "space.kern0x1b.swiftui.demo"
 local LOG = "/var/tmp/swiftui-demo.log"
-local SBLAUNCH = "/private/var/tmp/sblaunch"
+local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
+local SHOT = "/usr/libexec/revenant-shot"
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -49,7 +50,7 @@ local function wait_for(device, settings, text, tries, pause)
 end
 
 local function shot(device, settings, file)
-    if not on_device(device, settings, "shot") then
+    if not on_device(device, settings, SHOT .. " /tmp/screenshot.png") then
         raise("the phone took no screenshot")
     end
     if not device.fetch(settings, "/tmp/screenshot.png", file) then
@@ -57,11 +58,51 @@ local function shot(device, settings, file)
     end
 end
 
+local function provision(device, settings, file, remote)
+    if not os.isfile(file) then
+        raise("%s was not built: it is a target of the SwiftUIDemo component", file)
+    end
+    local current = (on_device(device, settings, "sha256sum " .. remote .. " | cut -d' ' -f1") or ""):match("%x+")
+    if current ~= hash.sha256(file) then
+        local staged = "/var/tmp/" .. path.filename(remote)
+        device.copy(settings, file, staged)
+        device.run(settings, "mv " .. staged .. " " .. remote)
+    end
+    device.run(settings, "chmod 755 " .. remote)
+end
+
+local function guest_stamp()
+    local digests = {}
+    for _, file in ipairs(os.files(path.join(os.projectdir(), "emulator", "src", "guest", "*"))) do
+        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
+    end
+    table.insert(digests, "daemon=" .. hash.sha256(path.join(os.projectdir(), "toolchain", "rules", "daemon", "xmake.lua")))
+    table.insert(digests, "sdk=" .. import("@addon.revenant.workspace", {anonymous = true}).sdk())
+    table.sort(digests)
+    return hash.strhash128(table.concat(digests, ";"))
+end
+
+local function tools(device, settings)
+    local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
+    local stamp = path.join(out, "guest-sources")
+    local current = guest_stamp()
+    local built = os.isfile(stamp) and io.readfile(stamp) == current
+        and os.isfile(path.join(out, "revenant-sblaunch")) and os.isfile(path.join(out, "revenant-shot"))
+    if not built then
+        os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch", "revenant-shot"})
+        io.writefile(stamp, current)
+    end
+    provision(device, settings, path.join(out, "revenant-sblaunch"), SBLAUNCH)
+    provision(device, settings, path.join(out, "revenant-shot"), SHOT)
+    device.run(settings, "mkdir -p /var/revenant && chmod 777 /var/revenant")
+end
+
 local function install(device, settings)
     local app = tree.demo()
     if not os.isdir(app) then
         raise("%s does not exist: build it first, ./xmakew build -P . SwiftUIDemo", app)
     end
+    tools(device, settings)
     local scratch = tree.fresh("device-install")
     local archive = path.join(scratch, "swiftui-demo.tgz")
     os.execv("tar", {"czf", archive, "-C", path.directory(app), path.filename(app)}, {envs = {COPYFILE_DISABLE = "1"}})

@@ -29,15 +29,7 @@ function run(...)
 end
 
 function demo()
-    import("core.project.config")
-    import("core.project.project")
-    config.load()
-    local target = project.target("SwiftUIDemo")
-    if not target then
-        raise("the project at %s has no SwiftUIDemo target: run this from the top of revenant, configured with ./xmakew f -P . -p iphoneos -a armv7",
-              os.projectdir())
-    end
-    return path.join(target:targetdir(), "SwiftUIDemo.app")
+    return path.join(os.projectdir(), "build", "iphoneos", "armv7", "release", "SwiftUIDemo.app")
 end
 
 function fresh(name)
