@@ -59,6 +59,8 @@ jobs:
       TICKS: ${{ inputs.ticks }}
       SAVE_TICKS: ${{ inputs.save_ticks }}
       MEASURE_TICKS: ${{ inputs.measure_ticks }}
+      GUEST: ${{ github.workspace }}/build/iphoneos/armv7/release/emulator_minimal_guest
+      GUEST_PATH: /usr/libexec/emulator-minimal
       CONTROL: ${{ inputs.control }}
       ROUNDS: ${{ inputs.rounds }}
     steps:
@@ -185,6 +187,13 @@ jobs:
           path: .cache/firmware/rootfs/iPhone4,1
           key: firmware-rootfs-6.1.3-iphone4-1-v1
 
+      - name: Build the minimal guest the snapshot runs
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 15
+        run: |
+          ./xmakew build -P . emulator_minimal_guest
+          test -f "$GUEST" || { echo "no minimal guest at $GUEST" >&2; exit 1; }
+
       - name: Configure the emulator for release
         id: configure
         timeout-minutes: 30
@@ -203,7 +212,7 @@ jobs:
       - name: Run the snapshot gates and the unit tests of the snapshot code
         if: inputs.job == 'snapshot'
         timeout-minutes: 90
-        run: ./xmakew test -P . repository/layout repository/comments_check 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' --output-on-failure
+        run: ./xmakew test -P . repository/layout repository/comments_check 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' 'emulator_graphics_*/*' 'emulator_mach_*/*' 'emulator_network_*/*' --output-on-failure
 
       - name: Perturb the restore for the negative control
         if: inputs.job == 'snapshot' && inputs.negative_control
@@ -222,7 +231,7 @@ jobs:
         run: |
           out="$RUNNER_TEMP/out"
           mkdir -p "$out"
-          ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
+          ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
 
       - name: Expect the comparison to fail on the perturbed restore
         if: inputs.job == 'snapshot' && inputs.negative_control
@@ -230,7 +239,7 @@ jobs:
         run: |
           out="$RUNNER_TEMP/out"
           mkdir -p "$out"
-          if ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" > "$out/comparison.txt" 2>&1; then
+          if ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" > "$out/comparison.txt" 2>&1; then
             cat "$out/comparison.txt"
             echo "negative control: the comparison passed on a perturbed restore" >&2
             exit 1
