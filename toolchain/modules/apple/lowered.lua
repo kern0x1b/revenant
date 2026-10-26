@@ -556,8 +556,6 @@ local function merged_ranges(ranges)
         local last = merged[#merged]
         if last and range.start <= last.stop and not range.remove and not last.remove then
             last.stop = math.max(last.stop, range.stop)
-            last.before = last.before or range.before
-            last.after = last.after or range.after
         else
             table.insert(merged, {start = range.start, stop = range.stop, remove = range.remove, before = range.before, after = range.after})
         end
@@ -638,15 +636,6 @@ local function typedef_declarations(text)
         table.insert(found, {start = lead, stop = stop, name = name, annotated = #availability(text:sub(lead, stop)) > 0, words = words})
         position = stop + 1
     end
-end
-
-local function enclosing_typedef(declarations, position)
-    for _, declaration in ipairs(declarations) do
-        if declaration.start <= position and position <= declaration.stop then
-            return declaration
-        end
-    end
-    return nil
 end
 
 local function apply_ranges(text, merged)
@@ -765,6 +754,15 @@ local function enum_body_at(text, at)
         raise("a backported declaration sits in the body of %s, which an availability region spans: the region cannot be split inside it", head)
     end
     return {start = start, stop = stop, open = open, close = close}
+end
+
+local function covered_by_lowered(ranges, body)
+    for _, range in ipairs(ranges) do
+        if not range.remove and range.start <= body.start and range.stop >= body.stop then
+            return true
+        end
+    end
+    return false
 end
 
 local function enumerators_in(text, body)
@@ -909,18 +907,8 @@ local function lowering_of(text, implemented, declarations)
             position = block_end + 1
         end
     end
-    local typedefs = nil
     for _, hit in ipairs(hits) do
-        local enclosing = nil
         if hit.kind == "global" then
-            typedefs = typedefs or typedef_declarations(text)
-            enclosing = enclosing_typedef(typedefs, hit.position)
-        end
-        if enclosing then
-            for _, piece in ipairs(pieces_of(text, enclosing.start, enclosing.stop)) do
-                lower(piece[1], piece[2])
-            end
-        elseif hit.kind == "global" then
             local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
             if first then
@@ -975,7 +963,9 @@ local function lowering_of(text, implemented, declarations)
                 for _, range in ipairs(inside) do
                     local body = enum_body_at(text, range.start)
                     if body then
-                        bodies[body.start] = body
+                        if not covered_by_lowered(ranges, body) then
+                            bodies[body.start] = body
+                        end
                     else
                         range.before = "\n" .. region.end_text .. "\n"
                         range.after = "\n" .. region.begin_text .. "\n"
