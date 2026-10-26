@@ -63,7 +63,9 @@ int main(int argc, char **argv)
     revenant_check(hostMissing == nil && backportMissing == nil, "a missing file gives no archive", [NSString stringWithFormat:@"%@ %@", hostMissing, backportMissing]);
     revenant_compare_error("a missing file reports the host's error", hostMissingError, error);
 
-    NSString *garbagePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-binary-archive-garbage.bin"];
+    NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+    [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
+    NSString *garbagePath = [directory stringByAppendingPathComponent:@"revenant-binary-archive-garbage.bin"];
     [@"not an archive" writeToFile:garbagePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
     NSURL *garbage = [NSURL fileURLWithPath:garbagePath];
     error = nil;
@@ -99,7 +101,6 @@ int main(int argc, char **argv)
     BOOL backportCompute = [backportArchive addComputePipelineFunctionsWithDescriptor:compute error:&error];
     revenant_check(hostCompute == backportCompute && backportCompute, "a compute pipeline is added as on the host", error.localizedDescription ?: @"added");
 
-    NSString *directory = NSTemporaryDirectory();
     NSURL *hostOut = [NSURL fileURLWithPath:[directory stringByAppendingPathComponent:@"revenant-binary-archive-host.archive"]];
     NSURL *backportOut = [NSURL fileURLWithPath:[directory stringByAppendingPathComponent:@"revenant-binary-archive-backport.archive"]];
     [[NSFileManager defaultManager] removeItemAtURL:hostOut error:nil];
@@ -135,5 +136,6 @@ int main(int argc, char **argv)
     id backportZero = revenant_archive(device, [NSURL fileURLWithPath:zeroPath], &error);
     revenant_check(backportZero == nil && error != nil, "a zero-byte file gives no archive", [NSString stringWithFormat:@"%@", backportZero]);
 
+    [[NSFileManager defaultManager] removeItemAtPath:directory error:NULL];
     return revenant_finish();
 }
