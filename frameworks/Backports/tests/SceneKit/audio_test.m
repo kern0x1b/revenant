@@ -356,17 +356,22 @@ int main(int argc, char **argv)
         SCNAudioSource *streamTone = [[SCNAudioSource alloc] initWithURL:tone];
         streamTone.positional = NO;
         streamTone.shouldStream = YES;
-        SCNAudioPlayer *streaming = [SCNAudioPlayer audioPlayerWithSource:streamTone];
-        [streaming revenantStartOnNode:nil];
-        double streamedFrequency = revenant_frequency(revenant_capture(0.5));
-        [streaming revenantStop];
         SCNAudioSource *plainTone = [[SCNAudioSource alloc] initWithURL:tone];
         plainTone.positional = NO;
-        SCNAudioPlayer *plainPlayer = [SCNAudioPlayer audioPlayerWithSource:plainTone];
-        [plainPlayer revenantStartOnNode:nil];
-        double plainFrequency = revenant_frequency(revenant_capture(0.5));
-        [plainPlayer revenantStop];
-        revenant_expect_number("a streamed tone keeps the pitch of the same tone loaded in memory", streamedFrequency / plainFrequency, 1, 0.02);
+        const int pitchRounds = 3;
+        double pitchTotal = 0;
+        for (int round = 0; round < pitchRounds; round++) {
+            SCNAudioPlayer *streaming = [SCNAudioPlayer audioPlayerWithSource:streamTone];
+            [streaming revenantStartOnNode:nil];
+            double streamedFrequency = revenant_frequency(revenant_capture(0.5));
+            [streaming revenantStop];
+            SCNAudioPlayer *plainPlayer = [SCNAudioPlayer audioPlayerWithSource:plainTone];
+            [plainPlayer revenantStartOnNode:nil];
+            double plainFrequency = revenant_frequency(revenant_capture(0.5));
+            [plainPlayer revenantStop];
+            pitchTotal += streamedFrequency / plainFrequency;
+        }
+        revenant_expect_number("a streamed tone keeps the pitch of the same tone loaded in memory", pitchTotal / pitchRounds, 1, 0.02);
 
         revenant_hold_listener(SCNVector3Make(0, 0, 0));
         SCNAudioSource *streamedPan = [[SCNAudioSource alloc] initWithURL:tone];

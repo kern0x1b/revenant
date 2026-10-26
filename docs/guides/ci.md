@@ -29,7 +29,8 @@ choose a runner, so each job keeps its own `runs-on`.
 - `swift` configures the Swift component, builds the Swift targets (AppIntents, ActivityKit, TipKit, WidgetKit,
   swiftSpatial, swiftCloudKit, swiftWeatherKit, swiftNetwork, swiftUniformTypeIdentifiers, swiftCryptoKit) and installs the Swift
   packages through their wrappers. It names `swift-runtime` and `libcxx` in `REVENANT_PREBUILT_ONLY` as well, so a
-  missing release of either is an error.
+  missing release of either is an error. Its install step has a 40-minute limit: on a cold store it installed the eleven
+  packages in 17 min 47 s, and on a warm store, restored by the cache step, it finished in 58 s.
 
 The checks run on macOS, not Linux: the suites compile with the Mac's clang and the emulator is a macOS program. Every
 test in the default run must pass, so the `checks` job is red when one of them fails, and no test is skipped in CI
@@ -139,7 +140,7 @@ The jobs, chosen by `job`:
   round. `measurement.md` has one row per boot: real, user and system seconds from `/usr/bin/time -l`, maximum RSS and
   peak footprint in MB. The table is also on the run's summary page, and each boot keeps its perf summary and log.
 
-The runner builds the emulator in release and takes the firmware it boots from `./xmakew firmware`: the iOS 6.1.3 shared
+The runner builds the emulator in release and takes the firmware it boots from the revenant `firmware` task: the iOS 6.1.3 shared
 cache (key `dyld-shared-cache-6.1.3-armv7-v1`) and the root filesystem of the iPhone 4S (key
 `firmware-rootfs-6.1.3-iphone4-1-v1`), under `~/.revenant/dyld/6.1.3` and `~/.revenant/firmware/rootfs/iPhone4,1`.
 A boot clones the root filesystem, since the emulator writes its device state beside the one it boots.
