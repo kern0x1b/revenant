@@ -47,3 +47,10 @@ static NSURL *revenant_write_tone(NSString *name, NSTimeInterval seconds, double
 {
     return revenant_write_wave_samples(name, 8000, (uint32_t)(seconds * 8000), frequency);
 }
+
+static NSString *revenant_fixture_directory(void)
+{
+    NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+    [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
+    return directory;
+}

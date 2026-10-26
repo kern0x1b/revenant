@@ -14,14 +14,15 @@ in the main checkout, in every worktree, and in every framework of each. `REVENA
 gigabytes. The size is counted with `du`, which counts an APFS clone at its full size although the clone takes no room;
 the count can be above what the disk holds, so a write can be refused that would fit.
 
-Each folder falls in one of these classes. Only the first three can be evicted, and only to make room for a write:
+Each folder falls in one of these classes. Only the package, generation, source, scratch and build classes can be evicted, and only to make room for a write:
 
 | Folder | What it is | Class |
 | --- | --- | --- |
 | `xmake/<key>` | the pinned and patched xmake, one folder per pin and patch set | kept |
 | `xmake/<key>.build.*`, `xmake/<key>.log` | xmake's build folders and logs from `xmakew` | scratch |
 | `xmake-global/.xmake/packages` | the package store: a package's folder, its link `<hash>`, and its install generations `<hash>.g<token>` | package, generation |
-| `xmake-global/.xmake/cache` | the package sources and build folders | scratch |
+| `xmake-global/.xmake/cache/packages/<yymm>/<letter>/<package>` | the package sources and build folders, one folder per package | source |
+| the rest of `xmake-global/.xmake/cache` | xmake's other caches | scratch |
 | the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to `.cache/xmake-global` | kept |
 | `scratch/<task>` | the scratch of one task, written by the task and deleted when it ends | scratch |
 | `dyld/<release>` | the shared caches and libraries of each iOS release, taken out of decrypted firmware; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
@@ -49,13 +50,16 @@ attempt), a root file system (three times the firmware, since the image expands)
 image it copies, a conservative figure since a clone takes no room).
 
 If the write would take the cache past the cap, entries are evicted whole, in this order, least recently used first
-within each group:
+within each group, and stopping as soon as the write fits:
 
 1. package generations that are not their package's current install;
-2. packages;
-3. scratch.
+2. the sources of packages, one package folder at a time;
+3. scratch;
+4. the build outputs of each worktree;
+5. installed packages, last, and only when the groups before them cannot make room.
 
-An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
+An evicted entry takes its lock files with it, and each folder of the package store that it leaves empty, so that nothing
+is left for xmake to take for an install. An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
 If the write still does not fit once nothing more can go, it fails before anything is removed. The message names the
 write, the cap, and the five biggest entries.
 

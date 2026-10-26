@@ -13,7 +13,7 @@
 static void check(bool value)
 {
     if (!value)
-        std::abort();
+        std::exit(1);
 }
 
 static bool negative_control;
