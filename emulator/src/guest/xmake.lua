@@ -1,4 +1,5 @@
-if get_config("component") ~= "" or not is_plat("iphoneos") then
+local component = get_config("component")
+if (component ~= "" and component ~= "emulator-guest") or not is_plat("iphoneos") then
     return
 end
 
