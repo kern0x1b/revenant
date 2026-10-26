@@ -116,6 +116,13 @@ jobs:
           path: build/generated/backports
           key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
 
+      - name: Build the minimal guest the snapshot runs
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 15
+        run: |
+          ./xmakew build -P . emulator_minimal_guest
+          test -f "$GUEST" || { echo "no minimal guest at $GUEST" >&2; exit 1; }
+
       - uses: actions/cache/restore@v4
         if: inputs.job == 'probe'
         id: dyld60
@@ -186,13 +193,6 @@ jobs:
         with:
           path: .cache/firmware/rootfs/iPhone4,1
           key: firmware-rootfs-6.1.3-iphone4-1-v1
-
-      - name: Build the minimal guest the snapshot runs
-        if: inputs.job == 'snapshot'
-        timeout-minutes: 15
-        run: |
-          ./xmakew build -P . emulator_minimal_guest
-          test -f "$GUEST" || { echo "no minimal guest at $GUEST" >&2; exit 1; }
 
       - name: Configure the emulator for release
         id: configure
