@@ -34,7 +34,8 @@ option_end()
 
 includes("tests/guest/dns-probe", "tests/guest/minimal")
 
-if get_config("component") ~= "" or is_plat("iphoneos") then
+local component = get_config("component")
+if (component ~= "" and component ~= "emulator") or is_plat("iphoneos") then
     return
 end
 
