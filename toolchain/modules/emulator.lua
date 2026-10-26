@@ -700,6 +700,20 @@ function scan(state, line)
     elseif line:startswith("[display] frame=") then
         state.frames = (state.frames or 0) + 1
     end
+    local perf_begin = line:match("^REVENANT%-PERF%-BEGIN (%S+)$")
+    if perf_begin then
+        state.perf_begin = perf_begin
+    elseif line == "REVENANT-PERF-END" then
+        state.perf_end = true
+    end
+    local perf_started = line:match("^%[control%] perf%-begin label=(%S+)$")
+    if perf_started then
+        state.perf_started = perf_started
+    end
+    local perf_finished = line:match("^%[perf%-display%] label=(%S+) ")
+    if perf_finished then
+        state.perf_finished = perf_finished
+    end
     local started = line:match("^%[transition%] input%-complete id=(%d+)") or line:match("^%[transition%] settle id=(%d+)")
     if started then
         state.transition = math.max(state.transition or 0, tonumber(started))

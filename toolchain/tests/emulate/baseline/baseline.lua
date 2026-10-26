@@ -69,6 +69,12 @@ function main(device, release)
             print(value)
         end
     end
+    for line in text:gmatch("[^\n]+") do
+        if line:find("BASELINE-PROBE ct-", 1, true) == 1 or line:find("BASELINE-PROBE draw-in-rect", 1, true) == 1
+            or line:find("BASELINE-PROBE draw-flipped", 1, true) == 1 or line:find("BASELINE-PROBE bounds", 1, true) == 1 then
+            print(line)
+        end
+    end
     if not done or not plain or not raised or not shift then
         print("the probe did not finish its measurements; its stdout is " .. stdout)
         os.exit(1)

@@ -66,6 +66,7 @@
 @interface PHAsset (Revenant)
 - (instancetype)initWithRevenantAsset:(ALAsset *)asset sourceType:(PHAssetSourceType)sourceType;
 - (ALAsset *)revenant_asset;
+- (BOOL)isLocallyAvailable;
 @end
 
 @interface PHAssetCollection (Revenant)

@@ -30,7 +30,7 @@ local LIBRARIES = {
     {name = "GraphicsBackports", folder = "Graphics", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports", "CoreGraphicsBackports"}, archives = {"box2d"}, system = {}},
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
-    {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
@@ -265,7 +265,7 @@ else
                                   network = "network_test.lua", networktls = "network_tls_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -273,7 +273,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "CloudKitBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -290,9 +290,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CloudKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
         add_syslinks("objc")
     target_end()
 
@@ -340,6 +340,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("loader_class_backport")
         add_tests("flat_class_launch")
         add_tests("screenshot_notification")
+        add_tests("directory_attributes")
+        add_tests("photos_assets")
         add_tests("weak_class_binding")
         add_tests("missing_class_binding")
         add_tests("keybag_lock_state")
@@ -496,5 +498,6 @@ if not is_plat("iphoneos") then
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end

@@ -212,13 +212,6 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
         throw std::runtime_error { "failed to map initial user stack" };
     }
 
-    if (environment.empty()) {
-        environment = {
-            "PATH=/usr/bin:/bin:/usr/sbin:/sbin",
-            "HOME=/var/root",
-            "SHELL=/bin/sh",
-        };
-    }
     if (std::none_of(environment.begin(), environment.end(),
             [](const std::string& variable) {
                 return variable.starts_with(launch_services_directory_name);

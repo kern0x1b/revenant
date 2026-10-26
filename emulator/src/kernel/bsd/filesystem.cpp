@@ -212,6 +212,39 @@ bool CompatibilityKernel::dispatch_bsd_thread_directory(
     return true;
 }
 
+void CompatibilityKernel::append_directory_entries(
+    const std::filesystem::path& directory,
+    std::vector<DirectoryEntry>& entries,
+    std::error_code& directory_error) const
+{
+    for (std::filesystem::directory_iterator iterator { directory,
+             directory_error },
+        end;
+        !directory_error && iterator != end;
+        iterator.increment(directory_error)) {
+        if (hfs::MetadataProvider::is_resource_sidecar(iterator->path())) {
+            continue;
+        }
+        const auto status = iterator->symlink_status(directory_error);
+        if (directory_error)
+            break;
+        const auto metadata = query_hfs_metadata(iterator->path(), false, false);
+        if (!metadata) {
+            directory_error = std::make_error_code(std::errc::io_error);
+            break;
+        }
+        std::uint8_t type = 0;
+        if (std::filesystem::is_directory(status))
+            type = 4;
+        else if (std::filesystem::is_regular_file(status))
+            type = 8;
+        else if (std::filesystem::is_symlink(status))
+            type = 10;
+        entries.push_back({ iterator->path().filename().string(), type,
+            metadata->catalog_id });
+    }
+}
+
 void CompatibilityKernel::dispatch_bsd_filesystem(
     Cpu& cpu, std::uint32_t number)
 {
@@ -1418,34 +1451,8 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                     current_metadata ? current_metadata->catalog_id : 2U },
                 { "..", 4, parent_metadata ? parent_metadata->catalog_id : 2U }
             };
-            for (std::filesystem::directory_iterator
-                     iterator { descriptor->second, directory_error },
-                end;
-                !directory_error && iterator != end;
-                iterator.increment(directory_error)) {
-                if (hfs::MetadataProvider::is_resource_sidecar(
-                        iterator->path())) {
-                    continue;
-                }
-                const auto status = iterator->symlink_status(directory_error);
-                if (directory_error)
-                    break;
-                const auto metadata =
-                    query_hfs_metadata(iterator->path(), false, false);
-                if (!metadata) {
-                    directory_error = std::make_error_code(std::errc::io_error);
-                    break;
-                }
-                std::uint8_t type = 0;
-                if (std::filesystem::is_directory(status))
-                    type = 4;
-                else if (std::filesystem::is_regular_file(status))
-                    type = 8;
-                else if (std::filesystem::is_symlink(status))
-                    type = 10;
-                entries.push_back({ iterator->path().filename().string(), type,
-                    metadata->catalog_id });
-            }
+            append_directory_entries(
+                descriptor->second, entries, directory_error);
             if (directory_error) {
                 bsd_error(cpu, 5);
                 return;
@@ -1582,6 +1589,136 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         file_offsets_[fd] = entry_index;
         bsd_success(cpu, static_cast<std::uint32_t>(bytes.size()));
+        return;
+    }
+    case 222: {
+        auto fd = registers[0];
+        if (const auto duplicate = duplicated_descriptors_.find(fd);
+            duplicate != duplicated_descriptors_.end()) {
+            fd = duplicate->second;
+        }
+        const auto descriptor = file_descriptors_.find(fd);
+        std::error_code directory_error;
+        if (descriptor == file_descriptors_.end()) {
+            bsd_error(cpu, bsd_support::bad_file_descriptor);
+            return;
+        }
+        if (!std::filesystem::is_directory(descriptor->second, directory_error)) {
+            bsd_error(cpu, bsd_support::invalid_argument);
+            return;
+        }
+        const auto bitmap_count = memory_.read16(registers[1]);
+        if (!bitmap_count) {
+            bsd_error(cpu, bsd_support::bad_address);
+            return;
+        }
+        if (*bitmap_count != 5) {
+            bsd_error(cpu, bsd_support::invalid_argument);
+            return;
+        }
+        std::array<std::uint32_t, 5> masks { };
+        for (std::uint32_t index = 0; index < 5; ++index) {
+            const auto mask = memory_.read32(registers[1] + 4U + index * 4U);
+            if (!mask) {
+                bsd_error(cpu, bsd_support::bad_address);
+                return;
+            }
+            masks[index] = *mask;
+        }
+        const hfs::AttributeRequest request { masks[0], masks[1], masks[2],
+            masks[3], masks[4] };
+        if (!hfs::MetadataProvider::valid_request(request) ||
+            request.volume != 0) {
+            bsd_error(cpu, bsd_support::invalid_argument);
+            return;
+        }
+        constexpr std::uint32_t fsopt_nofollow = 0x00000001U;
+        constexpr std::uint32_t fsopt_noinmemupdate = 0x00000002U;
+        constexpr std::size_t hfs_average_name_size = 22;
+        if ((registers[7] & ~(fsopt_nofollow | fsopt_noinmemupdate)) != 0U) {
+            bsd_error(cpu, bsd_support::invalid_argument);
+            return;
+        }
+        const auto requested = memory_.read32(registers[4]);
+        if (!requested) {
+            bsd_error(cpu, bsd_support::bad_address);
+            return;
+        }
+        if (*requested == 0 || registers[3] == 0) {
+            bsd_error(cpu, bsd_support::invalid_argument);
+            return;
+        }
+        if (registers[5] == 0 || registers[6] == 0) {
+            bsd_error(cpu, bsd_support::bad_address);
+            return;
+        }
+        std::vector<DirectoryEntry> listing;
+        append_directory_entries(descriptor->second, listing, directory_error);
+        if (directory_error) {
+            bsd_error(cpu, 5);
+            return;
+        }
+        std::sort(listing.begin(), listing.end(),
+            [](const DirectoryEntry& lhs, const DirectoryEntry& rhs) {
+                return lhs.name < rhs.name;
+            });
+        const auto total = listing.size();
+        const auto start = static_cast<std::size_t>(file_offsets_[fd]);
+        auto index = start;
+        std::uint32_t actual = 0;
+        std::vector<std::byte> bytes;
+        bool end_of_directory = true;
+        if (index < total) {
+            const auto average_record =
+                hfs::MetadataProvider::fixed_block_size(request) +
+                hfs_average_name_size;
+            const auto resid = static_cast<std::size_t>(registers[3]);
+            const auto maxentries =
+                std::min<std::size_t>(resid / average_record, *requested);
+            if (maxentries < 1) {
+                bsd_error(cpu, bsd_support::invalid_argument);
+                return;
+            }
+            const auto batch_end = std::min(total, index + maxentries);
+            std::size_t remaining = resid;
+            std::uint32_t allowed = *requested;
+            while (index < batch_end) {
+                const auto host_path = descriptor->second / listing[index].name;
+                const auto metadata =
+                    query_hfs_metadata(host_path, false, false);
+                if (!metadata) {
+                    bsd_error(cpu, 5);
+                    return;
+                }
+                const auto guest_path =
+                    (std::filesystem::path { "/" } /
+                        host_path.lexically_relative(rootfs_))
+                        .lexically_normal()
+                        .generic_string();
+                const auto record = hfs::MetadataProvider::pack_attributes(
+                    *metadata, request, guest_path);
+                if (record.size() > remaining)
+                    break;
+                bytes.insert(bytes.end(), record.begin(), record.end());
+                remaining -= record.size();
+                ++actual;
+                ++index;
+                if (--allowed == 0 || remaining < average_record)
+                    break;
+            }
+            end_of_directory = actual == total;
+            if (!(index < total && !end_of_directory && actual > 0))
+                end_of_directory = true;
+        }
+        if (!memory_.write32(registers[4], actual) ||
+            !memory_.write32(registers[5], static_cast<std::uint32_t>(start)) ||
+            !memory_.write32(registers[6], static_cast<std::uint32_t>(total)) ||
+            (!bytes.empty() && !memory_.copy_in(registers[2], bytes))) {
+            bsd_error(cpu, bsd_support::bad_address);
+            return;
+        }
+        file_offsets_[fd] = index;
+        bsd_success(cpu, end_of_directory ? 1U : 0U);
         return;
     }
     case 199: {

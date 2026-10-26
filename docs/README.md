@@ -55,6 +55,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Shared translation](explanation/emulator/shared-translation.md) | the design for translating the shared cache once |
 | [Guest memory under parallel execution](explanation/emulator/memory-model.md) | the design for two-core guests to use the page tables, the exclusive monitor, and what is still open |
 | [Load average and interface records](explanation/emulator/load-average-and-link-sysctl.md) | the `vm.loadavg` and `net.link.generic` answers, and what is not modelled |
+| [Directory attribute listing](explanation/emulator/directory-attributes.md) | `getdirentriesattr`: what is matched to XNU, and what is not |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
 | [Fatal-fault report](reference/emulator/fault-report.md) | the fields of the fatal line and the fault words, and how their addresses are named |
@@ -102,6 +103,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
+| [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |

@@ -598,9 +598,7 @@ void EmulatorSession::run()
     initial_memory->set_parallel_access(guest_processor_count > 1);
     ProcessLoader loader { rootfs, *initial_memory, guest_architecture,
         session_catalog.index(), darwin_abi.initial_apple_vector_abi, darwin_abi.address_layout };
-    std::vector<std::string> initial_environment {
-        "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "HOME=/var/root", "SHELL=/bin/sh"
-    };
+    std::vector<std::string> initial_environment;
     auto process =
         loader.load(binary, std::move(initial_arguments), initial_environment);
     Dynarmic::ExclusiveMonitor shared_exclusive_monitor {

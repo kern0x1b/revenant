@@ -381,7 +381,7 @@ names the first file it failed on, with its text, whether it exists, and the sta
 occurrence says what it read. The xmake patches 0018 (process exits) and 0019 (lock inodes) do not touch the publish
 path of patch 0015, and main's xmake was not run in the loop.
 
-## baselineOffset on iOS 6: ignored by UIKit string drawing (measured)
+## baselineOffset on iOS 6: ignored by drawing and layout (measured)
 
 The constant `NSBaselineOffsetAttributeName` is in the 6.1.3 image as `_NSBaselineOffsetAttributeName`, and its SDK mark
 is lowered in `toolchain/modules/apple/lowered.lua`. The 6.1.3 image exports no CoreText baseline-offset key
@@ -396,9 +396,52 @@ attribute. The backport now honours it in `drawAtPoint:` (`frameworks/Backports/
 the probe with the backport linked shifts the same ink by 6 points (top 33 to 39, 390 ink pixels, `shift=6 ink-equal=1`),
 the same as the control. On the host, `frameworks/Backports/tests/baseline_offset_oracle_test.lua` compares the replacement
 with macOS's own drawing, which honours the attribute: plain and offset text match pixel for pixel, and an offset that is
-not applied is detected. This covers single-line `drawAtPoint:` only. Runs are drawn one by one at their own font's
-top, so a mix of fonts in one line is not aligned on a shared baseline, and `drawInRect:` and the layout classes are not
-covered yet.
+not applied is detected.
+
+The CoreText path, which Telegram's text stack uses, is covered too. The attribute is ignored by `CTLineDraw`, `CTRunDraw` and
+`CTFrameDraw`, and by the line metrics: `CTLineGetTypographicBounds`, `CTLineGetImageBounds`, the origins from
+`CTFrameGetLineOrigins`, and `CTFramesetterSuggestFrameSizeWithConstraints`. The backport asks the system once, on its first
+draw, whether `CTLineDraw` honours the attribute, and passes every call through to the system where it does. `frameworks/Backports/src/CoreText/CTDrawBaselineOffset7.m`
+replaces those functions with one model, and `CTLineGetBoundsWithOptions` for the two options below. A run moves by its offset along the text matrix's y axis. A line's ascent
+rises by the offset and its descent falls by it, not below zero, and its leading is unchanged. A frame applies each line's
+change to the system's own origins and rounds each baseline. A suggested height is the frame's top down to the bottom of its
+last line, whole points up. The model matches macOS's CoreText for raised, lowered and mixed runs, one and two lines
+(`tests/baseline_offset/coretext_oracle.m`, `CT-LAYOUT all-equal=1`).
+
+On the device, `tests/emulate/baseline` links the replacement into its own probe and prints `ct-line`, `ct-run`, `ct-frame`,
+`ct-metrics`, `ct-image`, `ct-origin`, `ct-line-flipped`, `draw-flipped`, `ct-bounds` and `ct-trailing` next to the system's
+answers. The numbers those lines print have not been recorded on this branch, so this section quotes none of them; the
+emulate case is run by CI, and its output is the measurement.
+
+The oracle is not iOS 13+. No simulator runtime is installed on this machine, so no iOS 13+ CoreText exists to compare with.
+macOS's CoreText agrees with the model in unflipped contexts, and Apple's iOS 16.5 SDK documents the attribute as a shift
+"above the text baseline" (`CTStringAttributes.h`). macOS does not agree in a flipped context with a flipped text matrix: its
+raised line moves down by 6, and AppKit's `drawAtPoint:` does not move it. That is the configuration Telegram's `TextNode`
+draws in (`context.textMatrix = CGAffineTransform(scaleX: 1.0, y: -1.0)`).
+
+Unverified against iOS 13+: the flipped direction. The backport follows the documented direction, "above the text baseline",
+in a flipped context with a flipped text matrix, and that is what the iOS 6.1.3 device draws. Nothing here shows iOS 13+
+does the same. To verify it, either run a simulator runtime for iOS 13 or later on a Mac (none is installed here, and
+`xcrun simctl` is absent), drawing the same raised `CTLine` in that configuration and comparing it with the device's
+`ct-line-flipped`; or take a screenshot of Telegram's `TextNode` with raised text on a modern device and compare it with the
+same text drawn by the backport. Neither has been done.
+
+`CTLineGetBoundsWithOptions` is covered for the two options Telegram passes. `kCTLineBoundsUseGlyphPathBounds` (seven call
+sites) is the glyphs' ink, the image model: on macOS it equals `CTLineGetImageBounds` for raised, lowered, mixed and trailing-space
+text (`CT-BOUNDS ... glyph=1`). `kCTLineBoundsUseOpticalBounds` (two call sites) does not move with the offset on macOS, so the
+system's answer stands (`optical=1`). `CTLineGetTrailingWhitespaceWidth` (called from `TextNode` and the GraphCore text utilities) is
+not wrapped: it is the same with and without the offset on macOS (`trailing=1`), and on the device it is the same too
+(`ct-trailing plain=13.344 raised=13.344`). On the device the probe prints the glyph-path and optical bounds of the same two lines (`ct-bounds`) and the trailing width
+(`ct-trailing`) for the system and for the backport.
+
+Not covered: the other `CTLineGetBoundsWithOptions` options, vertical text, and `drawInRect:` for several lines. A single-line
+`drawInRect:` has no shift on either platform, and the bounds grow by 6. The model relies on the run-level
+calls `CTRunGetTypographicBounds` and `CTRunGetImageBounds` returning plain values on both platforms, which the device and host
+results support. The application's references to these functions reach the backport through the CoreText entries of
+`toolchain/modules/apple/flat_classes.lua`, which list the functions the app link cuts from `CoreText.tbd` and binds flat, as it
+does for the Foundation classes. A flat bind takes the first loaded image that exports the symbol, so the routing holds only
+where the backport library loads before CoreText. The host test covers the link (`toolchain/tests/addon/flat_classes_test.lua`
+binds `CTLineDraw` dynamically with the stubs and to CoreText without them); the load order on a device is not measured.
 
 The probe's first runs trapped in `[UIFont systemFontOfSize:]`: ARM exception 8 at 0x311150d4, a `udf #254` in
 CoreFoundation's trap stub, which `_CFRuntimeCreateInstance` calls through a callback slot after `_GSFontCreateWithName`

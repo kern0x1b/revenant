@@ -8,14 +8,53 @@ local function ios6(sdk)
     return {"-target", "armv7-apple-ios6.0", "-miphoneos-version-min=6.0", "-Wno-incompatible-sysroot", "-isysroot", sdk}
 end
 
-local function binding(binary)
+local FUNCTION = "_CTLineDraw"
+
+local FUNCTION_PROBE = "#include <CoreText/CoreText.h>\nvoid *keep __attribute__((used)) = (void *)CTLineDraw;\nint main(void) { return 0; }\n"
+
+local function binding(binary, symbol)
     local lines = {}
     for line in os.iorunv("nm", {"-m", binary}):gmatch("[^\n]+") do
-        if line:find(SYMBOL, 1, true) then
+        if line:find(symbol or SYMBOL, 1, true) then
             table.insert(lines, line)
         end
     end
     return table.concat(lines, "\n")
+end
+
+local function function_failures(arguments, output, stubs, found)
+    local source = path.join(output, "function.c")
+    io.writefile(source, FUNCTION_PROBE)
+    local object = path.join(output, "function.o")
+    local log = path.join(output, "function.log")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-c", source, "-o", object}), {try = true, stdout = log, stderr = log}) ~= 0 then
+        table.insert(found, "the armv7 iOS 6 CoreText probe does not compile: " .. (io.readfile(log) or ""))
+        return
+    end
+    local plain = path.join(output, "function-plain")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {object, "-framework", "CoreText", "-o", plain}), {try = true, stdout = log, stderr = log}) ~= 0 then
+        table.insert(found, "the CoreText control link failed: " .. (io.readfile(log) or ""))
+        return
+    end
+    if not binding(plain, FUNCTION):find("(from CoreText)", 1, true) then
+        table.insert(found, "the control link does not bind CTLineDraw to CoreText: " .. binding(plain, FUNCTION))
+    end
+    local tbd = io.readfile(path.join(stubs, "CoreText.framework", "CoreText.tbd"))
+    if tbd:find("[%s,%[']" .. FUNCTION .. "'?[,%]%s]") then
+        table.insert(found, "the CoreText stub still lists CTLineDraw")
+    end
+    local app = path.join(output, "function-app")
+    local app_log = path.join(output, "function-app.log")
+    local app_linked = os.execv(arguments.clang, table.join(ios6(arguments.sdk), {object, "-framework", "CoreText", "-o", app},
+                                flat.app_link_flags(arguments.sdk, stubs)), {try = true, stdout = app_log, stderr = app_log})
+    if app_linked ~= 0 then
+        table.insert(found, "the app link of the CoreText probe with the flat-class stubs failed: " .. (io.readfile(app_log) or ""))
+        return
+    end
+    local bound = binding(app, FUNCTION)
+    if bound:find("(from CoreText)", 1, true) or not bound:find("(dynamically looked up)", 1, true) then
+        table.insert(found, "the CTLineDraw reference binds to CoreText instead of the flat namespace: " .. bound)
+    end
 end
 
 function failures(arguments)
@@ -90,5 +129,6 @@ function failures(arguments)
     if text:find("NSURLComponents", 1, true) then
         table.insert(found, "a flat-bound class in the table was reported missing: " .. text)
     end
+    function_failures(arguments, output, stubs, found)
     return found
 end
