@@ -243,6 +243,18 @@ struct GuestPageBacking {
     [[nodiscard]] bool enable_shared_write_tracking();
     [[nodiscard]] bool shared_write_tracking_enabled() const;
     [[nodiscard]] static std::uint64_t shared_write_tracking_epoch();
+    void hold_retired_reference() noexcept
+    {
+        retired_references_.fetch_add(1U, std::memory_order_relaxed);
+    }
+    void release_retired_reference() noexcept
+    {
+        retired_references_.fetch_sub(1U, std::memory_order_relaxed);
+    }
+    [[nodiscard]] std::size_t retired_reference_count() const noexcept
+    {
+        return retired_references_.load(std::memory_order_relaxed);
+    }
     [[nodiscard]] std::uint64_t shared_write_generation() const;
     void mark_shared_write();
     void publish_shared_write() noexcept;
@@ -265,6 +277,7 @@ private:
     bool has_file_source_ { };
     std::atomic<bool> shared_write_tracking_ { };
     std::atomic<std::uint64_t> shared_write_generation_ { };
+    std::atomic<std::size_t> retired_references_ { };
 };
 
 struct FilePageCacheLimits {

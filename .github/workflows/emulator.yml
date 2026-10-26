@@ -9,6 +9,7 @@ on:
         options:
           - boot
           - measure
+          - probe
         default: boot
       ticks:
         description: The CPU ticks every boot of the run is bounded by
@@ -104,6 +105,32 @@ jobs:
           key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
 
       - uses: actions/cache/restore@v4
+        if: inputs.job == 'probe'
+        id: dyld60
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Fetch the iOS 6.0 armv7 shared cache the probe's guest package is configured against
+        if: inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/save@v4
+        if: success() && inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Write the iOS 6.0 inventory from the shared cache
+        if: inputs.job == 'probe'
+        timeout-minutes: 30
+        run: |
+          if [ ! -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json" ]; then
+            ./xmakew firmware -P . -y --arch=armv7 classes 6.0
+          fi
+
+      - uses: actions/cache/restore@v4
         id: dyld
         with:
           path: .cache/dyld/6.1.3
@@ -172,6 +199,23 @@ jobs:
           (cd "$RUNNER_TEMP/control" && ./xmakew f -P . -y -m release && ./xmakew build -P . emulator)
           df -h /
 
+      - name: Run the libdispatch connect probe on two cores and on one
+        if: inputs.job == 'probe'
+        timeout-minutes: 180
+        run: |
+          out="$RUNNER_TEMP/out"
+          probe="$RUNNER_TEMP/probe"
+          mkdir -p "$probe"
+          status=0
+          for cores in 2 1; do
+            folder="$probe/cores-$cores"
+            mkdir -p "$out/probe-cores-$cores"
+            OUT_DIR="$folder" ./xmakew lua emulator/tests/guest/connect_dispatch/connect.lua iPhone4,1 6.1.3 "$cores" > "$out/probe-cores-$cores/probe.log" 2>&1 || status=1
+            cp "$folder"/*.log "$out/probe-cores-$cores/" 2>/dev/null || true
+            grep -a '^connect_writable ' "$out/probe-cores-$cores/probe.log" || true
+          done
+          exit "$status"
+
       - name: Boot the iOS 6.1.3 device to SpringBoard
         if: inputs.job == 'boot'
         timeout-minutes: 60
@@ -232,7 +276,7 @@ jobs:
       - name: Delete the scratch of the run
         if: always()
         run: |
-          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control"; do
+          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" "$RUNNER_TEMP/probe"; do
             if [ -e "$scratch" ]; then
               chmod -R u+w "$scratch"
               rm -rf "$scratch"

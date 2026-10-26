@@ -3762,6 +3762,8 @@ void EmulatorSession::run()
                         return guest_parallelism_policy.should_serialize(
                             prepared.scheduled.thread);
                     }));
+        for (auto& prepared : prepared_slices)
+            prepared.runtime->memory->reclaim_retired_backings();
         for (auto& prepared : prepared_slices) {
             prepared.deferred_svc = parallel_guest_batch;
             prepared.execution.cpu->set_svc_dispatch_mode(

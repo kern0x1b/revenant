@@ -182,6 +182,13 @@ target("emulator_materialized_page_counts_test")
     add_deps("emulator_foundation")
     add_tests("materialized_page_counts")
 
+target("emulator_copy_on_write_detach_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("tests/unit/copy_on_write_detach_test.cpp")
+    add_deps("emulator_foundation")
+    add_tests("copy_on_write_detach")
+
 target("emulator_fault_dump_test")
     set_kind("binary")
     set_default(false)
