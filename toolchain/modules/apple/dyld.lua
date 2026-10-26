@@ -617,7 +617,7 @@ local LISTED_KEYS = {["symbols"] = "", ["weak-symbols"] = "", ["objc-classes"] =
 local SCRIPTDIR = os.scriptdir()
 
 local function stored(name, under)
-    return path.join(under or path.directory(root()), "cache", name)
+    return path.join(under or path.join(workspace.scratch(), "dyld"), name)
 end
 
 local function kept_text(file)

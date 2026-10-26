@@ -25,7 +25,7 @@ package("swiftui")
         os.mkdir(project)
         io.writefile(path.join(project, "xmake.lua"), table.concat({
             "add_repositories(\"revenant " .. root .. "\")",
-            "add_addons(\"revenant\")",
+            "add_addons(\"revenant\", {sourcedir = \"" .. path.join(root, "toolchain") .. "\"})",
             "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
             "set_config(\"apple_sdk\", \"" .. package:config("apple_sdk") .. "\")",
             "includes(\"@addon/revenant/apple-ios\")",
@@ -38,9 +38,9 @@ package("swiftui")
             "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")",
             ""}, "\n"))
         io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
-        os.vrunv(os.programfile(), {"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
-        os.vrunv(os.programfile(), {"build", "-y", "SwiftUI"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
-        os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "SwiftUI"}, {curdir = project})
+        os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+        os.vrunv(os.programfile(), {"build", "-P", project, "-y", "SwiftUI"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+        os.vrunv(os.programfile(), {"install", "-P", project, "-y", "-o", package:installdir(), "SwiftUI"}, {curdir = project})
         package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"))
     end)
 

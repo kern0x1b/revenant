@@ -1,13 +1,15 @@
 import("core.base.json")
 
 local root = path.directory(os.scriptdir())
-local home = os.getenv("HOME")
+local home = import("@addon.revenant.workspace", {anonymous = true}).home()
+local emulator = import("@addon.revenant.emulator", {anonymous = true})
 local defaults = {
     emulator = path.join(root, "build", "macosx", "arm64", "release", "emulator"),
-    firmware = path.join(home, ".revenant", "firmware", "rootfs", "iPhone4,1", "6.1.3_10B329"),
+    firmware = path.join(home, "firmware", "rootfs", "iPhone4,1", "6.1.3_10B329"),
     device = "iPhone4,1",
+    build = "10B329",
     cap = "2700",
-    out = path.join(home, ".revenant", "cache", "emulator-gtest")
+    out = path.join(home, "scratch", "emulator-gtest")
 }
 
 local function options(args)
@@ -40,7 +42,12 @@ function main(...)
     os.mkdir(run)
 
     local rootfs = path.join(run, "rootfs")
-    os.vrunv("cp", {"-c", "-R", firmware, rootfs})
+    emulator.clone(firmware, rootfs)
+    local device = given.device or defaults.device
+    local host = emulator.host_cache(device, given.build or defaults.build)
+    local tmp = path.join(run, "tmp")
+    emulator.directory(host)
+    emulator.directory(tmp)
     local vroot = path.join(rootfs, "var", "root")
     os.mkdir(vroot)
     os.cp(binary, path.join(vroot, name))
@@ -53,9 +60,9 @@ function main(...)
     try {
         function ()
             os.execv("perl", {"-e", "alarm " .. (given.cap or defaults.cap) .. "; exec @ARGV", emulator, "boot",
-                              "--rootfs", rootfs, "--device", given.device or defaults.device, "--binary", guest,
+                              "--rootfs", rootfs, "--device", device, "--host-cache", host, "--binary", guest,
                               "--display", "headless", "--gles-backend", "software", "--time-scale", "10",
-                              "--perf-summary"}, {stdout = log, stderr = log})
+                              "--perf-summary"}, {stdout = log, stderr = log, envs = {TMPDIR = tmp}})
         end,
         catch { function () end }
     }
@@ -73,6 +80,8 @@ function main(...)
         tests, failures = data.tests or 0, data.failures or 0
         os.cp(results, path.join(run, "gtest.json"))
     end
+    emulator.remove(rootfs)
+    emulator.remove(tmp)
     print("%s: %s, %d tests, %d failures, %d completed (%s)", name,
           finished and "finished" or "did not finish", tests, failures, completed, run)
     if not finished or failures > 0 or tests == 0 then

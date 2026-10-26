@@ -49,9 +49,9 @@ shows: the app came up, drew, and took the taps you sent.
 Check: `xmake where emulator` prints an install folder; the configure output has no `error:`.
 
 **Disk and time, first use of a device and release:** the root filesystem is downloaded from
-Apple's servers and unpacked into `~/.revenant/firmware/rootfs/<device>/<version>_<build>/` (about
+Apple's servers and unpacked into `.cache/firmware/rootfs/<device>/<version>_<build>/` (about
 1.2 GB for an iOS 6 iPhone; skill `firmware`), then booted once past its first-boot data migration
-into a **golden image** under `~/.revenant/emulator/golden.noindex/` (about 1.5 GB, about 5 host
+into a **golden image** under `.cache/emulator/golden.noindex/` (about 1.5 GB, about 5 host
 minutes for iOS 6). Every later install and run is an APFS clone of it: seconds and almost no
 space. A golden image is keyed by device, build and the emulator package: a changed emulator, which is a new
 package, builds a new golden image and removes the old one.
@@ -112,7 +112,7 @@ with `error: <verdict> on <device> <version> (<build>) in …; the emulator log 
 | `boot-blocked(<where>…)` | the command never ran, although the image booted at `install`: the emulator, a process in a crash loop, SpringBoard or the data migration stopped the boot; a guest crash report's reason and a request that never got its reply are named |
 
 `run` prints the command's own standard output and error before the verdict. The evidence stays in
-`~/.revenant/emulator/images.noindex/<project>-<hash>/<device>_<build>/run/`: `verdict.json`
+`.cache/emulator/images.noindex/<project>-<hash>/<device>_<build>/run/`: `verdict.json`
 (`state`, `guest_seconds`, `host_seconds`, `scale`), `results/test.stdout`, `results/test.stderr`,
 `results/reports/` (the guest's crash reports), `emulator.log` and `frame.png`. It is replaced by
 the next run of the same device and release: copy what you cite into the project's `.logs/`.

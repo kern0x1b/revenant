@@ -1,7 +1,7 @@
 local USAGE = [[usage: ./xmakew l frameworks/WebKit/tests/device/gl-present.lua [HOST]
   checks that a WebGL canvas the GPU drew reaches the screen: it loads a canvas cleared to red,
   prints how much of the page area is red, and fails when the answer is absent. The screenshot
-  goes to `$HOME/.revenant/cache/<task>/webkit-shots/gl-present.png`.]]
+  goes to `<cache>/scratch/<task>/webkit-shots/gl-present.png`, where `<cache>` is the cache of the main checkout.]]
 
 function main(host)
     if host == "--help" then

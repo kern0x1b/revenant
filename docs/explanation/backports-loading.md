@@ -37,7 +37,7 @@ Take (f), built from (c) and (e). Keep the wrappers in `/usr/lib/revenant/org.re
 
 ## To measure on a device
 
-1. The dyld build on iOS 6.1.3: `strings -a` on the dyld binary of the release under `~/.revenant/dyld/<release>/`, for `dyld-`. This settles whether dyld-210.2.3 is the reference.
+1. The dyld build on iOS 6.1.3: `strings -a` on the dyld binary of the release under `.cache/dyld/<release>/`, for `dyld-`. This settles whether dyld-210.2.3 is the reference.
 2. Missing-symbol timing: an app with a non-weak import the wrapper lacks. Does it die at launch or at first call, and what does syslog say? Then the `weak_import` variant: is the pointer NULL?
 3. Native load set: `otool -L` on a built app against the count of `lib*Backports.dylib` in `linkdirs`. Then `_dyld_image_count()` and resident size from `task_info` with zero and one wrapper linked.
 4. C shadowing on iOS 7 or later: call a backported C function and `dladdr` its address. The image path says which implementation ran.

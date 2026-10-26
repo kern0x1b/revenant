@@ -20,9 +20,9 @@ function install(package, opt)
     table.join2(lines, {"set_defaultplat(\"iphoneos\")", "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")", ""})
     io.writefile(path.join(project, "xmake.lua"), table.concat(lines, "\n"))
     io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
-    os.vrunv(os.programfile(), {"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
-    os.vrunv(os.programfile(), table.join({"build", "-y"}, opt.targets), {curdir = project, envs = {REVENANT_RELEASE = "1"}})
-    os.vrunv(os.programfile(), table.join({"install", "-y", "-o", package:installdir()}, opt.targets), {curdir = project})
+    os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+    os.vrunv(os.programfile(), table.join({"build", "-P", project, "-y"}, opt.targets), {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+    os.vrunv(os.programfile(), table.join({"install", "-P", project, "-y", "-o", package:installdir()}, opt.targets), {curdir = project})
     if opt.modules then
         package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"))
     end

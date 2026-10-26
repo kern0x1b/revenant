@@ -365,7 +365,7 @@ function main()
         sdk = sdkfiles.sdk_folder()
     end
     local sources = path.absolute(path.join(os.scriptdir(), "..", "src", "UIKit"))
-    local root = path.join(workspace.home(), "cache", "uikit-test")
+    local root = path.join(workspace.scratch(), "uikit-test")
     os.tryrm(root)
     local objects, total = 0, 0
     for _, area in ipairs(AREAS) do

@@ -77,7 +77,7 @@ function failures(opt)
     local envs = {XMAKE_GLOBALDIR = store, XMAKE_MAIN_REPO = fixtures.empty_repository(folder)}
     for _, recipe in ipairs(recipes) do
         local log = path.join(folder, recipe.name .. ".log")
-        local ok = os.execv(os.programfile(), {"require", "-y"}, {curdir = recipe.project, try = true,
+        local ok = os.execv(os.programfile(), {"require", "-P", recipe.project, "-y"}, {curdir = recipe.project, try = true,
                                                                   stdout = log, stderr = log, envs = envs})
         if ok ~= 0 then
             table.insert(found, "the install from " .. recipe.name .. " failed: " .. (io.readfile(log) or ""))
