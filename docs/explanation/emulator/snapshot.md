@@ -297,6 +297,7 @@ taken while the value is set.
 | `last_interactive_host_activity` | 2763 | host time of the last input | rebuild |
 | `interaction_generation` | 2764 | input generation counter, starts at 1 | save |
 | `input_receiver_process` | 2765 | the process that receives input | save; refuse while input is pending |
+| `guest_tick_clock` remainder | 388 | the fraction of a nanosecond carried between the rounds that advance the kernel clock | save as `guest_time_remainder`; set on the clock before the first round after a restore |
 | `pending_touch_input_completion`, `pending_button_input_completion` | 495, 496 | input in flight | refuse while set |
 | `touch_replay`, `live_control`, `live_button_scheduler`, `live_touch_scheduler` | 471 to 474 | input replay and the control channel | refuse while a replay is active; rebuild otherwise |
 | `display_presenter`, `frame_file_presenter` | 469, 470 | host display output | rebuild |

@@ -16,6 +16,13 @@ target("emulator_network_host_readiness_test")
     add_deps("emulator_network")
     add_tests("network.host_readiness")
 
+target("emulator_network_wifi_snapshot_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/wifi_state_snapshot_test.cpp")
+    add_deps("emulator_network")
+    add_tests("network.wifi_snapshot")
+
 target("emulator_network_host_readiness_bench")
     set_kind("binary")
     set_default(false)

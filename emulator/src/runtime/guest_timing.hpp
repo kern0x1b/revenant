@@ -41,6 +41,19 @@ public:
                scaled_fraction / ticks_per_second_;
     }
 
+    [[nodiscard]] std::uint64_t remainder() const
+    {
+        return remainder_;
+    }
+
+    void set_remainder(std::uint64_t value)
+    {
+        if (value >= ticks_per_second_) {
+            throw std::invalid_argument { "guest time remainder out of range" };
+        }
+        remainder_ = value;
+    }
+
 private:
     std::uint64_t ticks_per_second_ { };
     std::uint64_t remainder_ { };

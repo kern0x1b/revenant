@@ -310,6 +310,18 @@ CoreAudioHle::CoreAudioHle(
     }
 }
 
+void CoreAudioHle::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, buffer_frame_size_);
+    snapshot::save(out, next_native_io_proc_id_);
+}
+
+void CoreAudioHle::load(snapshot::Reader& in)
+{
+    snapshot::load(in, buffer_frame_size_);
+    snapshot::load(in, next_native_io_proc_id_);
+}
+
 void CoreAudioHle::set_service(std::shared_ptr<AudioService> service)
 {
     service_ = std::move(service);

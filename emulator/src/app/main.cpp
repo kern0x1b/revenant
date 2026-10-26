@@ -90,6 +90,7 @@ std::string usage()
            "[--shared-cache GUEST_PATH] [--thumb]\n"
            "  emulator boot --rootfs DIR [--device PROFILE] [--ios-build CODE] "
            "[--binary /sbin/launchd] [--guest-command COMMAND] [--ticks N] "
+           "[--census-output FILE] [--snapshot-out FILE] [--snapshot-in FILE] "
            "[--cores N] [--jit-cache-mib 8..512] "
            "[--no-shared-image-slab] [--image-slab-mib N] "
            "[--jit-cache-budget-mib 256..4096] "
@@ -1153,7 +1154,28 @@ void boot(const std::vector<std::string>& args, Output& output)
     options.baseband_input = option(args, "--baseband-input");
     options.baseband_output = option(args, "--baseband-output");
     options.quiet_output = !flag(args, "--verbose");
-    DesktopHost host;
+    const auto census_output = option(args, "--census-output");
+    if (census_output && !options.ticks) {
+        throw std::runtime_error {
+            "--census-output needs --ticks, which sets the tick it is taken at"
+        };
+    }
+    options.snapshot_output = option(args, "--snapshot-out");
+    if (options.snapshot_output && !options.ticks)
+        throw std::runtime_error { "--snapshot-out needs --ticks" };
+    if (options.snapshot_output &&
+        *options.ticks % bounded_tick_alignment != 0)
+        throw std::runtime_error {
+            "--snapshot-out needs --ticks to be a multiple of " +
+            std::to_string(bounded_tick_alignment)
+        };
+    options.snapshot_input = option(args, "--snapshot-in");
+    if (options.snapshot_input && !options.ticks)
+        throw std::runtime_error {
+            "--snapshot-in needs --ticks, the total tick count of the restored run"
+        };
+    DesktopHost host { census_output ? std::filesystem::path { *census_output }
+                                     : std::filesystem::path { } };
     EmulatorSession session { std::move(options), host, output };
     session.run();
 }
@@ -1265,6 +1287,9 @@ int main(int argc, char** argv)
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "emulator: " << error.what() << '\n';
+        return 1;
+    } catch (...) {
+        std::cerr << "emulator: unknown error, not a std::exception\n";
         return 1;
     }
 }

@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include "foundation/snapshot_io.hpp"
+
 namespace emulator {
 
 class UserlandHleCall;
@@ -27,6 +29,8 @@ enum class DarwinNotifyStateAbi : std::uint8_t {
 };
 
 class DarwinNotifyStateHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using StateProvider = std::function<std::uint64_t()>;
     using NotificationDispatcher = std::function<void(std::uint32_t process_id,
@@ -49,6 +53,8 @@ public:
     void publish(std::string_view name);
     void observe_post(std::string_view name, std::uint32_t process_id);
     void reset();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     void initialize(UserlandHleCall& call);
@@ -60,12 +66,16 @@ private:
     void cancel(UserlandHleCall& call);
     void record_registration(std::string name, std::uint32_t token,
         std::uint32_t process_id, std::uint32_t port_name);
+    void publish_registration_locked(std::string name,
+        std::uint32_t process_id, std::uint32_t port_name,
+        std::uint32_t token);
     [[nodiscard]] std::uint32_t allocate_virtual_token();
     [[nodiscard]] bool native_server_ready() const;
 
     using RegistrationKey = std::pair<std::uint32_t, std::uint32_t>;
     struct PublishedRegistration {
         std::string name;
+        std::uint32_t port_name { };
         std::function<void()> notify;
     };
     struct SharedBus {

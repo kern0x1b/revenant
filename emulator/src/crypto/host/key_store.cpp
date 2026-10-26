@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <string_view>
 #include <fcntl.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
@@ -82,6 +83,19 @@ std::shared_ptr<KeyStore> KeyStore::open(
         return { };
     }
     return std::shared_ptr<KeyStore> { new KeyStore { secret.bytes } };
+}
+
+std::optional<std::array<std::byte, 32>> KeyStore::identity() const
+{
+    constexpr std::string_view label { "emulator key store identity v1" };
+    std::array<std::byte, 32> digest { };
+    unsigned digest_size = 0;
+    if (!HMAC(EVP_sha256(), secret_.data(), static_cast<int>(secret_.size()),
+            reinterpret_cast<const unsigned char*>(label.data()), label.size(),
+            reinterpret_cast<unsigned char*>(digest.data()), &digest_size) ||
+        digest_size != digest.size())
+        return std::nullopt;
+    return digest;
 }
 
 std::optional<std::vector<std::byte>> KeyStore::wrap(

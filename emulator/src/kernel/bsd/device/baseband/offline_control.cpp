@@ -66,4 +66,15 @@ void OfflineControlPlane::reset() { lines_.clear(); }
 
 void OfflineControlPlane::reset(std::uint32_t channel) { lines_.erase(channel); }
 
+void OfflineControlPlane::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, lines_);
+}
+
+void OfflineControlPlane::load(snapshot::Reader& in)
+{
+    lines_.clear();
+    snapshot::load(in, lines_);
+}
+
 }

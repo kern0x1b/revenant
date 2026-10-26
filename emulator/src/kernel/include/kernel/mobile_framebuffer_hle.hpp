@@ -16,6 +16,7 @@
 #include <set>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "graphics/host_graphics.hpp"
 
 namespace emulator {
@@ -31,6 +32,8 @@ class UserlandHleRegistry;
 class SurfaceStore;
 
 class MobileFramebufferHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     MobileFramebufferHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,
@@ -49,6 +52,9 @@ public:
     void set_semantic_presentation_handler(
         std::function<void(std::uint32_t)> handler);
     [[nodiscard]] bool has_active_layers() const;
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     enum class SubmissionResult : std::uint8_t {

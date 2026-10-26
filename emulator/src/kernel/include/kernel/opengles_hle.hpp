@@ -19,6 +19,7 @@
 #include <string_view>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "graphics/display.hpp"
 #include "graphics/gles_abi.hpp"
 #include "graphics/gles_math.hpp"
@@ -41,6 +42,8 @@ class SurfaceStore;
 struct KernelSharedState;
 
 class OpenGlesHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     OpenGlesHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,
@@ -57,6 +60,9 @@ public:
     {
         return resources_;
     }
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     friend class OpenGlesDispatchHle;

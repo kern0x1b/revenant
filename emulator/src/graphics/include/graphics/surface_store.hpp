@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "foundation/file_page_cache.hpp"
+#include "foundation/snapshot_io.hpp"
 
 namespace emulator {
 
@@ -106,6 +107,8 @@ constexpr std::uint32_t surface_bytes_per_pixel(std::uint32_t pixel_format)
 }
 
 class SurfaceStore {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     struct CpuSynchronizationOptions {
         bool avoid_sync { };
@@ -138,6 +141,8 @@ public:
     void reset();
     void inherit_state(const SurfaceStore& parent);
     void share_registry(const SurfaceStore& peer);
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
     [[nodiscard]] std::uint32_t allocate_identifier();
     [[nodiscard]] std::uint64_t publication_watermark() const;
     [[nodiscard]] bool publish(AddressSpace& memory, Backing backing);

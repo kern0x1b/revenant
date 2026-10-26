@@ -7,6 +7,7 @@
 
 #include "foundation/darwin_notify_state_hle.hpp"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -131,6 +132,83 @@ void DarwinNotifyStateHle::reset()
     token_names_.clear();
     virtual_tokens_.clear();
     next_virtual_token_ = 0x4000'0000U;
+}
+
+void DarwinNotifyStateHle::save(snapshot::Writer& out) const
+{
+    std::scoped_lock lock { mutex_, bus_->mutex };
+    std::vector<std::string> provider_names;
+    for (const auto& [name, provider] : providers_) {
+        static_cast<void>(provider);
+        provider_names.push_back(name);
+    }
+    snapshot::save(out, provider_names);
+    snapshot::save(out, abi_);
+    snapshot::save(out, token_names_);
+    snapshot::save(out, virtual_tokens_);
+    snapshot::save(out, next_virtual_token_);
+    snapshot::save(out, owned_registrations_);
+    snapshot::save(out, static_cast<std::uint64_t>(bus_->registrations.size()));
+    for (const auto& [key, registration] : bus_->registrations) {
+        if (!owned_registrations_.contains(key))
+            throw snapshot::RefusedError { "notify.foreign_registration" };
+        snapshot::save(out, key);
+        snapshot::save(out, registration.name);
+        snapshot::save(out, registration.port_name);
+    }
+}
+
+void DarwinNotifyStateHle::load(snapshot::Reader& in)
+{
+    std::scoped_lock lock { mutex_, bus_->mutex };
+    std::vector<std::string> provider_names;
+    snapshot::load(in, provider_names);
+    DarwinNotifyStateAbi abi { };
+    snapshot::load(in, abi);
+    std::map<std::uint32_t, std::string> token_names;
+    snapshot::load(in, token_names);
+    std::set<std::uint32_t> virtual_tokens;
+    snapshot::load(in, virtual_tokens);
+    std::uint32_t next_virtual_token { };
+    snapshot::load(in, next_virtual_token);
+    std::set<RegistrationKey> owned_registrations;
+    snapshot::load(in, owned_registrations);
+    std::uint64_t registration_count { };
+    snapshot::load(in, registration_count);
+    std::vector<std::pair<RegistrationKey, PublishedRegistration>> published;
+    for (std::uint64_t index = 0; index < registration_count; ++index) {
+        RegistrationKey key { };
+        PublishedRegistration registration;
+        snapshot::load(in, key);
+        snapshot::load(in, registration.name);
+        snapshot::load(in, registration.port_name);
+        if (!owned_registrations.contains(key))
+            throw snapshot::FormatError { "notify registration is not owned" };
+        published.emplace_back(key, std::move(registration));
+    }
+
+    if (abi != abi_)
+        throw snapshot::FormatError { "notify ABI differs from the wiring" };
+    if (!std::equal(provider_names.begin(), provider_names.end(),
+            providers_.begin(), providers_.end(),
+            [](const std::string& name, const auto& provider) {
+                return name == provider.first;
+            })) {
+        throw snapshot::FormatError { "notify providers differ from the wiring" };
+    }
+    if (!published.empty() && !dispatcher_)
+        throw snapshot::FormatError { "notify registrations need a dispatcher" };
+
+    for (const auto& key : owned_registrations_)
+        bus_->registrations.erase(key);
+    owned_registrations_ = std::move(owned_registrations);
+    token_names_ = std::move(token_names);
+    virtual_tokens_ = std::move(virtual_tokens);
+    next_virtual_token_ = next_virtual_token;
+    for (auto& [key, registration] : published) {
+        publish_registration_locked(std::move(registration.name), key.first,
+            registration.port_name, key.second);
+    }
 }
 
 void DarwinNotifyStateHle::initialize(UserlandHleCall& call)
@@ -332,14 +410,20 @@ void DarwinNotifyStateHle::record_registration(std::string name,
     token_names_.insert_or_assign(token, name);
     if (port_name == 0 || !dispatcher_)
         return;
-    const auto key = RegistrationKey { process_id, token };
+    publish_registration_locked(std::move(name), process_id, port_name, token);
+    owned_registrations_.insert(RegistrationKey { process_id, token });
+}
+
+void DarwinNotifyStateHle::publish_registration_locked(std::string name,
+    std::uint32_t process_id, std::uint32_t port_name, std::uint32_t token)
+{
     const auto dispatcher = dispatcher_;
     bus_->registrations.insert_or_assign(
-        key, PublishedRegistration {
-                 std::move(name), [dispatcher, process_id, port_name, token] {
-                     dispatcher(process_id, port_name, token);
-                 } });
-    owned_registrations_.insert(key);
+        RegistrationKey { process_id, token },
+        PublishedRegistration { std::move(name), port_name,
+            [dispatcher, process_id, port_name, token] {
+                dispatcher(process_id, port_name, token);
+            } });
 }
 
 std::uint32_t DarwinNotifyStateHle::allocate_virtual_token()

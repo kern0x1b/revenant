@@ -19,6 +19,9 @@
 
 namespace emulator {
 
+inline constexpr std::uint64_t bounded_tick_alignment = std::uint64_t { 1 }
+    << 20;
+
 enum class JitProfileMode : std::uint8_t {
     Adaptive,
     Off,
@@ -65,6 +68,8 @@ struct BootOptions {
     std::uint64_t startup_profile_blocks { 64 };
     std::uint64_t startup_profile_budget_us { 4'000 };
     std::optional<std::string> frame_output;
+    std::optional<std::string> snapshot_output;
+    std::optional<std::string> snapshot_input;
     std::optional<std::filesystem::path> boot_logo;
     std::optional<std::string> touch_replay;
     std::optional<std::uint16_t> gdb_port;

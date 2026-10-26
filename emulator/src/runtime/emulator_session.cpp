@@ -19,8 +19,11 @@
 #include "resource_policy.hpp"
 #include "runtime/live_button_scheduler.hpp"
 #include "runtime/live_touch_scheduler.hpp"
+#include "runtime/loop_carried_state.hpp"
 #include "runtime/realtime_pacer.hpp"
 #include "runtime/session_host.hpp"
+#include "runtime/session_snapshot.hpp"
+#include "runtime/session_state.hpp"
 #include "session_catalog.hpp"
 #include "session_debugger.hpp"
 #include "session_diagnostics.hpp"
@@ -195,20 +198,6 @@ namespace {
     };
 
 }
-
-struct LoopCarriedState {
-    std::optional<XnuThreadId> last_serial_thread;
-    std::optional<XnuThreadId> scheduler_handoff_thread;
-    std::optional<XnuThreadId> display_urgent_thread;
-    std::optional<XnuThreadId> display_urgent_receiver_thread;
-    std::optional<XnuThreadId> display_yielded_thread;
-    std::uint64_t display_inflight_callback_sequence { };
-    std::uint64_t diagnostic_display_yield_count { };
-    std::uint64_t remaining_ticks { };
-    std::uint64_t executed_ticks_since_catch_up { };
-    std::uint64_t interaction_generation { 1U };
-    std::optional<std::uint32_t> input_receiver_process;
-};
 
 void EmulatorSession::run()
 {
@@ -594,8 +583,35 @@ void EmulatorSession::run()
     device.baseband.transport = baseband_input_path ? BasebandTransport::Virtual
                                                     : device.baseband.transport;
 
+    std::optional<SessionSnapshot> restored_snapshot;
+    if (options.snapshot_input) {
+        std::ifstream file { *options.snapshot_input, std::ios::binary };
+        if (!file)
+            throw std::runtime_error { "cannot open snapshot: " + *options.snapshot_input };
+        const auto size = std::filesystem::file_size(*options.snapshot_input);
+        std::vector<std::byte> bytes(size);
+        file.read(reinterpret_cast<char*>(bytes.data()),
+            static_cast<std::streamsize>(size));
+        if (!file)
+            throw std::runtime_error { "cannot read snapshot: " + *options.snapshot_input };
+        restored_snapshot = decode_session_snapshot(bytes);
+        const auto& header = restored_snapshot->header;
+        if (header.device != std::string { device.identity.product_type })
+            throw std::runtime_error { "snapshot device " + header.device +
+                                       " does not match the device " +
+                                       std::string { device.identity.product_type } };
+        if (header.binary != binary)
+            throw std::runtime_error { "snapshot binary " + header.binary +
+                                       " does not match the binary " + binary };
+        if (header.ticks >= *ticks_option)
+            throw std::invalid_argument { "--ticks must exceed the snapshot's " +
+                                          std::to_string(header.ticks) + " ticks" };
+        require_rootfs_identity(header, rootfs,
+            host_cache / "rootfs-manifest-digests.bin");
+    }
     auto initial_memory = std::make_unique<AddressSpace>();
     initial_memory->set_parallel_access(guest_processor_count > 1);
+    initial_memory->set_backing_root(rootfs);
     ProcessLoader loader { rootfs, *initial_memory, guest_architecture,
         session_catalog.index(), darwin_abi.initial_apple_vector_abi, darwin_abi.address_layout };
     std::vector<std::string> initial_environment;
@@ -1495,9 +1511,11 @@ void EmulatorSession::run()
         boot_pixels = BootLogo::placeholder(device.screen.panel);
         output.marker("[boot] logo-source=built-in-placeholder");
     }
-    initial->kernel->initialize_boot_display(std::move(boot_pixels));
-    if (display_presenter)
-        display_presenter->flush_presentation();
+    if (!restored_snapshot) {
+        initial->kernel->initialize_boot_display(std::move(boot_pixels));
+        if (display_presenter)
+            display_presenter->flush_presentation();
+    }
     initial->allocated.assign(initial_guest_thread_slots, false);
     Runtime* initial_runtime = initial.get();
     CatalogMaintenance catalog_maintenance {
@@ -2170,27 +2188,43 @@ void EmulatorSession::run()
     };
     configure_runtime(*initial_runtime);
 
-    auto& initial_cpu = initial_runtime->cpus->cpu(0);
-    initial_runtime->allocated[0] = true;
-    static_cast<void>(scheduler.register_thread(
-        XnuThreadId { initial_runtime->kernel->process().pid, 0 },
-        initial_runtime->kernel->process().thread_base_priority));
-    pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
-    initial_cpu.registers()[13] = process.stack_pointer;
-    initial_cpu.registers()[15] = process.entry_point;
-    initial_cpu.set_cpsr(0x10);
+    if (restored_snapshot) {
+        output.line("[snapshot] load-start host-ms=" +
+                    std::to_string(host_unix_milliseconds()));
+        snapshot::Reader in { restored_snapshot->body };
+        load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
+        if (!in.at_end())
+            throw snapshot::FormatError { "snapshot has bytes after the session state" };
+        guest_tick_clock.set_remainder(loop_state.guest_time_remainder);
+        loop_state.executed_ticks = restored_snapshot->header.ticks;
+        loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
+        output.line("[snapshot] restored=" + *options.snapshot_input +
+                    " saved-ticks=" + std::to_string(restored_snapshot->header.ticks) +
+                    " remaining-ticks=" + std::to_string(loop_state.remaining_ticks) +
+                    " host-ms=" + std::to_string(host_unix_milliseconds()));
+    } else {
+        auto& initial_cpu = initial_runtime->cpus->cpu(0);
+        initial_runtime->allocated[0] = true;
+        static_cast<void>(scheduler.register_thread(
+            XnuThreadId { initial_runtime->kernel->process().pid, 0 },
+            initial_runtime->kernel->process().thread_base_priority));
+        pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
+        initial_cpu.registers()[13] = process.stack_pointer;
+        initial_cpu.registers()[15] = process.entry_point;
+        initial_cpu.set_cpsr(0x10);
 
-    {
-        std::ostringstream message;
-        message << "[loader] main=0x" << std::hex << process.main_header
-                << " dyld_entry=0x" << process.entry_point << " sp=0x"
-                << process.stack_pointer << std::dec
-                << " processors=" << guest_processor_count
-                << " network=" << host_network_policy_name(network_policy)
-                << '\n';
-        output.write(message.str());
+        {
+            std::ostringstream message;
+            message << "[loader] main=0x" << std::hex << process.main_header
+                    << " dyld_entry=0x" << process.entry_point << " sp=0x"
+                    << process.stack_pointer << std::dec
+                    << " processors=" << guest_processor_count
+                    << " network=" << host_network_policy_name(network_policy)
+                    << '\n';
+            output.write(message.str());
+        }
+        loop_state.remaining_ticks = ticks;
     }
-    loop_state.remaining_ticks = ticks;
     std::uint64_t consumed_ticks = 0;
     std::uint32_t stopped_pid = 1;
     std::size_t stopped_cpu = 0;
@@ -3662,7 +3696,6 @@ void EmulatorSession::run()
                            guest_ticks_per_second));
             }
         }
-        auto batch_ticks = loop_state.remaining_ticks;
         const auto host_slice_now = std::chrono::steady_clock::now();
         const auto host_control_deadline = next_host_control_deadline();
         const auto host_control_delay =
@@ -3671,6 +3704,9 @@ void EmulatorSession::run()
                           duration_cast<std::chrono::nanoseconds>(
                               *host_control_deadline - host_slice_now) }
                 : std::nullopt;
+        auto batch_ticks = std::min(loop_state.remaining_ticks,
+            bounded_tick_alignment -
+                loop_state.executed_ticks % bounded_tick_alignment);
         const auto display_deadline_delay =
             realtime_pacer && display_vsync_deadline
                 ? std::optional<std::chrono::nanoseconds> { realtime_pacer
@@ -3862,6 +3898,7 @@ void EmulatorSession::run()
             stopped_result = result;
             consumed_ticks += result.ticks_consumed;
             if (bounded_execution) {
+                loop_state.executed_ticks += result.ticks_consumed;
                 loop_state.remaining_ticks -=
                     std::min(loop_state.remaining_ticks, result.ticks_consumed);
             }
@@ -4746,6 +4783,47 @@ void EmulatorSession::run()
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
     catalog_maintenance.publish_stable(*initial_runtime->kernel);
     host_resources.wait_idle();
+    if (options.snapshot_output) {
+        if (!bounded_execution)
+            throw std::invalid_argument { "--snapshot-out needs --ticks" };
+        if (display_inflight_callback_deadline ||
+            display_urgent_lease_deadline || display_callback_pending_since)
+            throw snapshot::RefusedError { "run.display_callback_deadline" };
+        if (display_urgent_process || display_inflight_callback_thread)
+            throw snapshot::RefusedError { "run.display_urgent_callback" };
+        if (diagnostic_svc_spin_thread)
+            throw snapshot::RefusedError { "run.diagnostic_svc_spin" };
+        if (hard_stop || loop_state.remaining_ticks != 0)
+            throw snapshot::RefusedError { "run.stopped_before_ticks" };
+        loop_state.guest_time_remainder = guest_tick_clock.remainder();
+        snapshot::Writer body;
+        save_session_state(body, *initial_runtime, runtimes.size(), scheduler,
+            loop_state, next_pid);
+        SessionSnapshot snapshot;
+        snapshot.header.device = std::string { device.identity.product_type };
+        snapshot.header.binary = binary;
+        snapshot.header.ticks = loop_state.executed_ticks;
+        snapshot.header.rootfs_manifest = rootfs_manifest_identity(
+            rootfs, host_cache / "rootfs-manifest-digests.bin");
+        snapshot.body = std::move(body.bytes());
+        const auto encoded = encode_session_snapshot(snapshot);
+        const auto& target = *options.snapshot_output;
+        const auto partial = target + ".partial";
+        {
+            std::ofstream file { partial, std::ios::binary };
+            file.write(reinterpret_cast<const char*>(encoded.data()),
+                static_cast<std::streamsize>(encoded.size()));
+            file.close();
+            if (!file)
+                throw std::runtime_error { "cannot write snapshot: " + target };
+        }
+        std::filesystem::rename(partial, target);
+        output.line("[snapshot] written=" + target +
+                    " bytes=" + std::to_string(encoded.size()) +
+                    " ticks=" + std::to_string(loop_state.executed_ticks));
+    }
+    if (bounded_execution)
+        host.session_stopped(*initial_runtime->kernel, *initial_runtime->memory);
     if (artifact_compaction_task && artifact_compaction_record &&
         artifact_compaction_record->state() ==
             ArtifactCompactionTaskState::Queued &&

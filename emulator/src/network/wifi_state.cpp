@@ -28,6 +28,59 @@ namespace {
         } };
     }
 
+    void save_access_point(
+        snapshot::Writer& out, const VirtualAccessPoint& point)
+    {
+        snapshot::save(out, point.ssid);
+        out.raw(point.bssid);
+        snapshot::save(out, point.channel);
+        snapshot::save(out, point.rssi);
+        snapshot::save(out, point.link_rate_mbps);
+        snapshot::save(out, point.security);
+    }
+
+    VirtualAccessPoint load_access_point(snapshot::Reader& in)
+    {
+        VirtualAccessPoint point;
+        snapshot::load(in, point.ssid);
+        const auto bssid = in.raw(point.bssid.size());
+        std::copy(bssid.begin(), bssid.end(), point.bssid.begin());
+        snapshot::load(in, point.channel);
+        snapshot::load(in, point.rssi);
+        snapshot::load(in, point.link_rate_mbps);
+        snapshot::load(in, point.security);
+        return point;
+    }
+
+    bool same_access_point(
+        const VirtualAccessPoint& left, const VirtualAccessPoint& right)
+    {
+        return left.ssid == right.ssid && left.bssid == right.bssid &&
+               left.channel == right.channel && left.rssi == right.rssi &&
+               left.link_rate_mbps == right.link_rate_mbps &&
+               left.security == right.security;
+    }
+
+    void save_ipv4(snapshot::Writer& out, const WifiIpv4Configuration& ipv4)
+    {
+        snapshot::save(out, ipv4.address);
+        snapshot::save(out, ipv4.netmask);
+        snapshot::save(out, ipv4.broadcast);
+        snapshot::save(out, ipv4.gateway);
+        snapshot::save(out, ipv4.dns_servers);
+    }
+
+    WifiIpv4Configuration load_ipv4(snapshot::Reader& in)
+    {
+        WifiIpv4Configuration ipv4;
+        snapshot::load(in, ipv4.address);
+        snapshot::load(in, ipv4.netmask);
+        snapshot::load(in, ipv4.broadcast);
+        snapshot::load(in, ipv4.gateway);
+        snapshot::load(in, ipv4.dns_servers);
+        return ipv4;
+    }
+
 }
 
 WifiState::WifiState()
@@ -182,6 +235,59 @@ WifiIpv4Configuration WifiState::default_ipv4_configuration()
     result.gateway = virtual_network::gateway_address;
     result.dns_servers.push_back(virtual_network::dns_proxy_address);
     return result;
+}
+
+void WifiState::save(snapshot::Writer& out) const
+{
+    std::lock_guard lock { mutex_ };
+    snapshot::save(out, static_cast<std::uint64_t>(access_points_.size()));
+    for (const auto& point : access_points_)
+        save_access_point(out, point);
+    snapshot::save(out, preferred_networks_);
+    snapshot::save(out, link_state_);
+    snapshot::save(out, airplane_mode_);
+    snapshot::save(out, powered_before_airplane_mode_);
+    snapshot::save(out, associated_index_);
+    snapshot::save(out, ipv4_.has_value());
+    if (ipv4_)
+        save_ipv4(out, *ipv4_);
+}
+
+void WifiState::load(snapshot::Reader& in)
+{
+    std::lock_guard lock { mutex_ };
+    std::uint64_t access_point_count { };
+    snapshot::load(in, access_point_count);
+    if (access_point_count != access_points_.size())
+        throw snapshot::FormatError { "Wi-Fi access points differ from the wiring" };
+    for (const auto& expected : access_points_) {
+        if (!same_access_point(load_access_point(in), expected))
+            throw snapshot::FormatError { "Wi-Fi access points differ from the wiring" };
+    }
+    std::vector<std::string> preferred_networks;
+    snapshot::load(in, preferred_networks);
+    WifiLinkState link_state { };
+    snapshot::load(in, link_state);
+    bool airplane_mode { };
+    snapshot::load(in, airplane_mode);
+    bool powered_before_airplane_mode { };
+    snapshot::load(in, powered_before_airplane_mode);
+    std::optional<std::size_t> associated_index;
+    snapshot::load(in, associated_index);
+    if (associated_index && *associated_index >= access_points_.size())
+        throw snapshot::FormatError { "Wi-Fi association is not a wired access point" };
+    bool has_ipv4 { };
+    snapshot::load(in, has_ipv4);
+    std::optional<WifiIpv4Configuration> ipv4;
+    if (has_ipv4)
+        ipv4 = load_ipv4(in);
+
+    preferred_networks_ = std::move(preferred_networks);
+    link_state_ = link_state;
+    airplane_mode_ = airplane_mode;
+    powered_before_airplane_mode_ = powered_before_airplane_mode;
+    associated_index_ = associated_index;
+    ipv4_ = std::move(ipv4);
 }
 
 }

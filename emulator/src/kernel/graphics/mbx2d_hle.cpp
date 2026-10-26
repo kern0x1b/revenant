@@ -297,6 +297,20 @@ void Mbx2dHle::inherit_state(const Mbx2dHle& parent)
     surface_store_->inherit_state(*parent.surface_store_);
 }
 
+void Mbx2dHle::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, next_context_);
+    snapshot::save(out, next_surface_);
+    snapshot::save(out, next_client_host_source_);
+}
+
+void Mbx2dHle::load(snapshot::Reader& in)
+{
+    snapshot::load(in, next_context_);
+    snapshot::load(in, next_surface_);
+    snapshot::load(in, next_client_host_source_);
+}
+
 void Mbx2dHle::set_display(std::shared_ptr<DisplayState> display)
 {
     display_ = std::move(display);

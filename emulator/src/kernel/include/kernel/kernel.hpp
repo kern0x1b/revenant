@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/darwin_file_guard.hpp"
 #include <array>
 #include <chrono>
@@ -509,8 +510,13 @@ public:
     {
         return thread_object_for_processor(processor);
     }
+    void save_kernel_bookkeeping(snapshot::Writer& out) const;
+    void load_kernel_bookkeeping(snapshot::Reader& in);
+    void save_snapshot(snapshot::Writer& out) const;
+    void load_snapshot(snapshot::Reader& in);
 
 private:
+    friend struct CompatibilityKernelSnapshot;
     struct CreatedGuestThread {
         std::size_t processor { };
         std::uint32_t port_name { };

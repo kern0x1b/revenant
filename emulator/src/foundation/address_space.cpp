@@ -20,10 +20,22 @@
 
 #include <sys/mman.h>
 
+#include "foundation/content_identity.hpp"
 #include "foundation/performance.hpp"
 
 namespace emulator {
 namespace {
+
+    std::string backing_relative_path(
+        const std::filesystem::path& path, const std::filesystem::path& root)
+    {
+        if (root.empty())
+            throw snapshot::RefusedError { "mem.file_mappings" };
+        const auto relative = path.lexically_relative(root);
+        if (relative.empty() || *relative.begin() == "..")
+            throw snapshot::RefusedError { "mem.file_mappings" };
+        return relative.generic_string();
+    }
 
     std::atomic<std::uint64_t> write_batch_calls { };
     std::atomic<std::uint64_t> write_batch_operations { };
@@ -115,6 +127,73 @@ namespace {
     {
         bytes.insert(
             bytes.end(), identity.digest.begin(), identity.digest.end());
+    }
+
+    constexpr std::uint64_t guest_address_limit = std::uint64_t { 1 } << 32U;
+
+    std::vector<VmMap::MappingRegion> mapping_regions(const VmMap& map)
+    {
+        std::vector<VmMap::MappingRegion> regions;
+        std::uint64_t cursor = 0;
+        while (cursor < guest_address_limit) {
+            const auto region =
+                map.region_at_or_after(static_cast<std::uint32_t>(cursor));
+            if (!region)
+                break;
+            regions.push_back(*region);
+            cursor = region->end;
+        }
+        return regions;
+    }
+
+    std::optional<ContentIdentity> mapped_range_identity(
+        const std::filesystem::path& path, std::uint64_t file_offset,
+        std::uint64_t length)
+    {
+        std::error_code error;
+        const auto file_size = std::filesystem::file_size(path, error);
+        if (error)
+            return std::nullopt;
+        const auto available = file_size > file_offset
+                                   ? static_cast<std::uint64_t>(file_size -
+                                         file_offset)
+                                   : std::uint64_t { 0 };
+        return sha256_file(path, file_offset, std::min(length, available));
+    }
+
+    void save_mapping_regions(snapshot::Writer& out,
+        const std::vector<VmMap::MappingRegion>& regions)
+    {
+        snapshot::save(out, static_cast<std::uint64_t>(regions.size()));
+        for (const auto& region : regions) {
+            snapshot::save(out, region.address);
+            snapshot::save(out, region.end);
+            snapshot::save(out, region.permissions);
+            snapshot::save(out, region.inheritance);
+        }
+    }
+
+    std::vector<VmMap::MappingRegion> load_mapping_regions(
+        snapshot::Reader& in)
+    {
+        std::uint64_t count { };
+        snapshot::load(in, count);
+        std::vector<VmMap::MappingRegion> regions;
+        for (std::uint64_t index = 0; index < count; ++index) {
+            VmMap::MappingRegion region;
+            snapshot::load(in, region.address);
+            snapshot::load(in, region.end);
+            snapshot::load(in, region.permissions);
+            snapshot::load(in, region.inheritance);
+            if (region.end <= region.address ||
+                region.end > guest_address_limit ||
+                region.address % AddressSpace::page_size != 0 ||
+                region.end % AddressSpace::page_size != 0) {
+                throw snapshot::FormatError { "snapshot holds a bad region" };
+            }
+            regions.push_back(region);
+        }
+        return regions;
     }
 
 }
@@ -209,6 +288,11 @@ std::uint64_t AddressSpace::exclusive_reservation_key(
     } catch (...) {
     }
     return static_cast<std::uint64_t>(address & exclusive_granule_mask);
+}
+
+void AddressSpace::set_backing_root(std::filesystem::path root)
+{
+    backing_root_ = std::move(root);
 }
 
 void AddressSpace::set_parallel_access(bool enabled)
@@ -746,6 +830,217 @@ void AddressSpace::clear()
     write_tracked_pages_.clear();
     mapping_leases_.clear();
     bump_executable_content_generation_locked();
+}
+
+void AddressSpace::save(snapshot::Writer& out) const
+{
+    auto lock = read_lock();
+    if (!tracked_write_ranges_.empty())
+        throw snapshot::RefusedError { "memory.tracked_write_ranges" };
+    if (!write_tracked_pages_.empty())
+        throw snapshot::RefusedError { "memory.write_tracked_pages" };
+    if (!exclusive_write_tracked_pages_.empty())
+        throw snapshot::RefusedError { "memory.exclusive_write_tracking" };
+    if (!mapping_leases_.empty())
+        throw snapshot::RefusedError { "memory.mapping_leases" };
+
+    std::vector<const std::pair<const std::uint32_t, Page>*> resident;
+    for (const auto& entry : *pages_) {
+        const auto& page = entry.second;
+        if (page.shared_writable)
+            throw snapshot::RefusedError { "memory.shared_writable" };
+        if (page.file_writeback)
+            throw snapshot::RefusedError { "memory.file_writeback" };
+        if (page.backing) {
+            resident.push_back(&entry);
+        } else if (page.write_generation != 0 || page.file_writeback_capable) {
+            throw snapshot::RefusedError { "memory.page_without_backing" };
+        }
+    }
+    std::vector<ContentIdentity> file_identities;
+    for (const auto& [address, mapping] : file_mappings_) {
+        const auto identity = mapped_range_identity(mapping.backing->path,
+            mapping.file_offset, mapping.end - address);
+        if (!identity)
+            throw snapshot::RefusedError { "memory.file_mapping_unreadable" };
+        file_identities.push_back(*identity);
+    }
+
+    snapshot::save(out, parallel_access_);
+    snapshot::save(out, jit_page_table_enabled_);
+    snapshot::save(out, jit_write_page_table_enabled_);
+    snapshot::save(out, write_generation_);
+    snapshot::save(out,
+        executable_content_generation_.load(std::memory_order_acquire));
+    snapshot::save(out,
+        translation_profile_mapping_generation_.load(std::memory_order_acquire));
+    snapshot::save(out, next_mapping_lease_token_);
+    save_mapping_regions(out, mapping_regions(vm_map_));
+    save_mapping_regions(out, mapping_regions(translation_profile_map_));
+    snapshot::save(out, static_cast<std::uint64_t>(file_identities.size()));
+    std::size_t identity_index = 0;
+    for (const auto& [address, mapping] : file_mappings_) {
+        snapshot::save(out, address);
+        snapshot::save(out, mapping.end);
+        snapshot::save(out, mapping.file_offset);
+        snapshot::save(out,
+            backing_relative_path(mapping.backing->path, backing_root_));
+        snapshot::save(out, file_identities[identity_index++].digest);
+    }
+    snapshot::save(out, static_cast<std::uint64_t>(resident.size()));
+    for (const auto* entry : resident) {
+        const auto& [address, page] = *entry;
+        const bool stored = !page.file_cached;
+        snapshot::save(out, address);
+        snapshot::save(out, stored);
+        if (stored) {
+            page.backing->materialize();
+            out.raw(page.backing->bytes);
+        }
+        snapshot::save(out, page.write_generation);
+        snapshot::save(out, page.file_writeback_capable);
+        snapshot::save(out, page.file_cached);
+        snapshot::save(out, page.copy_on_write_possible);
+    }
+}
+
+void AddressSpace::load(snapshot::Reader& in)
+{
+    clear();
+    auto lock = write_lock();
+    bool parallel_access { };
+    bool jit_page_table_enabled { };
+    bool jit_write_page_table_enabled { };
+    std::uint64_t executable_content_generation { };
+    std::uint64_t translation_profile_mapping_generation { };
+    snapshot::load(in, parallel_access);
+    snapshot::load(in, jit_page_table_enabled);
+    snapshot::load(in, jit_write_page_table_enabled);
+    snapshot::load(in, write_generation_);
+    snapshot::load(in, executable_content_generation);
+    snapshot::load(in, translation_profile_mapping_generation);
+    snapshot::load(in, next_mapping_lease_token_);
+    for (const auto& region : load_mapping_regions(in)) {
+        vm_map_.map_or(
+            region.address, region.end, region.permissions, region.inheritance);
+        add_page_permissions_locked(
+            region.address, region.end, region.permissions);
+    }
+    for (const auto& region : load_mapping_regions(in)) {
+        translation_profile_map_.map_or(
+            region.address, region.end, region.permissions, region.inheritance);
+    }
+    std::uint64_t file_mapping_count { };
+    snapshot::load(in, file_mapping_count);
+    for (std::uint64_t index = 0; index < file_mapping_count; ++index) {
+        std::uint32_t address { };
+        std::uint64_t end { };
+        std::uint64_t file_offset { };
+        std::string path;
+        ContentIdentity identity;
+        snapshot::load(in, address);
+        snapshot::load(in, end);
+        snapshot::load(in, file_offset);
+        snapshot::load(in, path);
+        snapshot::load(in, identity.digest);
+        const auto next = file_mappings_.lower_bound(address);
+        const bool overlaps_next =
+            next != file_mappings_.end() && next->first < end;
+        const bool overlaps_previous = next != file_mappings_.begin() &&
+                                       std::prev(next)->second.end > address;
+        if (end <= address || end > guest_address_limit ||
+            address % page_size != 0 || end % page_size != 0 ||
+            file_offset % page_size != 0 ||
+            !vm_map_.accessible(address, end, MemoryPermission::None) ||
+            overlaps_next || overlaps_previous) {
+            throw snapshot::FormatError { "snapshot holds a bad file mapping" };
+        }
+        const auto file_path = backing_root_ / path;
+        const auto actual = mapped_range_identity(
+            file_path, file_offset, end - address);
+        if (!actual || *actual != identity) {
+            throw snapshot::FormatError {
+                "file mapping changed since the snapshot: " + path
+            };
+        }
+        const auto backing = file_page_cache_->open_mapping(file_path,
+            file_offset, static_cast<std::uint32_t>(end - address));
+        if (!backing) {
+            throw snapshot::FormatError {
+                "file mapping cannot be reopened: " + path
+            };
+        }
+        file_mappings_.emplace(address, FileMapping { end, file_offset, *backing });
+    }
+
+    std::uint64_t page_record_count { };
+    snapshot::load(in, page_record_count);
+    for (std::uint64_t index = 0; index < page_record_count; ++index) {
+        std::uint32_t address { };
+        snapshot::load(in, address);
+        bool stored { };
+        snapshot::load(in, stored);
+        const auto bytes = stored ? in.raw(page_size)
+                                  : std::span<const std::byte> { };
+        std::uint64_t write_generation { };
+        bool file_writeback_capable { };
+        bool file_cached { };
+        bool copy_on_write_possible { };
+        snapshot::load(in, write_generation);
+        snapshot::load(in, file_writeback_capable);
+        snapshot::load(in, file_cached);
+        snapshot::load(in, copy_on_write_possible);
+        if (address % page_size != 0 ||
+            !vm_map_.accessible(address,
+                static_cast<std::uint64_t>(address) + page_size,
+                MemoryPermission::None)) {
+            throw snapshot::FormatError { "snapshot page is not mapped" };
+        }
+        if (stored == file_cached)
+            throw snapshot::FormatError { "snapshot page has no contents" };
+        const auto [page, inserted] = pages_->try_emplace(address);
+        if (!inserted)
+            throw snapshot::FormatError { "snapshot repeats a page" };
+        if (stored) {
+            page->second.backing = std::make_shared<GuestPageBacking>();
+            std::copy(bytes.begin(), bytes.end(),
+                page->second.backing->bytes.begin());
+        } else {
+            const auto* mapping = find_file_mapping_locked(address);
+            if (mapping == nullptr)
+                throw snapshot::FormatError { "snapshot file page is unmapped" };
+            const auto mapping_start = static_cast<std::uint64_t>(
+                std::prev(file_mappings_.upper_bound(address))->first);
+            const auto page_file_offset =
+                mapping->file_offset +
+                (static_cast<std::uint64_t>(address) - mapping_start);
+            const auto byte_count =
+                static_cast<std::uint32_t>(std::min<std::uint64_t>(page_size,
+                    mapping->backing->end_offset - page_file_offset));
+            auto backing = file_page_cache_->load_page(
+                mapping->backing, page_file_offset, byte_count);
+            backing->materialize();
+            page->second.backing = std::move(backing);
+        }
+        page->second.write_generation = write_generation;
+        page->second.file_writeback_capable = file_writeback_capable;
+        page->second.file_cached = file_cached;
+        page->second.copy_on_write_possible = copy_on_write_possible;
+        cache_page_locked(address, page->second);
+    }
+    executable_content_generation_.store(
+        executable_content_generation, std::memory_order_release);
+    translation_profile_mapping_generation_.store(
+        translation_profile_mapping_generation, std::memory_order_release);
+    parallel_access_ = parallel_access;
+    jit_page_table_enabled_ = jit_page_table_enabled;
+    jit_write_page_table_enabled_ = jit_write_page_table_enabled;
+    if (jit_read_page_table_ || jit_write_page_table_) {
+        for (const auto& [address, page] : *pages_) {
+            static_cast<void>(page);
+            refresh_jit_page_locked(address);
+        }
+    }
 }
 
 AddressSpace::ProtectResult AddressSpace::protect_with_result(

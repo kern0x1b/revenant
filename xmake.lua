@@ -51,6 +51,7 @@ if whole then
         add_tests("credentials")
         add_tests("open_gaps")
         add_tests("docs_commands")
+        add_tests("snapshot_diff")
         on_test(function (target, opt)
             local root = os.projectdir()
             if path.filename(opt.name) == "credentials" then
@@ -92,7 +93,8 @@ if whole then
                               comments_check = {path.join(root, "tools", "comments.lua"), "check"},
                               comments_test = {path.join(root, "tools", "comments.lua"), "test"},
                               open_gaps = {path.join(root, "tools", "open_gaps.lua")},
-                              docs_commands = {path.join(root, "tools", "docs_commands.lua")}}
+                              docs_commands = {path.join(root, "tools", "docs_commands.lua")},
+                              snapshot_diff = {path.join(root, "tools", "snapshot_diff.lua"), "test"}}
             local ok = os.execv(os.programfile(), table.join({"l", "-P", root}, commands[path.filename(opt.name)]), {try = true, curdir = root})
             if ok ~= 0 then
                 opt.errors = path.filename(opt.name) .. " failed"

@@ -3140,7 +3140,7 @@ bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
             open_file.name = path.filename().string();
             open_file.permanent_id =
                 hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
-                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+                    .value_or(hfs_metadata_.guest_path_id(path));
             open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);
@@ -3275,7 +3275,7 @@ bool CompatibilityKernel::write_guest_stat64(std::uint32_t address,
             open_file.name = path.filename().string();
             open_file.permanent_id =
                 hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
-                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+                    .value_or(hfs_metadata_.guest_path_id(path));
             open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);

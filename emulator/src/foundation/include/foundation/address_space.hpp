@@ -25,6 +25,7 @@
 
 #include "foundation/file_page_cache.hpp"
 #include "foundation/memory_permission.hpp"
+#include "foundation/snapshot_io.hpp"
 #include "foundation/vm_map.hpp"
 
 namespace emulator {
@@ -82,6 +83,8 @@ struct FileMappingBatchContext {
 [[nodiscard]] AddressSpaceWriteStats address_space_write_stats() noexcept;
 
 class AddressSpace {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using MappingRegion = VmMap::MappingRegion;
     static constexpr std::uint32_t page_size = guest_memory_page_size;
@@ -95,6 +98,7 @@ public:
         std::shared_ptr<GuestFileGenerationRegistry> generation_registry);
 
     void set_parallel_access(bool enabled);
+    void set_backing_root(std::filesystem::path root);
     class ExclusiveAccess {
     public:
         explicit ExclusiveAccess(AddressSpace& memory);
@@ -177,6 +181,8 @@ public:
     [[nodiscard]] FileSyncResult synchronize_file_mappings(
         std::uint32_t address, std::uint32_t size, bool synchronous);
     void clear();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
     struct ProtectResult {
         bool succeeded { };
         bool executable_permissions_changed { };
@@ -413,6 +419,7 @@ private:
 
     mutable std::mutex mutex_;
     bool parallel_access_ { true };
+    std::filesystem::path backing_root_;
     VmMap vm_map_;
     VmMap translation_profile_map_;
     std::shared_ptr<PageMap> pages_ { std::make_shared<PageMap>() };

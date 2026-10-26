@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <bit>
 #include <limits>
+#include <map>
 #include <stdexcept>
 
 namespace emulator {
@@ -1289,6 +1290,281 @@ std::uint32_t XnuScheduler::timeshare_quanta() const
     }
     return static_cast<std::uint32_t>(
         (processor_count + run_queue_count / 2U) / run_queue_count);
+}
+
+namespace {
+
+void save_xnu_thread_id(snapshot::Writer& out, XnuThreadId thread)
+{
+    snapshot::save(out, thread.process);
+    snapshot::save(out, thread.thread);
+}
+
+XnuThreadId load_xnu_thread_id(snapshot::Reader& in)
+{
+    XnuThreadId thread;
+    snapshot::load(in, thread.process);
+    snapshot::load(in, thread.thread);
+    return thread;
+}
+
+}
+
+void XnuScheduler::save_thread_record(
+    snapshot::Writer& out, const ThreadRecord& record)
+{
+    const auto& info = record.info;
+    snapshot::save(out, info.state);
+    snapshot::save(out, info.base_priority);
+    snapshot::save(out, info.scheduled_priority);
+    snapshot::save(out, info.remaining_quantum);
+    snapshot::save(out, info.scheduling_usage);
+    snapshot::save(out, info.cpu_usage);
+    snapshot::save(out, info.scheduler_stamp);
+    snapshot::save(out, info.bound_processor);
+    snapshot::save(out, info.last_processor);
+    snapshot::save(out, info.realtime_period);
+    snapshot::save(out, info.realtime_computation);
+    snapshot::save(out, info.realtime_constraint);
+    snapshot::save(out, info.realtime_deadline);
+    snapshot::save(out, info.computation_metered);
+    snapshot::save(out, info.failsafe_release_tick);
+    snapshot::save(out, info.remaining_timeslices);
+    snapshot::save(out, info.timeslice_processor);
+    snapshot::save(out, info.timeshare);
+    snapshot::save(out, info.realtime);
+    snapshot::save(out, info.realtime_preemptible);
+    snapshot::save(out, info.failsafe);
+    snapshot::save(out, info.depressed);
+    snapshot::save(out, record.queued);
+    snapshot::save(out, record.queued_priority);
+    snapshot::save(out, record.enqueue_sequence);
+    snapshot::save(out, record.runnable_generation);
+    snapshot::save(out, record.front_continuation);
+    snapshot::save(out, record.realtime_queue_key.has_value());
+    if (record.realtime_queue_key) {
+        snapshot::save(out, record.realtime_queue_key->first);
+        save_xnu_thread_id(out, record.realtime_queue_key->second);
+    }
+    snapshot::save(out, record.priority_usage_shift);
+    snapshot::save(out, record.queued_processor);
+    snapshot::save(out, record.depression_deadline);
+    snapshot::save(out, record.suspend_count);
+    snapshot::save(out, record.resume_runnable);
+    snapshot::save(out, record.wake_pending);
+    snapshot::save(out, record.failsafe_saved_base_priority);
+    snapshot::save(out, record.failsafe_saved_timeshare);
+    snapshot::save(out, record.failsafe_saved_realtime);
+}
+
+XnuScheduler::ThreadRecord XnuScheduler::load_thread_record(
+    snapshot::Reader& in)
+{
+    ThreadRecord record;
+    auto& info = record.info;
+    snapshot::load(in, info.state);
+    snapshot::load(in, info.base_priority);
+    snapshot::load(in, info.scheduled_priority);
+    snapshot::load(in, info.remaining_quantum);
+    snapshot::load(in, info.scheduling_usage);
+    snapshot::load(in, info.cpu_usage);
+    snapshot::load(in, info.scheduler_stamp);
+    snapshot::load(in, info.bound_processor);
+    snapshot::load(in, info.last_processor);
+    snapshot::load(in, info.realtime_period);
+    snapshot::load(in, info.realtime_computation);
+    snapshot::load(in, info.realtime_constraint);
+    snapshot::load(in, info.realtime_deadline);
+    snapshot::load(in, info.computation_metered);
+    snapshot::load(in, info.failsafe_release_tick);
+    snapshot::load(in, info.remaining_timeslices);
+    snapshot::load(in, info.timeslice_processor);
+    snapshot::load(in, info.timeshare);
+    snapshot::load(in, info.realtime);
+    snapshot::load(in, info.realtime_preemptible);
+    snapshot::load(in, info.failsafe);
+    snapshot::load(in, info.depressed);
+    snapshot::load(in, record.queued);
+    snapshot::load(in, record.queued_priority);
+    snapshot::load(in, record.enqueue_sequence);
+    snapshot::load(in, record.runnable_generation);
+    snapshot::load(in, record.front_continuation);
+    bool has_realtime_key { };
+    snapshot::load(in, has_realtime_key);
+    if (has_realtime_key) {
+        std::uint64_t deadline { };
+        snapshot::load(in, deadline);
+        record.realtime_queue_key = RealtimeQueueKey {
+            deadline, load_xnu_thread_id(in)
+        };
+    }
+    snapshot::load(in, record.priority_usage_shift);
+    snapshot::load(in, record.queued_processor);
+    snapshot::load(in, record.depression_deadline);
+    snapshot::load(in, record.suspend_count);
+    snapshot::load(in, record.resume_runnable);
+    snapshot::load(in, record.wake_pending);
+    snapshot::load(in, record.failsafe_saved_base_priority);
+    snapshot::load(in, record.failsafe_saved_timeshare);
+    snapshot::load(in, record.failsafe_saved_realtime);
+    return record;
+}
+
+void XnuScheduler::save_run_queue(
+    snapshot::Writer& out, const RunQueue& run_queue)
+{
+    snapshot::save(out, static_cast<std::uint64_t>(run_queue.count));
+    std::uint64_t non_empty { };
+    for (const auto& queue : run_queue.queues) {
+        if (!queue.empty())
+            ++non_empty;
+    }
+    snapshot::save(out, non_empty);
+    for (std::size_t priority = 0; priority < run_queue.queues.size();
+        ++priority) {
+        const auto& queue = run_queue.queues[priority];
+        if (queue.empty())
+            continue;
+        snapshot::save(out, static_cast<std::int32_t>(priority));
+        snapshot::save(out, static_cast<std::uint64_t>(queue.size()));
+        for (const auto thread : queue)
+            save_xnu_thread_id(out, thread);
+    }
+}
+
+void XnuScheduler::load_run_queue(snapshot::Reader& in,
+    std::optional<std::size_t> processor, RunQueue& run_queue)
+{
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    std::uint64_t non_empty { };
+    snapshot::load(in, non_empty);
+    std::uint64_t entries = 0;
+    for (std::uint64_t index = 0; index < non_empty; ++index) {
+        std::int32_t priority { };
+        snapshot::load(in, priority);
+        if (priority < 0 ||
+            static_cast<std::size_t>(priority) >= run_queue.queues.size()) {
+            throw snapshot::FormatError {
+                "snapshot run queue priority is out of range"
+            };
+        }
+        auto& queue = run_queue.queues[static_cast<std::size_t>(priority)];
+        if (!queue.empty())
+            throw snapshot::FormatError { "snapshot repeats a run queue priority" };
+        std::uint64_t size { };
+        snapshot::load(in, size);
+        for (std::uint64_t entry = 0; entry < size; ++entry) {
+            const auto thread = load_xnu_thread_id(in);
+            const auto found = threads_.find(thread);
+            if (found == threads_.end() || !found->second.queued ||
+                found->second.queue_position.has_value() ||
+                found->second.queued_priority != priority ||
+                found->second.queued_processor != processor) {
+                throw snapshot::FormatError {
+                    "snapshot run queue disagrees with the thread records"
+                };
+            }
+            auto& record = found->second;
+            record.queue_position = queue.insert(queue.end(), thread);
+            if (record.realtime_queue_key)
+                run_queue.realtime_order.insert(*record.realtime_queue_key);
+            run_queue.bitmap[static_cast<std::size_t>(priority) / 32U] |=
+                std::uint32_t { 1 } << (static_cast<std::uint32_t>(priority) % 32U);
+            ++entries;
+        }
+    }
+    if (entries != count) {
+        throw snapshot::FormatError {
+            "snapshot run queue count differs from its entries"
+        };
+    }
+    run_queue.count = static_cast<std::size_t>(entries);
+    refresh_high_queue(run_queue);
+}
+
+void XnuScheduler::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, quantum_ticks_);
+    snapshot::save(out, scheduler_tick_ticks_);
+    snapshot::save(
+        out, static_cast<std::uint64_t>(processor_run_queues_.size()));
+    snapshot::save(out, elapsed_since_scheduler_tick_);
+    snapshot::save(out, elapsed_ticks_);
+    snapshot::save(out, realtime_clock_ticks_);
+    snapshot::save(out, external_realtime_clock_);
+    snapshot::save(out, scheduler_tick_);
+    snapshot::save(out, next_enqueue_sequence_);
+    snapshot::save(out, runnable_count_);
+    snapshot::save(out, waiting_count_);
+    snapshot::save(out, active_timeshare_count_);
+
+    std::map<XnuThreadId, const ThreadRecord*> ordered;
+    for (const auto& [thread, record] : threads_)
+        ordered.emplace(thread, &record);
+    snapshot::save(out, static_cast<std::uint64_t>(ordered.size()));
+    for (const auto& [thread, record] : ordered) {
+        save_xnu_thread_id(out, thread);
+        save_thread_record(out, *record);
+    }
+    save_run_queue(out, processor_set_run_queue_);
+    for (const auto& run_queue : processor_run_queues_)
+        save_run_queue(out, run_queue);
+}
+
+void XnuScheduler::load(snapshot::Reader& in)
+{
+    std::uint64_t quantum_ticks { };
+    std::uint64_t tick_ticks { };
+    std::uint64_t processor_count { };
+    snapshot::load(in, quantum_ticks);
+    snapshot::load(in, tick_ticks);
+    snapshot::load(in, processor_count);
+    if (quantum_ticks != quantum_ticks_ ||
+        tick_ticks != scheduler_tick_ticks_ ||
+        processor_count != processor_run_queues_.size()) {
+        throw snapshot::FormatError {
+            "XNU scheduler configuration differs from the wiring"
+        };
+    }
+    if (!threads_.empty())
+        throw snapshot::FormatError { "XNU scheduler already holds threads" };
+    snapshot::load(in, elapsed_since_scheduler_tick_);
+    snapshot::load(in, elapsed_ticks_);
+    snapshot::load(in, realtime_clock_ticks_);
+    snapshot::load(in, external_realtime_clock_);
+    snapshot::load(in, scheduler_tick_);
+    snapshot::load(in, next_enqueue_sequence_);
+    snapshot::load(in, runnable_count_);
+    snapshot::load(in, waiting_count_);
+    snapshot::load(in, active_timeshare_count_);
+
+    std::uint64_t thread_count { };
+    snapshot::load(in, thread_count);
+    for (std::uint64_t index = 0; index < thread_count; ++index) {
+        const auto thread = load_xnu_thread_id(in);
+        auto record = load_thread_record(in);
+        if (!threads_.emplace(thread, std::move(record)).second)
+            throw snapshot::FormatError { "snapshot repeats an XNU thread" };
+    }
+    load_run_queue(in, std::nullopt, processor_set_run_queue_);
+    for (std::size_t processor = 0; processor < processor_run_queues_.size();
+        ++processor) {
+        load_run_queue(in, processor, processor_run_queues_[processor]);
+    }
+
+    for (const auto& [thread, record] : threads_) {
+        if (record.queued != record.queue_position.has_value()) {
+            throw snapshot::FormatError {
+                "snapshot queued thread is not in a run queue"
+            };
+        }
+        process_threads_[thread.process].insert(thread);
+        if (is_runnable_state(record.info.state))
+            ++process_runnable_counts_[thread.process];
+        index_depression(thread, record);
+        index_failsafe(thread, record);
+    }
 }
 
 }

@@ -9,12 +9,21 @@ on:
         options:
           - boot
           - measure
+          - snapshot
           - probe
         default: boot
       ticks:
-        description: The CPU ticks every boot of the run is bounded by
+        description: The CPU ticks every boot of the run is bounded by; for snapshot, the ticks the cold and the restored runs go to
         type: string
         default: "16000000000"
+      save_ticks:
+        description: For snapshot, the CPU ticks the snapshot is saved at, a multiple of 1048576 below ticks
+        type: string
+        default: "1048576"
+      negative_control:
+        description: For snapshot, add one executed tick to the restore and expect the comparison to report a difference
+        type: boolean
+        default: false
       control:
         description: The branch or commit of origin the control emulator is built from, for measure
         type: string
@@ -48,7 +57,10 @@ jobs:
     timeout-minutes: ${{ inputs.job == 'measure' && 30 || 240 }}
     env:
       TICKS: ${{ inputs.ticks }}
+      SAVE_TICKS: ${{ inputs.save_ticks }}
       MEASURE_TICKS: ${{ inputs.measure_ticks }}
+      GUEST: ${{ github.workspace }}/build/iphoneos/armv7/release/emulator_minimal_guest
+      GUEST_PATH: /usr/libexec/emulator-minimal
       CONTROL: ${{ inputs.control }}
       ROUNDS: ${{ inputs.rounds }}
     steps:
@@ -103,6 +115,13 @@ jobs:
         with:
           path: build/generated/backports
           key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
+
+      - name: Build the minimal guest the snapshot runs
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 15
+        run: |
+          ./xmakew build -P . emulator_minimal_guest
+          test -f "$GUEST" || { echo "no minimal guest at $GUEST" >&2; exit 1; }
 
       - uses: actions/cache/restore@v4
         if: inputs.job == 'probe'
@@ -190,6 +209,44 @@ jobs:
           ./xmakew build -P . emulator
           df -h /
 
+      - name: Run the snapshot gates and the unit tests of the snapshot code
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 90
+        run: ./xmakew test -P . repository/layout repository/comments_check repository/snapshot_diff 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' 'emulator_graphics_*/*' 'emulator_mach_*/*' 'emulator_network_*/*' --output-on-failure
+
+      - name: Perturb the restore for the negative control
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        run: |
+          perl -0pi -e 's/(loop_state\.executed_ticks = restored_snapshot->header\.ticks;)/$1 loop_state.executed_ticks += 1;/' emulator/src/runtime/emulator_session.cpp
+          grep -q 'executed_ticks += 1;' emulator/src/runtime/emulator_session.cpp
+
+      - name: Rebuild the perturbed emulator
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 60
+        run: ./xmakew build -P . emulator
+
+      - name: Round trip a snapshot through save, cold and restore
+        if: inputs.job == 'snapshot' && !inputs.negative_control
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
+
+      - name: Expect the comparison to fail on the perturbed restore
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          if ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" > "$out/comparison.txt" 2>&1; then
+            cat "$out/comparison.txt"
+            echo "negative control: the comparison passed on a perturbed restore" >&2
+            exit 1
+          fi
+          cat "$out/comparison.txt"
+          grep -q 'snapshots differ in' "$out/comparison.txt"
+
       - name: Build the control emulator from the control ref
         if: inputs.job == 'measure'
         timeout-minutes: 15
@@ -273,10 +330,22 @@ jobs:
           find "$HOME/Library/Logs/DiagnosticReports" -maxdepth 1 -iname '*emulator*' -exec cp {} "$out/crash-reports/" \;
           ls -la "$out/crash-reports"
 
+      - name: Keep the snapshot logs, the snapshots, the timings and the comparison
+        if: always() && inputs.job == 'snapshot'
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          find "$RUNNER_TEMP/snapshot" -maxdepth 2 -type f \( -name '*.log' -o -name '*.log.err' -o -name '*.time' -o -name '*.snap' -o -name 'compare-*.txt' \) | while IFS= read -r file; do
+            relative="${file#"$RUNNER_TEMP/snapshot/"}"
+            cp "$file" "$out/${relative//\//-}"
+          done || true
+          if [ -f "$out/comparison.txt" ]; then cat "$out/comparison.txt" >> "$GITHUB_STEP_SUMMARY"; fi
+          ls -la "$out"
+
       - name: Delete the scratch of the run
         if: always()
         run: |
-          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" "$RUNNER_TEMP/probe"; do
+          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" "$RUNNER_TEMP/probe" "$RUNNER_TEMP/snapshot"; do
             if [ -e "$scratch" ]; then
               chmod -R u+w "$scratch"
               rm -rf "$scratch"

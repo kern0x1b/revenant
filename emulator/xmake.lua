@@ -32,7 +32,7 @@ option("emulator_dynarmic_test_emit_failure")
     set_description("Compile Dynarmic's portable-emit fault injection, for tests")
 option_end()
 
-includes("tests/guest/dns-probe")
+includes("tests/guest/dns-probe", "tests/guest/minimal")
 
 if get_config("component") ~= "" or is_plat("iphoneos") then
     return

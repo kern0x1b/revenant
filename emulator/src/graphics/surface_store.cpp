@@ -1169,4 +1169,30 @@ bool SurfaceStore::write_argb_region_to_guest(AddressSpace& memory,
     return true;
 }
 
+void SurfaceStore::save(snapshot::Writer& out) const
+{
+    const auto registry = registry_;
+    std::scoped_lock lock { mutex_, registry->mutex };
+    if (!backings_.empty() || !backing_references_.empty())
+        throw snapshot::RefusedError { "surface.backings" };
+    if (!registry->objects.empty())
+        throw snapshot::RefusedError { "surface.shared_objects" };
+    snapshot::save(out, registry->next_identifier);
+    snapshot::save(out, registry->publication_watermark);
+}
+
+void SurfaceStore::load(snapshot::Reader& in)
+{
+    const auto registry = registry_;
+    std::scoped_lock lock { mutex_, registry->mutex };
+    if (!backings_.empty() || !backing_references_.empty())
+        throw snapshot::RefusedError { "surface.backings" };
+    std::uint32_t next_identifier { };
+    snapshot::load(in, next_identifier);
+    std::uint64_t publication_watermark { };
+    snapshot::load(in, publication_watermark);
+    registry->next_identifier = next_identifier;
+    registry->publication_watermark = publication_watermark;
+}
+
 }

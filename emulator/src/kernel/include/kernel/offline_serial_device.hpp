@@ -15,6 +15,7 @@
 #include <string_view>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/darwin_tty_abi.hpp"
 
 namespace emulator::bsd::offline_serial_device {
@@ -32,6 +33,9 @@ public:
     [[nodiscard]] std::size_t write(std::span<const std::byte> bytes);
     [[nodiscard]] std::vector<std::byte> read(std::size_t maximum);
     [[nodiscard]] std::size_t pending_bytes() const;
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     void consume_h4_byte(std::byte value);
