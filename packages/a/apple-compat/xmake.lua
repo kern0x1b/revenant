@@ -34,6 +34,7 @@ package("apple-compat")
             "add_addons(\"revenant\", {sourcedir = \"" .. path.join(root, "toolchain") .. "\"})",
             "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
             "set_config(\"apple_sdk\", \"" .. package:config("apple_sdk") .. "\")",
+            "set_config(\"apple_compat_only\", true)",
             "includes(\"@addon/revenant/apple-ios\")",
             "option(\"component\", {type = \"string\", default = \"\"})",
             "includes(\"" .. data.src("apple-compat") .. "\")",
