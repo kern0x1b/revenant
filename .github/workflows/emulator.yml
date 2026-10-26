@@ -13,15 +13,19 @@ on:
       ticks:
         description: The CPU ticks every boot of the run is bounded by
         type: string
-        default: "4000000000"
+        default: "16000000000"
       control:
         description: The branch or commit of origin the control emulator is built from, for measure
         type: string
         default: main
+      measure_ticks:
+        description: The CPU ticks every measure boot is bounded by, kept short so measure runs in under 30 minutes
+        type: string
+        default: "4000000000"
       rounds:
         description: The control and branch boots of measure, alternating in order each round
         type: string
-        default: "2"
+        default: "1"
 
 permissions:
   contents: read
@@ -40,9 +44,10 @@ defaults:
 jobs:
   emulator:
     runs-on: macos-26
-    timeout-minutes: 240
+    timeout-minutes: ${{ inputs.job == 'measure' && 30 || 240 }}
     env:
       TICKS: ${{ inputs.ticks }}
+      MEASURE_TICKS: ${{ inputs.measure_ticks }}
       CONTROL: ${{ inputs.control }}
       ROUNDS: ${{ inputs.rounds }}
     steps:
@@ -77,6 +82,12 @@ jobs:
           restore-keys: |
             xmake-global-emulator-${{ runner.os }}-
 
+      - uses: actions/cache/restore@v4
+        id: facts
+        with:
+          path: build/generated/backports
+          key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
+
       - name: Install the firmware tools through the Backports configuration
         id: firmware-tools
         timeout-minutes: 45
@@ -85,6 +96,12 @@ jobs:
           if grep -q 'install .* \.\. ' "$RUNNER_TEMP/firmware-tools.log"; then
             echo "installed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.facts.outputs.cache-hit != 'true'
+        with:
+          path: build/generated/backports
+          key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
 
       - uses: actions/cache/restore@v4
         id: dyld
@@ -148,7 +165,7 @@ jobs:
 
       - name: Build the control emulator from the control ref
         if: inputs.job == 'measure'
-        timeout-minutes: 90
+        timeout-minutes: 15
         run: |
           git fetch --no-tags --depth=1 origin "$CONTROL"
           git worktree add --detach "$RUNNER_TEMP/control" FETCH_HEAD
@@ -166,11 +183,16 @@ jobs:
           build/macosx/arm64/release/emulator boot --rootfs "$boot/rootfs" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$TICKS" --perf-summary --output "$out/perf-summary.txt" 2> "$out/boot.log"
           chmod -R u+w "$boot"
           rm -rf "$boot"
+          if ! grep -E '^\[boot\] milestone=springboard-finished-startup ' "$out/perf-summary.txt" > "$out/springboard.txt"; then
+            echo "SpringBoard did not finish starting within $TICKS CPU ticks" >&2
+            exit 1
+          fi
+          cat "$out/springboard.txt" >> "$GITHUB_STEP_SUMMARY"
           df -h /
 
       - name: Measure the control and the branch in alternating boots
         if: inputs.job == 'measure'
-        timeout-minutes: 210
+        timeout-minutes: 12
         run: |
           out="$RUNNER_TEMP/out"
           scratch="$RUNNER_TEMP/measure"
@@ -185,7 +207,7 @@ jobs:
               esac
               clone="$scratch/$side-$round"
               cp -c -R "$ROOTFS" "$clone"
-              /usr/bin/time -l -o "$out/time-$side-$round.txt" "$bin" boot --rootfs "$clone" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$TICKS" --perf-summary --output "$out/perf-$side-$round.txt" 2> "$out/boot-$side-$round.log"
+              /usr/bin/time -l -o "$out/time-$side-$round.txt" "$bin" boot --rootfs "$clone" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$MEASURE_TICKS" --perf-summary --output "$out/perf-$side-$round.txt" 2> "$out/boot-$side-$round.log"
               chmod -R u+w "$clone"
               rm -rf "$clone"
               awk -v round="$round" -v side="$side" '
