@@ -19,6 +19,16 @@ local function names_in(text)
     return found
 end
 
+local function coverage_names(text, coverage)
+    local found = {}
+    for name, kind in text:gmatch('{"([^"]+)", Coverage::(%a+)}') do
+        if kind == coverage then
+            found[#found + 1] = name
+        end
+    end
+    return found
+end
+
 local function array_names(text, identifier)
     local start = text:find("constexpr std::array<std::string_view, %d+> " .. identifier .. " {")
     if not start then
@@ -63,10 +73,10 @@ function main(...)
     end
 
     local ledger = io.readfile(LEDGER)
-    local saved = array_names(ledger, "saved_members")
-    local open = array_names(ledger, "open_members")
-    local wired = array_names(ledger, "wired_members")
-    local refused = array_names(ledger, "refused_members")
+    local saved = coverage_names(ledger, "saved")
+    local open = coverage_names(ledger, "open")
+    local wired = coverage_names(ledger, "wired")
+    local refused = coverage_names(ledger, "refused")
     local probe = set_of(names_in(io.readfile(PROBE)))
     local booted = array_names(io.readfile(BOOTED), "booted_populated_members")
 

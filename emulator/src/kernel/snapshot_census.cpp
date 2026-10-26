@@ -11,7 +11,6 @@
 #include "foundation/virtual_clock.hpp"
 #include "kernel/snapshot_ledger.hpp"
 
-#include <algorithm>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -541,14 +540,8 @@ void require_covered_members(
     const auto memory_members =
         CompatibilityKernelSnapshot::populated_memory(memory);
     members.insert(members.end(), memory_members.begin(), memory_members.end());
-    for (const auto& name : members) {
-        const std::string_view view { name };
-        const auto& saved = snapshot_ledger::saved_members;
-        const auto& wired = snapshot_ledger::wired_members;
-        if (std::ranges::find(saved, view) == saved.end() &&
-            std::ranges::find(wired, view) == wired.end())
-            throw snapshot::RefusedError { name };
-    }
+    if (const auto uncovered = snapshot_ledger::first_uncovered(members))
+        throw snapshot::RefusedError { std::string { *uncovered } };
 }
 
 }

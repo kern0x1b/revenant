@@ -24,10 +24,9 @@ using emulator::AddressSpace;
 using emulator::CompatibilityKernel;
 using emulator::CompatibilityKernelSnapshot;
 using emulator::Output;
-using emulator::snapshot_ledger::open_members;
-using emulator::snapshot_ledger::refused_members;
-using emulator::snapshot_ledger::saved_members;
-using emulator::snapshot_ledger::wired_members;
+using emulator::snapshot_ledger::Coverage;
+using emulator::snapshot_ledger::count_of;
+using emulator::snapshot_ledger::find_member;
 
 int failures = 0;
 std::size_t checked = 0;
@@ -36,12 +35,8 @@ void check_accounted(const std::string& name)
 {
     ++checked;
     const std::string_view view { name };
-    if (std::ranges::find(saved_members, view) != saved_members.end() ||
-        std::ranges::find(open_members, view) != open_members.end() ||
-        std::ranges::find(wired_members, view) != wired_members.end() ||
-        std::ranges::find(refused_members, view) != refused_members.end()) {
+    if (find_member(view) != nullptr)
         return;
-    }
     std::cerr << "FAIL: populated member " << name
               << " has no serializer and no named refusal\n";
     ++failures;
@@ -164,8 +159,9 @@ int main()
               << " populated members checked, "
               << emulator::booted_populated_members.size()
               << " booted members, ledger has "
-              << saved_members.size() << " saved, " << open_members.size()
-              << " open, " << wired_members.size() << " wired and "
-              << refused_members.size() << " refused entries\n";
+              << count_of(Coverage::saved) << " saved, "
+              << count_of(Coverage::open) << " open, "
+              << count_of(Coverage::wired) << " wired and "
+              << count_of(Coverage::refused) << " refused entries\n";
     return 0;
 }
