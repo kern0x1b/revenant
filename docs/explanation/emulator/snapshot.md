@@ -217,6 +217,11 @@ refused by name. Two parts of a member still live elsewhere: its `is_default` te
 (`note`), and its save and restore are in the owner's save and load functions. Moving both onto the descriptor is the
 remaining step, one owner at a time, and the save order stays the same until each owner moves.
 
+The clock is the first owner moved. `VirtualClock::snapshot_members()` (`foundation/snapshot_member.hpp`) lists its
+two members, `clock.now` and `clock.wall_time`, each with its `is_default`, `save` and `restore`. The clock's `save`
+and `load` run through that list and write the same 16 bytes as before; the census takes the populated clock members
+from the same list.
+
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
 rejects a section it does not know. Pages are written as address, flags and a backing index, with each backing's 4 KiB
