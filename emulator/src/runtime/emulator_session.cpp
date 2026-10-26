@@ -2191,6 +2191,8 @@ void EmulatorSession::run()
     configure_runtime(*initial_runtime);
 
     if (restored_snapshot) {
+        output.line("[snapshot] load-start host-ms=" +
+                    std::to_string(host_unix_milliseconds()));
         snapshot::Reader in { restored_snapshot->body };
         load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
         if (!in.at_end())
@@ -2200,7 +2202,8 @@ void EmulatorSession::run()
         loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
         output.line("[snapshot] restored=" + *options.snapshot_input +
                     " saved-ticks=" + std::to_string(restored_snapshot->header.ticks) +
-                    " remaining-ticks=" + std::to_string(loop_state.remaining_ticks));
+                    " remaining-ticks=" + std::to_string(loop_state.remaining_ticks) +
+                    " host-ms=" + std::to_string(host_unix_milliseconds()));
     } else {
         auto& initial_cpu = initial_runtime->cpus->cpu(0);
         initial_runtime->allocated[0] = true;

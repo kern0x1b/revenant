@@ -29,7 +29,9 @@ it. --ios-build names the iOS build of a rootfs that carries no firmware metadat
 --binary the guest boots launchd. The check is skipped without --rootfs. The save ticks and
 --ticks must be multiples of 2^20, and every save tick below --ticks. Clones use cp -c, so this
 runs on macOS. Each boot is timed with /usr/bin/time: the cold boot runs from zero to --ticks,
-each restored boot from its save tick to --ticks, and each save from zero to its tick.]==]
+each restored boot from its save tick to --ticks, and each save from zero to its tick. The load column
+of a restored boot is the emulator's own host-ms stamps from the load start to the restored line, so it
+excludes the process start, the snapshot file read and the runtime configuration before the load.]==]
 
 local flags = {
     ["--emulator"] = "emulator",
@@ -159,6 +161,16 @@ local function boot(options, directory, label, ticks, extra)
     return log, timing_of(timing)
 end
 
+local function load_seconds(log)
+    local text = io.readfile(log) or ""
+    local started = text:match("%[snapshot%] load%-start host%-ms=(%d+)")
+    local restored = text:match("%[snapshot%] restored=[^\n]* host%-ms=(%d+)")
+    if not started or not restored then
+        raise("no load stamps in %s", log)
+    end
+    return (tonumber(restored) - tonumber(started)) / 1000
+end
+
 local function require_marker(log, marker)
     local text = io.readfile(log)
     if not text:find(marker, 1, true) then
@@ -179,8 +191,9 @@ local function compare(cold, restored, report)
     return #cold_bytes
 end
 
-local function row(label, ticks, timing)
-    return string.format("| %s | %d | %.1f | %.1f |", label, ticks, timing.real, timing.cpu)
+local function row(label, ticks, timing, load)
+    return string.format("| %s | %d | %.1f | %.1f | %s |", label, ticks, timing.real, timing.cpu,
+        load and string.format("%.3f", load) or "-")
 end
 
 local function save_round_trip(options, base, base_timing, cold_snapshot, index, save_tick, rows)
@@ -205,7 +218,8 @@ local function save_round_trip(options, base, base_timing, cold_snapshot, index,
         {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
     require_marker(restore_log, "[snapshot] restored")
     require_marker(restore_log, "[snapshot] written")
-    table.insert(rows, row("restored, " .. save_tick .. " to --ticks", options.ticks - save_tick, restore_timing))
+    table.insert(rows, row("restored, " .. save_tick .. " to --ticks", options.ticks - save_tick, restore_timing,
+        load_seconds(restore_log)))
 
     local size = compare(cold_snapshot, restored_snapshot, path.join(options.work, "compare-" .. save_tick .. ".txt"))
     print(string.format("round trip: save at %d, cold and restored snapshots at %d are identical, %d bytes",
@@ -272,8 +286,8 @@ function main(...)
     os.mkdir(work)
 
     local rows = {
-        "| run | ticks | real s | cpu s |",
-        "|---|---|---|---|",
+        "| run | ticks | real s | cpu s | load s |",
+        "|---|---|---|---|---|",
     }
     local failures = {}
     try {
