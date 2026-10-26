@@ -157,6 +157,14 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the runtime case `scenekit_members` reads back `SCNDebugOptionShowWireframe` after it is set. No image is compared.
 - Removed by: drawing `RenderAsWireframe` and `ShowWireframe` on the GLES renderer, with a snapshot test that the wireframe image differs from the solid one; or documenting each remaining option as unsupported, with the member answering NO for it.
 
+### C25. Vision requests beyond iOS 6 image-analysis engines
+
+- Stands in for: `VNDetectRectanglesRequest`, `VNRecognizeTextRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
+- Why: iOS 6 Core Image has face detection, but no rectangle, OCR, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented.
+- Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
+- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison against Apple's Vision has been run.
+- Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
+>
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install

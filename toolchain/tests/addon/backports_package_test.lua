@@ -23,6 +23,15 @@ local function target(name, file)
     return {name = function () return name end, targetfile = function () return file end}
 end
 
+local function unpack(deb, folder)
+    local parts = members(deb)
+    os.mkdir(folder)
+    io.writefile(path.join(folder, "control.tar.gz"), parts["control.tar.gz"], {encoding = "binary"})
+    io.writefile(path.join(folder, "data.tar.gz"), parts["data.tar.gz"], {encoding = "binary"})
+    os.runv("tar", {"-xzf", path.join(folder, "control.tar.gz"), "-C", folder})
+    os.runv("tar", {"-xzf", path.join(folder, "data.tar.gz"), "-C", folder})
+end
+
 function failures(opt)
     local backports = import("apple.backports_package", {rootdir = opt.modules, anonymous = true})
     local shared = import("apple.shared_runtime", {rootdir = opt.modules, anonymous = true})
@@ -126,6 +135,70 @@ function failures(opt)
     end)
     if not unbuilt or not unbuilt:find("is not built", 1, true) then
         table.insert(found, "a target that is not built must be refused, not packaged as nothing: " .. tostring(unbuilt))
+    end
+
+    io.writefile(path.join(folder, "abi.c"), "int abi(void) { return 5; }\n")
+    io.writefile(path.join(folder, "cxx.c"), "extern int abi(void);\nint cxx(void) { return abi() + 1; }\n")
+    io.writefile(path.join(folder, "vision.c"), "extern int cxx(void);\nint vision(void) { return cxx() + 1; }\n")
+    fixtures.link(folder, opt.ld64, "libc++abi.1.0.dylib", "armv7-apple-ios6.0", "abi.c",{"-dynamiclib", "-install_name", "@rpath/libc++abi.1.dylib"})
+    fixtures.link(folder, opt.ld64, "libc++.1.0.dylib", "armv7-apple-ios6.0", "cxx.c", {"-dynamiclib", "-install_name", "@rpath/libc++.1.dylib", "-L.", "-lc++abi.1.0"})
+    fixtures.link(folder, opt.ld64, "libVisionFixture.dylib", "armv7-apple-ios6.0", "vision.c", {"-dynamiclib", "-install_name", "@rpath/libVisionFixture.dylib", "-L.", "-lc++.1.0"})
+    local runtime = path.join(folder, "runtime", "lib")
+    os.mkdir(runtime)
+    os.cp(path.join(folder, "libc++.1.0.dylib"), runtime .. "/")
+    os.cp(path.join(folder, "libc++abi.1.0.dylib"), runtime .. "/")
+    os.ln(path.join(runtime, "libc++.1.0.dylib"), path.join(runtime, "libc++.1.dylib"))
+    os.ln(path.join(runtime, "libc++abi.1.0.dylib"), path.join(runtime, "libc++abi.1.dylib"))
+    local libcxx = {installdir = function () return path.join(folder, "runtime") end}
+    local carried = backports.carried_runtime(libcxx)
+    local pairs_found = {}
+    for _, library in ipairs(carried) do
+        table.insert(pairs_found, library.leaf .. "=" .. path.filename(library.file))
+    end
+    if table.concat(pairs_found, ",") ~= "libc++.1.dylib=libc++.1.0.dylib,libc++abi.1.dylib=libc++abi.1.0.dylib" then
+        table.insert(found, "the carried runtime is the libc++ and libc++abi of the C++ runtime by their real files, not their links: " .. table.concat(pairs_found, ","))
+    end
+
+    local vision = path.join(folder, "libVisionFixture.dylib")
+    local withRuntime = backports.write({targets = {target("VisionBackports", vision)}, ldid = opt.ldid, packages = {}, provided = {},
+                                        runtime = carried, workdir = path.join(folder, "runtime-work"), outputdir = path.join(folder, "runtime-debs")})
+    local unpacked = path.join(folder, "runtime-unpacked")
+    unpack(withRuntime.deb, unpacked)
+    local dir = path.join(unpacked, "usr", "lib", "revenant", NAME)
+    local listed = {}
+    for _, file in ipairs(os.files(path.join(unpacked, "usr", "**"))) do
+        table.insert(listed, path.relative(file, unpacked))
+    end
+    table.sort(listed)
+    local expected = {"usr/lib/revenant/" .. NAME .. "/libVisionFixture.dylib", "usr/lib/revenant/" .. NAME .. "/libc++.1.dylib", "usr/lib/revenant/" .. NAME .. "/libc++abi.1.dylib"}
+    table.sort(expected)
+    if table.concat(listed, ",") ~= table.concat(expected, ",") then
+        table.insert(found, "the package carries the runtime's pair beside the libraries, under the package's folder: " .. table.concat(listed, ","))
+    end
+    local vision_names = fixtures.run(folder, "xcrun", {"otool", "-L", path.join(dir, "libVisionFixture.dylib")})
+    if vision_names:find("@rpath", 1, true) or not vision_names:find(FOLDER .. "/libc++.1.dylib", 1, true) then
+        table.insert(found, "a Backports library that links the C++ runtime names the carried libc++ in the package's folder, not @rpath: " .. vision_names)
+    end
+    local libcxx_names = fixtures.run(folder, "xcrun", {"otool", "-D", path.join(dir, "libc++.1.dylib")}) ..
+                         fixtures.run(folder, "xcrun", {"otool", "-L", path.join(dir, "libc++.1.dylib")})
+    if not libcxx_names:find(FOLDER .. "/libc++.1.dylib", 1, true) or not libcxx_names:find(FOLDER .. "/libc++abi.1.dylib", 1, true) or libcxx_names:find("@rpath", 1, true) then
+        table.insert(found, "the carried libc++ is named by the package's folder and names the carried libc++abi there: " .. libcxx_names)
+    end
+    local abi_names = fixtures.run(folder, "xcrun", {"otool", "-D", path.join(dir, "libc++abi.1.dylib")})
+    if not abi_names:find(FOLDER .. "/libc++abi.1.dylib", 1, true) then
+        table.insert(found, "the carried libc++abi is named by the package's folder: " .. abi_names)
+    end
+    for _, file in ipairs({"libVisionFixture.dylib", "libc++.1.dylib", "libc++abi.1.dylib"}) do
+        if not fixtures.run(unpacked, "xcrun", {"otool", "-l", path.join(dir, file)}):find("LC_CODE_SIGNATURE", 1, true) then
+            table.insert(found, "the carried runtime is signed like the libraries: " .. file)
+        end
+    end
+    local collision = fixtures.refusal(function ()
+        backports.write({targets = {target("VisionBackports", vision)}, ldid = opt.ldid, packages = {}, provided = {},
+                         runtime = {{leaf = "libVisionFixture.dylib", file = carried[1].file}}, workdir = path.join(folder, "collision"), outputdir = outputs})
+    end)
+    if not collision or not collision:find("already is", 1, true) then
+        table.insert(found, "a carried runtime that names a library of the package must be refused: " .. tostring(collision))
     end
 
     os.tryrm(folder)
