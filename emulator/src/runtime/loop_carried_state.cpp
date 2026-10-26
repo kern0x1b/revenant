@@ -48,6 +48,7 @@ void save_loop_carried_state(
     snapshot::save(out, state.executed_ticks_since_catch_up);
     snapshot::save(out, state.interaction_generation);
     snapshot::save(out, state.input_receiver_process);
+    snapshot::save(out, state.guest_time_remainder);
 }
 
 LoopCarriedState load_loop_carried_state(snapshot::Reader& in)
@@ -65,6 +66,7 @@ LoopCarriedState load_loop_carried_state(snapshot::Reader& in)
     snapshot::load(in, state.executed_ticks_since_catch_up);
     snapshot::load(in, state.interaction_generation);
     snapshot::load(in, state.input_receiver_process);
+    snapshot::load(in, state.guest_time_remainder);
     return state;
 }
 

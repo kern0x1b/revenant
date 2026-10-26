@@ -93,6 +93,7 @@ local function body(reader)
     if reader:number("loop", "input_receiver_process.present", BOOL) ~= 0 then
         reader:number("loop", "input_receiver_process", U32)
     end
+    reader:number("loop", "guest_time_remainder", U64)
     for _, scalar in ipairs(SCHEDULER_SCALARS) do
         reader:number("scheduler", scalar[1], scalar[2])
     end

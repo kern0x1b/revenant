@@ -5,7 +5,7 @@
 local snapshot = import("snapshot.decode", {rootdir = os.scriptdir()})
 
 local HEADER_BYTES = 8 + 4 + (8 + 9) + (8 + 29) + 8 + 32 + 8
-local ELAPSED_TICKS_OFFSET = 5 + 6 * 8 + 1 + 4 * 8
+local ELAPSED_TICKS_OFFSET = 5 + 6 * 8 + 1 + 8 + 4 * 8
 
 local function u32(value)
     return string.pack("<I4", value)
@@ -35,10 +35,12 @@ local function snapshot_bytes(overrides)
     for name, value in pairs(overrides or {}) do
         scheduler[name] = value
     end
+    local remainder = overrides and overrides.remainder or 0
     local body = table.concat({
         flag(false), flag(false), flag(false), flag(false), flag(false),
         u64(0), u64(0), u64(1048576), u64(1048576), u64(1048576), u64(1),
         flag(false),
+        u64(remainder),
         u64(scheduler.quantum), u64(scheduler.tick_ticks), u64(scheduler.processors),
         u64(scheduler.elapsed_since_tick), u64(scheduler.elapsed_ticks), u64(scheduler.realtime),
         flag(scheduler.external), u64(scheduler.tick), u64(scheduler.next_enqueue),
@@ -84,6 +86,14 @@ local function test_named_realtime_field()
         "a changed realtime clock must name scheduler.realtime_clock_ticks")
 end
 
+local function test_named_remainder_field()
+    local cold = snapshot_bytes()
+    local restored = snapshot_bytes({remainder = 200000000})
+    local difference = snapshot.first_difference(cold, restored)
+    expect(difference and difference.owner == "loop" and difference.field == "guest_time_remainder",
+        "a changed guest time remainder must name loop.guest_time_remainder")
+end
+
 local function test_undecoded_tail()
     local cold = snapshot_bytes()
     local restored = cold:sub(1, -2) .. "Z"
@@ -114,7 +124,8 @@ function main(command)
     test_identical()
     test_named_scheduler_field()
     test_named_realtime_field()
+    test_named_remainder_field()
     test_undecoded_tail()
     test_not_a_snapshot()
-    print("snapshot diff: 5 decoder tests passed")
+    print("snapshot diff: 6 decoder tests passed")
 end

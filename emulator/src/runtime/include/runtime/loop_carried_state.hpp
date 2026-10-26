@@ -28,6 +28,7 @@ struct LoopCarriedState {
     std::uint64_t executed_ticks_since_catch_up { };
     std::uint64_t interaction_generation { 1U };
     std::optional<std::uint32_t> input_receiver_process;
+    std::uint64_t guest_time_remainder { };
 
     friend bool operator==(const LoopCarriedState&,
         const LoopCarriedState&) = default;

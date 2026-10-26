@@ -43,6 +43,7 @@ LoopCarriedState populated_state()
     state.executed_ticks_since_catch_up = 14;
     state.interaction_generation = 15;
     state.input_receiver_process = 16U;
+    state.guest_time_remainder = 17;
     return state;
 }
 

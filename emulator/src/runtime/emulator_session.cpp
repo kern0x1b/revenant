@@ -2195,6 +2195,7 @@ void EmulatorSession::run()
         load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
         if (!in.at_end())
             throw snapshot::FormatError { "snapshot has bytes after the session state" };
+        guest_tick_clock.set_remainder(loop_state.guest_time_remainder);
         loop_state.executed_ticks = restored_snapshot->header.ticks;
         loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
         output.line("[snapshot] restored=" + *options.snapshot_input +
@@ -4793,6 +4794,7 @@ void EmulatorSession::run()
             throw snapshot::RefusedError { "run.diagnostic_svc_spin" };
         if (hard_stop || loop_state.remaining_ticks != 0)
             throw snapshot::RefusedError { "run.stopped_before_ticks" };
+        loop_state.guest_time_remainder = guest_tick_clock.remainder();
         snapshot::Writer body;
         save_session_state(body, *initial_runtime, runtimes.size(), scheduler,
             loop_state, next_pid);

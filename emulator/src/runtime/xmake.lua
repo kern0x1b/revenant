@@ -24,6 +24,13 @@ target("emulator_runtime_loop_carried_state_test")
     add_deps("emulator_runtime")
     add_tests("runtime.loop_carried_state")
 
+target("emulator_runtime_guest_timing_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("test/guest_timing_test.cpp")
+    add_deps("emulator_runtime", "emulator_kernel")
+    add_tests("runtime.guest_timing")
+
 target("emulator_runtime_session_snapshot_test")
     set_kind("binary")
     set_default(false)
