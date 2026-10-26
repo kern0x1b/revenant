@@ -273,7 +273,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "CloudKitBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -290,7 +290,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CloudKitBackports")
         end
         add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox")
         add_syslinks("objc")
@@ -350,6 +350,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("scenekit_members")
         add_tests("alias_public_name")
         add_tests("alias_system_class")
+        add_tests("protocol_uimutabletraits")
+        add_tests("protocol_ck_key_value_setting")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)

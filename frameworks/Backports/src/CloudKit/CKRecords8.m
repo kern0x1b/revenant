@@ -523,6 +523,9 @@ static NSString *RevenantZoneText(CKRecordZoneID *zone)
 
 #pragma mark - CKRecord
 
+@interface CKRecord (RevenantKeyValueSetting) <CKRecordKeyValueSetting>
+@end
+
 @implementation CKRecord
 - (NSString *)recordType { return _recordType; }
 - (void)setRecordType:(NSString *)recordType { _recordType = [recordType copy]; }
