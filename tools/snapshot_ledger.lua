@@ -1,7 +1,10 @@
 local root = path.absolute(path.directory(os.scriptdir()))
 
 local PROBE = path.join(root, "emulator", "src", "kernel", "snapshot_census.cpp")
-local DESCRIBED = path.join(root, "emulator", "src", "foundation", "virtual_clock.cpp")
+local DESCRIBED = {
+    path.join(root, "emulator", "src", "foundation", "virtual_clock.cpp"),
+    path.join(root, "emulator", "src", "network", "wifi_state.cpp"),
+}
 local LEDGER = path.join(root, "emulator", "src", "kernel", "include", "kernel", "snapshot_ledger.hpp")
 local BOOTED = path.join(root, "emulator", "src", "kernel", "test", "kernel_snapshot_booted_members.hpp")
 
@@ -78,7 +81,11 @@ function main(...)
     local open = coverage_names(ledger, "open")
     local wired = coverage_names(ledger, "wired")
     local refused = coverage_names(ledger, "refused")
-    local probe = set_of(names_in(io.readfile(PROBE) .. io.readfile(DESCRIBED)))
+    local sources = io.readfile(PROBE)
+    for _, file in ipairs(DESCRIBED) do
+        sources = sources .. io.readfile(file)
+    end
+    local probe = set_of(names_in(sources))
     local booted = array_names(io.readfile(BOOTED), "booted_populated_members")
 
     local accounted = {}

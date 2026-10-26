@@ -486,16 +486,8 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
         note(out, "display.content_orientation_", display.content_orientation_);
         note(out, "display.host_surface_", display.host_surface_);
     }
-    if (wifi.state_) {
-        const auto& state = *wifi.state_;
-        note(out, "wifi.access_points_", state.access_points_);
-        note(out, "wifi.preferred_networks_", state.preferred_networks_);
-        note(out, "wifi.link_state_", state.link_state_);
-        note(out, "wifi.airplane_mode_", state.airplane_mode_);
-        note(out, "wifi.powered_before_airplane_mode_", state.powered_before_airplane_mode_);
-        note(out, "wifi.associated_index_", state.associated_index_);
-        note(out, "wifi.ipv4_", state.ipv4_);
-    }
+    if (wifi.state_)
+        snapshot::note_populated_members(out, *wifi.state_, WifiState::snapshot_members());
     if (notify.bus_) {
         note(out, "bus.registrations", notify.bus_->registrations);
     }

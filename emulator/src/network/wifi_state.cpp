@@ -237,57 +237,101 @@ WifiIpv4Configuration WifiState::default_ipv4_configuration()
     return result;
 }
 
+const std::array<snapshot::Member<WifiState>, 7>& WifiState::snapshot_members()
+{
+    static constexpr std::array<snapshot::Member<WifiState>, 7> members {{
+        {"wifi.access_points_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.access_points_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, static_cast<std::uint64_t>(wifi.access_points_.size()));
+                for (const auto& point : wifi.access_points_)
+                    save_access_point(out, point);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                std::uint64_t access_point_count { };
+                snapshot::load(in, access_point_count);
+                if (access_point_count != wifi.access_points_.size())
+                    throw snapshot::FormatError { "Wi-Fi access points differ from the wiring" };
+                for (const auto& expected : wifi.access_points_) {
+                    if (!same_access_point(load_access_point(in), expected))
+                        throw snapshot::FormatError {
+                            "Wi-Fi access points differ from the wiring" };
+                }
+            }},
+        {"wifi.preferred_networks_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.preferred_networks_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.preferred_networks_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                snapshot::load(in, wifi.preferred_networks_);
+            }},
+        {"wifi.link_state_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.link_state_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.link_state_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                snapshot::load(in, wifi.link_state_);
+            }},
+        {"wifi.airplane_mode_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.airplane_mode_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.airplane_mode_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                snapshot::load(in, wifi.airplane_mode_);
+            }},
+        {"wifi.powered_before_airplane_mode_",
+            [](const WifiState& wifi) {
+                return snapshot::is_default(wifi.powered_before_airplane_mode_);
+            },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.powered_before_airplane_mode_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                snapshot::load(in, wifi.powered_before_airplane_mode_);
+            }},
+        {"wifi.associated_index_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.associated_index_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.associated_index_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                snapshot::load(in, wifi.associated_index_);
+                if (wifi.associated_index_ &&
+                    *wifi.associated_index_ >= wifi.access_points_.size())
+                    throw snapshot::FormatError { "Wi-Fi association is not a wired access point" };
+            }},
+        {"wifi.ipv4_",
+            [](const WifiState& wifi) { return snapshot::is_default(wifi.ipv4_); },
+            [](snapshot::Writer& out, const WifiState& wifi) {
+                snapshot::save(out, wifi.ipv4_.has_value());
+                if (wifi.ipv4_)
+                    save_ipv4(out, *wifi.ipv4_);
+            },
+            [](snapshot::Reader& in, WifiState& wifi) {
+                bool has_ipv4 { };
+                snapshot::load(in, has_ipv4);
+                std::optional<WifiIpv4Configuration> ipv4;
+                if (has_ipv4)
+                    ipv4 = load_ipv4(in);
+                wifi.ipv4_ = std::move(ipv4);
+            }},
+    }};
+    return members;
+}
+
 void WifiState::save(snapshot::Writer& out) const
 {
     std::lock_guard lock { mutex_ };
-    snapshot::save(out, static_cast<std::uint64_t>(access_points_.size()));
-    for (const auto& point : access_points_)
-        save_access_point(out, point);
-    snapshot::save(out, preferred_networks_);
-    snapshot::save(out, link_state_);
-    snapshot::save(out, airplane_mode_);
-    snapshot::save(out, powered_before_airplane_mode_);
-    snapshot::save(out, associated_index_);
-    snapshot::save(out, ipv4_.has_value());
-    if (ipv4_)
-        save_ipv4(out, *ipv4_);
+    snapshot::save_members(out, *this, snapshot_members());
 }
 
 void WifiState::load(snapshot::Reader& in)
 {
     std::lock_guard lock { mutex_ };
-    std::uint64_t access_point_count { };
-    snapshot::load(in, access_point_count);
-    if (access_point_count != access_points_.size())
-        throw snapshot::FormatError { "Wi-Fi access points differ from the wiring" };
-    for (const auto& expected : access_points_) {
-        if (!same_access_point(load_access_point(in), expected))
-            throw snapshot::FormatError { "Wi-Fi access points differ from the wiring" };
-    }
-    std::vector<std::string> preferred_networks;
-    snapshot::load(in, preferred_networks);
-    WifiLinkState link_state { };
-    snapshot::load(in, link_state);
-    bool airplane_mode { };
-    snapshot::load(in, airplane_mode);
-    bool powered_before_airplane_mode { };
-    snapshot::load(in, powered_before_airplane_mode);
-    std::optional<std::size_t> associated_index;
-    snapshot::load(in, associated_index);
-    if (associated_index && *associated_index >= access_points_.size())
-        throw snapshot::FormatError { "Wi-Fi association is not a wired access point" };
-    bool has_ipv4 { };
-    snapshot::load(in, has_ipv4);
-    std::optional<WifiIpv4Configuration> ipv4;
-    if (has_ipv4)
-        ipv4 = load_ipv4(in);
-
-    preferred_networks_ = std::move(preferred_networks);
-    link_state_ = link_state;
-    airplane_mode_ = airplane_mode;
-    powered_before_airplane_mode_ = powered_before_airplane_mode;
-    associated_index_ = associated_index;
-    ipv4_ = std::move(ipv4);
+    snapshot::restore_members(in, *this, snapshot_members());
 }
 
 }

@@ -220,7 +220,10 @@ remaining step, one owner at a time, and the save order stays the same until eac
 The clock is the first owner moved. `VirtualClock::snapshot_members()` (`foundation/snapshot_member.hpp`) lists its
 two members, `clock.now` and `clock.wall_time`, each with its `is_default`, `save` and `restore`. The clock's `save`
 and `load` run through that list and write the same 16 bytes as before; the census takes the populated clock members
-from the same list.
+from the same list. The Wi-Fi state is the second: `WifiState::snapshot_members()` lists its seven members in save
+order, and its `load` checks the access points and the association inside the restore of each member. A refused
+stream can leave the members restored before the refusal set, as the clock and the other owners already can, because
+the kernel restores its owners in sequence.
 
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
