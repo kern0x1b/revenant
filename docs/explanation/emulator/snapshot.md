@@ -210,6 +210,13 @@ while the state exists.
 Quiescence. A snapshot is taken at a scheduler point where every saved category is in a serialisable state and every
 refused category is empty. The session names the first refused category it finds, and a refused snapshot is not written.
 
+Coverage ledger. `kernel/include/kernel/snapshot_ledger.hpp` holds one descriptor per member the census can name: its
+name and its class, saved, wired, open or refused. `require_covered_members` walks that table with `first_uncovered`:
+a populated member is covered only when its class is saved or wired, and a populated member with no descriptor is
+refused by name. Two parts of a member still live elsewhere: its `is_default` test is in `kernel/snapshot_census.cpp`
+(`note`), and its save and restore are in the owner's save and load functions. Moving both onto the descriptor is the
+remaining step, one owner at a time, and the save order stays the same until each owner moves.
+
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
 rejects a section it does not know. Pages are written as address, flags and a backing index, with each backing's 4 KiB
