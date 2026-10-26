@@ -342,12 +342,12 @@ function main()
 
     local photos_source = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h")
     local photos_lowered = lowered.lower_header(io.readfile(photos_source), {markers = lowered.region_markers(sdk), classes = {}, functions = {},
-                                                                              globals = {PHImageContentModeAspectFill = true, PHImageContentModeDefault = true}, protocols = {}})
+                                                                              globals = {PHImageContentModeAspectFill = true}, protocols = {}})
     local photos_enum = photos_lowered:match("typedef NS_ENUM%(NSInteger, PHImageContentMode%) %b{}")
     assert(photos_enum and not photos_enum:find("API_AVAILABLE_BEGIN", 1, true) and not photos_enum:find("API_AVAILABLE_END", 1, true),
            "an availability marker sits inside the enum whose constant is lowered:\n" .. photos_lowered)
     assert(photos_enum:find("PHImageContentModeAspectFit API_AVAILABLE(", 1, true) and not photos_enum:find("PHImageContentModeAspectFill API_AVAILABLE", 1, true)
-           and not photos_enum:find("PHImageContentModeDefault API_AVAILABLE", 1, true),
+           and photos_enum:find("PHImageContentModeDefault API_AVAILABLE(", 1, true),
            "the constant Backports do not define keeps the region's availability, and the lowered constants lose it:\n" .. photos_enum)
     local photos_probe = path.join(probes, "photos.m")
     io.writefile(photos_probe, table.concat({
