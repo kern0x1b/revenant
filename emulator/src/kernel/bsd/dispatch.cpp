@@ -335,6 +335,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case 216:
     case 220:
     case 221:
+    case 222:
     case 344:
     case 338:
     case 339:

@@ -646,6 +646,13 @@ bool MetadataProvider::valid_request(const AttributeRequest& request)
            (request.file & ~file_supported_mask) == 0;
 }
 
+std::size_t MetadataProvider::fixed_block_size(const AttributeRequest& request)
+{
+    return 4U + common_fixed_size(request.common) +
+           directory_fixed_size(request.directory) +
+           file_fixed_size(request.file);
+}
+
 std::vector<std::byte> MetadataProvider::pack_attributes(
     const Metadata& metadata, const AttributeRequest& request,
     std::string_view guest_path)

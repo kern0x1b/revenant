@@ -225,6 +225,8 @@ public:
         const std::filesystem::path& path, bool follow_symlink,
         bool include_directory_entry_count = true) const;
     [[nodiscard]] static bool valid_request(const AttributeRequest& request);
+    [[nodiscard]] static std::size_t fixed_block_size(
+        const AttributeRequest& request);
     [[nodiscard]] static std::vector<std::byte> pack_attributes(
         const Metadata& metadata, const AttributeRequest& request,
         std::string_view guest_path = {});

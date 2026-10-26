@@ -684,6 +684,9 @@ private:
     [[nodiscard]] std::optional<std::filesystem::path> guest_path_of_host(
         const std::filesystem::path& host) const;
     [[nodiscard]] std::optional<std::uint32_t> current_thread_object() const;
+    void append_directory_entries(const std::filesystem::path& directory,
+        std::vector<DirectoryEntry>& entries,
+        std::error_code& directory_error) const;
     [[nodiscard]] std::optional<hfs::Metadata> query_hfs_metadata(
         const std::filesystem::path& path, bool follow_symlink,
         bool include_directory_entry_count = true) const;
