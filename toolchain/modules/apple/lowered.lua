@@ -638,6 +638,15 @@ local function typedef_declarations(text)
     end
 end
 
+local function enclosing_typedef(declarations, position)
+    for _, declaration in ipairs(declarations) do
+        if declaration.start <= position and position <= declaration.stop then
+            return declaration
+        end
+    end
+    return nil
+end
+
 local function apply_ranges(text, merged)
     local edits = {}
     for _, range in ipairs(merged) do
@@ -898,8 +907,18 @@ local function lowering_of(text, implemented, declarations)
             position = block_end + 1
         end
     end
+    local typedefs = nil
     for _, hit in ipairs(hits) do
+        local enclosing = nil
         if hit.kind == "global" then
+            typedefs = typedefs or typedef_declarations(text)
+            enclosing = enclosing_typedef(typedefs, hit.position)
+        end
+        if enclosing then
+            for _, piece in ipairs(pieces_of(text, enclosing.start, enclosing.stop)) do
+                lower(piece[1], piece[2])
+            end
+        elseif hit.kind == "global" then
             local start, stop = hit.position, hit.position + #hit.word - 1
             local first = statement_start(text, start, true)
             if first then
