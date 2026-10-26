@@ -9,7 +9,7 @@
 
 namespace emulator::snapshot_ledger {
 
-inline constexpr std::array<std::string_view, 234> saved_members {
+inline constexpr std::array<std::string_view, 235> saved_members {
     "clock.now",
     "clock.wall_time",
     "display.pixels_",
@@ -244,6 +244,7 @@ inline constexpr std::array<std::string_view, 234> saved_members {
     "wifi.ipv4_",
     "wifi.powered_before_airplane_mode_",
     "wifi.preferred_networks_",
+    "cpu.requested_halt_reason_",
 };
 
 inline constexpr std::array<std::string_view, 35> open_members {

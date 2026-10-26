@@ -5185,6 +5185,8 @@ void CpuCluster::save_state(snapshot::Writer& out)
         if (cpu->active_executor_ != nullptr)
             throw snapshot::RefusedError { "cpu.active_executor" };
         cpu->state_.save(out);
+        snapshot::save(
+            out, static_cast<std::uint32_t>(cpu->requested_halt_reason_));
     }
     save_exclusive_monitor(out, monitor_);
 }
@@ -5207,8 +5209,13 @@ void CpuCluster::load_state(snapshot::Reader& in)
         if (!add_cpu())
             throw snapshot::FormatError { "cannot add a snapshot processor" };
     }
-    for (const auto& cpu : cpus_)
+    for (const auto& cpu : cpus_) {
         cpu->state_.load(in);
+        std::uint32_t halt_reason { };
+        snapshot::load(in, halt_reason);
+        cpu->requested_halt_reason_ =
+            static_cast<Dynarmic::HaltReason>(halt_reason);
+    }
     load_exclusive_monitor(in, monitor_);
 }
 

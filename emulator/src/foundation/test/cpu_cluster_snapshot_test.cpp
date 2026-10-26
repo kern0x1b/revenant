@@ -75,6 +75,25 @@ void round_trip_restores_every_processor()
     expect(save(target) == bytes, "save, load and save reproduce the bytes");
 }
 
+void pending_halt_request_survives_round_trip()
+{
+    AddressSpace source_memory;
+    CpuCluster source { 2, source_memory };
+    pattern(source.cpu(0), 0x500U);
+    source.cpu(1).halt(Dynarmic::HaltReason::UserDefined2);
+    const auto bytes = save(source);
+
+    AddressSpace target_memory;
+    CpuCluster target { 2, target_memory };
+    Reader in { bytes };
+    target.load_state(in);
+    expect(in.at_end(), "the halt request stream is consumed exactly");
+    expect(target.cpu(0).consume_requested_halt_reason() == Dynarmic::HaltReason { },
+        "a processor without a halt request restores none");
+    expect(target.cpu(1).consume_requested_halt_reason() == Dynarmic::HaltReason::UserDefined2,
+        "a pending halt request is restored");
+}
+
 void missing_processors_are_added()
 {
     AddressSpace source_memory;
@@ -133,6 +152,7 @@ void truncated_stream_is_a_format_error()
 int main()
 {
     round_trip_restores_every_processor();
+    pending_halt_request_survives_round_trip();
     missing_processors_are_added();
     extra_processors_are_refused();
     truncated_stream_is_a_format_error();
