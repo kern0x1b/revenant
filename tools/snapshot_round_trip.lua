@@ -4,6 +4,8 @@
 
 local ALIGNMENT = 1048576
 
+local snapshot = import("snapshot.decode", {rootdir = os.scriptdir()})
+
 local USAGE = [==[usage: ./xmakew l tools/snapshot_round_trip.lua --rootfs DIR [--emulator EMU]
                                                              [--binary GUEST] [--guest FILE]
                                                              [--ios-build CODE]
@@ -16,6 +18,11 @@ identical. The cold boot does not depend on N, so one cold boot serves every sav
 boots its own clone of the rootfs. The device key store is random per device state, so every run
 takes the first save's key store. The guest sees the image's file times, not the clone's host
 times, so every clone of one image is interchangeable.
+
+Every save tick is compared before the run fails, so one failure does not hide another. A mismatch
+names the first differing field of the two snapshots (tools/snapshot/decode.lua walks their layout),
+and the timing table prints even when a round trip fails. The snapshots and timing files of every
+run stay in --work.
 
 --guest copies FILE into every clone at --binary, so a guest built apart from the rootfs runs in
 it. --ios-build names the iOS build of a rootfs that carries no firmware metadata. Without
@@ -160,20 +167,79 @@ local function require_marker(log, marker)
 end
 
 local function compare(cold, restored, report)
-    local size = os.filesize(cold)
-    if size ~= os.filesize(restored) then
-        raise("cold and restored snapshots differ in size: %d and %d bytes", size, os.filesize(restored))
+    local cold_bytes = io.readfile(cold, {encoding = "binary"})
+    local restored_bytes = io.readfile(restored, {encoding = "binary"})
+    local difference = snapshot.first_difference(cold_bytes, restored_bytes)
+    if difference then
+        local text = snapshot.describe(difference)
+        io.writefile(report, text .. "\n", {encoding = "binary"})
+        raise("cold and restored snapshots differ in %s, see %s: %s",
+            difference.kind == "size" and "size" or "content", report, text)
     end
-    local differences = report .. ".cmp"
-    local status = os.execv("cmp", {cold, restored}, {try = true, stdout = differences})
-    if status ~= 0 then
-        raise("cold and restored snapshots differ in content, see %s: %s", differences, io.readfile(differences) or "")
-    end
-    return size
+    return #cold_bytes
 end
 
 local function row(label, ticks, timing)
     return string.format("| %s | %d | %.1f | %.1f |", label, ticks, timing.real, timing.cpu)
+end
+
+local function save_round_trip(options, base, base_timing, cold_snapshot, index, save_tick, rows)
+    local save = path.join(options.work, "save-" .. save_tick)
+    local save_snapshot = path.join(save, "session.snap")
+    local save_timing = base_timing
+    if index > 1 then
+        clone(options, options.rootfs, save)
+        share_key_store(base, save)
+        local save_log
+        save_log, save_timing = boot(options, save, "save-" .. save_tick, save_tick,
+            {"--snapshot-out", save_snapshot})
+        require_marker(save_log, "[snapshot] written")
+    end
+    table.insert(rows, row("save, 0 to " .. save_tick, save_tick, save_timing))
+
+    local restore = path.join(options.work, "restore-" .. save_tick)
+    clone(options, options.rootfs, restore)
+    share_key_store(base, restore)
+    local restored_snapshot = path.join(restore, "restored.snap")
+    local restore_log, restore_timing = boot(options, restore, "restore-" .. save_tick, options.ticks,
+        {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
+    require_marker(restore_log, "[snapshot] restored")
+    require_marker(restore_log, "[snapshot] written")
+    table.insert(rows, row("restored, " .. save_tick .. " to --ticks", options.ticks - save_tick, restore_timing))
+
+    local size = compare(cold_snapshot, restored_snapshot, path.join(options.work, "compare-" .. save_tick .. ".txt"))
+    print(string.format("round trip: save at %d, cold and restored snapshots at %d are identical, %d bytes",
+        save_tick, options.ticks, size))
+end
+
+local function round_trips(options, rows, failures)
+    local first_tick = options.save_ticks[1]
+    local base = path.join(options.work, "save-" .. first_tick)
+    clone(options, options.rootfs, base)
+    local base_log, base_timing = boot(options, base, "save-" .. first_tick, first_tick,
+        {"--snapshot-out", path.join(base, "session.snap")})
+    require_marker(base_log, "[snapshot] written")
+
+    local cold = path.join(options.work, "cold")
+    clone(options, options.rootfs, cold)
+    share_key_store(base, cold)
+    local cold_snapshot = path.join(cold, "cold.snap")
+    local cold_log, cold_timing = boot(options, cold, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
+    require_marker(cold_log, "[snapshot] written")
+    table.insert(rows, row("cold, 0 to --ticks", options.ticks, cold_timing))
+
+    for index, save_tick in ipairs(options.save_ticks) do
+        try {
+            function ()
+                save_round_trip(options, base, base_timing, cold_snapshot, index, save_tick, rows)
+            end,
+            catch {
+                function (errors)
+                    table.insert(failures, string.format("save at %d: %s", save_tick, tostring(errors)))
+                end
+            }
+        }
+    end
 end
 
 function main(...)
@@ -205,57 +271,26 @@ function main(...)
     end
     os.mkdir(work)
 
-    local first_tick = options.save_ticks[1]
-    local base = path.join(work, "save-" .. first_tick)
-    clone(options, options.rootfs, base)
-    local base_log, base_timing = boot(options, base, "save-" .. first_tick, first_tick,
-        {"--snapshot-out", path.join(base, "session.snap")})
-    require_marker(base_log, "[snapshot] written")
-
-    local cold = path.join(work, "cold")
-    clone(options, options.rootfs, cold)
-    share_key_store(base, cold)
-    local cold_snapshot = path.join(cold, "cold.snap")
-    local cold_log, cold_timing = boot(options, cold, "cold", options.ticks, {"--snapshot-out", cold_snapshot})
-    require_marker(cold_log, "[snapshot] written")
-
     local rows = {
         "| run | ticks | real s | cpu s |",
         "|---|---|---|---|",
-        row("cold, 0 to --ticks", options.ticks, cold_timing),
     }
-    for index, save_tick in ipairs(options.save_ticks) do
-        local save = path.join(work, "save-" .. save_tick)
-        local save_snapshot = path.join(save, "session.snap")
-        local save_timing
-        if index == 1 then
-            save_timing = base_timing
-        else
-            clone(options, options.rootfs, save)
-            share_key_store(base, save)
-            local save_log
-            save_log, save_timing = boot(options, save, "save-" .. save_tick, save_tick,
-                {"--snapshot-out", save_snapshot})
-            require_marker(save_log, "[snapshot] written")
-        end
-
-        local restore = path.join(work, "restore-" .. save_tick)
-        clone(options, options.rootfs, restore)
-        share_key_store(base, restore)
-        local restored_snapshot = path.join(restore, "restored.snap")
-        local restore_log, restore_timing = boot(options, restore, "restore-" .. save_tick, options.ticks,
-            {"--snapshot-in", save_snapshot, "--snapshot-out", restored_snapshot})
-        require_marker(restore_log, "[snapshot] restored")
-        require_marker(restore_log, "[snapshot] written")
-
-        local size = compare(cold_snapshot, restored_snapshot, path.join(work, "compare-" .. save_tick))
-        print(string.format("round trip: save at %d, cold and restored snapshots at %d are identical, %d bytes",
-            save_tick, options.ticks, size))
-        table.insert(rows, row("save, 0 to " .. save_tick, save_tick, save_timing))
-        table.insert(rows, row("restored, " .. save_tick .. " to --ticks", options.ticks - save_tick, restore_timing))
-    end
+    local failures = {}
+    try {
+        function ()
+            round_trips(options, rows, failures)
+        end,
+        catch {
+            function (errors)
+                table.insert(failures, tostring(errors))
+            end
+        }
+    }
     print("")
     for _, line in ipairs(rows) do
         print(line)
+    end
+    if #failures > 0 then
+        raise("%d round trip failure(s):\n%s", #failures, table.concat(failures, "\n"))
     end
 end
