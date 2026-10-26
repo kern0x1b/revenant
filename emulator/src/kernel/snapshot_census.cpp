@@ -361,13 +361,12 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
 
     const auto& coreaudio = kernel.core_audio_hle_;
     note(out, "coreaudio.service_", coreaudio.service_);
-    note(out, "coreaudio.buffer_frame_size_", coreaudio.buffer_frame_size_);
+    snapshot::note_populated_members(out, coreaudio, CoreAudioHle::snapshot_members());
     note(out, "coreaudio.stream_formats_", coreaudio.stream_formats_);
     note(out, "coreaudio.device_volumes_", coreaudio.device_volumes_);
     note(out, "coreaudio.hardware_control_states_", coreaudio.hardware_control_states_);
     note(out, "coreaudio.io_procs_", coreaudio.io_procs_);
     note(out, "coreaudio.native_io_procs_", coreaudio.native_io_procs_);
-    note(out, "coreaudio.next_native_io_proc_id_", coreaudio.next_native_io_proc_id_);
     note(out, "coreaudio.retired_io_proc_threads_", coreaudio.retired_io_proc_threads_);
 
     const auto& wifi = kernel.apple80211_hle_;
