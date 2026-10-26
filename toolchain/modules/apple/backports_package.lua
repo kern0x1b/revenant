@@ -26,7 +26,26 @@ function folder()
     return FOLDER
 end
 
-function libraries(targets)
+local RUNTIME = {"libc++.1.dylib", "libc++abi.1.dylib"}
+
+function carried_runtime(package)
+    local found = {}
+    for _, leaf in ipairs(RUNTIME) do
+        local file
+        for _, candidate in ipairs(os.files(path.join(package:installdir(), "lib", "*.dylib"))) do
+            if not os.islink(candidate) and path.filename(macho.images(macho.read(candidate))[1].identity or candidate) == leaf then
+                file = candidate
+            end
+        end
+        if not file then
+            raise("the C++ runtime at %s installs no %s, which the Backports package carries", package:installdir(), leaf)
+        end
+        table.insert(found, {leaf = leaf, file = file})
+    end
+    return found
+end
+
+function libraries(targets, runtime)
     local found, leaves = {}, {}
     for _, target in ipairs(targets) do
         if not os.isfile(target:targetfile()) then
@@ -35,6 +54,13 @@ function libraries(targets)
         local leaf = path.filename(target:targetfile())
         found[leaf] = {leaf = leaf, file = target:targetfile()}
         table.insert(leaves, leaf)
+    end
+    for _, library in ipairs(runtime or {}) do
+        if found[library.leaf] then
+            raise("the C++ runtime the package carries names %s, which a Backports library already is", library.leaf)
+        end
+        found[library.leaf] = library
+        table.insert(leaves, library.leaf)
     end
     byteorder.sort(leaves)
     local ordered = {}
@@ -98,7 +124,7 @@ function stage(libs, root, provided)
 end
 
 function write(opt)
-    local libs = libraries(opt.targets)
+    local libs = libraries(opt.targets, opt.runtime)
     local root = path.join(opt.workdir, "root")
     os.tryrm(opt.workdir)
     local binaries = stage(libs, root, opt.provided)
@@ -127,7 +153,7 @@ function ensure(opt)
         task.run("build", {target = target:name()})
         table.insert(targets, target)
     end
-    written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided,
+    written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided, runtime = opt.runtime,
                      workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
     return written
 end
