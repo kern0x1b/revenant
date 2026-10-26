@@ -137,27 +137,6 @@ extern OSStatus VTHDRPerFrameMetadataGenerationSessionAttachMetadata(
 @class VTTemporalNoiseFilterConfiguration;
 @class VTTemporalNoiseFilterParameters;
 
-@protocol VTFrameProcessorConfiguration <NSObject>
-
-@property (class, nonatomic, readonly, getter=isSupported) BOOL supported;
-@property (nonatomic, readonly, strong, nullable) NSArray<NSNumber *> *frameSupportedPixelFormats;
-@property (nonatomic, readonly, strong, nullable) NSDictionary<NSString *, id> *sourcePixelBufferAttributes;
-@property (nonatomic, readonly, strong, nullable) NSDictionary<NSString *, id> *destinationPixelBufferAttributes;
-@property (nonatomic, readonly, assign) NSInteger nextFrameCount;
-@property (nonatomic, readonly, assign) NSInteger previousFrameCount;
-@property (class, nonatomic, readonly) CMVideoDimensions maximumDimensions;
-@property (class, nonatomic, readonly) CMVideoDimensions minimumDimensions;
-
-@end
-
-@protocol VTFrameProcessorParameters <NSObject>
-
-@property (nonatomic, readonly, strong, nullable) VTFrameProcessorFrame *sourceFrame;
-@property (nonatomic, readonly, strong, nullable) VTFrameProcessorFrame *destinationFrame;
-@property (nonatomic, readonly, strong, nullable) NSArray<VTFrameProcessorFrame *> *destinationFrames;
-
-@end
-
 #endif
 
 NS_ASSUME_NONNULL_END

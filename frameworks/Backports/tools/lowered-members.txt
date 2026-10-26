@@ -262,6 +262,9 @@ class CIPDF417CodeDescriptor
 class CIQRCodeDescriptor
 class CIQRCodeFeature
 class CIRectangleFeature
+class CIRenderDestination
+class CIRenderInfo
+class CIRenderTask
 class CITextFeature
 class CKAcceptSharesOperation
 class CKAllowedSharingOptions
@@ -658,6 +661,10 @@ class INIntent
 class INIntentResolutionResult
 class INInteraction
 class INMessage
+class INObject
+class INObjectCollection
+class INObjectResolutionResult
+class INObjectSection
 class INParameter
 class INPaymentMethod
 class INPerson
@@ -1786,6 +1793,7 @@ class RevenantMenuHost
 class RevenantMenuTrigger
 class RevenantMeshBufferZoneState
 class RevenantMetal4CommandQueue
+class RevenantMetalBinaryArchive
 class RevenantMetalBinding
 class RevenantMetalBlitEncoder
 class RevenantMetalBuffer
@@ -3225,6 +3233,9 @@ enum MTLArgumentTypeSampler
 enum MTLArgumentTypeTexture
 enum MTLArgumentTypeThreadgroupMemory
 enum MTLAttributeFormatFloat3
+enum MTLBinaryArchiveErrorInternalError
+enum MTLBinaryArchiveErrorInvalidFile
+enum MTLBinaryArchiveErrorUnexpectedElement
 enum MTLBindingTypeBuffer
 enum MTLBindingTypeObjectPayload
 enum MTLBindingTypeTexture
@@ -4658,6 +4669,8 @@ function RevenantSpotlightDefaultItems
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTypedNode
+function RevenantVTConvertBiPlanarNEON
+function RevenantVTConvertBiPlanarScalar
 function RevenantVisionBarcodes
 function RevenantVisionDetectRectangles
 function RevenantVisionEdgeMap
@@ -4773,6 +4786,7 @@ function VTCompressionSessionEndPass
 function VTCompressionSessionGetTimeRangesForNextPass
 function VTCompressionSessionPrepareToEncodeFrames
 function VTCopySupportedPropertyDictionaryForEncoder
+function VTCreateCGImageFromCVPixelBuffer
 function VTDecompressionSessionDecodeFrameWithMultiImageCapableOutputHandler
 function VTDecompressionSessionDecodeFrameWithOptions
 function VTDecompressionSessionDecodeFrameWithOptionsAndOutputHandler
@@ -4781,6 +4795,7 @@ function VTDecompressionSessionSetMultiImageCallback
 function VTHDRPerFrameMetadataGenerationSessionAttachMetadata
 function VTHDRPerFrameMetadataGenerationSessionCreate
 function VTHDRPerFrameMetadataGenerationSessionGetTypeID
+function VTIsHardwareDecodeSupported
 function _MXSignpostMetricsSnapshot
 function __attribute__
 function _os_log_create
@@ -12603,8 +12618,11 @@ member CIContext -PNGRepresentationOfImage:format:colorSpace:options:
 member CIContext -TIFFRepresentationOfImage:format:colorSpace:options:
 member CIContext -clearCaches
 member CIContext -createCGImage:fromRect:format:colorSpace:deferred:
+member CIContext -prepareRender:fromRect:toDestination:atPoint:error:
 member CIContext -revenant_representationOfImage:format:colorSpace:type:
 member CIContext -revenant_writeRepresentationOfImage:toURL:format:colorSpace:type:error:
+member CIContext -startTaskToRender:fromRect:toDestination:atPoint:error:
+member CIContext -startTaskToRender:toDestination:error:
 member CIContext -writeJPEGRepresentationOfImage:toURL:colorSpace:options:error:
 member CIContext -writePNGRepresentationOfImage:toURL:format:colorSpace:options:error:
 member CIContext -writeTIFFRepresentationOfImage:toURL:format:colorSpace:options:error:
@@ -12689,6 +12707,25 @@ member CIRectangleFeature -initWithRevenantBounds:topLeft:topRight:bottomLeft:bo
 member CIRectangleFeature -topLeft
 member CIRectangleFeature -topRight
 member CIRectangleFeature -type
+member CIRenderDestination -colorSpace
+member CIRenderDestination -dealloc
+member CIRenderDestination -initWithBitmapData:width:height:bytesPerRow:format:
+member CIRenderDestination -initWithGLTexture:target:width:height:
+member CIRenderDestination -initWithIOSurface:
+member CIRenderDestination -initWithMTLTexture:commandBuffer:
+member CIRenderDestination -initWithPixelBuffer:
+member CIRenderDestination -initWithWidth:height:pixelFormat:commandBuffer:mtlTextureProvider:
+member CIRenderDestination -revenant_applyDefaults
+member CIRenderDestination -revenant_prepareRenderWithError:
+member CIRenderDestination -revenant_renderImage:context:error:
+member CIRenderDestination -revenant_renderImage:fromRect:atPoint:context:error:
+member CIRenderDestination -revenant_resolveFormat:error:
+member CIRenderDestination -revenant_writeRegion:format:pixels:rowBytes:texture:error:
+member CIRenderDestination -setColorSpace:
+member CIRenderInfo -initWithKernelExecutionTime:passCount:pixelsProcessed:
+member CIRenderInfo -kernelCompileTime
+member CIRenderTask -initWithInfo:
+member CIRenderTask -waitUntilCompletedAndReturnError:
 member CITextFeature -bottomLeft
 member CITextFeature -bottomRight
 member CITextFeature -bounds
@@ -16001,6 +16038,37 @@ member INMessage -reaction
 member INMessage -setReaction:
 member INMessage -setSticker:
 member INMessage -sticker
+member INObject +supportsSecureCoding
+member INObject -copyWithZone:
+member INObject -encodeWithCoder:
+member INObject -hash
+member INObject -initWithCoder:
+member INObject -initWithIdentifier:displayString:
+member INObject -initWithIdentifier:displayString:pronunciationHint:
+member INObject -initWithIdentifier:displayString:pronunciationHint:subtitleString:displayImage:
+member INObject -initWithIdentifier:displayString:subtitleString:displayImage:
+member INObject -isEqual:
+member INObject -spokenPhrase
+member INObject -vocabularyIdentifier
+member INObjectCollection +supportsSecureCoding
+member INObjectCollection -allItems
+member INObjectCollection -copyWithZone:
+member INObjectCollection -encodeWithCoder:
+member INObjectCollection -hash
+member INObjectCollection -initWithCoder:
+member INObjectCollection -initWithItems:
+member INObjectCollection -initWithSections:
+member INObjectCollection -isEqual:
+member INObjectResolutionResult +confirmationRequiredWithObjectToConfirm:
+member INObjectResolutionResult +disambiguationWithObjectsToDisambiguate:
+member INObjectResolutionResult +successWithResolvedObject:
+member INObjectSection +supportsSecureCoding
+member INObjectSection -copyWithZone:
+member INObjectSection -encodeWithCoder:
+member INObjectSection -hash
+member INObjectSection -initWithCoder:
+member INObjectSection -initWithTitle:items:
+member INObjectSection -isEqual:
 member INParameter +parameterForClass:keyPath:
 member INParameter +supportsSecureCoding
 member INParameter -copyWithZone:
@@ -24815,6 +24883,13 @@ member RevenantMetal4CommandQueue -updateBufferMappings:heap:operations:count:
 member RevenantMetal4CommandQueue -updateTextureMappings:heap:operations:count:
 member RevenantMetal4CommandQueue -waitForDrawable:
 member RevenantMetal4CommandQueue -waitForEvent:value:
+member RevenantMetalBinaryArchive -addComputePipelineFunctionsWithDescriptor:error:
+member RevenantMetalBinaryArchive -addPipeline:error:
+member RevenantMetalBinaryArchive -addRenderPipelineFunctionsWithDescriptor:error:
+member RevenantMetalBinaryArchive -device
+member RevenantMetalBinaryArchive -initWithDevice:descriptor:error:
+member RevenantMetalBinaryArchive -loadFromURL:error:
+member RevenantMetalBinaryArchive -serializeToURL:error:
 member RevenantMetalBinding -type
 member RevenantMetalBlitEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
 member RevenantMetalBlitEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:
@@ -24946,6 +25021,7 @@ member RevenantMetalDevice -isLowPower
 member RevenantMetalDevice -isRemovable
 member RevenantMetalDevice -maxThreadsPerThreadgroup
 member RevenantMetalDevice -name
+member RevenantMetalDevice -newBinaryArchiveWithDescriptor:error:
 member RevenantMetalDevice -newBufferWithBytes:length:options:
 member RevenantMetalDevice -newBufferWithLength:options:
 member RevenantMetalDevice -newCommandQueue
@@ -32795,6 +32871,7 @@ protocol MPSImageAllocator
 protocol MPSNDArrayAllocator
 protocol MTL4BinaryFunction
 protocol MTL4CommandQueue
+protocol MTLBinaryArchive
 protocol MTLBinding
 protocol MTLBlitCommandEncoder
 protocol MTLBuffer
@@ -32944,7 +33021,6 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
-protocol VTFrameProcessorParameters
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
@@ -33005,6 +33081,8 @@ protocol_member GKRandom -nextInt
 protocol_member GKRandom -nextIntWithUpperBound:
 protocol_member GKRandom -nextUniform
 protocol_member INSpeakable -identifier
+protocol_member INSpeakable -spokenPhrase
+protocol_member INSpeakable -vocabularyIdentifier
 protocol_member INUIHostedViewControlling -configureViewForParameters:ofInteraction:interactiveBehavior:context:completion:
 protocol_member INUIHostedViewControlling -configureWithInteraction:context:completion:
 protocol_member MDLAssetResolver -canResolveAssetNamed:
@@ -33065,6 +33143,10 @@ protocol_member MTL4CommandQueue -updateBufferMappings:heap:operations:count:
 protocol_member MTL4CommandQueue -updateTextureMappings:heap:operations:count:
 protocol_member MTL4CommandQueue -waitForDrawable:
 protocol_member MTL4CommandQueue -waitForEvent:value:
+protocol_member MTLBinaryArchive -addComputePipelineFunctionsWithDescriptor:error:
+protocol_member MTLBinaryArchive -addRenderPipelineFunctionsWithDescriptor:error:
+protocol_member MTLBinaryArchive -device
+protocol_member MTLBinaryArchive -serializeToURL:error:
 protocol_member MTLBinding -type
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
 protocol_member MTLBlitCommandEncoder -copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:
@@ -33148,6 +33230,7 @@ protocol_member MTLDevice -isLowPower
 protocol_member MTLDevice -isRemovable
 protocol_member MTLDevice -maxThreadsPerThreadgroup
 protocol_member MTLDevice -name
+protocol_member MTLDevice -newBinaryArchiveWithDescriptor:error:
 protocol_member MTLDevice -newBufferWithBytes:length:options:
 protocol_member MTLDevice -newBufferWithLength:options:
 protocol_member MTLDevice -newCommandQueue
@@ -34021,6 +34104,7 @@ type MTL4UpdateSparseTextureMappingOperation
 type MTLArgumentType
 type MTLAttributeFormat
 type MTLAutoreleasedArgument
+type MTLBinaryArchiveError
 type MTLBindingAccess
 type MTLBindingType
 type MTLBlendFactor
