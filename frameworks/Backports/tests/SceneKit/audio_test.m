@@ -103,9 +103,9 @@ static SCNAudioPlayer *revenant_start(SCNAudioSource *source, SCNVector3 positio
     return player;
 }
 
-static double revenant_level(SCNVector3 position, int channel)
+static double revenant_level(NSURL *toneURL, SCNVector3 position, int channel)
 {
-    SCNAudioSource *tone = [[SCNAudioSource alloc] initWithURL:[NSURL fileURLWithPath:@"scenekit_audio_tone.wav"]];
+    SCNAudioSource *tone = [[SCNAudioSource alloc] initWithURL:toneURL];
     SCNAudioPlayer *player = revenant_start(tone, position);
     NSData *data = revenant_capture(0.25);
     [player revenantStop];
@@ -117,8 +117,10 @@ int main(int argc, char **argv)
     @autoreleasepool {
         revenant_read_arguments(argc, argv);
         [RevenantSCNSoundEngine prepare];
-        NSURL *tone = revenant_write_tone(@"scenekit_audio_tone.wav", 2.0, 440);
-        NSURL *clip = revenant_write_wave(@"scenekit_audio_clip.wav", 0.1);
+        NSString *fixtures = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+        [[NSFileManager defaultManager] createDirectoryAtPath:fixtures withIntermediateDirectories:YES attributes:nil error:NULL];
+        NSURL *tone = revenant_write_tone([fixtures stringByAppendingPathComponent:@"scenekit_audio_tone.wav"], 2.0, 440);
+        NSURL *clip = revenant_write_wave([fixtures stringByAppendingPathComponent:@"scenekit_audio_clip.wav"], 0.1);
 
         revenant_check(alGetInteger(AL_DISTANCE_MODEL) == AL_INVERSE_DISTANCE_CLAMPED, "the distance model is inverse clamped", @"the distance model is not inverse clamped");
         revenant_expect_number("doppler factor is one", alGetFloat(AL_DOPPLER_FACTOR), 1, 1e-6);
@@ -217,8 +219,8 @@ int main(int argc, char **argv)
         centre = fabs(revenant_rms(aheadData, 0) - revenant_rms(aheadData, 1)) / fmax(revenant_rms(aheadData, 0), 1e-9);
         revenant_check(centre < 0.1, "a source ahead of the listener is centred", @"a source ahead is not centred");
 
-        double near = revenant_level(SCNVector3Make(0, 0, -1), 0);
-        double far = revenant_level(SCNVector3Make(0, 0, -4), 0);
+        double near = revenant_level(tone, SCNVector3Make(0, 0, -1), 0);
+        double far = revenant_level(tone, SCNVector3Make(0, 0, -4), 0);
         revenant_check(far < near, "a source farther away is quieter", @"distance does not attenuate");
         revenant_check(far / near > 0.15 && far / near < 0.35, "the falloff is the inverse distance model", @"the falloff is not the inverse distance model");
 
@@ -424,8 +426,7 @@ int main(int argc, char **argv)
         [nodePlayer revenantStop];
         revenant_check(customNode.engine == nil, "a stopped node player detaches its node", @"the node is still attached");
 
-        [[NSFileManager defaultManager] removeItemAtURL:tone error:NULL];
-        [[NSFileManager defaultManager] removeItemAtURL:clip error:NULL];
+        [[NSFileManager defaultManager] removeItemAtPath:fixtures error:NULL];
         revenant_check(revenant_negative ? NO : YES, "negative control", @"the negative control is inverted");
     }
     return revenant_finish();
