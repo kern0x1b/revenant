@@ -6,6 +6,10 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-property-synthesis"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
+@interface VNRectangleObservation (RevenantCorners)
+- (void)revenant_setCornersTopLeft:(CGPoint)topLeft topRight:(CGPoint)topRight bottomRight:(CGPoint)bottomRight bottomLeft:(CGPoint)bottomLeft;
+@end
+
 static NSSet *revenant_vision_coded_classes(void)
 {
     static NSSet *classes;
@@ -129,6 +133,11 @@ static void revenant_vision_decode(id object, NSCoder *coder)
 
 @implementation VNDetectedObjectObservation {
     CGRect _boundingBox;
+}
+
+- (CGRect)boundingBox
+{
+    return _boundingBox;
 }
 
 + (instancetype)observationWithBoundingBox:(CGRect)boundingBox
@@ -259,6 +268,34 @@ static void revenant_vision_decode(id object, NSCoder *coder)
     CGPoint _bottomRight;
     CGPoint _topRight;
 }
+
+- (CGPoint)topLeft
+{
+    return _topLeft;
+}
+
+- (CGPoint)topRight
+{
+    return _topRight;
+}
+
+- (CGPoint)bottomRight
+{
+    return _bottomRight;
+}
+
+- (CGPoint)bottomLeft
+{
+    return _bottomLeft;
+}
+
+- (void)revenant_setCornersTopLeft:(CGPoint)topLeft topRight:(CGPoint)topRight bottomRight:(CGPoint)bottomRight bottomLeft:(CGPoint)bottomLeft
+{
+    _topLeft = topLeft;
+    _topRight = topRight;
+    _bottomRight = bottomRight;
+    _bottomLeft = bottomLeft;
+}
 @end
 
 @implementation VNTextObservation {
@@ -270,6 +307,27 @@ static void revenant_vision_decode(id object, NSCoder *coder)
     NSString *_symbology;
     NSString *_payloadStringValue;
     CIBarcodeDescriptor *_barcodeDescriptor;
+}
+
++ (instancetype)revenant_observationWithPayload:(NSString *)payload symbology:(VNBarcodeSymbology)symbology boundingBox:(CGRect)boundingBox topLeft:(CGPoint)topLeft topRight:(CGPoint)topRight bottomRight:(CGPoint)bottomRight bottomLeft:(CGPoint)bottomLeft requestRevision:(NSUInteger)revision
+{
+    VNBarcodeObservation *observation = [self observationWithRequestRevision:revision boundingBox:boundingBox];
+    if (observation) {
+        observation->_payloadStringValue = [payload copy];
+        observation->_symbology = [symbology copy];
+        [observation revenant_setCornersTopLeft:topLeft topRight:topRight bottomRight:bottomRight bottomLeft:bottomLeft];
+    }
+    return observation;
+}
+
+- (NSString *)payloadStringValue
+{
+    return _payloadStringValue;
+}
+
+- (VNBarcodeSymbology)symbology
+{
+    return _symbology;
 }
 @end
 

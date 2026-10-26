@@ -4031,6 +4031,7 @@ enum UNNotificationSettingDisabled
 enum UNNotificationSettingEnabled
 enum UNNotificationSettingNotSupported
 enum UNShowPreviewsSettingWhenAuthenticated
+enum VNErrorUnsupportedRequest
 enum VNErrorUnsupportedRevision
 enum WKAudiovisualMediaTypeAll
 enum WKAudiovisualMediaTypeNone
@@ -4657,6 +4658,11 @@ function RevenantSpotlightDefaultItems
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTypedNode
+function RevenantVisionBarcodes
+function RevenantVisionDetectRectangles
+function RevenantVisionEdgeMap
+function RevenantVisionEdgeMapScalar
+function RevenantVisionRectangles
 function SCNMatrix4EqualToMatrix4
 function SCNMatrix4FromGLKMatrix4
 function SCNMatrix4Invert
@@ -32035,6 +32041,9 @@ member UTType -revenant_initWithIdentifier:
 member UTType -supertypes
 member UTType -tags
 member UTType -version
+member VNBarcodeObservation +revenant_observationWithPayload:symbology:boundingBox:topLeft:topRight:bottomRight:bottomLeft:requestRevision:
+member VNBarcodeObservation -payloadStringValue
+member VNBarcodeObservation -symbology
 member VNCircle +supportsSecureCoding
 member VNCircle +zeroCircle
 member VNCircle -center
@@ -32109,10 +32118,23 @@ member VNDetectFaceLandmarksRequest -inputFaceObservations
 member VNDetectFaceLandmarksRequest -setInputFaceObservations:
 member VNDetectHumanRectanglesRequest -initWithCompletionHandler:
 member VNDetectRectanglesRequest -initWithCompletionHandler:
+member VNDetectRectanglesRequest -maximumAspectRatio
+member VNDetectRectanglesRequest -maximumObservations
+member VNDetectRectanglesRequest -minimumAspectRatio
+member VNDetectRectanglesRequest -minimumConfidence
+member VNDetectRectanglesRequest -minimumSize
+member VNDetectRectanglesRequest -quadratureTolerance
+member VNDetectRectanglesRequest -setMaximumAspectRatio:
+member VNDetectRectanglesRequest -setMaximumObservations:
+member VNDetectRectanglesRequest -setMinimumAspectRatio:
+member VNDetectRectanglesRequest -setMinimumConfidence:
+member VNDetectRectanglesRequest -setMinimumSize:
+member VNDetectRectanglesRequest -setQuadratureTolerance:
 member VNDetectTextRectanglesRequest -reportCharacterBoxes
 member VNDetectTextRectanglesRequest -setReportCharacterBoxes:
 member VNDetectedObjectObservation +observationWithBoundingBox:
 member VNDetectedObjectObservation +observationWithRequestRevision:boundingBox:
+member VNDetectedObjectObservation -boundingBox
 member VNDetectedPoint +revenant_pointWithX:y:confidence:
 member VNDetectedPoint -confidence
 member VNDetectedPoint -encodeWithCoder:
@@ -32182,6 +32204,11 @@ member VNRecognizedText -copyWithZone:
 member VNRecognizedText -encodeWithCoder:
 member VNRecognizedText -initWithCoder:
 member VNRecognizedTextObservation -topCandidates:
+member VNRectangleObservation -bottomLeft
+member VNRectangleObservation -bottomRight
+member VNRectangleObservation -revenant_setCornersTopLeft:topRight:bottomRight:bottomLeft:
+member VNRectangleObservation -topLeft
+member VNRectangleObservation -topRight
 member VNRequest +currentRevision
 member VNRequest +defaultRevision
 member VNRequest +supportedRevisions

@@ -53,7 +53,7 @@ local LIBRARIES = {
     {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {}, system = {}},
+    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp"}, system = {}},
     {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MetalKitBackports", folder = "MetalKit", frameworks = {"MetalKit", "Metal", "ModelIO", "UIKit", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "ModelIOBackports"}, archives = {}, system = {}},
     {name = "MPSBackports", folder = "MetalPerformanceShaders", frameworks = {"Metal", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {}, system = {}},
@@ -115,6 +115,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@monocypher 4.0.2", {alias = "monocypher"})
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
+    add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
 
     local generator
 
@@ -176,14 +177,17 @@ if is_plat("iphoneos") then
             add_cflags(table.join(FLAGS, {"-fvisibility=hidden", "-fmacro-prefix-map=" .. ROOT .. "/="}))
             add_mflags(OBJC_FLAGS)
             add_mxxflags(table.join(OBJC_FLAGS, {"-fno-rtti", "-fvisibility-inlines-hidden"}))
+            if library.folder == "Vision" then
+                add_cxxflags("-std=c++20", "-fvisibility-inlines-hidden")
+            end
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             add_syslinks("objc")
-            if #os.files(path.join(SRC, library.folder, "*.mm")) > 0 then
+            if #os.files(path.join(SRC, library.folder, "*.mm")) > 0 or #os.files(path.join(SRC, library.folder, "*.cpp")) > 0 then
                 add_syslinks("c++")
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
-                                 os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
+                                 os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
             for _, name in ipairs(library.libraries) do
                 if name:endswith("Backports") then
                     add_deps(name)
@@ -226,6 +230,10 @@ if is_plat("iphoneos") then
         add_files(path.join(SRC, "MLCompute", "ggml", "ggml-libcxx.cpp"))
         add_cxxflags("-std=c++17", "-fno-exceptions", "-fno-rtti", "-fvisibility=hidden", "-fvisibility-inlines-hidden")
     target_end()
+end
+
+if not is_plat("iphoneos") then
+    add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
 end
 
 local function backports_tests(name, scripts)
@@ -436,15 +444,20 @@ local function host_tests(folder, tests, library, frameworks, options)
             set_plat("macosx")
             set_arch("arm64")
             set_default(false)
-            add_files(path.join(TESTS, name .. "_test.m"))
+            add_files(path.join(TESTS, name .. "_test." .. (options.extension or "m")))
             for _, source in ipairs(sources) do
                 add_files(path.join(SRC, library or folder, source))
             end
             add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, library or folder))
             add_mflags("-fobjc-arc")
+            add_mxxflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
+            add_cxxflags(table.unpack(options.cxxflags or {}))
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
             add_syslinks(table.unpack(options.syslinks or {}))
+            for _, package in ipairs(options.packages or {}) do
+                add_packages(package)
+            end
             for _, define in ipairs(options.defines or {}) do
                 add_defines(define)
             end
@@ -457,6 +470,8 @@ end
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
+    host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+    host_tests("Vision", {rectangle = {"VNRectangleDetector.c", "VNRectangleImage.m", "VNConstants.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm"})
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
