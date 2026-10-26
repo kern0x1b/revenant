@@ -116,6 +116,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
+    add_requires("revenant@libcxx", {alias = "libcxx"})
 
     local generator
 
@@ -183,7 +184,7 @@ if is_plat("iphoneos") then
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             add_syslinks("objc")
-            if #os.files(path.join(SRC, library.folder, "*.mm")) > 0 or #os.files(path.join(SRC, library.folder, "*.cpp")) > 0 then
+            if library.folder ~= "Vision" and (#os.files(path.join(SRC, library.folder, "*.mm")) > 0 or #os.files(path.join(SRC, library.folder, "*.cpp")) > 0) then
                 add_syslinks("c++")
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
@@ -204,6 +205,9 @@ if is_plat("iphoneos") then
                 else
                     add_packages(name)
                 end
+            end
+            if library.folder == "Vision" then
+                add_packages("libcxx")
             end
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
@@ -232,7 +236,7 @@ if is_plat("iphoneos") then
     target_end()
 end
 
-if not is_plat("iphoneos") then
+if not is_plat("iphoneos") and is_arch("arm64", "x86_64") then
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
 end
 
@@ -470,7 +474,9 @@ end
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
-    host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+    if is_arch("arm64", "x86_64") then
+        host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+    end
     host_tests("Vision", {rectangle = {"VNRectangleDetector.c", "VNRectangleImage.m", "VNConstants.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm"})
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
