@@ -13,7 +13,8 @@ set_defaultarchs("iphoneos|armv7")
 
 target("emulatebaseline")
     add_rules("@addon/revenant/daemon")
-    add_files("main.m", "../../../../frameworks/Backports/src/UIKit/NSAttributedString+BaselineOffset7.m")
-    add_frameworks("Foundation", "UIKit", "CoreGraphics")
+    add_files("main.m", "../../../../frameworks/Backports/src/UIKit/NSAttributedString+BaselineOffset7.m",
+              "../../../../frameworks/Backports/src/CoreText/CTDrawBaselineOffset7.m")
+    add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText")
     set_values("revenant.version", "1.0")
     set_values("revenant.control", "control")
