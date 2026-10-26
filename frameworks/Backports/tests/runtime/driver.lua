@@ -126,14 +126,34 @@ local function execute(program, firmware, libraries, app, guest, folder, saved)
     emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
     local results = emulator.results(rootfs)
     local verdict_file = path.join(results, "verdict.json")
+    local perf_ready = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-ready")
+    local perf_done = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-done")
     local slot = emulator.acquire()
     local booted = try {
         function ()
             return emulator.boot({emulator = program, rootfs = rootfs, identifier = DEVICE, run = folder,
                                   cache = emulator.host_cache(DEVICE, BUILD),
                                   tmpdir = path.join(folder, "tmp"), network = "isolated",
-                                  scale = emulator.TIME_SCALE, deadline = 900,
-                                  stop = function () return os.isfile(verdict_file) end})
+                                  scale = emulator.TIME_SCALE, deadline = 900, perf = true,
+                                  stop = function (state, control)
+                                      if state.perf_begin and not state.perf_begin_sent then
+                                          control("perf-begin " .. state.perf_begin)
+                                          state.perf_begin_sent = true
+                                      end
+                                      if state.perf_started and not state.perf_ready then
+                                          io.writefile(perf_ready, "ready\n")
+                                          state.perf_ready = true
+                                      end
+                                      if state.perf_end and not state.perf_end_sent then
+                                          control("perf-end")
+                                          state.perf_end_sent = true
+                                      end
+                                      if state.perf_finished and not state.perf_done then
+                                          io.writefile(perf_done, "done\n")
+                                          state.perf_done = true
+                                      end
+                                      return os.isfile(verdict_file)
+                                  end})
         end,
         catch {
             function (errors)

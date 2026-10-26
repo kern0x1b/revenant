@@ -63,6 +63,11 @@ static const NSUInteger RevenantResourceChunkLength = 1024 * 1024;
             *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorIdentifierNotFound reason:@"the asset this resource was made from no longer exists"];
         return NO;
     }
+    if (!asset.isLocallyAvailable) {
+        if (error)
+            *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorMissingResource reason:@"iOS 6 AssetsLibrary cannot retrieve an iCloud-only asset resource"];
+        return NO;
+    }
     ALAssetRepresentation *representation = [asset revenant_asset].defaultRepresentation;
     if (!representation) {
         if (error)

@@ -99,6 +99,8 @@ static NSArray *revenant_no_collections(void)
 
 - (instancetype)initWithRevenantSmartSubtype:(PHAssetCollectionSubtype)subtype
 {
+    if (subtype != PHAssetCollectionSubtypeSmartAlbumVideos)
+        return nil;
     self = [self initWithRevenantLocalIdentifier:[NSString stringWithFormat:@"REVENANT/SMART/%ld", (long)subtype]];
     if (!self)
         return nil;
@@ -109,17 +111,8 @@ static NSArray *revenant_no_collections(void)
     case PHAssetCollectionSubtypeSmartAlbumVideos:
         _title = @"Videos";
         break;
-    case PHAssetCollectionSubtypeSmartAlbumFavorites:
-        _title = @"Favorites";
-        break;
-    case PHAssetCollectionSubtypeSmartAlbumAllHidden:
-        _title = @"Hidden";
-        break;
-    case PHAssetCollectionSubtypeSmartAlbumBursts:
-        _title = @"Bursts";
-        break;
     default:
-        _title = nil;
+        return nil;
     }
     return self;
 }
@@ -172,8 +165,7 @@ static NSArray *revenant_no_collections(void)
 
 + (NSArray *)revenant_smartSubtypes
 {
-    return @[@(PHAssetCollectionSubtypeSmartAlbumVideos), @(PHAssetCollectionSubtypeSmartAlbumFavorites),
-             @(PHAssetCollectionSubtypeSmartAlbumBursts), @(PHAssetCollectionSubtypeSmartAlbumAllHidden)];
+    return @[@(PHAssetCollectionSubtypeSmartAlbumVideos)];
 }
 
 + (PHFetchResult<PHAssetCollection *> *)fetchAssetCollectionsWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype options:(PHFetchOptions *)options
