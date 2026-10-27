@@ -260,15 +260,19 @@ function backport_package(target)
     return backports_deb(target)
 end
 
-function report_selectors(source, binaries, architecture, folder, provided)
-    local found = objc.absent_selectors(source, table.join(binaries, provided or {}), architecture)
+function guarded_selectors(target)
+    return table.wrap(target:values("revenant.guarded_selectors"))
+end
+
+function report_selectors(source, binaries, architecture, folder, provided, declared)
+    local found = objc.absent_selectors(source, table.join(binaries, provided or {}), architecture, declared)
     for _, binary in ipairs(binaries) do
         local missing = found[binary]
         if missing then
             local named = folder and path.relative(binary, folder) or binary
             local limit = option.get("verbose") and #missing or 12
             local shown = table.concat(table.slice(missing, 1, math.min(limit, #missing)), " ") .. (#missing > limit and string.format(" and %d more, all of them under xmake -v", #missing - limit) or "")
-            cprint("${color.warning}warning:${clear} %s sends %d selector%s no class of the %s release it is checked against implements, which must run only behind respondsToSelector: or a version check: %s",
+            cprint("${color.warning}warning:${clear} %s sends %d selector%s no class of the %s release it is checked against implements and no target declares as guarded: %s; a selector the app sends only behind respondsToSelector: or a version check is declared with set_values(\"revenant.guarded_selectors\", ...) on the target that sends it",
                    named, #missing, #missing == 1 and "" or "s", architecture, shown)
         end
     end
@@ -311,7 +315,7 @@ function verify(target, binary, opt)
         local source = imports_source(target)
         local provided = provided_libraries(target)
         dyld.check(source, table.join({binary}, provided), nil, import_options(target, provided))
-        report_selectors(source, {binary}, target:arch(), nil, provided)
+        report_selectors(source, {binary}, target:arch(), nil, provided, guarded_selectors(target))
     end
 end
 
@@ -396,7 +400,7 @@ function verify_placed(target, installed)
     local source = imports_source(target)
     local provided = provided_libraries(target)
     dyld.check(source, table.join(binaries, provided), root, import_options(target, provided, runtime))
-    report_selectors(source, binaries, target:arch(), root, provided)
+    report_selectors(source, binaries, target:arch(), root, provided, guarded_selectors(target))
 end
 
 function copy_program(source, destination, description)
@@ -534,7 +538,7 @@ function application(target)
         local source = imports_source(target)
         local provided = provided_libraries(target)
         dyld.check(source, table.join(binaries, provided), folder, import_options(target, provided, runtime))
-        report_selectors(source, binaries, target:arch(), folder, provided)
+        report_selectors(source, binaries, target:arch(), folder, provided, guarded_selectors(target))
     end
     return folder
 end
