@@ -3,11 +3,11 @@
 #import <Security/SecProtocolMetadata.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
+#import "RevenantSecProtocolMetadata.h"
 
 const char * _Nullable sec_protocol_metadata_get_negotiated_protocol(sec_protocol_metadata_t metadata)
 {
-    (void)metadata;
-    return NULL;
+    return ((RevenantSecProtocolMetadata *)metadata).negotiatedProtocol.UTF8String;
 }
 
 dispatch_data_t sec_protocol_metadata_copy_peer_public_key(sec_protocol_metadata_t metadata)
@@ -64,9 +64,12 @@ bool sec_protocol_metadata_access_peer_certificate_chain(sec_protocol_metadata_t
 bool sec_protocol_metadata_access_ocsp_response(sec_protocol_metadata_t metadata,
                                                 void (^handler)(dispatch_data_t response))
 {
-    (void)metadata;
-    (void)handler;
-    return false;
+    NSData *response = ((RevenantSecProtocolMetadata *)metadata).ocspResponse;
+    if (!response.length)
+        return false;
+    dispatch_data_t data = dispatch_data_create(response.bytes, response.length, NULL, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    handler(data);
+    return true;
 }
 
 bool sec_protocol_metadata_access_supported_signature_algorithms(sec_protocol_metadata_t metadata,

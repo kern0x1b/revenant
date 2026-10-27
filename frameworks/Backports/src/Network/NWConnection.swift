@@ -92,6 +92,10 @@ public final class NWConnection: @unchecked Sendable {
         tls?.negotiatedVersion
     }
 
+    public var negotiatedCipherSuite: UInt16? {
+        tls?.negotiatedCipherSuite
+    }
+
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
         self.parameters = parameters
@@ -450,7 +454,7 @@ public final class NWConnection: @unchecked Sendable {
             switch result.status {
             case noErr:
                 count = result.count
-            case errSSLClosedGraceful:
+            case errSSLClosedGraceful, errSSLClosedNoNotify:
                 count = 0
             case errSSLWouldBlock:
                 return

@@ -11,6 +11,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Decisions](explanation/decisions/README.md) | the architecture decisions, each with the check that enforces it |
 | [Loading the backports](explanation/backports-loading.md) | how the backport libraries are loaded |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
+| [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
