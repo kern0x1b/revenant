@@ -160,19 +160,19 @@ let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
 }()
 
 func showLive(_ scenario: SnapshotCase) {
-    guard let action = scenario.action else {
-        probe("live: \(scenario.name) ready")
-        return
-    }
     guard let window = UIApplication.shared.keyWindow else {
         probe("live: \(scenario.name) no key window")
         return
     }
-    let size = UIScreen.main.bounds.size
+    let root = UIViewController()
+    window.rootViewController = root
+    let size = UIScreen.main.applicationFrame.size
     let host = _Probe(scenario.view, width: size.width, height: size.height)
-    window.addSubview(host.hostView)
+    root.view.addSubview(host.hostView)
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-        action(host)
+        if let action = scenario.action {
+            action(host)
+        }
         probe("live: \(scenario.name) ready")
     }
 }
@@ -192,7 +192,7 @@ struct DemoApp: App {
         WindowGroup {
             if let name = try? String(contentsOfFile: "/var/revenant/show", encoding: .utf8),
                let scenario = snapshotCases().first(where: { $0.name == name.trimmingCharacters(in: .whitespacesAndNewlines) }) {
-                AnyView(scenario.action == nil ? AnyView(scenario.view) : AnyView(Text(""))).onAppear {
+                AnyView(Text("")).onAppear {
                     showLive(scenario)
                     if let gesture = try? String(contentsOfFile: "/var/revenant/gesture", encoding: .utf8) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { runDeviceGesture(gesture.trimmingCharacters(in: .whitespacesAndNewlines)) }
