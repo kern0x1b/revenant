@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -17,6 +18,7 @@
 #include <string_view>
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
 namespace emulator {
 
@@ -55,6 +57,7 @@ public:
     void reset();
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<DarwinNotifyStateHle>, 7>& snapshot_members();
 
 private:
     void initialize(UserlandHleCall& call);

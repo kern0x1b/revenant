@@ -8,6 +8,7 @@
 #pragma once
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "media/pcm_sample_format.hpp"
 
 #include <array>
@@ -58,6 +59,7 @@ public:
 
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<CoreAudioHle>, 2>& snapshot_members();
 
 private:
     void device_property_info(UserlandHleCall& call);

@@ -5,11 +5,14 @@
 #include "network/wifi_state.hpp"
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -127,6 +130,70 @@ void truncated_stream_is_a_format_error()
     expect(threw, "a truncated Wi-Fi stream throws FormatError");
 }
 
+void no_access_point_layout_is_fixed()
+{
+    const WifiState wifi { std::vector<VirtualAccessPoint> {} };
+    Writer expected;
+    emulator::snapshot::save(expected, static_cast<std::uint64_t>(0));
+    emulator::snapshot::save(expected, std::vector<std::string> {});
+    emulator::snapshot::save(expected, emulator::WifiLinkState::PoweredOff);
+    emulator::snapshot::save(expected, false);
+    emulator::snapshot::save(expected, false);
+    emulator::snapshot::save(expected, std::optional<std::size_t> {});
+    emulator::snapshot::save(expected, false);
+    expect(save_wifi(wifi) == expected.bytes(),
+        "the Wi-Fi state saves its members in their fixed order");
+}
+
+void descriptors_name_the_saved_fields_in_order()
+{
+    std::vector<std::string> names;
+    for (const auto& member : WifiState::snapshot_members())
+        names.emplace_back(member.name);
+    const std::vector<std::string> expected {
+        "wifi.access_points_",
+        "wifi.preferred_networks_",
+        "wifi.link_state_",
+        "wifi.airplane_mode_",
+        "wifi.powered_before_airplane_mode_",
+        "wifi.associated_index_",
+        "wifi.ipv4_",
+    };
+    expect(names == expected, "the Wi-Fi members are named in save order");
+}
+
+void is_default_holds_for_a_state_with_nothing_wired()
+{
+    const WifiState empty { std::vector<VirtualAccessPoint> {} };
+    for (const auto& member : WifiState::snapshot_members()) {
+        expect(member.is_default(empty),
+            std::string { member.name } + " is default when nothing is wired or on");
+    }
+}
+
+void populated_members_name_the_fields_that_hold_state()
+{
+    const WifiState wired;
+    std::vector<std::string> populated;
+    emulator::snapshot::note_populated_members(
+        populated, wired, WifiState::snapshot_members());
+    expect(populated == std::vector<std::string> { "wifi.access_points_" },
+        "a powered-off Wi-Fi state populates only its wired access point");
+
+    WifiState associated;
+    expect(associated.set_power(true), "power the Wi-Fi on");
+    expect(associated.associate(), "associate to the wired access point");
+    populated.clear();
+    emulator::snapshot::note_populated_members(
+        populated, associated, WifiState::snapshot_members());
+    const auto has = [&populated](const std::string& name) {
+        return std::find(populated.begin(), populated.end(), name) != populated.end();
+    };
+    expect(has("wifi.link_state_"), "an associated Wi-Fi state populates its link state");
+    expect(has("wifi.associated_index_"),
+        "an associated Wi-Fi state populates its association");
+}
+
 }
 
 int main()
@@ -135,6 +202,10 @@ int main()
     airplane_mode_round_trip_keeps_the_mode();
     access_point_mismatch_is_a_format_error();
     truncated_stream_is_a_format_error();
+    no_access_point_layout_is_fixed();
+    descriptors_name_the_saved_fields_in_order();
+    is_default_holds_for_a_state_with_nothing_wired();
+    populated_members_name_the_fields_that_hold_state();
     if (failures != 0) {
         std::cerr << failures << " Wi-Fi snapshot checks failed\n";
         return 1;

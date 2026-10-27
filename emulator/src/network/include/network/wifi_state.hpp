@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "network/virtual_network.hpp"
 
 namespace emulator {
@@ -79,6 +80,7 @@ public:
     [[nodiscard]] bool disassociate();
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<WifiState>, 7>& snapshot_members();
 
 private:
     [[nodiscard]] static WifiIpv4Configuration default_ipv4_configuration();
