@@ -1,0 +1,38 @@
+From 3ea08bef08e7aacd7bcaf6ac6e3de0b0783a9de7 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Tue, 27 Oct 2026 21:36:34 +0100
+Subject: [PATCH] Read NEON on Apple armv7 from sysctl
+
+Tesseract finds NEON at run time only through getauxval or elf_aux_info, and neither exists on Darwin, so neon_available_ stays false and the compiled NEON matrix code is never selected. On Apple armv7 read hw.optional.neon instead.
+---
+ src/arch/simddetect.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/arch/simddetect.cpp b/src/arch/simddetect.cpp
+index 0031556..6be29eb 100644
+--- a/src/arch/simddetect.cpp
++++ b/src/arch/simddetect.cpp
+@@ -61,6 +61,8 @@
+ #    include <sys/auxv.h>
+ #  elif defined(HAVE_ELF_AUX_INFO)
+ #    include <sys/auxv.h>
++#  elif defined(__APPLE__)
++#    include <sys/sysctl.h>
+ #  endif
+ #endif
+ 
+@@ -236,6 +238,11 @@ SIMDDetect::SIMDDetect() {
+   unsigned long hwcap = 0;
+   elf_aux_info(AT_HWCAP, &hwcap, sizeof hwcap);
+   neon_available_ = hwcap & HWCAP_NEON;
++#  elif defined(__APPLE__)
++  int neon = 0;
++  size_t size = sizeof neon;
++  if (sysctlbyname("hw.optional.neon", &neon, &size, NULL, 0) == 0)
++    neon_available_ = neon != 0;
+ #  endif
+ #endif
+ 
+-- 
+2.54.0 (Apple Git-157)
+

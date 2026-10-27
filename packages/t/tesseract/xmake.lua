@@ -10,6 +10,17 @@ package("tesseract")
     add_deps("cmake", "ninja", {kind = "binary"})
     add_links("tesseract")
 
+    local patches = {"5.5.3-apple-neon-sysctl.patch"}
+    local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
+    for _, name in ipairs(patches) do
+        local file = path.join(os.scriptdir(), "patches", name)
+        local digest = hash.sha256(file)
+        add_patches("5.5.3", file, digest)
+        table.insert(digests, name .. "=" .. digest)
+    end
+    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed patch is a different build.",
+                           default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+
     local configs = {
         "-DBUILD_SHARED_LIBS=OFF",
         "-DBUILD_TESTS=OFF",
