@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorpathbackport
+Name: emulator backport path probe
+Architecture: iphoneos-arm
+Description: A program that prints the NWPathMonitor status, interfaces, gateways and usesInterfaceType answers through the Network backport, with the update handler and cancel checked on the queue it was given.

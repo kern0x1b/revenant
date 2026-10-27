@@ -62,16 +62,16 @@ function main()
     os.vrunv(openssl, {"pkcs12", "-export", "-inkey", clientKey, "-in", clientCertificate, "-certfile", authority, "-out", identity,
                        "-passout", "pass:revenant", "-keypbe", "PBE-SHA1-3DES", "-certpbe", "PBE-SHA1-3DES", "-macalg", "sha1"})
 
-    local bridge = path.join(out, "RevenantTLSBridge.o")
-    clang({"-c", path.join(src, "CBoringSSL", "RevenantTLSBridge.c"), "-o", bridge})
-    local objects = {bridge}
+    local engine = path.join(out, "RevenantTLSEngine.o")
+    clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(src, "RevenantTLSEngine.m"), "-o", engine})
+    local objects = {engine}
     for _, file in ipairs(securityObjects) do
         local object = path.join(out, path.basename(file) .. ".o")
         clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
         table.insert(objects, object)
     end
     local backport = path.join(out, "backport")
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),
                       {fixture},
                       objects,
