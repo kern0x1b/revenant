@@ -49,6 +49,10 @@ rule("apple-ios")
         local flat_flags = flat.app_link_flags(sdk, path.join(os.projectdir(), "build", "generated", "flat-stubs"))
         target:add("ldflags", flat_flags, {force = true})
         target:add("shflags", flat_flags, {force = true})
+        for _, library in ipairs(import("@self.apple.platform").platform_libraries(target)) do
+            target:add("ldflags", library, {force = true})
+            target:add("shflags", library, {force = true})
+        end
         local symbols = target:values("apple.compat")
         if symbols then
             local compat = target:pkg("apple-compat")

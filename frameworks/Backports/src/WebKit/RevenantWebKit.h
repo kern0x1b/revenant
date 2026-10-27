@@ -7,8 +7,6 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)revenant_scriptsDidChange;
 @end
 
-// The callbacks WKWebView sends, with the SDK's selectors. The response decision is declared for
-// conforming classes; the engine does not send it, because UIWebView gives no response hook.
 @protocol WKNavigationDelegate <NSObject>
 @optional
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;

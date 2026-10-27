@@ -52,7 +52,7 @@ if is_plat("iphoneos") then
         add_packages("combine", {public = true})
         set_optimize("fastest")
         add_files("src/*.swift")
-        add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings")
+        add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings", "-module-link-name", "SwiftUI")
         add_frameworks("UIKit", "QuartzCore", "CoreGraphics", "CoreData", "Foundation", "CoreFoundation")
         before_build(function (target)
             os.vrunv(os.programfile(), {"l", path.join(target:scriptdir(), "tools", "coverage.lua"), "--check", "--before-build"})
