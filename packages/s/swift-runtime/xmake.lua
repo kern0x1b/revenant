@@ -348,6 +348,9 @@ package("swift-runtime")
                                     {"_SwiftRevenantUIKitOverlayShims", "UIKit", "RevenantUIKitOverlayShims.h"}}
             for _, entry in ipairs(revenant_shims) do
                 os.vcp(path.join(revenant_overlay, entry[2], entry[3]), installed_shims .. "/")
+                if entry[2] == "os" then
+                    os.vcp(path.join(revenant_overlay, "os", "RevenantOSLogRender.h"), installed_shims .. "/")
+                end
                 if not io.readfile(shim_modules):find(entry[1], 1, true) then
                     io.writefile(shim_modules, io.readfile(shim_modules) ..
                                  string.format("\nmodule %s {\n  header \"%s\"\n}\n", entry[1], entry[3]))

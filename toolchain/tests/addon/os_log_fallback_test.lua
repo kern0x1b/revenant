@@ -40,10 +40,10 @@ local RENDER_PROBE = [[
 static void show(const char *label, const char *format, int count, int error, ...) {
     va_list arguments;
     va_start(arguments, error);
-    revenant_os_log_text text;
-    revenant_os_log_render(&text, format, arguments, count, error);
+    char *text = revenant_os_log_render_arguments(format, arguments, count, error);
     va_end(arguments);
-    printf("%s\t%s\n", label, text.bytes);
+    printf("%s\t%s\n", label, text ? text : "(failed)");
+    free(text);
 }
 
 int main(void) {
