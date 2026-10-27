@@ -24,7 +24,7 @@ local STUBBED = {
     },
 }
 
-local EXPORTED = {NSURLComponents = true, NSURLQueryItem = true}
+local EXPORTED = {NSURLComponents = true, NSURLQueryItem = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
 
 local function symbol_of(entry, name)
     if entry.functions then

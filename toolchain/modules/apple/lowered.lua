@@ -1736,6 +1736,10 @@ local function digest_of(base, files)
     return hash.strhash128(table.concat(parts, "\n"))
 end
 
+local function generator_files()
+    return {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+end
+
 local function members_key(src, sdk)
     local sdk_files = table.join(framework_headers(sdk))
     for _, entry in ipairs(MEMBERS) do
@@ -1744,11 +1748,10 @@ local function members_key(src, sdk)
     byteorder.sort(sdk_files)
     local src_files = os.files(path.join(src, "**"))
     byteorder.sort(src_files)
-    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
     local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
     local tools = {path.join(src, "..", "tools", "facts.lua"), path.join(src, "..", "tools", "ast.lua"), path.join(src, "..", "tools", "sdk.lua")}
     return hash.strhash128(table.concat({
-        "generator=" .. digest_of(MODULE_DIR, generator),
+        "generator=" .. digest_of(MODULE_DIR, generator_files()),
         "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
         "tools=" .. digest_of(path.join(src, ".."), tools),
         "device=" .. hash.sha256(device_members_file()),
@@ -1885,7 +1888,7 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
 end
 
 function overlay(sdk, out, set, subtrees)
