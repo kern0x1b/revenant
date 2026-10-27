@@ -1,8 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 
-// The scheme callbacks and the task a handler receives. The engine loads a scheme through an NSURLProtocol
-// scoped to the web view (RevenantWebURLProtocol), so these describe the handler's side of that route.
 @protocol WKURLSchemeTask <NSObject>
 @property (nonatomic, readonly, copy) NSURLRequest *request;
 - (void)didReceiveResponse:(NSURLResponse *)response;

@@ -4,8 +4,6 @@
 
 #import <WebKit/WebKit.h>
 
-// The engine shows no file picker, so it never asks the delegate to open one and no parameters are created.
-// The defaults a caller reads are the ones for a single file.
 @implementation WKOpenPanelParameters
 
 - (BOOL)allowsMultipleSelection

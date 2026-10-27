@@ -4058,6 +4058,7 @@ enum WKNavigationResponsePolicyCancel
 enum WKNavigationTypeBackForward
 enum WKNavigationTypeOther
 enum WKNavigationTypeReload
+enum WKUserScriptInjectionTimeAtDocumentStart
 enum WKWebExtensionErrorInvalidManifest
 enum WKWebExtensionErrorResourceNotFound
 enum WKWebExtensionMatchPatternErrorInvalidHost
@@ -4500,6 +4501,10 @@ function RevenantCKZoneWithDocument
 function RevenantCertificateNameTLV
 function RevenantCertificateReadTLV
 function RevenantChannelsForLayoutTag
+function RevenantCodecBridgeMessage
+function RevenantCodecDecoded
+function RevenantCodecMessageBody
+function RevenantCodecParsed
 function RevenantCreatePhotoImage
 function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
@@ -35181,6 +35186,7 @@ protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
 protocol WKDownloadDelegate
 protocol WKNavigationDelegate
+protocol WKScriptMessageHandler
 protocol WKUIDelegate
 protocol WKURLSchemeHandler
 protocol WKURLSchemeTask

@@ -7,8 +7,6 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)revenant_scriptsDidChange;
 @end
 
-// The callbacks WKWebView sends, with the SDK's selectors. The response decision is declared for
-// conforming classes; the engine does not send it, because UIWebView gives no response hook.
 @protocol WKNavigationDelegate <NSObject>
 @optional
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;
@@ -19,8 +17,11 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error;
 @end
 
-// The UI callbacks the engine can meet. The engine shows no file picker, no window and no context menu for a page,
-// so these are declared for the delegate to implement, and the engine does not send them.
+@protocol WKScriptMessageHandler <NSObject>
+@required
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message;
+@end
+
 @protocol WKUIDelegate <NSObject>
 @optional
 - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures;
@@ -28,9 +29,6 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)webView:(WKWebView *)webView contextMenuConfigurationForElement:(WKContextMenuElementInfo *)elementInfo completionHandler:(void (^)(UIContextMenuConfiguration *configuration))completionHandler;
 @end
 
-// The download callbacks Telegram implements. The engine never hands a download to WebKit's path, so it sends none of
-// them. The redirect and placeholder callbacks are left out: their policy types are the SDK's, and no caller here
-// implements them.
 @protocol WKDownloadDelegate <NSObject>
 @required
 - (void)download:(WKDownload *)download decideDestinationUsingResponse:(NSURLResponse *)response suggestedFilename:(NSString *)suggestedFilename completionHandler:(void (^)(NSURL *destination))completionHandler;

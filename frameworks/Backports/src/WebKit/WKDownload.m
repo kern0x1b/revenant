@@ -4,9 +4,6 @@
 
 #import <WebKit/WebKit.h>
 
-// The engine never hands a navigation or response to WebKit's download path, so no WKDownload is created.
-// The class is complete for a download a caller holds: cancelling it reports no resume data, as this engine
-// cannot resume anything.
 @implementation WKDownload {
     __weak id<WKDownloadDelegate> _delegate;
 }
