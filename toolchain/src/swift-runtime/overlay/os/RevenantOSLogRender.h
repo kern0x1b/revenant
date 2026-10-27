@@ -1,19 +1,3 @@
-/*
- * The os_log renderer shared by the Backports logging runtime (frameworks/Backports/src/Foundation/
- * RevenantOSLogFormat.m) and the os overlay's fallback (RevenantOSOverlayShims.h), so that both print the same text.
- *
- * A message is rendered from a format and its arguments the way os_log renders it in a release build: %{public}
- * values are printed, %{private}, %{sensitive} and mask values print as <private>, and a string, a pointer or an
- * object is private unless it is marked %{public}. Numbers are public unless marked private. The format is parsed
- * here and never passed to printf: each specifier is formatted alone with its own flags, width and precision.
- *
- * Two argument sources are rendered: a va_list, with at most `count` arguments read from it, and the packed buffer the
- * compiler's os_log builtin emits. The buffer layout is the one the os_log ABI defines (swiftlang/swift
- * stdlib/private/OSLog/OSLogMessage.swift): a summary byte, an argument count byte, then per argument a header byte
- * (type in the high four bits, privacy flag in the low four, see OSLogPrivacy.swift), a size byte and the bytes.
- * Both sources decide privacy with revenant_os_log_is_private.
- */
-
 #include <errno.h>
 #include <limits.h>
 #include <mach-o/dyld.h>
@@ -48,8 +32,6 @@ typedef struct {
     size_t capacity;
 } revenant_os_log_text;
 
-/* The privacy flag of an argument: the low four bits of its header byte, as the os_log ABI encodes it (swiftlang/swift
-   stdlib/private/OSLog/OSLogPrivacy.swift, argumentFlag: private 0x1, public 0x2, auto 0). */
 enum {
     REVENANT_OS_LOG_PRIVACY_DEFAULT = 0,
     REVENANT_OS_LOG_PRIVACY_PUBLIC = 0x2,
@@ -87,8 +69,6 @@ static inline const revenant_os_log_spec *revenant_os_log_plain_spec(void) {
     return &plain;
 }
 
-/* Width and precision are capped, and so is the whole message: a format from an app or a huge argument cannot make the
-   padding or the buffer grow without bound. */
 #define REVENANT_OS_LOG_MAX_LIMIT 128
 #define REVENANT_OS_LOG_MAX_MESSAGE 8192
 
@@ -188,7 +168,6 @@ static inline unsigned long long revenant_os_log_read_little_endian(const unsign
     return value;
 }
 
-/* Takes one argument slot of a va_list; the buffer source has its own item count and always succeeds here. */
 static inline int revenant_os_log_claim(revenant_os_log_args *arguments, int slots) {
     if (!arguments->arguments) {
         return 1;
@@ -321,8 +300,6 @@ static inline void revenant_os_log_skip_hash_items(revenant_os_log_args *argumen
     }
 }
 
-/* The text of an object's description, or NULL when it has none. The Objective-C runtime is used directly, so the header
-   needs no Foundation import. */
 static inline const char *_Nullable revenant_os_log_description_text(const void *_Nonnull object, SEL description_selector) {
     id description = ((id (*)(id, SEL))objc_msgSend)((REVENANT_OS_LOG_RENDER_BRIDGE id)object, description_selector);
     SEL utf8_selector = sel_registerName("UTF8String");
@@ -333,8 +310,6 @@ static inline const char *_Nullable revenant_os_log_description_text(const void 
     return NULL;
 }
 
-/* The description of an object, or NULL when it has none or its description raises, as the renderer has always printed
-   it as (null). An exception is caught where the compiler has Objective-C exceptions; C has none to catch. */
 static inline const char *_Nullable revenant_os_log_description(const void *_Nonnull object) {
     Class cls = object_getClass((REVENANT_OS_LOG_RENDER_BRIDGE id)object);
     SEL description_selector = sel_registerName("description");
@@ -622,7 +597,6 @@ static inline void revenant_os_log_parse_decorators(const char *_Nonnull *_Nonnu
     *cursor = close + 1;
 }
 
-/* The argument type a va_list conversion stands for, so that both sources decide privacy the same way. */
 static inline unsigned revenant_os_log_va_type(char conversion) {
     switch (conversion) {
     case 's':
@@ -637,9 +611,6 @@ static inline unsigned revenant_os_log_va_type(char conversion) {
     }
 }
 
-/* Whether an argument is private. The header flag decides when it is set. Without one (auto) the renderer treats
-   strings, objects and data as private and numbers and pointers as public; the os_log ABI leaves auto to the system
-   (swiftlang/swift stdlib/private/OSLog/OSLogPrivacy.swift), so this default is the renderer's own. */
 static inline int revenant_os_log_is_private(unsigned flag, unsigned type, char conversion) {
     if (flag & REVENANT_OS_LOG_PRIVACY_PRIVATE) {
         return 1;
@@ -659,7 +630,6 @@ static inline int revenant_os_log_is_private(unsigned flag, unsigned type, char 
     }
 }
 
-/* Reads and discards the va_list argument of a private conversion, so the next specifier reads the next argument. */
 static inline void revenant_os_log_discard(revenant_os_log_args *arguments, const revenant_os_log_spec *spec, char conversion) {
     switch (conversion) {
     case 'e': case 'E': case 'f': case 'F': case 'g': case 'G': case 'a': case 'A':
@@ -848,7 +818,6 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 continue;
             }
         }
-        /* A buffer argument is private when its header flag says so, or by the default for its type. */
         if (!ap->arguments && strchr("diouxXcsSeEfFgGaApP@C", conversion)) {
             revenant_os_log_item item;
             if (revenant_os_log_peek_item(ap, &item) && revenant_os_log_is_private(item.privacy, item.type, conversion)) {
@@ -857,7 +826,6 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 continue;
             }
         }
-        /* A va_list conversion consumes one argument; without one left the message says so. */
         if (ap->arguments && strchr("diouxXcsSeEfFgGaApP@C", conversion)) {
             if (!revenant_os_log_claim(ap, 1)) {
                 revenant_os_log_text_append(&text, REVENANT_OS_LOG_MISSING_TEXT, strlen(REVENANT_OS_LOG_MISSING_TEXT));
@@ -961,7 +929,6 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
     return escaped.bytes;
 }
 
-/* Renders a va_list of `count` arguments. The caller keeps its va_list: the rendering reads a copy. */
 static inline char *_Nullable revenant_os_log_render_arguments(const char *format, va_list arguments, int count, int error) {
     va_list list;
     va_copy(list, arguments);
@@ -971,7 +938,6 @@ static inline char *_Nullable revenant_os_log_render_arguments(const char *forma
     return text;
 }
 
-/* Renders the packed buffer the compiler's os_log builtin emits for `format`. */
 static inline char *_Nullable revenant_os_log_render_buffer(const char *format, const uint8_t *buffer, uint32_t size, int error) {
     revenant_os_log_args args = {NULL, 0, buffer, size, 0, 0, error};
     if (buffer && size >= 2) {

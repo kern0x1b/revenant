@@ -27,10 +27,6 @@ int main(void) {
 }
 ]]
 
--- Each probe line is "label<TAB>text": the text the fallback renders for the format and arguments of that label.
--- The formats are the ones the os overlay forwards: the StaticString of an os_log call, with the specifiers the
--- release build understands. Privacy: %{public} prints, %{private} and %{sensitive} print <private>, and a string or
--- object without an annotation is private, a number is public.
 local RENDER_PROBE = [[
 #import "RevenantOSOverlayShims.h"
 #include <errno.h>
@@ -141,8 +137,6 @@ int main(void) {
 }
 ]]
 
--- The expected text per label. None of these lines has been compared with macOS `log show` yet, so they are the
--- release-build rules above, not a recorded os_log run.
 local RENDER = {
     {"01", "hello"}, {"02", "<private>"}, {"03", "<private>"}, {"04", "42"}, {"05", "7"}, {"06", "<private>"},
     {"07", "object text"}, {"08", "<private>"}, {"09", "<private>"}, {"10", "0000BEEF"}, {"11", "1234567890123"},
@@ -152,10 +146,8 @@ local RENDER = {
     {"28", "No such file or directory"}, {"29", "<private>"}, {"30", "(null)"}, {"31", "<private>"},
     {"32", "   7"}, {"33", "<decode: missing data>"}, {"34", "first"}, {"35", "abc"}, {"36", "   ab|"},
     {"37", "ab   |"}, {"38", "+5"}, {"39", "1.500000e+00"}, {"40", "0.0001"}, {"41", "ff"}, {"42", "9"},
-    -- The buffer source: the privacy flag of each header byte, and the default (auto) for its type.
     {"51", "<private>"}, {"52", "42"}, {"53", "7"}, {"54", "<private>"}, {"55", "plain"}, {"56", "<private>"},
     {"57", "object text"}, {"58", "42 <private>"},
-    -- Width and precision are capped at 128, so an oversized width cannot make the padding grow without bound.
     {"59", string.rep(" ", 127) .. "1"}, {"60", string.rep(" ", 127) .. "1"},
 }
 

@@ -33,10 +33,6 @@ static inline int revenant_os_log_asl_level(uint8_t type) {
     }
 }
 
-/*
- * The fallback for a process that does not load the Backports logging runtime. The message is rendered by the same
- * renderer that the runtime uses (RevenantOSLogRender.h), reading at most `count` of the Swift caller's arguments.
- */
 static inline void revenant_os_log_fallback(uint8_t type, const char *_Nonnull format, va_list arguments, int count, int error) {
     if (!revenant_os_log_recorded(type)) {
         return;
