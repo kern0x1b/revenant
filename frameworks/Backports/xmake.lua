@@ -50,7 +50,7 @@ local LIBRARIES = {
     {name = "BackgroundTasksBackports", folder = "BackgroundTasks", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "DeviceCheckBackports", folder = "DeviceCheck", frameworks = {"DeviceCheck", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation", "PhotosUI"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp"}, system = {}},
@@ -202,6 +202,14 @@ if is_plat("iphoneos") then
                         if not exported:find(" " .. symbol .. "\n", 1, true) then
                             raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
                         end
+                    end
+                end)
+            end
+            if library.name == "PhotosBackports" then
+                after_build(function (target)
+                    local load = os.iorunv("otool", {"-l", target:targetfile()})
+                    if not load:find("LC_LOAD_WEAK_DYLIB%s+cmdsize %d+%s+name [^%s]*PhotosUI%.framework/PhotosUI") then
+                        raise("%s must weak-link PhotosUI, which an iOS 6 device does not have, so a strong link would stop the app from launching", target:targetfile())
                     end
                 end)
             end
