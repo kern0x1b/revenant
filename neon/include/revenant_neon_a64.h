@@ -1,6 +1,9 @@
 #ifndef REVENANT_NEON_A64_H_
 #define REVENANT_NEON_A64_H_
 
+#include "revenant_neon_sqrt.h"
+#include "revenant_neon_fma.h"
+
 #define REVENANT_A64_INLINE static __inline__ __attribute__((always_inline, unused))
 
 #define REVENANT_RED_Q8(NAME, OPV, OPP, S, T, VT, DT)                          \
@@ -329,6 +332,14 @@ REVENANT_A64_INLINE uint16x8_t vcltzq_s16(int16x8_t a) {
 
 REVENANT_A64_INLINE uint64x2_t vcltzq_s64(int64x2_t a) {
   return vreinterpretq_u64_s64(vshrq_n_s64(a, 63));
+}
+
+REVENANT_A64_INLINE float32x4_t vsqrtq_f32(float32x4_t a) {
+  return revenant_vsqrtq_f32(a);
+}
+
+REVENANT_A64_INLINE float32x4_t vfmaq_f32(float32x4_t a, float32x4_t b, float32x4_t c) {
+  return revenant_vfmaq_f32(a, b, c);
 }
 
 #define vdupq_laneq_s16(v, lane) vdupq_n_s16(vgetq_lane_s16((v), (lane)))

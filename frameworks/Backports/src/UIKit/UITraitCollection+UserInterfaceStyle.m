@@ -28,7 +28,8 @@ void revenant_set_trait_style(UITraitCollection *collection, UIUserInterfaceStyl
 
 - (UIUserInterfaceStyle)userInterfaceStyle
 {
-    return revenant_trait_style(self);
+    UIUserInterfaceStyle style = revenant_trait_style(self);
+    return style == UIUserInterfaceStyleUnspecified ? UIUserInterfaceStyleLight : style;
 }
 
 @end
