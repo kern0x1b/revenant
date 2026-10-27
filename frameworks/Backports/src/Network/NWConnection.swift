@@ -128,7 +128,7 @@ public final class NWConnection: @unchecked Sendable {
                 let fd = self.acceptedDescriptor
                 self.acceptedDescriptor = -1
                 self.setState(.preparing)
-                guard self.parameters.tlsOptions?.hasLocalIdentity ?? true else {
+                guard self.parameters.tlsOptions?.hasServerCredentials ?? true else {
                     Darwin.close(fd)
                     self.fail(.posix(errno: ENOTSUP))
                     return
@@ -259,7 +259,7 @@ public final class NWConnection: @unchecked Sendable {
                 tls = try NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName, serverSide: serverSide)
             } catch {
                 fputs("Network: TLS setting refused: \((error as? NWTLSUnsupportedSetting)?.reason ?? String(describing: error))\n", stderr)
-                fail(.tls(errSSLInternal))
+                fail(.tls((error as? NWTLSUnsupportedSetting)?.status ?? errSSLInternal))
                 return
             }
         }

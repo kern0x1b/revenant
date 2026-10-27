@@ -79,12 +79,22 @@ func startServer(port: UInt16, arguments: [String]) -> (process: Process, transc
     }
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    process.arguments = ["timeout", "60", opensslPath, "s_server", "-accept", String(port), "-cert", certificatePath, "-key", keyPath] + arguments
+    let identity = arguments.contains("-nocert") ? [] : ["-cert", certificatePath, "-key", keyPath]
+    process.arguments = ["timeout", "60", opensslPath, "s_server", "-accept", String(port)] + identity + arguments
     process.standardInput = Pipe()
     process.standardOutput = pipe
     process.standardError = pipe
     try! process.run()
     return (process, transcript)
+}
+
+func describe(_ error: NWError) -> String {
+    switch error {
+    case .tls(let status):
+        return "tls=\(status)"
+    default:
+        return "other"
+    }
 }
 
 func parameters(_ configure: (sec_protocol_options_t) -> Void) -> NWParameters {
@@ -102,11 +112,11 @@ func settle(_ parameters: NWParameters, port: UInt16) -> String {
         case .ready:
             outcome.withValue { $0 = "ready" }
             settled.signal()
-        case .failed:
-            outcome.withValue { $0 = "failed" }
+        case .failed(let error):
+            outcome.withValue { $0 = "failed \(describe(error))" }
             settled.signal()
-        case .waiting:
-            outcome.withValue { $0 = "waiting" }
+        case .waiting(let error):
+            outcome.withValue { $0 = "waiting \(describe(error))" }
             settled.signal()
         default:
             break
@@ -163,14 +173,57 @@ let scenarios: [Scenario] = [
         sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
         sec_protocol_options_set_challenge_block(options, { _, complete in complete(nil) }, challengeQueue)
     }),
-    Scenario(name: "psk-refused", serverArguments: [], reportsCipher: false, reportsLeaf: false, configure: { options in
+    Scenario(name: "psk-client", serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "PSK-AES128-CBC-SHA"], reportsCipher: true, reportsLeaf: false, configure: { options in
         unauthenticated(options)
+        sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
         sec_protocol_options_add_pre_shared_key(options, dispatchData("secret"), dispatchData("client"))
+    }),
+    Scenario(name: "dh-refused", serverArguments: [], reportsCipher: false, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_set_tls_diffie_hellman_parameters(options, dispatchData("parameters"))
+    }),
+    Scenario(name: "cipher-unknown", serverArguments: [], reportsCipher: false, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_add_tls_ciphersuite(options, SSLCipherSuite(0xFFFF))
+    }),
+    Scenario(name: "psk-wrong-key",serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "PSK-AES128-CBC-SHA"], reportsCipher: false, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
+        sec_protocol_options_add_pre_shared_key(options, dispatchData("wrong"), dispatchData("client"))
     }),
 ]
 
+func pskServer(name: String, port: UInt16, clientKey: String) -> String {
+    let tls = NWProtocolTLS.Options()
+    sec_protocol_options_set_max_tls_protocol_version(tls.securityProtocolOptions, tls_protocol_version_t.TLSv12)
+    sec_protocol_options_add_pre_shared_key(tls.securityProtocolOptions, dispatchData("secret"), dispatchData("client"))
+    let queue = DispatchQueue(label: "revenant.tlsoptions.psk.server")
+    let accepted = Locked<[NWConnection]>([])
+    let listener = try! NWListener(using: NWParameters(tls: tls, tcp: NWProtocolTCP.Options()), on: NWEndpoint.Port(rawValue: port)!)
+    listener.newConnectionHandler = { connection in
+        accepted.withValue { $0.append(connection) }
+        connection.start(queue: queue)
+    }
+    listener.start(queue: queue)
+    usleep(500_000)
+    let pipe = Pipe()
+    let client = Process()
+    client.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    client.arguments = ["timeout", "20", opensslPath, "s_client", "-connect", "127.0.0.1:\(port)", "-tls1_2",
+                        "-cipher", "PSK-AES128-CBC-SHA", "-psk", clientKey, "-psk_identity", "client"]
+    client.standardInput = FileHandle.nullDevice
+    client.standardOutput = pipe
+    client.standardError = pipe
+    try! client.run()
+    let transcript = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+    client.waitUntilExit()
+    listener.cancel()
+    let outcome = client.terminationStatus == 0 ? "ready" : "failed"
+    return "\(name) \(outcome) cipher=\(cipherName(in: transcript))"
+}
+
 func cipherName(in transcript: String) -> String {
-    guard let range = transcript.range(of: "CIPHER is ") else {
+    guard let range = transcript.range(of: "cipher is ", options: .caseInsensitive) else {
         return "none"
     }
     return transcript[range.upperBound...].prefix { !$0.isNewline }.trimmingCharacters(in: .whitespaces)
@@ -198,3 +251,6 @@ for (index, scenario) in scenarios.enumerated() {
     }
     print(line)
 }
+
+print(pskServer(name: "psk-server", port: 14800, clientKey: "736563726574"))
+print(pskServer(name: "psk-server-wrong-key", port: 14801, clientKey: "77726f6e67"))

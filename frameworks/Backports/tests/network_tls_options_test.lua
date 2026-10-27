@@ -7,16 +7,21 @@ local securityObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m"
 
 local expected = table.concat({
     "verify-accept ready",
-    "verify-reject waiting",
+    "verify-reject waiting tls=-9807",
     "pin-match ready leaf=match",
-    "pin-mismatch waiting leaf=mismatch",
+    "pin-mismatch waiting tls=-9807 leaf=mismatch",
     "cipher-allowed ready cipher=ECDHE-RSA-AES128-GCM-SHA256",
-    "cipher-refused failed cipher=none",
+    "cipher-refused failed tls=-9824 cipher=none",
     "ocsp ready",
     "sct ready",
     "challenge-identity ready",
-    "challenge-none failed",
-    "psk-refused failed",
+    "challenge-none failed tls=-9824",
+    "psk-client ready cipher=PSK-AES128-CBC-SHA",
+    "dh-refused failed tls=-9848",
+    "cipher-unknown failed tls=-9818",
+    "psk-wrong-key failed tls=-9846",
+    "psk-server ready cipher=PSK-AES128-CBC-SHA",
+    "psk-server-wrong-key failed cipher=PSK-AES128-CBC-SHA",
 }, "\n") .. "\n"
 
 local function swiftc(args)

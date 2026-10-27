@@ -56,13 +56,45 @@ static BOOL RevenantTLSVersionForSSLProtocol(SSLProtocol protocol, tls_protocol_
         return "ciphersuite groups are unsupported: they name suite sets BoringSSL cannot reproduce, so list the ciphersuites";
     if (self.preSharedKeySelection)
         return "pre-shared-key selection blocks are unsupported: BoringSSL has no PSK selection callback";
-    if (self.preSharedKeys.count > 0 || self.preSharedKeyIdentityHint)
-        return "pre-shared keys are unsupported: the PSK suites are not wired to BoringSSL yet";
+    if (self.preSharedKeys.count > 0 && self.maxTLSVersion >= tls_protocol_version_TLSv13)
+        return "pre-shared keys need TLS 1.2 as the maximum: BoringSSL has no TLS 1.3 external PSK callback";
     if (server && self.challengeBlock)
         return "challenge blocks are unsupported on a server: they answer client certificate requests";
     if (server && (self.ocspEnabled || self.sctEnabled))
         return "OCSP and SCT are unsupported on a server: they are client-side requests";
     return NULL;
+}
+
+static NSData *RevenantDispatchDataBytes(dispatch_data_t data)
+{
+    NSMutableData *bytes = [NSMutableData data];
+    dispatch_data_apply(data, ^bool(dispatch_data_t region, size_t offset, const void *buffer, size_t size) {
+        (void)region;
+        (void)offset;
+        [bytes appendBytes:buffer length:size];
+        return true;
+    });
+    return bytes;
+}
+
+- (NSUInteger)revenantCopyData:(NSInteger)kind index:(NSUInteger)index into:(void *)buffer capacity:(NSUInteger)capacity
+{
+    dispatch_data_t data = nil;
+    if (kind == 0) {
+        if (index < self.preSharedKeys.count)
+            data = self.preSharedKeys[index];
+    } else if (kind == 1) {
+        if (index < self.preSharedKeyIdentities.count)
+            data = self.preSharedKeyIdentities[index];
+    } else {
+        data = self.preSharedKeyIdentityHint;
+    }
+    if (!data)
+        return 0;
+    NSData *bytes = RevenantDispatchDataBytes(data);
+    if (buffer && capacity >= bytes.length)
+        memcpy(buffer, bytes.bytes, bytes.length);
+    return bytes.length;
 }
 
 - (BOOL)revenantVerifyTrust:(SecTrustRef)trust

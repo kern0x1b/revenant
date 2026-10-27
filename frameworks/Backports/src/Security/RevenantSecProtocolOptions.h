@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) sec_identity_t localIdentity;
 - (nullable SecIdentityRef)revenantCopyIdentityRef CF_RETURNS_RETAINED;
 - (nullable const char *)revenantUnsupportedSettingForServer:(BOOL)server;
+- (NSUInteger)revenantCopyData:(NSInteger)kind index:(NSUInteger)index into:(nullable void *)buffer capacity:(NSUInteger)capacity;
 - (BOOL)revenantVerifyTrust:(SecTrustRef)trust;
 - (nullable SecIdentityRef)revenantChallengeIdentity CF_RETURNS_RETAINED;
 

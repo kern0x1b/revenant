@@ -103,6 +103,18 @@ uint32_t RevenantSecProtocolOptionsCiphersuiteAt(const void *options, size_t ind
     return ((unsigned int (*)(id, SEL))objc_msgSend)(value, sel_registerName("unsignedIntValue"));
 }
 
+size_t RevenantSecProtocolOptionsPreSharedKeyCount(const void *options)
+{
+    id keys = RevenantSend(options, "preSharedKeys");
+    return ((unsigned long (*)(id, SEL))objc_msgSend)(keys, sel_registerName("count"));
+}
+
+size_t RevenantSecProtocolOptionsCopyData(const void *options, int kind, size_t index, void *buffer, size_t capacity)
+{
+    return ((unsigned long (*)(id, SEL, long, unsigned long, void *, unsigned long))objc_msgSend)((id)options,
+        sel_registerName("revenantCopyData:index:into:capacity:"), (long)kind, (unsigned long)index, buffer, (unsigned long)capacity);
+}
+
 const void *RevenantSecProtocolOptionsCopyLocalIdentity(const void *options)
 {
     return RevenantSend(options, "revenantCopyIdentityRef");
