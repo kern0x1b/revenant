@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dlfcn.h>
 #include <Security/Security.h>
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -186,10 +187,25 @@ static void reachability(void)
     CFRelease(query);
 }
 
+static void lock_state(void)
+{
+    void *library = dlopen("/System/Library/PrivateFrameworks/MobileKeyBag.framework/MobileKeyBag", RTLD_LAZY);
+    if (!library) {
+        printf("probe: MobileKeyBag dlopen failed: %s\n", dlerror());
+        return;
+    }
+    int (*device_lock_state)(CFDictionaryRef) = (int (*)(CFDictionaryRef))dlsym(library, "MKBGetDeviceLockState");
+    int (*unlocked_since_boot)(void) = (int (*)(void))dlsym(library, "MKBDeviceUnlockedSinceBoot");
+    printf("probe: MKBGetDeviceLockState(NULL)=%d\n", device_lock_state ? device_lock_state(NULL) : -1);
+    printf("probe: MKBDeviceUnlockedSinceBoot()=%d\n", unlocked_since_boot ? unlocked_since_boot() : -1);
+    printf("probe: MKBUnlockDevice symbol %s\n", dlsym(library, "MKBUnlockDevice") ? "present" : "absent");
+}
+
 int main(void)
 {
     freopen("/var/mobile/Library/Caches/revenant-security-gaps-probe.txt", "w", stdout);
     printf("probe: start\n");
+    lock_state();
     reachability();
     add_item("always", kSecAttrAccessibleAlways, NULL);
     add_item("after-first-unlock", kSecAttrAccessibleAfterFirstUnlock, NULL);
