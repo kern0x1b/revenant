@@ -546,10 +546,7 @@ static NSURL *withoutFragment(NSURL *url)
             if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart) {
                 if (started)
                     continue;
-                static dispatch_once_t once;
-                dispatch_once(&once, ^{
-                    NSLog(@"WKUserScript: a document-start script that the document rewrite did not reach runs after the page's own scripts.");
-                });
+                NSLog(@"WKUserScript: the document rewrite did not reach %@ (navigation type %ld), so a document-start script runs after the page's own scripts.", _web.request.URL.absoluteString ?: @"nil", (long)_navigationType);
             }
             [_web stringByEvaluatingJavaScriptFromString:script.source];
         }

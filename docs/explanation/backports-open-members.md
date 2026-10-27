@@ -223,9 +223,13 @@ Already present, with the same limits:
   request and reached the protocol with cache policy 1, the reload-ignoring-cache policy. The `WKWebView` backport
   (WebKitBackports armv7 build) ran the document-start script before the page's own scripts for `loadHTMLString:`,
   `loadData:` (ISO-8859-1) and `loadFileURL:`, and for `reload`, so the four shared lines match the macOS oracle. The
-  backport's `goBack` after `loadFileURL:` ended the probe with no output and no crash report, so `goBack` on the device
-  is not measured. The backport also logged once the fallback message that a document-start script the rewrite did not
-  reach runs after the page's own scripts; the probe does not say which load logged it, so that is open.
+  backport's `goBack` on an iPad 2 (iOS 6.1.3) finished for pages loaded over HTTP: the page saw the value its start script
+  set. For a `goBack` to a page loaded by `loadHTMLString:` or `loadFileURL:`, the process vanished about 8 to 18 seconds
+  after the call, with no signal, no crash report and no `UIApplication` lifecycle callback. The main thread was idle in
+  the run loop until then, and the same happened with the sampler off. The cause is not found. The fallback message that a
+  document-start script the rewrite did not reach runs after the page's own scripts now names the document and the
+  navigation type, and it logs on every load that hits it. `reload` of a `file:` document still bypasses the protocol, so
+  that document gets its start scripts after the page's own scripts; that is a real gap, not yet closed.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
