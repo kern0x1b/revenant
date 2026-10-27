@@ -17,7 +17,14 @@ package("ffmpeg-hevc")
         local chosen = cmake.toolchain(package)
         local deployment = chosen:config("deployment")
         local target = table.concat({"-target", package:arch() .. "-apple-ios" .. deployment, "-isysroot", chosen:config("sdkdir")}, " ")
-        local cc = chosen:tool("cc") .. " " .. target
+        local linker_version = chosen:config("linker_version") and {"-mlinker-version=" .. chosen:config("linker_version")} or {}
+        local linker = {}
+        for _, flag in ipairs(table.wrap(chosen:get("shflags"))) do
+            if flag:startswith("-fuse-ld=") then
+                table.insert(linker, flag)
+            end
+        end
+        local cc = chosen:tool("cc") .. " " .. target .. " " .. table.concat(linker_version, " ")
         local folder = "/usr/lib/revenant/org.revenant.backports"
         local envs = {SOURCE_DATE_EPOCH = "0", IPHONEOS_DEPLOYMENT_TARGET = deployment}
         local options = {"--prefix=" .. package:installdir(), "--target-os=darwin", "--arch=" .. package:arch(),
@@ -26,7 +33,7 @@ package("ffmpeg-hevc")
             "--disable-armv5te", "--disable-armv6", "--disable-armv6t2", "--enable-neon", "--enable-pic",
             "--disable-avdevice", "--disable-avfilter", "--disable-avformat", "--disable-swresample", "--disable-swscale",
             "--enable-avcodec", "--enable-avutil", "--enable-decoder=hevc", "--enable-parser=hevc",
-            "--install-name-dir=" .. folder, "--extra-ldflags=" .. target}
+            "--install-name-dir=" .. folder, "--extra-ldflags=" .. target .. " " .. table.concat(linker, " ")}
         local build = path.absolute("build-ffmpeg")
         os.mkdir(build)
         os.vrunv(path.absolute("configure"), options, {curdir = build, envs = envs})
