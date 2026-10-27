@@ -18,10 +18,17 @@ denormal gives +0 and a negative one gives NaN. `tests/vsqrt_test.c` measures it
 inputs: at most 2 ulp, and correctly rounded for 70% of them. That run is on the arm64 host, with the same estimate and
 step instructions the ARMv7 build emits; the armv7 build is compiled and its assembly checked, not run on an emulator.
 
+`vfmaq_f32` is fused: each lane is `a + b * c` rounded once. ARMv7 NEON only has the unfused `vmla`, which rounds the
+product, so `include/revenant_neon_fma.h` calls libm `fmaf` once per lane. Its result is exact wherever libm's `fmaf`
+is correctly rounded, which is the same bits as AArch64. A NaN result may carry a different payload. `tests/fma_test.c`
+compares the shim with the native fused intrinsic on the arm64 host over 2^20 random groups of four lanes and over every
+combination of zeros, ones, denormals, infinities, NaN, FLT_MAX and FLT_MIN, and it checks that the product rounds once.
+Those host checks do not exercise the armv7 libm `fmaf`, which is not run on a device or an emulator here, and the speed
+is not measured. Cortex-A9 has no VFPv4, so this is a library call per lane, not an instruction.
+
 Not implemented, because ARMv7 NEON cannot give the same bits: the AES instructions (`vaes*`, `vaesmcq`), the
-double-precision vector intrinsics (`*_f64`, the vector types have no f64 lanes on ARMv7), the fused multiply-add
-`vfmaq_f32` (ARMv7 NEON only has the unfused multiply-add), the 64-bit polynomial multiply (`vmull_p64`), and the
-rounding conversions (`vcvtn*`, `vrndm*`). Code that uses them must be compiled out on armv7.
+double-precision vector intrinsics (`*_f64`, the vector types have no f64 lanes on ARMv7), the 64-bit polynomial multiply
+(`vmull_p64`), and the rounding conversions (`vcvtn*`, `vrndm*`). Code that uses them must be compiled out on armv7.
 
 SIMDe (MIT) implements the same names, but its ARMv7 path for these is a scalar loop, not the NEON sequence, so it is
 not used.
