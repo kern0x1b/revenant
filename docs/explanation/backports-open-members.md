@@ -203,8 +203,10 @@ here; a Swift error text and the exact typecheck command are what would settle i
   iOS 6 the SecItem calls, which the Security backport defines and forwards to the system's Security image (see
   `backports-loading.md`), gate the items that carry one. That gate is checked against a literal contract and is not
   yet confirmed on the device (see the Security reference).
-- Secure Enclave keys: the emulated key is a backport object whose private scalar and public point are two keychain
-  items. Its representation, the reasoning and the caveats are in the Security reference, "Secure Enclave keys on iOS 6".
+- Secure Enclave keys: on the device the emulated key is a genuine `SecKeyRef`, made by the system's `SecKeyCreate` from a
+  descriptor of the backport's own. On the host it is a backport object. The private scalar and the public point of a
+  permanent key are two keychain items. The representation, the reasoning and the caveats are in the Security reference,
+  "Secure Enclave keys on iOS 6".
 - `kSecUseAuthenticationContext` and `kSecUseDataProtectionKeychain`: the values match macOS. The second is a no-op on iOS 6.
 - `kSecAttrAccess` is not backported. The only use in the Telegram 13.0 tree is `PasscodeKeychainScopeTests.swift`, a
   macOS scope test, and the production code uses `kSecAttrAccessGroup`, which iOS 6 has.
