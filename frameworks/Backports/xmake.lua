@@ -314,7 +314,8 @@ if is_plat("iphoneos") then
         set_default(false)
         add_rules("@addon/revenant/app")
         add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m",
-                  "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/Metal/*.m")
+                  "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
+                  "src/UIKit/RevenantTextContentType.m", "src/Metal/*.m")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
         set_values("app.plist-file", "tests/device_probe/Info.plist")

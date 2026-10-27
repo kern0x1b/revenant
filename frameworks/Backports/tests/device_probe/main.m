@@ -68,6 +68,16 @@ static void revenant_text_checks(void)
     revenant_check(mode != nil, @"textInputMode is not nil");
     revenant_check([mode.primaryLanguage isEqualToString:current.primaryLanguage], @"textInputMode has the current primary language");
     revenant_line(@"INFO primaryLanguage %@ same object %d", current.primaryLanguage, mode == current);
+
+    UITextField *code = [[UITextField alloc] init];
+    revenant_check(code.keyboardType == UIKeyboardTypeDefault, @"a new field has the default keyboard");
+    [code setValue:@"oneTimeCode" forKey:@"textContentType"];
+    revenant_check(code.keyboardType == UIKeyboardTypeNumberPad, @"oneTimeCode sets the number pad keyboard");
+    revenant_check([[code valueForKey:@"textContentType"] isEqualToString:@"oneTimeCode"], @"textContentType reads back oneTimeCode");
+    UITextField *chosen = [[UITextField alloc] init];
+    chosen.keyboardType = UIKeyboardTypeURL;
+    [chosen setValue:@"oneTimeCode" forKey:@"textContentType"];
+    revenant_check(chosen.keyboardType == UIKeyboardTypeURL, @"an explicit keyboard type is kept under oneTimeCode");
 }
 
 static void revenant_metal_checks(UIWindow *window)
