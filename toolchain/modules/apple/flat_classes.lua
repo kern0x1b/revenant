@@ -12,6 +12,10 @@ local STUBBED = {
         classes = {"NSURLSessionWebSocketMessage"},
     },
     {
+        framework = "UIKit",
+        classes = {"UIPointerEffect", "UIPointerShape", "UIPointerStyle"},
+    },
+    {
         framework = "CoreText",
         functions = {
             "CTFrameDraw", "CTFrameGetLineOrigins", "CTFramesetterSuggestFrameSizeWithConstraints", "CTLineDraw",
