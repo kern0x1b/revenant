@@ -11,6 +11,7 @@ import("bundle")
 import("runtime_guards")
 import("shared_runtime", {alias = "staged"})
 import("backports_package")
+import("vision_text")
 
 function waivers(target)
     local waived = {}
@@ -258,8 +259,19 @@ function backports_deb(signer)
     local all, identities = shared_packages(signer)
     local targets = project_backports()
     return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
-                                     runtime = backports_runtime(targets),
+                                     runtime = backports_runtime(targets), depends = vision_text.depends(),
+                                     recommends = vision_text.recommended(),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
+end
+
+function vision_text_debs(outputdir)
+    for _, target in ipairs(project_backports()) do
+        local models = target:pkg("tessdata")
+        if models then
+            return vision_text.write({root = models:installdir(), workdir = path.join(config.builddir(), ".revenant", "vision-text"), outputdir = outputdir})
+        end
+    end
+    raise("the Backports libraries name no tessdata package, so the Vision text models cannot be packaged; the Vision target must require tessdata")
 end
 
 function backports_runtime(targets)

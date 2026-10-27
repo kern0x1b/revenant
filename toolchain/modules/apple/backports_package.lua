@@ -129,13 +129,14 @@ function write(opt)
     os.tryrm(opt.workdir)
     local binaries = stage(libs, root, opt.provided)
     local depends = needs(binaries, opt.packages)
+    table.join2(depends, opt.depends or {})
     local version = release(libs, depends)
     for _, binary in ipairs(binaries) do
         signing.sign(opt.ldid, binary)
     end
     local control = path.join(opt.workdir, NAME .. ".control")
     io.writefile(control, table.concat(FIELDS, "\n") .. "\n")
-    local deb = debian.write({control = control, version = version, root = root, depends = depends, outputdir = opt.outputdir})
+    local deb = debian.write({control = control, version = version, root = root, depends = depends, recommends = opt.recommends, outputdir = opt.outputdir})
     local leaves = {}
     for _, library in ipairs(libs) do
         table.insert(leaves, library.leaf)
@@ -154,6 +155,6 @@ function ensure(opt)
         table.insert(targets, target)
     end
     written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided, runtime = opt.runtime,
-                     workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
+                     depends = opt.depends, recommends = opt.recommends, workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
     return written
 end

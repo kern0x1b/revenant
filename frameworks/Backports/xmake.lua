@@ -119,6 +119,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
     add_requires("revenant@tesseract 5.5.3", {alias = "tesseract"})
     add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
+    add_requires("revenant@tessdata", {alias = "tessdata", configs = {languages = "eng,rus,ukr"}})
     add_requires("revenant@libcxx", {alias = "libcxx"})
 
     local generator
@@ -233,6 +234,7 @@ if is_plat("iphoneos") then
             end
             if library.folder == "Vision" then
                 add_packages("libcxx")
+                add_packages("tessdata")
             end
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
@@ -279,7 +281,7 @@ if not is_plat("iphoneos") and is_arch("arm64", "x86_64") then
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
     add_requires("revenant@tesseract 5.5.3", {alias = "tesseract"})
     add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
-    add_requires("revenant@tessdata", {alias = "tessdata"})
+    add_requires("revenant@tessdata", {alias = "tessdata", configs = {languages = "all"}})
 end
 
 local function backports_tests(name, scripts)

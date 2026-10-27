@@ -1,6 +1,6 @@
 package("tessdata")
     set_homepage("https://github.com/tesseract-ocr/tessdata_fast")
-    set_description("The Tesseract 5 models of Vision's text recognition: tessdata_fast for the six languages of the fast level, and tessdata_best for the accurate level's languages, each downloaded from its pinned commit and checked by sha256")
+    set_description("The Tesseract 5 models of Vision's text recognition: tessdata_fast and tessdata_best for the languages the languages config names, each downloaded from its pinned commit and checked by sha256")
     set_license("Apache-2.0")
 
     local FAST_COMMIT = "87416418657359cb625c412a48b6e1d6d41c29bd"
@@ -13,7 +13,9 @@ package("tessdata")
         {"fra", "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca"},
         {"ita", "b8f89e1e785118dac4d51ae042c029a64edb5c3ee42ef73027a6d412748d8827"},
         {"por", "c4932b937207a9514b7514d518b931a99938c02a28a5a5a553f8599ed58b7deb"},
-        {"spa", "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464"}
+        {"rus", "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225"},
+        {"spa", "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464"},
+        {"ukr", "d59e53e2bded32f4445f124b4b00240fcac7e8044c003ab822ccb94f0b3db59b"}
     }
 
     local BEST = {
@@ -47,9 +49,38 @@ package("tessdata")
         {"vie", "b6b49293d95d0b6dbd8780174627e82c75be957b6f4ed9862155540d6b00bb45"}
     }
 
-    add_configs("models", {description = "The pinned commits and checksums of the models, so a changed model is a different package.",
-                           default = FAST_COMMIT .. " " .. BEST_COMMIT .. " " .. LICENSE_SHA256 .. " " .. #FAST .. " " .. #BEST,
-                           type = "string", readonly = true})
+    local DEFAULT = "eng,rus,ukr"
+
+    add_configs("languages", {description = "The Tesseract codes whose models are installed, comma separated, or all. Each code is installed at the fast level where tessdata_fast has its model and at the accurate level where tessdata_best has it.",
+                              default = DEFAULT, type = "string"})
+
+    local function find_model(models, code)
+        for _, model in ipairs(models) do
+            if model[1] == code then
+                return model
+            end
+        end
+    end
+
+    local function chosen(package)
+        local value = package:config("languages") or DEFAULT
+        local codes = {}
+        if value == "all" then
+            for _, model in ipairs(BEST) do
+                table.insert(codes, model[1])
+            end
+        else
+            for code in value:gmatch("[^,%s]+") do
+                table.insert(codes, code)
+            end
+        end
+        for _, code in ipairs(codes) do
+            if not find_model(FAST, code) and not find_model(BEST, code) then
+                raise("tessdata has no model for %s", code)
+            end
+        end
+        return codes
+    end
 
     on_install(function (package)
         import("net.http")
@@ -59,26 +90,33 @@ package("tessdata")
                 raise("%s does not match its pinned sha256", url)
             end
         end
-        local function install(level, repository, commit, models)
+        local function install(level, repository, commit, model)
             local folder = path.join(package:installdir("share"), "tessdata", level)
             os.mkdir(folder)
-            for _, model in ipairs(models) do
-                fetch("https://github.com/tesseract-ocr/" .. repository .. "/raw/" .. commit .. "/" .. model[1] .. ".traineddata",
-                      path.join(folder, model[1] .. ".traineddata"), model[2])
+            fetch("https://github.com/tesseract-ocr/" .. repository .. "/raw/" .. commit .. "/" .. model[1] .. ".traineddata",
+                  path.join(folder, model[1] .. ".traineddata"), model[2])
+        end
+        for _, code in ipairs(chosen(package)) do
+            local fast, best = find_model(FAST, code), find_model(BEST, code)
+            if fast then
+                install("fast", "tessdata_fast", FAST_COMMIT, fast)
+            end
+            if best then
+                install("best", "tessdata_best", BEST_COMMIT, best)
             end
         end
-        install("fast", "tessdata_fast", FAST_COMMIT, FAST)
-        install("best", "tessdata_best", BEST_COMMIT, BEST)
         os.mkdir(package:installdir("licenses"))
         fetch("https://github.com/tesseract-ocr/tessdata_fast/raw/" .. FAST_COMMIT .. "/LICENSE",
               path.join(package:installdir("licenses"), "LICENSE"), LICENSE_SHA256)
     end)
 
     on_test(function (package)
-        for _, model in ipairs(FAST) do
-            assert(os.isfile(path.join(package:installdir("share"), "tessdata", "fast", model[1] .. ".traineddata")))
-        end
-        for _, model in ipairs(BEST) do
-            assert(os.isfile(path.join(package:installdir("share"), "tessdata", "best", model[1] .. ".traineddata")))
+        for _, code in ipairs(chosen(package)) do
+            if find_model(FAST, code) then
+                assert(os.isfile(path.join(package:installdir("share"), "tessdata", "fast", code .. ".traineddata")))
+            end
+            if find_model(BEST, code) then
+                assert(os.isfile(path.join(package:installdir("share"), "tessdata", "best", code .. ".traineddata")))
+            end
         end
     end)

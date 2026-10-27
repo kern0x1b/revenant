@@ -2,42 +2,51 @@ local debian = import("debian", {rootdir = path.join(os.scriptdir(), ".."), anon
 
 local FOLDER = "usr/share/revenant/tessdata"
 local ARCHITECTURE = "iphoneos-arm"
-local FAST_PACKAGE = "org.revenant.vision-text-fast"
-local FAST_CODES = {"eng", "fra", "ita", "deu", "spa", "por"}
+local PREFIX = "org.revenant.vision-text-"
+local DEPENDS = {PREFIX .. "fast-eng"}
+local RECOMMENDS = {PREFIX .. "fast-rus", PREFIX .. "fast-ukr"}
 
 local LANGUAGES = {
-    {code = "eng", package = "en", identifiers = {"en-US"}},
-    {code = "fra", package = "fr", identifiers = {"fr-FR"}},
-    {code = "ita", package = "it", identifiers = {"it-IT"}},
-    {code = "deu", package = "de", identifiers = {"de-DE"}},
-    {code = "spa", package = "es", identifiers = {"es-ES"}},
-    {code = "por", package = "pt", identifiers = {"pt-BR"}},
-    {code = "chi_sim", package = "zh-hans", identifiers = {"zh-Hans", "yue-Hans"}},
-    {code = "chi_tra", package = "zh-hant", identifiers = {"zh-Hant", "yue-Hant"}},
-    {code = "kor", package = "ko", identifiers = {"ko-KR"}},
-    {code = "jpn", package = "ja", identifiers = {"ja-JP"}},
-    {code = "rus", package = "ru", identifiers = {"ru-RU"}},
-    {code = "ukr", package = "uk", identifiers = {"uk-UA"}},
-    {code = "tha", package = "th", identifiers = {"th-TH"}},
-    {code = "vie", package = "vi", identifiers = {"vi-VT"}},
-    {code = "ara", package = "ar", identifiers = {"ar-SA", "ars-SA"}},
-    {code = "tur", package = "tr", identifiers = {"tr-TR"}},
-    {code = "ind", package = "id", identifiers = {"id-ID"}},
-    {code = "ces", package = "cs", identifiers = {"cs-CZ"}},
-    {code = "dan", package = "da", identifiers = {"da-DK"}},
-    {code = "nld", package = "nl", identifiers = {"nl-NL"}},
-    {code = "nor", package = "no", identifiers = {"no-NO", "nn-NO", "nb-NO"}},
-    {code = "msa", package = "ms", identifiers = {"ms-MY"}},
-    {code = "pol", package = "pl", identifiers = {"pl-PL"}},
-    {code = "ron", package = "ro", identifiers = {"ro-RO"}},
-    {code = "swe", package = "sv", identifiers = {"sv-SE"}},
-    {code = "fin", package = "fi", identifiers = {"fi-FI"}},
-    {code = "hin", package = "hi", identifiers = {"hi-IN"}},
-    {code = "mar", package = "mr", identifiers = {"mr-IN"}},
+    {code = "eng", identifiers = {"en-US"}},
+    {code = "fra", identifiers = {"fr-FR"}},
+    {code = "ita", identifiers = {"it-IT"}},
+    {code = "deu", identifiers = {"de-DE"}},
+    {code = "spa", identifiers = {"es-ES"}},
+    {code = "por", identifiers = {"pt-BR"}},
+    {code = "chi_sim", identifiers = {"zh-Hans", "yue-Hans"}},
+    {code = "chi_tra", identifiers = {"zh-Hant", "yue-Hant"}},
+    {code = "kor", identifiers = {"ko-KR"}},
+    {code = "jpn", identifiers = {"ja-JP"}},
+    {code = "rus", identifiers = {"ru-RU"}},
+    {code = "ukr", identifiers = {"uk-UA"}},
+    {code = "tha", identifiers = {"th-TH"}},
+    {code = "vie", identifiers = {"vi-VT"}},
+    {code = "ara", identifiers = {"ar-SA", "ars-SA"}},
+    {code = "tur", identifiers = {"tr-TR"}},
+    {code = "ind", identifiers = {"id-ID"}},
+    {code = "ces", identifiers = {"cs-CZ"}},
+    {code = "dan", identifiers = {"da-DK"}},
+    {code = "nld", identifiers = {"nl-NL"}},
+    {code = "nor", identifiers = {"no-NO", "nn-NO", "nb-NO"}},
+    {code = "msa", identifiers = {"ms-MY"}},
+    {code = "pol", identifiers = {"pl-PL"}},
+    {code = "ron", identifiers = {"ro-RO"}},
+    {code = "swe", identifiers = {"sv-SE"}},
+    {code = "fin", identifiers = {"fi-FI"}},
+    {code = "hin", identifiers = {"hi-IN"}},
+    {code = "mar", identifiers = {"mr-IN"}},
 }
 
-local function package_of(language)
-    return "org.revenant.vision-text-" .. language.package
+local function language_of(code)
+    for _, language in ipairs(LANGUAGES) do
+        if language.code == code then
+            return language
+        end
+    end
+end
+
+local function package_of(level, code)
+    return PREFIX .. level .. "-" .. (code:gsub("_", "-"))
 end
 
 local function version(commit)
@@ -85,16 +94,12 @@ function languages()
     return LANGUAGES
 end
 
-function fast_codes()
-    return FAST_CODES
-end
-
-function fast_package()
-    return FAST_PACKAGE
+function depends()
+    return table.copy(DEPENDS)
 end
 
 function recommended()
-    return {"org.revenant.vision-text-en", "org.revenant.vision-text-ru", "org.revenant.vision-text-uk"}
+    return table.copy(RECOMMENDS)
 end
 
 function write(opt)
@@ -102,22 +107,28 @@ function write(opt)
     local license = path.join(opt.root, "licenses", "LICENSE")
     local commits = pins()
     local written = {}
-    local fast_files = {}
-    for _, code in ipairs(FAST_CODES) do
-        table.insert(fast_files, path.join(share, "fast", code .. ".traineddata"))
-    end
-    table.insert(written, write_package({
-        name = FAST_PACKAGE, title = "Vision text fast models", level = "fast", files = fast_files, license = license,
-        version = version(commits.fast), outputdir = opt.outputdir, workdir = path.join(opt.workdir, "fast"),
-        description = "the tessdata_fast models of Vision's fast text recognition for en-US, fr-FR, it-IT, de-DE, es-ES and pt-BR, in /" .. FOLDER .. "/fast; the Backports library of Vision depends on it",
-    }))
-    for _, language in ipairs(LANGUAGES) do
-        table.insert(written, write_package({
-            name = package_of(language), title = "Vision text " .. language.package, level = "best",
-            files = {path.join(share, "best", language.code .. ".traineddata")}, license = license,
-            version = version(commits.best), outputdir = opt.outputdir, workdir = path.join(opt.workdir, language.package),
-            description = "the tessdata_best model " .. language.code .. " of Vision's accurate text recognition for " .. table.concat(language.identifiers, ", ") .. ", in /" .. FOLDER .. "/best",
-        }))
+    for _, level in ipairs({"fast", "best"}) do
+        local files = os.files(path.join(share, level, "*.traineddata"))
+        table.sort(files)
+        for _, file in ipairs(files) do
+            local code = path.filename(file):match("^(.+)%.traineddata$")
+            local language = language_of(code)
+            if not language then
+                raise("%s is not a Vision text model, so it has no package", file)
+            end
+            local name = package_of(level, code)
+            local description
+            if level == "fast" then
+                description = "the tessdata_fast model " .. code .. " of Vision's fast text recognition, in /" .. FOLDER .. "/fast"
+            else
+                description = "the tessdata_best model " .. code .. " of Vision's accurate text recognition for " .. table.concat(language.identifiers, ", ") .. ", in /" .. FOLDER .. "/best"
+            end
+            table.insert(written, write_package({
+                name = name, title = "Vision text " .. level .. " " .. code, level = level, files = {file}, license = license,
+                version = version(commits[level]), outputdir = opt.outputdir, workdir = path.join(opt.workdir, name),
+                description = description,
+            }))
+        end
     end
     return written
 end

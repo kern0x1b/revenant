@@ -162,6 +162,10 @@ function write(opt)
             cprint("${bright green}deb${clear} %s", copied)
             table.insert(written, {deb = copied})
         end
+        for _, deb in ipairs(platform.vision_text_debs(opt.outputdir or config.builddir())) do
+            cprint("${bright green}deb${clear} %s", deb)
+            table.insert(written, {deb = deb})
+        end
     end
     if #written == 0 then
         raise("no target names a control file with set_values(\"revenant.control\", ...), so there is no package to write")
