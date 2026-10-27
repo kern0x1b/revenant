@@ -144,7 +144,12 @@ static NSString *const Stubs =
     @"getElementsByTagName:function(){return [];},"
     @"createElement:function(tag){return {style:{},parentNode:null};}};"
     @"var setTimeout=function(){};"
-    @"var events=[];document.createEvent=function(){return {initMessageEvent:function(type,bubbles,cancelable,data,origin){this.type=type;this.data=data;this.origin=origin;}};};"
+    @"var location={protocol:'http:',host:'127.0.0.1:8787'};"
+    @"var syncAnswer='1';"
+    @"function XMLHttpRequest(){this.status=0;this.responseText='';}"
+    @"XMLHttpRequest.prototype.open=function(method,url){this.url=url;};"
+    @"XMLHttpRequest.prototype.send=function(){frames.push(this.url);this.status=200;this.responseText=syncAnswer;};"
+    @"var events=[];document.createEvent=function(){return {initMessageEvent:function(type,bubbles,cancelable,data,origin,lastEventId,source){this.type=type;this.data=data;this.origin=origin;this.source=source;}};};"
     @"window.dispatchEvent=function(event){events.push(event);};";
 
 static NSURL *Bridged(JSContext *context, NSString *expression, NSUInteger before)
@@ -157,12 +162,26 @@ static NSURL *Bridged(JSContext *context, NSString *expression, NSUInteger befor
     return [NSURL URLWithString:source];
 }
 
-static JSContext *Shimmed(void)
+static JSContext *ShimmedWithOpener(NSString *opener)
 {
     JSContext *context = [[JSContext alloc] init];
     [context evaluateScript:Stubs];
-    [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[\"h\"]", Nonce]];
+    [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[\"h\"]", Nonce, opener]];
     return context;
+}
+
+static JSContext *Shimmed(void)
+{
+    return ShimmedWithOpener(@"null");
+}
+
+static NSDictionary *Envelope(NSURL *URL)
+{
+    if ([URL.scheme isEqualToString:RevenantWebKitBridgeScheme])
+        return RevenantCodecBridgeMessage(URL, Nonce);
+    BOOL valid = NO;
+    NSDictionary *message = RevenantCodecParsed([URL.query stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], &valid);
+    return valid && [message[@"k"] isEqual:Nonce] ? message : nil;
 }
 
 static NSArray<NSString *> *BackportLines(void)
@@ -187,7 +206,7 @@ static NSArray<NSString *> *BackportWindowLines(void)
     JSContext *context = Shimmed();
     [context evaluateScript:PopupCall];
     NSURL *URL = [NSURL URLWithString:[[context evaluateScript:@"frames[frames.length - 1]"] toString]];
-    NSDictionary *message = RevenantCodecBridgeMessage(URL, Nonce);
+    NSDictionary *message = Envelope(URL);
     BOOL valid = NO;
     NSDictionary *request = RevenantCodecMessageBody(message[@"b"], &valid);
     if (![message[@"w"] isEqual:@1] || !valid || ![request isKindOfClass:[NSDictionary class]])
@@ -246,7 +265,7 @@ static NSArray<NSString *> *BackportChecks(void)
 static NSDictionary *LastFrame(JSContext *context)
 {
     NSURL *URL = [NSURL URLWithString:[[context evaluateScript:@"frames[frames.length - 1]"] toString]];
-    return RevenantCodecBridgeMessage(URL, Nonce);
+    return Envelope(URL);
 }
 
 static NSArray<NSString *> *BackportProxyChecks(void)
@@ -262,7 +281,7 @@ static NSArray<NSString *> *BackportProxyChecks(void)
         && [request[@"u"] isEqual:@"http://example.invalid/popup?x=1"] && [request[@"f"] isEqual:@"width=320"];
     BOOL object = [[context evaluateScript:@"typeof w === 'object' && w !== null"] toBool];
     BOOL starts = [[context evaluateScript:@"w.closed === false"] toBool];
-    BOOL location = [[context evaluateScript:@"w.location.href === 'http://example.invalid/popup?x=1'"] toBool];
+    BOOL location = [[context evaluateScript:@"w.location.href === 'about:blank'"] toBool];
     NSUInteger beforeClose = [[context evaluateScript:@"frames.length"] toUInt32];
     [context evaluateScript:@"w.close(); w.close();"];
     NSUInteger afterClose = [[context evaluateScript:@"frames.length"] toUInt32];
@@ -301,9 +320,9 @@ static NSArray<NSString *> *BackportProxyChecks(void)
         [NSString stringWithFormat:@"window proxy open envelope: %d", opened],
         [NSString stringWithFormat:@"window proxy is an object: %d", object],
         [NSString stringWithFormat:@"window proxy starts open: %d", starts],
-        [NSString stringWithFormat:@"window proxy location is the URL: %d", location],
+        [NSString stringWithFormat:@"window location starts at about:blank: %d", location],
         [NSString stringWithFormat:@"window proxy close posts once: %d", closesOnce],
-        [NSString stringWithFormat:@"window proxy closed after close: %d", closed],
+        [NSString stringWithFormat:@"window closed after close() is true: %d", closed],
         [NSString stringWithFormat:@"window proxy postMessage posts origin: %d", posted],
         [NSString stringWithFormat:@"window proxy location set posts navigation: %d", navigated],
         [NSString stringWithFormat:@"window proxy message round trips: %d", trips == SampleCount],
@@ -311,6 +330,79 @@ static NSArray<NSString *> *BackportProxyChecks(void)
         [NSString stringWithFormat:@"window proxy native update closes: %d", nativeClosed],
         [NSString stringWithFormat:@"window self close posts: %d", selfClose],
         [NSString stringWithFormat:@"window proxy survives a second install: %d", reinstalled],
+    ];
+}
+
+static NSArray<NSString *> *BackportSyncChecks(void)
+{
+    JSContext *context = Shimmed();
+    [context evaluateScript:@"syncAnswer='0';"];
+    NSUInteger before = [[context evaluateScript:@"frames.length"] toUInt32];
+    BOOL refused = [[context evaluateScript:@"window.open('http://example.invalid/refused') === null"] toBool];
+    NSUInteger after = [[context evaluateScript:@"frames.length"] toUInt32];
+    BOOL refusedSent = after == before + 1 && [LastFrame(context)[@"w"] isEqual:@1];
+    [context evaluateScript:@"syncAnswer='1';"];
+    BOOL accepted = [[context evaluateScript:@"typeof window.open('http://example.invalid/accepted') === 'object'"] toBool];
+    return @[
+        [NSString stringWithFormat:@"window open refused is null: %d", refused],
+        [NSString stringWithFormat:@"window open refusal is sent synchronously: %d", refusedSent],
+        [NSString stringWithFormat:@"window open accepted is an object: %d", accepted],
+    ];
+}
+
+static NSArray<NSString *> *BackportOpenerChecks(void)
+{
+    JSContext *context = ShimmedWithOpener(@"{\"href\":\"http://example.invalid/opener\"}");
+    BOOL object = [[context evaluateScript:@"typeof window.opener === 'object' && window.opener !== null"] toBool];
+    BOOL href = [[context evaluateScript:@"window.opener.location.href === 'http://example.invalid/opener'"] toBool];
+    BOOL open = [[context evaluateScript:@"window.opener.closed === false"] toBool];
+    [context evaluateScript:@"window.opener.postMessage({a:[1,'x']},'http://example.invalid');"];
+    NSDictionary *post = LastFrame(context);
+    BOOL valid = NO;
+    NSDictionary *body = RevenantCodecMessageBody(post[@"b"], &valid);
+    BOOL posted = [post[@"w"] isEqual:@6] && [post[@"o"] isEqual:@"http://example.invalid"] && valid && [body[@"a"] count] == 2;
+    [context evaluateScript:@"window.opener.location.href='http://example.invalid/next';"];
+    NSDictionary *navigate = LastFrame(context);
+    BOOL navigated = [navigate[@"w"] isEqual:@7] && [navigate[@"u"] isEqual:@"http://example.invalid/next"];
+    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({opener:true,href:'http://example.invalid/moved'});", Nonce]];
+    BOOL moved = [[context evaluateScript:@"window.opener.location.href === 'http://example.invalid/moved'"] toBool];
+    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:'\"hello\"',o:'http://example.invalid',s:'opener'});", Nonce]];
+    BOOL delivered = [[context evaluateScript:@"var e=events[events.length-1]; e.type === 'message' && e.data === 'hello' && e.origin === 'http://example.invalid' && e.source === window.opener"] toBool];
+    [context evaluateScript:@"syncAnswer='1';"];
+    JSContext *popup = ShimmedWithOpener(@"null");
+    BOOL noOpener = [[popup evaluateScript:@"window.opener === undefined"] toBool];
+    return @[
+        [NSString stringWithFormat:@"window opener is an object: %d", object],
+        [NSString stringWithFormat:@"window opener href is the opener URL: %d", href],
+        [NSString stringWithFormat:@"window opener starts open: %d", open],
+        [NSString stringWithFormat:@"window opener postMessage posts origin: %d", posted],
+        [NSString stringWithFormat:@"window opener location set posts navigation: %d", navigated],
+        [NSString stringWithFormat:@"window opener native update moves location: %d", moved],
+        [NSString stringWithFormat:@"window message from opener has its source: %d", delivered],
+        [NSString stringWithFormat:@"window without opener has none: %d", noOpener],
+    ];
+}
+
+static NSArray<NSString *> *BackportLoadChecks(void)
+{
+    JSContext *context = Shimmed();
+    [context evaluateScript:@"var q=window.open('http://example.invalid/loaded');"];
+    context[@"__loaded"] = LastFrame(context)[@"i"];
+    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({i:__loaded,href:'http://example.invalid/loaded'});", Nonce]];
+    BOOL loaded = [[context evaluateScript:@"q.location.href === 'http://example.invalid/loaded'"] toBool];
+    return @[
+        [NSString stringWithFormat:@"window location is the URL after load: %d", loaded],
+    ];
+}
+
+static NSArray<NSString *> *BackportOriginChecks(void)
+{
+    NSString *popup = RevenantOriginOf([NSURL URLWithString:@"http://127.0.0.1:8080/popup.html?x=1"]);
+    NSString *opener = RevenantOriginOf([NSURL URLWithString:@"http://127.0.0.1:8080/opener.html"]);
+    return @[
+        [NSString stringWithFormat:@"window postMessage other origin is dropped: %d", !RevenantTargetAllows(@"http://example.invalid", opener, popup)],
+        [NSString stringWithFormat:@"window postMessage matching origin is delivered: %d", RevenantTargetAllows(popup, opener, popup)],
+        [NSString stringWithFormat:@"window origin drops default port: %d", [RevenantOriginOf([NSURL URLWithString:@"https://example.invalid:443/"]) isEqualToString:@"https://example.invalid"]],
     ];
 }
 
@@ -330,6 +422,14 @@ int main(int argc, const char *argv[])
         for (NSString *line in BackportChecks())
             printf("%s\n", line.UTF8String);
         for (NSString *line in BackportProxyChecks())
+            printf("%s\n", line.UTF8String);
+        for (NSString *line in BackportSyncChecks())
+            printf("%s\n", line.UTF8String);
+        for (NSString *line in BackportOpenerChecks())
+            printf("%s\n", line.UTF8String);
+        for (NSString *line in BackportLoadChecks())
+            printf("%s\n", line.UTF8String);
+        for (NSString *line in BackportOriginChecks())
             printf("%s\n", line.UTF8String);
 #endif
     }

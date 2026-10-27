@@ -429,7 +429,7 @@ int main(int argc, const char *argv[])
         [context evaluateScript:ShimStubs];
         shimmed = [[context evaluateScript:RevenantDocumentStartedScript(token)] toString];
         [lines addObject:Flag(@"started marker absent before the shim", [shimmed isEqualToString:@"false"])];
-        [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[]", token]];
+        [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[]", token, @"null"]];
         shimmed = [[context evaluateScript:RevenantDocumentStartedScript(token)] toString];
         [lines addObject:Flag(@"started marker set by the shim", [shimmed isEqualToString:@"true"])];
 

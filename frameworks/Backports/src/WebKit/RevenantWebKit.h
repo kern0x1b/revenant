@@ -82,6 +82,7 @@ extern NSString *const RevenantWebKitBridgeScheme;
 + (instancetype)revenant_downloadWithRequest:(NSURLRequest *)request webView:(WKWebView *)webView;
 + (instancetype)revenant_resumeWithData:(NSData *)data webView:(WKWebView *)webView;
 - (void)revenant_start;
+- (void)revenant_setDecision:(void (^)(BOOL allowed))decision;
 @end
 
 @interface WKBackForwardList (RevenantWebKit)
@@ -91,6 +92,12 @@ extern NSString *const RevenantWebKitBridgeScheme;
 @interface WKNavigationResponse (RevenantWebKit)
 + (instancetype)revenant_responseWithResponse:(NSURLResponse *)response;
 + (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed;
+@end
+
+void RevenantSyncRegister(NSString *token, WKWebView *webView);
+
+@interface WKWebView (RevenantSync)
+- (NSString *)revenant_answerSynchronously:(NSDictionary *)message;
 @end
 
 @interface WKWindowFeatures (RevenantWebKit)

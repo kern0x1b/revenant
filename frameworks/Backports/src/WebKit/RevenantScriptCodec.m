@@ -28,7 +28,7 @@ NSString *const RevenantEncoder =
     @"return JSON.stringify(walk(v,true,false));}";
 
 NSString *const RevenantShim =
-    @"(function(names,nonce){"
+    @"(function(names,nonce,opener){"
     @"var all=document.getElementsByTagName('script');"
     @"var mine=all[all.length-1];"
     @"if(mine&&mine.firstChild&&String(mine.firstChild.nodeValue).indexOf(nonce)>=0){mine.parentNode.removeChild(mine);}"
@@ -41,7 +41,12 @@ NSString *const RevenantShim =
     @"(document.documentElement||document.body).appendChild(frame);"
     @"setTimeout(function(){if(frame.parentNode){frame.parentNode.removeChild(frame);}},0);"
     @"}"
-    @"var proxies=window[nonce+'p']||(window[nonce+'p']={});var opened=0;var base=String(Math.random()).slice(2);"
+    @"var table=window[nonce+'p']||(window[nonce+'p']={});var opened=0;var base=String(Math.random()).slice(2);"
+    @"function syncPost(envelope){"
+    @"var target=(location.protocol==='http:'||location.protocol==='https:')?location.protocol+'//'+location.host+'/__revenant_sync/'+nonce:'revenant-wkbridge://sync/'+nonce;"
+    @"var request=new XMLHttpRequest();"
+    @"try{request.open('GET',target+'?'+encodeURIComponent(JSON.stringify(envelope)),false);request.send(null);}catch(e){return null;}"
+    @"return request.status===200?request.responseText:null;}"
     @"function locate(url){var link=document.createElement('a');link.href=(url===undefined||url==='')?'about:blank':String(url);return link.href;}"
     @"function revive(value){var ids=[];"
     @"function walk(x){"
@@ -55,22 +60,32 @@ NSString *const RevenantShim =
     @"if(t==='o'){var object={};ids.push(object);for(var k=0;k<x.k.length;k++){object[x.k[k]]=walk(x.v[k]);}return object;}"
     @"return undefined;}"
     @"return walk(value);}"
-    @"function windowProxy(id,url){"
-    @"var href=locate(url);var closed=false;"
+    @"function windowProxy(id){"
+    @"var href='about:blank';var closed=false;"
     @"var where={get href(){return href;},set href(value){href=locate(value);post({w:4,i:id,u:href,k:nonce});},toString:function(){return href;}};"
     @"var proxy={get closed(){return closed;},get location(){return where;},set location(value){where.href=value;},"
     @"close:function(){if(!closed){closed=true;post({w:2,i:id,k:nonce});}},"
     @"postMessage:function(message,origin){post({w:3,i:id,b:encode(message),o:origin===undefined?'':String(origin),k:nonce});}};"
-    @"proxies[id]=function(update){if(update.href!==undefined){href=String(update.href);}if(update.closed){closed=true;}};"
+    @"table[id]={proxy:proxy,update:function(update){if(update.href!==undefined){href=String(update.href);}if(update.closed){closed=true;}}};"
     @"return proxy;}"
+    @"function openerProxy(info){"
+    @"var href=locate(info.href);var closed=false;"
+    @"var where={get href(){return href;},set href(value){href=locate(value);post({w:7,u:href,k:nonce});},toString:function(){return href;}};"
+    @"var proxy={get closed(){return closed;},get location(){return where;},set location(value){where.href=value;},"
+    @"postMessage:function(message,origin){post({w:6,b:encode(message),o:origin===undefined?'':String(origin),k:nonce});}};"
+    @"table.opener={proxy:proxy,update:function(update){if(update.href!==undefined){href=String(update.href);}if(update.closed){closed=true;}}};"
+    @"return proxy;}"
+    @"if(opener){if(table.opener){table.opener.update({href:opener.href});window.opener=table.opener.proxy;}else{window.opener=openerProxy(opener);}}"
     @"window.open=function(url,name,features){"
-    @"var id=base+'.'+(++opened);var proxy=windowProxy(id,url);"
-    @"post({w:1,i:id,b:encode({u:locate(url),t:name===undefined?'':String(name),f:features===undefined?'':String(features)}),k:nonce});"
-    @"return proxy;};"
+    @"var id=base+'.'+(++opened);"
+    @"var answer=syncPost({w:1,i:id,b:encode({u:locate(url),t:name===undefined?'':String(name),f:features===undefined?'':String(features)}),k:nonce});"
+    @"if(answer!=='1'){return null;}"
+    @"return windowProxy(id);};"
     @"window.close=function(){post({w:5,k:nonce});};"
     @"window[nonce+'w']=function(update){"
-    @"if(update.m!==undefined){var event=document.createEvent('MessageEvent');event.initMessageEvent('message',false,false,revive(JSON.parse(update.m)),update.o,'',null,null);window.dispatchEvent(event);return;}"
-    @"var target=proxies[update.i];if(target){target(update);}};"
+    @"if(update.m!==undefined){var source=null;if(update.s==='opener'){source=table.opener?table.opener.proxy:null;}else if(table[update.s]){source=table[update.s].proxy;}"
+    @"var event=document.createEvent('MessageEvent');event.initMessageEvent('message',false,false,revive(JSON.parse(update.m)),update.o,'',source,null);window.dispatchEvent(event);return;}"
+    @"var entry=update.opener?table.opener:table[update.i];if(entry){entry.update(update);}};"
     @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
     @"var handlers={};"
     @"names.forEach(function(name){handlers[name]={postMessage:function(body){"
@@ -78,7 +93,7 @@ NSString *const RevenantShim =
     @"}};});"
     @"if(!window.webkit){window.webkit={};}"
     @"window.webkit.messageHandlers=handlers;"
-    @"})(%@,\"%@\")";
+    @"})(%@,\"%@\",%@)";
 
 static const NSUInteger MaximumDepth = 64;
 
@@ -165,6 +180,26 @@ NSDictionary *RevenantCodecBridgeMessage(NSURL *URL, NSString *nonce)
     if (![presented isKindOfClass:[NSString class]] || !nonce.length || ![presented isEqualToString:nonce])
         return nil;
     return message;
+}
+
+NSString *RevenantOriginOf(NSURL *URL)
+{
+    NSString *scheme = URL.scheme.lowercaseString;
+    NSString *host = URL.host.lowercaseString;
+    if (!host.length || !([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]))
+        return nil;
+    NSNumber *port = URL.port;
+    BOOL standard = !port || ([scheme isEqualToString:@"http"] && port.integerValue == 80) || ([scheme isEqualToString:@"https"] && port.integerValue == 443);
+    return standard ? [NSString stringWithFormat:@"%@://%@", scheme, host] : [NSString stringWithFormat:@"%@://%@:%@", scheme, host, port];
+}
+
+BOOL RevenantTargetAllows(NSString *target, NSString *senderOrigin, NSString *recipientOrigin)
+{
+    if (![target isKindOfClass:[NSString class]])
+        return NO;
+    if ([target isEqualToString:@"*"] || [target isEqualToString:recipientOrigin])
+        return YES;
+    return [target isEqualToString:@"/"] && senderOrigin && [recipientOrigin isEqualToString:senderOrigin];
 }
 
 id RevenantCodecMessageBody(id encoded, BOOL *valid)

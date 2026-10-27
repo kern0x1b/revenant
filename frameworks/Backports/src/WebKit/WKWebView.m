@@ -52,17 +52,6 @@ static NSURL *withoutFragment(NSURL *url)
 
 @end
 
-static NSString *OriginOf(NSURL *URL)
-{
-    NSString *scheme = URL.scheme.lowercaseString;
-    NSString *host = URL.host.lowercaseString;
-    if (!host.length || !([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]))
-        return nil;
-    NSNumber *port = URL.port;
-    BOOL standard = !port || ([scheme isEqualToString:@"http"] && port.integerValue == 80) || ([scheme isEqualToString:@"https"] && port.integerValue == 443);
-    return standard ? [NSString stringWithFormat:@"%@://%@", scheme, host] : [NSString stringWithFormat:@"%@://%@:%@", scheme, host, port];
-}
-
 @implementation WKWebView {
     UIWebView *_web;
     WKWebViewConfiguration *_configuration;
@@ -121,6 +110,7 @@ static NSString *OriginOf(NSURL *URL)
 - (void)revenant_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
 {
     _token = RevenantDocumentRegister(self);
+    RevenantSyncRegister(_token, self);
     [configuration revenant_bindURLSchemeHandlersToWebView:self];
     _configuration = [configuration copy];
     _title = @"";
@@ -628,7 +618,10 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 - (NSString *)revenant_shimWithNames:(NSArray *)names
 {
     NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
-    return [NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], _token];
+    NSDictionary *opener = [self revenant_openerInfo];
+    NSData *openerData = opener ? [NSJSONSerialization dataWithJSONObject:opener options:0 error:NULL] : nil;
+    NSString *openerJSON = openerData ? [[NSString alloc] initWithData:openerData encoding:NSUTF8StringEncoding] : @"null";
+    return [NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], _token, openerJSON];
 }
 
 - (NSArray<NSString *> *)revenant_documentStartScripts
@@ -666,10 +659,27 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
         dispatch_async(dispatch_get_main_queue(), decide);
 }
 
+- (void)revenant_failNavigation:(WKNavigation *)navigation interruptedAt:(NSURL *)URL
+{
+    NSDictionary *userInfo = URL ? @{NSURLErrorFailingURLErrorKey: URL} : nil;
+    NSError *error = [NSError errorWithDomain:@"WebKitErrorDomain" code:102 userInfo:userInfo];
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if ([delegate respondsToSelector:@selector(webView:didFailProvisionalNavigation:withError:)])
+        [delegate webView:self didFailProvisionalNavigation:navigation withError:error];
+}
+
 - (void)revenant_downloadResponse:(NSURLResponse *)response request:(NSURLRequest *)request
 {
+    WKNavigation *navigation = _navigation;
+    NSURL *URL = response.URL;
     [self revenant_abandonNavigation];
     WKDownload *download = [WKDownload revenant_downloadWithRequest:RevenantDocumentInnerCopy(request) webView:self];
+    __weak WKWebView *weak = self;
+    [download revenant_setDecision:^(BOOL allowed) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weak revenant_failNavigation:navigation interruptedAt:URL];
+        });
+    }];
     id<WKNavigationDelegate> delegate = _navigationDelegate;
     if ([delegate respondsToSelector:@selector(webView:navigationResponse:didBecomeDownload:)])
         [delegate webView:self navigationResponse:[WKNavigationResponse revenant_responseWithResponse:response] didBecomeDownload:download];
@@ -731,8 +741,15 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)revenant_notifyOpener
 {
-    if (_opener && _committedURL.absoluteString)
-        [_opener revenant_sendUpdate:@{@"i": _openerWindow, @"href": _committedURL.absoluteString}];
+    NSString *href = _committedURL.absoluteString;
+    if (!href)
+        return;
+    if (_opener)
+        [_opener revenant_sendUpdate:@{@"i": _openerWindow, @"href": href}];
+    for (WKWebView *popup in _windows.objectEnumerator) {
+        if (popup->_opener == self)
+            [popup revenant_sendUpdate:@{@"opener": @YES, @"href": href}];
+    }
 }
 
 - (void)revenant_closeWindow
@@ -745,16 +762,22 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     _openerWindow = nil;
     [opener->_windows removeObjectForKey:identifier];
     [opener revenant_sendUpdate:@{@"i": identifier, @"closed": @YES}];
+    for (WKWebView *popup in _windows.objectEnumerator) {
+        if (popup->_opener == self) {
+            popup->_opener = nil;
+            [popup revenant_sendUpdate:@{@"opener": @YES, @"closed": @YES}];
+        }
+    }
     id<WKUIDelegate> UIDelegate = self.UIDelegate;
     if ([UIDelegate respondsToSelector:@selector(webViewDidClose:)])
         [UIDelegate webViewDidClose:self];
 }
 
-- (void)revenant_openWindowFromMessage:(NSDictionary *)message
+- (BOOL)revenant_openWindowFromMessage:(NSDictionary *)message
 {
     NSString *identifier = message[@"i"];
     if (![identifier isKindOfClass:[NSString class]])
-        return;
+        return NO;
     BOOL valid = NO;
     NSDictionary *request = RevenantCodecMessageBody(message[@"b"], &valid);
     NSString *target = request[@"u"];
@@ -763,24 +786,41 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     NSURL *URL = [target isKindOfClass:[NSString class]] ? [NSURL URLWithString:target] : nil;
     id<WKUIDelegate> UIDelegate = self.UIDelegate;
     if (!valid || ![request isKindOfClass:[NSDictionary class]] || !URL || ![name isKindOfClass:[NSString class]]
-        || ![features isKindOfClass:[NSString class]] || ![UIDelegate respondsToSelector:@selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:)]) {
-        [self revenant_sendUpdate:@{@"i": identifier, @"closed": @YES}];
-        return;
-    }
+        || ![features isKindOfClass:[NSString class]] || ![UIDelegate respondsToSelector:@selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:)])
+        return NO;
     NSURLRequest *window = [NSURLRequest requestWithURL:URL];
     WKNavigationAction *action = [WKNavigationAction revenant_actionWithRequest:window type:WKNavigationTypeOther mainFrame:YES];
     WKWindowFeatures *windowFeatures = [WKWindowFeatures revenant_featuresWithString:features];
     WKWebView *created = [UIDelegate webView:self createWebViewWithConfiguration:[_configuration copy] forNavigationAction:action windowFeatures:windowFeatures];
-    if (![created isKindOfClass:[WKWebView class]]) {
-        [self revenant_sendUpdate:@{@"i": identifier, @"closed": @YES}];
-        return;
-    }
+    if (![created isKindOfClass:[WKWebView class]])
+        return NO;
     if (!_windows)
         _windows = [NSMapTable strongToWeakObjectsMapTable];
     [_windows setObject:created forKey:identifier];
     created->_opener = self;
     created->_openerWindow = identifier;
     [created loadRequest:window];
+    return YES;
+}
+
+- (NSString *)revenant_answerSynchronously:(NSDictionary *)message
+{
+    if (![message[@"w"] isEqual:@1])
+        return @"0";
+    return [self revenant_openWindowFromMessage:message] ? @"1" : @"0";
+}
+
+- (NSDictionary *)revenant_openerInfo
+{
+    NSString *href = _opener.revenant_committedURLString;
+    if (!href)
+        return nil;
+    return @{@"href": href};
+}
+
+- (NSString *)revenant_committedURLString
+{
+    return _committedURL.absoluteString;
 }
 
 - (void)revenant_closeOpenedWindow:(NSDictionary *)message
@@ -807,21 +847,46 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     NSString *target = message[@"o"];
     if (!popup || !valid || ![target isKindOfClass:[NSString class]])
         return;
-    NSString *origin = OriginOf(_committedURL);
-    NSString *popupOrigin = OriginOf(popup->_committedURL);
-    BOOL allowed = [target isEqualToString:@"*"] || [target isEqualToString:popupOrigin]
-        || ([target isEqualToString:@"/"] && origin && [popupOrigin isEqualToString:origin]);
-    if (!allowed)
+    NSString *origin = RevenantOriginOf(_committedURL);
+    NSString *popupOrigin = RevenantOriginOf(popup->_committedURL);
+    if (!RevenantTargetAllows(target, origin, popupOrigin))
         return;
-    [popup revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null"}];
+    [popup revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"s": @"opener"}];
+}
+
+- (void)revenant_postMessageToOpener:(NSDictionary *)message
+{
+    WKWebView *opener = _opener;
+    BOOL valid = NO;
+    RevenantCodecMessageBody(message[@"b"], &valid);
+    NSString *target = message[@"o"];
+    if (!opener || !valid || ![target isKindOfClass:[NSString class]])
+        return;
+    NSString *origin = RevenantOriginOf(_committedURL);
+    NSString *openerOrigin = RevenantOriginOf(opener->_committedURL);
+    if (!RevenantTargetAllows(target, origin, openerOrigin))
+        return;
+    [opener revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"s": _openerWindow}];
+}
+
+- (void)revenant_navigateOpener:(NSDictionary *)message
+{
+    NSString *target = message[@"u"];
+    NSURL *URL = [target isKindOfClass:[NSString class]] ? [NSURL URLWithString:target] : nil;
+    if (_opener && URL)
+        [_opener loadRequest:[NSURLRequest requestWithURL:URL]];
 }
 
 - (void)revenant_receiveBridgeURL:(NSURL *)URL
 {
     NSDictionary *message = RevenantCodecBridgeMessage(URL, _token);
     NSNumber *kind = message[@"w"];
-    if ([kind isEqual:@1]) {
-        [self revenant_openWindowFromMessage:message];
+    if ([kind isEqual:@6]) {
+        [self revenant_postMessageToOpener:message];
+        return;
+    }
+    if ([kind isEqual:@7]) {
+        [self revenant_navigateOpener:message];
         return;
     }
     if ([kind isEqual:@2]) {

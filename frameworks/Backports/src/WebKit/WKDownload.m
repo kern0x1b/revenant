@@ -34,6 +34,7 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
     BOOL _deciding;
     BOOL _finished;
     BOOL _done;
+    void (^_decision)(BOOL allowed);
 }
 
 + (instancetype)revenant_downloadWithRequest:(NSURLRequest *)request webView:(WKWebView *)webView
@@ -108,7 +109,9 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
 {
     if (_connection || _done)
         return;
-    _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:YES];
+    _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:NO];
+    [_connection scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [_connection start];
 }
 
 - (void)revenant_stop
@@ -153,6 +156,19 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
     _progress.completedUnitCount = _offset + _received;
 }
 
+- (void)revenant_setDecision:(void (^)(BOOL allowed))decision
+{
+    _decision = [decision copy];
+}
+
+- (void)revenant_settle:(BOOL)allowed
+{
+    void (^decision)(BOOL) = _decision;
+    _decision = nil;
+    if (decision)
+        decision(allowed);
+}
+
 - (void)revenant_decided:(NSURL *)destination
 {
     _deciding = NO;
@@ -173,6 +189,7 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
         [_file seekToEndOfFile];
     }
     if (!usable) {
+        [self revenant_settle:NO];
         [self revenant_stop];
         [self revenant_failWithError:[NSError errorWithDomain:NSURLErrorDomain code:destination ? NSURLErrorCannotCreateFile : NSURLErrorCancelled userInfo:nil] resumeData:nil];
         return;
@@ -182,6 +199,7 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
         [_file writeData:_pending];
         _pending = nil;
     }
+    [self revenant_settle:YES];
     if (_finished)
         [self revenant_finish];
 }
