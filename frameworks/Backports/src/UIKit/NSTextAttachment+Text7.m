@@ -16,6 +16,9 @@ static void hold(id object, Ivar held, id value)
         CFRelease((__bridge CFTypeRef)previous);
 }
 
+@interface NSTextAttachment (RevenantText7) <NSTextAttachmentContainer>
+@end
+
 @implementation NSTextAttachment (RevenantText7)
 
 - (CGRect)bounds

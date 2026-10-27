@@ -35045,6 +35045,7 @@ protocol NSItemProviderWriting
 protocol NSMutableCopying
 protocol NSSecureCoding
 protocol NSStreamDelegate
+protocol NSTextAttachmentContainer
 protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
@@ -35555,6 +35556,7 @@ protocol_member NSItemProviderWriting -writableTypeIdentifiersForItemProvider
 protocol_member NSMutableCopying -mutableCopyWithZone:
 protocol_member NSSecureCoding +supportsSecureCoding
 protocol_member NSStreamDelegate -stream:handleEvent:
+protocol_member NSTextAttachmentContainer -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
 protocol_member NSTextLocation -compare:
 protocol_member NSTextStorageDelegate -textStorage:didProcessEditing:range:changeInLength:
 protocol_member NSURLConnectionDataDelegate -connection:didReceiveData:
