@@ -126,6 +126,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSUnderlineStylePatternDot",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+            replace = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+        },
+    },
+    {
         member = "LABiometryType",
         header = {
             name = "LocalAuthentication",
