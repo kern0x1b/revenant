@@ -41,6 +41,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Device codegen](reference/toolchain/codegen.md) | what the toolchain sets for the device's code generation, what was measured on the bench workloads, and what is held |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
+| [The os_log fallback](explanation/toolchain/os-log.md) | how a message prints without the Backports runtime: the buffer layout, the privacy rules, and what is still provisional |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
 | [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
