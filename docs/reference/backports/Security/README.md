@@ -54,10 +54,42 @@ The values the Security backport answers, where each came from, and what has no 
   not supported on this platform".
 - `SecRequestSharedWebCredential` with a NULL or empty fqdn: callback with NULL credentials and -50.
 - `SecRequestSharedWebCredential` with a valid fqdn: no callback within 90 seconds on this headless machine. It waits
-  on something this process cannot answer, so the answer is unmeasured. The backport gives -4, the same answer its
-  Add gives for a valid fqdn on the same release.
+  on something this process cannot answer, so the answer is unmeasured. The backport does not copy that silence; it
+  answers by the iOS 8+ rules below.
 - `SecCreateSharedWebCredentialPassword` on macOS gives 15 characters in four groups of three separated by hyphens,
   with a digit, an upper-case and a lower-case letter. The backport's 200 samples have the same shape.
+- The SDK's constants (macOS 27): `kSecSharedPassword` is `spwd`, `kSecAttrServer` is `srvr`, `kSecAttrPort` is `port`.
+  The credential dictionary of `SecRequestSharedWebCredential` has `kSecAttrServer`, `kSecAttrAccount` and
+  `kSecSharedPassword`, plus `kSecAttrPort` when the port is not 443 (`SecSharedCredential.h`).
+
+## Shared web credentials on iOS 8+ (Request), implemented from the rules
+
+The backport answers `SecRequestSharedWebCredential` for a valid fqdn by the rules iOS 8+ states in
+`SecSharedCredential.h`: the request must match an entry in the calling app's `com.apple.developer.associated-domains`
+entitlement. The backport checks it in this order:
+
+1. The app's own entitlements, read from the embedded signature of its main executable (`LC_CODE_SIGNATURE`, the
+   `CSSLOT_ENTITLEMENTS` blob of the superblob, an XML plist). `com.apple.developer.associated-domains` must contain
+   `webcredentials:<fqdn>`. Otherwise the callback gets `errSecMissingEntitlement` (-34018).
+2. `https://<fqdn>/apple-app-site-association` is fetched (15 s timeout, status 200). Its `webcredentials.apps` must list
+   the app's `application-identifier`. Otherwise, or when the file cannot be read, the callback gets `errSecAuthFailed`
+   (-25293).
+3. The internet passwords of keychain group `com.apple.cfnetwork` with `kSecAttrServer` equal to the fqdn are returned,
+   with the account when one was asked for. An empty match gives an empty array and `errSecItemNotFound` (-25300), as the
+   header says. Any other keychain status gives NULL and that status.
+
+Measured and chosen:
+
+- The group is the one MobileSafari holds. Its `keychain-access-groups` entitlement (`codesign -d --entitlements :-` on the
+  6.1.3 rootfs binary, read on the host) is `com.apple.cfnetwork`, `com.apple.identities`, `com.apple.mobilesafari` and
+  `com.apple.certificates`. The phone's `agrp` values in `keychain-2.db` are the cross-check; it is not run yet.
+- The error codes of steps 1 and 2 are the backport's choice. The iOS 8+ answers for them are not measured.
+- On macOS 27 an ad-hoc signed copy that carries `com.apple.developer.associated-domains` (or `application-identifier`)
+  is killed at launch (exit 137), so the positive path cannot run on the host. The host test
+  (`tests/security_shared_web_test.lua`) runs an unentitled binary and checks -34018, which also walks its real signature.
+  The positive path (steps 2 and 3) waits for the iPad with the app-bundle entitlements.
+- `SecAddSharedWebCredential` with a valid fqdn still gives -4 (`errSecUnimplemented`), the macOS answer. Writing into
+  Safari's group is not implemented.
 
 ## iPad 2 on iOS 6.1.3
 
@@ -91,13 +123,42 @@ The values the Security backport answers, where each came from, and what has no 
   `LAErrorAuthenticationFailed`, and Cancel gives `LAErrorUserCancel`. The prompt makes one attempt per call and refuses a
   second prompt while one is showing.
 - The prompt has not run on a device. The lock states other than 3 are read as "passcode set" from one measurement (3 on
-  the iPad 2); the simple form is four digits and the number pad, a value fixed in the backport because the system's
-  simple-or-complex setting is not yet located. The entry is sent to `MKBUnlockDevice` as its UTF-8 bytes, which is a
-  guess the image does not confirm.
+  the iPad 2). The form comes from the system's own record, `-[MCPasscodeManager currentUnlockScreenType]` (see "Passcode
+  form, from ManagedConfiguration"): the number pad when the stored form is numeric, the full keyboard when it is
+  alphanumeric, and the full keyboard when the framework cannot be read. The simple form accepts four or more digits. The
+  entry is sent to `MKBUnlockDevice` as its UTF-8 bytes, the encoding the 6.1.3 caller uses (see below).
 - On the Mac the MobileKeyBag path resolves through the system's dyld cache and `MKBGetDeviceLockState` returns a state other
   than 3, so the host cannot stand in for the no-passcode device. The host test (`tests/localauth_passcode_test.lua`)
   replaces `RevenantPasscodeUnlockDevice`, and it checks the mapping, the validation, the outcome and that evaluation
   fails closed (-1004) when the prompt is not available.
+
+## Passcode form, from ManagedConfiguration (6.1.3 image)
+
+Read from the iOS 6.1.3 ManagedConfiguration image (`/System/Library/PrivateFrameworks/ManagedConfiguration.framework/
+ManagedConfiguration`, extracted from the dyld cache with `xmake firmware --library=... extract 6.1.3`, disassembled with
+`llvm-objdump --triple=thumbv7-apple-ios6.1 --mcpu=cortex-a8`; selectors and key strings resolved from `__objc_selrefs` and
+the CFString literals). The framework's own files on the rootfs are `defaultRestrictions.plist`, `defaultSettings.plist`
+and `publicRestrictionKeys.plist`. Nothing was called on any device.
+
+- `-[MCPasscodeManager currentUnlockScreenType]` returns the `keyboardType` value of the stored passcode characteristics, or
+  2 when that value is absent (`0x3520b4b0`). The characteristics are `-[MCPasscodeManager _passcodeCharacteristics]`, which
+  is the `characteristics` entry of `_publicPasscodeDict` (`0x3520b460`). The public record lives under
+  `Library/ConfigurationProfiles/PublicInfo`; its file name is not a literal string in the image.
+- `-[MCPasscodeManager changePasscodeFrom:to:outError:]` writes that value when a passcode is set: it calls
+  `+[MCPasscodeManager unlockScreenTypeForPasscodeCharacteristics:]` on the new passcode's characteristics and stores the
+  NSNumber under `keyboardType` (the store is at `0x3520ad46`, the call at `0x3520ad08`).
+- `+[MCPasscodeManager unlockScreenTypeForPasscodeCharacteristics:]` (`0x3520b5dc`) reads `length` and `allDigits`:
+  length 0 gives 0; `allDigits` NO gives 2; `allDigits` YES with length 4 gives 0; `allDigits` YES with any other length gives
+  1. Read as a form: 0 and 1 are numeric entries, 2 is alphanumeric. The number-pad mapping in SpringBoard is not read.
+- `+[MCPasscodeManager unlockScreenTypeForRestrictions:]` (`0x3520b684`) gives the form for a new passcode under the
+  restrictions `allowSimple`, `requireAlphanumeric` and `forcePIN`. It is not used for unlocking. The restrictions' defaults
+  in `defaultRestrictions.plist` are `allowSimple` false, `requireAlphanumeric` true and `forcePIN` true. How they combine
+  with the Settings switch is not measured.
+- `-[MCPasscodeManager isPasscodeSet]` (`0x3520a91c`) and the lock state decide whether a passcode exists. The backport checks
+  the lock state first (LocalAuthentication), so the form is read only when a passcode is set.
+- The backport reads the form with `-[MCPasscodeManager currentUnlockScreenType]` through `dlopen` of the framework and
+  `objc_msgSend`. Whether an application may read `Library/ConfigurationProfiles` is not measured; when the read fails the
+  form is the full keyboard, which accepts every passcode.
 
 ## MobileKeyBag and the passcode, from the 6.1.3 image
 
@@ -107,8 +168,15 @@ Nothing was called on any device.
 
 - `MKBUnlockDevice` takes one argument, in r0. The wrapper reads it as a `CFDataRef`: `CFDataGetBytePtr` and
   `CFDataGetLength` give the bytes and their length, and `_AppleKeyStoreUnlockDevice` sends them to the kernel as the input
-  struct of selector 9 of the AppleKeyStore user client. The image does not show what the bytes must hold (the passcode as
-  typed, or a value derived from it). The kernel decides.
+  struct of selector 9 of the AppleKeyStore user client. The wrapper does not read r1 (its first instruction passes r0 on).
+- The caller is `-[MCPasscodeManager unlockDeviceWithPasscode:outError:]` in ManagedConfiguration (`0x3520a9f0`).
+  SpringBoard reaches the unlock through that method (its strings carry the selector) and imports no MKB symbol. The method:
+  1. If `MKBGetDeviceLockState(NULL)` is 3 (no passcode), it returns YES without calling MKB.
+  2. Otherwise it calls `MKBUnlockDevice([passcode dataUsingEncoding:NSUTF8StringEncoding], NULL)`. The encoding argument is
+     4 (`NSUTF8StringEncoding`), so the bytes are the passcode as typed, in UTF-8.
+  3. Zero gives YES. Any other value gives NO with `-[MCPasscodeManager _wrongPasscodeError]` as the error. A nil error
+     object makes the method return YES, a quirk the backport does not copy.
+- Whether the kernel accepts those bytes, and what each refusal means for the passcode attempts, is not measured.
 - The return value is the wrapper's status. The kernel's codes map as follows: 0 gives 0; 0xE00002E2 gives -2; 0xE00002F0
   gives -8; 0xE00002CE gives -3; 0xE00002C9 gives -9. Any other non-zero code gives -1 and writes a log line.
 - Before the call the wrapper connects to the AppleKeyStore user client (`_connect_to_service`). With no connection it
@@ -125,8 +193,9 @@ What this does and does not settle:
 - Whether a wrong argument counts against the passcode attempts, or locks the device for a while, is not known. A
   probe on an owner's device with a passcode set must not run without the owner's word.
 - Measurements still open, each under a device claim: the status with an empty argument on a phone with no passcode
-  (state 3), and the status from a process that runs as `mobile` rather than root. The passcode type setting (simple or
-  complex) is not located in the image yet.
+  (state 3), and the status from a process that runs as `mobile` rather than root. The passcode form (simple or complex)
+  is located in ManagedConfiguration (see "Passcode form, from ManagedConfiguration"); whether an application can read it
+  is not measured.
 
 ## SecItem access control on iOS 6
 
@@ -235,11 +304,14 @@ message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/
   reference (`kSecValueRef` with `kSecReturnPersistentRef`, then `kSecValuePersistentRef` with `kSecReturnData`) and
   returns it when it is a PKCS#1 private key.
 - **Implemented, measured on the iPad 2:** the LocalAuthentication answers above (no YES for device-owner).
-- **Open, not measured:** device-owner authentication with a passcode set, the passcode entry that matches the system's,
-  and whether an app can verify a passcode through `MKBUnlockDevice` (its argument is a `CFDataRef` and its privilege is in
-  the kernel; see "MobileKeyBag and the passcode"). The
-  user-presence gate fails closed until that entry exists.
+- **Open, not measured:** device-owner authentication with a passcode set, and whether an app can verify a passcode through
+  `MKBUnlockDevice` (the caller's bytes are the typed passcode in UTF-8; the kernel's privilege is not in the image; see
+  "MobileKeyBag and the passcode"). The user-presence gate fails closed until that is measured.
 - **Implemented, host-tested with the unlock call replaced, not run on a device:** the passcode prompt and its verification
-  path (`RevenantPasscode.m`), and the device-owner answers built on them. The one call to `MKBUnlockDevice` is
-  `RevenantPasscodeKeyBag.m`; it is not made on any device until the owner allows the measurement. Until then the gates
-  that need a passcode fail closed on the device.
+  path (`RevenantPasscode.m`), and the device-owner answers built on them. The form the prompt shows is read from
+  `-[MCPasscodeManager currentUnlockScreenType]` (see "Passcode form, from ManagedConfiguration"). The one call to
+  `MKBUnlockDevice` is `RevenantPasscodeKeyBag.m`; it is not made on any device until the owner allows the measurement.
+  Until then the gates that need a passcode fail closed on the device.
+- **Implemented, host-tested for the unentitled answer, not run on a device:** `SecRequestSharedWebCredential` with a valid
+  fqdn, by the iOS 8+ rules above (entitlement, association file, `com.apple.cfnetwork` group). Its positive path waits for
+  the iPad with the app-bundle entitlements.
