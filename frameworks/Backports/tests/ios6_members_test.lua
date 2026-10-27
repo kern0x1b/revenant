@@ -59,6 +59,21 @@ local CASES = {
         },
     },
     {
+        label = "MTLDrawable presented handlers",
+        sdk = {
+            {"Metal", "MTLDrawable.h", {
+                "- (void)addPresentedHandler:(MTLDrawablePresentedHandler)block API_AVAILABLE(macos(10.15.4), ios(10.3), macCatalyst(13.4));",
+            }},
+        },
+        source = "src/Metal/RevenantMetalDrawable.m",
+        mutation = {"handler((id<MTLDrawable>)self);", "(void)self;"},
+        needles = {
+            "- (void)addPresentedHandler:(MTLDrawablePresentedHandler)block",
+            "[_presentedHandlers addObject:block];",
+            "handler((id<MTLDrawable>)self);",
+        },
+    },
+    {
         label = "CLGeocoder postal address",
         sdk = {
             {"CoreLocation", "CLGeocoder.h", {

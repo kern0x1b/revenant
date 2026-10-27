@@ -7,6 +7,7 @@
     __weak CAMetalLayer *_layer;
     EAGLContext *_context;
     GLuint _renderbuffer;
+    NSMutableArray *_presentedHandlers;
 }
 
 - (instancetype)initWithTexture:(RevenantMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context
@@ -44,6 +45,10 @@
     glBindRenderbuffer(GL_RENDERBUFFER, (GLuint)renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
     [device relinquish];
+    NSArray *handlers = _presentedHandlers;
+    _presentedHandlers = nil;
+    for (MTLDrawablePresentedHandler handler in handlers)
+        handler((id<MTLDrawable>)self);
 }
 
 - (void)presentAtTime:(CFTimeInterval)presentationTime
@@ -58,6 +63,11 @@
 
 - (void)addPresentedHandler:(MTLDrawablePresentedHandler)block
 {
+    if (!block)
+        return;
+    if (!_presentedHandlers)
+        _presentedHandlers = [NSMutableArray array];
+    [_presentedHandlers addObject:block];
 }
 
 - (CFTimeInterval)presentedTime
