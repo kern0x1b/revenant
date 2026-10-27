@@ -1,3 +1,4 @@
+local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 local debian = import("debian", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 local FOLDER = "usr/share/revenant/tessdata"
@@ -109,7 +110,7 @@ function write(opt)
     local written = {}
     for _, level in ipairs({"fast", "best"}) do
         local files = os.files(path.join(share, level, "*.traineddata"))
-        table.sort(files)
+        byteorder.sort(files)
         for _, file in ipairs(files) do
             local code = path.filename(file):match("^(.+)%.traineddata$")
             local language = language_of(code)
