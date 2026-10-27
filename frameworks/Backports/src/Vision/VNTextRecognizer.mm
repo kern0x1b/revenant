@@ -153,7 +153,7 @@ static BOOL revenant_text_region(NSValue *region, size_t wide, size_t high, Reve
     return YES;
 }
 
-NSArray *RevenantVisionTextLines(id image, CGImagePropertyOrientation orientation, NSDictionary *options, NSError **error)
+static NSArray *revenant_text_lines(id image, CGImagePropertyOrientation orientation, NSDictionary *options, NSError **error)
 {
     size_t wide = 0;
     size_t high = 0;
@@ -215,4 +215,16 @@ NSArray *RevenantVisionTextLines(id image, CGImagePropertyOrientation orientatio
                              @"words": wordResults}];
     }
     return results;
+}
+
+NSArray *RevenantVisionTextLines(id image, CGImagePropertyOrientation orientation, NSDictionary *options, NSError **error)
+{
+    NSError *failure = nil;
+    NSArray *lines;
+    @autoreleasepool {
+        lines = revenant_text_lines(image, orientation, options, &failure);
+    }
+    if (error)
+        *error = failure;
+    return lines;
 }

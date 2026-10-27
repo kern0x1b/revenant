@@ -51,7 +51,7 @@ The fast level answers only the six languages of macOS's fast list, so it has no
 
 ## Where it differs from Apple's Vision
 
-Each difference below is measured by `frameworks/Backports/tests/Vision/text_test.mm` against macOS Vision on the same image, or follows from the Tesseract output the backport reads.
+Each difference below is measured by `frameworks/Backports/tests/Vision/text_test.mm` against macOS Vision on the same image, or follows from the Tesseract output the backport reads. Each one is a stand-in listed in `docs/reference/backports/crutches.md`, C26 to C36.
 
 - **Accuracy.** The accurate-level models read the fixtures to the text macOS Vision reads; the fast models misread a character in one fixture, `42` as `A2` in `de.png`. The fast check therefore allows an edit distance of at most 0.2 of the expected length, and the accurate check requires an exact match.
 - **Box positions.** Tesseract's line and word boxes are compared with Vision's boxes in normalized coordinates. The tolerance is 0.04 on each of origin and size. The worst accurate deviation measured is 0.0323 (`uk.png`), so the tolerance has 0.008 of headroom. A tighter tolerance fails a fixture that is correct.
@@ -85,8 +85,9 @@ The probe is a C++ and Objective-C program over `VNTextRecognizer.h`, built for 
 The text read matches the fixtures: `Hello, world` and `Vision text 2026` for English, `Привет, мир` and `Текст на русском языке` for Russian, `Привіт, світ` and `Текст українською мовою` for Ukrainian.
 
 - Memory: the accurate level's peak is about 52 MiB on a device with 512 MiB, so the accurate level fits the A5 in memory.
-- Time: an accurate recognition of a two-line image takes about 4.7 seconds, against about 0.65 seconds for the fast level. The first recognition adds about 0.8 seconds to load the model. A full page takes longer; that was not measured.
-- Growth: each recognition after the first leaves about 4.2 MiB more resident. The cause is not determined. The probe runs no autorelease pool, so Objective-C objects of earlier runs stay until exit; that does not account for the whole growth.
+- Time: an accurate recognition of a two-line image takes 4.2 to 5.2 seconds on the device, against about 0.65 seconds for the fast level. A 12-line page (`page-12-lines.png`, 1200 by 4800 pixels, made from the English fixtures) takes 29 to 32 seconds. Loading the model takes about 0.5 seconds, and the first recognition is the only one that pays it.
+- Speed levers tried on the device, both removed: the NEON matrix path, which is now selected (`dotproduct neon`), took the same time as the generic path (3.73 to 3.84 seconds for the two-line image in both); splitting the region at a blank row into two engines on two threads took 29.3 seconds for the page against 31.3 for the serial build, and 4.3 seconds for the two-line image against 4.2. The cost that dominates is not measured. The open item is C36 in `docs/reference/backports/crutches.md`.
+- Growth: fixed. Each call allocated its RGBA scratch and luma plane with `dataWithLength:`, which autoreleases them, so a caller without an autorelease pool kept them until exit. On the host, without a pool, resident memory grew by about 3.8 MiB per call for the two-line image; with one pool per call it stayed flat. On the device the 12-line page grew by about 29 MB per call (56.9, 84.8 and 112.4 MiB over three calls). `RevenantVisionTextLines` now drains its own pool, and the same probe stays flat: 38.9, 39.2 and 39.3 MiB over three calls.
 
 ## Status
 
@@ -94,4 +95,4 @@ The text read matches the fixtures: `Hello, world` and `Vision text 2026` for En
 - Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control. The host tests were rerun after the `tessdata` recipe took the `languages` option.
 - Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the per-model packages, the dependency and recommendation names, an unknown model, and a missing license). The `tessdata` recipe configures and installs for macOS.
 - Not yet run: a full iOS packaging run that writes the Backports package and the model packages together. The iOS default set (`eng,rus,ukr`) was not installed for iOS in this run.
-- Open: the growth of resident memory across recognitions.
+- Open: the speed of the accurate level on the device (C36).

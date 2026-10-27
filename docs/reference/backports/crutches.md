@@ -160,10 +160,98 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 ### C25. Vision requests beyond iOS 6 image-analysis engines
 
 - Stands in for: `VNDetectRectanglesRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
-- Why: iOS 6 Core Image has face detection, but no rectangle, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented. `VNRecognizeTextRequest` is not a stand-in: it reads text with Tesseract, as described in [Vision text recognition on iOS 6](../../explanation/backports/vision-text.md).
+- Why: iOS 6 Core Image has face detection, but no rectangle, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented. `VNRecognizeTextRequest` is implemented with Tesseract and is not listed here; its stand-ins are C26 to C36, described in [Vision text recognition on iOS 6](../../explanation/backports/vision-text.md).
 - Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
-- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison of barcodes against Apple's Vision has been run. The text fixtures are compared with macOS Vision: the accurate models match its text, and their boxes deviate by at most 0.0323 against a tolerance of 0.04.
+- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison of barcodes against Apple's Vision has been run.
 - Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
+
+### C26. Tesseract's accurate models stand in for Vision's accurate text recognizer
+
+- Stands in for: `VNRecognizeTextRequest` at the accurate level, for every revision, language and region of interest.
+- Why: iOS 6 has no text recognizer, so the backport reads the text with Tesseract 5.5.3 and the pinned tessdata_best LSTM models.
+- Behavior: the text matches macOS Vision on the fixtures exactly. Line and word boxes deviate from Vision's in normalized coordinates by at most 0.0323 (`uk.png`) against a tolerance of 0.04. The boxes are Tesseract's segmentation, so a region with another line structure may split or join lines differently from Vision.
+- Measurement: `frameworks/Backports/tests/Vision/text_test.mm` compares each fixture with macOS Vision on the same image. On the iPhone 4S a two-line image takes 4.2 to 5.2 s per call (C36).
+- Removed by: an iOS 6 implementation of Vision's own recognizer, measured against macOS Vision on the same fixtures.
+
+### C27. The fast models stand in for Vision's fast text recognizer, with misreads
+
+- Stands in for: `VNRequestTextRecognitionLevelFast` for the six languages of macOS's fast list: `en-US`, `fr-FR`, `it-IT`, `de-DE`, `es-ES` and `pt-BR`.
+- Why: tessdata_fast is Tesseract's fast LSTM model set, the nearest match to Vision's fast engine.
+- Behavior: the fast models misread characters: `42` reads as `A2` in `de.png`. The fast check accepts an edit distance of up to 0.2 of the expected length; the accurate check is exact. Russian and Ukrainian are refused at this level, as on macOS.
+- Measurement: `text_test.mm` runs the fast fixtures with that tolerance. On the iPhone 4S the two-line fast recognition takes about 0.65 s (C36).
+- Removed by: a fast engine measured against macOS Vision on the fixtures without the edit-distance allowance.
+
+### C28. Word ranges, confidence, candidates and line text stand in for Vision's observations
+
+- Stands in for: `VNRecognizedTextObservation` as Vision builds it: character ranges, Vision's confidence values, and the candidates of `topCandidates:`.
+- Why: Tesseract reports lines and words, with a confidence per word; the backport maps them onto Vision's types.
+- Behavior: word ranges cover Tesseract's words, so `10:30` is one word where macOS Vision reports two. A word whose text is not found in the line text is skipped. The confidence is the mean of Tesseract's word confidences divided by 100, so it is continuous where Vision's are 0.5 or 1.0. `topCandidates:` returns one candidate per line. The text of a line is Tesseract's own line text, so the spacing of Latin text is kept. `minimumTextHeight` is applied to the line boxes.
+- Measurement: `text_test.mm` checks the expected lines, word ranges and boxes of each fixture. The confidence values are not compared with macOS Vision.
+- Removed by: a character-level segmentation of the line, and a confidence mapping measured against Vision's values on the fixtures.
+
+### C29. Dictionary toggles and a user-words file stand in for language correction and custom words
+
+- Stands in for: `usesLanguageCorrection` and `customWords`.
+- Why: Tesseract applies its dictionaries to words and reads extra words from a user-words file.
+- Behavior: `usesLanguageCorrection = NO` turns off Tesseract's dictionaries (the `load_*_dawg` variables). That approximates Vision's behaviour; it is not Vision's algorithm. `customWords` is written to a file in `NSTemporaryDirectory()`, named by a hash of the words, and read by Tesseract as `user_words_file`.
+- Measurement: none against macOS Vision for either option.
+- Removed by: a correction measured against macOS Vision on the fixtures with correction on and off, and a custom-word test against Vision's output.
+
+### C30. Nearest models stand in for the identifiers Tesseract has no model for
+
+- Stands in for: the Vision identifiers that have no Tesseract model of their own.
+- Why: Tesseract has no Cantonese or Najdi Arabic model, and one Norwegian model serves three identifiers.
+- Behavior: `yue-Hans` and `yue-Hant` read with `chi_sim` and `chi_tra`; `ars-SA` with `ara`; `no-NO`, `nn-NO` and `nb-NO` with `nor`; `vi-VT` with `vie`. The vertical models `chi_sim_vert` and `jpn_vert` are not packaged, so Tesseract logs that it cannot find them and reads horizontal text.
+- Measurement: none against macOS Vision for these identifiers; the fixtures contain no Cantonese, Najdi Arabic or vertical text.
+- Removed by: a model for each identifier, or the vertical models packaged and measured on vertical fixtures.
+
+### C31. The CJK spacing rule approximates the spacing of Tesseract's words
+
+- Stands in for: the spacing between Chinese and Japanese words in Vision's text.
+- Why: Tesseract puts a space between each Chinese or Japanese word unit, and Vision does not.
+- Behavior: the backport drops a space when both neighbours are ideographs or kana (U+3040 to U+30FF, U+3400 to U+9FFF, U+F900 to U+FAFF). Without it the Chinese fixture reads `你 好 世界`. Hangul is not covered.
+- Measurement: `text_test.mm` on the Chinese and Japanese fixtures.
+- Removed by: spacing taken from Vision's own rule, measured on the fixtures, or a Tesseract output without the extra spaces.
+
+### C32. A cropped copy stands in for the region of interest
+
+- Stands in for: `regionOfInterest` as Vision applies it inside the image.
+- Why: Tesseract's `SetRectangle` returned no lines for a region that starts at row 0.
+- Behavior: the region is copied into its own buffer before recognition, and the boxes are shifted back by the region's origin. Each call copies the region once.
+- Measurement: `text_test.mm` checks the region fixture (region {0, 0.6, 1, 0.4}).
+- Removed by: a Tesseract region that reads a region starting at row 0, measured on the fixture.
+
+### C33. A Core Image luma plane stands in for Vision's grayscale input
+
+- Stands in for: the luminance Vision recognises from.
+- Why: Tesseract reads one 8-bit plane. Core Image renders the image as RGBA8 and the plane is its luma, `(306 R + 601 G + 117 B + 512) >> 10`, with the orientation applied afterwards.
+- Behavior: the luma of a photograph may differ from Vision's. For each call the RGBA scratch is 4 bytes per pixel and the plane is 1 byte per pixel; both are released when the call returns, since `RevenantVisionTextLines` drains its own autorelease pool.
+- Measurement: the fixtures pass. The luma is not compared with Vision's.
+- Removed by: a plane measured against Vision's input on the fixtures, or a plane rendered without the RGBA scratch.
+
+### C34. A recognition engine is kept for the life of the process
+
+- Stands in for: Vision's loading and unloading of its models for each request.
+- Why: a Tesseract model takes about 0.5 s to load on the iPhone 4S, so the engine is kept per datapath, language, user-words file and correction setting, and replaced when any of them changes.
+- Behavior: after the first two-line recognition the engine keeps about 25 MB resident on the iPhone 4S, against a peak of about 65 MB. The host test prints `LEAK` lines at exit because the engine is still allocated when the leak checker runs. The engine is a raw pointer: a `unique_ptr` version aborted at exit with `mutex lock failed: Invalid argument`.
+- Measurement: the device probe, three calls in one process (table in [Vision text recognition on iOS 6](../../explanation/backports/vision-text.md)).
+- Removed by: a load and unload per request, measured for time and memory on the device.
+
+### C35. Tesseract and Leptonica are built for iOS with reduced features and a NEON patch
+
+- Stands in for: the text engine's libraries on iOS 6, which have no packaged OpenMP runtime, image codecs or training tools.
+- Why: Tesseract is built with `-DOPENMP_BUILD=OFF`, Leptonica without its codecs, and the TIFF probe is answered in the build (`LEPT_TIFF_RESULT`, `LEPT_TIFF_COMPILE_SUCCESS`). Tesseract finds NEON at run time only through `getauxval` or `elf_aux_info`, which Darwin lacks, so the compiled NEON matrix path was never selected. `packages/t/tesseract/patches/5.5.3-apple-neon-sysctl.patch` reads `hw.optional.neon` on Apple ARM instead.
+- Behavior: Tesseract runs on one of the two A5 cores. Leptonica prints `pixReadMemTiff`, `bmfCreate` and `changeFormatForMissingLib` on stderr; none changes a result. With the patch the NEON path is selected (`dotproduct neon`); the text is unchanged, and the time is the same as the generic path on the device.
+- Measurement: the device probe with `DOTPRODUCT=neon` and `DOTPRODUCT=generic` on the two-line image: 3.73 to 3.84 s and 3.73 to 3.82 s per call.
+- Removed by: an OpenMP build of Tesseract for iOS, which lets the LSTM use both cores, or a Tesseract release that reads `hw.optional.neon` on Darwin, which drops the patch.
+
+### C36. The recognition time stands in for Vision's latency on the device
+
+- Stands in for: the latency of `VNRecognizeTextRequest` on the device, which Apple's engine provides.
+- Why: Tesseract's LSTM runs on the A5 CPU, and its page analysis runs first. Neither the NEON path (C35) nor splitting a region across two engines on two threads reduced the time on the device, and the cost that dominates is not measured.
+- Behavior: the accurate level takes 4.2 to 5.2 s for the two-line fixture and 29 to 32 s for a 12-line page on the iPhone 4S; the fast level takes about 0.65 s for the two-line fixture. The split was tried and removed: on the 12-line page it took 29.3 s where the serial build took 31.3 s, and on the two-line fixture it took 4.3 s where the serial build took 4.2 s.
+- Measurement: the device probe, three calls per configuration, on the iPhone 4S (dual A5, iOS 6.1.3).
+- Removed by: a profile that names the dominant cost on the device, and a change that brings a 12-line page below a stated target with the accurate fixtures unchanged.
 >
 ## Removed
 
