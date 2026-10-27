@@ -5,7 +5,6 @@ struct Case {
     let status: NWPath.Status
     let expensive: Bool
     let interfaces: [NWInterface]
-    let defaultInterface: NWInterface?
     let uses: [NWInterface.InterfaceType]
 }
 
@@ -18,20 +17,17 @@ let tunnel = NWInterface(name: "utun0", index: 9, type: .other)
 
 let cases: [Case] = [
     Case(name: "recorded on the host: satisfied, wifi en0 listed twice", status: .satisfied, expensive: false,
-         interfaces: [wifi, wifi], defaultInterface: wifi, uses: [.wifi]),
-    Case(name: "unsatisfied uses no interface", status: .unsatisfied, expensive: false, interfaces: [], defaultInterface: nil, uses: []),
-    Case(name: "loopback only", status: .satisfied, expensive: false, interfaces: [loopback], defaultInterface: loopback, uses: [.loopback]),
-    Case(name: "cellular while expensive", status: .satisfied, expensive: true, interfaces: [cellular], defaultInterface: cellular, uses: [.cellular]),
-    Case(name: "cellular default with wifi also up", status: .satisfied, expensive: true, interfaces: [wifi, cellular], defaultInterface: cellular, uses: [.cellular]),
-    Case(name: "wired ethernet", status: .satisfied, expensive: false, interfaces: [wired], defaultInterface: wired, uses: [.wiredEthernet]),
-    Case(name: "wifi listed first, default route on wired ethernet", status: .satisfied, expensive: false, interfaces: [wifi, wired], defaultInterface: wired, uses: [.wiredEthernet]),
-    Case(name: "tunnel", status: .satisfied, expensive: false, interfaces: [tunnel], defaultInterface: tunnel, uses: [.other]),
-    Case(name: "reachable without a default route uses no interface", status: .satisfied, expensive: false, interfaces: [wifi], defaultInterface: nil, uses: []),
+         interfaces: [wifi, wifi], uses: [.wifi]),
+    Case(name: "unsatisfied uses no interface", status: .unsatisfied, expensive: false, interfaces: [], uses: []),
+    Case(name: "loopback only", status: .satisfied, expensive: false, interfaces: [loopback], uses: [.loopback]),
+    Case(name: "cellular while expensive", status: .satisfied, expensive: true, interfaces: [cellular], uses: [.cellular]),
+    Case(name: "wired ethernet", status: .satisfied, expensive: false, interfaces: [wired], uses: [.wiredEthernet]),
+    Case(name: "tunnel", status: .satisfied, expensive: false, interfaces: [tunnel], uses: [.other]),
 ]
 
 var failures = 0
 for entry in cases {
-    let path = NWPath(status: entry.status, isExpensive: entry.expensive, availableInterfaces: entry.interfaces, defaultInterface: entry.defaultInterface)
+    let path = NWPath(status: entry.status, isExpensive: entry.expensive, availableInterfaces: entry.interfaces)
     if path.status != entry.status {
         failures += 1
         print("FAIL \(entry.name): status is \(path.status), expected \(entry.status)")

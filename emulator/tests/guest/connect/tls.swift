@@ -21,7 +21,27 @@ final class Locked<Value> {
 struct Handshake {
     let state: String
     let milliseconds: Double
+    let version: String
+    let suite: String
     let connection: NWConnection
+}
+
+func versionName(_ version: UInt16?) -> String {
+    switch version {
+    case 0x0301: return "TLSv1.0"
+    case 0x0302: return "TLSv1.1"
+    case 0x0303: return "TLSv1.2"
+    case 0x0304: return "TLSv1.3"
+    case let value?: return "0x" + String(value, radix: 16)
+    case nil: return "none"
+    }
+}
+
+func suiteName(_ suite: UInt16?) -> String {
+    guard let suite else {
+        return "none"
+    }
+    return "0x" + String(suite, radix: 16, uppercase: true)
 }
 
 func milliseconds(since start: DispatchTime) -> Double {
@@ -41,6 +61,7 @@ func handshake(host: String, maximum: tls_protocol_version_t) -> Handshake {
                                   using: NWParameters(tls: tls, tcp: NWProtocolTCP.Options()))
     let state = Locked("timeout")
     let elapsed = Locked(0.0)
+    let negotiated = Locked(("none", "none"))
     let settled = DispatchSemaphore(value: 0)
     let start = DispatchTime.now()
     connection.stateUpdateHandler = { update in
@@ -48,6 +69,7 @@ func handshake(host: String, maximum: tls_protocol_version_t) -> Handshake {
         case .ready:
             state.withValue { $0 = "ready" }
             elapsed.withValue { $0 = milliseconds(since: start) }
+            negotiated.withValue { $0 = (versionName(connection.negotiatedTLSVersion), suiteName(connection.negotiatedCipherSuite)) }
             settled.signal()
         case .failed(let error):
             state.withValue { $0 = "failed \(error.debugDescription)" }
@@ -63,7 +85,9 @@ func handshake(host: String, maximum: tls_protocol_version_t) -> Handshake {
     }
     connection.start(queue: DispatchQueue(label: "revenant.tls.probe.handshake"))
     _ = settled.wait(timeout: .now() + 30)
-    return Handshake(state: state.withValue { $0 }, milliseconds: elapsed.withValue { $0 }, connection: connection)
+    let result = negotiated.withValue { $0 }
+    return Handshake(state: state.withValue { $0 }, milliseconds: elapsed.withValue { $0 }, version: result.0, suite: result.1,
+                     connection: connection)
 }
 
 func fetch(_ connection: NWConnection, host: String) -> String {
@@ -115,9 +139,9 @@ enum TLSProbe {
         for host in hosts {
             let tls12 = handshake(host: host, maximum: tls_protocol_version_t.TLSv12)
             tls12.connection.cancel()
-            print("tls_backport \(host) tls12 \(tls12.state) \(format(tls12.milliseconds))")
+            print("tls_backport \(host) tls12 \(tls12.state) \(format(tls12.milliseconds)) \(tls12.version) \(tls12.suite)")
             let tls13 = handshake(host: host, maximum: tls_protocol_version_t.TLSv13)
-            print("tls_backport \(host) tls13 \(tls13.state) \(format(tls13.milliseconds))")
+            print("tls_backport \(host) tls13 \(tls13.state) \(format(tls13.milliseconds)) \(tls13.version) \(tls13.suite)")
             if tls13.state == "ready" {
                 print("tls_backport \(host) get \(fetch(tls13.connection, host: host))")
             } else {

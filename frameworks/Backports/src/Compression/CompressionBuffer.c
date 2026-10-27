@@ -291,7 +291,7 @@ COMPRESSION_EXPORT size_t compression_decode_scratch_buffer_size(compression_alg
 COMPRESSION_EXPORT size_t compression_encode_buffer(uint8_t *__restrict dst_buffer, size_t dst_size, const uint8_t *__restrict src_buffer,
                                  size_t src_size, void *__nullable scratch_buffer, compression_algorithm algorithm)
 {
-    if (!dst_buffer || !src_buffer && src_size) return 0;
+    if (!dst_buffer || (!src_buffer && src_size)) return 0;
     switch (algorithm) {
     case COMPRESSION_LZFSE:
         {

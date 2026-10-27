@@ -1,6 +1,11 @@
 #import "../Foundation/check.h"
+#define WKSecurityOrigin WKSecurityOriginRevenant
 #import <WebKit/WebKit.h>
 #import "../../src/WebKit/RevenantURLSchemes.h"
+
+@interface WKSecurityOrigin (RevenantTest)
++ (instancetype)revenant_originWithURL:(NSURL *)url;
+@end
 
 @interface RevenantRecordingClient : NSObject <NSURLProtocolClient>
 
@@ -82,6 +87,16 @@
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
+
+    WKSecurityOrigin *origin = [WKSecurityOrigin revenant_originWithURL:[NSURL URLWithString:@"HTTPS://Example.COM/page"]];
+    revenant_check([origin.protocol isEqualToString:@"https"], "security origin protocol is the lowercased scheme", origin.protocol);
+    revenant_check([origin.host isEqualToString:@"example.com"], "security origin host is lowercased", origin.host);
+    revenant_check(origin.port == 0, "security origin port is 0 for the default port", [NSString stringWithFormat:@"%ld", (long)origin.port]);
+    WKSecurityOrigin *explicitPort = [WKSecurityOrigin revenant_originWithURL:[NSURL URLWithString:@"https://example.com:8443/"]];
+    revenant_check(explicitPort.port == 8443, "security origin port is the explicit port", [NSString stringWithFormat:@"%ld", (long)explicitPort.port]);
+    WKSecurityOrigin *empty = [WKSecurityOrigin revenant_originWithURL:nil];
+    revenant_check(empty.protocol.length == 0 && empty.host.length == 0 && empty.port == 0, "a frame without a request has an empty security origin", empty.host);
+
     Class snapshotClass = NSClassFromString(@"WKSnapshotConfigurationRevenant");
     revenant_check((snapshotClass != Nil) != revenant_negative, "WKSnapshotConfiguration implementation is present", NSStringFromClass(snapshotClass));
     if (!snapshotClass) {
