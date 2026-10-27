@@ -227,6 +227,12 @@ local function emulator_entries(base, found)
     end
 end
 
+local function modcache_entries(base, found)
+    for _, folder in ipairs(children(path.join(base, "modcache"))) do
+        table.insert(found, entry(base, folder, "scratch"))
+    end
+end
+
 function entries(base)
     local found = {}
     for _, folder in ipairs(children(base)) do
@@ -235,6 +241,8 @@ function entries(base)
             for _, task in ipairs(children(folder)) do
                 table.insert(found, entry(base, task, "scratch"))
             end
+        elseif name == "modcache" then
+            modcache_entries(base, found)
         elseif name == "xmake" then
             xmake_binaries(base, found)
         elseif name == "xmake-global" then
