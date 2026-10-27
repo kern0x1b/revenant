@@ -37,12 +37,17 @@ The fast level reads six languages, so only those six fast models are packaged. 
 
 ## Packaging
 
-The layout is decided; the packaging run that ships it is not wired yet (see Status).
+The `tessdata` recipe takes a `languages` option: a list of Tesseract codes, or `all`. The default is `eng,rus,ukr`. Each code is installed at the fast level where tessdata_fast has its model, and at the accurate level where tessdata_best has it. The packaging configuration installs the default set; the host tests install `all`.
 
-- `org.revenant.vision-text-fast` installs the six `tessdata_fast` models in `/usr/share/revenant/tessdata/fast`.
-- `org.revenant.vision-text-<lang>` installs one `tessdata_best` model in `/usr/share/revenant/tessdata/best`, for each of the 28 languages.
-- The Backports package depends on `org.revenant.vision-text-fast` and recommends `en`, `ru` and `uk`, so an app that reads Russian or Ukrainian has the models without a second install.
-- The module `toolchain/modules/apple/vision_text.lua` writes these packages from the `tessdata` package's install directory; `toolchain/modules/debian.lua` writes the `Recommends` field.
+Each installed model is one package, installed in `/usr/share/revenant/tessdata/{fast,best}`:
+
+- `org.revenant.vision-text-fast-eng` is the fast English model. The Backports package depends on it.
+- `org.revenant.vision-text-fast-rus` and `org.revenant.vision-text-fast-ukr` are the fast Russian and Ukrainian models. The Backports package recommends them.
+- `org.revenant.vision-text-best-<code>` is the accurate model for each code. An underscore in the code becomes a hyphen, so `chi_sim` is `best-chi-sim`. Nothing depends on these; an app that needs an accurate language installs its package.
+
+`toolchain/modules/apple/vision_text.lua` writes one package for each installed model. `platform.vision_text_debs` calls it with the install directory of the `tessdata` package that the Vision target requires, and `backports_package` writes the Depends and Recommends fields.
+
+The fast level answers only the six languages of macOS's list, so as the backport stands no Vision request reads `fast-rus` or `fast-ukr`. The recommendation follows the packaging decision. Whether the fast level should answer Russian and Ukrainian, which would differ from macOS, or whether the Backports package should recommend the accurate packages instead, is open.
 
 ## Where it differs from Apple's Vision
 
@@ -66,10 +71,27 @@ Each difference below is measured by `frameworks/Backports/tests/Vision/text_tes
 - Leptonica is built without its image codecs, and Tesseract's TIFF probe is answered in the build (`LEPT_TIFF_RESULT`, `LEPT_TIFF_COMPILE_SUCCESS`). Leptonica and Tesseract then print to stderr: `pixReadMemTiff`, `bmfCreate`, `changeFormatForMissingLib`, `Parameter not found`, and `Detected N diacritics`. None of these changes a result.
 - The host test prints `LEAK` lines at exit. The engine is kept until the process ends, so its model state is still allocated when the leak checker runs. The engine is a raw pointer that is deleted only when the language or the model changes; a `unique_ptr` version aborted at exit with `mutex lock failed: Invalid argument`.
 
+## Measured on the iPhone 4S
+
+The probe is a C++ and Objective-C program over `VNTextRecognizer.h`, built for `armv7-apple-ios6.0` and run on an iPhone 4S with iOS 6.1.3. It recognizes one image three times in one process; the first run includes loading the model. The probe must be linked with the project's `ld64` (`-fuse-ld=`): a binary linked with Xcode's linker crashed at startup on the device with a segmentation fault or a bad system call, and the same program linked with `ld64` ran.
+
+| Model | Image | Run 1 s | Run 2 s | Run 3 s | Peak RSS MiB | Resident after each run MiB |
+| --- | --- | --- | --- | --- | --- | --- |
+| best `eng` | `en-two-lines.png` | 4.60 | 3.80 | 3.82 | 51.8 | 21.8, 26.0, 30.2 |
+| best `rus` | `ru.png` | 5.50 | 4.72 | 4.71 | 51.5 | 22.5, 26.7, 31.0 |
+| best `ukr` | `uk.png` | 5.21 | 4.68 | 4.67 | 38.7 | 22.3, 26.4, 30.6 |
+| fast `eng` | `en-two-lines.png` | 0.88 | 0.64 | 0.65 | 24.8 | 15.2, 19.4, 23.6 |
+
+The text read matches the fixtures: `Hello, world` and `Vision text 2026` for English, `Привет, мир` and `Текст на русском языке` for Russian, `Привіт, світ` and `Текст українською мовою` for Ukrainian.
+
+- Memory: the accurate level's peak is about 52 MiB on a device with 512 MiB, so the accurate level fits the A5 in memory.
+- Time: an accurate recognition of a two-line image takes about 4.7 seconds, against about 0.65 seconds for the fast level. The first recognition adds about 0.8 seconds to load the model. A full page takes longer; that was not measured.
+- Growth: each recognition after the first leaves about 4.2 MiB more resident. The cause is not determined. The probe runs no autorelease pool, so Objective-C objects of earlier runs stay until exit; that does not account for the whole growth.
+
 ## Status
 
-- Compiled for `armv7-apple-ios6.0`: the six Vision sources pass a syntax check against the iOS 6 SDK.
-- Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control.
-- Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the fast package, a Russian package, the recommended names, and a refused missing model).
-- Not yet done: wiring `vision_text.write` into the packaging run, which needs the `tessdata` install directory in that run. The `tessdata` recipe installs the 34 models the layout uses (about 390 MB) on its first install. They are needed only by the packaging run, not by an app build, so whether the packaging run gets them through the package manager is still to be decided.
-- Not yet measured on the device: the iPhone 4S (A5, 512 MB) timing and resident memory for the best models. The result will be recorded here before the accurate level is shipped to the phone.
+- Compiled for `armv7-apple-ios6.0`: the six Vision sources pass a syntax check against the iOS 6 SDK, and the probe runs on the iPhone 4S (above).
+- Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control. The host tests were rerun after the `tessdata` recipe took the `languages` option.
+- Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the per-model packages, the dependency and recommendation names, an unknown model, and a missing license). The `tessdata` recipe configures and installs for macOS.
+- Not yet run: a full iOS packaging run that writes the Backports package and the model packages together. The iOS default set (`eng,rus,ukr`) was not installed for iOS in this run.
+- Open: the fast Russian and Ukrainian models are recommended but not read (see Packaging); the growth of resident memory across recognitions.
