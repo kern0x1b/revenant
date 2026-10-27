@@ -2,6 +2,7 @@
 
 @interface UIFindSession (RevenantFindNavigation)
 - (void)revenant_clearHighlight;
+- (void)revenant_setBottomObstruction:(CGFloat)height;
 @end
 
 @interface RevenantFindNavigator : UIView
@@ -51,6 +52,7 @@
     UITextField *_replaceField;
     UIButton *_replaceButton;
     UIButton *_replaceAllButton;
+    CGFloat _keyboardOverlap;
 }
 
 - (instancetype)initWithSessionDelegate:(id<UIFindInteractionDelegate>)sessionDelegate
@@ -151,6 +153,9 @@
     _findNavigatorVisible = NO;
     _showingReplace = NO;
     UIFindSession *session = _activeFindSession;
+    [self revenant_stopObserving];
+    _keyboardOverlap = 0;
+    [session revenant_setBottomObstruction:0];
     [_field resignFirstResponder];
     [_replaceField resignFirstResponder];
     [_navigator removeFromSuperview];
@@ -250,11 +255,50 @@
     _field.text = _searchText;
     _replaceField.text = _replacementText;
     _navigator.showsReplaceRow = _showingReplace;
-    CGFloat height = _showingReplace ? 88 : 44;
-    _navigator.frame = CGRectMake(0, CGRectGetHeight(_view.bounds) - height, CGRectGetWidth(_view.bounds), height);
     _navigator.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [_view addSubview:_navigator];
+    [self revenant_startObserving];
+    [self revenant_layoutNavigator];
     [self revenant_search];
+}
+
+- (void)revenant_layoutNavigator
+{
+    CGFloat height = _navigator.showsReplaceRow ? 88 : 44;
+    CGRect bounds = _view.bounds;
+    _navigator.frame = CGRectMake(0, CGRectGetHeight(bounds) - _keyboardOverlap - height, CGRectGetWidth(bounds), height);
+    [_activeFindSession revenant_setBottomObstruction:height + _keyboardOverlap];
+}
+
+- (void)revenant_startObserving
+{
+    [self revenant_stopObserving];
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self selector:@selector(revenant_keyboardChanged:) name:UIKeyboardWillChangeFrameNotification object:nil];
+    [center addObserver:self selector:@selector(revenant_resultsChanged:) name:@"RevenantFindSessionResultsDidChange" object:nil];
+}
+
+- (void)revenant_stopObserving
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)revenant_keyboardChanged:(NSNotification *)notification
+{
+    UIWindow *window = _view.window;
+    if (!window)
+        return;
+    CGRect frame = [[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGRect keyboard = [_view convertRect:[window convertRect:frame fromWindow:nil] fromView:window];
+    _keyboardOverlap = MAX(0, CGRectGetMaxY(_view.bounds) - CGRectGetMinY(keyboard));
+    if (_findNavigatorVisible)
+        [self revenant_layoutNavigator];
+}
+
+- (void)revenant_resultsChanged:(NSNotification *)notification
+{
+    if (_findNavigatorVisible && notification.object == _activeFindSession)
+        [self updateResultCount];
 }
 
 - (void)revenant_buildNavigator

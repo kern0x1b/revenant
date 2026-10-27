@@ -5,6 +5,9 @@
 - (void)revenant_highlight:(NSRange)range;
 - (void)revenant_clearHighlight;
 - (void)revenant_replaceRanges:(NSArray *)ranges withString:(NSString *)string;
+- (void)revenant_setBottomObstruction:(CGFloat)height;
+- (CGFloat)revenant_bottomObstruction;
+- (void)revenant_didChangeResults;
 @end
 
 static NSArray *revenant_matches(NSString *document, NSString *query, UITextSearchOptions *options)
@@ -40,6 +43,7 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
     NSArray *_results;
     NSInteger _highlightedResultIndex;
     UIFindSessionSearchResultDisplayStyle _searchResultDisplayStyle;
+    CGFloat _bottomObstruction;
 }
 
 - (instancetype)init
@@ -153,6 +157,21 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
 
 - (void)revenant_replaceRanges:(NSArray *)ranges withString:(NSString *)string
 {
+}
+
+- (void)revenant_setBottomObstruction:(CGFloat)height
+{
+    _bottomObstruction = height;
+}
+
+- (CGFloat)revenant_bottomObstruction
+{
+    return _bottomObstruction;
+}
+
+- (void)revenant_didChangeResults
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RevenantFindSessionResultsDidChange" object:self];
 }
 
 @end
