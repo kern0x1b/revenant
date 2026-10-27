@@ -1,4 +1,5 @@
 #import "RevenantVision.h"
+#import "VNTextRecognizer.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -99,8 +100,49 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
 
 @implementation VNRecognizeTextRequest {
     VNRequestProgressHandler _progressHandler;
+    VNRequestTextRecognitionLevel _recognitionLevel;
+    NSArray<NSString *> *_recognitionLanguages;
+    BOOL _usesLanguageCorrection;
+    NSArray<NSString *> *_customWords;
+    float _minimumTextHeight;
+    CGRect _regionOfInterest;
 }
 @synthesize progressHandler = _progressHandler;
+@synthesize recognitionLevel = _recognitionLevel;
+@synthesize recognitionLanguages = _recognitionLanguages;
+@synthesize usesLanguageCorrection = _usesLanguageCorrection;
+@synthesize customWords = _customWords;
+@synthesize minimumTextHeight = _minimumTextHeight;
+@synthesize regionOfInterest = _regionOfInterest;
+
+- (instancetype)initWithCompletionHandler:(VNRequestCompletionHandler)completionHandler
+{
+    if ((self = [super initWithCompletionHandler:completionHandler])) {
+        _recognitionLevel = VNRequestTextRecognitionLevelAccurate;
+        _recognitionLanguages = @[@"en-US"];
+        _usesLanguageCorrection = YES;
+        _customWords = @[];
+        _minimumTextHeight = 0;
+        _regionOfInterest = CGRectMake(0, 0, 1, 1);
+    }
+    return self;
+}
+
++ (NSArray<NSString *> *)supportedRecognitionLanguagesForTextRecognitionLevel:(VNRequestTextRecognitionLevel)recognitionLevel revision:(NSUInteger)requestRevision error:(NSError **)error
+{
+    if (![[self supportedRevisions] containsIndex:requestRevision]) {
+        if (error)
+            *error = revenant_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support Revision%lu",
+                                                                           NSStringFromClass(self), (unsigned long)requestRevision]);
+        return nil;
+    }
+    return RevenantVisionTextLanguages(RevenantVisionTextModelRoot(), requestRevision, recognitionLevel == VNRequestTextRecognitionLevelFast);
+}
+
+- (NSArray<NSString *> *)supportedRecognitionLanguagesAndReturnError:(NSError **)error
+{
+    return [[self class] supportedRecognitionLanguagesForTextRecognitionLevel:self.recognitionLevel revision:self.revision error:error];
+}
 
 - (BOOL)indeterminate
 {
@@ -109,11 +151,20 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
 
 @end
 
-@implementation VNRecognizedTextObservation
+@implementation VNRecognizedTextObservation {
+    NSArray<VNRecognizedText *> *_candidates;
+}
 
 - (NSArray<VNRecognizedText *> *)topCandidates:(NSUInteger)maxCandidateCount
 {
-    return @[];
+    if (maxCandidateCount >= _candidates.count)
+        return _candidates;
+    return [_candidates subarrayWithRange:NSMakeRange(0, maxCandidateCount)];
+}
+
+- (void)revenant_setCandidates:(NSArray<VNRecognizedText *> *)candidates
+{
+    _candidates = [candidates copy];
 }
 
 @end
@@ -130,13 +181,46 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
 @implementation VNSaliencyImageObservation
 @end
 
-@implementation VNRecognizedText
+@implementation VNRecognizedText {
+    NSArray<NSDictionary *> *_words;
+}
 
 @synthesize requestRevision = _requestRevision;
 
++ (instancetype)revenant_textWithString:(NSString *)string confidence:(float)confidence requestRevision:(NSUInteger)requestRevision words:(NSArray<NSDictionary *> *)words
+{
+    VNRecognizedText *text = [[self alloc] init];
+    text->_string = [string copy];
+    text->_confidence = confidence;
+    text->_requestRevision = requestRevision;
+    text->_words = [words copy];
+    return text;
+}
+
 - (VNRectangleObservation *)boundingBoxForRange:(NSRange)range error:(NSError **)error
 {
-    return nil;
+    if (range.location == NSNotFound || NSMaxRange(range) > _string.length) {
+        if (error)
+            *error = revenant_vision_error(VNErrorInvalidArgument, @"the range is outside the recognized string");
+        return nil;
+    }
+    CGRect box = CGRectNull;
+    for (NSDictionary *word in _words) {
+        NSRange wordRange = [word[@"range"] rangeValue];
+        if (NSIntersectionRange(range, wordRange).length > 0)
+            box = CGRectUnion(box, RevenantVisionRectFromValue(word[@"bounds"]));
+    }
+    if (CGRectIsNull(box)) {
+        if (error)
+            *error = revenant_vision_error(VNErrorOperationFailed, @"no text in the range could be located");
+        return nil;
+    }
+    VNRectangleObservation *observation = [VNRectangleObservation observationWithRequestRevision:_requestRevision boundingBox:box];
+    [observation revenant_setCornersTopLeft:CGPointMake(CGRectGetMinX(box), CGRectGetMaxY(box))
+                                   topRight:CGPointMake(CGRectGetMaxX(box), CGRectGetMaxY(box))
+                                bottomRight:CGPointMake(CGRectGetMaxX(box), CGRectGetMinY(box))
+                                 bottomLeft:CGPointMake(CGRectGetMinX(box), CGRectGetMinY(box))];
+    return observation;
 }
 
 + (BOOL)supportsSecureCoding

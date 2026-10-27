@@ -53,7 +53,7 @@ local LIBRARIES = {
     {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation", "PhotosUI"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp"}, system = {}},
+    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp", "tesseract", "leptonica"}, system = {}},
     {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MetalKitBackports", folder = "MetalKit", frameworks = {"MetalKit", "Metal", "ModelIO", "UIKit", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "ModelIOBackports"}, archives = {}, system = {}},
     {name = "MPSBackports", folder = "MetalPerformanceShaders", frameworks = {"Metal", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {}, system = {}},
@@ -117,6 +117,8 @@ if is_plat("iphoneos") then
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
+    add_requires("revenant@tesseract 5.5.3", {alias = "tesseract"})
+    add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
     add_requires("revenant@libcxx", {alias = "libcxx"})
 
     local generator
@@ -275,6 +277,9 @@ end
 
 if not is_plat("iphoneos") and is_arch("arm64", "x86_64") then
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
+    add_requires("revenant@tesseract 5.5.3", {alias = "tesseract"})
+    add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
+    add_requires("revenant@tessdata", {alias = "tessdata"})
 end
 
 local function backports_tests(name, scripts)
@@ -525,6 +530,9 @@ local function host_tests(folder, tests, library, frameworks, options)
             add_tests("default")
             add_tests("negative", {runargs = {"--negative"}, expect_failure = true})
             on_test(function (target, opt)
+                if options.arguments then
+                    opt.runargs = table.join(opt.runargs or {}, options.arguments(target, TESTS))
+                end
                 return import("@addon.revenant.host_test", {anonymous = true}).run(target, opt)
             end)
         target_end()
@@ -535,7 +543,8 @@ if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
     if is_arch("arm64", "x86_64") then
-        host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+        host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm", "VNGrayscale.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+        host_tests("Vision", {text = {"VNTextRecognizerCore.cpp", "VNTextRecognizer.mm", "VNGrayscale.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo", "ImageIO"}, {extension = "mm", packages = {"tesseract", "leptonica", "tessdata"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}, arguments = function (target, tests) return {path.join(tests, "data", "text"), path.join(target:pkg("tessdata"):installdir(), "share", "tessdata")} end})
     end
     host_tests("Vision", {rectangle = {"VNRectangleDetector.c", "VNRectangleImage.m", "VNConstants.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm"})
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
