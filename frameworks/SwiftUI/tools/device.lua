@@ -88,7 +88,6 @@ end
 
 local function tools(device, settings)
     local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
-    -- The build output is unsigned. Only the installed copy carries the entitlements SpringBoard checks, so provision that.
     local signed = path.join(out, "install", "usr", "libexec")
     local stamp = path.join(out, "guest-sources")
     local current = guest_stamp()
