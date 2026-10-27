@@ -178,8 +178,10 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
   WebKit does.
 - `window.opener` in a popup is a proxy with `closed`, `location` (read and set), and `postMessage(message, targetOrigin)`,
   which reaches the opener as a `message` event under the same `targetOrigin` rule. Opener updates arrive through
-  `RevenantScriptCodec`'s `opener` update path. One gap stays on iOS 6: `initMessageEvent` takes a `source` that must be a
-  real Window, so `event.source` for a message from the opener is null and `event.source === window.opener` is false.
+  `RevenantScriptCodec`'s `opener` update path. Host-tested, device-unverified: `initMessageEvent` on iOS 6 takes a `source`
+  that must be a real Window, so the shim builds the event with a null source and defines `source` on the event instance as
+  the same proxy object returned as `window.opener`. The JSContext harness checks `e.source === window.opener`. The iPad
+  `opener` probe measured `e.source === window.opener` as false before this change; the change has not been measured on the device.
 - `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`), and `webViewDidClose:`
   is sent to the closing view's `UIDelegate` when a popup closes, whether the opener or the popup closed it.
   `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
@@ -281,8 +283,8 @@ Already present, with the same limits:
   `WebKitErrorDomain` 102 (frame load interrupted by policy change); the download's finish races the 102 failure. The backport
   reports the same order (`tests/webkit_navigation/oracle.m` records the macOS run). The backport's `WKDownload` runs its
   connection on the main run loop, so the decision cannot race the data. Measured on the iPad, a 300000-byte download
-  matched its bytes. A nil destination differs: the backport sends
-  `download:didFailWithError:` after the 102, and macOS sends no download callback at all.
+  matched its bytes. A nil destination: the backport now sends no download callback, as macOS does (host-tested,
+  device-unverified; the nil-destination path has no device probe mode).
 - Measured on the iPad with the `window` probe mode: a popup created by `window.open` with a delegate that returns a
   view; `location` reflected the first commit; `postMessage` reached the popup with the sent value (a nested object and
   array with `null` and a number), and a `targetOrigin` that did not match was dropped; the opener's `close()` called
