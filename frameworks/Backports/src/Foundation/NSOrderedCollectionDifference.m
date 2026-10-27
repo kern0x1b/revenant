@@ -1,4 +1,7 @@
 #import "RevenantOrderedCollections.h"
+#import "../revenant_alias.h"
+
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 static NSComparisonResult revenant_compare_changes(NSOrderedCollectionChange *one, NSOrderedCollectionChange *two, void *context)
 {
@@ -11,16 +14,21 @@ static void revenant_raise_duplicate(NSString *reason, NSUInteger index)
     [[NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:@{@"index": @(index)}] raise];
 }
 
-@implementation NSOrderedCollectionDifference {
-@private
+REVENANT_ALIAS_STATE(NSOrderedCollectionDifference, NSObject,
     NSArray *_insertions;
     NSArray *_removals;
     NSArray *_ordered;
-}
+)
+
+@interface REVENANT_ALIAS_CLASS(NSOrderedCollectionDifference) (RevenantBackport)
+- (instancetype)revenant_initWithInsertions:(NSArray *)insertions removals:(NSArray *)removals __attribute__((objc_method_family(init)));
+@end
+
+@implementation REVENANT_ALIAS_CLASS(NSOrderedCollectionDifference) (RevenantBackport)
 
 - (instancetype)init
 {
-    return [self initWithChanges:@[]];
+    return [self initWithInsertIndexes:[NSIndexSet indexSet] insertedObjects:nil removeIndexes:[NSIndexSet indexSet] removedObjects:nil additionalChanges:@[]];
 }
 
 - (instancetype)initWithChanges:(NSArray *)changes

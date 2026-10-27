@@ -7,9 +7,10 @@ local INSTALLED = path.join("/usr/libexec", PROGRAM)
 function main(device, release)
     device = device or "iPhone2,1"
     release = release or "6.1.3"
-    local here = os.scriptdir()
+    local here = path.absolute(os.scriptdir())
     local out = runs.folder("emulate-install")
     os.mkdir(out)
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
 
     local existing = runs.images_of(PROJECT)[1]
     if existing then
@@ -20,9 +21,9 @@ function main(device, release)
 
     local configure = path.join(out, "configure.log")
     local install = path.join(out, "install.log")
-    os.execv(os.programfile(), {"f", "-p", "iphoneos", "-a", "armv7", "-y"},
+    os.execv(os.programfile(), {"f", "-P", here, "-p", "iphoneos", "-a", "armv7", "-y"},
              {curdir = here, stdout = configure, stderr = configure})
-    os.execv(os.programfile(), {"emulate", "install", "-d", device, "-r", release},
+    os.execv(os.programfile(), {"emulate", "-d", device, "-r", release, "install"},
              {curdir = here, stdout = install, stderr = install})
     local output = runs.lines(install)
     for index = math.max(1, #output - 2), #output do

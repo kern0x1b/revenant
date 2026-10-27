@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "media/pcm_sample_format.hpp"
 
 #include <array>
@@ -27,6 +29,8 @@ class UserlandHleCall;
 class UserlandHleRegistry;
 
 class CoreAudioHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     struct ScheduledIoProc {
         std::uint32_t process_id { };
@@ -52,6 +56,10 @@ public:
     void io_proc_schedule_failed(
         std::uint32_t process_id, bool native, std::uint32_t io_proc_id);
     [[nodiscard]] std::vector<std::size_t> take_retired_io_proc_threads();
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<CoreAudioHle>, 2>& snapshot_members();
 
 private:
     void device_property_info(UserlandHleCall& call);
@@ -112,6 +120,7 @@ private:
         std::uint64_t next_deadline { };
         std::uint64_t sample_time { };
         std::uint64_t callback_count { };
+        std::uint64_t underruns { };
         std::uint32_t peak_since_report { };
         std::optional<std::size_t> processor;
         bool running { };

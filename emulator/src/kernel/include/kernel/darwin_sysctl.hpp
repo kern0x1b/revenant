@@ -24,8 +24,11 @@ namespace emulator::darwin::sysctl {
 
 inline constexpr std::uint32_t control_unspecified = 0;
 inline constexpr std::uint32_t control_kernel = 1;
+inline constexpr std::uint32_t control_vm = 2;
 inline constexpr std::uint32_t control_vfs = 3;
+inline constexpr std::uint32_t control_net = 4;
 inline constexpr std::uint32_t control_hardware = 6;
+inline constexpr std::uint32_t vm_loadavg = 2;
 inline constexpr std::uint32_t operation_oid_to_name = 1;
 inline constexpr std::uint32_t operation_name_to_oid = 3;
 inline constexpr std::uint32_t operation_oid_format = 4;

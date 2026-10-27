@@ -1,8 +1,10 @@
-if get_config("component") ~= "" or not is_plat("iphoneos") then
+local component = get_config("component")
+if (component ~= "" and component ~= "SwiftUIDemo") or not is_plat("iphoneos") then
     return
 end
 
 local GUEST = os.scriptdir()
+local DEVICE_SHARED = path.join(os.projectdir(), "frameworks", "SwiftUI", "examples", "showcase", "device")
 
 target("revenant-runner")
     add_rules("@addon/revenant/daemon")
@@ -15,3 +17,16 @@ target("revenant-sblaunch")
     add_files(path.join(GUEST, "revenant-sblaunch.c"))
     add_frameworks("CoreFoundation")
     set_values("revenant.entitlements", "revenant-sblaunch.entitlements")
+
+target("revenant-shot")
+    add_rules("@addon/revenant/daemon")
+    add_files(path.join(GUEST, "revenant-shot.m"))
+    add_frameworks("CoreFoundation", "CoreGraphics", "Foundation", "UIKit")
+    add_syslinks("objc")
+
+target("revenant-unlock")
+    add_rules("@addon/revenant/daemon")
+    add_files(path.join(GUEST, "revenant-unlock.m"), path.join(DEVICE_SHARED, "hid.m"))
+    add_includedirs(DEVICE_SHARED)
+    add_frameworks("CoreFoundation", "CoreGraphics", "Foundation", "UIKit")
+    add_syslinks("objc")

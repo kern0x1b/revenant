@@ -10,7 +10,7 @@ end
 
 function main()
     local out = workspace.run("backports-tests", "NetworkTLSListener")
-    local boringssl = workspace.package_of("boringssl", true, {plat = "macosx", arch = "arm64"})
+    local boringssl = workspace.package_of("boringssl", true)
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")

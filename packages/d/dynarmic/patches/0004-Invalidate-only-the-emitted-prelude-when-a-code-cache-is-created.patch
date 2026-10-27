@@ -1,0 +1,26 @@
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.cpp b/src/dynarmic/backend/arm64/a32_address_space.cpp
+index dda85b5..72b53c8 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a32_address_space.cpp
+@@ -457,7 +457,7 @@ void A32AddressSpace::EmitPrelude() {
+ 
+     prelude_info.end_of_prelude = code.offset();
+ 
+-    mem.invalidate_all();
++    mem.invalidate(mem.ptr(), code.offset());
+     ProtectCodeMemory();
+ }
+ 
+diff --git a/src/dynarmic/backend/arm64/a64_address_space.cpp b/src/dynarmic/backend/arm64/a64_address_space.cpp
+index 09d50b6..45970c0 100644
+--- a/src/dynarmic/backend/arm64/a64_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a64_address_space.cpp
+@@ -538,7 +538,7 @@ void A64AddressSpace::EmitPrelude() {
+ 
+     prelude_info.end_of_prelude = code.offset();
+ 
+-    mem.invalidate_all();
++    mem.invalidate(mem.ptr(), code.offset());
+     ProtectCodeMemory();
+ }
+ 

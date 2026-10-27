@@ -584,6 +584,23 @@ private:
     mutable JitArtifactStoreStats stats_;
 };
 
+struct ImageCodeRegion {
+    std::string identity;
+    std::uint32_t begin { };
+    std::uint32_t end { };
+    std::size_t cache_bytes { };
+    std::uint32_t second_begin { };
+    std::uint32_t second_end { };
+};
+
+void set_machine_image_code_region(ImageCodeRegion region);
+[[nodiscard]] ImageCodeRegion machine_image_code_region();
+[[nodiscard]] Dynarmic::A32::NativeCodeSlab* machine_image_code_slab();
+void service_machine_image_code_slab();
+class ExecutionContext;
+[[nodiscard]] Dynarmic::A32::NativeCodeSlab* machine_image_code_slab_for(
+    const ExecutionContext& context);
+
 class ExecutionContext {
 public:
     ExecutionContext();
@@ -623,6 +640,10 @@ public:
     {
         return cache_clear_epoch_.load(std::memory_order_acquire);
     }
+    [[nodiscard]] bool image_private() const noexcept
+    {
+        return image_private_.load(std::memory_order_acquire);
+    }
     [[nodiscard]] bool observe_slab_generation(
         std::uint64_t generation) noexcept;
     [[nodiscard]] std::uint64_t observed_slab_generation() const noexcept
@@ -642,6 +663,7 @@ private:
     bool process_id_bound_ { };
     std::atomic<std::uint64_t> cache_invalidation_epoch_ { };
     std::atomic<std::uint64_t> cache_clear_epoch_ { };
+    std::atomic<bool> image_private_ { false };
     std::atomic<std::uint64_t> observed_slab_generation_ { };
     mutable std::mutex invalidation_mutex_;
     std::vector<std::unique_ptr<LinkCell>> link_cells_;

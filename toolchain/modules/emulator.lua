@@ -6,6 +6,8 @@ import("apple.macho")
 import("gdb")
 import("apple.firmware")
 import("byteorder")
+import("generations")
+import("cache")
 
 RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
@@ -14,6 +16,7 @@ LAUNCHER = "usr/libexec/revenant-sblaunch"
 INSTALLATION_CACHE = "private/var/mobile/Library/Caches/com.apple.mobile.installation.plist"
 RUNNER_JOB = "System/Library/LaunchDaemons/org.revenant.emulator.runner.plist"
 LAUNCHD_CONF = "private/etc/launchd.conf"
+SPRINGBOARD_JOB = "System/Library/LaunchDaemons/com.apple.SpringBoard.plist"
 RUNNER_TASK = RESULTS .. "/job"
 MIGRATOR = "System/Library/PrivateFrameworks/DataMigration.framework/Support/DataMigrator"
 SETUP_KEYS = {{"SetupDone", "-bool", "YES"}, {"SetupFinishedAllSteps", "-bool", "YES"}, {"AssistantPresented", "-bool", "YES"}}
@@ -22,6 +25,22 @@ LOCKDOWN_KEYS = {{"com\\.apple\\.purplebuddy-SetupState", "-string", "DONE"}}
 CRASH_LOOP = 3
 REGISTERS = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
 TIME_SCALE = 10
+UNLOCK_SLIDE = "drag 50 430 300 430 900 40"
+
+function launch_instructions(log)
+    local text = os.isfile(log) and io.readfile(log) or ""
+    local ticks = text:match("%[perf%-display%] label=launch cpu%-ticks=(%d+)")
+    return ticks and tonumber(ticks) or nil
+end
+
+function last_visible_pixels(log)
+    local text = os.isfile(log) and io.readfile(log) or ""
+    local visible
+    for pixels in text:gmatch("%[display%] frame=%d+ visible%-pixels=(%d+)") do
+        visible = tonumber(pixels)
+    end
+    return visible
+end
 
 function directory(folder)
     if not os.isdir(folder) then
@@ -44,7 +63,15 @@ function remove(folder)
 end
 
 function root()
+    local override = os.getenv("REVENANT_EMULATOR_ROOT")
+    if override and override ~= "" then
+        return override
+    end
     return path.join(path.directory(dyld.root()), "emulator")
+end
+
+function host_cache(identifier, build)
+    return path.join(root(), "cache.noindex", identifier .. "_" .. build)
 end
 
 function profiles(emulator)
@@ -233,9 +260,9 @@ function debugged(opt)
     os.tryrm(log)
     os.tryrm(errors)
     local port = opt.port or (12000 + os.getpid() % 2000)
-    local argv = {"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
-                  "--display", "headless", "--gles-backend", "software", "--network", opt.network or "isolated",
-                  "--binary", opt.guest, "--gdb", tostring(port)}
+    local argv = table.join({"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
+                             "--display", "headless", "--gles-backend", "software", "--network", opt.network or "isolated",
+                             "--binary", opt.guest, "--gdb", tostring(port)}, core_arguments(opt))
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do
         table.insert(envs, name .. "=" .. value)
@@ -286,6 +313,7 @@ end
 function clone(source, destination)
     remove(destination)
     os.mkdir(path.directory(destination))
+    cache.reserve(cache.bytes_of(source), "an emulator image cloned from " .. source)
     os.vrunv("cp", {"-c", "-R", source, destination})
 end
 
@@ -493,7 +521,7 @@ local function place(tree, rootfs)
         else
             os.mkdir(path.directory(target))
             os.tryrm(target)
-            os.vrunv("cp", {"-p", source, target})
+            os.vrunv("cp", {"-c", "-p", source, target})
             local wanted, got = os.filesize(source), os.isfile(target) and os.filesize(target) or -1
             if got ~= wanted then
                 remove(path.directory(destination))
@@ -634,6 +662,10 @@ function runner_job()
         ""}, "\n")
 end
 
+function lean_run(rootfs)
+    remove(guest_path(rootfs, SPRINGBOARD_JOB))
+end
+
 function install_runner(rootfs, guest, argv, deadline, release)
     local runner = guest_path(rootfs, RUNNER)
     os.mkdir(path.directory(runner))
@@ -667,6 +699,20 @@ function scan(state, line)
         state.ready = true
     elseif line:startswith("[display] frame=") then
         state.frames = (state.frames or 0) + 1
+    end
+    local perf_begin = line:match("^REVENANT%-PERF%-BEGIN (%S+)$")
+    if perf_begin then
+        state.perf_begin = perf_begin
+    elseif line == "REVENANT-PERF-END" then
+        state.perf_end = true
+    end
+    local perf_started = line:match("^%[control%] perf%-begin label=(%S+)$")
+    if perf_started then
+        state.perf_started = perf_started
+    end
+    local perf_finished = line:match("^%[perf%-display%] label=(%S+) ")
+    if perf_finished then
+        state.perf_finished = perf_finished
     end
     local started = line:match("^%[transition%] input%-complete id=(%d+)") or line:match("^%[transition%] settle id=(%d+)")
     if started then
@@ -767,7 +813,7 @@ function gap(state)
     return longest
 end
 
-function milestone(state)
+function milestone(state, lean)
     if not state.ready then
         return "emulator"
     end
@@ -775,7 +821,7 @@ function milestone(state)
     if looping then
         return looping
     end
-    if not state.springboard then
+    if not lean and not state.springboard then
         return "SpringBoard"
     end
     if state.migrator and not state.migrated then
@@ -789,7 +835,7 @@ function verdict(state, results, opt)
     local file = path.join(results, "verdict.json")
     local timing = {scale = opt.scale or TIME_SCALE, host_seconds = opt.host_seconds, reports = opt.reports}
     if not os.isfile(file) then
-        return table.join2({state = "boot-blocked", milestone = milestone(state), frame = opt.frame,
+        return table.join2({state = "boot-blocked", milestone = milestone(state, opt.lean), frame = opt.frame,
                             errors = opt.errors, gap = gap(state)}, timing)
     end
     local recorded = json.loadfile(file)
@@ -822,22 +868,34 @@ function verdict(state, results, opt)
     return result
 end
 
-function report_output(folder, output)
+local function show_line(style, text, say)
+    if say then
+        return say(text)
+    end
+    cprint("${" .. style .. "}%s${clear}", text)
+end
+
+function report_output(folder, output, say)
     if output == 0 then
-        cprint("${color.warning}the program's output was not captured${clear}: the runner could not open it, and it says why in %s",
-               path.join(folder, "results", "runner.stderr"))
+        show_line("color.warning", "the program's output was not captured: the runner could not open it, and it says why in " ..
+                  path.join(folder, "results", "runner.stderr"), say)
         return false
     end
     local said = false
     for _, name in ipairs({"test.stdout", "test.stderr"}) do
         local file = path.join(folder, "results", name)
         if os.isfile(file) and os.filesize(file) > 0 then
-            io.write(io.readfile(file))
+            local text = io.readfile(file)
+            if say then
+                say(text)
+            else
+                io.write(text)
+            end
             said = true
         end
     end
     if not said then
-        cprint("${dim}the program wrote nothing to stdout or stderr${clear}")
+        show_line("dim", "the program wrote nothing to stdout or stderr", say)
     end
     return said
 end
@@ -889,6 +947,13 @@ function parse_steps(words)
     return steps
 end
 
+function exit_code(exit)
+    if exit.signal ~= 0 then
+        return 128 + exit.signal
+    end
+    return exit.status
+end
+
 function launch_driver(opt)
     local driver = {phase = "launching", shots = {}, step = 0, unlocks = 0}
     local clock = opt.clock or os.mclock
@@ -926,6 +991,7 @@ function launch_driver(opt)
                     return true
                 end
                 driver.launched = clock()
+                send("perf-begin launch")
                 settle(state, send)
                 return false
             end
@@ -933,7 +999,7 @@ function launch_driver(opt)
             local last = (os.isfile(stdout) and io.readfile(stdout) or ""):match("([^\n]*)\n$") or ""
             local idle = not driver.unlocking or (state.stable or {})[driver.unlocking]
             if idle and last:find("screen=locked", 1, true) then
-                send("unlock")
+                send(driver.unlocks == 0 and "unlock" or UNLOCK_SLIDE)
                 driver.unlocks = driver.unlocks + 1
                 driver.unlocking = (state.transition or 0) + 1
             end
@@ -942,6 +1008,10 @@ function launch_driver(opt)
                 driver.settling = state.transition
             end
             if driver.settling and (state.stable or {})[driver.settling] then
+                if driver.launched and not driver.measured then
+                    send("perf-end")
+                    driver.measured = true
+                end
                 driver.pending = path.join(opt.run, string.format("app-%d.png", #driver.shots))
                 send("snapshot " .. driver.pending)
                 driver.phase = "shooting"
@@ -964,6 +1034,7 @@ function launch_driver(opt)
         elseif driver.phase == "holding" then
             if driver.application and (state.exits or {})[driver.application.pid] then
                 driver.held, driver.held_seconds = "exited", running()
+                driver.exit = state.exits[driver.application.pid]
                 settle(state, send)
             elseif running() >= opt.seconds then
                 driver.held, driver.held_seconds = "deadline", running()
@@ -979,6 +1050,33 @@ function launch_driver(opt)
     return driver
 end
 
+function boot_expired(now, started, progressed, deadline, slowdown)
+    local factor = slowdown or 1
+    if now - progressed > deadline * factor * 1000 then
+        return "stalled"
+    end
+    if now - started > deadline * 10 * factor * 1000 then
+        return "deadline"
+    end
+    return nil
+end
+
+function host_slowdown()
+    local cores = os.cpuinfo("ncpu")
+    local load = machine_load()
+    if load == nil or cores == nil or cores <= 0 then
+        return 1
+    end
+    return math.max(1, load / cores)
+end
+
+function core_arguments(opt)
+    if opt.cores == nil then
+        return {}
+    end
+    return {"--cores", tostring(opt.cores)}
+end
+
 function boot(opt)
     local run = opt.run
     os.mkdir(run)
@@ -988,10 +1086,16 @@ function boot(opt)
     os.tryrm(log)
     os.tryrm(errors)
     local scale = opt.scale or TIME_SCALE
-    local argv = {"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
-                  "--display", "headless", "--gles-backend", "software", "--control-stdin",
-                  "--network", opt.network or "isolated", "--frame-output", frame,
-                  "--time-scale", tostring(scale)}
+    local argv = table.join({"boot", "--rootfs", opt.rootfs, "--device", opt.identifier, "--host-cache", opt.cache,
+                             "--display", "headless", "--gles-backend", "software", "--control-stdin",
+                             "--network", opt.network or "isolated", "--frame-output", frame,
+                             "--time-scale", tostring(scale)}, core_arguments(opt))
+    if opt.perf then
+        table.insert(argv, "--perf-summary")
+    end
+    if opt.test_concurrent then
+        table.insert(argv, "--test-concurrent-threads")
+    end
     local input, control = pipe.openpair("BB")
     local envs = {}
     for name, value in pairs(table.join(os.getenvs(), {TMPDIR = opt.tmpdir, VK_ICD_FILENAMES = opt.icd})) do
@@ -1000,6 +1104,8 @@ function boot(opt)
     directory(opt.tmpdir)
     directory(opt.cache)
     local started = os.mclock()
+    local progressed = started
+    local slowdown, checked = host_slowdown(), started
     local proc = process.openv(opt.emulator, argv, {stdin = input, stdout = log, stderr = errors, envs = envs})
     input:close()
     local state, offset, reason = {}, 0, "deadline"
@@ -1032,7 +1138,12 @@ function boot(opt)
             reason = "reached"
             break
         end
-        if boot_expired(os.mclock(), progressed, started, opt.deadline) then
+        if os.mclock() - checked > 30000 then
+            slowdown, checked = host_slowdown(), os.mclock()
+        end
+        local expired = boot_expired(os.mclock(), started, progressed, opt.deadline, slowdown)
+        if expired then
+            reason = expired
             break
         end
     end
@@ -1050,59 +1161,23 @@ function boot(opt)
             log = log, errors = errors, frame = os.isfile(frame) and frame or nil}
 end
 
+local RESERVED_CORES = 2
+local RESERVED_MB = 4096
+local CORES_PER_EMULATOR = 1
+local MB_PER_EMULATOR = 4800
+
+function capacity_of(cores, megabytes)
+    local by_cores = (cores - RESERVED_CORES) // CORES_PER_EMULATOR
+    local by_memory = (megabytes - RESERVED_MB) // MB_PER_EMULATOR
+    return math.max(1, math.min(by_cores, by_memory))
+end
+
 function capacity()
-    local cores = os.cpuinfo("ncpu")
-    local gigabytes = os.meminfo("totalsize") // 1024
-    return math.max(1, math.min(cores // 3, gigabytes // 5))
+    return capacity_of(os.cpuinfo("ncpu"), os.meminfo("totalsize"))
 end
 
-BUILD_SLOT = "REVENANT_BUILD_SLOT"
-
-function build_slot_name()
-    return BUILD_SLOT
-end
-
-function build_capacity()
-    local cores = os.cpuinfo("ncpu") or 4
-    return math.max(2, cores // 4)
-end
-
-JOBS_TASKS = {build = true, test = true, require = true, pack = true, install = true}
-
-function build_jobs(cores, capacity)
-    return math.max(1, (cores or 4) // math.max(1, capacity or 1))
-end
-
-function queued_arguments(program, arguments, jobs)
-    if path.basename(program) ~= "xmake" then
-        return arguments
-    end
-    local task, given = nil, #arguments + 1
-    for index, argument in ipairs(arguments) do
-        if argument == "--" then
-            given = index
-            break
-        elseif argument:startswith("-j") or argument:startswith("--jobs") then
-            return arguments
-        elseif not argument:startswith("-") and not task then
-            task = argument
-        end
-    end
-    if task and not JOBS_TASKS[task] then
-        return arguments
-    end
-    return table.join(table.slice(arguments, 1, given - 1), {"-j", tostring(jobs)}, table.slice(arguments, given))
-end
-
-function holds_build_slot(environment)
-    local value = (environment or os.getenvs())[BUILD_SLOT]
-    return value ~= nil and value ~= ""
-end
-
-BOOT_CEILING = 10
-
-function boot_expired(now, progressed, started, deadline)
-    return now - progressed > deadline * 1000 or now - started > deadline * 1000 * BOOT_CEILING
+function slots_folder()
+    return path.join(path.directory(dyld.root()), "emulator-slots")
 end
 
 function crowded(load, cores)
@@ -1135,7 +1210,7 @@ end
 
 function acquire(opt)
     opt = opt or {}
-    local folder = directory(opt.folder or path.join(root(), "slots"))
+    local folder = directory(opt.folder or slots_folder())
     local count = opt.count or capacity()
     if opt.patience ~= 0 then
         wait_for_quiet(opt)
@@ -1165,28 +1240,58 @@ function release(slot)
     slot.lock:close()
 end
 
-function clone_golden(rootfs, destination)
-    local lock = io.openlock(path.directory(rootfs) .. ".lock")
-    lock:lock({shared = true})
-    local ok, errors = try {function () clone(rootfs, destination) return true end, catch {function (caught) return false, caught end}}
-    lock:unlock()
-    lock:close()
-    if not ok then
-        raise(errors)
+function clone_golden(opt, destination)
+    for _ = 1, 20 do
+        local folder = golden(opt)
+        local lock = generations.hold(folder)
+        if os.isfile(path.join(folder, "golden.json")) then
+            local failure
+            local ok = try {function () clone(path.join(folder, "rootfs"), destination) return true end, catch {function (caught) failure = caught end}}
+            generations.release(lock)
+            if ok then
+                return
+            end
+            if os.isfile(path.join(folder, "golden.json")) then
+                raise("%s", tostring(failure))
+            end
+            os.tryrm(destination)
+        else
+            generations.release(lock)
+        end
     end
+    raise("the golden image of %s %s was replaced on every attempt to read it", opt.identifier, opt.build)
+end
+
+local function published_names(parent, prefix)
+    local names = {}
+    local pattern = path.join(parent, (prefix or "") .. "*")
+    for _, item in ipairs(table.join(os.dirs(pattern), os.files(pattern))) do
+        local name = path.filename(item):match("^[^.]+")
+        if name then
+            table.insert(names, name)
+        end
+    end
+    return table.unique(names)
 end
 
 function retire(parent, opt, kept)
-    for _, marker in ipairs(os.files(path.join(parent, opt.identifier .. "_" .. opt.build .. "_*", "golden.json"))) do
-        local folder = path.directory(marker)
-        local recorded = try {function () return json.loadfile(marker) end}
-        if path.filename(folder) ~= kept and recorded and recorded.emulator ~= opt.emulator_hash then
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
-                remove(folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
+    for _, name in ipairs(published_names(parent, opt.identifier .. "_" .. opt.build .. "_")) do
+        if name ~= kept then
+            local published = path.join(parent, name)
+            local lockpath = published .. ".build.lock"
+            local lock = generations.try_take(lockpath)
+            if lock then
+                local current = generations.resolve(published)
+                local recorded = current and try {function () return json.loadfile(path.join(current, "golden.json")) end}
+                if recorded and recorded.emulator ~= opt.emulator_hash then
+                    generations.unpublish(published)
+                end
+                generations.sweep(published)
+                if generations.empty(published) then
+                    generations.drop(lockpath, lock)
+                else
+                    generations.release(lock)
+                end
             end
         end
     end
@@ -1275,47 +1380,54 @@ function clean(opt)
             table.insert(removed, folder)
         end
     end
-    if opt.goldens then
-        for _, marker in ipairs(os.files(path.join(base, "golden.noindex", "*", "golden.json"))) do
-            local folder = path.directory(marker)
-            local lock = io.openlock(folder .. ".lock")
-            if lock and lock:trylock() then
-                remove(folder)
-                table.insert(removed, folder)
-                lock:unlock()
-                lock:close()
-                os.tryrm(folder .. ".lock")
-            end
+    local parent = path.join(base, "golden.noindex")
+    for _, name in ipairs(published_names(parent)) do
+        local published = path.join(parent, name)
+        local lock = generations.take(published .. ".build.lock")
+        if opt.goldens then
+            generations.unpublish(published)
+            generations.sweep(published, {grace = 0})
+            table.insert(removed, published)
+        else
+            generations.sweep(published)
+        end
+        if generations.empty(published) then
+            generations.drop(published .. ".build.lock", lock)
+        else
+            generations.release(lock)
         end
     end
     return removed
 end
 
-function golden(opt)
+local function golden_key(opt)
     local written = {}
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
         table.insert(written, table.concat(key, " "))
     end
-    local key = string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
-                              table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+    return string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
+                         table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
+end
+
+function golden(opt)
+    local key = golden_key(opt)
     local parent = path.join(opt.root or root(), "golden.noindex")
-    local folder = path.join(parent, key)
-    local marker = path.join(folder, "golden.json")
-    if os.isfile(marker) then
-        return path.join(folder, "rootfs")
+    local published = path.join(parent, key)
+    local current = generations.resolve(published)
+    if current and os.isfile(path.join(current, "golden.json")) then
+        return current
     end
     directory(parent)
-    local lock = io.openlock(path.join(parent, key .. ".lock"))
-    lock:lock()
-    local ok, errors = try {
+    local lock = generations.take(published .. ".build.lock")
+    local built, staging, staged, failure
+    local ok = try {
         function ()
-            if os.isfile(marker) then
+            current = generations.resolve(published)
+            if current and os.isfile(path.join(current, "golden.json")) then
+                built = current
                 return true
             end
-            for _, stale in ipairs(os.dirs(path.join(parent, key .. ".partial-*"))) do
-                remove(stale)
-            end
-            local staging = path.join(parent, key .. ".partial-" .. os.getpid())
+            staging, staged = generations.begin(published)
             local rootfs = path.join(staging, "rootfs")
             clone(opt.firmware, rootfs)
             home(rootfs, opt.build)
@@ -1325,25 +1437,36 @@ function golden(opt)
                 return state.springboard and (state.migrated or not migrates)
             end}))
             if booted.reason ~= "reached" then
-                raise("%s %s did not get past %s within %d seconds; the emulator log is %s", opt.identifier, opt.build,
-                      milestone(booted.state), opt.deadline, booted.log)
+                raise("%s %s did not get past %s: the emulator %s (-t %d seconds); the emulator log is %s", opt.identifier, opt.build,
+                      milestone(booted.state), booted.reason == "stalled" and "wrote nothing for that long" or "ran past its whole-boot limit",
+                      opt.deadline, booted.log)
             end
             json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
-            remove(folder)
-            os.mv(staging, folder)
+            generations.publish(published, staging)
+            built = staging
+            staging = nil
+            generations.release(staged)
+            staged = nil
             retire(parent, opt, key)
             return true
         end,
         catch {
             function (caught)
-                return false, caught
+                failure = caught
+                if staging then
+                    generations.abort(published, staging, staged)
+                end
             end
         }
     }
     lock:unlock()
     lock:close()
     if not ok then
-        raise("%s", tostring(errors))
+        raise("%s", tostring(failure))
     end
-    return path.join(folder, "rootfs")
+    return built
+end
+
+function golden_published(opt)
+    return path.join(opt.root or root(), "golden.noindex", golden_key(opt))
 end

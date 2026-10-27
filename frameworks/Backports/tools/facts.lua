@@ -132,10 +132,6 @@ local function swift_walk(state, node, container, intro)
     end
 end
 
-local function digester()
-    return os.iorunv("/usr/bin/xcrun", {"--find", "swift-api-digester"}):trim()
-end
-
 local function target_of(version)
     return "arm64-apple-ios" .. version
 end
@@ -157,10 +153,54 @@ function objc_facts(sdk, name, version)
     return state.rows
 end
 
+function constant_intros(sdk)
+    local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
+    if os.isfile(file) then
+        local cached = {}
+        for line in io.lines(file) do
+            local name, intro, kind = string.match(line, "^([^\t]*)\t([^\t]*)\t([^\t]*)$")
+            assert(name, "a malformed constant intro row in " .. file .. ": " .. line)
+            cached[name] = {intro = tonumber(intro), kind = kind}
+        end
+        return cached
+    end
+    local intros = {}
+    local function note(name, intro, kind)
+        if name and (intros[name] == nil or intros[name].intro == nil) then
+            intros[name] = {intro = intro, kind = kind}
+        end
+    end
+    for _, name in ipairs(sdkfiles.framework_names(sdk)) do
+        local umbrella = sdkfiles.umbrella_header(sdk, name)
+        if umbrella ~= nil then
+            local text = os.iorunv(CLANG, {"-target", target_of(sdkfiles.sdk_version(sdk)), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
+                "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella})
+            ast.scan(lines_of(text), function (top)
+                if top.kind == "VarDecl" and top.name and top.flags.extern then
+                    note(top.name, ast.ios_intro(top), "extern")
+                elseif top.kind == "EnumDecl" then
+                    for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
+                        note(child.name, ast.ios_intro(child) or ast.ios_intro(top), "enum")
+                    end
+                end
+            end)
+        end
+    end
+    local rows = {}
+    for name, found in pairs(intros) do
+        table.insert(rows, string.format("%s\t%s\t%s", name, found.intro and tostring(found.intro) or "", found.kind))
+    end
+    table.sort(rows)
+    os.mkdir(path.directory(file))
+    io.writefile(file .. ".part", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
+    os.mv(file .. ".part", file)
+    return intros
+end
+
 function swift_facts(sdk, name, version, scratch)
     local output = path.join(scratch, name .. ".json")
-    os.execv(digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
-        "-avoid-tool-args", "-swift-only", "-module-cache-path", sdkfiles.model_cache(), "-o", output})
+    os.execv(sdkfiles.digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
+        "-avoid-tool-args", "-swift-only", "-module-cache-path", sdkfiles.model_cache(sdk), "-o", output})
     local document = json.loadfile(output)
     os.tryrm(output)
     assert(document, "the digester wrote no JSON for " .. name)

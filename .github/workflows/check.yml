@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  REVENANT_CACHE: ${{ github.workspace }}/.cache
+
 concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -17,41 +20,193 @@ defaults:
     shell: bash --noprofile --norc -eo pipefail {0}
 
 jobs:
-  checks:
-    runs-on: macos-26
-    timeout-minutes: 60
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      native: ${{ steps.diff.outputs.native }}
+      docs: ${{ steps.diff.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide which jobs the change reaches
+        id: diff
+        run: |
+          if [ "$GITHUB_REF" = refs/heads/main ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            echo "native=true" >> "$GITHUB_OUTPUT"
+            echo "docs=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base=$(git merge-base origin/main HEAD)
+          git diff --name-only "$base" HEAD > "$RUNNER_TEMP/changed.txt"
+          if grep -qvE '^(docs/|emulator/|recompiler/|toolchain/tests/emulate/)|\.md$' "$RUNNER_TEMP/changed.txt"; then
+            echo "native=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "native=false" >> "$GITHUB_OUTPUT"
+          fi
+          if grep -qvE '^docs/|^[^/]+\.md$' "$RUNNER_TEMP/changed.txt"; then
+            echo "docs=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  repository:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
 
       - uses: ./.github/actions/revenant-setup
 
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          restore-keys: |
+            xmake-global-checks-${{ runner.os }}-
 
       - name: Install the packages
         id: configure
         timeout-minutes: 30
-        run: ./xmakew f -P . -y --emulator_vulkan=n
+        run: |
+          ./xmakew f -P . -y --emulator_vulkan=n 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run the repository checks
+        run: ./xmakew test -P . 'repository/*' --output-on-failure
+
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
+      - name: Save the package store
+        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+  checks:
+    needs: changes
+    if: needs.changes.outputs.docs != 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
+
+      - uses: ./.github/actions/revenant-setup
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          restore-keys: |
+            xmake-global-checks-${{ runner.os }}-
+
+      - name: Install the packages
+        id: configure
+        timeout-minutes: 30
+        run: |
+          ./xmakew f -P . -y --emulator_vulkan=n 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - uses: actions/cache/restore@v4
+        id: inventory-cache
+        with:
+          path: .cache/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v2-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
 
       - name: Check whether the iOS 6.0 inventory is cached
         id: inventory
         run: |
-          if [ -f "$HOME/.revenant/dyld/6.0/classes_armv7.json" ]; then
+          if [ -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
@@ -67,6 +222,12 @@ jobs:
         timeout-minutes: 20
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
+      - uses: actions/cache/save@v4
+        if: steps.dyld.outputs.cache-hit != 'true'
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
       - name: Write the iOS 6.0 inventory from the shared cache
         if: steps.inventory.outputs.present != 'true'
         timeout-minutes: 30
@@ -78,30 +239,93 @@ jobs:
         run: ./xmakew f -P . -y --emulator_vulkan=n
 
       - name: Assert the iOS 6.0 inventory is in place
-        run: test -f "$HOME/.revenant/dyld/6.0/classes_armv7.json"
+        run: test -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json"
+
+      - name: Save the iOS 6.0 inventory
+        if: steps.inventory.outputs.present != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/dyld/6.0/classes_armv7.json
+          key: dyld-inventory-6.0-armv7-v2-${{ hashFiles('toolchain/plugins/firmware/**', 'toolchain/modules/apple/objc.lua', 'toolchain/modules/apple/dyld.lua', 'toolchain/modules/apple/firmware.lua') }}
 
       - name: Run the tests
         id: tests
         run: ./xmakew test -P . --output-on-failure
 
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
       - name: Save the package store
-        if: success() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
+        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   backports:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+
+      - name: Mark the start of the job
+        run: touch "$RUNNER_TEMP/job-start"
 
       - name: Give the checkout a fixed mtime
         run: git ls-files -z | xargs -0 touch -t 200001010000
@@ -111,18 +335,25 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          restore-keys: |
+            xmake-global-${{ runner.os }}-
 
       - uses: actions/cache/restore@v4
         id: generated
@@ -140,17 +371,21 @@ jobs:
             build/.deps
             build/iphoneos
             build/backports-sources.txt
-          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
           restore-keys: |
-            backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-
+            backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-
 
       - name: Configure the Backports component
+        id: configure
         timeout-minutes: 45
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | tee "$RUNNER_TEMP/backports-configure.log" | stamp
           echo "stage configure ends $(date -u +%H:%M:%S)"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/backports-configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Extract the facts of every framework
         timeout-minutes: 10
@@ -179,17 +414,17 @@ jobs:
       - name: Show the package logs when the configure failed
         if: failure()
         run: |
-          find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
-          for f in $(find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
+          find "$REVENANT_CACHE/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
+          for f in $(find "$REVENANT_CACHE/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
             echo "== $f"
             tail -30 "$f"
           done
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true'
+        if: steps.store.outputs.cache-hit != 'true' && steps.configure.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - name: Save the generated skeleton
@@ -223,7 +458,7 @@ jobs:
             build/.deps
             build/iphoneos
             build/backports-sources.txt
-          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - name: Upload the Backports libraries
         uses: actions/upload-artifact@v4
@@ -235,6 +470,58 @@ jobs:
       - name: Run the Backports tests
         timeout-minutes: 10
         run: ./xmakew test -P . "backports_uikit/*" --output-on-failure
+
+      - name: Print the crash reports of the failed tests
+        if: failure()
+        timeout-minutes: 5
+        run: |
+          tests=$(find build/macosx -type f -perm -u+x -name '*_test' -exec basename {} \; 2>/dev/null || true)
+          newest_age() {
+            local newest=0 report base mtime
+            for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+              [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+              base=$(basename "$report" .ips)
+              grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+              mtime=$(stat -f %m "$report")
+              [ "$mtime" -gt "$newest" ] && newest=$mtime
+            done
+            echo $(( $(date +%s) - newest ))
+          }
+          reporter_started() {
+            local since pid age
+            since=$(( $(date +%s) - $(stat -f %m "$RUNNER_TEMP/job-start" 2>/dev/null || date +%s) ))
+            for pid in $(pgrep -x ReportCrash || true); do
+              age=$(ps -o etime= -p "$pid" | awk -F'[-:]' '{ if (NF == 4) print $1 * 86400 + $2 * 3600 + $3 * 60 + $4; else if (NF == 3) print $1 * 3600 + $2 * 60 + $3; else print $1 * 60 + $2 }' || true)
+              if [ -n "$age" ] && [ "$age" -lt "$since" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          deadline=$((SECONDS + 30))
+          while [ "$SECONDS" -lt "$deadline" ] && { reporter_started || [ "$(newest_age)" -lt 2 ]; }; do
+            sleep 1
+          done
+          shown=0
+          for report in "$HOME"/Library/Logs/DiagnosticReports/*.ips; do
+            [ "$shown" -lt 5 ] || break
+            [ "$report" -nt "$RUNNER_TEMP/job-start" ] || continue
+            base=$(basename "$report" .ips)
+            grep -qx "${base%-*-*-*-*}" <<< "$tests" || continue
+            shown=$((shown + 1))
+            body=$(tail -n +2 "$report")
+            echo "::group::$base"
+            echo "exception: $(printf '%s' "$body" | plutil -extract exception json -o - - 2>/dev/null || true)"
+            echo "termination: $(printf '%s' "$body" | plutil -extract termination json -o - - 2>/dev/null || true)"
+            thread=$(printf '%s' "$body" | plutil -extract faultingThread raw -o - - 2>/dev/null || true)
+            frames=$(printf '%s' "$body" | plutil -extract "threads.$thread.frames" json -o - - 2>/dev/null || true)
+            sed 's/},{/},\n{/g' <<< "$frames" | sed -n '1,40p'
+            echo "::endgroup::"
+          done
+          if [ "$shown" -eq 0 ]; then
+            echo "no crash reports"
+          fi
+
       - name: Link the probe app against the Backports libraries
         timeout-minutes: 10
         run: |
@@ -269,10 +556,147 @@ jobs:
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+  package:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
+      - uses: ./.github/actions/revenant-setup
+        with:
+          prebuilt-only: "llvm,swift,ld64,swift-runtime,libcxx"
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-latest
+          restore-keys: |
+            xmake-global-package-${{ runner.os }}-
+
+      - name: Update the package repositories for the keys
+        run: ./xmakew repo -u
+
+      - name: Key the Backports facts by the SDK, the compiler and the Xcode build
+        id: facts_keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$({ cat "$RUNNER_TEMP/key-lines.txt"; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Key the demo's objects by every input they are built from
+        id: objects_keys_all
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$({ cat "$RUNNER_TEMP/key-lines.txt"; xcodebuild -version; xcrun clang --version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: objects
+        with:
+          path: build
+          key: swiftui-demo-objects-v2-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Fetch the iOS 6.0 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/restore@v4
+        id: facts
+        with:
+          path: build/generated/backports
+          key: backports-facts-${{ runner.os }}-${{ steps.facts_keys.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
+
+      - name: Configure the SwiftUI demo's component
+        timeout-minutes: 45
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=SwiftUIDemo --emulator_vulkan=n -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.facts.outputs.cache-hit != 'true'
+        with:
+          path: build/generated/backports
+          key: backports-facts-${{ runner.os }}-${{ steps.facts_keys.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
+
+      - name: Key the package store under the configuration that installed it
+        id: keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: lookup
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          lookup-only: true
+
+      - name: Build the demo and package it with its platform package
+        timeout-minutes: 60
+        run: ./xmakew deb -P . SwiftUIDemo 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+
+      - name: Check the demo's Depends and the platform package's file list
+        run: ./xmakew l -P . toolchain/tools/deb_check.lua build space.kern0x1b.swiftui org.revenant.backports
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swiftui-packages
+          path: build/*.deb
+          if-no-files-found: error
+
+      - name: Keep the package out of the objects cache
+        if: success() && steps.objects.outputs.cache-hit != 'true'
+        run: rm -f build/*.deb
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: build
+          key: swiftui-demo-objects-v2-novulkan-${{ runner.os }}-${{ steps.objects_keys_all.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'xmake.lua', 'toolchain/**', 'packages/**', 'addons/**', 'frameworks/Backports/**', 'frameworks/Combine/**', 'frameworks/SwiftUI/**') }}
+
+      - name: Save the package store
+        if: steps.lookup.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-package-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   swift:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -288,28 +712,32 @@ jobs:
       - uses: actions/cache/restore@v4
         id: xmake
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
-
-      - name: Key the package store
-        id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
-          path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
-
-      - name: Install the firmware tools through the Backports configuration
-        timeout-minutes: 45
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          path: .cache/xmake-global
+          key: xmake-global-${{ runner.os }}-latest
+          restore-keys: |
+            xmake-global-${{ runner.os }}-
 
       - uses: actions/cache/restore@v4
         id: dyld
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Install the firmware tools through the Backports configuration
+        id: firmware-tools
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 45
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | tee "$RUNNER_TEMP/firmware-tools.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/firmware-tools.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: steps.dyld.outputs.cache-hit != 'true'
@@ -319,30 +747,44 @@ jobs:
       - uses: actions/cache/save@v4
         if: steps.dyld.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Configure the Swift component
+        id: configure-swift
         timeout-minutes: 20
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | tee "$RUNNER_TEMP/swift-configure.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/swift-configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Key the package store under the configuration that installed it
+        id: keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 swift-runtime libcxx > "$RUNNER_TEMP/keys.txt"
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 4
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: Build the Swift targets
         timeout-minutes: 20
         run: ./xmakew build -P . AppIntents ActivityKit TipKit WidgetKit swiftSpatial swiftCloudKit swiftWeatherKit swiftNetwork swiftUniformTypeIdentifiers swiftCryptoKit swiftStoreKit swiftAuthenticationServices 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Install the Swift packages through their wrappers
-        timeout-minutes: 20
+        timeout-minutes: 40
         run: ./xmakew require -P . -y revenant@appintents revenant@activitykit revenant@tipkit revenant@storekit revenant@authenticationservices revenant@widgetkit revenant@swiftui revenant@spatial revenant@cloudkit revenant@weatherkit revenant@uniformtypeidentifiers revenant@cryptokit 2>&1 | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
 
       - name: Save the package store
-        if: steps.store.outputs.cache-hit != 'true'
+        if: steps.firmware-tools.outputs.installed == 'true' || steps.configure-swift.outputs.installed == 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/cache/xmake-global
+          path: .cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
-          path: ~/.revenant/cache/xmake
+          path: .cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

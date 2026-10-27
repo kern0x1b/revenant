@@ -9,6 +9,7 @@
 
 #include <array>
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -24,6 +25,7 @@
 
 #include "foundation/file_page_cache.hpp"
 #include "foundation/memory_permission.hpp"
+#include "foundation/snapshot_io.hpp"
 #include "foundation/vm_map.hpp"
 
 namespace emulator {
@@ -51,6 +53,29 @@ struct AddressSpaceWriteStats {
     std::uint64_t copy_on_write_detaches { };
 };
 
+struct MaterializedPageCounts {
+    std::uint64_t anonymous { };
+    std::uint64_t file_cached { };
+    std::uint64_t copy_on_write_possible { };
+    std::uint64_t shared_writable { };
+
+    [[nodiscard]] std::uint64_t total() const noexcept
+    {
+        return anonymous + file_cached + copy_on_write_possible +
+               shared_writable;
+    }
+
+    MaterializedPageCounts& operator+=(
+        const MaterializedPageCounts& other) noexcept
+    {
+        anonymous += other.anonymous;
+        file_cached += other.file_cached;
+        copy_on_write_possible += other.copy_on_write_possible;
+        shared_writable += other.shared_writable;
+        return *this;
+    }
+};
+
 struct FileMappingBatchContext {
     std::shared_ptr<GuestFileBacking> backing;
 };
@@ -58,6 +83,8 @@ struct FileMappingBatchContext {
 [[nodiscard]] AddressSpaceWriteStats address_space_write_stats() noexcept;
 
 class AddressSpace {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using MappingRegion = VmMap::MappingRegion;
     static constexpr std::uint32_t page_size = guest_memory_page_size;
@@ -71,6 +98,7 @@ public:
         std::shared_ptr<GuestFileGenerationRegistry> generation_registry);
 
     void set_parallel_access(bool enabled);
+    void set_backing_root(std::filesystem::path root);
     class ExclusiveAccess {
     public:
         explicit ExclusiveAccess(AddressSpace& memory);
@@ -90,6 +118,52 @@ public:
     [[nodiscard]] std::uint8_t** jit_write_page_table();
     void disable_jit_page_table();
     void disable_jit_write_page_table();
+    class GuestQuiescence {
+    public:
+        class SliceScope {
+        public:
+            explicit SliceScope(GuestQuiescence& quiescence);
+            ~SliceScope();
+            SliceScope(const SliceScope&) = delete;
+            SliceScope& operator=(const SliceScope&) = delete;
+
+        private:
+            GuestQuiescence& quiescence_;
+            std::uint64_t serial_;
+            std::uint64_t previous_serial_;
+        };
+
+        void wait();
+
+    private:
+        enum class SliceState : std::uint8_t { Running, Quiescing };
+
+        std::uint64_t enter();
+        void leave(std::uint64_t serial) noexcept;
+
+        std::mutex mutex_;
+        std::condition_variable changed_;
+        std::map<std::uint64_t, SliceState> slices_;
+    };
+    void publish_code_page(std::uint32_t address);
+    void reclaim_retired_backings();
+    [[nodiscard]] GuestQuiescence& guest_quiescence() noexcept;
+    enum class JitSlowPathReason : std::size_t {
+        Exclusive,
+        Misaligned,
+        TableDisabled,
+        Unbacked,
+        CodeWrite,
+        ReservationWrite,
+        FileOrCopyOnWrite,
+        SharedWrite,
+        Unmapped,
+        ParallelChecked,
+        Other,
+        Count,
+    };
+    [[nodiscard]] JitSlowPathReason jit_slow_path_reason(
+        std::uint32_t address, std::size_t size, bool write) const;
     void track_exclusive_access(std::uint32_t address, std::size_t size);
     void clear_exclusive_access_tracking();
     void synchronize_shared_write_tracking();
@@ -107,6 +181,8 @@ public:
     [[nodiscard]] FileSyncResult synchronize_file_mappings(
         std::uint32_t address, std::uint32_t size, bool synchronous);
     void clear();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
     struct ProtectResult {
         bool succeeded { };
         bool executable_permissions_changed { };
@@ -219,6 +295,7 @@ public:
     [[nodiscard]] std::size_t mapped_page_count() const;
     [[nodiscard]] std::size_t resident_page_count() const;
     [[nodiscard]] std::size_t shared_page_count() const;
+    [[nodiscard]] MaterializedPageCounts materialized_page_counts() const;
     [[nodiscard]] std::size_t cached_file_mapping_count() const;
     [[nodiscard]] std::size_t cached_file_page_count() const;
     [[nodiscard]] FilePageCacheStats file_page_cache_stats() const;
@@ -306,9 +383,13 @@ private:
         std::size_t local_transitions, bool backing_may_have_aliases);
     void invalidate_shared_write_jit_pages_locked();
     void clear_jit_page_table_locked();
+    void retire_page_backing_locked(Page& page);
+    void push_retired_backing_locked(std::shared_ptr<GuestPageBacking> backing);
+    [[nodiscard]] std::size_t page_backing_owner_count_locked(
+        const std::shared_ptr<GuestPageBacking>& backing) const;
     [[nodiscard]] static std::byte read_byte_locked(
         const Page* page, std::uint32_t offset);
-    [[nodiscard]] static GuestPageBacking& writable_backing_locked(
+    [[nodiscard]] GuestPageBacking& writable_backing_locked(
         Page& page, bool* jit_eligibility_changed = nullptr);
     [[nodiscard]] bool reservation_invalidation_required_locked(
         const Page& page) const noexcept;
@@ -338,6 +419,7 @@ private:
 
     mutable std::mutex mutex_;
     bool parallel_access_ { true };
+    std::filesystem::path backing_root_;
     VmMap vm_map_;
     VmMap translation_profile_map_;
     std::shared_ptr<PageMap> pages_ { std::make_shared<PageMap>() };
@@ -350,6 +432,9 @@ private:
     std::unique_ptr<JitPageTableStorage> jit_read_page_table_;
     std::unique_ptr<JitPageTableStorage> jit_write_page_table_;
     std::unordered_set<std::uint32_t> direct_jit_write_pages_;
+    std::unordered_set<std::uint32_t> published_code_pages_;
+    std::vector<std::shared_ptr<GuestPageBacking>> retired_backings_;
+    GuestQuiescence guest_quiescence_;
     bool jit_page_table_enabled_ { };
     bool jit_write_page_table_enabled_ { true };
     std::unordered_map<std::uint32_t, std::uint64_t>

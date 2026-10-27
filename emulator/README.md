@@ -9,9 +9,9 @@ The emulator boots a firmware's own userland (launchd, the daemons, SpringBoard 
 From the top of revenant:
 
 ```sh
-./xmakew f -y
-./xmakew build emulator
-./xmakew test
+./xmakew f -P . -y -m release --component=emulator
+./xmakew build -P . emulator
+./xmakew test -P .
 ```
 
 Requirements, options and how to boot a root filesystem are in [build, run and test](../docs/guides/emulator/build-and-test.md). Every document is listed in [the documentation index](../docs/README.md).

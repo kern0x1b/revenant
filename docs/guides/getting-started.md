@@ -28,7 +28,7 @@ enforced by a check and which are not. Neither is needed to run the commands bel
 
     REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64 ./xmakew f -P . -y --emulator_vulkan=n
 
-The first run of `./xmakew` builds the pinned xmake under `~/.revenant/cache/xmake/`, which takes a few
+The first run of `./xmakew` builds the pinned xmake under `.cache/xmake/`, which takes a few
 minutes. The two variables take LLVM, Swift and ld64 from kern0x1b/revenant's releases; without them those
 three are built from source, which takes hours: LLVM alone is about 3,200 build steps. `--emulator_vulkan=n` leaves the emulator's Vulkan backend
 off, as CI does.
@@ -68,6 +68,6 @@ lists what each library provides.
   of the same package meet. If it does not clear, look for a stuck xmake with `pgrep -fl xmake`.
 - If the step 5 configure prints `Building CXX object` lines for LLVM, it was started without the two prebuilt
   variables. Stop it and run step 5 again with them, as written above.
-- To keep a trial apart from your own cache, export `REVENANT_HOME` and `XMAKE_GLOBALDIR` to empty folders
-  before step 3. The pinned xmake binary under `~/.revenant/cache/xmake/` is still shared.
+- To keep a trial apart from your own cache, export `REVENANT_CACHE` and `XMAKE_GLOBALDIR` to empty folders
+  before step 3. The pinned xmake binary under `.cache/xmake/` is still shared.
 - To give the cache back, see [the machine guide](machine.md).

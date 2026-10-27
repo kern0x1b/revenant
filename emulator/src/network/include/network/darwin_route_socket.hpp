@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -149,6 +151,9 @@ public:
         std::string_view interface_name, std::uint16_t interface_index,
         std::uint8_t family);
     [[nodiscard]] std::vector<Entry> snapshot() const;
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     mutable std::mutex mutex_;

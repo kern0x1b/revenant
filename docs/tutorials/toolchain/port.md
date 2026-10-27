@@ -64,7 +64,7 @@ An application that runs on more than one architecture names them:
 
 `xmake deb` builds each slice for the release its architecture first runs, merges the bundles itself (every file
 but a `.plist` has to be the same in every slice), and checks the merged binaries. Pin `MinimumOSVersion` in the
-plist. A slice built without its shared cache under `~/.revenant/dyld` is said to be unchecked.
+plist. A slice built without its shared cache under `.cache/dyld` is said to be unchecked.
 
 ## Frameworks and runtimes
 
@@ -76,7 +76,7 @@ A port takes a package by its name and an alias, adds it to the target, and name
         add_rules("@addon/revenant/app")
         add_deps("FoundationBackports")
 
-The Backport libraries are the component's own targets, and the package a program depends on for them is written by `./xmakew deb`; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
+The Backport libraries are the component's own targets, and the package a program depends on for them is written by `./xmakew deb -P .`; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
 
 ### Swift
 

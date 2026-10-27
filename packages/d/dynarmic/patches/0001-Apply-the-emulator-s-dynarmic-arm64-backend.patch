@@ -4,24 +4,24 @@ Date: Sat, 19 Sep 2026 15:22:12 +0200
 Subject: [PATCH 1/3] Apply the emulator's dynarmic arm64 backend
 
 ---
- .../backend/arm64/a32_address_space.cpp       |  223 ++-
- .../backend/arm64/a32_address_space.h         |   18 +-
- src/dynarmic/backend/arm64/a32_interface.cpp  | 1304 ++++++++++++++++-
- src/dynarmic/backend/arm64/a32_jitstate.h     |   19 +-
- src/dynarmic/backend/arm64/abi.h              |    1 +
- src/dynarmic/backend/arm64/address_space.cpp  |   95 +-
- src/dynarmic/backend/arm64/address_space.h    |   42 +
- src/dynarmic/backend/arm64/emit_arm64.cpp     |    2 +-
- src/dynarmic/backend/arm64/emit_arm64.h       |    6 +-
- src/dynarmic/backend/arm64/emit_arm64_a32.cpp |   43 +-
- .../arm64/emit_arm64_a32_coprocessor.cpp      |    7 +-
- .../backend/arm64/emit_arm64_memory.cpp       |   42 +-
- .../backend/arm64/exclusive_monitor.cpp       |    4 +-
- .../backend/block_range_information.cpp       |   12 +-
- 14 files changed, 1674 insertions(+), 144 deletions(-)
+ src/dynarmic/backend/arm64/a32_address_space.cpp   |  224 +++-
+ src/dynarmic/backend/arm64/a32_address_space.h     |   18 +-
+ src/dynarmic/backend/arm64/a32_interface.cpp       | 1304 +++++++++++++++++++-
+ src/dynarmic/backend/arm64/a32_jitstate.h          |   20 +-
+ src/dynarmic/backend/arm64/abi.h                   |    1 +
+ src/dynarmic/backend/arm64/address_space.cpp       |   95 +-
+ src/dynarmic/backend/arm64/address_space.h         |   42 +
+ src/dynarmic/backend/arm64/emit_arm64.cpp          |    2 +-
+ src/dynarmic/backend/arm64/emit_arm64.h            |    7 +-
+ src/dynarmic/backend/arm64/emit_arm64_a32.cpp      |   55 +-
+ .../backend/arm64/emit_arm64_a32_coprocessor.cpp   |    7 +-
+ src/dynarmic/backend/arm64/emit_arm64_memory.cpp   |   42 +-
+ src/dynarmic/backend/arm64/exclusive_monitor.cpp   |    4 +-
+ src/dynarmic/backend/block_range_information.cpp   |   12 +-
+ 14 files changed, 1689 insertions(+), 144 deletions(-)
 
 diff --git a/src/dynarmic/backend/arm64/a32_address_space.cpp b/src/dynarmic/backend/arm64/a32_address_space.cpp
-index 2f28e46f..dda85b5d 100644
+index 2f28e46..aff339c 100644
 --- a/src/dynarmic/backend/arm64/a32_address_space.cpp
 +++ b/src/dynarmic/backend/arm64/a32_address_space.cpp
 @@ -20,16 +20,40 @@
@@ -372,7 +372,15 @@ index 2f28e46f..dda85b5d 100644
      }
  
      prelude_info.return_from_run_code = code.xptr<void*>();
-@@ -422,6 +510,9 @@ EmitConfig A32AddressSpace::GetEmitConfig() {
+@@ -378,6 +466,7 @@ EmitConfig A32AddressSpace::GetEmitConfig() {
+         .optimizations = conf.unsafe_optimizations ? conf.optimizations : conf.optimizations & all_safe_optimizations,
+ 
+         .hook_isb = conf.hook_isb,
++        .dispatch_counters = conf.dispatch_counters,
+ 
+         .cntfreq_el0{},
+         .ctr_el0{},
+@@ -422,6 +511,9 @@ EmitConfig A32AddressSpace::GetEmitConfig() {
          .coprocessors = conf.coprocessors,
  
          .very_verbose_debugging_output = conf.very_verbose_debugging_output,
@@ -383,7 +391,7 @@ index 2f28e46f..dda85b5d 100644
  }
  
 diff --git a/src/dynarmic/backend/arm64/a32_address_space.h b/src/dynarmic/backend/arm64/a32_address_space.h
-index 3b9e9fb2..894515bb 100644
+index 3b9e9fb..894515b 100644
 --- a/src/dynarmic/backend/arm64/a32_address_space.h
 +++ b/src/dynarmic/backend/arm64/a32_address_space.h
 @@ -15,11 +15,23 @@ struct EmittedBlockInfo;
@@ -424,10 +432,10 @@ index 3b9e9fb2..894515bb 100644
  };
  
 diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
-index 37b7e884..f1dbf0fd 100644
+index 37b7e88..bdbf6f2 100644
 --- a/src/dynarmic/backend/arm64/a32_interface.cpp
 +++ b/src/dynarmic/backend/arm64/a32_interface.cpp
-@@ -3,41 +3,878 @@
+@@ -3,41 +3,877 @@
   * SPDX-License-Identifier: 0BSD
   */
  
@@ -1306,7 +1314,6 @@ index 37b7e884..f1dbf0fd 100644
          };
  
 -        HaltReason hr = core.Run(current_address_space, current_state, &halt_reason);
-+        ++jit_state.rsb_misses;
 +        const CodePtr current_codeptr = GetCurrentBlock(execution_generation);
 +
 +        const HaltReason hr = native_code_slab->run_code(
@@ -1314,7 +1321,7 @@ index 37b7e884..f1dbf0fd 100644
  
          PerformRequestedCacheInvalidation(hr);
  
-@@ -46,135 +883,460 @@ struct Jit::Impl final {
+@@ -46,135 +882,461 @@ struct Jit::Impl final {
  
      HaltReason Step() {
          ASSERT(!jit_interface->is_executing);
@@ -1572,6 +1579,7 @@ index 37b7e884..f1dbf0fd 100644
 +            0,
 +            0,
 +            0,
++            jit_state.fast_dispatch_hint_exits,
 +        };
 +    }
 +
@@ -1868,7 +1876,7 @@ index 37b7e884..f1dbf0fd 100644
 +
  }  // namespace Dynarmic::A32
 diff --git a/src/dynarmic/backend/arm64/a32_jitstate.h b/src/dynarmic/backend/arm64/a32_jitstate.h
-index 978bf84a..efeeb3c0 100644
+index 978bf84..2f7a7f4 100644
 --- a/src/dynarmic/backend/arm64/a32_jitstate.h
 +++ b/src/dynarmic/backend/arm64/a32_jitstate.h
 @@ -6,6 +6,7 @@
@@ -1879,7 +1887,7 @@ index 978bf84a..efeeb3c0 100644
  
  #include <mcl/stdint.hpp>
  
-@@ -25,12 +26,28 @@ struct A32JitState {
+@@ -25,12 +26,29 @@ struct A32JitState {
  
      std::array<u32, 16> regs{};
  
@@ -1905,12 +1913,13 @@ index 978bf84a..efeeb3c0 100644
 +
 +    u64 rsb_hits = 0;
 +    u64 rsb_misses = 0;
++    u64 fast_dispatch_hint_exits = 0;
 +
      u32 Cpsr() const;
      void SetCpsr(u32 cpsr);
  
 diff --git a/src/dynarmic/backend/arm64/abi.h b/src/dynarmic/backend/arm64/abi.h
-index 609b06cd..0054dc57 100644
+index 609b06c..0054dc5 100644
 --- a/src/dynarmic/backend/arm64/abi.h
 +++ b/src/dynarmic/backend/arm64/abi.h
 @@ -22,6 +22,7 @@ constexpr oaknut::XReg Xhalt{27};
@@ -1922,7 +1931,7 @@ index 609b06cd..0054dc57 100644
  constexpr oaknut::XReg Xscratch0{16}, Xscratch1{17}, Xscratch2{30};
  constexpr oaknut::WReg Wscratch0{16}, Wscratch1{17}, Wscratch2{30};
 diff --git a/src/dynarmic/backend/arm64/address_space.cpp b/src/dynarmic/backend/arm64/address_space.cpp
-index a5e22b6e..fc112cea 100644
+index a5e22b6..fc112ce 100644
 --- a/src/dynarmic/backend/arm64/address_space.cpp
 +++ b/src/dynarmic/backend/arm64/address_space.cpp
 @@ -84,6 +84,7 @@ void AddressSpace::InvalidateBasicBlocks(const tsl::robin_set<IR::LocationDescri
@@ -2064,7 +2073,7 @@ index a5e22b6e..fc112cea 100644
              c.BL(prelude_info.isb_raised);
              break;
 diff --git a/src/dynarmic/backend/arm64/address_space.h b/src/dynarmic/backend/arm64/address_space.h
-index 4dcf173c..58052f0f 100644
+index 4dcf173..58052f0 100644
 --- a/src/dynarmic/backend/arm64/address_space.h
 +++ b/src/dynarmic/backend/arm64/address_space.h
 @@ -5,8 +5,11 @@
@@ -2142,7 +2151,7 @@ index 4dcf173c..58052f0f 100644
          void* ic_raised;
          void* isb_raised;
 diff --git a/src/dynarmic/backend/arm64/emit_arm64.cpp b/src/dynarmic/backend/arm64/emit_arm64.cpp
-index 1ecb5424..d9ef96ba 100644
+index 1ecb542..d9ef96b 100644
 --- a/src/dynarmic/backend/arm64/emit_arm64.cpp
 +++ b/src/dynarmic/backend/arm64/emit_arm64.cpp
 @@ -191,7 +191,7 @@ static void EmitAddCycles(oaknut::CodeGenerator& code, EmitContext& ctx, size_t
@@ -2155,7 +2164,7 @@ index 1ecb5424..d9ef96ba 100644
          std::puts(IR::DumpBlock(block).c_str());
      }
 diff --git a/src/dynarmic/backend/arm64/emit_arm64.h b/src/dynarmic/backend/arm64/emit_arm64.h
-index a5d2c1b3..0e3bf5b2 100644
+index a5d2c1b..4fe79c2 100644
 --- a/src/dynarmic/backend/arm64/emit_arm64.h
 +++ b/src/dynarmic/backend/arm64/emit_arm64.h
 @@ -77,6 +77,7 @@ enum class LinkTarget {
@@ -2166,7 +2175,15 @@ index a5d2c1b3..0e3bf5b2 100644
      InstructionSynchronizationBarrierRaised,
      InstructionCacheOperationRaised,
      DataCacheOperationRaised,
-@@ -164,9 +165,12 @@ struct EmitConfig {
+@@ -113,6 +114,7 @@ struct EmitConfig {
+     bool HasOptimization(OptimizationFlag f) const { return (f & optimizations) != no_optimizations; }
+ 
+     bool hook_isb;
++    bool dispatch_counters;
+ 
+     // System registers
+     u64 cntfreq_el0;
+@@ -164,9 +166,12 @@ struct EmitConfig {
  
      // Debugging
      bool very_verbose_debugging_output;
@@ -2181,7 +2198,7 @@ index a5d2c1b3..0e3bf5b2 100644
  template<IR::Opcode op>
  void EmitIR(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Inst* inst);
 diff --git a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
-index 909dde73..96616278 100644
+index 909dde7..01e8c12 100644
 --- a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
 +++ b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
 @@ -3,6 +3,8 @@
@@ -2212,10 +2229,19 @@ index 909dde73..96616278 100644
  }
  
  void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::ReturnToDispatch, IR::LocationDescriptor, bool) {
-@@ -58,12 +68,31 @@ static void EmitSetUpperLocationDescriptor(oaknut::CodeGenerator& code, EmitCont
+@@ -58,12 +68,40 @@ static void EmitSetUpperLocationDescriptor(oaknut::CodeGenerator& code, EmitCont
      }
  }
  
++static void EmitCountEvent(oaknut::CodeGenerator& code, EmitContext& ctx, std::size_t counter_offset) {
++    if (!ctx.conf.dispatch_counters) {
++        return;
++    }
++    code.LDR(Xscratch0, Xstate, counter_offset);
++    code.ADD(Xscratch0, Xscratch0, 1);
++    code.STR(Xscratch0, Xstate, counter_offset);
++}
++
 +static void EmitHostExecutionBoundary(oaknut::CodeGenerator& code, EmitContext& ctx, std::optional<u32> return_pc) {
 +    oaknut::Label disabled;
 +
@@ -2244,7 +2270,7 @@ index 909dde73..96616278 100644
          if (ctx.conf.enable_cycle_counting) {
              code.CMP(Xticks, 0);
              code.B(LE, fail);
-@@ -85,6 +114,7 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Li
+@@ -85,6 +123,7 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Li
      EmitSetUpperLocationDescriptor(code, ctx, terminal.next, initial_location);
  
      if (ctx.conf.HasOptimization(OptimizationFlag::BlockLinking) && !is_single_step) {
@@ -2252,7 +2278,7 @@ index 909dde73..96616278 100644
          EmitBlockLinkRelocation(code, ctx, terminal.next, BlockRelocationType::Branch);
      }
  
-@@ -97,6 +127,8 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
+@@ -97,6 +136,8 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
      if (ctx.conf.HasOptimization(OptimizationFlag::ReturnStackBuffer) && !is_single_step) {
          oaknut::Label fail;
  
@@ -2261,7 +2287,17 @@ index 909dde73..96616278 100644
          code.LDR(Wscratch2, SP, offsetof(StackLayout, rsb_ptr));
          code.AND(Wscratch2, Wscratch2, RSBIndexMask);
          code.ADD(X2, SP, Xscratch2);
-@@ -118,10 +150,11 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
+@@ -110,18 +151,22 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
+ 
+         code.CMP(X0, Xscratch0);
+         code.B(NE, fail);
++        EmitCountEvent(code, ctx, offsetof(A32JitState, rsb_hits));
+         code.BR(Xscratch1);
+ 
+         code.l(fail);
++        EmitCountEvent(code, ctx, offsetof(A32JitState, rsb_misses));
+     }
+ 
      EmitRelocation(code, ctx, LinkTarget::ReturnToDispatcher);
  }
  
@@ -2270,6 +2306,7 @@ index 909dde73..96616278 100644
 +    if (ctx.conf.HasOptimization(OptimizationFlag::FastDispatch) && !is_single_step) {
 +        EmitHostExecutionBoundary(code, ctx, std::nullopt);
 +    }
++    EmitCountEvent(code, ctx, offsetof(A32JitState, fast_dispatch_hint_exits));
      EmitRelocation(code, ctx, LinkTarget::ReturnToDispatcher);
 -
 -    // TODO: Implement FastDispatchHint optimization
@@ -2277,7 +2314,7 @@ index 909dde73..96616278 100644
  
  void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
 diff --git a/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp b/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
-index 5115fbbb..326fb6f8 100644
+index 5115fbb..326fb6f 100644
 --- a/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
 +++ b/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
 @@ -27,7 +27,12 @@ static void CallCoprocCallback(oaknut::CodeGenerator& code, EmitContext& ctx, A3
@@ -2295,7 +2332,7 @@ index 5115fbbb..326fb6f8 100644
  
      code.MOV(Xscratch0, reinterpret_cast<u64>(callback.function));
 diff --git a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
-index 7708720e..981119ba 100644
+index 7708720..981119b 100644
 --- a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
 +++ b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
 @@ -138,6 +138,22 @@ LinkTarget ExclusiveWriteMemoryLinkTarget(size_t bitsize) {
@@ -2420,7 +2457,7 @@ index 7708720e..981119ba 100644
          ctx.conf.emit_check_memory_abort(code, ctx, inst, *end);
          code.B(*end);
 diff --git a/src/dynarmic/backend/arm64/exclusive_monitor.cpp b/src/dynarmic/backend/arm64/exclusive_monitor.cpp
-index 5e49cc41..db7a2dc3 100644
+index 5e49cc4..db7a2dc 100644
 --- a/src/dynarmic/backend/arm64/exclusive_monitor.cpp
 +++ b/src/dynarmic/backend/arm64/exclusive_monitor.cpp
 @@ -30,9 +30,9 @@ void ExclusiveMonitor::Unlock() {
@@ -2436,18 +2473,15 @@ index 5e49cc41..db7a2dc3 100644
          Unlock();
          return false;
 diff --git a/src/dynarmic/backend/block_range_information.cpp b/src/dynarmic/backend/block_range_information.cpp
-index 22708130..f7bf5585 100644
+index 2270813..f7bf558 100644
 --- a/src/dynarmic/backend/block_range_information.cpp
 +++ b/src/dynarmic/backend/block_range_information.cpp
-@@ -45,8 +45,16 @@ template<typename ProgramCounterType>
+@@ -45,8 +45,13 @@ template<typename ProgramCounterType>
  tsl::robin_set<IR::LocationDescriptor> BlockRangeInformation<ProgramCounterType>::InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges) {
      tsl::robin_set<IR::LocationDescriptor> erase_locations;
      for (auto invalidate_interval : ranges) {
 -        auto pair = block_ranges.equal_range(invalidate_interval);
 -        for (auto it = pair.first; it != pair.second; ++it) {
-+        // equal_range only reaches the first block of the range: the blocks
-+        // inside it all compare equivalent to the range while staying ordered
-+        // among themselves, which is not a strict weak ordering.
 +        const auto first = boost::icl::first(invalidate_interval);
 +        const auto last = boost::icl::last(invalidate_interval);
 +        for (auto it = block_ranges.lower_bound(Interval::closed(first, first));

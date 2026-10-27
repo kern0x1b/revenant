@@ -15,7 +15,7 @@ public enum NWProtocolTCP {
         public var keepaliveCount = 0
         public var keepaliveInterval = 0
         public var enableFastOpen = false
-        public var connectionTimeout = 0
+        public var connectionTimeout = 30
 
         public init() {}
 

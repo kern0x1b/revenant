@@ -527,6 +527,7 @@ void PerformanceCounters::reset(bool enabled)
     jit_stable_table_collisions_.store(0, std::memory_order_relaxed);
     jit_rsb_hits_.store(0, std::memory_order_relaxed);
     jit_rsb_misses_.store(0, std::memory_order_relaxed);
+    jit_fast_dispatch_hint_exits_.store(0, std::memory_order_relaxed);
     jit_host_yield_checks_.store(0, std::memory_order_relaxed);
     jit_host_yields_.store(0, std::memory_order_relaxed);
     jit_host_slice_budget_samples_.store(0, std::memory_order_relaxed);
@@ -766,6 +767,21 @@ bool PerformanceCounters::begin_display_window()
             std::memory_order_relaxed);
     diagnostic_work_baseline.translation_blocks =
         translation_blocks_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.memory_callbacks =
+        memory_callbacks_.load(std::memory_order_relaxed);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        diagnostic_work_baseline.memory_callback_reasons[reason] =
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed);
+    }
+    diagnostic_work_baseline.jit_page_table_disables =
+        jit_page_table_disables_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.code_publications =
+        code_publications_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.code_publication_wait_ns =
+        code_publication_wait_ns_.load(std::memory_order_relaxed);
+    diagnostic_work_baseline.copy_on_write_detaches =
+        copy_on_write_detaches_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_executions =
         cpu_executions_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.cpu_ticks =
@@ -989,9 +1005,32 @@ std::optional<PerformanceSnapshot> PerformanceCounters::end_display_window()
         diagnostic_work_baseline.scheduler_quantum_expirations);
     result.translation_blocks_shared_region =
         translation_blocks_shared_region_.load(std::memory_order_relaxed);
+    result.translation_compile_nanoseconds =
+        translation_compile_nanoseconds_.load(std::memory_order_relaxed);
     result.translation_blocks =
         diagnostic_delta(translation_blocks_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.translation_blocks);
+    result.memory_callbacks = diagnostic_delta(
+        memory_callbacks_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.memory_callbacks);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        result.memory_callback_reasons[reason] = diagnostic_delta(
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed),
+            diagnostic_work_baseline.memory_callback_reasons[reason]);
+    }
+    result.jit_page_table_disables = diagnostic_delta(
+        jit_page_table_disables_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.jit_page_table_disables);
+    result.code_publications = diagnostic_delta(
+        code_publications_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.code_publications);
+    result.code_publication_wait_ns = diagnostic_delta(
+        code_publication_wait_ns_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.code_publication_wait_ns);
+    result.copy_on_write_detaches = diagnostic_delta(
+        copy_on_write_detaches_.load(std::memory_order_relaxed),
+        diagnostic_work_baseline.copy_on_write_detaches);
     result.cpu_executions =
         diagnostic_delta(cpu_executions_.load(std::memory_order_relaxed),
             diagnostic_work_baseline.cpu_executions);
@@ -1426,7 +1465,7 @@ void PerformanceCounters::record_jit_demand_translation(
 void PerformanceCounters::record_jit_dispatch(std::uint64_t fast_link_hits,
     std::uint64_t fast_link_misses, std::uint64_t stable_table_probes,
     std::uint64_t stable_table_collisions, std::uint64_t rsb_hits,
-    std::uint64_t rsb_misses)
+    std::uint64_t rsb_misses, std::uint64_t fast_dispatch_hint_exits)
 {
     if (!enabled())
         return;
@@ -1439,6 +1478,8 @@ void PerformanceCounters::record_jit_dispatch(std::uint64_t fast_link_hits,
         stable_table_collisions, std::memory_order_relaxed);
     jit_rsb_hits_.fetch_add(rsb_hits, std::memory_order_relaxed);
     jit_rsb_misses_.fetch_add(rsb_misses, std::memory_order_relaxed);
+    jit_fast_dispatch_hint_exits_.fetch_add(
+        fast_dispatch_hint_exits, std::memory_order_relaxed);
 }
 
 void PerformanceCounters::record_jit_dispatch(std::uint64_t stable_link_hits,
@@ -1446,7 +1487,7 @@ void PerformanceCounters::record_jit_dispatch(std::uint64_t stable_link_hits,
     std::uint64_t rsb_misses)
 {
     record_jit_dispatch(stable_link_hits, stable_link_misses,
-        stable_link_hits + stable_link_misses, 0, rsb_hits, rsb_misses);
+        stable_link_hits + stable_link_misses, 0, rsb_hits, rsb_misses, 0);
 }
 
 void PerformanceCounters::record_jit_host_yield(
@@ -1578,9 +1619,38 @@ void PerformanceCounters::record_translation_block()
     add_if_enabled(translation_blocks_, enabled_);
 }
 
+void PerformanceCounters::record_translation_compile(std::uint64_t nanoseconds)
+{
+    if (enabled_)
+        translation_compile_nanoseconds_.fetch_add(
+            nanoseconds, std::memory_order_relaxed);
+}
+
 void PerformanceCounters::record_translation_block_shared_region()
 {
     add_if_enabled(translation_blocks_shared_region_, enabled_);
+}
+
+void PerformanceCounters::record_memory_callback(std::size_t reason)
+{
+    add_if_enabled(memory_callbacks_, enabled_);
+    add_if_enabled(memory_callback_reasons_[reason], enabled_);
+}
+
+void PerformanceCounters::record_jit_page_table_disable()
+{
+    add_if_enabled(jit_page_table_disables_, enabled_);
+}
+
+void PerformanceCounters::record_code_publication(std::uint64_t wait_ns)
+{
+    add_if_enabled(code_publications_, enabled_);
+    add_if_enabled(code_publication_wait_ns_, enabled_, wait_ns);
+}
+
+void PerformanceCounters::record_copy_on_write_detach()
+{
+    add_if_enabled(copy_on_write_detaches_, enabled_);
 }
 
 void PerformanceCounters::record_cpu_execution(std::uint64_t ticks)
@@ -2808,6 +2878,8 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
         jit_stable_table_collisions_.load(std::memory_order_relaxed);
     result.jit_rsb_hits = jit_rsb_hits_.load(std::memory_order_relaxed);
     result.jit_rsb_misses = jit_rsb_misses_.load(std::memory_order_relaxed);
+    result.jit_fast_dispatch_hint_exits =
+        jit_fast_dispatch_hint_exits_.load(std::memory_order_relaxed);
     result.jit_stable_link_hits = result.jit_fast_link_hits;
     result.jit_stable_link_misses = result.jit_fast_link_misses;
     result.jit_host_yield_checks =
@@ -2857,6 +2929,22 @@ PerformanceSnapshot PerformanceCounters::snapshot() const
         translation_blocks_.load(std::memory_order_relaxed);
     result.translation_blocks_shared_region =
         translation_blocks_shared_region_.load(std::memory_order_relaxed);
+    result.translation_compile_nanoseconds =
+        translation_compile_nanoseconds_.load(std::memory_order_relaxed);
+    result.memory_callbacks = memory_callbacks_.load(std::memory_order_relaxed);
+    for (std::size_t reason = 0; reason < memory_callback_reason_count;
+        ++reason) {
+        result.memory_callback_reasons[reason] =
+            memory_callback_reasons_[reason].load(std::memory_order_relaxed);
+    }
+    result.jit_page_table_disables =
+        jit_page_table_disables_.load(std::memory_order_relaxed);
+    result.code_publications =
+        code_publications_.load(std::memory_order_relaxed);
+    result.code_publication_wait_ns =
+        code_publication_wait_ns_.load(std::memory_order_relaxed);
+    result.copy_on_write_detaches =
+        copy_on_write_detaches_.load(std::memory_order_relaxed);
     result.cpu_executions = cpu_executions_.load(std::memory_order_relaxed);
     result.cpu_ticks = cpu_ticks_.load(std::memory_order_relaxed);
     result.svc_calls = svc_calls_.load(std::memory_order_relaxed);
@@ -3260,6 +3348,28 @@ void append_diagnostic_process_summary(std::ostringstream& text,
     }
 }
 
+namespace {
+std::string memory_callback_summary(const PerformanceSnapshot& snapshot)
+{
+    constexpr std::array<std::string_view, memory_callback_reason_count> names {
+        "exclusive", "misaligned", "table-disabled", "unbacked", "code-write",
+        "reservation-write", "file-or-cow", "shared-write", "unmapped",
+        "parallel-checked", "other"
+    };
+    std::ostringstream text;
+    text << " memory-callbacks=" << snapshot.memory_callbacks
+         << " jit-page-table-disables=" << snapshot.jit_page_table_disables
+         << " code-publications=" << snapshot.code_publications
+         << " code-publication-wait-ns=" << snapshot.code_publication_wait_ns
+         << " copy-on-write-detaches=" << snapshot.copy_on_write_detaches;
+    for (std::size_t reason = 0; reason < names.size(); ++reason) {
+        text << " memory-" << names[reason] << '='
+             << snapshot.memory_callback_reasons[reason];
+    }
+    return text.str();
+}
+}
+
 std::string format_performance_summary(const PerformanceSnapshot& snapshot)
 {
     std::uint64_t fallback_total = 0;
@@ -3307,6 +3417,8 @@ std::string format_performance_summary(const PerformanceSnapshot& snapshot)
          << snapshot.jit_stable_table_probes
          << " jit-rsb=" << snapshot.jit_rsb_hits << "/"
          << snapshot.jit_rsb_misses
+         << " jit-fast-dispatch-hint-exits="
+         << snapshot.jit_fast_dispatch_hint_exits
          << " jit-host-yield-checks=" << snapshot.jit_host_yield_checks
          << " jit-host-yields=" << snapshot.jit_host_yields
          << " jit-host-budget-ns="
@@ -3331,6 +3443,8 @@ std::string format_performance_summary(const PerformanceSnapshot& snapshot)
          << " scheduler-quantum-expired="
          << snapshot.scheduler_quantum_expirations
          << " translation-blocks=" << snapshot.translation_blocks
+         << " translation-compile-ns=" << snapshot.translation_compile_nanoseconds
+         << memory_callback_summary(snapshot)
          << " translation-blocks-shared-region="
          << snapshot.translation_blocks_shared_region
          << " cpu-exec=" << snapshot.cpu_executions
@@ -3487,6 +3601,8 @@ std::string format_display_performance_summary(
     std::ostringstream text;
     text << std::fixed << std::setprecision(2)
          << "[perf-display] label=" << label
+         << " cpu-ticks=" << snapshot.cpu_ticks
+         << memory_callback_summary(snapshot)
          << " guest-submit=" << snapshot.display_submissions << " guest-fps="
          << frames_per_second(snapshot.display_submissions,
                 snapshot.display_first_nanoseconds,

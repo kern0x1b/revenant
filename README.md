@@ -41,11 +41,11 @@ comment, copied-text and credential checks. The suites and what runs where:
 ## One xmake project
 
 `xmake.lua` at the top is the project: it includes every member's own `xmake.lua`, so all targets are one graph and
-a member uses another's target with `add_deps`. `./xmakew f -y && ./xmakew` at the top builds everything, `./xmakew
-build <target>` one target, `./xmakew test` the tests.
+a member uses another's target with `add_deps`. `./xmakew f -P . -y && ./xmakew` at the top builds everything, `./xmakew
+build -P . <target>` one target, `./xmakew test -P .` the tests.
 
 `xmakew` is the xmake of revenant: the first run builds the xmake pinned in `packages/x/xmake` (its url,
-commit and patches, read from that recipe) into `~/.revenant/cache/xmake/<key>`, the key being made of the commit and
+commit and patches, read from that recipe) into `.cache/xmake/<key>`, the key being made of the commit and
 the patches' checksums, and every run executes that build with its arguments. It needs only `sh`, `git`, `make` and
 a C compiler, and builds again when the recipe changes.
 
@@ -53,8 +53,8 @@ a C compiler, and builds again when the recipe changes.
 | --- | --- |
 | `xmakew` | the pinned and patched xmake, built on first use (above) |
 | `packages/<letter>/<name>/` | an xmake package: third-party code as the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches`, and the build files of an upstream that has none in `port/` |
-| `tools/layout.lua` | `./xmakew l tools/layout.lua`: the layout of AGENTS.md, which `./xmakew test -P .` runs as `repository/layout` |
-| `tools/publish.lua` | `./xmakew l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
+| `tools/layout.lua` | `./xmakew l -P . tools/layout.lua`: the layout of AGENTS.md, which `./xmakew test -P .` runs as `repository/layout` |
+| `tools/publish.lua` | `./xmakew l -P . tools/publish.lua <member>`: a member's history as a repository of its own (below) |
 
 The three layers (components, the package repository, the addon and toolchain), what each folder is, and how an app
 built outside this checkout gets our libraries: [docs/explanation/architecture.md](docs/explanation/architecture.md).
@@ -68,7 +68,7 @@ OpenCombine at a commit plus the patches of `revenant@combine`.
 
 `SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and typechecks are targets of the graph for iphoneos,
 and Combine is the package `combine` they take; Revenant's other packages are third-party code to them (the Swift
-runtime, libc++, the SDK and the tools). The components' targets are described in [the architecture](docs/explanation/architecture.md). They are built with `./xmakew f -p iphoneos -a armv7`. The whole iOS graph does not configure today: the top `xmake.lua` requires `swift-runtime` and `libcxx`, which have no release for the keys these recipes have now, so a configure would build them from source ([prebuilt packages](docs/guides/prebuilt.md)). Until those releases exist, configure one component at a time (`--component=Backports`, `--component=Swift`); see [the packages reference](docs/reference/toolchain/packages.md). The option
+runtime, libc++, the SDK and the tools). The components' targets are described in [the architecture](docs/explanation/architecture.md). They are built with `./xmakew f -P . -p iphoneos -a armv7`. The whole iOS graph does not configure today: the top `xmake.lua` requires `swift-runtime` and `libcxx`, which have no release for the keys these recipes have now, so a configure would build them from source ([prebuilt packages](docs/guides/prebuilt.md)). Until those releases exist, configure one component at a time (`--component=Backports`, `--component=Swift`); see [the packages reference](docs/reference/toolchain/packages.md). The option
 `--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
 device and runs them there.
 
@@ -79,11 +79,11 @@ declares the addon with `add_addons("revenant", {sourcedir = "toolchain"})` and 
 xmake takes the addon from that folder for this project, as it is in the checkout, and installs nothing in its global
 directory, so the machine's active revenant addon (the one other projects use) stays as it is. `@addon/revenant/...` rules, toolchains and
 includes, `@addon.revenant.<module>` imports, the global modules of `toolchain/addon.lua` and Revenant's plugins all resolve
-to `toolchain/`, also in the xmake processes a build starts. `./xmakew f -p iphoneos -a armv7 -v` prints the folder it
+to `toolchain/`, also in the xmake processes a build starts. `./xmakew f -P . -p iphoneos -a armv7 -v` prints the folder it
 uses (`addon(revenant): <checkout>/toolchain`).
 
 ```
-./xmakew f -p iphoneos -a armv7 -o $HOME/.revenant/cache/<task>/build && ./xmakew
+./xmakew f -P . -p iphoneos -a armv7 -o .cache/scratch/<task>/build && ./xmakew
 ```
 
 Stock xmake does not know `sourcedir` in `add_addons` and would fetch and install the toolchain from the repository instead,
@@ -97,7 +97,7 @@ test targets take the upstream tree from the same package, in its `src/`.
 ## Publishing a member
 
 Applications outside revenant take the toolchain with `add_repositories("revenant <url> <tag>")`, and xmake reads a package
-repository from the top of what it clones. `./xmakew l tools/publish.lua toolchain` writes a mirror of the `toolchain/`
+repository from the top of what it clones. `./xmakew l -P . tools/publish.lua toolchain` writes a mirror of the `toolchain/`
 folder as the branch `publish/toolchain` (`git subtree split`); that mirror has the addon, but not the `packages/` and
 `addons/` of the root, and `tools/publish.lua` cannot split the root yet.
 `git subtree split` follows the folder's path, and the folder had another name before the rename, so the mirror's

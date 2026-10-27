@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -160,6 +162,44 @@ public:
     }
 
     [[nodiscard]] std::size_t size() const { return objects_.size(); }
+
+    void save(snapshot::Writer& out) const
+    {
+        snapshot::save(out, static_cast<std::uint64_t>(objects_.size()));
+        for (const auto& [object, port] : objects_) {
+            snapshot::save(out, object);
+            snapshot::save(out, port.receive_owner);
+            snapshot::save(out, port.kernel_owned);
+            snapshot::save(out, port.make_send_count);
+            snapshot::save(out, port.sequence_number);
+            snapshot::save(out, port.queue_limit);
+            snapshot::save(out, port.temporary_owner);
+            snapshot::save(out, port.guard);
+            snapshot::save(out, port.strict_guard);
+        }
+    }
+
+    void load(snapshot::Reader& in)
+    {
+        objects_.clear();
+        std::uint64_t count { };
+        snapshot::load(in, count);
+        for (std::uint64_t index = 0; index < count; ++index) {
+            PortObjectId object { };
+            snapshot::load(in, object);
+            PortObject port;
+            snapshot::load(in, port.receive_owner);
+            snapshot::load(in, port.kernel_owned);
+            snapshot::load(in, port.make_send_count);
+            snapshot::load(in, port.sequence_number);
+            snapshot::load(in, port.queue_limit);
+            snapshot::load(in, port.temporary_owner);
+            snapshot::load(in, port.guard);
+            snapshot::load(in, port.strict_guard);
+            if (!objects_.emplace(object, port).second)
+                throw snapshot::FormatError { "snapshot repeats a Mach port object" };
+        }
+    }
 
 private:
     std::map<PortObjectId, PortObject> objects_;

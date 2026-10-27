@@ -47,15 +47,16 @@ end
 function main(device, release)
     device = device or "iPhone2,1"
     release = release or "6.1.3"
-    local here = os.scriptdir()
+    local here = path.absolute(os.scriptdir())
     local out = runs.folder("emulate-output")
     os.mkdir(out)
+    os.setenv("REVENANT_EMULATOR_ROOT", path.join(out, "emulator"))
 
     local function xmake(args, log, opt)
         return os.execv(os.programfile(), args, table.join({curdir = here, stdout = log, stderr = log}, opt or {}))
     end
     xmake({"f", "-p", "iphoneos", "-a", "armv7", "-y"}, path.join(out, "configure.log"))
-    xmake({"emulate", "install", "-d", device, "-r", release}, path.join(out, "install.log"))
+    xmake({"emulate", "-d", device, "-r", release, "install"}, path.join(out, "install.log"))
 
     local status = 0
     local marker = path.join(out, ".marked")

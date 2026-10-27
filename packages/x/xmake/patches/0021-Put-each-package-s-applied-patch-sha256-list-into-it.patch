@@ -1,0 +1,56 @@
+From 6e7bfd87ac940760116ab12570aa75ee98133e90 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 19:13:59 +0200
+Subject: [PATCH] Put each package's applied patch sha256 list into its build
+ hash
+
+A package's build hash names its install folder, and the patches that its recipe applies change what the install contains, but the hash left them out. Two recipes at one version with different patches therefore shared one install, and the second project got the first one's patched files.
+
+The build hash now ends with the sha256 of each patch the package applies at its version, in order, and with the patch's options when it has any. A patch declared without a sha256, which is a local file, contributes the sha256 of its file, found beside the package's script when the path is relative; when there is no file it contributes its path. A package without patches adds nothing, so its hash does not change. Every variant of the hash takes the list, including the compatibility variants, so an install keyed without it is never picked up.
+
+Changes-build-output: no
+
+---
+ xmake/core/package/package.lua | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 64d9a05..0752b21 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1824,6 +1824,17 @@ function _instance:_strhash128(str)
+     return hash.uuid4(str):replace("-", "", {plain = true}):lower()
+ end
+ 
++local function _patch_identity(instance, patch)
++    if patch.sha256 then
++        return patch.sha256
++    end
++    local file = patch.url
++    if not os.isfile(file) and instance:scriptdir() then
++        file = path.join(instance:scriptdir(), patch.url)
++    end
++    return os.isfile(file) and hash.sha256(file) or patch.url
++end
++
+ local function _patchset_digest()
+     local file = path.join(os.programdir(), "revenant-patch-set")
+     if not os.isfile(file) then
+@@ -1899,6 +1910,14 @@ function _instance:buildhash()
+             if patchset then
+                 str = str .. "_" .. patchset
+             end
++            local patches = self:patches()
++            if patches then
++                local shas = {}
++                for _, patch in ipairs(patches) do
++                    table.insert(shas, _patch_identity(self, patch) .. (patch.extra and string.serialize(patch.extra, {strip = true, indent = false, orderkeys = true}) or ""))
++                end
++                str = str .. "_" .. table.concat(shas, "_")
++            end
+             return self:_strhash128(str)
+         end
+         local function _get_installdir(...)
+-- 
+2.54.0 (Apple Git-157)
+

@@ -31,9 +31,10 @@ package("apple-compat")
         os.mkdir(project)
         io.writefile(path.join(project, "xmake.lua"), table.concat({
             "add_repositories(\"revenant " .. root .. "\")",
-            "add_addons(\"revenant\")",
+            "add_addons(\"revenant\", {sourcedir = \"" .. path.join(root, "toolchain") .. "\"})",
             "set_config(\"apple_minimum\", \"" .. toolchain:config("deployment") .. "\")",
             "set_config(\"apple_sdk\", \"" .. package:config("apple_sdk") .. "\")",
+            "set_config(\"apple_compat_only\", true)",
             "includes(\"@addon/revenant/apple-ios\")",
             "option(\"component\", {type = \"string\", default = \"\"})",
             "includes(\"" .. data.src("apple-compat") .. "\")",
@@ -42,9 +43,9 @@ package("apple-compat")
             ""}, "\n"))
         io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
         if #(package:data("provided") or {}) > 0 then
-            os.vrunv(os.programfile(), {"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
-            os.vrunv(os.programfile(), {"build", "-y", "apple-compat"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
-            os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "apple-compat"}, {curdir = project})
+            os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+            os.vrunv(os.programfile(), {"build", "-P", project, "-y", "apple-compat"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+            os.vrunv(os.programfile(), {"install", "-P", project, "-y", "-o", package:installdir(), "apple-compat"}, {curdir = project})
         end
         os.vcp(data.licence(), package:installdir("licenses"))
     end)

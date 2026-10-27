@@ -15,6 +15,13 @@ namespace emulator {
 
 class MachOImage;
 
+inline constexpr std::string_view core_animation_transaction_v1_name {
+    "core-animation-remote-transaction-v1"
+};
+inline constexpr std::string_view core_animation_render_server_v1_name {
+    "core-animation-remote-render-server-v1"
+};
+
 struct CoreAnimationRemoteAbi {
     std::string_view name;
     std::uint32_t inline_transaction_message { };

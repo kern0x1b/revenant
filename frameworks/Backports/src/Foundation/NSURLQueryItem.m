@@ -1,10 +1,12 @@
 #import <Foundation/Foundation.h>
+#import "../revenant_alias.h"
 
-@implementation NSURLQueryItem {
-@private
+REVENANT_ALIAS_STATE(NSURLQueryItem, NSObject,
     NSString *_revenantName;
     NSString *_revenantValue;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(NSURLQueryItem) (RevenantQueryItem)
 
 + (instancetype)queryItemWithName:(NSString *)name value:(NSString *)value
 {
@@ -18,7 +20,9 @@
 
 - (instancetype)init
 {
-    return [self initWithName:@"" value:nil];
+    if ((self = [super init]))
+        _revenantName = @"";
+    return self;
 }
 
 - (instancetype)initWithName:(NSString *)name value:(NSString *)value

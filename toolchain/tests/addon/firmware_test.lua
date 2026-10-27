@@ -6,11 +6,47 @@ local function image(folder, name, bytes)
     return mount
 end
 
+local function output(program, argv)
+    local file = os.tmpfile()
+    os.execv(program, argv, {try = true, stdout = file, stderr = file})
+    local text = io.readfile(file) or ""
+    os.tryrm(file)
+    return text:trim()
+end
+
+local DETACH_ATTEMPTS = 5
+
+local function detach_volume(volume)
+    local errors = nil
+    for attempt = 1, DETACH_ATTEMPTS do
+        local detached = false
+        try {
+            function ()
+                os.vrunv("hdiutil", {"detach", "-quiet", volume})
+                detached = true
+            end,
+            catch {
+                function (raised)
+                    errors = tostring(raised)
+                end
+            }
+        }
+        if detached then
+            return true
+        end
+        if attempt < DETACH_ATTEMPTS then
+            print("the image at %s is busy, detach attempt %d of %d failed, retrying", volume, attempt, DETACH_ATTEMPTS)
+            os.sleep(attempt * 500)
+        end
+    end
+    return false, errors
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local home = os.getenv("REVENANT_HOME")
-    os.setenv("REVENANT_HOME", path.join(folder, "home"))
+    local home = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     local firmware = import("apple.firmware", {rootdir = opt.modules, anonymous = true})
     local dyld = import("apple.dyld", {rootdir = opt.modules, anonymous = true})
     local held = path.join(dyld.root(), "9.9", "dyld_shared_cache_armv7")
@@ -94,6 +130,8 @@ function failures(opt)
     os.vrunv("hdiutil", {"create", "-quiet", "-size", "40m", "-fs", "HFS+", "-volname", "revenant", "-type", "UDIF", hfs})
     os.mkdir(volume)
     os.vrunv("hdiutil", {"attach", "-quiet", "-nobrowse", "-mountpoint", volume, hfs})
+    io.writefile(path.join(volume, ".metadata_never_index"), "")
+    local failure = nil
     try {
         function ()
             io.writefile(path.join(volume, "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_armv7"), "the cache of one firmware")
@@ -111,12 +149,34 @@ function failures(opt)
                 table.insert(found, "a compressed library beside the cache is taken readable, byte for byte: " .. (unread or "the bytes differ"))
             end
         end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
         finally {
             function ()
-                os.vrunv("hdiutil", {"detach", "-quiet", volume})
+                local detached, detach = detach_volume(volume)
+                if not detached then
+                    local holders = output("lsof", {"-n", "-P", "+D", volume})
+                    local services = {}
+                    for line in output("ps", {"-axo", "pid,comm"}):gmatch("[^\n]+") do
+                        if line:find("mds", 1, true) or line:find("fseventsd", 1, true) or line:find("diskimage", 1, true)
+                           or line:find("diskarbitrationd", 1, true) or line:find("backupd", 1, true) then
+                            table.insert(services, line:trim())
+                        end
+                    end
+                    local message = string.format("the image did not detach from %s: %s; open on it: %s; indexing and mounting services: %s",
+                                                  volume, detach, holders ~= "" and holders or "none", #services > 0 and table.concat(services, "; ") or "none")
+                    raise("%s", failure and (failure .. "\n" .. message) or message)
+                end
             end
         }
     }
+
+    if failure then
+        raise("%s", failure)
+    end
 
     os.tryrm(outside)
     os.mkdir(path.join(outside, "dev"))
@@ -158,7 +218,7 @@ function failures(opt)
         table.insert(found, "the libraries of a held cache come from the firmware of any architecture that carries it: " .. tostring(errors))
     end
 
-    os.setenv("REVENANT_HOME", home or nil)
+    os.setenv("REVENANT_CACHE", home or nil)
     os.tryrm(folder)
     return found
 end

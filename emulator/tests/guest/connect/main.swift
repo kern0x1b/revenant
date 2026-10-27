@@ -15,10 +15,10 @@ for round in 0..<rounds {
         connection.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                queue.sync { states[index] = "ready" }
+                states[index] = "ready"
                 settled.signal()
             case .failed(let error), .waiting(let error):
-                queue.sync { states[index] = "failed \(error.debugDescription)" }
+                states[index] = "failed \(error.debugDescription)"
                 settled.signal()
             default:
                 break

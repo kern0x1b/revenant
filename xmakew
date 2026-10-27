@@ -8,6 +8,20 @@ root=$(cd "$(dirname "$0")" && pwd)
 package=$root/packages/x/xmake
 recipe=$package/xmake.lua
 
+common=$(git -C "$root" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)
+if [ -n "$common" ]; then
+    checkout=$(dirname "$common")
+else
+    checkout=$root
+fi
+cache=${REVENANT_CACHE:-$checkout/.cache}
+case $cache in
+    /*) ;;
+    *) cache=$(pwd)/$cache ;;
+esac
+REVENANT_CACHE=$cache
+export REVENANT_CACHE
+
 url=$(sed -n 's/^ *add_urls("\([^"]*\)").*/\1/p' "$recipe")
 commit=$(sed -n 's/^ *add_versions("[^"]*", *"\([0-9a-f]*\)").*/\1/p' "$recipe")
 patches=$(sed -n 's/^ *{"\([^"]*\.patch\)", *"\([0-9a-f]*\)"}.*/\1 \2/p' "$recipe")
@@ -24,13 +38,39 @@ sha256() {
     fi
 }
 
+patchset() {
+    marked=""
+    while read -r name checksum; do
+        [ -n "$name" ] || continue
+        declared=$(awk '/^---$/{exit} /^Changes-build-output: (yes|no)$/{print $2}' "$1/$name" | head -n 1)
+        if [ "$declared" = yes ]; then
+            marked="$marked$name $checksum
+"
+        elif [ "$declared" != no ]; then
+            echo "xmakew: $name does not declare Changes-build-output: yes or no" >&2
+            exit 1
+        fi
+    done <<EOF
+$3
+EOF
+    if [ -n "$marked" ]; then
+        printf '%s\n%s' "$2" "$marked" | sha256 | cut -d' ' -f1
+    fi
+}
+
+if [ "${1:-}" = --patchset ]; then
+    patchset "$2" "$3" "$4"
+    exit 0
+fi
+
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
-cache=$HOME/.revenant/cache/xmake
-prefix=$cache/$key
+digest=$(patchset "$package/patches" "$commit" "$patches")
+xmakes=$cache/xmake
+prefix=$xmakes/$key
 
 if [ ! -x "$prefix/bin/xmake" ]; then
-    work=$cache/$key.build.$$
-    log=$cache/$key.log
+    work=$xmakes/$key.build.$$
+    log=$xmakes/$key.log
     mkdir -p "$work/src"
     trap 'rm -rf "$work"' EXIT INT TERM
     echo "xmakew: building xmake $commit with its patches into $prefix, log in $log" >&2
@@ -55,6 +95,8 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         ./configure --prefix="$work/install"
         make -j"${XMAKE_MAX_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
         make install
+        mkdir -p "$work/install/share/xmake"
+        printf '%s\n' "$digest" > "$work/install/share/xmake/revenant-patch-set"
         mkdir -p "$work/lua"
         for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
             case ${file##*/} in
@@ -74,6 +116,38 @@ if [ ! -x "$prefix/bin/xmake" ]; then
     trap - EXIT INT TERM
 fi
 
-XMAKE_GLOBALDIR=${XMAKE_GLOBALDIR:-$HOME/.revenant/cache/xmake-global}
+XMAKE_GLOBALDIR=$cache/xmake-global
 export XMAKE_GLOBALDIR
-exec "$prefix/bin/xmake" "$@"
+
+scratch_stamp=$cache/.scratch-swept
+if [ -z "$(find "$scratch_stamp" -mmin -1440 2>/dev/null)" ]; then
+    "$prefix/bin/xmake" l -P "$root" "$root/tools/clean.lua" --scratch || echo "xmakew: the scratch retention did not finish" >&2
+fi
+
+run_xmake() {
+    case " $* " in
+        *" -P "* | *" --project"*)
+            "$prefix/bin/xmake" "$@"
+            ;;
+        *)
+            if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+                command=$1
+                shift
+                "$prefix/bin/xmake" "$command" -P "$root" "$@"
+            else
+                "$prefix/bin/xmake" -P "$root" "$@"
+            fi
+            ;;
+    esac
+}
+
+case ${1:-} in
+    f | build | rebuild | test | install | run | package | deb)
+        "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" guard "$root" || exit 1
+        status=0
+        run_xmake "$@" || status=$?
+        "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" record "$root" || true
+        exit $status
+        ;;
+esac
+run_xmake "$@"

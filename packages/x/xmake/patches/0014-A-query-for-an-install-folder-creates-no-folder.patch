@@ -14,6 +14,9 @@ still find it.
 
 Self-review: clean
 Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+
+Changes-build-output: no
+
 ---
  xmake/core/package/package.lua                                | 2 +-
  xmake/modules/private/action/require/impl/actions/install.lua | 1 +

@@ -1,0 +1,71 @@
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -988,8 +988,11 @@ struct Jit::Impl final {
+         }
+ 
+         if (slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
+-            recycle_native_slab = true;
+-            invalidate_entire_cache = true;
++            {
++                std::unique_lock lock{invalidation_mutex};
++                recycle_native_slab = !invalidate_entire_cache || recycle_native_slab;
++                invalidate_entire_cache = true;
++            }
+             PerformRequestedCacheInvalidation(HaltReason::CacheInvalidation);
+             generation = slab->generation();
+         }
+@@ -1028,17 +1031,21 @@ struct Jit::Impl final {
+     }
+ 
+     void request_entire_cache_invalidation(bool recycle_segment) noexcept {
+-        if (invalidate_entire_cache) {
+-            recycle_native_slab = recycle_native_slab && recycle_segment;
+-        } else {
+-            recycle_native_slab = recycle_segment;
++        {
++            std::unique_lock lock{invalidation_mutex};
++            if (invalidate_entire_cache) {
++                recycle_native_slab = recycle_native_slab && recycle_segment;
++            } else {
++                recycle_native_slab = recycle_segment;
++            }
++            invalidate_entire_cache = true;
+         }
+-        invalidate_entire_cache = true;
+         HaltExecution(HaltReason::CacheInvalidation);
+         if (!jit_interface->is_executing) {
+             try {
+                 PerformRequestedCacheInvalidation(HaltReason::CacheInvalidation);
+             } catch (...) {
++                std::unique_lock lock{invalidation_mutex};
+                 invalidate_entire_cache = true;
+                 HaltExecution(HaltReason::CacheInvalidation);
+             }
+@@ -1356,16 +1363,16 @@ private:
+                 } else {
+                     native_code_slab->clear_cache();
+                 }
+-            } else {
+-                for (const auto& range : invalid_cache_ranges) {
+-                    const auto lower = range.lower();
+-                    const auto upper = range.upper();
+-                    native_code_slab->invalidate_cache_range(
+-                        lower, static_cast<std::size_t>(upper - lower) + 1U);
+-                    if (image_slab_enabled && upper >= conf.image_code_begin && lower < conf.image_code_end) {
+-                        image_code_slab->invalidate_cache_range(
+-                            lower, static_cast<std::size_t>(upper - lower) + 1U);
+-                    }
++            }
++            for (const auto& range : invalid_cache_ranges) {
++                const auto lower = range.lower();
++                const auto upper = range.upper();
++                const auto length = static_cast<std::size_t>(upper - lower) + 1U;
++                if (!invalidate_entire_cache) {
++                    native_code_slab->invalidate_cache_range(lower, length);
++                }
++                if (image_slab_enabled && upper >= conf.image_code_begin && lower < conf.image_code_end) {
++                    image_code_slab->invalidate_cache_range(lower, length);
+                 }
+             }
+             invalid_cache_ranges.clear();

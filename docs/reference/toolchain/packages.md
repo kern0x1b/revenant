@@ -47,7 +47,7 @@ SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWe
 
 | Package | What it is |
 | --- | --- |
-| `box2d`, `ggml`, `lz4`, `lzfse`, `micro-ecc`, `monocypher`, `openssl`, `suitesparse-ordering`, `xz`, `zlib` | libraries a port links, each built for the target and carried into its program |
+| `box2d`, `ggml`, `lz4`, `lzfse`, `micro-ecc`, `monocypher`, `openssl`, `suitesparse-ordering`, `xz`, `zlib`, `zxing-cpp` | libraries a port links, each built for the target and carried into its program |
 | `emulator` | the emulator, which boots a firmware's userland on macOS arm64 |
 | `emulator-guest` | the guest programs, `revenant-runner` and `revenant-sblaunch` |
 | `firmware-tools` | `revenant-firmware`, which decrypts the FileVault root filesystems and the Apple Encrypted Archives of firmware |

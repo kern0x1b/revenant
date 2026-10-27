@@ -55,7 +55,7 @@ The xmake verbs the toolchain adds, their options and defaults, the verdicts and
 | `shot [FILE]` | Copies the last frame. |
 | `clean` | Removes this port's images, or every image and golden image with `-a`. |
 
-`until-exit` holds the guest until the application has ended, so an application that produces a result over time is given the time to produce it. The verdict then says in `held` whether the application's own end (`exited`) or the run's budget (`deadline`) came first.
+`until-exit` holds the guest until the application has ended, so an application that produces a result over time is given the time to produce it. The verdict then says in `held` whether the application's own end (`exited`) or the run's budget (`deadline`) came first. An application that ends with status 0 is a success, whether it ends during the steps or before them. Any other end makes the command exit with the application's status, or with 128 plus the signal that ended it.
 
 ### Verdicts
 
@@ -91,22 +91,23 @@ A boot that never ran the command, whose reports show a daemon was killed, is ex
 | Action | What it does |
 | --- | --- |
 | `fetch RELEASE` | Fetches the system libraries of the release for the import check: the shared cache, or the library folder before iOS 3.1. |
-| `rootfs RELEASE` | With `-d`: unpacks the whole root filesystem of the device's earliest firmware not older than the release, into `~/.revenant/firmware/rootfs/<device>/<version>_<build>/`. From iOS 16 the SystemOS cryptex is included. |
+| `rootfs RELEASE` | With `-d`: unpacks the whole root filesystem of the device's earliest firmware not older than the release, into `.cache/firmware/rootfs/<device>/<version>_<build>/`. From iOS 16 the SystemOS cryptex is included. |
 | `classes RELEASE` | Writes the release's Objective-C inventory as JSON beside its cache, with `-o` to choose the path. |
 | `extract RELEASE` | With `-l`: takes one library out of the shared cache as a Mach-O of its own, to be read, not run. |
 | `list` | Lists what is held. |
 
-`-a` is one of `armv6`, `armv7`, `armv7s`, `arm64` and `arm64e`; the default is the configured architecture. Firmware and caches are downloaded from Apple's servers and from the catalogue kept in `~/.revenant/firmware/catalog.json`. Only the system image is downloaded.
+`-a` is one of `armv6`, `armv7`, `armv7s`, `arm64` and `arm64e`; the default is the configured architecture. Firmware and caches are downloaded from Apple's servers and from the catalogue kept in `.cache/firmware/catalog.json`. Only the system image is downloaded.
 
 ## Environment
 
 | Variable | Read by | Meaning |
 | --- | --- | --- |
-| `REVENANT_HOME` | the caches, firmware and emulator folders | the root of the state folders, default `~/.revenant` |
+| `REVENANT_CACHE` | `toolchain/modules/cache.lua`, and `./xmakew` for the xmake folders | the one folder of everything revenant keeps outside its sources, default `.cache` of the main checkout; see `docs/guides/machine.md` |
+| `REVENANT_CACHE_GB` | `toolchain/modules/cache.lua` | the cap on that folder, in decimal gigabytes, default 15 |
 | `REVENANT_RELEASE` | the import check | pins the release, so weak imports the release lacks are refused |
 | `REVENANT_DEVICE` | `xmake device` | the `device.NAME.env` of the whole shell |
 | `REVENANT_DEVICE_HOLDER` | `xmake device` | the holder the whole shell claims as |
 | `REVENANT_SWIFT_MODULES` | the `swift` rule | folders of the Swift modules a package installs, set by the package with `package:setenv` |
 | `REVENANT_ASSETS_EXTRACT_CACHE` | `tools/assets_extract` | where the tool builds itself |
 | `LLVM_PREFIX` | the `ld64` package | the prefix of the `llvm` package, from which `llvm-config` finds `libLTO` |
-| `XMAKE_GLOBALDIR` | `./xmakew` | the package store, default `~/.revenant/cache/xmake-global` |
+| `XMAKE_GLOBALDIR` | `./xmakew` | the package store, set by `./xmakew` to `xmake-global` in the cache |

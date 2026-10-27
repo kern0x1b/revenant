@@ -43,6 +43,8 @@ namespace {
     constexpr std::uint32_t hfs_vnode_tag = 16;
     constexpr std::uint32_t hfs_device = 1;
     constexpr std::uint32_t hfs_block_size = allocation_block_size;
+    constexpr std::size_t max_cached_xattr_bytes = 4096;
+    constexpr std::size_t max_cached_xattrs = 65'536;
 
 #if defined(__APPLE__)
     ssize_t host_getxattr(const char* path, const char* name, void* value,
@@ -98,7 +100,7 @@ namespace {
     }
 #endif
 
-    std::optional<std::vector<std::byte>> read_xattr(
+    std::optional<std::vector<std::byte>> read_host_xattr(
         const std::filesystem::path& path, std::string_view name, bool follow)
     {
         const auto size = host_getxattr(
@@ -112,26 +114,6 @@ namespace {
             return std::nullopt;
         }
         return result;
-    }
-
-    std::optional<std::uint32_t> numeric_xattr(
-        const std::filesystem::path& path, std::string_view name, bool follow)
-    {
-        const auto bytes = read_xattr(path, name, follow);
-        if (!bytes || bytes->empty())
-            return std::nullopt;
-        const std::string_view text {
-            reinterpret_cast<const char*>(bytes->data()), bytes->size()
-        };
-        const auto terminator = text.find('\0');
-        const auto length =
-            terminator == std::string_view::npos ? text.size() : terminator;
-        std::uint32_t result = 0;
-        const auto parsed =
-            std::from_chars(text.data(), text.data() + length, result, 10);
-        return parsed.ec == std::errc { } && parsed.ptr == text.data() + length
-                   ? std::optional { result }
-                   : std::nullopt;
     }
 
     std::uint32_t fnv_catalog_id(std::span<const std::byte> bytes)
@@ -155,14 +137,6 @@ namespace {
             std::as_bytes(std::span { text.data(), text.size() }));
     }
 
-    std::uint32_t inode_catalog_id(const struct stat& status)
-    {
-        std::array<std::uint64_t, 2> identity { static_cast<std::uint64_t>(
-                                                    status.st_dev),
-            static_cast<std::uint64_t>(status.st_ino) };
-        return fnv_catalog_id(std::as_bytes(std::span { identity }));
-    }
-
     bool is_within_root(
         const std::filesystem::path& root, const std::filesystem::path& path)
     {
@@ -174,19 +148,6 @@ namespace {
             normalized_path.lexically_relative(normalized_root);
         return !relative.empty() && relative != "." &&
                relative.begin()->string() != "..";
-    }
-
-    std::optional<std::uint32_t> inherited_identity(
-        const std::filesystem::path& root, const std::filesystem::path& path,
-        std::string_view name)
-    {
-        auto current = path.lexically_normal();
-        while (is_within_root(root, current) && current != root) {
-            current = current.parent_path();
-            if (const auto value = numeric_xattr(current, name, true))
-                return value;
-        }
-        return std::nullopt;
     }
 
     constexpr std::int64_t days_from_civil(
@@ -428,6 +389,12 @@ std::optional<std::uint32_t> MetadataProvider::table_id(std::uint64_t device,
         GuestIdTable::Identity { device, inode }, guest_path);
 }
 
+std::uint32_t MetadataProvider::guest_path_id(
+    const std::filesystem::path& path) const
+{
+    return path_catalog_id(root_, path);
+}
+
 std::optional<GuestIdTable::Identity> MetadataProvider::last_link_identity(
     const std::filesystem::path& path) const
 {
@@ -446,7 +413,9 @@ bool MetadataProvider::remove_name(
     const std::filesystem::path& path, std::error_code& error) const
 {
     const auto freed = last_link_identity(path);
-    if (!std::filesystem::remove(path, error))
+    const auto removed = std::filesystem::remove(path, error);
+    invalidate_xattrs();
+    if (!removed)
         return false;
     if (freed)
         forget(*freed);
@@ -457,6 +426,92 @@ void MetadataProvider::forget(const GuestIdTable::Identity& identity) const
 {
     if (guest_ids_)
         guest_ids_->forget(identity);
+}
+
+std::uint64_t XattrCache::epoch() const
+{
+    const std::lock_guard lock { mutex_ };
+    return epoch_;
+}
+
+std::optional<XattrCache::Value> XattrCache::find(const std::string& key) const
+{
+    const std::lock_guard lock { mutex_ };
+    const auto found = entries_.find(key);
+    if (found == entries_.end() || found->second.epoch != epoch_)
+        return std::nullopt;
+    return found->second.value;
+}
+
+void XattrCache::store(std::string key, Value value, std::uint64_t epoch)
+{
+    const std::lock_guard lock { mutex_ };
+    if (epoch != epoch_)
+        return;
+    if (entries_.size() >= max_cached_xattrs)
+        entries_.clear();
+    entries_.insert_or_assign(
+        std::move(key), Entry { epoch, std::move(value) });
+}
+
+void XattrCache::invalidate()
+{
+    const std::lock_guard lock { mutex_ };
+    ++epoch_;
+}
+
+void MetadataProvider::invalidate_xattrs() const
+{
+    xattrs_->invalidate();
+}
+
+std::optional<std::vector<std::byte>> MetadataProvider::read_xattr(
+    const std::filesystem::path& path, std::string_view name, bool follow) const
+{
+    std::string key { path.string() };
+    key.push_back('\0');
+    key.push_back(follow ? 'f' : 'l');
+    key.append(name);
+    if (const auto cached = xattrs_->find(key))
+        return *cached;
+    const auto epoch = xattrs_->epoch();
+    auto value = read_host_xattr(path, name, follow);
+    if (!value || value->size() <= max_cached_xattr_bytes)
+        xattrs_->store(std::move(key), value, epoch);
+    return value;
+}
+
+std::optional<std::uint32_t> MetadataProvider::numeric_xattr(
+    const std::filesystem::path& path, std::string_view name, bool follow) const
+{
+    const auto bytes = read_xattr(path, name, follow);
+    if (!bytes || bytes->empty())
+        return std::nullopt;
+    const std::string_view text {
+        reinterpret_cast<const char*>(bytes->data()), bytes->size()
+    };
+    const auto terminator = text.find('\0');
+    const auto length =
+        terminator == std::string_view::npos ? text.size() : terminator;
+    std::uint32_t result = 0;
+    const auto parsed =
+        std::from_chars(text.data(), text.data() + length, result, 10);
+    return parsed.ec == std::errc { } && parsed.ptr == text.data() + length
+               ? std::optional { result }
+               : std::nullopt;
+}
+
+std::optional<std::uint32_t> MetadataProvider::inherited_identity(
+    const std::filesystem::path& root, const std::filesystem::path& path,
+    std::string_view name) const
+{
+    auto current = path.lexically_normal();
+    while (is_within_root(root, current) && current != root) {
+        current = current.parent_path();
+        if (const auto value = numeric_xattr(current, name, true))
+            return value;
+    }
+    return std::nullopt;
 }
 
 std::optional<Metadata> MetadataProvider::query(
@@ -493,7 +548,7 @@ std::optional<Metadata> MetadataProvider::query(
             .value_or(0);
     result.link_count = static_cast<std::uint32_t>(status.st_nlink);
     result.permanent_id = table_id(status.st_dev, status.st_ino, path)
-                              .value_or(inode_catalog_id(status));
+                              .value_or(path_catalog_id(root_, path));
     result.catalog_id =
         is_root ? hfs_root_catalog_id
         : status.st_nlink > 1
@@ -515,7 +570,7 @@ std::optional<Metadata> MetadataProvider::query(
         } else {
             result.parent_catalog_id =
                 table_id(parent_status.st_dev, parent_status.st_ino, parent)
-                    .value_or(inode_catalog_id(parent_status));
+                    .value_or(path_catalog_id(root_, parent));
         }
     }
     result.data_length = S_ISREG(status.st_mode)
@@ -541,16 +596,12 @@ std::optional<Metadata> MetadataProvider::query(
     result.modification_time =
         Timestamp { static_cast<std::int32_t>(status.st_mtim.tv_sec),
             static_cast<std::int32_t>(status.st_mtim.tv_nsec) };
-    result.change_time =
-        Timestamp { static_cast<std::int32_t>(status.st_ctim.tv_sec),
-            static_cast<std::int32_t>(status.st_ctim.tv_nsec) };
-    result.access_time =
-        Timestamp { static_cast<std::int32_t>(status.st_atim.tv_sec),
-            static_cast<std::int32_t>(status.st_atim.tv_nsec) };
+    result.change_time = result.modification_time;
+    result.access_time = result.modification_time;
     result.creation_time = parse_hfs_time(
         read_xattr(path, "user.hfsfuse.record.date_created", follow_symlink)
             .value_or(std::vector<std::byte> { }))
-                               .value_or(result.change_time);
+                               .value_or(result.modification_time);
     result.backup_time = parse_hfs_time(
         read_xattr(path, "user.hfsfuse.record.date_backedup", follow_symlink)
             .value_or(std::vector<std::byte> { }))
@@ -587,6 +638,13 @@ bool MetadataProvider::valid_request(const AttributeRequest& request)
     }
     return (request.directory & ~directory_supported_mask) == 0 &&
            (request.file & ~file_supported_mask) == 0;
+}
+
+std::size_t MetadataProvider::fixed_block_size(const AttributeRequest& request)
+{
+    return 4U + common_fixed_size(request.common) +
+           directory_fixed_size(request.directory) +
+           file_fixed_size(request.file);
 }
 
 std::vector<std::byte> MetadataProvider::pack_attributes(

@@ -298,7 +298,8 @@ public final class NWConnection: @unchecked Sendable {
             driveHandshake(session)
             return
         }
-        let path = NWPath(status: .satisfied, isExpensive: false, availableInterfaces: [])
+        let route = revenantCurrentPath()
+        let path = NWPath(status: .satisfied, isExpensive: route.isExpensive, availableInterfaces: route.availableInterfaces)
         currentPath = path
         setState(.ready)
         pathUpdateHandler?(path)

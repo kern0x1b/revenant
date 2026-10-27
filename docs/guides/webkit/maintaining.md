@@ -45,8 +45,8 @@ loud:
 For (2) the answer is a declarative manifest, checked before anything is built:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/carry_check.lua [--tree DIR]   # reads carry-manifest.txt, fails with a list
-./xmakew l frameworks/WebKit/tools/carry_check.lua --paths        # the engine paths it reads, for a sparse checkout
+./xmakew l -P . frameworks/WebKit/tools/carry_check.lua [--tree DIR]   # reads carry-manifest.txt, fails with a list
+./xmakew l -P . frameworks/WebKit/tools/carry_check.lua --paths        # the engine paths it reads, for a sparse checkout
 ```
 
 Every engine build runs the same check on the patched tree before it compiles anything.

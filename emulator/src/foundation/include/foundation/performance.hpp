@@ -229,6 +229,8 @@ enum class PerfSchedulerPreemptionKind : std::uint8_t {
     Urgent,
 };
 
+inline constexpr std::size_t memory_callback_reason_count = 11;
+
 struct PerformanceSnapshot {
     std::uint64_t jit_instances { };
     std::uint64_t jit_live_instances { };
@@ -259,6 +261,7 @@ struct PerformanceSnapshot {
     std::uint64_t jit_stable_table_collisions { };
     std::uint64_t jit_rsb_hits { };
     std::uint64_t jit_rsb_misses { };
+    std::uint64_t jit_fast_dispatch_hint_exits { };
     std::uint64_t jit_stable_link_hits { };
     std::uint64_t jit_stable_link_misses { };
     std::uint64_t jit_host_yield_checks { };
@@ -285,6 +288,14 @@ struct PerformanceSnapshot {
     std::uint64_t scheduler_quantum_expirations { };
     std::uint64_t translation_blocks { };
     std::uint64_t translation_blocks_shared_region { };
+    std::uint64_t translation_compile_nanoseconds { };
+    std::uint64_t memory_callbacks { };
+    std::array<std::uint64_t, memory_callback_reason_count>
+        memory_callback_reasons { };
+    std::uint64_t jit_page_table_disables { };
+    std::uint64_t code_publications { };
+    std::uint64_t code_publication_wait_ns { };
+    std::uint64_t copy_on_write_detaches { };
     std::uint64_t cpu_executions { };
     std::uint64_t cpu_ticks { };
     std::uint64_t svc_calls { };
@@ -443,7 +454,7 @@ public:
     void record_jit_dispatch(std::uint64_t fast_link_hits,
         std::uint64_t fast_link_misses, std::uint64_t stable_table_probes,
         std::uint64_t stable_table_collisions, std::uint64_t rsb_hits,
-        std::uint64_t rsb_misses);
+        std::uint64_t rsb_misses, std::uint64_t fast_dispatch_hint_exits);
     void record_jit_dispatch(std::uint64_t stable_link_hits,
         std::uint64_t stable_link_misses, std::uint64_t rsb_hits,
         std::uint64_t rsb_misses);
@@ -463,6 +474,11 @@ public:
     void record_scheduler_quantum_expiry();
     void record_translation_block();
     void record_translation_block_shared_region();
+    void record_translation_compile(std::uint64_t nanoseconds);
+    void record_memory_callback(std::size_t reason);
+    void record_jit_page_table_disable();
+    void record_code_publication(std::uint64_t wait_ns);
+    void record_copy_on_write_detach();
     void record_cpu_execution(std::uint64_t ticks);
     void record_svc();
     void record_page_miss();
@@ -637,6 +653,7 @@ private:
     std::atomic<std::uint64_t> jit_stable_table_collisions_ { };
     std::atomic<std::uint64_t> jit_rsb_hits_ { };
     std::atomic<std::uint64_t> jit_rsb_misses_ { };
+    std::atomic<std::uint64_t> jit_fast_dispatch_hint_exits_ { };
     std::atomic<std::uint64_t> jit_host_yield_checks_ { };
     std::atomic<std::uint64_t> jit_host_yields_ { };
     std::atomic<std::uint64_t> jit_host_slice_budget_samples_ { };
@@ -661,6 +678,14 @@ private:
     std::atomic<std::uint64_t> scheduler_quantum_expirations_ { };
     std::atomic<std::uint64_t> translation_blocks_ { };
     std::atomic<std::uint64_t> translation_blocks_shared_region_ { };
+    std::atomic<std::uint64_t> translation_compile_nanoseconds_ { };
+    std::atomic<std::uint64_t> memory_callbacks_ { };
+    std::array<std::atomic<std::uint64_t>, memory_callback_reason_count>
+        memory_callback_reasons_ { };
+    std::atomic<std::uint64_t> jit_page_table_disables_ { };
+    std::atomic<std::uint64_t> code_publications_ { };
+    std::atomic<std::uint64_t> code_publication_wait_ns_ { };
+    std::atomic<std::uint64_t> copy_on_write_detaches_ { };
     std::atomic<std::uint64_t> cpu_executions_ { };
     std::atomic<std::uint64_t> cpu_ticks_ { };
     std::atomic<std::uint64_t> svc_calls_ { };

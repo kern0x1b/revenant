@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -15,6 +16,9 @@
 #include <set>
 #include <string>
 #include <string_view>
+
+#include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
 namespace emulator {
 
@@ -27,12 +31,16 @@ enum class DarwinNotifyStateAbi : std::uint8_t {
 };
 
 class DarwinNotifyStateHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     using StateProvider = std::function<std::uint64_t()>;
     using NotificationDispatcher = std::function<void(std::uint32_t process_id,
         std::uint32_t port_name, std::uint32_t token)>;
     using NativeServerReadyQuery = std::function<bool()>;
     using NativeServerProviderQuery = std::function<bool()>;
+    using PostObserver = std::function<void(
+        std::string_view name, std::uint32_t process_id)>;
 
     explicit DarwinNotifyStateHle(UserlandHleRegistry& registry);
     ~DarwinNotifyStateHle();
@@ -42,12 +50,18 @@ public:
     void set_native_server_provider_query(NativeServerProviderQuery query);
     void set_provider(std::string name, StateProvider provider);
     void set_notification_dispatcher(NotificationDispatcher dispatcher);
+    void set_post_observer(PostObserver observer);
     void inherit_state(const DarwinNotifyStateHle& parent);
     void publish(std::string_view name);
+    void observe_post(std::string_view name, std::uint32_t process_id);
     void reset();
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<DarwinNotifyStateHle>, 7>& snapshot_members();
 
 private:
     void initialize(UserlandHleCall& call);
+    void post(UserlandHleCall& call);
     void register_mach_port(UserlandHleCall& call);
     void register_check(UserlandHleCall& call);
     void check(UserlandHleCall& call);
@@ -55,12 +69,16 @@ private:
     void cancel(UserlandHleCall& call);
     void record_registration(std::string name, std::uint32_t token,
         std::uint32_t process_id, std::uint32_t port_name);
+    void publish_registration_locked(std::string name,
+        std::uint32_t process_id, std::uint32_t port_name,
+        std::uint32_t token);
     [[nodiscard]] std::uint32_t allocate_virtual_token();
     [[nodiscard]] bool native_server_ready() const;
 
     using RegistrationKey = std::pair<std::uint32_t, std::uint32_t>;
     struct PublishedRegistration {
         std::string name;
+        std::uint32_t port_name { };
         std::function<void()> notify;
     };
     struct SharedBus {
@@ -79,6 +97,7 @@ private:
     NativeServerReadyQuery native_server_ready_query_;
     NativeServerProviderQuery native_server_provider_query_;
     NotificationDispatcher dispatcher_;
+    PostObserver post_observer_;
     std::shared_ptr<SharedBus> bus_ { std::make_shared<SharedBus>() };
     std::set<RegistrationKey> owned_registrations_;
 };

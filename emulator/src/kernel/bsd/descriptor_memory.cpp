@@ -446,6 +446,10 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                 return;
             }
             const auto sent = udp->second->send(*bytes);
+            const auto peer = udp->second->peer_address();
+            count_interface_traffic(
+                peer && darwin::network::darwin_address_is_loopback(*peer),
+                true, bytes->size(), sent != bsd::VirtualUdpStatus::Success);
             if (sent != bsd::VirtualUdpStatus::Success) {
                 bsd_error(cpu, sent == bsd::VirtualUdpStatus::NotConnected
                                    ? bsd_support::not_connected

@@ -20,11 +20,10 @@ diff --git a/tests/A32/testenv.h b/tests/A32/testenv.h
 index 4345663b..cbd23862 100644
 --- a/tests/A32/testenv.h
 +++ b/tests/A32/testenv.h
-@@ -95,6 +95,18 @@ public:
+@@ -95,6 +95,17 @@ public:
          MemoryWrite32(vaddr + 4, static_cast<u32>(value >> 32));
      }
  
-+    // The tests run one thread, so a read followed by a write is indivisible.
 +    std::uint8_t MemorySwap8(u32 vaddr, std::uint8_t value) override {
 +        const std::uint8_t previous = MemoryRead8(vaddr);
 +        MemoryWrite8(vaddr, value);
@@ -39,11 +38,10 @@ index 4345663b..cbd23862 100644
      void InterpreterFallback(u32 pc, size_t num_instructions) override { ASSERT_MSG(false, "InterpreterFallback({:08x}, {}) code = {:08x}", pc, num_instructions, *MemoryReadCode(pc)); }
  
      void CallSVC(std::uint32_t swi) override { ASSERT_MSG(false, "CallSVC({})", swi); }
-@@ -165,6 +177,18 @@ public:
+@@ -165,6 +176,17 @@ public:
          write(vaddr, value);
      }
  
-+    // The tests run one thread, so a read followed by a write is indivisible.
 +    std::uint8_t MemorySwap8(std::uint32_t vaddr, std::uint8_t value) override {
 +        const std::uint8_t previous = MemoryRead8(vaddr);
 +        MemoryWrite8(vaddr, value);

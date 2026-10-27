@@ -14,8 +14,10 @@
 
 namespace emulator {
 
+class AddressSpace;
 class AudioDecoder;
 class AudioSink;
+class CompatibilityKernel;
 class ControlChannel;
 class DisplayPresenter;
 struct DeviceModel;
@@ -39,6 +41,8 @@ public:
     [[nodiscard]] virtual HostMemorySnapshot memory_snapshot() const = 0;
     [[nodiscard]] virtual HostMemoryBudgetSnapshot
     memory_budget_snapshot() const = 0;
+    virtual void session_stopped(const CompatibilityKernel&,
+        const AddressSpace&) { }
 };
 
 }

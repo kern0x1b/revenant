@@ -115,7 +115,7 @@ std::optional<CoreAnimationRemoteAbi> CoreAnimationRemoteAbi::detect(
     if (inline_message &&
         *inline_message != std::numeric_limits<std::uint32_t>::max()) {
         return CoreAnimationRemoteAbi {
-            "core-animation-remote-transaction-v1", *inline_message,
+            core_animation_transaction_v1_name, *inline_message,
             *inline_message + 1U, false
         };
     }
@@ -127,13 +127,13 @@ std::optional<CoreAnimationRemoteAbi> CoreAnimationRemoteAbi::detect(
             });
     if (has_render_server_protocol) {
         return CoreAnimationRemoteAbi {
-            "core-animation-remote-render-server-v1", 0U, 0U, true
+            core_animation_render_server_v1_name, 0U, 0U, true
         };
     }
 
     if (image.find_symbol(early_render_server_port_symbol) != nullptr) {
         return CoreAnimationRemoteAbi {
-            "core-animation-remote-render-server-v1", 0U, 0U, true
+            core_animation_render_server_v1_name, 0U, 0U, true
         };
     }
     return std::nullopt;

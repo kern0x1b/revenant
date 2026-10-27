@@ -13,7 +13,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
-| [Continuous checks](guides/ci.md) | what CI runs |
+| [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
 | [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |
@@ -34,10 +34,14 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Packages](reference/toolchain/packages.md) | the packages and their versions |
 | [ld64](reference/toolchain/ld64.md) | the linker package: Apple's ld64 from cctools-port, its patches and why the port needs it |
 | [Tools](reference/toolchain/tools.md) | the developer tools |
+| [Optimisation measurements](reference/toolchain/optimisation.md) | the prototypes' numbers: emulator instructions, page misses and text size, and the codegen reproducers |
 | [Third-party code](reference/toolchain/third-party.md) | the third-party code, and where each piece stands |
+| [Guest memory](reference/toolchain/guest-memory.md) | the helper that reads a task's virtual, resident and peak size, and what the emulator answers for it |
+| [Device codegen](reference/toolchain/codegen.md) | what the toolchain sets for the device's code generation, what was measured on the bench workloads, and what is held |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
+| [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
 ## Emulator
 
@@ -47,10 +51,15 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Contributor guide](guides/emulator/contributing.md) | the layout, what bites, the conventions |
 | [How it works](explanation/emulator/how-it-works.md) | what is emulated and how the pieces fit |
 | [Where the time goes](explanation/emulator/performance.md) | why the emulator is as slow as it is, and why not another emulator |
+| [Snapshot and restore](explanation/emulator/snapshot.md) | what a booted machine holds, what a snapshot would save and restore, and the measured costs |
 | [Performance measurements](reference/emulator/performance.md) | the measured runs and the counters of a boot |
 | [Shared translation](explanation/emulator/shared-translation.md) | the design for translating the shared cache once |
+| [Guest memory under parallel execution](explanation/emulator/memory-model.md) | the design for two-core guests to use the page tables, the exclusive monitor, and what is still open |
+| [Load average and interface records](explanation/emulator/load-average-and-link-sysctl.md) | the `vm.loadavg` and `net.link.generic` answers, and what is not modelled |
+| [Directory attribute listing](explanation/emulator/directory-attributes.md) | `getdirentriesattr`: what is matched to XNU, and what is not |
 | [iOS 6.1.3](explanation/emulator/ios-6.1.3.md) | what kept 6.1.3 from booting, and what fixed it |
 | [Control surface](reference/emulator/control-surface.md) | the `--control-stdin` commands and the log lines |
+| [Fatal-fault report](reference/emulator/fault-report.md) | the fields of the fatal line and the fault words, and how their addresses are named |
 | [Guest tests](reference/emulator/guest-tests.md) | the guest programs that check what only a running guest shows |
 | [Graphics](reference/emulator/graphics.md) | the shader limits, the Vulkan driver path and the Core Image path |
 | [Third-party](reference/emulator/third-party.md) | what is bundled or linked, and under which license |
@@ -95,6 +104,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
+| [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |

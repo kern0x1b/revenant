@@ -37,8 +37,18 @@ rule("apple-ios")
         local include = lowered.include_directory(overlay_root)
         target:add("cxflags", "-ivfsoverlay", overlay, {force = true})
         target:add("cxflags", "-I" .. include, {force = true})
+        if not path.absolute(target:scriptdir()):find(path.join("frameworks", "Backports"), 1, true) then
+            target:add("mflags", "-ivfsoverlay", overlay, {force = true})
+            target:add("mflags", "-I" .. include, {force = true})
+            target:add("mxflags", "-ivfsoverlay", overlay, {force = true})
+            target:add("mxflags", "-I" .. include, {force = true})
+        end
         target:add("values", "swift.flags", "-vfsoverlay", overlay)
         target:add("values", "swift.flags", "-Xcc", "-I" .. include)
+        local flat = import("@self.apple.flat_classes")
+        local flat_flags = flat.app_link_flags(sdk, path.join(os.projectdir(), "build", "generated", "flat-stubs"))
+        target:add("ldflags", flat_flags, {force = true})
+        target:add("shflags", flat_flags, {force = true})
         local symbols = target:values("apple.compat")
         if symbols then
             local compat = target:pkg("apple-compat")

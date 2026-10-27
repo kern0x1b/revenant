@@ -1,0 +1,16 @@
+local outcome = import("lib.outcome", {rootdir = os.scriptdir(), anonymous = true})
+
+function main()
+    local passed = outcome.gesture_outcome("swipe-real", false, "gesture: log [archive Row 1]")
+    assert(not passed, "a gesture that never finished must fail")
+    passed = outcome.gesture_outcome("swipe-real", true, "gesture: log []")
+    assert(not passed, "a swipe that never reached the archive action must fail")
+    passed = outcome.gesture_outcome("swipe-real", true, nil)
+    assert(not passed, "a swipe with no gesture log line must fail")
+    assert(outcome.gesture_outcome("swipe-real", true, "gesture: log [archive Row 1]"), "a swipe that archived a row must pass")
+    assert(outcome.gesture_outcome("styles", true, nil), "a gesture with no expectation must pass once it is done")
+    assert(not outcome.gesture_outcome("styles", false, nil), "a gesture with no expectation that never finished must fail")
+    assert(not outcome.live_outcome(false), "a live scenario that never logged ready must fail")
+    assert(outcome.live_outcome(true), "a live scenario that logged ready must pass")
+    print("outcome: all checks passed")
+end

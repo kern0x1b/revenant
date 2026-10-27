@@ -18,6 +18,9 @@ on:
 permissions:
   contents: write
 
+env:
+  REVENANT_CACHE: ${{ github.workspace }}/.cache
+
 concurrency:
   group: prebuilt-${{ inputs.package }}-${{ github.ref_name }}
   cancel-in-progress: false
@@ -98,8 +101,8 @@ jobs:
         id: dyld
         uses: actions/cache/restore@v4
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Fetch the iOS 6.0 armv7 shared cache
         if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
@@ -109,8 +112,8 @@ jobs:
         if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/.revenant/dyld/6.0
-          key: dyld-shared-cache-6.0-armv7-v1
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Build or fetch the package
         env:
@@ -137,7 +140,7 @@ jobs:
           if [ -d "$cache" ]; then
             tar -C "$(dirname "$cache")" -cf "$evidence/clang-module-cache.tar" ModuleCache
           fi
-          lowered=$(find "$HOME/.revenant/cache/xmake-global/.xmake/cache/packages" -type d -name lowered -path '*/swift-runtime/*/source/lowered' 2>/dev/null | head -n 1)
+          lowered=$(find "$REVENANT_CACHE/xmake-global/.xmake/cache/packages" -type d -name lowered -path '*/swift-runtime/*/source/lowered' 2>/dev/null | head -n 1)
           if [ -n "$lowered" ]; then
             tar -C "$(dirname "$lowered")" -cf "$evidence/lowered.tar" lowered
           fi

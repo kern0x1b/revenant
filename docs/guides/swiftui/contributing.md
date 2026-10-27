@@ -27,9 +27,9 @@ named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with t
 - `examples/showcase/` — the demo app and its snapshot scenarios, with the `Info.plist` and `control` of both applications.
 - `docs/` at the top of revenant — the documents of this module, by kind: the ledger
   (`docs/reference/swiftui/ledger.md`) with `tools/coverage.lua` as its checker, and the rest under `docs/*/swiftui/`.
-- `tools/` — every script of this folder, in Lua, run with `./xmakew l frameworks/SwiftUI/tools/<script>` from the top of
+- `tools/` — every script of this folder, in Lua, run with `./xmakew l -P . frameworks/SwiftUI/tools/<script>` from the top of
   revenant; `tools/lib/tree.lua` names the folders they read and the run folder they write
-  (`$HOME/.revenant/cache/<task>/swiftui/`, from `toolchain/modules/workspace.lua`).
+  (`.cache/scratch/<task>/swiftui/`, from `toolchain/modules/workspace.lua`).
 - `xmake.lua` — the targets of this member in the revenant project (the top `xmake.lua` of revenant includes it):
   `SwiftUI` on Combine's `Combine`; the demo `SwiftUIDemo` and `SwiftUISnapshots`, the same demo sources whose
   Info.plist carries `SwiftUISnapshots` so it renders the scenarios; `SwiftUITests` and `SwiftUIProbe`, daemons; each a
@@ -44,12 +44,12 @@ From the top of revenant:
 ./xmakew f -P . -p iphoneos -a armv7 -y
 ./xmakew build -P . SwiftUI                                      # begins with the ledger check
 ./xmakew test -P . SwiftUITypeChecks/*                           # the builder typechecks
-./xmakew l frameworks/SwiftUI/tools/emulate.lua tests            # the engine tests, in the emulator
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots        # 38 rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua tests            # the engine tests, in the emulator
+./xmakew l -P . frameworks/SwiftUI/tools/emulate.lua snapshots        # 38 rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
 ```
 
 `emulate.lua` drives revenant's emulator (skill `emulator-session`): it configures the project with `-c` (so the package
-the pin names is the one installed) and `--emulate=y`, then runs `./xmakew emulate install` and
+the pin names is the one installed) and `--emulate=y`, then runs `./xmakew emulate -P . install` and
 `emulate run /usr/libexec/SwiftUITests`, or `emulate launch space.kern0x1b.swiftui.snapshots until-exit`. The scenarios
 need a key window, so they run in the application, through SpringBoard; the engine tests are a console binary and go
 through `run`. Its logs, the run's results and the pictures go to a fresh folder under the run folder, which it

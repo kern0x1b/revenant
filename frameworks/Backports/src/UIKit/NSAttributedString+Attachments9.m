@@ -1,5 +1,8 @@
 #import <UIKit/UIKit.h>
 
+NSString *const NSAttachmentAttributeName = @"NSAttachment";
+NSString *const NSLinkAttributeName = @"NSLink";
+
 @implementation NSAttributedString (RevenantAttachments9)
 
 - (BOOL)containsAttachmentsInRange:(NSRange)range

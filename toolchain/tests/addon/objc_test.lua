@@ -290,10 +290,31 @@ local function object_failures(folder, opt)
     return found
 end
 
+local function declared_failures(folder, opt)
+    local found = {}
+    local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})
+    local missing = {app = {"probeDidFinishWithCount:", "isLowPowerModeEnabled"}, call = {"setConfiguration:active:error:disableRecording:"}}
+    local undeclared = objc.undeclared(missing, nil)
+    if #undeclared.app ~= 2 or #undeclared.call ~= 1 then
+        table.insert(found, "without a declaration every reported selector must still be reported")
+    end
+    local partly = objc.undeclared(missing, {"probeDidFinishWithCount:", "setConfiguration:active:error:disableRecording:"})
+    if #partly.app ~= 1 or partly.app[1] ~= "isLowPowerModeEnabled" then
+        table.insert(found, "an undeclared selector must still be reported when other selectors of the same binary are declared")
+    end
+    if partly.call then
+        table.insert(found, "a declared selector must be silent in the binary that sends it")
+    end
+    if #table.keys(objc.undeclared(missing, {"probeDidFinishWithCount:", "isLowPowerModeEnabled", "setConfiguration:active:error:disableRecording:"})) > 0 then
+        table.insert(found, "declaring every reported selector must leave nothing to report")
+    end
+    return found
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    for _, check in ipairs({stub_failures, selector_failures, inventory_failures, held_failures, kept_failures, object_failures}) do
+    for _, check in ipairs({stub_failures, selector_failures, declared_failures, inventory_failures, held_failures, kept_failures, object_failures}) do
         table.join2(found, check(folder, opt))
     end
     os.tryrm(folder)

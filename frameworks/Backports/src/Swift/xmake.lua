@@ -288,3 +288,21 @@ overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Securi
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 
 overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, frameworks = {"Foundation"}})
+
+target("swift_backports_tests")
+    set_kind("phony")
+    set_default(false)
+    add_tests("oslock")
+    on_test(function (target, opt)
+        import("core.project.project")
+        local root = path.join(SRC, "..", "..", "..")
+        local runtime = project.required_package("swift-runtime"):installdir()
+        local compiler = path.join(project.required_package("swift"):installdir(), "bin", "swiftc")
+        local ok = os.execv(os.programfile(), {"l", "-P", root, path.join(SRC, "..", "tests", "os_lock_test.lua")},
+                            {try = true, curdir = root, envs = {REVENANT_SWIFT_RUNTIME = runtime, REVENANT_SWIFT_COMPILER = compiler}})
+        if ok ~= 0 then
+            opt.errors = "oslock failed"
+        end
+        return ok == 0
+    end)
+target_end()

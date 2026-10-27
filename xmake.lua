@@ -5,7 +5,7 @@ add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
 option("component", {type = "string", default = "", showmenu = true,
-                     description = "Configure only this component and what it needs, for example Backports; empty configures every component."})
+                     description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})
 option("apple_sdk", {type = "string", default = "", showmenu = true,
                      description = "The iPhoneOS SDK version, 16.4 or 26.2; empty takes 26.2, the one SDK every configure uses."})
 
@@ -25,6 +25,7 @@ set_config("apple_minimum", "6.0")
 if is_plat("iphoneos") then
     includes("@addon/revenant/apple-ios")
     includes("emulator/src/guest")
+    includes("toolchain/src/guest-memory")
     if has_config("emulate") then
         includes("@addon/revenant/emulate")
     end
@@ -39,7 +40,7 @@ includes("frameworks/Backports")
 includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
 on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
-if whole then
+if whole or component == "emulator" then
     target("repository")
         set_kind("phony")
         set_default(false)
@@ -49,6 +50,8 @@ if whole then
         add_tests("copied_text")
         add_tests("credentials")
         add_tests("open_gaps")
+        add_tests("docs_commands")
+        add_tests("snapshot_diff")
         on_test(function (target, opt)
             local root = os.projectdir()
             if path.filename(opt.name) == "credentials" then
@@ -89,7 +92,9 @@ if whole then
             local commands = {layout = {path.join(root, "tools", "layout.lua")},
                               comments_check = {path.join(root, "tools", "comments.lua"), "check"},
                               comments_test = {path.join(root, "tools", "comments.lua"), "test"},
-                              open_gaps = {path.join(root, "tools", "open_gaps.lua")}}
+                              open_gaps = {path.join(root, "tools", "open_gaps.lua")},
+                              docs_commands = {path.join(root, "tools", "docs_commands.lua")},
+                              snapshot_diff = {path.join(root, "tools", "snapshot_diff.lua"), "test"}}
             local ok = os.execv(os.programfile(), table.join({"l", "-P", root}, commands[path.filename(opt.name)]), {try = true, curdir = root})
             if ok ~= 0 then
                 opt.errors = path.filename(opt.name) .. " failed"

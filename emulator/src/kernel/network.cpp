@@ -70,6 +70,8 @@ namespace kernel_network {
             result.ipv6_address = interface.ipv6_address;
             result.ipv6_netmask = interface.ipv6_netmask;
         }
+        result.counters = interface.counters;
+        result.up_time_nanoseconds = interface.up_time_nanoseconds;
         return result;
     }
 }
@@ -187,6 +189,9 @@ bool CompatibilityKernel::receive_socket_message(
         const auto received = udp->second->receive(receive_capacity);
         if (!received)
             return false;
+        count_interface_traffic(
+            darwin::network::darwin_address_is_loopback(received->source_address),
+            false, received->bytes.size(), false);
 
         std::size_t source_offset = 0;
         for (const auto& iovec : iovecs) {
@@ -284,6 +289,9 @@ bool CompatibilityKernel::receive_socket_message(
         const auto received = host->second->receive(receive_capacity);
         if (received.status == HostSocketStatus::WouldBlock)
             return false;
+        count_interface_traffic(host->second->loopback_for(received.address),
+            false, received.transferred,
+            received.status == HostSocketStatus::Error);
         if (received.status == HostSocketStatus::Error) {
             bsd_error(cpu, received.darwin_error);
             return true;
@@ -632,6 +640,9 @@ bool CompatibilityKernel::receive_socket_bytes(Cpu& cpu, std::uint32_t fd,
         const auto received = host->second->receive(size);
         if (received.status == HostSocketStatus::WouldBlock)
             return false;
+        count_interface_traffic(host->second->loopback_for(received.address),
+            false, received.transferred,
+            received.status == HostSocketStatus::Error);
         if (received.status == HostSocketStatus::Error) {
             bsd_error(cpu, received.darwin_error);
             return true;
@@ -654,6 +665,9 @@ bool CompatibilityKernel::receive_socket_bytes(Cpu& cpu, std::uint32_t fd,
         const auto received = udp->second->receive(size);
         if (!received)
             return false;
+        count_interface_traffic(
+            darwin::network::darwin_address_is_loopback(received->source_address),
+            false, received->bytes.size(), false);
         if (!memory_.copy_in(address, received->bytes) ||
             !copy_socket_address(source_address, source_length_address,
                 received->source_address)) {
@@ -1213,7 +1227,32 @@ void CompatibilityKernel::synchronize_interface_routes(
     }
 }
 
-bool CompatibilityKernel::descriptor_readable(std::uint32_t fd) const
+namespace {
+
+bool host_socket_readable(const HostSocket& socket,
+    const HostReadinessProbe* host_readiness)
+{
+    if (host_readiness) {
+        if (const auto answer = host_readiness->readable(socket.descriptor()))
+            return *answer;
+    }
+    return socket.readable();
+}
+
+bool host_socket_writable(const HostSocket& socket,
+    const HostReadinessProbe* host_readiness)
+{
+    if (host_readiness) {
+        if (const auto answer = host_readiness->writable(socket.descriptor()))
+            return *answer;
+    }
+    return socket.writable();
+}
+
+}
+
+bool CompatibilityKernel::descriptor_readable(std::uint32_t fd,
+    const HostReadinessProbe* host_readiness) const
 {
     if (file_descriptors_.contains(fd))
         return true;
@@ -1245,7 +1284,8 @@ bool CompatibilityKernel::descriptor_readable(std::uint32_t fd) const
         return true;
     }
     if (const auto host = host_sockets_.find(fd);
-        host != host_sockets_.end() && host->second->readable()) {
+        host != host_sockets_.end() &&
+        host_socket_readable(*host->second, host_readiness)) {
         return true;
     }
     if (const auto udp = virtual_udp_sockets_.find(fd);
@@ -1286,9 +1326,11 @@ bool CompatibilityKernel::descriptor_readable(std::uint32_t fd) const
         queue->second.begin(), queue->second.end(), [&](const auto& event) {
             return (event.ident != fd &&
                        event.filter == darwin::kqueue::filter_read &&
-                       descriptor_readable(static_cast<std::uint32_t>(event.ident))) ||
+                       descriptor_readable(static_cast<std::uint32_t>(event.ident),
+                           host_readiness)) ||
                    (event.filter == darwin::kqueue::filter_write &&
-                       descriptor_writable(static_cast<std::uint32_t>(event.ident))) ||
+                       descriptor_writable(static_cast<std::uint32_t>(event.ident),
+                           host_readiness)) ||
                    (event.filter == darwin::kqueue::filter_mach_port &&
                        ready_mach_kevent_name(event).has_value()) ||
                    (event.enabled && event.timer &&
@@ -1302,14 +1344,15 @@ bool CompatibilityKernel::descriptor_readable(std::uint32_t fd) const
         });
 }
 
-bool CompatibilityKernel::descriptor_writable(std::uint32_t fd) const
+bool CompatibilityKernel::descriptor_writable(std::uint32_t fd,
+    const HostReadinessProbe* host_readiness) const
 {
     if (fd == 1 || fd == 2 || file_descriptors_.contains(fd) ||
         socket_pair_endpoints_.contains(fd)) {
         return true;
     }
     if (const auto host = host_sockets_.find(fd); host != host_sockets_.end()) {
-        return host->second->writable();
+        return host_socket_writable(*host->second, host_readiness);
     }
     if (const auto udp = virtual_udp_sockets_.find(fd);
         udp != virtual_udp_sockets_.end()) {
@@ -1561,6 +1604,23 @@ std::optional<std::uint32_t> CompatibilityKernel::collect_ready_kevents(
     if (queue == kqueues_.end())
         return std::nullopt;
     std::uint32_t written = 0;
+    HostReadinessProbe host_readiness;
+    for (const auto& registration : queue->second) {
+        if (!registration.enabled)
+            continue;
+        const auto host =
+            host_sockets_.find(static_cast<std::uint32_t>(registration.ident));
+        if (host == host_sockets_.end())
+            continue;
+        if (registration.filter == darwin::kqueue::filter_read &&
+            host->second->readable_polls()) {
+            host_readiness.request_readable(host->second->descriptor());
+        } else if (registration.filter == darwin::kqueue::filter_write &&
+                   host->second->writable_polls()) {
+            host_readiness.request_writable(host->second->descriptor());
+        }
+    }
+    host_readiness.run();
     for (auto registration = queue->second.begin();
         registration != queue->second.end();) {
         std::uint32_t filter_flags = 0;
@@ -1618,9 +1678,11 @@ std::optional<std::uint32_t> CompatibilityKernel::collect_ready_kevents(
         const auto ready =
             !registration->enabled ? false
             : registration->filter == darwin::kqueue::filter_read
-                ? descriptor_readable(static_cast<std::uint32_t>(registration->ident))
+                ? descriptor_readable(static_cast<std::uint32_t>(registration->ident),
+                    &host_readiness)
             : registration->filter == darwin::kqueue::filter_write
-                ? descriptor_writable(static_cast<std::uint32_t>(registration->ident))
+                ? descriptor_writable(static_cast<std::uint32_t>(registration->ident),
+                    &host_readiness)
             : registration->filter == darwin::kqueue::filter_process
                 ? filter_flags != 0U
             : registration->filter == darwin::kqueue::filter_vnode

@@ -532,6 +532,8 @@ SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int heig
     NSHashTable<SCNScene *> *_surveyed;
 }
 @synthesize lastRenderPointOfView = _lastRenderPointOfView, lastRenderWidth = _lastRenderWidth, lastRenderHeight = _lastRenderHeight;
+@synthesize jitterX = _jitterX, jitterY = _jitterY;
+@synthesize autoenablesDefaultLighting = _autoenablesDefaultLighting;
 
 - (instancetype)initWithContext:(EAGLContext *)context
 {
@@ -1113,6 +1115,45 @@ static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
     }
 }
 
+- (BOOL)prepareObject:(id)object shouldAbortBlock:(BOOL (^)(void))block
+{
+    if (block && block()) {
+        return NO;
+    }
+    if ([object isKindOfClass:[SCNScene class]]) {
+        return [self prepareObject:((SCNScene *)object).rootNode shouldAbortBlock:block];
+    }
+    if ([object isKindOfClass:[SCNNode class]]) {
+        SCNNode *node = object;
+        if (node.geometry && ![self prepareObject:node.geometry shouldAbortBlock:block]) {
+            return NO;
+        }
+        for (SCNNode *child in node.childNodes) {
+            if (![self prepareObject:child shouldAbortBlock:block]) {
+                return NO;
+            }
+        }
+        return YES;
+    }
+    if ([object isKindOfClass:[SCNGeometry class]]) {
+        return [self meshFor:object] != nil;
+    }
+    if ([object isKindOfClass:[SCNMaterial class]]) {
+        SCNMaterial *material = object;
+        for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+            BOOL hasAlpha = NO;
+            [self textureFor:RevenantSCNSlotProperty(material, (RevenantSCNSlot)slot).contents sRGB:RevenantSCNSlots[slot].sRGB hasAlpha:&hasAlpha];
+        }
+        return YES;
+    }
+    if ([object isKindOfClass:[SCNMaterialProperty class]]) {
+        BOOL hasAlpha = NO;
+        [self textureFor:((SCNMaterialProperty *)object).contents sRGB:NO hasAlpha:&hasAlpha];
+        return YES;
+    }
+    return NO;
+}
+
 - (void)renderScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height
 {
     _frame++;
@@ -1130,6 +1171,12 @@ static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
     SCNMatrix4 view = RevenantSCNMatrixInvert(cameraWorld);
     SCNCamera *camera = pointOfView.camera;
     SCNMatrix4 projection = RevenantSCNProjectionMatrix(pointOfView, width, height);
+    if (self.jitterX != 0 || self.jitterY != 0) {
+        SCNMatrix4 shift = SCNMatrix4Identity;
+        shift.m41 = 2 * self.jitterX / width;
+        shift.m42 = 2 * self.jitterY / height;
+        projection = RevenantSCNMatrixMultiply(projection, shift);
+    }
     self.lastRenderPointOfView = pointOfView;
     self.lastRenderWidth = width;
     self.lastRenderHeight = height;
@@ -1282,7 +1329,7 @@ static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
         glUniform1f(program->_opacity, item->opacity);
         glUniform1f(program->_transparency, (float)material.transparency);
         glUniform1f(program->_shininess, (float)material.shininess);
-        glUniform1f(program->_implicitLight, lightCount == 0 ? 1 : 0);
+        glUniform1f(program->_implicitLight, (lightCount == 0 && self.autoenablesDefaultLighting) ? 1 : 0);
         GLint unit = 0;
         for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
             SCNMaterialProperty *property = RevenantSCNSlotProperty(material, (RevenantSCNSlot)slot);

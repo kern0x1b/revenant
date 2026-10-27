@@ -104,4 +104,57 @@ bool HidEventSystemHle::prepare_pending_event(
     return delivering_;
 }
 
+const std::array<snapshot::Member<HidEventSystemHle>, 3>& HidEventSystemHle::snapshot_members()
+{
+    static constexpr std::array<snapshot::Member<HidEventSystemHle>, 3> members {{
+        {"hid.consumer_process_",
+            [](const HidEventSystemHle& hid) {
+                return snapshot::is_default(hid.consumer_process_);
+            },
+            [](snapshot::Writer& out, const HidEventSystemHle& hid) {
+                snapshot::save(out, hid.consumer_process_);
+            },
+            [](snapshot::Reader& in, HidEventSystemHle& hid) {
+                snapshot::load(in, hid.consumer_process_);
+            }},
+        {"hid.consumer_processor_",
+            [](const HidEventSystemHle& hid) {
+                return snapshot::is_default(hid.consumer_processor_);
+            },
+            [](snapshot::Writer& out, const HidEventSystemHle& hid) {
+                snapshot::save(out, static_cast<std::uint64_t>(hid.consumer_processor_));
+            },
+            [](snapshot::Reader& in, HidEventSystemHle& hid) {
+                std::uint64_t consumer_processor { };
+                snapshot::load(in, consumer_processor);
+                hid.consumer_processor_ = static_cast<std::size_t>(consumer_processor);
+            }},
+        {"hid.accelerometer_",
+            [](const HidEventSystemHle& hid) {
+                return !hid.accelerometer_.next_deadline().has_value();
+            },
+            [](snapshot::Writer& out, const HidEventSystemHle& hid) {
+                hid.accelerometer_.save(out);
+            },
+            [](snapshot::Reader& in, HidEventSystemHle& hid) {
+                HidAccelerometer accelerometer;
+                accelerometer.load(in);
+                hid.accelerometer_ = accelerometer;
+            }},
+    }};
+    return members;
+}
+
+void HidEventSystemHle::save(snapshot::Writer& out) const
+{
+    if (delivering_)
+        throw snapshot::RefusedError { "hid.delivering" };
+    snapshot::save_members(out, *this, snapshot_members());
+}
+
+void HidEventSystemHle::load(snapshot::Reader& in)
+{
+    snapshot::restore_members(in, *this, snapshot_members());
+}
+
 }

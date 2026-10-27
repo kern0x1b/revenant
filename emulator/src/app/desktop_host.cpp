@@ -7,6 +7,7 @@
 
 #include "app/desktop_host.hpp"
 
+#include <fstream>
 #include <stdexcept>
 
 #include "app/live_control.hpp"
@@ -16,10 +17,39 @@
 #include "host/resource_usage.hpp"
 #include "app/sdl_audio_sink.hpp"
 #include "app/sdl_display.hpp"
+#include "kernel/snapshot_census.hpp"
 
 namespace emulator {
 
+DesktopHost::DesktopHost(std::filesystem::path census_output)
+    : census_output_ { std::move(census_output) }
+{
+}
+
 void DesktopHost::initialize_graphics() { register_native_gles_renderer(); }
+
+void DesktopHost::session_stopped(const CompatibilityKernel& kernel,
+    const AddressSpace& memory)
+{
+    if (census_output_.empty())
+        return;
+    std::ofstream out { census_output_ };
+    if (!out) {
+        throw std::runtime_error {
+            "cannot write census output: " + census_output_.string()
+        };
+    }
+    for (const auto& name : CompatibilityKernelSnapshot::populated_members(kernel))
+        out << name << '\n';
+    for (const auto& name : CompatibilityKernelSnapshot::populated_memory(memory))
+        out << name << '\n';
+    out.flush();
+    if (!out) {
+        throw std::runtime_error {
+            "cannot flush census output: " + census_output_.string()
+        };
+    }
+}
 
 std::unique_ptr<DisplayPresenter> DesktopHost::create_display(
     const DeviceModel& device)

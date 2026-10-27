@@ -17,6 +17,10 @@ local NOT_STRINGS = {
     ["modules/apple/dyld.lua|table.sort(slots)"] = "numbers",
     ["modules/apple/firmware.lua|table.sort(chosen, function (a, b) return a.size < b.size end)"] = "sizes",
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
+    ["modules/cache.lua|table.sort(all, function (a, b) return a.bytes > b.bytes end)"] = "sizes",
+    ["modules/cache.lua|table.sort(candidates, function (a, b)"] = "eviction classes, then times",
+    ["modules/cache.lua|table.sort(list, function (a, b) return a.used > b.used end)"] = "times",
+    ["modules/cache.lua|table.sort(rows, function (a, b) return a.bytes > b.bytes end)"] = "sizes",
     ["modules/gyb/runtime.lua|table.sort(keyed, function(a, b)"] = "Python's order, byteorder.less on strings, then the index",
 }
 

@@ -6,7 +6,7 @@ package("ffmpeg")
 
     add_urls("https://github.com/FFmpeg/FFmpeg.git")
     add_versions("8.1.2", "38b88335f99e76ed89ff3c93f877fdefce736c13")
-    add_patches("8.1.2", "patches/0001-version-and-mov-stsd.patch", "c7fc29dc410e56cd7b4eb86ad20702bb73347f09dbc185fd89db5fed69af8066")
+    add_patches("8.1.2", "patches/0001-version-and-mov-stsd.patch", "7efef3d9f5e1527578243ec3ec002f69aa87fcf4d54608e7e63dee18f9c044ef")
     add_patches("8.1.2", "patches/0002-audiotoolbox-uint32-out-params.patch", "cfbe482fec85966fa0b3db121df16648442f66438e4462bb9d507309f4575d0c")
     add_patches("8.1.2", "patches/0003-audiotoolbox-encoder-uint32-out-params.patch", "d7f2ce04e2872d0d3ab1c7aaecb1bdbc7295b0bd38294ef7c98e5d318dd812d7")
     add_links("avformat", "avcodec", "swresample", "avutil")

@@ -4,8 +4,8 @@ Numbers, on the phone, repeatable - because a screenshot is not a measurement
 and one run is not evidence.
 
 ```sh
-./xmakew l frameworks/WebKit/tests/device/run.lua                # every page, verdict per check
-./xmakew l frameworks/WebKit/tests/device/run.lua --port 8898    # if 8899 is busy
+./xmakew l -P . frameworks/WebKit/tests/device/run.lua                # every page, verdict per check
+./xmakew l -P . frameworks/WebKit/tests/device/run.lua --port 8898    # if 8899 is busy
 ```
 
 The device cannot be asked for its DOM, so each page reports itself: the runner
@@ -150,11 +150,11 @@ rectangle: reading back and presenting are different paths, and only one of them
 was working. This loads a canvas cleared to red and looks at the screen.
 
 ```sh
-./xmakew l frameworks/WebKit/tests/device/gl-present.lua
+./xmakew l -P . frameworks/WebKit/tests/device/gl-present.lua
 ```
 
 It prints how much of the page area is red and exits non-zero when the answer is
-`absent`. The screenshot goes to `$HOME/.revenant/cache/<task>/webkit-shots/gl-present.png`.
+`absent`. The screenshot goes to `.cache/scratch/<task>/webkit-shots/gl-present.png`.
 
 ## conformance.lua — Khronos' suite, on the phone
 
@@ -171,7 +171,7 @@ Then name the tests to run, and the checkout's `sdk/tests` with `--suite` or
 `WEBGL_TESTS`:
 
 ```sh
-./xmakew l frameworks/WebKit/tests/device/conformance.lua --suite <checkout>/sdk/tests \
+./xmakew l -P . frameworks/WebKit/tests/device/conformance.lua --suite <checkout>/sdk/tests \
     conformance/rendering/culling.html
 ```
 
@@ -190,7 +190,7 @@ alive, WebKit rebuilt the drawing buffer every frame, and the web thread stopped
 answering after the first one - no crash and no log line.
 
 ```sh
-./xmakew l frameworks/WebKit/tests/device/gl-frame-rate.lua
+./xmakew l -P . frameworks/WebKit/tests/device/gl-frame-rate.lua
 ```
 
 It animates for four seconds at each of three canvas sizes and prints the rate,
@@ -206,13 +206,13 @@ is served through a reverse SSH tunnel so it arrives at `http://localhost`, whic
 is a secure context, and `revtouch` taps the button and then the sheet's Cancel.
 
 ```sh
-./xmakew l frameworks/WebKit/tests/device/share-sheet.lua
+./xmakew l -P . frameworks/WebKit/tests/device/share-sheet.lua
 ```
 
 It prints what the page saw on load and after cancelling, and exits non-zero
 unless the promise rejects with `AbortError`, which is what the specification
 asks for when the sheet is dismissed. The screenshot of the open sheet goes to
-`$HOME/.revenant/cache/<task>/webkit-shots/share-sheet.png`.
+`.cache/scratch/<task>/webkit-shots/share-sheet.png`.
 
 ## sweep.lua — the same engine against the web as it is served
 
@@ -222,8 +222,8 @@ have looks like a blank page and nothing else. `sweep.lua` loads real sites, one
 browser per site, and reports four things per page:
 
 ```
-./xmakew l frameworks/WebKit/tests/device/sweep.lua https://example.org/   # the sites you name
-./xmakew l frameworks/WebKit/tests/device/sweep.lua                        # or a list in sweep-sites.txt, which is yours and gitignored
+./xmakew l -P . frameworks/WebKit/tests/device/sweep.lua https://example.org/   # the sites you name
+./xmakew l -P . frameworks/WebKit/tests/device/sweep.lua                        # or a list in sweep-sites.txt, which is yours and gitignored
 ```
 
 It ships with no list of its own. Which sites a browser here is driven at from
@@ -238,7 +238,7 @@ is served out of this directory.
 | `PAINTED` | how much of the page area the screenshot drew, `blank` under 1% |
 | `DIRTY` | the process's dirty memory, which is what jetsam judges by |
 
-Screenshots go to `$HOME/.revenant/cache/<task>/webkit-shots/`, so a verdict that
+Screenshots go to `.cache/scratch/<task>/webkit-shots/`, so a verdict that
 looks wrong can be looked at.
 
 **The device is not a Unix box.** It carries `sed`, `grep`, `xargs`, `cat`, `ls`,

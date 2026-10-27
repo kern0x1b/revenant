@@ -15,6 +15,7 @@
 #include <set>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "graphics/host_graphics.hpp"
 #include "graphics/mbx2d_abi.hpp"
 #include "graphics/surface_store.hpp"
@@ -29,6 +30,8 @@ struct KernelSharedState;
 class PresentationTracker;
 
 class Mbx2dHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     Mbx2dHle(UserlandHleRegistry& registry,
         std::shared_ptr<DisplayState> display,
@@ -42,6 +45,9 @@ public:
     void set_presentation_tracker(
         std::shared_ptr<PresentationTracker> presentations);
     void set_shared_state(std::shared_ptr<KernelSharedState> shared_state);
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     struct Surface {

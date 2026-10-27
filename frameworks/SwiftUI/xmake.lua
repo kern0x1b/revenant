@@ -4,11 +4,17 @@ option("swiftui_perf", {default = false, showmenu = true,
                         description = "Have the demo application run its timing scenarios after launch and quit."})
 
 local component = get_config("component")
-if component ~= "" and component ~= "SwiftUI" then
+if component ~= "" and component ~= "SwiftUI" and component ~= "SwiftUIDemo" then
     return
 end
 
 if is_plat("iphoneos") then
+    if component == "SwiftUI" or component == "SwiftUIDemo" then
+        add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
+        add_requires("revenant@libcxx", {alias = "libcxx"})
+        add_requires("revenant@combine", {alias = "combine"})
+    end
+
     local function weak_import_waiver()
         add_values("revenant.waive.weak-imports",
                    "every weak import is reached only behind #available or carried by the backports: the runtime's overlays built with availability checking on, Combine's run-loop timer tolerance, compiler-rt's version check")
@@ -17,16 +23,15 @@ if is_plat("iphoneos") then
     local function demo_application(identifier, name, ...)
         add_rules("@addon/revenant/app", "@addon/revenant/swift")
         add_deps("SwiftUI")
+        add_packages("combine")
         add_files("examples/showcase/*.swift")
-        add_files("examples/showcase/device/gesture.m")
-        add_includedirs("examples/showcase/device")
         add_deps("UIKitBackports", "CoreDataBackports")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")
-        set_values("swift.flags", "-import-objc-header", path.join(os.scriptdir(), "examples", "showcase", "device", "bridge.h"))
         set_optimize("fastest")
         set_values("app.plist-file", "examples/showcase/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=" .. identifier, "CFBundleDisplayName=" .. name, ...)
         set_values("revenant.control", "examples/showcase/control")
+        set_values("revenant.version", "1.0.0")
         weak_import_waiver()
     end
 
@@ -69,6 +74,10 @@ if is_plat("iphoneos") then
         if only and only ~= "" then
             add_values("app.plist", "SwiftUISnapshotOnly=" .. only)
         end
+
+    if component == "SwiftUIDemo" then
+        return
+    end
 
     target("SwiftUITests")
         probe_daemon("tests/control", "tests/main.swift")

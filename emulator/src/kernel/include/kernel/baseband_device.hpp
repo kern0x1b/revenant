@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/darwin_tty_abi.hpp"
 #include "kernel/offline_baseband_control.hpp"
 
@@ -143,6 +144,9 @@ public:
     void set_transmit_capture_enabled(bool enabled);
     void set_transmit_sink(TransmitSink sink);
     [[nodiscard]] bool transmit_sink_failed() const;
+
+    void save(snapshot::Writer& out) const;
+    void load(snapshot::Reader& in);
 
 private:
     struct ScheduledReceive {

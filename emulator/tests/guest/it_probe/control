@@ -1,0 +1,4 @@
+Package: org.revenant.emulatoritprobe
+Name: emulator IT block and exclusive probe
+Architecture: iphoneos-arm
+Description: Runs the guard that libdispatch's release path uses, an IT block over a compare and a branch, and one ldrex/strex decrement, and reports each result the emulated CPU produced.

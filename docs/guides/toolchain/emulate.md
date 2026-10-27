@@ -74,13 +74,13 @@ A boot that never ran the command says where it stopped: the emulator, a process
 
 `-d` names the device; without it, the first device the emulator has a profile for, of the configured architecture, that runs the release. `-r` names the release; without it, `apple_minimum`. The emulator runs the earliest firmware not older than the release, and refuses a device without a profile, or a release whose Darwin it does not emulate, with the reason. Device names are as the firmware catalogue names them: `iPhone3,1`, `iPhone4,1`, `iPad2,1`.
 
-The first run of a device and release unpacks its root filesystem, marks Setup Assistant done, and boots it once past the data migration. The result is a golden image under `~/.revenant/emulator/golden.noindex/`, keyed by device, build and the emulator package. Each run after that clones it, so the first run is slow and the rest are not. A golden image of an older emulator package is removed when the new one is made.
+The first run of a device and release unpacks its root filesystem, marks Setup Assistant done, and boots it once past the data migration. The result is a golden image under `.cache/emulator/golden.noindex/`, keyed by device, build and the emulator package. Each run after that clones it, so the first run is slow and the rest are not. A golden image is published the way a package is in the store: the name is a link to a generation folder, a new golden image is built beside the old one and published by swapping the link, and a reader keeps the generation it holds. A generation that a new one replaces stays for `REVENANT_GENERATION_GRACE` seconds (an hour by default) and then goes once nothing holds it. A golden image of an older emulator package is retired when the new one is made, by the same rule.
 
 To unpack a root filesystem by hand:
 
     xmake firmware --device=iPhone3,1 rootfs 6.0
 
-Several ports and sessions emulate at once. A boot takes one of `min(cores/3, RAM/5 GB)` slots of the machine, and a second session waits for a golden image being built rather than building it again.
+Several ports and sessions emulate at once. A boot takes one of the machine's slots, which number `max(1, min(cores // 3, RAM // 5 GB))` (at least one, even on a small machine), and a second session waits for a golden image being built rather than building it again.
 
 ## Time
 

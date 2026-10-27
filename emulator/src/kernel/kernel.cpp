@@ -14,6 +14,10 @@
 #include "bsd/security/extensions.hpp"
 #include "foundation/application_display.hpp"
 #include "foundation/application_path.hpp"
+#include "foundation/fault_dump.hpp"
+#include "foundation/guest_image_table.hpp"
+#include "foundation/macho.hpp"
+#include <algorithm>
 #include "device_state/darwin_kernel_identity.hpp"
 #include "foundation/rootfs_path_resolver.hpp"
 
@@ -28,6 +32,10 @@
 #include "kernel/darwin_kqueue_abi.hpp"
 #include "network/darwin_network_abi.hpp"
 #include "kernel/darwin_resource_abi.hpp"
+#include "kernel/mach_thread_policy_abi.hpp"
+#include <fcntl.h>
+#include <sys/param.h>
+#include <unistd.h>
 #include "network/darwin_route_socket.hpp"
 #include "network/dns_configuration_hle.hpp"
 #include "kernel/graphics_services_input.hpp"
@@ -91,6 +99,9 @@ std::size_t CompatibilityKernel::bootstrap_checked_in_service_count() const
 
 namespace {
 
+    constexpr std::string_view springboard_finished_startup_notification_name {
+        "com.apple.springboard.finishedstartup"
+    };
     constexpr std::uint32_t carry_flag = 1U << 29U;
     constexpr std::uint32_t ebadf = 9;
     constexpr std::uint32_t efault = 14;
@@ -218,6 +229,8 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
 {
     memory_.set_file_generation_registry(
         shared_state_->guest_file_generation_registry);
+    for (auto& entry : shared_state_->network_interfaces)
+        entry.second.up_time_nanoseconds = shared_state_->clock.wall_time();
     shared_state_->shared_mapping_page_cache->set_generation_registry(
         shared_state_->guest_file_generation_registry);
     opengles_hle_.set_guest_capabilities(
@@ -433,8 +446,7 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
             process_.exit_status,
             process_.termination_signal, process_.exited, false, false,
             "launchd", "/sbin/launchd", { "/sbin/launchd" },
-            { "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "HOME=/var/root",
-                "SHELL=/bin/sh" },
+            { },
             KernelSharedState::GraphicsInputAbi::Darwin9_0, { }, { },
             DisplayOrientation::Portrait, { }, 0U };
     shared_state_->processes[process_.pid].memory_status =
@@ -508,6 +520,16 @@ void CompatibilityKernel::configure_darwin_notify_state()
             message.sender_pid = 0;
             state->enqueue_mach_message_locked(
                 *destination, std::move(message));
+        });
+    darwin_notify_state_hle_.set_post_observer(
+        [this](std::string_view name, std::uint32_t process_id) {
+            output_.line("[notify] post pid=" + std::to_string(process_id) +
+                         " name=" + std::string { name });
+            if (name != springboard_finished_startup_notification_name)
+                return;
+            output_.line("[boot] milestone=springboard-finished-startup pid=" +
+                         std::to_string(process_id) + " host-ms=" +
+                         std::to_string(host_unix_milliseconds()));
         });
 }
 
@@ -1421,7 +1443,8 @@ bool CompatibilityKernel::deliver_pending_event(Cpu& cpu)
         delivered = deliver_pending_mach_if_ready_locked(cpu, true);
         if (delivered)
             note_timer_deadline_transition();
-    } else if (pending_io_poll_required_locked(processor)) {
+    } else if (pending_io_poll_required_locked(
+                   processor, pending_io_deadline_locked(processor))) {
         const auto io_generation =
             shared_state_->io_event_generation_snapshot();
         const auto mach_generation =
@@ -1477,12 +1500,12 @@ CompatibilityKernel::pending_event_poll_candidates()
     std::optional<std::uint64_t> next_deadline;
     bool requires_host_probe = false;
     for (const auto processor : pending_event_processors_) {
+        const auto deadline = pending_io_deadline_locked(processor);
         if (pending_mach_receives_.contains(processor) ||
-            pending_io_poll_required_locked(processor)) {
+            pending_io_poll_required_locked(processor, deadline)) {
             processors.push_back(processor);
         }
-        if (const auto deadline = pending_io_deadline_locked(processor);
-            deadline && *deadline > guest_now &&
+        if (deadline && *deadline > guest_now &&
             (!next_deadline || *deadline < *next_deadline)) {
             next_deadline = deadline;
         }
@@ -1534,7 +1557,7 @@ void CompatibilityKernel::refresh_pending_event_processor_locked(
 }
 
 bool CompatibilityKernel::pending_io_poll_required_locked(
-    std::size_t processor) const
+    std::size_t processor, std::optional<std::uint64_t> deadline) const
 {
     const auto cached = pending_io_poll_cache_.find(processor);
     if (cached == pending_io_poll_cache_.end())
@@ -1545,8 +1568,7 @@ bool CompatibilityKernel::pending_io_poll_required_locked(
             shared_state_->mach_queue_generation_snapshot()) {
         return true;
     }
-    if (const auto deadline = pending_io_deadline_locked(processor);
-        deadline && shared_state_->clock.now() >= *deadline) {
+    if (deadline && shared_state_->clock.now() >= *deadline) {
         return true;
     }
     return cached->second.host_probe_required &&
@@ -1821,6 +1843,11 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
                 pending->second.bytes, pending->second.destination);
             if (sent.status == HostSocketStatus::WouldBlock)
                 return false;
+            count_interface_traffic(
+                pending->second.socket->loopback_for(
+                    pending->second.destination),
+                true, sent.transferred,
+                sent.status == HostSocketStatus::Error);
             if (sent.status == HostSocketStatus::Error) {
                 bsd_error(cpu, sent.darwin_error);
             } else {
@@ -2375,7 +2402,6 @@ CompatibilityKernel::timer_deadline_snapshot() const
             static_cast<void>(processor);
             consider(local_deadline, receive.deadline);
         }
-        consider(local_deadline, core_audio_hle_.next_io_proc_deadline());
         consider(local_deadline, kernel_bsd::interval_timer::next_deadline(
                                      *shared_state_, process_.pid));
         local_timer_deadline_cache_ = local_deadline;
@@ -2386,6 +2412,7 @@ CompatibilityKernel::timer_deadline_snapshot() const
     std::uint64_t generation = 0;
     for (unsigned attempt = 0; attempt < 2U; ++attempt) {
         deadline = local_timer_deadline_cache_;
+        consider(deadline, core_audio_hle_.next_io_proc_deadline());
         consider(deadline, hid_event_system_hle_.next_sample_deadline());
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -2547,6 +2574,112 @@ void CompatibilityKernel::schedule_due_audio_io(std::uint64_t deadline)
     }
     core_audio_hle_.io_proc_thread_scheduled(callback->process_id,
         callback->native, callback->io_proc_id, *processor);
+}
+
+std::vector<std::string> CompatibilityKernel::fault_word_report(
+    const AddressSpace& memory, const std::array<std::uint32_t, 16>& registers)
+{
+    std::uint32_t all_image_info_address { };
+    {
+        std::lock_guard mach_lock { shared_state_->mach_mutex };
+        if (auto record = shared_state_->processes.find(process_.pid);
+            record != shared_state_->processes.end())
+            all_image_info_address = record->second.dyld_all_image_info_address;
+    }
+    const auto images = all_image_info_address != 0U
+                            ? read_guest_image_table(memory,
+                                  all_image_info_address)
+                            : GuestImageTable { };
+    const auto* cache = dyld_shared_cache_.get();
+    const auto architecture =
+        arm_architecture_for_model(device_model_.processor.model);
+    struct CacheImageEntry {
+        std::uint32_t index { };
+        std::string name;
+    };
+    std::vector<CacheImageEntry> cache_images;
+    std::optional<std::int64_t> slide;
+    if (cache != nullptr) {
+        for (const auto& image : cache->images()) {
+            const auto path = std::string { image.path };
+            const auto slash = path.rfind('/');
+            cache_images.push_back(CacheImageEntry {
+                image.index,
+                slash == std::string::npos ? path : path.substr(slash + 1) });
+        }
+        for (const auto& guest : images.images()) {
+            if (const auto view = cache->find_image(guest.path)) {
+                slide = static_cast<std::int64_t>(guest.load_address) -
+                        static_cast<std::int64_t>(view->unslid_load_address);
+                break;
+            }
+        }
+    }
+    struct CacheSegmentSpan {
+        std::uint64_t begin { };
+        std::uint64_t end { };
+        std::size_t entry { };
+    };
+    std::optional<std::vector<CacheSegmentSpan>> cache_spans;
+    const auto cache_symbol = [&](std::uint32_t address) -> std::string {
+        if (!slide)
+            return { };
+        const auto unslid = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(address) - *slide);
+        if (!cache_spans) {
+            cache_spans.emplace();
+            for (std::size_t entry = 0; entry < cache_images.size(); ++entry) {
+                const auto parsed =
+                    cache->parse_image(cache_images[entry].index, architecture);
+                if (!parsed)
+                    continue;
+                for (const auto& segment : parsed->segments()) {
+                    if (segment.vm_size == 0U)
+                        continue;
+                    cache_spans->push_back(CacheSegmentSpan {
+                        segment.vm_address,
+                        static_cast<std::uint64_t>(segment.vm_address) +
+                            segment.vm_size,
+                        entry });
+                }
+            }
+        }
+        const auto span = std::find_if(cache_spans->begin(), cache_spans->end(),
+            [unslid](const CacheSegmentSpan& candidate) {
+                return unslid >= candidate.begin && unslid < candidate.end;
+            });
+        if (span == cache_spans->end())
+            return { };
+        const auto& entry = cache_images[span->entry];
+        const auto parsed = cache->parse_image(entry.index, architecture);
+        if (!parsed)
+            return { };
+        std::vector<MachSection> sections;
+        for (const auto& segment : parsed->segments())
+            sections.insert(sections.end(), segment.sections.begin(),
+                segment.sections.end());
+        const auto label = symbol_offset_label(parsed->symbols(), sections,
+            static_cast<std::uint32_t>(unslid));
+        return label.empty() ? std::string { } : entry.name + "`" + label;
+    };
+    return describe_fault_words(
+        registers,
+        [&memory](std::uint32_t address) { return memory.read32(address); },
+        [&images, &cache_symbol](std::uint32_t address) -> std::string {
+            if (auto symbol = cache_symbol(address); !symbol.empty())
+                return symbol;
+            const auto* image = images.find(address);
+            if (image == nullptr)
+                return { };
+            const auto slash = image->path.rfind('/');
+            const auto name = slash == std::string::npos
+                                  ? image->path
+                                  : image->path.substr(slash + 1);
+            char offset[16];
+            std::snprintf(offset, sizeof offset, "+0x%x",
+                address - image->load_address);
+            return name + offset;
+        });
 }
 
 void CompatibilityKernel::inject_wifi_driver_event(
@@ -3007,7 +3140,7 @@ bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
             open_file.name = path.filename().string();
             open_file.permanent_id =
                 hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
-                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+                    .value_or(hfs_metadata_.guest_path_id(path));
             open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);
@@ -3142,7 +3275,7 @@ bool CompatibilityKernel::write_guest_stat64(std::uint32_t address,
             open_file.name = path.filename().string();
             open_file.permanent_id =
                 hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
-                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+                    .value_or(hfs_metadata_.guest_path_id(path));
             open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);
@@ -3310,6 +3443,31 @@ std::optional<std::uint32_t> CompatibilityKernel::current_thread_object() const
     return thread_object_for_processor(*syscall_processor_);
 }
 
+std::optional<std::filesystem::path> CompatibilityKernel::guest_path_of_host(
+    const std::filesystem::path& host) const
+{
+    std::error_code error;
+    const auto root = std::filesystem::weakly_canonical(rootfs_, error);
+    if (error)
+        return std::nullopt;
+    const auto relative = host.lexically_normal().lexically_relative(root);
+    if (relative.empty() || *relative.begin() == "..")
+        return std::nullopt;
+    return (std::filesystem::path { "/" } / relative).lexically_normal();
+}
+
+void CompatibilityKernel::release_thread_directory_locked(
+    std::uint32_t thread_object)
+{
+    const auto found =
+        shared_state_->thread_working_directories.find(thread_object);
+    if (found == shared_state_->thread_working_directories.end())
+        return;
+    if (found->second.host_descriptor >= 0)
+        close(found->second.host_descriptor);
+    shared_state_->thread_working_directories.erase(found);
+}
+
 std::filesystem::path CompatibilityKernel::working_directory() const
 {
     if (const auto thread = current_thread_object()) {
@@ -3317,7 +3475,15 @@ std::filesystem::path CompatibilityKernel::working_directory() const
         if (const auto found =
                 shared_state_->thread_working_directories.find(*thread);
             found != shared_state_->thread_working_directories.end()) {
-            return found->second;
+            const auto& pinned = found->second;
+            if (pinned.host_descriptor >= 0) {
+                char host[MAXPATHLEN];
+                if (fcntl(pinned.host_descriptor, F_GETPATH, host) == 0) {
+                    if (const auto guest = guest_path_of_host(host))
+                        return *guest;
+                }
+            }
+            return pinned.guest;
         }
     }
     return guest_working_directory_;
@@ -3434,15 +3600,58 @@ void CompatibilityKernel::copy_kqueue_descriptor_state(
 void CompatibilityKernel::trace_unknown(
     Cpu& cpu, std::string kind, std::uint32_t number)
 {
+    {
+        constexpr std::size_t maximum_reported_unknown_calls = 4096;
+        const std::lock_guard lock { reported_unknown_mutex_ };
+        if (reported_unknown_calls_.size() >= maximum_reported_unknown_calls ||
+            !reported_unknown_calls_.emplace(process_.pid, kind, number).second)
+            return;
+    }
     std::ostringstream message;
-    message << "[kernel] unsupported " << kind << ' ' << number << " pc=0x"
-            << std::hex << cpu.registers()[15];
+    message << "[kernel] unsupported " << kind << ' ' << number
+            << " pid=" << process_.pid << " process=" << process_image_
+            << " pc=0x" << std::hex << cpu.registers()[15];
     for (std::size_t index = 0; index < 7; ++index) {
         message << " r" << std::dec << index << "=0x" << std::hex
                 << cpu.registers()[index];
     }
     message << std::dec << '\n';
     output_.write(message.str());
+}
+
+void CompatibilityKernel::sample_load_average(std::size_t runnable_threads)
+{
+    constexpr auto period =
+        static_cast<std::uint64_t>(foundation::load_average_period_seconds) *
+        darwin::mach::thread_policy::absolute_time_units_per_second;
+    const auto now = current_absolute_time();
+    const auto runnable = static_cast<std::uint32_t>(std::min<std::size_t>(
+        runnable_threads, std::numeric_limits<std::uint32_t>::max()));
+    std::lock_guard lock { load_average_mutex_ };
+    if (next_load_average_sample_ == 0) {
+        next_load_average_sample_ = now + period;
+        return;
+    }
+    while (next_load_average_sample_ <= now) {
+        load_average_.sample(runnable);
+        next_load_average_sample_ += period;
+    }
+}
+
+foundation::LoadAverage CompatibilityKernel::load_average() const
+{
+    std::lock_guard lock { load_average_mutex_ };
+    return load_average_;
+}
+
+void CompatibilityKernel::count_interface_traffic(bool loopback, bool output,
+    std::size_t bytes, bool failed)
+{
+    std::lock_guard network_lock { shared_state_->network_mutex };
+    const auto found = shared_state_->network_interfaces.find(
+        loopback ? "lo0" : "en0");
+    if (found != shared_state_->network_interfaces.end())
+        found->second.counters.record(output, bytes, failed);
 }
 
 }

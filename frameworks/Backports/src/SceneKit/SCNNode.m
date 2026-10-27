@@ -17,6 +17,8 @@
     SCNNode *_presentation;
     BOOL _isPresentation;
     RevenantSCNAnimations *_animations;
+    NSMutableArray<SCNAudioPlayer *> *_audioPlayers;
+    NSMutableArray<RevenantSCNActionRun *> *_actionRuns;
 }
 
 - (instancetype)init
@@ -37,6 +39,13 @@
 + (instancetype)node
 {
     return [[self alloc] init];
+}
+
++ (instancetype)nodeWithGeometry:(SCNGeometry *)geometry
+{
+    SCNNode *node = [self node];
+    node.geometry = geometry;
+    return node;
 }
 
 @synthesize name = _name;
@@ -466,5 +475,153 @@
 {
     return self->_particleSystems.count ? [self->_particleSystems copy] : nil;
 }
+
+#pragma mark SCNAudioSupport
+
+- (void)addAudioPlayer:(SCNAudioPlayer *)player
+{
+    if (self->_audioPlayers == nil) {
+        self->_audioPlayers = [NSMutableArray array];
+    }
+    [self->_audioPlayers addObject:player];
+    [player revenantStartOnNode:self];
+}
+
+- (void)removeAudioPlayer:(SCNAudioPlayer *)player
+{
+    if ([self->_audioPlayers containsObject:player]) {
+        [self->_audioPlayers removeObject:player];
+        [player revenantStop];
+    }
+}
+
+- (void)removeAllAudioPlayers
+{
+    for (SCNAudioPlayer *player in self->_audioPlayers) {
+        [player revenantStop];
+    }
+    [self->_audioPlayers removeAllObjects];
+}
+
+- (NSArray<SCNAudioPlayer *> *)audioPlayers
+{
+    return self->_audioPlayers ? [self->_audioPlayers copy] : @[];
+}
+
+- (void)revenantRemoveFinishedAudioPlayer:(SCNAudioPlayer *)player
+{
+    [self->_audioPlayers removeObject:player];
+}
+
+- (void)revenantUpdateAudioAtTime:(CFTimeInterval)now
+{
+    if (self->_audioPlayers.count == 0) {
+        return;
+    }
+    SCNMatrix4 world = [self revenantPresentedWorldTransform];
+    for (NSUInteger index = 0; index < self->_audioPlayers.count;) {
+        NSUInteger count = self->_audioPlayers.count;
+        [self->_audioPlayers[index] revenantUpdateWithWorld:world time:now];
+        if (self->_audioPlayers.count == count) {
+            index++;
+        }
+    }
+}
+
+
+#pragma mark SCNActionable
+
+- (BOOL)hasActions
+{
+    return self->_actionRuns.count > 0;
+}
+
+- (NSArray<NSString *> *)actionKeys
+{
+    NSMutableArray<NSString *> *keys = [NSMutableArray array];
+    for (RevenantSCNActionRun *run in self->_actionRuns) {
+        if (run.key) {
+            [keys addObject:run.key];
+        }
+    }
+    return keys;
+}
+
+- (SCNAction *)actionForKey:(NSString *)key
+{
+    for (RevenantSCNActionRun *run in self->_actionRuns) {
+        if ([run.key isEqualToString:key]) {
+            return run.action;
+        }
+    }
+    return nil;
+}
+
+- (void)removeActionForKey:(NSString *)key
+{
+    for (NSUInteger index = 0; index < self->_actionRuns.count; index++) {
+        if ([self->_actionRuns[index].key isEqualToString:key]) {
+            [self->_actionRuns removeObjectAtIndex:index];
+            return;
+        }
+    }
+}
+
+- (void)removeAllActions
+{
+    [self->_actionRuns removeAllObjects];
+}
+
+- (void)runAction:(SCNAction *)action
+{
+    [self runAction:action forKey:nil completionHandler:nil];
+}
+
+- (void)runAction:(SCNAction *)action completionHandler:(void (^)(void))block
+{
+    [self runAction:action forKey:nil completionHandler:block];
+}
+
+- (void)runAction:(SCNAction *)action forKey:(NSString *)key
+{
+    [self runAction:action forKey:key completionHandler:nil];
+}
+
+- (void)runAction:(SCNAction *)action forKey:(NSString *)key completionHandler:(void (^)(void))block
+{
+    if (key) {
+        [self removeActionForKey:key];
+    }
+    if (self->_actionRuns == nil) {
+        self->_actionRuns = [NSMutableArray array];
+    }
+    [self->_actionRuns addObject:[[RevenantSCNActionRun alloc] initWithAction:action key:key completion:block time:CACurrentMediaTime()]];
+}
+
+- (void)revenantStepActionsAtTime:(CFTimeInterval)now
+{
+    NSMutableArray<void (^)(void)> *completions = nil;
+    for (NSUInteger index = 0; index < self->_actionRuns.count;) {
+        RevenantSCNActionRun *run = self->_actionRuns[index];
+        NSTimeInterval dt = MAX(now - run.lastTime, 0);
+        run.lastTime = now;
+        NSTimeInterval leftover = 0;
+        if ([run advanceBy:dt onNode:self leftover:&leftover]) {
+            [self->_actionRuns removeObjectAtIndex:index];
+            if (run.completion) {
+                if (completions == nil) {
+                    completions = [NSMutableArray array];
+                }
+                [completions addObject:run.completion];
+            }
+        } else {
+            index++;
+        }
+    }
+    for (void (^completion)(void) in completions) {
+        completion();
+    }
+}
+
 
 @end

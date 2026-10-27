@@ -1227,6 +1227,7 @@ private:
         std::uint64_t translation_nanoseconds,
         const Dynarmic::IR::Block* optimized_block) noexcept
     {
+        performance_counters().record_translation_compile(translation_nanoseconds);
         maybe_check_host_yield(
             0U, translation_nanoseconds >=
                     static_cast<std::uint64_t>(
@@ -1258,6 +1259,7 @@ public:
 
     std::optional<std::uint32_t> MemoryReadCode(std::uint32_t address) override
     {
+        memory_.publish_code_page(address);
         const auto value = memory_.read32(address, MemoryPermission::Execute);
         if (!value) {
             memory_fault(address, 4, MemoryPermission::Execute);
@@ -1265,8 +1267,28 @@ public:
         return value;
     }
 
+    static_assert(static_cast<std::size_t>(
+                      AddressSpace::JitSlowPathReason::Count) ==
+                  memory_callback_reason_count);
+    void note_memory_callback(
+        std::uint32_t address, std::size_t size, bool write)
+    {
+        if (!performance_counters().enabled())
+            return;
+        performance_counters().record_memory_callback(static_cast<std::size_t>(
+            memory_.jit_slow_path_reason(address, size, write)));
+    }
+    void note_exclusive_callback()
+    {
+        if (!performance_counters().enabled())
+            return;
+        performance_counters().record_memory_callback(static_cast<std::size_t>(
+            AddressSpace::JitSlowPathReason::Exclusive));
+    }
+
     std::uint8_t MemoryRead8(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint8_t), false);
         const auto value = memory_.read8(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(address, sizeof(std::uint8_t), MemoryPermission::Read);
@@ -1277,6 +1299,7 @@ public:
     }
     std::uint16_t MemoryRead16(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint16_t), false);
         const auto value = memory_.read16(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1288,6 +1311,7 @@ public:
     }
     std::uint32_t MemoryRead32(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint32_t), false);
         const auto value = memory_.read32(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1299,6 +1323,7 @@ public:
     }
     std::uint64_t MemoryRead64(std::uint32_t address) override
     {
+        note_memory_callback(address, sizeof(std::uint64_t), false);
         const auto value = memory_.read64(address, MemoryPermission::Read);
         if (!value) {
             memory_fault(
@@ -1326,8 +1351,24 @@ public:
         write(address, value, &AddressSpace::write64);
     }
 
+    void bind_exclusive_monitor(
+        Dynarmic::ExclusiveMonitor& monitor, std::size_t processor)
+    {
+        exclusive_monitor_ = &monitor;
+        exclusive_processor_ = processor;
+    }
+
+    void drop_exclusive_state()
+    {
+        if (jit_ != nullptr)
+            jit_->ClearExclusiveState();
+        if (exclusive_monitor_ != nullptr)
+            exclusive_monitor_->ClearProcessor(exclusive_processor_);
+    }
+
     void MemoryReadExclusive(std::uint32_t address, std::size_t size) override
     {
+        note_exclusive_callback();
         memory_.track_exclusive_access(address, size);
     }
 
@@ -1382,6 +1423,7 @@ public:
 
     void CallSVC(std::uint32_t immediate) override
     {
+        drop_exclusive_state();
         performance_counters().record_svc();
         ++svc_calls_;
         svc_ = immediate;
@@ -1890,6 +1932,7 @@ private:
     template <typename T, typename Member>
     void write(std::uint32_t address, T value, Member member)
     {
+        note_memory_callback(address, sizeof(T), true);
         if (!(memory_.*member)(address, value)) {
             memory_fault(address, sizeof(T), MemoryPermission::Write);
         } else {
@@ -1900,6 +1943,7 @@ private:
     template <typename T, typename Member>
     T swap(std::uint32_t address, T value, Member member)
     {
+        note_memory_callback(address, sizeof(T), true);
         const auto previous = (memory_.*member)(address, value);
         if (!previous) {
             memory_fault(address, sizeof(T),
@@ -1914,6 +1958,7 @@ private:
     bool write_exclusive(
         std::uint32_t address, T value, T expected, Member member)
     {
+        note_exclusive_callback();
         const auto written = (memory_.*member)(address, expected, value);
         if (written)
             notify_memory_write(address, sizeof(T), value);
@@ -1960,6 +2005,8 @@ private:
     AddressSpace& memory_;
     const ArmCpuModel& cpu_model_;
     Cpu* owner_ { };
+    Dynarmic::ExclusiveMonitor* exclusive_monitor_ { };
+    std::size_t exclusive_processor_ { };
     std::uint32_t process_id_ { };
     Dynarmic::A32::Jit* jit_ { };
     std::uint64_t ticks_remaining_ { };
@@ -2219,6 +2266,9 @@ public:
             static_cast<std::uint32_t>(execution_slot_),
             single_step ? 1U : ticks };
         const std::unique_lock lock { execution_mutex_ };
+        const AddressSpace::GuestQuiescence::SliceScope slice {
+            memory_.guest_quiescence()
+        };
         diagnostics.checkpoint(PerfLatencyKind::CpuRunLockWait);
         memory_.synchronize_shared_write_tracking();
         diagnostics.checkpoint(PerfLatencyKind::CpuRunSharedWriteSync);
@@ -2435,6 +2485,7 @@ public:
         ensure_jit();
         jit_->ClearExclusiveState();
         monitor_.ClearProcessor(processor_id_);
+        callbacks_->drop_exclusive_state();
     }
 
     void set_translation_profile(std::shared_ptr<JitTranslationProfile> profile,
@@ -2908,7 +2959,12 @@ private:
             observed_invalidation_epoch_) {
             return;
         }
+        if (jit_ && jit_image_slab_ != machine_image_code_slab_for(*execution_context_)) {
+            jit_.reset();
+        }
+        ensure_jit();
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {
@@ -2957,6 +3013,7 @@ private:
 
     void ensure_jit()
     {
+        callbacks_->bind_exclusive_monitor(monitor_, processor_id_);
         if (jit_) {
             return;
         }
@@ -2967,6 +3024,16 @@ private:
         }
         Dynarmic::A32::UserConfig config { callbacks_.get() };
         config.native_code_slab = execution_context_->native_code_slab();
+        jit_image_slab_ = machine_image_code_slab_for(*execution_context_);
+        if (jit_image_slab_ != nullptr) {
+            const auto image_region = machine_image_code_region();
+            config.image_native_code_slab = jit_image_slab_;
+            config.image_code_begin = image_region.begin;
+            config.image_code_end = image_region.end;
+            config.image_code_second_begin = image_region.second_begin;
+            config.image_code_second_end = image_region.second_end;
+            config.image_code_cache_size = image_region.cache_bytes;
+        }
         config.callbacks_link = runtime_link_cell_address_;
         if (performance_counters().native_lookup_diagnostics_enabled()) {
             config.native_code_block_lookup_callback =
@@ -2993,6 +3060,7 @@ private:
         config.always_little_endian = true;
         config.enable_cycle_counting = true;
         config.optimizations = jit_optimizations();
+        config.dispatch_counters = performance_counters().enabled();
         config.check_halt_on_memory_access = true;
         config.code_cache_size = code_cache_size_;
         config.coprocessors[15] = cp15_;
@@ -3200,7 +3268,9 @@ private:
             delta(current.stable_table_collisions,
                 recorded_dispatch_counters_.stable_table_collisions),
             delta(current.rsb_hits, recorded_dispatch_counters_.rsb_hits),
-            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses));
+            delta(current.rsb_misses, recorded_dispatch_counters_.rsb_misses),
+            delta(current.fast_dispatch_hint_exits,
+                recorded_dispatch_counters_.fast_dispatch_hint_exits));
     }
 
     [[nodiscard]] std::uint64_t executor_local_memory_bytes() const noexcept
@@ -3271,6 +3341,7 @@ private:
     const std::atomic<std::uint64_t>*
         exclusive_monitor_values_link_cell_address_ { };
     std::unique_ptr<Dynarmic::A32::Jit> jit_;
+    Dynarmic::A32::NativeCodeSlab* jit_image_slab_ { };
     JitHostExecutionBudget host_execution_budget_;
     AddressRanges own_image_ranges_;
     std::uint32_t own_image_count_ { 0xffffffffU };
@@ -3474,6 +3545,7 @@ public:
             return;
         static_cast<void>(execution_context_->request_cache_clear());
         execution_context_->native_code_slab()->service_pending_invalidation();
+        service_machine_image_code_slab();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
         if (execution_context_->observe_slab_generation(slab_generation)) {
@@ -5064,6 +5136,7 @@ void Cpu::set_memory_write_watchpoint(
     std::uint32_t address, MemoryWriteHandler handler)
 {
     if (handler && execution_pool_) {
+        performance_counters().record_jit_page_table_disable();
         execution_pool_->disable_jit_page_table();
     }
     memory_write_watch_address_ = address;
@@ -5088,6 +5161,68 @@ void Cpu::clear_exclusive_state(std::size_t execution_slot)
         return;
     }
     execution_pool_->clear_exclusive_state(execution_slot);
+}
+
+void save_exclusive_monitor(
+    snapshot::Writer& out, Dynarmic::ExclusiveMonitor& monitor)
+{
+    monitor.Clear();
+    snapshot::save(out,
+        static_cast<std::uint64_t>(monitor.GetProcessorCount()));
+}
+
+void load_exclusive_monitor(
+    snapshot::Reader& in, Dynarmic::ExclusiveMonitor& monitor)
+{
+    std::uint64_t processor_count { };
+    snapshot::load(in, processor_count);
+    if (processor_count != monitor.GetProcessorCount()) {
+        throw snapshot::FormatError {
+            "exclusive monitor processor count differs from the wiring"
+        };
+    }
+    monitor.Clear();
+}
+
+void CpuCluster::save_state(snapshot::Writer& out)
+{
+    snapshot::save(out, static_cast<std::uint64_t>(cpus_.size()));
+    for (const auto& cpu : cpus_) {
+        if (cpu->active_executor_ != nullptr)
+            throw snapshot::RefusedError { "cpu.active_executor" };
+        cpu->state_.save(out);
+        snapshot::save(
+            out, static_cast<std::uint32_t>(cpu->requested_halt_reason_));
+    }
+    save_exclusive_monitor(out, monitor_);
+}
+
+void CpuCluster::load_state(snapshot::Reader& in)
+{
+    std::uint64_t count { };
+    snapshot::load(in, count);
+    if (count > capacity()) {
+        throw snapshot::FormatError {
+            "snapshot holds more processors than the restored cluster can hold"
+        };
+    }
+    if (cpus_.size() > count) {
+        throw snapshot::FormatError {
+            "restored cluster already has more processors than the snapshot"
+        };
+    }
+    while (cpus_.size() < count) {
+        if (!add_cpu())
+            throw snapshot::FormatError { "cannot add a snapshot processor" };
+    }
+    for (const auto& cpu : cpus_) {
+        cpu->state_.load(in);
+        std::uint32_t halt_reason { };
+        snapshot::load(in, halt_reason);
+        cpu->requested_halt_reason_ =
+            static_cast<Dynarmic::HaltReason>(halt_reason);
+    }
+    load_exclusive_monitor(in, monitor_);
 }
 
 CpuCluster::CpuCluster(std::size_t processor_count, AddressSpace& memory)

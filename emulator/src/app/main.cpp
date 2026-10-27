@@ -90,7 +90,9 @@ std::string usage()
            "[--shared-cache GUEST_PATH] [--thumb]\n"
            "  emulator boot --rootfs DIR [--device PROFILE] [--ios-build CODE] "
            "[--binary /sbin/launchd] [--guest-command COMMAND] [--ticks N] "
+           "[--census-output FILE] [--snapshot-out FILE] [--snapshot-in FILE] "
            "[--cores N] [--jit-cache-mib 8..512] "
+           "[--no-shared-image-slab] [--image-slab-mib N] "
            "[--jit-cache-budget-mib 256..4096] "
            "[--watch-address ADDR] [--gdb PORT] "
            "[--display headless|sdl] [--network isolated|loopback|host] "
@@ -237,11 +239,14 @@ std::size_t jit_code_cache_size(const std::vector<std::string>& args)
     const auto& value = *configured;
     std::size_t consumed { };
     const auto mebibytes = std::stoull(value, &consumed, 10);
+    const auto minimum_mebibytes =
+        JitCodeCacheGovernor::minimum_demand_working_set_bytes / bytes_per_mebibyte;
     const auto maximum_mebibytes =
         JitWorkPolicy::maximum_native_slab_bytes() / bytes_per_mebibyte;
-    if (consumed != value.size() || mebibytes < 8U ||
+    if (consumed != value.size() || mebibytes < minimum_mebibytes ||
         mebibytes > maximum_mebibytes) {
-        throw std::runtime_error { "--jit-cache-mib must be in the range 8.." +
+        throw std::runtime_error { "--jit-cache-mib must be in the range " +
+                                   std::to_string(minimum_mebibytes) + ".." +
                                    std::to_string(maximum_mebibytes) };
     }
     return static_cast<std::size_t>(mebibytes) * 1024U * 1024U;
@@ -1093,7 +1098,18 @@ void boot(const std::vector<std::string>& args, Output& output)
         options.time_scale = parsed;
     }
     options.jit_observer_only = flag(args, "--jit-observer-only");
+    options.shared_image_slab = !flag(args, "--no-shared-image-slab");
+    if (const auto value = option(args, "--image-slab-mib")) {
+        if (!options.shared_image_slab)
+            throw std::runtime_error {
+                "--image-slab-mib needs the shared image slab, not --no-shared-image-slab"
+            };
+        options.image_slab_bytes = static_cast<std::size_t>(parse_mib_value(
+            *value, "--image-slab-mib", 8U,
+            JitWorkPolicy::maximum_native_slab_bytes() / bytes_per_mebibyte));
+    }
     options.report_performance = flag(args, "--perf-summary");
+    options.test_concurrent_threads = flag(args, "--test-concurrent-threads");
     if (const auto value = option(args, "--ticks"))
         options.ticks = std::stoull(*value);
     if (const auto value = option(args, "--cores"))
@@ -1138,7 +1154,28 @@ void boot(const std::vector<std::string>& args, Output& output)
     options.baseband_input = option(args, "--baseband-input");
     options.baseband_output = option(args, "--baseband-output");
     options.quiet_output = !flag(args, "--verbose");
-    DesktopHost host;
+    const auto census_output = option(args, "--census-output");
+    if (census_output && !options.ticks) {
+        throw std::runtime_error {
+            "--census-output needs --ticks, which sets the tick it is taken at"
+        };
+    }
+    options.snapshot_output = option(args, "--snapshot-out");
+    if (options.snapshot_output && !options.ticks)
+        throw std::runtime_error { "--snapshot-out needs --ticks" };
+    if (options.snapshot_output &&
+        *options.ticks % bounded_tick_alignment != 0)
+        throw std::runtime_error {
+            "--snapshot-out needs --ticks to be a multiple of " +
+            std::to_string(bounded_tick_alignment)
+        };
+    options.snapshot_input = option(args, "--snapshot-in");
+    if (options.snapshot_input && !options.ticks)
+        throw std::runtime_error {
+            "--snapshot-in needs --ticks, the total tick count of the restored run"
+        };
+    DesktopHost host { census_output ? std::filesystem::path { *census_output }
+                                     : std::filesystem::path { } };
     EmulatorSession session { std::move(options), host, output };
     session.run();
 }
@@ -1250,6 +1287,9 @@ int main(int argc, char** argv)
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "emulator: " << error.what() << '\n';
+        return 1;
+    } catch (...) {
+        std::cerr << "emulator: unknown error, not a std::exception\n";
         return 1;
     }
 }

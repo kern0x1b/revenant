@@ -29,6 +29,9 @@ inline constexpr std::size_t basic_32_word_count = 8;
 inline constexpr std::uint32_t basic_64_flavor = 5;
 inline constexpr std::size_t basic_64_word_count = 8;
 
+inline constexpr std::uint32_t basic_64_2_flavor = 18;
+inline constexpr std::size_t basic_64_2_word_count = 10;
+
 inline constexpr std::uint32_t dyld_info_flavor = 17;
 inline constexpr std::size_t dyld_info_word_count = 5;
 

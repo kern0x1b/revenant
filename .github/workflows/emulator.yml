@@ -1,0 +1,380 @@
+name: emulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: The emulator job to run
+        type: choice
+        options:
+          - boot
+          - measure
+          - snapshot
+          - probe
+        default: boot
+      ticks:
+        description: The CPU ticks every boot of the run is bounded by; for snapshot, the ticks the cold and the restored runs go to
+        type: string
+        default: "16000000000"
+      save_ticks:
+        description: For snapshot, the CPU ticks the snapshot is saved at, a multiple of 1048576 below ticks
+        type: string
+        default: "1048576"
+      negative_control:
+        description: For snapshot, add one executed tick to the restore and expect the comparison to report a difference
+        type: boolean
+        default: false
+      control:
+        description: The branch or commit of origin the control emulator is built from, for measure
+        type: string
+        default: main
+      measure_ticks:
+        description: The CPU ticks every measure boot is bounded by, kept short so measure runs in under 30 minutes
+        type: string
+        default: "4000000000"
+      rounds:
+        description: The control and branch boots of measure, alternating in order each round
+        type: string
+        default: "1"
+
+permissions:
+  contents: read
+
+env:
+  REVENANT_CACHE: ${{ github.workspace }}/.cache
+
+concurrency:
+  group: emulator-${{ inputs.job }}-${{ github.ref_name }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -eo pipefail {0}
+
+jobs:
+  emulator:
+    runs-on: macos-26
+    timeout-minutes: ${{ inputs.job == 'measure' && 30 || 240 }}
+    env:
+      TICKS: ${{ inputs.ticks }}
+      SAVE_TICKS: ${{ inputs.save_ticks }}
+      MEASURE_TICKS: ${{ inputs.measure_ticks }}
+      GUEST: ${{ github.workspace }}/build/iphoneos/armv7/release/emulator_minimal_guest
+      GUEST_PATH: /usr/libexec/emulator-minimal
+      CONTROL: ${{ inputs.control }}
+      ROUNDS: ${{ inputs.rounds }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: ./.github/actions/revenant-setup
+
+      - name: Free the disk of the other Xcode versions
+        run: |
+          df -h /
+          for app in /Applications/Xcode_*.app; do
+            case "$app" in
+              /Applications/Xcode_26.6.app) ;;
+              *) sudo rm -rf "$app" ;;
+            esac
+          done
+          df -h /
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-emulator-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua') }}
+          restore-keys: |
+            xmake-global-emulator-${{ runner.os }}-
+
+      - uses: actions/cache/restore@v4
+        id: facts
+        with:
+          path: build/generated/backports
+          key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
+
+      - name: Install the firmware tools through the Backports configuration
+        id: firmware-tools
+        timeout-minutes: 45
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | tee "$RUNNER_TEMP/firmware-tools.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/firmware-tools.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.facts.outputs.cache-hit != 'true'
+        with:
+          path: build/generated/backports
+          key: backports-facts-xcode-26.6-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/i/iphoneos-sdk/**', 'frameworks/Backports/xmake.lua', 'frameworks/Backports/tools/**') }}
+
+      - name: Build the minimal guest the snapshot runs
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 15
+        run: |
+          ./xmakew build -P . emulator_minimal_guest
+          test -f "$GUEST" || { echo "no minimal guest at $GUEST" >&2; exit 1; }
+
+      - uses: actions/cache/restore@v4
+        if: inputs.job == 'probe'
+        id: dyld60
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Fetch the iOS 6.0 armv7 shared cache the probe's guest package is configured against
+        if: inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
+
+      - uses: actions/cache/save@v4
+        if: success() && inputs.job == 'probe' && steps.dyld60.outputs.cache-hit != 'true'
+        with:
+          path: .cache/dyld/6.0
+          key: dyld-shared-cache-6.0-armv7-v3
+
+      - name: Write the iOS 6.0 inventory from the shared cache
+        if: inputs.job == 'probe'
+        timeout-minutes: 30
+        run: |
+          if [ ! -f "$REVENANT_CACHE/dyld/6.0/classes_armv7.json" ]; then
+            ./xmakew firmware -P . -y --arch=armv7 classes 6.0
+          fi
+
+      - uses: actions/cache/restore@v4
+        id: dyld
+        with:
+          path: .cache/dyld/6.1.3
+          key: dyld-shared-cache-6.1.3-armv7-v1
+
+      - name: Fetch the iOS 6.1.3 armv7 shared cache
+        if: steps.dyld.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.1.3
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.dyld.outputs.cache-hit != 'true'
+        with:
+          path: .cache/dyld/6.1.3
+          key: dyld-shared-cache-6.1.3-armv7-v1
+
+      - uses: actions/cache/restore@v4
+        id: rootfs
+        with:
+          path: .cache/firmware/rootfs/iPhone4,1
+          key: firmware-rootfs-6.1.3-iphone4-1-v1
+
+      - name: Unpack the iOS 6.1.3 root filesystem of the iPhone 4S
+        if: steps.rootfs.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: ./xmakew firmware -P . -y --arch=armv7 --device=iPhone4,1 rootfs 6.1.3
+
+      - name: Name the root filesystem the boot clones
+        run: |
+          rootfs=$(ls -d "$REVENANT_CACHE/firmware/rootfs/iPhone4,1/6.1.3_"* | head -n 1)
+          if [ -z "$rootfs" ] || [ ! -d "$rootfs" ]; then
+            echo "no iOS 6.1.3 root filesystem for iPhone4,1" >&2
+            exit 1
+          fi
+          echo "ROOTFS=$rootfs" >> "$GITHUB_ENV"
+          echo "root filesystem: $rootfs"
+          df -h /
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.rootfs.outputs.cache-hit != 'true'
+        with:
+          path: .cache/firmware/rootfs/iPhone4,1
+          key: firmware-rootfs-6.1.3-iphone4-1-v1
+
+      - name: Configure the emulator for release
+        id: configure
+        timeout-minutes: 30
+        run: |
+          ./xmakew f -P . -y -m release --component=emulator 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the emulator
+        timeout-minutes: 60
+        run: |
+          ./xmakew build -P . emulator
+          df -h /
+
+      - name: Run the snapshot gates and the unit tests of the snapshot code
+        if: inputs.job == 'snapshot'
+        timeout-minutes: 90
+        run: ./xmakew test -P . repository/layout repository/comments_check repository/snapshot_diff 'emulator_runtime_*/*' 'emulator_foundation_*/*' 'emulator_kernel_*/*' 'emulator_graphics_*/*' 'emulator_mach_*/*' 'emulator_network_*/*' --output-on-failure
+
+      - name: Perturb the restore for the negative control
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        run: |
+          perl -0pi -e 's/(loop_state\.executed_ticks = restored_snapshot->header\.ticks;)/$1 loop_state.executed_ticks += 1;/' emulator/src/runtime/emulator_session.cpp
+          grep -q 'executed_ticks += 1;' emulator/src/runtime/emulator_session.cpp
+
+      - name: Rebuild the perturbed emulator
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 60
+        run: ./xmakew build -P . emulator
+
+      - name: Round trip a snapshot through save, cold and restore
+        if: inputs.job == 'snapshot' && !inputs.negative_control
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" 2>&1 | tee "$out/comparison.txt"
+
+      - name: Expect the comparison to fail on the perturbed restore
+        if: inputs.job == 'snapshot' && inputs.negative_control
+        timeout-minutes: 200
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          if ./xmakew l tools/snapshot_round_trip.lua --rootfs "$ROOTFS" --emulator build/macosx/arm64/release/emulator --guest "$GUEST" --binary "$GUEST_PATH" --save-ticks "$SAVE_TICKS" --ticks "$TICKS" --work "$RUNNER_TEMP/snapshot" > "$out/comparison.txt" 2>&1; then
+            cat "$out/comparison.txt"
+            echo "negative control: the comparison passed on a perturbed restore" >&2
+            exit 1
+          fi
+          cat "$out/comparison.txt"
+          grep -q 'snapshots differ in' "$out/comparison.txt"
+
+      - name: Build the control emulator from the control ref
+        if: inputs.job == 'measure'
+        timeout-minutes: 15
+        run: |
+          git fetch --no-tags --depth=1 origin "$CONTROL"
+          git worktree add --detach "$RUNNER_TEMP/control" FETCH_HEAD
+          (cd "$RUNNER_TEMP/control" && ./xmakew f -P . -y -m release && ./xmakew build -P . emulator)
+          df -h /
+
+      - name: Run the libdispatch connect probe on two cores and on one
+        if: inputs.job == 'probe'
+        timeout-minutes: 180
+        run: |
+          out="$RUNNER_TEMP/out"
+          probe="$RUNNER_TEMP/probe"
+          mkdir -p "$probe"
+          status=0
+          for cores in 2 1; do
+            folder="$probe/cores-$cores"
+            mkdir -p "$out/probe-cores-$cores"
+            OUT_DIR="$folder" ./xmakew lua emulator/tests/guest/connect_dispatch/connect.lua iPhone4,1 6.1.3 "$cores" > "$out/probe-cores-$cores/probe.log" 2>&1 || status=1
+            cp "$folder"/*.log "$out/probe-cores-$cores/" 2>/dev/null || true
+            grep -a '^connect_writable ' "$out/probe-cores-$cores/probe.log" || true
+          done
+          exit "$status"
+
+      - name: Boot the iOS 6.1.3 device to SpringBoard
+        if: inputs.job == 'boot'
+        timeout-minutes: 60
+        run: |
+          out="$RUNNER_TEMP/out"
+          boot="$RUNNER_TEMP/boot"
+          mkdir -p "$out" "$boot"
+          cp -c -R "$ROOTFS" "$boot/rootfs"
+          build/macosx/arm64/release/emulator boot --rootfs "$boot/rootfs" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$TICKS" --perf-summary --output "$out/perf-summary.txt" 2> "$out/boot.log"
+          chmod -R u+w "$boot"
+          rm -rf "$boot"
+          if ! grep -E '^\[boot\] milestone=springboard-finished-startup ' "$out/perf-summary.txt" > "$out/springboard.txt"; then
+            echo "SpringBoard did not finish starting within $TICKS CPU ticks" >&2
+            exit 1
+          fi
+          cat "$out/springboard.txt" >> "$GITHUB_STEP_SUMMARY"
+          df -h /
+
+      - name: Measure the control and the branch in alternating boots
+        if: inputs.job == 'measure'
+        timeout-minutes: 12
+        run: |
+          out="$RUNNER_TEMP/out"
+          scratch="$RUNNER_TEMP/measure"
+          mkdir -p "$out" "$scratch"
+          printf '%s\n' '| round | build | real s | user s | sys s | max RSS MB | peak footprint MB |' '|---|---|---|---|---|---|---|' > "$out/measurement.md"
+          for round in $(seq 1 "$ROUNDS"); do
+            if [ $((round % 2)) -eq 1 ]; then order="control branch"; else order="branch control"; fi
+            for side in $order; do
+              case "$side" in
+                control) bin="$RUNNER_TEMP/control/build/macosx/arm64/release/emulator" ;;
+                branch) bin="$GITHUB_WORKSPACE/build/macosx/arm64/release/emulator" ;;
+              esac
+              clone="$scratch/$side-$round"
+              cp -c -R "$ROOTFS" "$clone"
+              /usr/bin/time -l -o "$out/time-$side-$round.txt" "$bin" boot --rootfs "$clone" --device iPhone4,1 --display headless --gles-backend software --time-scale 10 --ticks "$MEASURE_TICKS" --perf-summary --output "$out/perf-$side-$round.txt" 2> "$out/boot-$side-$round.log"
+              chmod -R u+w "$clone"
+              rm -rf "$clone"
+              awk -v round="$round" -v side="$side" '
+                $2 == "real" { real = $1; user = $3; sys = $5 }
+                /maximum resident set size/ { rss = $1 / 1048576 }
+                /peak memory footprint/ { footprint = $1 / 1048576 }
+                END { printf "| %s | %s | %.1f | %.1f | %.1f | %.0f | %.0f |\n", round, side, real, user, sys, rss, footprint }
+              ' "$out/time-$side-$round.txt" >> "$out/measurement.md"
+            done
+          done
+          cat "$out/measurement.md" >> "$GITHUB_STEP_SUMMARY"
+          df -h /
+
+      - name: Collect the crash reports of the emulator
+        if: always()
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out/crash-reports"
+          find "$HOME/Library/Logs/DiagnosticReports" -maxdepth 1 -iname '*emulator*' -exec cp {} "$out/crash-reports/" \;
+          ls -la "$out/crash-reports"
+
+      - name: Keep the snapshot logs, the snapshots, the timings and the comparison
+        if: always() && inputs.job == 'snapshot'
+        run: |
+          out="$RUNNER_TEMP/out"
+          mkdir -p "$out"
+          find "$RUNNER_TEMP/snapshot" -maxdepth 2 -type f \( -name '*.log' -o -name '*.log.err' -o -name '*.time' -o -name '*.snap' -o -name 'compare-*.txt' \) | while IFS= read -r file; do
+            relative="${file#"$RUNNER_TEMP/snapshot/"}"
+            cp "$file" "$out/${relative//\//-}"
+          done || true
+          if [ -f "$out/comparison.txt" ]; then cat "$out/comparison.txt" >> "$GITHUB_STEP_SUMMARY"; fi
+          ls -la "$out"
+
+      - name: Delete the scratch of the run
+        if: always()
+        run: |
+          for scratch in "$RUNNER_TEMP/boot" "$RUNNER_TEMP/measure" "$RUNNER_TEMP/control" "$RUNNER_TEMP/probe" "$RUNNER_TEMP/snapshot"; do
+            if [ -e "$scratch" ]; then
+              chmod -R u+w "$scratch"
+              rm -rf "$scratch"
+            fi
+          done
+
+      - name: Measure the disk
+        if: always()
+        run: |
+          df -h /
+          du -sh "$REVENANT_CACHE" "$GITHUB_WORKSPACE/build" 2>/dev/null || true
+
+      - name: Keep the logs, the performance summaries and the measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-${{ inputs.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/out
+          retention-days: 14
+          if-no-files-found: warn
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.store.outputs.cache-hit != 'true' && steps.configure.outcome == 'success' && steps.configure.outputs.installed == 'true'
+        with:
+          path: .cache/xmake-global
+          key: xmake-global-emulator-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua') }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

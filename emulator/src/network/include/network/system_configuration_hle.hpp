@@ -13,6 +13,8 @@ class UserlandHleCall;
 class UserlandHleRegistry;
 
 class SystemConfigurationHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     explicit SystemConfigurationHle(UserlandHleRegistry& registry);
 

@@ -202,6 +202,24 @@ OpenGlesHle::OpenGlesHle(UserlandHleRegistry& registry,
 
 OpenGlesHle::~OpenGlesHle() { release_renderer_resources(); }
 
+void OpenGlesHle::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, next_context_);
+    snapshot::save(out, next_surface_);
+    snapshot::save(out, next_framebuffer_);
+    snapshot::save(out, next_renderbuffer_);
+    snapshot::save(out, egl_error_);
+}
+
+void OpenGlesHle::load(snapshot::Reader& in)
+{
+    snapshot::load(in, next_context_);
+    snapshot::load(in, next_surface_);
+    snapshot::load(in, next_framebuffer_);
+    snapshot::load(in, next_renderbuffer_);
+    snapshot::load(in, egl_error_);
+}
+
 void OpenGlesHle::reset()
 {
     release_renderer_resources();

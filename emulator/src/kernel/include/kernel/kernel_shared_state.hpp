@@ -47,6 +47,7 @@
 #include "foundation/device_security_profile.hpp"
 #include "foundation/display_geometry.hpp"
 #include "foundation/file_page_cache.hpp"
+#include "foundation/snapshot_io.hpp"
 #include "filesystem/hfs_metadata.hpp"
 #include "kernel/iokit_abi.hpp"
 #include "kernel/kernel_mach_task_identity.hpp"
@@ -411,6 +412,8 @@ struct KernelSharedState {
         std::array<std::byte, 16> ipv4_gateway { };
         std::array<std::byte, 28> ipv6_address { };
         std::array<std::byte, 28> ipv6_netmask { };
+        darwin::network::InterfaceCounters counters;
+        std::uint64_t up_time_nanoseconds { };
     };
     struct KernelEvent {
         std::uint32_t identifier { };
@@ -1137,7 +1140,11 @@ struct KernelSharedState {
     std::map<std::uint32_t, std::uint32_t> task_name_port_pids;
     std::map<std::uint32_t, std::map<std::uint32_t, std::uint32_t>>
         task_thread_port_objects;
-    std::map<std::uint32_t, std::filesystem::path> thread_working_directories;
+    struct PinnedDirectory {
+        std::filesystem::path guest;
+        int host_descriptor { -1 };
+    };
+    std::map<std::uint32_t, PinnedDirectory> thread_working_directories;
     std::map<std::uint32_t, std::map<std::uint32_t, std::uint32_t>>
         task_special_ports;
     std::map<std::uint32_t, TaskExceptionActions> task_exception_actions;
@@ -1694,6 +1701,17 @@ struct KernelSharedState {
         foreground_transition_snapshot->terminal =
             foreground_transition_timestamp_locked();
     }
+
+    void save_scalar_state(snapshot::Writer& out) const;
+    void load_scalar_state(snapshot::Reader& in);
+    void save_port_and_event_tables(snapshot::Writer& out) const;
+    void load_port_and_event_tables(snapshot::Reader& in);
+    void save_process_table(snapshot::Writer& out) const;
+    void load_process_table(snapshot::Reader& in);
+    void save_key_store_identity(snapshot::Writer& out) const;
+    void load_key_store_identity(snapshot::Reader& in);
+    void save_service_tables(snapshot::Writer& out) const;
+    void load_service_tables(snapshot::Reader& in);
 
     std::mutex mach_mutex;
     std::shared_ptr<bsd::sandbox::Extensions> sandbox_extensions;

@@ -19,6 +19,8 @@ class SceneCoordinator;
 class UserlandHleRegistry;
 
 class LayerKitHle {
+    friend struct CompatibilityKernelSnapshot;
+
 public:
     void register_handlers(UserlandHleRegistry& registry,
         std::shared_ptr<KernelSharedState> shared_state,

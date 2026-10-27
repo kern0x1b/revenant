@@ -19,8 +19,11 @@
 #include "resource_policy.hpp"
 #include "runtime/live_button_scheduler.hpp"
 #include "runtime/live_touch_scheduler.hpp"
+#include "runtime/loop_carried_state.hpp"
 #include "runtime/realtime_pacer.hpp"
 #include "runtime/session_host.hpp"
+#include "runtime/session_snapshot.hpp"
+#include "runtime/session_state.hpp"
 #include "session_catalog.hpp"
 #include "session_debugger.hpp"
 #include "session_diagnostics.hpp"
@@ -67,6 +70,7 @@
 #include "device_state/network_preferences.hpp"
 #include "foundation/address_space.hpp"
 #include "foundation/cpu.hpp"
+#include "foundation/darwin_address_layout.hpp"
 #include "foundation/deadline_queue.hpp"
 #include "foundation/device_model.hpp"
 #include "graphics/display.hpp"
@@ -103,6 +107,19 @@
 namespace emulator {
 using namespace runtime_detail;
 namespace {
+
+    std::pair<std::uint32_t, std::uint32_t> dynamic_linker_text_range(
+        const std::filesystem::path& rootfs, ArmArchitectureVersion architecture)
+    {
+        const auto image = MachOImage::parse(
+            rootfs / "usr" / "lib" / "dyld", architecture);
+        for (const auto& segment : image.segments()) {
+            if (segment.name == "__TEXT")
+                return { segment.vm_address,
+                    segment.vm_address + segment.vm_size };
+        }
+        return { };
+    }
 
     std::uint64_t host_random_seed()
     {
@@ -282,13 +299,33 @@ void EmulatorSession::run()
         device.identity.hardware_model_override =
             device.identity.activation_hardware_model;
     }
+    if (options.shared_image_slab) {
+        const auto bounds = darwin_address_bounds(
+            darwin_configuration.abi.address_layout);
+        const auto [dyld_begin, dyld_end] = dynamic_linker_text_range(
+            options.rootfs, arm_architecture_for_model(device.processor.model));
+        set_machine_image_code_region(ImageCodeRegion {
+            options.rootfs.string() + "|" +
+                std::string { device.identity.product_type },
+            bounds.shared_region_base, bounds.shared_region_end,
+            options.image_slab_bytes.value_or(0U), dyld_begin, dyld_end });
+        output.line("[jit] image-slab-mib=" +
+                    (options.image_slab_bytes
+                            ? std::to_string(*options.image_slab_bytes /
+                                             1024U / 1024U)
+                            : std::string { "shared" }));
+    } else {
+        set_machine_image_code_region(ImageCodeRegion { });
+    }
     const auto ticks_option = options.ticks;
     const auto bounded_execution = ticks_option.has_value();
     const std::shared_ptr<hfs::GuestIdTable> guest_ids =
         bounded_execution ? std::make_shared<hfs::GuestIdTable>() : nullptr;
     const auto device_time_policy =
         bounded_execution ? DeviceTimePolicy::DeterministicExecution
-                          : DeviceTimePolicy::HostMappedInteractive;
+        : options.windowed || options.gdb_port.has_value()
+            ? DeviceTimePolicy::HostMappedInteractive
+            : DeviceTimePolicy::FastForwardIdle;
     const auto ticks = ticks_option ? *ticks_option
                                     : std::numeric_limits<std::uint64_t>::max();
     const bool disable_scheduler_preemption =
@@ -350,6 +387,7 @@ void EmulatorSession::run()
     const auto guest_ticks_per_second = cpu_model->ticks_per_second();
     GuestTickClock guest_tick_clock { guest_ticks_per_second };
     const auto explicit_processor_count = options.cores;
+    const auto test_concurrent_threads = options.test_concurrent_threads;
     const auto guest_processor_count =
         explicit_processor_count.value_or(default_processor_count);
     if (guest_processor_count == 0 ||
@@ -380,6 +418,8 @@ void EmulatorSession::run()
                 : adaptive_jit_code_cache_size(host.memory_budget_snapshot()));
     const auto jit_cache_budget = jit_code_cache_budget(
         options.jit_cache_budget_bytes, host.memory_budget_snapshot());
+    output.line("[boot] host-start-ms=" +
+                std::to_string(host_unix_milliseconds()));
     output.line("[jit] code-cache-mib=" +
                 std::to_string(configured_jit_code_cache_size / 1024U / 1024U));
     output.line(
@@ -543,13 +583,38 @@ void EmulatorSession::run()
     device.baseband.transport = baseband_input_path ? BasebandTransport::Virtual
                                                     : device.baseband.transport;
 
+    std::optional<SessionSnapshot> restored_snapshot;
+    if (options.snapshot_input) {
+        std::ifstream file { *options.snapshot_input, std::ios::binary };
+        if (!file)
+            throw std::runtime_error { "cannot open snapshot: " + *options.snapshot_input };
+        const auto size = std::filesystem::file_size(*options.snapshot_input);
+        std::vector<std::byte> bytes(size);
+        file.read(reinterpret_cast<char*>(bytes.data()),
+            static_cast<std::streamsize>(size));
+        if (!file)
+            throw std::runtime_error { "cannot read snapshot: " + *options.snapshot_input };
+        restored_snapshot = decode_session_snapshot(bytes);
+        const auto& header = restored_snapshot->header;
+        if (header.device != std::string { device.identity.product_type })
+            throw std::runtime_error { "snapshot device " + header.device +
+                                       " does not match the device " +
+                                       std::string { device.identity.product_type } };
+        if (header.binary != binary)
+            throw std::runtime_error { "snapshot binary " + header.binary +
+                                       " does not match the binary " + binary };
+        if (header.ticks >= *ticks_option)
+            throw std::invalid_argument { "--ticks must exceed the snapshot's " +
+                                          std::to_string(header.ticks) + " ticks" };
+        require_rootfs_identity(header, rootfs,
+            host_cache / "rootfs-manifest-digests.bin");
+    }
     auto initial_memory = std::make_unique<AddressSpace>();
     initial_memory->set_parallel_access(guest_processor_count > 1);
+    initial_memory->set_backing_root(rootfs);
     ProcessLoader loader { rootfs, *initial_memory, guest_architecture,
         session_catalog.index(), darwin_abi.initial_apple_vector_abi, darwin_abi.address_layout };
-    std::vector<std::string> initial_environment {
-        "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "HOME=/var/root", "SHELL=/bin/sh"
-    };
+    std::vector<std::string> initial_environment;
     auto process =
         loader.load(binary, std::move(initial_arguments), initial_environment);
     Dynarmic::ExclusiveMonitor shared_exclusive_monitor {
@@ -1446,9 +1511,11 @@ void EmulatorSession::run()
         boot_pixels = BootLogo::placeholder(device.screen.panel);
         output.marker("[boot] logo-source=built-in-placeholder");
     }
-    initial->kernel->initialize_boot_display(std::move(boot_pixels));
-    if (display_presenter)
-        display_presenter->flush_presentation();
+    if (!restored_snapshot) {
+        initial->kernel->initialize_boot_display(std::move(boot_pixels));
+        if (display_presenter)
+            display_presenter->flush_presentation();
+    }
     initial->allocated.assign(initial_guest_thread_slots, false);
     Runtime* initial_runtime = initial.get();
     CatalogMaintenance catalog_maintenance {
@@ -1469,14 +1536,16 @@ void EmulatorSession::run()
         static_cast<std::int64_t>(
             iokit_abi::display_vsync::period_absolute_time) } };
     GuestParallelismPolicy guest_parallelism_policy { guest_ticks_per_second };
-    std::optional<XnuThreadId> last_serial_thread;
-    std::optional<XnuThreadId> scheduler_handoff_thread;
+    LoopCarriedState loop_state;
+    const auto pin_to_slot = [&scheduler, test_concurrent_threads,
+                                 guest_processor_count](
+                                 XnuThreadId thread, std::size_t slot) {
+        if (test_concurrent_threads)
+            static_cast<void>(scheduler.bind_thread(
+                thread, slot % guest_processor_count));
+    };
     std::optional<std::uint32_t> display_urgent_process;
-    std::optional<XnuThreadId> display_urgent_thread;
-    std::optional<XnuThreadId> display_urgent_receiver_thread;
-    std::optional<XnuThreadId> display_yielded_thread;
     std::optional<XnuThreadId> display_inflight_callback_thread;
-    std::uint64_t display_inflight_callback_sequence { };
     std::optional<std::chrono::steady_clock::time_point>
         display_inflight_callback_deadline;
     std::optional<std::chrono::steady_clock::time_point>
@@ -1487,7 +1556,6 @@ void EmulatorSession::run()
     std::optional<XnuThreadId> diagnostic_svc_spin_thread;
     std::uint64_t diagnostic_svc_spin_calls = 0;
     std::uint64_t diagnostic_svc_spin_report_at = 1'000;
-    std::uint64_t diagnostic_display_yield_count = 0;
 
     std::uint32_t next_pid = 2;
     std::size_t watchpoint_trace_count = 0;
@@ -1588,7 +1656,7 @@ void EmulatorSession::run()
             configure_cpu(index);
         }
         runtime.kernel->set_thread_create_handler(
-            [runtime_ptr, &scheduler, configure_cpu](
+            [runtime_ptr, &scheduler, &pin_to_slot, configure_cpu](
                 const std::array<std::uint32_t, 16>& registers,
                 std::uint32_t cpsr) -> std::optional<std::size_t> {
                 const auto allocate_slot =
@@ -1608,6 +1676,9 @@ void EmulatorSession::run()
                         runtime_ptr->allocated[index] = false;
                         return std::nullopt;
                     }
+                    pin_to_slot(XnuThreadId { runtime_ptr->kernel->process().pid,
+                                    static_cast<std::uint32_t>(index) },
+                        index);
                     return index;
                 };
                 for (std::size_t index = 1; index < runtime_ptr->cpus->size();
@@ -1820,6 +1891,7 @@ void EmulatorSession::run()
             static_cast<void>(
                 scheduler.register_thread(XnuThreadId { child_pid, 0 },
                     child->kernel->process().thread_base_priority));
+            pin_to_slot(XnuThreadId { child_pid, 0 }, 0);
             observe_runtime_jit_memory_counted(*child);
             runtime_index.insert(*child);
             runtimes.push_back(std::move(child));
@@ -2116,26 +2188,43 @@ void EmulatorSession::run()
     };
     configure_runtime(*initial_runtime);
 
-    auto& initial_cpu = initial_runtime->cpus->cpu(0);
-    initial_runtime->allocated[0] = true;
-    static_cast<void>(scheduler.register_thread(
-        XnuThreadId { initial_runtime->kernel->process().pid, 0 },
-        initial_runtime->kernel->process().thread_base_priority));
-    initial_cpu.registers()[13] = process.stack_pointer;
-    initial_cpu.registers()[15] = process.entry_point;
-    initial_cpu.set_cpsr(0x10);
+    if (restored_snapshot) {
+        output.line("[snapshot] load-start host-ms=" +
+                    std::to_string(host_unix_milliseconds()));
+        snapshot::Reader in { restored_snapshot->body };
+        load_session_state(in, *initial_runtime, scheduler, loop_state, next_pid);
+        if (!in.at_end())
+            throw snapshot::FormatError { "snapshot has bytes after the session state" };
+        guest_tick_clock.set_remainder(loop_state.guest_time_remainder);
+        loop_state.executed_ticks = restored_snapshot->header.ticks;
+        loop_state.remaining_ticks = *ticks_option - restored_snapshot->header.ticks;
+        output.line("[snapshot] restored=" + *options.snapshot_input +
+                    " saved-ticks=" + std::to_string(restored_snapshot->header.ticks) +
+                    " remaining-ticks=" + std::to_string(loop_state.remaining_ticks) +
+                    " host-ms=" + std::to_string(host_unix_milliseconds()));
+    } else {
+        auto& initial_cpu = initial_runtime->cpus->cpu(0);
+        initial_runtime->allocated[0] = true;
+        static_cast<void>(scheduler.register_thread(
+            XnuThreadId { initial_runtime->kernel->process().pid, 0 },
+            initial_runtime->kernel->process().thread_base_priority));
+        pin_to_slot(XnuThreadId { initial_runtime->kernel->process().pid, 0 }, 0);
+        initial_cpu.registers()[13] = process.stack_pointer;
+        initial_cpu.registers()[15] = process.entry_point;
+        initial_cpu.set_cpsr(0x10);
 
-    {
-        std::ostringstream message;
-        message << "[loader] main=0x" << std::hex << process.main_header
-                << " dyld_entry=0x" << process.entry_point << " sp=0x"
-                << process.stack_pointer << std::dec
-                << " processors=" << guest_processor_count
-                << " network=" << host_network_policy_name(network_policy)
-                << '\n';
-        output.write(message.str());
+        {
+            std::ostringstream message;
+            message << "[loader] main=0x" << std::hex << process.main_header
+                    << " dyld_entry=0x" << process.entry_point << " sp=0x"
+                    << process.stack_pointer << std::dec
+                    << " processors=" << guest_processor_count
+                    << " network=" << host_network_policy_name(network_policy)
+                    << '\n';
+            output.write(message.str());
+        }
+        loop_state.remaining_ticks = ticks;
     }
-    std::uint64_t remaining_ticks = ticks;
     std::uint64_t consumed_ticks = 0;
     std::uint32_t stopped_pid = 1;
     std::size_t stopped_cpu = 0;
@@ -2478,6 +2567,8 @@ void EmulatorSession::run()
                   << " (one guest second takes that many host seconds)";
             output.line(scale.str());
         }
+    }
+    if (device_time_policy != DeviceTimePolicy::DeterministicExecution) {
         const auto host_wall_time =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
@@ -2486,14 +2577,17 @@ void EmulatorSession::run()
             initial_runtime->kernel->set_wall_time(
                 static_cast<std::uint64_t>(host_wall_time));
         }
-        output.line("[clock] mode=virtual-rtc seed=host-once rate=realtime "
-                    "timezone=guest");
+        output.line(
+            realtime_pacer
+                ? "[clock] mode=virtual-rtc seed=host-once rate=realtime "
+                  "timezone=guest"
+                : "[clock] mode=virtual-rtc seed=host-once rate=fast-forward "
+                  "timezone=guest");
     }
     GuestTickClock executed_time_clock { guest_ticks_per_second };
-    std::uint64_t executed_ticks_since_catch_up { };
     const auto account_stability_catch_up = [&](std::uint64_t advance) {
         const auto executed = executed_time_clock.absolute_time_units(
-            std::exchange(executed_ticks_since_catch_up, 0));
+            std::exchange(loop_state.executed_ticks_since_catch_up, 0));
         if (!transition_attribution.internal_stability_active.load(
                 std::memory_order_acquire)) {
             return;
@@ -2553,6 +2647,8 @@ void EmulatorSession::run()
             guest_ticks_per_second);
         scheduler.synchronize_time(scheduler_time);
         scheduler.set_realtime_clock_ticks(scheduler_time);
+        initial_runtime->kernel->sample_load_average(
+            scheduler.runnable_count());
     };
     const auto jit_work_observation_due =
         [&](std::chrono::steady_clock::time_point now, bool guest_quiet) {
@@ -2732,14 +2828,12 @@ void EmulatorSession::run()
         }
     };
     auto last_interactive_host_activity = std::chrono::steady_clock::now();
-    std::uint64_t interaction_generation { 1U };
-    std::optional<std::uint32_t> input_receiver_process;
     const auto note_interactive_host_activity = [&]() {
         last_interactive_host_activity = std::chrono::steady_clock::now();
-        input_receiver_process =
+        loop_state.input_receiver_process =
             initial_runtime->kernel->graphics_input_receiver_process_id();
-        if (++interaction_generation == 0U)
-            ++interaction_generation;
+        if (++loop_state.interaction_generation == 0U)
+            ++loop_state.interaction_generation;
         jit_work_signal->notify_work();
         for (const auto& runtime : runtimes) {
             for (const auto& task : runtime->precompile_tasks) {
@@ -2751,7 +2845,7 @@ void EmulatorSession::run()
     };
     SessionDiagnostics diagnostics { *initial_runtime, runtimes, scheduler,
         display_presenter.get(), output };
-    while ((!bounded_execution || remaining_ticks != 0) &&
+    while ((!bounded_execution || loop_state.remaining_ticks != 0) &&
            !initial_runtime->kernel->process().exited && !hard_stop) {
         synchronize_device_time_to_host();
         synchronize_scheduler_time();
@@ -3111,9 +3205,11 @@ void EmulatorSession::run()
                     processor) {
                     const XnuThreadId receiver_thread { *display_urgent_process,
                         static_cast<std::uint32_t>(*processor) };
-                    if (!display_urgent_receiver_thread ||
-                        *display_urgent_receiver_thread != receiver_thread) {
-                        display_urgent_receiver_thread = receiver_thread;
+                    if (!loop_state.display_urgent_receiver_thread ||
+                        *loop_state.display_urgent_receiver_thread !=
+                            receiver_thread) {
+                        loop_state.display_urgent_receiver_thread =
+                            receiver_thread;
                         display_urgent_lease_deadline =
                             std::chrono::steady_clock::now() +
                             std::chrono::milliseconds { 50 };
@@ -3126,9 +3222,10 @@ void EmulatorSession::run()
                             *display_urgent_process,
                             static_cast<std::uint32_t>(*processor)
                         };
-                        if (!display_urgent_thread ||
-                            *display_urgent_thread != callback_thread) {
-                            display_urgent_thread = callback_thread;
+                        if (!loop_state.display_urgent_thread ||
+                            *loop_state.display_urgent_thread !=
+                                callback_thread) {
+                            loop_state.display_urgent_thread = callback_thread;
                             display_urgent_lease_deadline =
                                 std::chrono::steady_clock::now() +
                                 std::chrono::milliseconds { 50 };
@@ -3171,11 +3268,11 @@ void EmulatorSession::run()
                                         *callback_processor) })) {
                             callback_processor = processor;
                         }
-                        display_urgent_thread = XnuThreadId {
+                        loop_state.display_urgent_thread = XnuThreadId {
                             runtime->kernel->process().pid,
                             static_cast<std::uint32_t>(*callback_processor)
                         };
-                        display_urgent_receiver_thread = thread;
+                        loop_state.display_urgent_receiver_thread = thread;
                         display_urgent_lease_deadline =
                             std::chrono::steady_clock::now() +
                             std::chrono::milliseconds { 50 };
@@ -3202,8 +3299,8 @@ void EmulatorSession::run()
                         return info->state == XnuThreadState::Runnable;
                     return false;
                 };
-                return is_runnable(display_urgent_thread) ||
-                       is_runnable(display_urgent_receiver_thread);
+                return is_runnable(loop_state.display_urgent_thread) ||
+                       is_runnable(loop_state.display_urgent_receiver_thread);
             }();
             const auto guest_ahead_delay =
                 display_urgent_runnable
@@ -3363,7 +3460,8 @@ void EmulatorSession::run()
         const auto observed_inflight_callback =
             [&]() -> std::optional<std::pair<XnuThreadId, std::uint64_t>> {
             if (!display_urgent_process ||
-                (!display_urgent_thread && !display_urgent_receiver_thread))
+                (!loop_state.display_urgent_thread &&
+                 !loop_state.display_urgent_receiver_thread))
                 return std::nullopt;
             for (const auto& runtime : runtimes) {
                 if (!runtime->kernel->process().exited &&
@@ -3383,16 +3481,16 @@ void EmulatorSession::run()
         }();
         if (!observed_inflight_callback) {
             display_inflight_callback_thread.reset();
-            display_inflight_callback_sequence = 0U;
+            loop_state.display_inflight_callback_sequence = 0U;
             display_inflight_callback_deadline.reset();
         } else if (!display_inflight_callback_thread ||
                    *display_inflight_callback_thread !=
                        observed_inflight_callback->first ||
-                   display_inflight_callback_sequence !=
+                   loop_state.display_inflight_callback_sequence !=
                        observed_inflight_callback->second) {
             display_inflight_callback_thread =
                 observed_inflight_callback->first;
-            display_inflight_callback_sequence =
+            loop_state.display_inflight_callback_sequence =
                 observed_inflight_callback->second;
             display_inflight_callback_deadline =
                 std::chrono::steady_clock::now() +
@@ -3406,7 +3504,7 @@ void EmulatorSession::run()
         const auto display_callback_work_active =
             display_callback_pending || display_inflight_callback_active;
         if (!display_callback_work_active)
-            display_yielded_thread.reset();
+            loop_state.display_yielded_thread.reset();
         if (performance_counters().cpu_source_diagnostics_enabled() &&
             display_callback_pending) {
             const auto now = std::chrono::steady_clock::now();
@@ -3427,9 +3525,10 @@ void EmulatorSession::run()
                 };
                 output.line("[perf] display-callback-pending duration-ms=100 "
                             "callback=" +
-                            format_thread(display_urgent_thread) +
+                            format_thread(loop_state.display_urgent_thread) +
                             " receiver=" +
-                            format_thread(display_urgent_receiver_thread));
+                            format_thread(
+                                loop_state.display_urgent_receiver_thread));
                 display_callback_pending_reported = true;
             }
         } else {
@@ -3439,8 +3538,8 @@ void EmulatorSession::run()
         if (display_urgent_lease_deadline && !display_callback_pending &&
             std::chrono::steady_clock::now() >=
                 *display_urgent_lease_deadline) {
-            display_urgent_thread.reset();
-            display_urgent_receiver_thread.reset();
+            loop_state.display_urgent_thread.reset();
+            loop_state.display_urgent_receiver_thread.reset();
             display_urgent_lease_deadline.reset();
         }
         const auto debugger_thread =
@@ -3468,17 +3567,18 @@ void EmulatorSession::run()
             GuestDispatchObservation {
                 .now = dispatch_now,
                 .debugger_thread = debugger_thread,
-                .explicit_handoff_thread = scheduler_handoff_thread,
+                .explicit_handoff_thread = loop_state.scheduler_handoff_thread,
                 .realtime_process = display_urgent_process,
-                .realtime_callback_thread = display_urgent_thread,
-                .realtime_receiver_thread = display_urgent_receiver_thread,
-                .realtime_yielded_thread = display_yielded_thread,
+                .realtime_callback_thread = loop_state.display_urgent_thread,
+                .realtime_receiver_thread =
+                    loop_state.display_urgent_receiver_thread,
+                .realtime_yielded_thread = loop_state.display_yielded_thread,
                 .realtime_inflight_thread = display_inflight_callback_thread,
                 .input_target_thread = input_preferred_thread,
-                .input_receiver_process = input_receiver_process,
+                .input_receiver_process = loop_state.input_receiver_process,
                 .foreground_transition_process = transition_process,
                 .active_process = active_process,
-                .interaction_generation = interaction_generation,
+                .interaction_generation = loop_state.interaction_generation,
                 .realtime_notification_pending = display_callback_pending,
                 .realtime_work_pending = display_callback_work_active,
                 .realtime_inflight = display_inflight_callback_active,
@@ -3487,25 +3587,25 @@ void EmulatorSession::run()
                     dispatch_now < *display_urgent_lease_deadline,
             });
         if (dispatch.explicit_handoff_stale)
-            scheduler_handoff_thread.reset();
+            loop_state.scheduler_handoff_thread.reset();
         const auto preferred_thread = dispatch.preferred_thread;
         std::vector<XnuScheduledSlice> scheduled_batch;
         scheduled_batch.reserve(guest_processor_count);
-        auto reservable_ticks = remaining_ticks;
+        auto reservable_ticks = loop_state.remaining_ticks;
         for (std::size_t processor = 0; processor < guest_processor_count;
             ++processor) {
             if (bounded_execution && reservable_ticks == 0)
                 break;
-            const auto scheduled =
-                scheduler.choose_next(processor, preferred_thread);
+            const auto scheduled = scheduler.choose_next(processor,
+                test_concurrent_threads ? std::nullopt : preferred_thread);
             if (scheduled) {
-                if (scheduler_handoff_thread &&
-                    *scheduler_handoff_thread == scheduled->thread) {
-                    scheduler_handoff_thread.reset();
+                if (loop_state.scheduler_handoff_thread &&
+                    *loop_state.scheduler_handoff_thread == scheduled->thread) {
+                    loop_state.scheduler_handoff_thread.reset();
                 }
-                if (display_yielded_thread &&
-                    *display_yielded_thread != scheduled->thread) {
-                    display_yielded_thread.reset();
+                if (loop_state.display_yielded_thread &&
+                    *loop_state.display_yielded_thread != scheduled->thread) {
+                    loop_state.display_yielded_thread.reset();
                 }
                 performance_counters().record_diagnostic_input_execute(
                     scheduled->thread.process, scheduled->thread.thread);
@@ -3563,13 +3663,13 @@ void EmulatorSession::run()
                         std::min(reservable_ticks, scheduled->tick_budget);
                 }
                 if (scheduled_batch.size() == 1U &&
-                    guest_processor_count > 1U &&
+                    guest_processor_count > 1U && !test_concurrent_threads &&
                     guest_parallelism_policy.should_serialize(
                         scheduled->thread)) {
                     break;
                 }
             }
-            if (preferred_thread)
+            if (preferred_thread && !test_concurrent_threads)
                 break;
         }
 
@@ -3596,7 +3696,6 @@ void EmulatorSession::run()
                            guest_ticks_per_second));
             }
         }
-        auto batch_ticks = remaining_ticks;
         const auto host_slice_now = std::chrono::steady_clock::now();
         const auto host_control_deadline = next_host_control_deadline();
         const auto host_control_delay =
@@ -3605,6 +3704,9 @@ void EmulatorSession::run()
                           duration_cast<std::chrono::nanoseconds>(
                               *host_control_deadline - host_slice_now) }
                 : std::nullopt;
+        auto batch_ticks = std::min(loop_state.remaining_ticks,
+            bounded_tick_alignment -
+                loop_state.executed_ticks % bounded_tick_alignment);
         const auto display_deadline_delay =
             realtime_pacer && display_vsync_deadline
                 ? std::optional<std::chrono::nanoseconds> { realtime_pacer
@@ -3688,11 +3790,14 @@ void EmulatorSession::run()
 
         const auto parallel_guest_batch =
             prepared_slices.size() > 1U &&
-            std::none_of(prepared_slices.begin(), prepared_slices.end(),
-                [&guest_parallelism_policy](const auto& prepared) {
-                    return guest_parallelism_policy.should_serialize(
-                        prepared.scheduled.thread);
-                });
+            (test_concurrent_threads ||
+                std::none_of(prepared_slices.begin(), prepared_slices.end(),
+                    [&guest_parallelism_policy](const auto& prepared) {
+                        return guest_parallelism_policy.should_serialize(
+                            prepared.scheduled.thread);
+                    }));
+        for (auto& prepared : prepared_slices)
+            prepared.runtime->memory->reclaim_retired_backings();
         for (auto& prepared : prepared_slices) {
             prepared.deferred_svc = parallel_guest_batch;
             prepared.execution.cpu->set_svc_dispatch_mode(
@@ -3702,13 +3807,9 @@ void EmulatorSession::run()
                 prepared.scheduled.thread.thread);
         }
 
-        if (guest_processor_count == 1 && !prepared_slices.empty() &&
-            last_serial_thread !=
-                std::optional<XnuThreadId> {
-                    prepared_slices.front().scheduled.thread }) {
-            prepared_slices.front().execution.cpu->clear_exclusive_state(
-                prepared_slices.front().scheduled.processor);
-            last_serial_thread = prepared_slices.front().scheduled.thread;
+        for (auto& prepared : prepared_slices) {
+            prepared.execution.cpu->clear_exclusive_state(
+                prepared.scheduled.processor);
         }
         if (parallel_guest_batch) {
             std::vector<GuestExecutionRequest*> execution_requests;
@@ -3788,7 +3889,7 @@ void EmulatorSession::run()
             }
             if (const auto handoff =
                     runtime.kernel->consume_scheduler_handoff(index)) {
-                scheduler_handoff_thread = *handoff;
+                loop_state.scheduler_handoff_thread = *handoff;
             }
             scheduler_round_ticks =
                 std::max(scheduler_round_ticks, result.ticks_consumed);
@@ -3797,8 +3898,9 @@ void EmulatorSession::run()
             stopped_result = result;
             consumed_ticks += result.ticks_consumed;
             if (bounded_execution) {
-                remaining_ticks -=
-                    std::min(remaining_ticks, result.ticks_consumed);
+                loop_state.executed_ticks += result.ticks_consumed;
+                loop_state.remaining_ticks -=
+                    std::min(loop_state.remaining_ticks, result.ticks_consumed);
             }
             bool debug_stop = result.debug_breakpoint.has_value() ||
                               prepared.execution.single_step;
@@ -3827,6 +3929,9 @@ void EmulatorSession::run()
                     failure << " r" << std::dec << index << "=0x" << std::hex
                             << registers[index];
                 output.line(failure.str());
+                for (const auto& line : runtime.kernel->fault_word_report(
+                         *runtime.memory, registers))
+                    output.line(line);
             }
             auto completion = XnuSliceCompletion::Continue;
             bool scheduler_completed = false;
@@ -3909,6 +4014,9 @@ void EmulatorSession::run()
                         XnuThreadId { runtime.kernel->process().pid,
                             static_cast<std::uint32_t>(pending.processor) },
                         runtime.kernel->process().thread_base_priority));
+                    pin_to_slot(XnuThreadId { runtime.kernel->process().pid,
+                                    static_cast<std::uint32_t>(pending.processor) },
+                        pending.processor);
                     scheduler_completed = true;
                 } catch (const std::exception& error) {
                     output.line("[process] exec failed pid=" +
@@ -3959,18 +4067,20 @@ void EmulatorSession::run()
                     if (performance_counters()
                             .cpu_source_diagnostics_enabled() &&
                         display_callback_pending &&
-                        diagnostic_display_yield_count++ < 32U) {
+                        loop_state.diagnostic_display_yield_count++ < 32U) {
                         output.line(
                             "[perf] display-yield source=" +
                             std::to_string(scheduled->thread.process) + ":" +
                             std::to_string(scheduled->thread.thread) +
                             " handoff=" +
-                            (scheduler_handoff_thread
+                            (loop_state.scheduler_handoff_thread
                                     ? std::to_string(
-                                          scheduler_handoff_thread->process) +
+                                          loop_state.scheduler_handoff_thread
+                                              ->process) +
                                           ":" +
                                           std::to_string(
-                                              scheduler_handoff_thread->thread)
+                                              loop_state.scheduler_handoff_thread
+                                                  ->thread)
                                     : "none") +
                             " depress=" + std::to_string(request->depress));
                     }
@@ -4000,14 +4110,15 @@ void EmulatorSession::run()
             }
             if (completion == XnuSliceCompletion::Yield &&
                 display_callback_work_active &&
-                ((display_urgent_thread &&
-                     *display_urgent_thread == scheduled->thread) ||
-                    (display_urgent_receiver_thread &&
-                        *display_urgent_receiver_thread == scheduled->thread) ||
+                ((loop_state.display_urgent_thread &&
+                     *loop_state.display_urgent_thread == scheduled->thread) ||
+                    (loop_state.display_urgent_receiver_thread &&
+                        *loop_state.display_urgent_receiver_thread ==
+                            scheduled->thread) ||
                     (display_inflight_callback_thread &&
                         *display_inflight_callback_thread ==
                             scheduled->thread))) {
-                display_yielded_thread = scheduled->thread;
+                loop_state.display_yielded_thread = scheduled->thread;
             }
             if (!scheduler_completed) {
                 guest_execution_policy.observe(scheduled->thread, completion);
@@ -4059,8 +4170,8 @@ void EmulatorSession::run()
                 break;
         }
         if (realtime_pacer)
-            executed_ticks_since_catch_up += scheduler_round_ticks;
-        if (device_time_policy == DeviceTimePolicy::DeterministicExecution) {
+            loop_state.executed_ticks_since_catch_up += scheduler_round_ticks;
+        if (device_time_policy != DeviceTimePolicy::HostMappedInteractive) {
             scheduler.advance_time(scheduler_round_ticks);
             if (scheduler_round_ticks != 0) {
                 initial_runtime->kernel->advance_time_by(
@@ -4122,11 +4233,11 @@ void EmulatorSession::run()
         if (display_submissions != observed_display_submissions) {
             observed_display_submissions = display_submissions;
             last_display_submission = std::chrono::steady_clock::now();
-            display_urgent_thread.reset();
-            display_urgent_receiver_thread.reset();
-            display_yielded_thread.reset();
+            loop_state.display_urgent_thread.reset();
+            loop_state.display_urgent_receiver_thread.reset();
+            loop_state.display_yielded_thread.reset();
             display_inflight_callback_thread.reset();
-            display_inflight_callback_sequence = 0U;
+            loop_state.display_inflight_callback_sequence = 0U;
             display_inflight_callback_deadline.reset();
             display_urgent_lease_deadline.reset();
         }
@@ -4665,11 +4776,54 @@ void EmulatorSession::run()
     PerformanceSnapshot stopped_guest;
     FilePageCacheStats file_cache_stats;
     std::uint64_t file_page_cache_bytes { };
+    MaterializedPageCounts materialized_pages;
+    std::size_t materialized_processes { };
     host_resources.set_next_deadline(std::nullopt);
     host_resources.wait_idle();
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
     catalog_maintenance.publish_stable(*initial_runtime->kernel);
     host_resources.wait_idle();
+    if (options.snapshot_output) {
+        if (!bounded_execution)
+            throw std::invalid_argument { "--snapshot-out needs --ticks" };
+        if (display_inflight_callback_deadline ||
+            display_urgent_lease_deadline || display_callback_pending_since)
+            throw snapshot::RefusedError { "run.display_callback_deadline" };
+        if (display_urgent_process || display_inflight_callback_thread)
+            throw snapshot::RefusedError { "run.display_urgent_callback" };
+        if (diagnostic_svc_spin_thread)
+            throw snapshot::RefusedError { "run.diagnostic_svc_spin" };
+        if (hard_stop || loop_state.remaining_ticks != 0)
+            throw snapshot::RefusedError { "run.stopped_before_ticks" };
+        loop_state.guest_time_remainder = guest_tick_clock.remainder();
+        snapshot::Writer body;
+        save_session_state(body, *initial_runtime, runtimes.size(), scheduler,
+            loop_state, next_pid);
+        SessionSnapshot snapshot;
+        snapshot.header.device = std::string { device.identity.product_type };
+        snapshot.header.binary = binary;
+        snapshot.header.ticks = loop_state.executed_ticks;
+        snapshot.header.rootfs_manifest = rootfs_manifest_identity(
+            rootfs, host_cache / "rootfs-manifest-digests.bin");
+        snapshot.body = std::move(body.bytes());
+        const auto encoded = encode_session_snapshot(snapshot);
+        const auto& target = *options.snapshot_output;
+        const auto partial = target + ".partial";
+        {
+            std::ofstream file { partial, std::ios::binary };
+            file.write(reinterpret_cast<const char*>(encoded.data()),
+                static_cast<std::streamsize>(encoded.size()));
+            file.close();
+            if (!file)
+                throw std::runtime_error { "cannot write snapshot: " + target };
+        }
+        std::filesystem::rename(partial, target);
+        output.line("[snapshot] written=" + target +
+                    " bytes=" + std::to_string(encoded.size()) +
+                    " ticks=" + std::to_string(loop_state.executed_ticks));
+    }
+    if (bounded_execution)
+        host.session_stopped(*initial_runtime->kernel, *initial_runtime->memory);
     if (artifact_compaction_task && artifact_compaction_record &&
         artifact_compaction_record->state() ==
             ArtifactCompactionTaskState::Queued &&
@@ -4712,6 +4866,10 @@ void EmulatorSession::run()
             static_cast<std::uint64_t>(
                 initial_runtime->memory->cached_file_page_count()) *
             AddressSpace::page_size;
+        materialized_processes = runtimes.size();
+        for (const auto& runtime : runtimes)
+            materialized_pages +=
+                runtime->memory->materialized_page_counts();
     }
     catalog_maintenance.report_watch_stats();
     output.line(
@@ -5577,6 +5735,16 @@ void EmulatorSession::run()
             " touched-pages=" + std::to_string(write_stats.touched_pages) +
             " copy-on-write-detaches=" +
             std::to_string(write_stats.copy_on_write_detaches));
+        output.line(
+            "[perf-memory-pages] processes=" +
+            std::to_string(materialized_processes) +
+            " materialized=" + std::to_string(materialized_pages.total()) +
+            " anonymous=" + std::to_string(materialized_pages.anonymous) +
+            " file-cached=" + std::to_string(materialized_pages.file_cached) +
+            " copy-on-write-possible=" +
+            std::to_string(materialized_pages.copy_on_write_possible) +
+            " shared-writable=" +
+            std::to_string(materialized_pages.shared_writable));
         auto final_snapshot = performance_counters().snapshot();
         final_snapshot.jit_live_instances = stopped_guest.jit_live_instances;
         final_snapshot.jit_code_cache_bytes =

@@ -53,7 +53,7 @@ function main()
         ld = path.join(installdir("ld64"), "bin", "ld"),
         ldid = path.join(installdir("ldid"), "bin", "ldid"),
         blocks = path.join(installdir("blocksruntime"), "src"),
-        dyld = path.join(os.getenv("HOME"), ".revenant", "dyld", "6.0")
+        dyld = path.join(import("@addon.revenant.workspace", {anonymous = true}).home(), "dyld", "6.0")
     }
     _g.env = env
     return env

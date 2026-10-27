@@ -93,4 +93,43 @@ void VirtualClock::advance_to(std::uint64_t deadline)
                                      std::memory_order_relaxed)) { }
 }
 
+const std::array<snapshot::Member<VirtualClock>, 2>& VirtualClock::snapshot_members()
+{
+    static constexpr std::array<snapshot::Member<VirtualClock>, 2> members {{
+        {"clock.now",
+            [](const VirtualClock& clock) { return clock.now() == 0; },
+            [](snapshot::Writer& out, const VirtualClock& clock) {
+                snapshot::save(out, clock.now());
+            },
+            [](snapshot::Reader& in, VirtualClock& clock) {
+                std::uint64_t value { };
+                snapshot::load(in, value);
+                clock.now_.store(value, std::memory_order_relaxed);
+            }},
+        {"clock.wall_time",
+            [](const VirtualClock& clock) {
+                return clock.wall_time_offset_.load(std::memory_order_relaxed) == 0;
+            },
+            [](snapshot::Writer& out, const VirtualClock& clock) {
+                snapshot::save(out, clock.wall_time_offset_.load(std::memory_order_relaxed));
+            },
+            [](snapshot::Reader& in, VirtualClock& clock) {
+                std::int64_t offset { };
+                snapshot::load(in, offset);
+                clock.wall_time_offset_.store(offset, std::memory_order_relaxed);
+            }},
+    }};
+    return members;
+}
+
+void VirtualClock::save(snapshot::Writer& out) const
+{
+    snapshot::save_members(out, *this, snapshot_members());
+}
+
+void VirtualClock::load(snapshot::Reader& in)
+{
+    snapshot::restore_members(in, *this, snapshot_members());
+}
+
 }

@@ -7,12 +7,15 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include "runtime/session_host.hpp"
 
 namespace emulator {
 
 class DesktopHost final : public SessionHost {
 public:
+    explicit DesktopHost(std::filesystem::path census_output = { });
     void initialize_graphics() override;
     [[nodiscard]] std::unique_ptr<DisplayPresenter> create_display(
         const DeviceModel& device) override;
@@ -22,6 +25,11 @@ public:
     [[nodiscard]] HostMemorySnapshot memory_snapshot() const override;
     [[nodiscard]] HostMemoryBudgetSnapshot
     memory_budget_snapshot() const override;
+    void session_stopped(const CompatibilityKernel& kernel,
+        const AddressSpace& memory) override;
+
+private:
+    std::filesystem::path census_output_;
 };
 
 }

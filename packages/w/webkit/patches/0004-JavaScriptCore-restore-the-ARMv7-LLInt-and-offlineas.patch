@@ -109,15 +109,14 @@ index 560b7396ba88790ce5ad807aa74e110e192dc6c8..689f76f15df7de38d326e9eff1f215c8
          static_assert(noOverlap(GPRInfo::argumentGPR0, GPRInfo::argumentGPR1, GPRInfo::argumentGPR2, GPRInfo::regT3, GPRInfo::regT4, GPRInfo::regT5));
  #if CPU(X86_64)
          jit.pop(JSInterfaceJIT::regT4);
-@@ -466,6 +467,61 @@ MacroAssemblerCodeRef<JITThunkPtrTag> arityFixupThunk()
+@@ -466,6 +467,54 @@ MacroAssemblerCodeRef<JITThunkPtrTag> arityFixupThunk()
  #endif
          jit.ret();
  
 +#else
-+        jit.subPtr(JSInterfaceJIT::stackPointerRegister, CCallHelpers::TrustedImm32(static_cast<int32_t>(sizeof(CallerFrameAndPC))), JSInterfaceJIT::regT3); // Initially expected callFramePointer after prologue.
++        jit.subPtr(JSInterfaceJIT::stackPointerRegister, CCallHelpers::TrustedImm32(static_cast<int32_t>(sizeof(CallerFrameAndPC))), JSInterfaceJIT::regT3);
 +        jit.add32(JSInterfaceJIT::TrustedImm32(CallFrame::headerSizeInRegisters), JSInterfaceJIT::argumentGPR2);
 +
-+        // Check to see if we have extra slots we can use
 +        jit.move(JSInterfaceJIT::argumentGPR0, GPRInfo::regT4);
 +        jit.and32(JSInterfaceJIT::TrustedImm32(stackAlignmentRegisters() - 1), GPRInfo::regT4);
 +        JSInterfaceJIT::Jump noExtraSlot = jit.branchTest32(MacroAssembler::Zero, GPRInfo::regT4);
@@ -134,15 +133,10 @@ index 560b7396ba88790ce5ad807aa74e110e192dc6c8..689f76f15df7de38d326e9eff1f215c8
 +
 +        jit.neg32(JSInterfaceJIT::argumentGPR0);
 +
-+        // Adjust call frame register and stack pointer to account for missing args.
-+        // We need to change the stack pointer first before performing copy/fill loops.
-+        // This stack space below the stack pointer is considered unused by OS. Therefore,
-+        // OS may corrupt this space when constructing a signal stack.
 +        jit.move(JSInterfaceJIT::argumentGPR0, JSInterfaceJIT::regT5);
 +        jit.lshift32(JSInterfaceJIT::TrustedImm32(3), JSInterfaceJIT::regT5);
 +        jit.addPtr(JSInterfaceJIT::regT5, JSInterfaceJIT::stackPointerRegister);
 +
-+        // Move current frame down argumentGPR0 number of slots
 +        JSInterfaceJIT::Label copyLoop(jit.label());
 +        jit.load32(MacroAssembler::Address(JSInterfaceJIT::regT3, PayloadOffset), JSInterfaceJIT::regT5);
 +        jit.store32(JSInterfaceJIT::regT5, MacroAssembler::BaseIndex(JSInterfaceJIT::regT3, JSInterfaceJIT::argumentGPR0, JSInterfaceJIT::TimesEight, PayloadOffset));
@@ -151,7 +145,6 @@ index 560b7396ba88790ce5ad807aa74e110e192dc6c8..689f76f15df7de38d326e9eff1f215c8
 +        jit.addPtr(JSInterfaceJIT::TrustedImm32(8), JSInterfaceJIT::regT3);
 +        jit.branchSub32(MacroAssembler::NonZero, JSInterfaceJIT::TrustedImm32(1), JSInterfaceJIT::argumentGPR2).linkTo(copyLoop, &jit);
 +
-+        // Fill in argumentGPR0 missing arg slots with undefined
 +        jit.move(JSInterfaceJIT::argumentGPR0, JSInterfaceJIT::argumentGPR2);
 +        JSInterfaceJIT::Label fillUndefinedLoop(jit.label());
 +        jit.move(JSInterfaceJIT::TrustedImm32(0), JSInterfaceJIT::regT5);
@@ -171,7 +164,7 @@ index 560b7396ba88790ce5ad807aa74e110e192dc6c8..689f76f15df7de38d326e9eff1f215c8
          LinkBuffer patchBuffer(jit, GLOBAL_THUNK_ID, LinkBuffer::Profile::LLIntThunk);
          codeRef.construct(FINALIZE_CODE(patchBuffer, JITThunkPtrTag, "arityFixup"_s, "fixup arity"));
      });
-@@ -891,9 +947,6 @@ MacroAssemblerCodeRef<NativeToJITGatePtrTag> getSentinelFrameReturnPCGateThunk(v
+@@ -891,9 +940,6 @@ MacroAssemblerCodeRef<NativeToJITGatePtrTag> getSentinelFrameReturnPCGateThunk(v
  
  #endif
  
@@ -984,7 +977,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  static void decodeResult(UGPRPair result, CLoopRegister& t0, CLoopRegister& t1)
  {
      const void* t0Result;
-@@ -289,18 +309,16 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
+@@ -289,18 +309,13 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
          return JSValue();
      }
  
@@ -998,9 +991,6 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
 -    // 1. Outgoing args are arg1 in t0, arg2 in t1, etc.
 -    // 2. 32 bit result values are in the low 32-bit of t0.
 -    // 3. 64 bit result values are in t0.
-+    //
-+    //
-+    //
  
      CLoopRegister t0, t1, t2, t3, t5, t6, t7, sp, cfr, lr, pc;
 +#if USE(JSVALUE64)
@@ -1009,7 +999,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
      CLoopRegister pcBase;
      CLoopRegister metadataTable;
      CLoopDoubleRegister d0, d1;
-@@ -345,10 +363,12 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
+@@ -345,10 +360,12 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
      t1 = vm;
      t2 = protoCallFrame;
  
@@ -1022,7 +1012,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  
      // Interpreter variables for value passing between opcodes and/or helpers:
      NativeFunction nativeFunc = nullptr;
-@@ -419,7 +439,11 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
+@@ -419,7 +436,11 @@ JSValue CLoop::execute(OpcodeID entryOpcodeID, void* executableAddress, VM* vm,
          {
              ASSERT(startSP == sp.vp());
              ASSERT(startCFR == cfr.callFrame());
@@ -1034,7 +1024,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
          }
  
  #if !ENABLE(COMPUTED_GOTO_OPCODES)
-@@ -469,7 +493,9 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+@@ -469,7 +490,9 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
  // For the spacer instruction, we'll choose a breakpoint instruction. However, we can
  // also just emit an unused piece of data. A breakpoint instruction is preferable.
  
@@ -1045,7 +1035,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  #define OFFLINE_ASM_BEGIN_SPACER "brk #" STRINGIZE_VALUE_OF(WTF_FATAL_CRASH_CODE) "\n"
  #elif CPU(X86_64)
  #define OFFLINE_ASM_BEGIN_SPACER "int3\n"
-@@ -520,7 +546,17 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+@@ -520,7 +543,17 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
  #define OFFLINE_ASM_TEXT_SECTION ".text\n"
  #endif
  
@@ -1064,7 +1054,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  #define OFFLINE_ASM_GLOBAL_LABEL_IMPL(label, ALT_ENTRY, ALIGNMENT, VISIBILITY) \
      OFFLINE_ASM_TEXT_SECTION                    \
      ALIGNMENT                                   \
-@@ -555,6 +591,8 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+@@ -555,6 +588,8 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
  #define OFFLINE_ASM_ALIGN_TRAP(align) OFFLINE_ASM_BEGIN_SPACER "\n .balignl " #align ", 0xd4388e20\n" // pad with brk instructions
  #elif CPU(X86_64)
  #define OFFLINE_ASM_ALIGN_TRAP(align) OFFLINE_ASM_BEGIN_SPACER "\n .balign " #align ", 0xcc\n" // pad with int 3 instructions
@@ -1073,15 +1063,10 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  #elif CPU(RISCV64)
  #define OFFLINE_ASM_ALIGN_TRAP(align) OFFLINE_ASM_BEGIN_SPACER "\n .balignw " #align ", 0x9002\n" // pad with c.ebreak instructions
  #endif
-@@ -578,9 +616,21 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+@@ -578,9 +613,16 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
  #define OFFLINE_ASM_ALT_GLOBAL_LABEL(label)
  #endif
  
-+//
-+//
-+//
-+//
-+//
 +#if COMPILER(CLANG) && ENABLE(OFFLINE_ASM_ALT_ENTRY)
 +#define OFFLINE_ASM_LOCAL_LABEL(label) \
 +    OFFLINE_ASM_ALIGN4B \
@@ -1095,7 +1080,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  
  #if OS(LINUX)
  #define OFFLINE_ASM_OPCODE_DEBUG_LABEL(label)  #label ":\n"
-@@ -624,6 +674,19 @@ __asm__(
+@@ -624,6 +666,19 @@ __asm__(
      ".cfi_offset fp, -16\n"
      OFFLINE_ASM_BEGIN_SPACER
  );
@@ -1115,7 +1100,7 @@ index c50c248beb76bae04c735f90c0e3332396babda4..e4b630c2add24cf3c11dbfe9ca36f14b
  #endif
  #endif
  
-@@ -633,7 +696,7 @@ __asm__(
+@@ -633,7 +688,7 @@ __asm__(
  
  // See GdbJIT.cpp for a detailed explanation.
  #if !OS(DARWIN) && COMPILER(CLANG)

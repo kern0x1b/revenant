@@ -323,12 +323,12 @@ function failures(opt)
         {identifier = "iPhone3,1", platform = "s5l8930x", firmwares = {release("2.2.1", "5H11"), release("4.3.5", "8L1"), release("4.1", "8B117")}},
         {identifier = "iPhone5,1", platform = "s5l8950x", firmwares = {release("6.0", "10A405")}}
     }})
-    local home = os.getenv("REVENANT_HOME")
-    os.setenv("REVENANT_HOME", path.join(folder, "home"))
+    local home = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     local held = firmware.source("armv7", "2.0")
     local absent, absent_release = firmware.source("armv7", "4.0")
     local later = firmware.release_for("armv7s", "5.0")
-    os.setenv("REVENANT_HOME", home or "")
+    os.setenv("REVENANT_CACHE", home or "")
     if held ~= libraries then
         table.insert(found, "a 2.0 port must be checked against the libraries of 2.2.1, the earliest release not older than it, not " .. tostring(held))
     end
@@ -365,9 +365,9 @@ function failures(opt)
                               source = cache(path.join(folder, "rungs", rung[1], "dyld_shared_cache_armv7"), "armv7", rung[2])})
     end
     io.writefile(path.join(folder, "sdk", "usr", "lib", "libSystem.tbd"), fixtures.system_stub("_returned, _arrived, _removed, _never"))
-    os.setenv("REVENANT_HOME", path.join(folder, "home"))
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     local first = dyld.first_releases(ladder, path.join(folder, "sdk"), {"_returned", "_arrived", "_removed", "_never"})
-    os.setenv("REVENANT_HOME", home or "")
+    os.setenv("REVENANT_CACHE", home or "")
     if first._returned ~= "5.0" then
         table.insert(found, "a symbol 4.0 exports and 4.3 does not is the release's own from 5.0, where it is exported again, not " .. tostring(first._returned))
     end

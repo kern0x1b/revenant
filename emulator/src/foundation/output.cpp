@@ -7,9 +7,18 @@
 
 #include "foundation/output.hpp"
 
+#include <chrono>
 #include <stdexcept>
 
 namespace emulator {
+
+std::uint64_t host_unix_milliseconds() noexcept
+{
+    return static_cast<std::uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch())
+            .count());
+}
 
 namespace {
 
@@ -22,6 +31,7 @@ namespace {
             "[clock]",
             "[process]",
             "[cpu] fatal",
+            "[fault-words]",
             "[time]",
             "[signal]",
             "[mach] stalled",
@@ -35,6 +45,7 @@ namespace {
             "[perf-artifact]",
             "[perf-artifact-validation]",
             "[perf-jit-profile]",
+            "[perf-memory-pages]",
             "[perf-block]",
             "[perf-block-top]",
             "[perf-block-image]",

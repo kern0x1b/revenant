@@ -1,5 +1,8 @@
 #import <SceneKit/SceneKit.h>
 #import <UIKit/UIKit.h>
+#import "RevenantSCNAudio.h"
+#import "RevenantSCNSoundEngine.h"
+#import "RevenantSCNActions.h"
 
 @interface SCNPhysicsRadialGravityField : SCNPhysicsField <NSSecureCoding>
 @end
@@ -50,7 +53,11 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 @property (nonatomic, strong) SCNNode *lastRenderPointOfView;
 @property (nonatomic, assign) int lastRenderWidth;
 @property (nonatomic, assign) int lastRenderHeight;
+@property (nonatomic, assign) float jitterX;
+@property (nonatomic, assign) float jitterY;
+@property (nonatomic, assign) BOOL autoenablesDefaultLighting;
 - (void)renderScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height;
+- (BOOL)prepareObject:(id)object shouldAbortBlock:(BOOL (^)(void))block;
 + (SCNNode *)defaultPointOfViewInScene:(SCNScene *)scene;
 @end
 
@@ -70,7 +77,7 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 - (NSDictionary<NSString *, NSValue *> *)presented;
 - (RevenantSCNAnimations *)revenantCopy;
 - (void)evaluateAtTime:(CFTimeInterval)now model:(id<RevenantSCNAnimatable>)model;
-+ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now;
++ (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now listener:(SCNNode *)listener;
 @end
 
 @interface SCNNode (RevenantSCNAnimation) <RevenantSCNAnimatable>
@@ -78,6 +85,10 @@ SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height
 - (SCNMatrix4)revenantPresentedTransform;
 - (SCNMatrix4)revenantPresentedWorldTransform;
 - (CGFloat)revenantPresentedOpacity;
+@end
+
+@interface SCNNode (RevenantSCNActions)
+- (void)revenantStepActionsAtTime:(CFTimeInterval)now;
 @end
 
 @interface SCNMaterialProperty (RevenantSCNAnimation) <RevenantSCNAnimatable>

@@ -1,0 +1,52 @@
+From 91995dd47566abf82e54f49fc6bab3386b8391a3 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sat, 24 Oct 2026 20:23:25 +0200
+Subject: [PATCH] Put the addons a project pins into each package's build hash
+
+A package's recipes run the code of the addon version that the project locks: revenant's recipes import @addon.revenant.* from the addon the project loads. Two projects that lock different versions of an addon could build the same package under one key, and the second would get the first one's install, built from another version's code.
+
+The build hash now ends with name@version for each installed addon that the process pins, from the project's lock or from an inherited pin. An addon from a folder of the project (add_addons with sourcedir) has no version and adds nothing, so a project with only such addons keeps its keys, and so does a project which pins nothing.
+
+Changes-build-output: no
+---
+ xmake/core/package/package.lua | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 0752b21..6d6ad7a 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1844,6 +1844,19 @@ local function _patchset_digest()
+     return digest ~= "" and digest or nil
+ end
+ 
++local function _addons_for_buildhash()
++    local addons = addon.addons()
++    local terms = {}
++    for dirname in pairs(table.join(addon._inherited(), addon._pinned())) do
++        local addoninfo = addons[dirname]
++        if addoninfo and not addoninfo.sourcedir then
++            table.insert(terms, dirname .. "@" .. addoninfo.version)
++        end
++    end
++    table.sort(terms)
++    return terms
++end
++
+ -- get the build hash
+ function _instance:buildhash()
+     local buildhash = self._BUILDHASH
+@@ -1918,6 +1931,10 @@ function _instance:buildhash()
+                 end
+                 str = str .. "_" .. table.concat(shas, "_")
+             end
++            local addons = _addons_for_buildhash()
++            if #addons > 0 then
++                str = str .. "_" .. table.concat(addons, "_")
++            end
+             return self:_strhash128(str)
+         end
+         local function _get_installdir(...)
+-- 
+2.54.0 (Apple Git-157)
+

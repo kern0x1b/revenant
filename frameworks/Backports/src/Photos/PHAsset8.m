@@ -46,6 +46,11 @@
     return _asset;
 }
 
+- (BOOL)isLocallyAvailable
+{
+    return _asset.defaultRepresentation != nil;
+}
+
 - (PHAssetPlaybackStyle)playbackStyle
 {
     return _mediaType == PHAssetMediaTypeImage ? PHAssetPlaybackStyleImage : _mediaType == PHAssetMediaTypeVideo ? PHAssetPlaybackStyleVideo : PHAssetPlaybackStyleUnsupported;

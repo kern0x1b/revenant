@@ -3,6 +3,8 @@ import("macho")
 import("compat")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
+local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
+local FLAT_SYMBOLS = flat_classes.flat_symbols()
 
 local caches = {}
 
@@ -615,7 +617,7 @@ local LISTED_KEYS = {["symbols"] = "", ["weak-symbols"] = "", ["objc-classes"] =
 local SCRIPTDIR = os.scriptdir()
 
 local function stored(name, under)
-    return path.join(under or path.directory(root()), "cache", name)
+    return path.join(under or path.join(workspace.scratch(), "dyld"), name)
 end
 
 local function kept_text(file)
@@ -912,15 +914,19 @@ function image_imports(binaries, others, architecture)
         table.join2(exported, defined_exports(data, image, image.base))
         loaded[binary] = {data = data, image = image}
     end
-    local imports = {}
+    local imports, flat = {}, {}
     for _, binary in ipairs(binaries) do
-        local names = {}
+        local names, looked_up = {}, {}
         for _, symbol in ipairs(undefined_imports(loaded[binary].data, loaded[binary].image)) do
             names[symbol.name] = symbol.weak
+            if symbol.ordinal == 0xFE then
+                looked_up[symbol.name] = true
+            end
         end
         imports[path.filename(binary)] = names
+        flat[path.filename(binary)] = looked_up
     end
-    return {imports = imports, exported = exported}
+    return {imports = imports, exported = exported, flat = flat}
 end
 
 function missing_imports(cachefile, binaries, root)
@@ -995,7 +1001,7 @@ function missing_imports(cachefile, binaries, root)
                         local elsewhere = (cache.exports[symbol.name] or own[symbol.name]) and ", which only another library exports" or ""
                         table.insert(missing, {named(entry.binary), string.format("%s (bound to %s%s)", symbol.name, library, elsewhere)})
                     end
-                elseif not own[symbol.name] and not cache.exports[symbol.name] then
+                elseif not own[symbol.name] and not cache.exports[symbol.name] and not (symbol.ordinal == 0xFE and FLAT_SYMBOLS[symbol.name]) then
                     table.insert(missing, {named(entry.binary), symbol.name})
                 end
             end
@@ -1237,7 +1243,7 @@ local function local_symbols(cache, address, wide)
     local head = read(region_offset, 24)
     local nlist_offset, nlist_count, strings_offset, strings_size, entries_offset, entries_count = string.unpack("<I4I4I4I4I4I4", head, 1)
     local base = string.unpack("<I8", cache.read(cache.main, cache.main.mapping_offset, 8), 1)
-    local entry_width = region_size >= entries_offset + entries_count * 16 and #read(region_offset + entries_offset, math.min(16, region_size - entries_offset)) == 16 and 16 or 12
+    local entry_width = file.header:sub(1, 16):find("arm64", 1, true) and 16 or 12
     local entries = read(region_offset + entries_offset, entries_count * entry_width)
     local start, count
     for index = 0, entries_count - 1 do

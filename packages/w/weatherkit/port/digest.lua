@@ -1,1 +1,1 @@
-weatherkit_sources_digest = "b7c0bdce02975c3656de1342b13d2348"
+weatherkit_sources_digest = "71284c9e6cdf66604ad89445657aaee1"

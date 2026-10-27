@@ -463,4 +463,50 @@ bool MachNamespaceTable::valid_name(MachName name)
     return name != null_name && name != dead_name;
 }
 
+void MachNamespaceTable::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, static_cast<std::uint64_t>(spaces_.size()));
+    for (const auto& [task, space] : spaces_) {
+        snapshot::save(out, task);
+        snapshot::save(out, space.next_name);
+        snapshot::save(out, static_cast<std::uint64_t>(space.entries.size()));
+        for (const auto& [name, entry] : space.entries) {
+            snapshot::save(out, name);
+            snapshot::save(out, entry.object);
+            snapshot::save(out, entry.type);
+            snapshot::save(out, entry.user_references);
+        }
+    }
+}
+
+void MachNamespaceTable::load(snapshot::Reader& in)
+{
+    spaces_.clear();
+    std::uint64_t task_count { };
+    snapshot::load(in, task_count);
+    for (std::uint64_t task_index = 0; task_index < task_count; ++task_index) {
+        TaskId task { };
+        snapshot::load(in, task);
+        const auto [space_entry, inserted] = spaces_.try_emplace(task);
+        if (!inserted)
+            throw snapshot::FormatError { "snapshot repeats a Mach name space" };
+        auto& space = space_entry->second;
+        snapshot::load(in, space.next_name);
+        std::uint64_t entry_count { };
+        snapshot::load(in, entry_count);
+        for (std::uint64_t entry_index = 0; entry_index < entry_count;
+            ++entry_index) {
+            MachName name { };
+            snapshot::load(in, name);
+            NameEntry entry;
+            snapshot::load(in, entry.object);
+            snapshot::load(in, entry.type);
+            snapshot::load(in, entry.user_references);
+            if (!space.entries.emplace(name, entry).second)
+                throw snapshot::FormatError { "snapshot repeats a Mach name" };
+            index_name(space, entry.object, name);
+        }
+    }
+}
+
 }

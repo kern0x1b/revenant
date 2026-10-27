@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "foundation/snapshot_io.hpp"
 #include "kernel/darwin_file_guard.hpp"
 #include <array>
 #include <chrono>
@@ -23,14 +24,17 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "foundation/address_space.hpp"
+#include "foundation/load_average.hpp"
 #include "network/apple80211_event_stream.hpp"
 #include "network/apple80211_hle.hpp"
+#include "network/host_readiness.hpp"
 #include "media/audio.hpp"
 #include "media/audio_toolbox_hle.hpp"
 #include "media/core_audio_hle.hpp"
@@ -204,6 +208,9 @@ public:
     {
         thread_create_handler_ = std::move(handler);
     }
+    [[nodiscard]] std::vector<std::string> fault_word_report(
+        const AddressSpace& memory,
+        const std::array<std::uint32_t, 16>& registers);
     void set_thread_terminate_handler(ThreadTerminateHandler handler)
     {
         thread_terminate_handler_ = std::move(handler);
@@ -412,6 +419,10 @@ public:
     {
         return shared_state_->clock.wall_time();
     }
+    void sample_load_average(std::size_t runnable_threads);
+    [[nodiscard]] foundation::LoadAverage load_average() const;
+    void count_interface_traffic(bool loopback, bool output, std::size_t bytes,
+        bool failed);
     [[nodiscard]] std::size_t bootstrap_checked_in_service_count() const;
     void report_stalled_receives(std::uint64_t threshold_nanoseconds) const;
     void set_wall_time(std::uint64_t unix_time_nanoseconds)
@@ -499,8 +510,13 @@ public:
     {
         return thread_object_for_processor(processor);
     }
+    void save_kernel_bookkeeping(snapshot::Writer& out) const;
+    void load_kernel_bookkeeping(snapshot::Reader& in);
+    void save_snapshot(snapshot::Writer& out) const;
+    void load_snapshot(snapshot::Reader& in);
 
 private:
+    friend struct CompatibilityKernelSnapshot;
     struct CreatedGuestThread {
         std::size_t processor { };
         std::uint32_t port_name { };
@@ -540,7 +556,8 @@ private:
     guest_directory_of_descriptor(std::uint32_t descriptor, std::uint32_t& error) const;
     void dispatch_bsd_psynch(Cpu& cpu, std::uint32_t number);
     [[nodiscard]] bool service_bsd_workqueue(Cpu* requesting_cpu);
-    void dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys);
+    void dispatch_bsd_nosys(
+        Cpu& cpu, std::uint32_t number, bool send_sigsys);
     [[nodiscard]] std::optional<std::uint32_t> thread_object_for_processor(
         std::size_t processor) const;
     [[nodiscard]] std::optional<CreatedGuestThread> create_guest_thread(
@@ -671,7 +688,13 @@ private:
     [[nodiscard]] std::filesystem::path resolve_guest_path(
         const std::string& path, bool follow_final_symlink = true) const;
     [[nodiscard]] std::filesystem::path working_directory() const;
+    void release_thread_directory_locked(std::uint32_t thread_object);
+    [[nodiscard]] std::optional<std::filesystem::path> guest_path_of_host(
+        const std::filesystem::path& host) const;
     [[nodiscard]] std::optional<std::uint32_t> current_thread_object() const;
+    void append_directory_entries(const std::filesystem::path& directory,
+        std::vector<DirectoryEntry>& entries,
+        std::error_code& directory_error) const;
     [[nodiscard]] std::optional<hfs::Metadata> query_hfs_metadata(
         const std::filesystem::path& path, bool follow_symlink,
         bool include_directory_entry_count = true) const;
@@ -724,8 +747,8 @@ private:
         const KeventRegistration& registration, std::size_t processor,
         bool waking_blocked_receiver);
     bool deliver_pending_io_locked(Cpu& cpu);
-    [[nodiscard]] bool pending_io_poll_required_locked(
-        std::size_t processor) const;
+    [[nodiscard]] bool pending_io_poll_required_locked(std::size_t processor,
+        std::optional<std::uint64_t> deadline) const;
     void remember_pending_io_not_ready_locked(std::size_t processor,
         std::uint64_t io_generation, std::uint64_t mach_generation);
     [[nodiscard]] std::optional<std::uint64_t>
@@ -782,8 +805,10 @@ private:
     export_descriptor(std::uint32_t fd) const;
     [[nodiscard]] std::optional<std::uint32_t> import_descriptor(
         const KernelSharedState::DescriptorTransfer& transfer);
-    [[nodiscard]] bool descriptor_readable(std::uint32_t fd) const;
-    [[nodiscard]] bool descriptor_writable(std::uint32_t fd) const;
+    [[nodiscard]] bool descriptor_readable(std::uint32_t fd,
+        const HostReadinessProbe* host_readiness = nullptr) const;
+    [[nodiscard]] bool descriptor_writable(std::uint32_t fd,
+        const HostReadinessProbe* host_readiness = nullptr) const;
     [[nodiscard]] bool descriptor_requires_host_poll(
         std::uint32_t fd) const;
     [[nodiscard]] bool descriptor_requires_host_poll(std::uint32_t fd,
@@ -873,6 +898,9 @@ private:
     static thread_local std::optional<std::size_t> syscall_processor_;
     std::string process_image_ { "/sbin/launchd" };
     ProcessContext process_;
+    std::mutex reported_unknown_mutex_;
+    std::set<std::tuple<std::uint32_t, std::string, std::uint32_t>>
+        reported_unknown_calls_;
     DarwinPthreadRuntime pthread_runtime_;
     std::map<std::uint32_t, std::filesystem::path> file_descriptors_;
     std::map<std::uint32_t, std::shared_ptr<bsd::RegularFileOpenDescription>>
@@ -1033,6 +1061,9 @@ private:
     std::uint32_t virtual_processor_count_ { 1 };
     HostNetworkPolicy host_network_policy_ { HostNetworkPolicy::Isolated };
     std::mutex mutex_;
+    mutable std::mutex load_average_mutex_;
+    foundation::LoadAverage load_average_;
+    std::uint64_t next_load_average_sample_ { };
 };
 
 }

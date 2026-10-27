@@ -20,8 +20,11 @@ static double now(void)
 
 static void usage(void)
 {
-    fprintf(stderr, "usage: revenant-sblaunch [--wait SECONDS] [--stdout PATH] [--stderr PATH] <bundle identifier>\n"
-                    "  --wait: retry until SpringBoard takes the launch and the application is frontmost\n");
+    fprintf(stderr, "usage: revenant-sblaunch [--wait SECONDS] [--stdout PATH] [--stderr PATH] [--dyld-statistics] <bundle identifier>\n"
+                    "       revenant-sblaunch --probe\n"
+                    "  --dyld-statistics: ask dyld to print launch statistics\n"
+                    "  --wait: retry until SpringBoard takes the launch and the application is frontmost\n"
+                    "  --probe: print the uid, the SpringBoard ports and the launch error table; launches nothing\n");
 }
 
 static double started;
@@ -53,10 +56,41 @@ static void c_string(CFStringRef text, char* buffer, size_t size)
         CFStringGetCString(text, buffer, size, kCFStringEncodingUTF8);
 }
 
+extern mach_port_t bootstrap_port;
+kern_return_t bootstrap_look_up(mach_port_t bootstrap, const char* name, mach_port_t* port);
+
+static int probe(void)
+{
+    void* services = dlopen("/System/Library/PrivateFrameworks/SpringBoardServices.framework/SpringBoardServices", RTLD_NOW);
+    if (!services) {
+        fprintf(stderr, "revenant-sblaunch: SpringBoardServices does not load\n");
+        return 3;
+    }
+    mach_port_t (*server)(void) = (mach_port_t (*)(void))dlsym(services, "SBSSpringBoardServerPort");
+    CFStringRef (*error_string)(int) = (CFStringRef (*)(int))dlsym(services, "SBSApplicationLaunchingErrorString");
+    printf("uid=%d euid=%d pid=%d bootstrap_port=%u\n", getuid(), geteuid(), getpid(), bootstrap_port);
+    printf("SBSSpringBoardServerPort=%u\n", server ? server() : MACH_PORT_NULL);
+    const char* names[] = {"com.apple.springboard.services", "com.apple.SpringBoard", "com.apple.backboard.services", "com.apple.springboard.debugapplications"};
+    for (unsigned index = 0; index < sizeof names / sizeof names[0]; ++index) {
+        mach_port_t port = MACH_PORT_NULL;
+        kern_return_t status = bootstrap_look_up(bootstrap_port, names[index], &port);
+        printf("bootstrap_look_up %s: kern_return=%d port=%u\n", names[index], status, port);
+    }
+    for (int code = 0; code <= 8; ++code) {
+        char text[96];
+        c_string(error_string ? error_string(code) : NULL, text, sizeof text);
+        printf("error %d: %s\n", code, text);
+    }
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
+    if (argc == 2 && strcmp(argv[1], "--probe") == 0)
+        return probe();
     double wait = 0;
     const char *out = NULL, *err = NULL, *bundle = NULL;
+    bool dyld_statistics = false;
     for (int index = 1; index < argc; ++index) {
         if (strcmp(argv[index], "--wait") == 0 && index + 1 < argc)
             wait = atof(argv[++index]);
@@ -64,6 +98,8 @@ int main(int argc, char** argv)
             out = argv[++index];
         else if (strcmp(argv[index], "--stderr") == 0 && index + 1 < argc)
             err = argv[++index];
+        else if (strcmp(argv[index], "--dyld-statistics") == 0)
+            dyld_statistics = true;
         else if (!bundle && argv[index][0] != '-')
             bundle = argv[index];
         else {
@@ -78,9 +114,9 @@ int main(int argc, char** argv)
     void* services = dlopen("/System/Library/PrivateFrameworks/SpringBoardServices.framework/SpringBoardServices", RTLD_NOW);
     launch_function launch = services ? (launch_function)dlsym(services, "SBSLaunchApplicationWithIdentifier") : NULL;
     debug_launch_function debug_launch = services ? (debug_launch_function)dlsym(services, "SBSLaunchApplicationForDebugging") : NULL;
-    if (!launch || ((out || err) && !debug_launch)) {
+    if (!launch || ((out || err || dyld_statistics) && !debug_launch)) {
         fprintf(stderr, "revenant-sblaunch: SpringBoardServices has no %s\n",
-                launch ? "SBSLaunchApplicationForDebugging, which the application's output needs" : "SBSLaunchApplicationWithIdentifier");
+                launch ? "SBSLaunchApplicationForDebugging, which launch diagnostics need" : "SBSLaunchApplicationWithIdentifier");
         return 3;
     }
     mach_port_t (*server)(void) = (mach_port_t (*)(void))dlsym(services, "SBSSpringBoardServerPort");
@@ -94,9 +130,11 @@ int main(int argc, char** argv)
 
     CFStringRef identifier = string(bundle);
     CFStringRef out_path = string(out), err_path = string(err);
-    const void* keys[] = {CFSTR("CFLOG_FORCE_STDERR"), CFSTR("NSUnbufferedIO")};
-    const void* values[] = {CFSTR("1"), CFSTR("YES")};
-    CFDictionaryRef environment = CFDictionaryCreate(NULL, keys, values, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    const void* keys[] = {CFSTR("CFLOG_FORCE_STDERR"), CFSTR("NSUnbufferedIO"), CFSTR("DYLD_PRINT_STATISTICS")};
+    const void* values[] = {CFSTR("1"), CFSTR("YES"), CFSTR("1")};
+    CFIndex environment_count = dyld_statistics ? 3 : 2;
+    CFDictionaryRef environment = CFDictionaryCreate(NULL, keys, values, environment_count,
+                                                      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
     started = now();
     int result = -1;
@@ -109,7 +147,7 @@ int main(int argc, char** argv)
         if (server && port == MACH_PORT_NULL)
             say("waiting for SpringBoard");
         else {
-            result = debug_launch && (out || err)
+            result = debug_launch && (out || err || dyld_statistics)
                 ? debug_launch(identifier, NULL, NULL, environment, out_path, err_path, 0)
                 : launch(identifier, false);
             if (result == 0)

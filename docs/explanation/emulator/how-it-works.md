@@ -10,7 +10,7 @@
   the guest's IOKit, Mach and BSD calls itself.
 - Publishes the hardware the firmware looks for (audio, baseband, display, keybag) the way the real devices do. The
   iPhone 4S's Voice audio device is described from a registry dump of a real one.
-- Runs a test program inside the guest and hands back its result. That is how the toolchain's `./xmakew emulate`
+- Runs a test program inside the guest and hands back its result. That is how the toolchain's `./xmakew emulate -P .`
   uses it.
 
 ## How it works
@@ -26,6 +26,13 @@ so the firmware's own launchd, daemons and frameworks run unchanged on top.
 
 Persistent translations are keyed on the Dynarmic package's build fingerprint, so an artifact made by another core
 is never reused.
+
+## The guest environment
+
+XNU starts `launchd` with an empty environment (`load_init_program` passes `envp = 0`). `launchd` then sets `TMPDIR`,
+`SHELL`, `HOME`, `USER` and `LOGNAME` for each job from the job's `UserName` (`job_postfork_become_user` in launchd's
+`src/core.c`), so a `UserName=mobile` job sees `HOME=/var/mobile`. The emulator starts `launchd` with the same empty
+environment and sets none of these itself.
 
 ## Layout
 

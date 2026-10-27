@@ -199,6 +199,20 @@ void MobileFramebufferHle::inherit_state(const MobileFramebufferHle& parent)
     deferred_foreground_frame_.reset();
 }
 
+void MobileFramebufferHle::save(snapshot::Writer& out) const
+{
+    snapshot::save(out, next_swap_id_);
+    snapshot::save(out, background_argb_);
+    snapshot::save(out, submitted_background_argb_);
+}
+
+void MobileFramebufferHle::load(snapshot::Reader& in)
+{
+    snapshot::load(in, next_swap_id_);
+    snapshot::load(in, background_argb_);
+    snapshot::load(in, submitted_background_argb_);
+}
+
 void MobileFramebufferHle::set_display(std::shared_ptr<DisplayState> display)
 {
     display_ = std::move(display);

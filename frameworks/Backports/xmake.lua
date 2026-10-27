@@ -27,10 +27,10 @@ local LIBRARIES = {
     {name = "BrowserKitBackports", folder = "BrowserKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreNFCBackports", folder = "CoreNFC", frameworks = {"Foundation", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameKitBackports", folder = "GameKit", frameworks = {"GameKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "GraphicsBackports", folder = "Graphics", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
+    {name = "GraphicsBackports", folder = "Graphics", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports", "CoreGraphicsBackports"}, archives = {"box2d"}, system = {}},
-    {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
+    {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
@@ -53,7 +53,7 @@ local LIBRARIES = {
     {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {}, system = {}},
+    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp"}, system = {}},
     {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MetalKitBackports", folder = "MetalKit", frameworks = {"MetalKit", "Metal", "ModelIO", "UIKit", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "ModelIOBackports"}, archives = {}, system = {}},
     {name = "MPSBackports", folder = "MetalPerformanceShaders", frameworks = {"Metal", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {}, system = {}},
@@ -66,7 +66,7 @@ local LIBRARIES = {
     {name = "CoreSpotlightBackports", folder = "CoreSpotlight", frameworks = {"CoreSpotlight", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PushKitBackports", folder = "PushKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "JavaScriptCoreBackports", folder = "JavaScriptCore", frameworks = {"JavaScriptCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "OpenGLESBackports"}, archives = {}, system = {}},
+    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "OpenAL", "AudioToolbox", "AVFoundation"}, libraries = {"FoundationBackports", "OpenGLESBackports", "AVFoundationBackports"}, archives = {}, system = {}},
     {name = "MediaPlayerBackports", folder = "MediaPlayer", frameworks = {"MediaPlayer", "AVFoundation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessageUIBackports", folder = "MessageUI", frameworks = {"MessageUI", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "MessagesBackports", folder = "Messages", frameworks = {"MessageUI", "Messages", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -97,12 +97,12 @@ local LIBRARIES = {
     {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "SpriteKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
-    {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
+    {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
+    {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "DispatchBackports", folder = "Dispatch", frameworks = {}, libraries = {}, archives = {}, system = {}},
 }
 
 if is_plat("iphoneos") then
@@ -115,6 +115,8 @@ if is_plat("iphoneos") then
     add_requires("revenant@monocypher 4.0.2", {alias = "monocypher"})
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
+    add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
+    add_requires("revenant@libcxx", {alias = "libcxx"})
 
     local generator
 
@@ -162,6 +164,7 @@ if is_plat("iphoneos") then
         add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
         set_values("tweak.filter", path.join(TWEAK, "springboard.plist"))
         set_values("revenant.control", path.join(TWEAK, "control"))
+        set_values("revenant.version", "1.0.0")
 
     for _, library in ipairs(LIBRARIES) do
         target(library.name)
@@ -175,14 +178,17 @@ if is_plat("iphoneos") then
             add_cflags(table.join(FLAGS, {"-fvisibility=hidden", "-fmacro-prefix-map=" .. ROOT .. "/="}))
             add_mflags(OBJC_FLAGS)
             add_mxxflags(table.join(OBJC_FLAGS, {"-fno-rtti", "-fvisibility-inlines-hidden"}))
+            if library.folder == "Vision" then
+                add_cxxflags("-std=c++20", "-fvisibility-inlines-hidden")
+            end
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             add_syslinks("objc")
-            if #os.files(path.join(SRC, library.folder, "*.mm")) > 0 then
+            if library.folder ~= "Vision" and (#os.files(path.join(SRC, library.folder, "*.mm")) > 0 or #os.files(path.join(SRC, library.folder, "*.cpp")) > 0) then
                 add_syslinks("c++")
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
-                                 os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
+                                 os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
             for _, name in ipairs(library.libraries) do
                 if name:endswith("Backports") then
                     add_deps(name)
@@ -199,6 +205,9 @@ if is_plat("iphoneos") then
                 else
                     add_packages(name)
                 end
+            end
+            if library.folder == "Vision" then
+                add_packages("libcxx")
             end
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
@@ -227,6 +236,10 @@ if is_plat("iphoneos") then
     target_end()
 end
 
+if not is_plat("iphoneos") and is_arch("arm64", "x86_64") then
+    add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
+end
+
 local function backports_tests(name, scripts)
     target(name)
         set_kind("phony")
@@ -245,14 +258,29 @@ local function backports_tests(name, scripts)
 end
 
 if is_plat("iphoneos") then
+    target("BackportsLayoutProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/layout/main.m", "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
+                  "src/UIKit/UIViewController+ExtendedLayout.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation")
+        set_values("app.plist-file", "tests/layout/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.layout", "CFBundleDisplayName=BackportsLayoutProbe")
+        set_values("revenant.control", "tests/layout/control")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
+    backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
-                                  network = "network_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua",
+                                  network = "network_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
-                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua",
-                                  vfs = "lowered_vfs_test.lua"})
+                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
+                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -260,7 +288,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -271,31 +299,84 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_rules("@addon/revenant/apple-ios")
         add_files(path.join(RUNTIME, "app", "main.m"), path.join(RUNTIME, "cases", "*.m"))
         add_includedirs(path.join(RUNTIME, "app"))
+        add_deps("RevenantInterposeProbe")
         add_mflags("-fobjc-arc")
         if RUNTIME_LIBS and RUNTIME_LIBS ~= "" then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("FoundationBackports", "UIKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
         add_syslinks("objc")
+    target_end()
+
+    target("RevenantWeakProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "weak_probe.c"))
+        add_frameworks("Foundation")
+    target_end()
+
+    target("RevenantInterposeProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "interpose_probe.c"))
+        add_shflags("-Wl,-install_name,/usr/lib/revenant/org.revenant.backports/libRevenantInterposeProbe.dylib", {force = true})
+    target_end()
+
+    target("RevenantMissingProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "missing_probe.c"))
+        add_frameworks("Foundation")
+        add_shflags("-Wl,-U,_OBJC_CLASS_$_RevenantNoSuchClass", {force = true})
+    target_end()
+
+    target("RevenantSystemProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "system_stand_in.m"))
+        add_frameworks("Foundation")
+        add_shflags("-install_name", INSTALL_FOLDER .. "/libRevenantSystemProbe.dylib", "-Wno-incompatible-sysroot", {force = true})
     target_end()
 
     target("backports_runtime")
         set_kind("phony")
         set_default(false)
         set_group("device")
-        add_deps("backports_runtime_app")
+        add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe", "RevenantSystemProbe")
         add_packages("emulator-guest")
         add_tests("foundation_url_components")
         add_tests("loader_class_backport")
+        add_tests("flat_class_launch")
         add_tests("screenshot_notification")
+        add_tests("directory_attributes")
+        add_tests("photos_assets")
+        add_tests("weak_class_binding")
+        add_tests("missing_class_binding")
+        add_tests("keybag_lock_state")
+        add_tests("iosurface_surface")
+        add_tests("interpose_launch", {should_fail = true})
+        add_tests("scenekit_audio")
+        add_tests("scenekit_render")
+        add_tests("scenekit_members")
+        add_tests("alias_public_name")
+        add_tests("alias_system_class")
+        add_tests("protocol_uimutabletraits")
+        add_tests("protocol_ck_key_value_setting")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
             local failures = import("driver", {rootdir = RUNTIME, anonymous = true}).failures(case, target)
             for _, failure in ipairs(failures) do
                 cprint("${red}%s: %s", case, failure)
+            end
+            if opt.should_fail then
+                return #failures > 0 and failures[1]:find("^the check must pass", 1) ~= nil
             end
             return #failures == 0
         end)
@@ -364,6 +445,19 @@ local QUARTZCORE_TESTS = {
     spring_animation = {"RevenantSpringSolver.m", "RevenantSpringKeyframes.m", "CASpringAnimation.m"},
 }
 
+local CORETEXT_TESTS = {
+    open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
+}
+
+local SCENEKIT_TESTS = {
+    action_math = {"RevenantSCNActionMath.m"},
+    clock = {"RevenantSCNClock.m"},
+    jitter = {"RevenantSCNJitter.m"},
+    picking = {"RevenantSCNGeometry.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
+    audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
+}
+
 local function host_tests(folder, tests, library, frameworks, options)
     options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
@@ -373,20 +467,28 @@ local function host_tests(folder, tests, library, frameworks, options)
             set_plat("macosx")
             set_arch("arm64")
             set_default(false)
-            add_files(path.join(TESTS, name .. "_test.m"))
+            add_files(path.join(TESTS, name .. "_test." .. (options.extension or "m")))
             for _, source in ipairs(sources) do
                 add_files(path.join(SRC, library or folder, source))
             end
             add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), path.join(SRC, library or folder))
             add_mflags("-fobjc-arc")
+            add_mxxflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
+            add_cxxflags(table.unpack(options.cxxflags or {}))
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
             add_syslinks(table.unpack(options.syslinks or {}))
+            for _, package in ipairs(options.packages or {}) do
+                add_packages(package)
+            end
             for _, define in ipairs(options.defines or {}) do
                 add_defines(define)
             end
             add_tests("default")
-            add_tests("negative", {runargs = {"--negative"}, should_fail = true})
+            add_tests("negative", {runargs = {"--negative"}, expect_failure = true})
+            on_test(function (target, opt)
+                return import("@addon.revenant.host_test", {anonymous = true}).run(target, opt)
+            end)
         target_end()
     end
 end
@@ -394,13 +496,23 @@ end
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
+    if is_arch("arm64", "x86_64") then
+        host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
+    end
+    host_tests("Vision", {rectangle = {"VNRectangleDetector.c", "VNRectangleImage.m", "VNConstants.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm"})
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
+    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
-    host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end

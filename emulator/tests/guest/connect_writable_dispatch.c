@@ -12,13 +12,16 @@
 #define CONNECTIONS 32
 #define ROUNDS 20
 #define WAIT_SECONDS 10
+#define SETTLE_MICROSECONDS 200000
 
 static dispatch_semaphore_t writable_signal;
 static int writable_flags[CONNECTIONS];
+static int writable_deliveries[CONNECTIONS];
 
 static void on_writable(void *context)
 {
     int index = (int)(intptr_t)context;
+    writable_deliveries[index]++;
     if (!writable_flags[index]) {
         writable_flags[index] = 1;
         dispatch_semaphore_signal(writable_signal);
@@ -46,11 +49,13 @@ static int round_failures(int round, dispatch_queue_t queue)
     getsockname(listener, (struct sockaddr *)&address, &length);
 
     int descriptors[CONNECTIONS];
+    int deliveries_at_cancel[CONNECTIONS];
     dispatch_source_t writes[CONNECTIONS];
     dispatch_source_t reads[CONNECTIONS];
     int connecting = 0;
     writable_signal = dispatch_semaphore_create(0);
     memset(writable_flags, 0, sizeof writable_flags);
+    memset(writable_deliveries, 0, sizeof writable_deliveries);
     for (int index = 0; index < CONNECTIONS; index++) {
         descriptors[index] = socket(AF_INET, SOCK_STREAM, 0);
         fcntl(descriptors[index], F_SETFL, fcntl(descriptors[index], F_GETFL, 0) | O_NONBLOCK);
@@ -78,6 +83,8 @@ static int round_failures(int round, dispatch_queue_t queue)
     }
 
     int failures = 0;
+    int events = 0;
+    int most = 0;
     for (int index = 0; index < CONNECTIONS; index++) {
         int error = 0;
         socklen_t size = sizeof error;
@@ -86,13 +93,23 @@ static int round_failures(int round, dispatch_queue_t queue)
             failures++;
             printf("connect_writable round %d connection %d not writable after %d s, so_error %d\n", round, index, WAIT_SECONDS, error);
         }
+        deliveries_at_cancel[index] = writable_deliveries[index];
+        events += writable_deliveries[index];
+        if (writable_deliveries[index] > most)
+            most = writable_deliveries[index];
         dispatch_source_cancel(writes[index]);
-        dispatch_resume(writes[index]);
         dispatch_source_cancel(reads[index]);
         dispatch_resume(reads[index]);
+    }
+    usleep(SETTLE_MICROSECONDS);
+    for (int index = 0; index < CONNECTIONS; index++) {
+        if (writable_deliveries[index] != deliveries_at_cancel[index]) {
+            failures++;
+            printf("connect_writable round %d connection %d writable delivered after cancel: %d then %d\n", round, index, deliveries_at_cancel[index], writable_deliveries[index]);
+        }
         close(descriptors[index]);
     }
-    printf("connect_writable round %d %d of %d writable\n", round, reached, CONNECTIONS);
+    printf("connect_writable round %d %d of %d writable, %d writable events, most %d for one connection\n", round, reached, CONNECTIONS, events, most);
     close(listener);
     return failures;
 }

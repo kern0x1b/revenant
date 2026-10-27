@@ -17,8 +17,8 @@ and the four CoreGraphics typealiases that no `.swiftinterface` declares are on 
 reason.
 
 It is a host project of its own, `frameworks/SwiftUI/tests/surface/xmake.lua`, because the gate itself must stay Lua-only and
-fast: `./xmakew l frameworks/SwiftUI/tools/api_surface.lua apple` builds it and writes the surface file,
-`apple-26-surface.tsv` in the run folder (`$HOME/.revenant/cache/<task>/swiftui/api/`), which `api_invented.lua`
+fast: `./xmakew l -P . frameworks/SwiftUI/tools/api_surface.lua apple` builds it and writes the surface file,
+`apple-26-surface.tsv` in the run folder (`.cache/scratch/<task>/swiftui/api/`), which `api_invented.lua`
 reads.
 
 * `swift-syntax` — the toolchain's package `revenant@swift-syntax` (604.0.0, the tag that matches the 6.4
@@ -45,11 +45,11 @@ count found, because the sets it partitions would otherwise hold vacuously at `0
 **`surface_rows.lua tree` writes four columns and `surface_diff.lua diff` reads three**, so the three-column *ours* file is made
 by `surface_rows.lua collapse`, which drops the path and collapses a row whose owner, kind and name repeat:
 
-    ./xmakew l frameworks/SwiftUI/tools/surface_rows.lua collapse ours13.tsv > ours13-3col.tsv
+    ./xmakew l -P . frameworks/SwiftUI/tools/surface_rows.lua collapse ours13.tsv > ours13-3col.tsv
 
 The refusal covers a 2-column file, a 4-column file, a 1-column *old* side, and an empty *new* side with and without `--allow-empty-new`.
 
-    $ ./xmakew l frameworks/SwiftUI/tools/surface_diff.lua diff old.tsv new.tsv      # new.tsv has two columns
+    $ ./xmakew l -P . frameworks/SwiftUI/tools/surface_diff.lua diff old.tsv new.tsv      # new.tsv has two columns
     …/new.tsv: line 1 has 2 tab-separated column(s), the 3 this diff reads are owner/kind/name; 1 line(s)
     in all (first at line 1). Refusing to read the file as the empty set: the partition below would hold
     vacuously. Use the artifact that has three columns (docs/reference/swiftui/surface.md says …).
@@ -80,7 +80,7 @@ declare and this tree does not) and two bare `subscript` rows the old file names
 
 **The copy of Apple's framework is generated run output, and the authority is the SDK `surface_rows.lua sdk` reads.**
 `tools/api_surface.lua prepare` copies the 16.4 SDK's `SwiftUI.framework` into the run folder
-(`$HOME/.revenant/cache/<task>/swiftui/fw/`), outside the tree; nothing measured from it is a fact about this
+(`.cache/scratch/<task>/swiftui/fw/`), outside the tree; nothing measured from it is a fact about this
 repository. `surface_rows.lua sdk` and `surface_diff.lua` read the iOS 26.2 SDK that `toolchain/modules/workspace.lua` names
 (`sdk()`: revenant's `iphoneos-sdk 26.2` package, or the folder `REVENANT_GEN_SDK` names), `surface_diff.lua` for its
 `arm64e-apple-ios.swiftinterface` index. **A surface number is only comparable with another taken from the same

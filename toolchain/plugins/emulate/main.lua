@@ -25,6 +25,18 @@ local function timing()
     return "scaled"
 end
 
+local function cores()
+    local value = option.get("cores")
+    if value == nil then
+        return nil
+    end
+    local count = tonumber(value)
+    if count == nil or count ~= math.floor(count) or count < 1 or count > 64 then
+        raise("xmake emulate --cores takes a whole number from 1 to 64, not %s", tostring(value))
+    end
+    return count
+end
+
 local function network()
     if option.get("network") then
         return option.get("network")
@@ -42,7 +54,16 @@ local function context()
     if not is_host("macosx") or os.arch() ~= "arm64" then
         raise("xmake emulate runs on macOS arm64 hosts only, and this is %s %s", os.host(), os.arch())
     end
-    task.run("config", {}, {disable_dump = true})
+    local sources = import("sources", {rootdir = path.join(os.scriptdir(), "../../../packages/e/emulator/port"), anonymous = true})
+    local digest = sources.digest(path.join(os.scriptdir(), "../../.."))
+    local marker = path.join(os.projectdir(), "build", "emulator-sources")
+    if digest ~= nil and (not os.isfile(marker) or io.readfile(marker) ~= digest) then
+        task.run("config", {clean = true})
+        os.mkdir(path.directory(marker))
+        io.writefile(marker, digest)
+    else
+        task.run("config", {}, {disable_dump = true})
+    end
     local emulator_package = required("emulator")
     local guest = required("emulator-guest")
     local swiftshader = required("swiftshader")
@@ -60,7 +81,8 @@ local function context()
     return {emulator = program, emulator_hash = path.filename(emulator_package:installdir()), guest = guest:installdir(), tool = tool,
             icd = path.join(swiftshader:installdir(), "share", "vulkan", "icd.d", "vk_swiftshader_icd.json"),
             identifier = chosen.identifier, version = chosen.version, build = chosen.build, image = image,
-            deadline = tonumber(option.get("timeout")), network = network()}
+            deadline = tonumber(option.get("timeout")), network = network(), cores = cores(),
+            test_concurrent = option.get("test-concurrent-threads") and true or nil}
 end
 
 local function booter(ctx)
@@ -70,8 +92,10 @@ local function booter(ctx)
             function ()
                 return true, emulator.boot(table.join(opt, {
                     scale = tonumber(option.get("scale")) or emulator.TIME_SCALE,
-                    cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
-                    tmpdir = path.join(emulator.root(), "tmp.noindex")}))
+                    cores = ctx.cores,
+                    test_concurrent = ctx.test_concurrent,
+                    cache = emulator.host_cache(ctx.identifier, ctx.build),
+                    tmpdir = path.join(opt.run, "tmp")}))
             end,
             catch {
                 function (errors)
@@ -87,16 +111,11 @@ local function booter(ctx)
     end
 end
 
-local function golden(ctx)
-    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
-    return emulator.golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}))
-end
-
 local function install(ctx)
     local written = packaging.write()
-    local base = golden(ctx)
+    local firmware_rootfs = firmware.rootfs(ctx.identifier, ctx.version, {tool = ctx.tool})
     local rootfs = path.join(ctx.image, "rootfs")
-    emulator.clone_golden(base, rootfs)
+    emulator.clone_golden(table.join(ctx, {firmware = firmware_rootfs, boot = booter(ctx)}), rootfs)
     local applications = {}
     for _, package in ipairs(written) do
         local placed = emulator.install_deb(package.deb, rootfs)
@@ -131,6 +150,7 @@ local function run(ctx, argv)
     emulator.clone(image, rootfs)
     local seconds = tonumber(option.get("seconds"))
     emulator.install_runner(rootfs, ctx.guest, argv, seconds, ctx.version)
+    emulator.lean_run(rootfs)
     local results = emulator.results(rootfs)
     local ok, result, booted, errors = try {
         function ()
@@ -140,7 +160,7 @@ local function run(ctx, argv)
             local reports = emulator.reports(rootfs)
             local verdict = emulator.verdict(boot.state, results, {frame = boot.frame, errors = boot.errors,
                                                                    scale = boot.scale, host_seconds = boot.seconds,
-                                                                   reports = reports})
+                                                                   reports = reports, lean = true})
             os.cp(results, path.join(folder, "results"))
             for _, report in ipairs(reports) do
                 os.cp(report.file, path.join(folder, "results", "reports", path.filename(report.file)))
@@ -161,6 +181,7 @@ local function run(ctx, argv)
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
     if not ok then
         raise(errors)
@@ -197,7 +218,9 @@ local function launch(ctx, identifier, steps)
     local scale = tonumber(option.get("scale")) or emulator.TIME_SCALE
     local driver = emulator.launch_driver({results = results, run = folder, application = application, steps = steps,
                                            seconds = seconds, scale = scale})
-    local booted = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = driver.stop}))
+    local booted = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = driver.stop, perf = true}))
+    local instructions = emulator.launch_instructions(booted.log)
+    local visible = emulator.last_visible_pixels(booted.log)
     os.cp(results, path.join(folder, "results"))
     local reports = emulator.reports(rootfs)
     for _, report in ipairs(reports) do
@@ -206,13 +229,15 @@ local function launch(ctx, identifier, steps)
     local result = {identifier = identifier, application = application, shots = driver.shots, failure = driver.failure,
                     exit = driver.exit, pid = driver.application and driver.application.pid, unlocks = driver.unlocks,
                     held = driver.held, held_seconds = driver.held_seconds,
-                    reason = booted.reason, seconds = booted.seconds, scale = booted.scale,
+                    reason = booted.reason, seconds = booted.seconds, scale = booted.scale, instructions = instructions,
+                    visible_pixels = visible,
                     stdout = path.join(folder, "results", "app.stdout"), stderr = path.join(folder, "results", "app.stderr")}
     json.savefile(path.join(folder, "verdict.json"), result)
     if not option.get("keep") then
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
     for _, name in ipairs({"app.stdout", "app.stderr"}) do
         local file = path.join(folder, "results", name)
@@ -236,10 +261,6 @@ local function launch(ctx, identifier, steps)
                                    seconds, last ~= "" and last or "none")
         end
         raise("SpringBoard did not launch %s %s: %s; the emulator log is %s", identifier, where, reason, booted.log)
-    elseif driver.failure == "exited" then
-        raise("%s ended %s %s; the emulator log is %s", identifier,
-              driver.exit.signal ~= 0 and string.format("on signal %d", driver.exit.signal) or string.format("with status %d", driver.exit.status),
-              where, booted.log)
     elseif not driver.application then
         raise("%s was %s, and no process of %s ever started %s; the emulator log is %s", identifier,
               driver.phase == "launching" and "never launched" or "launched", application, where, booted.log)
@@ -247,7 +268,23 @@ local function launch(ctx, identifier, steps)
         raise("%s ran, and the run ended (%s) %s before its %d steps were taken; the emulator log is %s", identifier,
               booted.reason, where, #steps, booted.log)
     end
+    local ended = driver.exit
+    if ended and emulator.exit_code(ended) ~= 0 then
+        cprint("${bright red}%s${clear} ended %s %s; the command exits with the same status, and the emulator log is %s", identifier,
+               ended.signal ~= 0 and string.format("on signal %d", ended.signal) or string.format("with status %d", ended.status),
+               where, booted.log)
+        os.exit(emulator.exit_code(ended))
+    end
     cprint("${bright green}launched${clear} %s as pid %s %s, %d snapshot(s)", identifier, driver.application.pid, where, #driver.shots)
+    if ended and not driver.held then
+        cprint("${bright green}ended${clear} %s with status 0 before the run's steps were taken", identifier)
+    end
+    if instructions then
+        cprint("${dim}launch: %d guest instructions from the spawn to the first settled frame", instructions)
+    end
+    if visible then
+        cprint("${dim}settled frame: %d visible pixels of 614400", visible)
+    end
     if driver.held == "exited" then
         cprint("${bright green}held${clear} until %s ended, %.0f guest seconds after it was frontmost", identifier, driver.held_seconds)
     elseif driver.held == "deadline" then
@@ -294,8 +331,8 @@ local function debug_command(ctx, command)
         function ()
             return emulator.debugged(table.join(ctx, {rootfs = rootfs, run = folder, guest = command,
                                                       architecture = config.arch(), network = network(),
-                                                      cache = path.join(emulator.root(), "cache.noindex", ctx.identifier .. "_" .. ctx.build, "slot-" .. slot.index),
-                                                      tmpdir = path.join(emulator.root(), "tmp.noindex")}))
+                                                      cache = emulator.host_cache(ctx.identifier, ctx.build),
+                                                      tmpdir = path.join(folder, "tmp")}))
         end,
         catch {
             function (errors)
@@ -328,6 +365,7 @@ local function debug_command(ctx, command)
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
         emulator.remove(path.join(folder, ".shade-device-state"))
+        emulator.remove(path.join(folder, "tmp"))
     end
 end
 

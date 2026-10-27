@@ -76,5 +76,5 @@ dependencies in its recipe. `revenant@widgetkit` is not: its package refuses on 
 
 If an `xmake` command waits with `package(...) is being accessed by other processes, please wait!`,
 another build is using the same package store, `$XMAKE_GLOBALDIR` (default
-`~/.revenant/cache/xmake-global`). Wait for it to finish, or give this build its own store by setting
+`.cache/xmake-global`). Wait for it to finish, or give this build its own store by setting
 `XMAKE_GLOBALDIR` to another folder.

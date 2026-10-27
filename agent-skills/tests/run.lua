@@ -130,7 +130,7 @@ function main(...)
                                   "LANG=en_US.UTF-8", "TERM=xterm-256color", "TMPDIR=" .. path.join(scratch, "tmp"),
                                   "PATH=" .. table.concat({guard_folder, brew_prefix .. "/bin", brew_prefix .. "/sbin", "/usr/local/bin",
                                                            "/usr/bin", "/bin", "/usr/sbin", "/sbin"}, ":"),
-                                  "XMAKE_GLOBALDIR=" .. real_home, "REVENANT_HOME=" .. path.join(real_home, ".revenant")}
+                                  "XMAKE_GLOBALDIR=" .. path.join(workspace.home(), "xmake-global"), "REVENANT_CACHE=" .. workspace.home()}
                     local login = path.join(home, ".claude", ".credentials.json")
                     io.writefile(login, "")
                     os.execv("chmod", {"600", login})

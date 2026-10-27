@@ -351,6 +351,6 @@ function log(settings, seconds, text)
     if text and text ~= "" then
         table.join2(argv, {"-m", text})
     end
-    os.execv("sh", {"-c", string.format("%s %s & reader=$!; sleep %d; kill $reader 2>/dev/null; wait $reader 2>/dev/null; true",
+    os.execv("sh", {"-c", string.format("%s %s <&0 & reader=$!; sleep %d; kill $reader 2>/dev/null; wait $reader 2>/dev/null; true",
                                        syslog.program, os.args(argv), seconds)})
 end

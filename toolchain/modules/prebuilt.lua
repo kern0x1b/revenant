@@ -1,4 +1,5 @@
 import("byteorder")
+import("cache")
 
 local function source()
     local repository = os.getenv("REVENANT_PREBUILT")
@@ -68,6 +69,20 @@ local function ready(package)
     return true
 end
 
+local function remote_size(url)
+    local headers = try { function () return os.iorunv("curl", {"-fsIL", url}) end } or ""
+    local size = 0
+    for value in headers:gmatch("[Cc]ontent%-[Ll]ength:%s*(%d+)") do
+        size = tonumber(value)
+    end
+    return size
+end
+
+local function unpacked_size(archive)
+    local totals = os.iorunv("xz", {"--robot", "-l", archive}):match("totals\t[^\n]*") or ""
+    return tonumber(totals:match("^totals\t%d+\t%d+\t%d+\t(%d+)")) or 0
+end
+
 function fetch(package)
     local repository = source()
     if not repository then
@@ -83,6 +98,7 @@ function fetch(package)
     local url = string.format("https://github.com/%s/releases/download/%s/%s", repository, tag(package), asset(package))
     local partial = archive .. ".part"
     local listed = archive .. ".sha256"
+    cache.reserve(remote_size(url), "the prebuilt " .. package:name() .. " download")
     os.mkdir(path.directory(archive))
     local fetched = try { function ()
         os.vrunv("curl", {"-fsSL", "--retry", "2", "-o", listed, url .. ".sha256"})
@@ -114,6 +130,7 @@ function install(package)
         return false
     end
     local archive = archive_of(package)
+    cache.reserve(unpacked_size(archive), "the prebuilt " .. package:name() .. " install")
     os.mkdir(package:installdir())
     os.vrunv("tar", {"-xJf", archive, "-C", package:installdir()})
     os.tryrm(archive)

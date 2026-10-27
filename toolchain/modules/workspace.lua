@@ -1,10 +1,10 @@
 import("core.base.json")
+import("cache")
 
 local SDK_VERSION = "26.2"
 local SDK_VARIABLE = "REVENANT_GEN_SDK"
 local CORPUS_VARIABLE = "REVENANT_CORPUS_ROOT"
 local TASK_VARIABLE = "REVENANT_TASK"
-local HOME_VARIABLE = "REVENANT_HOME"
 
 local resolved = {}
 
@@ -13,15 +13,7 @@ function root()
 end
 
 function home()
-    local named = os.getenv(HOME_VARIABLE)
-    if named and named ~= "" then
-        return named
-    end
-    local value = os.getenv("HOME")
-    if not value or value == "" then
-        raise("workspace: HOME is not set, so there is no $HOME/.revenant to keep revenant's data in")
-    end
-    return path.join(value, ".revenant")
+    return cache.root()
 end
 
 function task()
@@ -42,8 +34,8 @@ function task()
     end
 end
 
-function cache()
-    return path.join(home(), "cache")
+function scratch()
+    return path.join(home(), "scratch")
 end
 
 local function ensure(folder)
@@ -55,7 +47,7 @@ local function ensure(folder)
 end
 
 function run(...)
-    local folder = path.join(cache(), task(), ...)
+    local folder = path.join(scratch(), task(), ...)
     ensure(folder)
     if not os.isdir(folder) then
         raise("workspace: cannot create %s", folder)
@@ -92,40 +84,8 @@ local function sdk_in(installdir, version)
     return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
-local function exclusively(name, body)
-    local lock = path.join(cache(), "locks", (name:gsub("[^%w]", "_")) .. ".lock")
-    ensure(path.directory(lock))
-    local waited = 0
-    while os.execv("mkdir", {lock}, {try = true, stdout = os.nuldev(), stderr = os.nuldev()}) ~= 0 do
-        if waited >= 900000 then
-            break
-        end
-        os.sleep(1000)
-        waited = waited + 1000
-    end
-    local failure
-    try {
-        function ()
-            body()
-        end,
-        catch {
-            function (errors)
-                failure = tostring(errors)
-            end
-        }
-    }
-    os.tryrm(lock)
-    if failure then
-        raise("%s", failure)
-    end
-end
-
-local function populated(folder)
-    return os.isdir(folder) and (#os.files(path.join(folder, "*")) > 0 or #os.dirs(path.join(folder, "*")) > 0)
-end
-
 local function installdir_of(scratch, requirement)
-    local output = os.iorunv(os.programfile(), {"require", "--info", "--format=json"}, {curdir = scratch})
+    local output = os.iorunv(os.programfile(), {"require", "-P", scratch, "--info", "--format=json"}, {curdir = scratch})
     local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
     local entries = start and json.decode(output:sub(start)) or {}
     for _, entry in ipairs(entries) do
@@ -135,9 +95,10 @@ local function installdir_of(scratch, requirement)
     end
 end
 
-function package_of(requirement, install, platform)
+function package_of(requirement, install)
     local scratch = fresh("package-resolve")
-    local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
+    local lines = {string.format("add_repositories(%q)", "revenant " .. root()),
+                   string.format("add_requires(%q, {system = false})", requirement)}
     if install then
         table.insert(lines, string.format("add_addons(%q, {sourcedir = %q})", "revenant", path.join(root(), "toolchain")))
     end
@@ -145,19 +106,12 @@ function package_of(requirement, install, platform)
     local failure
     local result = try {
         function ()
-            if platform then
-                os.execv(os.programfile(), {"f", "-c", "-p", platform.plat, "-a", platform.arch, "-y"}, {curdir = scratch})
+            local folder = installdir_of(scratch, requirement)
+            if install and not (folder and os.isfile(path.join(folder, "manifest.txt"))) then
+                os.execv(os.programfile(), {"require", "-P", scratch, "-y"}, {curdir = scratch})
+                folder = installdir_of(scratch, requirement)
             end
-            if install then
-                exclusively(requirement .. (platform and (platform.plat .. platform.arch) or ""), function ()
-                    os.execv(os.programfile(), {"require", "-y"}, {curdir = scratch})
-                    local folder = installdir_of(scratch, requirement)
-                    if folder and not populated(folder) then
-                        os.execv(os.programfile(), {"require", "-y", "--force"}, {curdir = scratch})
-                    end
-                end)
-            end
-            return installdir_of(scratch, requirement)
+            return folder
         end,
         catch {
             function (errors)
