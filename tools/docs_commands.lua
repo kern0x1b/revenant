@@ -2,7 +2,7 @@ local root = path.absolute(path.directory(os.scriptdir()))
 
 local XMAKE_TASKS = {f = true, config = true, build = true, test = true, l = true, lua = true, require = true,
                      package = true, install = true, uninstall = true, run = true, show = true, clean = true, addon = true}
-local GLOBAL_VALUES = {P = true, p = true, a = true, j = true, o = true}
+local GLOBAL_VALUES = {F = true, P = true, p = true, a = true, m = true, k = true, j = true, o = true}
 local GLOBAL_FLAGS = {y = true, v = true, c = true}
 local GLOBAL_LONGS = {menu = true, yes = true, verbose = true, force = true, install = true, remove = true}
 

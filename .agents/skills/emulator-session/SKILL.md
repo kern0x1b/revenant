@@ -11,7 +11,7 @@ macOS arm64 hosts only. The name covers two things: the emulator program built f
 
 From the top of revenant:
 
-- `./xmakew f -y`, then `./xmakew build emulator`, then `./xmakew test`.
+- `./xmakew f -y --component=emulator`, then `./xmakew build emulator`, then `./xmakew test`. The component configures only the emulator and its host packages, not the other components.
 - The program is `build/macosx/arm64/release/emulator`; below, EMU stands for it. `EMU --help` lists the verbs.
 - Options to `./xmakew f`: `--emulator_sdl=y` for a window (`--display sdl`), `--emulator_vulkan` (on by default), `--emulator_lto`.
 - `EMU profile --list` lists the device profiles, `EMU profile --device iPhone4,1` shows one.

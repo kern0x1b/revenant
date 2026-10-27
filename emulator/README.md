@@ -9,7 +9,7 @@ The emulator boots a firmware's own userland (launchd, the daemons, SpringBoard 
 From the top of revenant:
 
 ```sh
-./xmakew f -P . -y
+./xmakew f -P . -y -m release --component=emulator
 ./xmakew build -P . emulator
 ./xmakew test -P .
 ```
