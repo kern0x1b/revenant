@@ -523,6 +523,7 @@ local function host_tests(folder, tests, library, frameworks, options)
 end
 
 if not is_plat("iphoneos") then
+    add_requires("revenant@ffmpeg", {alias = "ffmpeg"})
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
     if is_arch("arm64", "x86_64") then
@@ -539,6 +540,7 @@ if not is_plat("iphoneos") then
     host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("VideoToolbox", {hevc = {"VTDecompressionSession8_0.m", "VTSession8_0.m", "VTDecompressionSessionHEVC.m", "VTDecodeHEVC.c", "VTConvertBiPlanar.c", "VTInterleave.c", "VTSystem.c"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"}, {defines = {"REVENANT_HOST_BUILD", "REVENANT_VT_FIXTURE_DIR=\"" .. path.join(os.scriptdir(), "tests", "data", "VideoToolbox") .. "\""}, packages = {"ffmpeg"}, syslinks = {"iconv"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
