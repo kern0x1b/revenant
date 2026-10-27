@@ -3,6 +3,7 @@
 
 
 static NSUInteger revenant_drawable_counter;
+static const char revenant_last_presented_key;
 
 @implementation RevenantMetalDrawable {
     RevenantMetalTexture *_texture;
@@ -50,6 +51,8 @@ static NSUInteger revenant_drawable_counter;
     glBindRenderbuffer(GL_RENDERBUFFER, (GLuint)renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
     _presentedTime = CACurrentMediaTime();
+    if (_layer)
+        objc_setAssociatedObject(_layer, &revenant_last_presented_key, @(_presentedTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [device relinquish];
     NSArray *handlers = _presentedHandlers;
     _presentedHandlers = nil;
@@ -71,7 +74,8 @@ static NSUInteger revenant_drawable_counter;
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration
 {
-    [self present];
+    NSNumber *last = _layer ? objc_getAssociatedObject(_layer, &revenant_last_presented_key) : nil;
+    [self presentAtTime:last ? last.doubleValue + duration : 0];
 }
 
 - (void)addPresentedHandler:(MTLDrawablePresentedHandler)block
