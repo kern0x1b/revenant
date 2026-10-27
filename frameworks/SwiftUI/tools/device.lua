@@ -13,6 +13,8 @@ local BUNDLE = "space.kern0x1b.swiftui.demo"
 local LOG = "/var/tmp/swiftui-demo.log"
 local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
 local SHOT = "/usr/libexec/revenant-shot"
+local UNLOCK = "/usr/libexec/revenant-unlock"
+local SLIDE = {"0.374", "0.9375", "0.72", "0.9375"}
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -73,7 +75,9 @@ end
 
 local function guest_stamp()
     local digests = {}
-    for _, file in ipairs(os.files(path.join(os.projectdir(), "emulator", "src", "guest", "*"))) do
+    local shared = path.join(os.projectdir(), "frameworks", "SwiftUI", "examples", "showcase", "device")
+    for _, file in ipairs(table.join(os.files(path.join(os.projectdir(), "emulator", "src", "guest", "*")),
+                                     os.files(path.join(shared, "hid.*")))) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
     table.insert(digests, "daemon=" .. hash.sha256(path.join(os.projectdir(), "toolchain", "rules", "daemon", "xmake.lua")))
@@ -84,16 +88,20 @@ end
 
 local function tools(device, settings)
     local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
+    local signed = path.join(out, "install", "usr", "libexec")
     local stamp = path.join(out, "guest-sources")
     local current = guest_stamp()
     local built = os.isfile(stamp) and io.readfile(stamp) == current
-        and os.isfile(path.join(out, "revenant-sblaunch")) and os.isfile(path.join(out, "revenant-shot"))
+        and os.isfile(path.join(signed, "revenant-sblaunch")) and os.isfile(path.join(signed, "revenant-shot"))
+        and os.isfile(path.join(signed, "revenant-unlock"))
     if not built then
-        os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch", "revenant-shot"})
+        os.vrunv(os.programfile(), {"build", "-P", os.projectdir(), "-y", "revenant-sblaunch", "revenant-shot", "revenant-unlock"})
+        os.vrunv(os.programfile(), {"install", "-P", os.projectdir(), "-o", path.join(out, "install"), "revenant-sblaunch", "revenant-shot", "revenant-unlock"})
         io.writefile(stamp, current)
     end
-    provision(device, settings, path.join(out, "revenant-sblaunch"), SBLAUNCH)
-    provision(device, settings, path.join(out, "revenant-shot"), SHOT)
+    provision(device, settings, path.join(signed, "revenant-sblaunch"), SBLAUNCH)
+    provision(device, settings, path.join(signed, "revenant-shot"), SHOT)
+    provision(device, settings, path.join(signed, "revenant-unlock"), UNLOCK)
     device.run(settings, "mkdir -p /var/revenant && chmod 777 /var/revenant")
 end
 
@@ -113,7 +121,23 @@ local function install(device, settings)
                .. " && su mobile -c 'uicache -p /Applications/" .. name .. "'")
 end
 
+local function unlock(device, settings)
+    local state = (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+")
+    if state == "unlocked" then
+        return
+    end
+    if state ~= "locked" then
+        raise("the screen is %s: revenant-unlock slides only a lock screen without a passcode", state or "not readable")
+    end
+    device.run(settings, UNLOCK .. " wake; sleep 1; " .. UNLOCK .. " drag " .. table.concat(SLIDE, " "))
+    os.sleep(3000)
+    if (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+") ~= "unlocked" then
+        raise("the screen is still locked after the slide to unlock")
+    end
+end
+
 local function start(device, settings, setup)
+    unlock(device, settings)
     on_device(device, settings, "killall SwiftUIDemo")
     device.run(settings, "sleep 1; rm -rf /var/revenant/show /var/revenant/gesture /var/revenant/snapshots.on /var/revenant/snapshots.png "
                .. "/var/revenant/snapshots.only /var/revenant/swiftui-snapshots " .. LOG .. "; " .. setup
