@@ -1883,6 +1883,7 @@ class RevenantPDFSelectionSpan
 class RevenantPDFTextRun
 class RevenantPagination
 class RevenantParagraphStyle9
+class RevenantPasscodePrompt
 class RevenantPendingLayout
 class RevenantPersonNameParts
 class RevenantPhotoOutput
@@ -3053,6 +3054,7 @@ enum LACompanionTypeMac
 enum LACompanionTypeWatch
 enum LACredentialTypeApplicationPassword
 enum LAErrorAppCancel
+enum LAErrorAuthenticationFailed
 enum LAErrorBiometryNotAvailable
 enum LAErrorInvalidContext
 enum LAErrorNotInteractive
@@ -4657,6 +4659,12 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
+function RevenantPasscodeIsValid
+function RevenantPasscodeMapStatus
+function RevenantPasscodeOutcome
+function RevenantPasscodePresent
+function RevenantPasscodeUnlockDevice
+function RevenantPasscodeVerify
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
@@ -27133,6 +27141,8 @@ member RevenantPagination -forwardingTargetForSelector:
 member RevenantPagination -respondsToSelector:
 member RevenantPagination -webViewDidFinishLoad:
 member RevenantParagraphStyle9 +load
+member RevenantPasscodePrompt -alertView:clickedButtonAtIndex:
+member RevenantPasscodePrompt -finishWithResult:
 member RevenantPendingLayout -completion
 member RevenantPendingLayout -layout
 member RevenantPersonNameParts -composite
@@ -35677,6 +35687,7 @@ protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationP
 protocol_member UIActivityItemsConfigurationReading -activityItemsConfigurationSupportsInteraction:
 protocol_member UIActivityItemsConfigurationReading -applicationActivitiesForActivityItemsConfiguration
 protocol_member UIActivityItemsConfigurationReading -itemProvidersForActivityItemsConfiguration
+protocol_member UIAlertViewDelegate -alertView:clickedButtonAtIndex:
 protocol_member UIAlertViewDelegate -alertView:didDismissWithButtonIndex:
 protocol_member UIAlertViewDelegate -alertView:willDismissWithButtonIndex:
 protocol_member UIAlertViewDelegate -alertViewShouldEnableFirstOtherButton:
