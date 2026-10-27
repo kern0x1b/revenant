@@ -98,7 +98,6 @@ local LIBRARIES = {
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
     {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
-    {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
