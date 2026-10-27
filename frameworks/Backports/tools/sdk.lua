@@ -8,6 +8,10 @@ function workspace()
     return import("@addon.revenant.workspace", {anonymous = true})
 end
 
+function retention()
+    return import("@addon.revenant.retention", {anonymous = true})
+end
+
 function src_root()
     return path.join(root(), "frameworks", "Backports", "src")
 end
@@ -94,8 +98,14 @@ function build_root()
     return path.join(root(), "build", "generated", "backports")
 end
 
-function model_cache()
-    return path.join(workspace().scratch(), "backports", "modcache")
+function digester()
+    return os.iorunv("/usr/bin/xcrun", {"--find", "swift-api-digester"}):trim()
+end
+
+function model_cache(sdk)
+    local tool = digester()
+    local identity = {retention().real_path(sdk), sdk_version(sdk), tool, tostring(os.mtime(tool)), tostring(os.filesize(tool))}
+    return path.join(workspace().home(), "modcache", string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16))
 end
 
 function cache_key(version)

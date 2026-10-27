@@ -14,7 +14,10 @@ local LOG = "/var/tmp/swiftui-demo.log"
 local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
 local SHOT = "/usr/libexec/revenant-shot"
 local UNLOCK = "/usr/libexec/revenant-unlock"
-local SLIDE = {"0.374", "0.9375", "0.72", "0.9375"}
+local SLIDE_POINTS = {
+    iPad = {knob = {287, 64}, finish = 553},
+    iPhone = {knob = {52.5, 48.5}, finish = 240},
+}
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -121,6 +124,22 @@ local function install(device, settings)
                .. " && su mobile -c 'uicache -p /Applications/" .. name .. "'")
 end
 
+local function slide(device, settings)
+    local model = (on_device(device, settings, "sysctl -n hw.machine") or ""):match("^(%a+)")
+    local measured = SLIDE_POINTS[model]
+    if not measured then
+        raise("the phone is a %s, whose lock slide is not measured: add it to SLIDE_POINTS", model or "model nobody read")
+    end
+    local width, height = (on_device(device, settings, UNLOCK .. " screen") or ""):match("(%d+)%s+(%d+)")
+    if not width then
+        raise("revenant-unlock screen did not report the screen size")
+    end
+    width, height = tonumber(width), tonumber(height)
+    local y = (height - measured.knob[2]) / height
+    return {string.format("%.4f", measured.knob[1] / width), string.format("%.4f", y),
+            string.format("%.4f", measured.finish / width), string.format("%.4f", y)}
+end
+
 local function unlock(device, settings)
     local state = (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+")
     if state == "unlocked" then
@@ -129,7 +148,7 @@ local function unlock(device, settings)
     if state ~= "locked" then
         raise("the screen is %s: revenant-unlock slides only a lock screen without a passcode", state or "not readable")
     end
-    device.run(settings, UNLOCK .. " wake; sleep 1; " .. UNLOCK .. " drag " .. table.concat(SLIDE, " "))
+    device.run(settings, UNLOCK .. " wake; sleep 1; " .. UNLOCK .. " drag " .. table.concat(slide(device, settings), " "))
     os.sleep(3000)
     if (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+") ~= "unlocked" then
         raise("the screen is still locked after the slide to unlock")
