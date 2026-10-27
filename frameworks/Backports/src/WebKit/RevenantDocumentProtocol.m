@@ -97,6 +97,7 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     BOOL _deciding;
     BOOL _finished;
     BOOL _stopped;
+    NSThread *_thread;
     NSURLAuthenticationChallenge *_challenge;
 }
 
@@ -121,6 +122,7 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     if (![_token isKindOfClass:[NSString class]])
         _token = ExpectedToken(self.request, YES);
     _source = SourceForToken(_token);
+    _thread = [NSThread currentThread];
     NSMutableURLRequest *inner = [self.request mutableCopy];
     [NSURLProtocol setProperty:@YES forKey:InnerKey inRequest:inner];
     _connection = [[NSURLConnection alloc] initWithRequest:inner delegate:self];
@@ -188,13 +190,15 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
         return;
     }
     _deciding = YES;
+    NSThread *thread = _thread;
     [_source revenant_decideResponse:response completion:^(BOOL allowed) {
-        [self decided:allowed];
+        [self performSelector:@selector(decided:) onThread:thread withObject:@(allowed) waitUntilDone:NO];
     }];
 }
 
-- (void)decided:(BOOL)allowed
+- (void)decided:(NSNumber *)answer
 {
+    BOOL allowed = answer.boolValue;
     if (_stopped || !_deciding)
         return;
     _deciding = NO;
