@@ -9,12 +9,31 @@ package("ffmpeg")
     add_patches("8.1.2", "patches/0001-version-and-mov-stsd.patch", "7efef3d9f5e1527578243ec3ec002f69aa87fcf4d54608e7e63dee18f9c044ef")
     add_patches("8.1.2", "patches/0002-audiotoolbox-uint32-out-params.patch", "cfbe482fec85966fa0b3db121df16648442f66438e4462bb9d507309f4575d0c")
     add_patches("8.1.2", "patches/0003-audiotoolbox-encoder-uint32-out-params.patch", "d7f2ce04e2872d0d3ab1c7aaecb1bdbc7295b0bd38294ef7c98e5d318dd812d7")
-    add_links("avformat", "avcodec", "swresample", "avutil")
-    add_deps("revenant@libcxx", {alias = "libcxx"})
-    add_deps("revenant@opus", {alias = "opus"})
-    add_deps("revenant@vpx", {alias = "vpx"})
-    add_deps("revenant@dav1d", {alias = "dav1d"})
-    add_deps("pkgconf", {kind = "binary", host = true})
+    if is_plat("iphoneos") then
+        add_links("avformat", "avcodec", "swresample", "avutil")
+        add_deps("revenant@libcxx", {alias = "libcxx"})
+        add_deps("revenant@opus", {alias = "opus"})
+        add_deps("revenant@vpx", {alias = "vpx"})
+        add_deps("revenant@dav1d", {alias = "dav1d"})
+        add_deps("pkgconf", {kind = "binary", host = true})
+    else
+        add_links("avcodec", "avutil")
+        add_syslinks("iconv")
+    end
+
+    on_install("macosx", function (package)
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
+        local build = path.absolute("build-ffmpeg")
+        os.mkdir(build)
+        os.vrunv(path.absolute("configure"), {"--prefix=" .. package:installdir(), "--disable-programs", "--disable-doc",
+            "--disable-network", "--disable-everything", "--disable-avformat", "--disable-avfilter", "--disable-avdevice",
+            "--disable-swresample", "--disable-swscale", "--enable-avcodec", "--enable-avutil",
+            "--enable-decoder=hevc", "--enable-parser=hevc"}, {curdir = build})
+        parallel.hold(nil, function (width)
+            os.vrunv("make", {"-j" .. width}, {curdir = build})
+        end)
+        os.vrunv("make", {"install"}, {curdir = build})
+    end)
 
     on_install("iphoneos", function (package)
         local parallel = import("@addon.revenant.parallel", {anonymous = true})
@@ -79,7 +98,8 @@ package("ffmpeg")
     end)
 
     on_test(function (package)
-        for _, library in ipairs({"avcodec", "avformat", "avutil", "swresample"}) do
+        local libraries = package:plat() == "iphoneos" and {"avcodec", "avformat", "avutil", "swresample"} or {"avcodec", "avutil"}
+        for _, library in ipairs(libraries) do
             assert(os.isfile(path.join(package:installdir("lib"), "lib" .. library .. ".a")), "lib" .. library .. ".a is not installed")
         end
     end)
