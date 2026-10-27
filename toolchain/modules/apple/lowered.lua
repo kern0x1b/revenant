@@ -65,6 +65,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "UIEditMenuConfiguration",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIEditMenuInteraction.h",
+            find = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint;",
+            replace = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint NS_SWIFT_NAME(init(identifier:sourcePoint:));",
+        },
+    },
+    {
         member = "UIPointerStyle",
         header = {
             name = "UIKit",
