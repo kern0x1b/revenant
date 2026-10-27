@@ -116,14 +116,15 @@ What is open:
 
 ## WebKit (`WK*`)
 
-What exists, from `frameworks/Backports/src/WebKit` (14 `WK*` source files):
+What exists, from `frameworks/Backports/src/WebKit`:
 
 - `WKWebView` is a `UIView` that owns a `UIWebView`. `WKWebView.m` creates `_web` (line 180) and makes the object a
   `UIWebViewDelegate` (line 119). Navigation is bridged through `WKNavigation` (`revenant_beginNavigation`). The
   demand map counts `WKWebView` as backported.
 - The delegate callbacks are sent by selector. `WKWebView.m` checks `respondsToSelector:` and then sends
   `webView:decidePolicyForNavigationAction:decisionHandler:` (lines 399, 630) and
-  `webView:didStartProvisionalNavigation:` (line 692). The protocol object itself is not declared (see below).
+  `webView:didStartProvisionalNavigation:` (line 692) and the other navigation callbacks. The protocols they belong to
+  are declared in `RevenantWebKit.h` (see below).
 - The engine under `UIWebView`: `docs/explanation/webkit/architecture.md` ("Two WebKits in one process") records that
   UIKit loads the system WebKit for `UIWebView`, and that the port's substitution replaces the WebKit UIKit loads.
   So a `WKWebView` reaches the revenant engine where that substitution is installed. This is documented, and it was
@@ -132,25 +133,56 @@ What exists, from `frameworks/Backports/src/WebKit` (14 `WK*` source files):
   `WKContentRuleList11.m`, `WKContentWorld14.m`, `WKWebpagePreferences13.m`, `WKWebsiteDataStore.m`, and the
   `WKWebExtension*` family.
 
-What is missing:
+Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports only what the `UIWebView` engine can give:
 
-- Protocols with no `@protocol` definition in `src`: `WKNavigationDelegate` (8 files), `WKScriptMessageHandler` (7),
-  `WKUIDelegate` (4), `WKDownloadDelegate` (2), `WKURLSchemeHandler` (1), `WKURLSchemeTask` (1). The `WKWebExtension*`
-  protocols are not in this list: `RevenantWebExtensionController.h` defines `WKWebExtensionControllerDelegate`, and the
-  other extension protocols are only forward-declared.
-- Classes with no source file: `WKSecurityOrigin` (4 files), `WKWindowFeatures` (4), `WKDownload` (3),
-  `WKSnapshotConfiguration` (3), `WKContextMenuElementInfo` (1), `WKOpenPanelParameters` (1).
-- Global variables: `WKWebsiteDataTypeFetchCache` and `WKWebsiteDataTypeServiceWorkerRegistrations` (1 file each).
+- `WKWindowFeatures`: every getter is nil. The engine reports no window features and never asks for a new window.
+- `WKNavigationActionPolicy` and `WKNavigationResponsePolicy`: the typedefs are lowered to iOS 6
+  (`toolchain/modules/apple/lowered.lua`). `WKNavigationResponse +revenant_policyAllowing:` answers allow or cancel. The
+  engine never sends `webView:decidePolicyForNavigationResponse:decisionHandler:`, so no response decision is asked, and
+  `WKNavigationResponsePolicyDownload` is never carried out: the engine has no download path.
+- `WKDownload` and `WKDownloadDelegate`: a download a caller holds reports nil request, web view, frame and progress, is
+  not user-initiated, and cancels with no resume data, because nothing here can resume. The engine creates no download
+  and sends no download callback.
+- `WKOpenPanelParameters`: both properties are NO. The engine shows no file picker and never sends `runOpenPanel`.
+- `WKUIDelegate`: declared with `createWebViewWithConfiguration:`, `runOpenPanelWithParameters:` and
+  `contextMenuConfigurationForElement:`. The engine sends none of the three: it opens no window, shows no picker, and
+  shows no context menu for a page element.
+- `WKURLSchemeHandler` and `WKURLSchemeTask`: declared to match the existing route. A scheme registered on a
+  `WKWebViewConfiguration` loads through `RevenantWebURLProtocol`, an `NSURLProtocol` scoped to that web view. It calls
+  the handler's start and stop, and passes the task's response, data, and finish or failure to the protocol client. This
+  is real for loads in that web view.
+- `WKPermissionDecision` and `WKMediaCaptureType`: the typedefs are lowered to iOS 6 (they are iOS 15 in the SDK). The
+  engine has no permission prompt, so no decision is asked. The media-capture delegate method takes a `WKSecurityOrigin`,
+  which is `47e86bd3` on `work/telegram-unblock`, not on this branch.
+- `WKWebsiteDataTypeFetchCache` and `WKWebsiteDataTypeServiceWorkerRegistrations`: constants. The engine keeps neither
+  kind of data, so removing these types removes nothing.
+- `WKWebpagePreferences.allowsContentJavaScript` (iOS 14): stored, default YES. Setting NO logs once: the engine cannot
+  switch JavaScript off for one page, so the page runs with it.
+- `WKWebpagePreferences.preferredContentMode`: stored, and logs once when set. The engine renders every page one way.
 
-Decisions still open:
+Already present, with the same limits:
 
-- The protocols. Declaring `WKNavigationDelegate` without `WKWebView` sending the callbacks through the protocol would
-  let conforming classes compile and then never be told what they need. `WKWebView.m` already sends the two callbacks
-  above, so the protocol can be declared with the same selectors. Which other delegate callbacks `WKWebView.m` sends is
-  not checked here, and must be before the protocol's method list is written.
-- `WKSecurityOrigin`, `WKWindowFeatures`, `WKDownload` and `WKSnapshotConfiguration` need a decision on what the
-  `UIWebView` engine can report: an origin, a download and a snapshot are not `UIWebView` features. A loud stub, named in
-  the open gaps of `frameworks/Backports/README.md`, is the default if the engine cannot report them.
+- `WKSnapshotConfiguration`: `rect` and `snapshotWidth` change the image `takeSnapshot` renders.
+  `afterScreenUpdates` is stored and has no effect, because the snapshot is taken from the layer at once.
+- `WKContextMenuElementInfo`: `linkURL` is always nil, since the engine shows no context menu.
+- `WKContentWorld`: named worlds are distinct objects, but the engine has one JavaScript world, so they share it.
+
+The protocols `src` declares (`WKNavigationDelegate`, `WKUIDelegate`, `WKDownloadDelegate`, `WKURLSchemeHandler`,
+`WKURLSchemeTask`) use the SDK's selectors. Clang ignores each copy in a translation unit that also imports WebKit
+(`duplicate protocol definition ... is ignored`), so the SDK's declarations are the ones compiled. The copies put the
+names in `lowered-members.txt`.
+
+Checks: `tests/webkit_values_test.lua` compares the snapshot defaults with macOS, and checks the values of `WKDownload`,
+`WKOpenPanelParameters` and `WKWindowFeatures` against the list above. It has a negative control that flips one default.
+`WKWebpagePreferences` and `WKContentWorld` have no host oracle. The armv7 Swift typecheck of Telegram's call shapes covers
+them, and it compiles; its link needs the WebKit backport library, which the typecheck target does not link.
+
+Still missing:
+
+- `WKScriptMessageHandler` (7 files), which has no `@protocol` definition in `src`.
+- `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
+- Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
+  decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.
 
 ## Telegram 13.0 members: the crutches left
 
