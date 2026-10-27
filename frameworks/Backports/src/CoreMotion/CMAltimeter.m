@@ -19,6 +19,11 @@
 
 - (void)startRelativeAltitudeUpdatesToQueue:(NSOperationQueue *)queue withHandler:(CMAltitudeHandler)handler
 {
+    if (!handler)
+        return;
+    [(queue ?: [NSOperationQueue mainQueue]) addOperationWithBlock:^{
+        handler(nil, [NSError errorWithDomain:CMErrorDomain code:CMErrorNotAvailable userInfo:nil]);
+    }];
 }
 
 - (void)stopRelativeAltitudeUpdates
@@ -27,6 +32,11 @@
 
 - (void)startAbsoluteAltitudeUpdatesToQueue:(NSOperationQueue *)queue withHandler:(CMAbsoluteAltitudeHandler)handler
 {
+    if (!handler)
+        return;
+    [(queue ?: [NSOperationQueue mainQueue]) addOperationWithBlock:^{
+        handler(nil, [NSError errorWithDomain:CMErrorDomain code:CMErrorNotAvailable userInfo:nil]);
+    }];
 }
 
 - (void)stopAbsoluteAltitudeUpdates

@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
+#import "RevenantAnimationDuration.h"
 
 static const char RevenantKeyframesKey;
 static const char RevenantFocusedKey;
@@ -42,8 +43,13 @@ static const char RevenantFocusedKey;
                            completion:(void (^)(BOOL finished))completion
 {
     objc_setAssociatedObject(self, &RevenantKeyframesKey, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if (animations)
-        animations();
+    RevenantAnimationDurationPush(duration);
+    @try {
+        if (animations)
+            animations();
+    } @finally {
+        RevenantAnimationDurationPop();
+    }
     NSArray *keyframes = objc_getAssociatedObject(self, &RevenantKeyframesKey);
     objc_setAssociatedObject(self, &RevenantKeyframesKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (!keyframes.count) {
@@ -86,11 +92,6 @@ static const char RevenantFocusedKey;
         parallelAnimations();
     if (completion)
         completion(YES);
-}
-
-+ (NSTimeInterval)inheritedAnimationDuration
-{
-    return 0;
 }
 
 @end

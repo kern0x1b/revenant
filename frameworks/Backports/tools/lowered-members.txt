@@ -3338,6 +3338,8 @@ enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
 enum MTLPrimitiveTypeTriangleStrip
+enum MTLPurgeableStateKeepCurrent
+enum MTLPurgeableStateNonVolatile
 enum MTLResourceStorageModePrivate
 enum MTLResourceStorageModeShared
 enum MTLSamplerAddressModeClampToEdge
@@ -4444,6 +4446,10 @@ function NSStringFromDirectionalEdgeInsets
 function RevenantASAppleIDButtonTitle
 function RevenantAURenderInput
 function RevenantAccessFromWord
+function RevenantAnimationDurationInherited
+function RevenantAnimationDurationPop
+function RevenantAnimationDurationPush
+function RevenantAnimationDurationSetCurrent
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -4644,6 +4650,7 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
+function RevenantPhotoLongestIncreasingSubsequence
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
@@ -8854,6 +8861,7 @@ global RevenantASAppleIDButtonLogoCharacter
 global RevenantAVMetadataTimedItemsKey
 global RevenantAVMetadataTimedRangeKey
 global RevenantAXSettingsErrorDomain
+global RevenantAnimationDurationDefault
 global RevenantCKDevelopmentEnvironment
 global RevenantCKHost
 global RevenantCKProductionEnvironment
@@ -33236,6 +33244,8 @@ member UITextFormattingCoordinator -setSelectedAttributes:isMultiple:
 member UITextInputAssistantItem -allowsHidingShortcuts
 member UITextInputAssistantItem -init
 member UITextInputAssistantItem -leadingBarButtonGroups
+member UITextInputAssistantItem -revenant_attachToResponder:
+member UITextInputAssistantItem -revenant_shortcutsDidChange
 member UITextInputAssistantItem -setAllowsHidingShortcuts:
 member UITextInputAssistantItem -setLeadingBarButtonGroups:
 member UITextInputAssistantItem -setTrailingBarButtonGroups:
@@ -33623,6 +33633,12 @@ member UIView +load
 member UIView +modifyAnimationsWithRepeatCount:autoreverses:animations:
 member UIView +performSystemAnimation:onViews:options:animations:completion:
 member UIView +performWithoutAnimation:
+member UIView +revenant_animateWithDuration:animations:
+member UIView +revenant_animateWithDuration:animations:completion:
+member UIView +revenant_animateWithDuration:delay:options:animations:completion:
+member UIView +revenant_beginAnimations:context:
+member UIView +revenant_commitAnimations
+member UIView +revenant_setAnimationDuration:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:
 member UIView -accessibilityIgnoresInvertColors
