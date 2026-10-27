@@ -1,4 +1,5 @@
 #import "RevenantContentSize.h"
+#import "RevenantTraitStyle.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
@@ -33,17 +34,30 @@ static UITraitCollection *revenant_limited(UIView *view, UITraitCollection *inhe
     return [UITraitCollection traitCollectionWithTraitsFromCollections:@[inherited, [UITraitCollection traitCollectionWithPreferredContentSizeCategory:ordered[clamped]]]];
 }
 
+static UITraitCollection *revenant_inherited(UIView *view)
+{
+    UIResponder *next = view.nextResponder;
+    if ([next isKindOfClass:[UIViewController class]] && ((UIViewController *)next).view == view)
+        return [(UIViewController *)next traitCollection];
+    if (view.superview)
+        return [view.superview traitCollection];
+    UIWindow *window = [view isKindOfClass:[UIWindow class]] ? (UIWindow *)view : view.window;
+    return [UITraitCollection revenant_traitCollectionForScreen:window.screen];
+}
+
+static UITraitCollection *revenant_styled(UIView *view, UITraitCollection *collection)
+{
+    UIUserInterfaceStyle style = revenant_view_style_override(view);
+    if (style == UIUserInterfaceStyleUnspecified || !view.window)
+        return collection;
+    return [UITraitCollection traitCollectionWithTraitsFromCollections:@[collection, [UITraitCollection traitCollectionWithUserInterfaceStyle:style]]];
+}
+
 @implementation UIView (RevenantTraitEnvironment)
 
 - (UITraitCollection *)traitCollection
 {
-    UIResponder *next = self.nextResponder;
-    if ([next isKindOfClass:[UIViewController class]] && ((UIViewController *)next).view == self)
-        return revenant_limited(self, [(UIViewController *)next traitCollection]);
-    if (self.superview)
-        return revenant_limited(self, [self.superview traitCollection]);
-    UIWindow *window = [self isKindOfClass:[UIWindow class]] ? (UIWindow *)self : self.window;
-    return revenant_limited(self, [UITraitCollection revenant_traitCollectionForScreen:window.screen]);
+    return revenant_styled(self, revenant_limited(self, revenant_inherited(self)));
 }
 
 - (UIContentSizeCategory)minimumContentSizeCategory
@@ -68,6 +82,10 @@ static UITraitCollection *revenant_limited(UIView *view, UITraitCollection *inhe
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
+    UIColor *background = self.backgroundColor;
+    UIColor *resolved = revenant_color_for_traits(background, self.traitCollection);
+    if (resolved != background)
+        self.backgroundColor = resolved;
 }
 
 @end

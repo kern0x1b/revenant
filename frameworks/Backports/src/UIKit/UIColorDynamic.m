@@ -16,12 +16,25 @@ static UIColor *revenant_resolve(UIColor *color, UITraitCollection *traits)
     return resolved ? revenant_resolve(resolved, traits) : nil;
 }
 
-static UIColor *revenant_dynamic(RevenantColorProvider provider)
+static UIColor *revenant_carrier(RevenantColorProvider provider, UITraitCollection *traits)
 {
-    UIColor *base = revenant_resolve(provider([UITraitCollection currentTraitCollection]), [UITraitCollection currentTraitCollection]);
+    UIColor *base = revenant_resolve(provider(traits), traits);
     UIColor *carrier = [[UIColor alloc] initWithCGColor:base ? base.CGColor : [UIColor clearColor].CGColor];
     objc_setAssociatedObject(carrier, &revenant_provider_key, [provider copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return carrier;
+}
+
+static UIColor *revenant_dynamic(RevenantColorProvider provider)
+{
+    return revenant_carrier(provider, [UITraitCollection currentTraitCollection]);
+}
+
+UIColor *revenant_color_for_traits(UIColor *color, UITraitCollection *traits)
+{
+    if (!color)
+        return nil;
+    RevenantColorProvider provider = objc_getAssociatedObject(color, &revenant_provider_key);
+    return provider ? revenant_carrier(provider, traits) : color;
 }
 
 typedef struct {

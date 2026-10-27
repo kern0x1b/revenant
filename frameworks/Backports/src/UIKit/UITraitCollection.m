@@ -135,6 +135,11 @@ static void revenant_deliver_trait_changes(NSArray *environments, void (^change)
     }
 }
 
+void revenant_deliver_view_trait_change(UIView *view, void (^change)(void))
+{
+    revenant_deliver_trait_changes(@[view], change);
+}
+
 static void revenant_orientation_changed(NSNotification *notification)
 {
     NSNumber *old = [notification.userInfo objectForKey:UIApplicationStatusBarOrientationUserInfoKey];
