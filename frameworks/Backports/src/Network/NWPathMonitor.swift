@@ -22,30 +22,29 @@ public final class NWPath: Equatable, CustomDebugStringConvertible {
     public let status: Status
     public let isExpensive: Bool
     public let availableInterfaces: [NWInterface]
+    let defaultInterface: NWInterface?
     private let usedInterfaceType: NWInterface.InterfaceType?
 
-    init(status: Status, isExpensive: Bool, availableInterfaces: [NWInterface]) {
+    init(status: Status, isExpensive: Bool, availableInterfaces: [NWInterface], defaultInterface: NWInterface?) {
         self.status = status
         self.isExpensive = isExpensive
         self.availableInterfaces = availableInterfaces
-        self.usedInterfaceType = NWPath.primaryInterfaceType(status: status, isExpensive: isExpensive, availableInterfaces: availableInterfaces)
+        self.defaultInterface = defaultInterface
+        self.usedInterfaceType = NWPath.primaryInterfaceType(status: status, isExpensive: isExpensive, defaultInterface: defaultInterface)
     }
 
     public func usesInterfaceType(_ type: NWInterface.InterfaceType) -> Bool {
         usedInterfaceType == type
     }
 
-    private static func primaryInterfaceType(status: Status, isExpensive: Bool, availableInterfaces: [NWInterface]) -> NWInterface.InterfaceType? {
+    private static func primaryInterfaceType(status: Status, isExpensive: Bool, defaultInterface: NWInterface?) -> NWInterface.InterfaceType? {
         guard status != .unsatisfied else {
             return nil
         }
-        if isExpensive {
-            return .cellular
-        }
-        for type in [NWInterface.InterfaceType.wifi, .wiredEthernet, .loopback, .other] where availableInterfaces.contains(where: { $0.type == type }) {
+        if let type = defaultInterface?.type {
             return type
         }
-        return nil
+        return isExpensive ? .cellular : nil
     }
 
     public static func == (lhs: NWPath, rhs: NWPath) -> Bool {
@@ -84,6 +83,65 @@ private func revenantAvailableInterfaces() -> [NWInterface] {
     return names.compactMap { NWInterface(named: $0, kernelType: kernelTypes[$0]) }.filter { $0.type != .loopback }
 }
 
+private func revenantDefaultRouteSource() -> in_addr_t? {
+    let descriptor = socket(AF_INET, SOCK_DGRAM, 0)
+    guard descriptor >= 0 else {
+        return nil
+    }
+    defer {
+        close(descriptor)
+    }
+    var peer = sockaddr_in()
+    peer.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+    peer.sin_family = sa_family_t(AF_INET)
+    peer.sin_port = UInt16(9).bigEndian
+    peer.sin_addr.s_addr = inet_addr("192.0.2.1")
+    let connected = withUnsafePointer(to: &peer) { pointer in
+        pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { socketAddress in
+            connect(descriptor, socketAddress, socklen_t(MemoryLayout<sockaddr_in>.size))
+        }
+    }
+    guard connected == 0 else {
+        return nil
+    }
+    var local = sockaddr_in()
+    var length = socklen_t(MemoryLayout<sockaddr_in>.size)
+    let named = withUnsafeMutablePointer(to: &local) { pointer in
+        pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { socketAddress in
+            getsockname(descriptor, socketAddress, &length)
+        }
+    }
+    guard named == 0, local.sin_addr.s_addr != 0 else {
+        return nil
+    }
+    return local.sin_addr.s_addr
+}
+
+private func revenantDefaultInterface(in interfaces: [NWInterface]) -> NWInterface? {
+    guard let source = revenantDefaultRouteSource() else {
+        return nil
+    }
+    var list: UnsafeMutablePointer<ifaddrs>? = nil
+    guard getifaddrs(&list) == 0, let first = list else {
+        return nil
+    }
+    defer {
+        freeifaddrs(list)
+    }
+    var name: String?
+    var entry: UnsafeMutablePointer<ifaddrs>? = first
+    while let current = entry, name == nil {
+        if let address = current.pointee.ifa_addr, address.pointee.sa_family == UInt8(AF_INET) {
+            let inet = address.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
+            if inet.sin_addr.s_addr == source {
+                name = String(cString: current.pointee.ifa_name)
+            }
+        }
+        entry = current.pointee.ifa_next
+    }
+    return interfaces.first { $0.name == name }
+}
+
 private func revenantPath(for flags: SCNetworkReachabilityFlags) -> NWPath {
     let status: NWPath.Status
     if flags.contains(.reachable) {
@@ -92,7 +150,8 @@ private func revenantPath(for flags: SCNetworkReachabilityFlags) -> NWPath {
         status = .unsatisfied
     }
     let interfaces = status == .unsatisfied ? [] : revenantAvailableInterfaces()
-    return NWPath(status: status, isExpensive: revenantIsExpensive(flags), availableInterfaces: interfaces)
+    let defaultInterface = status == .unsatisfied ? nil : revenantDefaultInterface(in: interfaces)
+    return NWPath(status: status, isExpensive: revenantIsExpensive(flags), availableInterfaces: interfaces, defaultInterface: defaultInterface)
 }
 
 private func revenantIsExpensive(_ flags: SCNetworkReachabilityFlags) -> Bool {
@@ -122,7 +181,7 @@ private func revenantCurrentFlags(_ reachability: SCNetworkReachability) -> SCNe
 
 func revenantCurrentPath() -> NWPath {
     guard let reachability = revenantReachability() else {
-        return NWPath(status: .unsatisfied, isExpensive: false, availableInterfaces: [])
+        return NWPath(status: .unsatisfied, isExpensive: false, availableInterfaces: [], defaultInterface: nil)
     }
     return revenantPath(for: revenantCurrentFlags(reachability))
 }

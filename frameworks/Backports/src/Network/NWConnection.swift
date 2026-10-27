@@ -301,7 +301,7 @@ public final class NWConnection: @unchecked Sendable {
             return
         }
         let route = revenantCurrentPath()
-        let path = NWPath(status: .satisfied, isExpensive: route.isExpensive, availableInterfaces: route.availableInterfaces)
+        let path = NWPath(status: .satisfied, isExpensive: route.isExpensive, availableInterfaces: route.availableInterfaces, defaultInterface: route.defaultInterface)
         currentPath = path
         setState(.ready)
         pathUpdateHandler?(path)

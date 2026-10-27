@@ -228,8 +228,10 @@ func pathStatus() {
     let monitor = NWPathMonitor()
     let first = DispatchSemaphore(value: 0)
     var loopback = false
+    var uses: [String] = []
     monitor.pathUpdateHandler = { path in
         loopback = path.availableInterfaces.contains { $0.type == .loopback }
+        uses = [NWInterface.InterfaceType.wifi, .cellular, .wiredEthernet, .loopback, .other].filter { path.usesInterfaceType($0) }.map { String(describing: $0) }
         first.signal()
     }
     monitor.start(queue: queue)
@@ -237,6 +239,7 @@ func pathStatus() {
     monitor.cancel()
     queue.sync {
         print("path has loopback interface \(loopback)")
+        print("path uses \(uses)")
     }
 }
 
