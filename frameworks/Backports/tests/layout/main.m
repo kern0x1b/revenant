@@ -94,6 +94,7 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
 @property (nonatomic, assign) BOOL setWants;
 @property (nonatomic, assign) CGFloat edges;
 @property (nonatomic, assign) BOOL setEdges;
+@property (nonatomic, assign) CGFloat afterEdges;
 @property (nonatomic, copy) void (^recorded)(RevenantLayoutController *);
 @end
 
@@ -107,6 +108,8 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
         self.wantsFullScreenLayout = self.wantsFull;
     if (self.setEdges)
         ((void (*)(id, SEL, NSUInteger))objc_msgSend)(self, sel_registerName("setEdgesForExtendedLayout:"), (NSUInteger)self.edges);
+    if (self.afterEdges >= 0)
+        ((void (*)(id, SEL, NSUInteger))objc_msgSend)(self, sel_registerName("setEdgesForExtendedLayout:"), (NSUInteger)self.afterEdges);
     UITableView *table = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     table.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:table];
@@ -130,6 +133,8 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) NSMutableString *log;
 @property (nonatomic, assign) NSInteger index;
+@property (nonatomic, strong) AVCaptureSession *session;
+@property (nonatomic, strong) AVCaptureVideoPreviewLayer *preview;
 @end
 
 @implementation RevenantLayoutDelegate
@@ -143,21 +148,55 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
         [UINavigationBar instancesRespondToSelector:@selector(setTranslucent:)]];
     revenant_test_rect_of_interest(self.log);
     [self.window makeKeyAndVisible];
+    [self startSession];
+    [self performSelector:@selector(measureSession) withObject:nil afterDelay:3.0];
     [self next];
     return YES;
+}
+
+- (void)startSession
+{
+    self.session = [[AVCaptureSession alloc] init];
+    NSError *error = nil;
+    AVCaptureDevice *camera = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDeviceInput *input = camera ? [AVCaptureDeviceInput deviceInputWithDevice:camera error:&error] : nil;
+    if (input && [self.session canAddInput:input])
+        [self.session addInput:input];
+    AVCaptureMetadataOutput *metadata = [[AVCaptureMetadataOutput alloc] init];
+    if ([self.session canAddOutput:metadata])
+        [self.session addOutput:metadata];
+    self.preview = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
+    self.preview.frame = self.window.layer.bounds;
+    [self.window.layer addSublayer:self.preview];
+    [self.session startRunning];
+    [self.log appendFormat:@"info session input=%d output=%d running=%d error=%@\n",
+        input != nil, [self.session.outputs count] > 0, self.session.isRunning, error];
+}
+
+- (void)measureSession
+{
+    CGRect bounds = self.preview.bounds;
+    CGRect centred = [self.preview metadataOutputRectOfInterestForRect:CGRectMake(CGRectGetMidX(bounds) - 60, CGRectGetMidY(bounds) - 60, 120, 120)];
+    [self.log appendFormat:@"info session running=%d centred = %@\n", self.session.isRunning, NSStringFromCGRect(centred)];
+    revenant_check(self.log, fabs(CGRectGetMidX(centred) - 0.5) < 0.01 && fabs(CGRectGetMidY(centred) - 0.5) < 0.01,
+        @"session: a rect centred on the layer converts to a rect centred on the output");
+    CGRect whole = [self.preview metadataOutputRectOfInterestForRect:bounds];
+    [self.log appendFormat:@"info session whole layer = %@\n", NSStringFromCGRect(whole)];
 }
 
 - (void)next
 {
     NSArray *cases = @[
-        @[@NO, @NO, @NO, @0, @NO],
-        @[@NO, @NO, @YES, @0, @NO],
-        @[@YES, @NO, @NO, @0, @NO],
-        @[@YES, @NO, @YES, @0, @NO],
-        @[@NO, @NO, @NO, @(REVENANT_EDGE_NONE), @YES],
-        @[@NO, @NO, @NO, @(REVENANT_EDGE_ALL), @YES],
-        @[@YES, @NO, @NO, @(REVENANT_EDGE_NONE), @YES],
-        @[@YES, @NO, @NO, @(REVENANT_EDGE_ALL), @YES],
+        @[@NO, @NO, @NO, @0, @NO, @(-1)],
+        @[@NO, @YES, @YES, @0, @NO, @(-1)],
+        @[@YES, @NO, @NO, @0, @NO, @(-1)],
+        @[@YES, @YES, @YES, @0, @NO, @(-1)],
+        @[@NO, @NO, @NO, @(REVENANT_EDGE_NONE), @YES, @(-1)],
+        @[@NO, @NO, @NO, @(REVENANT_EDGE_ALL), @YES, @(-1)],
+        @[@YES, @NO, @NO, @(REVENANT_EDGE_NONE), @YES, @(-1)],
+        @[@YES, @NO, @NO, @(REVENANT_EDGE_ALL), @YES, @(-1)],
+        @[@NO, @NO, @NO, @(REVENANT_EDGE_ALL), @YES, @(REVENANT_EDGE_NONE)],
+        @[@YES, @NO, @NO, @(REVENANT_EDGE_ALL), @YES, @(REVENANT_EDGE_NONE)],
     ];
     if (self.index >= (NSInteger)cases.count) {
         [self.log writeToFile:REVENANT_LAYOUT_LOG atomically:YES encoding:NSUTF8StringEncoding error:NULL];
@@ -169,6 +208,8 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
     BOOL setWants = [c[2] boolValue];
     CGFloat edges = [c[3] doubleValue];
     BOOL setEdges = [c[4] boolValue];
+    CGFloat afterEdges = [c[5] doubleValue];
+    CGFloat finalEdges = afterEdges >= 0 ? afterEdges : edges;
     NSInteger index = self.index;
     if (setEdges && ![UIViewController instancesRespondToSelector:@selector(setEdgesForExtendedLayout:)]) {
         [self.log appendFormat:@"case %ld skipped: edgesForExtendedLayout is absent on this release\n", (long)index];
@@ -181,6 +222,7 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
     controller.setWants = setWants;
     controller.edges = edges;
     controller.setEdges = setEdges;
+    controller.afterEdges = afterEdges;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
     if ([nav.navigationBar respondsToSelector:@selector(setTranslucent:)])
         nav.navigationBar.translucent = translucent;
@@ -194,12 +236,12 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
                 table = (UITableView *)subview;
         NSString *expect = @"";
         if (setEdges) {
-            BOOL below = edges == REVENANT_EDGE_NONE || !translucent;
+            BOOL below = finalEdges == REVENANT_EDGE_NONE || !translucent;
             BOOL matches = below ? fabs(CGRectGetMinY(view) - CGRectGetMaxY(bar)) < 0.5 : fabs(CGRectGetMinY(view)) < 0.5;
             expect = [NSString stringWithFormat:@" iOS7expectation=%@ match=%d", below ? @"below-bars" : @"under-translucent-bar", matches];
         }
         [weakSelf.log appendFormat:@"case %ld translucentBar=%d setWants=%d wants=%d setEdges=%d edges=%d barMaxY=%.1f viewY=%.1f viewH=%.1f tableY=%.1f tableInsetTop=%.1f statusBarH=%.1f barIsTranslucent=%d%@\n",
-            (long)index, translucent, setWants, wants, setEdges, (int)edges, CGRectGetMaxY(bar), CGRectGetMinY(view), CGRectGetHeight(view),
+            (long)index, translucent, setWants, wants, setEdges, (int)finalEdges, CGRectGetMaxY(bar), CGRectGetMinY(view), CGRectGetHeight(view),
             table ? CGRectGetMinY([table.superview convertRect:table.frame toView:nil]) : -1,
             table ? table.contentInset.top : -1,
             [[UIApplication sharedApplication] statusBarFrame].size.height,
