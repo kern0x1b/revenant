@@ -1,1 +1,1 @@
-swift_data_sources_digest = "d5c2cd02d5b73a8d1ea6a18c26962a85"
+swift_data_sources_digest = "82d5664997d9b2e02f6b6d54eb711c55"
