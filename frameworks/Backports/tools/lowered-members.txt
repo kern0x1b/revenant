@@ -1997,6 +1997,7 @@ class RevenantSwipeContainer
 class RevenantSwipeController
 class RevenantSwipeInstaller
 class RevenantSwipeItem
+class RevenantTLSSession
 class RevenantTableDropCoordinator
 class RevenantTableDropItem
 class RevenantTablePlaceholderContext
@@ -2691,6 +2692,7 @@ class WKWebView
 class WKWebViewConfiguration
 class WKWebpagePreferences
 class WKWebsiteDataStore
+class WKWindowFeatures
 class __NSConcreteUUID
 class cls
 enum AAAttributionErrorCodePlatformNotSupported
@@ -4051,6 +4053,8 @@ enum WKErrorJavaScriptExceptionOccurred
 enum WKErrorJavaScriptResultTypeIsUnsupported
 enum WKErrorUnknown
 enum WKNavigationActionPolicyAllow
+enum WKNavigationResponsePolicyAllow
+enum WKNavigationResponsePolicyCancel
 enum WKNavigationTypeBackForward
 enum WKNavigationTypeOther
 enum WKNavigationTypeReload
@@ -4665,27 +4669,6 @@ function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
 function RevenantSecKeyECVerify
 function RevenantSecKeyFail
-function RevenantSecProtocolOptionsApplicationProtocolAt
-function RevenantSecProtocolOptionsApplicationProtocolCount
-function RevenantSecProtocolOptionsCiphersuiteAt
-function RevenantSecProtocolOptionsCiphersuiteCount
-function RevenantSecProtocolOptionsCiphersuiteGroupAt
-function RevenantSecProtocolOptionsCiphersuiteGroupCount
-function RevenantSecProtocolOptionsCopyChallengeIdentity
-function RevenantSecProtocolOptionsCopyData
-function RevenantSecProtocolOptionsCopyLocalIdentity
-function RevenantSecProtocolOptionsCreate
-function RevenantSecProtocolOptionsHasChallengeBlock
-function RevenantSecProtocolOptionsHasVerifyBlock
-function RevenantSecProtocolOptionsMaxTLS
-function RevenantSecProtocolOptionsMinTLS
-function RevenantSecProtocolOptionsOCSPEnabled
-function RevenantSecProtocolOptionsPeerAuthenticationRequired
-function RevenantSecProtocolOptionsPreSharedKeyCount
-function RevenantSecProtocolOptionsSCTEnabled
-function RevenantSecProtocolOptionsServerName
-function RevenantSecProtocolOptionsUnsupportedSetting
-function RevenantSecProtocolOptionsVerifyTrust
 function RevenantSecurityAttributesFromItemResult
 function RevenantSecurityCarries
 function RevenantSecurityKeyIsPortEC
@@ -4694,6 +4677,20 @@ function RevenantSecurityPaddingFor
 function RevenantSensorKitMonotonicSeconds
 function RevenantSignpostMetrics
 function RevenantSpotlightDefaultItems
+function RevenantTLSEngineClose
+function RevenantTLSEngineCreate
+function RevenantTLSEngineFree
+function RevenantTLSEngineHandshake
+function RevenantTLSEngineIsEstablished
+function RevenantTLSEngineNegotiatedCipherSuite
+function RevenantTLSEngineNegotiatedProtocol
+function RevenantTLSEngineNegotiatedVersion
+function RevenantTLSEngineOCSPResponse
+function RevenantTLSEngineRead
+function RevenantTLSEngineWantsWrite
+function RevenantTLSEngineWrite
+function RevenantTLSOptionsCreate
+function RevenantTLSOptionsHasServerCredentials
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTypedNode
@@ -23837,6 +23834,7 @@ member NSTextAttachment -attachmentBoundsForTextContainer:proposedLineFragment:g
 member NSTextAttachment -bounds
 member NSTextAttachment -contents
 member NSTextAttachment -fileType
+member NSTextAttachment -imageForBounds:textContainer:characterIndex:
 member NSTextAttachment -setBounds:
 member NSTextAttachment -setContents:
 member NSTextAttachment -setFileType:
@@ -27611,6 +27609,10 @@ member RevenantSecIdentity -initWithIdentity:
 member RevenantSecIdentity -revenantCertificates
 member RevenantSecIdentity -revenantIdentity
 member RevenantSecIdentity -revenantSetCertificates:
+member RevenantSecProtocolMetadata -negotiatedCipherSuite
+member RevenantSecProtocolMetadata -negotiatedProtocol
+member RevenantSecProtocolMetadata -negotiatedVersion
+member RevenantSecProtocolMetadata -ocspResponse
 member RevenantSecProtocolOptions -challengeBlock
 member RevenantSecProtocolOptions -ciphersuites
 member RevenantSecProtocolOptions -diffieHellmanParameters
@@ -27878,6 +27880,19 @@ member RevenantSwipeItem -color
 member RevenantSwipeItem -image
 member RevenantSwipeItem -title
 member RevenantSwipeItem -width
+member RevenantTLSSession -clientPreSharedKeyIdentity:maximumIdentity:key:maximumKey:
+member RevenantTLSSession -close
+member RevenantTLSSession -dataArray:kind:
+member RevenantTLSSession -dealloc
+member RevenantTLSSession -handshake
+member RevenantTLSSession -initWithOptions:descriptor:defaultServerName:serverSide:reason:status:
+member RevenantTLSSession -installClientIdentity
+member RevenantTLSSession -readInto:capacity:count:
+member RevenantTLSSession -serverPreSharedKeyIdentity:key:maximumKey:
+member RevenantTLSSession -signAlgorithm:input:length:out:outLength:maxOut:
+member RevenantTLSSession -statusForResult:
+member RevenantTLSSession -verifyChain
+member RevenantTLSSession -writeBytes:count:written:
 member RevenantTableDropCoordinator -destination
 member RevenantTableDropCoordinator -destinationIndexPath
 member RevenantTableDropCoordinator -dropItem:intoRowAtIndexPath:rect:
@@ -34617,6 +34632,7 @@ member WKNavigationAction -navigationType
 member WKNavigationAction -request
 member WKNavigationAction -sourceFrame
 member WKNavigationAction -targetFrame
+member WKNavigationResponse +revenant_policyAllowing:
 member WKNavigationResponse -canShowMIMEType
 member WKNavigationResponse -isForMainFrame
 member WKNavigationResponse -response
@@ -34945,6 +34961,15 @@ member WKWebsiteDataStore -initWithCoder:
 member WKWebsiteDataStore -isPersistent
 member WKWebsiteDataStore -removeDataOfTypes:forDataRecords:completionHandler:
 member WKWebsiteDataStore -removeDataOfTypes:modifiedSince:completionHandler:
+member WKWindowFeatures -allowsResizing
+member WKWindowFeatures -copyWithZone:
+member WKWindowFeatures -height
+member WKWindowFeatures -menuBarVisibility
+member WKWindowFeatures -statusBarVisibility
+member WKWindowFeatures -toolbarsVisibility
+member WKWindowFeatures -width
+member WKWindowFeatures -x
+member WKWindowFeatures -y
 member __NSConcreteUUID -UUIDString
 member __NSConcreteUUID -classForCoder
 member __NSConcreteUUID -copyWithZone:
@@ -35045,6 +35070,7 @@ protocol NSItemProviderWriting
 protocol NSMutableCopying
 protocol NSSecureCoding
 protocol NSStreamDelegate
+protocol NSTextAttachmentContainer
 protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
@@ -35156,6 +35182,7 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
+protocol WKNavigationDelegate
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
@@ -35555,6 +35582,8 @@ protocol_member NSItemProviderWriting -writableTypeIdentifiersForItemProvider
 protocol_member NSMutableCopying -mutableCopyWithZone:
 protocol_member NSSecureCoding +supportsSecureCoding
 protocol_member NSStreamDelegate -stream:handleEvent:
+protocol_member NSTextAttachmentContainer -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
+protocol_member NSTextAttachmentContainer -imageForBounds:textContainer:characterIndex:
 protocol_member NSTextLocation -compare:
 protocol_member NSTextStorageDelegate -textStorage:didProcessEditing:range:changeInLength:
 protocol_member NSURLConnectionDataDelegate -connection:didReceiveData:

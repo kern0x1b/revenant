@@ -213,9 +213,32 @@ function shared_runtime(target)
     return {packages = listed, identities = identities, libraries = libraries}
 end
 
+local PLATFORM_FOLDER = "/usr/lib/revenant/org.revenant.backports/"
+
+function platform_libraries(target)
+    local libraries, seen = {}, {}
+    local pending = table.wrap(target:values("revenant.platform"))
+    while #pending > 0 do
+        local file = table.remove(pending, 1)
+        if not os.isfile(file) then
+            raise("target(%s) names %s as a library the platform package provides, and it is not built: build it first", target:name(), file)
+        end
+        if not seen[file] then
+            seen[file] = true
+            table.insert(libraries, file)
+            for _, reference in ipairs(macho.images(macho.read(file))[1].libraries) do
+                if reference:startswith(PLATFORM_FOLDER) then
+                    table.insert(pending, path.join(path.directory(file), path.filename(reference)))
+                end
+            end
+        end
+    end
+    return libraries
+end
+
 function provided_libraries(target)
     local shared = shared_runtime(target)
-    return table.join(backport_libraries(target), shared and shared.libraries or {})
+    return table.join(backport_libraries(target), platform_libraries(target), shared and shared.libraries or {})
 end
 
 function project_backports()

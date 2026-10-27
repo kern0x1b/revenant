@@ -4,6 +4,8 @@ set_xmakever("3.1.2")
 add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
+add_requireconfs("**.ninja", {override = true, kind = "binary", host = true, public = false})
+
 option("component", {type = "string", default = "", showmenu = true,
                      description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})
 option("apple_sdk", {type = "string", default = "", showmenu = true,

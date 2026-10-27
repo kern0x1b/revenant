@@ -13,4 +13,10 @@ final class TraitObserver: UIView {
             updateTraitsIfNeeded()
         }
     }
+
+    func present(_ interaction: UIEditMenuInteraction, at point: CGPoint) {
+        if #available(iOS 16.0, *) {
+            interaction.presentEditMenu(with: UIEditMenuConfiguration(identifier: nil, sourcePoint: point))
+        }
+    }
 }

@@ -16,6 +16,9 @@ static void hold(id object, Ivar held, id value)
         CFRelease((__bridge CFTypeRef)previous);
 }
 
+@interface NSTextAttachment (RevenantText7) <NSTextAttachmentContainer>
+@end
+
 @implementation NSTextAttachment (RevenantText7)
 
 - (CGRect)bounds
@@ -36,6 +39,11 @@ static void hold(id object, Ivar held, id value)
         return bounds;
     CGSize size = self.image.size;
     return CGRectMake(0, 0, size.width, size.height);
+}
+
+- (UIImage *)imageForBounds:(CGRect)imageBounds textContainer:(NSTextContainer *)textContainer characterIndex:(NSUInteger)charIndex
+{
+    return self.image;
 }
 
 - (NSData *)contents

@@ -98,6 +98,11 @@
 
 @implementation WKNavigationResponse
 
++ (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed
+{
+    return allowed ? WKNavigationResponsePolicyAllow : WKNavigationResponsePolicyCancel;
+}
+
 - (BOOL)isForMainFrame
 {
     return YES;

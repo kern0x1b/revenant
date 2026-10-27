@@ -1,1 +1,1 @@
-activitykit_sources_digest = "59a9dd9a617f879021ab1898d6eab530"
+activitykit_sources_digest = "c79e8ec0c509cc9fda0c44dc7a3fc54d"

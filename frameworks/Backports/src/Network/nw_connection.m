@@ -1,5 +1,7 @@
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
+#import "RevenantTLS/RevenantTLSEngine.h"
+#import "../Security/RevenantSecProtocolMetadata.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -18,7 +20,6 @@
 #include <unistd.h>
 
 #include <Security/Security.h>
-#include <Security/SecureTransport.h>
 
 enum { nw_connection_state_setup = 0 };
 
@@ -39,7 +40,7 @@ enum { nw_connection_state_setup = 0 };
     BOOL _started, _cancelled, _finished, _secure, _viable, _viableKnown, _connecting;
     int _socket;
     int _acceptedSocket;
-    SSLContextRef _ssl;
+    RevenantTLSEngine *_ssl;
     dispatch_source_t _readSource;
     dispatch_source_t _writeSource;
     BOOL _readingSource, _handshaking;
@@ -125,7 +126,6 @@ static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int
 static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error);
 static void revenant_readable(RevenantNWConnection *connection);
 static RevenantSecProtocolOptions *revenant_tls_options(RevenantNWParameters *parameters);
-static OSStatus revenant_tls_versions(RevenantSecProtocolOptions *options, SSLProtocol *minimum, SSLProtocol *maximum, const char **reason);
 
 #pragma mark - the state machine
 
@@ -236,46 +236,6 @@ static void revenant_apply_options(RevenantNWConnection *connection)
         int reuse = 1;
         setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
     }
-}
-
-#pragma mark - the TLS of the release, over the same engine
-
-static OSStatus revenant_tls_read(SSLConnectionRef connection, void *data, size_t *length)
-{
-    RevenantNWConnection *self = (__bridge RevenantNWConnection *)connection;
-    if (self->_pendingRead.length >= *length) {
-        memcpy(data, self->_pendingRead.bytes, *length);
-        [self->_pendingRead replaceBytesInRange:NSMakeRange(0, *length) withBytes:NULL length:0];
-        return errSSLWouldBlock;
-    }
-    [self->_pendingRead setLength:0];
-    ssize_t got = read(self->_socket, data, *length);
-    if (got > 0) {
-        *length = (size_t)got;
-        return errSecSuccess;
-    }
-    *length = 0;
-    if (got == 0)
-        return errSSLClosedGraceful;
-    return errSSLWouldBlock;
-}
-
-static OSStatus revenant_tls_write(SSLConnectionRef connection, const void *data, size_t *length)
-{
-    RevenantNWConnection *self = (__bridge RevenantNWConnection *)connection;
-    if (self->_pendingWrite.length + *length > (NSUInteger)revenant_nw_available_send_buffer(self->_socket)) {
-        [self->_pendingWrite appendBytes:data length:*length];
-        *length = 0;
-        return errSSLWouldBlock;
-    }
-    ssize_t put = write(self->_socket, data, *length);
-    if (put > 0) {
-        *length = (size_t)put;
-        return errSecSuccess;
-    }
-    if (put == 0)
-        return errSSLWouldBlock;
-    return errno == EAGAIN || errno == EWOULDBLOCK ? errSSLWouldBlock : errSSLClosedAbort;
 }
 
 #pragma mark - the bytes
@@ -393,26 +353,14 @@ static void revenant_flush(RevenantNWConnection *connection)
     revenant_dump(connection, "flush");
     while (connection->_pendingWrite.length) {
         size_t length = connection->_pendingWrite.length;
-        if (connection->_ssl) {
-            size_t written = 0;
-            OSStatus status = SSLWrite(connection->_ssl, connection->_pendingWrite.bytes, length, &written);
-            length = written;
-            if (status == errSSLWouldBlock)
-                break;
-            if (status != errSecSuccess) {
-                revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
-                return;
-            }
-        } else {
-            ssize_t put = write(connection->_socket, connection->_pendingWrite.bytes, length);
-            if (put > 0)
-                length = (size_t)put;
-            else if (put < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
-                break;
-            else {
-                revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
-                return;
-            }
+        ssize_t put = write(connection->_socket, connection->_pendingWrite.bytes, length);
+        if (put > 0)
+            length = (size_t)put;
+        else if (put < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+            break;
+        else {
+            revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
+            return;
         }
         [connection->_pendingWrite replaceBytesInRange:NSMakeRange(0, length) withBytes:NULL length:0];
     }
@@ -424,14 +372,13 @@ static void revenant_flush(RevenantNWConnection *connection)
         [connection->_sends removeObjectAtIndex:0];
         if (connection->_ssl) {
             size_t written = 0;
-            OSStatus status = SSLWrite(connection->_ssl, content.bytes, length, &written);
+            OSStatus status = RevenantTLSEngineWrite(connection->_ssl, content.bytes, length, &written);
             length = written;
             if (status == errSSLWouldBlock) {
-                [connection->_pendingWrite appendData:content];
                 [connection->_sends insertObject:send atIndex:0];
                 break;
             }
-            if (status != errSecSuccess) {
+            if (status != noErr) {
                 if (completion)
                     completion(revenant_error(nw_error_domain_tls, (int)status));
                 revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
@@ -473,17 +420,21 @@ static void revenant_tls_pump(RevenantNWConnection *connection)
 {
     uint8_t buffer[16384];
     for (;;) {
-        size_t length = sizeof buffer;
-        OSStatus status = SSLRead(connection->_ssl, buffer, sizeof buffer, &length);
+        size_t length = 0;
+        OSStatus status = RevenantTLSEngineRead(connection->_ssl, buffer, sizeof buffer, &length);
         if (status == errSSLWouldBlock)
             return;
-        if (status != errSecSuccess && status != errSSLClosedNoNotify) {
+        if (status == errSSLClosedGraceful || status == errSSLClosedNoNotify) {
+            connection->_finished = YES;
+            revenant_deliver_received(connection);
+            revenant_report_state(connection, nw_connection_state_cancelled, nil);
+            return;
+        }
+        if (status != noErr) {
             connection->_finished = YES;
             revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
             return;
         }
-        if (!length)
-            return;
         revenant_received(connection, [NSData dataWithBytes:buffer length:length]);
     }
 }
@@ -523,11 +474,28 @@ static void revenant_readable(RevenantNWConnection *connection)
     }
 }
 
+static void revenant_tls_publish_metadata(RevenantNWConnection *connection)
+{
+    if (!connection->_secureMetadata)
+        return;
+    RevenantSecProtocolMetadata *metadata = (RevenantSecProtocolMetadata *)nw_tls_copy_sec_protocol_metadata((nw_protocol_metadata_t)connection->_secureMetadata);
+    if (!metadata)
+        return;
+    metadata.negotiatedVersion = RevenantTLSEngineNegotiatedVersion(connection->_ssl);
+    metadata.negotiatedCipherSuite = RevenantTLSEngineNegotiatedCipherSuite(connection->_ssl);
+    size_t length = 0;
+    const uint8_t *protocol = RevenantTLSEngineNegotiatedProtocol(connection->_ssl, &length);
+    metadata.negotiatedProtocol = protocol ? [[NSString alloc] initWithBytes:protocol length:length encoding:NSUTF8StringEncoding] : nil;
+    const uint8_t *ocsp = RevenantTLSEngineOCSPResponse(connection->_ssl, &length);
+    metadata.ocspResponse = ocsp ? [NSData dataWithBytes:ocsp length:length] : nil;
+}
+
 static void revenant_handshake(RevenantNWConnection *connection)
 {
-    OSStatus status = SSLHandshake(connection->_ssl);
-    if (status == errSecSuccess) {
+    OSStatus status = RevenantTLSEngineHandshake(connection->_ssl);
+    if (status == noErr) {
         connection->_handshaking = NO;
+        revenant_tls_publish_metadata(connection);
         revenant_report_state(connection, nw_connection_state_ready, nil);
         return;
     }
@@ -751,28 +719,22 @@ static void revenant_ready(RevenantNWConnection *connection)
     revenant_install_sources(connection);
 
     if (connection->_secure) {
-        connection->_ssl = SSLCreateContext(kCFAllocatorDefault, kSSLClientSide, kSSLStreamType);
+        RevenantNWProtocolMetadata *tls = [[RevenantNWProtocolMetadata alloc] init];
+        tls->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_tls_definition();
+        tls->_values = [NSMutableDictionary dictionary];
+        tls->_objects = [NSMutableDictionary dictionary];
+        connection->_secureMetadata = tls;
+        RevenantSecProtocolOptions *secOptions = revenant_tls_options(connection->_parameters) ?: [[RevenantSecProtocolOptions alloc] init];
+        NSString *hostname = connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil;
+        char reason[512] = "";
+        OSStatus status = noErr;
+        connection->_ssl = RevenantTLSEngineCreate((__bridge const void *)secOptions, connection->_socket, hostname.UTF8String, false,
+                                                   reason, sizeof reason, &status);
         if (!connection->_ssl) {
-            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, errSSLInternal));
+            fprintf(stderr, "Network: TLS setting refused: %s\n", reason);
+            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
             return;
         }
-        SSLSetIOFuncs(connection->_ssl, revenant_tls_read, revenant_tls_write);
-        SSLProtocol minimum, maximum;
-        const char *versionReason = NULL;
-        OSStatus versions = revenant_tls_versions(revenant_tls_options(connection->_parameters), &minimum, &maximum, &versionReason);
-        if (versions == noErr)
-            versions = SSLSetProtocolVersionMin(connection->_ssl, minimum);
-        if (versions == noErr)
-            versions = SSLSetProtocolVersionMax(connection->_ssl, maximum);
-        if (versions != noErr) {
-            fprintf(stderr, "Network: TLS setting refused: %s\n", versionReason ? versionReason : "SecureTransport rejected the TLS version range");
-            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)versions));
-            return;
-        }
-        RevenantSecProtocolOptions *secOptions = revenant_tls_options(connection->_parameters);
-        NSString *peer = secOptions.serverName.length ? secOptions.serverName : (connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil);
-        if (peer.length)
-            SSLSetPeerDomainName(connection->_ssl, peer.UTF8String, (int)peer.length);
         connection->_handshaking = YES;
         revenant_handshake(connection);
         if (connection->_handshaking)
@@ -801,65 +763,6 @@ static RevenantSecProtocolOptions *revenant_tls_options(RevenantNWParameters *pa
     return tls ? tls->_objects[@"sec_protocol_options"] : nil;
 }
 
-static OSStatus revenant_tls_versions(RevenantSecProtocolOptions *options, SSLProtocol *minimum, SSLProtocol *maximum, const char **reason)
-{
-    uint16_t low = options ? options.minTLSVersion : 0x0303;
-    uint16_t high = options ? options.maxTLSVersion : 0x0304;
-    if (low > 0x0303) {
-        *reason = "the minimum TLS version is above TLS 1.2, which this TLS path cannot negotiate";
-        return errSSLProtocol;
-    }
-    if (high < low) {
-        *reason = "the maximum TLS version is below the minimum TLS version";
-        return errSSLProtocol;
-    }
-    *minimum = low <= 0x0301 ? kTLSProtocol1 : (low == 0x0302 ? kTLSProtocol11 : kTLSProtocol12);
-    *maximum = high <= 0x0301 ? kTLSProtocol1 : (high == 0x0302 ? kTLSProtocol11 : kTLSProtocol12);
-    return noErr;
-}
-
-static OSStatus revenant_tls_refusal(RevenantNWParameters *parameters, const char **reason)
-{
-    RevenantSecProtocolOptions *options = revenant_tls_options(parameters);
-    SSLProtocol minimum, maximum;
-    if (!options)
-        return revenant_tls_versions(nil, &minimum, &maximum, reason);
-    const char *setting = [options revenantUnsupportedSettingForServer:NO];
-    if (setting) {
-        *reason = setting;
-        return errSSLBadConfiguration;
-    }
-    if (options.verifyBlock || options.challengeBlock) {
-        *reason = "verify and challenge blocks are not honoured by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    if (options.localIdentity) {
-        *reason = "client identities are not sent by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    if (options.preSharedKeys.count > 0) {
-        *reason = "pre-shared keys are not honoured by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    if (options.ocspEnabled) {
-        *reason = "OCSP stapling is not honoured by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    if (options.sctEnabled) {
-        *reason = "signed certificate timestamps are not honoured by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    if (options.ciphersuites.count > 0 || [options revenantCiphersuiteGroups].count > 0) {
-        *reason = "ciphersuite selection is not honoured by this TLS path";
-        return errSSLBadCipherSuite;
-    }
-    if (options.applicationProtocols.count > 0) {
-        *reason = "application protocol negotiation is not honoured by this TLS path";
-        return errSSLBadConfiguration;
-    }
-    return revenant_tls_versions(options, &minimum, &maximum, reason);
-}
-
 static void revenant_open(RevenantNWConnection *connection)
 {
     RevenantNWConnection *self = connection;
@@ -867,15 +770,6 @@ static void revenant_open(RevenantNWConnection *connection)
     RevenantNWParameters *parameters = connection->_parameters;
     connection->_isDatagram = revenant_is_datagram(parameters);
     connection->_secure = revenant_is_secure(parameters);
-    if (connection->_secure) {
-        const char *reason = NULL;
-        OSStatus refused = revenant_tls_refusal(parameters, &reason);
-        if (refused != noErr) {
-            fprintf(stderr, "Network: TLS setting refused: %s\n", reason);
-            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)refused));
-            return;
-        }
-    }
 
     struct addrinfo hints;
     memset(&hints, 0, sizeof hints);
@@ -979,8 +873,8 @@ static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_
         connection->_readingSource = NO;
     }
     if (connection->_ssl) {
-        SSLClose(connection->_ssl);
-        CFRelease(connection->_ssl);
+        RevenantTLSEngineClose(connection->_ssl);
+        RevenantTLSEngineFree(connection->_ssl);
         connection->_ssl = NULL;
     }
     if (connection->_socket >= 0) {
