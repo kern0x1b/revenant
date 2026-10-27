@@ -79,5 +79,10 @@ extern NSString *const RevenantWebKitBridgeScheme;
 @end
 
 @interface WKNavigationResponse (RevenantWebKit)
++ (instancetype)revenant_responseWithResponse:(NSURLResponse *)response;
 + (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed;
+@end
+
+@interface WKWindowFeatures (RevenantWebKit)
++ (instancetype)revenant_featuresWithString:(NSString *)string;
 @end

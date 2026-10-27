@@ -6,6 +6,18 @@
 #else
 #import <JavaScriptCore/JavaScriptCore.h>
 #import "RevenantScriptCodec.h"
+
+@interface WKWindowFeaturesRevenant : NSObject
++ (instancetype)revenant_featuresWithString:(NSString *)string;
+@property (nonatomic, readonly) NSNumber *menuBarVisibility;
+@property (nonatomic, readonly) NSNumber *statusBarVisibility;
+@property (nonatomic, readonly) NSNumber *toolbarsVisibility;
+@property (nonatomic, readonly) NSNumber *allowsResizing;
+@property (nonatomic, readonly) NSNumber *x;
+@property (nonatomic, readonly) NSNumber *y;
+@property (nonatomic, readonly) NSNumber *width;
+@property (nonatomic, readonly) NSNumber *height;
+@end
 #endif
 
 static NSString *const Samples[] = {
@@ -28,6 +40,9 @@ static NSString *const Samples[] = {
     @"({})",
 };
 static const NSUInteger SampleCount = sizeof(Samples) / sizeof(Samples[0]);
+
+static NSString *const PopupCall = @"window.open('http://example.invalid/popup?x=1','pop','width=320,height=240,left=10,top=20,resizable=no,menubar=no,status=yes,toolbar=no');";
+static const NSUInteger WindowCount = 2;
 
 static NSString *Dump(id value)
 {
@@ -64,10 +79,18 @@ static NSString *Dump(id value)
     return [NSString stringWithFormat:@"other(%@)", [value class]];
 }
 
+static NSString *Features(NSNumber *width, NSNumber *height, NSNumber *x, NSNumber *y, NSNumber *menubar, NSNumber *status, NSNumber *toolbar, NSNumber *resizable)
+{
+    return [NSString stringWithFormat:@"window open features: width=%@ height=%@ x=%@ y=%@ menubar=%@ status=%@ toolbar=%@ resizable=%@",
+            width.stringValue ?: @"nil", height.stringValue ?: @"nil", x.stringValue ?: @"nil", y.stringValue ?: @"nil",
+            menubar.stringValue ?: @"nil", status.stringValue ?: @"nil", toolbar.stringValue ?: @"nil", resizable.stringValue ?: @"nil"];
+}
+
 #ifdef WEBKIT_MESSAGE_ORACLE
 
-@interface MessageRecorder : NSObject <WKScriptMessageHandler>
+@interface MessageRecorder : NSObject <WKScriptMessageHandler, WKUIDelegate>
 @property (nonatomic, strong) NSMutableArray<NSString *> *lines;
+@property (nonatomic, strong) NSMutableArray<NSString *> *windows;
 @end
 
 @implementation MessageRecorder
@@ -77,24 +100,37 @@ static NSString *Dump(id value)
     [self.lines addObject:[NSString stringWithFormat:@"%@ main: %d", Dump(message.body), message.frameInfo.isMainFrame]];
 }
 
+- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
+{
+    [self.windows addObject:[NSString stringWithFormat:@"window open url: %@", navigationAction.request.URL.absoluteString]];
+    [self.windows addObject:Features(windowFeatures.width, windowFeatures.height, windowFeatures.x, windowFeatures.y,
+                                     windowFeatures.menuBarVisibility, windowFeatures.statusBarVisibility,
+                                     windowFeatures.toolbarsVisibility, windowFeatures.allowsResizing)];
+    return nil;
+}
+
 @end
 
 static NSArray<NSString *> *OracleLines(void)
 {
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    configuration.preferences.javaScriptCanOpenWindowsAutomatically = YES;
     MessageRecorder *recorder = [[MessageRecorder alloc] init];
     recorder.lines = [NSMutableArray array];
+    recorder.windows = [NSMutableArray array];
     [configuration.userContentController addScriptMessageHandler:recorder name:@"h"];
     WKWebView *webView = [[WKWebView alloc] initWithFrame:NSMakeRect(0, 0, 320, 480) configuration:configuration];
+    webView.UIDelegate = recorder;
     NSMutableString *script = [NSMutableString string];
     for (NSUInteger index = 0; index < SampleCount; index++)
         [script appendFormat:@"window.webkit.messageHandlers.h.postMessage(%@);\n", Samples[index]];
+    [script appendFormat:@"%@\n", PopupCall];
     NSString *html = [NSString stringWithFormat:@"<html><body><script>\n%@</script></body></html>", script];
     [webView loadHTMLString:html baseURL:nil];
     NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:20];
-    while (recorder.lines.count < SampleCount && [deadline timeIntervalSinceNow] > 0)
+    while ((recorder.lines.count < SampleCount || recorder.windows.count < WindowCount) && [deadline timeIntervalSinceNow] > 0)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-    return recorder.lines;
+    return [recorder.lines arrayByAddingObjectsFromArray:recorder.windows];
 }
 
 #else
@@ -142,6 +178,24 @@ static NSArray<NSString *> *BackportLines(void)
         [lines addObject:[NSString stringWithFormat:@"%@ main: 1", Dump(body)]];
     }
     return lines;
+}
+
+static NSArray<NSString *> *BackportWindowLines(void)
+{
+    JSContext *context = Shimmed();
+    [context evaluateScript:PopupCall];
+    NSURL *URL = [NSURL URLWithString:[[context evaluateScript:@"frames[frames.length - 1]"] toString]];
+    NSDictionary *message = RevenantCodecBridgeMessage(URL, Nonce);
+    BOOL valid = NO;
+    NSDictionary *request = RevenantCodecMessageBody(message[@"b"], &valid);
+    if (![message[@"w"] isEqual:@1] || !valid || ![request isKindOfClass:[NSDictionary class]])
+        return @[@"window open envelope: missing"];
+    WKWindowFeaturesRevenant *features = [WKWindowFeaturesRevenant revenant_featuresWithString:request[@"f"]];
+    return @[
+        [NSString stringWithFormat:@"window open url: %@", request[@"u"]],
+        Features(features.width, features.height, features.x, features.y, features.menuBarVisibility,
+                 features.statusBarVisibility, features.toolbarsVisibility, features.allowsResizing),
+    ];
 }
 
 static NSURL *Forged(NSString *JSON)
@@ -197,6 +251,8 @@ int main(int argc, const char *argv[])
             printf("%s\n", line.UTF8String);
 #else
         for (NSString *line in BackportLines())
+            printf("%s\n", line.UTF8String);
+        for (NSString *line in BackportWindowLines())
             printf("%s\n", line.UTF8String);
         for (NSString *line in BackportChecks())
             printf("%s\n", line.UTF8String);

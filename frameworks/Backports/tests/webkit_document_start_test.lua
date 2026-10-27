@@ -42,6 +42,8 @@ local EXPECTED = {
     "csp header hash: 1",
     "csp page script saw: set-by-start",
     "csp meta hash: 1",
+    "response denied: 1",
+    "response denied injected: 0",
     "loadHTMLString page saw: set-by-start",
     "loadData page saw: set-by-start",
     "loadFileURL page saw: set-by-start",

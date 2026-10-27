@@ -135,18 +135,29 @@ What exists, from `frameworks/Backports/src/WebKit`:
 
 Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports only what the `UIWebView` engine can give:
 
-- `WKWindowFeatures`: every getter is nil. The engine reports no window features and never asks for a new window.
-- `WKNavigationActionPolicy` and `WKNavigationResponsePolicy`: the typedefs are lowered to iOS 6
-  (`toolchain/modules/apple/lowered.lua`). `WKNavigationResponse +revenant_policyAllowing:` answers allow or cancel. The
-  engine never sends `webView:decidePolicyForNavigationResponse:decisionHandler:`, so no response decision is asked, and
-  `WKNavigationResponsePolicyDownload` is never carried out: the engine has no download path.
+- `WKWindowFeatures`: `revenant_featuresWithString:` parses the features string that the page passes to `window.open`.
+  `menubar`, `status`, `toolbar`, `resizable` are booleans (a bare key is yes); `width`, `height`, `left`/`screenX` and
+  `top`/`screenY` are numbers, and `innerWidth`/`innerHeight` set width and height. Unset values stay nil. The shim posts
+  the call through the bridge, and `WKWebView` sends `webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:`
+  with the parsed features and a copy of the configuration, then loads the request into the view that the delegate returns.
+  The page receives `null` from `window.open`, because no window object exists in this engine. The features are checked
+  against macOS WKWebView in `tests/webkit_script_message`.
+- `WKNavigationResponse`: carries the response, and `canShowMIMEType` is true for `text/*`, `image/*`,
+  `application/xhtml+xml` and `application/pdf`. `WKWebView` asks `webView:decidePolicyForNavigationResponse:decisionHandler:`
+  for each main-frame response that `RevenantDocumentProtocol` claims. The protocol holds the response and its body until
+  the answer comes: allow forwards them (with the document-start rewrite when they are HTML), and cancel or a download
+  answer fails the load with `NSURLErrorCancelled`, because the engine has no download path. A main-frame load that the
+  protocol does not claim gets no response decision: a `file:` or `data:` load, and a main-frame load the engine starts
+  itself without a link click or form post, which is loaded untagged. `WKNavigationActionPolicy` and
+  `WKNavigationResponsePolicy` are lowered to iOS 6 (`toolchain/modules/apple/lowered.lua`).
+  `WKNavigationResponse +revenant_policyAllowing:` maps allow and cancel.
 - `WKDownload` and `WKDownloadDelegate`: a download a caller holds reports nil request, web view, frame and progress, is
   not user-initiated, and cancels with no resume data, because nothing here can resume. The engine creates no download
   and sends no download callback.
 - `WKOpenPanelParameters`: both properties are NO. The engine shows no file picker and never sends `runOpenPanel`.
-- `WKUIDelegate`: declared with `createWebViewWithConfiguration:`, `runOpenPanelWithParameters:` and
-  `contextMenuConfigurationForElement:`. The engine sends none of the three: it opens no window, shows no picker, and
-  shows no context menu for a page element.
+- `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`).
+  `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
+  picker and no context menu for a page element.
 - `WKURLSchemeHandler` and `WKURLSchemeTask`: declared to match the existing route. A scheme registered on a
   `WKWebViewConfiguration` loads through `RevenantWebURLProtocol`, an `NSURLProtocol` scoped to that web view. It calls
   the handler's start and stop, and passes the task's response, data, and finish or failure to the protocol client. This
@@ -203,8 +214,18 @@ Already present, with the same limits:
   again, the shim sets a property named by the webview's token on `window` before anything else, and the late path checks it
   (`RevenantDocumentStartedScript`) before it runs a document-start script. Measured on macOS WKWebView (the same loads as
   the oracle in `tests/webkit_document_start/oracle.m`): `goBack` to a page that was loaded by `loadFileURL:` ran its start
-  script 0 more times, and its `window.early` was still set. `UIWebView`'s own page cache is not measured here, because
-  there is no iOS 6 device or simulator in this environment.
+  script 0 more times, and its `window.early` was still set.
+- Measured on an iPhone 4S (iOS 6.1.3) with a bundle launched through `revenant-sblaunch`, and a loopback server inside
+  the probe serving two pages. Plain `UIWebView` (no backport): `loadRequest:` of each page reached the protocol once per
+  request, with `mainDocumentURL` equal to the page URL and cache policy 0. `goBack` made one server request and reached
+  the protocol with cache policy 2. `goForward` and `history.go(-1)` made no server request and no protocol call, so the
+  page cache restored both pages, and each kept the `window.marker` it had on its last visit. `reload` made one server
+  request and reached the protocol with cache policy 1, the reload-ignoring-cache policy. The `WKWebView` backport
+  (WebKitBackports armv7 build) ran the document-start script before the page's own scripts for `loadHTMLString:`,
+  `loadData:` (ISO-8859-1) and `loadFileURL:`, and for `reload`, so the four shared lines match the macOS oracle. The
+  backport's `goBack` after `loadFileURL:` ended the probe with no output and no crash report, so `goBack` on the device
+  is not measured. The backport also logged once the fallback message that a document-start script the rewrite did not
+  reach runs after the page's own scripts; the probe does not say which load logged it, so that is open.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the

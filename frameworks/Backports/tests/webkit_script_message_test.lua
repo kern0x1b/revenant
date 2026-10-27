@@ -3,8 +3,10 @@ local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "WebKit")
 local MAIN = path.join(TESTS, "webkit_script_message", "main.m")
 local CODEC = path.join(SRC, "RevenantScriptCodec.m")
+local WINDOW_FEATURES = path.join(SRC, "WKWindowFeatures.m")
 
 local SAMPLE_COUNT = 17
+local WINDOW_COUNT = 2
 
 local BACKPORT_ONLY = {
     "cycle identical: 1",
@@ -62,34 +64,34 @@ function main()
     os.mkdir(work)
 
     local oracle_program = build(work, "oracle_messages", {MAIN}, {"-DWEBKIT_MESSAGE_ORACLE", "-framework", "WebKit", "-framework", "AppKit"})
-    local backport_flags = {"-I", SRC, "-framework", "JavaScriptCore"}
-    local backport_program = build(work, "backport_messages", {MAIN, CODEC}, backport_flags)
+    local backport_flags = {"-I", SRC, "-framework", "JavaScriptCore", "-framework", "WebKit", "-framework", "AppKit", "-DREVENANT_HOST_BUILD"}
+    local backport_program = build(work, "backport_messages", {MAIN, CODEC, WINDOW_FEATURES}, backport_flags)
 
     local oracle = run(oracle_program)
-    assert(#oracle == SAMPLE_COUNT, "the macOS WKWebView delivered " .. #oracle .. " of " .. SAMPLE_COUNT .. " messages")
+    assert(#oracle == SAMPLE_COUNT + WINDOW_COUNT, "the macOS WKWebView delivered " .. #oracle .. " of " .. (SAMPLE_COUNT + WINDOW_COUNT) .. " lines")
 
     local backport = run(backport_program)
-    assert(#backport == SAMPLE_COUNT + #BACKPORT_ONLY, "the backport printed " .. #backport .. " lines, expected "
-        .. (SAMPLE_COUNT + #BACKPORT_ONLY))
+    assert(#backport == SAMPLE_COUNT + WINDOW_COUNT + #BACKPORT_ONLY, "the backport printed " .. #backport .. " lines, expected "
+        .. (SAMPLE_COUNT + WINDOW_COUNT + #BACKPORT_ONLY))
     local shared = {}
-    for index = 1, SAMPLE_COUNT do
+    for index = 1, SAMPLE_COUNT + WINDOW_COUNT do
         table.insert(shared, backport[index])
     end
     local differing = compare(oracle, shared)
-    assert(#differing == 0, "the backport's message bodies disagree with macOS WKWebView:\n  " .. table.concat(differing, "\n  "))
+    assert(#differing == 0, "the backport disagrees with macOS WKWebView:\n  " .. table.concat(differing, "\n  "))
 
     local checks = {}
-    for index = SAMPLE_COUNT + 1, #backport do
+    for index = SAMPLE_COUNT + WINDOW_COUNT + 1, #backport do
         table.insert(checks, backport[index])
     end
     local check_differing = compare(BACKPORT_ONLY, checks)
     assert(#check_differing == 0, "a backport-only check failed:\n  " .. table.concat(check_differing, "\n  "))
 
-    local control_program = build(work, "control_messages", {MAIN, CODEC}, table.join(backport_flags, {"-DWEBKIT_MESSAGE_NEGATIVE_CONTROL"}))
+    local control_program = build(work, "control_messages", {MAIN, CODEC, WINDOW_FEATURES}, table.join(backport_flags, {"-DWEBKIT_MESSAGE_NEGATIVE_CONTROL"}))
     local detected = compare(oracle, run(control_program))
     assert(#detected > 0, "the negative control passed: a damaged bridge URL decoded to the macOS bodies, so the comparison proves nothing")
 
     os.tryrm(work)
-    print(string.format("WEBKIT_SCRIPT_MESSAGE_TEST passed (%d page messages agree with macOS WKWebView, %d backport-only checks, negative control detected %d)",
-        SAMPLE_COUNT, #BACKPORT_ONLY, #detected))
+    print(string.format("WEBKIT_SCRIPT_MESSAGE_TEST passed (%d page messages and %d window.open lines agree with macOS WKWebView, %d backport-only checks, negative control detected %d)",
+        SAMPLE_COUNT, WINDOW_COUNT, #BACKPORT_ONLY, #detected))
 end

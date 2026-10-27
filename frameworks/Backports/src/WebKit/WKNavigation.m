@@ -96,7 +96,16 @@
 
 @end
 
-@implementation WKNavigationResponse
+@implementation WKNavigationResponse {
+    NSURLResponse *_response;
+}
+
++ (instancetype)revenant_responseWithResponse:(NSURLResponse *)response
+{
+    WKNavigationResponse *navigationResponse = [self alloc];
+    navigationResponse->_response = [response copy];
+    return navigationResponse;
+}
 
 + (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed
 {
@@ -110,12 +119,21 @@
 
 - (NSURLResponse *)response
 {
-    return nil;
+    return _response;
 }
 
 - (BOOL)canShowMIMEType
 {
-    return YES;
+    NSString *mime = _response.MIMEType.lowercaseString;
+    if (!mime.length)
+        return NO;
+    return [mime hasPrefix:@"text/"] || [mime hasPrefix:@"image/"] || [mime isEqualToString:@"application/xhtml+xml"]
+        || [mime isEqualToString:@"application/pdf"];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    return self;
 }
 
 @end

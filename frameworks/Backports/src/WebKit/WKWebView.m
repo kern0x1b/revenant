@@ -517,6 +517,25 @@ static NSURL *withoutFragment(NSURL *url)
     _documentInjected = YES;
 }
 
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL))completion
+{
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if (![delegate respondsToSelector:@selector(webView:decidePolicyForNavigationResponse:decisionHandler:)]) {
+        completion(YES);
+        return;
+    }
+    WKNavigationResponse *navigationResponse = [WKNavigationResponse revenant_responseWithResponse:response];
+    void (^decide)(void) = ^{
+        [delegate webView:self decidePolicyForNavigationResponse:navigationResponse decisionHandler:^(WKNavigationResponsePolicy policy) {
+            completion(policy == WKNavigationResponsePolicyAllow);
+        }];
+    };
+    if ([NSThread isMainThread])
+        decide();
+    else
+        dispatch_async(dispatch_get_main_queue(), decide);
+}
+
 - (void)revenant_installScripts:(BOOL)userScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
@@ -548,9 +567,37 @@ static NSURL *withoutFragment(NSURL *url)
     return main == nil || [withoutFragment(main) isEqual:withoutFragment(request.URL)];
 }
 
+- (void)revenant_openWindowFromMessage:(NSDictionary *)message
+{
+    BOOL valid = NO;
+    NSDictionary *request = RevenantCodecMessageBody(message[@"b"], &valid);
+    if (!valid || ![request isKindOfClass:[NSDictionary class]])
+        return;
+    NSString *target = request[@"u"];
+    NSString *name = request[@"t"];
+    NSString *features = request[@"f"];
+    if (![target isKindOfClass:[NSString class]] || ![name isKindOfClass:[NSString class]] || ![features isKindOfClass:[NSString class]])
+        return;
+    NSURL *URL = [NSURL URLWithString:target];
+    if (!URL)
+        return;
+    id<WKUIDelegate> UIDelegate = self.UIDelegate;
+    if (![UIDelegate respondsToSelector:@selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:)])
+        return;
+    NSURLRequest *window = [NSURLRequest requestWithURL:URL];
+    WKNavigationAction *action = [WKNavigationAction revenant_actionWithRequest:window type:WKNavigationTypeOther mainFrame:YES];
+    WKWindowFeatures *windowFeatures = [WKWindowFeatures revenant_featuresWithString:features];
+    WKWebView *created = [UIDelegate webView:self createWebViewWithConfiguration:[_configuration copy] forNavigationAction:action windowFeatures:windowFeatures];
+    [created loadRequest:window];
+}
+
 - (void)revenant_receiveBridgeURL:(NSURL *)URL
 {
     NSDictionary *message = RevenantCodecBridgeMessage(URL, _token);
+    if ([message[@"w"] isEqual:@1]) {
+        [self revenant_openWindowFromMessage:message];
+        return;
+    }
     NSString *name = message[@"n"];
     if (![name isKindOfClass:[NSString class]])
         return;

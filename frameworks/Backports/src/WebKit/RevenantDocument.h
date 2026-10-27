@@ -3,6 +3,7 @@
 @protocol RevenantDocumentSource <NSObject>
 - (NSArray<NSString *> *)revenant_documentStartScripts;
 - (void)revenant_documentDidInject;
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL allowed))completion;
 @end
 
 NSString *RevenantDocumentRegister(id<RevenantDocumentSource> source);

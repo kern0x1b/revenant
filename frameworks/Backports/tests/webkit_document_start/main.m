@@ -68,7 +68,7 @@ static NSData *Reply(NSString *method, NSString *path, NSString *head, NSData *r
         NSString *html = [NSString stringWithFormat:@"<!DOCTYPE html><html><head></head><body><script>var seen = window.early + '|%@|%@|%@';</script></body></html>", method, probe, body];
         return Message(@"200 OK", @"Content-Type: text/html; charset=utf-8\r\n", UTF8(html));
     }
-    if ([path isEqualToString:@"/start"])
+    if ([path isEqualToString:@"/start"] || [path isEqualToString:@"/deny"])
         return Message(@"200 OK", @"Content-Type: text/html; charset=utf-8\r\n", UTF8(StartPage));
     if ([path isEqualToString:@"/redirect/1"])
         return Message(@"302 Found", @"Location: /redirect/2\r\n", [NSData data]);
@@ -185,11 +185,17 @@ static int StartServer(void)
     self.injections++;
 }
 
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL))completion
+{
+    completion(![response.URL.path isEqualToString:@"/deny"]);
+}
+
 @end
 
 @interface Loader : NSObject <NSURLConnectionDataDelegate>
 @property (nonatomic, strong) NSHTTPURLResponse *response;
 @property (nonatomic, strong) NSMutableData *data;
+@property (nonatomic, strong) NSError *error;
 @property (nonatomic) BOOL finished;
 @end
 
@@ -213,6 +219,7 @@ static int StartServer(void)
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
+    self.error = error;
     self.finished = YES;
 }
 
@@ -396,6 +403,11 @@ int main(int argc, const char *argv[])
         Loader *cspMeta = Fetch([base stringByAppendingString:@"/csp-meta"], token);
         NSString *metaBody = [[NSString alloc] initWithData:cspMeta.data encoding:NSUTF8StringEncoding] ?: @"";
         [lines addObject:Flag(@"csp meta hash", [metaBody containsString:[NSString stringWithFormat:@"'sha256-%@'", earlyHash]])];
+
+        source.injected = NO;
+        Loader *denied = Fetch([base stringByAppendingString:@"/deny"], token);
+        [lines addObject:Flag(@"response denied", denied.error.code == NSURLErrorCancelled && denied.response == nil && denied.data == nil)];
+        [lines addObject:Flag(@"response denied injected", source.injected)];
 
         NSString *htmlString = RevenantDocumentInsert(Page, @[Early]);
         [lines addObject:[NSString stringWithFormat:@"loadHTMLString page saw: %@", PageScriptSawEncoded(UTF8(htmlString), NSUTF8StringEncoding)]];

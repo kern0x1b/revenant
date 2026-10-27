@@ -94,6 +94,9 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     NSHTTPURLResponse *_response;
     NSMutableData *_body;
     BOOL _buffering;
+    BOOL _deciding;
+    BOOL _finished;
+    BOOL _stopped;
     NSURLAuthenticationChallenge *_challenge;
 }
 
@@ -125,6 +128,7 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
 
 - (void)stopLoading
 {
+    _stopped = YES;
     [_connection cancel];
     _connection = nil;
 }
@@ -179,14 +183,43 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
 {
     _response = (NSHTTPURLResponse *)response;
     _body = [NSMutableData data];
-    _buffering = _source && _response.statusCode == 200 && [_response.MIMEType.lowercaseString isEqualToString:@"text/html"];
-    if (!_buffering)
+    if (!_source) {
         [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageAllowed];
+        return;
+    }
+    _deciding = YES;
+    [_source revenant_decideResponse:response completion:^(BOOL allowed) {
+        [self decided:allowed];
+    }];
+}
+
+- (void)decided:(BOOL)allowed
+{
+    if (_stopped || !_deciding)
+        return;
+    _deciding = NO;
+    if (!allowed) {
+        [_connection cancel];
+        _connection = nil;
+        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSURLErrorFailingURLErrorKey: _response.URL ?: self.request.URL}]];
+        return;
+    }
+    _buffering = _response.statusCode == 200 && [_response.MIMEType.lowercaseString isEqualToString:@"text/html"];
+    if (_buffering) {
+        if (_finished)
+            [self completeDocument];
+        return;
+    }
+    [self.client URLProtocol:self didReceiveResponse:_response cacheStoragePolicy:NSURLCacheStorageAllowed];
+    [self.client URLProtocol:self didLoadData:_body];
+    _body = [NSMutableData data];
+    if (_finished)
+        [self.client URLProtocolDidFinishLoading:self];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
-    if (_buffering)
+    if (_deciding || _buffering)
         [_body appendData:data];
     else
         [self.client URLProtocol:self didLoadData:data];
@@ -194,8 +227,19 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    if (_buffering)
-        [self finishDocument];
+    _finished = YES;
+    if (_deciding)
+        return;
+    if (_buffering) {
+        [self completeDocument];
+        return;
+    }
+    [self.client URLProtocolDidFinishLoading:self];
+}
+
+- (void)completeDocument
+{
+    [self finishDocument];
     [self.client URLProtocolDidFinishLoading:self];
 }
 
