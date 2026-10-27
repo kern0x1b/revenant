@@ -343,6 +343,16 @@ package("swift-runtime")
                 io.writefile(shim_modules, io.readfile(shim_modules) ..
                              "\nmodule _SwiftUIKitOverlayShims {\n  header \"UIKitOverlayShims.h\"\n}\n")
             end
+            local revenant_overlay = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay")
+            local revenant_shims = {{"_SwiftRevenantOSOverlayShims", "os", "RevenantOSOverlayShims.h"},
+                                    {"_SwiftRevenantUIKitOverlayShims", "UIKit", "RevenantUIKitOverlayShims.h"}}
+            for _, entry in ipairs(revenant_shims) do
+                os.vcp(path.join(revenant_overlay, entry[2], entry[3]), installed_shims .. "/")
+                if not io.readfile(shim_modules):find(entry[1], 1, true) then
+                    io.writefile(shim_modules, io.readfile(shim_modules) ..
+                                 string.format("\nmodule %s {\n  header \"%s\"\n}\n", entry[1], entry[3]))
+                end
+            end
             local function overlay_sources_of(name, files)
                 local found = {}
                 for _, file in ipairs(files) do
@@ -366,6 +376,9 @@ package("swift-runtime")
             build_overlay("CoreGraphics", table.join({graphics}, overlay_sources_of("CoreGraphics", {"CoreGraphics.swift", "Geometry.swift"})),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftCoreFoundation",
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"})
+            build_overlay("os", {path.join(revenant_overlay, "os", "os.swift")},
+                          {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send",
+                           "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_type_enabled"})
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
             local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
@@ -417,9 +430,13 @@ package("swift-runtime")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
                      "-o", initializers}, objc_linker))
+            local uikit_cache = path.join(generated, "module-cache-lowered-uikit")
+            os.mkdir(uikit_cache)
             build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
-                                    generated_from("UIKit", "UIKit_FoundationExtensions.swift")},
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers})
+                                    generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
+                                    path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift")},
+                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
+                          {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
 
             local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
             local conformances = path.join(generated, "CoreData.mm.o")

@@ -4,7 +4,56 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 
+local TRAIT_REGISTRATION = {
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withHandler:(UITraitChangeHandler)handler", "registerForTraitChanges(_:handler:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withTarget:(id)target action:(SEL)action", "registerForTraitChanges(_:target:action:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withAction:(SEL)action", "registerForTraitChanges(_:action:)"},
+    {"- (void)unregisterForTraitChanges:(id<UITraitChangeRegistration>)registration", "unregisterForTraitChanges(_:)"},
+}
+
+local function trait_declaration(entry)
+    return entry[1] .. " NS_SWIFT_NAME(" .. entry[2] .. ");"
+end
+
+local function trait_registration(owner, interface)
+    local declarations = {}
+    for _, entry in ipairs(TRAIT_REGISTRATION) do
+        table.insert(declarations, trait_declaration(entry))
+    end
+    return {
+        member = owner,
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = owner .. ".h",
+            find = interface,
+            replace = interface .. "\n" .. table.concat(declarations, "\n"),
+        },
+    }
+end
+
+local function trait_protocol_name(entry)
+    return {
+        member = "UITraitChangeObservable",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITraitCollection.h",
+            find = entry[1] .. ";",
+            replace = trait_declaration(entry),
+        },
+    }
+end
+
 local MEMBERS = {
+    trait_registration("UIView", "@interface UIView () <UITraitChangeObservable>"),
+    trait_registration("UIViewController", "@interface UIViewController () <UITraitChangeObservable>"),
+    trait_registration("UIWindowScene", "@interface UIWindowScene () <UITraitEnvironment, UITraitChangeObservable>"),
+    trait_registration("UIPresentationController", "@interface UIPresentationController () <UITraitChangeObservable>"),
+    trait_protocol_name(TRAIT_REGISTRATION[1]),
+    trait_protocol_name(TRAIT_REGISTRATION[2]),
+    trait_protocol_name(TRAIT_REGISTRATION[3]),
+    trait_protocol_name(TRAIT_REGISTRATION[4]),
     {
         member = "UIPointerStyle",
         header = {
@@ -13,6 +62,16 @@ local MEMBERS = {
             file = "UIPointerStyle.h",
             find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
             replace = "+ (instancetype)systemPointerStyle;",
+        },
+    },
+    {
+        member = "UIEditMenuConfiguration",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIEditMenuInteraction.h",
+            find = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint;",
+            replace = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint NS_SWIFT_NAME(init(identifier:sourcePoint:));",
         },
     },
     {
@@ -147,6 +206,23 @@ local MEMBERS = {
         },
     },
     {
+        member = "os_unfair_lock",
+        header = {
+            name = "os",
+            directory = {"usr", "include", "os"},
+            file = "lock.h",
+            find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            replace = table.concat({
+                "#if defined(__OBJC__) || defined(__cplusplus)",
+                "#define REVENANT_OS_OPTIONS OS_OPTIONS",
+                "#else",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
+                "#endif",
+                "REVENANT_OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            }, "\n"),
+        },
+    },
+    {
         member = "CAFrameRateRange",
         header = {
             name = "QuartzCore",
@@ -219,6 +295,36 @@ local MEMBERS = {
             file = {"stdlib", "public", "Darwin", "Foundation", "JSONEncoder.swift"},
             find = "        @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)\n        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
             replace = "        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
+        },
+    },
+    {
+        member = "kSecAccessControlPrivateKeyUsage",
+        header = {
+            name = "Security",
+            directory = {"System", "Library", "Frameworks", "Security.framework", "Headers"},
+            file = "SecAccessControl.h",
+            find = "kSecAccessControlPrivateKeyUsage        API_AVAILABLE(macos(10.12.1), ios(9.0)) = 1u << 30,",
+            replace = "kSecAccessControlPrivateKeyUsage        = 1u << 30,",
+        },
+    },
+    {
+        member = "WKNavigationActionPolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+        },
+    },
+    {
+        member = "WKNavigationResponsePolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
         },
     },
 }
@@ -783,6 +889,16 @@ local function enumerators_in(text, body)
     return found
 end
 
+local function adopts_lowered_protocol(text, stop, implemented)
+    local line = text:sub(stop + 1, text:find("\n", stop, true) or #text)
+    for word in line:gmatch("[%a_][%w_]*") do
+        for _ in pairs((implemented.protocol_members or {})[word] or {}) do
+            return true
+        end
+    end
+    return false
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -810,7 +926,8 @@ local function lowering_of(text, implemented, declarations)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
+            local category = text:match("^%s*%(", stop + 1) ~= nil
+            if first and (not category or adopts_lowered_protocol(text, stop, implemented)) and not (implemented.weak_classes and implemented.weak_classes[class]) then
                 lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
@@ -1789,7 +1906,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
@@ -1806,6 +1923,41 @@ local function lowered_apinotes(text, set)
             line = line:gsub("__(%w+):", "%1:")
         end
         table.insert(lines, line)
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function trait_name(name)
+    return name:lower():find("trait", 1, true) ~= nil
+end
+
+local function lowered_trait_apinotes(text, set)
+    local classes, protocols, types = set.classes or {}, set.protocols or {}, set.types or {}
+    local protocol_members = set.protocol_members or {}
+    local function backed(owner, key)
+        for _, sign in ipairs({"-", "+"}) do
+            if (classes[owner] or {})[sign .. key] or (protocol_members[owner] or {})[sign .. key] then
+                return true
+            end
+        end
+        return false
+    end
+    local owner, entry, member = nil, false, false
+    local lines = {}
+    for line in text:gmatch("[^\n]+") do
+        local name = line:match("^%- Name: (%S+)")
+        local sub = line:match("^  %- %a+: ['\"]?([^'\"]+)['\"]?$")
+        if name then
+            owner = name
+            entry = trait_name(name) and (classes[name] ~= nil or protocols[name] ~= nil or types[name] == true)
+            member = false
+        elseif sub then
+            member = trait_name(sub) and owner ~= nil and backed(owner, sub)
+        end
+        local private = (entry and line == "  SwiftPrivate: true") or (member and line == "    SwiftPrivate: true")
+        if not private then
+            table.insert(lines, line)
+        end
     end
     return table.concat(lines, "\n") .. "\n"
 end
@@ -1867,6 +2019,10 @@ function build_overlay(sdk, out, set, subtrees)
     local notes = path.join(sdk, "usr", "include", "os.apinotes")
     if os.isfile(notes) then
         changed[notes] = lowered_apinotes(io.readfile(notes), set)
+    end
+    local uikit_notes = path.join(sdk, "System", "Library", "Frameworks", "UIKit.framework", "Headers", "UIKit.apinotes")
+    if os.isfile(uikit_notes) then
+        changed[uikit_notes] = lowered_trait_apinotes(io.readfile(uikit_notes), set)
     end
     local roots = {}
     local file_roots = {}
