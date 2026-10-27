@@ -178,12 +178,10 @@ func showLive(_ scenario: SnapshotCase) {
 }
 
 func runDeviceGesture(_ name: String) {
-    switch name {
-    case "swipe-real":
+    if name == "swipe-real" {
         probe("gesture: waiting for the swipe")
-    default: break
     }
-    gesture_run { probe("gesture: done") }
+    probe("gesture: done")
 }
 
 @main
