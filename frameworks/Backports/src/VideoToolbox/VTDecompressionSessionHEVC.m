@@ -114,10 +114,12 @@ static BOOL RevenantVTIsSupportedProperty(CFStringRef key)
 
 @implementation RevenantVTPendingFrame
 
+@synthesize presentationTimeStamp, presentationDuration, sourceFrameRefCon, suppressed, resolved, status, buffer, output;
+
 - (void)dealloc
 {
-    if (_buffer)
-        CVPixelBufferRelease(_buffer);
+    if (self.buffer)
+        CVPixelBufferRelease(self.buffer);
 }
 
 @end

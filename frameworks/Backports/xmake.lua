@@ -97,7 +97,7 @@ local LIBRARIES = {
     {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "SpriteKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
-    {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
+    {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {"ffmpeg-hevc"}, system = {}},
     {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -118,6 +118,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
     add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
     add_requires("revenant@libcxx", {alias = "libcxx"})
+    add_requires("revenant@ffmpeg-hevc", {alias = "ffmpeg-hevc"})
 
     local generator
 
