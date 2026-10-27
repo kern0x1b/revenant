@@ -22,6 +22,11 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
     BOOL _beamHorizontal;
 }
 
++ (CGFloat)revenantDefaultCornerRadius
+{
+    return RevenantShapeDefaultRadius;
+}
+
 + (instancetype)shapeWithPath:(UIBezierPath *)path
 {
     UIPointerShape *shape = [[self alloc] initRevenant];

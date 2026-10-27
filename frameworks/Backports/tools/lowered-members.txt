@@ -32100,6 +32100,7 @@ member UIPointerRegionRequest -initRevenantWithLocation:modifiers:
 member UIPointerRegionRequest -location
 member UIPointerRegionRequest -modifiers
 member UIPointerShape +beamWithPreferredLength:axis:
+member UIPointerShape +revenantDefaultCornerRadius
 member UIPointerShape +shapeWithPath:
 member UIPointerShape +shapeWithRoundedRect:
 member UIPointerShape +shapeWithRoundedRect:cornerRadius:
