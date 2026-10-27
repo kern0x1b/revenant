@@ -21,7 +21,8 @@ local SLIDE_POINTS = {
     iPad = {knob = {287, 64}, finish = 553},
     iPhone = {knob = {52.5, 48.5}, finish = 240},
 }
-local EXTERNAL_TOUCHES = {["swipe-real"] = {"drag 0.974 0.041 0.70 0.041", "tap 0.941 0.041"}}
+local ROW_CENTRE_POINTS = 42
+local EXTERNAL_TOUCHES = {["swipe-real"] = {"drag 0.974 ROW 0.70 ROW", "tap 0.941 ROW"}}
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -214,8 +215,13 @@ local function shots(arguments)
             if #touches > 0 then
                 wait_for(device, settings, "gesture: waiting", 60, 1000)
                 os.sleep(1000)
+                local _, height = (on_device(device, settings, UNLOCK .. " screen") or ""):match("(%d+)%s+(%d+)")
+                if not height then
+                    raise("revenant-unlock screen did not report the screen size")
+                end
+                local row = string.format("%.4f", ROW_CENTRE_POINTS / tonumber(height))
                 for _, touch in ipairs(touches) do
-                    device.run(settings, UNLOCK .. " " .. touch)
+                    device.run(settings, UNLOCK .. " " .. (touch:gsub("ROW", row)))
                 end
                 wait_for(device, settings, "swipe: archive", 60, 1000)
             end
