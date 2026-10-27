@@ -1,13 +1,16 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 local outcome = import("lib.outcome", {rootdir = os.scriptdir(), anonymous = true})
+local picture = import("lib.picture", {rootdir = os.scriptdir(), anonymous = true})
 
 local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/device.lua ACTION ..., from a folder whose device.env names the claimed phone
   copy LOCAL REMOTE                 a file to the phone
   fetch REMOTE LOCAL                a file from the phone
-  shots [--live | --gesture] SCENARIO...
+  shots [--live [--accept] [--calibrate=N] | --gesture] SCENARIO...
                                     install the built demo, have it render each scenario (or show it on the screen, or
-                                    run its touches) and fetch the pictures
+                                    run its touches) and fetch the pictures; --live judges each picture against the
+                                    reference in tests/data/device/MODEL, --accept writes the picture as that reference,
+                                    --calibrate=N captures each scenario N times and writes the tolerance
   crash [REPORT]                    symbolicate REPORT, or the demo's latest crash report fetched from the phone]]
 
 local BUNDLE = "space.kern0x1b.swiftui.demo"
@@ -15,6 +18,7 @@ local LOG = "/var/tmp/swiftui-demo.log"
 local LAUNCH_OUT = "/var/tmp/swiftui-demo.out"
 local LAUNCH_ERR = "/var/tmp/swiftui-demo.err"
 local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
+local EMULATOR_CONDITIONS = "--arg -AppleLanguages --arg '(en)' --arg -AppleLocale --arg en_US --env TZ=America/Los_Angeles"
 local SHOT = "/usr/libexec/revenant-shot"
 local UNLOCK = "/usr/libexec/revenant-unlock"
 local SLIDE_POINTS = {
@@ -66,6 +70,14 @@ local function shot(device, settings, file)
     if not device.fetch(settings, "/tmp/screenshot.png", file) then
         raise("the screenshot could not be fetched to %s", file)
     end
+end
+
+local function screen_height(device, settings)
+    local _, height = (on_device(device, settings, UNLOCK .. " screen") or ""):match("(%d+)%s+(%d+)")
+    if not height then
+        raise("revenant-unlock screen did not report the screen size")
+    end
+    return tonumber(height)
 end
 
 local function provision(device, settings, file, remote)
@@ -190,23 +202,44 @@ local function start(device, settings, setup)
     on_device(device, settings, "killall SwiftUIDemo")
     device.run(settings, "sleep 1; rm -rf /var/revenant/show /var/revenant/gesture /var/revenant/snapshots.on /var/revenant/snapshots.png "
                .. "/var/revenant/snapshots.only /var/revenant/swiftui-snapshots " .. LOG .. " " .. LAUNCH_OUT .. " " .. LAUNCH_ERR .. "; " .. setup
-               .. "; " .. SBLAUNCH .. " --stdout " .. LAUNCH_OUT .. " --stderr " .. LAUNCH_ERR .. " " .. BUNDLE)
+               .. "; " .. SBLAUNCH .. " --stdout " .. LAUNCH_OUT .. " --stderr " .. LAUNCH_ERR .. " " .. EMULATOR_CONDITIONS .. " " .. BUNDLE)
     await_launch(device, settings)
 end
 
 local function shots(arguments)
-    local mode = "render"
-    if arguments[1] == "--live" or arguments[1] == "--gesture" then
-        mode = table.remove(arguments, 1):sub(3)
+    local mode, accept, calibrate = "render", false, 0
+    while arguments[1] and arguments[1]:sub(1, 2) == "--" do
+        local option = table.remove(arguments, 1)
+        if option == "--live" or option == "--gesture" then
+            mode = option:sub(3)
+        elseif option == "--accept" then
+            accept = true
+        elseif option:match("^%-%-calibrate=%d+$") then
+            calibrate = tonumber(option:match("=(%d+)"))
+        else
+            raise(USAGE)
+        end
     end
-    if #arguments == 0 then
+    local live_only = accept or calibrate > 0
+    if #arguments == 0 or (live_only and mode ~= "live") or calibrate == 1 then
         raise(USAGE)
     end
     local device, settings = phone()
-    local out = tree.run("device-shots")
     platform(device, settings)
     install(device, settings)
-    local failed = {}
+    local model = (on_device(device, settings, "sysctl -n hw.machine") or ""):match("%S+")
+        or raise("the phone named no model, so its pictures and trees cannot be told apart")
+    local out = tree.run("device-shots", model)
+    local height, reference_dir, tolerances
+    if mode == "live" then
+        height = screen_height(device, settings)
+        reference_dir = path.join(tree.workspace().home(), "device-baselines", model)
+        tolerances = picture.read_tolerances(path.join(reference_dir, "tolerance.txt"))
+        if accept or calibrate > 0 then
+            picture.write_screen(path.join(reference_dir, "screen.txt"), height)
+        end
+    end
+    local calibrated, failed, sheet_entries = {}, {}, {}
     for _, scenario in ipairs(arguments) do
         if mode == "gesture" then
             start(device, settings, "printf %s " .. scenario .. " > /var/revenant/show; printf %s " .. scenario
@@ -215,11 +248,7 @@ local function shots(arguments)
             if #touches > 0 then
                 wait_for(device, settings, "gesture: waiting", 60, 1000)
                 os.sleep(1000)
-                local _, height = (on_device(device, settings, UNLOCK .. " screen") or ""):match("(%d+)%s+(%d+)")
-                if not height then
-                    raise("revenant-unlock screen did not report the screen size")
-                end
-                local row = string.format("%.4f", ROW_CENTRE_POINTS / tonumber(height))
+                local row = string.format("%.4f", ROW_CENTRE_POINTS / screen_height(device, settings))
                 for _, touch in ipairs(touches) do
                     device.run(settings, UNLOCK .. " " .. (touch:gsub("ROW", row)))
                 end
@@ -239,18 +268,51 @@ local function shots(arguments)
                 table.insert(failed, scenario .. " (gesture)")
             end
         elseif mode == "live" then
-            start(device, settings, "printf %s " .. scenario .. " > /var/revenant/show; chmod 666 /var/revenant/show")
-            local ready = wait_for(device, settings, "live: " .. scenario .. " ready", 60, 1000)
-            os.sleep(8000)
-            local passed, why = outcome.live_outcome(ready)
-            local file = path.join(out, "live-" .. scenario .. (passed and ".png" or "-failed.png"))
-            shot(device, settings, file)
-            on_device(device, settings, "rm -f /var/revenant/show")
-            if passed then
-                print("%s (live screen): %s", scenario, file)
-            else
-                print("%s (live screen): FAILED, %s: %s", scenario, why, file)
-                table.insert(failed, scenario)
+            local captures = {}
+            for index = 1, math.max(calibrate, 1) do
+                start(device, settings, "printf %s " .. scenario .. " > /var/revenant/show; chmod 666 /var/revenant/show")
+                local ready = wait_for(device, settings, "live: " .. scenario .. " ready", 60, 1000)
+                os.sleep(8000)
+                local passed, why = outcome.live_outcome(ready)
+                local file = path.join(out, "live-" .. scenario .. (calibrate > 0 and ("-" .. index) or "")
+                                    .. (passed and "" or "-failed") .. ".png")
+                shot(device, settings, file)
+                on_device(device, settings, "rm -f /var/revenant/show")
+                if not passed then
+                    print("%s (live screen): FAILED, %s: %s", scenario, why, file)
+                    table.insert(failed, scenario)
+                    break
+                end
+                table.insert(captures, file)
+            end
+            local reference = path.join(reference_dir, scenario .. ".png")
+            if #captures == math.max(calibrate, 1) then
+                if accept then
+                    os.mkdir(reference_dir)
+                    os.cp(captures[1], reference)
+                    table.insert(sheet_entries, scenario .. "=" .. reference)
+                    print("%s (accepted as the baseline): %s", scenario, reference)
+                end
+                if calibrate > 0 then
+                    local spread, tolerance = picture.spread(captures, height)
+                    calibrated[scenario] = tolerance
+                    print("%s (calibrate): spread %.4f over %d captures, tolerance %.4f", scenario, spread, #captures, tolerance)
+                end
+                if not accept and calibrate == 0 then
+                    if not os.isfile(reference) then
+                        print("%s (live screen): FAILED, there is no reference for %s: review %s and run with --accept", scenario, model, captures[1])
+                        table.insert(failed, scenario)
+                    elseif not tolerances[scenario] then
+                        print("%s (live screen): FAILED, there is no tolerance for it: run with --calibrate=N", scenario)
+                        table.insert(failed, scenario)
+                    else
+                        local passed, _, detail = picture.judge(reference, captures[1], height, tolerances[scenario])
+                        print("%s (live screen): %s, %s: %s", scenario, passed and "PASS" or "FAILED", detail, captures[1])
+                        if not passed then
+                            table.insert(failed, scenario)
+                        end
+                    end
+                end
             end
         else
             start(device, settings, "touch /var/revenant/snapshots.on /var/revenant/snapshots.png; printf %s " .. scenario
@@ -264,9 +326,36 @@ local function shots(arguments)
                         raise("%s.%s was not written on the phone", scenario, extension)
                     end
                 end
-                print("%s: %s", scenario, path.join(out, scenario .. ".png"))
+                local changed, diff = picture.tree_difference(tree.root("tests", "data", "snapshots", scenario .. ".txt"),
+                                                              path.join(out, scenario .. ".txt"))
+                if changed == 0 then
+                    print("%s (tree): PASS, identical to tests/data/snapshots", scenario)
+                else
+                    print("%s (tree): FAILED, %d line(s) differ from tests/data/snapshots:", scenario, changed)
+                    local shown = 0
+                    for line in diff:gmatch("[^\n]+") do
+                        shown = shown + 1
+                        if shown > 16 then
+                            break
+                        end
+                        io.write(line, "\n")
+                    end
+                    table.insert(failed, scenario .. " (tree)")
+                end
             end
         end
+    end
+    if not table.empty(sheet_entries) then
+        local contact = path.join(reference_dir, "contact-sheet.png")
+        picture.sheet(contact, 8, sheet_entries)
+        print("contact sheet of the %d accepted pictures, for review before they are kept: %s", #sheet_entries, contact)
+    end
+    if not table.empty(calibrated) then
+        for name, tolerance in pairs(calibrated) do
+            tolerances[name] = tolerance
+        end
+        picture.write_tolerances(path.join(reference_dir, "tolerance.txt"), tolerances)
+        print("tolerances written to %s", path.join(reference_dir, "tolerance.txt"))
     end
     if #failed > 0 then
         raise("%d scenario(s) failed on the phone, their pictures are the *-failed*.png files: %s", #failed, table.concat(failed, ", "))

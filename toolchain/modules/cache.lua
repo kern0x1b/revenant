@@ -243,6 +243,10 @@ function entries(base)
             end
         elseif name == "modcache" then
             modcache_entries(base, found)
+        elseif name == "device-baselines" then
+            for _, device in ipairs(children(folder)) do
+                table.insert(found, entry(base, device, "kept"))
+            end
         elseif name == "xmake" then
             xmake_binaries(base, found)
         elseif name == "xmake-global" then
