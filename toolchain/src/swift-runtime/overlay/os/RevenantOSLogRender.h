@@ -8,8 +8,10 @@
  * here and never passed to printf: each specifier is formatted alone with its own flags, width and precision.
  *
  * Two argument sources are rendered: a va_list, with at most `count` arguments read from it, and the packed buffer the
- * compiler's os_log builtin emits. The buffer source decodes its privacy bits only for mismatch diagnostics, so its
- * private values are printed as before.
+ * compiler's os_log builtin emits. The buffer layout is the one the os_log ABI defines (swiftlang/swift
+ * stdlib/private/OSLog/OSLogMessage.swift): a summary byte, an argument count byte, then per argument a header byte
+ * (type in the high four bits, privacy flag in the low four, see OSLogPrivacy.swift), a size byte and the bytes.
+ * Both sources decide privacy with revenant_os_log_is_private.
  */
 
 #include <errno.h>
@@ -46,10 +48,12 @@ typedef struct {
     size_t capacity;
 } revenant_os_log_text;
 
+/* The privacy flag of an argument: the low four bits of its header byte, as the os_log ABI encodes it (swiftlang/swift
+   stdlib/private/OSLog/OSLogPrivacy.swift, argumentFlag: private 0x1, public 0x2, auto 0). */
 enum {
-    REVENANT_OS_LOG_PRIVACY_DEFAULT,
-    REVENANT_OS_LOG_PRIVACY_PUBLIC,
-    REVENANT_OS_LOG_PRIVACY_PRIVATE,
+    REVENANT_OS_LOG_PRIVACY_DEFAULT = 0,
+    REVENANT_OS_LOG_PRIVACY_PUBLIC = 0x2,
+    REVENANT_OS_LOG_PRIVACY_PRIVATE = 0x1,
 };
 
 typedef struct {
@@ -83,7 +87,23 @@ static inline const revenant_os_log_spec *revenant_os_log_plain_spec(void) {
     return &plain;
 }
 
+/* Width and precision are capped, and so is the whole message: a format from an app or a huge argument cannot make the
+   padding or the buffer grow without bound. */
+#define REVENANT_OS_LOG_MAX_LIMIT 128
+#define REVENANT_OS_LOG_MAX_MESSAGE 8192
+
+static inline int revenant_os_log_limit(int value) {
+    return value > REVENANT_OS_LOG_MAX_LIMIT ? REVENANT_OS_LOG_MAX_LIMIT : value;
+}
+
+static inline int revenant_os_log_digit(int value, char digit) {
+    return revenant_os_log_limit(value * 10 + (digit - '0'));
+}
+
 static inline void revenant_os_log_text_append(revenant_os_log_text *text, const char *bytes, size_t length) {
+    if (length > REVENANT_OS_LOG_MAX_MESSAGE - text->length) {
+        length = REVENANT_OS_LOG_MAX_MESSAGE - text->length;
+    }
     if (text->length + length + 1 > text->capacity) {
         size_t capacity = (text->length + length + 1) * 2;
         char *grown = realloc(text->bytes, capacity);
@@ -301,23 +321,35 @@ static inline void revenant_os_log_skip_hash_items(revenant_os_log_args *argumen
     }
 }
 
-/* The description of an object, or its class name when it has none: the Objective-C runtime is used directly, so
-   the header needs no Foundation import. */
-static inline const char *_Nonnull revenant_os_log_description(const void *_Nonnull object) {
+/* The text of an object's description, or NULL when it has none. The Objective-C runtime is used directly, so the header
+   needs no Foundation import. */
+static inline const char *_Nullable revenant_os_log_description_text(const void *_Nonnull object, SEL description_selector) {
+    id description = ((id (*)(id, SEL))objc_msgSend)((REVENANT_OS_LOG_RENDER_BRIDGE id)object, description_selector);
+    SEL utf8_selector = sel_registerName("UTF8String");
+    Class description_class = description ? object_getClass(description) : NULL;
+    if (description_class && class_respondsToSelector(description_class, utf8_selector)) {
+        return ((const char *(*)(id, SEL))objc_msgSend)(description, utf8_selector);
+    }
+    return NULL;
+}
+
+/* The description of an object, or NULL when it has none or its description raises, as the renderer has always printed
+   it as (null). An exception is caught where the compiler has Objective-C exceptions; C has none to catch. */
+static inline const char *_Nullable revenant_os_log_description(const void *_Nonnull object) {
     Class cls = object_getClass((REVENANT_OS_LOG_RENDER_BRIDGE id)object);
     SEL description_selector = sel_registerName("description");
-    if (cls && class_respondsToSelector(cls, description_selector)) {
-        id description = ((id (*)(id, SEL))objc_msgSend)((REVENANT_OS_LOG_RENDER_BRIDGE id)object, description_selector);
-        SEL utf8_selector = sel_registerName("UTF8String");
-        Class description_class = description ? object_getClass(description) : NULL;
-        if (description_class && class_respondsToSelector(description_class, utf8_selector)) {
-            const char *text = ((const char *(*)(id, SEL))objc_msgSend)(description, utf8_selector);
-            if (text) {
-                return text;
-            }
-        }
+    if (!cls || !class_respondsToSelector(cls, description_selector)) {
+        return NULL;
     }
-    return class_getName(cls) ?: "object";
+#if defined(__OBJC__)
+    @try {
+        return revenant_os_log_description_text(object, description_selector);
+    } @catch (id exception) {
+        return NULL;
+    }
+#else
+    return revenant_os_log_description_text(object, description_selector);
+#endif
 }
 
 static inline int revenant_os_log_in_read_only_segment(const void *pointer) {
@@ -435,7 +467,8 @@ static inline void revenant_os_log_append_mismatch(revenant_os_log_text *text, c
     } else if (item->type == 0 || item->type == 6) {
         size = item->length;
     } else if (item->type == 4) {
-        size = pointer ? strlen(revenant_os_log_description(pointer)) + 1 : 0;
+        const char *description = pointer ? revenant_os_log_description(pointer) : NULL;
+        size = description ? strlen(description) + 1 : 0;
     }
     revenant_os_log_text_append(text, "<decode: mismatch for [", strlen("<decode: mismatch for ["));
     revenant_os_log_text_append(text, label, labelLength);
@@ -589,15 +622,41 @@ static inline void revenant_os_log_parse_decorators(const char *_Nonnull *_Nonnu
     *cursor = close + 1;
 }
 
-/* Whether a va_list argument of this conversion is private: strings, pointers and objects by default, numbers not. */
-static inline int revenant_os_log_is_private(const revenant_os_log_spec *spec, char conversion) {
-    if (spec->privacy == REVENANT_OS_LOG_PRIVACY_PUBLIC) {
+/* The argument type a va_list conversion stands for, so that both sources decide privacy the same way. */
+static inline unsigned revenant_os_log_va_type(char conversion) {
+    switch (conversion) {
+    case 's':
+    case 'S':
+        return 2;
+    case '@':
+        return 4;
+    case 'P':
+        return 3;
+    default:
         return 0;
     }
-    if (spec->privacy == REVENANT_OS_LOG_PRIVACY_PRIVATE) {
+}
+
+/* Whether an argument is private. The header flag decides when it is set. Without one (auto) the renderer treats
+   strings, objects and data as private and numbers and pointers as public; the os_log ABI leaves auto to the system
+   (swiftlang/swift stdlib/private/OSLog/OSLogPrivacy.swift), so this default is the renderer's own. */
+static inline int revenant_os_log_is_private(unsigned flag, unsigned type, char conversion) {
+    if (flag & REVENANT_OS_LOG_PRIVACY_PRIVATE) {
         return 1;
     }
-    return conversion == 's' || conversion == 'S' || conversion == '@' || conversion == 'P';
+    if (flag & REVENANT_OS_LOG_PRIVACY_PUBLIC) {
+        return 0;
+    }
+    switch (type) {
+    case 2:
+    case 4:
+    case 5:
+        return 1;
+    case 3:
+        return conversion == 'P';
+    default:
+        return 0;
+    }
 }
 
 /* Reads and discards the va_list argument of a private conversion, so the next specifier reads the next argument. */
@@ -711,13 +770,13 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 int width = (int)revenant_os_log_fetch_signed(ap, revenant_os_log_plain_spec());
                 if (width < 0 && flagCount < sizeof spec.flags - 1) {
                     spec.flags[flagCount++] = '-';
-                    width = -width;
                 }
-                spec.width = width;
+                int magnitude = width < -REVENANT_OS_LOG_MAX_LIMIT ? REVENANT_OS_LOG_MAX_LIMIT : width < 0 ? -width : width;
+                spec.width = revenant_os_log_limit(magnitude);
             }
         } else {
             while (*cursor >= '0' && *cursor <= '9') {
-                spec.width = spec.width * 10 + (*cursor++ - '0');
+                spec.width = revenant_os_log_digit(spec.width, *cursor++);
             }
         }
         if (*cursor == '.') {
@@ -728,12 +787,13 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 if (!revenant_os_log_claim(ap, 1)) {
                     missing = 1;
                 } else {
-                    spec.precision = (int)revenant_os_log_fetch_signed(ap, revenant_os_log_plain_spec());
+                    int precision = (int)revenant_os_log_fetch_signed(ap, revenant_os_log_plain_spec());
+                    spec.precision = precision < 0 ? -1 : revenant_os_log_limit(precision);
                 }
             } else {
                 literal_precision = 1;
                 while (*cursor >= '0' && *cursor <= '9') {
-                    spec.precision = spec.precision * 10 + (*cursor++ - '0');
+                    spec.precision = revenant_os_log_digit(spec.precision, *cursor++);
                 }
             }
         }
@@ -788,13 +848,22 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 continue;
             }
         }
+        /* A buffer argument is private when its header flag says so, or by the default for its type. */
+        if (!ap->arguments && strchr("diouxXcsSeEfFgGaApP@C", conversion)) {
+            revenant_os_log_item item;
+            if (revenant_os_log_peek_item(ap, &item) && revenant_os_log_is_private(item.privacy, item.type, conversion)) {
+                revenant_os_log_next_item(ap, &item);
+                revenant_os_log_text_append(&text, REVENANT_OS_LOG_PRIVATE_TEXT, strlen(REVENANT_OS_LOG_PRIVATE_TEXT));
+                continue;
+            }
+        }
         /* A va_list conversion consumes one argument; without one left the message says so. */
         if (ap->arguments && strchr("diouxXcsSeEfFgGaApP@C", conversion)) {
             if (!revenant_os_log_claim(ap, 1)) {
                 revenant_os_log_text_append(&text, REVENANT_OS_LOG_MISSING_TEXT, strlen(REVENANT_OS_LOG_MISSING_TEXT));
                 continue;
             }
-            if (revenant_os_log_is_private(&spec, conversion)) {
+            if (revenant_os_log_is_private(spec.privacy, revenant_os_log_va_type(conversion), conversion)) {
                 revenant_os_log_discard(ap, &spec, conversion);
                 revenant_os_log_text_append(&text, REVENANT_OS_LOG_PRIVATE_TEXT, strlen(REVENANT_OS_LOG_PRIVATE_TEXT));
                 continue;
@@ -863,12 +932,9 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 break;
             }
             const void *object = revenant_os_log_take_pointer(ap);
+            const char *description = object ? revenant_os_log_description(object) : NULL;
             spec.precision = -1;
-            if (!object) {
-                revenant_os_log_text_padded(&text, &spec, "(null)");
-            } else {
-                revenant_os_log_text_padded(&text, &spec, revenant_os_log_description(object));
-            }
+            revenant_os_log_text_padded(&text, &spec, description ? description : "(null)");
             break;
         }
         case 'P': {

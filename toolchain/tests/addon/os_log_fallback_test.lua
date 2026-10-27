@@ -46,6 +46,25 @@ static void show(const char *label, const char *format, int count, int error, ..
     free(text);
 }
 
+/* Appends one argument to a buffer: the header byte (type in the high four bits, privacy flag in the low four), the size
+   byte and the bytes. The layout is the os_log ABI's (swiftlang/swift stdlib/private/OSLog/OSLogMessage.swift). */
+static size_t put(uint8_t *out, size_t at, uint8_t header, const void *data, uint8_t size) {
+    out[at] = header;
+    out[at + 1] = size;
+    memcpy(out + at + 2, data, size);
+    return at + 2 + size;
+}
+
+static void show_buffer(const char *label, const char *format, uint8_t count, const uint8_t *items, size_t length) {
+    uint8_t buffer[256];
+    buffer[0] = 0;
+    buffer[1] = count;
+    memcpy(buffer + 2, items, length);
+    char *text = revenant_os_log_render_buffer(format, buffer, (uint32_t)(length + 2), 0);
+    printf("%s\t%s\n", label, text ? text : "(failed)");
+    free(text);
+}
+
 int main(void) {
     const void *object = (const void *)@"object text";
     const void *hidden = (const void *)@"hidden";
@@ -93,6 +112,31 @@ int main(void) {
     show("40", "%{public}g", 1, 0, 0.0001);
     show("41", "%{public}hhx", 1, 0, 0x1FF);
     show("42", "%{public}zd", 1, 0, 9L);
+    show("59", "%{public}*d", 2, 0, 100000000, 1);
+    show("60", "%99999999999999d", 1, 0, 1);
+    {
+        uint8_t items[128];
+        int number = 42, seven = 7;
+        const char *literal = "plain";
+        size_t at;
+        at = put(items, 0, 0x01, &number, 4);
+        show_buffer("51", "%{private}d", 1, items, at);
+        at = put(items, 0, 0x02, &number, 4);
+        show_buffer("52", "%{public}d", 1, items, at);
+        at = put(items, 0, 0x00, &seven, 4);
+        show_buffer("53", "%d", 1, items, at);
+        at = put(items, 0, 0x20, &literal, sizeof literal);
+        show_buffer("54", "%s", 1, items, at);
+        at = put(items, 0, 0x22, &literal, sizeof literal);
+        show_buffer("55", "%{public}s", 1, items, at);
+        at = put(items, 0, 0x41, &object, sizeof object);
+        show_buffer("56", "%{private}@", 1, items, at);
+        at = put(items, 0, 0x42, &object, sizeof object);
+        show_buffer("57", "%{public}@", 1, items, at);
+        at = put(items, 0, 0x02, &number, 4);
+        at = put(items, at, 0x21, &literal, sizeof literal);
+        show_buffer("58", "%{public}d %{private}s", 2, items, at);
+    }
     return 0;
 }
 ]]
@@ -108,6 +152,11 @@ local RENDER = {
     {"28", "No such file or directory"}, {"29", "<private>"}, {"30", "(null)"}, {"31", "<private>"},
     {"32", "   7"}, {"33", "<decode: missing data>"}, {"34", "first"}, {"35", "abc"}, {"36", "   ab|"},
     {"37", "ab   |"}, {"38", "+5"}, {"39", "1.500000e+00"}, {"40", "0.0001"}, {"41", "ff"}, {"42", "9"},
+    -- The buffer source: the privacy flag of each header byte, and the default (auto) for its type.
+    {"51", "<private>"}, {"52", "42"}, {"53", "7"}, {"54", "<private>"}, {"55", "plain"}, {"56", "<private>"},
+    {"57", "object text"}, {"58", "42 <private>"},
+    -- Width and precision are capped at 128, so an oversized width cannot make the padding grow without bound.
+    {"59", string.rep(" ", 127) .. "1"}, {"60", string.rep(" ", 127) .. "1"},
 }
 
 local MODES = {
