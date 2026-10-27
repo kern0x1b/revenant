@@ -112,6 +112,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@xz v5.8.4", {alias = "xz"})
     add_requires("revenant@box2d 2.2.1", {alias = "box2d"})
     add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
+    add_requires("revenant@boringssl", {alias = "boringssl"})
     add_requires("revenant@monocypher 4.0.2", {alias = "monocypher"})
     add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
@@ -239,6 +240,20 @@ if is_plat("iphoneos") then
                     target:add("files", table.unpack(files))
                 end
             end)
+            if library.name == "NetworkBackports" then
+                before_build(function (target)
+                    local boringssl = target:pkg("boringssl")
+                    if not boringssl then
+                        local names = {}
+                        for _, pkg in pairs(target:pkgs() or {}) do
+                            table.insert(names, tostring(pkg:name()))
+                        end
+                        raise("NetworkBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
+                              table.concat(table.wrap(target:get("packages")), ","))
+                    end
+                    target:add("cflags", "-I" .. boringssl:installdir() .. "/include")
+                end)
+            end
     end
 
     target("MLComputeBackports")

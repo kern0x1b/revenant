@@ -1,1 +1,1 @@
-realitykit_sources_digest = "8221a5faf2bd1b303359a919d55dc2bd"
+realitykit_sources_digest = "677f8db3205c2175a9f72dc1855f8a82"

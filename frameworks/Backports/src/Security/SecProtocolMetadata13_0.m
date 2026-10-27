@@ -6,6 +6,10 @@
 #import "RevenantSecProtocolMetadata.h"
 
 @implementation RevenantSecProtocolMetadata
+@synthesize negotiatedVersion = _negotiatedVersion;
+@synthesize negotiatedCipherSuite = _negotiatedCipherSuite;
+@synthesize negotiatedProtocol = _negotiatedProtocol;
+@synthesize ocspResponse = _ocspResponse;
 @end
 
 tls_protocol_version_t sec_protocol_metadata_get_negotiated_tls_protocol_version(
