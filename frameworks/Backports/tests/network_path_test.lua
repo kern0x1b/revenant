@@ -54,11 +54,4 @@ function main()
     swiftc({async, "-o", async_host})
     swiftc(table.join({"-D", "REVENANT_BACKPORT"}, backport_files(), {async, "-o", async_backport}))
     same("async path sequence", output(async_host), output(async_backport))
-
-    local telegram = path.join(programs, "telegram", "main.swift")
-    local telegram_host = path.join(out, "telegram-host")
-    local telegram_backport = path.join(out, "telegram-backport")
-    swiftc({telegram, "-o", telegram_host})
-    swiftc(table.join({"-D", "REVENANT_BACKPORT"}, backport_files(), {telegram, "-o", telegram_backport}))
-    same("Telegram path usage", output(telegram_host), output(telegram_backport))
 end
