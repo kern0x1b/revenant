@@ -82,7 +82,10 @@ Measured and chosen:
 
 - The group is the one MobileSafari holds. Its `keychain-access-groups` entitlement (`codesign -d --entitlements :-` on the
   6.1.3 rootfs binary, read on the host) is `com.apple.cfnetwork`, `com.apple.identities`, `com.apple.mobilesafari` and
-  `com.apple.certificates`. The phone's `agrp` values in `keychain-2.db` are the cross-check; it is not run yet.
+  `com.apple.certificates`. The phone's `agrp` cross-check is not done. The 6.1.3 phone has no sqlite3, perl, python or lua,
+  and copying `keychain-2.db` to the host would expose its plaintext account and server columns, so it was not copied. A
+  count-only check on the phone (read 2026-10-27, iPhone 4S) found `com.apple.cfnetwork` in `keychain-2.db` on two lines.
+  That shows the group is present; it does not give the distinct `inet` values.
 - The error codes of steps 1 and 2 are the backport's choice. The iOS 8+ answers for them are not measured, and the 6.1.3
   image cannot supply them. Searched: every file under the 6.1.3 rootfs
   (`.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`) and the strings of the 6.1.3 dyld cache for
@@ -163,6 +166,10 @@ and `publicRestrictionKeys.plist`. Nothing was called on any device.
   with the Settings switch is not measured.
 - `-[MCPasscodeManager isPasscodeSet]` (`0x3520a91c`) is `MKBGetDeviceLockState(NULL) != 3`. The backport's device-owner
   check reads the same lock state (LocalAuthentication), so the form is read only when a passcode is set.
+- On the iPhone 4S (6.1.3, read only, 2026-10-27), `/var/mobile/Library/ConfigurationProfiles/PublicInfo` holds
+  `EffectiveUserSettings.plist` and `MCMeta.plist` and no passcode characteristics file, so that phone has no stored passcode
+  record. The form was therefore not read on a phone with a passcode. The phone has no sqlite3, perl, python or lua, so no
+  program on it can call `currentUnlockScreenType`; a program for it waits for the iphoneos prebuilt.
 - The backport reads the form with `-[MCPasscodeManager currentUnlockScreenType]` through `dlopen` of the framework and
   `objc_msgSend`. Whether an application may read `Library/ConfigurationProfiles` is not measured; when the read fails the
   form is the full keyboard, which accepts every passcode.
