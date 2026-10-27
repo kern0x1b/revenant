@@ -154,7 +154,7 @@ function objc_facts(sdk, name, version)
 end
 
 function constant_intros(sdk)
-    local file = path.join(sdkfiles.cache_folder(sdkfiles.sdk_version(sdk)), "constant_intros.tsv")
+    local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     if os.isfile(file) then
         local cached = {}
         for line in io.lines(file) do

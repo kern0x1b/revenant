@@ -98,7 +98,7 @@ function extract_all(sdk, version, cache, logs, names)
 end
 
 local function ready(sdk, version, logs, names)
-    local cache = sdkfiles.cache_folder(version)
+    local cache = sdkfiles.cache_folder(sdk)
     os.mkdir(cache)
     local missing = {}
     for _, name in ipairs(names) do
@@ -107,7 +107,7 @@ local function ready(sdk, version, logs, names)
         end
     end
     for _, stale in ipairs(os.dirs(path.join(sdkfiles.build_root(), "cache", "*"))) do
-        if path.filename(stale) ~= sdkfiles.cache_key(version) then
+        if path.filename(stale) ~= sdkfiles.cache_key(sdk) then
             os.tryrm(stale)
         end
     end
