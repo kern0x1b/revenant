@@ -1,4 +1,5 @@
 #import "RevenantWebKit.h"
+#import "RevenantWebFind.h"
 
 NSString *const RevenantWebKitBridgeScheme = @"revenant-wkbridge";
 
@@ -116,7 +117,7 @@ static NSURL *withoutFragment(NSURL *url)
     return range.location == NSNotFound ? url : [NSURL URLWithString:[string substringToIndex:range.location]];
 }
 
-@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost>
+@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost, UIFindInteractionDelegate>
 @end
 
 @implementation WKWebView {
@@ -145,6 +146,8 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _decided;
     BOOL _shimmed;
     BOOL _didCommit;
+    UIFindInteraction *_findInteraction;
+    RevenantWebFindSession *_findSession;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -540,6 +543,40 @@ static NSURL *withoutFragment(NSURL *url)
             handler(result, error);
         });
     }
+}
+
+- (UIFindInteraction *)findInteraction
+{
+    return _findInteraction;
+}
+
+- (BOOL)isFindInteractionEnabled
+{
+    return _findInteraction != nil;
+}
+
+- (void)setFindInteractionEnabled:(BOOL)enabled
+{
+    if (enabled == (_findInteraction != nil))
+        return;
+    if (enabled) {
+        _findInteraction = [[UIFindInteraction alloc] initWithSessionDelegate:self];
+        [self addInteraction:_findInteraction];
+    } else {
+        [self removeInteraction:_findInteraction];
+        _findInteraction = nil;
+    }
+}
+
+- (UIFindSession *)findInteraction:(UIFindInteraction *)interaction sessionForView:(UIView *)view
+{
+    if (!_findSession) {
+        UIWebView *web = _web;
+        _findSession = [[RevenantWebFindSession alloc] initWithEvaluator:^NSString *(NSString *script) {
+            return [web stringByEvaluatingJavaScriptFromString:script];
+        }];
+    }
+    return _findSession;
 }
 
 - (void)revenant_refreshTitle
