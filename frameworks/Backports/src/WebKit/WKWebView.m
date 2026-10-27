@@ -775,6 +775,8 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (BOOL)revenant_openWindowFromMessage:(NSDictionary *)message
 {
+    if (!_configuration.preferences.javaScriptCanOpenWindowsAutomatically)
+        return NO;
     NSString *identifier = message[@"i"];
     if (![identifier isKindOfClass:[NSString class]])
         return NO;
@@ -851,7 +853,7 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     NSString *popupOrigin = RevenantOriginOf(popup->_committedURL);
     if (!RevenantTargetAllows(target, origin, popupOrigin))
         return;
-    [popup revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"s": @"opener"}];
+    [popup revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"t": target, @"s": @"opener"}];
 }
 
 - (void)revenant_postMessageToOpener:(NSDictionary *)message
@@ -866,7 +868,7 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     NSString *openerOrigin = RevenantOriginOf(opener->_committedURL);
     if (!RevenantTargetAllows(target, origin, openerOrigin))
         return;
-    [opener revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"s": _openerWindow}];
+    [opener revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"t": target, @"s": _openerWindow}];
 }
 
 - (void)revenant_navigateOpener:(NSDictionary *)message

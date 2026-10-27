@@ -144,7 +144,7 @@ static NSString *const Stubs =
     @"getElementsByTagName:function(){return [];},"
     @"createElement:function(tag){return {style:{},parentNode:null};}};"
     @"var setTimeout=function(){};"
-    @"var location={protocol:'http:',host:'127.0.0.1:8787'};"
+    @"var location={protocol:'http:',host:'example.invalid'};"
     @"var syncAnswer='1';"
     @"function XMLHttpRequest(){this.status=0;this.responseText='';}"
     @"XMLHttpRequest.prototype.open=function(method,url){this.url=url;};"
@@ -301,7 +301,7 @@ static NSArray<NSString *> *BackportProxyChecks(void)
     for (NSUInteger index = 0; index < SampleCount; index++) {
         [context evaluateScript:[NSString stringWithFormat:@"v.postMessage(%@, 'http://example.invalid');", Samples[index]]];
         context[@"__b"] = LastFrame(context)[@"b"];
-        if ([[context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:__b,o:'http://example.invalid'}); var __e=events[events.length-1]; __e.type === 'message' && __e.origin === 'http://example.invalid' && __encode(__e.data) === __b;", Nonce]] toBool])
+        if ([[context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:__b,o:'http://example.invalid',t:'http://example.invalid'}); var __e=events[events.length-1]; __e.type === 'message' && __e.origin === 'http://example.invalid' && __encode(__e.data) === __b;", Nonce]] toBool])
             trips++;
     }
     [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({i:__second,href:'http://example.invalid/from-native'});", Nonce]];
@@ -366,7 +366,7 @@ static NSArray<NSString *> *BackportOpenerChecks(void)
     BOOL navigated = [navigate[@"w"] isEqual:@7] && [navigate[@"u"] isEqual:@"http://example.invalid/next"];
     [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({opener:true,href:'http://example.invalid/moved'});", Nonce]];
     BOOL moved = [[context evaluateScript:@"window.opener.location.href === 'http://example.invalid/moved'"] toBool];
-    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:'\"hello\"',o:'http://example.invalid',s:'opener'});", Nonce]];
+    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:'\"hello\"',o:'http://example.invalid',t:'http://example.invalid',s:'opener'});", Nonce]];
     BOOL delivered = [[context evaluateScript:@"var e=events[events.length-1]; e.type === 'message' && e.data === 'hello' && e.origin === 'http://example.invalid' && e.source === window.opener"] toBool];
     [context evaluateScript:@"syncAnswer='1';"];
     JSContext *popup = ShimmedWithOpener(@"null");
@@ -399,10 +399,15 @@ static NSArray<NSString *> *BackportOriginChecks(void)
 {
     NSString *popup = RevenantOriginOf([NSURL URLWithString:@"http://127.0.0.1:8080/popup.html?x=1"]);
     NSString *opener = RevenantOriginOf([NSURL URLWithString:@"http://127.0.0.1:8080/opener.html"]);
+    JSContext *context = Shimmed();
+    [context evaluateScript:@"var before=events.length;"];
+    [context evaluateScript:[NSString stringWithFormat:@"window['%@w']({m:'\"x\"',o:'http://example.invalid',t:'http://other.invalid',s:'opener'});", Nonce]];
+    BOOL pageDropped = [[context evaluateScript:@"events.length === before"] toBool];
     return @[
         [NSString stringWithFormat:@"window postMessage other origin is dropped: %d", !RevenantTargetAllows(@"http://example.invalid", opener, popup)],
         [NSString stringWithFormat:@"window postMessage matching origin is delivered: %d", RevenantTargetAllows(popup, opener, popup)],
         [NSString stringWithFormat:@"window origin drops default port: %d", [RevenantOriginOf([NSURL URLWithString:@"https://example.invalid:443/"]) isEqualToString:@"https://example.invalid"]],
+        [NSString stringWithFormat:@"window message to other origin is dropped in the page: %d", pageDropped],
     ];
 }
 

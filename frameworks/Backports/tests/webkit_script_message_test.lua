@@ -45,6 +45,7 @@ local BACKPORT_ONLY = {
     "window postMessage other origin is dropped: 1",
     "window postMessage matching origin is delivered: 1",
     "window origin drops default port: 1",
+    "window message to other origin is dropped in the page: 1",
 }
 
 local function clang()

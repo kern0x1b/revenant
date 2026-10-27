@@ -6,8 +6,6 @@ local MAIN = path.join(TESTS, "webkit_script_message", "main.m")
 local CODEC = path.join(SRC, "RevenantScriptCodec.m")
 local WINDOW_FEATURES = path.join(SRC, "WKWindowFeatures.m")
 
--- Checks the macOS oracle prints that the JSContext harness cannot run: a message
--- from the popup has to cross into a second live page, which only WKWebView can do.
 local ORACLE_ONLY = {
     "popup message reaches opener with source: 1",
 }
@@ -43,7 +41,6 @@ local function name_of(line)
     return name
 end
 
--- The backport also prints the window.open envelope lines, which are not checks.
 local function index_by_name(lines)
     local index = {}
     for _, line in ipairs(lines) do
