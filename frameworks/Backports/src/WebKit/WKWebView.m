@@ -29,6 +29,29 @@ static NSURL *withoutFragment(NSURL *url)
 @interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost, RevenantDocumentSource>
 @end
 
+@interface RevenantSubstitute : NSObject
+@property (nonatomic, copy) NSString *string;
+@property (nonatomic, copy) NSData *data;
+@property (nonatomic, copy) NSString *MIMEType;
+@property (nonatomic, copy) NSString *encoding;
+@property (nonatomic, copy) NSURL *baseURL;
+@property (nonatomic, copy) NSURL *fileURL;
+- (NSData *)revenant_document;
+@end
+
+@implementation RevenantSubstitute
+
+@synthesize string = _string, data = _data, MIMEType = _MIMEType, encoding = _encoding, baseURL = _baseURL, fileURL = _fileURL;
+
+- (NSData *)revenant_document
+{
+    if (self.fileURL)
+        return [NSData dataWithContentsOfURL:self.fileURL] ?: [NSData data];
+    return self.data ?: [NSData data];
+}
+
+@end
+
 @implementation WKWebView {
     UIWebView *_web;
     WKWebViewConfiguration *_configuration;
@@ -56,6 +79,8 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _didCommit;
     NSString *_token;
     BOOL _documentInjected;
+    RevenantSubstitute *_pendingSubstitute;
+    BOOL _substituteHistory;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -279,6 +304,7 @@ static NSURL *withoutFragment(NSURL *url)
     _decided = NO;
     _didCommit = NO;
     _documentInjected = NO;
+    _pendingSubstitute = nil;
     _navigationType = type;
     _previousIndex = -1;
     if (index >= 0 && index != _index) {
@@ -370,35 +396,78 @@ static NSURL *withoutFragment(NSURL *url)
     NSData *data = URL.isFileURL && page ? [NSData dataWithContentsOfURL:URL] : nil;
     if (!data)
         return [self loadRequest:[NSURLRequest requestWithURL:URL]];
-    return [self loadData:data MIMEType:@"text/html" characterEncodingName:nil baseURL:URL];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.fileURL = URL;
+    substitute.MIMEType = @"text/html";
+    substitute.baseURL = URL;
+    return [self revenant_loadSubstitute:substitute URL:URL type:WKNavigationTypeOther index:-1];
 }
 
 - (WKNavigation *)loadHTMLString:(NSString *)string baseURL:(NSURL *)baseURL
 {
-    NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    NSString *html = RevenantDocumentInsert(string ?: @"", [self revenant_documentStartScripts]);
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
-        [self revenant_documentDidInject];
-        [_web loadHTMLString:html baseURL:baseURL];
-    }];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.string = string ?: @"";
+    substitute.baseURL = baseURL;
+    return [self revenant_loadSubstitute:substitute URL:baseURL ?: [NSURL URLWithString:@"about:blank"] type:WKNavigationTypeOther index:-1];
 }
 
 - (WKNavigation *)loadData:(NSData *)data MIMEType:(NSString *)MIMEType characterEncodingName:(NSString *)characterEncodingName baseURL:(NSURL *)baseURL
 {
-    NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    NSData *document = data ?: [NSData data];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.data = data ?: [NSData data];
+    substitute.MIMEType = MIMEType;
+    substitute.encoding = characterEncodingName;
+    substitute.baseURL = baseURL;
+    return [self revenant_loadSubstitute:substitute URL:baseURL ?: [NSURL URLWithString:@"about:blank"] type:WKNavigationTypeOther index:-1];
+}
+
+- (WKNavigation *)revenant_loadSubstitute:(RevenantSubstitute *)substitute URL:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
+{
+    _substituteHistory = YES;
+    if (substitute.string) {
+        NSString *html = RevenantDocumentInsert(substitute.string, [self revenant_documentStartScripts]);
+        return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
+            self->_pendingSubstitute = substitute;
+            [self revenant_documentDidInject];
+            [self->_web loadHTMLString:html baseURL:substitute.baseURL];
+        }];
+    }
+    NSData *document = [substitute revenant_document];
     BOOL injected = NO;
-    if ([MIMEType.lowercaseString isEqualToString:@"text/html"]) {
-        NSData *rewritten = RevenantDocumentRewrite(document, nil, characterEncodingName, [self revenant_documentStartScripts]);
+    if ([substitute.MIMEType.lowercaseString isEqualToString:@"text/html"]) {
+        NSData *rewritten = RevenantDocumentRewrite(document, nil, substitute.encoding, [self revenant_documentStartScripts]);
         if (rewritten) {
             document = rewritten;
             injected = YES;
         }
     }
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
+        self->_pendingSubstitute = substitute;
         if (injected)
             [self revenant_documentDidInject];
-        [_web loadData:document MIMEType:MIMEType textEncodingName:characterEncodingName baseURL:baseURL];
+        [self->_web loadData:document MIMEType:substitute.MIMEType textEncodingName:substitute.encoding baseURL:substitute.baseURL];
+    }];
+}
+
+- (WKNavigation *)revenant_moveToIndex:(NSInteger)index
+{
+    WKBackForwardListItem *item = _items[index];
+    NSURL *target = item.URL;
+    RevenantHistoryMove move = RevenantHistoryPlanMove(item.revenant_substitute != nil, !_substituteHistory);    if (move == RevenantHistoryMoveReplay)
+        return [self revenant_loadSubstitute:item.revenant_substitute URL:target type:WKNavigationTypeBackForward index:index];
+    if (move == RevenantHistoryMoveLoad)
+        return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:index perform:^{
+            [self->_web loadRequest:[self revenant_taggedRequest:[NSURLRequest requestWithURL:target]]];
+        }];
+    NSInteger delta = index - _index;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:index perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        if (delta == -1)
+            [self->_web goBack];
+        else if (delta == 1)
+            [self->_web goForward];
+        else
+            [self->_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
     }];
 }
 
@@ -406,22 +475,14 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoBack)
         return nil;
-    NSURL *target = _items[_index - 1].URL;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
-        RevenantDocumentExpect(self->_token, target);
-        [self->_web goBack];
-    }];
+    return [self revenant_moveToIndex:_index - 1];
 }
 
 - (WKNavigation *)goForward
 {
     if (!self.canGoForward)
         return nil;
-    NSURL *target = _items[_index + 1].URL;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
-        RevenantDocumentExpect(self->_token, target);
-        [self->_web goForward];
-    }];
+    return [self revenant_moveToIndex:_index + 1];
 }
 
 - (WKNavigation *)goToBackForwardListItem:(WKBackForwardListItem *)item
@@ -429,18 +490,15 @@ static NSURL *withoutFragment(NSURL *url)
     NSUInteger position = [_items indexOfObjectIdenticalTo:item];
     if (position == NSNotFound || (NSInteger)position == _index)
         return nil;
-    NSInteger delta = (NSInteger)position - _index;
-    NSURL *target = item.URL;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
-        RevenantDocumentExpect(self->_token, target);
-        [self->_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
-    }];
+    return [self revenant_moveToIndex:(NSInteger)position];
 }
 
 - (WKNavigation *)reload
 {
     if (!_committedURL)
         return nil;
+    if (_index >= 0 && _index < (NSInteger)_items.count && _items[_index].revenant_substitute)
+        return [self revenant_loadSubstitute:_items[_index].revenant_substitute URL:_committedURL type:WKNavigationTypeReload index:-1];
     NSURL *target = _committedURL;
     return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeReload index:-1 perform:^{
         RevenantDocumentExpect(self->_token, target);
@@ -740,6 +798,8 @@ static NSURL *withoutFragment(NSURL *url)
     }
     _previousIndex = -1;
     _committedURL = URL;
+    item.revenant_substitute = _pendingSubstitute;
+    _pendingSubstitute = nil;
     [self revenant_setTitle:@""];
     [self revenant_setItems:items index:index];
 }

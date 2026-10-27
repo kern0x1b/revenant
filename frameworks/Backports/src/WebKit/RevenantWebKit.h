@@ -72,7 +72,10 @@ extern NSString *const RevenantWebKitBridgeScheme;
 @interface WKBackForwardListItem (RevenantWebKit)
 + (instancetype)revenant_itemWithURL:(NSURL *)url title:(NSString *)title;
 @property (nonatomic, copy) NSString *revenant_title;
+@property (nonatomic, strong) id revenant_substitute;
 @end
+
+#import "RevenantHistoryPlan.h"
 
 @interface WKBackForwardList (RevenantWebKit)
 - (void)revenant_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index;

@@ -3,6 +3,17 @@
 @implementation WKBackForwardListItem {
     NSURL *_URL;
     NSString *_title;
+    id _substitute;
+}
+
+- (id)revenant_substitute
+{
+    return _substitute;
+}
+
+- (void)setRevenant_substitute:(id)substitute
+{
+    _substitute = substitute;
 }
 
 + (instancetype)revenant_itemWithURL:(NSURL *)url title:(NSString *)title

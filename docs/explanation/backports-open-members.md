@@ -224,12 +224,19 @@ Already present, with the same limits:
   (WebKitBackports armv7 build) ran the document-start script before the page's own scripts for `loadHTMLString:`,
   `loadData:` (ISO-8859-1) and `loadFileURL:`, and for `reload`, so the four shared lines match the macOS oracle. The
   backport's `goBack` on an iPad 2 (iOS 6.1.3) finished for pages loaded over HTTP: the page saw the value its start script
-  set. For a `goBack` to a page loaded by `loadHTMLString:` or `loadFileURL:`, the process vanished about 8 to 18 seconds
-  after the call, with no signal, no crash report and no `UIApplication` lifecycle callback. The main thread was idle in
-  the run loop until then, and the same happened with the sampler off. The cause is not found. The fallback message that a
-  document-start script the rewrite did not reach runs after the page's own scripts now names the document and the
-  navigation type, and it logs on every load that hits it. `reload` of a `file:` document still bypasses the protocol, so
-  that document gets its start scripts after the page's own scripts; that is a real gap, not yet closed.
+  set. The `goBack` to a page loaded by `loadHTMLString:` or `loadFileURL:` did nothing, and the probe then waited for a
+  navigation that never came. The engine keeps no history entry for a string or data load (`canGoBack` stays 0 and
+  `history.length` stays 1 in a raw `UIWebView`), so its `goBack` could not go back to one. The process that disappeared
+  about 8 to 18 seconds later was the probe's own launch watchdog (`0x8badf00d` in `AppleSupport/general.log`), because
+  the probe ran inside `applicationDidFinishLaunching`. The backport now keeps each string or data load on its history
+  item and replays it on a move back or forward, or on a reload; a `file:` document is read again on each replay. After
+  such a load it stops asking the engine to move, and loads each entry's URL instead, because the engine's list no longer
+  matches the backport's. Measured on the device: `goBack` to a string page and to a file page finishes with the page's
+  start script run and its page script saw `set-by-start`; the full probe (string, data, file, reload, file, goBack)
+  finishes with every load seeing `set-by-start`, and `reload` of a `file:` document goes through the rewrite. The
+  fallback message about a document-start script the rewrite did not reach now names its document and navigation type,
+  and it has not fired in these runs. The load-by-URL path (an http entry moved to after a string load) is not measured
+  on the device yet.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
