@@ -47,6 +47,19 @@ static BOOL RevenantTLSVersionForSSLProtocol(SSLProtocol protocol, tls_protocol_
     return self.localIdentity ? sec_identity_copy_ref(self.localIdentity) : NULL;
 }
 
+- (BOOL)revenantHasUnsupportedSettings
+{
+    return self.verifyBlock != nil
+        || self.challengeBlock != nil
+        || self.ciphersuites.count > 0
+        || self.ciphersuiteGroup != nil
+        || self.ciphersuiteGroups.count > 0
+        || self.preSharedKeys.count > 0
+        || self.diffieHellmanParameters != nil
+        || self.ocspEnabled
+        || self.sctEnabled;
+}
+
 - (instancetype)init
 {
     self = [super init];

@@ -15,3 +15,4 @@ const char *RevenantSecProtocolOptionsServerName(const void *options);
 size_t RevenantSecProtocolOptionsApplicationProtocolCount(const void *options);
 const char *RevenantSecProtocolOptionsApplicationProtocolAt(const void *options, size_t index);
 const void *RevenantSecProtocolOptionsCopyLocalIdentity(const void *options);
+bool RevenantSecProtocolOptionsHasUnsupportedSettings(const void *options);

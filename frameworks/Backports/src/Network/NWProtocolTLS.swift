@@ -29,6 +29,7 @@ struct NWTLSConfiguration {
     let applicationProtocols: [String]
     let peerAuthenticationRequired: Bool
     let localIdentity: SecIdentity?
+    let hasUnsupportedSettings: Bool
 
     init(_ options: sec_protocol_options_t) {
         let handle = Unmanaged.passUnretained(options as AnyObject).toOpaque()
@@ -42,6 +43,7 @@ struct NWTLSConfiguration {
         localIdentity = RevenantSecProtocolOptionsCopyLocalIdentity(handle).map {
             Unmanaged<SecIdentity>.fromOpaque($0).takeRetainedValue()
         }
+        hasUnsupportedSettings = RevenantSecProtocolOptionsHasUnsupportedSettings(handle)
     }
 }
 
@@ -191,6 +193,10 @@ final class NWTLSSession {
             return nil
         }
         let configuration = NWTLSConfiguration(options)
+        guard !configuration.hasUnsupportedSettings else {
+            SSL_CTX_free(context)
+            return nil
+        }
         guard SSL_CTX_set_min_proto_version(context, configuration.minimumVersion) == 1,
               SSL_CTX_set_max_proto_version(context, configuration.maximumVersion) == 1 else {
             SSL_CTX_free(context)

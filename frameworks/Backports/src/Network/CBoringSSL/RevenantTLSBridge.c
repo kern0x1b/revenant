@@ -62,3 +62,8 @@ const void *RevenantSecProtocolOptionsCopyLocalIdentity(const void *options)
 {
     return RevenantSend(options, "revenantCopyIdentityRef");
 }
+
+bool RevenantSecProtocolOptionsHasUnsupportedSettings(const void *options)
+{
+    return ((BOOL (*)(id, SEL))objc_msgSend)((id)options, sel_registerName("revenantHasUnsupportedSettings")) != NO;
+}
