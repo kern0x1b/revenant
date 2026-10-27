@@ -100,11 +100,13 @@ int main(void)
         declined.delegate = refused;
         [declined revenant_start];
         WaitFor(^BOOL{
-            return refused.failures > 0;
+            return refused.decisions > 0;
         });
-        printf("download without destination fails cancelled: %d\n", reported(refused.failures == 1 && refused.failureCode == NSURLErrorCancelled));
+        NSDate *settled = [NSDate dateWithTimeIntervalSinceNow:1];
+        while ([settled timeIntervalSinceNow] > 0)
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+        printf("download without destination sends no failure: %d\n", reported(refused.failures == 0 && refused.finishes == 0));
         printf("download without destination writes nothing: %d\n", reported(refused.finishes == 0 && refused.decisions == 1));
-        printf("download failure has no resume data: %d\n", reported(!refused.failureHadResumeData));
 
         printf("download original request set: %d\n", reported([download.originalRequest.URL isEqual:sourceURL]));
 

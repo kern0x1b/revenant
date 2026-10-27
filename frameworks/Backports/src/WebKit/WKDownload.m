@@ -191,7 +191,8 @@ static BOOL AcceptsRanges(NSHTTPURLResponse *response)
     if (!usable) {
         [self revenant_settle:NO];
         [self revenant_stop];
-        [self revenant_failWithError:[NSError errorWithDomain:NSURLErrorDomain code:destination ? NSURLErrorCannotCreateFile : NSURLErrorCancelled userInfo:nil] resumeData:nil];
+        if (destination)
+            [self revenant_failWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotCreateFile userInfo:nil] resumeData:nil];
         return;
     }
     _destination = destination;
