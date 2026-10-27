@@ -42,6 +42,23 @@ local CASES = {
         },
     },
     {
+        label = "UIResponder textInputMode",
+        sdk = {
+            {"UIKit", "UIResponder.h", {
+                "*textInputMode API_AVAILABLE(ios(7.0))",
+            }},
+            {"UIKit", "UITextInput.h", {
+                "+ (nullable UITextInputMode *)currentInputMode API_DEPRECATED(",
+            }},
+        },
+        source = "src/UIKit/UIResponder+TextInput7.m",
+        mutation = {"return [UITextInputMode currentInputMode];", "return nil;"},
+        needles = {
+            "- (UITextInputMode *)textInputMode",
+            "return [UITextInputMode currentInputMode];",
+        },
+    },
+    {
         label = "CLGeocoder postal address",
         sdk = {
             {"CoreLocation", "CLGeocoder.h", {
