@@ -1,6 +1,7 @@
 #import "VTDecompressionSessionHEVC.h"
 
 #import <Foundation/Foundation.h>
+#import <pthread.h>
 
 #import "VTConvertBiPlanar.h"
 #import "VTDecodeHEVC.h"
@@ -105,10 +106,20 @@ static BOOL RevenantVTIsSupportedProperty(CFStringRef key)
 @property (nonatomic) CMTime presentationDuration;
 @property (nonatomic) void *sourceFrameRefCon;
 @property (nonatomic) BOOL suppressed;
+@property (nonatomic) BOOL resolved;
+@property (nonatomic) OSStatus status;
+@property (nonatomic) CVPixelBufferRef buffer;
 @property (nonatomic, copy) RevenantVTDecodeOutput output;
 @end
 
 @implementation RevenantVTPendingFrame
+
+- (void)dealloc
+{
+    if (_buffer)
+        CVPixelBufferRelease(_buffer);
+}
+
 @end
 
 static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *picture);
@@ -134,10 +145,15 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
     size_t _poolHeight;
     uint8_t *_scratch;
     size_t _scratchSize;
-    NSMutableDictionary<NSNumber *, RevenantVTPendingFrame *> *_pending;
+    NSLock *_decodeLock;
+    NSLock *_stateLock;
+    NSMutableDictionary<NSNumber *, RevenantVTPendingFrame *> *_awaiting;
+    NSMutableArray<RevenantVTPendingFrame *> *_queue;
     NSMutableDictionary<NSString *, id> *_properties;
     int64_t _nextSequence;
     OSStatus _emitStatus;
+    BOOL _delivering;
+    pthread_t _deliverer;
     BOOL _invalidated;
 }
 
@@ -149,7 +165,10 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
         _dimensions = dimensions;
         _pixelFormat = pixelFormat;
         _output = [output copy];
-        _pending = [NSMutableDictionary dictionary];
+        _decodeLock = [[NSLock alloc] init];
+        _stateLock = [[NSLock alloc] init];
+        _awaiting = [NSMutableDictionary dictionary];
+        _queue = [NSMutableArray array];
         _properties = [NSMutableDictionary dictionary];
     }
     return self;
@@ -166,81 +185,162 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
     free(_scratch);
 }
 
+- (BOOL)isDeliveringOnCurrentThread
+{
+    [_stateLock lock];
+    const BOOL delivering = _delivering && pthread_equal(_deliverer, pthread_self());
+    [_stateLock unlock];
+    return delivering;
+}
+
+- (BOOL)isInvalidated
+{
+    [_stateLock lock];
+    const BOOL invalidated = _invalidated;
+    [_stateLock unlock];
+    return invalidated;
+}
+
+- (void)dropSequence:(int64_t)sequence
+{
+    NSNumber *key = @(sequence);
+    [_stateLock lock];
+    RevenantVTPendingFrame *frame = _awaiting[key];
+    if (frame) {
+        [_awaiting removeObjectForKey:key];
+        [_queue removeObject:frame];
+    }
+    [_stateLock unlock];
+}
+
+- (void)dropUnresolved
+{
+    [_stateLock lock];
+    [_awaiting removeAllObjects];
+    NSIndexSet *unresolved = [_queue indexesOfObjectsPassingTest:^BOOL(RevenantVTPendingFrame *frame, NSUInteger index, BOOL *stop) {
+        return !frame.resolved;
+    }];
+    [_queue removeObjectsAtIndexes:unresolved];
+    [_stateLock unlock];
+}
+
+- (void)deliverReady
+{
+    [_stateLock lock];
+    if (_delivering) {
+        [_stateLock unlock];
+        return;
+    }
+    _delivering = YES;
+    _deliverer = pthread_self();
+    for (;;) {
+        RevenantVTPendingFrame *frame = _queue.firstObject;
+        if (!frame || !frame.resolved)
+            break;
+        if (_invalidated) {
+            [_queue removeAllObjects];
+            break;
+        }
+        [_queue removeObjectAtIndex:0];
+        [_stateLock unlock];
+        frame.output(frame.sourceFrameRefCon, frame.status, 0, frame.buffer, frame.presentationTimeStamp, frame.presentationDuration);
+        [_stateLock lock];
+    }
+    _delivering = NO;
+    [_stateLock unlock];
+}
+
+- (OSStatus)submitSample:(CMSampleBufferRef)sample flags:(VTDecodeFrameFlags)flags refcon:(void *)refcon output:(RevenantVTDecodeOutput)output infoFlags:(VTDecodeInfoFlags *)infoFlagsOut
+{
+    if ([self isInvalidated])
+        return kVTInvalidSessionErr;
+    RevenantVTDecodeOutput handler = output ?: _output;
+    if (!sample || !handler)
+        return kVTParameterErr;
+    CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sample);
+    if (!block)
+        return kVTParameterErr;
+    const size_t length = CMBlockBufferGetDataLength(block);
+    char *contiguous = NULL;
+    size_t contiguousLength = 0;
+    size_t totalLength = 0;
+    __attribute__((objc_precise_lifetime)) NSMutableData *copy = nil;
+    const uint8_t *bytes = NULL;
+    if (CMBlockBufferGetDataPointer(block, 0, &contiguousLength, &totalLength, &contiguous) == kCMBlockBufferNoErr && contiguousLength == length) {
+        bytes = (const uint8_t *)contiguous;
+    } else {
+        copy = [NSMutableData dataWithLength:length];
+        if (CMBlockBufferCopyDataBytes(block, 0, length, copy.mutableBytes) != kCMBlockBufferNoErr)
+            return kVTVideoDecoderBadDataErr;
+        bytes = copy.bytes;
+    }
+
+    RevenantVTPendingFrame *frame = [[RevenantVTPendingFrame alloc] init];
+    frame.presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sample);
+    frame.presentationDuration = CMSampleBufferGetDuration(sample);
+    frame.sourceFrameRefCon = refcon;
+    frame.suppressed = (flags & kVTDecodeFrame_DoNotOutputFrame) != 0;
+    frame.output = handler;
+    const int64_t sequence = _nextSequence++;
+    [_stateLock lock];
+    _awaiting[@(sequence)] = frame;
+    [_queue addObject:frame];
+    [_stateLock unlock];
+    _emitStatus = noErr;
+    const RevenantVTHEVCResult result = RevenantVTHEVCDecoderDecode(_decoder, bytes, length, sequence, RevenantVTSoftwareEmit, (__bridge void *)self);
+    if (infoFlagsOut)
+        *infoFlagsOut = 0;
+    if (result != RevenantVTHEVCOK) {
+        [self dropSequence:sequence];
+        return RevenantVTStatusOf(result);
+    }
+    return _emitStatus;
+}
+
 - (OSStatus)decodeSample:(CMSampleBufferRef)sample flags:(VTDecodeFrameFlags)flags refcon:(void *)refcon output:(RevenantVTDecodeOutput)output infoFlags:(VTDecodeInfoFlags *)infoFlagsOut
 {
     __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
-    @synchronized (self) {
-        if (_invalidated)
-            return kVTInvalidSessionErr;
-        RevenantVTDecodeOutput handler = output ?: _output;
-        if (!sample || !handler)
-            return kVTParameterErr;
-        CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sample);
-        if (!block)
-            return kVTParameterErr;
-        const size_t length = CMBlockBufferGetDataLength(block);
-        char *contiguous = NULL;
-        size_t contiguousLength = 0;
-        size_t totalLength = 0;
-        __attribute__((objc_precise_lifetime)) NSMutableData *copy = nil;
-        const uint8_t *bytes = NULL;
-        if (CMBlockBufferGetDataPointer(block, 0, &contiguousLength, &totalLength, &contiguous) == kCMBlockBufferNoErr && contiguousLength == length) {
-            bytes = (const uint8_t *)contiguous;
-        } else {
-            copy = [NSMutableData dataWithLength:length];
-            if (CMBlockBufferCopyDataBytes(block, 0, length, copy.mutableBytes) != kCMBlockBufferNoErr)
-                return kVTVideoDecoderBadDataErr;
-            bytes = copy.bytes;
-        }
-
-        RevenantVTPendingFrame *frame = [[RevenantVTPendingFrame alloc] init];
-        frame.presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sample);
-        frame.presentationDuration = CMSampleBufferGetDuration(sample);
-        frame.sourceFrameRefCon = refcon;
-        frame.suppressed = (flags & kVTDecodeFrame_DoNotOutputFrame) != 0;
-        frame.output = handler;
-        const int64_t sequence = _nextSequence++;
-        _pending[@(sequence)] = frame;
-        _emitStatus = noErr;
-        const RevenantVTHEVCResult result = RevenantVTHEVCDecoderDecode(_decoder, bytes, length, sequence, RevenantVTSoftwareEmit, (__bridge void *)self);
-        if (infoFlagsOut)
-            *infoFlagsOut = 0;
-        if (result != RevenantVTHEVCOK) {
-            [_pending removeObjectForKey:@(sequence)];
-            return RevenantVTStatusOf(result);
-        }
-        return _emitStatus;
-    }
+    if ([self isDeliveringOnCurrentThread])
+        return kVTVideoDecoderNotAvailableNowErr;
+    [_decodeLock lock];
+    const OSStatus status = [self submitSample:sample flags:flags refcon:refcon output:output infoFlags:infoFlagsOut];
+    [_decodeLock unlock];
+    [self deliverReady];
+    return status;
 }
 
 - (OSStatus)finish
 {
     __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
-    @synchronized (self) {
-        if (_invalidated)
-            return kVTInvalidSessionErr;
-        _emitStatus = noErr;
-        const RevenantVTHEVCResult result = RevenantVTHEVCDecoderFinish(_decoder, RevenantVTSoftwareEmit, (__bridge void *)self);
-        if (result == RevenantVTHEVCBusy)
-            return RevenantVTStatusOf(result);
-        [_pending removeAllObjects];
-        if (result != RevenantVTHEVCOK)
-            return RevenantVTStatusOf(result);
-        return _emitStatus;
+    if ([self isDeliveringOnCurrentThread])
+        return kVTVideoDecoderNotAvailableNowErr;
+    [_decodeLock lock];
+    if ([self isInvalidated]) {
+        [_decodeLock unlock];
+        return kVTInvalidSessionErr;
     }
+    _emitStatus = noErr;
+    const RevenantVTHEVCResult result = RevenantVTHEVCDecoderFinish(_decoder, RevenantVTSoftwareEmit, (__bridge void *)self);
+    [self dropUnresolved];
+    const OSStatus status = result == RevenantVTHEVCOK ? _emitStatus : RevenantVTStatusOf(result);
+    [_decodeLock unlock];
+    [self deliverReady];
+    return status;
 }
 
 - (void)invalidate
 {
     __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
-    @synchronized (self) {
-        if (_invalidated)
-            return;
+    if (![self isDeliveringOnCurrentThread])
         (void)[self finish];
-        _invalidated = YES;
-        RevenantVTHEVCDecoderDestroy(_decoder);
-        _decoder = NULL;
-    }
+    [_decodeLock lock];
+    [_stateLock lock];
+    _invalidated = YES;
+    [_stateLock unlock];
+    RevenantVTHEVCDecoderDestroy(_decoder);
+    _decoder = NULL;
+    [_decodeLock unlock];
+    [self deliverReady];
 }
 
 - (BOOL)canAcceptFormat:(CMFormatDescriptionRef)format
@@ -257,9 +357,9 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
         return kVTPropertyNotSupportedErr;
     if (!value || CFGetTypeID(value) != CFBooleanGetTypeID())
         return kVTParameterErr;
-    @synchronized (self) {
-        _properties[(__bridge NSString *)key] = (__bridge id)value;
-    }
+    [_stateLock lock];
+    _properties[(__bridge NSString *)key] = (__bridge id)value;
+    [_stateLock unlock];
     return noErr;
 }
 
@@ -267,10 +367,10 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
 {
     if (!valueOut || !RevenantVTIsSupportedProperty(key))
         return kVTPropertyNotSupportedErr;
-    @synchronized (self) {
-        id value = _properties[(__bridge NSString *)key] ?: @NO;
-        *valueOut = CFBridgingRetain(value);
-    }
+    [_stateLock lock];
+    id value = _properties[(__bridge NSString *)key] ?: @NO;
+    *valueOut = CFBridgingRetain(value);
+    [_stateLock unlock];
     return noErr;
 }
 
@@ -355,28 +455,24 @@ static void RevenantVTInterleaveChroma(uint8_t *out, size_t outStride, const uin
 
 - (void)emitPicture:(const RevenantVTHEVCPicture *)picture
 {
-    if (_invalidated)
-        return;
     NSNumber *key = @(picture->sequence);
-    RevenantVTPendingFrame *frame = _pending[key];
+    [_stateLock lock];
+    RevenantVTPendingFrame *frame = _awaiting[key];
+    [_stateLock unlock];
     if (!frame) {
         _emitStatus = kVTVideoDecoderMalfunctionErr;
         return;
     }
-    [_pending removeObjectForKey:key];
-    if (frame.suppressed) {
-        frame.output(frame.sourceFrameRefCon, noErr, 0, NULL, frame.presentationTimeStamp, frame.presentationDuration);
-        return;
-    }
     OSStatus status = noErr;
-    CVPixelBufferRef buffer = [self pixelBufferForPicture:picture status:&status];
-    if (status != noErr) {
+    CVPixelBufferRef buffer = frame.suppressed ? NULL : [self pixelBufferForPicture:picture status:&status];
+    [_stateLock lock];
+    [_awaiting removeObjectForKey:key];
+    frame.buffer = buffer;
+    frame.status = status;
+    frame.resolved = YES;
+    [_stateLock unlock];
+    if (status != noErr)
         _emitStatus = status;
-        frame.output(frame.sourceFrameRefCon, status, 0, NULL, frame.presentationTimeStamp, frame.presentationDuration);
-        return;
-    }
-    frame.output(frame.sourceFrameRefCon, noErr, 0, buffer, frame.presentationTimeStamp, frame.presentationDuration);
-    CVPixelBufferRelease(buffer);
 }
 
 @end
