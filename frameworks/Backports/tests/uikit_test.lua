@@ -379,6 +379,18 @@ local AREAS = {
             "+[UITraitCollection traitCollectionWithUserInterfaceStyle:]", "+[UITraitCollection traitCollectionWithTraitsFromCollections:]",
         },
     },
+    {
+        name = "find in page on WKWebView: the find interaction and the page search session",
+        library = "WebKit",
+        sources = {"WKWebView.m", "RevenantWebFind.m"},
+        members = {
+            "-[WKWebView findInteraction]", "-[WKWebView isFindInteractionEnabled]", "-[WKWebView setFindInteractionEnabled:]",
+            "-[WKWebView findInteraction:sessionForView:]",
+            "-[RevenantWebFindSession initWithEvaluator:]", "-[RevenantWebFindSession resultCount]", "-[RevenantWebFindSession highlightedResultIndex]",
+            "-[RevenantWebFindSession performSearchWithQuery:options:]", "-[RevenantWebFindSession highlightNextResultInDirection:]",
+            "-[RevenantWebFindSession invalidateFoundResults]",
+        },
+    },
 }
 
 local function key_of(member)
@@ -396,22 +408,24 @@ function main()
     if not sdk or sdk == "" then
         sdk = sdkfiles.sdk_folder()
     end
-    local sources = path.absolute(path.join(os.scriptdir(), "..", "src", "UIKit"))
     local root = path.join(workspace.scratch(), "uikit-test")
     os.tryrm(root)
     local objects, total = 0, 0
     for _, area in ipairs(AREAS) do
+        local library = area.library or "UIKit"
+        local sources = path.absolute(path.join(os.scriptdir(), "..", "src", library))
         for _, name in ipairs(area.sources) do
-            local object = path.join(root, "UIKit", "src", "UIKit", name .. ".o")
+            local object = path.join(root, library, "src", library, name .. ".o")
             os.mkdir(path.directory(object))
             os.vrunv("clang", {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc", "-Os", "-w", "-c", "-o", object,
                 path.join(sources, name)})
             objects = objects + 1
         end
     end
-    local keys = implemented.from_objects(root).UIKit or {}
+    local found = implemented.from_objects(root)
     local missing = {}
     for _, area in ipairs(AREAS) do
+        local keys = found[area.library or "UIKit"] or {}
         for _, member in ipairs(area.members) do
             total = total + 1
             if not keys[key_of(member)] then
@@ -419,7 +433,7 @@ function main()
             end
         end
     end
-    assert(#missing == 0, "members not implemented by the compiled UIKit objects:\n" .. table.concat(missing, "\n"))
+    assert(#missing == 0, "members not implemented by the compiled objects:\n" .. table.concat(missing, "\n"))
     os.tryrm(root)
-    print("uikit tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
+    print("symbol tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
 end
