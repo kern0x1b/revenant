@@ -1,3 +1,5 @@
+#import <dlfcn.h>
+
 #import "RevenantWebKit.h"
 #import "RevenantScriptCodec.h"
 
@@ -50,21 +52,34 @@ static NSString *TokenOf(NSURL *URL)
     return request;
 }
 
++ (NSString *)answerForView:(WKWebView *)view message:(NSDictionary *)message
+{
+    if ([NSThread isMainThread])
+        return [view revenant_answerSynchronously:message] ?: @"0";
+    void (*callDelegate)(NSInvocation *) = dlsym(RTLD_DEFAULT, "WebThreadCallDelegate");
+    if (!callDelegate)
+        return @"0";
+    SEL selector = @selector(revenant_answerSynchronously:);
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[WKWebView instanceMethodSignatureForSelector:selector]];
+    NSDictionary *argument = message;
+    invocation.target = view;
+    invocation.selector = selector;
+    [invocation setArgument:&argument atIndex:2];
+    callDelegate(invocation);
+    __unsafe_unretained NSString *result = nil;
+    [invocation getReturnValue:&result];
+    return result ?: @"0";
+}
+
 - (void)startLoading
 {
     NSString *token = TokenOf(self.request.URL);
     WKWebView *view = ViewForToken(token);
     BOOL valid = NO;
     NSDictionary *message = RevenantCodecParsed([self.request.URL.query stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], &valid);
-    __block NSString *answer = @"0";
-    void (^answerMessage)(void) = ^{
-        if (view && valid && [message isKindOfClass:[NSDictionary class]] && [message[@"k"] isEqual:token])
-            answer = [view revenant_answerSynchronously:message] ?: @"0";
-    };
-    if ([NSThread isMainThread])
-        answerMessage();
-    else
-        dispatch_sync(dispatch_get_main_queue(), answerMessage);
+    NSString *answer = @"0";
+    if (view && valid && [message isKindOfClass:[NSDictionary class]] && [message[@"k"] isEqual:token])
+        answer = [RevenantSyncProtocol answerForView:view message:message];
     NSData *data = [answer dataUsingEncoding:NSUTF8StringEncoding];
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.request.URL statusCode:200 HTTPVersion:@"HTTP/1.1" headerFields:@{@"Content-Type": @"text/plain", @"Cache-Control": @"no-store"}];
     [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
