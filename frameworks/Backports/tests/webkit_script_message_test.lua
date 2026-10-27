@@ -17,6 +17,19 @@ local BACKPORT_ONLY = {
     "refused forged nonce: 1",
     "refused missing nonce: 1",
     "nesting capped: 1",
+    "window proxy open envelope: 1",
+    "window proxy is an object: 1",
+    "window proxy starts open: 1",
+    "window proxy location is the URL: 1",
+    "window proxy close posts once: 1",
+    "window proxy closed after close: 1",
+    "window proxy postMessage posts origin: 1",
+    "window proxy location set posts navigation: 1",
+    "window proxy message round trips: 1",
+    "window proxy native update moves location: 1",
+    "window proxy native update closes: 1",
+    "window self close posts: 1",
+    "window proxy survives a second install: 1",
 }
 
 local function clang()

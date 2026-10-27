@@ -161,7 +161,18 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
   is the same path and its size is N. A `file:` source has no resume data. `isUserInitiated` is NO and `originatingFrame`
   is nil, because the engine does not report either.
 - `WKOpenPanelParameters`: both properties are NO. The engine shows no file picker and never sends `runOpenPanel`.
-- `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`).
+- `window.open` returns a WindowProxy at once, before the native side has made the window. Its `closed`, `location`
+  (`href` read and set), `close()` and `postMessage(message, targetOrigin)` are bridged through the shim: each call posts an
+  envelope with the window's id (`w` 1 for open, 2 for close, 3 for a message, 4 for a navigation, 5 for the popup's own
+  `window.close()`). Native code answers by evaluating an update in the opener: `href` after each commit of the popup, and
+  `closed` when the popup closes. A message is delivered to the popup as a `message` event whose data is the encoded value
+  revived in script, so an object, array, `undefined`, `NaN`, `-0`, a date or a cycle arrives as it was sent. The
+  `targetOrigin` must be `*`, the popup's exact origin, or `/` for the sender's own origin, and anything else is dropped.
+  When the delegate gives no window, or a view that is not a `WKWebView`, the proxy is closed at once. WebKit returns null
+  there, but the bridge is asynchronous, so the page cannot learn it synchronously. `window.opener` in the popup is not
+  set.
+- `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`), and `webViewDidClose:`
+  is sent to the closing view's `UIDelegate` when a popup closes, whether the opener or the popup closed it.
   `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
   picker and no context menu for a page element.
 - `WKURLSchemeHandler` and `WKURLSchemeTask`: declared to match the existing route. A scheme registered on a
@@ -258,6 +269,14 @@ Already present, with the same limits:
   after the navigation download, because the backport reports neither `didFinish` nor `didFail` for that navigation.
   Whether iOS 6 `WKWebView` should send `didFailProvisionalNavigation` (with `WebKitErrorDomain` 102) there is not checked
   against macOS yet.
+- Measured on the iPad with the `window` probe mode: a popup created by `window.open` with a delegate that returns a
+  view; `location` reflected the first commit; `postMessage` reached the popup with the sent value (a nested object and
+  array with `null` and a number), and a `targetOrigin` that did not match was dropped; the opener's `close()` called
+  `webViewDidClose:` and set `closed`; the popup's own `window.close()` did the same for the opener; a popup navigating
+  itself updated the opener's `location`; and setting the opener's `location` navigated the popup. An earlier run showed
+  the opener's `closed` and `location` not updating, because the shim runs again after the document rewrite, and the
+  second run replaced the table of proxies. The table now lives on `window` under the nonce-named property, so both runs
+  share it (host test `webkit_script_message_test`, check "survives a second install").
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
