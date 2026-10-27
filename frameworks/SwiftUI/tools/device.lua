@@ -1,5 +1,6 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+local outcome = import("lib.outcome", {rootdir = os.scriptdir(), anonymous = true})
 
 local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/device.lua ACTION ..., from a folder whose device.env names the claimed phone
   copy LOCAL REMOTE                 a file to the phone
@@ -15,6 +16,9 @@ local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
 local SHOT = "/usr/libexec/revenant-shot"
 local UNLOCK = "/usr/libexec/revenant-unlock"
 local SLIDE = {"0.374", "0.9375", "0.72", "0.9375"}
+-- The touches a gesture scenario waits for. Sent from outside the demo by revenant-unlock, as fractions of the screen:
+-- injecting them from inside the demo quits the demo mid-drag. The drag opens the row's actions, the tap takes Archive.
+local EXTERNAL_TOUCHES = {["swipe-real"] = {"drag 0.974 0.041 0.70 0.041", "tap 0.941 0.041"}}
 
 local function phone()
     local device = import("@addon.revenant.device", {anonymous = true})
@@ -156,26 +160,47 @@ local function shots(arguments)
     local device, settings = phone()
     local out = tree.run("device-shots")
     install(device, settings)
+    local failed = {}
     for _, scenario in ipairs(arguments) do
         if mode == "gesture" then
             start(device, settings, "printf %s " .. scenario .. " > /var/revenant/show; printf %s " .. scenario
                   .. " > /var/revenant/gesture; chmod 666 /var/revenant/show /var/revenant/gesture")
-            wait_for(device, settings, "gesture: opened", 60, 1000)
-            local open = path.join(out, "gesture-" .. scenario .. "-open.png")
-            shot(device, settings, open)
-            wait_for(device, settings, "gesture: done", 30, 1000)
-            local after = path.join(out, "gesture-" .. scenario .. "-after.png")
-            shot(device, settings, after)
+            local touches = EXTERNAL_TOUCHES[scenario] or {}
+            if #touches > 0 then
+                wait_for(device, settings, "gesture: waiting", 60, 1000)
+                os.sleep(1000)
+                for _, touch in ipairs(touches) do
+                    device.run(settings, UNLOCK .. " " .. touch)
+                end
+                wait_for(device, settings, "swipe: archive", 60, 1000)
+            end
+            local done = wait_for(device, settings, "gesture: done", 60, 1000)
+            local logged = on_device(device, settings, "grep -a 'swipe: archive' " .. LOG)
+            local passed, why = outcome.gesture_outcome(scenario, done, logged)
+            local file = path.join(out, "gesture-" .. scenario .. (passed and ".png" or "-failed.png"))
+            shot(device, settings, file)
             io.write(on_device(device, settings, "grep -a 'gesture\\|swipe\\|backports' " .. LOG) or "")
             on_device(device, settings, "rm -f /var/revenant/show /var/revenant/gesture")
-            print("%s (gesture): %s, %s", scenario, open, after)
+            if passed then
+                print("%s (gesture): %s", scenario, file)
+            else
+                print("%s (gesture): FAILED, %s: %s", scenario, why, file)
+                table.insert(failed, scenario .. " (gesture)")
+            end
         elseif mode == "live" then
             start(device, settings, "printf %s " .. scenario .. " > /var/revenant/show; chmod 666 /var/revenant/show")
+            local ready = wait_for(device, settings, "live: " .. scenario .. " ready", 60, 1000)
             os.sleep(8000)
-            local file = path.join(out, "live-" .. scenario .. ".png")
+            local passed, why = outcome.live_outcome(ready)
+            local file = path.join(out, "live-" .. scenario .. (passed and ".png" or "-failed.png"))
             shot(device, settings, file)
             on_device(device, settings, "rm -f /var/revenant/show")
-            print("%s (live screen): %s", scenario, file)
+            if passed then
+                print("%s (live screen): %s", scenario, file)
+            else
+                print("%s (live screen): FAILED, %s: %s", scenario, why, file)
+                table.insert(failed, scenario)
+            end
         else
             start(device, settings, "touch /var/revenant/snapshots.on /var/revenant/snapshots.png; printf %s " .. scenario
                   .. " > /var/revenant/snapshots.only; chmod 666 /var/revenant/snapshots.*")
@@ -191,6 +216,9 @@ local function shots(arguments)
                 print("%s: %s", scenario, path.join(out, scenario .. ".png"))
             end
         end
+    end
+    if #failed > 0 then
+        raise("%d scenario(s) failed on the phone, their pictures are the *-failed*.png files: %s", #failed, table.concat(failed, ", "))
     end
 end
 

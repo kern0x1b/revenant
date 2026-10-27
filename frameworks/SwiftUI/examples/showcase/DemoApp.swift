@@ -159,17 +159,32 @@ let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
     return (name?.isEmpty == false ? name : nil, images, fromBundle)
 }()
 
+// Shows a scenario on the phone the way the snapshot run builds it: a probe hosts the view, and the scenario's action
+// (search activated, a row tapped) runs on it before the screen is marked ready for its picture.
+func showLive(_ scenario: SnapshotCase) {
+    guard let action = scenario.action else {
+        probe("live: \(scenario.name) ready")
+        return
+    }
+    guard let window = UIApplication.shared.keyWindow else {
+        probe("live: \(scenario.name) no key window")
+        return
+    }
+    let size = UIScreen.main.bounds.size
+    let host = _Probe(scenario.view, width: size.width, height: size.height)
+    window.addSubview(host.hostView)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        action(host)
+        probe("live: \(scenario.name) ready")
+    }
+}
+
 func runDeviceGesture(_ name: String) {
-    probe("swipe bridge: \(_Probe.swipeBridgeState())")
-    probe("table recognisers: \(_Probe.tableRecognizers(in: UIApplication.shared.keyWindow ?? UIView()))")
-    guard gesture_ready() else { probe("gesture: no HID client"); return }
+    // The touches of swipe-real come from the phone's revenant-unlock, from outside this process: injecting them from
+    // inside the demo quits the demo mid-drag (measured on the iPad). This script only waits for them and reports.
     switch name {
     case "swipe-real":
-        let width = UIScreen.main.bounds.size.width
-        gesture_drag({ CGPoint(x: width - 20, y: 42) }, { CGPoint(x: width - 230, y: 42) }, 12, 0.6)
-        gesture_step(6.0) { probe("gesture: opened") }
-        gesture_tap({ CGPoint(x: width - 45, y: 42) }, 0.5)
-        gesture_step(0.5) { probe("gesture: log \(swipeLog) \(_Probe.swipeBridgeState())") }
+        probe("gesture: waiting for the swipe")
     default: break
     }
     gesture_run { probe("gesture: done") }
@@ -183,7 +198,8 @@ struct DemoApp: App {
         WindowGroup {
             if let name = try? String(contentsOfFile: "/var/revenant/show", encoding: .utf8),
                let scenario = snapshotCases().first(where: { $0.name == name.trimmingCharacters(in: .whitespacesAndNewlines) }) {
-                AnyView(scenario.view).onAppear {
+                AnyView(scenario.action == nil ? AnyView(scenario.view) : AnyView(Text(""))).onAppear {
+                    showLive(scenario)
                     if let gesture = try? String(contentsOfFile: "/var/revenant/gesture", encoding: .utf8) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { runDeviceGesture(gesture.trimmingCharacters(in: .whitespacesAndNewlines)) }
                     }
