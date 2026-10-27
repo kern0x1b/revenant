@@ -1,1 +1,1 @@
-cloudkit_sources_digest = "82aca358f16a17b5977cfc326806b65c"
+cloudkit_sources_digest = "fa0872cfa30ad13b6bd454d5bdb97e08"
