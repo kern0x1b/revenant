@@ -163,6 +163,14 @@ RevenantVTHEVCResult RevenantVTHEVCDecoderDecode(RevenantVTHEVCDecoder *decoder,
     return RevenantVTHEVCLeave(decoder, RevenantVTHEVCDecodePacket(decoder, data, size, sequence, sink, context));
 }
 
+RevenantVTHEVCResult RevenantVTHEVCDecoderWait(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context)
+{
+    if (decoder->depth)
+        return RevenantVTHEVCBusy;
+    decoder->depth++;
+    return RevenantVTHEVCLeave(decoder, RevenantVTHEVCDrain(decoder, sink, context));
+}
+
 static RevenantVTHEVCResult RevenantVTHEVCFinishFrames(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context)
 {
     const int sent = avcodec_send_packet(decoder->context, NULL);

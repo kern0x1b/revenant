@@ -41,6 +41,7 @@ typedef void (*RevenantVTHEVCSink)(void *context, const RevenantVTHEVCPicture *p
 
 __attribute__((visibility("hidden"))) RevenantVTHEVCDecoder *RevenantVTHEVCDecoderCreate(const uint8_t *configuration, size_t size, int threads, RevenantVTHEVCResult *result);
 __attribute__((visibility("hidden"))) RevenantVTHEVCResult RevenantVTHEVCDecoderDecode(RevenantVTHEVCDecoder *decoder, const uint8_t *data, size_t size, int64_t sequence, RevenantVTHEVCSink sink, void *context);
+__attribute__((visibility("hidden"))) RevenantVTHEVCResult RevenantVTHEVCDecoderWait(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context);
 __attribute__((visibility("hidden"))) RevenantVTHEVCResult RevenantVTHEVCDecoderFinish(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context);
 __attribute__((visibility("hidden"))) void RevenantVTHEVCDecoderDestroy(RevenantVTHEVCDecoder *decoder);
 

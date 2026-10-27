@@ -9,6 +9,7 @@
 
 extern OSStatus RevenantVTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut);
 extern OSStatus RevenantVTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef session);
+extern OSStatus RevenantVTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session);
 extern void RevenantVTDecompressionSessionInvalidate(VTDecompressionSessionRef session);
 
 @interface RevenantTestSample : NSObject
@@ -409,6 +410,115 @@ static void RevenantCheckCallbackWaitsForAnotherThread(RevenantTestClip *clip)
     CFRelease(format);
 }
 
+static void RevenantCollectSerially(void *refcon, void *sourceFrameRefCon, OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef image, CMTime pts, CMTime duration)
+{
+    NSMutableArray<RevenantTestFrame *> *frames = (__bridge NSMutableArray<RevenantTestFrame *> *)refcon;
+    @synchronized (frames) {
+        RevenantCollect(refcon, sourceFrameRefCon, status, infoFlags, image, pts, duration);
+    }
+}
+
+static NSUInteger RevenantEmittedCount(NSMutableArray<RevenantTestFrame *> *frames)
+{
+    @synchronized (frames) {
+        return frames.count;
+    }
+}
+
+@interface RevenantEmissionTrace : NSObject
+@property (nonatomic, strong) NSMutableArray<NSNumber *> *afterDecode;
+@property (nonatomic) NSUInteger flushedByWait;
+@property (nonatomic, strong) NSArray<RevenantTestFrame *> *frames;
+@end
+
+@implementation RevenantEmissionTrace
+@end
+
+static RevenantEmissionTrace *RevenantTraceEmission(RevenantTestClip *clip, CMVideoFormatDescriptionRef format, VTDecodeFrameFlags flags, BOOL backport, NSUInteger waitAt)
+{
+    NSMutableArray<RevenantTestFrame *> *frames = [NSMutableArray array];
+    RevenantEmissionTrace *trace = [[RevenantEmissionTrace alloc] init];
+    trace.afterDecode = [NSMutableArray arrayWithCapacity:clip.samples.count];
+    VTDecompressionSessionRef session = NULL;
+    OSStatus status = noErr;
+    if (backport) {
+        RevenantVTDecodeOutput output = ^(void *sourceFrameRefCon, OSStatus frameStatus, VTDecodeInfoFlags infoFlags, CVImageBufferRef image, CMTime pts, CMTime duration) {
+            RevenantCollectSerially((__bridge void *)frames, sourceFrameRefCon, frameStatus, infoFlags, image, pts, duration);
+        };
+        status = RevenantVTSoftwareSessionCreate(format, (__bridge CFDictionaryRef)RevenantNV12Attributes(), output, &session);
+    } else {
+        VTDecompressionOutputCallbackRecord record = {RevenantCollectSerially, (__bridge void *)frames};
+        status = VTDecompressionSessionCreate(kCFAllocatorDefault, format, NULL, (__bridge CFDictionaryRef)RevenantNV12Attributes(), &record, &session);
+    }
+    if (status != noErr || !session)
+        return nil;
+    for (NSUInteger index = 0; index < clip.samples.count; index++) {
+        CMSampleBufferRef buffer = RevenantSampleOf(format, clip, clip.samples[index]);
+        if (buffer) {
+            if (backport)
+                RevenantVTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
+            else
+                VTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
+            CFRelease(buffer);
+        }
+        [trace.afterDecode addObject:@(RevenantEmittedCount(frames))];
+        if (index == waitAt) {
+            const NSUInteger before = RevenantEmittedCount(frames);
+            if (backport)
+                RevenantVTDecompressionSessionWaitForAsynchronousFrames(session);
+            else
+                VTDecompressionSessionWaitForAsynchronousFrames(session);
+            trace.flushedByWait = RevenantEmittedCount(frames) - before;
+        }
+    }
+    if (backport) {
+        RevenantVTDecompressionSessionFinishDelayedFrames(session);
+        RevenantVTDecompressionSessionInvalidate(session);
+    } else {
+        VTDecompressionSessionFinishDelayedFrames(session);
+        VTDecompressionSessionInvalidate(session);
+    }
+    CFRelease(session);
+    trace.frames = frames;
+    return trace;
+}
+
+static NSString *RevenantCountsList(NSArray<NSNumber *> *counts)
+{
+    NSMutableArray<NSString *> *values = [NSMutableArray arrayWithCapacity:counts.count];
+    for (NSNumber *count in counts)
+        [values addObject:count.stringValue];
+    return [values componentsJoinedByString:@","];
+}
+
+static void RevenantCheckEmissionTiming(RevenantTestClip *clip)
+{
+    CMVideoFormatDescriptionRef format = RevenantFormatOf(clip, clip.configuration);
+    if (!format)
+        return;
+    const VTDecodeFrameFlags flagSets[] = {0, kVTDecodeFrame_EnableTemporalProcessing, kVTDecodeFrame_EnableAsynchronousDecompression, kVTDecodeFrame_EnableAsynchronousDecompression | kVTDecodeFrame_EnableTemporalProcessing};
+    NSString *names[] = {@"no flags", @"temporal processing", @"asynchronous", @"asynchronous and temporal processing"};
+    const NSUInteger waitAt = clip.samples.count / 2;
+    for (size_t index = 0; index < sizeof(flagSets) / sizeof(flagSets[0]); index++) {
+        RevenantEmissionTrace *reference = RevenantTraceEmission(clip, format, flagSets[index], NO, waitAt);
+        RevenantEmissionTrace *decoded = RevenantTraceEmission(clip, format, flagSets[index], YES, waitAt);
+        NSString *label = [NSString stringWithFormat:@"%@ with %@", @"clip", names[index]];
+        printf("%s\n  macOS after decode: %s\n  macOS flushed by wait: %lu, frames %lu\n  backport after decode: %s\n  backport flushed by wait: %lu, frames %lu\n",
+            [label UTF8String],
+            [RevenantCountsList(reference.afterDecode) UTF8String], (unsigned long)reference.flushedByWait, (unsigned long)reference.frames.count,
+            [RevenantCountsList(decoded.afterDecode) UTF8String], (unsigned long)decoded.flushedByWait, (unsigned long)decoded.frames.count);
+        RevenantExpect(reference != nil && decoded != nil, [label stringByAppendingString:@": both sessions are created"], @"a session was not created");
+        if (reference && decoded) {
+            RevenantExpect(decoded.frames.count == clip.samples.count, [label stringByAppendingString:@": a mid-stream wait leaves the decoder running, so every frame arrives"], [NSString stringWithFormat:@"%lu of %lu", (unsigned long)decoded.frames.count, (unsigned long)clip.samples.count]);
+            const NSInteger emittedBeforeFinish = decoded.afterDecode.lastObject.integerValue;
+            RevenantExpect(emittedBeforeFinish >= (NSInteger)clip.samples.count - 8, [label stringByAppendingString:@": frames come out before finish, within the stream's reorder window"], [NSString stringWithFormat:@"%ld of %lu emitted before finish", (long)emittedBeforeFinish, (unsigned long)clip.samples.count]);
+            RevenantExpect([RevenantPTSList(decoded.frames) isEqualToString:RevenantSamplePTSList(clip)], [label stringByAppendingString:@": the frames after a mid-stream wait are in decode order"], RevenantPTSList(decoded.frames));
+            RevenantExpect(reference.frames.count == clip.samples.count && [RevenantPTSList(reference.frames) isEqualToString:RevenantSamplePTSList(clip)], [label stringByAppendingString:@": macOS keeps decoding after a mid-stream wait, in decode order"], RevenantPTSList(reference.frames));
+        }
+    }
+    CFRelease(format);
+}
+
 int main(int argc, char **argv)
 {
     @autoreleasepool {
@@ -421,6 +531,7 @@ int main(int argc, char **argv)
             RevenantCheckRejectsBadConfiguration(clip);
             RevenantCheckReentrancy(clip);
             RevenantCheckCallbackWaitsForAnotherThread(clip);
+            RevenantCheckEmissionTiming(clip);
         }
         return revenant_finish();
     }

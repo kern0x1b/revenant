@@ -130,6 +130,7 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
 - (instancetype)initWithDecoder:(RevenantVTHEVCDecoder *)decoder dimensions:(CMVideoDimensions)dimensions pixelFormat:(OSType)pixelFormat output:(RevenantVTDecodeOutput)output;
 - (OSStatus)decodeSample:(CMSampleBufferRef)sample flags:(VTDecodeFrameFlags)flags refcon:(void *)refcon output:(RevenantVTDecodeOutput)output infoFlags:(VTDecodeInfoFlags *)infoFlagsOut;
 - (OSStatus)finish;
+- (OSStatus)wait;
 - (void)invalidate;
 - (BOOL)canAcceptFormat:(CMFormatDescriptionRef)format;
 - (OSStatus)setProperty:(CFStringRef)key value:(CFTypeRef)value;
@@ -330,6 +331,24 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
     return status;
 }
 
+- (OSStatus)wait
+{
+    __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
+    if ([self isDeliveringOnCurrentThread])
+        return kVTVideoDecoderNotAvailableNowErr;
+    [_decodeLock lock];
+    if ([self isInvalidated]) {
+        [_decodeLock unlock];
+        return kVTInvalidSessionErr;
+    }
+    _emitStatus = noErr;
+    const RevenantVTHEVCResult result = RevenantVTHEVCDecoderWait(_decoder, RevenantVTSoftwareEmit, (__bridge void *)self);
+    const OSStatus status = result == RevenantVTHEVCOK ? _emitStatus : RevenantVTStatusOf(result);
+    [_decodeLock unlock];
+    [self deliverReady];
+    return status;
+}
+
 - (void)invalidate
 {
     __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
@@ -512,7 +531,7 @@ OSStatus RevenantVTSoftwareSessionCreate(CMVideoFormatDescriptionRef format, CFD
     if (status != noErr)
         return status;
     RevenantVTHEVCResult result = RevenantVTHEVCOK;
-    RevenantVTHEVCDecoder *decoder = RevenantVTHEVCDecoderCreate(configuration.bytes, configuration.length, 1, &result);
+    RevenantVTHEVCDecoder *decoder = RevenantVTHEVCDecoderCreate(configuration.bytes, configuration.length, 2, &result);
     if (!decoder)
         return RevenantVTStatusOf(result);
     RevenantVTSoftwareSession *session = [[RevenantVTSoftwareSession alloc] initWithDecoder:decoder dimensions:dimensions pixelFormat:pixelFormat output:output];
@@ -540,6 +559,11 @@ OSStatus RevenantVTSoftwareSessionDecode(VTDecompressionSessionRef session, CMSa
 OSStatus RevenantVTSoftwareSessionFinish(VTDecompressionSessionRef session)
 {
     return [RevenantVTSessionOf(session) finish];
+}
+
+OSStatus RevenantVTSoftwareSessionWait(VTDecompressionSessionRef session)
+{
+    return [RevenantVTSessionOf(session) wait];
 }
 
 void RevenantVTSoftwareSessionInvalidate(VTDecompressionSessionRef session)

@@ -13,6 +13,7 @@ __attribute__((visibility("hidden"))) OSStatus RevenantVTSoftwareSessionCreate(C
 __attribute__((visibility("hidden"))) BOOL RevenantVTSoftwareSessionOwns(VTDecompressionSessionRef session);
 __attribute__((visibility("hidden"))) OSStatus RevenantVTSoftwareSessionDecode(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut, RevenantVTDecodeOutput output);
 __attribute__((visibility("hidden"))) OSStatus RevenantVTSoftwareSessionFinish(VTDecompressionSessionRef session);
+__attribute__((visibility("hidden"))) OSStatus RevenantVTSoftwareSessionWait(VTDecompressionSessionRef session);
 __attribute__((visibility("hidden"))) void RevenantVTSoftwareSessionInvalidate(VTDecompressionSessionRef session);
 __attribute__((visibility("hidden"))) BOOL RevenantVTSoftwareSessionCanAccept(VTDecompressionSessionRef session, CMFormatDescriptionRef format);
 __attribute__((visibility("hidden"))) OSStatus RevenantVTSoftwareSessionSetProperty(VTDecompressionSessionRef session, CFStringRef key, CFTypeRef value);

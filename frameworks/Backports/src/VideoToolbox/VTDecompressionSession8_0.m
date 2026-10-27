@@ -72,7 +72,7 @@ OSStatus VTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef ses
 OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session))
-        return RevenantVTSoftwareSessionFinish(session);
+        return RevenantVTSoftwareSessionWait(session);
     RevenantVTStatusFunction wait = (RevenantVTStatusFunction)RevenantVTSystemSymbol("VTDecompressionSessionWaitForAsynchronousFrames");
     return wait ? wait(session) : kVTVideoDecoderNotAvailableNowErr;
 }
