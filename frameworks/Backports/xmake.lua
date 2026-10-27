@@ -50,7 +50,7 @@ local LIBRARIES = {
     {name = "BackgroundTasksBackports", folder = "BackgroundTasks", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "DeviceCheckBackports", folder = "DeviceCheck", frameworks = {"DeviceCheck", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation", "PhotosUI"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp"}, system = {}},
@@ -204,6 +204,14 @@ if is_plat("iphoneos") then
                     end
                 end)
             end
+            if library.name == "PhotosBackports" then
+                after_build(function (target)
+                    local load = os.iorunv("otool", {"-l", target:targetfile()})
+                    if not load:find("LC_LOAD_WEAK_DYLIB%s+cmdsize %d+%s+name [^%s]*PhotosUI%.framework/PhotosUI") then
+                        raise("%s must weak-link PhotosUI, which an iOS 6 device does not have, so a strong link would stop the app from launching", target:targetfile())
+                    end
+                end)
+            end
             for _, name in ipairs(library.libraries) do
                 if name:endswith("Backports") then
                     add_deps(name)
@@ -307,7 +315,7 @@ else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
-                                  members = "lowered_members_test.lua", device = "device_members_test.lua",
+                                  members = "lowered_members_test.lua", device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua"})
 end
@@ -397,6 +405,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("alias_public_name")
         add_tests("alias_system_class")
         add_tests("protocol_uimutabletraits")
+        add_tests("trait_style_default")
         add_tests("protocol_ck_key_value_setting")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
@@ -541,7 +550,7 @@ if not is_plat("iphoneos") then
     host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m", "WKSecurityOrigin.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end

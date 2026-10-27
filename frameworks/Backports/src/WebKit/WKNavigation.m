@@ -40,6 +40,11 @@
     return _request;
 }
 
+- (WKSecurityOrigin *)securityOrigin
+{
+    return [WKSecurityOrigin revenant_originWithURL:_request.URL];
+}
+
 - (id)copyWithZone:(NSZone *)zone
 {
     return self;
@@ -92,6 +97,11 @@
 @end
 
 @implementation WKNavigationResponse
+
++ (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed
+{
+    return allowed ? WKNavigationResponsePolicyAllow : WKNavigationResponsePolicyCancel;
+}
 
 - (BOOL)isForMainFrame
 {
