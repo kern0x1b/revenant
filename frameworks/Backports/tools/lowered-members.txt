@@ -23837,6 +23837,7 @@ member NSTextAttachment -attachmentBoundsForTextContainer:proposedLineFragment:g
 member NSTextAttachment -bounds
 member NSTextAttachment -contents
 member NSTextAttachment -fileType
+member NSTextAttachment -imageForBounds:textContainer:characterIndex:
 member NSTextAttachment -setBounds:
 member NSTextAttachment -setContents:
 member NSTextAttachment -setFileType:
@@ -35557,6 +35558,7 @@ protocol_member NSMutableCopying -mutableCopyWithZone:
 protocol_member NSSecureCoding +supportsSecureCoding
 protocol_member NSStreamDelegate -stream:handleEvent:
 protocol_member NSTextAttachmentContainer -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
+protocol_member NSTextAttachmentContainer -imageForBounds:textContainer:characterIndex:
 protocol_member NSTextLocation -compare:
 protocol_member NSTextStorageDelegate -textStorage:didProcessEditing:range:changeInLength:
 protocol_member NSURLConnectionDataDelegate -connection:didReceiveData:

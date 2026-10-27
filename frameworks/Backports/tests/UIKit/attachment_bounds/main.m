@@ -19,6 +19,12 @@ static void report(NSString *name, NSTextAttachment *attachment)
     printf("%s %g %g %g %g\n", name.UTF8String, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
+static void reportImage(NSString *name, NSTextAttachment *attachment)
+{
+    NSImage *image = [attachment imageForBounds:CGRectZero textContainer:nil characterIndex:0];
+    printf("%s %g %g\n", name.UTF8String, image.size.width, image.size.height);
+}
+
 int main(void)
 {
     @autoreleasepool {
@@ -38,6 +44,7 @@ int main(void)
         NSTextAttachment *sized = [[SizedAttachment alloc] init];
         sized.image = [[NSImage alloc] initWithSize:NSMakeSize(10, 20)];
         report(@"subclass override", sized);
+        reportImage(@"image for bounds", image);
     }
     return 0;
 }
