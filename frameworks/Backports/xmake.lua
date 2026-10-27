@@ -530,5 +530,6 @@ if not is_plat("iphoneos") then
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}})
+    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}}, nil, {"Foundation"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end
