@@ -15,7 +15,8 @@ end
 
 local contract = table.concat({
     "map 0=accepted -2=unavailable -1=rejected -3=rejected -8=rejected -9=rejected",
-    "valid simple 1234=1 123=0 12a4=0 empty=0",
+    "style 0=simple 1=simple 2=complex 7=complex current=complex",
+    "valid simple 1234=1 123=0 12a4=0 12345=1 empty=0",
     "valid complex abc!=1 empty=0",
     "verify accepted accepted calls=1 bytes=1234",
     "verify refused unavailable calls=1 bytes=1234",

@@ -115,7 +115,7 @@ static NSError *revenant_error_for_passcode(RevenantPasscodeResult result)
         if (_interactionNotAllowed) {
             failure = revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
         } else {
-            RevenantPasscodePresent(localizedReason, RevenantPasscodeStyleSimple, ^(RevenantPasscodeResult result) {
+            RevenantPasscodePresent(localizedReason, RevenantPasscodeCurrentStyle(), ^(RevenantPasscodeResult result) {
                 handler(result == RevenantPasscodeAccepted, revenant_error_for_passcode(result));
             });
             return;

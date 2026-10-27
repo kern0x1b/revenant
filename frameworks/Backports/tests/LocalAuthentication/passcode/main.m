@@ -42,15 +42,23 @@ static void verify(const char *label, NSString *text, int32_t status, BOOL reach
     printf("verify %s %s calls=%d bytes=%s\n", label, name(result), stubCalls, stubBytes ? stubBytes.UTF8String : "-");
 }
 
+static const char *style(RevenantPasscodeStyle style)
+{
+    return style == RevenantPasscodeStyleSimple ? "simple" : "complex";
+}
+
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
         printf("map 0=%s -2=%s -1=%s -3=%s -8=%s -9=%s\n", name(RevenantPasscodeMapStatus(0)), name(RevenantPasscodeMapStatus(-2)),
                name(RevenantPasscodeMapStatus(-1)), name(RevenantPasscodeMapStatus(-3)), name(RevenantPasscodeMapStatus(-8)),
                name(RevenantPasscodeMapStatus(-9)));
-        printf("valid simple 1234=%d 123=%d 12a4=%d empty=%d\n", RevenantPasscodeIsValid(@"1234", RevenantPasscodeStyleSimple),
+        printf("style 0=%s 1=%s 2=%s 7=%s current=%s\n", style(RevenantPasscodeStyleForUnlockScreenType(0)),
+               style(RevenantPasscodeStyleForUnlockScreenType(1)), style(RevenantPasscodeStyleForUnlockScreenType(2)),
+               style(RevenantPasscodeStyleForUnlockScreenType(7)), style(RevenantPasscodeCurrentStyle()));
+        printf("valid simple 1234=%d 123=%d 12a4=%d 12345=%d empty=%d\n", RevenantPasscodeIsValid(@"1234", RevenantPasscodeStyleSimple),
                RevenantPasscodeIsValid(@"123", RevenantPasscodeStyleSimple), RevenantPasscodeIsValid(@"12a4", RevenantPasscodeStyleSimple),
-               RevenantPasscodeIsValid(@"", RevenantPasscodeStyleSimple));
+               RevenantPasscodeIsValid(@"12345", RevenantPasscodeStyleSimple), RevenantPasscodeIsValid(@"", RevenantPasscodeStyleSimple));
         printf("valid complex abc!=%d empty=%d\n", RevenantPasscodeIsValid(@"abc!", RevenantPasscodeStyleComplex),
                RevenantPasscodeIsValid(@"", RevenantPasscodeStyleComplex));
         verify("accepted", @"1234", 0, YES);

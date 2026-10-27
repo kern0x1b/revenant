@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <TargetConditionals.h>
+#import <dlfcn.h>
+#import <objc/message.h>
 #import "RevenantPasscode.h"
 
 #if TARGET_OS_IPHONE
@@ -7,7 +9,45 @@
 #endif
 
 static const int32_t revenant_passcode_kernel_refused = -2;
-static const NSUInteger revenant_passcode_simple_length = 4;
+static const NSUInteger revenant_passcode_simple_minimum = 4;
+static const NSUInteger revenant_passcode_default_screen_type = 2;
+
+RevenantPasscodeStyle RevenantPasscodeStyleForUnlockScreenType(NSUInteger type)
+{
+    return type < 2 ? RevenantPasscodeStyleSimple : RevenantPasscodeStyleComplex;
+}
+
+#if TARGET_OS_IPHONE
+
+static NSUInteger revenant_passcode_current_screen_type(void)
+{
+    static void *library = NULL;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        library = dlopen("/System/Library/PrivateFrameworks/ManagedConfiguration.framework/ManagedConfiguration", RTLD_LAZY);
+    });
+    Class manager = library ? NSClassFromString(@"MCPasscodeManager") : Nil;
+    if (![manager respondsToSelector:@selector(sharedManager)])
+        return revenant_passcode_default_screen_type;
+    id shared = ((id (*)(id, SEL))objc_msgSend)(manager, @selector(sharedManager));
+    if (![shared respondsToSelector:@selector(currentUnlockScreenType)])
+        return revenant_passcode_default_screen_type;
+    return ((NSUInteger (*)(id, SEL))objc_msgSend)(shared, @selector(currentUnlockScreenType));
+}
+
+RevenantPasscodeStyle RevenantPasscodeCurrentStyle(void)
+{
+    return RevenantPasscodeStyleForUnlockScreenType(revenant_passcode_current_screen_type());
+}
+
+#else
+
+RevenantPasscodeStyle RevenantPasscodeCurrentStyle(void)
+{
+    return RevenantPasscodeStyleComplex;
+}
+
+#endif
 
 RevenantPasscodeResult RevenantPasscodeMapStatus(int32_t status)
 {
@@ -24,7 +64,7 @@ BOOL RevenantPasscodeIsValid(NSString *text, RevenantPasscodeStyle style)
         return NO;
     if (style == RevenantPasscodeStyleComplex)
         return YES;
-    if (text.length != revenant_passcode_simple_length)
+    if (text.length < revenant_passcode_simple_minimum)
         return NO;
     NSCharacterSet *digits = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
     return [text rangeOfCharacterFromSet:[digits invertedSet]].location == NSNotFound;

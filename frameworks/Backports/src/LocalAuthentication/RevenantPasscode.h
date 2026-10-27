@@ -15,6 +15,8 @@ typedef NS_ENUM(NSInteger, RevenantPasscodeStyle) {
 };
 
 bool RevenantPasscodeUnlockDevice(NSData *passcode, int32_t *status);
+RevenantPasscodeStyle RevenantPasscodeStyleForUnlockScreenType(NSUInteger type);
+RevenantPasscodeStyle RevenantPasscodeCurrentStyle(void);
 RevenantPasscodeResult RevenantPasscodeMapStatus(int32_t status);
 BOOL RevenantPasscodeIsValid(NSString *text, RevenantPasscodeStyle style);
 RevenantPasscodeResult RevenantPasscodeVerify(NSString *text, RevenantPasscodeStyle style);
