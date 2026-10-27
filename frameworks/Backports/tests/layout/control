@@ -1,0 +1,6 @@
+Package: space.kern0x1b.backports.layout
+Name: BackportsLayoutProbe
+Architecture: iphoneos-arm
+Description: Measures the layout of a view controller in a navigation controller on iOS 6, with and without
+ wantsFullScreenLayout, under opaque and translucent bars, so that the Backports can map the iOS 7 layout
+ members to what the release does.

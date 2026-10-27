@@ -258,7 +258,22 @@ local function backports_tests(name, scripts)
 end
 
 if is_plat("iphoneos") then
+    target("BackportsLayoutProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/layout/main.m", "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
+                  "src/UIKit/UIViewController+ExtendedLayout.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation")
+        set_values("app.plist-file", "tests/layout/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.layout", "CFBundleDisplayName=BackportsLayoutProbe")
+        set_values("revenant.control", "tests/layout/control")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
+    backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
     backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",

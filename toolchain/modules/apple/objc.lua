@@ -452,7 +452,26 @@ function known_selectors(source)
     return known
 end
 
-function absent_selectors(source, binaries, architecture)
+function undeclared(found, declared)
+    local names, results = {}, {}
+    for _, selector in ipairs(declared or {}) do
+        names[selector] = true
+    end
+    for binary, missing in pairs(found) do
+        local kept = {}
+        for _, selector in ipairs(missing) do
+            if not names[selector] then
+                table.insert(kept, selector)
+            end
+        end
+        if #kept > 0 then
+            results[binary] = kept
+        end
+    end
+    return results
+end
+
+function absent_selectors(source, binaries, architecture, declared)
     local known = known_selectors(source)
     local results, implemented = {}, {}
     local found = {}
@@ -475,5 +494,5 @@ function absent_selectors(source, binaries, architecture)
             results[binary] = missing
         end
     end
-    return results
+    return undeclared(results, declared)
 end

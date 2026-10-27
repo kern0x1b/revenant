@@ -5,6 +5,14 @@ local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local AREAS = {
     {
+        name = "extended layout and keyboard dismissal of the iOS 7 scroll and view controller members",
+        sources = {"UIViewController+ExtendedLayout.m", "UIScrollView+KeyboardDismiss.m"},
+        members = {
+            "-[UIViewController edgesForExtendedLayout]", "-[UIViewController setEdgesForExtendedLayout:]",
+            "-[UIScrollView keyboardDismissMode]", "-[UIScrollView setKeyboardDismissMode:]",
+        },
+    },
+    {
         name = "text tabs, constraint identifiers and screen snapshots",
         sources = {"NSTextTab.m", "NSLayoutConstraint+Identifier7.m", "UIScreen+Snapshot7.m"},
         members = {
