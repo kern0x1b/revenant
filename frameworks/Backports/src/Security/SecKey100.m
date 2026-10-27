@@ -179,28 +179,49 @@ CFDataRef SecKeyCreateDecryptedData(SecKeyRef key, SecKeyAlgorithm algorithm, CF
     return revenant_sec_transform(key, algorithm, ciphertext, error, NO);
 }
 
+static CFDataRef revenant_sec_stored_data(SecKeyRef key)
+{
+    CFMutableDictionaryRef byKey = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionarySetValue(byKey, kSecValueRef, key);
+    CFDictionarySetValue(byKey, kSecReturnPersistentRef, kCFBooleanTrue);
+    CFTypeRef persistent = NULL;
+    OSStatus status = SecItemCopyMatching(byKey, &persistent);
+    CFRelease(byKey);
+    if (status != errSecSuccess || !persistent)
+        return NULL;
+    CFMutableDictionaryRef byReference = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionarySetValue(byReference, kSecValuePersistentRef, persistent);
+    CFDictionarySetValue(byReference, kSecReturnData, kCFBooleanTrue);
+    CFTypeRef data = NULL;
+    status = SecItemCopyMatching(byReference, &data);
+    CFRelease(byReference);
+    CFRelease(persistent);
+    if (status != errSecSuccess || !data)
+        return NULL;
+    if (CFGetTypeID(data) != CFDataGetTypeID()) {
+        CFRelease(data);
+        return NULL;
+    }
+    return (CFDataRef)data;
+}
+
 CFDataRef SecKeyCopyExternalRepresentation(SecKeyRef key, CFErrorRef *error)
 {
     if (!key) {
         revenant_sec_fail(error, errSecParam, @"no key to export");
         return NULL;
     }
+    CFDataRef stored = revenant_sec_stored_data(key);
+    if (stored && revenant_is_private_representation(stored))
+        return stored;
     CFDictionaryRef attributes = SecKeyCopyAttributeDictionary(key);
-    CFDataRef stored = NULL;
-    if (attributes) {
-        CFTypeRef value = CFDictionaryGetValue(attributes, kSecValueData);
-        stored = value && CFGetTypeID(value) == CFDataGetTypeID() ? (CFDataRef)value : NULL;
-    }
-    if (stored && revenant_is_private_representation(stored)) {
-        CFDataRef answer = CFDataCreateCopy(kCFAllocatorDefault, stored);
-        CFRelease(attributes);
-        return answer;
-    }
     CFDataRef serialized = NULL;
     OSStatus status = SecKeyCopyPublicBytes(key, &serialized);
     BOOL answerable = serialized && ((stored && CFEqual(stored, serialized)) || revenant_says_public(attributes));
     if (attributes)
         CFRelease(attributes);
+    if (stored)
+        CFRelease(stored);
     if (answerable)
         return serialized;
     if (serialized)
