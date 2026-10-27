@@ -14,6 +14,7 @@ typedef enum {
     RevenantVTHEVCUnsupportedFormat,
     RevenantVTHEVCOutOfMemory,
     RevenantVTHEVCMalfunction,
+    RevenantVTHEVCBusy,
 } RevenantVTHEVCResult;
 
 typedef enum {

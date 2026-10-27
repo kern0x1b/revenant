@@ -325,6 +325,45 @@ static void RevenantCheckClip(NSString *leaf)
     CFRelease(format);
 }
 
+static void RevenantCheckReentrancy(RevenantTestClip *clip)
+{
+    CMVideoFormatDescriptionRef format = RevenantFormatOf(clip, clip.configuration);
+    if (!format)
+        return;
+    __block VTDecompressionSessionRef session = NULL;
+    __block OSStatus reentrantDecode = noErr;
+    __block OSStatus reentrantFinish = noErr;
+    __block int callbacks = 0;
+    RevenantVTDecodeOutput output = ^(void *sourceFrameRefCon, OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef image, CMTime pts, CMTime duration) {
+        callbacks++;
+        if (callbacks > 1)
+            return;
+        CMSampleBufferRef buffer = RevenantSampleOf(format, clip, clip.samples[1]);
+        reentrantDecode = RevenantVTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
+        CFRelease(buffer);
+        reentrantFinish = RevenantVTDecompressionSessionFinishDelayedFrames(session);
+        RevenantVTDecompressionSessionInvalidate(session);
+    };
+    const OSStatus status = RevenantVTSoftwareSessionCreate(format, NULL, output, &session);
+    RevenantExpect(status == noErr, @"the software session for the re-entrancy check is created", [NSString stringWithFormat:@"status %d", (int)status]);
+    if (status == noErr) {
+        for (RevenantTestSample *sample in clip.samples) {
+            CMSampleBufferRef buffer = RevenantSampleOf(format, clip, sample);
+            if (buffer) {
+                RevenantVTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
+                CFRelease(buffer);
+            }
+        }
+        RevenantVTDecompressionSessionFinishDelayedFrames(session);
+        RevenantVTDecompressionSessionInvalidate(session);
+        CFRelease(session);
+        RevenantExpect(reentrantDecode == kVTVideoDecoderNotAvailableNowErr, @"a decode from inside an output callback is refused while the decoder is busy", [NSString stringWithFormat:@"status %d", (int)reentrantDecode]);
+        RevenantExpect(reentrantFinish == kVTVideoDecoderNotAvailableNowErr, @"a finish from inside an output callback is refused while the decoder is busy", [NSString stringWithFormat:@"status %d", (int)reentrantFinish]);
+        RevenantExpect(callbacks == 1, @"invalidating from an output callback stops the frames of the decode in progress", [NSString stringWithFormat:@"%d callbacks", callbacks]);
+    }
+    CFRelease(format);
+}
+
 int main(int argc, char **argv)
 {
     @autoreleasepool {
@@ -333,8 +372,10 @@ int main(int argc, char **argv)
         RevenantCheckClip(@"clip-480p.rvhevc");
         RevenantCheckClip(@"clip-720p.rvhevc");
         RevenantTestClip *clip = RevenantLoadClip([@REVENANT_VT_FIXTURE_DIR stringByAppendingPathComponent:@"clip-480p.rvhevc"]);
-        if (clip)
+        if (clip) {
             RevenantCheckRejectsBadConfiguration(clip);
+            RevenantCheckReentrancy(clip);
+        }
         return revenant_finish();
     }
 }

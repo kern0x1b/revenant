@@ -10,6 +10,8 @@ struct RevenantVTHEVCDecoder {
     AVCodecContext *context;
     AVPacket *packet;
     AVFrame *frame;
+    int depth;
+    bool destroyRequested;
 };
 
 static RevenantVTHEVCResult RevenantVTHEVCClassify(int error)
@@ -118,7 +120,15 @@ RevenantVTHEVCDecoder *RevenantVTHEVCDecoderCreate(const uint8_t *configuration,
     return decoder;
 }
 
-RevenantVTHEVCResult RevenantVTHEVCDecoderDecode(RevenantVTHEVCDecoder *decoder, const uint8_t *data, size_t size, int64_t sequence, RevenantVTHEVCSink sink, void *context)
+static RevenantVTHEVCResult RevenantVTHEVCLeave(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCResult result)
+{
+    decoder->depth--;
+    if (!decoder->depth && decoder->destroyRequested)
+        RevenantVTHEVCDecoderDestroy(decoder);
+    return result;
+}
+
+static RevenantVTHEVCResult RevenantVTHEVCDecodePacket(RevenantVTHEVCDecoder *decoder, const uint8_t *data, size_t size, int64_t sequence, RevenantVTHEVCSink sink, void *context)
 {
     AVPacket *packet = decoder->packet;
     av_packet_unref(packet);
@@ -145,7 +155,15 @@ RevenantVTHEVCResult RevenantVTHEVCDecoderDecode(RevenantVTHEVCDecoder *decoder,
     return RevenantVTHEVCDrain(decoder, sink, context);
 }
 
-RevenantVTHEVCResult RevenantVTHEVCDecoderFinish(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context)
+RevenantVTHEVCResult RevenantVTHEVCDecoderDecode(RevenantVTHEVCDecoder *decoder, const uint8_t *data, size_t size, int64_t sequence, RevenantVTHEVCSink sink, void *context)
+{
+    if (decoder->depth)
+        return RevenantVTHEVCBusy;
+    decoder->depth++;
+    return RevenantVTHEVCLeave(decoder, RevenantVTHEVCDecodePacket(decoder, data, size, sequence, sink, context));
+}
+
+static RevenantVTHEVCResult RevenantVTHEVCFinishFrames(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context)
 {
     const int sent = avcodec_send_packet(decoder->context, NULL);
     if (sent < 0 && sent != AVERROR_EOF)
@@ -165,10 +183,22 @@ RevenantVTHEVCResult RevenantVTHEVCDecoderFinish(RevenantVTHEVCDecoder *decoder,
     return RevenantVTHEVCOK;
 }
 
+RevenantVTHEVCResult RevenantVTHEVCDecoderFinish(RevenantVTHEVCDecoder *decoder, RevenantVTHEVCSink sink, void *context)
+{
+    if (decoder->depth)
+        return RevenantVTHEVCBusy;
+    decoder->depth++;
+    return RevenantVTHEVCLeave(decoder, RevenantVTHEVCFinishFrames(decoder, sink, context));
+}
+
 void RevenantVTHEVCDecoderDestroy(RevenantVTHEVCDecoder *decoder)
 {
     if (!decoder)
         return;
+    if (decoder->depth) {
+        decoder->destroyRequested = true;
+        return;
+    }
     av_frame_free(&decoder->frame);
     av_packet_free(&decoder->packet);
     avcodec_free_context(&decoder->context);

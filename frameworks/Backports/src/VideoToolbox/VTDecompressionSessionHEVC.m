@@ -56,6 +56,8 @@ static OSStatus RevenantVTStatusOf(RevenantVTHEVCResult result)
         return kVTVideoDecoderUnsupportedDataFormatErr;
     case RevenantVTHEVCOutOfMemory:
         return kVTAllocationFailedErr;
+    case RevenantVTHEVCBusy:
+        return kVTVideoDecoderNotAvailableNowErr;
     case RevenantVTHEVCMalfunction:
         break;
     }
@@ -166,6 +168,7 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
 
 - (OSStatus)decodeSample:(CMSampleBufferRef)sample flags:(VTDecodeFrameFlags)flags refcon:(void *)refcon output:(RevenantVTDecodeOutput)output infoFlags:(VTDecodeInfoFlags *)infoFlagsOut
 {
+    __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
     @synchronized (self) {
         if (_invalidated)
             return kVTInvalidSessionErr;
@@ -212,11 +215,14 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
 
 - (OSStatus)finish
 {
+    __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
     @synchronized (self) {
         if (_invalidated)
             return kVTInvalidSessionErr;
         _emitStatus = noErr;
         const RevenantVTHEVCResult result = RevenantVTHEVCDecoderFinish(_decoder, RevenantVTSoftwareEmit, (__bridge void *)self);
+        if (result == RevenantVTHEVCBusy)
+            return RevenantVTStatusOf(result);
         [_pending removeAllObjects];
         if (result != RevenantVTHEVCOK)
             return RevenantVTStatusOf(result);
@@ -226,6 +232,7 @@ static void RevenantVTSoftwareEmit(void *context, const RevenantVTHEVCPicture *p
 
 - (void)invalidate
 {
+    __attribute__((objc_precise_lifetime)) RevenantVTSoftwareSession *lifetime = self;
     @synchronized (self) {
         if (_invalidated)
             return;
@@ -348,6 +355,8 @@ static void RevenantVTInterleaveChroma(uint8_t *out, size_t outStride, const uin
 
 - (void)emitPicture:(const RevenantVTHEVCPicture *)picture
 {
+    if (_invalidated)
+        return;
     NSNumber *key = @(picture->sequence);
     RevenantVTPendingFrame *frame = _pending[key];
     if (!frame) {
