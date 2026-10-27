@@ -25,7 +25,7 @@ if is_plat("iphoneos") then
         add_deps("SwiftUI")
         add_packages("combine")
         add_files("examples/showcase/*.swift")
-        add_files("examples/showcase/device/gesture.m")
+        add_files("examples/showcase/device/gesture.m", "examples/showcase/device/hid.m")
         add_includedirs("examples/showcase/device")
         add_deps("UIKitBackports", "CoreDataBackports")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")

@@ -134,81 +134,135 @@ void DarwinNotifyStateHle::reset()
     next_virtual_token_ = 0x4000'0000U;
 }
 
+const std::array<snapshot::Member<DarwinNotifyStateHle>, 7>&
+DarwinNotifyStateHle::snapshot_members()
+{
+    static constexpr std::array<snapshot::Member<DarwinNotifyStateHle>, 7> members {{
+        {"notify.providers_",
+            [](const DarwinNotifyStateHle& notify) {
+                return snapshot::is_default(notify.providers_);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                std::vector<std::string> provider_names;
+                for (const auto& [name, provider] : notify.providers_) {
+                    static_cast<void>(provider);
+                    provider_names.push_back(name);
+                }
+                snapshot::save(out, provider_names);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                std::vector<std::string> provider_names;
+                snapshot::load(in, provider_names);
+                if (!std::equal(provider_names.begin(), provider_names.end(),
+                        notify.providers_.begin(), notify.providers_.end(),
+                        [](const std::string& name, const auto& provider) {
+                            return name == provider.first;
+                        })) {
+                    throw snapshot::FormatError { "notify providers differ from the wiring" };
+                }
+            }},
+        {"notify.abi_",
+            [](const DarwinNotifyStateHle& notify) { return snapshot::is_default(notify.abi_); },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, notify.abi_);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                DarwinNotifyStateAbi abi { };
+                snapshot::load(in, abi);
+                if (abi != notify.abi_)
+                    throw snapshot::FormatError { "notify ABI differs from the wiring" };
+            }},
+        {"notify.token_names_",
+            [](const DarwinNotifyStateHle& notify) {
+                return snapshot::is_default(notify.token_names_);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, notify.token_names_);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                snapshot::load(in, notify.token_names_);
+            }},
+        {"notify.virtual_tokens_",
+            [](const DarwinNotifyStateHle& notify) {
+                return snapshot::is_default(notify.virtual_tokens_);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, notify.virtual_tokens_);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                snapshot::load(in, notify.virtual_tokens_);
+            }},
+        {"notify.next_virtual_token_",
+            [](const DarwinNotifyStateHle& notify) {
+                return snapshot::is_default(notify.next_virtual_token_);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, notify.next_virtual_token_);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                snapshot::load(in, notify.next_virtual_token_);
+            }},
+        {"notify.owned_registrations_",
+            [](const DarwinNotifyStateHle& notify) {
+                return snapshot::is_default(notify.owned_registrations_);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, notify.owned_registrations_);
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                for (const auto& key : notify.owned_registrations_)
+                    notify.bus_->registrations.erase(key);
+                snapshot::load(in, notify.owned_registrations_);
+            }},
+        {"bus.registrations",
+            [](const DarwinNotifyStateHle& notify) {
+                return !notify.bus_ || snapshot::is_default(notify.bus_->registrations);
+            },
+            [](snapshot::Writer& out, const DarwinNotifyStateHle& notify) {
+                snapshot::save(out, static_cast<std::uint64_t>(notify.bus_->registrations.size()));
+                for (const auto& [key, registration] : notify.bus_->registrations) {
+                    if (!notify.owned_registrations_.contains(key))
+                        throw snapshot::RefusedError { "notify.foreign_registration" };
+                    snapshot::save(out, key);
+                    snapshot::save(out, registration.name);
+                    snapshot::save(out, registration.port_name);
+                }
+            },
+            [](snapshot::Reader& in, DarwinNotifyStateHle& notify) {
+                std::uint64_t registration_count { };
+                snapshot::load(in, registration_count);
+                std::vector<std::pair<RegistrationKey, PublishedRegistration>> published;
+                for (std::uint64_t index = 0; index < registration_count; ++index) {
+                    RegistrationKey key { };
+                    PublishedRegistration registration;
+                    snapshot::load(in, key);
+                    snapshot::load(in, registration.name);
+                    snapshot::load(in, registration.port_name);
+                    if (!notify.owned_registrations_.contains(key))
+                        throw snapshot::FormatError { "notify registration is not owned" };
+                    published.emplace_back(key, std::move(registration));
+                }
+                if (!published.empty() && !notify.dispatcher_)
+                    throw snapshot::FormatError { "notify registrations need a dispatcher" };
+                for (auto& [key, registration] : published) {
+                    notify.publish_registration_locked(std::move(registration.name), key.first,
+                        registration.port_name, key.second);
+                }
+            }},
+    }};
+    return members;
+}
+
 void DarwinNotifyStateHle::save(snapshot::Writer& out) const
 {
     std::scoped_lock lock { mutex_, bus_->mutex };
-    std::vector<std::string> provider_names;
-    for (const auto& [name, provider] : providers_) {
-        static_cast<void>(provider);
-        provider_names.push_back(name);
-    }
-    snapshot::save(out, provider_names);
-    snapshot::save(out, abi_);
-    snapshot::save(out, token_names_);
-    snapshot::save(out, virtual_tokens_);
-    snapshot::save(out, next_virtual_token_);
-    snapshot::save(out, owned_registrations_);
-    snapshot::save(out, static_cast<std::uint64_t>(bus_->registrations.size()));
-    for (const auto& [key, registration] : bus_->registrations) {
-        if (!owned_registrations_.contains(key))
-            throw snapshot::RefusedError { "notify.foreign_registration" };
-        snapshot::save(out, key);
-        snapshot::save(out, registration.name);
-        snapshot::save(out, registration.port_name);
-    }
+    snapshot::save_members(out, *this, snapshot_members());
 }
 
 void DarwinNotifyStateHle::load(snapshot::Reader& in)
 {
     std::scoped_lock lock { mutex_, bus_->mutex };
-    std::vector<std::string> provider_names;
-    snapshot::load(in, provider_names);
-    DarwinNotifyStateAbi abi { };
-    snapshot::load(in, abi);
-    std::map<std::uint32_t, std::string> token_names;
-    snapshot::load(in, token_names);
-    std::set<std::uint32_t> virtual_tokens;
-    snapshot::load(in, virtual_tokens);
-    std::uint32_t next_virtual_token { };
-    snapshot::load(in, next_virtual_token);
-    std::set<RegistrationKey> owned_registrations;
-    snapshot::load(in, owned_registrations);
-    std::uint64_t registration_count { };
-    snapshot::load(in, registration_count);
-    std::vector<std::pair<RegistrationKey, PublishedRegistration>> published;
-    for (std::uint64_t index = 0; index < registration_count; ++index) {
-        RegistrationKey key { };
-        PublishedRegistration registration;
-        snapshot::load(in, key);
-        snapshot::load(in, registration.name);
-        snapshot::load(in, registration.port_name);
-        if (!owned_registrations.contains(key))
-            throw snapshot::FormatError { "notify registration is not owned" };
-        published.emplace_back(key, std::move(registration));
-    }
-
-    if (abi != abi_)
-        throw snapshot::FormatError { "notify ABI differs from the wiring" };
-    if (!std::equal(provider_names.begin(), provider_names.end(),
-            providers_.begin(), providers_.end(),
-            [](const std::string& name, const auto& provider) {
-                return name == provider.first;
-            })) {
-        throw snapshot::FormatError { "notify providers differ from the wiring" };
-    }
-    if (!published.empty() && !dispatcher_)
-        throw snapshot::FormatError { "notify registrations need a dispatcher" };
-
-    for (const auto& key : owned_registrations_)
-        bus_->registrations.erase(key);
-    owned_registrations_ = std::move(owned_registrations);
-    token_names_ = std::move(token_names);
-    virtual_tokens_ = std::move(virtual_tokens);
-    next_virtual_token_ = next_virtual_token;
-    for (auto& [key, registration] : published) {
-        publish_registration_locked(std::move(registration.name), key.first,
-            registration.port_name, key.second);
-    }
+    snapshot::restore_members(in, *this, snapshot_members());
 }
 
 void DarwinNotifyStateHle::initialize(UserlandHleCall& call)

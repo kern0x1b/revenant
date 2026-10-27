@@ -198,7 +198,7 @@ jobs:
         id: configure
         timeout-minutes: 30
         run: |
-          ./xmakew f -P . -y -m release 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          ./xmakew f -P . -y -m release --component=emulator 2>&1 | tee "$RUNNER_TEMP/configure.log"
           if grep -q 'install .* \.\. ' "$RUNNER_TEMP/configure.log"; then
             echo "installed=true" >> "$GITHUB_OUTPUT"
           fi

@@ -310,16 +310,41 @@ CoreAudioHle::CoreAudioHle(
     }
 }
 
+const std::array<snapshot::Member<CoreAudioHle>, 2>& CoreAudioHle::snapshot_members()
+{
+    static constexpr std::array<snapshot::Member<CoreAudioHle>, 2> members {{
+        {"coreaudio.buffer_frame_size_",
+            [](const CoreAudioHle& audio) {
+                return snapshot::is_default(audio.buffer_frame_size_);
+            },
+            [](snapshot::Writer& out, const CoreAudioHle& audio) {
+                snapshot::save(out, audio.buffer_frame_size_);
+            },
+            [](snapshot::Reader& in, CoreAudioHle& audio) {
+                snapshot::load(in, audio.buffer_frame_size_);
+            }},
+        {"coreaudio.next_native_io_proc_id_",
+            [](const CoreAudioHle& audio) {
+                return snapshot::is_default(audio.next_native_io_proc_id_);
+            },
+            [](snapshot::Writer& out, const CoreAudioHle& audio) {
+                snapshot::save(out, audio.next_native_io_proc_id_);
+            },
+            [](snapshot::Reader& in, CoreAudioHle& audio) {
+                snapshot::load(in, audio.next_native_io_proc_id_);
+            }},
+    }};
+    return members;
+}
+
 void CoreAudioHle::save(snapshot::Writer& out) const
 {
-    snapshot::save(out, buffer_frame_size_);
-    snapshot::save(out, next_native_io_proc_id_);
+    snapshot::save_members(out, *this, snapshot_members());
 }
 
 void CoreAudioHle::load(snapshot::Reader& in)
 {
-    snapshot::load(in, buffer_frame_size_);
-    snapshot::load(in, next_native_io_proc_id_);
+    snapshot::restore_members(in, *this, snapshot_members());
 }
 
 void CoreAudioHle::set_service(std::shared_ptr<AudioService> service)

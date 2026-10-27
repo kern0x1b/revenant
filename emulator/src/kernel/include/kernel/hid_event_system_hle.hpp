@@ -7,8 +7,10 @@
 #pragma once
 
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "kernel/hid_accelerometer.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -36,6 +38,7 @@ public:
         Cpu& cpu, std::uint32_t process, std::uint32_t svc_immediate);
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<HidEventSystemHle>, 3>& snapshot_members();
 
 private:
     UserlandHleRegistry& registry_;

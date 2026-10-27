@@ -21,7 +21,9 @@ static double now(void)
 static void usage(void)
 {
     fprintf(stderr, "usage: revenant-sblaunch [--wait SECONDS] [--stdout PATH] [--stderr PATH] <bundle identifier>\n"
-                    "  --wait: retry until SpringBoard takes the launch and the application is frontmost\n");
+                    "       revenant-sblaunch --probe\n"
+                    "  --wait: retry until SpringBoard takes the launch and the application is frontmost\n"
+                    "  --probe: print the uid, the SpringBoard ports and the launch error table; launches nothing\n");
 }
 
 static double started;
@@ -53,8 +55,38 @@ static void c_string(CFStringRef text, char* buffer, size_t size)
         CFStringGetCString(text, buffer, size, kCFStringEncodingUTF8);
 }
 
+extern mach_port_t bootstrap_port;
+kern_return_t bootstrap_look_up(mach_port_t bootstrap, const char* name, mach_port_t* port);
+
+static int probe(void)
+{
+    void* services = dlopen("/System/Library/PrivateFrameworks/SpringBoardServices.framework/SpringBoardServices", RTLD_NOW);
+    if (!services) {
+        fprintf(stderr, "revenant-sblaunch: SpringBoardServices does not load\n");
+        return 3;
+    }
+    mach_port_t (*server)(void) = (mach_port_t (*)(void))dlsym(services, "SBSSpringBoardServerPort");
+    CFStringRef (*error_string)(int) = (CFStringRef (*)(int))dlsym(services, "SBSApplicationLaunchingErrorString");
+    printf("uid=%d euid=%d pid=%d bootstrap_port=%u\n", getuid(), geteuid(), getpid(), bootstrap_port);
+    printf("SBSSpringBoardServerPort=%u\n", server ? server() : MACH_PORT_NULL);
+    const char* names[] = {"com.apple.springboard.services", "com.apple.SpringBoard", "com.apple.backboard.services", "com.apple.springboard.debugapplications"};
+    for (unsigned index = 0; index < sizeof names / sizeof names[0]; ++index) {
+        mach_port_t port = MACH_PORT_NULL;
+        kern_return_t status = bootstrap_look_up(bootstrap_port, names[index], &port);
+        printf("bootstrap_look_up %s: kern_return=%d port=%u\n", names[index], status, port);
+    }
+    for (int code = 0; code <= 8; ++code) {
+        char text[96];
+        c_string(error_string ? error_string(code) : NULL, text, sizeof text);
+        printf("error %d: %s\n", code, text);
+    }
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
+    if (argc == 2 && strcmp(argv[1], "--probe") == 0)
+        return probe();
     double wait = 0;
     const char *out = NULL, *err = NULL, *bundle = NULL;
     for (int index = 1; index < argc; ++index) {

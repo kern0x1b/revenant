@@ -217,6 +217,18 @@ refused by name. Two parts of a member still live elsewhere: its `is_default` te
 (`note`), and its save and restore are in the owner's save and load functions. Moving both onto the descriptor is the
 remaining step, one owner at a time, and the save order stays the same until each owner moves.
 
+The clock is the first owner moved. `VirtualClock::snapshot_members()` (`foundation/snapshot_member.hpp`) lists its
+two members, `clock.now` and `clock.wall_time`, each with its `is_default`, `save` and `restore`. The clock's `save`
+and `load` run through that list and write the same 16 bytes as before; the census takes the populated clock members
+from the same list. The Wi-Fi state is the second: `WifiState::snapshot_members()` lists its seven members in save
+order, and its `load` checks the access points and the association inside the restore of each member. A refused
+stream can leave the members restored before the refusal set, as the clock and the other owners already can, because
+the kernel restores its owners in sequence. The Darwin notify state is the third: its list includes
+`bus.registrations`, which the ledger refuses when populated but which the save still writes, so a refused-but-written
+member keeps its bytes in the list. The display state is the fourth: its two geometry words are saved rows, checked
+against the wiring on load, and its host surface is refused at save rather than written. The Core Audio state is the
+fifth: its two saved fields are its list, and its other census members are never written, so they stay census notes. The HID event system is the sixth: its list holds the consumer process, the consumer processor and the accelerometer, whose `is_default` holds while it is stopped. Its `save` refuses a delivery in flight before it writes its own bytes; `hid.delivering_` stays a refused row, and the wired `hid.state_` stays a plain census note.
+
 Format. Little-endian. A header holds the format version, the emulator build identity, the device model, the rootfs
 content identity and the profile. Then one section per owner above, each with its own version and length, so a reader
 rejects a section it does not know. Pages are written as address, flags and a backing index, with each backing's 4 KiB

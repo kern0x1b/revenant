@@ -8,6 +8,7 @@
 #include "foundation/address_space.hpp"
 #include "foundation/output.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "foundation/userland_hle.hpp"
 
 #include <cstddef>
@@ -111,6 +112,64 @@ void truncated_event_system_is_a_format_error()
     expect(threw, "a truncated HID stream throws FormatError");
 }
 
+void descriptors_name_the_saved_fields_in_order()
+{
+    std::vector<std::string> names;
+    for (const auto& member : HidEventSystemHle::snapshot_members())
+        names.emplace_back(member.name);
+    const std::vector<std::string> expected {
+        "hid.consumer_process_",
+        "hid.consumer_processor_",
+        "hid.accelerometer_",
+    };
+    expect(names == expected, "the HID members are named in save order");
+}
+
+void fresh_layout_is_fixed()
+{
+    std::ostringstream log;
+    Output output { log };
+    AddressSpace memory;
+    UserlandHleRegistry registry { memory, output };
+    const HidEventSystemHle fresh { registry };
+    Writer expected;
+    emulator::snapshot::save(expected, static_cast<std::uint32_t>(0));
+    emulator::snapshot::save(expected, static_cast<std::uint64_t>(0));
+    emulator::snapshot::save(expected, std::optional<std::uint64_t> {});
+    expect(save_state(fresh) == expected.bytes(),
+        "the HID state saves its consumer, its consumer processor, then the accelerometer");
+}
+
+void running_accelerometer_is_populated_and_saved_again()
+{
+    std::ostringstream log;
+    Output output { log };
+    AddressSpace memory;
+    UserlandHleRegistry registry { memory, output };
+    Writer stream;
+    emulator::snapshot::save(stream, static_cast<std::uint32_t>(7));
+    emulator::snapshot::save(stream, static_cast<std::uint64_t>(3));
+    emulator::snapshot::save(stream, std::optional<std::uint64_t> { 12'345U });
+    const auto bytes = stream.bytes();
+
+    HidEventSystemHle restored { registry };
+    Reader in { bytes };
+    restored.load(in);
+    expect(in.at_end(), "the HID stream with a running accelerometer is consumed");
+    expect(save_state(restored) == bytes,
+        "a restored HID state with a running accelerometer is saved again in the same stream");
+    std::vector<std::string> populated;
+    emulator::snapshot::note_populated_members(
+        populated, restored, HidEventSystemHle::snapshot_members());
+    const std::vector<std::string> expected {
+        "hid.consumer_process_",
+        "hid.consumer_processor_",
+        "hid.accelerometer_",
+    };
+    expect(populated == expected,
+        "a HID state with a consumer and a running accelerometer populates all three members");
+}
+
 }
 
 int main()
@@ -118,6 +177,9 @@ int main()
     accelerometer_round_trip_keeps_the_deadline();
     event_system_round_trip_keeps_the_idle_state();
     truncated_event_system_is_a_format_error();
+    descriptors_name_the_saved_fields_in_order();
+    fresh_layout_is_fixed();
+    running_accelerometer_is_populated_and_saved_again();
     if (failures != 0) {
         std::cerr << failures << " HID event system snapshot checks failed\n";
         return 1;
