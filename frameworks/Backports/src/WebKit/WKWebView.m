@@ -418,9 +418,11 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 {
     NSURLResponse *response = [[NSURLResponse alloc] initWithURL:URL MIMEType:MIMEType expectedContentLength:length textEncodingName:encoding];
     WKNavigation *navigation = _navigation;
-    [self revenant_decideResponse:response completion:^(BOOL allowed) {
-        if (allowed)
+    [self revenant_decideResponse:response completion:^(NSInteger policy) {
+        if (policy == WKNavigationResponsePolicyAllow)
             load();
+        else if (policy == WKNavigationResponsePolicyDownload)
+            [self revenant_downloadResponse:response request:[NSURLRequest requestWithURL:URL]];
         else
             [self revenant_denyNavigation:navigation];
     }];
@@ -631,23 +633,49 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     _documentInjected = YES;
 }
 
-- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL))completion
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(NSInteger))completion
 {
     id<WKNavigationDelegate> delegate = _navigationDelegate;
     if (![delegate respondsToSelector:@selector(webView:decidePolicyForNavigationResponse:decisionHandler:)]) {
-        completion(YES);
+        completion(WKNavigationResponsePolicyAllow);
         return;
     }
     WKNavigationResponse *navigationResponse = [WKNavigationResponse revenant_responseWithResponse:response];
     void (^decide)(void) = ^{
         [delegate webView:self decidePolicyForNavigationResponse:navigationResponse decisionHandler:^(WKNavigationResponsePolicy policy) {
-            completion(policy == WKNavigationResponsePolicyAllow);
+            completion(policy);
         }];
     };
     if ([NSThread isMainThread])
         decide();
     else
         dispatch_async(dispatch_get_main_queue(), decide);
+}
+
+- (void)revenant_downloadResponse:(NSURLResponse *)response request:(NSURLRequest *)request
+{
+    [self revenant_abandonNavigation];
+    WKDownload *download = [WKDownload revenant_downloadWithRequest:RevenantDocumentInnerCopy(request) webView:self];
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if ([delegate respondsToSelector:@selector(webView:navigationResponse:didBecomeDownload:)])
+        [delegate webView:self navigationResponse:[WKNavigationResponse revenant_responseWithResponse:response] didBecomeDownload:download];
+    [download revenant_start];
+}
+
+- (void)startDownloadUsingRequest:(NSURLRequest *)request completionHandler:(void (^)(WKDownload *))completionHandler
+{
+    WKDownload *download = [WKDownload revenant_downloadWithRequest:RevenantDocumentInnerCopy(request) webView:self];
+    [download revenant_start];
+    if (completionHandler)
+        completionHandler(download);
+}
+
+- (void)resumeDownloadFromResumeData:(NSData *)resumeData completionHandler:(void (^)(WKDownload *))completionHandler
+{
+    WKDownload *download = [WKDownload revenant_resumeWithData:resumeData webView:self];
+    [download revenant_start];
+    if (completionHandler)
+        completionHandler(download);
 }
 
 - (void)revenant_installScripts:(BOOL)userScripts

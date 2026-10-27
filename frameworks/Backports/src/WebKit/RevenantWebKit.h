@@ -77,6 +77,12 @@ extern NSString *const RevenantWebKitBridgeScheme;
 
 #import "RevenantHistoryPlan.h"
 
+@interface WKDownload (RevenantWebKit)
++ (instancetype)revenant_downloadWithRequest:(NSURLRequest *)request webView:(WKWebView *)webView;
++ (instancetype)revenant_resumeWithData:(NSData *)data webView:(WKWebView *)webView;
+- (void)revenant_start;
+@end
+
 @interface WKBackForwardList (RevenantWebKit)
 - (void)revenant_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index;
 @end

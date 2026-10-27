@@ -145,15 +145,21 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
 - `WKNavigationResponse`: carries the response, and `canShowMIMEType` is true for `text/*`, `image/*`,
   `application/xhtml+xml` and `application/pdf`. `WKWebView` asks `webView:decidePolicyForNavigationResponse:decisionHandler:`
   for each main-frame response that `RevenantDocumentProtocol` claims. The protocol holds the response and its body until
-  the answer comes: allow forwards them (with the document-start rewrite when they are HTML), and cancel or a download
-  answer fails the load with `NSURLErrorCancelled`, because the engine has no download path. A main-frame load that the
+  the answer comes: allow forwards them (with the document-start rewrite when they are HTML), cancel fails the load with
+  `NSURLErrorCancelled`, and a download answer hands the response to a `WKDownload` (below). A main-frame load that the
   protocol does not claim gets no response decision: a `file:` or `data:` load, and a main-frame load the engine starts
   itself without a link click or form post, which is loaded untagged. `WKNavigationActionPolicy` and
   `WKNavigationResponsePolicy` are lowered to iOS 6 (`toolchain/modules/apple/lowered.lua`).
   `WKNavigationResponse +revenant_policyAllowing:` maps allow and cancel.
-- `WKDownload` and `WKDownloadDelegate`: a download a caller holds reports nil request, web view, frame and progress, is
-  not user-initiated, and cancels with no resume data, because nothing here can resume. The engine creates no download
-  and sends no download callback.
+- `WKDownload` and `WKDownloadDelegate`: a download runs over `NSURLConnection` and writes to the path the delegate picks in
+  `download:decideDestinationUsingResponse:suggestedFilename:completionHandler:`. A nil destination fails it with
+  `NSURLErrorCancelled`. It reports `downloadDidFinish:` or `download:didFailWithError:resumeData:`, and its progress
+  counts the bytes written. It is made in three ways: a navigation response the delegate answers with download (sent to
+  `webView:navigationResponse:didBecomeDownload:`), `startDownloadUsingRequest:completionHandler:`, and
+  `resumeDownloadFromResumeData:completionHandler:`. `cancel:` gives resume data only when the server sent
+  `Accept-Ranges: bytes` and some bytes arrived; a resume sends `Range: bytes=N-` and appends only when the destination
+  is the same path and its size is N. A `file:` source has no resume data. `isUserInitiated` is NO and `originatingFrame`
+  is nil, because the engine does not report either.
 - `WKOpenPanelParameters`: both properties are NO. The engine shows no file picker and never sends `runOpenPanel`.
 - `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`).
   `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
@@ -244,6 +250,14 @@ Already present, with the same limits:
   `location` change, not a fragment) is replayed through the protocol, so it gets the same decision as a link. Measured on
   the device: an engine-started `location.href` load was decided, a denied `file:` load and a denied `data:` load failed
   with `-999` and kept the page, and an allowed `file:` load ran its start script.
+- Measured on the same iPad with the `download` probe mode: a navigation whose response the delegate sent to download
+  (a 300000-byte `application/octet-stream` file) reached `didBecomeDownload`, and the file on disk matched the bytes
+  served. `startDownloadUsingRequest:` on a server that honours `Range` was cancelled after 19821 bytes (the cancel
+  reported `NSURLErrorCancelled` with resume data), and `resumeDownloadFromResumeData:` sent `bytes=19821-`, got 206 for
+  the remaining 280179 bytes, and the file on disk matched the whole body. The probe still waited its full 20 seconds
+  after the navigation download, because the backport reports neither `didFinish` nor `didFail` for that navigation.
+  Whether iOS 6 `WKWebView` should send `didFailProvisionalNavigation` (with `WebKitErrorDomain` 102) there is not checked
+  against macOS yet.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the

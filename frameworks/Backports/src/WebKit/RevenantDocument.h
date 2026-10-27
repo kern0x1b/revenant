@@ -3,12 +3,14 @@
 @protocol RevenantDocumentSource <NSObject>
 - (NSArray<NSString *> *)revenant_documentStartScripts;
 - (void)revenant_documentDidInject;
-- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL allowed))completion;
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(NSInteger policy))completion;
+- (void)revenant_downloadResponse:(NSURLResponse *)response request:(NSURLRequest *)request;
 @end
 
 NSString *RevenantDocumentRegister(id<RevenantDocumentSource> source);
 void RevenantDocumentTagRequest(NSMutableURLRequest *request, NSString *token);
 NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token);
+NSURLRequest *RevenantDocumentInnerCopy(NSURLRequest *request);
 BOOL RevenantDocumentIsTagged(NSURLRequest *request);
 BOOL RevenantDocumentIsWebURL(NSURL *URL);
 void RevenantDocumentExpect(NSString *token, NSURL *URL);

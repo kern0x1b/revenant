@@ -84,6 +84,14 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     return tagged;
 }
 
+NSURLRequest *RevenantDocumentInnerCopy(NSURLRequest *request)
+{
+    NSMutableURLRequest *inner = [request mutableCopy];
+    [NSURLProtocol removePropertyForKey:TokenKey inRequest:inner];
+    [NSURLProtocol setProperty:@YES forKey:InnerKey inRequest:inner];
+    return inner;
+}
+
 @interface RevenantDocumentProtocol : NSURLProtocol <NSURLConnectionDataDelegate>
 @end
 
@@ -191,18 +199,26 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     }
     _deciding = YES;
     NSThread *thread = _thread;
-    [_source revenant_decideResponse:response completion:^(BOOL allowed) {
-        [self performSelector:@selector(decided:) onThread:thread withObject:@(allowed) waitUntilDone:NO];
+    [_source revenant_decideResponse:response completion:^(NSInteger policy) {
+        [self performSelector:@selector(decided:) onThread:thread withObject:@(policy) waitUntilDone:NO];
     }];
 }
 
 - (void)decided:(NSNumber *)answer
 {
-    BOOL allowed = answer.boolValue;
+    NSInteger policy = answer.integerValue;
     if (_stopped || !_deciding)
         return;
     _deciding = NO;
-    if (!allowed) {
+    if (policy == 2) {
+        _stopped = YES;
+        [_connection cancel];
+        _connection = nil;
+        [_source revenant_downloadResponse:_response request:self.request];
+        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSURLErrorFailingURLErrorKey: _response.URL ?: self.request.URL}]];
+        return;
+    }
+    if (policy == 0) {
         [_connection cancel];
         _connection = nil;
         [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSURLErrorFailingURLErrorKey: _response.URL ?: self.request.URL}]];

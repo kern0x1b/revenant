@@ -185,9 +185,13 @@ static int StartServer(void)
     self.injections++;
 }
 
-- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(BOOL))completion
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(NSInteger))completion
 {
-    completion(![response.URL.path isEqualToString:@"/deny"]);
+    completion([response.URL.path isEqualToString:@"/deny"] ? 0 : 1);
+}
+
+- (void)revenant_downloadResponse:(NSURLResponse *)response request:(NSURLRequest *)request
+{
 }
 
 @end
