@@ -5,6 +5,7 @@
 static char revenant_edges_key;
 static char revenant_opaque_bars_key;
 static char revenant_scroll_insets_key;
+static char revenant_prior_wants_key;
 
 static BOOL revenant_edges_noted;
 static BOOL revenant_opaque_bars_noted;
@@ -29,11 +30,21 @@ static void revenant_note_once(BOOL *noted, NSString *message)
 - (void)setEdgesForExtendedLayout:(UIRectEdge)edgesForExtendedLayout
 {
     objc_setAssociatedObject(self, &revenant_edges_key, @(edgesForExtendedLayout), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    NSNumber *prior = objc_getAssociatedObject(self, &revenant_prior_wants_key);
     if (edgesForExtendedLayout == UIRectEdgeAll) {
+        if (!prior) {
+            BOOL current = ((BOOL (*)(id, SEL))objc_msgSend)(self, sel_registerName("wantsFullScreenLayout"));
+            objc_setAssociatedObject(self, &revenant_prior_wants_key, @(current), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
         ((void (*)(id, SEL, BOOL))objc_msgSend)(self, sel_registerName("setWantsFullScreenLayout:"), YES);
         return;
     }
-    revenant_note_once(&revenant_edges_noted, @"edgesForExtendedLayout: only UIRectEdgeAll is mapped to wantsFullScreenLayout on this release; other edges are stored without effect");
+    if (prior) {
+        objc_setAssociatedObject(self, &revenant_prior_wants_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        ((void (*)(id, SEL, BOOL))objc_msgSend)(self, sel_registerName("setWantsFullScreenLayout:"), prior.boolValue);
+    }
+    if (edgesForExtendedLayout != UIRectEdgeNone)
+        revenant_note_once(&revenant_edges_noted, @"edgesForExtendedLayout: only UIRectEdgeAll and UIRectEdgeNone are mapped to wantsFullScreenLayout on this release; other edges are stored without effect");
 }
 
 - (BOOL)extendedLayoutIncludesOpaqueBars
