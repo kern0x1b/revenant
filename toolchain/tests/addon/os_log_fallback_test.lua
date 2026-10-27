@@ -17,20 +17,12 @@ void revenant_os_log_send(void *log, uint8_t type, const char *format, va_list a
 }
 #endif
 
-static void formatted(char *text, size_t size, const char *format, ...) {
-    va_list arguments;
-    va_start(arguments, format);
-    revenant_os_log_format(text, size, format, arguments);
-    va_end(arguments);
-}
-
 int main(void) {
-    char text[256];
-    formatted(text, sizeof(text), "%s has %d items, %x", "list", 3, 255);
     printf("linked %d\n", revenant_os_log_linked());
-    printf("text %s\n", text);
-    printf("levels %d %d %d %d %d\n", revenant_os_log_asl_level(0x01), revenant_os_log_asl_level(0x02),
-           revenant_os_log_asl_level(0x10), revenant_os_log_asl_level(0x11), revenant_os_log_asl_level(0x00));
+    printf("recorded %d %d %d %d %d\n", revenant_os_log_recorded(0x00), revenant_os_log_recorded(0x01),
+           revenant_os_log_recorded(0x02), revenant_os_log_recorded(0x10), revenant_os_log_recorded(0x11));
+    printf("levels %d %d %d\n", revenant_os_log_asl_level(0x00), revenant_os_log_asl_level(0x10),
+           revenant_os_log_asl_level(0x11));
     return 0;
 }
 ]]
@@ -40,7 +32,7 @@ local MODES = {
     {name = "present", stubs = true, linked = "linked 1"},
 }
 
-local WANT = {"text list has 3 items, ff", "levels 6 7 3 2 5"}
+local WANT = {"recorded 1 0 0 1 1", "levels 5 3 2"}
 
 local function probe_failures(folder, mode, found)
     local source = path.join(folder, mode.name .. ".c")

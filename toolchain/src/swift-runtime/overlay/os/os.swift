@@ -40,11 +40,11 @@ private func emit(_ message: StaticString, log: OSLog, type: OSLogType, _ args: 
         buffer.map { CChar(bitPattern: $0) } + [0]
     }
     format.withUnsafeBufferPointer { text in
+        guard let handle = log.handle else {
+            revenant_os_log_fallback(type.rawValue, text.baseAddress!)
+            return
+        }
         withVaList(args) { arguments in
-            guard let handle = log.handle else {
-                revenant_os_log_fallback(type.rawValue, text.baseAddress!, arguments)
-                return
-            }
             guard revenant_os_log_type_enabled(handle, type.rawValue) != 0 else {
                 return
             }
