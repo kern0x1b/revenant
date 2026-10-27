@@ -348,6 +348,19 @@ local AREAS = {
         },
     },
     {
+        name = "find interaction, find sessions and the text searching session",
+        sources = {"UIFindInteraction.m", "UIFindSession.m", "UITextSearchingFindSession.m"},
+        members = {
+            "-[UIFindInteraction presentFindNavigatorShowingReplace:]", "-[UIFindInteraction dismissFindNavigator]",
+            "-[UIFindInteraction findNext]", "-[UIFindInteraction findPrevious]", "-[UIFindInteraction updateResultCount]",
+            "-[UIFindSession resultCount]", "-[UIFindSession highlightedResultIndex]", "-[UIFindSession performSearchWithQuery:options:]",
+            "-[UIFindSession highlightNextResultInDirection:]", "-[UIFindSession invalidateFoundResults]",
+            "-[UIFindSession performSingleReplacementWithSearchQuery:replacementString:options:]",
+            "-[UIFindSession replaceAllInstancesOfSearchQuery:withReplacementString:options:]",
+            "-[UITextSearchingFindSession initWithSearchableObject:]", "-[UITextSearchingFindSession searchableObject]",
+        },
+    },
+    {
         name = "iOS 14 color well",
         sources = {"UIColorWell.m"},
         members = {
