@@ -1,8 +1,8 @@
 # Security on iOS 6: access control, keys and shared credentials
 
 The values the Security backport answers, where each came from, and what has no measurement yet. The backport is
-`frameworks/Backports/src/Security`; its host tests are `tests/security_access_control_test.lua` and
-`tests/security_shared_web_test.lua`.
+`frameworks/Backports/src/Security`; its host tests are `tests/security_access_control_test.lua`,
+`tests/security_shared_web_test.lua`, `tests/security_item_test.lua` and `tests/security_key_test.lua`.
 
 ## Sources
 
@@ -88,13 +88,92 @@ The values the Security backport answers, where each came from, and what has no 
   set-passcode state needs a device with a passcode, and iOS 6 offers an app no passcode prompt to verify. The backport
   never answers YES for device-owner authentication.
 
+## SecItem access control on iOS 6
+
+- `SecItemAdd`, `SecItemCopyMatching`, `SecItemUpdate` and `SecItemDelete` are defined by the backport and forwarded to the
+  system's Security image through `dlsym`, as the IOSurface wrapper does. On a system that enforces access control (iOS
+  8 and later, detected by `SecAccessControlGetTypeID`) the forwarders pass every call through unchanged.
+- On iOS 6 an item that carries `kSecAttrAccessControl` with a user-authentication flag is gated in the backport. A query
+  that forbids UI gets `errSecInteractionNotAllowed` (-25308). A query that allows UI runs the LocalAuthentication
+  device-owner evaluation first and fails when that evaluation is refused, so with no passcode set the gate fails closed.
+  The gate's state is a sidecar generic-password item keyed by the SHA-256 of the item's persistent reference.
+- The contract the host test checks (`tests/Security/items/contract.c`) is a literal: add ok, copy and update without UI
+  -25308, cleanup ok. It is not a macOS oracle. macOS refuses to add an access-control item from a command-line process
+  (-34018, `errSecMissingEntitlement`), so the release's answers were not measured on the host. The device has not confirmed it.
+
+## Secure Enclave keys on iOS 6: the representation
+
+iOS 6 has no Secure Enclave and no EC `SecKeyRef`. `SecKeyCreateRandomKey` with `kSecAttrTokenIDSecureEnclave`,
+`SecKeyCreateSignature` and `SecKeyCopyKeyExchangeResult` are iOS 8 and later. An app that asks for a Secure Enclave key
+needs three things back: an object it can hold as a `SecKeyRef` for the signing and exchange calls, a public key it can
+export, and the same key after a relaunch, looked up by its application tag. The private half must never leave the
+backport.
+
+The decision: the key is a backport CoreFoundation object (type `RevenantSecKey`, in
+`frameworks/Backports/src/Security/SecureEnclaveKey9.m`). Its material is two keychain items:
+
+- the private scalar, service `org.revenant.secure-enclave.private`, account the hex of the application tag, stored with
+  the key's protection class and its `SecAccessControl`. Every read goes through `SecItemCopyMatching`, so the gate of the
+  SecItem layer applies to each signature and exchange;
+- the public point (65 bytes), service `org.revenant.secure-enclave.public`, `AfterFirstUnlockThisDeviceOnly`, so a
+  lookup of the public key needs no gate.
+
+Why this shape:
+
+- A key that lives only in the backport object dies with the process. A Secure Enclave key survives a relaunch, so the
+  keychain must hold it.
+- A scalar stored as a plain keychain item, with no access control, could be read by anything under the app's access
+  group with no gate. Carrying the access control on the item keeps the gate on each use.
+- Returning a system `SecKeyRef` is not possible. iOS 6 has no EC `SecKeyRef` to create or wrap.
+
+What the object answers (`SecKeyCreateRandomKey`, `SecKeyCopyPublicKey`, `SecKeyCopyExternalRepresentation`,
+`SecKeyCreateSignature`, `SecKeyVerifySignature`, `SecKeyCopyKeyExchangeResult`):
+
+- Create: P-256 only, 256 bits. A permanent key needs an application tag, and the tag must be free.
+- Export: the private half returns -4 with "export not implemented for key", the answer the macOS oracle gives. The public
+  half returns the 65-byte point beginning `04`.
+- Sign and verify: ECDSA, X9.62, SHA-256, through micro-ecc. The signature is DER.
+- Key exchange: raw ECDH, `kSecKeyAlgorithmECDHKeyExchangeStandard` and `kSecKeyAlgorithmECDHKeyExchangeCofactor`. P-256
+  has cofactor 1, so the two agree. The X9.63 KDF variants return -50, because the backport does not derive keys.
+- Lookup: `SecItemCopyMatching` with `kSecClassKey` and an application tag returns the key when the system does not
+  enforce access control. Delete removes both items.
+
+Caveats:
+
+1. `CFGetTypeID(key) == SecKeyGetTypeID()` is false for these keys. Code that checks the type before it passes the key on
+   rejects it. Telegram's `LocalAuth.swift` (`getPrivateKey`, in `~/Git/reference/Telegram-iOS-release-13.0.0`, outside
+   `ios/`) does such a check. The owner and Telegram must decide this; the backport does not change it.
+2. Only the calls above accept these keys. Encrypt and decrypt return -4 without touching the key. Other system SecKey
+   calls, for example `SecKeyGetBlockSize` or `SecKeyGetAlgorithmID`, would read the backport object as a system key.
+   No test covers them, and an app that calls one on these keys is not supported.
+3. A key whose access control asks for user presence or a passcode fails closed on iOS 6 until the passcode prompt is
+   built. The LocalAuthentication device-owner answer with no passcode is -5.
+4. HEAD had two faults in the exchange path, both fixed here. The predicate required names starting with `ECDH`, but the
+   backport's constants are `algid:keyexchange:ECDH`, so no exchange ever reached the port. The old code also hashed the
+   secret with SHA-256 for the X9.63 variants, which is not the X9.63 KDF.
+5. Ephemeral keys live in memory. Permanent keys need the keychain, which returns -25308 on the iPad 2 (see above), so the
+   permanent path is not measured on iOS 6.
+
+Host verification (`tests/security_key_test.lua`): one fixture runs against macOS's Security framework and against the
+backport with the emulation on. The outputs must equal each other and a literal contract: create, the export length and
+prefix, the export refusal -4, sign and verify (own, other key, tampered message), and the ECDH length and symmetry. The
+backport's DER signature and public point must verify with `openssl dgst -sha256 -verify` (LibreSSL 3.3.6), and a changed
+message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/micro_ecc.lua`.
+
 ## What is implemented, and what is not
 
 - **Implemented, host-tested against macOS:** the SecAccessControl type, its creation rules and equality; the shared
-  credential calls' validation and completion; the shared password's shape.
+  credential calls' validation and completion; the shared password's shape; the Secure Enclave key representation above.
 - **Implemented, measured on the iPad 2:** the LocalAuthentication answers above (no YES for device-owner).
-- **Open, not measured:** device-owner authentication with a passcode set, and whether an app can verify a passcode
-  through `MKBUnlockDevice` (its signature and entitlement are unknown).
+- **Implemented, not verified on iOS 6 hardware:** the SecItem forwarders and the access-control gate, which are checked
+  only against the literal contract; the Secure Enclave emulation for ephemeral keys; the permanent keys and their
+  lookups, which wait for the keychain on the iPad 2; `SecKeyCopyExternalRepresentation` on a private software key,
+  which reads the stored data through the key's persistent reference (`kSecValueRef` with `kSecReturnPersistentRef`, then
+  `kSecValuePersistentRef` with `kSecReturnData`) and returns it when it is a PKCS#1 private key.
+- **Open, not measured:** device-owner authentication with a passcode set, the passcode entry that matches the system's,
+  and whether an app can verify a passcode through `MKBUnlockDevice` (its signature and entitlement are unknown). The
+  user-presence gate fails closed until that entry exists.
+- **Open, decided by the owner and Telegram:** the object type of a Secure Enclave key (caveat 1 above).
 - **Implemented, not verified on iOS 6:** `SecKeyCopyExternalRepresentation` on a private key reads the stored data
   through the key's persistent reference (`kSecValueRef` with `kSecReturnPersistentRef`, then `kSecValuePersistentRef`
   with `kSecReturnData`) and returns it when it is a PKCS#1 private key. This waits for the keychain answer above.

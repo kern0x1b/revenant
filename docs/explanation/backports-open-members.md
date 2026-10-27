@@ -191,21 +191,20 @@ here; a Swift error text and the exact typecheck command are what would settle i
 - `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: the value is `"aku"` on iOS 6, the closest native class, so items
   stored with it are not refused when the device has no passcode, and they are not removed when a passcode is removed
   later. The SDK promises both, and the backport does neither. The host test checks the value against the macOS oracle
-  and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
+  and fails the `"akpu"` value. The refusal is not built, because the passcode predicate is not settled:
   - The passcode predicate. On the iPad 2 on 6.1.3 with no passcode, `MKBGetDeviceLockState(NULL)` returns 3 and
     `MKBDeviceUnlockedSinceBoot()` returns 1 (measured on the device, 2026-10-27, with no passcode changed). The emulator
     returns the same 3, but from a constant in its keybag service, so only the device counts as a measurement. The value
     for a set passcode is still unmeasured: the emulator has no passcode state, and the owner's devices must not change.
     `MKBUnlockDevice` is exported on 6.1.3 (checked with `dlsym`, not called); its signature and entitlement are not known.
-  - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
-    defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
-    and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.
-  Until both are in, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` is a weaker class than its name, and that is the
+  Until it is settled, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` is a weaker class than its name, and that is the
   decision to make before Telegram's passcode storage ships on iOS 6.
-- `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the value is defined, but the flags are not enforced.
-  The constructor returns NULL with `errSecUnimplemented`, so biometric or passcode flags fail loudly. Enforcing
-  `kSecUseAuthenticationContext` or an access control at `SecItemAdd`/`SecItemCopyMatching` needs interception of the
-  SecItem calls, and the tree has no such layer.
+- `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the constructor builds the object with macOS's rules. On
+  iOS 6 the SecItem calls, which the Security backport defines and forwards to the system's Security image (see
+  `backports-loading.md`), gate the items that carry one. That gate is checked against a literal contract and is not
+  yet confirmed on the device (see the Security reference).
+- Secure Enclave keys: the emulated key is a backport object whose private scalar and public point are two keychain
+  items. Its representation, the reasoning and the caveats are in the Security reference, "Secure Enclave keys on iOS 6".
 - `kSecUseAuthenticationContext` and `kSecUseDataProtectionKeychain`: the values match macOS. The second is a no-op on iOS 6.
 - `kSecAttrAccess` is not backported. The only use in the Telegram 13.0 tree is `PasscodeKeychainScopeTests.swift`, a
   macOS scope test, and the production code uses `kSecAttrAccessGroup`, which iOS 6 has.
