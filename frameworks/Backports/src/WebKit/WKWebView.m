@@ -353,12 +353,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (NSURLRequest *)revenant_taggedRequest:(NSURLRequest *)request
 {
-    NSString *scheme = request.URL.scheme.lowercaseString;
-    if (![scheme isEqualToString:@"http"] && ![scheme isEqualToString:@"https"])
-        return request;
-    NSMutableURLRequest *tagged = [request mutableCopy];
-    RevenantDocumentTagRequest(tagged, _token);
-    return tagged;
+    return RevenantDocumentTaggedCopy(request, _token);
 }
 
 - (WKNavigation *)loadRequest:(NSURLRequest *)request
@@ -565,6 +560,20 @@ static NSURL *withoutFragment(NSURL *url)
         return NO;
     }
     BOOL main = [self revenant_isMainFrameRequest:request];
+    if (!_navigation && main && [request.mainDocumentURL isEqual:request.URL] && !RevenantDocumentIsTagged(request)
+        && RevenantDocumentIsWebURL(request.URL) && (type == UIWebViewNavigationTypeLinkClicked || type == UIWebViewNavigationTypeFormSubmitted)) {
+        WKNavigationType replayType = (WKNavigationType)type;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self->_navigation) {
+                [self->_web loadRequest:request];
+                return;
+            }
+            [self revenant_navigateWithRequest:request type:replayType index:-1 perform:^{
+                [self->_web loadRequest:[self revenant_taggedRequest:request]];
+            }];
+        });
+        return NO;
+    }
     WKNavigationType wkType = type == UIWebViewNavigationTypeOther ? WKNavigationTypeOther : (WKNavigationType)type;
     if (main && _navigation)
         wkType = _navigationType == WKNavigationTypeOther ? wkType : _navigationType;

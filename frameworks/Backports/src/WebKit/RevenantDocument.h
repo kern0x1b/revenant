@@ -7,6 +7,9 @@
 
 NSString *RevenantDocumentRegister(id<RevenantDocumentSource> source);
 void RevenantDocumentTagRequest(NSMutableURLRequest *request, NSString *token);
+NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token);
+BOOL RevenantDocumentIsTagged(NSURLRequest *request);
+BOOL RevenantDocumentIsWebURL(NSURL *URL);
 
 NSData *RevenantDocumentRewrite(NSData *body, NSString *contentEncoding, NSString *charset, NSArray<NSString *> *scripts);
 NSString *RevenantDocumentInsert(NSString *html, NSArray<NSString *> *scripts);

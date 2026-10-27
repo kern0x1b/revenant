@@ -184,19 +184,28 @@ Already present, with the same limits:
   Non-HTML and non-200 responses go through unchanged. Each Content-Security-Policy `script-src` (or `default-src`) gets the
   SHA-256 hash of each injected script, in the header and in a `<meta>` policy; WebKit runs `WKUserScript` without CSP, so
   the backport adds the hashes to the policy the page carries.
-- Not covered by document start, which run at load finish instead (the engine logs the first time): link clicks inside a
-  page, which `UIWebView` loads itself; `goBack`, `goForward`, `goToBackForwardListItem` and `reload`, which use the
-  `UIWebView` history; `loadHTMLString:` and `loadData:`; and `loadFileURL:`. The shim is then installed late, as before.
-  A load that is not tagged has no `window.webkit` while the page's own first script runs.
+- A main-frame link click or form submission is not loaded by `UIWebView` directly. When `shouldStartLoadWithRequest`
+  sees one (http(s), `mainDocumentURL` equal to the URL, untagged, and no navigation in progress), it cancels the load and
+  replays it through the navigation path as a tagged `loadRequest:`, with the same method, body and headers. The replay
+  runs on the next turn of the main queue, so the delegate is asked about it asynchronously. If a navigation started in
+  between, the plain request is loaded and that page gets late injection.
+- Still on late injection, which runs the shim and the document-start scripts when the page finishes loading (the engine
+  logs the first time): `goBack`, `goForward`, `goToBackForwardListItem` and `reload`, which use the `UIWebView` history;
+  `loadHTMLString:` and `loadData:`; and `loadFileURL:`. A load on late injection has no `window.webkit` while the page's
+  own first script runs.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
-  message, since only the main document's shim holds the nonce; the payload does not set it. The codec refuses a value
+  message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
+  protocol rewrites main-frame HTML and the late path evaluates in the main frame), and the nonce is removed from the DOM
+  after the shim runs, so a subframe cannot read it and cannot send a message the bridge accepts. The codec refuses a value
   whose type is not what the tag says, and stops decoding at 64 levels of nesting.
 - The host test `tests/webkit_document_start_test.lua` serves the pages from a local HTTP server on a thread and pulls them
   through the protocol with `NSURLConnection`. It covers a page whose own first script reads a value a document-start script
-  set, a redirect chain, gzip, a header charset in ISO-8859-1 and a `<meta>` charset, a JSON resource and a 404 (both
-  untouched), a CSP header and a CSP `<meta>`, and the placement rules. A negative control turns the start scripts off. Authentication
-  challenges and cookies are not exercised by the host test.
+  set, a redirect chain, a link GET and a POST form (both tagged the way the replay tags them, with the method, body and a
+  header kept), gzip, a header charset in ISO-8859-1 and a `<meta>` charset, a JSON resource and a 404 (both untouched), a CSP
+  header and a CSP `<meta>`, and the placement rules. A negative control turns the start scripts off. The host test does not
+  run the `UIKit` side: the choice of which `UIWebView` load to replay is checked by the armv7 build and by reading the code.
+  Authentication challenges and cookies are not exercised by the host test.
 - The host test `tests/webkit_script_message_test.lua` runs the shim in JavaScriptCore and decodes its bridge URL. The
   macOS build posts the same 17 values through a real `WKWebView`, and the bodies agree line by line. Four backport-only
   checks cover cycles, the refused bodies and a foreign URL, and a damaged bridge URL is detected.
@@ -213,8 +222,9 @@ them, and it compiles; its link needs the WebKit backport library, which the typ
 
 Still missing:
 
-- Document start for links clicked inside a page, history navigation and `loadHTMLString:` (see above). Those loads run
-  the start scripts late. Telegram's WebProxy hardening depends on document start, so a link inside a mini app is not covered.
+- Document start for `goBack`, `goForward`, `goToBackForwardListItem`, `reload`, `loadHTMLString:` and `loadData:` (see above).
+  Those loads run the start scripts late. Telegram's WebProxy hardening depends on document start, so a history step or an
+  HTML-string load is not covered.
 - `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
 - Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
   decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.

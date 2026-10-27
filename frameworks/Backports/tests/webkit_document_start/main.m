@@ -47,8 +47,24 @@ static NSData *Message(NSString *status, NSString *headers, NSData *body)
     return message;
 }
 
-static NSData *Reply(NSString *path)
+static NSString *HeaderNamed(NSString *head, NSString *name)
 {
+    for (NSString *line in [head componentsSeparatedByString:@"\r\n"]) {
+        NSString *prefix = [name stringByAppendingString:@":"];
+        if ([line.lowercaseString hasPrefix:prefix.lowercaseString])
+            return [[line substringFromIndex:prefix.length] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    }
+    return @"";
+}
+
+static NSData *Reply(NSString *method, NSString *path, NSString *head, NSData *requestBody)
+{
+    if ([path hasPrefix:@"/echo"]) {
+        NSString *probe = HeaderNamed(head, @"X-Probe");
+        NSString *body = [[NSString alloc] initWithData:requestBody encoding:NSASCIIStringEncoding] ?: @"";
+        NSString *html = [NSString stringWithFormat:@"<!DOCTYPE html><html><head></head><body><script>var seen = window.early + '|%@|%@|%@';</script></body></html>", method, probe, body];
+        return Message(@"200 OK", @"Content-Type: text/html; charset=utf-8\r\n", UTF8(html));
+    }
     if ([path isEqualToString:@"/start"])
         return Message(@"200 OK", @"Content-Type: text/html; charset=utf-8\r\n", UTF8(StartPage));
     if ([path isEqualToString:@"/redirect/1"])
@@ -74,6 +90,7 @@ static NSData *Reply(NSString *path)
 
 static void Serve(int listener)
 {
+    NSData *separator = [NSData dataWithBytes:"\r\n\r\n" length:4];
     for (;;) {
         @autoreleasepool {
             int client = accept(listener, NULL, NULL);
@@ -81,15 +98,28 @@ static void Serve(int listener)
                 continue;
             NSMutableData *request = [NSMutableData data];
             char buffer[2048];
-            ssize_t count;
-            while ((count = read(client, buffer, sizeof buffer)) > 0) {
-                [request appendBytes:buffer length:(NSUInteger)count];
-                if (memmem(request.bytes, request.length, "\r\n\r\n", 4))
-                    break;
+            ssize_t count = 1;
+            while (count > 0 && [request rangeOfData:separator options:0 range:NSMakeRange(0, request.length)].location == NSNotFound) {
+                count = read(client, buffer, sizeof buffer);
+                if (count > 0)
+                    [request appendBytes:buffer length:(NSUInteger)count];
             }
-            NSString *text = [[NSString alloc] initWithData:request encoding:NSASCIIStringEncoding] ?: @"";
-            NSArray *words = [[[text componentsSeparatedByString:@"\r\n"] firstObject] componentsSeparatedByString:@" "];
-            NSData *reply = Reply(words.count > 1 ? words[1] : @"/");
+            NSRange split = [request rangeOfData:separator options:0 range:NSMakeRange(0, request.length)];
+            NSUInteger headLength = split.location == NSNotFound ? request.length : split.location;
+            NSString *head = [[NSString alloc] initWithData:[request subdataWithRange:NSMakeRange(0, headLength)] encoding:NSASCIIStringEncoding] ?: @"";
+            NSUInteger bodyStart = split.location == NSNotFound ? request.length : NSMaxRange(split);
+            NSUInteger expected = (NSUInteger)[HeaderNamed(head, @"Content-Length") integerValue];
+            while (count > 0 && request.length - bodyStart < expected) {
+                count = read(client, buffer, sizeof buffer);
+                if (count > 0)
+                    [request appendBytes:buffer length:(NSUInteger)count];
+            }
+            NSUInteger available = MIN(expected, request.length - bodyStart);
+            NSData *requestBody = [request subdataWithRange:NSMakeRange(bodyStart, available)];
+            NSArray *words = [[head componentsSeparatedByString:@"\r\n"].firstObject componentsSeparatedByString:@" "];
+            NSString *method = words.count > 0 ? words[0] : @"GET";
+            NSString *path = words.count > 1 ? words[1] : @"/";
+            NSData *reply = Reply(method, path, head, requestBody);
             const char *bytes = reply.bytes;
             size_t remaining = reply.length;
             while (remaining > 0) {
@@ -183,10 +213,8 @@ static int StartServer(void)
 
 @end
 
-static Loader *Fetch(NSString *URLString, NSString *token)
+static Loader *FetchRequest(NSURLRequest *request)
 {
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
-    RevenantDocumentTagRequest(request, token);
     Loader *loader = [[Loader alloc] init];
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:loader startImmediately:YES];
     NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:10];
@@ -194,6 +222,13 @@ static Loader *Fetch(NSString *URLString, NSString *token)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
     [connection cancel];
     return loader;
+}
+
+static Loader *Fetch(NSString *URLString, NSString *token)
+{
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:URLString]];
+    RevenantDocumentTagRequest(request, token);
+    return FetchRequest(request);
 }
 
 static NSString *Flag(NSString *label, BOOL value)
@@ -254,6 +289,26 @@ int main(int argc, const char *argv[])
         [lines addObject:Flag(@"redirect final is start", [redirect.response.URL.path isEqualToString:@"/start"])];
         [lines addObject:Flag(@"redirect injected", source.injected)];
         [lines addObject:[NSString stringWithFormat:@"redirect page script saw: %@", PageScriptSaw(redirect.data)]];
+
+        source.injected = NO;
+        NSURL *linkURL = [NSURL URLWithString:[base stringByAppendingString:@"/echo?link=1"]];
+        NSMutableURLRequest *link = [NSMutableURLRequest requestWithURL:linkURL];
+        [link setValue:@"probe-42" forHTTPHeaderField:@"X-Probe"];
+        NSURLRequest *taggedLink = RevenantDocumentTaggedCopy(link, token);
+        [lines addObject:Flag(@"link tagged copy keeps the original", !RevenantDocumentIsTagged(link) && RevenantDocumentIsTagged(taggedLink))];
+        Loader *linked = FetchRequest(taggedLink);
+        [lines addObject:Flag(@"link injected", source.injected)];
+        [lines addObject:[NSString stringWithFormat:@"link page script saw: %@", PageScriptSaw(linked.data)]];
+
+        source.injected = NO;
+        NSMutableURLRequest *form = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[base stringByAppendingString:@"/echo"]]];
+        form.HTTPMethod = @"POST";
+        form.HTTPBody = UTF8(@"field=value");
+        [form setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+        [form setValue:@"probe-42" forHTTPHeaderField:@"X-Probe"];
+        Loader *posted = FetchRequest(RevenantDocumentTaggedCopy(form, token));
+        [lines addObject:Flag(@"form injected", source.injected)];
+        [lines addObject:[NSString stringWithFormat:@"form page script saw: %@", PageScriptSaw(posted.data)]];
 
         source.injected = NO;
         Loader *gzip = Fetch([base stringByAppendingString:@"/gzip"], token);

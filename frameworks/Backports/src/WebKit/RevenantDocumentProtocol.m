@@ -39,10 +39,24 @@ static NSString *HeaderValue(NSDictionary *headers, NSString *name)
     return nil;
 }
 
-static BOOL IsWebURL(NSURL *URL)
+BOOL RevenantDocumentIsWebURL(NSURL *URL)
 {
     NSString *scheme = URL.scheme.lowercaseString;
     return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
+}
+
+BOOL RevenantDocumentIsTagged(NSURLRequest *request)
+{
+    return [NSURLProtocol propertyForKey:TokenKey inRequest:request] != nil;
+}
+
+NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
+{
+    if (!RevenantDocumentIsWebURL(request.URL))
+        return request;
+    NSMutableURLRequest *tagged = [request mutableCopy];
+    RevenantDocumentTagRequest(tagged, token);
+    return tagged;
 }
 
 @interface RevenantDocumentProtocol : NSURLProtocol <NSURLConnectionDataDelegate>
@@ -60,7 +74,7 @@ static BOOL IsWebURL(NSURL *URL)
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
-    if (!IsWebURL(request.URL) || [NSURLProtocol propertyForKey:InnerKey inRequest:request])
+    if (!RevenantDocumentIsWebURL(request.URL) || [NSURLProtocol propertyForKey:InnerKey inRequest:request])
         return NO;
     NSString *token = [NSURLProtocol propertyForKey:TokenKey inRequest:request];
     return [token isKindOfClass:[NSString class]] && SourceForToken(token) != nil;
