@@ -37,17 +37,17 @@ The fast level reads six languages, so only those six fast models are packaged. 
 
 ## Packaging
 
-The `tessdata` recipe takes a `languages` option: a list of Tesseract codes, or `all`. The default is `eng,rus,ukr`. Each code is installed at the fast level where tessdata_fast has its model, and at the accurate level where tessdata_best has it. The packaging configuration installs the default set; the host tests install `all`.
+The `tessdata` recipe takes a `languages` option: a list of Tesseract codes, or `all`. The default is `eng,rus,ukr`. Each code is installed at the fast level where the fast level answers it (the six languages of the table above), and at the accurate level where tessdata_best has its model. The packaging configuration installs the default set; the host tests install `all`.
 
 Each installed model is one package, installed in `/usr/share/revenant/tessdata/{fast,best}`:
 
-- `org.revenant.vision-text-fast-eng` is the fast English model. The Backports package depends on it.
-- `org.revenant.vision-text-fast-rus` and `org.revenant.vision-text-fast-ukr` are the fast Russian and Ukrainian models. The Backports package recommends them.
-- `org.revenant.vision-text-best-<code>` is the accurate model for each code. An underscore in the code becomes a hyphen, so `chi_sim` is `best-chi-sim`. Nothing depends on these; an app that needs an accurate language installs its package.
+- `org.revenant.vision-text-best-eng` and `org.revenant.vision-text-fast-eng` are the accurate and the fast English models. The Backports package depends on both.
+- `org.revenant.vision-text-best-rus` and `org.revenant.vision-text-best-ukr` are the accurate Russian and Ukrainian models. The Backports package recommends them.
+- `org.revenant.vision-text-fast-<code>` is the fast model of each of the other five fast-level languages, and `org.revenant.vision-text-best-<code>` is the accurate model for each code. An underscore in the code becomes a hyphen, so `chi_sim` is `best-chi-sim`. Nothing depends on these; an app that needs one of them installs its package.
 
 `toolchain/modules/apple/vision_text.lua` writes one package for each installed model. `platform.vision_text_debs` calls it with the install directory of the `tessdata` package that the Vision target requires, and `backports_package` writes the Depends and Recommends fields.
 
-The fast level answers only the six languages of macOS's list, so as the backport stands no Vision request reads `fast-rus` or `fast-ukr`. The recommendation follows the packaging decision. Whether the fast level should answer Russian and Ukrainian, which would differ from macOS, or whether the Backports package should recommend the accurate packages instead, is open.
+The fast level answers only the six languages of macOS's fast list, so it has no Russian or Ukrainian model at all; `ru-RU` and `uk-UA` are read at the accurate level, as on macOS. For that reason the Backports package recommends `best-rus` and `best-ukr`, and the fast Russian and Ukrainian models are not packaged.
 
 ## Where it differs from Apple's Vision
 
@@ -94,4 +94,4 @@ The text read matches the fixtures: `Hello, world` and `Vision text 2026` for En
 - Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control. The host tests were rerun after the `tessdata` recipe took the `languages` option.
 - Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the per-model packages, the dependency and recommendation names, an unknown model, and a missing license). The `tessdata` recipe configures and installs for macOS.
 - Not yet run: a full iOS packaging run that writes the Backports package and the model packages together. The iOS default set (`eng,rus,ukr`) was not installed for iOS in this run.
-- Open: the fast Russian and Ukrainian models are recommended but not read (see Packaging); the growth of resident memory across recognitions.
+- Open: the growth of resident memory across recognitions.

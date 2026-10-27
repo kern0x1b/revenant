@@ -3,8 +3,8 @@ local debian = import("debian", {rootdir = path.join(os.scriptdir(), ".."), anon
 local FOLDER = "usr/share/revenant/tessdata"
 local ARCHITECTURE = "iphoneos-arm"
 local PREFIX = "org.revenant.vision-text-"
-local DEPENDS = {PREFIX .. "fast-eng"}
-local RECOMMENDS = {PREFIX .. "fast-rus", PREFIX .. "fast-ukr"}
+local DEPENDS = {PREFIX .. "best-eng", PREFIX .. "fast-eng"}
+local RECOMMENDS = {PREFIX .. "best-rus", PREFIX .. "best-ukr"}
 
 local LANGUAGES = {
     {code = "eng", identifiers = {"en-US"}},

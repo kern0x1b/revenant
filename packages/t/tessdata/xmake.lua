@@ -13,9 +13,7 @@ package("tessdata")
         {"fra", "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca"},
         {"ita", "b8f89e1e785118dac4d51ae042c029a64edb5c3ee42ef73027a6d412748d8827"},
         {"por", "c4932b937207a9514b7514d518b931a99938c02a28a5a5a553f8599ed58b7deb"},
-        {"rus", "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225"},
-        {"spa", "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464"},
-        {"ukr", "d59e53e2bded32f4445f124b4b00240fcac7e8044c003ab822ccb94f0b3db59b"}
+        {"spa", "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464"}
     }
 
     local BEST = {

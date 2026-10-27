@@ -46,11 +46,10 @@ function failures(opt)
     end
     os.mkdir(path.join(root, "licenses"))
     io.writefile(path.join(root, "licenses", "LICENSE"), "license")
-    for _, code in ipairs({"eng", "rus", "ukr"}) do
-        io.writefile(path.join(share, "fast", code .. ".traineddata"), code)
+    io.writefile(path.join(share, "fast", "eng.traineddata"), "eng")
+    for _, code in ipairs({"eng", "rus", "ukr", "chi_sim"}) do
         io.writefile(path.join(share, "best", code .. ".traineddata"), code)
     end
-    io.writefile(path.join(share, "best", "chi_sim.traineddata"), "chi_sim")
 
     local out = path.join(folder, "out")
     local written = vision_text.write({root = root, workdir = path.join(folder, "work"), outputdir = out})
@@ -60,8 +59,7 @@ function failures(opt)
     end
     table.sort(names)
     local expected = {"org.revenant.vision-text-best-chi-sim", "org.revenant.vision-text-best-eng", "org.revenant.vision-text-best-rus",
-                      "org.revenant.vision-text-best-ukr", "org.revenant.vision-text-fast-eng", "org.revenant.vision-text-fast-rus",
-                      "org.revenant.vision-text-fast-ukr"}
+                      "org.revenant.vision-text-best-ukr", "org.revenant.vision-text-fast-eng"}
     if #written ~= #expected then
         table.insert(found, "one package is written per installed model, got " .. table.concat(names, ", "))
     end
@@ -92,11 +90,11 @@ function failures(opt)
         table.insert(found, "the Russian package carries the tessdata license: " .. contents(folder, russian))
     end
 
-    if table.concat(vision_text.depends(), ",") ~= "org.revenant.vision-text-fast-eng" then
-        table.insert(found, "Backports depends on the fast English package, got " .. table.concat(vision_text.depends(), ","))
+    if table.concat(vision_text.depends(), ",") ~= "org.revenant.vision-text-best-eng,org.revenant.vision-text-fast-eng" then
+        table.insert(found, "Backports depends on the accurate and fast English packages, got " .. table.concat(vision_text.depends(), ","))
     end
-    if table.concat(vision_text.recommended(), ",") ~= "org.revenant.vision-text-fast-rus,org.revenant.vision-text-fast-ukr" then
-        table.insert(found, "Backports recommends the fast Russian and Ukrainian packages, got " .. table.concat(vision_text.recommended(), ","))
+    if table.concat(vision_text.recommended(), ",") ~= "org.revenant.vision-text-best-rus,org.revenant.vision-text-best-ukr" then
+        table.insert(found, "Backports recommends the accurate Russian and Ukrainian packages, got " .. table.concat(vision_text.recommended(), ","))
     end
 
     io.writefile(path.join(share, "best", "xyz.traineddata"), "xyz")
