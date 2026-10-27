@@ -237,6 +237,13 @@ Already present, with the same limits:
   fallback message about a document-start script the rewrite did not reach now names its document and navigation type,
   and it has not fired in these runs. The load-by-URL path (an http entry moved to after a string load) is not measured
   on the device yet.
+- Response decisions reach `file:`, `data:` and engine-started main-frame loads too. A string, data or file document
+  (`loadHTMLString:`, `loadData:`, `loadFileURL:`, and a `loadRequest:` of a `file:` or `data:` URL) asks the delegate's
+  `decidePolicyForNavigationResponse:` with a response built from its MIME type; a deny fails the navigation with
+  `NSURLErrorCancelled` and leaves the page as it was. A main-frame load the engine starts by itself (a script's
+  `location` change, not a fragment) is replayed through the protocol, so it gets the same decision as a link. Measured on
+  the device: an engine-started `location.href` load was decided, a denied `file:` load and a denied `data:` load failed
+  with `-999` and kept the page, and an allowed `file:` load ran its start script.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
