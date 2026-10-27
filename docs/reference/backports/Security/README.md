@@ -88,6 +88,35 @@ The values the Security backport answers, where each came from, and what has no 
   set-passcode state needs a device with a passcode, and iOS 6 offers an app no passcode prompt to verify. The backport
   never answers YES for device-owner authentication.
 
+## MobileKeyBag and the passcode, from the 6.1.3 image
+
+Read from the iOS 6.1.3 MobileKeyBag image (`/System/Library/PrivateFrameworks/MobileKeyBag.framework/MobileKeyBag`, taken
+with `xmake firmware --library=... extract 6.1.3` and disassembled with `llvm-objdump --triple=thumbv7-apple-ios6.1`).
+Nothing was called on any device.
+
+- `MKBUnlockDevice` takes one argument, in r0. The wrapper reads it as a `CFDataRef`: `CFDataGetBytePtr` and
+  `CFDataGetLength` give the bytes and their length, and `_AppleKeyStoreUnlockDevice` sends them to the kernel as the input
+  struct of selector 9 of the AppleKeyStore user client. The image does not show what the bytes must hold (the passcode as
+  typed, or a value derived from it). The kernel decides.
+- The return value is the wrapper's status. The kernel's codes map as follows: 0 gives 0; 0xE00002E2 gives -2; 0xE00002F0
+  gives -8; 0xE00002CE gives -3; 0xE00002C9 gives -9. Any other non-zero code gives -1 and writes a log line.
+- Before the call the wrapper connects to the AppleKeyStore user client (`_connect_to_service`). With no connection it
+  returns 0xE00002BC. The privilege that decides whether the call is allowed is in the kernel, which this image does not
+  contain. No entitlement name appears in MobileKeyBag; the only service name is `com.apple.mobile.keybagd`, which is not
+  the AppleKeyStore path.
+- The lock state is `MKBGetDeviceLockState` (3 is the no-passcode state, measured on the iPad 2), with
+  `MKBDeviceUnlockedSinceBoot` beside it.
+
+What this does and does not settle:
+
+- An app can verify a passcode only if the kernel allows the call from an app's process, and only if the argument's bytes
+  are what it expects. Neither is measured. The backport therefore keeps the device-owner answer fail-closed.
+- Whether a wrong argument counts against the passcode attempts, or locks the device for a while, is not known. A
+  probe on an owner's device with a passcode set must not run without the owner's word.
+- Measurements still open, each under a device claim: the status with an empty argument on a phone with no passcode
+  (state 3), and the status from a process that runs as `mobile` rather than root. The passcode type setting (simple or
+  complex) is not located in the image yet.
+
 ## SecItem access control on iOS 6
 
 - `SecItemAdd`, `SecItemCopyMatching`, `SecItemUpdate` and `SecItemDelete` are defined by the backport and forwarded to the
@@ -196,6 +225,7 @@ message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/
   returns it when it is a PKCS#1 private key.
 - **Implemented, measured on the iPad 2:** the LocalAuthentication answers above (no YES for device-owner).
 - **Open, not measured:** device-owner authentication with a passcode set, the passcode entry that matches the system's,
-  and whether an app can verify a passcode through `MKBUnlockDevice` (its signature and entitlement are unknown). The
+  and whether an app can verify a passcode through `MKBUnlockDevice` (its argument is a `CFDataRef` and its privilege is in
+  the kernel; see "MobileKeyBag and the passcode"). The
   user-presence gate fails closed until that entry exists.
 - **Not implemented:** the passcode prompt. Until it exists, every gate that needs user presence or a passcode fails closed.
