@@ -12,6 +12,8 @@ local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/device.lua ACTION ...
 
 local BUNDLE = "space.kern0x1b.swiftui.demo"
 local LOG = "/var/tmp/swiftui-demo.log"
+local LAUNCH_OUT = "/var/tmp/swiftui-demo.out"
+local LAUNCH_ERR = "/var/tmp/swiftui-demo.err"
 local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
 local SHOT = "/usr/libexec/revenant-shot"
 local UNLOCK = "/usr/libexec/revenant-unlock"
@@ -110,6 +112,20 @@ local function tools(device, settings)
     device.run(settings, "mkdir -p /var/revenant && chmod 777 /var/revenant")
 end
 
+local function platform(device, settings)
+    local missing = {}
+    for line in (os.iorun("otool -L " .. path.join(tree.demo(), "SwiftUIDemo")) or ""):gmatch("[^\n]+") do
+        local lib = line:match("^%s*(/usr/lib/revenant/%S+)")
+        if lib and not line:find(", weak)", 1, true) and not on_device(device, settings, "test -f " .. lib .. " && echo present") then
+            table.insert(missing, lib)
+        end
+    end
+    if #missing > 0 then
+        raise("the phone lacks %s, which SwiftUIDemo links: install the revenant platform package that provides it (org.revenant.backports) on this phone first",
+              table.concat(missing, ", "))
+    end
+end
+
 local function install(device, settings)
     local app = tree.demo()
     if not os.isdir(app) then
@@ -157,12 +173,24 @@ local function unlock(device, settings)
     end
 end
 
+local function await_launch(device, settings)
+    for _ = 1, 10 do
+        if on_device(device, settings, "launchctl list | grep 'UIKitApplication:" .. BUNDLE .. "' && echo running") then
+            return
+        end
+        os.sleep(1000)
+    end
+    raise("the demo did not start on the phone, though the launcher returned; its stderr: %s",
+          on_device(device, settings, "cat " .. LAUNCH_ERR) or "nothing")
+end
+
 local function start(device, settings, setup)
     unlock(device, settings)
     on_device(device, settings, "killall SwiftUIDemo")
     device.run(settings, "sleep 1; rm -rf /var/revenant/show /var/revenant/gesture /var/revenant/snapshots.on /var/revenant/snapshots.png "
-               .. "/var/revenant/snapshots.only /var/revenant/swiftui-snapshots " .. LOG .. "; " .. setup
-               .. "; " .. SBLAUNCH .. " " .. BUNDLE)
+               .. "/var/revenant/snapshots.only /var/revenant/swiftui-snapshots " .. LOG .. " " .. LAUNCH_OUT .. " " .. LAUNCH_ERR .. "; " .. setup
+               .. "; " .. SBLAUNCH .. " --stdout " .. LAUNCH_OUT .. " --stderr " .. LAUNCH_ERR .. " " .. BUNDLE)
+    await_launch(device, settings)
 end
 
 local function shots(arguments)
@@ -175,6 +203,7 @@ local function shots(arguments)
     end
     local device, settings = phone()
     local out = tree.run("device-shots")
+    platform(device, settings)
     install(device, settings)
     local failed = {}
     for _, scenario in ipairs(arguments) do
