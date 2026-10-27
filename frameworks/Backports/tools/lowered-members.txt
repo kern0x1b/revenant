@@ -2053,6 +2053,7 @@ class RevenantWeakBox
 class RevenantWeakDelegateBox
 class RevenantWeakGroup
 class RevenantWeakMapTable
+class RevenantWebFindSession
 class RevenantWebPagination7
 class RevenantWebSchemeTask
 class RevenantWebURLProtocol
@@ -26087,6 +26088,7 @@ member RevenantFileLocationsController -tableView:didSelectRowAtIndexPath:
 member RevenantFileLocationsController -tableView:numberOfRowsInSection:
 member RevenantFileLocationsController -viewDidLoad
 member RevenantFindNavigator -layoutSubviews
+member RevenantFindNavigator -showsReplaceRow
 member RevenantFlashActiveWait -finish
 member RevenantFlashActiveWait -observeValueForKeyPath:ofObject:change:context:
 member RevenantFlowModel -items
@@ -28186,6 +28188,14 @@ member RevenantWeakMapTable -removeObjectForKey:
 member RevenantWeakMapTable -setObject:forKey:
 member RevenantWeakMapTable -takePending
 member RevenantWeakMapTable -valuePointerFunctions
+member RevenantWebFindSession -highlightNextResultInDirection:
+member RevenantWebFindSession -highlightedResultIndex
+member RevenantWebFindSession -initWithEvaluator:
+member RevenantWebFindSession -invalidateFoundResults
+member RevenantWebFindSession -performSearchWithQuery:options:
+member RevenantWebFindSession -resultCount
+member RevenantWebFindSession -revenant_call:argument:
+member RevenantWebFindSession -revenant_clearHighlight
 member RevenantWebPagination7 +load
 member RevenantWebSchemeTask -didFailWithError:
 member RevenantWebSchemeTask -didFinish
@@ -34889,6 +34899,8 @@ member WKWebView -customUserAgent
 member WKWebView -dealloc
 member WKWebView -estimatedProgress
 member WKWebView -evaluateJavaScript:completionHandler:
+member WKWebView -findInteraction
+member WKWebView -findInteraction:sessionForView:
 member WKWebView -goBack
 member WKWebView -goForward
 member WKWebView -goToBackForwardListItem:
@@ -34896,6 +34908,7 @@ member WKWebView -hasOnlySecureContent
 member WKWebView -initWithCoder:
 member WKWebView -initWithFrame:
 member WKWebView -initWithFrame:configuration:
+member WKWebView -isFindInteractionEnabled
 member WKWebView -isLoading
 member WKWebView -loadData:MIMEType:characterEncodingName:baseURL:
 member WKWebView -loadFileURL:allowingReadAccessToURL:
@@ -34927,6 +34940,7 @@ member WKWebView -scrollView
 member WKWebView -setAllowsBackForwardNavigationGestures:
 member WKWebView -setAllowsLinkPreview:
 member WKWebView -setCustomUserAgent:
+member WKWebView -setFindInteractionEnabled:
 member WKWebView -setNavigationDelegate:
 member WKWebView -setUIDelegate:
 member WKWebView -stopLoading
@@ -35153,6 +35167,7 @@ protocol UIDragSession
 protocol UIDropInteractionDelegate
 protocol UIDropSession
 protocol UIDynamicItem
+protocol UIFindInteractionDelegate
 protocol UIFocusItem
 protocol UIGestureRecognizerDelegate
 protocol UIImagePickerControllerDelegate
@@ -35720,6 +35735,7 @@ protocol_member UIDropSession -progressIndicatorStyle
 protocol_member UIDynamicItem -bounds
 protocol_member UIDynamicItem -center
 protocol_member UIDynamicItem -transform
+protocol_member UIFindInteractionDelegate -findInteraction:sessionForView:
 protocol_member UIFocusItem -canBecomeFocused
 protocol_member UIFocusItem -focusEffect
 protocol_member UIFocusItem -focusGroupPriority
