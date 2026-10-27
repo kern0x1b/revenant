@@ -167,6 +167,17 @@ if is_plat("iphoneos") then
         set_values("revenant.control", path.join(TWEAK, "control"))
         set_values("revenant.version", "1.0.0")
 
+    local ALTICON = path.join(SRC, "UIKit", "tweak")
+
+    target("revenant-alticon")
+        set_default(false)
+        add_rules("@addon/revenant/tweak")
+        add_files(path.join(ALTICON, "RevenantAlternateIconTweak.m"))
+        add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
+        set_values("tweak.filter", path.join(ALTICON, "springboard.plist"))
+        set_values("revenant.control", path.join(ALTICON, "control"))
+        set_values("revenant.version", "1.0.0")
+
     for _, library in ipairs(LIBRARIES) do
         target(library.name)
             set_kind("shared")

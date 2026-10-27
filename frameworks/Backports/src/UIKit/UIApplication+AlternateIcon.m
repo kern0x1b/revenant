@@ -7,7 +7,10 @@ static const char *const revenant_alternate_icon_changed = "org.revenant.alticon
 
 static NSDictionary *revenant_alternate_icons(void)
 {
-    NSDictionary *icons = [[NSBundle mainBundle] infoDictionary][@"CFBundleAlternateIcons"];
+    NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+    NSString *key = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"CFBundleIcons~ipad" : @"CFBundleIcons";
+    NSDictionary *primary = info[key];
+    NSDictionary *icons = [primary isKindOfClass:[NSDictionary class]] ? primary[@"CFBundleAlternateIcons"] : nil;
     return [icons isKindOfClass:[NSDictionary class]] ? icons : nil;
 }
 
