@@ -319,16 +319,18 @@ overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concur
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock")
+    add_tests("oslock", "uikittraits")
     on_test(function (target, opt)
         import("core.project.project")
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua"}
+        local name = path.filename(opt.name)
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()
         local compiler = path.join(project.required_package("swift"):installdir(), "bin", "swiftc")
-        local ok = os.execv(os.programfile(), {"l", "-P", root, path.join(SRC, "..", "tests", "os_lock_test.lua")},
+        local ok = os.execv(os.programfile(), {"l", "-P", root, path.join(SRC, "..", "tests", scripts[name])},
                             {try = true, curdir = root, envs = {REVENANT_SWIFT_RUNTIME = runtime, REVENANT_SWIFT_COMPILER = compiler}})
         if ok ~= 0 then
-            opt.errors = "oslock failed"
+            opt.errors = name .. " failed"
         end
         return ok == 0
     end)

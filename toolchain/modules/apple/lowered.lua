@@ -4,7 +4,56 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 
+local TRAIT_REGISTRATION = {
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withHandler:(UITraitChangeHandler)handler", "registerForTraitChanges(_:handler:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withTarget:(id)target action:(SEL)action", "registerForTraitChanges(_:target:action:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withAction:(SEL)action", "registerForTraitChanges(_:action:)"},
+    {"- (void)unregisterForTraitChanges:(id<UITraitChangeRegistration>)registration", "unregisterForTraitChanges(_:)"},
+}
+
+local function trait_declaration(entry)
+    return entry[1] .. " NS_SWIFT_NAME(" .. entry[2] .. ");"
+end
+
+local function trait_registration(owner, interface)
+    local declarations = {}
+    for _, entry in ipairs(TRAIT_REGISTRATION) do
+        table.insert(declarations, trait_declaration(entry))
+    end
+    return {
+        member = owner,
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = owner .. ".h",
+            find = interface,
+            replace = interface .. "\n" .. table.concat(declarations, "\n"),
+        },
+    }
+end
+
+local function trait_protocol_name(entry)
+    return {
+        member = "UITraitChangeObservable",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITraitCollection.h",
+            find = entry[1] .. ";",
+            replace = trait_declaration(entry),
+        },
+    }
+end
+
 local MEMBERS = {
+    trait_registration("UIView", "@interface UIView () <UITraitChangeObservable>"),
+    trait_registration("UIViewController", "@interface UIViewController () <UITraitChangeObservable>"),
+    trait_registration("UIWindowScene", "@interface UIWindowScene () <UITraitEnvironment, UITraitChangeObservable>"),
+    trait_registration("UIPresentationController", "@interface UIPresentationController () <UITraitChangeObservable>"),
+    trait_protocol_name(TRAIT_REGISTRATION[1]),
+    trait_protocol_name(TRAIT_REGISTRATION[2]),
+    trait_protocol_name(TRAIT_REGISTRATION[3]),
+    trait_protocol_name(TRAIT_REGISTRATION[4]),
     {
         member = "UIPointerStyle",
         header = {
@@ -1810,6 +1859,41 @@ local function lowered_apinotes(text, set)
     return table.concat(lines, "\n") .. "\n"
 end
 
+local function trait_name(name)
+    return name:lower():find("trait", 1, true) ~= nil
+end
+
+local function lowered_trait_apinotes(text, set)
+    local classes, protocols, types = set.classes or {}, set.protocols or {}, set.types or {}
+    local protocol_members = set.protocol_members or {}
+    local function backed(owner, key)
+        for _, sign in ipairs({"-", "+"}) do
+            if (classes[owner] or {})[sign .. key] or (protocol_members[owner] or {})[sign .. key] then
+                return true
+            end
+        end
+        return false
+    end
+    local owner, entry, member = nil, false, false
+    local lines = {}
+    for line in text:gmatch("[^\n]+") do
+        local name = line:match("^%- Name: (%S+)")
+        local sub = line:match("^  %- %a+: ['\"]?([^'\"]+)['\"]?$")
+        if name then
+            owner = name
+            entry = trait_name(name) and (classes[name] ~= nil or protocols[name] ~= nil or types[name] == true)
+            member = false
+        elseif sub then
+            member = trait_name(sub) and owner ~= nil and backed(owner, sub)
+        end
+        local private = (entry and line == "  SwiftPrivate: true") or (member and line == "    SwiftPrivate: true")
+        if not private then
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
 local function vfs_subtree(relative, subtrees)
     local head = relative and relative:match("^([^/]+)")
     return head ~= nil and (subtrees or VFS_SUBTREES)[head] == true
@@ -1867,6 +1951,10 @@ function build_overlay(sdk, out, set, subtrees)
     local notes = path.join(sdk, "usr", "include", "os.apinotes")
     if os.isfile(notes) then
         changed[notes] = lowered_apinotes(io.readfile(notes), set)
+    end
+    local uikit_notes = path.join(sdk, "System", "Library", "Frameworks", "UIKit.framework", "Headers", "UIKit.apinotes")
+    if os.isfile(uikit_notes) then
+        changed[uikit_notes] = lowered_trait_apinotes(io.readfile(uikit_notes), set)
     end
     local roots = {}
     local file_roots = {}
