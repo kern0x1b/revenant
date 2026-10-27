@@ -214,7 +214,7 @@ local MEMBERS = {
             find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
             replace = table.concat({
                 "#if defined(__OBJC__) || defined(__cplusplus)",
-                "#define REVENANT_OS_OPTIONS OS_OPTIONS",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef enum __OS_ENUM_ATTR __OS_OPTIONS_ATTR : _type { __VA_ARGS__ } _name##_t",
                 "#else",
                 "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
                 "#endif",
