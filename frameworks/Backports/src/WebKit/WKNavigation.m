@@ -98,6 +98,13 @@
 
 @implementation WKNavigationResponse
 
+// The engine loads a page without asking for a response decision, so no delegate receives this value yet;
+// it maps a decision onto the SDK's policy values for when one is asked for.
++ (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed
+{
+    return allowed ? WKNavigationResponsePolicyAllow : WKNavigationResponsePolicyCancel;
+}
+
 - (BOOL)isForMainFrame
 {
     return YES;

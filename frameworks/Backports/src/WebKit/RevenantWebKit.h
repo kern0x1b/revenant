@@ -7,6 +7,18 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)revenant_scriptsDidChange;
 @end
 
+// The callbacks WKWebView sends, with the SDK's selectors. The response decision is declared for
+// conforming classes; the engine does not send it, because UIWebView gives no response hook.
+@protocol WKNavigationDelegate <NSObject>
+@optional
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler;
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation;
+- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation;
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation;
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error;
+@end
+
 @interface WKUserContentController (RevenantWebKit)
 - (NSArray<WKUserScript *> *)revenant_scripts;
 - (NSArray<NSString *> *)revenant_handlerNames;
@@ -45,4 +57,8 @@ extern NSString *const RevenantWebKitBridgeScheme;
 
 @interface WKBackForwardList (RevenantWebKit)
 - (void)revenant_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index;
+@end
+
+@interface WKNavigationResponse (RevenantWebKit)
++ (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed;
 @end
