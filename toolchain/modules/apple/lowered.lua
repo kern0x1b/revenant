@@ -1865,7 +1865,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
