@@ -71,6 +71,8 @@ local CASES = {
             "- (void)addPresentedHandler:(MTLDrawablePresentedHandler)block",
             "[_presentedHandlers addObject:block];",
             "handler((id<MTLDrawable>)self);",
+            "_drawableID = __sync_add_and_fetch(&revenant_drawable_counter, 1);",
+            "_presentedTime = CACurrentMediaTime();",
         },
     },
     {

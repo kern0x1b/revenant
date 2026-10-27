@@ -2,12 +2,16 @@
 #import <objc/runtime.h>
 
 
+static NSUInteger revenant_drawable_counter;
+
 @implementation RevenantMetalDrawable {
     RevenantMetalTexture *_texture;
     __weak CAMetalLayer *_layer;
     EAGLContext *_context;
     GLuint _renderbuffer;
     NSMutableArray *_presentedHandlers;
+    NSUInteger _drawableID;
+    CFTimeInterval _presentedTime;
 }
 
 - (instancetype)initWithTexture:(RevenantMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context
@@ -16,6 +20,7 @@
         _texture = texture;
         _layer = layer;
         _context = context;
+        _drawableID = __sync_add_and_fetch(&revenant_drawable_counter, 1);
     }
     return self;
 }
@@ -32,7 +37,7 @@
 
 - (NSUInteger)drawableID
 {
-    return 0;
+    return _drawableID;
 }
 
 - (void)present
@@ -44,6 +49,7 @@
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, (GLuint)renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
+    _presentedTime = CACurrentMediaTime();
     [device relinquish];
     NSArray *handlers = _presentedHandlers;
     _presentedHandlers = nil;
@@ -72,7 +78,7 @@
 
 - (CFTimeInterval)presentedTime
 {
-    return 0;
+    return _presentedTime;
 }
 
 @end
