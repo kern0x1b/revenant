@@ -83,7 +83,14 @@ Measured and chosen:
 - The group is the one MobileSafari holds. Its `keychain-access-groups` entitlement (`codesign -d --entitlements :-` on the
   6.1.3 rootfs binary, read on the host) is `com.apple.cfnetwork`, `com.apple.identities`, `com.apple.mobilesafari` and
   `com.apple.certificates`. The phone's `agrp` values in `keychain-2.db` are the cross-check; it is not run yet.
-- The error codes of steps 1 and 2 are the backport's choice. The iOS 8+ answers for them are not measured.
+- The error codes of steps 1 and 2 are the backport's choice. The iOS 8+ answers for them are not measured, and the 6.1.3
+  image cannot supply them. Searched: every file under the 6.1.3 rootfs
+  (`.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`) and the strings of the 6.1.3 dyld cache for
+  `apple-app-site-association`, `webcredentials`, `associated-domains`, `SharedWebCredential`, `kSecSharedPassword`,
+  `swcd`, and, case-insensitively, `site-association` and `associated-domain`. None occurs. The control
+  `SecItemCopyMatching` is found in both, so the search works. The association check is an iOS 8+ mechanism that 6.1.3 does
+  not contain. Its failure codes therefore stay as chosen (-34018 for a missing entitlement, -25293 for an association file
+  that cannot be read or does not list the app) until an iOS 8+ image is read.
 - On macOS 27 an ad-hoc signed copy that carries `com.apple.developer.associated-domains` (or `application-identifier`)
   is killed at launch (exit 137), so the positive path cannot run on the host. The host test
   (`tests/security_shared_web_test.lua`) runs an unentitled binary and checks -34018, which also walks its real signature.
@@ -179,6 +186,8 @@ Nothing was called on any device.
   3. Zero gives YES. Any other value gives NO with `-[MCPasscodeManager _wrongPasscodeError]` as the error. A nil error
      object makes the method return YES, a quirk the backport does not copy.
 - Whether the kernel accepts those bytes, and what each refusal means for the passcode attempts, is not measured.
+- Owner's rule: `MKBUnlockDevice` is never called on any device. The unlock path is verified from the 6.1.3 rootfs only, and
+  no device call is planned for it. Later sessions should not plan one; the caller's encoding above is the native source.
 - The return value is the wrapper's status. The kernel's codes map as follows: 0 gives 0; 0xE00002E2 gives -2; 0xE00002F0
   gives -8; 0xE00002CE gives -3; 0xE00002C9 gives -9. Any other non-zero code gives -1 and writes a log line.
 - Before the call the wrapper connects to the AppleKeyStore user client (`_connect_to_service`). With no connection it
