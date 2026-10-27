@@ -15,9 +15,10 @@ local LOG = "/var/tmp/swiftui-demo.log"
 local SBLAUNCH = "/usr/libexec/revenant-sblaunch"
 local SHOT = "/usr/libexec/revenant-shot"
 local UNLOCK = "/usr/libexec/revenant-unlock"
-local SLIDE = {"0.374", "0.9375", "0.72", "0.9375"}
--- The touches a gesture scenario waits for. Sent from outside the demo by revenant-unlock, as fractions of the screen:
--- injecting them from inside the demo quits the demo mid-drag. The drag opens the row's actions, the tap takes Archive.
+local SLIDES = {
+    iPad = {"0.374", "0.9375", "0.72", "0.9375"},
+    iPhone = {"0.164", "0.899", "0.75", "0.899"},
+}
 local EXTERNAL_TOUCHES = {["swipe-real"] = {"drag 0.974 0.041 0.70 0.041", "tap 0.941 0.041"}}
 
 local function phone()
@@ -92,7 +93,6 @@ end
 
 local function tools(device, settings)
     local out = path.join(os.projectdir(), "build", "iphoneos", "armv7", "release")
-    -- The build output is unsigned. Only the installed copy carries the entitlements SpringBoard checks, so provision that.
     local signed = path.join(out, "install", "usr", "libexec")
     local stamp = path.join(out, "guest-sources")
     local current = guest_stamp()
@@ -134,7 +134,12 @@ local function unlock(device, settings)
     if state ~= "locked" then
         raise("the screen is %s: revenant-unlock slides only a lock screen without a passcode", state or "not readable")
     end
-    device.run(settings, UNLOCK .. " wake; sleep 1; " .. UNLOCK .. " drag " .. table.concat(SLIDE, " "))
+    local model = (on_device(device, settings, "sysctl -n hw.machine") or ""):match("^(%a+)")
+    local slide = SLIDES[model]
+    if not slide then
+        raise("the phone is a %s, whose lock slide is not measured: add it to SLIDES", model or "model nobody read")
+    end
+    device.run(settings, UNLOCK .. " wake; sleep 1; " .. UNLOCK .. " drag " .. table.concat(slide, " "))
     os.sleep(3000)
     if (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+") ~= "unlocked" then
         raise("the screen is still locked after the slide to unlock")

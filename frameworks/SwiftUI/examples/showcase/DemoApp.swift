@@ -159,8 +159,6 @@ let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
     return (name?.isEmpty == false ? name : nil, images, fromBundle)
 }()
 
-// Shows a scenario on the phone the way the snapshot run builds it: a probe hosts the view, and the scenario's action
-// (search activated, a row tapped) runs on it before the screen is marked ready for its picture.
 func showLive(_ scenario: SnapshotCase) {
     guard let action = scenario.action else {
         probe("live: \(scenario.name) ready")
@@ -180,8 +178,6 @@ func showLive(_ scenario: SnapshotCase) {
 }
 
 func runDeviceGesture(_ name: String) {
-    // The touches of swipe-real come from the phone's revenant-unlock, from outside this process: injecting them from
-    // inside the demo quits the demo mid-drag (measured on the iPad). This script only waits for them and reports.
     switch name {
     case "swipe-real":
         probe("gesture: waiting for the swipe")

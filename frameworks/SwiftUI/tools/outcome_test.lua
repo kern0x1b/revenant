@@ -1,4 +1,3 @@
--- Negative checks for lib/outcome: a scenario whose demo never logged what its script owes must fail.
 local outcome = import("lib.outcome", {rootdir = os.scriptdir(), anonymous = true})
 
 function main()
