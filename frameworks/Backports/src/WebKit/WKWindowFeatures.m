@@ -1,7 +1,5 @@
 #import "RevenantWebKit.h"
 
-// UIWebView reports no window features, and it never asks the delegate to open a window, so every
-// feature a page could request reads as unset.
 @implementation WKWindowFeatures
 
 - (NSNumber *)menuBarVisibility
