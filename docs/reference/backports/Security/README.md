@@ -154,8 +154,8 @@ and `publicRestrictionKeys.plist`. Nothing was called on any device.
   restrictions `allowSimple`, `requireAlphanumeric` and `forcePIN`. It is not used for unlocking. The restrictions' defaults
   in `defaultRestrictions.plist` are `allowSimple` false, `requireAlphanumeric` true and `forcePIN` true. How they combine
   with the Settings switch is not measured.
-- `-[MCPasscodeManager isPasscodeSet]` (`0x3520a91c`) and the lock state decide whether a passcode exists. The backport checks
-  the lock state first (LocalAuthentication), so the form is read only when a passcode is set.
+- `-[MCPasscodeManager isPasscodeSet]` (`0x3520a91c`) is `MKBGetDeviceLockState(NULL) != 3`. The backport's device-owner
+  check reads the same lock state (LocalAuthentication), so the form is read only when a passcode is set.
 - The backport reads the form with `-[MCPasscodeManager currentUnlockScreenType]` through `dlopen` of the framework and
   `objc_msgSend`. Whether an application may read `Library/ConfigurationProfiles` is not measured; when the read fails the
   form is the full keyboard, which accepts every passcode.
@@ -168,7 +168,9 @@ Nothing was called on any device.
 
 - `MKBUnlockDevice` takes one argument, in r0. The wrapper reads it as a `CFDataRef`: `CFDataGetBytePtr` and
   `CFDataGetLength` give the bytes and their length, and `_AppleKeyStoreUnlockDevice` sends them to the kernel as the input
-  struct of selector 9 of the AppleKeyStore user client. The wrapper does not read r1 (its first instruction passes r0 on).
+  struct of selector 9 of the AppleKeyStore user client. The wrapper passes r0 and r1 on unchanged to
+  `_AppleKeyStoreUnlockDevice`, which passes r1 into `_verifyUserClient` before it overwrites it. The caller passes NULL as
+  r1, and the backport passes NULL too.
 - The caller is `-[MCPasscodeManager unlockDeviceWithPasscode:outError:]` in ManagedConfiguration (`0x3520a9f0`).
   SpringBoard reaches the unlock through that method (its strings carry the selector) and imports no MKB symbol. The method:
   1. If `MKBGetDeviceLockState(NULL)` is 3 (no passcode), it returns YES without calling MKB.
