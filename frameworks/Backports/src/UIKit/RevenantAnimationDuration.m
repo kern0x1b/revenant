@@ -4,10 +4,19 @@ const NSTimeInterval RevenantAnimationDurationDefault = 0.2;
 
 static NSString *const RevenantAnimationDurationStackKey = @"space.kern0x1b.revenant.animation-duration";
 
-static NSMutableArray<NSNumber *> *RevenantAnimationDurationStack(void)
+@interface RevenantAnimationGroup : NSObject
+@property (nonatomic) NSTimeInterval duration;
+@property (nonatomic) float repeatCount;
+@property (nonatomic) BOOL autoreverses;
+@end
+
+@implementation RevenantAnimationGroup
+@end
+
+static NSMutableArray<RevenantAnimationGroup *> *RevenantAnimationGroupStack(void)
 {
     NSMutableDictionary *dictionary = [NSThread currentThread].threadDictionary;
-    NSMutableArray<NSNumber *> *stack = dictionary[RevenantAnimationDurationStackKey];
+    NSMutableArray<RevenantAnimationGroup *> *stack = dictionary[RevenantAnimationDurationStackKey];
     if (!stack) {
         stack = [NSMutableArray array];
         dictionary[RevenantAnimationDurationStackKey] = stack;
@@ -15,27 +24,60 @@ static NSMutableArray<NSNumber *> *RevenantAnimationDurationStack(void)
     return stack;
 }
 
+static RevenantAnimationGroup *RevenantAnimationGroupCurrent(void)
+{
+    return RevenantAnimationGroupStack().lastObject;
+}
+
 NSTimeInterval RevenantAnimationDurationInherited(void)
 {
-    NSMutableArray<NSNumber *> *stack = RevenantAnimationDurationStack();
-    return stack.count ? stack.lastObject.doubleValue : 0;
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    return group ? group.duration : 0;
 }
 
 void RevenantAnimationDurationPush(NSTimeInterval duration)
 {
-    [RevenantAnimationDurationStack() addObject:@(duration)];
+    RevenantAnimationGroup *group = [[RevenantAnimationGroup alloc] init];
+    group.duration = duration;
+    [RevenantAnimationGroupStack() addObject:group];
 }
 
 void RevenantAnimationDurationSetCurrent(NSTimeInterval duration)
 {
-    NSMutableArray<NSNumber *> *stack = RevenantAnimationDurationStack();
-    if (stack.count)
-        stack[stack.count - 1] = @(duration);
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    if (group)
+        group.duration = duration;
 }
 
 void RevenantAnimationDurationPop(void)
 {
-    NSMutableArray<NSNumber *> *stack = RevenantAnimationDurationStack();
+    NSMutableArray<RevenantAnimationGroup *> *stack = RevenantAnimationGroupStack();
     if (stack.count)
         [stack removeLastObject];
+}
+
+float RevenantAnimationGroupRepeatCount(void)
+{
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    return group ? group.repeatCount : 0;
+}
+
+void RevenantAnimationGroupSetRepeatCount(float count)
+{
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    if (group)
+        group.repeatCount = count;
+}
+
+BOOL RevenantAnimationGroupAutoreverses(void)
+{
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    return group ? group.autoreverses : NO;
+}
+
+void RevenantAnimationGroupSetAutoreverses(BOOL autoreverses)
+{
+    RevenantAnimationGroup *group = RevenantAnimationGroupCurrent();
+    if (group)
+        group.autoreverses = autoreverses;
 }

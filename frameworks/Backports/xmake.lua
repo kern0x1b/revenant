@@ -313,14 +313,35 @@ if is_plat("iphoneos") then
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/app")
-        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m",
+        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m", "src/UIKit/UIView+iOS13.m",
                   "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
-                  "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/Metal/*.m")
+                  "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/UIKit/UILabel+Tightening9.m",
+                  "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.deviceprobe", "CFBundleDisplayName=BackportsDeviceProbe")
         set_values("revenant.control", "tests/device_probe/control")
+        set_values("revenant.guarded_selectors", "modifyAnimationsWithRepeatCount:autoreverses:animations:")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("BackportsSceneKitProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m",
+                  "src/UIKit/UIView+iOS13.m", "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m",
+                  "src/UIKit/UITextField+ContentType.m", "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m",
+                  "src/UIKit/UILabel+Tightening9.m", "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+        add_defines("REVENANT_PROBE_SCENEKIT")
+        add_deps("SceneKitBackports")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.scenekitprobe", "CFBundleDisplayName=BackportsSceneKitProbe")
+        set_values("revenant.control", "tests/device_probe/control")
+        set_values("revenant.guarded_selectors", "modifyAnimationsWithRepeatCount:autoreverses:animations:")
         set_values("revenant.version", "1.0.0")
     target_end()
 
@@ -567,6 +588,6 @@ if not is_plat("iphoneos") then
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m", "WKSecurityOrigin.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}})
-    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}}, nil, {"Foundation"})
+    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}}, nil, {"Foundation"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end
