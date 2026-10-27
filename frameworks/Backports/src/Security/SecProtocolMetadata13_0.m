@@ -11,14 +11,12 @@
 tls_protocol_version_t sec_protocol_metadata_get_negotiated_tls_protocol_version(
     sec_protocol_metadata_t metadata)
 {
-    (void)metadata;
-    return 0;
+    return ((RevenantSecProtocolMetadata *)metadata).negotiatedVersion;
 }
 
 tls_ciphersuite_t sec_protocol_metadata_get_negotiated_tls_ciphersuite(sec_protocol_metadata_t metadata)
 {
-    (void)metadata;
-    return 0;
+    return ((RevenantSecProtocolMetadata *)metadata).negotiatedCipherSuite;
 }
 
 bool sec_protocol_metadata_access_pre_shared_keys(sec_protocol_metadata_t metadata,

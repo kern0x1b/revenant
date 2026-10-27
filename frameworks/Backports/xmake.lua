@@ -89,7 +89,7 @@ local LIBRARIES = {
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports", "SecurityBackports"}, archives = {}, system = {}},
+    {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports", "SecurityBackports"}, archives = {"boringssl"}, system = {}},
     {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
@@ -189,16 +189,11 @@ if is_plat("iphoneos") then
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
-            if library.name == "SecurityBackports" then
+            if library.name == "NetworkBackports" then
                 after_build(function (target)
-                    local stub = import("security_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
+                    local stub = import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
-                    local required = {}
-                    for _, objc in ipairs(stub.objcClasses) do
-                        table.insert(required, "_OBJC_CLASS_$_" .. objc)
-                    end
-                    table.join2(required, stub.symbols)
-                    for _, symbol in ipairs(required) do
+                    for _, symbol in ipairs(stub.symbols) do
                         if not exported:find(" " .. symbol .. "\n", 1, true) then
                             raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
                         end

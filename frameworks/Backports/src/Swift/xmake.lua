@@ -35,7 +35,7 @@ end
 
 local SWIFT_DIR = os.scriptdir()
 
-local function security_stub_text(stub)
+local function stub_text(stub)
     local targets = "[ " .. table.concat(stub.targets, ", ") .. " ]"
     local lines = {"--- !tapi-tbd", "tbd-version: 4", "targets: " .. targets, "install-name: '" .. stub.installName .. "'",
                    "current-version: 1", "compatibility-version: 1", "exports:", "  - targets: " .. targets}
@@ -254,10 +254,10 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.stub then
-                local stub = import("security_stub", {rootdir = SWIFT_DIR, anonymous = true}).stub()
+                local stub = import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
-                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), security_stub_text(stub))
+                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), stub_text(stub))
                 target:add("linkdirs", folder)
                 target:add("links", stub.library)
             end
@@ -310,7 +310,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL", cfiles = {"CBoringSSL/RevenantTLSBridge.c"}, stub = true})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = "RevenantTLS", stub = "network_stub"})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

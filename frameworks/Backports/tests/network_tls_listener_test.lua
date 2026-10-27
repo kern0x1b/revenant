@@ -19,16 +19,16 @@ function main()
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
-    local bridge = path.join(out, "RevenantTLSBridge.o")
+    local bridge = path.join(out, "RevenantTLSEngine.o")
     local options = {}
-    clang({"-c", path.join(src, "CBoringSSL", "RevenantTLSBridge.c"), "-o", bridge})
+    clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(src, "RevenantTLSEngine.m"), "-o", bridge})
     for _, file in ipairs({"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}) do
         local object = path.join(out, path.basename(file) .. ".o")
         clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
         table.insert(options, object)
     end
     swiftc({fixture, "-o", host})
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),
                       {fixture, bridge},
                       options,
