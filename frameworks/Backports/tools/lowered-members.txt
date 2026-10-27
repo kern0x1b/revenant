@@ -3335,6 +3335,8 @@ enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
 enum MTLPrimitiveTypeTriangleStrip
+enum MTLPurgeableStateKeepCurrent
+enum MTLPurgeableStateNonVolatile
 enum MTLResourceStorageModePrivate
 enum MTLResourceStorageModeShared
 enum MTLSamplerAddressModeClampToEdge
