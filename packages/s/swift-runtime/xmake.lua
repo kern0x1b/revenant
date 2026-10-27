@@ -377,7 +377,8 @@ package("swift-runtime")
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftCoreFoundation",
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"})
             build_overlay("os", {path.join(revenant_overlay, "os", "os.swift")},
-                          {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send"})
+                          {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send",
+                           "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_type_enabled"})
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
             local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")

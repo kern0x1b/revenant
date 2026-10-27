@@ -35,12 +35,16 @@ public func os_log(_ type: OSLogType, dso: UnsafeRawPointer? = #dsohandle, log: 
 }
 
 private func emit(_ message: StaticString, log: OSLog, type: OSLogType, _ args: [CVarArg]) {
+    let error = revenant_os_log_errno()
+    guard revenant_os_log_type_enabled(log.handle, type.rawValue) != 0 else {
+        return
+    }
     let format = message.withUTF8Buffer { buffer in
         buffer.map { CChar(bitPattern: $0) } + [0]
     }
     format.withUnsafeBufferPointer { text in
         withVaList(args) { arguments in
-            revenant_os_log_send(log.handle, type.rawValue, text.baseAddress!, arguments, 0)
+            revenant_os_log_send(log.handle, type.rawValue, text.baseAddress!, arguments, error)
         }
     }
 }
