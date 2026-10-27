@@ -13,6 +13,11 @@ func pointerStyles(for view: UIView, path: UIBezierPath, rect: CGRect) -> [UIPoi
     ]
 }
 
+@available(iOS 13.4, *)
+func defaultRadiusIsLeastNormal() -> Bool {
+    return UIPointerShape.defaultCornerRadius == CGFloat.leastNormalMagnitude
+}
+
 func frameRateRange(_ link: CADisplayLink, _ animation: CAAnimation) -> Bool {
     link.preferredFrameRateRange = CAFrameRateRange(minimum: 30.0, maximum: 120.0, preferred: 120.0)
     animation.preferredFrameRateRange = .default
