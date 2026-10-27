@@ -3,11 +3,12 @@
 #import <string.h>
 #import <stdlib.h>
 #import <CommonCrypto/CommonDigest.h>
+#import "RevenantSecureEnclave.h"
 
 extern CFIndex SecKeyGetAlgorithmID(SecKeyRef key);
-extern CFDictionaryRef SecKeyCopyAttributeDictionary(SecKeyRef key);
 extern OSStatus SecKeyCopyPublicBytes(SecKeyRef key, CFDataRef *serialized);
 extern SecKeyRef SecKeyCreateFromPublicData(CFAllocatorRef allocator, CFIndex algorithmID, CFDataRef serialized);
+extern void RevenantSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description);
 
 extern int RevenantCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out);
 extern int RevenantCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, uint8_t *der, size_t capacity);
@@ -20,42 +21,14 @@ static void revenant_elliptic_sha256(const uint8_t *message, size_t length, uint
     CC_SHA256(message, (CC_LONG)length, digest);
 }
 
-void RevenantSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description)
-{
-    if (!error) {
-        return;
-    }
-    *error = CFErrorCreate(kCFAllocatorDefault, (__bridge CFStringRef)NSOSStatusErrorDomain, status,
-                           (__bridge CFDictionaryRef)@{@"NSDescription": description});
-}
-
-#define kRevenantSecKeyMarker "RevenantSecKeyScalar"
-
 bool RevenantSecurityKeyIsPortEC(SecKeyRef key)
 {
-    CFDictionaryRef attributes = SecKeyCopyAttributeDictionary(key);
-    if (!attributes) {
-        return NO;
-    }
-    CFTypeRef marker = CFDictionaryGetValue(attributes, CFSTR(kRevenantSecKeyMarker));
-    BOOL ours = marker != NULL;
-    CFRelease(attributes);
-    return ours;
+    return RevenantSecureEnclaveKeyIs(key);
 }
 
-static BOOL revenant_elliptic_port_scalar(SecKeyRef key, uint8_t scalar[32])
+static OSStatus revenant_elliptic_port_scalar(SecKeyRef key, uint8_t scalar[32])
 {
-    CFDictionaryRef attributes = SecKeyCopyAttributeDictionary(key);
-    if (!attributes) {
-        return NO;
-    }
-    CFTypeRef stored = CFDictionaryGetValue(attributes, kSecValueData);
-    BOOL whole = stored != NULL && CFGetTypeID(stored) == CFDataGetTypeID() && CFDataGetLength((CFDataRef)stored) == 32;
-    if (whole) {
-        memcpy(scalar, CFDataGetBytePtr((CFDataRef)stored), 32);
-    }
-    CFRelease(attributes);
-    return whole;
+    return RevenantSecureEnclaveKeyScalar(key, scalar);
 }
 
 static const uint8_t *revenant_elliptic_value(const uint8_t *cursor, const uint8_t *end, uint8_t tag, size_t *length)
@@ -83,6 +56,9 @@ static const uint8_t *revenant_elliptic_value(const uint8_t *cursor, const uint8
 
 static BOOL revenant_elliptic_point(SecKeyRef key, uint8_t point[65])
 {
+    if (RevenantSecureEnclaveKeyIs(key)) {
+        return RevenantSecureEnclaveKeyPoint(key, point) == errSecSuccess;
+    }
     CFDataRef serialized = NULL;
     if (SecKeyCopyPublicBytes(key, &serialized) != errSecSuccess || !serialized) {
         if (serialized) {
@@ -186,18 +162,12 @@ static CFDataRef revenant_elliptic_der(CFDataRef raw, CFErrorRef *error)
     return CFDataCreate(kCFAllocatorDefault, der, (CFIndex)offset);
 }
 
-static BOOL revenant_elliptic_exchange(SecKeyAlgorithm algorithm, BOOL *hashed)
+static BOOL revenant_elliptic_exchange(SecKeyAlgorithm algorithm)
 {
     if (!algorithm) {
         return NO;
     }
-    NSString *name = (__bridge NSString *)algorithm;
-    if (![name hasPrefix:@"ECDH"]) {
-        return NO;
-    }
-    *hashed = [name hasSuffix:@"SHA1"] || [name hasSuffix:@"SHA224"] || [name hasSuffix:@"SHA256"]
-        || [name hasSuffix:@"SHA384"] || [name hasSuffix:@"SHA512"];
-    return YES;
+    return CFEqual(algorithm, kSecKeyAlgorithmECDHKeyExchangeStandard) || CFEqual(algorithm, kSecKeyAlgorithmECDHKeyExchangeCofactor);
 }
 
 bool RevenantSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm)
@@ -209,8 +179,7 @@ bool RevenantSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algo
         CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256)) {
         return operation == kSecKeyOperationTypeSign || operation == kSecKeyOperationTypeVerify;
     }
-    BOOL hashed = NO;
-    if (!revenant_elliptic_exchange(algorithm, &hashed)) {
+    if (!revenant_elliptic_exchange(algorithm)) {
         return false;
     }
     return operation == kSecKeyOperationTypeKeyExchange;
@@ -246,8 +215,9 @@ CFDataRef RevenantSecKeyECSign(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataR
         return NULL;
     }
     uint8_t scalar[32];
-    if (!revenant_elliptic_port_scalar(key, scalar)) {
-        RevenantSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to sign with");
+    OSStatus status = revenant_elliptic_port_scalar(key, scalar);
+    if (status != errSecSuccess) {
+        RevenantSecKeyFail(error, status, @"this key of the port's keeps no private scalar to sign with");
         return NULL;
     }
     uint8_t der[72];
@@ -305,9 +275,9 @@ CFDataRef RevenantSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorit
         RevenantSecKeyFail(error, errSecParam, @"an exchange needs both keys");
         return NULL;
     }
-    BOOL hashed = NO;
-    if (!revenant_elliptic_exchange(algorithm, &hashed)) {
-        RevenantSecKeyFail(error, errSecParam, [NSString stringWithFormat:@"algid:exchange:%@: this port exchanges over P-256 and nothing else", algorithm]);
+    if (!revenant_elliptic_exchange(algorithm)) {
+        RevenantSecKeyFail(error, errSecParam,
+                             [NSString stringWithFormat:@"algid:exchange:%@: this port exchanges P-256 without a key derivation function only", algorithm]);
         return NULL;
     }
     if (!RevenantSecurityKeyIsPortEC(privateKey)) {
@@ -316,8 +286,9 @@ CFDataRef RevenantSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorit
         return NULL;
     }
     uint8_t scalar[32];
-    if (!revenant_elliptic_port_scalar(privateKey, scalar)) {
-        RevenantSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to exchange with");
+    OSStatus status = revenant_elliptic_port_scalar(privateKey, scalar);
+    if (status != errSecSuccess) {
+        RevenantSecKeyFail(error, status, @"this key of the port's keeps no private scalar to exchange with");
         return NULL;
     }
     uint8_t peer[65];
@@ -330,10 +301,5 @@ CFDataRef RevenantSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorit
         RevenantSecKeyFail(error, errSecInternalError, @"micro-ecc made no shared secret of the two keys");
         return NULL;
     }
-    if (!hashed) {
-        return CFDataCreate(kCFAllocatorDefault, secret, (CFIndex)sizeof secret);
-    }
-    uint8_t digest[32];
-    revenant_elliptic_sha256(secret, sizeof secret, digest);
-    return CFDataCreate(kCFAllocatorDefault, digest, (CFIndex)sizeof digest);
+    return CFDataCreate(kCFAllocatorDefault, secret, (CFIndex)sizeof secret);
 }

@@ -4,6 +4,7 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <dlfcn.h>
 #import "RevenantSecAccessControl.h"
+#import "RevenantSecureEnclave.h"
 
 extern CFTypeID SecAccessControlGetTypeID(void);
 
@@ -210,6 +211,26 @@ static OSStatus revenant_authenticate(BOOL allowUI, NSString *reason)
     return status;
 }
 
+OSStatus RevenantSecItemAuthenticate(bool allowUI, CFStringRef reason)
+{
+    return revenant_authenticate(allowUI, (__bridge NSString *)reason);
+}
+
+bool RevenantSecItemFlagsRequireUser(CFOptionFlags flags)
+{
+    return (flags & revenant_user_authentication_flags) != 0;
+}
+
+bool RevenantSecItemSystemEnforcesAccessControl(void)
+{
+    return revenant_system_enforces_access_control();
+}
+
+static BOOL revenant_is_key_query(NSDictionary *source)
+{
+    return [source[(__bridge NSString *)kSecClass] isEqual:(__bridge NSString *)kSecClassKey];
+}
+
 static NSMutableDictionary *revenant_lookup_query(NSDictionary *query, BOOL all)
 {
     NSSet *skipped = [NSSet setWithObjects:(__bridge NSString *)kSecReturnData, (__bridge NSString *)kSecReturnAttributes,
@@ -333,6 +354,11 @@ OSStatus SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result)
     if (revenant_system_enforces_access_control() || !query)
         return revenant_native_copy()(query, result);
     NSDictionary *source = (__bridge NSDictionary *)query;
+    if (revenant_is_key_query(source)) {
+        OSStatus handled = RevenantSecureEnclaveKeyLookup(query, result);
+        if (handled != errSecItemNotFound)
+            return handled;
+    }
     NSArray *references = nil;
     OSStatus status = revenant_references(source, NO, &references);
     if (status == errSecSuccess)
@@ -377,6 +403,11 @@ OSStatus SecItemDelete(CFDictionaryRef query)
     if (revenant_system_enforces_access_control() || !query)
         return revenant_native_delete()(query);
     NSDictionary *source = (__bridge NSDictionary *)query;
+    if (revenant_is_key_query(source)) {
+        OSStatus handled = RevenantSecureEnclaveKeyDelete(query);
+        if (handled != errSecItemNotFound)
+            return handled;
+    }
     NSArray *references = nil;
     OSStatus status = revenant_references(source, YES, &references);
     if (status != errSecSuccess)
