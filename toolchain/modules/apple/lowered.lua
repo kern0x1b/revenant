@@ -196,6 +196,23 @@ local MEMBERS = {
         },
     },
     {
+        member = "os_unfair_lock",
+        header = {
+            name = "os",
+            directory = {"usr", "include", "os"},
+            file = "lock.h",
+            find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            replace = table.concat({
+                "#if defined(__OBJC__) || defined(__cplusplus)",
+                "#define REVENANT_OS_OPTIONS OS_OPTIONS",
+                "#else",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
+                "#endif",
+                "REVENANT_OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            }, "\n"),
+        },
+    },
+    {
         member = "CAFrameRateRange",
         header = {
             name = "QuartzCore",
