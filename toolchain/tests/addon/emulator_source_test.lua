@@ -37,7 +37,7 @@ function failures(opt)
     local launcher_source = path.join(repository, "emulator", "src", "guest", "revenant-sblaunch.c")
     local launcher_binary = path.join(launcher_test, "revenant-sblaunch")
     local launcher = io.readfile(launcher_source)
-    if not launcher:find('CFSTR("DYLD_PRINT_STATISTICS")', 1, true) or not launcher:find("dyld_statistics ? 3 : 2", 1, true) then
+    if not launcher:find('if (dyld_statistics)\n        CFDictionarySetValue(environment, CFSTR("DYLD_PRINT_STATISTICS")', 1, true) then
         table.insert(found, "revenant-sblaunch must add DYLD_PRINT_STATISTICS to the launch environment only when requested")
     end
     os.vrunv("clang", {"-framework", "CoreFoundation", launcher_source, "-o", launcher_binary})

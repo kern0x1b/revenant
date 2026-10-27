@@ -1,0 +1,4 @@
+Package: org.revenant.emulatenetworktls
+Name: emulate Network TLS daemon
+Architecture: iphoneos-arm
+Description: A program that runs the Network backport's TLS listener and client on loopback inside the guest, printing the lines the host Network.framework run prints, so that TLS 1.3, ALPN, the trust chain and the strict client-auth case are checked on armv7 iOS 6.1.3.

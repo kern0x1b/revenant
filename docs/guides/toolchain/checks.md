@@ -25,6 +25,17 @@ A check that the port cannot meet is waived by name, with the reason, and the re
 - `revenant.waive.input-minimum.<package>`: a package whose objects do not record the port's minimum release.
 - `revenant.waive.<check>`: any other named check.
 
+## Selectors the release lacks
+
+The import check also reports the selectors a binary sends that no class of the release implements, and no other binary of the bundle or its provided libraries implements. Each is a call that fails at run time on the release unless it runs only behind `respondsToSelector:` or a version check. The report names them. Two fixes exist:
+
+- A selector the release should have is backported in `frameworks/Backports`, so that the library implements it and the report drops it.
+- A selector the app sends only on purpose behind `respondsToSelector:` or a version check is declared on the target that sends it:
+
+      set_values("revenant.guarded_selectors", "isLowPowerModeEnabled", "setConfiguration:active:error:disableRecording:")
+
+  A declared selector is silent in that binary. Any other selector still reports. The declaration is the app's statement that the guard is in its code; the check does not read the guard itself.
+
 ## Import checks need the release's libraries
 
 The import check reads the system libraries of a release from `.cache/dyld/<release>/`. When they are not held, the check offers to fetch them, and `-y` accepts:

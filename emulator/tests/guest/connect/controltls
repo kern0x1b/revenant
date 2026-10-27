@@ -1,0 +1,4 @@
+Package: org.revenant.emulatortlsbackport
+Name: emulator backport TLS probe
+Architecture: iphoneos-arm
+Description: A program that runs TLS 1.2 and 1.3 handshakes, an HTTPS GET and a SecureTransport request through the Network backport to a fixed list of hosts over the host network, and prints handshake times.

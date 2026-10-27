@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorconnectbackport
+Name: emulator backport connect probe
+Architecture: iphoneos-arm
+Description: A program that starts many concurrent NWConnection TCP connects through the Network backport to an external address over the host network, and counts how many reach ready.

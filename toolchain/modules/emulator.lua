@@ -1110,6 +1110,7 @@ function boot(opt)
     input:close()
     local state, offset, reason = {}, 0, "deadline"
     local pending = ""
+    local progressed = started
     while true do
         local ok = proc:wait(500)
         if os.isfile(log) then

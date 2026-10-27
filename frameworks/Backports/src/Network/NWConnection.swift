@@ -88,6 +88,10 @@ public final class NWConnection: @unchecked Sendable {
         tls?.negotiatedApplicationProtocol
     }
 
+    public var negotiatedTLSVersion: UInt16? {
+        tls?.negotiatedVersion
+    }
+
     public init(host: NWEndpoint.Host, port: NWEndpoint.Port, using parameters: NWParameters) {
         self.endpoint = .hostPort(host: host, port: port)
         self.parameters = parameters
@@ -124,12 +128,12 @@ public final class NWConnection: @unchecked Sendable {
                 let fd = self.acceptedDescriptor
                 self.acceptedDescriptor = -1
                 self.setState(.preparing)
-                guard self.parameters.tlsOptions == nil else {
+                guard self.parameters.tlsOptions?.hasServerCredentials ?? true else {
                     Darwin.close(fd)
                     self.fail(.posix(errno: ENOTSUP))
                     return
                 }
-                self.attach(fd, connecting: false)
+                self.attach(fd, connecting: false, serverSide: true)
             } else {
                 self.open()
             }
@@ -240,7 +244,7 @@ public final class NWConnection: @unchecked Sendable {
         fail(.posix(errno: lastError))
     }
 
-    private func attach(_ fd: Int32, connecting: Bool) {
+    private func attach(_ fd: Int32, connecting: Bool, serverSide: Bool = false) {
         descriptor = fd
         if parameters.transport == .tcp {
             parameters.tcpOptions?.apply(to: fd)
@@ -251,11 +255,13 @@ public final class NWConnection: @unchecked Sendable {
             if case .hostPort(let host, _) = endpoint {
                 serverName = hostText(host)
             }
-            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName) else {
-                fail(.tls(errSSLInternal))
+            do {
+                tls = try NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName, serverSide: serverSide)
+            } catch {
+                fputs("Network: TLS setting refused: \((error as? NWTLSUnsupportedSetting)?.reason ?? String(describing: error))\n", stderr)
+                fail(.tls((error as? NWTLSUnsupportedSetting)?.status ?? errSSLInternal))
                 return
             }
-            tls = session
         }
         self.connecting = connecting
         let read = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
@@ -389,6 +395,7 @@ public final class NWConnection: @unchecked Sendable {
 
     private func flushSends() {
         guard state == .ready, descriptor >= 0 else {
+            setWriteActive(false)
             return
         }
         while var pending = sends.first {
