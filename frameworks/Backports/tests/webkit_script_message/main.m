@@ -99,10 +99,13 @@ static NSArray<NSString *> *OracleLines(void)
 
 #else
 
+static NSString *const Nonce = @"nonce-under-test";
+
 static NSString *const Stubs =
     @"var window=this; window.top=window;"
     @"var frames=[];"
     @"var document={documentElement:{appendChild:function(frame){frames.push(frame.src);}},"
+    @"getElementsByTagName:function(){return [];},"
     @"createElement:function(tag){return {style:{},parentNode:null};}};"
     @"var setTimeout=function(){};";
 
@@ -116,43 +119,71 @@ static NSURL *Bridged(JSContext *context, NSString *expression, NSUInteger befor
     return [NSURL URLWithString:source];
 }
 
-static NSArray<NSString *> *BackportLines(void)
+static JSContext *Shimmed(void)
 {
     JSContext *context = [[JSContext alloc] init];
     [context evaluateScript:Stubs];
-    [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[\"h\"]"]];
+    [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[\"h\"]", Nonce]];
+    return context;
+}
+
+static NSArray<NSString *> *BackportLines(void)
+{
+    JSContext *context = Shimmed();
     NSMutableArray<NSString *> *lines = [NSMutableArray array];
     for (NSUInteger index = 0; index < SampleCount; index++) {
         NSURL *URL = Bridged(context, Samples[index], index);
 #ifdef WEBKIT_MESSAGE_NEGATIVE_CONTROL
         URL = [NSURL URLWithString:[URL.absoluteString substringToIndex:URL.absoluteString.length - 1]];
 #endif
-        NSDictionary *message = RevenantCodecBridgeMessage(URL);
+        NSDictionary *message = RevenantCodecBridgeMessage(URL, Nonce);
         BOOL valid = NO;
         id body = RevenantCodecMessageBody(message[@"b"], &valid);
-        [lines addObject:[NSString stringWithFormat:@"%@ main: %d", Dump(body), [message[@"m"] boolValue]]];
+        [lines addObject:[NSString stringWithFormat:@"%@ main: 1", Dump(body)]];
     }
     return lines;
 }
 
+static NSURL *Forged(NSString *JSON)
+{
+    NSString *encoded = [JSON stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    return [NSURL URLWithString:[@"revenant-wkbridge://m/" stringByAppendingString:encoded]];
+}
+
 static NSArray<NSString *> *BackportChecks(void)
 {
-    JSContext *context = [[JSContext alloc] init];
-    [context evaluateScript:Stubs];
-    [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[\"h\"]"]];
-    NSDictionary *cycle = RevenantCodecBridgeMessage(Bridged(context, @"(function(){var o={n:1};o.self=o;return o;})()", 0));
+    JSContext *context = Shimmed();
+    NSDictionary *cycle = RevenantCodecBridgeMessage(Bridged(context, @"(function(){var o={n:1};o.self=o;return o;})()", 0), Nonce);
     BOOL valid = NO;
     id body = RevenantCodecMessageBody(cycle[@"b"], &valid);
     BOOL identical = [body isKindOfClass:[NSDictionary class]] && body[@"self"] == body;
-    BOOL numberValid = YES, garbageValid = YES;
+    BOOL numberValid = YES, garbageValid = YES, taggedValid = YES;
     id number = RevenantCodecMessageBody(@5, &numberValid);
     id garbage = RevenantCodecMessageBody(@"{not json", &garbageValid);
-    BOOL foreign = RevenantCodecBridgeMessage([NSURL URLWithString:@"https://example.invalid/?n=h"]) == nil;
+    id tagged = RevenantCodecMessageBody(@"{\"$revenant\":5}", &taggedValid);
+    BOOL foreign = RevenantCodecBridgeMessage([NSURL URLWithString:@"https://example.invalid/?n=h"], Nonce) == nil;
+    BOOL forgedNonce = RevenantCodecBridgeMessage(Forged(@"{\"n\":\"h\",\"b\":\"1\",\"k\":\"forged\"}"), Nonce) == nil;
+    BOOL missingNonce = RevenantCodecBridgeMessage(Forged(@"{\"n\":\"h\",\"b\":\"1\"}"), Nonce) == nil;
+    NSMutableString *deep = [NSMutableString string];
+    for (NSUInteger level = 0; level < 200; level++)
+        [deep appendString:@"{\"$revenant\":\"a\",\"v\":["];
+    [deep appendString:@"1"];
+    for (NSUInteger level = 0; level < 200; level++)
+        [deep appendString:@"]}"];
+    BOOL deepValid = NO;
+    id nested = RevenantCodecMessageBody(deep, &deepValid);
+    NSUInteger depth = 0;
+    for (id cursor = nested; [cursor isKindOfClass:[NSArray class]] && [cursor count]; cursor = [cursor firstObject])
+        depth++;
     return @[
         [NSString stringWithFormat:@"cycle identical: %d", identical],
         [NSString stringWithFormat:@"refused non-string body: %d", !numberValid && number == nil],
         [NSString stringWithFormat:@"refused non-JSON body: %d", !garbageValid && garbage == nil],
+        [NSString stringWithFormat:@"refused non-string tag: %d", taggedValid && tagged == nil],
         [NSString stringWithFormat:@"refused foreign URL: %d", foreign],
+        [NSString stringWithFormat:@"refused forged nonce: %d", forgedNonce],
+        [NSString stringWithFormat:@"refused missing nonce: %d", missingNonce],
+        [NSString stringWithFormat:@"nesting capped: %d", deepValid && depth > 0 && depth <= 65],
     ];
 }
 

@@ -1,4 +1,5 @@
 #import "RevenantWebKit.h"
+#import "RevenantDocument.h"
 #import "RevenantScriptCodec.h"
 
 static NSString *const RevenantEvaluate =
@@ -25,7 +26,7 @@ static NSURL *withoutFragment(NSURL *url)
     return range.location == NSNotFound ? url : [NSURL URLWithString:[string substringToIndex:range.location]];
 }
 
-@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost>
+@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost, RevenantDocumentSource>
 @end
 
 @implementation WKWebView {
@@ -54,6 +55,8 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _decided;
     BOOL _shimmed;
     BOOL _didCommit;
+    NSString *_token;
+    BOOL _documentInjected;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -79,6 +82,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
 {
+    _token = RevenantDocumentRegister(self);
     [configuration revenant_bindURLSchemeHandlersToWebView:self];
     _configuration = [configuration copy];
     _title = @"";
@@ -275,6 +279,7 @@ static NSURL *withoutFragment(NSURL *url)
     _started = NO;
     _decided = NO;
     _didCommit = NO;
+    _documentInjected = NO;
     _navigationType = type;
     _previousIndex = -1;
     if (index >= 0 && index != _index) {
@@ -346,10 +351,20 @@ static NSURL *withoutFragment(NSURL *url)
     return navigation;
 }
 
+- (NSURLRequest *)revenant_taggedRequest:(NSURLRequest *)request
+{
+    NSString *scheme = request.URL.scheme.lowercaseString;
+    if (![scheme isEqualToString:@"http"] && ![scheme isEqualToString:@"https"])
+        return request;
+    NSMutableURLRequest *tagged = [request mutableCopy];
+    RevenantDocumentTagRequest(tagged, _token);
+    return tagged;
+}
+
 - (WKNavigation *)loadRequest:(NSURLRequest *)request
 {
     return [self revenant_navigateWithRequest:request type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadRequest:request];
+        [_web loadRequest:[self revenant_taggedRequest:request]];
     }];
 }
 
@@ -459,21 +474,47 @@ static NSURL *withoutFragment(NSURL *url)
         _items[_index].revenant_title = title;
 }
 
+- (NSString *)revenant_shimWithNames:(NSArray *)names
+{
+    NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
+    return [NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], _token];
+}
+
+- (NSArray<NSString *> *)revenant_documentStartScripts
+{
+    WKUserContentController *controller = _configuration.userContentController;
+    NSArray *names = controller.revenant_handlerNames;
+    NSMutableArray<NSString *> *scripts = [NSMutableArray array];
+    if (names.count)
+        [scripts addObject:[self revenant_shimWithNames:names]];
+    for (WKUserScript *script in controller.revenant_scripts) {
+        if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart)
+            [scripts addObject:script.source];
+    }
+    return scripts;
+}
+
+- (void)revenant_documentDidInject
+{
+    _documentInjected = YES;
+}
+
 - (void)revenant_installScripts:(BOOL)userScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
     NSArray *names = controller.revenant_handlerNames;
     if (names.count || _shimmed) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
-        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
+        [_web stringByEvaluatingJavaScriptFromString:[self revenant_shimWithNames:names]];
         _shimmed = names.count > 0;
     }
     if (userScripts)
         for (WKUserScript *script in controller.revenant_scripts) {
             if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart) {
+                if (_documentInjected)
+                    continue;
                 static dispatch_once_t once;
                 dispatch_once(&once, ^{
-                    NSLog(@"WKUserScript: UIWebView has no document-start hook, so an at-document-start script runs after the page's own scripts.");
+                    NSLog(@"WKUserScript: a document-start script that the document rewrite did not reach runs after the page's own scripts.");
                 });
             }
             [_web stringByEvaluatingJavaScriptFromString:script.source];
@@ -494,7 +535,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_receiveBridgeURL:(NSURL *)URL
 {
-    NSDictionary *message = RevenantCodecBridgeMessage(URL);
+    NSDictionary *message = RevenantCodecBridgeMessage(URL, _token);
     NSString *name = message[@"n"];
     if (![name isKindOfClass:[NSString class]])
         return;
@@ -503,7 +544,7 @@ static NSURL *withoutFragment(NSURL *url)
         return;
     BOOL bodyValid = NO;
     id body = RevenantCodecMessageBody(message[@"b"], &bodyValid);
-    WKScriptMessage *object = [WKScriptMessage revenant_messageWithBody:body name:name webView:self mainFrame:[message[@"m"] boolValue]];
+    WKScriptMessage *object = [WKScriptMessage revenant_messageWithBody:body name:name webView:self mainFrame:YES];
     dispatch_async(dispatch_get_main_queue(), ^{
         [handler userContentController:_configuration.userContentController didReceiveScriptMessage:object];
     });
@@ -514,7 +555,7 @@ static NSURL *withoutFragment(NSURL *url)
     _approved = request;
     if (!_navigation)
         [self revenant_beginNavigation:request.URL type:_navigationType];
-    [_web loadRequest:request];
+    [_web loadRequest:[self revenant_taggedRequest:request]];
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)type

@@ -11,6 +11,6 @@ id RevenantCodecParsed(NSString *text, BOOL *valid);
 
 id RevenantCodecDecoded(id value);
 
-NSDictionary *RevenantCodecBridgeMessage(NSURL *URL);
+NSDictionary *RevenantCodecBridgeMessage(NSURL *URL, NSString *nonce);
 
 id RevenantCodecMessageBody(id encoded, BOOL *valid);

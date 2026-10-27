@@ -42,7 +42,7 @@ local LIBRARIES = {
     {name = "AccelerateBackports", folder = "Accelerate", frameworks = {"Accelerate", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"suitesparse-ordering"}, system = {}},
     {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "CoreFoundationBackports", "CoreMediaBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AVFAudioBackports", folder = "AVFAudio", frameworks = {"AudioToolbox", "CoreAudio", "AVFoundation", "UIKit", "Foundation", "Accelerate", "QuartzCore"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "AVFoundationBackports"}, archives = {}, system = {}},
-    {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation", "CoreGraphics", "QuartzCore"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
+    {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation", "CoreGraphics", "QuartzCore"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {"z"}},
     {name = "LocalAuthenticationBackports", folder = "LocalAuthentication", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "OpenGLESBackports", folder = "OpenGLES", frameworks = {"OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SafariServicesBackports", folder = "SafariServices", frameworks = {"SafariServices", "UIKit", "Foundation", "CoreGraphics", "QuartzCore", "MobileCoreServices"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -296,7 +296,7 @@ else
                                   network = "network_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,

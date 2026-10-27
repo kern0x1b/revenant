@@ -174,12 +174,29 @@ Already present, with the same limits:
   iframe to `revenant-wkbridge://m/`. `shouldStartLoadWithRequest` reads that URL, never loads it, and delivers a
   `WKScriptMessage` (name, body as Foundation objects, web view, frame) to `userContentController:didReceiveScriptMessage:`
   on the main queue. A body that is not a string, or not JSON, is refused.
-- The shim is installed when the page finishes loading, not before its first script. UIWebView has no document-start hook,
-  so `window.webkit` does not exist while a page's own load-time scripts run. A `WKUserScript` at document start is
-  also run at load finish. The first time that happens the engine logs it. Telegram's WebProxy carrier (`WebProxyWebViewCarrier.swift`)
-  injects its hardening script at document start, so the carrier's protection runs after the page's scripts on this
-  engine. Closing that needs the main-frame HTML rewritten before the page runs (an NSURLProtocol over http and https),
-  which is not built.
+- Document start on UIWebView: `WKWebView` tags the loads it starts itself (`loadRequest:`, and the replay of a navigation
+  the delegate approved) with a property that `RevenantDocumentProtocol` claims. The protocol loads the resource with
+  `NSURLConnection`, follows redirects through the client (each hop is tagged again), and forwards authentication
+  challenges, cookies and cache policy. A 200 `text/html` document is buffered and rewritten in `RevenantDocumentInjector.m`:
+  the shim and each `WKUserScript` at document start go in a `<script>` right after `<head>` (after the doctype, or at the
+  start, when there is no head), in front of the page's own scripts. The declared charset (or the `<meta charset>`) is kept, and
+  the body is re-encoded in it. A `gzip` body is inflated, and its `Content-Encoding` and `Content-Length` are replaced.
+  Non-HTML and non-200 responses go through unchanged. Each Content-Security-Policy `script-src` (or `default-src`) gets the
+  SHA-256 hash of each injected script, in the header and in a `<meta>` policy; WebKit runs `WKUserScript` without CSP, so
+  the backport adds the hashes to the policy the page carries.
+- Not covered by document start, which run at load finish instead (the engine logs the first time): link clicks inside a
+  page, which `UIWebView` loads itself; `goBack`, `goForward`, `goToBackForwardListItem` and `reload`, which use the
+  `UIWebView` history; `loadHTMLString:` and `loadData:`; and `loadFileURL:`. The shim is then installed late, as before.
+  A load that is not tagged has no `window.webkit` while the page's own first script runs.
+- The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
+  is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
+  message, since only the main document's shim holds the nonce; the payload does not set it. The codec refuses a value
+  whose type is not what the tag says, and stops decoding at 64 levels of nesting.
+- The host test `tests/webkit_document_start_test.lua` serves the pages from a local HTTP server on a thread and pulls them
+  through the protocol with `NSURLConnection`. It covers a page whose own first script reads a value a document-start script
+  set, a redirect chain, gzip, a header charset in ISO-8859-1 and a `<meta>` charset, a JSON resource and a 404 (both
+  untouched), a CSP header and a CSP `<meta>`, and the placement rules. A negative control turns the start scripts off. Authentication
+  challenges and cookies are not exercised by the host test.
 - The host test `tests/webkit_script_message_test.lua` runs the shim in JavaScriptCore and decodes its bridge URL. The
   macOS build posts the same 17 values through a real `WKWebView`, and the bodies agree line by line. Four backport-only
   checks cover cycles, the refused bodies and a foreign URL, and a damaged bridge URL is detected.
@@ -196,8 +213,8 @@ them, and it compiles; its link needs the WebKit backport library, which the typ
 
 Still missing:
 
-- Document-start injection, for the shim and for `WKUserScript` at document start (see above). Telegram's WebProxy
-  hardening depends on it.
+- Document start for links clicked inside a page, history navigation and `loadHTMLString:` (see above). Those loads run
+  the start scripts late. Telegram's WebProxy hardening depends on document start, so a link inside a mini app is not covered.
 - `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
 - Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
   decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.

@@ -10,7 +10,11 @@ local BACKPORT_ONLY = {
     "cycle identical: 1",
     "refused non-string body: 1",
     "refused non-JSON body: 1",
+    "refused non-string tag: 1",
     "refused foreign URL: 1",
+    "refused forged nonce: 1",
+    "refused missing nonce: 1",
+    "nesting capped: 1",
 }
 
 local function clang()

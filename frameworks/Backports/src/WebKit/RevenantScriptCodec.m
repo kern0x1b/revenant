@@ -28,32 +28,44 @@ NSString *const RevenantEncoder =
     @"return JSON.stringify(walk(v,true,false));}";
 
 NSString *const RevenantShim =
-    @"(function(names){"
+    @"(function(names,nonce){"
+    @"var all=document.getElementsByTagName('script');"
+    @"var mine=all[all.length-1];"
+    @"if(mine&&mine.firstChild&&String(mine.firstChild.nodeValue).indexOf(nonce)>=0){mine.parentNode.removeChild(mine);}"
     @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
     @"var encode=%@;"
-    @"var top=window===window.top;"
     @"var handlers={};"
     @"names.forEach(function(name){handlers[name]={postMessage:function(body){"
     @"var text=encode(body);"
     @"var frame=document.createElement('iframe');"
     @"frame.style.display='none';"
-    @"frame.src='" @"revenant-wkbridge" @"://m/'+encodeURIComponent(JSON.stringify({n:name,b:text,m:top}));"
+    @"frame.src='" @"revenant-wkbridge" @"://m/'+encodeURIComponent(JSON.stringify({n:name,b:text,k:nonce}));"
     @"(document.documentElement||document.body).appendChild(frame);"
     @"setTimeout(function(){if(frame.parentNode){frame.parentNode.removeChild(frame);}},0);"
     @"}};});"
     @"if(!window.webkit){window.webkit={};}"
     @"window.webkit.messageHandlers=handlers;"
-    @"})(%@)";
+    @"})(%@,\"%@\")";
 
-static id decode(id value, NSMutableArray *ids)
+static const NSUInteger MaximumDepth = 64;
+
+static id decode(id value, NSMutableArray *ids, NSUInteger depth)
 {
     if (![value isKindOfClass:[NSDictionary class]])
         return value;
+    if (depth > MaximumDepth)
+        return nil;
     NSString *kind = value[@"$revenant"];
-    if ([kind isEqualToString:@"d"])
-        return [NSDate dateWithTimeIntervalSince1970:[value[@"v"] doubleValue] / 1000];
+    if (![kind isKindOfClass:[NSString class]])
+        return nil;
+    if ([kind isEqualToString:@"d"]) {
+        NSNumber *time = value[@"v"];
+        return [time isKindOfClass:[NSNumber class]] ? [NSDate dateWithTimeIntervalSince1970:time.doubleValue / 1000] : nil;
+    }
     if ([kind isEqualToString:@"n"]) {
         NSString *name = value[@"v"];
+        if (![name isKindOfClass:[NSString class]])
+            return nil;
         if ([name isEqualToString:@"NaN"])
             return @(NAN);
         if ([name isEqualToString:@"-0"])
@@ -61,22 +73,33 @@ static id decode(id value, NSMutableArray *ids)
         return [name hasPrefix:@"-"] ? @(-INFINITY) : @(INFINITY);
     }
     if ([kind isEqualToString:@"r"]) {
-        NSUInteger index = [value[@"i"] unsignedIntegerValue];
-        return index < ids.count ? ids[index] : nil;
+        NSNumber *index = value[@"i"];
+        if (![index isKindOfClass:[NSNumber class]])
+            return nil;
+        NSUInteger position = index.unsignedIntegerValue;
+        return position < ids.count ? ids[position] : nil;
     }
     if ([kind isEqualToString:@"a"]) {
+        NSArray *items = value[@"v"];
+        if (![items isKindOfClass:[NSArray class]])
+            return nil;
         NSMutableArray *array = [NSMutableArray array];
         [ids addObject:array];
-        for (id item in value[@"v"])
-            [array addObject:decode(item, ids) ?: [NSNull null]];
+        for (id item in items)
+            [array addObject:decode(item, ids, depth + 1) ?: [NSNull null]];
         return array;
     }
     if ([kind isEqualToString:@"o"]) {
+        NSArray *keys = value[@"k"], *values = value[@"v"];
+        if (![keys isKindOfClass:[NSArray class]] || ![values isKindOfClass:[NSArray class]])
+            return nil;
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         [ids addObject:dictionary];
-        NSArray *keys = value[@"k"], *values = value[@"v"];
-        for (NSUInteger index = 0; index < keys.count && index < values.count; index++)
-            dictionary[keys[index]] = decode(values[index], ids) ?: [NSNull null];
+        for (NSUInteger index = 0; index < keys.count && index < values.count; index++) {
+            if (![keys[index] isKindOfClass:[NSString class]])
+                continue;
+            dictionary[keys[index]] = decode(values[index], ids, depth + 1) ?: [NSNull null];
+        }
         return dictionary;
     }
     return nil;
@@ -84,7 +107,7 @@ static id decode(id value, NSMutableArray *ids)
 
 id RevenantCodecDecoded(id value)
 {
-    return decode(value, [NSMutableArray array]);
+    return decode(value, [NSMutableArray array], 0);
 }
 
 id RevenantCodecParsed(NSString *text, BOOL *valid)
@@ -95,7 +118,7 @@ id RevenantCodecParsed(NSString *text, BOOL *valid)
     return object;
 }
 
-NSDictionary *RevenantCodecBridgeMessage(NSURL *URL)
+NSDictionary *RevenantCodecBridgeMessage(NSURL *URL, NSString *nonce)
 {
     if (![URL.scheme isEqualToString:RevenantWebKitBridgeScheme])
         return nil;
@@ -103,7 +126,12 @@ NSDictionary *RevenantCodecBridgeMessage(NSURL *URL)
     NSString *encoded = [URL.absoluteString substringFromIndex:MIN(prefix.length, URL.absoluteString.length)];
     BOOL valid = NO;
     NSDictionary *message = RevenantCodecParsed([encoded stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], &valid);
-    return valid && [message isKindOfClass:[NSDictionary class]] ? message : nil;
+    if (!valid || ![message isKindOfClass:[NSDictionary class]])
+        return nil;
+    NSString *presented = message[@"k"];
+    if (![presented isKindOfClass:[NSString class]] || !nonce.length || ![presented isEqualToString:nonce])
+        return nil;
+    return message;
 }
 
 id RevenantCodecMessageBody(id encoded, BOOL *valid)
