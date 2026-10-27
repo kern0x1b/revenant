@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-#import <objc/message.h>
 #import <objc/runtime.h>
 
 static char revenant_edges_key;
@@ -17,7 +16,6 @@ static char revenant_scroll_insets_key;
 - (void)setEdgesForExtendedLayout:(UIRectEdge)edgesForExtendedLayout
 {
     objc_setAssociatedObject(self, &revenant_edges_key, @(edgesForExtendedLayout), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    ((void (*)(id, SEL, BOOL))objc_msgSend)(self, sel_registerName("setWantsFullScreenLayout:"), edgesForExtendedLayout != UIRectEdgeNone);
 }
 
 - (BOOL)extendedLayoutIncludesOpaqueBars

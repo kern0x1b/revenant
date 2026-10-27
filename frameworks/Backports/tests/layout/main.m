@@ -205,6 +205,7 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
             [[UIApplication sharedApplication] statusBarFrame].size.height,
             [top.navigationController.navigationBar respondsToSelector:@selector(isTranslucent)] ? [top.navigationController.navigationBar isTranslucent] : -1,
             expect];
+        [weakSelf.log writeToFile:REVENANT_LAYOUT_LOG atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         weakSelf.index = index + 1;
         [weakSelf.window setRootViewController:nil];
         [weakSelf performSelector:@selector(next) withObject:nil afterDelay:REVENANT_CASE_HOLD];
