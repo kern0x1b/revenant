@@ -168,9 +168,18 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
   `closed` when the popup closes. A message is delivered to the popup as a `message` event whose data is the encoded value
   revived in script, so an object, array, `undefined`, `NaN`, `-0`, a date or a cycle arrives as it was sent. The
   `targetOrigin` must be `*`, the popup's exact origin, or `/` for the sender's own origin, and anything else is dropped.
-  When the delegate gives no window, or a view that is not a `WKWebView`, the proxy is closed at once. WebKit returns null
-  there, but the bridge is asynchronous, so the page cannot learn it synchronously. `window.opener` in the popup is not
-  set.
+  A `window.open` that is refused returns `null` at once, as WebKit does. The shim asks synchronously: a synchronous XHR to
+  `revenant-wkbridge://sync/<nonce>` on a page with a null origin, or to `/__revenant_sync/<nonce>` on the page's own origin
+  for an http(s) page (a custom scheme from an http origin fails with NETWORK_ERR 101). `RevenantSyncProtocol` answers
+  through `revenant_answerSynchronously:`, on the main thread. A plain `dispatch_sync` to main deadlocks, because the
+  WebThread holds WebKit's lock while the page runs; the answer goes through `WebThreadCallDelegate` instead, and a missing
+  symbol refuses the request rather than hanging. Nothing opens unless `WKPreferences javaScriptCanOpenWindowsAutomatically`
+  is YES, which is also WebKit's default (NO). A window starts at `about:blank` and takes the committed URL after load, as
+  WebKit does.
+- `window.opener` in a popup is a proxy with `closed`, `location` (read and set), and `postMessage(message, targetOrigin)`,
+  which reaches the opener as a `message` event under the same `targetOrigin` rule. Opener updates arrive through
+  `RevenantScriptCodec`'s `opener` update path. One gap stays on iOS 6: `initMessageEvent` takes a `source` that must be a
+  real Window, so `event.source` for a message from the opener is null and `event.source === window.opener` is false.
 - `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`), and `webViewDidClose:`
   is sent to the closing view's `UIDelegate` when a popup closes, whether the opener or the popup closed it.
   `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
@@ -267,8 +276,13 @@ Already present, with the same limits:
   reported `NSURLErrorCancelled` with resume data), and `resumeDownloadFromResumeData:` sent `bytes=19821-`, got 206 for
   the remaining 280179 bytes, and the file on disk matched the whole body. The probe still waited its full 20 seconds
   after the navigation download, because the backport reports neither `didFinish` nor `didFail` for that navigation.
-  Whether iOS 6 `WKWebView` should send `didFailProvisionalNavigation` (with `WebKitErrorDomain` 102) there is not checked
-  against macOS yet.
+  On macOS WKWebView, a navigation response the delegate sends to download produces, in order: `decidePolicyForNavigationResponse`
+  with download, `navigationResponse:didBecomeDownload:`, the destination question, and `didFailProvisionalNavigation` with
+  `WebKitErrorDomain` 102 (frame load interrupted by policy change); the download's finish races the 102 failure. The backport
+  reports the same order (`tests/webkit_navigation/oracle.m` records the macOS run). The backport's `WKDownload` runs its
+  connection on the main run loop, so the decision cannot race the data. Measured on the iPad, a 300000-byte download
+  matched its bytes. A nil destination differs: the backport sends
+  `download:didFailWithError:` after the 102, and macOS sends no download callback at all.
 - Measured on the iPad with the `window` probe mode: a popup created by `window.open` with a delegate that returns a
   view; `location` reflected the first commit; `postMessage` reached the popup with the sent value (a nested object and
   array with `null` and a number), and a `targetOrigin` that did not match was dropped; the opener's `close()` called
@@ -277,6 +291,16 @@ Already present, with the same limits:
   the opener's `closed` and `location` not updating, because the shim runs again after the document rewrite, and the
   second run replaced the table of proxies. The table now lives on `window` under the nonce-named property, so both runs
   share it (host test `webkit_script_message_test`, check "survives a second install").
+- Measured on the iPad (iPad2,2, iOS 6.1.3) with the `opener`, `popups-off` and `string-back` probe modes. In `opener`, a page
+  served over http opened a popup and a refused `window.open` (the delegate returned nil): the refused call was null, the
+  popup's `window.opener` was an object whose `href` is the opener's URL and whose `closed` is false, a popup `postMessage`
+  reached the opener under the matching origin and a mismatched origin was dropped, the opener's `close()` called
+  `webViewDidClose:`, and `window.open` refused from a page script returned null. The one failing check is the
+  `event.source` identity described above. In `popups-off` (the flag at its default NO) no popup was created and
+  `window.open` returned null. In `string-back` (a `loadRequest` of `a.html`, then `loadHTMLString`, then `goBack`), `goBack`
+  started one load of `a.html` over the network, the page was a fresh document (its own start script ran), and the URL was
+  `a.html`. No macOS run of that sequence exists: the macOS `goBack` oracle in `tests/webkit_document_start` covers a
+  file-URL sequence, so the two are not compared.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
@@ -299,7 +323,9 @@ The protocols `src` declares (`WKNavigationDelegate`, `WKUIDelegate`, `WKDownloa
 (`duplicate protocol definition ... is ignored`), so the SDK's declarations are the ones compiled. The copies put the
 names in `lowered-members.txt`.
 
-Checks: `tests/webkit_values_test.lua` compares the snapshot defaults with macOS, and checks the values of `WKDownload`,
+Checks: `tests/webkit_window_test.lua` compares the window and opener checks with macOS WKWebView by name (the macOS side is
+`tests/webkit_window/oracle.m`, which opens a popup over loopback and runs the same checks), and
+`tests/webkit_values_test.lua` compares the snapshot defaults with macOS, and checks the values of `WKDownload`,
 `WKOpenPanelParameters` and `WKWindowFeatures` against the list above. It has a negative control that flips one default.
 `WKWebpagePreferences` and `WKContentWorld` have no host oracle. The armv7 Swift typecheck of Telegram's call shapes covers
 them, and it compiles; its link needs the WebKit backport library, which the typecheck target does not link.
