@@ -14,7 +14,8 @@ static uint32_t revenant_random(uint32_t bound)
 
 static NSUInteger revenant_moves_by_oracle(NSArray *before, NSArray *after)
 {
-    NSOrderedCollectionDifference *difference = [after differenceFromArray:before withOptions:NSOrderedCollectionDifferenceCalculationInferMoves];
+    NSMutableArray *target = [NSMutableArray arrayWithArray:after];
+    NSOrderedCollectionDifference *difference = [target differenceFromArray:before withOptions:NSOrderedCollectionDifferenceCalculationInferMoves];
     NSUInteger moves = 0;
     for (NSOrderedCollectionChange *change in difference) {
         if (change.changeType == NSCollectionChangeRemove && change.associatedIndex != NSNotFound)
