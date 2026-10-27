@@ -8,6 +8,10 @@ NSString *const WKWebsiteDataTypeLocalStorage = @"WKWebsiteDataTypeLocalStorage"
 NSString *const WKWebsiteDataTypeSessionStorage = @"WKWebsiteDataTypeSessionStorage";
 NSString *const WKWebsiteDataTypeWebSQLDatabases = @"WKWebsiteDataTypeWebSQLDatabases";
 NSString *const WKWebsiteDataTypeIndexedDBDatabases = @"WKWebsiteDataTypeIndexedDBDatabases";
+// The engine keeps no fetch cache and no service worker registrations, so these types name data that is never
+// stored: they are accepted, and removing them removes nothing, as it would for an empty store.
+NSString *const WKWebsiteDataTypeFetchCache = @"WKWebsiteDataTypeFetchCache";
+NSString *const WKWebsiteDataTypeServiceWorkerRegistrations = @"WKWebsiteDataTypeServiceWorkerRegistrations";
 
 @implementation WKWebsiteDataStore {
     BOOL _persistent;

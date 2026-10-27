@@ -1,4 +1,8 @@
-#import "RevenantWebKit.h"
+#if defined(REVENANT_HOST_BUILD)
+#define WKWindowFeatures WKWindowFeaturesRevenant
+#endif
+
+#import <WebKit/WebKit.h>
 
 // UIWebView reports no window features, and it never asks the delegate to open a window, so every
 // feature a page could request reads as unset.

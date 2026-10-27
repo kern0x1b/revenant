@@ -19,6 +19,27 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error;
 @end
 
+// The UI callbacks the engine can meet. The engine shows no file picker, no window and no context menu for a page,
+// so these are declared for the delegate to implement, and the engine does not send them.
+@protocol WKUIDelegate <NSObject>
+@optional
+- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures;
+- (void)webView:(WKWebView *)webView runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSArray<NSURL *> *URLs))completionHandler;
+- (void)webView:(WKWebView *)webView contextMenuConfigurationForElement:(WKContextMenuElementInfo *)elementInfo completionHandler:(void (^)(UIContextMenuConfiguration *configuration))completionHandler;
+@end
+
+// The download callbacks Telegram implements. The engine never hands a download to WebKit's path, so it sends none of
+// them. The redirect and placeholder callbacks are left out: their policy types are the SDK's, and no caller here
+// implements them.
+@protocol WKDownloadDelegate <NSObject>
+@required
+- (void)download:(WKDownload *)download decideDestinationUsingResponse:(NSURLResponse *)response suggestedFilename:(NSString *)suggestedFilename completionHandler:(void (^)(NSURL *destination))completionHandler;
+@optional
+- (void)download:(WKDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
+- (void)downloadDidFinish:(WKDownload *)download;
+- (void)download:(WKDownload *)download didFailWithError:(NSError *)error resumeData:(NSData *)resumeData;
+@end
+
 @interface WKUserContentController (RevenantWebKit)
 - (NSArray<WKUserScript *> *)revenant_scripts;
 - (NSArray<NSString *> *)revenant_handlerNames;

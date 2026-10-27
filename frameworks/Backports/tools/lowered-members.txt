@@ -2665,10 +2665,12 @@ class WKContentRuleList
 class WKContentRuleListStore
 class WKContentWorld
 class WKContextMenuElementInfo
+class WKDownload
 class WKFrameInfo
 class WKNavigation
 class WKNavigationAction
 class WKNavigationResponse
+class WKOpenPanelParameters
 class WKPreferences
 class WKProcessPool
 class WKScriptMessage
@@ -9528,10 +9530,12 @@ global WKWebExtensionPermissionWebNavigation
 global WKWebExtensionPermissionWebRequest
 global WKWebsiteDataTypeCookies
 global WKWebsiteDataTypeDiskCache
+global WKWebsiteDataTypeFetchCache
 global WKWebsiteDataTypeIndexedDBDatabases
 global WKWebsiteDataTypeLocalStorage
 global WKWebsiteDataTypeMemoryCache
 global WKWebsiteDataTypeOfflineWebApplicationCache
+global WKWebsiteDataTypeServiceWorkerRegistrations
 global WKWebsiteDataTypeSessionStorage
 global WKWebsiteDataTypeWebSQLDatabases
 global _nw_data_transfer_report_all_paths
@@ -34606,6 +34610,14 @@ member WKContentWorld +pageWorld
 member WKContentWorld +worldWithName:
 member WKContentWorld -name
 member WKContextMenuElementInfo -linkURL
+member WKDownload -cancel:
+member WKDownload -delegate
+member WKDownload -isUserInitiated
+member WKDownload -originalRequest
+member WKDownload -originatingFrame
+member WKDownload -progress
+member WKDownload -setDelegate:
+member WKDownload -webView
 member WKFrameInfo +revenant_frameWithMainFrame:request:
 member WKFrameInfo -copyWithZone:
 member WKFrameInfo -isMainFrame
@@ -34622,6 +34634,8 @@ member WKNavigationResponse +revenant_policyAllowing:
 member WKNavigationResponse -canShowMIMEType
 member WKNavigationResponse -isForMainFrame
 member WKNavigationResponse -response
+member WKOpenPanelParameters -allowsDirectories
+member WKOpenPanelParameters -allowsMultipleSelection
 member WKPreferences +supportsSecureCoding
 member WKPreferences -encodeWithCoder:
 member WKPreferences -init
@@ -34930,8 +34944,10 @@ member WKWebViewConfiguration -suppressesIncrementalRendering
 member WKWebViewConfiguration -urlSchemeHandlerForURLScheme:
 member WKWebViewConfiguration -userContentController
 member WKWebViewConfiguration -websiteDataStore
+member WKWebpagePreferences -allowsContentJavaScript
 member WKWebpagePreferences -init
 member WKWebpagePreferences -preferredContentMode
+member WKWebpagePreferences -setAllowsContentJavaScript:
 member WKWebpagePreferences -setPreferredContentMode:
 member WKWebsiteDataStore +allWebsiteDataTypes
 member WKWebsiteDataStore +defaultDataStore
@@ -35163,7 +35179,10 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
+protocol WKDownloadDelegate
 protocol WKNavigationDelegate
+protocol WKUIDelegate
+protocol WKURLSchemeHandler
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:

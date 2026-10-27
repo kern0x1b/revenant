@@ -241,6 +241,26 @@ local MEMBERS = {
             replace = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
         },
     },
+    {
+        member = "WKPermissionDecision",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKUIDelegate.h",
+            find = "    WKPermissionDecisionDeny,\n} API_AVAILABLE(macos(12.0), ios(15.0));",
+            replace = "    WKPermissionDecisionDeny,\n};",
+        },
+    },
+    {
+        member = "WKMediaCaptureType",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKUIDelegate.h",
+            find = "    WKMediaCaptureTypeCameraAndMicrophone,\n} API_AVAILABLE(macos(12.0), ios(15.0));",
+            replace = "    WKMediaCaptureTypeCameraAndMicrophone,\n};",
+        },
+    },
 }
 
 local MODULE_DIR = os.scriptdir()
