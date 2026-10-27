@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -17,6 +18,7 @@
 
 #include "foundation/display_geometry.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
 namespace emulator {
 
@@ -80,6 +82,7 @@ public:
     bool clear_if_owner(std::uint32_t owner_process_id);
     void save(snapshot::Writer& out) const;
     void load(snapshot::Reader& in);
+    static const std::array<snapshot::Member<DisplayState>, 9>& snapshot_members();
 
     [[nodiscard]] DisplayFrame snapshot() const;
     [[nodiscard]] std::uint64_t presented_frames() const;

@@ -2,7 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#include "foundation/darwin_notify_state_hle.hpp"
+#include "foundation/virtual_clock.hpp"
 #include "kernel/snapshot_ledger.hpp"
+#include "network/wifi_state.hpp"
 
 #include <cstddef>
 #include <iostream>
@@ -76,6 +79,39 @@ void only_saved_and_wired_members_are_covered()
         "a member without a descriptor is not covered");
 }
 
+void every_clock_descriptor_is_a_saved_row()
+{
+    for (const auto& member : emulator::VirtualClock::snapshot_members()) {
+        const auto* row = find_member(member.name);
+        expect(row != nullptr && row->coverage == Coverage::saved,
+            "the clock member " + std::string { member.name } +
+                " has a saved ledger row");
+    }
+}
+
+void every_wifi_descriptor_is_a_saved_row()
+{
+    for (const auto& member : emulator::WifiState::snapshot_members()) {
+        const auto* row = find_member(member.name);
+        expect(row != nullptr && row->coverage == Coverage::saved,
+            "the Wi-Fi member " + std::string { member.name } +
+                " has a saved ledger row");
+    }
+}
+
+void every_notify_descriptor_has_a_closed_row()
+{
+    for (const auto& member : emulator::DarwinNotifyStateHle::snapshot_members()) {
+        const auto* row = find_member(member.name);
+        expect(row != nullptr && row->coverage != Coverage::open,
+            "the notify member " + std::string { member.name } +
+                " has a saved, wired or refused ledger row");
+    }
+    const auto* bus = find_member("bus.registrations");
+    expect(bus && bus->coverage == Coverage::refused,
+        "the notify bus registrations are refused, and still written by the save");
+}
+
 void covered_members_pass_the_walk()
 {
     const std::vector<std::string> populated { "clock.now", "kss.launchd_job_catalog" };
@@ -119,6 +155,9 @@ int main()
     every_class_is_counted();
     coverage_follows_the_class();
     only_saved_and_wired_members_are_covered();
+    every_clock_descriptor_is_a_saved_row();
+    every_wifi_descriptor_is_a_saved_row();
+    every_notify_descriptor_has_a_closed_row();
     covered_members_pass_the_walk();
     member_added_without_a_descriptor_fails_by_name();
     open_and_refused_members_fail_by_name();

@@ -19,9 +19,11 @@ struct MemberDescriptor {
     Coverage coverage;
 };
 
-inline constexpr std::array<MemberDescriptor, 446> members {{
+inline constexpr std::array<MemberDescriptor, 450> members {{
     {"clock.now", Coverage::saved},
     {"clock.wall_time", Coverage::saved},
+    {"display.geometry_width", Coverage::saved},
+    {"display.geometry_height", Coverage::saved},
     {"display.pixels_", Coverage::saved},
     {"display.sequence_", Coverage::saved},
     {"display.content_revision_", Coverage::saved},
@@ -50,6 +52,7 @@ inline constexpr std::array<MemberDescriptor, 446> members {{
     {"mem.next_mapping_lease_token_", Coverage::saved},
     {"mem.translation_profile_map_", Coverage::saved},
     {"notify.providers_", Coverage::saved},
+    {"notify.abi_", Coverage::saved},
     {"notify.next_virtual_token_", Coverage::saved},
     {"notify.bus_", Coverage::saved},
     {"surface.display_", Coverage::saved},
@@ -245,6 +248,7 @@ inline constexpr std::array<MemberDescriptor, 446> members {{
     {"kss.key_store", Coverage::saved},
     {"hid.consumer_process_", Coverage::saved},
     {"hid.consumer_processor_", Coverage::saved},
+    {"hid.accelerometer_", Coverage::saved},
     {"mem.write_generation_", Coverage::saved},
     {"notify.owned_registrations_", Coverage::saved},
     {"notify.token_names_", Coverage::saved},

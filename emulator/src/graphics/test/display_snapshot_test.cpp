@@ -6,6 +6,7 @@
 
 #include "foundation/display_geometry.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -16,6 +17,7 @@
 namespace {
 
 using emulator::DisplayGeometry;
+using emulator::DisplayOrientation;
 using emulator::DisplayState;
 using emulator::snapshot::FormatError;
 using emulator::snapshot::Reader;
@@ -127,6 +129,59 @@ void truncated_stream_is_a_format_error()
     expect(threw, "a truncated display stream throws FormatError");
 }
 
+void descriptors_name_the_saved_fields_in_order()
+{
+    std::vector<std::string> names;
+    for (const auto& member : DisplayState::snapshot_members())
+        names.emplace_back(member.name);
+    const std::vector<std::string> expected {
+        "display.geometry_width",
+        "display.geometry_height",
+        "display.pixels_",
+        "display.surface_content_generation_",
+        "display.content_owner_process_id_",
+        "display.sequence_",
+        "display.content_revision_",
+        "display.powered_on_",
+        "display.content_orientation_",
+    };
+    expect(names == expected, "the display members are named in save order");
+}
+
+void fresh_layout_is_fixed()
+{
+    const DisplayState display(geometry);
+    Writer expected;
+    emulator::snapshot::save(expected, geometry.width);
+    emulator::snapshot::save(expected, geometry.height);
+    emulator::snapshot::save(expected,
+        std::vector<std::uint32_t>(geometry.pixel_count(), 0xff00'0000U));
+    emulator::snapshot::save(expected, static_cast<std::uint64_t>(0));
+    emulator::snapshot::save(expected, static_cast<std::uint32_t>(0));
+    emulator::snapshot::save(expected, static_cast<std::uint64_t>(0));
+    emulator::snapshot::save(expected, static_cast<std::uint64_t>(0));
+    emulator::snapshot::save(expected, true);
+    emulator::snapshot::save(expected, DisplayOrientation::Portrait);
+    expect(save_display(display) == expected.bytes(),
+        "the display saves its geometry, pixels, counters, power and orientation, in that order");
+}
+
+void populated_members_name_the_fields_that_hold_state()
+{
+    const DisplayState display(geometry);
+    std::vector<std::string> populated;
+    emulator::snapshot::note_populated_members(
+        populated, display, DisplayState::snapshot_members());
+    const std::vector<std::string> expected {
+        "display.geometry_width",
+        "display.geometry_height",
+        "display.pixels_",
+        "display.powered_on_",
+    };
+    expect(populated == expected,
+        "a fresh display populates its geometry, pixels and power state");
+}
+
 }
 
 int main()
@@ -135,6 +190,9 @@ int main()
     powered_off_display_round_trips();
     geometry_mismatch_is_a_format_error();
     truncated_stream_is_a_format_error();
+    descriptors_name_the_saved_fields_in_order();
+    fresh_layout_is_fixed();
+    populated_members_name_the_fields_that_hold_state();
     if (failures != 0) {
         std::cerr << failures << " display snapshot checks failed\n";
         return 1;

@@ -8,6 +8,7 @@
 
 #include "foundation/address_space.hpp"
 #include "foundation/snapshot_io.hpp"
+#include "foundation/snapshot_member.hpp"
 #include "foundation/virtual_clock.hpp"
 #include "kernel/snapshot_ledger.hpp"
 
@@ -316,8 +317,7 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "kss.task_thread_port_objects", shared.task_thread_port_objects);
     note(out, "kss.user_interface_geometry", shared.user_interface_geometry);
     note(out, "kss.virtual_effaceable_storage_available", shared.virtual_effaceable_storage_available);
-    note(out, "clock.now", shared.clock.now());
-    note(out, "clock.wall_time", shared.clock.wall_time());
+    snapshot::note_populated_members(out, shared.clock, VirtualClock::snapshot_members());
 
     const auto& hle = kernel.userland_hle_;
     note(out, "hle.registrations_", hle.registrations_);
@@ -350,28 +350,22 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     note(out, "hle.traced_symbols_", hle.traced_symbols_);
 
     const auto& hid = kernel.hid_event_system_hle_;
-    note(out, "hid.consumer_process_", hid.consumer_process_);
-    note(out, "hid.consumer_processor_", hid.consumer_processor_);
+    snapshot::note_populated_members(out, hid, HidEventSystemHle::snapshot_members());
     note(out, "hid.delivering_", hid.delivering_);
     note(out, "hid.state_", hid.state_);
 
     const auto& notify = kernel.darwin_notify_state_hle_;
-    note(out, "notify.providers_", notify.providers_);
-    note(out, "notify.token_names_", notify.token_names_);
-    note(out, "notify.virtual_tokens_", notify.virtual_tokens_);
-    note(out, "notify.next_virtual_token_", notify.next_virtual_token_);
-    note(out, "notify.owned_registrations_", notify.owned_registrations_);
+    snapshot::note_populated_members(out, notify, DarwinNotifyStateHle::snapshot_members());
     note(out, "notify.bus_", notify.bus_);
 
     const auto& coreaudio = kernel.core_audio_hle_;
     note(out, "coreaudio.service_", coreaudio.service_);
-    note(out, "coreaudio.buffer_frame_size_", coreaudio.buffer_frame_size_);
+    snapshot::note_populated_members(out, coreaudio, CoreAudioHle::snapshot_members());
     note(out, "coreaudio.stream_formats_", coreaudio.stream_formats_);
     note(out, "coreaudio.device_volumes_", coreaudio.device_volumes_);
     note(out, "coreaudio.hardware_control_states_", coreaudio.hardware_control_states_);
     note(out, "coreaudio.io_procs_", coreaudio.io_procs_);
     note(out, "coreaudio.native_io_procs_", coreaudio.native_io_procs_);
-    note(out, "coreaudio.next_native_io_proc_id_", coreaudio.next_native_io_proc_id_);
     note(out, "coreaudio.retired_io_proc_threads_", coreaudio.retired_io_proc_threads_);
 
     const auto& wifi = kernel.apple80211_hle_;
@@ -477,28 +471,11 @@ std::vector<std::string> CompatibilityKernelSnapshot::populated_members(
     }
     if (fb.display_) {
         const auto& display = *fb.display_;
-        note(out, "display.pixels_", display.pixels_);
-        note(out, "display.surface_content_generation_", display.surface_content_generation_);
-        note(out, "display.content_owner_process_id_", display.content_owner_process_id_);
-        note(out, "display.sequence_", display.sequence_);
-        note(out, "display.content_revision_", display.content_revision_);
-        note(out, "display.powered_on_", display.powered_on_);
-        note(out, "display.content_orientation_", display.content_orientation_);
+        snapshot::note_populated_members(out, display, DisplayState::snapshot_members());
         note(out, "display.host_surface_", display.host_surface_);
     }
-    if (wifi.state_) {
-        const auto& state = *wifi.state_;
-        note(out, "wifi.access_points_", state.access_points_);
-        note(out, "wifi.preferred_networks_", state.preferred_networks_);
-        note(out, "wifi.link_state_", state.link_state_);
-        note(out, "wifi.airplane_mode_", state.airplane_mode_);
-        note(out, "wifi.powered_before_airplane_mode_", state.powered_before_airplane_mode_);
-        note(out, "wifi.associated_index_", state.associated_index_);
-        note(out, "wifi.ipv4_", state.ipv4_);
-    }
-    if (notify.bus_) {
-        note(out, "bus.registrations", notify.bus_->registrations);
-    }
+    if (wifi.state_)
+        snapshot::note_populated_members(out, *wifi.state_, WifiState::snapshot_members());
     return out;
 }
 
