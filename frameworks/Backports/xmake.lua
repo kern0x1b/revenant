@@ -420,6 +420,17 @@ if is_plat("iphoneos") then
         set_values("revenant.entitlements", "tests/Security/device/entitlements.xml")
         add_frameworks("Foundation", "Security", "CoreFoundation")
     target_end()
+
+    target("LocalAuthProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(os.scriptdir(), "tests", "LocalAuthentication", "device", "probe.m"),
+                  path.join(os.scriptdir(), "src", "LocalAuthentication", "LAContext.m"),
+                  path.join(os.scriptdir(), "src", "LocalAuthentication", "LAErrorDomain.m"))
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability")
+        add_frameworks("Foundation")
+    target_end()
 end
 
 option("air2cpu", {default = false, showmenu = true,
