@@ -298,13 +298,10 @@ final class NWTLSSession {
             SSL_CTX_free(context)
             throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the TLS version range", status: errSSLProtocol)
         }
-        if !names.isEmpty, SSL_CTX_set_strict_cipher_list(context, names.joined(separator: ":")) != 1 {
+        let suiteNames = usesPreSharedKeys ? NWTLSSession.preSharedKeyCipherNames : names
+        if !suiteNames.isEmpty, SSL_CTX_set_strict_cipher_list(context, suiteNames.joined(separator: ":")) != 1 {
             SSL_CTX_free(context)
             throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the ciphersuite list", status: errSSLBadCipherSuite)
-        }
-        if usesPreSharedKeys, SSL_CTX_set_cipher_list(context, (["DEFAULT"] + NWTLSSession.preSharedKeyCipherNames + ["!kPSK"]).joined(separator: ":")) != 1 {
-            SSL_CTX_free(context)
-            throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the pre-shared key suites", status: errSSLBadCipherSuite)
         }
         let peerRequired = configuration.peerAuthenticationRequired
         let verifies = configuration.hasVerifyBlock
