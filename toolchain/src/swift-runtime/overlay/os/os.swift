@@ -15,10 +15,10 @@ public struct OSLogType: Hashable, RawRepresentable {
 }
 
 public struct OSLog {
-    fileprivate let handle: UnsafeMutableRawPointer
+    fileprivate let handle: UnsafeMutableRawPointer?
 
     public init(subsystem: String, category: String) {
-        self.handle = revenant_os_log_named(subsystem, category)
+        self.handle = revenant_os_log_linked() != 0 ? revenant_os_log_named(subsystem, category) : nil
     }
 
     public static let `default` = OSLog(subsystem: "", category: "default")
@@ -36,15 +36,19 @@ public func os_log(_ type: OSLogType, dso: UnsafeRawPointer? = #dsohandle, log: 
 
 private func emit(_ message: StaticString, log: OSLog, type: OSLogType, _ args: [CVarArg]) {
     let error = revenant_os_log_errno()
-    guard revenant_os_log_type_enabled(log.handle, type.rawValue) != 0 else {
-        return
-    }
     let format = message.withUTF8Buffer { buffer in
         buffer.map { CChar(bitPattern: $0) } + [0]
     }
     format.withUnsafeBufferPointer { text in
         withVaList(args) { arguments in
-            revenant_os_log_send(log.handle, type.rawValue, text.baseAddress!, arguments, error)
+            guard let handle = log.handle else {
+                revenant_os_log_fallback(type.rawValue, text.baseAddress!, arguments)
+                return
+            }
+            guard revenant_os_log_type_enabled(handle, type.rawValue) != 0 else {
+                return
+            }
+            revenant_os_log_send(handle, type.rawValue, text.baseAddress!, arguments, error)
         }
     }
 }
