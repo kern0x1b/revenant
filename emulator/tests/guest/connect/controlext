@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorconnectext
+Name: emulator external kevent64 connect probe
+Architecture: iphoneos-arm
+Description: A program that connects many nonblocking sockets to an external address over the host network, registered with kevent64 and EV_DISPATCH, and waits for every write to be delivered.

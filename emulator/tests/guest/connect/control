@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorconnect
+Name: emulator concurrent connect probe
+Architecture: iphoneos-arm
+Description: A program that starts many nonblocking connects to a loopback listener and waits for every socket to report writable, to find connects the emulated kernel never reports.

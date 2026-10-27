@@ -2,6 +2,8 @@ if not is_plat("iphoneos") then
     return
 end
 
+add_requires("revenant@boringssl", {alias = "boringssl"})
+
 local SRC = path.directory(os.scriptdir())
 local TOOLS = path.join(SRC, "..", "tools")
 
@@ -29,6 +31,22 @@ local function add_flags(target, flags)
     for _, flag in ipairs(flags) do
         target:add("values", "swift.flags", flag)
     end
+end
+
+local SWIFT_DIR = os.scriptdir()
+
+local function security_stub_text(stub)
+    local targets = "[ " .. table.concat(stub.targets, ", ") .. " ]"
+    local lines = {"--- !tapi-tbd", "tbd-version: 4", "targets: " .. targets, "install-name: '" .. stub.installName .. "'",
+                   "current-version: 1", "compatibility-version: 1", "exports:", "  - targets: " .. targets}
+    if #stub.symbols > 0 then
+        table.insert(lines, "    symbols: [ " .. table.concat(stub.symbols, ", ") .. " ]")
+    end
+    if #stub.objcClasses > 0 then
+        table.insert(lines, "    objc-classes: [ " .. table.concat(stub.objcClasses, ", ") .. " ]")
+    end
+    table.insert(lines, "...")
+    return table.concat(lines, "\n") .. "\n"
 end
 
 target("AppIntents")
@@ -213,11 +231,17 @@ local function overlay(name, folder, opt)
         if #table.wrap(opt.frameworks) > 0 then
             add_frameworks(table.unpack(opt.frameworks))
         end
+        if #table.wrap(opt.packages) > 0 then
+            add_packages(table.unpack(opt.packages))
+        end
         if #table.wrap(opt.links) > 0 then
             add_links(table.unpack(opt.links))
         end
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
+            for _, file in ipairs(table.wrap(opt.cfiles)) do
+                target:add("files", path.join(SRC, folder, file))
+            end
         end)
         before_build(function (target)
             if opt.minimum then
@@ -229,6 +253,14 @@ local function overlay(name, folder, opt)
             end
         end)
         on_config(function (target)
+            if opt.stub then
+                local stub = import("security_stub", {rootdir = SWIFT_DIR, anonymous = true}).stub()
+                local folder = path.join(target:autogendir(), "stub")
+                os.mkdir(folder)
+                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), security_stub_text(stub))
+                target:add("linkdirs", folder)
+                target:add("links", stub.library)
+            end
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
                 os.mkdir(folder)
@@ -245,6 +277,15 @@ local function overlay(name, folder, opt)
                                                            apinotes = import("apinotes", {rootdir = TOOLS, anonymous = true})}))
             end
             add_flags(target, flags)
+            if opt.cmodule then
+                add_flags(target, {"-I", path.join(SRC, folder, opt.cmodule)})
+                for _, name in ipairs(table.wrap(opt.packages)) do
+                    local pkg = target:pkg(name)
+                    if pkg then
+                        add_flags(target, {"-Xcc", "-I" .. path.join(pkg:installdir(), "include")})
+                    end
+                end
+            end
         end)
     target_end()
 end
@@ -269,7 +310,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL", cfiles = {"CBoringSSL/RevenantTLSBridge.c"}, stub = true})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

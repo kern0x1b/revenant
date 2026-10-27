@@ -97,7 +97,8 @@ end
 
 function package_of(requirement, install)
     local scratch = fresh("package-resolve")
-    local lines = {string.format("add_repositories(%q)", "revenant " .. root()), string.format("add_requires(%q)", requirement)}
+    local lines = {string.format("add_repositories(%q)", "revenant " .. root()),
+                   string.format("add_requires(%q, {system = false})", requirement)}
     if install then
         table.insert(lines, string.format("add_addons(%q, {sourcedir = %q})", "revenant", path.join(root(), "toolchain")))
     end

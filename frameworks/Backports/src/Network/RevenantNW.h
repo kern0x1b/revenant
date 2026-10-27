@@ -2,6 +2,8 @@
 #import <Network/Network.h>
 #import <Security/Security.h>
 #import <Security/SecureTransport.h>
+#import "../Security/RevenantSecProtocolOptions.h"
+#import "../Security/RevenantSecProtocolMetadata.h"
 
 
 #pragma clang diagnostic push
@@ -45,7 +47,6 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 @class RevenantNWConnectionGroup;
 @class RevenantNWGroupDescriptor;
 @class RevenantNWFramer;
-@class RevenantNWSecProtocol;
 @class RevenantNWWebSocketRequest;
 @class RevenantNWWebSocketResponse;
 @class RevenantNWEthernetChannel;
@@ -329,21 +330,6 @@ typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     uint64_t _smoothedRTTMilliseconds;
     uint64_t _minimumRTTMilliseconds;
     uint64_t _rttVarianceMilliseconds;
-}
-@end
-
-@interface RevenantNWSecProtocol : NSObject {
-@public
-    NSMutableDictionary *_values;
-    NSMutableArray *_applicationProtocols;
-    NSString *_identityLabel;
-    NSString *_label;
-    BOOL _server;
-    BOOL * _Nullable _verify;
-    dispatch_queue_t _verifyQueue;
-    BOOL _skipVerify;
-    NSString *_peerName;
-    NSNumber *_protocolVersion;
 }
 @end
 

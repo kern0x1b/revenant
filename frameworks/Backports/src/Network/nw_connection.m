@@ -124,6 +124,8 @@ static void revenant_install_sources(RevenantNWConnection *connection);
 static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpointValue *endpoint);
 static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error);
 static void revenant_readable(RevenantNWConnection *connection);
+static RevenantSecProtocolOptions *revenant_tls_options(RevenantNWParameters *parameters);
+static OSStatus revenant_tls_versions(RevenantSecProtocolOptions *options, SSLProtocol *minimum, SSLProtocol *maximum, const char **reason);
 
 #pragma mark - the state machine
 
@@ -755,9 +757,20 @@ static void revenant_ready(RevenantNWConnection *connection)
             return;
         }
         SSLSetIOFuncs(connection->_ssl, revenant_tls_read, revenant_tls_write);
-        SSLSetProtocolVersionMin(connection->_ssl, kTLSProtocol1);
-        SSLSetProtocolVersionMax(connection->_ssl, kTLSProtocol12);
-        NSString *peer = connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil;
+        SSLProtocol minimum, maximum;
+        const char *versionReason = NULL;
+        OSStatus versions = revenant_tls_versions(revenant_tls_options(connection->_parameters), &minimum, &maximum, &versionReason);
+        if (versions == noErr)
+            versions = SSLSetProtocolVersionMin(connection->_ssl, minimum);
+        if (versions == noErr)
+            versions = SSLSetProtocolVersionMax(connection->_ssl, maximum);
+        if (versions != noErr) {
+            fprintf(stderr, "Network: TLS setting refused: %s\n", versionReason ? versionReason : "SecureTransport rejected the TLS version range");
+            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)versions));
+            return;
+        }
+        RevenantSecProtocolOptions *secOptions = revenant_tls_options(connection->_parameters);
+        NSString *peer = secOptions.serverName.length ? secOptions.serverName : (connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil);
         if (peer.length)
             SSLSetPeerDomainName(connection->_ssl, peer.UTF8String, (int)peer.length);
         connection->_handshaking = YES;
@@ -782,6 +795,71 @@ static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int
     }
 }
 
+static RevenantSecProtocolOptions *revenant_tls_options(RevenantNWParameters *parameters)
+{
+    RevenantNWProtocolOptions *tls = revenant_stack_application(parameters, @"nw_tls");
+    return tls ? tls->_objects[@"sec_protocol_options"] : nil;
+}
+
+static OSStatus revenant_tls_versions(RevenantSecProtocolOptions *options, SSLProtocol *minimum, SSLProtocol *maximum, const char **reason)
+{
+    uint16_t low = options ? options.minTLSVersion : 0x0303;
+    uint16_t high = options ? options.maxTLSVersion : 0x0304;
+    if (low > 0x0303) {
+        *reason = "the minimum TLS version is above TLS 1.2, which this TLS path cannot negotiate";
+        return errSSLProtocol;
+    }
+    if (high < low) {
+        *reason = "the maximum TLS version is below the minimum TLS version";
+        return errSSLProtocol;
+    }
+    *minimum = low <= 0x0301 ? kTLSProtocol1 : (low == 0x0302 ? kTLSProtocol11 : kTLSProtocol12);
+    *maximum = high <= 0x0301 ? kTLSProtocol1 : (high == 0x0302 ? kTLSProtocol11 : kTLSProtocol12);
+    return noErr;
+}
+
+static OSStatus revenant_tls_refusal(RevenantNWParameters *parameters, const char **reason)
+{
+    RevenantSecProtocolOptions *options = revenant_tls_options(parameters);
+    SSLProtocol minimum, maximum;
+    if (!options)
+        return revenant_tls_versions(nil, &minimum, &maximum, reason);
+    const char *setting = [options revenantUnsupportedSettingForServer:NO];
+    if (setting) {
+        *reason = setting;
+        return errSSLBadConfiguration;
+    }
+    if (options.verifyBlock || options.challengeBlock) {
+        *reason = "verify and challenge blocks are not honoured by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    if (options.localIdentity) {
+        *reason = "client identities are not sent by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    if (options.preSharedKeys.count > 0) {
+        *reason = "pre-shared keys are not honoured by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    if (options.ocspEnabled) {
+        *reason = "OCSP stapling is not honoured by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    if (options.sctEnabled) {
+        *reason = "signed certificate timestamps are not honoured by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    if (options.ciphersuites.count > 0 || [options revenantCiphersuiteGroups].count > 0) {
+        *reason = "ciphersuite selection is not honoured by this TLS path";
+        return errSSLBadCipherSuite;
+    }
+    if (options.applicationProtocols.count > 0) {
+        *reason = "application protocol negotiation is not honoured by this TLS path";
+        return errSSLBadConfiguration;
+    }
+    return revenant_tls_versions(options, &minimum, &maximum, reason);
+}
+
 static void revenant_open(RevenantNWConnection *connection)
 {
     RevenantNWConnection *self = connection;
@@ -789,6 +867,15 @@ static void revenant_open(RevenantNWConnection *connection)
     RevenantNWParameters *parameters = connection->_parameters;
     connection->_isDatagram = revenant_is_datagram(parameters);
     connection->_secure = revenant_is_secure(parameters);
+    if (connection->_secure) {
+        const char *reason = NULL;
+        OSStatus refused = revenant_tls_refusal(parameters, &reason);
+        if (refused != noErr) {
+            fprintf(stderr, "Network: TLS setting refused: %s\n", reason);
+            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)refused));
+            return;
+        }
+    }
 
     struct addrinfo hints;
     memset(&hints, 0, sizeof hints);

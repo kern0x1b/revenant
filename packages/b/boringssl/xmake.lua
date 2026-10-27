@@ -10,10 +10,12 @@ package("boringssl")
     add_patches("2024.03.06", "patches/0002-cmake-apple-armv7-ios32-assembly.patch", "384213742b2e4a6d50823094ccfe3717dac974cf902dd87775d2b1629742ce87")
     add_patches("2024.03.06", "patches/0003-urandom-where-ccrandom-is-absent.patch", "81fe3447a7fc99c95dcf43251feabba903caff41b7dc707dc0603b88bfc25f83")
     add_links("ssl", "crypto")
-    add_deps("revenant@libcxx", {alias = "libcxx"})
+    if is_plat("iphoneos") then
+        add_deps("revenant@libcxx", {alias = "libcxx"})
+    end
 
-    on_install("iphoneos", function (package)
-        if package:is_arch("armv7") then
+    on_install("iphoneos", "macosx", function (package)
+        if package:is_plat("iphoneos") and package:is_arch("armv7") then
             for _, item in ipairs({
                 {"apple-arm/crypto/chacha/chacha-armv4-apple.S", "src/crypto/chacha/asm/chacha-armv4.pl"},
                 {"apple-arm/crypto/fipsmodule/aesv8-armv7-apple.S", "src/crypto/fipsmodule/aes/asm/aesv8-armx.pl"},
@@ -30,11 +32,19 @@ package("boringssl")
                 os.vrunv("perl", {item[2], "ios32", item[1]})
             end
         end
-        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
-        local builddir = cmake.install(package, {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DBUILD_TESTING=OFF", "-DBUILD_SHARED_LIBS=OFF"},
-            {deps = {"libcxx"}, targets = {"crypto", "ssl"}, install = false, licenses = "LICENSE"})
-        os.cp(path.join(builddir, "libcrypto.a"), package:installdir("lib"))
-        os.cp(path.join(builddir, "libssl.a"), package:installdir("lib"))
+        local configs = {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DBUILD_TESTING=OFF", "-DBUILD_SHARED_LIBS=OFF"}
+        if package:is_plat("iphoneos") then
+            local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+            local builddir = cmake.install(package, configs,
+                {deps = {"libcxx"}, targets = {"crypto", "ssl"}, install = false, licenses = "LICENSE"})
+            os.cp(path.join(builddir, "libcrypto.a"), package:installdir("lib"))
+            os.cp(path.join(builddir, "libssl.a"), package:installdir("lib"))
+        else
+            local builddir = path.absolute("build_revenant")
+            import("package.tools.cmake").build(package, configs, {builddir = builddir})
+            os.cp(path.join(builddir, "libcrypto.a"), package:installdir("lib"))
+            os.cp(path.join(builddir, "libssl.a"), package:installdir("lib"))
+        end
         os.cp("src/include/openssl", package:installdir("include"))
     end)
 

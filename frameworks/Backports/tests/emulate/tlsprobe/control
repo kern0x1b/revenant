@@ -1,0 +1,4 @@
+Package: org.revenant.emulatetlsprobe
+Name: emulate SecureTransport measurement probe
+Architecture: iphoneos-arm
+Description: A program that lists the protocol versions and ciphers of the firmware's SecureTransport and handshakes with public hosts, to measure what iOS 6.1.3 can still reach.

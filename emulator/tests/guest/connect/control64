@@ -1,0 +1,4 @@
+Package: org.revenant.emulatorconnect64
+Name: emulator kevent64 connect probe
+Architecture: iphoneos-arm
+Description: A program that registers connecting sockets with kevent64 and EV_DISPATCH, disabled until the connect completes, and waits for each write to be delivered after EV_ENABLE.
