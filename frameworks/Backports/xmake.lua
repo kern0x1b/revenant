@@ -184,6 +184,9 @@ if is_plat("iphoneos") then
             end
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
+            if library.name == "NetworkBackports" then
+                add_shflags("-Wl,-current_version,1", "-Wl,-compatibility_version,1", {force = true})
+            end
             add_syslinks("objc")
             if library.folder ~= "Vision" and (#os.files(path.join(SRC, library.folder, "*.mm")) > 0 or #os.files(path.join(SRC, library.folder, "*.cpp")) > 0) then
                 add_syslinks("c++")
