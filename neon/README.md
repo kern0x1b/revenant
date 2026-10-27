@@ -11,6 +11,13 @@ table indices give zero, as on AArch64. `tests/a64_compat_test.c` hashes each in
 pseudorandom inputs. The arm64 host runs the native intrinsics, the armv7 build runs on the emulator, and the two
 outputs must be identical. All 187 lines matched when this was committed.
 
+`vsqrtq_f32` is the exception to the same-bits rule. ARMv7 has no vector square root, so `include/revenant_neon_sqrt.h`
+takes the reciprocal square-root estimate (`vrsqrte`), refines it with three Newton steps (`vrsqrts`) and multiplies by x.
+Zeros keep their sign, +inf stays +inf, negatives and -inf give NaN. NEON flushes denormals to zero, so a positive
+denormal gives +0 and a negative one gives NaN. `tests/vsqrt_test.c` measures it against `sqrtf` on 2^20 random normal
+inputs: at most 2 ulp, and correctly rounded for 70% of them. That run is on the arm64 host, with the same estimate and
+step instructions the ARMv7 build emits; the armv7 build is compiled and its assembly checked, not run on an emulator.
+
 Not implemented, because ARMv7 NEON cannot give the same bits: the AES instructions (`vaes*`, `vaesmcq`), the
 double-precision vector intrinsics (`*_f64`, the vector types have no f64 lanes on ARMv7), the fused multiply-add
 `vfmaq_f32` (ARMv7 NEON only has the unfused multiply-add), the 64-bit polynomial multiply (`vmull_p64`), and the

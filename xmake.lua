@@ -37,7 +37,7 @@ if is_plat("iphoneos") then
 end
 
 includes("frameworks/Backports")
-includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
+includes("emulator", "recompiler", "neon", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
 on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
 if whole or component == "emulator" then
