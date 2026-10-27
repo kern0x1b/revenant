@@ -1721,6 +1721,7 @@ class RevenantExportMetadataFilterInstaller
 class RevenantFileEntry
 class RevenantFileFolderController
 class RevenantFileLocationsController
+class RevenantFindNavigator
 class RevenantFlashActiveWait
 class RevenantFlowModel
 class RevenantFontDescriptorInstaller
@@ -2014,6 +2015,7 @@ class RevenantTextDragRequest
 class RevenantTextDropAdaptor
 class RevenantTextDropRequest
 class RevenantTextLocation
+class RevenantTextReplacement
 class RevenantTextStack
 class RevenantTextViewSelectable7
 class RevenantTileCache
@@ -5463,6 +5465,7 @@ function revenant_capture_devices
 function revenant_ci_inert
 function revenant_close_list_swipe
 function revenant_coder_error
+function revenant_color_for_traits
 function revenant_content_overlay_insets
 function revenant_copy_all_tags
 function revenant_copy_is_copy_for_testing
@@ -5486,6 +5489,7 @@ function revenant_default_duration
 function revenant_default_preferred
 function revenant_default_shadow_colour
 function revenant_deliver_trait_registrations
+function revenant_deliver_view_trait_change
 function revenant_device_check_unsupported
 function revenant_diffable_changes
 function revenant_diffable_finish
@@ -5832,6 +5836,7 @@ function revenant_read_trait_value
 function revenant_reciprocal_converter
 function revenant_reciprocal_converter_class
 function revenant_refresh_bars_showing
+function revenant_refresh_view_colours
 function revenant_register_trait_definition
 function revenant_register_trait_kind
 function revenant_registered_models
@@ -5934,6 +5939,8 @@ function revenant_url_parse
 function revenant_url_valid
 function revenant_uttype_catalogue_add
 function revenant_uttype_catalogue_types
+function revenant_view_stored_tint
+function revenant_view_style_override
 function revenant_vision_bilinear
 function revenant_weak_get
 function revenant_weak_set
@@ -26079,6 +26086,7 @@ member RevenantFileLocationsController -tableView:cellForRowAtIndexPath:
 member RevenantFileLocationsController -tableView:didSelectRowAtIndexPath:
 member RevenantFileLocationsController -tableView:numberOfRowsInSection:
 member RevenantFileLocationsController -viewDidLoad
+member RevenantFindNavigator -layoutSubviews
 member RevenantFlashActiveWait -finish
 member RevenantFlashActiveWait -observeValueForKeyPath:ofObject:change:context:
 member RevenantFlowModel -items
@@ -27990,6 +27998,9 @@ member RevenantTextLocation -initWithTextContentStorage:offset:
 member RevenantTextLocation -isEqual:
 member RevenantTextLocation -offset
 member RevenantTextLocation -textContentStorage
+member RevenantTextReplacement -initWithInput:range:
+member RevenantTextReplacement -replaceWithString:undoManager:
+member RevenantTextReplacement -swap:
 member RevenantTextStack -revenant_pushToView
 member RevenantTextStack -textStorage:didProcessEditing:range:changeInLength:
 member RevenantTextStack -textStorageDidProcessEditing:
@@ -30948,6 +30959,15 @@ member UIFindInteraction -isFindNavigatorVisible
 member UIFindInteraction -optionsMenuProvider
 member UIFindInteraction -presentFindNavigatorShowingReplace:
 member UIFindInteraction -replacementText
+member UIFindInteraction -revenant_buildNavigator
+member UIFindInteraction -revenant_moveInDirection:
+member UIFindInteraction -revenant_navigatorButtonWithTitle:action:tag:
+member UIFindInteraction -revenant_replaceAll
+member UIFindInteraction -revenant_replaceCurrent
+member UIFindInteraction -revenant_replacementFieldChanged
+member UIFindInteraction -revenant_search
+member UIFindInteraction -revenant_searchFieldChanged
+member UIFindInteraction -revenant_showNavigator
 member UIFindInteraction -searchText
 member UIFindInteraction -setOptionsMenuProvider:
 member UIFindInteraction -setReplacementText:
@@ -30957,8 +30977,18 @@ member UIFindInteraction -view
 member UIFindInteraction -willMoveToView:
 member UIFindSession -allowsReplacement
 member UIFindSession -allowsReplacementForCurrentlyHighlightedResult
+member UIFindSession -highlightNextResultInDirection:
 member UIFindSession -highlightedResultIndex
+member UIFindSession -init
+member UIFindSession -invalidateFoundResults
+member UIFindSession -performSearchWithQuery:options:
+member UIFindSession -performSingleReplacementWithSearchQuery:replacementString:options:
+member UIFindSession -replaceAllInstancesOfSearchQuery:withReplacementString:options:
 member UIFindSession -resultCount
+member UIFindSession -revenant_clearHighlight
+member UIFindSession -revenant_document
+member UIFindSession -revenant_highlight:
+member UIFindSession -revenant_replaceRanges:withString:
 member UIFindSession -searchResultDisplayStyle
 member UIFindSession -setSearchResultDisplayStyle:
 member UIFindSession -supportsReplacement
@@ -33286,7 +33316,12 @@ member UITextSearchOptions -isEqual:
 member UITextSearchOptions -stringCompareOptions
 member UITextSearchOptions -wordMatchMethod
 member UITextSearchingFindSession -initWithSearchableObject:
+member UITextSearchingFindSession -revenant_clearHighlight
+member UITextSearchingFindSession -revenant_document
+member UITextSearchingFindSession -revenant_highlight:
+member UITextSearchingFindSession -revenant_replaceRanges:withString:
 member UITextSearchingFindSession -searchableObject
+member UITextSearchingFindSession -supportsReplacement
 member UITextSelectionRect -transform
 member UITextView -adjustsFontForContentSizeCategory
 member UITextView -borderStyle

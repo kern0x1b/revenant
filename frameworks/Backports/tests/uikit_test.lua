@@ -368,6 +368,17 @@ local AREAS = {
             "-[UIColorWell supportsAlpha]", "-[UIColorWell setSupportsAlpha:]", "-[UIColorWell title]", "-[UIColorWell setTitle:]",
         },
     },
+    {
+        name = "overrideUserInterfaceStyle, dynamic colours, tint and the trait collection of views",
+        sources = {"UIColorDynamic.m", "UIView+TintColor.m", "UIView+iOS13.m", "UITraitCollection.m", "UITraitCollection+UserInterfaceStyle.m", "UIView+TraitEnvironment.m"},
+        members = {
+            "+[UIColor colorWithDynamicProvider:]", "-[UIColor resolvedColorWithTraitCollection:]", "+[UIColor labelColor]", "+[UIColor systemBackgroundColor]",
+            "-[UIView overrideUserInterfaceStyle]", "-[UIView setOverrideUserInterfaceStyle:]",
+            "-[UIView tintColor]", "-[UIView setTintColor:]", "-[UIView tintColorDidChange]", "-[UIView tintAdjustmentMode]", "-[UIView setTintAdjustmentMode:]",
+            "-[UIView traitCollection]", "-[UIView traitCollectionDidChange:]",
+            "+[UITraitCollection traitCollectionWithUserInterfaceStyle:]", "+[UITraitCollection traitCollectionWithTraitsFromCollections:]",
+        },
+    },
 }
 
 local function key_of(member)

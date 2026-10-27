@@ -5,6 +5,7 @@
 @end
 
 @interface RevenantFindNavigator : UIView
+@property (nonatomic) BOOL showsReplaceRow;
 @end
 
 @implementation RevenantFindNavigator
@@ -12,14 +13,20 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    CGFloat width = CGRectGetWidth(self.bounds), height = CGRectGetHeight(self.bounds);
+    CGFloat width = CGRectGetWidth(self.bounds), row = 44;
     UIView *field = [self viewWithTag:1], *count = [self viewWithTag:2];
     UIView *previous = [self viewWithTag:3], *next = [self viewWithTag:4], *done = [self viewWithTag:5];
-    done.frame = CGRectMake(width - 64, 0, 60, height);
-    next.frame = CGRectMake(CGRectGetMinX(done.frame) - 40, 0, 40, height);
-    previous.frame = CGRectMake(CGRectGetMinX(next.frame) - 40, 0, 40, height);
-    count.frame = CGRectMake(CGRectGetMinX(previous.frame) - 90, 0, 90, height);
-    field.frame = CGRectMake(6, 7, MAX(0, CGRectGetMinX(count.frame) - 12), height - 14);
+    done.frame = CGRectMake(width - 64, 0, 60, row);
+    next.frame = CGRectMake(CGRectGetMinX(done.frame) - 40, 0, 40, row);
+    previous.frame = CGRectMake(CGRectGetMinX(next.frame) - 40, 0, 40, row);
+    count.frame = CGRectMake(CGRectGetMinX(previous.frame) - 90, 0, 90, row);
+    field.frame = CGRectMake(6, 7, MAX(0, CGRectGetMinX(count.frame) - 12), row - 14);
+    UIView *replaceField = [self viewWithTag:6], *replace = [self viewWithTag:7], *replaceAll = [self viewWithTag:8];
+    replaceAll.frame = CGRectMake(width - 116, row, 110, row);
+    replace.frame = CGRectMake(CGRectGetMinX(replaceAll.frame) - 84, row, 80, row);
+    replaceField.frame = CGRectMake(6, row + 7, MAX(0, CGRectGetMinX(replace.frame) - 12), row - 14);
+    BOOL replaceRow = self.showsReplaceRow;
+    replaceField.hidden = replace.hidden = replaceAll.hidden = !replaceRow;
 }
 
 @end
@@ -33,11 +40,15 @@
     UIMenu *(^_optionsMenuProvider)(NSArray<UIMenuElement *> *defaultOptions);
     UIFindSession *_activeFindSession;
     BOOL _findNavigatorVisible;
+    BOOL _showingReplace;
     RevenantFindNavigator *_navigator;
     UITextField *_field;
     UILabel *_count;
     UIButton *_previous;
     UIButton *_next;
+    UITextField *_replaceField;
+    UIButton *_replaceButton;
+    UIButton *_replaceAllButton;
 }
 
 - (instancetype)initWithSessionDelegate:(id<UIFindInteractionDelegate>)sessionDelegate
@@ -89,6 +100,8 @@
 - (void)setReplacementText:(NSString *)replacementText
 {
     _replacementText = replacementText;
+    if (_replaceField)
+        _replaceField.text = replacementText;
 }
 
 - (UIMenu *(^)(NSArray<UIMenuElement *> *))optionsMenuProvider
@@ -123,6 +136,7 @@
         return;
     _activeFindSession = session;
     _findNavigatorVisible = YES;
+    _showingReplace = showingReplace && session.supportsReplacement;
     [self revenant_showNavigator];
     if ([_delegate respondsToSelector:@selector(findInteraction:didBeginFindSession:)])
         [_delegate findInteraction:self didBeginFindSession:session];
@@ -133,8 +147,10 @@
     if (!_findNavigatorVisible)
         return;
     _findNavigatorVisible = NO;
+    _showingReplace = NO;
     UIFindSession *session = _activeFindSession;
     [_field resignFirstResponder];
+    [_replaceField resignFirstResponder];
     [_navigator removeFromSuperview];
     [session revenant_clearHighlight];
     if ([_delegate respondsToSelector:@selector(findInteraction:didEndFindSession:)])
@@ -171,6 +187,8 @@
     _count.text = text;
     _previous.enabled = total > 0;
     _next.enabled = total > 0;
+    _replaceButton.enabled = total > 0 && session.supportsReplacement;
+    _replaceAllButton.enabled = total > 0 && session.supportsReplacement;
 }
 
 - (void)revenant_moveInDirection:(UITextStorageDirection)direction
@@ -196,12 +214,38 @@
     [self revenant_search];
 }
 
+- (void)revenant_replacementFieldChanged
+{
+    _replacementText = [_replaceField.text copy];
+}
+
+- (void)revenant_replaceCurrent
+{
+    UIFindSession *session = _activeFindSession;
+    if (!_findNavigatorVisible || !session)
+        return;
+    [session performSingleReplacementWithSearchQuery:_searchText replacementString:_replacementText options:nil];
+    [self updateResultCount];
+}
+
+- (void)revenant_replaceAll
+{
+    UIFindSession *session = _activeFindSession;
+    if (!_findNavigatorVisible || !session)
+        return;
+    [session replaceAllInstancesOfSearchQuery:_searchText withReplacementString:_replacementText options:nil];
+    [self updateResultCount];
+}
+
 - (void)revenant_showNavigator
 {
     if (!_navigator)
         [self revenant_buildNavigator];
     _field.text = _searchText;
-    _navigator.frame = CGRectMake(0, CGRectGetHeight(_view.bounds) - 44, CGRectGetWidth(_view.bounds), 44);
+    _replaceField.text = _replacementText;
+    _navigator.showsReplaceRow = _showingReplace;
+    CGFloat height = _showingReplace ? 88 : 44;
+    _navigator.frame = CGRectMake(0, CGRectGetHeight(_view.bounds) - height, CGRectGetWidth(_view.bounds), height);
     _navigator.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [_view addSubview:_navigator];
     [self revenant_search];
@@ -234,6 +278,20 @@
     _previous = [self revenant_navigatorButtonWithTitle:@"‹" action:@selector(findPrevious) tag:3];
     _next = [self revenant_navigatorButtonWithTitle:@"›" action:@selector(findNext) tag:4];
     [self revenant_navigatorButtonWithTitle:@"Done" action:@selector(dismissFindNavigator) tag:5];
+
+    _replaceField = [[UITextField alloc] initWithFrame:CGRectZero];
+    _replaceField.tag = 6;
+    _replaceField.borderStyle = UITextBorderStyleRoundedRect;
+    _replaceField.placeholder = @"Replace";
+    _replaceField.text = _replacementText;
+    _replaceField.autocorrectionType = UITextAutocorrectionTypeNo;
+    _replaceField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    _replaceField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    [_replaceField addTarget:self action:@selector(revenant_replacementFieldChanged) forControlEvents:UIControlEventEditingChanged];
+    [_navigator addSubview:_replaceField];
+
+    _replaceButton = [self revenant_navigatorButtonWithTitle:@"Replace" action:@selector(revenant_replaceCurrent) tag:7];
+    _replaceAllButton = [self revenant_navigatorButtonWithTitle:@"Replace All" action:@selector(revenant_replaceAll) tag:8];
 }
 
 - (UIButton *)revenant_navigatorButtonWithTitle:(NSString *)title action:(SEL)action tag:(NSInteger)tag

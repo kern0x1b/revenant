@@ -1,4 +1,5 @@
 #import "RevenantTraitStyle.h"
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
@@ -6,6 +7,19 @@
 typedef UIColor *(^RevenantColorProvider)(UITraitCollection *traits);
 
 static const char revenant_provider_key;
+static const char revenant_layer_providers_key;
+
+static void revenant_install_layer_colour_hooks(void);
+
+static NSMapTable *revenant_carriers_by_cgcolor(void)
+{
+    static NSMapTable *table;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        table = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality valueOptions:NSPointerFunctionsWeakMemory];
+    });
+    return table;
+}
 
 static UIColor *revenant_resolve(UIColor *color, UITraitCollection *traits)
 {
@@ -19,8 +33,12 @@ static UIColor *revenant_resolve(UIColor *color, UITraitCollection *traits)
 static UIColor *revenant_carrier(RevenantColorProvider provider, UITraitCollection *traits)
 {
     UIColor *base = revenant_resolve(provider(traits), traits);
-    UIColor *carrier = [[UIColor alloc] initWithCGColor:base ? base.CGColor : [UIColor clearColor].CGColor];
+    CGColorRef colour = CGColorCreateCopy(base ? base.CGColor : [UIColor clearColor].CGColor);
+    UIColor *carrier = [[UIColor alloc] initWithCGColor:colour];
+    CGColorRelease(colour);
     objc_setAssociatedObject(carrier, &revenant_provider_key, [provider copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [revenant_carriers_by_cgcolor() setObject:carrier forKey:(__bridge id)carrier.CGColor];
+    revenant_install_layer_colour_hooks();
     return carrier;
 }
 
@@ -35,6 +53,81 @@ UIColor *revenant_color_for_traits(UIColor *color, UITraitCollection *traits)
         return nil;
     RevenantColorProvider provider = objc_getAssociatedObject(color, &revenant_provider_key);
     return provider ? revenant_carrier(provider, traits) : color;
+}
+
+static void revenant_remember_layer_colour(CALayer *layer, NSString *name, CGColorRef colour)
+{
+    UIColor *carrier = colour ? [revenant_carriers_by_cgcolor() objectForKey:(__bridge id)colour] : nil;
+    RevenantColorProvider provider = carrier ? objc_getAssociatedObject(carrier, &revenant_provider_key) : nil;
+    NSMutableDictionary *providers = objc_getAssociatedObject(layer, &revenant_layer_providers_key);
+    if (!provider) {
+        [providers removeObjectForKey:name];
+        return;
+    }
+    if (!providers) {
+        providers = [NSMutableDictionary dictionary];
+        objc_setAssociatedObject(layer, &revenant_layer_providers_key, providers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    [providers setObject:provider forKey:name];
+}
+
+static void revenant_hook_layer_colour(SEL selector, NSString *name)
+{
+    Method method = class_getInstanceMethod([CALayer class], selector);
+    void (*original)(id, SEL, CGColorRef) = (void (*)(id, SEL, CGColorRef))method_getImplementation(method);
+    method_setImplementation(method, imp_implementationWithBlock(^(CALayer *layer, CGColorRef colour) {
+        revenant_remember_layer_colour(layer, name, colour);
+        original(layer, selector, colour);
+    }));
+}
+
+static void revenant_install_layer_colour_hooks(void)
+{
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        revenant_hook_layer_colour(@selector(setBorderColor:), @"borderColor");
+        revenant_hook_layer_colour(@selector(setShadowColor:), @"shadowColor");
+    });
+}
+
+static void revenant_refresh_layer_colours(CALayer *layer, UITraitCollection *traits)
+{
+    NSDictionary *providers = [objc_getAssociatedObject(layer, &revenant_layer_providers_key) copy];
+    [providers enumerateKeysAndObjectsUsingBlock:^(NSString *name, id value, BOOL *stop) {
+        RevenantColorProvider provider = value;
+        UIColor *colour = revenant_carrier(provider, traits);
+        if ([name isEqualToString:@"shadowColor"])
+            layer.shadowColor = colour.CGColor;
+        else
+            layer.borderColor = colour.CGColor;
+    }];
+}
+
+void revenant_refresh_view_colours(UIView *view)
+{
+    UITraitCollection *traits = view.traitCollection;
+    UIColor *background = view.backgroundColor;
+    UIColor *resolvedBackground = revenant_color_for_traits(background, traits);
+    if (resolvedBackground != background)
+        view.backgroundColor = resolvedBackground;
+    UIColor *tint = revenant_view_stored_tint(view);
+    UIColor *resolvedTint = revenant_color_for_traits(tint, traits);
+    if (resolvedTint != tint)
+        view.tintColor = resolvedTint;
+    id target = view;
+    if ([target respondsToSelector:@selector(textColor)]) {
+        UIColor *text = [target textColor];
+        UIColor *resolved = revenant_color_for_traits(text, traits);
+        if (resolved != text)
+            [target setTextColor:resolved];
+    }
+    if ([target respondsToSelector:@selector(highlightedTextColor)]) {
+        UIColor *highlighted = [target highlightedTextColor];
+        UIColor *resolved = revenant_color_for_traits(highlighted, traits);
+        if (resolved != highlighted)
+            [target setHighlightedTextColor:resolved];
+    }
+    revenant_refresh_layer_colours(view.layer, traits);
 }
 
 typedef struct {

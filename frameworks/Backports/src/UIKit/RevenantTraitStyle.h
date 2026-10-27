@@ -6,6 +6,8 @@ void revenant_set_trait_style(UITraitCollection *collection, UIUserInterfaceStyl
 UIUserInterfaceStyle revenant_view_style_override(UIView *view);
 void revenant_deliver_view_trait_change(UIView *view, void (^change)(void));
 UIColor *revenant_color_for_traits(UIColor *color, UITraitCollection *traits);
+UIColor *revenant_view_stored_tint(UIView *view);
+void revenant_refresh_view_colours(UIView *view);
 
 typedef void (*RevenantTraitChangeObserver)(NSArray *environments, NSArray *previous);
 void revenant_add_trait_change_observer(RevenantTraitChangeObserver observer);

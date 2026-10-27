@@ -4,6 +4,7 @@
 - (NSString *)revenant_document;
 - (void)revenant_highlight:(NSRange)range;
 - (void)revenant_clearHighlight;
+- (void)revenant_replaceRanges:(NSArray *)ranges withString:(NSString *)string;
 @end
 
 static NSArray *revenant_matches(NSString *document, NSString *query, UITextSearchOptions *options)
@@ -77,12 +78,12 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
 
 - (BOOL)allowsReplacementForCurrentlyHighlightedResult
 {
-    return NO;
+    return self.supportsReplacement && _highlightedResultIndex != NSNotFound;
 }
 
 - (BOOL)allowsReplacement
 {
-    return NO;
+    return self.supportsReplacement;
 }
 
 - (void)performSearchWithQuery:(NSString *)query options:(UITextSearchOptions *)options
@@ -110,10 +111,26 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
 
 - (void)performSingleReplacementWithSearchQuery:(NSString *)searchQuery replacementString:(NSString *)replacementString options:(UITextSearchOptions *)options
 {
+    if (!self.supportsReplacement)
+        return;
+    NSArray *matches = revenant_matches([self revenant_document], searchQuery, options);
+    if (!matches.count)
+        return;
+    NSUInteger index = _highlightedResultIndex != NSNotFound && (NSUInteger)_highlightedResultIndex < matches.count ? (NSUInteger)_highlightedResultIndex : 0;
+    [self revenant_replaceRanges:@[matches[index]] withString:replacementString];
+    [self performSearchWithQuery:searchQuery options:options];
+    if (_results.count) {
+        _highlightedResultIndex = (NSInteger)MIN(index, _results.count - 1);
+        [self revenant_highlight:[_results[(NSUInteger)_highlightedResultIndex] rangeValue]];
+    }
 }
 
 - (void)replaceAllInstancesOfSearchQuery:(NSString *)searchQuery withReplacementString:(NSString *)replacementString options:(UITextSearchOptions *)options
 {
+    if (!self.supportsReplacement)
+        return;
+    [self revenant_replaceRanges:revenant_matches([self revenant_document], searchQuery, options) withString:replacementString];
+    [self performSearchWithQuery:searchQuery options:options];
 }
 
 - (void)invalidateFoundResults
@@ -131,6 +148,10 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
 }
 
 - (void)revenant_clearHighlight
+{
+}
+
+- (void)revenant_replaceRanges:(NSArray *)ranges withString:(NSString *)string
 {
 }
 
