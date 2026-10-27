@@ -2672,6 +2672,7 @@ class WKNavigationResponse
 class WKPreferences
 class WKProcessPool
 class WKScriptMessage
+class WKSecurityOrigin
 class WKSnapshotConfiguration
 class WKUserContentController
 class WKUserScript
@@ -34607,6 +34608,7 @@ member WKFrameInfo +revenant_frameWithMainFrame:request:
 member WKFrameInfo -copyWithZone:
 member WKFrameInfo -isMainFrame
 member WKFrameInfo -request
+member WKFrameInfo -securityOrigin
 member WKNavigation -revenant_request
 member WKNavigation -setRevenant_request:
 member WKNavigationAction +revenant_actionWithRequest:type:mainFrame:
@@ -34636,6 +34638,10 @@ member WKScriptMessage -body
 member WKScriptMessage -frameInfo
 member WKScriptMessage -name
 member WKScriptMessage -webView
+member WKSecurityOrigin +revenant_originWithURL:
+member WKSecurityOrigin -host
+member WKSecurityOrigin -port
+member WKSecurityOrigin -protocol
 member WKSnapshotConfiguration -afterScreenUpdates
 member WKSnapshotConfiguration -copyWithZone:
 member WKSnapshotConfiguration -init

@@ -22,6 +22,10 @@ extern NSString *const RevenantWebKitBridgeScheme;
 + (instancetype)revenant_frameWithMainFrame:(BOOL)mainFrame request:(NSURLRequest *)request;
 @end
 
+@interface WKSecurityOrigin (RevenantWebKit)
++ (instancetype)revenant_originWithURL:(NSURL *)url;
+@end
+
 @interface WKNavigationAction (RevenantWebKit)
 + (instancetype)revenant_actionWithRequest:(NSURLRequest *)request type:(WKNavigationType)type mainFrame:(BOOL)mainFrame;
 @end

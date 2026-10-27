@@ -40,6 +40,11 @@
     return _request;
 }
 
+- (WKSecurityOrigin *)securityOrigin
+{
+    return [WKSecurityOrigin revenant_originWithURL:_request.URL];
+}
+
 - (id)copyWithZone:(NSZone *)zone
 {
     return self;
