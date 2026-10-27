@@ -95,4 +95,4 @@ The text read matches the fixtures: `Hello, world` and `Vision text 2026` for En
 - Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control. The host tests were rerun after the `tessdata` recipe took the `languages` option.
 - Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the per-model packages, the dependency and recommendation names, an unknown model, and a missing license). The `tessdata` recipe configures and installs for macOS.
 - Not yet run: a full iOS packaging run that writes the Backports package and the model packages together. The iOS default set (`eng,rus,ukr`) was not installed for iOS in this run.
-- Open: the speed of the accurate level on the device (C36).
+- Open: the speed of the accurate level on the device (C36). C36 stays open in `crutches.md` until a native fix of the recognition time lands as separate work; nothing in this branch closes it.
