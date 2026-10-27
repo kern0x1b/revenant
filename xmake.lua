@@ -5,7 +5,7 @@ add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
 option("component", {type = "string", default = "", showmenu = true,
-                     description = "Configure only this component and what it needs, for example Backports; empty configures every component."})
+                     description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})
 option("apple_sdk", {type = "string", default = "", showmenu = true,
                      description = "The iPhoneOS SDK version, 16.4 or 26.2; empty takes 26.2, the one SDK every configure uses."})
 
@@ -40,7 +40,7 @@ includes("frameworks/Backports")
 includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
 on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 
-if whole then
+if whole or component == "emulator" then
     target("repository")
         set_kind("phony")
         set_default(false)
