@@ -859,6 +859,16 @@ local function enumerators_in(text, body)
     return found
 end
 
+local function adopts_lowered_protocol(text, stop, implemented)
+    local line = text:sub(stop + 1, text:find("\n", stop, true) or #text)
+    for word in line:gmatch("[%a_][%w_]*") do
+        for _ in pairs((implemented.protocol_members or {})[word] or {}) do
+            return true
+        end
+    end
+    return false
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -886,7 +896,8 @@ local function lowering_of(text, implemented, declarations)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
+            local category = text:match("^%s*%(", stop + 1) ~= nil
+            if first and (not category or adopts_lowered_protocol(text, stop, implemented)) and not (implemented.weak_classes and implemented.weak_classes[class]) then
                 lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
