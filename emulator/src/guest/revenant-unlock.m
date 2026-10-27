@@ -41,7 +41,7 @@ static CGPoint fraction(const char *x, const char *y)
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "usage: revenant-unlock status | wake | tap FX FY | drag FX0 FY0 FX1 FY1\n");
+        fprintf(stderr, "usage: revenant-unlock status | screen | wake | tap FX FY | drag FX0 FY0 FX1 FY1\n");
         return 2;
     }
     @autoreleasepool {
@@ -49,6 +49,11 @@ int main(int argc, char *argv[])
             int state = locked();
             printf("%s\n", state == 0 ? "unlocked" : state == 1 ? "locked" : state == 2 ? "passcode" : "unknown");
             return state < 0 ? 1 : 0;
+        }
+        if (strcmp(argv[1], "screen") == 0) {
+            CGSize size = [UIScreen mainScreen].bounds.size;
+            printf("%.0f %.0f\n", size.width, size.height);
+            return 0;
         }
         if (strcmp(argv[1], "wake") == 0) {
             void *services = dlopen("/System/Library/PrivateFrameworks/SpringBoardServices.framework/SpringBoardServices", RTLD_NOW);
