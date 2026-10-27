@@ -6,6 +6,7 @@ local PROBES = {
     connect_kevent64 = {program = "emulatorconnect64", source = "connect_kevent64.c", prefix = "connect_kevent64 ", network = "loopback"},
     connect_external = {program = "emulatorconnectext", source = "connect_external.c", prefix = "connect_external ", network = "host"},
     connect_backport = {program = "emulatorconnectbackport", source = "main.swift", prefix = "connect_backport ", network = "host", here = true},
+    tls_backport = {program = "emulatortlsbackport", source = "tls.swift", prefix = "tls_backport ", network = "host", here = true},
 }
 
 function main(device, release, probe)
@@ -16,7 +17,7 @@ function main(device, release, probe)
     local out = runs.folder("emulator-" .. probe)
     os.tryrm(out)
     os.mkdir(out)
-    for _, name in ipairs({"xmake.lua", "control", "control64", "controlext", "controlbackport"}) do
+    for _, name in ipairs({"xmake.lua", "control", "control64", "controlext", "controlbackport", "controltls"}) do
         os.cp(path.join(here, name), path.join(out, name))
     end
     for _, entry in pairs(PROBES) do

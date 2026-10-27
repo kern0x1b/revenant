@@ -255,11 +255,13 @@ public final class NWConnection: @unchecked Sendable {
             if case .hostPort(let host, _) = endpoint {
                 serverName = hostText(host)
             }
-            guard let session = NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName, serverSide: serverSide) else {
+            do {
+                tls = try NWTLSSession(descriptor: fd, options: options.securityProtocolOptions, defaultServerName: serverName, serverSide: serverSide)
+            } catch {
+                fputs("Network: TLS setting refused: \((error as? NWTLSUnsupportedSetting)?.reason ?? String(describing: error))\n", stderr)
                 fail(.tls(errSSLInternal))
                 return
             }
-            tls = session
         }
         self.connecting = connecting
         let read = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
@@ -393,6 +395,7 @@ public final class NWConnection: @unchecked Sendable {
 
     private func flushSends() {
         guard state == .ready, descriptor >= 0 else {
+            setWriteActive(false)
             return
         }
         while var pending = sends.first {

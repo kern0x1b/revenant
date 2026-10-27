@@ -20,13 +20,19 @@ function main()
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     local bridge = path.join(out, "RevenantTLSBridge.o")
-    local options = path.join(out, "SecProtocolOptions.o")
+    local options = {}
     clang({"-c", path.join(src, "CBoringSSL", "RevenantTLSBridge.c"), "-o", bridge})
-    clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, "SecProtocolOptions13_0.m"), "-o", options})
+    for _, file in ipairs({"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}) do
+        local object = path.join(out, path.basename(file) .. ".o")
+        clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
+        table.insert(options, object)
+    end
     swiftc({fixture, "-o", host})
     swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),
-                      {fixture, bridge, options, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", backport}))
+                      {fixture, bridge},
+                      options,
+                      {path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", backport}))
     os.execv(host, {identity}, {stdout = host .. ".out"})
     os.execv(backport, {identity}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")

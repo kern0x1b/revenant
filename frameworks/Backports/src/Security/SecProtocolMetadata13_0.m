@@ -3,9 +3,8 @@
 #import <Security/SecProtocolMetadata.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
+#import "RevenantSecProtocolMetadata.h"
 
-@interface RevenantSecProtocolMetadata : NSObject <OS_sec_protocol_metadata>
-@end
 @implementation RevenantSecProtocolMetadata
 @end
 

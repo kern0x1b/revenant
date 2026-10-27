@@ -347,11 +347,9 @@ sec_protocol_metadata_t nw_tls_copy_sec_protocol_metadata(nw_protocol_metadata_t
     if (![metadata isKindOfClass:[RevenantNWProtocolMetadata class]])
         return NULL;
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
-    RevenantNWSecProtocol *sec = value->_objects[@"sec_protocol_metadata"];
+    RevenantSecProtocolMetadata *sec = value->_objects[@"sec_protocol_metadata"];
     if (!sec) {
-        sec = [[RevenantNWSecProtocol alloc] init];
-        sec->_values = [NSMutableDictionary dictionary];
-        sec->_applicationProtocols = [NSMutableArray array];
+        sec = [[RevenantSecProtocolMetadata alloc] init];
         value->_objects[@"sec_protocol_metadata"] = sec;
     }
     return (sec_protocol_metadata_t)sec;

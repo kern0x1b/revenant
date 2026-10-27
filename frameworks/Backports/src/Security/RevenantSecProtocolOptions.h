@@ -17,7 +17,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL peerAuthenticationRequired;
 @property (nonatomic, nullable) sec_identity_t localIdentity;
 - (nullable SecIdentityRef)revenantCopyIdentityRef CF_RETURNS_RETAINED;
-- (BOOL)revenantHasUnsupportedSettings;
+- (nullable const char *)revenantUnsupportedSettingForServer:(BOOL)server;
+- (BOOL)revenantVerifyTrust:(SecTrustRef)trust;
+- (nullable SecIdentityRef)revenantChallengeIdentity CF_RETURNS_RETAINED;
 
 @property (nonatomic) BOOL ticketsEnabled;
 @property (nonatomic) BOOL fallbackAttempt;

@@ -60,9 +60,6 @@
 @implementation RevenantNWResolverConfig
 @end
 
-@implementation RevenantNWSecProtocol
-@end
-
 @implementation RevenantNWTxtRecord
 @end
 

@@ -18,8 +18,12 @@ public enum NWProtocolTLS {
 
 extension NWProtocolTLS.Options {
     var hasLocalIdentity: Bool {
-        NWTLSConfiguration(securityProtocolOptions).localIdentity != nil
+        NWTLSConfiguration(securityProtocolOptions, serverSide: false).localIdentity != nil
     }
+}
+
+struct NWTLSUnsupportedSetting: Error {
+    let reason: String
 }
 
 struct NWTLSConfiguration {
@@ -29,9 +33,14 @@ struct NWTLSConfiguration {
     let applicationProtocols: [String]
     let peerAuthenticationRequired: Bool
     let localIdentity: SecIdentity?
-    let hasUnsupportedSettings: Bool
+    let ciphersuites: [UInt16]
+    let ocspEnabled: Bool
+    let sctEnabled: Bool
+    let hasVerifyBlock: Bool
+    let hasChallengeBlock: Bool
+    let unsupportedSetting: String?
 
-    init(_ options: sec_protocol_options_t) {
+    init(_ options: sec_protocol_options_t, serverSide: Bool) {
         let handle = Unmanaged.passUnretained(options as AnyObject).toOpaque()
         minimumVersion = RevenantSecProtocolOptionsMinTLS(handle)
         maximumVersion = RevenantSecProtocolOptionsMaxTLS(handle)
@@ -43,7 +52,14 @@ struct NWTLSConfiguration {
         localIdentity = RevenantSecProtocolOptionsCopyLocalIdentity(handle).map {
             Unmanaged<SecIdentity>.fromOpaque($0).takeRetainedValue()
         }
-        hasUnsupportedSettings = RevenantSecProtocolOptionsHasUnsupportedSettings(handle)
+        ciphersuites = (0..<RevenantSecProtocolOptionsCiphersuiteCount(handle)).map { index in
+            UInt16(truncatingIfNeeded: RevenantSecProtocolOptionsCiphersuiteAt(handle, index))
+        }
+        ocspEnabled = RevenantSecProtocolOptionsOCSPEnabled(handle)
+        sctEnabled = RevenantSecProtocolOptionsSCTEnabled(handle)
+        hasVerifyBlock = RevenantSecProtocolOptionsHasVerifyBlock(handle)
+        hasChallengeBlock = RevenantSecProtocolOptionsHasChallengeBlock(handle)
+        unsupportedSetting = RevenantSecProtocolOptionsUnsupportedSetting(handle, serverSide).map { String(cString: $0) }
     }
 }
 
@@ -155,6 +171,13 @@ private let revenantVerifyChain: @convention(c) (OpaquePointer?, UnsafeMutablePo
     return Unmanaged<NWTLSSession>.fromOpaque(session).takeUnretainedValue().verifyPeerChain(ssl)
 }
 
+private let revenantClientCertificate: @convention(c) (OpaquePointer?, UnsafeMutableRawPointer?) -> Int32 = { ssl, _ in
+    guard let ssl, let session = SSL_get_ex_data(ssl, 0) else {
+        return 0
+    }
+    return Unmanaged<NWTLSSession>.fromOpaque(session).takeUnretainedValue().installClientIdentity() ? 1 : 0
+}
+
 private let revenantSelectProtocol: @convention(c) (OpaquePointer?, UnsafeMutablePointer<UnsafePointer<UInt8>?>?, UnsafeMutablePointer<UInt8>?, UnsafePointer<UInt8>?, UInt32, UnsafeMutableRawPointer?) -> Int32 = { _, out, outLength, input, inputLength, argument in
     guard let out, let outLength, let input, let argument else {
         return SSL_TLSEXT_ERR_NOACK
@@ -177,32 +200,49 @@ private func isIPAddress(_ name: String) -> Bool {
     return inet_pton(AF_INET, name, &version4) == 1 || inet_pton(AF_INET6, name, &address) == 1
 }
 
+private var revenantSignaturePreferences: [UInt16] {
+    #if os(macOS)
+    return [0x0804, 0x0805, 0x0806, 0x0401, 0x0501, 0x0601, 0x0201]
+    #else
+    return [0x0401, 0x0501, 0x0601, 0x0201]
+    #endif
+}
+
 final class NWTLSSession {
+    private let options: sec_protocol_options_t
     private let context: OpaquePointer
     private let ssl: OpaquePointer
     private let serverSide: Bool
     private let serverName: String?
     private let alpnOffer: ProtocolList?
-    private let signingKey: SecKey?
+    private let localIdentity: SecIdentity?
+    private let hasVerifyBlock: Bool
+    private let hasChallengeBlock: Bool
+    private var signingKey: SecKey?
     private var verifyFailure: OSStatus?
     private(set) var isEstablished = false
     private(set) var wantsWrite = false
 
-    init?(descriptor: Int32, options: sec_protocol_options_t, defaultServerName: String?, serverSide: Bool) {
-        guard let method = TLS_method(), let context = SSL_CTX_new(method) else {
-            return nil
+    init(descriptor: Int32, options: sec_protocol_options_t, defaultServerName: String?, serverSide: Bool) throws {
+        let configuration = NWTLSConfiguration(options, serverSide: serverSide)
+        if let reason = configuration.unsupportedSetting {
+            throw NWTLSUnsupportedSetting(reason: reason)
         }
-        let configuration = NWTLSConfiguration(options)
-        guard !configuration.hasUnsupportedSettings else {
-            SSL_CTX_free(context)
-            return nil
+        let cipherList = try NWTLSSession.cipherList(configuration.ciphersuites, maximumVersion: configuration.maximumVersion)
+        guard let method = TLS_method(), let context = SSL_CTX_new(method) else {
+            throw NWTLSUnsupportedSetting(reason: "BoringSSL could not allocate a TLS context")
         }
         guard SSL_CTX_set_min_proto_version(context, configuration.minimumVersion) == 1,
               SSL_CTX_set_max_proto_version(context, configuration.maximumVersion) == 1 else {
             SSL_CTX_free(context)
-            return nil
+            throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the TLS version range")
+        }
+        if let cipherList, SSL_CTX_set_strict_cipher_list(context, cipherList) != 1 {
+            SSL_CTX_free(context)
+            throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the ciphersuite list")
         }
         let peerRequired = configuration.peerAuthenticationRequired
+        let verifies = configuration.hasVerifyBlock
         let name = configuration.serverName ?? defaultServerName
         let offer = configuration.applicationProtocols.isEmpty ? nil : ProtocolList(configuration.applicationProtocols)
 
@@ -211,38 +251,38 @@ final class NWTLSSession {
             guard let identity = configuration.localIdentity, NWTLSSession.installCertificate(identity, into: context),
                   let key = NWTLSSession.privateKey(of: identity) else {
                 SSL_CTX_free(context)
-                return nil
+                throw NWTLSUnsupportedSetting(reason: "a server needs a local identity with a private key")
             }
             signing = key
             SSL_CTX_set_private_key_method(context, revenantPrivateKeyMethod)
-            #if os(macOS)
-            var preferences: [UInt16] = [0x0804, 0x0805, 0x0806, 0x0401, 0x0501, 0x0601, 0x0201]
-            #else
-            var preferences: [UInt16] = [0x0401, 0x0501, 0x0601, 0x0201]
-            #endif
+            var preferences = revenantSignaturePreferences
             SSL_CTX_set_signing_algorithm_prefs(context, &preferences, preferences.count)
-            var mode = SSL_VERIFY_NONE
-            if peerRequired {
-                mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
-            }
-            if peerRequired {
+            if peerRequired || verifies {
+                let mode = peerRequired ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_PEER
                 SSL_CTX_set_custom_verify(context, mode, revenantVerifyChain)
             }
             if let offer {
                 SSL_CTX_set_alpn_select_cb(context, revenantSelectProtocol, Unmanaged.passUnretained(offer).toOpaque())
             }
-        } else if peerRequired {
-            SSL_CTX_set_custom_verify(context, SSL_VERIFY_PEER, revenantVerifyChain)
+        } else {
+            SSL_CTX_set_cert_cb(context, revenantClientCertificate, nil)
+            if peerRequired || verifies {
+                SSL_CTX_set_custom_verify(context, SSL_VERIFY_PEER, revenantVerifyChain)
+            }
         }
 
         guard let ssl = SSL_new(context) else {
             SSL_CTX_free(context)
-            return nil
+            throw NWTLSUnsupportedSetting(reason: "BoringSSL could not allocate a TLS session")
         }
+        self.options = options
         self.context = context
         self.ssl = ssl
         self.serverSide = serverSide
         self.signingKey = signing
+        self.localIdentity = configuration.localIdentity
+        self.hasVerifyBlock = verifies
+        self.hasChallengeBlock = configuration.hasChallengeBlock
         self.serverName = serverSide ? nil : name
         self.alpnOffer = serverSide ? offer : nil
         SSL_set_fd(ssl, descriptor)
@@ -260,12 +300,22 @@ final class NWTLSSession {
             if let offer {
                 SSL_set_alpn_protos(ssl, offer.storage, offer.count)
             }
+            if configuration.ocspEnabled {
+                SSL_enable_ocsp_stapling(ssl)
+            }
+            if configuration.sctEnabled {
+                SSL_enable_signed_cert_timestamps(ssl)
+            }
         }
     }
 
     deinit {
         SSL_free(ssl)
         SSL_CTX_free(context)
+    }
+
+    private var optionsHandle: UnsafeRawPointer {
+        UnsafeRawPointer(Unmanaged.passUnretained(options as AnyObject).toOpaque())
     }
 
     var negotiatedApplicationProtocol: String? {
@@ -348,14 +398,51 @@ final class NWTLSSession {
         }
         let policy = SecPolicyCreateSSL(!serverSide, serverName as CFString?)
         var trust: SecTrust?
-        var result = SecTrustResultType.invalid
         guard !certificates.isEmpty, SecTrustCreateWithCertificates(certificates as CFArray, policy, &trust) == errSecSuccess,
-              let trust, SecTrustEvaluate(trust, &result) == errSecSuccess,
-              result == .proceed || result == .unspecified else {
+              let trust else {
+            verifyFailure = revenantCertificateChainInvalid
+            return ssl_verify_invalid
+        }
+        if hasVerifyBlock {
+            guard RevenantSecProtocolOptionsVerifyTrust(optionsHandle, Unmanaged.passUnretained(trust).toOpaque()) else {
+                verifyFailure = revenantCertificateChainInvalid
+                return ssl_verify_invalid
+            }
+            return ssl_verify_ok
+        }
+        var result = SecTrustResultType.invalid
+        guard SecTrustEvaluate(trust, &result) == errSecSuccess, result == .proceed || result == .unspecified else {
             verifyFailure = revenantCertificateChainInvalid
             return ssl_verify_invalid
         }
         return ssl_verify_ok
+    }
+
+    fileprivate func installClientIdentity() -> Bool {
+        guard let identity = challengedIdentity() ?? localIdentity else {
+            return true
+        }
+        guard let key = NWTLSSession.privateKey(of: identity), let certificate = NWTLSSession.certificate(of: identity) else {
+            return false
+        }
+        defer {
+            X509_free(certificate)
+        }
+        guard SSL_use_certificate(ssl, certificate) == 1 else {
+            return false
+        }
+        signingKey = key
+        SSL_set_private_key_method(ssl, revenantPrivateKeyMethod)
+        var preferences = revenantSignaturePreferences
+        SSL_set_signing_algorithm_prefs(ssl, &preferences, preferences.count)
+        return true
+    }
+
+    private func challengedIdentity() -> SecIdentity? {
+        guard hasChallengeBlock, let raw = RevenantSecProtocolOptionsCopyChallengeIdentity(optionsHandle) else {
+            return nil
+        }
+        return Unmanaged<SecIdentity>.fromOpaque(raw).takeRetainedValue()
     }
 
     private func status(for result: Int32) -> OSStatus {
@@ -372,22 +459,43 @@ final class NWTLSSession {
         }
     }
 
-    private static func installCertificate(_ identity: SecIdentity, into context: OpaquePointer) -> Bool {
-        var certificate: SecCertificate?
-        guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate else {
-            return false
+    private static func cipherList(_ suites: [UInt16], maximumVersion: UInt16) throws -> String? {
+        var names: [String] = []
+        for suite in suites {
+            guard let cipher = SSL_get_cipher_by_value(suite), let name = SSL_CIPHER_get_name(cipher) else {
+                throw NWTLSUnsupportedSetting(reason: "ciphersuite 0x\(String(suite, radix: 16)) is unknown to BoringSSL")
+            }
+            if (0x1301...0x1305).contains(suite) {
+                continue
+            }
+            names.append(String(cString: name))
         }
-        let certificateData = SecCertificateCopyData(certificate) as Data
-        guard let x509 = certificateData.withUnsafeBytes({ raw -> OpaquePointer? in
-            var pointer = raw.bindMemory(to: UInt8.self).baseAddress
-            return d2i_X509(nil, &pointer, raw.count)
-        }) else {
+        if names.isEmpty && !suites.isEmpty && maximumVersion < 0x0304 {
+            throw NWTLSUnsupportedSetting(reason: "only TLS 1.3 ciphersuites are listed, but the maximum is TLS 1.2: list a TLS 1.2 ciphersuite too")
+        }
+        return names.isEmpty ? nil : names.joined(separator: ":")
+    }
+
+    private static func installCertificate(_ identity: SecIdentity, into context: OpaquePointer) -> Bool {
+        guard let certificate = certificate(of: identity) else {
             return false
         }
         defer {
-            X509_free(x509)
+            X509_free(certificate)
         }
-        return SSL_CTX_use_certificate(context, x509) == 1
+        return SSL_CTX_use_certificate(context, certificate) == 1
+    }
+
+    private static func certificate(of identity: SecIdentity) -> OpaquePointer? {
+        var certificate: SecCertificate?
+        guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate else {
+            return nil
+        }
+        let certificateData = SecCertificateCopyData(certificate) as Data
+        return certificateData.withUnsafeBytes { raw -> OpaquePointer? in
+            var pointer = raw.bindMemory(to: UInt8.self).baseAddress
+            return d2i_X509(nil, &pointer, raw.count)
+        }
     }
 
     private static func privateKey(of identity: SecIdentity) -> SecKey? {

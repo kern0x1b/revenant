@@ -1,4 +1,5 @@
 #import "RevenantSecProtocolOptions.h"
+#import "RevenantSecProtocolMetadata.h"
 
 static RevenantSecProtocolOptions *RevenantOptions(sec_protocol_options_t options)
 {
@@ -47,17 +48,63 @@ static BOOL RevenantTLSVersionForSSLProtocol(SSLProtocol protocol, tls_protocol_
     return self.localIdentity ? sec_identity_copy_ref(self.localIdentity) : NULL;
 }
 
-- (BOOL)revenantHasUnsupportedSettings
+- (const char *)revenantUnsupportedSettingForServer:(BOOL)server
 {
-    return self.verifyBlock != nil
-        || self.challengeBlock != nil
-        || self.ciphersuites.count > 0
-        || self.ciphersuiteGroup != nil
-        || self.ciphersuiteGroups.count > 0
-        || self.preSharedKeys.count > 0
-        || self.diffieHellmanParameters != nil
-        || self.ocspEnabled
-        || self.sctEnabled;
+    if (self.diffieHellmanParameters)
+        return "DHE parameters are unsupported: BoringSSL removed finite-field Diffie-Hellman";
+    if (self.ciphersuiteGroup || self.ciphersuiteGroups.count > 0)
+        return "ciphersuite groups are unsupported: they name suite sets BoringSSL cannot reproduce, so list the ciphersuites";
+    if (self.preSharedKeySelection)
+        return "pre-shared-key selection blocks are unsupported: BoringSSL has no PSK selection callback";
+    if (self.preSharedKeys.count > 0 || self.preSharedKeyIdentityHint)
+        return "pre-shared keys are unsupported: the PSK suites are not wired to BoringSSL yet";
+    if (server && self.challengeBlock)
+        return "challenge blocks are unsupported on a server: they answer client certificate requests";
+    if (server && (self.ocspEnabled || self.sctEnabled))
+        return "OCSP and SCT are unsupported on a server: they are client-side requests";
+    return NULL;
+}
+
+- (BOOL)revenantVerifyTrust:(SecTrustRef)trust
+{
+    sec_protocol_verify_t block = self.verifyBlock;
+    if (!block)
+        return NO;
+    dispatch_queue_t queue = self.verifyQueue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    id metadata = [[RevenantSecProtocolMetadata alloc] init];
+    sec_trust_t wrapped = sec_trust_create(trust);
+    __block BOOL accepted = NO;
+    dispatch_semaphore_t finished = dispatch_semaphore_create(0);
+    dispatch_async(queue, ^{
+        block((sec_protocol_metadata_t)metadata, wrapped, ^(bool result) {
+            accepted = result;
+            dispatch_semaphore_signal(finished);
+        });
+    });
+    if (dispatch_semaphore_wait(finished, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC)) != 0)
+        return NO;
+    return accepted;
+}
+
+- (SecIdentityRef)revenantChallengeIdentity
+{
+    sec_protocol_challenge_t block = self.challengeBlock;
+    if (!block)
+        return NULL;
+    dispatch_queue_t queue = self.challengeQueue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    id metadata = [[RevenantSecProtocolMetadata alloc] init];
+    __block SecIdentityRef identity = NULL;
+    dispatch_semaphore_t finished = dispatch_semaphore_create(0);
+    dispatch_async(queue, ^{
+        block((sec_protocol_metadata_t)metadata, ^(sec_identity_t chosen) {
+            if (chosen)
+                identity = sec_identity_copy_ref(chosen);
+            dispatch_semaphore_signal(finished);
+        });
+    });
+    if (dispatch_semaphore_wait(finished, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC)) != 0)
+        return NULL;
+    return identity;
 }
 
 - (instancetype)init
