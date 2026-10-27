@@ -392,6 +392,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
         add_tests("alias_public_name")
         add_tests("alias_system_class")
         add_tests("protocol_uimutabletraits")
+        add_tests("trait_style_default")
         add_tests("protocol_ck_key_value_setting")
         on_test(function (target, opt)
             local case = path.filename(opt.name)
