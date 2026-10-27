@@ -33,6 +33,21 @@ function failures(opt)
     if not recipe:find('"port", "sources.lua"', 1, true) or recipe:find("table.sort", 1, true) then
         table.insert(found, "the emulator recipe must take its default sources config from port/sources.lua, so a direct require gets the addon's key")
     end
+    local launcher_test = fixtures.scratch()
+    local launcher_source = path.join(repository, "emulator", "src", "guest", "revenant-sblaunch.c")
+    local launcher_binary = path.join(launcher_test, "revenant-sblaunch")
+    local launcher = io.readfile(launcher_source)
+    if not launcher:find('CFSTR("DYLD_PRINT_STATISTICS")', 1, true) or not launcher:find("dyld_statistics ? 3 : 2", 1, true) then
+        table.insert(found, "revenant-sblaunch must add DYLD_PRINT_STATISTICS to the launch environment only when requested")
+    end
+    os.vrunv("clang", {"-framework", "CoreFoundation", launcher_source, "-o", launcher_binary})
+    local launch_error = fixtures.refusal(function ()
+        os.vrunv(launcher_binary, {"--dyld-statistics", "org.example.probe"})
+    end) or ""
+    if not launch_error:find("SpringBoardServices", 1, true) then
+        table.insert(found, "revenant-sblaunch must accept the optional dyld statistics flag and reach its launch service, said " .. launch_error)
+    end
+    os.tryrm(launcher_test)
     if not os.iorunv("locale", {"-a"}):find("de_DE.UTF-8", 1, true) then
         table.insert(found, "the locale check needs de_DE.UTF-8 installed on this host")
     end
