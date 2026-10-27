@@ -98,22 +98,31 @@ function build_root()
     return path.join(root(), "build", "generated", "backports")
 end
 
+function tool(name)
+    return os.iorunv("/usr/bin/xcrun", {"--find", name}):trim()
+end
+
 function digester()
-    return os.iorunv("/usr/bin/xcrun", {"--find", "swift-api-digester"}):trim()
+    return tool("swift-api-digester")
+end
+
+function tool_identity(name)
+    local file = tool(name)
+    return {file, tostring(os.mtime(file)), tostring(os.filesize(file))}
 end
 
 function model_cache(sdk)
-    local tool = digester()
-    local identity = {retention().real_path(sdk), sdk_version(sdk), tool, tostring(os.mtime(tool)), tostring(os.filesize(tool))}
+    local identity = table.join({retention().real_path(sdk), sdk_version(sdk)}, tool_identity("swift-api-digester"))
     return path.join(workspace().home(), "modcache", string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16))
 end
 
-function cache_key(version)
-    return version .. "-" .. generator_digest()
+function cache_key(sdk)
+    local identity = table.join({retention().real_path(sdk), sdk_version(sdk), generator_digest()}, tool_identity("clang"))
+    return sdk_version(sdk) .. "-" .. string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16)
 end
 
-function cache_folder(version)
-    return path.join(build_root(), "cache", cache_key(version))
+function cache_folder(sdk)
+    return path.join(build_root(), "cache", cache_key(sdk))
 end
 
 function clean_field(value)
