@@ -12,10 +12,6 @@ local STUBBED = {
         classes = {"NSURLSessionWebSocketMessage"},
     },
     {
-        framework = "UIKit",
-        classes = {"UIMenuElement"},
-    },
-    {
         framework = "CoreText",
         functions = {
             "CTFrameDraw", "CTFrameGetLineOrigins", "CTFramesetterSuggestFrameSizeWithConstraints", "CTLineDraw",
