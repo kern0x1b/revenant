@@ -2690,6 +2690,7 @@ class WKWebView
 class WKWebViewConfiguration
 class WKWebpagePreferences
 class WKWebsiteDataStore
+class WKWindowFeatures
 class __NSConcreteUUID
 class cls
 enum AAAttributionErrorCodePlatformNotSupported
@@ -4050,6 +4051,8 @@ enum WKErrorJavaScriptExceptionOccurred
 enum WKErrorJavaScriptResultTypeIsUnsupported
 enum WKErrorUnknown
 enum WKNavigationActionPolicyAllow
+enum WKNavigationResponsePolicyAllow
+enum WKNavigationResponsePolicyCancel
 enum WKNavigationTypeBackForward
 enum WKNavigationTypeOther
 enum WKNavigationTypeReload
@@ -34615,6 +34618,7 @@ member WKNavigationAction -navigationType
 member WKNavigationAction -request
 member WKNavigationAction -sourceFrame
 member WKNavigationAction -targetFrame
+member WKNavigationResponse +revenant_policyAllowing:
 member WKNavigationResponse -canShowMIMEType
 member WKNavigationResponse -isForMainFrame
 member WKNavigationResponse -response
@@ -34939,6 +34943,15 @@ member WKWebsiteDataStore -initWithCoder:
 member WKWebsiteDataStore -isPersistent
 member WKWebsiteDataStore -removeDataOfTypes:forDataRecords:completionHandler:
 member WKWebsiteDataStore -removeDataOfTypes:modifiedSince:completionHandler:
+member WKWindowFeatures -allowsResizing
+member WKWindowFeatures -copyWithZone:
+member WKWindowFeatures -height
+member WKWindowFeatures -menuBarVisibility
+member WKWindowFeatures -statusBarVisibility
+member WKWindowFeatures -toolbarsVisibility
+member WKWindowFeatures -width
+member WKWindowFeatures -x
+member WKWindowFeatures -y
 member __NSConcreteUUID -UUIDString
 member __NSConcreteUUID -classForCoder
 member __NSConcreteUUID -copyWithZone:
@@ -35150,6 +35163,7 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
+protocol WKNavigationDelegate
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:

@@ -221,6 +221,26 @@ local MEMBERS = {
             replace = "        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
         },
     },
+    {
+        member = "WKNavigationActionPolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+        },
+    },
+    {
+        member = "WKNavigationResponsePolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+        },
+    },
 }
 
 local MODULE_DIR = os.scriptdir()
