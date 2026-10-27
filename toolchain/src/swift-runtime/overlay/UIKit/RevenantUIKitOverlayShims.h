@@ -6,10 +6,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image identifier:(nullable NSString *)identifier handler:(UIActionHandler)handler NS_SWIFT_NAME(init(revenantTitle:image:identifier:handler:));
 @end
 
-@interface UIPointerShape (RevenantOverlayDefaults)
-+ (CGFloat)revenantDefaultCornerRadius;
-@end
-
 @interface UIMenu (RevenantOverlayInitializers)
 - (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image identifier:(nullable NSString *)identifier options:(UIMenuOptions)options children:(NSArray<UIMenuElement *> *)children NS_SWIFT_NAME(init(revenantTitle:image:identifier:options:children:));
 @end

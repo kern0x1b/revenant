@@ -11,7 +11,7 @@ public enum UIPointerShape {
     case verticalBeam(length: CGFloat)
     case horizontalBeam(length: CGFloat)
 
-    public static let defaultCornerRadius: CGFloat = __UIPointerShape.revenantDefaultCornerRadius()
+    public static let defaultCornerRadius: CGFloat = .leastNormalMagnitude
 
     fileprivate var objectiveC: __UIPointerShape {
         switch self {
