@@ -92,7 +92,7 @@ package("combine")
             resources = path.join(runtime:installdir(), "lib", "swift"),
             plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
             module = "Combine", optimize = "fastest", prefix_map = src .. "=/combine"}),
-            {"-I", swiftdir, "-I", path.join(helpers, "include"), "-emit-module", "-emit-module-path",
+            {"-I", swiftdir, "-I", path.join(helpers, "include"), "-module-link-name", "Combine", "-emit-module", "-emit-module-path",
              path.join(swiftmodule, package:arch() .. "-apple-ios.swiftmodule"), "-c"},
             os.files(path.join(module, "**.swift")), {"-o", path.join(objects, "Combine.o")})
         os.vrunv(swiftc, argv)
