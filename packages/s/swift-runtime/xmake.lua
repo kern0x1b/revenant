@@ -424,15 +424,17 @@ package("swift-runtime")
             end
             foundation_links = table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
                                 "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"})
-            build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift")},
-                          table.join(foundation_links, {"-framework", "QuartzCore"}))
+            build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift"), path.join(revenant_overlay, "QuartzCore", "CAFrameRateRange.swift")},
+                          table.join(foundation_links, {"-framework", "QuartzCore"}), nil,
+                          {extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
                      "-o", initializers}, objc_linker))
             build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
                                     generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift")},
+                                    path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
+                                    path.join(revenant_overlay, "UIKit", "UIKitPointer.swift")},
                           table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
                           {extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
 
