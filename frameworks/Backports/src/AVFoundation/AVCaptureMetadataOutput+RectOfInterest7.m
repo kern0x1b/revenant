@@ -20,6 +20,9 @@ static CGRect revenant_rect_of_interest(AVCaptureMetadataOutput *output)
 
 @implementation RevenantMetadataObjectsFilter
 
+@synthesize output = _output;
+@synthesize target = _target;
+
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
 {
     id<AVCaptureMetadataOutputObjectsDelegate> target = self.target;
