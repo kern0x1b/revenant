@@ -192,11 +192,11 @@ here; a Swift error text and the exact typecheck command are what would settle i
   stored with it are not refused when the device has no passcode, and they are not removed when a passcode is removed
   later. The SDK promises both, and the backport does neither. The host test checks the value against the macOS oracle
   and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
-  - The passcode predicate. The 6.1.3 MobileKeyBag exports `MKBGetDeviceLockState` and `MKBDeviceUnlockedSinceBoot`, and
-    its strings name no passcode key, so the return code that means "a passcode is set" is not known from the cache. A
-    measurement with and without a passcode settles it. On the 6.1.3 emulator without a passcode, the case
-    `keybag_lock_state` reads 3 from `MKBGetDeviceLockState` and passes, so 3 means no passcode is set. The value for a
-    set passcode is still unmeasured.
+  - The passcode predicate. On the iPad 2 on 6.1.3 with no passcode, `MKBGetDeviceLockState(NULL)` returns 3 and
+    `MKBDeviceUnlockedSinceBoot()` returns 1 (measured on the device, 2026-10-27, with no passcode changed). The emulator
+    returns the same 3, but from a constant in its keybag service, so only the device counts as a measurement. The value
+    for a set passcode is still unmeasured: the emulator has no passcode state, and the owner's devices must not change.
+    `MKBUnlockDevice` is exported on 6.1.3 (checked with `dlsym`, not called); its signature and entitlement are not known.
   - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
     defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
     and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.

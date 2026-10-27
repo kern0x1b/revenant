@@ -69,12 +69,32 @@ The values the Security backport answers, where each came from, and what has no 
   `mobile`, and from an app launched through SpringBoard with `keychain-access-groups`. The device is unlocked, has no
   passcode, runs `securityd`, and has `keychain-2.db`. `keybagd` is not running. The cause is not yet found, so the
   persistent-reference read of a private key (gap 3) and the storage of an emulated key are not measured on iOS 6.
-  The probe is `tests/Security/device/probe.c`, built by the `SecurityProbe` target.
+  The probe is `tests/Security/device/probe.c`, built by the `SecurityProbe` target. It also reads the MobileKeyBag lock
+  state before the keychain calls: `MKBGetDeviceLockState(NULL)` returns 3 and `MKBDeviceUnlockedSinceBoot()` returns 1
+  (no passcode, nothing changed). `MKBUnlockDevice` is exported (checked with `dlsym`, not called).
+
+## LocalAuthentication, measured on the iPad 2
+
+- `tests/LocalAuthentication/device/probe.m` compiles the backport's `LAContext.m` and `LAErrorDomain.m` into a binary and
+  runs it on the iPad 2 (6.1.3, no passcode).
+- Biometrics policy: `canEvaluatePolicy` NO, code -6, and `evaluatePolicy` the same. -6 is `kLAErrorTouchIDNotAvailable`,
+  which is `kLAErrorBiometryNotAvailable` in the macOS 27 SDK (`LAPublicDefines.h`). The iPad has no Touch ID.
+- Device-owner policy: `canEvaluatePolicy` NO, code -5 (`Passcode not set.`), and `evaluatePolicy` the same. -5 is
+  `kLAErrorPasscodeNotSet` in the macOS 27 SDK. The answer follows the MobileKeyBag state 3, which is the no-passcode
+  reading above.
+- iOS 6 has no LocalAuthentication framework, so the answers above follow the iOS 8+ contract. They are reproduced
+  without an iOS 8+ device, so the iOS 8+ values are not measured.
+- With a passcode set the backport answers NO with `LAErrorNotInteractive` (-1004). That path is not measured: the
+  set-passcode state needs a device with a passcode, and iOS 6 offers an app no passcode prompt to verify. The backport
+  never answers YES for device-owner authentication.
 
 ## What is implemented, and what is not
 
 - **Implemented, host-tested against macOS:** the SecAccessControl type, its creation rules and equality; the shared
   credential calls' validation and completion; the shared password's shape.
+- **Implemented, measured on the iPad 2:** the LocalAuthentication answers above (no YES for device-owner).
+- **Open, not measured:** device-owner authentication with a passcode set, and whether an app can verify a passcode
+  through `MKBUnlockDevice` (its signature and entitlement are unknown).
 - **Implemented, not verified on iOS 6:** `SecKeyCopyExternalRepresentation` on a private key reads the stored data
   through the key's persistent reference (`kSecValueRef` with `kSecReturnPersistentRef`, then `kSecValuePersistentRef`
   with `kSecReturnData`) and returns it when it is a PKCS#1 private key. This waits for the keychain answer above.
