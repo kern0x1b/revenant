@@ -2,6 +2,7 @@
 #import <Network/Network.h>
 #import <Security/Security.h>
 #import <Security/SecureTransport.h>
+#import "../Security/RevenantSecProtocolOptions.h"
 
 
 #pragma clang diagnostic push

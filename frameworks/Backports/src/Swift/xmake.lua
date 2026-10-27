@@ -223,6 +223,9 @@ local function overlay(name, folder, opt)
         end
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
+            for _, file in ipairs(table.wrap(opt.cfiles)) do
+                target:add("files", path.join(SRC, folder, file))
+            end
         end)
         before_build(function (target)
             if opt.minimum then
@@ -283,7 +286,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL"})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL", cfiles = {"CBoringSSL/RevenantTLSBridge.c"}})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

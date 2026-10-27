@@ -173,11 +173,9 @@ sec_protocol_options_t nw_quic_copy_sec_protocol_options(nw_protocol_options_t o
     if (!nw_protocol_options_is_quic(options))
         return NULL;
     RevenantNWProtocolOptions *value = (RevenantNWProtocolOptions *)options;
-    RevenantNWSecProtocol *sec = value->_objects[@"sec_protocol_options"];
+    RevenantSecProtocolOptions *sec = value->_objects[@"sec_protocol_options"];
     if (!sec) {
-        sec = [[RevenantNWSecProtocol alloc] init];
-        sec->_values = [NSMutableDictionary dictionary];
-        sec->_applicationProtocols = [NSMutableArray array];
+        sec = [[RevenantSecProtocolOptions alloc] init];
         value->_objects[@"sec_protocol_options"] = sec;
     }
     return (sec_protocol_options_t)sec;

@@ -128,7 +128,7 @@ public final class NWConnection: @unchecked Sendable {
                 let fd = self.acceptedDescriptor
                 self.acceptedDescriptor = -1
                 self.setState(.preparing)
-                guard self.parameters.tlsOptions == nil || self.parameters.tlsOptions?.securityProtocolOptions.localIdentity != nil else {
+                guard self.parameters.tlsOptions?.hasLocalIdentity ?? true else {
                     Darwin.close(fd)
                     self.fail(.posix(errno: ENOTSUP))
                     return

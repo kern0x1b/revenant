@@ -334,11 +334,9 @@ sec_protocol_options_t nw_tls_copy_sec_protocol_options(nw_protocol_options_t op
     if (![options isKindOfClass:[RevenantNWProtocolOptions class]])
         return NULL;
     RevenantNWProtocolOptions *value = (RevenantNWProtocolOptions *)options;
-    RevenantNWSecProtocol *sec = value->_objects[@"sec_protocol_options"];
+    RevenantSecProtocolOptions *sec = value->_objects[@"sec_protocol_options"];
     if (!sec) {
-        sec = [[RevenantNWSecProtocol alloc] init];
-        sec->_values = [NSMutableDictionary dictionary];
-        sec->_applicationProtocols = [NSMutableArray array];
+        sec = [[RevenantSecProtocolOptions alloc] init];
         value->_objects[@"sec_protocol_options"] = sec;
     }
     return (sec_protocol_options_t)sec;

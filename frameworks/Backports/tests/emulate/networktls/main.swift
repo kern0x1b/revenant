@@ -17,24 +17,25 @@ func loadIdentity() -> SecIdentity {
 
 func serverParameters(_ identity: SecIdentity) -> NWParameters {
     let tls = NWProtocolTLS.Options()
-    tls.securityProtocolOptions.localIdentity = identity
-    tls.securityProtocolOptions.applicationProtocols = ["h2"]
-    tls.securityProtocolOptions.peerAuthenticationRequired = false
+    sec_protocol_options_set_local_identity(tls.securityProtocolOptions, sec_identity_create(identity)!)
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "h2")
+    sec_protocol_options_set_peer_authentication_required(tls.securityProtocolOptions, false)
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
 }
 
 func strictServerParameters(_ identity: SecIdentity) -> NWParameters {
     let tls = NWProtocolTLS.Options()
-    tls.securityProtocolOptions.localIdentity = identity
-    tls.securityProtocolOptions.applicationProtocols = ["h2"]
-    tls.securityProtocolOptions.peerAuthenticationRequired = true
+    sec_protocol_options_set_local_identity(tls.securityProtocolOptions, sec_identity_create(identity)!)
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "h2")
+    sec_protocol_options_set_peer_authentication_required(tls.securityProtocolOptions, true)
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
 }
 
 func clientParameters() -> NWParameters {
     let tls = NWProtocolTLS.Options()
-    tls.securityProtocolOptions.applicationProtocols = ["http/1.1", "h2"]
-    tls.securityProtocolOptions.peerAuthenticationRequired = false
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "http/1.1")
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "h2")
+    sec_protocol_options_set_peer_authentication_required(tls.securityProtocolOptions, false)
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
 }
 
@@ -146,8 +147,9 @@ let reachHosts: [(String, String)] = [
 
 for (name, address) in reachHosts {
     let tls = NWProtocolTLS.Options()
-    tls.securityProtocolOptions.serverName = name
-    tls.securityProtocolOptions.applicationProtocols = ["h2", "http/1.1"]
+    sec_protocol_options_set_tls_server_name(tls.securityProtocolOptions, name)
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "h2")
+    sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "http/1.1")
     let connection = NWConnection(host: NWEndpoint.Host(address), port: NWEndpoint.Port(rawValue: 443)!,
                                   using: NWParameters(tls: tls, tcp: NWProtocolTCP.Options()))
     let outcome = DispatchSemaphore(value: 0)

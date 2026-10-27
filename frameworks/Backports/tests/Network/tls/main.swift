@@ -135,19 +135,13 @@ func startServer(identity: SecIdentity, alpn: Bool, done: DispatchSemaphore) -> 
 }
 
 func clientParameters(verify: Bool) -> NWParameters {
-    #if REVENANT_BACKPORT
-    let tls = NWProtocolTLS.Options()
-    tls.securityProtocolOptions.applicationProtocols = ["revenant"]
-    tls.securityProtocolOptions.peerAuthenticationRequired = verify
-    return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
-    #else
     let tls = NWProtocolTLS.Options()
     sec_protocol_options_add_tls_application_protocol(tls.securityProtocolOptions, "revenant")
+    sec_protocol_options_set_peer_authentication_required(tls.securityProtocolOptions, verify)
     if !verify {
         sec_protocol_options_set_verify_block(tls.securityProtocolOptions, { _, _, complete in complete(true) }, DispatchQueue.global())
     }
     return NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
-    #endif
 }
 
 func exchange(verify: Bool, alpn: Bool) -> [String] {

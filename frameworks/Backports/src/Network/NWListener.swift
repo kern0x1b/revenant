@@ -36,7 +36,7 @@ public final class NWListener: @unchecked Sendable {
     private var readSource: DispatchSourceRead?
 
     public init(using parameters: NWParameters, on port: NWEndpoint.Port) throws {
-        guard parameters.tlsOptions == nil || parameters.tlsOptions?.securityProtocolOptions.localIdentity != nil else {
+        guard parameters.tlsOptions?.hasLocalIdentity ?? true else {
             throw NWError.posix(errno: ENOTSUP)
         }
         self.parameters = parameters

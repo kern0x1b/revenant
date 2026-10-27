@@ -4,19 +4,44 @@ import Foundation
 import Security
 
 public enum NWProtocolTLS {
-    public final class SecurityProtocolOptions: @unchecked Sendable {
-        public var serverName: String?
-        public var applicationProtocols: [String] = []
-        public var peerAuthenticationRequired = true
-        public var localIdentity: SecIdentity?
-
-        public init() {}
-    }
-
     public final class Options: @unchecked Sendable {
-        public let securityProtocolOptions = SecurityProtocolOptions()
+        public let securityProtocolOptions: sec_protocol_options_t
 
-        public init() {}
+        public init() {
+            guard let created = RevenantSecProtocolOptionsCreate() else {
+                preconditionFailure("RevenantSecProtocolOptions is not loaded; link the Security backport")
+            }
+            securityProtocolOptions = Unmanaged<AnyObject>.fromOpaque(created).takeRetainedValue() as! sec_protocol_options_t
+        }
+    }
+}
+
+extension NWProtocolTLS.Options {
+    var hasLocalIdentity: Bool {
+        NWTLSConfiguration(securityProtocolOptions).localIdentity != nil
+    }
+}
+
+struct NWTLSConfiguration {
+    let minimumVersion: UInt16
+    let maximumVersion: UInt16
+    let serverName: String?
+    let applicationProtocols: [String]
+    let peerAuthenticationRequired: Bool
+    let localIdentity: SecIdentity?
+
+    init(_ options: sec_protocol_options_t) {
+        let handle = Unmanaged.passUnretained(options as AnyObject).toOpaque()
+        minimumVersion = RevenantSecProtocolOptionsMinTLS(handle)
+        maximumVersion = RevenantSecProtocolOptionsMaxTLS(handle)
+        serverName = RevenantSecProtocolOptionsServerName(handle).map { String(cString: $0) }
+        applicationProtocols = (0..<RevenantSecProtocolOptionsApplicationProtocolCount(handle)).compactMap { index in
+            RevenantSecProtocolOptionsApplicationProtocolAt(handle, index).map { String(cString: $0) }
+        }
+        peerAuthenticationRequired = RevenantSecProtocolOptionsPeerAuthenticationRequired(handle)
+        localIdentity = RevenantSecProtocolOptionsCopyLocalIdentity(handle).map {
+            Unmanaged<SecIdentity>.fromOpaque($0).takeRetainedValue()
+        }
     }
 }
 
@@ -161,18 +186,23 @@ final class NWTLSSession {
     private(set) var isEstablished = false
     private(set) var wantsWrite = false
 
-    init?(descriptor: Int32, options: NWProtocolTLS.SecurityProtocolOptions, defaultServerName: String?, serverSide: Bool) {
+    init?(descriptor: Int32, options: sec_protocol_options_t, defaultServerName: String?, serverSide: Bool) {
         guard let method = TLS_method(), let context = SSL_CTX_new(method) else {
             return nil
         }
-        SSL_CTX_set_min_proto_version(context, UInt16(TLS1_2_VERSION))
-        let peerRequired = options.peerAuthenticationRequired
-        let name = options.serverName ?? defaultServerName
-        let offer = options.applicationProtocols.isEmpty ? nil : ProtocolList(options.applicationProtocols)
+        let configuration = NWTLSConfiguration(options)
+        guard SSL_CTX_set_min_proto_version(context, configuration.minimumVersion) == 1,
+              SSL_CTX_set_max_proto_version(context, configuration.maximumVersion) == 1 else {
+            SSL_CTX_free(context)
+            return nil
+        }
+        let peerRequired = configuration.peerAuthenticationRequired
+        let name = configuration.serverName ?? defaultServerName
+        let offer = configuration.applicationProtocols.isEmpty ? nil : ProtocolList(configuration.applicationProtocols)
 
         var signing: SecKey?
         if serverSide {
-            guard let identity = options.localIdentity, NWTLSSession.installCertificate(identity, into: context),
+            guard let identity = configuration.localIdentity, NWTLSSession.installCertificate(identity, into: context),
                   let key = NWTLSSession.privateKey(of: identity) else {
                 SSL_CTX_free(context)
                 return nil
@@ -183,7 +213,6 @@ final class NWTLSSession {
             var preferences: [UInt16] = [0x0804, 0x0805, 0x0806, 0x0401, 0x0501, 0x0601, 0x0201]
             #else
             var preferences: [UInt16] = [0x0401, 0x0501, 0x0601, 0x0201]
-            SSL_CTX_set_max_proto_version(context, UInt16(TLS1_2_VERSION))
             #endif
             SSL_CTX_set_signing_algorithm_prefs(context, &preferences, preferences.count)
             var mode = SSL_VERIFY_NONE
