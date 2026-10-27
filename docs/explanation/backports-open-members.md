@@ -167,8 +167,25 @@ Already present, with the same limits:
 - `WKContextMenuElementInfo`: `linkURL` is always nil, since the engine shows no context menu.
 - `WKContentWorld`: named worlds are distinct objects, but the engine has one JavaScript world, so they share it.
 
-The protocols `src` declares (`WKNavigationDelegate`, `WKUIDelegate`, `WKDownloadDelegate`, `WKURLSchemeHandler`,
-`WKURLSchemeTask`) use the SDK's selectors. Clang ignores each copy in a translation unit that also imports WebKit
+`WKUserContentController` and the page's messages, from `src/WebKit/WKWebView.m` and `RevenantScriptCodec.m`:
+
+- `addScriptMessageHandler:name:` (Swift `add(_:name:)`) registers a handler. The shim `window.webkit.messageHandlers.<name>.postMessage(body)`
+  encodes the body as tagged JSON (`RevenantEncoder`: dates, NaN, infinities, -0, and cycles survive), and navigates a hidden
+  iframe to `revenant-wkbridge://m/`. `shouldStartLoadWithRequest` reads that URL, never loads it, and delivers a
+  `WKScriptMessage` (name, body as Foundation objects, web view, frame) to `userContentController:didReceiveScriptMessage:`
+  on the main queue. A body that is not a string, or not JSON, is refused.
+- The shim is installed when the page finishes loading, not before its first script. UIWebView has no document-start hook,
+  so `window.webkit` does not exist while a page's own load-time scripts run. A `WKUserScript` at document start is
+  also run at load finish. The first time that happens the engine logs it. Telegram's WebProxy carrier (`WebProxyWebViewCarrier.swift`)
+  injects its hardening script at document start, so the carrier's protection runs after the page's scripts on this
+  engine. Closing that needs the main-frame HTML rewritten before the page runs (an NSURLProtocol over http and https),
+  which is not built.
+- The host test `tests/webkit_script_message_test.lua` runs the shim in JavaScriptCore and decodes its bridge URL. The
+  macOS build posts the same 17 values through a real `WKWebView`, and the bodies agree line by line. Four backport-only
+  checks cover cycles, the refused bodies and a foreign URL, and a damaged bridge URL is detected.
+
+The protocols `src` declares (`WKNavigationDelegate`, `WKUIDelegate`, `WKDownloadDelegate`, `WKScriptMessageHandler`,
+`WKURLSchemeHandler`, `WKURLSchemeTask`) use the SDK's selectors. Clang ignores each copy in a translation unit that also imports WebKit
 (`duplicate protocol definition ... is ignored`), so the SDK's declarations are the ones compiled. The copies put the
 names in `lowered-members.txt`.
 
@@ -179,7 +196,8 @@ them, and it compiles; its link needs the WebKit backport library, which the typ
 
 Still missing:
 
-- `WKScriptMessageHandler` (7 files), which has no `@protocol` definition in `src`.
+- Document-start injection, for the shim and for `WKUserScript` at document start (see above). Telegram's WebProxy
+  hardening depends on it.
 - `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
 - Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
   decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.
