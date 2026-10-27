@@ -1956,7 +1956,6 @@ class RevenantScrollGuideObserver
 class RevenantScrollWatcher
 class RevenantSearchBar
 class RevenantSearchParser
-class RevenantSecAccessControl
 class RevenantSecCertificate
 class RevenantSecIdentity
 class RevenantSecProtocolMetadata
@@ -4122,6 +4121,13 @@ enum kNEHotspotHelperResultSuccess
 enum kNEHotspotHelperResultTemporaryFailure
 enum kNEHotspotHelperResultUIRequired
 enum kNEHotspotHelperResultUnsupportedNetwork
+enum kSecAccessControlAnd
+enum kSecAccessControlBiometryAny
+enum kSecAccessControlBiometryCurrentSet
+enum kSecAccessControlCompanion
+enum kSecAccessControlDevicePasscode
+enum kSecAccessControlOr
+enum kSecAccessControlUserPresence
 enum kSecKeyOperationTypeDecrypt
 enum kSecKeyOperationTypeEncrypt
 enum kSecKeyOperationTypeKeyExchange
@@ -4438,6 +4444,8 @@ function NSExtensionMain
 function NSStringFromDirectionalEdgeInsets
 function RevenantASAppleIDButtonTitle
 function RevenantAURenderInput
+function RevenantAccessControlFlags
+function RevenantAccessControlProtection
 function RevenantAccessFromWord
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
