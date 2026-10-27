@@ -151,9 +151,9 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
 {
     NSArray *cases = @[
         @[@NO, @NO, @NO, @0, @NO],
-        @[@NO, @NO, @YES, @0, @NO],
+        @[@NO, @YES, @YES, @0, @NO],
         @[@YES, @NO, @NO, @0, @NO],
-        @[@YES, @NO, @YES, @0, @NO],
+        @[@YES, @YES, @YES, @0, @NO],
         @[@NO, @NO, @NO, @(REVENANT_EDGE_NONE), @YES],
         @[@NO, @NO, @NO, @(REVENANT_EDGE_ALL), @YES],
         @[@YES, @NO, @NO, @(REVENANT_EDGE_NONE), @YES],
