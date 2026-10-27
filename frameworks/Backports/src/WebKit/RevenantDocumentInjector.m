@@ -216,6 +216,11 @@ NSString *RevenantDocumentInsert(NSString *html, NSArray<NSString *> *scripts)
     return document;
 }
 
+NSString *RevenantDocumentStartedScript(NSString *token)
+{
+    return [NSString stringWithFormat:@"(function(){return String(!!window[\"%@\"]);})()", token];
+}
+
 NSData *RevenantDocumentRewrite(NSData *body, NSString *contentEncoding, NSString *charset, NSArray<NSString *> *scripts)
 {
     if (!scripts.count)

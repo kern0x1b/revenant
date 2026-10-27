@@ -15,8 +15,33 @@ static NSMapTable *Sources(void)
 
 static id<RevenantDocumentSource> SourceForToken(NSString *token)
 {
+    if (!token)
+        return nil;
     @synchronized(Sources()) {
         return [Sources() objectForKey:token];
+    }
+}
+
+static NSMutableDictionary *Expectations(void)
+{
+    static NSMutableDictionary *table;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        table = [NSMutableDictionary dictionary];
+    });
+    return table;
+}
+
+static NSString *ExpectedToken(NSURLRequest *request, BOOL consume)
+{
+    if (request.mainDocumentURL && ![request.mainDocumentURL isEqual:request.URL])
+        return nil;
+    @synchronized(Expectations()) {
+        NSString *key = request.URL.absoluteString;
+        NSString *token = Expectations()[key];
+        if (token && consume)
+            [Expectations() removeObjectForKey:key];
+        return token;
     }
 }
 
@@ -77,7 +102,9 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
     if (!RevenantDocumentIsWebURL(request.URL) || [NSURLProtocol propertyForKey:InnerKey inRequest:request])
         return NO;
     NSString *token = [NSURLProtocol propertyForKey:TokenKey inRequest:request];
-    return [token isKindOfClass:[NSString class]] && SourceForToken(token) != nil;
+    if (![token isKindOfClass:[NSString class]])
+        token = ExpectedToken(request, NO);
+    return SourceForToken(token) != nil;
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
@@ -88,6 +115,8 @@ NSURLRequest *RevenantDocumentTaggedCopy(NSURLRequest *request, NSString *token)
 - (void)startLoading
 {
     _token = [NSURLProtocol propertyForKey:TokenKey inRequest:self.request];
+    if (![_token isKindOfClass:[NSString class]])
+        _token = ExpectedToken(self.request, YES);
     _source = SourceForToken(_token);
     NSMutableURLRequest *inner = [self.request mutableCopy];
     [NSURLProtocol setProperty:@YES forKey:InnerKey inRequest:inner];
@@ -222,4 +251,19 @@ NSString *RevenantDocumentRegister(id<RevenantDocumentSource> source)
 void RevenantDocumentTagRequest(NSMutableURLRequest *request, NSString *token)
 {
     [NSURLProtocol setProperty:token forKey:TokenKey inRequest:request];
+}
+
+void RevenantDocumentExpect(NSString *token, NSURL *URL)
+{
+    @synchronized(Expectations()) {
+        Expectations()[URL.absoluteString] = token;
+    }
+}
+
+void RevenantDocumentForget(NSString *token)
+{
+    @synchronized(Expectations()) {
+        for (NSString *key in [Expectations() allKeysForObject:token])
+            [Expectations() removeObjectForKey:key];
+    }
 }

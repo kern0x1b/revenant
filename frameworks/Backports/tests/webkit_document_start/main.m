@@ -8,8 +8,11 @@
 #import <unistd.h>
 #import <zlib.h>
 #import "RevenantDocument.h"
+#import "RevenantScriptCodec.h"
 
 static NSString *const Early = @"window.early = 'set-by-start';";
+
+static NSString *const Page = @"<!DOCTYPE html><html><head><title>page</title><script>var seen = window.early;</script></head><body>café</body></html>";
 
 static NSString *const StartPage = @"<!DOCTYPE html><html><head><title>start</title><script>var seen = window.early;</script></head><body>café</body></html>";
 
@@ -162,6 +165,7 @@ static int StartServer(void)
 
 @interface Source : NSObject <RevenantDocumentSource>
 @property (nonatomic) BOOL injected;
+@property (nonatomic) NSUInteger injections;
 @end
 
 @implementation Source
@@ -178,6 +182,7 @@ static int StartServer(void)
 - (void)revenant_documentDidInject
 {
     self.injected = YES;
+    self.injections++;
 }
 
 @end
@@ -236,6 +241,11 @@ static NSString *Flag(NSString *label, BOOL value)
     return [NSString stringWithFormat:@"%@: %d", label, value];
 }
 
+static NSString *Count(NSString *label, NSUInteger value)
+{
+    return [NSString stringWithFormat:@"%@: %lu", label, (unsigned long)value];
+}
+
 static BOOL HasHeader(NSHTTPURLResponse *response, NSString *name)
 {
     for (NSString *key in response.allHeaderFields) {
@@ -245,9 +255,9 @@ static BOOL HasHeader(NSHTTPURLResponse *response, NSString *name)
     return NO;
 }
 
-static NSString *PageScriptSaw(NSData *body)
+static NSString *PageScriptSawEncoded(NSData *body, NSStringEncoding encoding)
 {
-    NSString *html = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding] ?: @"";
+    NSString *html = [[NSString alloc] initWithData:body encoding:encoding] ?: @"";
     JSContext *context = [[JSContext alloc] init];
     [context evaluateScript:@"var window = this;"];
     NSRegularExpression *scripts = [NSRegularExpression regularExpressionWithPattern:@"<script>(.*?)</script>" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
@@ -255,6 +265,11 @@ static NSString *PageScriptSaw(NSData *body)
         [context evaluateScript:[html substringWithRange:[match rangeAtIndex:1]]];
     JSValue *seen = context[@"seen"];
     return seen.isUndefined ? @"undefined" : [seen toString];
+}
+
+static NSString *PageScriptSaw(NSData *body)
+{
+    return PageScriptSawEncoded(body, NSUTF8StringEncoding);
 }
 
 static NSString *IndependentHash(NSString *script)
@@ -270,6 +285,12 @@ static BOOL DecodesAsLatin1(NSData *body, NSString *text)
     NSString *decoded = [[NSString alloc] initWithData:body encoding:NSISOLatin1StringEncoding];
     return [decoded containsString:text];
 }
+
+static NSString *const ShimStubs =
+    @"var window=this; window.top=window;"
+    @"var document={documentElement:{appendChild:function(){}},getElementsByTagName:function(){return [];},"
+    @"createElement:function(){return {style:{}};}};"
+    @"var setTimeout=function(){};";
 
 int main(int argc, const char *argv[])
 {
@@ -309,6 +330,31 @@ int main(int argc, const char *argv[])
         Loader *posted = FetchRequest(RevenantDocumentTaggedCopy(form, token));
         [lines addObject:Flag(@"form injected", source.injected)];
         [lines addObject:[NSString stringWithFormat:@"form page script saw: %@", PageScriptSaw(posted.data)]];
+
+        NSURL *historyURL = [NSURL URLWithString:[base stringByAppendingString:@"/echo?history=1"]];
+        NSUInteger before = source.injections;
+        RevenantDocumentExpect(token, historyURL);
+        Loader *history = FetchRequest([NSURLRequest requestWithURL:historyURL]);
+        [lines addObject:Count(@"history network starts", source.injections - before)];
+        [lines addObject:[NSString stringWithFormat:@"history network page script saw: %@", PageScriptSaw(history.data)]];
+
+        before = source.injections;
+        FetchRequest([NSURLRequest requestWithURL:historyURL]);
+        [lines addObject:Count(@"history repeat starts", source.injections - before)];
+
+        NSURL *forgottenURL = [NSURL URLWithString:[base stringByAppendingString:@"/echo?forgotten=1"]];
+        before = source.injections;
+        RevenantDocumentExpect(token, forgottenURL);
+        RevenantDocumentForget(token);
+        FetchRequest([NSURLRequest requestWithURL:forgottenURL]);
+        [lines addObject:Count(@"forgotten expectation starts", source.injections - before)];
+
+        NSURL *startURL = [NSURL URLWithString:[base stringByAppendingString:@"/start"]];
+        Fetch(startURL.absoluteString, token);
+        before = source.injections;
+        RevenantDocumentExpect(token, startURL);
+        FetchRequest([NSURLRequest requestWithURL:startURL]);
+        [lines addObject:Count(@"reload starts", source.injections - before)];
 
         source.injected = NO;
         Loader *gzip = Fetch([base stringByAppendingString:@"/gzip"], token);
@@ -350,6 +396,26 @@ int main(int argc, const char *argv[])
         Loader *cspMeta = Fetch([base stringByAppendingString:@"/csp-meta"], token);
         NSString *metaBody = [[NSString alloc] initWithData:cspMeta.data encoding:NSUTF8StringEncoding] ?: @"";
         [lines addObject:Flag(@"csp meta hash", [metaBody containsString:[NSString stringWithFormat:@"'sha256-%@'", earlyHash]])];
+
+        NSString *htmlString = RevenantDocumentInsert(Page, @[Early]);
+        [lines addObject:[NSString stringWithFormat:@"loadHTMLString page saw: %@", PageScriptSawEncoded(UTF8(htmlString), NSUTF8StringEncoding)]];
+        NSData *data = RevenantDocumentRewrite(Latin1(Page), nil, @"iso-8859-1", @[Early]);
+        [lines addObject:[NSString stringWithFormat:@"loadData page saw: %@", data ? PageScriptSawEncoded(data, NSISOLatin1StringEncoding) : @"nil"]];
+        NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-document-start-test"];
+        [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
+        NSString *file = [directory stringByAppendingPathComponent:@"page.html"];
+        [UTF8(Page) writeToFile:file atomically:NO];
+        NSData *fileDocument = RevenantDocumentRewrite([NSData dataWithContentsOfFile:file], nil, nil, @[Early]);
+        [lines addObject:[NSString stringWithFormat:@"loadFileURL page saw: %@", fileDocument ? PageScriptSaw(fileDocument) : @"nil"]];
+
+        NSString *shimmed = nil;
+        JSContext *context = [[JSContext alloc] init];
+        [context evaluateScript:ShimStubs];
+        shimmed = [[context evaluateScript:RevenantDocumentStartedScript(token)] toString];
+        [lines addObject:Flag(@"started marker absent before the shim", [shimmed isEqualToString:@"false"])];
+        [context evaluateScript:[NSString stringWithFormat:RevenantShim, RevenantEncoder, @"[]", token]];
+        shimmed = [[context evaluateScript:RevenantDocumentStartedScript(token)] toString];
+        [lines addObject:Flag(@"started marker set by the shim", [shimmed isEqualToString:@"true"])];
 
         NSString *noHead = RevenantDocumentInsert(@"<p>x</p>", @[@"a=1;"]);
         [lines addObject:Flag(@"document start without head", [noHead hasPrefix:@"<script>a=1;</script><p>"])];

@@ -53,7 +53,6 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _documentReady;
     NSInteger _previousIndex;
     BOOL _decided;
-    BOOL _shimmed;
     BOOL _didCommit;
     NSString *_token;
     BOOL _documentInjected;
@@ -294,6 +293,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_abandonNavigation
 {
+    RevenantDocumentForget(_token);
     if (_previousIndex >= 0)
         [self revenant_setItems:_items index:_previousIndex];
     _previousIndex = -1;
@@ -365,22 +365,40 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (WKNavigation *)loadFileURL:(NSURL *)URL allowingReadAccessToURL:(NSURL *)readAccessURL
 {
-    return [self loadRequest:[NSURLRequest requestWithURL:URL]];
+    NSString *extension = URL.pathExtension.lowercaseString;
+    BOOL page = [extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"];
+    NSData *data = URL.isFileURL && page ? [NSData dataWithContentsOfURL:URL] : nil;
+    if (!data)
+        return [self loadRequest:[NSURLRequest requestWithURL:URL]];
+    return [self loadData:data MIMEType:@"text/html" characterEncodingName:nil baseURL:URL];
 }
 
 - (WKNavigation *)loadHTMLString:(NSString *)string baseURL:(NSURL *)baseURL
 {
     NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
+    NSString *html = RevenantDocumentInsert(string ?: @"", [self revenant_documentStartScripts]);
     return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadHTMLString:string baseURL:baseURL];
+        [self revenant_documentDidInject];
+        [_web loadHTMLString:html baseURL:baseURL];
     }];
 }
 
 - (WKNavigation *)loadData:(NSData *)data MIMEType:(NSString *)MIMEType characterEncodingName:(NSString *)characterEncodingName baseURL:(NSURL *)baseURL
 {
     NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
+    NSData *document = data ?: [NSData data];
+    BOOL injected = NO;
+    if ([MIMEType.lowercaseString isEqualToString:@"text/html"]) {
+        NSData *rewritten = RevenantDocumentRewrite(document, nil, characterEncodingName, [self revenant_documentStartScripts]);
+        if (rewritten) {
+            document = rewritten;
+            injected = YES;
+        }
+    }
     return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadData:data MIMEType:MIMEType textEncodingName:characterEncodingName baseURL:baseURL];
+        if (injected)
+            [self revenant_documentDidInject];
+        [_web loadData:document MIMEType:MIMEType textEncodingName:characterEncodingName baseURL:baseURL];
     }];
 }
 
@@ -388,8 +406,10 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoBack)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index - 1].URL] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
-        [_web goBack];
+    NSURL *target = _items[_index - 1].URL;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        [self->_web goBack];
     }];
 }
 
@@ -397,8 +417,10 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoForward)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index + 1].URL] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
-        [_web goForward];
+    NSURL *target = _items[_index + 1].URL;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        [self->_web goForward];
     }];
 }
 
@@ -408,8 +430,10 @@ static NSURL *withoutFragment(NSURL *url)
     if (position == NSNotFound || (NSInteger)position == _index)
         return nil;
     NSInteger delta = (NSInteger)position - _index;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:item.URL] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
-        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
+    NSURL *target = item.URL;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        [self->_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
     }];
 }
 
@@ -417,8 +441,10 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!_committedURL)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_committedURL] type:WKNavigationTypeReload index:-1 perform:^{
-        [_web reload];
+    NSURL *target = _committedURL;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeReload index:-1 perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        [self->_web reload];
     }];
 }
 
@@ -478,10 +504,7 @@ static NSURL *withoutFragment(NSURL *url)
 - (NSArray<NSString *> *)revenant_documentStartScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
-    NSArray *names = controller.revenant_handlerNames;
-    NSMutableArray<NSString *> *scripts = [NSMutableArray array];
-    if (names.count)
-        [scripts addObject:[self revenant_shimWithNames:names]];
+    NSMutableArray<NSString *> *scripts = [NSMutableArray arrayWithObject:[self revenant_shimWithNames:controller.revenant_handlerNames]];
     for (WKUserScript *script in controller.revenant_scripts) {
         if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart)
             [scripts addObject:script.source];
@@ -497,15 +520,12 @@ static NSURL *withoutFragment(NSURL *url)
 - (void)revenant_installScripts:(BOOL)userScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
-    NSArray *names = controller.revenant_handlerNames;
-    if (names.count || _shimmed) {
-        [_web stringByEvaluatingJavaScriptFromString:[self revenant_shimWithNames:names]];
-        _shimmed = names.count > 0;
-    }
+    BOOL started = _documentInjected || [[_web stringByEvaluatingJavaScriptFromString:RevenantDocumentStartedScript(_token)] isEqualToString:@"true"];
+    [_web stringByEvaluatingJavaScriptFromString:[self revenant_shimWithNames:controller.revenant_handlerNames]];
     if (userScripts)
         for (WKUserScript *script in controller.revenant_scripts) {
             if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart) {
-                if (_documentInjected)
+                if (started)
                     continue;
                 static dispatch_once_t once;
                 dispatch_once(&once, ^{
@@ -705,6 +725,7 @@ static NSURL *withoutFragment(NSURL *url)
     }
     _documentReady = YES;
     [self revenant_installScripts:YES];
+    RevenantDocumentForget(_token);
     [self revenant_emitCommit];
     _navigation = nil;
     _didCommit = NO;

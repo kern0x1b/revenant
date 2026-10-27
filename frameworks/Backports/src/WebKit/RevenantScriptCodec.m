@@ -32,6 +32,7 @@ NSString *const RevenantShim =
     @"var all=document.getElementsByTagName('script');"
     @"var mine=all[all.length-1];"
     @"if(mine&&mine.firstChild&&String(mine.firstChild.nodeValue).indexOf(nonce)>=0){mine.parentNode.removeChild(mine);}"
+    @"window[nonce]=true;"
     @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
     @"var encode=%@;"
     @"var handlers={};"

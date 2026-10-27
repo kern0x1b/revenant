@@ -189,10 +189,22 @@ Already present, with the same limits:
   replays it through the navigation path as a tagged `loadRequest:`, with the same method, body and headers. The replay
   runs on the next turn of the main queue, so the delegate is asked about it asynchronously. If a navigation started in
   between, the plain request is loaded and that page gets late injection.
-- Still on late injection, which runs the shim and the document-start scripts when the page finishes loading (the engine
-  logs the first time): `goBack`, `goForward`, `goToBackForwardListItem` and `reload`, which use the `UIWebView` history;
-  `loadHTMLString:` and `loadData:`; and `loadFileURL:`. A load on late injection has no `window.webkit` while the page's
-  own first script runs.
+- `loadHTMLString:baseURL:` and `loadData:MIMEType:characterEncodingName:baseURL:` rewrite the content before `UIWebView`
+  gets it, with the same injector as the network path (charset, `<meta>` CSP, hashes). `loadData:` rewrites only `text/html`.
+  `loadFileURL:allowingReadAccessToURL:` reads an `.html` or `.htm` file and loads it through `loadData:` with the file URL as
+  base. Other files, and a file that cannot be read, go through `loadRequest:` as before. The read-access URL is ignored,
+  because `UIWebView` does not restrict file access.
+- `reload`, `goBack`, `goForward` and `goToBackForwardListItem` keep the `UIWebView` history by not replacing it with a
+  `loadRequest:`. Each one records the target URL with `RevenantDocumentExpect` before it calls the engine, and the protocol
+  claims the next untagged main-document load of that exact URL (and only one whose `mainDocumentURL` is that URL or absent).
+  Whatever claims or forgets it, the record is dropped when the navigation finishes, fails or is abandoned.
+- A history load that the engine serves from its page cache makes no network request, so the protocol sees nothing. The
+  document is then the one that was already loaded, with its start scripts and shim already run. To keep those from running
+  again, the shim sets a property named by the webview's token on `window` before anything else, and the late path checks it
+  (`RevenantDocumentStartedScript`) before it runs a document-start script. Measured on macOS WKWebView (the same loads as
+  the oracle in `tests/webkit_document_start/oracle.m`): `goBack` to a page that was loaded by `loadFileURL:` ran its start
+  script 0 more times, and its `window.early` was still set. `UIWebView`'s own page cache is not measured here, because
+  there is no iOS 6 device or simulator in this environment.
 - The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
   is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
   message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
@@ -222,9 +234,8 @@ them, and it compiles; its link needs the WebKit backport library, which the typ
 
 Still missing:
 
-- Document start for `goBack`, `goForward`, `goToBackForwardListItem`, `reload`, `loadHTMLString:` and `loadData:` (see above).
-  Those loads run the start scripts late. Telegram's WebProxy hardening depends on document start, so a history step or an
-  HTML-string load is not covered.
+- Measured on a device: the `UIWebView` history and page-cache behaviour that the document-start claim depends on (see above).
+  The macOS WKWebView measurement is the only one here.
 - `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
 - Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
   decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.
