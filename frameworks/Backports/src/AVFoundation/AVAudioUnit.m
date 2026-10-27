@@ -1,10 +1,12 @@
 #import "RevenantAVAudioUnit.h"
+#import "RevenantAudioUnitPreset.h"
 
 @implementation AVAudioUnit {
     AudioComponentDescription _revenant_desc;
     NSString *_revenant_name;
     NSString *_revenant_manufacturerName;
     NSUInteger _revenant_version;
+    NSDictionary *_revenant_pendingPreset;
 }
 
 - (instancetype)initWithRevenantComponentDescription:(AudioComponentDescription)description name:(NSString *)name manufacturerName:(NSString *)manufacturerName version:(NSUInteger)version
@@ -45,9 +47,24 @@
 
 - (BOOL)loadAudioUnitPresetAtURL:(NSURL *)url error:(NSError **)outError
 {
-    if (outError)
-        *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudio_UnimplementedError userInfo:nil];
-    return NO;
+    NSDictionary *preset = RevenantAudioUnitReadPreset(url, outError);
+    if (!preset)
+        return NO;
+    AudioUnit unit = self.audioUnit;
+    if (!unit) {
+        _revenant_pendingPreset = preset;
+        return YES;
+    }
+    return RevenantAudioUnitApplyPreset(unit, preset, outError);
+}
+
+- (void)revenant_setEngine:(AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(AudioUnit)unit
+{
+    [super revenant_setEngine:engine auNode:node audioUnit:unit];
+    if (unit && _revenant_pendingPreset) {
+        RevenantAudioUnitApplyPreset(unit, _revenant_pendingPreset, NULL);
+        _revenant_pendingPreset = nil;
+    }
 }
 
 - (void)revenant_applyPendingParameters

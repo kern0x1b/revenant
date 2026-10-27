@@ -4455,6 +4455,8 @@ function RevenantAnimationGroupAutoreverses
 function RevenantAnimationGroupRepeatCount
 function RevenantAnimationGroupSetAutoreverses
 function RevenantAnimationGroupSetRepeatCount
+function RevenantAudioUnitApplyPreset
+function RevenantAudioUnitReadPreset
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -11660,6 +11662,7 @@ member AVAudioUnit -renderingAlgorithm
 member AVAudioUnit -revenant_applyPendingParameters
 member AVAudioUnit -revenant_inputParameter:
 member AVAudioUnit -revenant_readAzimuth:elevation:distance:
+member AVAudioUnit -revenant_setEngine:auNode:audioUnit:
 member AVAudioUnit -revenant_setInputParameter:value:
 member AVAudioUnit -reverbBlend
 member AVAudioUnit -setBypass:
