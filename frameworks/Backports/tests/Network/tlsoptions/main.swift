@@ -173,7 +173,7 @@ let scenarios: [Scenario] = [
         sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
         sec_protocol_options_set_challenge_block(options, { _, complete in complete(nil) }, challengeQueue)
     }),
-    Scenario(name: "psk-client", serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "PSK-AES128-CBC-SHA"], reportsCipher: true, reportsLeaf: false, configure: { options in
+    Scenario(name: "psk-client", serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "ECDHE-PSK-AES128-CBC-SHA"], reportsCipher: true, reportsLeaf: false, configure: { options in
         unauthenticated(options)
         sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
         sec_protocol_options_add_pre_shared_key(options, dispatchData("secret"), dispatchData("client"))
@@ -186,15 +186,31 @@ let scenarios: [Scenario] = [
         unauthenticated(options)
         sec_protocol_options_add_tls_ciphersuite(options, SSLCipherSuite(0xFFFF))
     }),
-    Scenario(name: "psk-wrong-key",serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "PSK-AES128-CBC-SHA"], reportsCipher: false, reportsLeaf: false, configure: { options in
+    Scenario(name: "psk-wrong-key",serverArguments: ["-nocert", "-psk", "736563726574", "-cipher", "ECDHE-PSK-AES128-CBC-SHA"], reportsCipher: false, reportsLeaf: false, configure: { options in
         unauthenticated(options)
         sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
         sec_protocol_options_add_pre_shared_key(options, dispatchData("wrong"), dispatchData("client"))
     }),
+    Scenario(name: "group-default-no-shared",serverArguments: ["-tls1_2", "-cipher", "AES128-SHA"], reportsCipher: true, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
+        sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_t.default)
+    }),
+    Scenario(name: "group-compatibility-allowed", serverArguments: ["-tls1_2", "-cipher", "AES128-SHA"], reportsCipher: true, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
+        sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_t.compatibility)
+    }),
+    Scenario(name: "group-legacy-refused", serverArguments: [], reportsCipher: false, reportsLeaf: false, configure: { options in
+        unauthenticated(options)
+        sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_t.TLSv12)
+        sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_t.legacy)
+    }),
 ]
 
-func pskServer(name: String, port: UInt16, clientKey: String) -> String {
+func pskServer(name: String, port: UInt16, clientKey: String, cipher: String = "ECDHE-PSK-AES128-CBC-SHA") -> String {
     let tls = NWProtocolTLS.Options()
+    unauthenticated(tls.securityProtocolOptions)
     sec_protocol_options_set_max_tls_protocol_version(tls.securityProtocolOptions, tls_protocol_version_t.TLSv12)
     sec_protocol_options_add_pre_shared_key(tls.securityProtocolOptions, dispatchData("secret"), dispatchData("client"))
     let queue = DispatchQueue(label: "revenant.tlsoptions.psk.server")
@@ -210,7 +226,7 @@ func pskServer(name: String, port: UInt16, clientKey: String) -> String {
     let client = Process()
     client.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     client.arguments = ["timeout", "20", opensslPath, "s_client", "-connect", "127.0.0.1:\(port)", "-tls1_2",
-                        "-cipher", "PSK-AES128-CBC-SHA", "-psk", clientKey, "-psk_identity", "client"]
+                        "-cipher", cipher, "-psk", clientKey, "-psk_identity", "client"]
     client.standardInput = FileHandle.nullDevice
     client.standardOutput = pipe
     client.standardError = pipe
@@ -219,6 +235,9 @@ func pskServer(name: String, port: UInt16, clientKey: String) -> String {
     client.waitUntilExit()
     listener.cancel()
     let outcome = client.terminationStatus == 0 ? "ready" : "failed"
+    if outcome != "ready" {
+        FileHandle.standardError.write(Data("client log for \(name):\n\(transcript)\n".utf8))
+    }
     return "\(name) \(outcome) cipher=\(cipherName(in: transcript))"
 }
 
@@ -254,3 +273,4 @@ for (index, scenario) in scenarios.enumerated() {
 
 print(pskServer(name: "psk-server", port: 14800, clientKey: "736563726574"))
 print(pskServer(name: "psk-server-wrong-key", port: 14801, clientKey: "77726f6e67"))
+print(pskServer(name: "psk-server-static-refused", port: 14802, clientKey: "736563726574", cipher: "PSK-AES128-CBC-SHA"))

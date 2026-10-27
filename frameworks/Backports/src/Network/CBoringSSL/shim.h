@@ -20,6 +20,8 @@ size_t RevenantSecProtocolOptionsApplicationProtocolCount(const void *options);
 const char *RevenantSecProtocolOptionsApplicationProtocolAt(const void *options, size_t index);
 size_t RevenantSecProtocolOptionsCiphersuiteCount(const void *options);
 uint32_t RevenantSecProtocolOptionsCiphersuiteAt(const void *options, size_t index);
+size_t RevenantSecProtocolOptionsCiphersuiteGroupCount(const void *options);
+uint32_t RevenantSecProtocolOptionsCiphersuiteGroupAt(const void *options, size_t index);
 size_t RevenantSecProtocolOptionsPreSharedKeyCount(const void *options);
 size_t RevenantSecProtocolOptionsCopyData(const void *options, int kind, size_t index, void *buffer, size_t capacity);
 const void *RevenantSecProtocolOptionsCopyLocalIdentity(const void *options);

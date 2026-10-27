@@ -48,12 +48,19 @@ static BOOL RevenantTLSVersionForSSLProtocol(SSLProtocol protocol, tls_protocol_
     return self.localIdentity ? sec_identity_copy_ref(self.localIdentity) : NULL;
 }
 
+- (NSArray<NSNumber *> *)revenantCiphersuiteGroups
+{
+    NSMutableArray<NSNumber *> *groups = [NSMutableArray array];
+    if (self.ciphersuiteGroup)
+        [groups addObject:self.ciphersuiteGroup];
+    [groups addObjectsFromArray:self.ciphersuiteGroups];
+    return groups;
+}
+
 - (const char *)revenantUnsupportedSettingForServer:(BOOL)server
 {
     if (self.diffieHellmanParameters)
         return "DHE parameters are unsupported: BoringSSL removed finite-field Diffie-Hellman";
-    if (self.ciphersuiteGroup || self.ciphersuiteGroups.count > 0)
-        return "ciphersuite groups are unsupported: they name suite sets BoringSSL cannot reproduce, so list the ciphersuites";
     if (self.preSharedKeySelection)
         return "pre-shared-key selection blocks are unsupported: BoringSSL has no PSK selection callback";
     if (self.preSharedKeys.count > 0 && self.maxTLSVersion >= tls_protocol_version_TLSv13)

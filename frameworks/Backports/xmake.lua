@@ -189,6 +189,22 @@ if is_plat("iphoneos") then
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
+            if library.name == "SecurityBackports" then
+                after_build(function (target)
+                    local stub = import("security_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true})
+                    local exported = os.iorunv("nm", {"-gU", target:targetfile()})
+                    local required = {}
+                    for _, objc in ipairs(stub.objcClasses) do
+                        table.insert(required, "_OBJC_CLASS_$_" .. objc)
+                    end
+                    table.join2(required, stub.symbols)
+                    for _, symbol in ipairs(required) do
+                        if not exported:find(" " .. symbol .. "\n", 1, true) then
+                            raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                        end
+                    end
+                end)
+            end
             for _, name in ipairs(library.libraries) do
                 if name:endswith("Backports") then
                     add_deps(name)

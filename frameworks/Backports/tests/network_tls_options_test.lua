@@ -16,12 +16,16 @@ local expected = table.concat({
     "sct ready",
     "challenge-identity ready",
     "challenge-none failed tls=-9824",
-    "psk-client ready cipher=PSK-AES128-CBC-SHA",
+    "psk-client ready cipher=ECDHE-PSK-AES128-CBC-SHA",
     "dh-refused failed tls=-9848",
     "cipher-unknown failed tls=-9818",
     "psk-wrong-key failed tls=-9846",
-    "psk-server ready cipher=PSK-AES128-CBC-SHA",
-    "psk-server-wrong-key failed cipher=PSK-AES128-CBC-SHA",
+    "group-default-no-shared failed tls=-9824 cipher=none",
+    "group-compatibility-allowed ready cipher=AES128-SHA",
+    "group-legacy-refused failed tls=-9818",
+    "psk-server ready cipher=ECDHE-PSK-AES128-CBC-SHA",
+    "psk-server-wrong-key failed cipher=ECDHE-PSK-AES128-CBC-SHA",
+    "psk-server-static-refused failed cipher=(NONE)",
 }, "\n") .. "\n"
 
 local function swiftc(args)

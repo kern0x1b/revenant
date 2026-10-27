@@ -1,11 +1,10 @@
-#include <dlfcn.h>
 #include <objc/message.h>
 #include <objc/runtime.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-static const char RevenantSecurityBackportPath[] = "/usr/lib/revenant/org.revenant.backports/libSecurityBackports.dylib";
+extern char OBJC_CLASS_$_RevenantSecProtocolOptions;
 
 static id RevenantSend(const void *receiver, const char *selector)
 {
@@ -26,14 +25,7 @@ static const char *RevenantUTF8(id string)
 
 void *RevenantSecProtocolOptionsCreate(void)
 {
-    Class cls = objc_getClass("RevenantSecProtocolOptions");
-    if (!cls) {
-        dlopen(RevenantSecurityBackportPath, RTLD_NOW | RTLD_GLOBAL);
-        cls = objc_getClass("RevenantSecProtocolOptions");
-    }
-    if (!cls)
-        return NULL;
-    id allocated = ((id (*)(id, SEL))objc_msgSend)((id)cls, sel_registerName("alloc"));
+    id allocated = ((id (*)(id, SEL))objc_msgSend)((id)&OBJC_CLASS_$_RevenantSecProtocolOptions, sel_registerName("alloc"));
     return ((id (*)(id, SEL))objc_msgSend)(allocated, sel_registerName("init"));
 }
 
@@ -100,6 +92,19 @@ uint32_t RevenantSecProtocolOptionsCiphersuiteAt(const void *options, size_t ind
 {
     id suites = RevenantSend(options, "ciphersuites");
     id value = ((id (*)(id, SEL, unsigned long))objc_msgSend)(suites, sel_registerName("objectAtIndex:"), (unsigned long)index);
+    return ((unsigned int (*)(id, SEL))objc_msgSend)(value, sel_registerName("unsignedIntValue"));
+}
+
+size_t RevenantSecProtocolOptionsCiphersuiteGroupCount(const void *options)
+{
+    id groups = RevenantSend(options, "revenantCiphersuiteGroups");
+    return ((unsigned long (*)(id, SEL))objc_msgSend)(groups, sel_registerName("count"));
+}
+
+uint32_t RevenantSecProtocolOptionsCiphersuiteGroupAt(const void *options, size_t index)
+{
+    id groups = RevenantSend(options, "revenantCiphersuiteGroups");
+    id value = ((id (*)(id, SEL, unsigned long))objc_msgSend)(groups, sel_registerName("objectAtIndex:"), (unsigned long)index);
     return ((unsigned int (*)(id, SEL))objc_msgSend)(value, sel_registerName("unsignedIntValue"));
 }
 

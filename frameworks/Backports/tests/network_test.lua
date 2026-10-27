@@ -1,6 +1,8 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "Network")
+local security = path.join(backports, "src", "Security")
+local securityObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
 local fixture = path.join(backports, "tests", "Network", "main.swift")
 local mapping = path.join(backports, "tests", "Network", "mapping", "main.swift")
 local live = path.join(backports, "tests", "Network", "live", "main.swift")
@@ -26,11 +28,24 @@ local function mutant_of(files, folder)
     return written
 end
 
+local function native_objects(folder)
+    local bridge = path.join(folder, "RevenantTLSBridge.o")
+    os.vrunv("xcrun", {"clang", "-c", path.join(src, "CBoringSSL", "RevenantTLSBridge.c"), "-o", bridge})
+    local objects = {bridge}
+    for _, file in ipairs(securityObjects) do
+        local object = path.join(folder, path.basename(file) .. ".o")
+        os.vrunv("xcrun", {"clang", "-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
+        table.insert(objects, object)
+    end
+    return objects
+end
+
 local function backport_program(source, files, output)
     local boringssl = workspace.package_of("boringssl", true)
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
+    local objects = native_objects(path.directory(output))
     swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "CBoringSSL"), "-Xcc", "-I" .. path.join(boringssl, "include")},
-                      files, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
+                      files, objects, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
     return output
 end
 

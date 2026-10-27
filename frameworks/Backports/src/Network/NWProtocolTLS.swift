@@ -40,6 +40,21 @@ private func revenantCopyBytes(_ handle: UnsafeRawPointer, _ kind: Int32, _ inde
     return bytes
 }
 
+private let revenantTLS13Suites: [UInt16] = [0x1301, 0x1302, 0x1303]
+private let revenantPFSSuites: [UInt16] = [0xC02C, 0xC02B, 0xCCA9, 0xC030, 0xC02F, 0xCCA8, 0xC00A, 0xC009, 0xC014, 0xC013]
+private let revenantNonPFSSuites: [UInt16] = [0x009D, 0x009C, 0x0035, 0x002F]
+private let revenantTLS10Suites: [UInt16] = [0xC009, 0xC00A, 0xC013, 0xC014, 0x0035, 0x002F]
+private let revenantTLS10TripleDESSuites: [UInt16] = [0xC008, 0xC012, 0x000A]
+private let revenantDHESuites: [UInt16] = [0x009F, 0x009E, 0x006B, 0x0067, 0x0039, 0x0033, 0x0016]
+
+private let revenantCiphersuiteGroups: [UInt16: (name: String, suites: [UInt16])] = [
+    0: ("default", revenantTLS13Suites + revenantPFSSuites),
+    1: ("compatibility", revenantNonPFSSuites + revenantTLS10Suites + revenantTLS10TripleDESSuites),
+    2: ("legacy", revenantDHESuites),
+    3: ("ats", revenantTLS13Suites + revenantPFSSuites),
+    4: ("ats_compatibility", revenantNonPFSSuites),
+]
+
 struct NWTLSConfiguration {
     let minimumVersion: UInt16
     let maximumVersion: UInt16
@@ -48,6 +63,7 @@ struct NWTLSConfiguration {
     let peerAuthenticationRequired: Bool
     let localIdentity: SecIdentity?
     let ciphersuites: [UInt16]
+    let ciphersuiteGroups: [UInt16]
     let ocspEnabled: Bool
     let sctEnabled: Bool
     let hasVerifyBlock: Bool
@@ -70,6 +86,9 @@ struct NWTLSConfiguration {
         }
         ciphersuites = (0..<RevenantSecProtocolOptionsCiphersuiteCount(handle)).map { index in
             UInt16(truncatingIfNeeded: RevenantSecProtocolOptionsCiphersuiteAt(handle, index))
+        }
+        ciphersuiteGroups = (0..<RevenantSecProtocolOptionsCiphersuiteGroupCount(handle)).map { index in
+            UInt16(truncatingIfNeeded: RevenantSecProtocolOptionsCiphersuiteGroupAt(handle, index))
         }
         ocspEnabled = RevenantSecProtocolOptionsOCSPEnabled(handle)
         sctEnabled = RevenantSecProtocolOptionsSCTEnabled(handle)
@@ -263,10 +282,14 @@ final class NWTLSSession {
         if let reason = configuration.unsupportedSetting {
             throw NWTLSUnsupportedSetting(reason: reason, status: errSSLBadConfiguration)
         }
-        var names = try NWTLSSession.cipherNames(configuration.ciphersuites, maximumVersion: configuration.maximumVersion)
-        if !configuration.preSharedKeys.isEmpty {
-            names += NWTLSSession.preSharedKeyCipherNames
+        let usesPreSharedKeys = !configuration.preSharedKeys.isEmpty
+        if usesPreSharedKeys && (configuration.peerAuthenticationRequired || configuration.hasVerifyBlock) {
+            throw NWTLSUnsupportedSetting(reason: "pre-shared keys need peer authentication turned off and no verify block: a PSK handshake has no certificate to check", status: errSSLBadConfiguration)
         }
+        if usesPreSharedKeys && (!configuration.ciphersuites.isEmpty || !configuration.ciphersuiteGroups.isEmpty) {
+            throw NWTLSUnsupportedSetting(reason: "pre-shared keys cannot be combined with a ciphersuite list or group: Apple ciphersuite values have no PSK suites", status: errSSLBadConfiguration)
+        }
+        let names = try NWTLSSession.cipherNames(configuration.ciphersuites, groups: configuration.ciphersuiteGroups, maximumVersion: configuration.maximumVersion)
         guard let method = TLS_method(), let context = SSL_CTX_new(method) else {
             throw NWTLSUnsupportedSetting(reason: "BoringSSL could not allocate a TLS context", status: errSSLInternal)
         }
@@ -278,6 +301,10 @@ final class NWTLSSession {
         if !names.isEmpty, SSL_CTX_set_strict_cipher_list(context, names.joined(separator: ":")) != 1 {
             SSL_CTX_free(context)
             throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the ciphersuite list", status: errSSLBadCipherSuite)
+        }
+        if usesPreSharedKeys, SSL_CTX_set_cipher_list(context, (["DEFAULT"] + NWTLSSession.preSharedKeyCipherNames + ["!kPSK"]).joined(separator: ":")) != 1 {
+            SSL_CTX_free(context)
+            throw NWTLSUnsupportedSetting(reason: "BoringSSL rejected the pre-shared key suites", status: errSSLBadCipherSuite)
         }
         let peerRequired = configuration.peerAuthenticationRequired
         let verifies = configuration.hasVerifyBlock
@@ -314,7 +341,7 @@ final class NWTLSSession {
             }
         }
 
-        if !configuration.preSharedKeys.isEmpty {
+        if usesPreSharedKeys {
             if serverSide {
                 SSL_CTX_set_psk_server_callback(context, revenantServerPreSharedKey)
                 if !configuration.preSharedKeyHint.isEmpty {
@@ -562,11 +589,29 @@ final class NWTLSSession {
         }
     }
 
-    fileprivate static let preSharedKeyCipherNames = ["ECDHE-PSK-AES128-CBC-SHA", "ECDHE-PSK-AES256-CBC-SHA", "ECDHE-PSK-CHACHA20-POLY1305", "PSK-AES128-CBC-SHA", "PSK-AES256-CBC-SHA"]
+    fileprivate static let preSharedKeyCipherNames = ["ECDHE-PSK-AES128-CBC-SHA", "ECDHE-PSK-AES256-CBC-SHA", "ECDHE-PSK-CHACHA20-POLY1305"]
 
-    private static func cipherNames(_ suites: [UInt16], maximumVersion: UInt16) throws -> [String] {
+    private static func cipherNames(_ suites: [UInt16], groups: [UInt16], maximumVersion: UInt16) throws -> [String] {
+        var requested: [UInt16] = []
+        for group in groups {
+            guard let entry = revenantCiphersuiteGroups[group] else {
+                throw NWTLSUnsupportedSetting(reason: "ciphersuite group \(group) is refused: its suite list is not in the Apple Security source", status: errSSLBadCipherSuite)
+            }
+            let known = entry.suites.filter { SSL_get_cipher_by_value($0) != nil }
+            let dropped = entry.suites.filter { SSL_get_cipher_by_value($0) == nil }
+            guard !known.isEmpty else {
+                throw NWTLSUnsupportedSetting(reason: "ciphersuite group \(entry.name) has no suite BoringSSL supports", status: errSSLBadCipherSuite)
+            }
+            if !dropped.isEmpty {
+                let ids = dropped.map { "0x" + String($0, radix: 16) }.joined(separator: ", ")
+                fputs("Network: ciphersuite group \(entry.name) drops \(ids), which BoringSSL lacks\n", stderr)
+            }
+            requested += known
+        }
+        requested += suites
         var names: [String] = []
-        for suite in suites {
+        var seen = Set<UInt16>()
+        for suite in requested where seen.insert(suite).inserted {
             guard let cipher = SSL_get_cipher_by_value(suite), let name = SSL_CIPHER_get_name(cipher) else {
                 throw NWTLSUnsupportedSetting(reason: "ciphersuite 0x\(String(suite, radix: 16)) is unknown to BoringSSL", status: errSSLBadCipherSuite)
             }
@@ -575,7 +620,7 @@ final class NWTLSSession {
             }
             names.append(String(cString: name))
         }
-        if names.isEmpty && !suites.isEmpty && maximumVersion < 0x0304 {
+        if names.isEmpty && !requested.isEmpty && maximumVersion < 0x0304 {
             throw NWTLSUnsupportedSetting(reason: "only TLS 1.3 ciphersuites are listed, but the maximum is TLS 1.2: list a TLS 1.2 ciphersuite too", status: errSSLBadCipherSuite)
         }
         return names

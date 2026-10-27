@@ -33,6 +33,22 @@ local function add_flags(target, flags)
     end
 end
 
+local SWIFT_DIR = os.scriptdir()
+
+local function security_stub_text(stub)
+    local targets = "[ " .. table.concat(stub.targets, ", ") .. " ]"
+    local lines = {"--- !tapi-tbd", "tbd-version: 4", "targets: " .. targets, "install-name: '" .. stub.installName .. "'",
+                   "current-version: 1", "compatibility-version: 1", "exports:", "  - targets: " .. targets}
+    if #stub.symbols > 0 then
+        table.insert(lines, "    symbols: [ " .. table.concat(stub.symbols, ", ") .. " ]")
+    end
+    if #stub.objcClasses > 0 then
+        table.insert(lines, "    objc-classes: [ " .. table.concat(stub.objcClasses, ", ") .. " ]")
+    end
+    table.insert(lines, "...")
+    return table.concat(lines, "\n") .. "\n"
+end
+
 target("AppIntents")
     set_kind("static")
     set_default(false)
@@ -237,6 +253,14 @@ local function overlay(name, folder, opt)
             end
         end)
         on_config(function (target)
+            if opt.stub then
+                local stub = import("security_stub", {rootdir = SWIFT_DIR, anonymous = true})
+                local folder = path.join(target:autogendir(), "stub")
+                os.mkdir(folder)
+                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), security_stub_text(stub))
+                target:add("linkdirs", folder)
+                target:add("links", stub.library)
+            end
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
                 os.mkdir(folder)
@@ -286,7 +310,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL", cfiles = {"CBoringSSL/RevenantTLSBridge.c"}})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, packages = {"boringssl"}, cmodule = "CBoringSSL", cfiles = {"CBoringSSL/RevenantTLSBridge.c"}, stub = true})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 
