@@ -25,7 +25,7 @@ function main()
         ""
     }, "\n"))
 
-    local cache = path.join(sdkfiles.cache_folder(sdkfiles.sdk_version(sdk)), "constant_intros.tsv")
+    local cache = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     os.tryrm(cache)
     local computed = facts.constant_intros(sdk)
     assert(computed.FixtureValue and computed.FixtureValue.kind == "extern", "the fixture's extern constant is not listed")
@@ -35,6 +35,16 @@ function main()
     local cached = facts.constant_intros(sdk)
     assert(describe(cached) == describe(computed), "the cached constant intros differ from the ones computed, so the cache is not read:\n" .. describe(cached))
 
+    local other = path.join(os.tmpdir(), "facts-cache-sdk-other")
+    os.tryrm(other)
+    os.mkdir(path.join(other, "System", "Library", "Frameworks", "Fixture.framework", "Headers"))
+    io.writefile(path.join(other, "SDKSettings.json"), '{"Version": "99.9"}')
+    io.writefile(path.join(other, "System", "Library", "Frameworks", "Fixture.framework", "Headers", "Fixture.h"),
+        "extern const int FixtureValue __attribute__((availability(ios, introduced=6.0)));\n")
+    local elsewhere = facts.constant_intros(other)
+    assert(elsewhere.FixtureValue and tonumber(elsewhere.FixtureValue.intro) == 6000,"another SDK of the same version was given the constant intros of the first one: " .. describe(elsewhere))
+
+    os.tryrm(other)
     os.tryrm(cache)
     os.tryrm(sdk)
     print("FACTS_CACHE_TEST passed")

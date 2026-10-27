@@ -268,6 +268,18 @@ function failures(arguments)
         table.insert(found, "a host cache of an emulator image is scratch, so the cap can evict it")
     end
 
+    local models = path.join(folder, "models")
+    folder_of(path.join(models, "modcache", "old-sdk"), MEGABYTE, OLDER)
+    local model_scratch = false
+    for _, row in ipairs(cache.status(models, {builds = {}})) do
+        if row.name == path.join("modcache", "old-sdk") and row.class == "scratch" then
+            model_scratch = true
+        end
+    end
+    if not model_scratch then
+        table.insert(found, "a module cache of one SDK is scratch, so the cap can evict it")
+    end
+
     local sources = path.join(folder, "sources")
     file_of(path.join(sources, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
     local installed = folder_of(package_of(sources, "bbb"), MEGABYTE, OLDEST)

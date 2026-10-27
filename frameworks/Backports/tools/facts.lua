@@ -132,10 +132,6 @@ local function swift_walk(state, node, container, intro)
     end
 end
 
-local function digester()
-    return os.iorunv("/usr/bin/xcrun", {"--find", "swift-api-digester"}):trim()
-end
-
 local function target_of(version)
     return "arm64-apple-ios" .. version
 end
@@ -158,7 +154,7 @@ function objc_facts(sdk, name, version)
 end
 
 function constant_intros(sdk)
-    local file = path.join(sdkfiles.cache_folder(sdkfiles.sdk_version(sdk)), "constant_intros.tsv")
+    local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     if os.isfile(file) then
         local cached = {}
         for line in io.lines(file) do
@@ -203,8 +199,8 @@ end
 
 function swift_facts(sdk, name, version, scratch)
     local output = path.join(scratch, name .. ".json")
-    os.execv(digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
-        "-avoid-tool-args", "-swift-only", "-module-cache-path", sdkfiles.model_cache(), "-o", output})
+    os.execv(sdkfiles.digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
+        "-avoid-tool-args", "-swift-only", "-module-cache-path", sdkfiles.model_cache(sdk), "-o", output})
     local document = json.loadfile(output)
     os.tryrm(output)
     assert(document, "the digester wrote no JSON for " .. name)
