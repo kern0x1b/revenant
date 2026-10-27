@@ -287,6 +287,16 @@ local MEMBERS = {
             replace = "        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
         },
     },
+    {
+        member = "kSecAccessControlPrivateKeyUsage",
+        header = {
+            name = "Security",
+            directory = {"System", "Library", "Frameworks", "Security.framework", "Headers"},
+            file = "SecAccessControl.h",
+            find = "kSecAccessControlPrivateKeyUsage        API_AVAILABLE(macos(10.12.1), ios(9.0)) = 1u << 30,",
+            replace = "kSecAccessControlPrivateKeyUsage        = 1u << 30,",
+        },
+    },
 }
 
 local MODULE_DIR = os.scriptdir()
