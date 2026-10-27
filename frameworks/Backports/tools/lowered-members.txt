@@ -1793,6 +1793,8 @@ class RevenantMarkdownParser
 class RevenantMenuHost
 class RevenantMenuTrigger
 class RevenantMeshBufferZoneState
+class RevenantMetadataObjectsFilter
+class RevenantMetadataOutputInstall
 class RevenantMetal4CommandQueue
 class RevenantMetalBinaryArchive
 class RevenantMetalBinding
@@ -11908,6 +11910,7 @@ member AVCaptureManualExposureBracketedStillImageSettings +manualExposureSetting
 member AVCaptureManualExposureBracketedStillImageSettings -ISO
 member AVCaptureManualExposureBracketedStillImageSettings -description
 member AVCaptureManualExposureBracketedStillImageSettings -exposureDuration
+member AVCaptureMetadataOutput -metadataObjectsDelegate
 member AVCaptureMetadataOutput -rectOfInterest
 member AVCaptureMetadataOutput -setRectOfInterest:
 member AVCaptureMultiCamSession +isMultiCamSupported
@@ -26463,6 +26466,8 @@ member RevenantMenuTrigger -initWithControl:
 member RevenantMenuTrigger -revenant_fire:
 member RevenantMeshBufferZoneState -allocator
 member RevenantMeshBufferZoneState -capacity
+member RevenantMetadataObjectsFilter -captureOutput:didOutputMetadataObjects:fromConnection:
+member RevenantMetadataOutputInstall +load
 member RevenantMetal4CommandQueue -addResidencySet:
 member RevenantMetal4CommandQueue -addResidencySets:count:
 member RevenantMetal4CommandQueue -copyBufferMappingsFromBuffer:toBuffer:operations:count:
@@ -34958,6 +34963,7 @@ protocol ARTrackable
 protocol AVAsynchronousKeyValueLoading
 protocol AVAudioMixing
 protocol AVCaptureAudioDataOutputSampleBufferDelegate
+protocol AVCaptureMetadataOutputObjectsDelegate
 protocol AVCapturePhotoCaptureDelegate
 protocol AVCaptureVideoDataOutputSampleBufferDelegate
 protocol AVMetricEventStreamPublisher
@@ -35163,6 +35169,7 @@ protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
 protocol_member AVAudioMixing -destinationForMixer:bus:
 protocol_member AVAudioMixing -volume
 protocol_member AVCaptureAudioDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
+protocol_member AVCaptureMetadataOutputObjectsDelegate -captureOutput:didOutputMetadataObjects:fromConnection:
 protocol_member AVCaptureVideoDataOutputSampleBufferDelegate -captureOutput:didDropSampleBuffer:fromConnection:
 protocol_member AVCaptureVideoDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
 protocol_member AVPictureInPictureControllerDelegate -pictureInPictureController:failedToStartPictureInPictureWithError:
