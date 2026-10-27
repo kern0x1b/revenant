@@ -3049,9 +3049,14 @@ enum LABiometryTypeNone
 enum LACompanionTypeMac
 enum LACompanionTypeWatch
 enum LACredentialTypeApplicationPassword
+enum LAErrorAppCancel
 enum LAErrorBiometryNotAvailable
 enum LAErrorInvalidContext
 enum LAErrorNotInteractive
+enum LAErrorSystemCancel
+enum LAErrorUserCancel
+enum LAErrorUserFallback
+enum LAPolicyDeviceOwnerAuthentication
 enum LPErrorMetadataFetchCancelled
 enum LPErrorMetadataFetchFailed
 enum LPErrorMetadataFetchTimedOut
@@ -4741,6 +4746,10 @@ function SecCertificateCopyNormalizedSubjectSequence
 function SecCertificateCopySerialNumberData
 function SecCopyErrorMessageString
 function SecCreateSharedWebCredentialPassword
+function SecItemAdd
+function SecItemCopyMatching
+function SecItemDelete
+function SecItemUpdate
 function SecKeyCopyAttributes
 function SecKeyCopyExternalRepresentation
 function SecKeyCopyKeyExchangeResult
