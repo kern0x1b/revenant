@@ -84,9 +84,20 @@ The values the Security backport answers, where each came from, and what has no 
   reading above.
 - iOS 6 has no LocalAuthentication framework, so the answers above follow the iOS 8+ contract. They are reproduced
   without an iOS 8+ device, so the iOS 8+ values are not measured.
-- With a passcode set the backport answers NO with `LAErrorNotInteractive` (-1004). That path is not measured: the
-  set-passcode state needs a device with a passcode, and iOS 6 offers an app no passcode prompt to verify. The backport
-  never answers YES for device-owner authentication.
+- With a passcode set (any lock state other than 3) `canEvaluatePolicy` answers YES, and `evaluatePolicy` shows the
+  backport's passcode prompt (`RevenantPasscode.m`, an alert with a secure field; the number pad for the simple form). The
+  reply is YES only when `MKBUnlockDevice` accepts the entry (see "MobileKeyBag and the passcode"). Any other answer is NO:
+  a refused check (`RevenantPasscodeUnavailable`) gives `LAErrorNotInteractive`, a wrong entry gives
+  `LAErrorAuthenticationFailed`, and Cancel gives `LAErrorUserCancel`. The prompt makes one attempt per call and refuses a
+  second prompt while one is showing.
+- The prompt has not run on a device. The lock states other than 3 are read as "passcode set" from one measurement (3 on
+  the iPad 2); the simple form is four digits and the number pad, a value fixed in the backport because the system's
+  simple-or-complex setting is not yet located. The entry is sent to `MKBUnlockDevice` as its UTF-8 bytes, which is a
+  guess the image does not confirm.
+- On the Mac the MobileKeyBag path resolves through the system's dyld cache and `MKBGetDeviceLockState` returns a state other
+  than 3, so the host cannot stand in for the no-passcode device. The host test (`tests/localauth_passcode_test.lua`)
+  replaces `RevenantPasscodeUnlockDevice`, and it checks the mapping, the validation, the outcome and that evaluation
+  fails closed (-1004) when the prompt is not available.
 
 ## MobileKeyBag and the passcode, from the 6.1.3 image
 
@@ -228,4 +239,7 @@ message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/
   and whether an app can verify a passcode through `MKBUnlockDevice` (its argument is a `CFDataRef` and its privilege is in
   the kernel; see "MobileKeyBag and the passcode"). The
   user-presence gate fails closed until that entry exists.
-- **Not implemented:** the passcode prompt. Until it exists, every gate that needs user presence or a passcode fails closed.
+- **Implemented, host-tested with the unlock call replaced, not run on a device:** the passcode prompt and its verification
+  path (`RevenantPasscode.m`), and the device-owner answers built on them. The one call to `MKBUnlockDevice` is
+  `RevenantPasscodeKeyBag.m`; it is not made on any device until the owner allows the measurement. Until then the gates
+  that need a passcode fail closed on the device.

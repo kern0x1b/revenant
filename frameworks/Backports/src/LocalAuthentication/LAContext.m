@@ -1,5 +1,6 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <dlfcn.h>
+#import "RevenantPasscode.h"
 
 extern NSString *const LAErrorDomain;
 
@@ -23,9 +24,27 @@ static int revenant_device_lock_state(void)
 
 static NSError *revenant_device_owner_error(void)
 {
-    if (revenant_device_lock_state() == revenant_lock_state_disabled)
+    int state = revenant_device_lock_state();
+    if (state == revenant_lock_state_disabled)
         return revenant_error(revenant_error_passcode_not_set, @"Passcode not set.", nil);
-    return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+    if (state < 0)
+        return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+    return nil;
+}
+
+static NSError *revenant_error_for_passcode(RevenantPasscodeResult result)
+{
+    switch (result) {
+    case RevenantPasscodeAccepted:
+        return nil;
+    case RevenantPasscodeRejected:
+        return revenant_error(LAErrorAuthenticationFailed, @"Authentication failed.", nil);
+    case RevenantPasscodeUnavailable:
+        return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"The device keybag refused the passcode check for this process.");
+    case RevenantPasscodeCancelled:
+        return revenant_error(LAErrorUserCancel, @"Authentication was cancelled by the user.", nil);
+    }
+    return nil;
 }
 
 @implementation LAContext {
@@ -81,7 +100,7 @@ static NSError *revenant_device_owner_error(void)
     NSError *failure = [self revenant_errorForPolicy:policy];
     if (error)
         *error = failure;
-    return NO;
+    return failure == nil;
 }
 
 - (void)evaluatePolicy:(LAPolicy)policy localizedReason:(NSString *)localizedReason reply:(void (^)(BOOL, NSError *))reply
@@ -92,6 +111,16 @@ static NSError *revenant_device_owner_error(void)
     if (!reply)
         return;
     void (^handler)(BOOL, NSError *) = [reply copy];
+    if (!failure && (NSInteger)policy == 2) {
+        if (_interactionNotAllowed) {
+            failure = revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+        } else {
+            RevenantPasscodePresent(localizedReason, RevenantPasscodeStyleSimple, ^(RevenantPasscodeResult result) {
+                handler(result == RevenantPasscodeAccepted, revenant_error_for_passcode(result));
+            });
+            return;
+        }
+    }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         handler(NO, failure);
     });

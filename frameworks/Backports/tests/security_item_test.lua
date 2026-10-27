@@ -29,6 +29,8 @@ function main()
         path.join(security, "RevenantSecKeyFail.m"),
         path.join(localauth, "LAContext.m"),
         path.join(localauth, "LAErrorDomain.m"),
+        path.join(localauth, "RevenantPasscode.m"),
+        path.join(localauth, "RevenantPasscodeKeyBag.m"),
         path.join(webauth, "RevenantCKWebAuth.c"),
         path.join(source, "uECC.c"),
     }
