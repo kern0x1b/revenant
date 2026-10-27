@@ -85,6 +85,12 @@ function failures(opt)
         end
     end
 
+    io.writefile(control, CONTROL)
+    local _, recommended = debian.control_text(control, "1.2.3", root, nil, {"org.example.english", "org.example.russian"})
+    if not recommended:find("\nRecommends: org.example.english, org.example.russian\n", 1, true) then
+        table.insert(found, "recommended packages join a Recommends field: " .. recommended)
+    end
+
     io.writefile(control, CONTROL .. "Version: 9\n")
     local errors = fixtures.refusal(function () debian.write({control = control, version = "1.2.3", root = root, outputdir = folder}) end)
     if not errors or not errors:find("must not carry Version", 1, true) then

@@ -10,6 +10,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Architecture](explanation/architecture.md) | the three layers, what each top-level folder is, and how an app built outside gets our libraries |
 | [Decisions](explanation/decisions/README.md) | the architecture decisions, each with the check that enforces it |
 | [Loading the backports](explanation/backports-loading.md) | how the backport libraries are loaded |
+| [Vision text recognition on iOS 6](explanation/backports/vision-text.md) | `VNRecognizeTextRequest` on Tesseract: the languages, the differences from Vision, the measurements, and the packaging |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |

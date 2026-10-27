@@ -159,10 +159,10 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 
 ### C25. Vision requests beyond iOS 6 image-analysis engines
 
-- Stands in for: `VNDetectRectanglesRequest`, `VNRecognizeTextRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
-- Why: iOS 6 Core Image has face detection, but no rectangle, OCR, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented.
+- Stands in for: `VNDetectRectanglesRequest`, `VNClassifyImageRequest`, `VNGeneratePersonSegmentationRequest`, `VNGenerateForegroundInstanceMaskRequest`, and the barcode symbologies other than QR and PDF417.
+- Why: iOS 6 Core Image has face detection, but no rectangle, built-in image-classification, or subject-segmentation engine. Barcode requests use zxing-cpp for QR and PDF417 because Telegram needs them for QR login and passport scanning; the other symbologies are not implemented. `VNRecognizeTextRequest` is not a stand-in: it reads text with Tesseract, as described in [Vision text recognition on iOS 6](../../explanation/backports/vision-text.md).
 - Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
-- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison against Apple's Vision has been run.
+- Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison of barcodes against Apple's Vision has been run. The text fixtures are compared with macOS Vision: the accurate models match its text, and their boxes deviate by at most 0.0323 against a tolerance of 0.04.
 - Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
 >
 ## Removed
