@@ -1,5 +1,3 @@
-// The host build renames the backport classes, as their sources do, so the test program and the backport sources
-// refer to the same classes. The macOS build keeps the SDK names and reads the real WebKit classes.
 #if defined(REVENANT_HOST_BUILD)
 #define WKSnapshotConfiguration WKSnapshotConfigurationRevenant
 #define WKDownload WKDownloadRevenant
@@ -11,9 +9,6 @@
 #import <WebKit/WebKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-// The lines printed here come first, and the macOS build prints only these. The backport build prints them too, and
-// the Lua driver compares them with macOS. The engine lines follow in the backport build only: a macOS caller cannot
-// make a WKDownload or a WKOpenPanelParameters, so no macOS value exists to compare them with.
 static int reported(int value)
 {
 #ifdef WEBKIT_VALUES_NEGATIVE_CONTROL

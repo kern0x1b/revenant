@@ -3,8 +3,6 @@ local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "WebKit")
 local MAIN = path.join(TESTS, "webkit_values", "main.m")
 
--- The engine values a backport object reports, and the values the UIWebView engine can really give. None of them
--- has a macOS counterpart: a caller on macOS cannot create these objects, so the macOS build never prints them.
 local ENGINE = {
     "engine download original request nil: 1",
     "engine download web view nil: 1",
