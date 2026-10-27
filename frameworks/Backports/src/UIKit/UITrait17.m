@@ -15,7 +15,7 @@
     }
 
 REVENANT_TRAIT(0, UITraitUserInterfaceIdiom, @"UserInterfaceIdiom", RevenantTraitValueNSInteger, RevenantTraitHomeIvar, @(-1), YES)
-REVENANT_TRAIT(1, UITraitUserInterfaceStyle, @"UserInterfaceStyle", RevenantTraitValueNSInteger, RevenantTraitHomeStyle, @(0), YES)
+REVENANT_TRAIT(1, UITraitUserInterfaceStyle, @"UserInterfaceStyle", RevenantTraitValueNSInteger, RevenantTraitHomeStyle, @(UIUserInterfaceStyleLight), YES)
 REVENANT_TRAIT(2, UITraitLayoutDirection, @"UserInterfaceLayoutDirection", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
 REVENANT_TRAIT(3, UITraitDisplayScale, @"DisplayScale", RevenantTraitValueCGFloat, RevenantTraitHomeIvar, @(0), NO)
 REVENANT_TRAIT(4, UITraitHorizontalSizeClass, @"HorizontalSizeClass", RevenantTraitValueNSInteger, RevenantTraitHomeIvar, @(0), NO)
