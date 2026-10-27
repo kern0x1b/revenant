@@ -27604,6 +27604,10 @@ member RevenantSecIdentity -initWithIdentity:
 member RevenantSecIdentity -revenantCertificates
 member RevenantSecIdentity -revenantIdentity
 member RevenantSecIdentity -revenantSetCertificates:
+member RevenantSecProtocolMetadata -negotiatedCipherSuite
+member RevenantSecProtocolMetadata -negotiatedProtocol
+member RevenantSecProtocolMetadata -negotiatedVersion
+member RevenantSecProtocolMetadata -ocspResponse
 member RevenantSecProtocolOptions -challengeBlock
 member RevenantSecProtocolOptions -ciphersuites
 member RevenantSecProtocolOptions -diffieHellmanParameters

@@ -254,13 +254,30 @@ private func revenantDefaultRoutes() -> [DefaultRoute] {
     return routes
 }
 
+// iOS has no /etc/resolv.conf. configd publishes the resolver configuration
+// through dnsinfo, and res_9_ninit reads that same configuration on Apple.
+private typealias ResolverInit = @convention(c) (UnsafeMutableRawPointer) -> Int32
+private typealias ResolverDestroy = @convention(c) (UnsafeMutableRawPointer) -> Void
+
 private func revenantHasDNSServers() -> Bool {
-    guard let text = try? String(contentsOfFile: "/etc/resolv.conf", encoding: .utf8) else {
+    guard let library = dlopen("/usr/lib/libresolv.9.dylib", RTLD_NOW),
+          let initSymbol = dlsym(library, "res_9_ninit"),
+          let destroySymbol = dlsym(library, "res_9_ndestroy") else {
         return false
     }
-    return text.split(whereSeparator: { $0.isNewline }).contains { line in
-        line.trimmingCharacters(in: .whitespaces).hasPrefix("nameserver")
+    let resolverInit = unsafeBitCast(initSymbol, to: ResolverInit.self)
+    let resolverDestroy = unsafeBitCast(destroySymbol, to: ResolverDestroy.self)
+    // struct __res_state is larger than the fields read here, so the buffer is generous.
+    let state = UnsafeMutableRawPointer.allocate(byteCount: 4096, alignment: 16)
+    defer { state.deallocate() }
+    state.initializeMemory(as: UInt8.self, repeating: 0, count: 4096)
+    guard resolverInit(state) == 0 else {
+        return false
     }
+    defer { resolverDestroy(state) }
+    // The fields before nscount are retrans and retry (int each), then options (unsigned long).
+    let nscountOffset = 2 * MemoryLayout<Int32>.size + MemoryLayout<UInt>.size
+    return state.load(fromByteOffset: nscountOffset, as: Int32.self) > 0
 }
 
 private func revenantIsExpensive(_ flags: SCNetworkReachabilityFlags) -> Bool {
