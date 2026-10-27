@@ -115,6 +115,50 @@ static void revenant_metal_checks(UIWindow *window)
     revenant_check([drawable presentedTime] > 0, @"presentedTime is set after present");
 }
 
+static CFTimeInterval REVENANT_REQUESTED_AT;
+static CFTimeInterval REVENANT_PRESENTED_AT;
+static BOOL REVENANT_TIMED_PRESENTED;
+
+static void revenant_paragraph_checks(void)
+{
+    NSParagraphStyle *defaults = [NSParagraphStyle defaultParagraphStyle];
+    revenant_check(!defaults.allowsDefaultTighteningForTruncation, @"NSParagraphStyle does not tighten before truncation by default");
+    NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
+    revenant_check(!style.allowsDefaultTighteningForTruncation, @"a new NSMutableParagraphStyle does not tighten before truncation");
+    style.allowsDefaultTighteningForTruncation = YES;
+    revenant_check(style.allowsDefaultTighteningForTruncation, @"an NSMutableParagraphStyle keeps allowsDefaultTighteningForTruncation");
+    NSParagraphStyle *copied = [style copy];
+    revenant_check(copied.allowsDefaultTighteningForTruncation, @"a copy of the style keeps allowsDefaultTighteningForTruncation");
+}
+
+static void revenant_present_timed_start(UIWindow *window)
+{
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    if (!device)
+        return;
+    CAMetalLayer *layer = [CAMetalLayer layer];
+    layer.device = device;
+    layer.frame = CGRectMake(0, 0, 64, 64);
+    [window.layer addSublayer:layer];
+    id<CAMetalDrawable> drawable = [layer nextDrawable];
+    if (!drawable)
+        return;
+    REVENANT_REQUESTED_AT = CACurrentMediaTime() + 0.5;
+    [drawable addPresentedHandler:^(id<MTLDrawable> presentedDrawable) {
+        id<CAMetalDrawable> shown = (id<CAMetalDrawable>)presentedDrawable;
+        REVENANT_PRESENTED_AT = [shown presentedTime];
+        REVENANT_TIMED_PRESENTED = YES;
+    }];
+    [drawable presentAtTime:REVENANT_REQUESTED_AT];
+    revenant_check(!REVENANT_TIMED_PRESENTED, @"presentAtTime does not present before the requested time");
+}
+
+static void revenant_present_timed_finish(void)
+{
+    revenant_check(REVENANT_TIMED_PRESENTED, @"presentAtTime presents once the requested time has come");
+    revenant_check(REVENANT_TIMED_PRESENTED && REVENANT_PRESENTED_AT >= REVENANT_REQUESTED_AT, @"presentAtTime presents no earlier than the requested time");
+}
+
 static void revenant_network_facts(void)
 {
     struct sockaddr_in address;
@@ -167,8 +211,16 @@ static void revenant_network_facts(void)
     revenant_line(@"INFO %@ iOS %@", [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion]);
     revenant_animation_checks();
     revenant_text_checks();
+    revenant_paragraph_checks();
     revenant_metal_checks(self.window);
+    revenant_present_timed_start(self.window);
     revenant_network_facts();
+    [self performSelector:@selector(revenantFinish) withObject:nil afterDelay:1.0];
+}
+
+- (void)revenantFinish
+{
+    revenant_present_timed_finish();
     revenant_line(@"REVENANT-DONE failures %lu", (unsigned long)REVENANT_FAILURES);
     [REVENANT_LOG writeToFile:REVENANT_PROBE_LOG atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     exit(0);

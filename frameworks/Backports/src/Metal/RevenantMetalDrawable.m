@@ -59,7 +59,14 @@ static NSUInteger revenant_drawable_counter;
 
 - (void)presentAtTime:(CFTimeInterval)presentationTime
 {
-    [self present];
+    CFTimeInterval delay = presentationTime - CACurrentMediaTime();
+    if (delay <= 0) {
+        [self present];
+        return;
+    }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self present];
+    });
 }
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration
