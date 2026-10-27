@@ -254,7 +254,7 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.stub then
-                local stub = import("security_stub", {rootdir = SWIFT_DIR, anonymous = true})
+                local stub = import("security_stub", {rootdir = SWIFT_DIR, anonymous = true}).stub()
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
                 io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), security_stub_text(stub))

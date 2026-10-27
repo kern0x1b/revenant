@@ -191,7 +191,7 @@ if is_plat("iphoneos") then
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
             if library.name == "SecurityBackports" then
                 after_build(function (target)
-                    local stub = import("security_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true})
+                    local stub = import("security_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
                     local required = {}
                     for _, objc in ipairs(stub.objcClasses) do
