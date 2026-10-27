@@ -279,6 +279,10 @@ package("swift-runtime")
         local foundation_links = {}
         local foundation_cache = path.join(generated, "module-cache-lowered")
         os.mkdir(foundation_cache)
+        local uikit_cache = path.join(generated, "module-cache-lowered-uikit")
+        os.mkdir(uikit_cache)
+        local quartzcore_cache = path.join(generated, "module-cache-lowered-quartzcore")
+        os.mkdir(quartzcore_cache)
 
         local function build_overlay(name, overlay_sources, links, objects, opt)
             local module = path.join(install, name .. ".swiftmodule")
@@ -426,7 +430,7 @@ package("swift-runtime")
                                 "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"})
             build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift"), path.join(revenant_overlay, "QuartzCore", "CAFrameRateRange.swift")},
                           table.join(foundation_links, {"-framework", "QuartzCore"}), nil,
-                          {extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+                          {module_cache = quartzcore_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
@@ -436,7 +440,7 @@ package("swift-runtime")
                                     path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
                                     path.join(revenant_overlay, "UIKit", "UIKitPointer.swift")},
                           table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
-                          {extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+                          {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
 
             local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
             local conformances = path.join(generated, "CoreData.mm.o")
