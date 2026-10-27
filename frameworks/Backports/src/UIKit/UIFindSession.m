@@ -91,11 +91,8 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
     _query = [query copy];
     _options = options;
     _results = revenant_matches([self revenant_document], _query, options);
-    _highlightedResultIndex = _results.count ? 0 : NSNotFound;
-    if (_results.count)
-        [self revenant_highlight:[_results[0] rangeValue]];
-    else
-        [self revenant_clearHighlight];
+    _highlightedResultIndex = NSNotFound;
+    [self revenant_clearHighlight];
 }
 
 - (void)highlightNextResultInDirection:(UITextStorageDirection)direction
@@ -103,8 +100,11 @@ static NSArray *revenant_matches(NSString *document, NSString *query, UITextSear
     NSUInteger count = _results.count;
     if (!count)
         return;
-    NSUInteger current = _highlightedResultIndex == NSNotFound ? 0 : (NSUInteger)_highlightedResultIndex;
-    NSUInteger next = direction == UITextStorageDirectionBackward ? (current + count - 1) % count : (current + 1) % count;
+    NSUInteger next = 0;
+    if (_highlightedResultIndex != NSNotFound) {
+        NSUInteger current = (NSUInteger)_highlightedResultIndex;
+        next = direction == UITextStorageDirectionBackward ? (current + count - 1) % count : (current + 1) % count;
+    }
     _highlightedResultIndex = (NSInteger)next;
     [self revenant_highlight:[_results[next] rangeValue]];
 }

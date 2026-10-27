@@ -10,6 +10,8 @@
 
 @implementation RevenantFindNavigator
 
+@synthesize showsReplaceRow = _showsReplaceRow;
+
 - (void)layoutSubviews
 {
     [super layoutSubviews];
@@ -155,7 +157,6 @@
     [session revenant_clearHighlight];
     if ([_delegate respondsToSelector:@selector(findInteraction:didEndFindSession:)])
         [_delegate findInteraction:self didEndFindSession:session];
-    _activeFindSession = nil;
 }
 
 - (void)findNext
@@ -176,7 +177,12 @@
     NSString *text = @"";
     switch (session.searchResultDisplayStyle) {
         case UIFindSessionSearchResultDisplayStyleCurrentAndTotal:
-            text = total ? [NSString stringWithFormat:@"%ld of %ld", (long)(index + 1), (long)total] : @"No results";
+            if (!total)
+                text = @"No results";
+            else if (index == NSNotFound)
+                text = total == 1 ? @"1 result" : [NSString stringWithFormat:@"%ld results", (long)total];
+            else
+                text = [NSString stringWithFormat:@"%ld of %ld", (long)(index + 1), (long)total];
             break;
         case UIFindSessionSearchResultDisplayStyleTotal:
             text = total == 1 ? @"1 result" : total ? [NSString stringWithFormat:@"%ld results", (long)total] : @"No results";
@@ -275,8 +281,8 @@
     _count.textAlignment = NSTextAlignmentCenter;
     [_navigator addSubview:_count];
 
-    _previous = [self revenant_navigatorButtonWithTitle:@"‹" action:@selector(findPrevious) tag:3];
-    _next = [self revenant_navigatorButtonWithTitle:@"›" action:@selector(findNext) tag:4];
+    _previous = [self revenant_navigatorButtonWithTitle:[NSString stringWithFormat:@"%C", (unichar)0x2039] action:@selector(findPrevious) tag:3];
+    _next = [self revenant_navigatorButtonWithTitle:[NSString stringWithFormat:@"%C", (unichar)0x203A] action:@selector(findNext) tag:4];
     [self revenant_navigatorButtonWithTitle:@"Done" action:@selector(dismissFindNavigator) tag:5];
 
     _replaceField = [[UITextField alloc] initWithFrame:CGRectZero];
