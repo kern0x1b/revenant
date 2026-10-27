@@ -26467,6 +26467,8 @@ member RevenantMenuTrigger -revenant_fire:
 member RevenantMeshBufferZoneState -allocator
 member RevenantMeshBufferZoneState -capacity
 member RevenantMetadataObjectsFilter -captureOutput:didOutputMetadataObjects:fromConnection:
+member RevenantMetadataObjectsFilter -output
+member RevenantMetadataObjectsFilter -target
 member RevenantMetadataOutputInstall +load
 member RevenantMetal4CommandQueue -addResidencySet:
 member RevenantMetal4CommandQueue -addResidencySets:count:
