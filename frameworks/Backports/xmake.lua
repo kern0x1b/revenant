@@ -386,7 +386,7 @@ else
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", air2es = "air2es_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -527,14 +527,44 @@ end
 option("air2cpu", {default = false, showmenu = true,
     description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
-if not is_plat("iphoneos") and has_config("air2cpu") then
-    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+option("air2es", {default = false, showmenu = true,
+    description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
+if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
+    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+end
+
+if not is_plat("iphoneos") and has_config("air2cpu") then
     target("air2cpu")
         set_kind("binary")
         set_default(false)
         add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
         add_packages("llvm")
+end
+
+rule("air2es.llvm")
+    on_config(function (target)
+        local llvm = target:pkg("llvm")
+        if llvm then
+            local prefix = llvm:installdir()
+            target:add("sysincludedirs", path.join(prefix, "include"))
+            target:add("linkdirs", path.join(prefix, "lib"))
+            target:add("rpathdirs", path.join(prefix, "lib"))
+        end
+        target:add("defines", "_GNU_SOURCE", "__STDC_CONSTANT_MACROS", "__STDC_FORMAT_MACROS", "__STDC_LIMIT_MACROS")
+        target:add("cxxflags", "-fno-rtti")
+    end)
+rule_end()
+
+if not is_plat("iphoneos") and has_config("air2es") then
+    target("air2es")
+        set_kind("binary")
+        set_default(false)
+        set_languages("c++20")
+        add_rules("air2es.llvm")
+        add_files(path.join(SRC, "air2es", "*.cpp"))
+        add_packages("llvm")
+        add_links("LLVM")
 end
 
 local FOUNDATION_TESTS = {
