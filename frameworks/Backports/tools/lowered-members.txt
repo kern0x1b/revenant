@@ -27167,8 +27167,11 @@ member RevenantPagination -forwardingTargetForSelector:
 member RevenantPagination -respondsToSelector:
 member RevenantPagination -webViewDidFinishLoad:
 member RevenantParagraphStyle9 +load
+member RevenantPasscodePrompt -alert
 member RevenantPasscodePrompt -alertView:clickedButtonAtIndex:
+member RevenantPasscodePrompt -completion
 member RevenantPasscodePrompt -finishWithResult:
+member RevenantPasscodePrompt -style
 member RevenantPendingLayout -completion
 member RevenantPendingLayout -layout
 member RevenantPersonNameParts -composite
