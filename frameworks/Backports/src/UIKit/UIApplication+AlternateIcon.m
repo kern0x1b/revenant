@@ -4,6 +4,12 @@
 static NSString *const revenant_alternate_icon_folder = @"/var/mobile/Library/Caches/org.revenant.alticon";
 static NSString *const revenant_alternate_icon_key = @"CFBundleAlternateIconName";
 static const char *const revenant_alternate_icon_changed = "org.revenant.alticon.changed";
+static NSString *const revenant_alternate_icon_tweak = @"/Library/MobileSubstrate/DynamicLibraries/revenant-alticon.dylib";
+
+static BOOL revenant_alternate_icon_tweak_installed(void)
+{
+    return [[NSFileManager defaultManager] fileExistsAtPath:revenant_alternate_icon_tweak];
+}
 
 static NSDictionary *revenant_alternate_icons(void)
 {
@@ -35,7 +41,7 @@ static NSError *revenant_alternate_icon_error(NSString *description)
 
 - (BOOL)supportsAlternateIcons
 {
-    return revenant_alternate_icons() != nil;
+    return revenant_alternate_icons() != nil && revenant_alternate_icon_tweak_installed();
 }
 
 - (NSString *)alternateIconName
@@ -56,10 +62,12 @@ static NSError *revenant_alternate_icon_error(NSString *description)
     } else {
         NSString *file = revenant_alternate_icon_file();
         if (alternateIconName.length) {
-            [[NSFileManager defaultManager] createDirectoryAtPath:revenant_alternate_icon_folder withIntermediateDirectories:YES
-                                                       attributes:@{NSFilePosixPermissions: @(0777)} error:NULL];
+            NSFileManager *manager = [NSFileManager defaultManager];
+            BOOL folderReady = [manager createDirectoryAtPath:revenant_alternate_icon_folder withIntermediateDirectories:YES
+                                                   attributes:@{NSFilePosixPermissions: @(0700)} error:NULL]
+                && [manager setAttributes:@{NSFilePosixPermissions: @(0700)} ofItemAtPath:revenant_alternate_icon_folder error:NULL];
             NSDictionary *state = @{revenant_alternate_icon_key: alternateIconName};
-            if (![state writeToFile:file atomically:YES])
+            if (!folderReady || ![state writeToFile:file atomically:YES])
                 error = revenant_alternate_icon_error(@"The requested operation couldn’t be completed because the icon state could not be saved.");
         } else {
             [[NSFileManager defaultManager] removeItemAtPath:file error:NULL];

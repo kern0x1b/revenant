@@ -45,6 +45,8 @@ static UIImage *revenant_alticon_image(NSString *identifier, float scale)
     if (!name.length)
         return nil;
     NSString *bundlePath = revenant_alticon_bundle_path(identifier);
+    if (!bundlePath)
+        return nil;
     NSArray *files = [revenant_alticon_declared(bundlePath, name) objectForKey:@"CFBundleIconFiles"];
     for (NSString *file in files) {
         NSString *extension = [file pathExtension].length ? [file pathExtension] : @"png";
@@ -63,12 +65,18 @@ static UIImage *revenant_alticon_image(NSString *identifier, float scale)
     return nil;
 }
 
+static CGSize revenant_alticon_pixels(UIImage *image)
+{
+    return CGSizeMake(image.size.width * image.scale, image.size.height * image.scale);
+}
+
 static UIImage *revenant_alticon_load(id self, SEL _cmd, id identifier, int format, float scale)
 {
+    UIImage *original = ((UIImage *(*)(id, SEL, id, int, float))revenant_alticon_original_load)(self, _cmd, identifier, format, scale);
     UIImage *alternate = [identifier isKindOfClass:[NSString class]] ? revenant_alticon_image(identifier, scale) : nil;
-    if (alternate)
+    if (alternate && original && CGSizeEqualToSize(revenant_alticon_pixels(alternate), revenant_alticon_pixels(original)))
         return alternate;
-    return ((UIImage *(*)(id, SEL, id, int, float))revenant_alticon_original_load)(self, _cmd, identifier, format, scale);
+    return original;
 }
 
 static NSString *revenant_alticon_display_name(NSString *identifier)
