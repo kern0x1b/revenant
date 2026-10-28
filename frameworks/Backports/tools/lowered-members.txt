@@ -25608,6 +25608,9 @@ member RevenantAccessoryView -tintColorDidChange
 member RevenantActiveFrameDurationInstaller +load
 member RevenantAlertPopoverPresentation -init
 member RevenantAlertPopoverPresentation -sourceView
+member RevenantAnimationGroup -autoreverses
+member RevenantAnimationGroup -duration
+member RevenantAnimationGroup -repeatCount
 member RevenantAnimatorDriver -initWithAnimator:
 member RevenantAnimatorDriver -invalidate
 member RevenantAnimatorDriver -step
