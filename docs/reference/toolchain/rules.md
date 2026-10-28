@@ -57,6 +57,7 @@ The rule passes `-Wno-incompatible-sysroot` to armv6, armv7 and armv7s targets. 
 | --- | --- |
 | `apple_minimum` | the oldest release the port runs on, for example `6.0`. A release the architecture cannot run is refused, naming the architectures that can. |
 | `apple_sdk` | the SDK version. The default is 26.2, the one SDK every configure uses; `16.4` is also available. |
+| `apple_lowered_modules` | the third-party module headers the overlay lowers, as `name=directory` entries separated by `;`. A name must be one of `THIRD_PARTY_MODULES` in `toolchain/modules/apple/lowered.lua`; only the protocol members the backports consult are lowered. The app's source is not changed. |
 
 ## Checks on every linked binary
 

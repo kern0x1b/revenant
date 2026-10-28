@@ -36,8 +36,8 @@ that was asked for: a basic X.509 policy asks only whether a chain is valid, not
 whether it was issued for this site, so without the host binding any
 certificate a trusted CA ever signed would be accepted for any domain.
 
-OpenSSL's own verification stays off (`SSL_VERIFY_NONE`): iOS 6 has no root store
-for it to use, so `SecTrust` is the verifier in both places it runs. When the
+OpenSSL's own verification stays off (`SSL_VERIFY_NONE`): iOS 6 keeps its roots in
+the system trust store that `SecTrust` reads (the names `TrustStoreContains` and `TrustStoreForDomain` are in the iOS 6.1.3 shared cache), and OpenSSL is not pointed at that store, so `SecTrust` is the verifier in both places it runs. When the
 caller asks to break on server auth (`kSSLSessionOptionBreakOnServerAuth`), the
 handshake returns `errSSLPeerAuthCompleted` once, and the caller evaluates the
 trust from `SSLCopyPeerTrust` before handshaking again. Otherwise the shim

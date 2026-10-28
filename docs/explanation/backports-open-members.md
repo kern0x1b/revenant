@@ -195,21 +195,22 @@ here; a Swift error text and the exact typecheck command are what would settle i
 - `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: the value is `"aku"` on iOS 6, the closest native class, so items
   stored with it are not refused when the device has no passcode, and they are not removed when a passcode is removed
   later. The SDK promises both, and the backport does neither. The host test checks the value against the macOS oracle
-  and fails the `"akpu"` value. The refusal is not built, for two reasons this tree cannot settle:
-  - The passcode predicate. The 6.1.3 MobileKeyBag exports `MKBGetDeviceLockState` and `MKBDeviceUnlockedSinceBoot`, and
-    its strings name no passcode key, so the return code that means "a passcode is set" is not known from the cache. A
-    measurement with and without a passcode settles it. On the 6.1.3 emulator without a passcode, the case
-    `keybag_lock_state` reads 3 from `MKBGetDeviceLockState` and passes, so 3 means no passcode is set. The value for a
-    set passcode is still unmeasured.
-  - The call to bind to. An app built with the overlay reaches a backport's `SecItemAdd` only if the Security backport
-    defines it, and it defines none. Adding one forwards to the system's `SecItemAdd`, as the IOSurface wrapper does,
-    and it is a packaging decision (see `backports-loading.md`). `SecItemUpdate` would need the same check.
-  Until both are in, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` is a weaker class than its name, and that is the
+  and fails the `"akpu"` value. The refusal is not built, because the passcode predicate is not settled:
+  - The passcode predicate. On the iPad 2 on 6.1.3 with no passcode, `MKBGetDeviceLockState(NULL)` returns 3 and
+    `MKBDeviceUnlockedSinceBoot()` returns 1 (measured on the device, 2026-10-27, with no passcode changed). The emulator
+    returns the same 3, but from a constant in its keybag service, so only the device counts as a measurement. The value
+    for a set passcode is still unmeasured: the emulator has no passcode state, and the owner's devices must not change.
+    `MKBUnlockDevice` is exported on 6.1.3 (checked with `dlsym`, not called); its signature and entitlement are not known.
+  Until it is settled, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` is a weaker class than its name, and that is the
   decision to make before Telegram's passcode storage ships on iOS 6.
-- `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the value is defined, but the flags are not enforced.
-  The constructor returns NULL with `errSecUnimplemented`, so biometric or passcode flags fail loudly. Enforcing
-  `kSecUseAuthenticationContext` or an access control at `SecItemAdd`/`SecItemCopyMatching` needs interception of the
-  SecItem calls, and the tree has no such layer.
+- `kSecAttrAccessControl` and `SecAccessControlCreateWithFlags`: the constructor builds the object with macOS's rules. On
+  iOS 6 the SecItem calls, which the Security backport defines and forwards to the system's Security image (see
+  `backports-loading.md`), gate the items that carry one. That gate is checked against a literal contract and is not
+  yet confirmed on the device (see the Security reference).
+- Secure Enclave keys: on the device the emulated key is a genuine `SecKeyRef`, made by the system's `SecKeyCreate` from a
+  descriptor of the backport's own. On the host it is a backport object. The private scalar and the public point of a
+  permanent key are two keychain items. The representation, the reasoning and the caveats are in the Security reference,
+  "Secure Enclave keys on iOS 6".
 - `kSecUseAuthenticationContext` and `kSecUseDataProtectionKeychain`: the values match macOS. The second is a no-op on iOS 6.
 - `kSecAttrAccess` is not backported. The only use in the Telegram 13.0 tree is `PasscodeKeychainScopeTests.swift`, a
   macOS scope test, and the production code uses `kSecAttrAccessGroup`, which iOS 6 has.
@@ -345,20 +346,37 @@ Open:
 
 ## Selectors Display calls through the delegates
 
-The respondsToSelector check was asked for as a generator change: count a selector that a class sends through
-`respondsToSelector:` as a protocol member. Two of Display's errors are the selectors that prompted it, and the probe
-on the lowered iOS 6 SDK settles both without that change:
+Display's errors on these selectors are not on UIKit's delegates. They are on AsyncDisplayKit's protocols,
+`ASGestureRecognizerDelegate` and `ASScrollViewDelegate` in `ASDisplayNode.h`, which Display's
+`GestureRecognizerDelegate.swift` wraps. Those declarations are Telegram's, so the SDK lowering does not reach them.
 
-- `scrollViewDidChangeAdjustedContentInset:` on `UIScrollViewDelegate` implements without a diagnostic under
-  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`. The lowered header no longer marks the protocol member,
-  so no generator change is needed for it.
-- `accessibilityAttributedScrollStatusForScrollView:` on `UIScrollView` is in `lowered-members.txt` and implemented in
-  `RevenantIOS11.m`, but the cached overlay the probe reads does not declare it, so the probe reports "no visible
-  @interface". Display's error is the Swift declaration's iOS 11 mark, which the UIKit Swift overlay carries, not the ObjC
-  header. The fix is in the overlay, not the generator.
+The lowering of such headers is generic. `THIRD_PARTY_MODULES` in `toolchain/modules/apple/lowered.lua` names each
+header and the protocols it declares, and the overlay serves a lowered copy of the header to the compiler the same way
+it serves an SDK header. The app's source stays as it is. A protocol member is lowered only when a backport consults
+it through `@selector` in `frameworks/Backports/src`. Three are consulted:
 
-Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
-re-checked with the next Display build.
+- `shouldRequireFailureOfGestureRecognizer:` and `shouldBeRequiredToFailByGestureRecognizer:` on
+  `ASGestureRecognizerDelegate`, consulted by `UIGestureRecognizer+Failure7.m`.
+- `scrollViewDidChangeAdjustedContentInset:` on `ASScrollViewDelegate`, consulted by `UIViewController+SafeAreaChanges11.m`.
+
+The project places the module with `apple_lowered_modules` (Telegram: `AsyncDisplayKit=<submodule>/Source/PublicHeaders/AsyncDisplayKit`).
+
+`accessibilityAttributedScrollStatusForScrollView:` on `ASScrollViewDelegate` is not lowered. Nothing consults it:
+`RevenantIOS11.m` defines it on `UIScrollView`, and no iOS 6 path calls that. Native delivery is not available either:
+the iOS 6 selector inventory has no public hook for the scroll status, only the private `_accessibilityScrollStatus`,
+and lowering the availability without a backport would fake the member. So it is a genuine limit. Display's
+`accessibilityAttributedScrollStatus(for:)` wrapper still fails to compile for armv7 iOS 6.
+
+Measured, not on device:
+
+- `swiftc -typecheck -target armv7-apple-ios6.0` of `GestureRecognizerDelegate.swift` against the SDK-only overlay: errors at
+  lines 36, 43, 185 and 199. Against the overlay with the module placed: only line 199.
+- The overlay built from the Telegram 13.0.0 reference header: the three consulted members lose their availability.
+  `shouldReceiveEvent:` (iOS 13.4) and `accessibilityAttributedScrollStatusForScrollView:` keep theirs.
+- `clang -fsyntax-only` for armv7-apple-ios6.0 of `TGNavigationBar.m` and `TGModernGalleryDefaultInterfaceView.m`
+  (LegacyComponents): warnings at `UIActivityIndicatorViewStyleMedium` without the overlay, none with it.
+- `UIScrollViewDelegate`'s `scrollViewDidChangeAdjustedContentInset:` implements without a diagnostic under
+  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`, so no generator change is needed for it.
 
 ## SceneKit: two members that raise on 6.1.3
 

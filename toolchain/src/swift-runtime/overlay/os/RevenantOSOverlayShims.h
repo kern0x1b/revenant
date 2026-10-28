@@ -2,6 +2,9 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "RevenantOSLogRender.h"
 
 void *_Nullable revenant_os_log_named(const char *_Nonnull subsystem, const char *_Nonnull category) __attribute__((weak_import));
 signed char revenant_os_log_type_enabled(void *_Nullable log, uint8_t type) __attribute__((weak_import));
@@ -30,8 +33,13 @@ static inline int revenant_os_log_asl_level(uint8_t type) {
     }
 }
 
-static inline void revenant_os_log_fallback(uint8_t type, const char *_Nonnull format) {
-    if (revenant_os_log_recorded(type)) {
-        asl_log(NULL, NULL, revenant_os_log_asl_level(type), "%s", format);
+static inline void revenant_os_log_fallback(uint8_t type, const char *_Nonnull format, va_list arguments, int count, int error) {
+    if (!revenant_os_log_recorded(type)) {
+        return;
+    }
+    char *text = revenant_os_log_render_arguments(format, arguments, count, error);
+    if (text) {
+        asl_log(NULL, NULL, revenant_os_log_asl_level(type), "%s", text);
+        free(text);
     }
 }

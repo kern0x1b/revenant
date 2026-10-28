@@ -1,4 +1,5 @@
 #import "RevenantPhotos.h"
+#import "RevenantPhotoMoves.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -124,6 +125,7 @@ static NSDictionary *revenant_positions(PHFetchResult *result)
     NSIndexSet *_removed;
     NSIndexSet *_inserted;
     NSIndexSet *_changed;
+    NSArray *_moves;
 }
 
 - (instancetype)initWithRevenantBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental
@@ -138,33 +140,44 @@ static NSDictionary *revenant_positions(PHFetchResult *result)
     for (PHObject *object in changed)
         [changedIdentifiers addObject:object.localIdentifier];
     NSMutableIndexSet *removed = [NSMutableIndexSet indexSet];
-    NSMutableArray *kept = [NSMutableArray array];
     for (NSUInteger index = 0; index < before.count; index++) {
-        if (afterPositions[[before[index] localIdentifier]])
-            [kept addObject:before[index]];
-        else
+        if (!afterPositions[[before[index] localIdentifier]])
             [removed addIndex:index];
     }
     NSMutableIndexSet *inserted = [NSMutableIndexSet indexSet];
     NSMutableIndexSet *changes = [NSMutableIndexSet indexSet];
-    NSUInteger position = 0;
-    BOOL ordered = YES;
+    size_t *fromIndexes = malloc(sizeof(size_t) * (after.count + 1));
+    size_t *toIndexes = malloc(sizeof(size_t) * (after.count + 1));
+    unsigned char *stable = malloc(after.count + 1);
+    size_t shared = 0;
     for (NSUInteger index = 0; index < after.count; index++) {
         PHObject *object = after[index];
-        if (!beforePositions[object.localIdentifier]) {
+        NSNumber *position = beforePositions[object.localIdentifier];
+        if (!position) {
             [inserted addIndex:index];
             continue;
         }
-        ordered = ordered && position < kept.count && [kept[position] isEqual:object];
-        position++;
+        fromIndexes[shared] = position.unsignedIntegerValue;
+        toIndexes[shared] = index;
+        shared++;
         if ([changedIdentifiers containsObject:object.localIdentifier])
             [changes addIndex:index];
     }
-    _incremental = incremental && ordered;
+    RevenantPhotoLongestIncreasingSubsequence(fromIndexes, shared, stable);
+    NSMutableArray *moves = [NSMutableArray array];
+    for (size_t position = 0; position < shared; position++) {
+        if (!stable[position])
+            [moves addObject:@[@(fromIndexes[position]), @(toIndexes[position])]];
+    }
+    free(fromIndexes);
+    free(toIndexes);
+    free(stable);
+    _incremental = incremental;
     if (_incremental) {
         _removed = removed;
         _inserted = inserted;
         _changed = changes;
+        _moves = moves;
     }
     return self;
 }
@@ -221,11 +234,13 @@ static NSDictionary *revenant_positions(PHFetchResult *result)
 
 - (BOOL)hasMoves
 {
-    return NO;
+    return _moves.count > 0;
 }
 
 - (void)enumerateMovesWithBlock:(void (^)(NSUInteger fromIndex, NSUInteger toIndex))handler
 {
+    for (NSArray *move in _moves)
+        handler([move[0] unsignedIntegerValue], [move[1] unsignedIntegerValue]);
 }
 
 @end

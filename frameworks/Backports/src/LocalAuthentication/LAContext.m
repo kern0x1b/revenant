@@ -1,6 +1,10 @@
 #import <LocalAuthentication/LocalAuthentication.h>
+#import <dlfcn.h>
 
 extern NSString *const LAErrorDomain;
+
+static const int revenant_lock_state_disabled = 3;
+static const NSInteger revenant_error_passcode_not_set = -5;
 
 static NSError *revenant_error(NSInteger code, NSString *description, NSString *debug)
 {
@@ -8,6 +12,20 @@ static NSError *revenant_error(NSInteger code, NSString *description, NSString *
     if (debug)
         info[NSDebugDescriptionErrorKey] = debug;
     return [NSError errorWithDomain:LAErrorDomain code:code userInfo:info];
+}
+
+static int revenant_device_lock_state(void)
+{
+    void *library = dlopen("/System/Library/PrivateFrameworks/MobileKeyBag.framework/MobileKeyBag", RTLD_LAZY);
+    int (*device_lock_state)(CFDictionaryRef) = library ? (int (*)(CFDictionaryRef))dlsym(library, "MKBGetDeviceLockState") : NULL;
+    return device_lock_state ? device_lock_state(NULL) : -1;
+}
+
+static NSError *revenant_device_owner_error(void)
+{
+    if (revenant_device_lock_state() == revenant_lock_state_disabled)
+        return revenant_error(revenant_error_passcode_not_set, @"Passcode not set.", nil);
+    return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
 }
 
 @implementation LAContext {
@@ -51,7 +69,7 @@ static NSError *revenant_error(NSInteger code, NSString *description, NSString *
     case 1:
         return revenant_error(LAErrorBiometryNotAvailable, @"Biometry is not available on this device.", nil);
     case 2:
-        return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+        return revenant_device_owner_error();
     }
     NSError *error = revenant_error(-1001, @"Authentication failure.", [NSString stringWithFormat:@"Unknown policy: '%ld'", (long)policy]);
     [NSException raise:NSInvalidArgumentException format:@"%@", error];
