@@ -140,7 +140,7 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
   `top`/`screenY` are numbers, and `innerWidth`/`innerHeight` set width and height. Unset values stay nil. The shim posts
   the call through the bridge, and `WKWebView` sends `webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:`
   with the parsed features and a copy of the configuration, then loads the request into the view that the delegate returns.
-  The page receives `null` from `window.open`, because no window object exists in this engine. The features are checked
+  The page receives `null` when the delegate creates no `WKWebView` (or the request is malformed), and a WindowProxy otherwise. The features are checked
   against macOS WKWebView in `tests/webkit_script_message`.
 - `WKNavigationResponse`: carries the response, and `canShowMIMEType` is true for `text/*`, `image/*`,
   `application/xhtml+xml` and `application/pdf`. `WKWebView` asks `webView:decidePolicyForNavigationResponse:decisionHandler:`
