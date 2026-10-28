@@ -1,0 +1,12 @@
+case 3 accurate
+source macOS 27.0.1 (build 26A434), Vision supportedRecognitionLanguages, revision 3, accurate
+languages en-US fr-FR it-IT de-DE es-ES pt-BR zh-Hans zh-Hant yue-Hans yue-Hant ko-KR ja-JP ru-RU uk-UA th-TH vi-VT ar-SA ars-SA tr-TR id-ID cs-CZ da-DK nl-NL no-NO nn-NO nb-NO ms-MY pl-PL ro-RO sv-SE fi-FI hi-IN mr-IN
+case 2 accurate
+source macOS 27.0.1 (build 26A434), Vision supportedRecognitionLanguages, revision 2, accurate
+languages en-US fr-FR it-IT de-DE es-ES pt-BR zh-Hans zh-Hant
+case 1 accurate
+source macOS 27.0.1 (build 26A434), Vision supportedRecognitionLanguages, revision 1, accurate
+languages en-US
+case 3 fast
+source macOS 27.0.1 (build 26A434), Vision supportedRecognitionLanguages, revision 3, fast
+languages en-US fr-FR it-IT de-DE es-ES pt-BR

@@ -11,6 +11,7 @@
 
 static const CGFloat TOLERANCE = 0.04;
 static const CGFloat FAST_TEXT_ERROR = 0.2;
+static const NSInteger RECORDED_MACOS_MAJOR = 27;
 
 static bool negative_control;
 
@@ -144,20 +145,52 @@ static void expect_fixtures(NSString *data, NSString *root, BOOL fast)
     }
 }
 
-static void expect_languages(NSString *root)
+static NSDictionary *recorded_languages(NSString *data)
 {
+    NSString *text = [NSString stringWithContentsOfFile:[data stringByAppendingPathComponent:@"languages.txt"] encoding:NSUTF8StringEncoding error:NULL];
+    require(text.length > 0, [NSString stringWithFormat:@"no recorded languages in %@", data]);
+    NSMutableDictionary *recorded = [NSMutableDictionary dictionary];
+    NSString *key = nil;
+    for (NSString *row in [text componentsSeparatedByString:@"\n"]) {
+        NSArray *fields = [row componentsSeparatedByString:@" "];
+        if ([fields[0] isEqualToString:@"case"] && fields.count == 3) {
+            key = [NSString stringWithFormat:@"%@ %@", fields[1], fields[2]];
+        } else if ([fields[0] isEqualToString:@"languages"] && key != nil) {
+            recorded[key] = [fields subarrayWithRange:NSMakeRange(1, fields.count - 1)];
+        }
+    }
+    return recorded;
+}
+
+static NSArray *vision_languages(NSUInteger revision, BOOL fast)
+{
+    NSError *error = nil;
+    NSArray *languages = [VNRecognizeTextRequest supportedRecognitionLanguagesForTextRecognitionLevel:fast ? VNRequestTextRecognitionLevelFast : VNRequestTextRecognitionLevelAccurate
+                                                                                                revision:revision error:&error];
+    require(languages != nil && error == nil, [NSString stringWithFormat:@"Vision does not list revision %lu languages", (unsigned long)revision]);
+    return languages;
+}
+
+static void expect_languages(NSString *data, NSString *root)
+{
+    NSDictionary *recorded = recorded_languages(data);
+    BOOL reference_host = [VNRecognizeTextRequest respondsToSelector:@selector(supportedRecognitionLanguagesForTextRecognitionLevel:revision:error:)]
+                          && [NSProcessInfo processInfo].operatingSystemVersion.majorVersion == RECORDED_MACOS_MAJOR;
     NSArray *cases = @[@[@3, @NO], @[@2, @NO], @[@1, @NO], @[@3, @YES]];
     for (NSArray *item in cases) {
         NSUInteger revision = [item[0] unsignedIntegerValue];
         BOOL fast = [item[1] boolValue];
-        NSError *error = nil;
-        NSArray *apple = [VNRecognizeTextRequest supportedRecognitionLanguagesForTextRecognitionLevel:fast ? VNRequestTextRecognitionLevelFast : VNRequestTextRecognitionLevelAccurate
-                                                                                              revision:revision error:&error];
-        require(apple != nil && error == nil, [NSString stringWithFormat:@"Vision does not list revision %lu languages", (unsigned long)revision]);
+        NSString *key = [NSString stringWithFormat:@"%lu %@", (unsigned long)revision, fast ? @"fast" : @"accurate"];
+        NSArray *want = recorded[key];
+        require(want != nil, [NSString stringWithFormat:@"no recorded languages for revision %@", key]);
         NSArray *backport = RevenantVisionTextLanguages(root, revision, fast);
-        expect(backport.count == apple.count && [[NSSet setWithArray:backport] isEqualToSet:[NSSet setWithArray:apple]],
-               [NSString stringWithFormat:@"revision %lu %@ languages are %@, Vision answers %@", (unsigned long)revision,
-                                          fast ? @"fast" : @"accurate", backport, apple]);
+        expect(backport.count == want.count && [[NSSet setWithArray:backport] isEqualToSet:[NSSet setWithArray:want]],
+               [NSString stringWithFormat:@"revision %@ languages are %@, recorded %@", key, backport, want]);
+        if (reference_host) {
+            NSArray *apple = vision_languages(revision, fast);
+            expect(apple.count == want.count && [[NSSet setWithArray:apple] isEqualToSet:[NSSet setWithArray:want]],
+                   [NSString stringWithFormat:@"revision %@ languages are %@ on this host, recorded %@", key, apple, want]);
+        }
     }
     expect(RevenantVisionTextLanguages(@"/nonexistent", 3, NO).count == 0, @"languages are listed without models");
 }
@@ -203,7 +236,7 @@ int main(int argc, char **argv)
     NSString *root = [NSString stringWithUTF8String:argv[first + 1]];
     expect_fixtures(data, root, NO);
     expect_fixtures(data, root, YES);
-    expect_languages(root);
+    expect_languages(data, root);
     expect_region(data, root);
     expect_failures(data, root);
     return 0;
