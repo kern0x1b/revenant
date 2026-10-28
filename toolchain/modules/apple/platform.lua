@@ -263,7 +263,7 @@ function backports_deb(signer)
 end
 
 function backports_runtime(targets)
-    local linked, decoder
+    local linked
     for _, target in ipairs(targets) do
         local package = target:pkg("libcxx")
         if package then
@@ -272,19 +272,8 @@ function backports_runtime(targets)
             end
             linked = package
         end
-        local shared = target:pkg("ffmpeg-hevc")
-        if shared then
-            if decoder and decoder:installdir() ~= shared:installdir() then
-                raise("the Backports libraries link two FFmpeg HEVC decoders, %s and %s; the package carries one", decoder:installdir(), shared:installdir())
-            end
-            decoder = shared
-        end
     end
-    local carried = linked and backports_package.carried_runtime(linked) or {}
-    for _, library in ipairs(decoder and backports_package.carried_shared(decoder) or {}) do
-        table.insert(carried, library)
-    end
-    return carried
+    return linked and backports_package.carried_runtime(linked) or {}
 end
 
 function backport_package(target)

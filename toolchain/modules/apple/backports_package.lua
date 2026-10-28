@@ -45,19 +45,6 @@ function carried_runtime(package)
     return found
 end
 
-function carried_shared(package)
-    local found = {}
-    for _, candidate in ipairs(os.files(path.join(package:installdir(), "lib", "*.dylib"))) do
-        if not os.islink(candidate) then
-            table.insert(found, {leaf = path.filename(candidate), file = candidate})
-        end
-    end
-    if #found == 0 then
-        raise("%s installs no shared library, which the Backports package carries", package:installdir())
-    end
-    return found
-end
-
 function libraries(targets, runtime)
     local found, leaves = {}, {}
     for _, target in ipairs(targets) do
