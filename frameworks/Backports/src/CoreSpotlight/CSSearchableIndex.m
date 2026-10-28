@@ -274,7 +274,7 @@ NSArray<CSSearchableItem *> *RevenantSpotlightDefaultItems(void)
 
 + (BOOL)isIndexingAvailable
 {
-    return YES;
+    return [[NSFileManager defaultManager] isWritableFileAtPath:RevenantSpotlightStoreDirectory()];
 }
 
 + (instancetype)defaultSearchableIndex

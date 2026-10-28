@@ -39,10 +39,20 @@
 
 - (void)queryPedometerDataFromDate:(NSDate *)start toDate:(NSDate *)end withHandler:(CMPedometerHandler)handler
 {
+    if (!handler)
+        return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handler(nil, [NSError errorWithDomain:CMErrorDomain code:CMErrorNotAvailable userInfo:nil]);
+    });
 }
 
 - (void)startPedometerUpdatesFromDate:(NSDate *)start withHandler:(CMPedometerHandler)handler
 {
+    if (!handler)
+        return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handler(nil, [NSError errorWithDomain:CMErrorDomain code:CMErrorNotAvailable userInfo:nil]);
+    });
 }
 
 - (void)stopPedometerUpdates
@@ -51,6 +61,11 @@
 
 - (void)startPedometerEventUpdatesWithHandler:(CMPedometerEventHandler)handler
 {
+    if (!handler)
+        return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handler(nil, [NSError errorWithDomain:CMErrorDomain code:CMErrorNotAvailable userInfo:nil]);
+    });
 }
 
 - (void)stopPedometerEventUpdates

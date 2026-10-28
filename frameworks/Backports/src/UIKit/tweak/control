@@ -1,0 +1,8 @@
+Package: org.revenant.alticon
+Name: Revenant Alternate Icons
+Architecture: iphoneos-arm
+Description: the SpringBoard side of UIApplication alternate icons on iOS 6: it shows the icon an app picked through setAlternateIconName:completionHandler: on its Home Screen and announces the change
+Maintainer: kern0x1b
+Author: kern0x1b
+Section: Tweaks
+Depends: mobilesubstrate

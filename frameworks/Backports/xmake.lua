@@ -32,7 +32,7 @@ local LIBRARIES = {
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
     {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
+    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports", "LocalAuthenticationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
     {name = "CoreBluetoothBackports", folder = "CoreBluetooth", frameworks = {"Foundation"}, libraries = {}, archives = {}, system = {}},
     {name = "CompressionBackports", folder = "Compression", frameworks = {}, libraries = {}, archives = {"lzfse", "zlib", "lz4", "xz"}, system = {}},
@@ -98,7 +98,6 @@ local LIBRARIES = {
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
     {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {}, system = {}},
-    {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -165,6 +164,17 @@ if is_plat("iphoneos") then
         add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
         set_values("tweak.filter", path.join(TWEAK, "springboard.plist"))
         set_values("revenant.control", path.join(TWEAK, "control"))
+        set_values("revenant.version", "1.0.0")
+
+    local ALTICON = path.join(SRC, "UIKit", "tweak")
+
+    target("revenant-alticon")
+        set_default(false)
+        add_rules("@addon/revenant/tweak")
+        add_files(path.join(ALTICON, "RevenantAlternateIconTweak.m"))
+        add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
+        set_values("tweak.filter", path.join(ALTICON, "springboard.plist"))
+        set_values("revenant.control", path.join(ALTICON, "control"))
         set_values("revenant.version", "1.0.0")
 
     for _, library in ipairs(LIBRARIES) do
@@ -309,6 +319,65 @@ if is_plat("iphoneos") then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("MetalDeviceProbe")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/gpu_probe/probe.m")
+        add_frameworks("Foundation", "OpenGLES", "CoreFoundation")
+        add_syslinks("objc")
+    target_end()
+
+    target("MetalDeviceTrace")
+        set_default(false)
+        add_rules("@addon/revenant/library")
+        add_files("tests/gpu_probe/gltrace.c")
+        add_frameworks("IOKit", "CoreFoundation")
+    target_end()
+
+    target("MetalQueueProbe")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/gpu_probe/queue.m")
+        add_frameworks("Foundation", "CoreFoundation", "OpenGLES", "IOKit")
+        add_syslinks("objc")
+    target_end()
+
+    target("BackportsDeviceProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m", "src/UIKit/UIView+iOS13.m",
+                  "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
+                  "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/UIKit/UILabel+Tightening9.m",
+                  "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.deviceprobe", "CFBundleDisplayName=BackportsDeviceProbe")
+        set_values("revenant.control", "tests/device_probe/control")
+        set_values("revenant.guarded_selectors", "modifyAnimationsWithRepeatCount:autoreverses:animations:")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("BackportsSceneKitProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m",
+                  "src/UIKit/UIView+iOS13.m", "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m",
+                  "src/UIKit/UITextField+ContentType.m", "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m",
+                  "src/UIKit/UILabel+Tightening9.m", "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+        add_defines("REVENANT_PROBE_SCENEKIT")
+        add_deps("SceneKitBackports")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.scenekitprobe", "CFBundleDisplayName=BackportsSceneKitProbe")
+        set_values("revenant.control", "tests/device_probe/control")
+        set_values("revenant.guarded_selectors", "modifyAnimationsWithRepeatCount:autoreverses:animations:")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
@@ -317,7 +386,8 @@ else
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua"})
+                                  vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", air2es = "air2es_test.lua",
+                                  webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -432,19 +502,70 @@ if is_plat("iphoneos") then
         add_syslinks("objc")
         add_frameworks("Foundation")
     target_end()
+
+    target("SecurityProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(os.scriptdir(), "tests", "Security", "device", "probe.c"))
+        add_cflags("-Wno-deprecated-declarations")
+        set_values("revenant.entitlements", "tests/Security/device/entitlements.xml")
+        add_frameworks("Foundation", "Security", "CoreFoundation")
+    target_end()
+
+    target("LocalAuthProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(os.scriptdir(), "tests", "LocalAuthentication", "device", "probe.m"),
+                  path.join(os.scriptdir(), "src", "LocalAuthentication", "LAContext.m"),
+                  path.join(os.scriptdir(), "src", "LocalAuthentication", "LAErrorDomain.m"))
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability")
+        add_frameworks("Foundation")
+    target_end()
 end
 
 option("air2cpu", {default = false, showmenu = true,
     description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
-if not is_plat("iphoneos") and has_config("air2cpu") then
-    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+option("air2es", {default = false, showmenu = true,
+    description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
+if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
+    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+end
+
+if not is_plat("iphoneos") and has_config("air2cpu") then
     target("air2cpu")
         set_kind("binary")
         set_default(false)
         add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
         add_packages("llvm")
+end
+
+rule("air2es.llvm")
+    on_config(function (target)
+        local llvm = target:pkg("llvm")
+        if llvm then
+            local prefix = llvm:installdir()
+            target:add("sysincludedirs", path.join(prefix, "include"))
+            target:add("linkdirs", path.join(prefix, "lib"))
+            target:add("rpathdirs", path.join(prefix, "lib"))
+        end
+        target:add("defines", "_GNU_SOURCE", "__STDC_CONSTANT_MACROS", "__STDC_FORMAT_MACROS", "__STDC_LIMIT_MACROS")
+        target:add("cxxflags", "-fno-rtti")
+    end)
+rule_end()
+
+if not is_plat("iphoneos") and has_config("air2es") then
+    target("air2es")
+        set_kind("binary")
+        set_default(false)
+        set_languages("c++20")
+        add_rules("air2es.llvm")
+        add_files(path.join(SRC, "air2es", "*.cpp"))
+        add_packages("llvm")
+        add_links("LLVM")
 end
 
 local FOUNDATION_TESTS = {
@@ -533,7 +654,7 @@ end
 
 if not is_plat("iphoneos") then
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
-    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}}, nil, {"Foundation", "CoreImage", "CoreGraphics"})
+    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
     if is_arch("arm64", "x86_64") then
         host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
     end
@@ -551,6 +672,7 @@ if not is_plat("iphoneos") then
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m", "WKSecurityOrigin.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}})
+    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}})
+    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}}, nil, {"Foundation"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end

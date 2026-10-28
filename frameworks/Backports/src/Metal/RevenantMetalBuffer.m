@@ -8,6 +8,7 @@
     NSUInteger _length;
     __strong RevenantMetalHeap *_heap;
     NSUInteger _heapOffset;
+    MTLPurgeableState _purgeableState;
 }
 
 @synthesize label;
@@ -89,9 +90,12 @@
 {
 }
 
-- (BOOL)setPurgeableState:(MTLPurgeableState)state
+- (MTLPurgeableState)setPurgeableState:(MTLPurgeableState)state
 {
-    return NO;
+    MTLPurgeableState previous = _purgeableState ?: MTLPurgeableStateNonVolatile;
+    if (state != MTLPurgeableStateKeepCurrent)
+        _purgeableState = state;
+    return previous;
 }
 
 

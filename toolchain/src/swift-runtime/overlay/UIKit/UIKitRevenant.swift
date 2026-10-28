@@ -1,7 +1,6 @@
 import UIKit
 import _SwiftRevenantUIKitOverlayShims
 
-@available(iOS 13.0, *)
 extension UIAction {
     public convenience init(title: String = "", image: UIImage? = nil, identifier: UIAction.Identifier? = nil,
                             discoverabilityTitle: String? = nil, attributes: UIMenuElement.Attributes = [],
@@ -13,11 +12,11 @@ extension UIAction {
     }
 }
 
-@available(iOS 13.0, *)
 extension UIMenu {
     public convenience init(title: String = "", image: UIImage? = nil, identifier: UIMenu.Identifier? = nil,
                             options: UIMenu.Options = [], children: [UIMenuElement] = []) {
-        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, options: options, children: children)
+        let objects: [AnyObject] = children.map { $0 as AnyObject }
+        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, options: options, children: objects)
     }
 }
 
