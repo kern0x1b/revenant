@@ -123,9 +123,10 @@ int translate(const char *path, const char *folder)
     for (const Entry &entry : entries) {
         Translation translation;
         Refusal refusal;
+        bool translated = fileNameOk(entry.name) && translateEntry(entry, translation, refusal);
         if (!fileNameOk(entry.name))
             refusal.reason = "a name that is not a file name";
-        else if (!translateEntry(entry, translation, refusal)) {
+        if (!translated) {
             refusals.push_back(Refusal{entry.name, refusal.reason});
             printf("%s: REFUSED %s: %s\n", path, entry.name.c_str(), refusal.reason.c_str());
             continue;

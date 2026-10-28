@@ -15,7 +15,7 @@ struct Refusal {
 
 struct Translation {
     std::string name;
-    Stage stage;
+    Stage stage = Stage::Vertex;
     std::string source;
     std::string reflection;
 };
