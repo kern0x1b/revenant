@@ -199,18 +199,18 @@ local function decodeFile(file)
 end
 
 local function run(program, arguments)
-    local failed = false
+    local failure
     try {
         function ()
             os.execv(program, arguments)
         end,
         catch {
-            function ()
-                failed = true
+            function (errors)
+                failure = tostring(errors)
             end
         }
     }
-    return not failed
+    return failure
 end
 
 function main(folder, glslang)
@@ -258,11 +258,12 @@ function main(folder, glslang)
         if #problems == 0 then
             structural = structural + 1
             local file = path.join(folder, entry.source)
-            if run(glslang, {"-S", entry.stage == "vertex" and "vert" or "frag", file}) then
+            local failure = run(glslang, {"-S", entry.stage == "vertex" and "vert" or "frag", file})
+            if failure then
+                print("FAIL " .. label .. ": " .. glslang .. " did not validate the source: " .. failure)
+            else
                 validated = validated + 1
                 print("PASS " .. label)
-            else
-                print("FAIL " .. label .. ": glslangValidator rejects the source")
             end
         else
             print("FAIL " .. label .. ": " .. table.concat(problems, "; "))
