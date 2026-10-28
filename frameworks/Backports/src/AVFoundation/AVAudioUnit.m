@@ -62,7 +62,9 @@
 {
     [super revenant_setEngine:engine auNode:node audioUnit:unit];
     if (unit && _revenant_pendingPreset) {
-        RevenantAudioUnitApplyPreset(unit, _revenant_pendingPreset, NULL);
+        NSError *error = nil;
+        if (!RevenantAudioUnitApplyPreset(unit, _revenant_pendingPreset, &error))
+            NSLog(@"AVAudioUnit loadAudioUnitPresetAtURL:error: the preset could not be applied when the engine attached the unit; it stays at its defaults: %@", error);
         _revenant_pendingPreset = nil;
     }
 }
