@@ -136,6 +136,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSUnderlineStylePatternDot",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+            replace = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+        },
+    },
+    {
         member = "LABiometryType",
         header = {
             name = "LocalAuthentication",
@@ -214,7 +224,7 @@ local MEMBERS = {
             find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
             replace = table.concat({
                 "#if defined(__OBJC__) || defined(__cplusplus)",
-                "#define REVENANT_OS_OPTIONS OS_OPTIONS",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef enum __OS_ENUM_ATTR __OS_OPTIONS_ATTR : _type { __VA_ARGS__ } _name##_t",
                 "#else",
                 "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
                 "#endif",
@@ -1726,6 +1736,10 @@ local function digest_of(base, files)
     return hash.strhash128(table.concat(parts, "\n"))
 end
 
+local function generator_files()
+    return {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+end
+
 local function members_key(src, sdk)
     local sdk_files = table.join(framework_headers(sdk))
     for _, entry in ipairs(MEMBERS) do
@@ -1734,11 +1748,10 @@ local function members_key(src, sdk)
     byteorder.sort(sdk_files)
     local src_files = os.files(path.join(src, "**"))
     byteorder.sort(src_files)
-    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
     local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
     local tools = {path.join(src, "..", "tools", "facts.lua"), path.join(src, "..", "tools", "ast.lua"), path.join(src, "..", "tools", "sdk.lua")}
     return hash.strhash128(table.concat({
-        "generator=" .. digest_of(MODULE_DIR, generator),
+        "generator=" .. digest_of(MODULE_DIR, generator_files()),
         "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
         "tools=" .. digest_of(path.join(src, ".."), tools),
         "device=" .. hash.sha256(device_members_file()),
@@ -1875,22 +1888,99 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
 end
 
-function overlay(sdk, out, set, subtrees)
+THIRD_PARTY_MODULES = {
+    AsyncDisplayKit = {["ASDisplayNode.h"] = {"ASGestureRecognizerDelegate", "ASScrollViewDelegate"}},
+}
+
+local function consulted_selectors()
+    local found = {}
+    local src = path.absolute(path.join(path.directory(members_file()), "..", "src"))
+    for selector in corpus_of(src):gmatch("@selector%(%s*([%w_:]+)%s*%)") do
+        found[selector] = true
+    end
+    return found
+end
+
+local function module_headers(modules)
+    local headers = {}
+    for _, name in ipairs(table.orderkeys(modules)) do
+        local entries = THIRD_PARTY_MODULES[name]
+        if not entries then
+            raise("%s is not a lowered third-party module: name it in THIRD_PARTY_MODULES", name)
+        end
+        local directory = path.absolute(modules[name])
+        for _, file in ipairs(table.orderkeys(entries)) do
+            local header = path.join(directory, file)
+            if not os.isfile(header) then
+                raise("module %s has no header %s", name, header)
+            end
+            table.insert(headers, {name = name, file = file, directory = directory, header = header, protocols = entries[file]})
+        end
+    end
+    return headers
+end
+
+local function module_digest(modules)
+    local headers = module_headers(modules)
+    if #headers == 0 then
+        return ""
+    end
+    local parts = {}
+    for _, entry in ipairs(headers) do
+        table.insert(parts, entry.name .. "=" .. entry.header .. "=" .. hash.sha256(entry.header) .. "=" .. table.concat(entry.protocols, ","))
+    end
+    table.insert(parts, table.concat(table.orderkeys(consulted_selectors()), ","))
+    return table.concat(parts, "\n")
+end
+
+local function third_party_lowering(entry, consulted, markers)
+    local text = io.readfile(entry.header)
+    local protocols, members = {}, {}
+    for _, protocol in ipairs(entry.protocols) do
+        if not text:find("@protocol%s+" .. protocol .. "[%s<]") then
+            raise("%s does not declare protocol %s, which THIRD_PARTY_MODULES names for it", entry.header, protocol)
+        end
+        protocols[protocol] = true
+        members[protocol] = {}
+        for selector in pairs(consulted) do
+            members[protocol]["-" .. selector] = true
+            members[protocol]["+" .. selector] = true
+        end
+    end
+    return (lowering_of(text, {classes = {}, functions = {}, globals = {}, protocols = protocols, protocol_members = members, markers = markers}))
+end
+
+function third_party_modules(text)
+    local modules = {}
+    for entry in (text or ""):gmatch("[^;]+") do
+        if entry:match("%S") then
+            local name, directory = entry:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+            if not name or directory == "" then
+                raise("apple_lowered_modules entry '%s' is not name=directory", entry)
+            end
+            modules[name] = directory
+        end
+    end
+    return modules
+end
+
+function overlay(sdk, out, set, subtrees, modules)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
-    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ",")}, "|")
+    local placed = module_digest(modules or {})
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed}, "|")
     if built[key] then
         return built[key]
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ","))
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed)
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), mapped)
+        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {})
         io.writefile(stamp, digest)
     end
     built[key] = vfs
@@ -1971,7 +2061,7 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
-function build_overlay(sdk, out, set, subtrees)
+function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(include_directory(out), "simd", "math.h")
@@ -2045,6 +2135,15 @@ function build_overlay(sdk, out, set, subtrees)
                 table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
             end
         end
+    end
+    local headers = module_headers(modules or {})
+    local consulted = #headers > 0 and consulted_selectors() or {}
+    for _, entry in ipairs(headers) do
+        local copy = path.join(out, "modules", entry.name, entry.file)
+        os.mkdir(path.directory(copy))
+        write_if_changed(copy, third_party_lowering(entry, consulted, set.markers))
+        roots[entry.directory] = roots[entry.directory] or {}
+        table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)

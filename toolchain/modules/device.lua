@@ -260,8 +260,142 @@ local function authenticated(settings, program, argv)
            {SSH_ASKPASS = askpass(), SSH_ASKPASS_REQUIRE = "force", REVENANT_DEVICE_SECRET = settings.password}
 end
 
+local SYSTEM_DIRECTORIES = {"Applications", "Library", "System", "bin", "etc", "lib", "private", "sbin", "usr", "var"}
+
+local TAR_ROOT = "tar would extract an archive into / from this command: an archive rooted at / writes Applications/ and usr/ over the phone. Install one app with cd /Applications && tar xzf <archive whose only top entry is Name.app>, and copy support files to their exact paths"
+
+local RM_WIPE = "rm would remove %s, which is a system directory or everything under one: name the one app as /Applications/<name>.app, and remove a support file by its exact path"
+
+local function listed(names, name)
+    for _, item in ipairs(names) do
+        if item == name then
+            return true
+        end
+    end
+    return false
+end
+
+local function components(p)
+    local parts = {}
+    for part in p:gmatch("[^/]+") do
+        table.insert(parts, part)
+    end
+    return parts
+end
+
+local function is_root(p)
+    return p ~= nil and p:match("^/+%.?/*$") ~= nil
+end
+
+local function resolve(cwd, target)
+    local base = target:startswith("/") and "" or cwd
+    if base == nil then
+        return nil
+    end
+    local parts = {}
+    for _, part in ipairs(components(base .. "/" .. target)) do
+        if part == ".." then
+            table.remove(parts)
+        elseif part ~= "." then
+            table.insert(parts, part)
+        end
+    end
+    return "/" .. table.concat(parts, "/")
+end
+
+local function has_glob(part)
+    return part == "." or part == ".." or part:find("[%*%?%[]") ~= nil
+end
+
+local function wipes(p)
+    local parts = components(p)
+    if #parts == 0 or has_glob(parts[1]) then
+        return true
+    end
+    if parts[1] == "Applications" then
+        return #parts == 1 or has_glob(parts[2]) or not parts[2]:match("%.app$")
+    end
+    if not listed(SYSTEM_DIRECTORIES, parts[1]) then
+        return false
+    end
+    return #parts == 1 or (#parts == 2 and has_glob(parts[2]))
+end
+
+local function segments(command)
+    local found = {}
+    local text = command:gsub("[;|&(){}\n]", "\n")
+    for line in text:gmatch("[^\n]+") do
+        table.insert(found, line)
+    end
+    return found
+end
+
+local function tar_extracts(args)
+    local extract, directories = false, {}
+    for index = 2, #args do
+        local arg = args[index]
+        if arg == "--extract" or arg == "--get" then
+            extract = true
+        elseif arg:startswith("--directory=") then
+            table.insert(directories, arg:sub(13))
+        elseif arg == "-C" or arg == "--directory" then
+            table.insert(directories, args[index + 1] or "")
+        elseif arg:match("^%-[^%-]") and arg:find("x", 2, true) then
+            extract = true
+        elseif index == 2 and arg:match("^%a+$") and arg:find("x", 1, true) then
+            extract = true
+        end
+    end
+    return extract, directories
+end
+
+function refused_command(command)
+    local cwd
+    local text = command:gsub("[\"']", "")
+    for _, segment in ipairs(segments(text)) do
+        local args = {}
+        for word in segment:gmatch("%S+") do
+            table.insert(args, word)
+        end
+        local program = args[1] and path.filename(args[1])
+        if program == "cd" or program == "pushd" then
+            if args[2] == nil then
+                cwd = "/var/root"
+            else
+                cwd = resolve(cwd, args[2])
+            end
+        elseif program == "tar" then
+            local extract, directories = tar_extracts(args)
+            if extract then
+                if is_root(cwd) then
+                    return TAR_ROOT
+                end
+                for _, directory in ipairs(directories) do
+                    local target = resolve(cwd, directory)
+                    if target and is_root(target) then
+                        return TAR_ROOT
+                    end
+                end
+            end
+        elseif program == "rm" then
+            for index = 2, #args do
+                if not args[index]:startswith("-") then
+                    local target = resolve(cwd, args[index])
+                    if target and wipes(target) then
+                        return string.format(RM_WIPE, target)
+                    end
+                end
+            end
+        end
+    end
+end
+
 function run(settings, command, opt)
     opt = opt or {}
+    local refused = refused_command(command)
+    if refused then
+        raise("%s", refused)
+    end
     if command:find("killall", 1, true) then
         wprint("killing a VoIP application makes iOS 6 relaunch it and kill it again for holding a file lock (0xdead10cc); quit it from the switcher instead")
     end
@@ -286,6 +420,84 @@ function fetch(settings, remote, localfile)
         os.runv(program, argv, {envs = envs})
         return true
     end }
+end
+
+function app_archive(app, archive)
+    local name = path.filename(app)
+    if not name:match("%.app$") then
+        raise("%s is not an app bundle, so it has no archive of its own", app)
+    end
+    os.execv("/usr/bin/env", {"COPYFILE_DISABLE=1", "tar", "--no-xattrs", "--no-mac-metadata", "-czf", archive, "-C", path.directory(app), name})
+    local listing = os.iorunv("tar", {"-tzf", archive})
+    for entry in listing:gmatch("[^\n]+") do
+        if not entry:startswith(name .. "/") then
+            raise("%s holds %s, which is outside %s; an app archive holds only that bundle", archive, entry, name)
+        end
+    end
+end
+
+function app_install_command(name, archive)
+    return string.format("cd /Applications && rm -rf /Applications/%s && tar xzf %s && rm -f %s && chmod -R 755 /Applications/%s", name, archive, archive, name)
+end
+
+local function same_identity(settings, app)
+    import("apple.bundle")
+    local name = path.filename(app)
+    local fetched = os.tmpfile() .. ".plist"
+    if not fetch(settings, "/Applications/" .. name .. "/Info.plist", fetched) or not os.isfile(fetched) then
+        return
+    end
+    local installed = bundle.read_plist(fetched).CFBundleIdentifier
+    os.rm(fetched)
+    local packaged = bundle.read_plist(path.join(app, "Info.plist")).CFBundleIdentifier
+    if installed ~= packaged then
+        raise("/Applications/%s on the phone is %s, and this install would replace it with %s; SpringBoard would lose the app until a reboot, so remove the installed one first", name, tostring(installed), tostring(packaged))
+    end
+end
+
+local function plain_path(p)
+    if not p:startswith("/") or p:endswith("/") or p:find("[%*%?%[]") then
+        return false
+    end
+    local parts = components(p)
+    if #parts < 2 then
+        return false
+    end
+    for _, part in ipairs(parts) do
+        if part == "." or part == ".." then
+            return false
+        end
+    end
+    return true
+end
+
+local function install_file(settings, localfile, remote)
+    if not os.isfile(localfile) then
+        raise("%s is not a file, so it cannot be installed at %s", localfile, remote)
+    end
+    if not plain_path(remote) then
+        raise("%s is not a plain destination for a support file: give its exact path, such as /usr/lib/revenant/org.revenant.backports/libName.dylib", remote)
+    end
+    local staged = "/var/tmp/" .. path.filename(remote)
+    copy(settings, localfile, staged)
+    run(settings, string.format("mv -f %s %s && chown root:wheel %s && chmod 755 %s", staged, remote, remote, remote))
+end
+
+function install_app(settings, app, opt)
+    local name = path.filename(app)
+    if not name:match("^[%w%._%-]+%.app$") or not os.isdir(app) then
+        raise("%s is not an app bundle directory: install_app takes one Name.app directory", app)
+    end
+    same_identity(settings, app)
+    local archive = os.tmpfile() .. ".tgz"
+    app_archive(app, archive)
+    local remote = "/var/tmp/" .. name .. ".tgz"
+    copy(settings, archive, remote)
+    os.rm(archive)
+    run(settings, app_install_command(name, remote))
+    for _, support in ipairs((opt and opt.support) or {}) do
+        install_file(settings, support.from, support.to)
+    end
 end
 
 function reverse_tunnel(settings, port)

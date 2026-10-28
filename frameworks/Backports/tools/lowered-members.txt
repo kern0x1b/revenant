@@ -1631,7 +1631,9 @@ class RevenantAVScheduledRemoval
 class RevenantAccessoryView
 class RevenantActionEntry
 class RevenantActiveFrameDurationInstaller
+class RevenantActivityIndicatorStyle13
 class RevenantAlertPopoverPresentation
+class RevenantAnimationGroup
 class RevenantAnimatorDriver
 class RevenantAnnotationState
 class RevenantAppearingInstaller
@@ -3344,6 +3346,8 @@ enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
 enum MTLPrimitiveTypeTriangleStrip
+enum MTLPurgeableStateKeepCurrent
+enum MTLPurgeableStateNonVolatile
 enum MTLResourceStorageModePrivate
 enum MTLResourceStorageModeShared
 enum MTLSamplerAddressModeClampToEdge
@@ -3778,6 +3782,8 @@ enum UIAccessibilityContrastHigh
 enum UIAccessibilityCustomSystemRotorTypeNone
 enum UIAccessibilityHearingDeviceEarNone
 enum UIActivityCategoryAction
+enum UIActivityIndicatorViewStyleLarge
+enum UIActivityIndicatorViewStyleMedium
 enum UIAlertActionStyleCancel
 enum UIAlertActionStyleDefault
 enum UIAlertActionStyleDestructive
@@ -4459,6 +4465,16 @@ function RevenantAURenderInput
 function RevenantAccessControlFlags
 function RevenantAccessControlProtection
 function RevenantAccessFromWord
+function RevenantAnimationDurationInherited
+function RevenantAnimationDurationPop
+function RevenantAnimationDurationPush
+function RevenantAnimationDurationSetCurrent
+function RevenantAnimationGroupAutoreverses
+function RevenantAnimationGroupRepeatCount
+function RevenantAnimationGroupSetAutoreverses
+function RevenantAnimationGroupSetRepeatCount
+function RevenantAudioUnitApplyPreset
+function RevenantAudioUnitReadPreset
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -4667,6 +4683,7 @@ function RevenantPasscodePresent
 function RevenantPasscodeStyleForUnlockScreenType
 function RevenantPasscodeUnlockDevice
 function RevenantPasscodeVerify
+function RevenantPhotoLongestIncreasingSubsequence
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
@@ -5934,6 +5951,7 @@ function revenant_task_progress_apply
 function revenant_task_progress_create
 function revenant_text
 function revenant_text_content_type
+function revenant_tightening_kern
 function revenant_track_bar
 function revenant_trait_classes
 function revenant_trait_collection_with
@@ -8892,6 +8910,7 @@ global RevenantASAppleIDButtonLogoCharacter
 global RevenantAVMetadataTimedItemsKey
 global RevenantAVMetadataTimedRangeKey
 global RevenantAXSettingsErrorDomain
+global RevenantAnimationDurationDefault
 global RevenantCKDevelopmentEnvironment
 global RevenantCKHost
 global RevenantCKProductionEnvironment
@@ -11684,6 +11703,7 @@ member AVAudioUnit -renderingAlgorithm
 member AVAudioUnit -revenant_applyPendingParameters
 member AVAudioUnit -revenant_inputParameter:
 member AVAudioUnit -revenant_readAzimuth:elevation:distance:
+member AVAudioUnit -revenant_setEngine:auNode:audioUnit:
 member AVAudioUnit -revenant_setInputParameter:value:
 member AVAudioUnit -reverbBlend
 member AVAudioUnit -setBypass:
@@ -25599,8 +25619,12 @@ member RevenantAccessoryView -setMarked:
 member RevenantAccessoryView -setRevenant_handler:
 member RevenantAccessoryView -tintColorDidChange
 member RevenantActiveFrameDurationInstaller +load
+member RevenantActivityIndicatorStyle13 +load
 member RevenantAlertPopoverPresentation -init
 member RevenantAlertPopoverPresentation -sourceView
+member RevenantAnimationGroup -autoreverses
+member RevenantAnimationGroup -duration
+member RevenantAnimationGroup -repeatCount
 member RevenantAnimatorDriver -initWithAnimator:
 member RevenantAnimatorDriver -invalidate
 member RevenantAnimatorDriver -step
@@ -31481,6 +31505,7 @@ member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -followsUndockedKeyboard
 member UIKeyboardLayoutGuide -setFollowsUndockedKeyboard:
+member UILabel +load
 member UILabel -adjustsFontForContentSizeCategory
 member UILabel -allowsDefaultTighteningForTruncation
 member UILabel -lineBreakStrategy
@@ -33276,6 +33301,8 @@ member UITextFormattingCoordinator -setSelectedAttributes:isMultiple:
 member UITextInputAssistantItem -allowsHidingShortcuts
 member UITextInputAssistantItem -init
 member UITextInputAssistantItem -leadingBarButtonGroups
+member UITextInputAssistantItem -revenant_attachToResponder:
+member UITextInputAssistantItem -revenant_shortcutsDidChange
 member UITextInputAssistantItem -setAllowsHidingShortcuts:
 member UITextInputAssistantItem -setLeadingBarButtonGroups:
 member UITextInputAssistantItem -setTrailingBarButtonGroups:
@@ -33663,6 +33690,14 @@ member UIView +load
 member UIView +modifyAnimationsWithRepeatCount:autoreverses:animations:
 member UIView +performSystemAnimation:onViews:options:animations:completion:
 member UIView +performWithoutAnimation:
+member UIView +revenant_animateWithDuration:animations:
+member UIView +revenant_animateWithDuration:animations:completion:
+member UIView +revenant_animateWithDuration:delay:options:animations:completion:
+member UIView +revenant_beginAnimations:context:
+member UIView +revenant_commitAnimations
+member UIView +revenant_setAnimationDuration:
+member UIView +revenant_setAnimationRepeatAutoreverses:
+member UIView +revenant_setAnimationRepeatCount:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:
 member UIView -accessibilityIgnoresInvertColors

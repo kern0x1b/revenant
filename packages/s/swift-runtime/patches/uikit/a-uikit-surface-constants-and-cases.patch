@@ -2,7 +2,7 @@ diff --git a/stdlib/public/Darwin/UIKit/UIKit.swift b/stdlib/public/Darwin/UIKit
 index ba8dd37..0faa1d8 100644
 --- a/stdlib/public/Darwin/UIKit/UIKit.swift
 +++ b/stdlib/public/Darwin/UIKit/UIKit.swift
-@@ -550,3 +550,219 @@ extension UITextDirection {
+@@ -550,3 +550,188 @@ extension UITextDirection {
  }
  
  #endif
@@ -161,37 +161,6 @@ index ba8dd37..0faa1d8 100644
 +        case hidden
 +        case visible
 +    }
-+}
-+
-+// The one declaration in this patch that carries a mark of its own. Every other type here is a namespace the
-+// overlay declares outright, or a typealias onto a class the port's headers carry, so its availability is the
-+// declaration's own and no mark is owed; this one's cases all take a `UITargetedPreview`, which the SDK's own
-+// UIKit marks iOS 13.0 and which only the UIKit backports carry below that. The mark is the release the SDK's
-+// `UIKit.framework/Modules/UIKit.swiftmodule/arm64e-apple-ios.swiftinterface` gives this enum (iOS 13.4), read
-+// from that file; the recipe lowers it where the UIKit backports are linked (`backports_uikit`), beside the two
-+// it lowers there for the iOS 11 wrappers.
-+//
-+// Measured at armv7-apple-ios6.1.3 over this tree: with the mark and without those backports the overlay
-+// compiles and the name is honest. Without the mark and without them it does not, and the compiler names the
-+// payload - 4 errors, "'UITargetedPreview' is only available in iOS 13.0 or newer", one per case.
-+@available(iOS 13.4, *)
-+public enum UIPointerEffect {
-+    case automatic(_: UITargetedPreview)
-+    case highlight(_: UITargetedPreview)
-+    case hover(_: UITargetedPreview, preferredTintMode: UIPointerEffect.TintMode = .overlay, prefersShadow: Bool = false, prefersScaledContent: Bool)
-+    case lift(_: UITargetedPreview)
-+    public enum TintMode {
-+        case none
-+        case overlay
-+        case underlay
-+    }
-+}
-+
-+public enum UIPointerShape {
-+    case horizontalBeam(length: CGFloat)
-+    case path(_: UIBezierPath)
-+    case roundedRect(_: CGRect, radius: CGFloat)
-+    case verticalBeam(length: CGFloat)
 +}
 +
 +public enum RevenantUITabBarController {

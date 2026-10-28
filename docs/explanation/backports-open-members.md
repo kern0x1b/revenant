@@ -342,20 +342,37 @@ Open:
 
 ## Selectors Display calls through the delegates
 
-The respondsToSelector check was asked for as a generator change: count a selector that a class sends through
-`respondsToSelector:` as a protocol member. Two of Display's errors are the selectors that prompted it, and the probe
-on the lowered iOS 6 SDK settles both without that change:
+Display's errors on these selectors are not on UIKit's delegates. They are on AsyncDisplayKit's protocols,
+`ASGestureRecognizerDelegate` and `ASScrollViewDelegate` in `ASDisplayNode.h`, which Display's
+`GestureRecognizerDelegate.swift` wraps. Those declarations are Telegram's, so the SDK lowering does not reach them.
 
-- `scrollViewDidChangeAdjustedContentInset:` on `UIScrollViewDelegate` implements without a diagnostic under
-  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`. The lowered header no longer marks the protocol member,
-  so no generator change is needed for it.
-- `accessibilityAttributedScrollStatusForScrollView:` on `UIScrollView` is in `lowered-members.txt` and implemented in
-  `RevenantIOS11.m`, but the cached overlay the probe reads does not declare it, so the probe reports "no visible
-  @interface". Display's error is the Swift declaration's iOS 11 mark, which the UIKit Swift overlay carries, not the ObjC
-  header. The fix is in the overlay, not the generator.
+The lowering of such headers is generic. `THIRD_PARTY_MODULES` in `toolchain/modules/apple/lowered.lua` names each
+header and the protocols it declares, and the overlay serves a lowered copy of the header to the compiler the same way
+it serves an SDK header. The app's source stays as it is. A protocol member is lowered only when a backport consults
+it through `@selector` in `frameworks/Backports/src`. Three are consulted:
 
-Neither probe reaches the Swift compile, and the cached overlay may predate the current member list, so both are
-re-checked with the next Display build.
+- `shouldRequireFailureOfGestureRecognizer:` and `shouldBeRequiredToFailByGestureRecognizer:` on
+  `ASGestureRecognizerDelegate`, consulted by `UIGestureRecognizer+Failure7.m`.
+- `scrollViewDidChangeAdjustedContentInset:` on `ASScrollViewDelegate`, consulted by `UIViewController+SafeAreaChanges11.m`.
+
+The project places the module with `apple_lowered_modules` (Telegram: `AsyncDisplayKit=<submodule>/Source/PublicHeaders/AsyncDisplayKit`).
+
+`accessibilityAttributedScrollStatusForScrollView:` on `ASScrollViewDelegate` is not lowered. Nothing consults it:
+`RevenantIOS11.m` defines it on `UIScrollView`, and no iOS 6 path calls that. Native delivery is not available either:
+the iOS 6 selector inventory has no public hook for the scroll status, only the private `_accessibilityScrollStatus`,
+and lowering the availability without a backport would fake the member. So it is a genuine limit. Display's
+`accessibilityAttributedScrollStatus(for:)` wrapper still fails to compile for armv7 iOS 6.
+
+Measured, not on device:
+
+- `swiftc -typecheck -target armv7-apple-ios6.0` of `GestureRecognizerDelegate.swift` against the SDK-only overlay: errors at
+  lines 36, 43, 185 and 199. Against the overlay with the module placed: only line 199.
+- The overlay built from the Telegram 13.0.0 reference header: the three consulted members lose their availability.
+  `shouldReceiveEvent:` (iOS 13.4) and `accessibilityAttributedScrollStatusForScrollView:` keep theirs.
+- `clang -fsyntax-only` for armv7-apple-ios6.0 of `TGNavigationBar.m` and `TGModernGalleryDefaultInterfaceView.m`
+  (LegacyComponents): warnings at `UIActivityIndicatorViewStyleMedium` without the overlay, none with it.
+- `UIScrollViewDelegate`'s `scrollViewDidChangeAdjustedContentInset:` implements without a diagnostic under
+  `-Wunguarded-availability-new -Werror` for `armv7-apple-ios6.0`, so no generator change is needed for it.
 
 ## SceneKit: two members that raise on 6.1.3
 
