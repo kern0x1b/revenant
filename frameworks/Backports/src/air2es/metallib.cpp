@@ -119,6 +119,10 @@ bool splitMetallib(const std::vector<uint8_t> &file, std::vector<Entry> &entries
             error = function.name + ": its module region has no bitcode wrapper";
             return false;
         }
+        if (function.regionSize > file.size() - regionAt) {
+            error = function.name + ": its module region runs past the end of the file";
+            return false;
+        }
         if (wrapperOffset + wrapperSize > function.regionSize) {
             error = function.name + ": its bitcode does not fit in its module region";
             return false;

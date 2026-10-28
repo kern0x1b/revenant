@@ -23,8 +23,8 @@ bool readFile(const char *path, std::vector<uint8_t> &bytes)
     size_t got;
     while ((got = fread(buffer, 1, sizeof buffer, file)) > 0)
         bytes.insert(bytes.end(), buffer, buffer + got);
-    fclose(file);
-    return true;
+    bool failed = ferror(file) != 0;
+    return fclose(file) == 0 && !failed;
 }
 
 bool writeFile(const std::string &path, const std::string &text)
@@ -46,15 +46,14 @@ const char *stageName(Stage stage)
     return "unknown";
 }
 
-std::string jsonQuote(const std::string &text)
+bool fileNameOk(const std::string &name)
 {
-    std::string out = "\"";
-    for (char c : text) {
-        if (c == '"' || c == '\\')
-            out += '\\';
-        out += c;
-    }
-    return out + "\"";
+    if (name.empty() || name == "." || name == "..")
+        return false;
+    for (char c : name)
+        if (c == '/' || (unsigned char)c < 0x20)
+            return false;
+    return true;
 }
 
 int usage()
@@ -91,12 +90,17 @@ int extract(const char *directory, const char *path)
         fprintf(stderr, "%s: %s\n", path, error.c_str());
         return 1;
     }
-    for (const Entry &entry : entries)
+    for (const Entry &entry : entries) {
+        if (!fileNameOk(entry.name)) {
+            fprintf(stderr, "air2es: %s is not a file name\n", entry.name.c_str());
+            return 1;
+        }
         if (!writeFile(std::string(directory) + "/" + entry.name + ".bc",
                        std::string(entry.bitcode.begin(), entry.bitcode.end()))) {
             fprintf(stderr, "air2es: cannot write %s/%s.bc\n", directory, entry.name.c_str());
             return 1;
         }
+    }
     printf("%zu module(s) written to %s\n", entries.size(), directory);
     return 0;
 }
@@ -119,7 +123,9 @@ int translate(const char *path, const char *folder)
     for (const Entry &entry : entries) {
         Translation translation;
         Refusal refusal;
-        if (!translateEntry(entry, translation, refusal)) {
+        if (!fileNameOk(entry.name))
+            refusal.reason = "a name that is not a file name";
+        else if (!translateEntry(entry, translation, refusal)) {
             refusals.push_back(Refusal{entry.name, refusal.reason});
             printf("%s: REFUSED %s: %s\n", path, entry.name.c_str(), refusal.reason.c_str());
             continue;

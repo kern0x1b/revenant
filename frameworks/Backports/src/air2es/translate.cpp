@@ -170,17 +170,6 @@ std::string floatLiteral(double value)
     return value < 0 ? "(" + out + ")" : out;
 }
 
-std::string jsonQuote(const std::string &text)
-{
-    std::string out = "\"";
-    for (char c : text) {
-        if (c == '"' || c == '\\')
-            out += '\\';
-        out += c;
-    }
-    return out + "\"";
-}
-
 std::string join(const std::vector<std::string> &items, const char *separator = ", ")
 {
     std::string out;
@@ -789,6 +778,8 @@ private:
                 if (!local(*phi, name))
                     return false;
             }
+            if (phi->getBasicBlockIndex(from) < 0)
+                return refuse("a phi that has no value for one of its edges");
             std::string value;
             if (!expression(phi->getIncomingValueForBlock(from), value))
                 return false;
@@ -1149,6 +1140,8 @@ private:
             return true;
         }
         if (width) {
+            if (call.arg_size() != 2)
+                return refuse("a width with an argument count this emitter does not map");
             Binding *texture = bindingOf(call.getArgOperand(0));
             if (!texture || texture->kind != "air.texture")
                 return refuse("a width of something other than a texture");
@@ -1163,6 +1156,8 @@ private:
             statement(name + " = int(" + size + ".x);\n");
             return true;
         }
+        if (call.arg_size() != 8)
+            return refuse("a sample with an argument count this emitter does not map");
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
             return refuse("a sample of something other than a texture argument");
@@ -1172,7 +1167,7 @@ private:
         auto *normalized = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *hasLevel = dyn_cast<ConstantInt>(call.getArgOperand(5));
         auto *level = dyn_cast<ConstantFP>(call.getArgOperand(6));
-        if (call.arg_size() != 8 || !normalized || !normalized->isOne() || !hasLevel || !hasLevel->isZero() ||
+        if (!normalized || !normalized->isOne() || !hasLevel || !hasLevel->isZero() ||
             !level || !level->isZero() || !isa<ConstantAggregateZero>(call.getArgOperand(4)))
             return refuse("a sample with a level, bias, offset or unnormalized coordinate this emitter does not map");
         if (args.size() != 1)
@@ -1290,6 +1285,24 @@ private:
     std::vector<Frame> frames_;
 };
 
+}
+
+std::string jsonQuote(const std::string &text)
+{
+    std::string out = "\"";
+    for (char c : text) {
+        if (c == '"' || c == '\\') {
+            out += '\\';
+            out += c;
+        } else if ((unsigned char)c < 0x20) {
+            char escape[8];
+            snprintf(escape, sizeof escape, "\\u%04x", (unsigned)(unsigned char)c);
+            out += escape;
+        } else {
+            out += c;
+        }
+    }
+    return out + "\"";
 }
 
 bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
