@@ -1,0 +1,4 @@
+Package: space.kern0x1b.backports.deviceprobe
+Name: BackportsDeviceProbe
+Architecture: iphoneos-arm
+Description: Runs the Backports' UIKit animation duration, text input mode, Metal presented handlers and purgeable state on the device, and reads the real reachability flags and interfaces beside them, writing the verdicts to /var/revenant/device-probe.txt.

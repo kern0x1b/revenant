@@ -41,7 +41,9 @@ private func emit(_ message: StaticString, log: OSLog, type: OSLogType, _ args: 
     }
     format.withUnsafeBufferPointer { text in
         guard let handle = log.handle else {
-            revenant_os_log_fallback(type.rawValue, text.baseAddress!)
+            withVaList(args) { arguments in
+                revenant_os_log_fallback(type.rawValue, text.baseAddress!, arguments, Int32(args.count), error)
+            }
             return
         }
         withVaList(args) { arguments in

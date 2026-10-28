@@ -2,11 +2,17 @@
 #import <objc/runtime.h>
 
 
+static NSUInteger revenant_drawable_counter;
+static const char revenant_last_presented_key;
+
 @implementation RevenantMetalDrawable {
     RevenantMetalTexture *_texture;
     __weak CAMetalLayer *_layer;
     EAGLContext *_context;
     GLuint _renderbuffer;
+    NSMutableArray *_presentedHandlers;
+    NSUInteger _drawableID;
+    CFTimeInterval _presentedTime;
 }
 
 - (instancetype)initWithTexture:(RevenantMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context
@@ -15,6 +21,7 @@
         _texture = texture;
         _layer = layer;
         _context = context;
+        _drawableID = __sync_add_and_fetch(&revenant_drawable_counter, 1);
     }
     return self;
 }
@@ -31,7 +38,7 @@
 
 - (NSUInteger)drawableID
 {
-    return 0;
+    return _drawableID;
 }
 
 - (void)present
@@ -43,26 +50,46 @@
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, (GLuint)renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
+    _presentedTime = CACurrentMediaTime();
+    if (_layer)
+        objc_setAssociatedObject(_layer, &revenant_last_presented_key, @(_presentedTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [device relinquish];
+    NSArray *handlers = _presentedHandlers;
+    _presentedHandlers = nil;
+    for (MTLDrawablePresentedHandler handler in handlers)
+        handler((id<MTLDrawable>)self);
 }
 
 - (void)presentAtTime:(CFTimeInterval)presentationTime
 {
-    [self present];
+    CFTimeInterval delay = presentationTime - CACurrentMediaTime();
+    if (delay <= 0) {
+        [self present];
+        return;
+    }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self present];
+    });
 }
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration
 {
-    [self present];
+    NSNumber *last = _layer ? objc_getAssociatedObject(_layer, &revenant_last_presented_key) : nil;
+    [self presentAtTime:last ? last.doubleValue + duration : 0];
 }
 
 - (void)addPresentedHandler:(MTLDrawablePresentedHandler)block
 {
+    if (!block)
+        return;
+    if (!_presentedHandlers)
+        _presentedHandlers = [NSMutableArray array];
+    [_presentedHandlers addObject:block];
 }
 
 - (CFTimeInterval)presentedTime
 {
-    return 0;
+    return _presentedTime;
 }
 
 @end

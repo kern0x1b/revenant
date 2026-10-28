@@ -42,6 +42,40 @@ local CASES = {
         },
     },
     {
+        label = "UIResponder textInputMode",
+        sdk = {
+            {"UIKit", "UIResponder.h", {
+                "*textInputMode API_AVAILABLE(ios(7.0))",
+            }},
+            {"UIKit", "UITextInput.h", {
+                "+ (nullable UITextInputMode *)currentInputMode API_DEPRECATED(",
+            }},
+        },
+        source = "src/UIKit/UIResponder+TextInput7.m",
+        mutation = {"return [UITextInputMode currentInputMode];", "return nil;"},
+        needles = {
+            "- (UITextInputMode *)textInputMode",
+            "return [UITextInputMode currentInputMode];",
+        },
+    },
+    {
+        label = "MTLDrawable presented handlers",
+        sdk = {
+            {"Metal", "MTLDrawable.h", {
+                "- (void)addPresentedHandler:(MTLDrawablePresentedHandler)block API_AVAILABLE(macos(10.15.4), ios(10.3), macCatalyst(13.4));",
+            }},
+        },
+        source = "src/Metal/RevenantMetalDrawable.m",
+        mutation = {"handler((id<MTLDrawable>)self);", "(void)self;"},
+        needles = {
+            "- (void)addPresentedHandler:(MTLDrawablePresentedHandler)block",
+            "[_presentedHandlers addObject:block];",
+            "handler((id<MTLDrawable>)self);",
+            "_drawableID = __sync_add_and_fetch(&revenant_drawable_counter, 1);",
+            "_presentedTime = CACurrentMediaTime();",
+        },
+    },
+    {
         label = "CLGeocoder postal address",
         sdk = {
             {"CoreLocation", "CLGeocoder.h", {

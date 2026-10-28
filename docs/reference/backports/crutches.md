@@ -252,7 +252,15 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Behavior: the accurate level takes 4.2 to 5.2 s for the two-line fixture and 29 to 32 s for a 12-line page on the iPhone 4S; the fast level takes about 0.65 s for the two-line fixture. The split was tried and removed: on the 12-line page it took 29.3 s where the serial build took 31.3 s, and on the two-line fixture it took 4.3 s where the serial build took 4.2 s.
 - Measurement: the device probe, three calls per configuration, on the iPhone 4S (dual A5, iOS 6.1.3).
 - Removed by: a profile that names the dominant cost on the device, and a change that brings a 12-line page below a stated target with the accurate fixtures unchanged.
->
+
+### C37. armv7 Objective-C -Wformat warnings are not errors
+
+- Stands in for: `-Werror` on the `-Wformat` class, for the Objective-C targets whose upstream copts set `-Werror` (14 generated targets). The generator adds `-Wno-error=format` only when `is_arch("armv7")`, so the relaxation is armv7-only. Every other `-Werror` stays strict, and no source is edited.
+- Why: on armv7 (ILP32) `NSInteger` is `int`, the same width as `long`, so passing an `NSInteger` to `%ld` is the same size and benign at runtime. Clang still reports the type mismatch as `-Wformat`, which `-Werror` makes fatal, for example `submodules/LegacyComponents/Sources/PGPhotoProcessPass.m:135`.
+- Behavior: the format warnings stay warnings on armv7. Swift `-warnings-as-errors` is unchanged.
+- Measurement: revenant's LLVM 23.1.3 clang defines `__SIZEOF_INT__` and `__SIZEOF_LONG__` as 4 with no `__LP64__` for `--target=armv7-apple-ios6.0`; for arm64 they are 8 with `__LP64__`. After the change, `LegacyComponents` reports its `-Wformat` findings as warnings and no longer fails on them; it still fails on a different error, `UIActivityIndicatorViewStyleMedium` (iOS 13), which is not covered by this entry.
+- Removed by: a Telegram source change that passes `-Wformat` on armv7 (none is made here), or the owner's decision to keep `-Werror` strict for these targets.
+>>
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install

@@ -14,6 +14,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
+| [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
+| [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
@@ -42,6 +44,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Device codegen](reference/toolchain/codegen.md) | what the toolchain sets for the device's code generation, what was measured on the bench workloads, and what is held |
 | [Why the toolchain is built this way](explanation/toolchain/design.md) | the design and its decisions |
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
+| [The os_log fallback](explanation/toolchain/os-log.md) | how a message prints without the Backports runtime: the buffer layout, the privacy rules, and what is still provisional |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
 | [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
@@ -107,6 +110,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
+| [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |

@@ -80,6 +80,11 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     vImage_YpCbCrPixelRange range = {0, 128, 255, 255, 255, 1, 255, 0};
     vImage_ARGBToYpCbCr info;
     (void)vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix, &range, &info, kvImageARGB8888, kvImage420Yp8_Cb8_Cr8, 0);
+    NSUnderlineStyle underline = NSUnderlineStylePatternDot;
+    (void)underline;
+    CAFrameRateRange frameRates = CAFrameRateRangeMake(30.0f, 120.0f, 120.0f);
+    (void)frameRates;
+    (void)[UIPointerShape shapeWithRoundedRect:CGRectZero cornerRadius:8.0];
 }
 ]=]
 
