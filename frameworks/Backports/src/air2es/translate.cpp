@@ -505,6 +505,8 @@ private:
             out = elements[constant->getZExtValue()];
             return true;
         }
+        if (count == 0)
+            return refuse("a variable read from an empty constant table");
         std::string selector;
         if (!expression(index, selector))
             return false;
