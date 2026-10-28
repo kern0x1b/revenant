@@ -1,5 +1,6 @@
 #import "RevenantMenus.h"
 #import "RevenantTraitStyle.h"
+#import "RevenantAnimationDuration.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
@@ -37,10 +38,17 @@ UIUserInterfaceStyle revenant_view_style_override(UIView *view)
 
 + (void)modifyAnimationsWithRepeatCount:(CGFloat)count autoreverses:(BOOL)autoreverses animations:(void (NS_NOESCAPE ^)(void))animations
 {
-    revenant_menus_say_once(@"modify-animations", @"+modifyAnimationsWithRepeatCount:autoreverses:animations: on iOS 6 sets the repeat count and autoreverse of the whole enclosing animation block, since the release cannot scope them to the animations inside");
+    revenant_menus_say_once(@"modify-animations", @"+modifyAnimationsWithRepeatCount:autoreverses:animations: on iOS 6 sets the repeat count and autoreverse of the enclosing animation group while the block runs and puts the caller's values back after it, since the release cannot scope them to the animations inside");
+    float repeatCount = RevenantAnimationGroupRepeatCount();
+    BOOL reverses = RevenantAnimationGroupAutoreverses();
     [UIView setAnimationRepeatCount:(float)count];
     [UIView setAnimationRepeatAutoreverses:autoreverses];
-    animations();
+    @try {
+        animations();
+    } @finally {
+        [UIView setAnimationRepeatCount:repeatCount];
+        [UIView setAnimationRepeatAutoreverses:reverses];
+    }
 }
 
 @end

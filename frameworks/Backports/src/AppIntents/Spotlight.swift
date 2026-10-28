@@ -147,10 +147,17 @@ public enum RevenantSpotlightJournal {
 public let RevenantAppEntityIdentifierAttribute = RevenantSpotlightJournal.entityIdentifierAttribute
 #endif
 
-@available(iOS 8.0, *)
+@available(iOS 6.0, *)
 extension NSUserActivity {
     public var appEntityIdentifier: String? {
-        return userInfo?[RevenantAppEntityIdentifierKey] as? String
+        get {
+            return userInfo?[RevenantAppEntityIdentifierKey] as? String
+        }
+        set {
+            var info = userInfo ?? [:]
+            info[RevenantAppEntityIdentifierKey] = newValue
+            userInfo = info
+        }
     }
 }
 

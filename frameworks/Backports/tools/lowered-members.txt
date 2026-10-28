@@ -1631,7 +1631,9 @@ class RevenantAVScheduledRemoval
 class RevenantAccessoryView
 class RevenantActionEntry
 class RevenantActiveFrameDurationInstaller
+class RevenantActivityIndicatorStyle13
 class RevenantAlertPopoverPresentation
+class RevenantAnimationGroup
 class RevenantAnimatorDriver
 class RevenantAnnotationState
 class RevenantAppearingInstaller
@@ -1957,7 +1959,6 @@ class RevenantScrollGuideObserver
 class RevenantScrollWatcher
 class RevenantSearchBar
 class RevenantSearchParser
-class RevenantSecAccessControl
 class RevenantSecCertificate
 class RevenantSecIdentity
 class RevenantSecProtocolMetadata
@@ -2676,6 +2677,7 @@ class WKNavigationResponse
 class WKPreferences
 class WKProcessPool
 class WKScriptMessage
+class WKSecurityOrigin
 class WKSnapshotConfiguration
 class WKUserContentController
 class WKUserScript
@@ -2694,6 +2696,7 @@ class WKWebView
 class WKWebViewConfiguration
 class WKWebpagePreferences
 class WKWebsiteDataStore
+class WKWindowFeatures
 class __NSConcreteUUID
 class cls
 enum AAAttributionErrorCodePlatformNotSupported
@@ -3054,9 +3057,14 @@ enum LABiometryTypeNone
 enum LACompanionTypeMac
 enum LACompanionTypeWatch
 enum LACredentialTypeApplicationPassword
+enum LAErrorAppCancel
 enum LAErrorBiometryNotAvailable
 enum LAErrorInvalidContext
 enum LAErrorNotInteractive
+enum LAErrorSystemCancel
+enum LAErrorUserCancel
+enum LAErrorUserFallback
+enum LAPolicyDeviceOwnerAuthentication
 enum LPErrorMetadataFetchCancelled
 enum LPErrorMetadataFetchFailed
 enum LPErrorMetadataFetchTimedOut
@@ -3339,6 +3347,8 @@ enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
 enum MTLPrimitiveTypeTriangleStrip
+enum MTLPurgeableStateKeepCurrent
+enum MTLPurgeableStateNonVolatile
 enum MTLResourceStorageModePrivate
 enum MTLResourceStorageModeShared
 enum MTLSamplerAddressModeClampToEdge
@@ -3773,6 +3783,8 @@ enum UIAccessibilityContrastHigh
 enum UIAccessibilityCustomSystemRotorTypeNone
 enum UIAccessibilityHearingDeviceEarNone
 enum UIActivityCategoryAction
+enum UIActivityIndicatorViewStyleLarge
+enum UIActivityIndicatorViewStyleMedium
 enum UIAlertActionStyleCancel
 enum UIAlertActionStyleDefault
 enum UIAlertActionStyleDestructive
@@ -4054,6 +4066,8 @@ enum WKErrorJavaScriptExceptionOccurred
 enum WKErrorJavaScriptResultTypeIsUnsupported
 enum WKErrorUnknown
 enum WKNavigationActionPolicyAllow
+enum WKNavigationResponsePolicyAllow
+enum WKNavigationResponsePolicyCancel
 enum WKNavigationTypeBackForward
 enum WKNavigationTypeOther
 enum WKNavigationTypeReload
@@ -4126,6 +4140,13 @@ enum kNEHotspotHelperResultSuccess
 enum kNEHotspotHelperResultTemporaryFailure
 enum kNEHotspotHelperResultUIRequired
 enum kNEHotspotHelperResultUnsupportedNetwork
+enum kSecAccessControlAnd
+enum kSecAccessControlBiometryAny
+enum kSecAccessControlBiometryCurrentSet
+enum kSecAccessControlCompanion
+enum kSecAccessControlDevicePasscode
+enum kSecAccessControlOr
+enum kSecAccessControlUserPresence
 enum kSecKeyOperationTypeDecrypt
 enum kSecKeyOperationTypeEncrypt
 enum kSecKeyOperationTypeKeyExchange
@@ -4442,7 +4463,19 @@ function NSExtensionMain
 function NSStringFromDirectionalEdgeInsets
 function RevenantASAppleIDButtonTitle
 function RevenantAURenderInput
+function RevenantAccessControlFlags
+function RevenantAccessControlProtection
 function RevenantAccessFromWord
+function RevenantAnimationDurationInherited
+function RevenantAnimationDurationPop
+function RevenantAnimationDurationPush
+function RevenantAnimationDurationSetCurrent
+function RevenantAnimationGroupAutoreverses
+function RevenantAnimationGroupRepeatCount
+function RevenantAnimationGroupSetAutoreverses
+function RevenantAnimationGroupSetRepeatCount
+function RevenantAudioUnitApplyPreset
+function RevenantAudioUnitReadPreset
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -4643,6 +4676,7 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
+function RevenantPhotoLongestIncreasingSubsequence
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
@@ -4663,11 +4697,22 @@ function RevenantSCNReadVector
 function RevenantSCNRowTransform
 function RevenantSCNUnprojectPoint
 function RevenantSCNWorldBox
+function RevenantSecItemAuthenticate
+function RevenantSecItemFlagsRequireUser
+function RevenantSecItemSystemEnforcesAccessControl
 function RevenantSecKeyECCarries
 function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
 function RevenantSecKeyECVerify
 function RevenantSecKeyFail
+function RevenantSecureEnclaveKeyCopyPublic
+function RevenantSecureEnclaveKeyCreateRandom
+function RevenantSecureEnclaveKeyDelete
+function RevenantSecureEnclaveKeyIs
+function RevenantSecureEnclaveKeyIsPrivate
+function RevenantSecureEnclaveKeyLookup
+function RevenantSecureEnclaveKeyPoint
+function RevenantSecureEnclaveKeyScalar
 function RevenantSecurityAttributesFromItemResult
 function RevenantSecurityCarries
 function RevenantSecurityKeyIsPortEC
@@ -4730,6 +4775,10 @@ function SecCertificateCopyNormalizedSubjectSequence
 function SecCertificateCopySerialNumberData
 function SecCopyErrorMessageString
 function SecCreateSharedWebCredentialPassword
+function SecItemAdd
+function SecItemCopyMatching
+function SecItemDelete
+function SecItemUpdate
 function SecKeyCopyAttributes
 function SecKeyCopyExternalRepresentation
 function SecKeyCopyKeyExchangeResult
@@ -5898,6 +5947,7 @@ function revenant_task_progress_apply
 function revenant_task_progress_create
 function revenant_text
 function revenant_text_content_type
+function revenant_tightening_kern
 function revenant_track_bar
 function revenant_trait_classes
 function revenant_trait_collection_with
@@ -8858,6 +8908,7 @@ global RevenantASAppleIDButtonLogoCharacter
 global RevenantAVMetadataTimedItemsKey
 global RevenantAVMetadataTimedRangeKey
 global RevenantAXSettingsErrorDomain
+global RevenantAnimationDurationDefault
 global RevenantCKDevelopmentEnvironment
 global RevenantCKHost
 global RevenantCKProductionEnvironment
@@ -11650,6 +11701,7 @@ member AVAudioUnit -renderingAlgorithm
 member AVAudioUnit -revenant_applyPendingParameters
 member AVAudioUnit -revenant_inputParameter:
 member AVAudioUnit -revenant_readAzimuth:elevation:distance:
+member AVAudioUnit -revenant_setEngine:auNode:audioUnit:
 member AVAudioUnit -revenant_setInputParameter:value:
 member AVAudioUnit -reverbBlend
 member AVAudioUnit -setBypass:
@@ -23838,6 +23890,7 @@ member NSTextAttachment -attachmentBoundsForTextContainer:proposedLineFragment:g
 member NSTextAttachment -bounds
 member NSTextAttachment -contents
 member NSTextAttachment -fileType
+member NSTextAttachment -imageForBounds:textContainer:characterIndex:
 member NSTextAttachment -setBounds:
 member NSTextAttachment -setContents:
 member NSTextAttachment -setFileType:
@@ -25564,8 +25617,12 @@ member RevenantAccessoryView -setMarked:
 member RevenantAccessoryView -setRevenant_handler:
 member RevenantAccessoryView -tintColorDidChange
 member RevenantActiveFrameDurationInstaller +load
+member RevenantActivityIndicatorStyle13 +load
 member RevenantAlertPopoverPresentation -init
 member RevenantAlertPopoverPresentation -sourceView
+member RevenantAnimationGroup -autoreverses
+member RevenantAnimationGroup -duration
+member RevenantAnimationGroup -repeatCount
 member RevenantAnimatorDriver -initWithAnimator:
 member RevenantAnimatorDriver -invalidate
 member RevenantAnimatorDriver -step
@@ -31487,6 +31544,7 @@ member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -followsUndockedKeyboard
 member UIKeyboardLayoutGuide -setFollowsUndockedKeyboard:
+member UILabel +load
 member UILabel -adjustsFontForContentSizeCategory
 member UILabel -allowsDefaultTighteningForTruncation
 member UILabel -lineBreakStrategy
@@ -33282,6 +33340,8 @@ member UITextFormattingCoordinator -setSelectedAttributes:isMultiple:
 member UITextInputAssistantItem -allowsHidingShortcuts
 member UITextInputAssistantItem -init
 member UITextInputAssistantItem -leadingBarButtonGroups
+member UITextInputAssistantItem -revenant_attachToResponder:
+member UITextInputAssistantItem -revenant_shortcutsDidChange
 member UITextInputAssistantItem -setAllowsHidingShortcuts:
 member UITextInputAssistantItem -setLeadingBarButtonGroups:
 member UITextInputAssistantItem -setTrailingBarButtonGroups:
@@ -33674,6 +33734,14 @@ member UIView +load
 member UIView +modifyAnimationsWithRepeatCount:autoreverses:animations:
 member UIView +performSystemAnimation:onViews:options:animations:completion:
 member UIView +performWithoutAnimation:
+member UIView +revenant_animateWithDuration:animations:
+member UIView +revenant_animateWithDuration:animations:completion:
+member UIView +revenant_animateWithDuration:delay:options:animations:completion:
+member UIView +revenant_beginAnimations:context:
+member UIView +revenant_commitAnimations
+member UIView +revenant_setAnimationDuration:
+member UIView +revenant_setAnimationRepeatAutoreverses:
+member UIView +revenant_setAnimationRepeatCount:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:
 member UIView -accessibilityIgnoresInvertColors
@@ -34674,6 +34742,7 @@ member WKFrameInfo +revenant_frameWithMainFrame:request:
 member WKFrameInfo -copyWithZone:
 member WKFrameInfo -isMainFrame
 member WKFrameInfo -request
+member WKFrameInfo -securityOrigin
 member WKNavigation -revenant_request
 member WKNavigation -setRevenant_request:
 member WKNavigationAction +revenant_actionWithRequest:type:mainFrame:
@@ -34682,6 +34751,7 @@ member WKNavigationAction -navigationType
 member WKNavigationAction -request
 member WKNavigationAction -sourceFrame
 member WKNavigationAction -targetFrame
+member WKNavigationResponse +revenant_policyAllowing:
 member WKNavigationResponse -canShowMIMEType
 member WKNavigationResponse -isForMainFrame
 member WKNavigationResponse -response
@@ -34703,6 +34773,10 @@ member WKScriptMessage -body
 member WKScriptMessage -frameInfo
 member WKScriptMessage -name
 member WKScriptMessage -webView
+member WKSecurityOrigin +revenant_originWithURL:
+member WKSecurityOrigin -host
+member WKSecurityOrigin -port
+member WKSecurityOrigin -protocol
 member WKSnapshotConfiguration -afterScreenUpdates
 member WKSnapshotConfiguration -copyWithZone:
 member WKSnapshotConfiguration -init
@@ -35010,6 +35084,15 @@ member WKWebsiteDataStore -initWithCoder:
 member WKWebsiteDataStore -isPersistent
 member WKWebsiteDataStore -removeDataOfTypes:forDataRecords:completionHandler:
 member WKWebsiteDataStore -removeDataOfTypes:modifiedSince:completionHandler:
+member WKWindowFeatures -allowsResizing
+member WKWindowFeatures -copyWithZone:
+member WKWindowFeatures -height
+member WKWindowFeatures -menuBarVisibility
+member WKWindowFeatures -statusBarVisibility
+member WKWindowFeatures -toolbarsVisibility
+member WKWindowFeatures -width
+member WKWindowFeatures -x
+member WKWindowFeatures -y
 member __NSConcreteUUID -UUIDString
 member __NSConcreteUUID -classForCoder
 member __NSConcreteUUID -copyWithZone:
@@ -35110,6 +35193,7 @@ protocol NSItemProviderWriting
 protocol NSMutableCopying
 protocol NSSecureCoding
 protocol NSStreamDelegate
+protocol NSTextAttachmentContainer
 protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
@@ -35222,6 +35306,7 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
+protocol WKNavigationDelegate
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
@@ -35621,6 +35706,8 @@ protocol_member NSItemProviderWriting -writableTypeIdentifiersForItemProvider
 protocol_member NSMutableCopying -mutableCopyWithZone:
 protocol_member NSSecureCoding +supportsSecureCoding
 protocol_member NSStreamDelegate -stream:handleEvent:
+protocol_member NSTextAttachmentContainer -attachmentBoundsForTextContainer:proposedLineFragment:glyphPosition:characterIndex:
+protocol_member NSTextAttachmentContainer -imageForBounds:textContainer:characterIndex:
 protocol_member NSTextLocation -compare:
 protocol_member NSTextStorageDelegate -textStorage:didProcessEditing:range:changeInLength:
 protocol_member NSURLConnectionDataDelegate -connection:didReceiveData:

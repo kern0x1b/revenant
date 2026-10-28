@@ -45,6 +45,8 @@ static void revenant_os_log_write(os_log_t log, os_log_type_t type, char *text);
 
 void revenant_os_log_send(os_log_t log, os_log_type_t type, const char *format, va_list arguments, int error)
 {
+    if (!revenant_os_log_type_enabled(log, type))
+        return;
     revenant_os_log_write(log, type, revenant_os_log_format(format, arguments, error));
 }
 

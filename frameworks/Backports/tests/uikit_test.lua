@@ -120,6 +120,14 @@ local AREAS = {
         },
     },
     {
+        name = "iOS 10.3 alternate icons of the application",
+        sources = {"UIApplication+AlternateIcon.m"},
+        members = {
+            "-[UIApplication supportsAlternateIcons]", "-[UIApplication alternateIconName]",
+            "-[UIApplication setAlternateIconName:completionHandler:]",
+        },
+    },
+    {
         name = "iOS 10 constraints, fonts, previews, refresh controls and bars",
         sources = {"UIFont+TextStyles10.m", "UICollectionView+Getter10.m", "UIViewPropertyAnimator+Getter10.m", "NSLayoutConstraint+Anchors10.m",
                    "UILayoutGuide+Ambiguity10.m", "UIImage+RendererFormat10.m", "UIPreviewInteraction.m", "UIViewController+FocusRestore10.m",

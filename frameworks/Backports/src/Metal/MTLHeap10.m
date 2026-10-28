@@ -12,6 +12,7 @@ const NSUInteger RevenantMetalHeapAlignment = 256;
     NSUInteger _allocated;
     MTLHeapType _type;
     MTLHazardTrackingMode _hazardTracking;
+    MTLPurgeableState _purgeableState;
     MTLStorageMode _storageMode;
     MTLCPUCacheMode _cpuCacheMode;
 }
@@ -194,9 +195,12 @@ const NSUInteger RevenantMetalHeapAlignment = 256;
     return texture;
 }
 
-- (BOOL)setPurgeableState:(MTLPurgeableState)state
+- (MTLPurgeableState)setPurgeableState:(MTLPurgeableState)state
 {
-    return NO;
+    MTLPurgeableState previous = _purgeableState ?: MTLPurgeableStateNonVolatile;
+    if (state != MTLPurgeableStateKeepCurrent)
+        _purgeableState = state;
+    return previous;
 }
 
 @end

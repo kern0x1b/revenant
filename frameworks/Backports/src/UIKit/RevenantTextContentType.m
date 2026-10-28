@@ -3,6 +3,21 @@
 
 static char revenant_text_content_type_key;
 
+static UIKeyboardType revenant_keyboard_type(NSString *type, BOOL *mapped)
+{
+    *mapped = YES;
+    if ([type isEqualToString:@"oneTimeCode"])
+        return UIKeyboardTypeNumberPad;
+    if ([type isEqualToString:@"emailAddress"])
+        return UIKeyboardTypeEmailAddress;
+    if ([type isEqualToString:@"URL"])
+        return UIKeyboardTypeURL;
+    if ([type isEqualToString:@"telephoneNumber"])
+        return UIKeyboardTypePhonePad;
+    *mapped = NO;
+    return UIKeyboardTypeDefault;
+}
+
 NSString *revenant_text_content_type(id object)
 {
     return objc_getAssociatedObject(object, &revenant_text_content_type_key);
@@ -10,10 +25,14 @@ NSString *revenant_text_content_type(id object)
 
 void revenant_set_text_content_type(id object, NSString *type)
 {
+    objc_setAssociatedObject(object, &revenant_text_content_type_key, [type copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    BOOL mapped = NO;
+    UIKeyboardType keyboard = revenant_keyboard_type(type, &mapped);
+    if (mapped && [object respondsToSelector:@selector(keyboardType)] && [object keyboardType] == UIKeyboardTypeDefault)
+        [object setKeyboardType:keyboard];
     static dispatch_once_t once;
     if (type)
         dispatch_once(&once, ^{
-            NSLog(@"textContentType is kept and handed back, and not used: iOS 6 has no keyboard that fills a field in from a type");
+            NSLog(@"textContentType sets the keyboard type when the app left it at the default; the AutoFill suggestion is system UI, and iOS 6 has none");
         });
-    objc_setAssociatedObject(object, &revenant_text_content_type_key, [type copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }

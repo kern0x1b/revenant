@@ -85,6 +85,11 @@ GUARDS = {
         ["_OBJC_CLASS_$_UIFontMetrics"] = "stdlib/public/Darwin/UIKit/UIKit.swift:357 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
         ["_UIContentSizeCategoryIsAccessibilityCategory"] = "stdlib/public/Darwin/UIKit/UIKit.swift:366 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
     },
+    ["libswiftos.dylib"] = {
+        ["_revenant_os_log_named"] = "toolchain/src/swift-runtime/overlay/os/RevenantOSOverlayShims.h (revenant_os_log_linked tests its address; os.swift calls it only when that test passes)",
+        ["_revenant_os_log_send"] = "toolchain/src/swift-runtime/overlay/os/RevenantOSOverlayShims.h (revenant_os_log_linked tests its address; os.swift calls it only when that test passes)",
+        ["_revenant_os_log_type_enabled"] = "toolchain/src/swift-runtime/overlay/os/RevenantOSOverlayShims.h (revenant_os_log_linked tests its address; os.swift calls it only when that test passes)",
+    },
 }
 
 PACKAGES = {

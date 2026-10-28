@@ -4,7 +4,56 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 
+local TRAIT_REGISTRATION = {
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withHandler:(UITraitChangeHandler)handler", "registerForTraitChanges(_:handler:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withTarget:(id)target action:(SEL)action", "registerForTraitChanges(_:target:action:)"},
+    {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withAction:(SEL)action", "registerForTraitChanges(_:action:)"},
+    {"- (void)unregisterForTraitChanges:(id<UITraitChangeRegistration>)registration", "unregisterForTraitChanges(_:)"},
+}
+
+local function trait_declaration(entry)
+    return entry[1] .. " NS_SWIFT_NAME(" .. entry[2] .. ");"
+end
+
+local function trait_registration(owner, interface)
+    local declarations = {}
+    for _, entry in ipairs(TRAIT_REGISTRATION) do
+        table.insert(declarations, trait_declaration(entry))
+    end
+    return {
+        member = owner,
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = owner .. ".h",
+            find = interface,
+            replace = interface .. "\n" .. table.concat(declarations, "\n"),
+        },
+    }
+end
+
+local function trait_protocol_name(entry)
+    return {
+        member = "UITraitChangeObservable",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITraitCollection.h",
+            find = entry[1] .. ";",
+            replace = trait_declaration(entry),
+        },
+    }
+end
+
 local MEMBERS = {
+    trait_registration("UIView", "@interface UIView () <UITraitChangeObservable>"),
+    trait_registration("UIViewController", "@interface UIViewController () <UITraitChangeObservable>"),
+    trait_registration("UIWindowScene", "@interface UIWindowScene () <UITraitEnvironment, UITraitChangeObservable>"),
+    trait_registration("UIPresentationController", "@interface UIPresentationController () <UITraitChangeObservable>"),
+    trait_protocol_name(TRAIT_REGISTRATION[1]),
+    trait_protocol_name(TRAIT_REGISTRATION[2]),
+    trait_protocol_name(TRAIT_REGISTRATION[3]),
+    trait_protocol_name(TRAIT_REGISTRATION[4]),
     {
         member = "UIPointerStyle",
         header = {
@@ -13,6 +62,16 @@ local MEMBERS = {
             file = "UIPointerStyle.h",
             find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
             replace = "+ (instancetype)systemPointerStyle;",
+        },
+    },
+    {
+        member = "UIEditMenuConfiguration",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIEditMenuInteraction.h",
+            find = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint;",
+            replace = "+ (instancetype)configurationWithIdentifier:(nullable id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint NS_SWIFT_NAME(init(identifier:sourcePoint:));",
         },
     },
     {
@@ -74,6 +133,16 @@ local MEMBERS = {
             file = "NSAttributedString.h",
             find = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0));",
             replace = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName;",
+        },
+    },
+    {
+        member = "NSUnderlineStylePatternDot",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+            replace = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), tvos(9.0), watchos(2.0), visionos(1.0))",
         },
     },
     {
@@ -144,6 +213,23 @@ local MEMBERS = {
             file = "lock.h",
             find = "#define OS_UNFAIR_LOCK_AVAILABILITY \\\n\t\t__API_AVAILABLE(macos(10.12), ios(10.0), tvos(10.0), watchos(3.0))",
             replace = "#define OS_UNFAIR_LOCK_AVAILABILITY",
+        },
+    },
+    {
+        member = "os_unfair_lock",
+        header = {
+            name = "os",
+            directory = {"usr", "include", "os"},
+            file = "lock.h",
+            find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            replace = table.concat({
+                "#if defined(__OBJC__) || defined(__cplusplus)",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef enum __OS_ENUM_ATTR __OS_OPTIONS_ATTR : _type { __VA_ARGS__ } _name##_t",
+                "#else",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
+                "#endif",
+                "REVENANT_OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
+            }, "\n"),
         },
     },
     {
@@ -219,6 +305,36 @@ local MEMBERS = {
             file = {"stdlib", "public", "Darwin", "Foundation", "JSONEncoder.swift"},
             find = "        @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)\n        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
             replace = "        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
+        },
+    },
+    {
+        member = "kSecAccessControlPrivateKeyUsage",
+        header = {
+            name = "Security",
+            directory = {"System", "Library", "Frameworks", "Security.framework", "Headers"},
+            file = "SecAccessControl.h",
+            find = "kSecAccessControlPrivateKeyUsage        API_AVAILABLE(macos(10.12.1), ios(9.0)) = 1u << 30,",
+            replace = "kSecAccessControlPrivateKeyUsage        = 1u << 30,",
+        },
+    },
+    {
+        member = "WKNavigationActionPolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+        },
+    },
+    {
+        member = "WKNavigationResponsePolicy",
+        header = {
+            name = "WebKit",
+            directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
+            file = "WKNavigationDelegate.h",
+            find = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
+            replace = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
         },
     },
 }
@@ -783,6 +899,16 @@ local function enumerators_in(text, body)
     return found
 end
 
+local function adopts_lowered_protocol(text, stop, implemented)
+    local line = text:sub(stop + 1, text:find("\n", stop, true) or #text)
+    for word in line:gmatch("[%a_][%w_]*") do
+        for _ in pairs((implemented.protocol_members or {})[word] or {}) do
+            return true
+        end
+    end
+    return false
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local globals, functions = implemented.globals or {}, implemented.functions or {}
@@ -810,7 +936,8 @@ local function lowering_of(text, implemented, declarations)
         if members then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
-            if first and not text:match("^%s*%(", stop + 1) and not (implemented.weak_classes and implemented.weak_classes[class]) then
+            local category = text:match("^%s*%(", stop + 1) ~= nil
+            if first and (not category or adopts_lowered_protocol(text, stop, implemented)) and not (implemented.weak_classes and implemented.weak_classes[class]) then
                 lower(first, text:find("\n", stop, true) or #text)
             end
             local block_end = text:find("@end", stop, true) or #text
@@ -1609,6 +1736,10 @@ local function digest_of(base, files)
     return hash.strhash128(table.concat(parts, "\n"))
 end
 
+local function generator_files()
+    return {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+end
+
 local function members_key(src, sdk)
     local sdk_files = table.join(framework_headers(sdk))
     for _, entry in ipairs(MEMBERS) do
@@ -1617,11 +1748,10 @@ local function members_key(src, sdk)
     byteorder.sort(sdk_files)
     local src_files = os.files(path.join(src, "**"))
     byteorder.sort(src_files)
-    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
     local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
     local tools = {path.join(src, "..", "tools", "facts.lua"), path.join(src, "..", "tools", "ast.lua"), path.join(src, "..", "tools", "sdk.lua")}
     return hash.strhash128(table.concat({
-        "generator=" .. digest_of(MODULE_DIR, generator),
+        "generator=" .. digest_of(MODULE_DIR, generator_files()),
         "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
         "tools=" .. digest_of(path.join(src, ".."), tools),
         "device=" .. hash.sha256(device_members_file()),
@@ -1758,22 +1888,99 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
 end
 
-function overlay(sdk, out, set, subtrees)
+THIRD_PARTY_MODULES = {
+    AsyncDisplayKit = {["ASDisplayNode.h"] = {"ASGestureRecognizerDelegate", "ASScrollViewDelegate"}},
+}
+
+local function consulted_selectors()
+    local found = {}
+    local src = path.absolute(path.join(path.directory(members_file()), "..", "src"))
+    for selector in corpus_of(src):gmatch("@selector%(%s*([%w_:]+)%s*%)") do
+        found[selector] = true
+    end
+    return found
+end
+
+local function module_headers(modules)
+    local headers = {}
+    for _, name in ipairs(table.orderkeys(modules)) do
+        local entries = THIRD_PARTY_MODULES[name]
+        if not entries then
+            raise("%s is not a lowered third-party module: name it in THIRD_PARTY_MODULES", name)
+        end
+        local directory = path.absolute(modules[name])
+        for _, file in ipairs(table.orderkeys(entries)) do
+            local header = path.join(directory, file)
+            if not os.isfile(header) then
+                raise("module %s has no header %s", name, header)
+            end
+            table.insert(headers, {name = name, file = file, directory = directory, header = header, protocols = entries[file]})
+        end
+    end
+    return headers
+end
+
+local function module_digest(modules)
+    local headers = module_headers(modules)
+    if #headers == 0 then
+        return ""
+    end
+    local parts = {}
+    for _, entry in ipairs(headers) do
+        table.insert(parts, entry.name .. "=" .. entry.header .. "=" .. hash.sha256(entry.header) .. "=" .. table.concat(entry.protocols, ","))
+    end
+    table.insert(parts, table.concat(table.orderkeys(consulted_selectors()), ","))
+    return table.concat(parts, "\n")
+end
+
+local function third_party_lowering(entry, consulted, markers)
+    local text = io.readfile(entry.header)
+    local protocols, members = {}, {}
+    for _, protocol in ipairs(entry.protocols) do
+        if not text:find("@protocol%s+" .. protocol .. "[%s<]") then
+            raise("%s does not declare protocol %s, which THIRD_PARTY_MODULES names for it", entry.header, protocol)
+        end
+        protocols[protocol] = true
+        members[protocol] = {}
+        for selector in pairs(consulted) do
+            members[protocol]["-" .. selector] = true
+            members[protocol]["+" .. selector] = true
+        end
+    end
+    return (lowering_of(text, {classes = {}, functions = {}, globals = {}, protocols = protocols, protocol_members = members, markers = markers}))
+end
+
+function third_party_modules(text)
+    local modules = {}
+    for entry in (text or ""):gmatch("[^;]+") do
+        if entry:match("%S") then
+            local name, directory = entry:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+            if not name or directory == "" then
+                raise("apple_lowered_modules entry '%s' is not name=directory", entry)
+            end
+            modules[name] = directory
+        end
+    end
+    return modules
+end
+
+function overlay(sdk, out, set, subtrees, modules)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
-    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ",")}, "|")
+    local placed = module_digest(modules or {})
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed}, "|")
     if built[key] then
         return built[key]
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ","))
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed)
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), mapped)
+        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {})
         io.writefile(stamp, digest)
     end
     built[key] = vfs
@@ -1789,7 +1996,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
@@ -1810,6 +2017,41 @@ local function lowered_apinotes(text, set)
     return table.concat(lines, "\n") .. "\n"
 end
 
+local function trait_name(name)
+    return name:lower():find("trait", 1, true) ~= nil
+end
+
+local function lowered_trait_apinotes(text, set)
+    local classes, protocols, types = set.classes or {}, set.protocols or {}, set.types or {}
+    local protocol_members = set.protocol_members or {}
+    local function backed(owner, key)
+        for _, sign in ipairs({"-", "+"}) do
+            if (classes[owner] or {})[sign .. key] or (protocol_members[owner] or {})[sign .. key] then
+                return true
+            end
+        end
+        return false
+    end
+    local owner, entry, member = nil, false, false
+    local lines = {}
+    for line in text:gmatch("[^\n]+") do
+        local name = line:match("^%- Name: (%S+)")
+        local sub = line:match("^  %- %a+: ['\"]?([^'\"]+)['\"]?$")
+        if name then
+            owner = name
+            entry = trait_name(name) and (classes[name] ~= nil or protocols[name] ~= nil or types[name] == true)
+            member = false
+        elseif sub then
+            member = trait_name(sub) and owner ~= nil and backed(owner, sub)
+        end
+        local private = (entry and line == "  SwiftPrivate: true") or (member and line == "    SwiftPrivate: true")
+        if not private then
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
 local function vfs_subtree(relative, subtrees)
     local head = relative and relative:match("^([^/]+)")
     return head ~= nil and (subtrees or VFS_SUBTREES)[head] == true
@@ -1819,7 +2061,7 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
-function build_overlay(sdk, out, set, subtrees)
+function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(include_directory(out), "simd", "math.h")
@@ -1868,6 +2110,10 @@ function build_overlay(sdk, out, set, subtrees)
     if os.isfile(notes) then
         changed[notes] = lowered_apinotes(io.readfile(notes), set)
     end
+    local uikit_notes = path.join(sdk, "System", "Library", "Frameworks", "UIKit.framework", "Headers", "UIKit.apinotes")
+    if os.isfile(uikit_notes) then
+        changed[uikit_notes] = lowered_trait_apinotes(io.readfile(uikit_notes), set)
+    end
     local roots = {}
     local file_roots = {}
     for file, text in pairs(changed) do
@@ -1889,6 +2135,15 @@ function build_overlay(sdk, out, set, subtrees)
                 table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
             end
         end
+    end
+    local headers = module_headers(modules or {})
+    local consulted = #headers > 0 and consulted_selectors() or {}
+    for _, entry in ipairs(headers) do
+        local copy = path.join(out, "modules", entry.name, entry.file)
+        os.mkdir(path.directory(copy))
+        write_if_changed(copy, third_party_lowering(entry, consulted, set.markers))
+        roots[entry.directory] = roots[entry.directory] or {}
+        table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)

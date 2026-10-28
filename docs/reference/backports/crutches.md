@@ -164,7 +164,6 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Behavior: unsupported requests and unsupported requested barcode symbologies complete with `VNErrorUnsupportedRequest` in `VNErrorDomain`.
 - Measurement: generated QR and PDF417 fixtures test decoded payloads, symbology, normalized bounds, and corner coordinates. No broad accuracy comparison against Apple's Vision has been run.
 - Removed by: an iOS 6 implementation measured against the corresponding Vision requests, or a source change that no longer requires those requests.
->
 
 ### Find in page (branch work/gaps-ui)
 
@@ -211,6 +210,14 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Gaps: no run on an iOS 6 device has written its results. The test app (`device-find/`, outside the repository) installed and launched on the iPhone 4S on 2026-10-27 and its results file was never written. On the iPad2,2 the native-find run wrote no `find-native-run.txt`; the only files from the iPad are the native probe and the method list (C26). The symbol gate (586 members, 180 objects, 26 areas) checks names, not behaviour.
 - Measurement: none on a device for the backport. The iPad2,2 run measured the system find's methods (C26), not the backport's search. The host test passes (`backports_avfoundation`, `backports_uikit`, symbol gate).
 - Removed by: a device run of the find test app whose results file has the counts of C26 and the centred offsets of C28.
+
+### C32. armv7 Objective-C -Wformat warnings are not errors
+
+- Stands in for: `-Werror` on the `-Wformat` class, for the Objective-C targets whose upstream copts set `-Werror` (14 generated targets). The generator adds `-Wno-error=format` only when `is_arch("armv7")`, so the relaxation is armv7-only. Every other `-Werror` stays strict, and no source is edited.
+- Why: on armv7 (ILP32) `NSInteger` is `int`, the same width as `long`, so passing an `NSInteger` to `%ld` is the same size and benign at runtime. Clang still reports the type mismatch as `-Wformat`, which `-Werror` makes fatal, for example `submodules/LegacyComponents/Sources/PGPhotoProcessPass.m:135`.
+- Behavior: the format warnings stay warnings on armv7. Swift `-warnings-as-errors` is unchanged.
+- Measurement: revenant's LLVM 23.1.3 clang defines `__SIZEOF_INT__` and `__SIZEOF_LONG__` as 4 with no `__LP64__` for `--target=armv7-apple-ios6.0`; for arm64 they are 8 with `__LP64__`. After the change, `LegacyComponents` reports its `-Wformat` findings as warnings and no longer fails on them; it still fails on a different error, `UIActivityIndicatorViewStyleMedium` (iOS 13), which is not covered by this entry.
+- Removed by: a Telegram source change that passes `-Wformat` on armv7 (none is made here), or the owner's decision to keep `-Werror` strict for these targets.
 
 ## Removed
 

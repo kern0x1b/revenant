@@ -16,4 +16,8 @@ function main()
                                        resources = path.join(runtime, "lib", "swift"), module = "OSLock", optimize = "none"})
     table.join2(flags, {"-vfsoverlay", vfs, "-typecheck", fixture})
     os.vrunv(compiler, flags)
+    local include = lowered.include_directory(path.join(out, "overlay"))
+    local clang = {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-ivfsoverlay", vfs, "-I", include, "-fsyntax-only", "-Werror"}
+    os.vrunv("clang", table.join(clang, {"-x", "objective-c", "-fobjc-arc", path.join(backports, "tests", "os_lock", "use.m")}))
+    os.vrunv("clang", table.join(clang, {"-x", "c", "-std=gnu11", "-Wpedantic", path.join(backports, "tests", "os_lock", "use.c")}))
 end
