@@ -33,3 +33,15 @@ static inline NSError *revenant_vision_error(NSInteger code, NSString *message)
 - (nullable NSNumber *)revenant_contrastPivotValue;
 - (void)revenant_setContrastPivotValue:(NSNumber *)value;
 @end
+
+@interface VNRectangleObservation (RevenantTextCorners)
+- (void)revenant_setCornersTopLeft:(CGPoint)topLeft topRight:(CGPoint)topRight bottomRight:(CGPoint)bottomRight bottomLeft:(CGPoint)bottomLeft;
+@end
+
+@interface VNRecognizedText (RevenantText)
++ (instancetype)revenant_textWithString:(NSString *)string confidence:(float)confidence requestRevision:(NSUInteger)requestRevision words:(NSArray<NSDictionary *> *)words;
+@end
+
+@interface VNRecognizedTextObservation (RevenantText)
+- (void)revenant_setCandidates:(NSArray<VNRecognizedText *> *)candidates;
+@end

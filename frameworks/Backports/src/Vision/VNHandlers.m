@@ -2,6 +2,7 @@
 #import "VNRectangleImage.h"
 #import "RevenantVisionImage.h"
 #import "VNBarcodeDecoder.h"
+#import "VNTextRecognizer.h"
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 
@@ -160,12 +161,26 @@ static NSArray *revenant_vision_coreml(VNCoreMLRequest *request, id image, NSErr
     return observations;
 }
 
+static NSDictionary *revenant_vision_text_options(VNRecognizeTextRequest *request)
+{
+    return @{@"tessdata": RevenantVisionTextModelRoot(),
+             @"fast": @(request.recognitionLevel == VNRequestTextRecognitionLevelFast),
+             @"revision": @(request.revision),
+             @"languages": request.recognitionLanguages ?: @[],
+             @"correction": @(request.usesLanguageCorrection),
+             @"customWords": request.customWords ?: @[],
+             @"minimumTextHeight": @(request.minimumTextHeight),
+             @"regionOfInterest": RevenantVisionRectValue(request.regionOfInterest)};
+}
+
 static NSError *revenant_vision_failure(VNRequest *request)
 {
     Class cls = [request class];
     if (![[cls supportedRevisions] containsIndex:request.revision])
         return revenant_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support %@Revision%lu", NSStringFromClass(cls), NSStringFromClass(cls), (unsigned long)request.revision]);
     if ([request isKindOfClass:[VNDetectContoursRequest class]])
+        return nil;
+    if ([request isKindOfClass:[VNRecognizeTextRequest class]])
         return nil;
     if ([request isKindOfClass:[VNDetectRectanglesRequest class]])
         return nil;
@@ -321,6 +336,34 @@ static BOOL revenant_vision_perform(id image, CGImagePropertyOrientation orienta
                     [observations addObject:observation];
             }
             if (failure) {
+                succeeded = NO;
+                first = first ?: failure;
+            } else {
+                [(VNRequest *)request revenant_setResults:observations];
+            }
+            if (request.completionHandler)
+                request.completionHandler(request, failure);
+            continue;
+        }
+        if (!failure && [request isKindOfClass:[VNRecognizeTextRequest class]]) {
+            VNRecognizeTextRequest *textRequest = (VNRecognizeTextRequest *)request;
+            NSError *recognitionFailure = nil;
+            NSArray *lines = RevenantVisionTextLines(image, orientation, revenant_vision_text_options(textRequest), &recognitionFailure);
+            NSMutableArray *observations = lines ? [NSMutableArray arrayWithCapacity:lines.count] : nil;
+            for (NSDictionary *line in lines) {
+                CGRect bounds = RevenantVisionRectFromValue(line[@"bounds"]);
+                VNRecognizedTextObservation *observation = [VNRecognizedTextObservation observationWithRequestRevision:request.revision boundingBox:bounds];
+                [observation revenant_setCornersTopLeft:CGPointMake(CGRectGetMinX(bounds), CGRectGetMaxY(bounds))
+                                               topRight:CGPointMake(CGRectGetMaxX(bounds), CGRectGetMaxY(bounds))
+                                            bottomRight:CGPointMake(CGRectGetMaxX(bounds), CGRectGetMinY(bounds))
+                                             bottomLeft:CGPointMake(CGRectGetMinX(bounds), CGRectGetMinY(bounds))];
+                VNRecognizedText *text = [VNRecognizedText revenant_textWithString:line[@"string"] confidence:[line[@"confidence"] floatValue]
+                                                                   requestRevision:request.revision words:line[@"words"]];
+                [observation revenant_setCandidates:@[text]];
+                [observations addObject:observation];
+            }
+            if (recognitionFailure) {
+                failure = revenant_vision_error(VNErrorOperationFailed, recognitionFailure.localizedDescription);
                 succeeded = NO;
                 first = first ?: failure;
             } else {
