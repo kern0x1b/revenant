@@ -49,8 +49,13 @@ static void revenant_draw_text_in_rect(UILabel *label, SEL selector, CGRect rect
             [source enumerateAttribute:NSKernAttributeName inRange:NSMakeRange(0, source.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
                 [text addAttribute:NSKernAttributeName value:@([value doubleValue] + kern) range:range];
             }];
-            CGFloat height = [text size].height;
-            [text drawAtPoint:CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect) + (CGRectGetHeight(rect) - height) / 2)];
+            CGSize size = [text size];
+            CGFloat x = CGRectGetMinX(rect);
+            if (label.textAlignment == NSTextAlignmentCenter)
+                x += (CGRectGetWidth(rect) - size.width) / 2;
+            else if (label.textAlignment == NSTextAlignmentRight)
+                x += CGRectGetWidth(rect) - size.width;
+            [text drawAtPoint:CGPointMake(x, CGRectGetMinY(rect) + (CGRectGetHeight(rect) - size.height) / 2)];
             return;
         }
     }
