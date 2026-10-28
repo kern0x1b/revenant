@@ -12,16 +12,36 @@ static uint32_t revenant_random(uint32_t bound)
     return (uint32_t)(revenant_state % bound);
 }
 
-static NSUInteger revenant_moves_by_oracle(NSArray *before, NSArray *after)
+static NSUInteger revenant_moves_by_definition(NSArray *before, NSArray *after)
 {
-    NSMutableArray *target = [NSMutableArray arrayWithArray:after];
-    NSOrderedCollectionDifference *difference = [target differenceFromArray:before withOptions:NSOrderedCollectionDifferenceCalculationInferMoves];
-    NSUInteger moves = 0;
-    for (NSOrderedCollectionChange *change in difference) {
-        if (change.changeType == NSCollectionChangeRemove && change.associatedIndex != NSNotFound)
-            moves++;
+    NSMutableDictionary *positions = [NSMutableDictionary dictionary];
+    for (NSUInteger index = 0; index < before.count; index++)
+        positions[before[index]] = @(index);
+    NSMutableArray *shared = [NSMutableArray array];
+    for (NSNumber *value in after) {
+        NSNumber *position = positions[value];
+        if (position)
+            [shared addObject:position];
     }
-    return moves;
+    NSUInteger count = shared.count;
+    NSUInteger kept = 0;
+    for (NSUInteger subset = 0; subset < ((NSUInteger)1 << count); subset++) {
+        NSUInteger size = 0;
+        NSInteger last = -1;
+        BOOL increasing = YES;
+        for (NSUInteger index = 0; index < count && increasing; index++) {
+            if (!(subset & ((NSUInteger)1 << index)))
+                continue;
+            NSInteger position = [shared[index] integerValue];
+            if (position <= last)
+                increasing = NO;
+            last = position;
+            size++;
+        }
+        if (increasing && size > kept)
+            kept = size;
+    }
+    return count - kept;
 }
 
 static NSUInteger revenant_moves_by_helper(NSArray *before, NSArray *after, BOOL *ordered)
@@ -74,8 +94,8 @@ int main(int argc, char **argv)
         NSArray *rotated = @[@1, @2, @3, @0];
         BOOL ordered = NO;
         NSUInteger moves = revenant_moves_by_helper(before, rotated, &ordered);
-        NSUInteger expected = revenant_moves_by_oracle(before, rotated);
-        revenant_check(expected == 1, "macOS reports one move for a rotated first item", [NSString stringWithFormat:@"%lu moves", (unsigned long)expected]);
+        NSUInteger expected = revenant_moves_by_definition(before, rotated);
+        revenant_check(expected == 1, "the move definition gives one move for a rotated first item", [NSString stringWithFormat:@"%lu moves", (unsigned long)expected]);
         revenant_check(moves == expected + (revenant_negative ? 1 : 0), "helper counts the rotated first item as one move", [NSString stringWithFormat:@"%lu moves", (unsigned long)moves]);
         revenant_check(ordered, "the items that stay are in order", @"stable items out of order");
 
@@ -86,8 +106,8 @@ int main(int argc, char **argv)
 
         NSArray *reversed = @[@2, @1, @0];
         moves = revenant_moves_by_helper(revenant_numbers(0, 3), reversed, &ordered);
-        expected = revenant_moves_by_oracle(revenant_numbers(0, 3), reversed);
-        revenant_check(moves == expected && expected == 2, "a reversed list of three moves two items", [NSString stringWithFormat:@"%lu moves, macOS %lu", (unsigned long)moves, (unsigned long)expected]);
+        expected = revenant_moves_by_definition(revenant_numbers(0, 3), reversed);
+        revenant_check(moves == expected && expected == 2, "a reversed list of three moves two items", [NSString stringWithFormat:@"%lu moves, definition %lu", (unsigned long)moves, (unsigned long)expected]);
 
         for (NSUInteger round = 0; round < 2000; round++) {
             NSUInteger beforeCount = revenant_random(11);
@@ -106,8 +126,8 @@ int main(int argc, char **argv)
             NSArray *source = revenant_numbers(0, beforeCount);
             ordered = NO;
             moves = revenant_moves_by_helper(source, after, &ordered);
-            expected = revenant_moves_by_oracle(source, after);
-            revenant_check(moves == expected && ordered, "helper matches the macOS move count on a random change", [NSString stringWithFormat:@"round %lu: %lu moves, macOS %lu, ordered %d", (unsigned long)round, (unsigned long)moves, (unsigned long)expected, ordered]);
+            expected = revenant_moves_by_definition(source, after);
+            revenant_check(moves == expected && ordered, "helper matches the move definition on a random change", [NSString stringWithFormat:@"round %lu: %lu moves, definition %lu, ordered %d", (unsigned long)round, (unsigned long)moves, (unsigned long)expected, ordered]);
         }
     }
     return revenant_finish();
