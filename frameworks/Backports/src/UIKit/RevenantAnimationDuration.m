@@ -11,6 +11,9 @@ static NSString *const RevenantAnimationDurationStackKey = @"space.kern0x1b.reve
 @end
 
 @implementation RevenantAnimationGroup
+@synthesize duration = _duration;
+@synthesize repeatCount = _repeatCount;
+@synthesize autoreverses = _autoreverses;
 @end
 
 static NSMutableArray<RevenantAnimationGroup *> *RevenantAnimationGroupStack(void)
