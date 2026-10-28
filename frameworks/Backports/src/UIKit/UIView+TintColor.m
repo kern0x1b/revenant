@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import "RevenantTraitStyle.h"
 #import <objc/runtime.h>
 
 static char revenant_tint_color_key;
@@ -49,6 +50,11 @@ static void revenant_tint_changed(UIView *view, BOOL colorChanged)
             continue;
         revenant_tint_changed(subview, colorChanged);
     }
+}
+
+UIColor *revenant_view_stored_tint(UIView *view)
+{
+    return revenant_stored_tint(view);
 }
 
 @implementation UIView (RevenantTintColor)

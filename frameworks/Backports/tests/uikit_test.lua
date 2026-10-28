@@ -356,11 +356,47 @@ local AREAS = {
         },
     },
     {
+        name = "find interaction, find sessions and the text searching session",
+        sources = {"UIFindInteraction.m", "UIFindSession.m", "UITextSearchingFindSession.m"},
+        members = {
+            "-[UIFindInteraction presentFindNavigatorShowingReplace:]", "-[UIFindInteraction dismissFindNavigator]",
+            "-[UIFindInteraction findNext]", "-[UIFindInteraction findPrevious]", "-[UIFindInteraction updateResultCount]",
+            "-[UIFindSession resultCount]", "-[UIFindSession highlightedResultIndex]", "-[UIFindSession performSearchWithQuery:options:]",
+            "-[UIFindSession highlightNextResultInDirection:]", "-[UIFindSession invalidateFoundResults]",
+            "-[UIFindSession performSingleReplacementWithSearchQuery:replacementString:options:]",
+            "-[UIFindSession replaceAllInstancesOfSearchQuery:withReplacementString:options:]",
+            "-[UITextSearchingFindSession initWithSearchableObject:]", "-[UITextSearchingFindSession searchableObject]",
+        },
+    },
+    {
         name = "iOS 14 color well",
         sources = {"UIColorWell.m"},
         members = {
             "@UIColorWell", "-[UIColorWell initWithFrame:]", "-[UIColorWell selectedColor]", "-[UIColorWell setSelectedColor:]",
             "-[UIColorWell supportsAlpha]", "-[UIColorWell setSupportsAlpha:]", "-[UIColorWell title]", "-[UIColorWell setTitle:]",
+        },
+    },
+    {
+        name = "overrideUserInterfaceStyle, dynamic colours, tint and the trait collection of views",
+        sources = {"UIColorDynamic.m", "UIView+TintColor.m", "UIView+iOS13.m", "UITraitCollection.m", "UITraitCollection+UserInterfaceStyle.m", "UIView+TraitEnvironment.m"},
+        members = {
+            "+[UIColor colorWithDynamicProvider:]", "-[UIColor resolvedColorWithTraitCollection:]", "+[UIColor labelColor]", "+[UIColor systemBackgroundColor]",
+            "-[UIView overrideUserInterfaceStyle]", "-[UIView setOverrideUserInterfaceStyle:]",
+            "-[UIView tintColor]", "-[UIView setTintColor:]", "-[UIView tintColorDidChange]", "-[UIView tintAdjustmentMode]", "-[UIView setTintAdjustmentMode:]",
+            "-[UIView traitCollection]", "-[UIView traitCollectionDidChange:]",
+            "+[UITraitCollection traitCollectionWithUserInterfaceStyle:]", "+[UITraitCollection traitCollectionWithTraitsFromCollections:]",
+        },
+    },
+    {
+        name = "find in page on WKWebView: the find interaction and the page search session",
+        library = "WebKit",
+        sources = {"WKWebView.m", "RevenantWebFind.m"},
+        members = {
+            "-[WKWebView findInteraction]", "-[WKWebView isFindInteractionEnabled]", "-[WKWebView setFindInteractionEnabled:]",
+            "-[WKWebView findInteraction:sessionForView:]",
+            "-[RevenantWebFindSession initWithEvaluator:]", "-[RevenantWebFindSession resultCount]", "-[RevenantWebFindSession highlightedResultIndex]",
+            "-[RevenantWebFindSession performSearchWithQuery:options:]", "-[RevenantWebFindSession highlightNextResultInDirection:]",
+            "-[RevenantWebFindSession invalidateFoundResults]",
         },
     },
 }
@@ -380,22 +416,24 @@ function main()
     if not sdk or sdk == "" then
         sdk = sdkfiles.sdk_folder()
     end
-    local sources = path.absolute(path.join(os.scriptdir(), "..", "src", "UIKit"))
     local root = path.join(workspace.scratch(), "uikit-test")
     os.tryrm(root)
     local objects, total = 0, 0
     for _, area in ipairs(AREAS) do
+        local library = area.library or "UIKit"
+        local sources = path.absolute(path.join(os.scriptdir(), "..", "src", library))
         for _, name in ipairs(area.sources) do
-            local object = path.join(root, "UIKit", "src", "UIKit", name .. ".o")
+            local object = path.join(root, library, "src", library, name .. ".o")
             os.mkdir(path.directory(object))
             os.vrunv("clang", {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc", "-Os", "-w", "-c", "-o", object,
                 path.join(sources, name)})
             objects = objects + 1
         end
     end
-    local keys = implemented.from_objects(root).UIKit or {}
+    local found = implemented.from_objects(root)
     local missing = {}
     for _, area in ipairs(AREAS) do
+        local keys = found[area.library or "UIKit"] or {}
         for _, member in ipairs(area.members) do
             total = total + 1
             if not keys[key_of(member)] then
@@ -403,7 +441,7 @@ function main()
             end
         end
     end
-    assert(#missing == 0, "members not implemented by the compiled UIKit objects:\n" .. table.concat(missing, "\n"))
+    assert(#missing == 0, "members not implemented by the compiled objects:\n" .. table.concat(missing, "\n"))
     os.tryrm(root)
-    print("uikit tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
+    print("symbol tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
 end
