@@ -153,10 +153,11 @@ function backport_libraries(target)
 end
 
 local SHARED = {"swift-runtime", "libcxx"}
+local LINKED = {"ffmpeg-hevc"}
 
-function shared_packages(target)
+function shared_packages(target, aliases)
     local all, identities, libraries = {}, {}, {}
-    for _, alias in ipairs(SHARED) do
+    for _, alias in ipairs(aliases or SHARED) do
         local package = target:pkg(alias)
         for _, entry in ipairs(package and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1] and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1]:split(";") or {}) do
             local name, needs = entry:match("^([^=]+)=?(.*)$")
@@ -257,9 +258,34 @@ function backports_deb(signer)
     end
     local all, identities = shared_packages(signer)
     local targets = project_backports()
+    local linked, linked_identities = linked_packages(targets)
+    table.join2(all, linked)
+    for leaf, identity in pairs(linked_identities) do
+        identities[leaf] = identity
+    end
     return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
                                      runtime = backports_runtime(targets),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
+end
+
+function linked_packages(targets)
+    local all, identities, seen = {}, {}, {}
+    for _, target in ipairs(targets) do
+        local found, found_identities = shared_packages(target, LINKED)
+        for leaf, identity in pairs(found_identities) do
+            identities[leaf] = identity
+        end
+        for _, package in ipairs(found) do
+            if not seen[package.name] then
+                seen[package.name] = true
+                table.insert(all, package)
+            end
+        end
+    end
+    if #all > 1 then
+        raise("the Backports libraries link %d FFmpeg HEVC decoders, %s; the package set carries one", #all, table.concat(table.imap(all, function (_, package) return package.name end), " and "))
+    end
+    return all, identities
 end
 
 function backports_runtime(targets)

@@ -100,10 +100,12 @@ function needs(files, packages)
             end
         end
     end
+    local shared = {}
     for _, label in ipairs(byteorder.keys(owners)) do
         table.insert(depends, string.format("%s (= %s)", label, owners[label].version))
+        table.insert(shared, owners[label])
     end
-    return depends
+    return depends, shared
 end
 
 function stage(libs, root, provided)
@@ -128,7 +130,7 @@ function write(opt)
     local root = path.join(opt.workdir, "root")
     os.tryrm(opt.workdir)
     local binaries = stage(libs, root, opt.provided)
-    local depends = needs(binaries, opt.packages)
+    local depends, shared = needs(binaries, opt.packages)
     local version = release(libs, depends)
     for _, binary in ipairs(binaries) do
         signing.sign(opt.ldid, binary)
@@ -141,7 +143,7 @@ function write(opt)
         table.insert(leaves, library.leaf)
     end
     os.tryrm(opt.workdir)
-    return {name = NAME, relation = "=", version = version, deb = deb, depends = depends, libraries = leaves}
+    return {name = NAME, relation = "=", version = version, deb = deb, depends = depends, libraries = leaves, shared = shared}
 end
 
 function ensure(opt)
