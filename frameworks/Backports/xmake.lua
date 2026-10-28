@@ -387,7 +387,8 @@ else
                                   members = "lowered_members_test.lua", device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", air2es = "air2es_test.lua",
-                                  webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua"})
+                                  webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua",
+                                  webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
