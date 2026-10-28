@@ -3,7 +3,7 @@ local STUBBED = {
         framework = "Foundation",
         classes = {
             "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
-            "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSURLComponents",
+            "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLComponents",
             "NSURLQueryItem", "NSURLSessionWebSocketMessage", "NSUnitConverterLinear",
         },
     },
