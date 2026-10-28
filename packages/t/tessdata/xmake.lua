@@ -1,11 +1,18 @@
 package("tessdata")
-    set_homepage("https://github.com/tesseract-ocr/tessdata_fast")
-    set_description("The Tesseract 5 models of Vision's text recognition: tessdata_fast and tessdata_best for the languages the languages config names, each downloaded from its pinned commit and checked by sha256")
+    set_homepage("https://github.com/tesseract-ocr/tessdata_best")
+    set_description("The Tesseract 5 models of Vision's text recognition: tessdata_fast and tessdata_best for the languages the languages config names, each copied from the checkout of its pinned commit and checked by sha256")
     set_license("Apache-2.0")
 
     local FAST_COMMIT = "87416418657359cb625c412a48b6e1d6d41c29bd"
     local BEST_COMMIT = "e12c65a915945e4c28e237a9b52bc4a8f39a0cec"
     local LICENSE_SHA256 = "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+
+    add_urls("https://github.com/tesseract-ocr/tessdata_best.git")
+    add_versions("2024.03.09", BEST_COMMIT)
+    add_resources("2024.03.09", "tessdata_fast", "https://github.com/tesseract-ocr/tessdata_fast.git", FAST_COMMIT)
+
+    local digest = {hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
+    add_configs("recipe", {description = "The digest of this recipe, so a changed model list or install step is a different package.", default = hash.strhash128(table.concat(digest, ";")), type = "string", readonly = true})
 
     local FAST = {
         {"deu", "19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d"},
@@ -81,31 +88,30 @@ package("tessdata")
     end
 
     on_install(function (package)
-        import("net.http")
-        local function fetch(url, file, sha256)
-            http.download(url, file)
-            if hash.sha256(file) ~= sha256 then
-                raise("%s does not match its pinned sha256", url)
+        local function copy(source, file, sha256)
+            if hash.sha256(source) ~= sha256 then
+                raise("%s does not match its pinned sha256", source)
             end
+            os.cp(source, file)
         end
-        local function install(level, repository, commit, model)
+        local best = os.curdir()
+        local fast = package:resourcedir("tessdata_fast")
+        local function install(level, checkout, model)
             local folder = path.join(package:installdir("share"), "tessdata", level)
             os.mkdir(folder)
-            fetch("https://github.com/tesseract-ocr/" .. repository .. "/raw/" .. commit .. "/" .. model[1] .. ".traineddata",
-                  path.join(folder, model[1] .. ".traineddata"), model[2])
+            copy(path.join(checkout, model[1] .. ".traineddata"), path.join(folder, model[1] .. ".traineddata"), model[2])
         end
         for _, code in ipairs(chosen(package)) do
-            local fast, best = find_model(FAST, code), find_model(BEST, code)
-            if fast then
-                install("fast", "tessdata_fast", FAST_COMMIT, fast)
+            local fast_model, best_model = find_model(FAST, code), find_model(BEST, code)
+            if fast_model then
+                install("fast", fast, fast_model)
             end
-            if best then
-                install("best", "tessdata_best", BEST_COMMIT, best)
+            if best_model then
+                install("best", best, best_model)
             end
         end
         os.mkdir(package:installdir("licenses"))
-        fetch("https://github.com/tesseract-ocr/tessdata_fast/raw/" .. FAST_COMMIT .. "/LICENSE",
-              path.join(package:installdir("licenses"), "LICENSE"), LICENSE_SHA256)
+        copy(path.join(fast, "LICENSE"), path.join(package:installdir("licenses"), "LICENSE"), LICENSE_SHA256)
     end)
 
     on_test(function (package)
