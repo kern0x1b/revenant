@@ -452,12 +452,29 @@ if not is_plat("iphoneos") and has_config("air2cpu") then
         add_packages("llvm")
 end
 
+rule("air2es.llvm")
+    on_config(function (target)
+        local llvm = target:pkg("llvm")
+        if llvm then
+            local prefix = llvm:installdir()
+            target:add("sysincludedirs", path.join(prefix, "include"))
+            target:add("linkdirs", path.join(prefix, "lib"))
+            target:add("rpathdirs", path.join(prefix, "lib"))
+        end
+        target:add("defines", "_GNU_SOURCE", "__STDC_CONSTANT_MACROS", "__STDC_FORMAT_MACROS", "__STDC_LIMIT_MACROS")
+        target:add("cxxflags", "-fno-rtti")
+    end)
+rule_end()
+
 if not is_plat("iphoneos") and has_config("air2es") then
     target("air2es")
         set_kind("binary")
         set_default(false)
+        set_languages("c++20")
+        add_rules("air2es.llvm")
         add_files(path.join(SRC, "air2es", "*.cpp"))
         add_packages("llvm")
+        add_links("LLVM")
 end
 
 local FOUNDATION_TESTS = {
