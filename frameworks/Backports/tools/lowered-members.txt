@@ -4741,7 +4741,11 @@ function RevenantVisionBarcodes
 function RevenantVisionDetectRectangles
 function RevenantVisionEdgeMap
 function RevenantVisionEdgeMapScalar
+function RevenantVisionGrayscale
 function RevenantVisionRectangles
+function RevenantVisionTextLanguages
+function RevenantVisionTextLines
+function RevenantVisionTextModelRoot
 function SCNMatrix4EqualToMatrix4
 function SCNMatrix4FromGLKMatrix4
 function SCNMatrix4Invert
@@ -34474,18 +34478,29 @@ member VNPoint -location
 member VNPoint -x
 member VNPoint -y
 member VNRecognizeAnimalsRequest +knownAnimalIdentifiersForRevision:error:
+member VNRecognizeTextRequest +supportedRecognitionLanguagesForTextRecognitionLevel:revision:error:
+member VNRecognizeTextRequest -customWords
 member VNRecognizeTextRequest -indeterminate
+member VNRecognizeTextRequest -initWithCompletionHandler:
+member VNRecognizeTextRequest -minimumTextHeight
 member VNRecognizeTextRequest -progressHandler
+member VNRecognizeTextRequest -recognitionLanguages
+member VNRecognizeTextRequest -recognitionLevel
+member VNRecognizeTextRequest -regionOfInterest
+member VNRecognizeTextRequest -supportedRecognitionLanguagesAndReturnError:
+member VNRecognizeTextRequest -usesLanguageCorrection
 member VNRecognizedPoint +revenant_pointWithX:y:confidence:identifier:
 member VNRecognizedPoint -encodeWithCoder:
 member VNRecognizedPoint -identifier
 member VNRecognizedPoint -initWithCoder:
+member VNRecognizedText +revenant_textWithString:confidence:requestRevision:words:
 member VNRecognizedText +supportsSecureCoding
 member VNRecognizedText -boundingBoxForRange:error:
 member VNRecognizedText -copyWithZone:
 member VNRecognizedText -encodeWithCoder:
 member VNRecognizedText -initWithCoder:
 member VNRecognizedText -requestRevision
+member VNRecognizedTextObservation -revenant_setCandidates:
 member VNRecognizedTextObservation -topCandidates:
 member VNRectangleObservation -bottomLeft
 member VNRectangleObservation -bottomRight
