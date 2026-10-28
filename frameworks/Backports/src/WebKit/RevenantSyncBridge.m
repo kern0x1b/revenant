@@ -57,8 +57,10 @@ static NSString *TokenOf(NSURL *URL)
     if ([NSThread isMainThread])
         return [view revenant_answerSynchronously:message] ?: @"0";
     void (*callDelegate)(NSInvocation *) = dlsym(RTLD_DEFAULT, "WebThreadCallDelegate");
-    if (!callDelegate)
+    if (!callDelegate) {
+        NSLog(@"RevenantSyncProtocol: WebThreadCallDelegate is not in this WebKit, so a window.open made on the WebThread is refused.");
         return @"0";
+    }
     SEL selector = @selector(revenant_answerSynchronously:);
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[WKWebView instanceMethodSignatureForSelector:selector]];
     NSDictionary *argument = message;
