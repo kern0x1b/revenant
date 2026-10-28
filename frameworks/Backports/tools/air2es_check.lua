@@ -181,19 +181,19 @@ local function decodeFile(file)
     if not os.isfile(file) then
         raise("missing file: " .. file)
     end
-    local value
+    local value, failure
     try {
         function ()
             value = json.decode(io.readfile(file))
         end,
         catch {
-            function ()
-                value = nil
+            function (errors)
+                failure = tostring(errors)
             end
         }
     }
-    if type(value) ~= "table" then
-        raise("not a JSON object: " .. file)
+    if failure or type(value) ~= "table" then
+        raise("not a JSON object: " .. file .. (failure and (": " .. failure) or ""))
     end
     return value
 end
@@ -202,7 +202,7 @@ local function run(program, arguments)
     local failed = false
     try {
         function ()
-            os.execv(program, arguments, {stdout = os.nuldev(), stderr = os.nuldev()})
+            os.execv(program, arguments)
         end,
         catch {
             function ()
