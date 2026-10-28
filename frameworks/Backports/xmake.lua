@@ -437,13 +437,26 @@ end
 option("air2cpu", {default = false, showmenu = true,
     description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
-if not is_plat("iphoneos") and has_config("air2cpu") then
-    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+option("air2es", {default = false, showmenu = true,
+    description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
+if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
+    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+end
+
+if not is_plat("iphoneos") and has_config("air2cpu") then
     target("air2cpu")
         set_kind("binary")
         set_default(false)
         add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
+        add_packages("llvm")
+end
+
+if not is_plat("iphoneos") and has_config("air2es") then
+    target("air2es")
+        set_kind("binary")
+        set_default(false)
+        add_files(path.join(SRC, "air2es", "*.cpp"))
         add_packages("llvm")
 end
 
