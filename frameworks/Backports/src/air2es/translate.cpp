@@ -269,8 +269,8 @@ public:
                 if (!declareLocal("vec4 position;\n", "position"))
                     return false;
                 statement("position = gl_FragCoord;\n");
-                if (!needFlip() || !needTarget())
-                    return false;
+                needFlip();
+                needTarget();
                 statement("position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;\n");
                 break;
             }
@@ -388,13 +388,12 @@ private:
         return nullptr;
     }
 
-    bool declare(const std::string &line, const std::string &name)
+    void declare(const std::string &line, const std::string &name)
     {
         if (declared_.count(name))
-            return true;
+            return;
         declared_.insert(name);
         declarations_.push_back(line);
-        return true;
     }
 
     bool declareLocal(const std::string &line, const std::string &name)
@@ -406,14 +405,14 @@ private:
         return true;
     }
 
-    bool needFlip()
+    void needFlip()
     {
-        return declare("uniform float revenant_flip;\n", "revenant_flip");
+        declare("uniform float revenant_flip;\n", "revenant_flip");
     }
 
-    bool needTarget()
+    void needTarget()
     {
-        return declare("uniform vec2 revenant_target;\n", "revenant_target");
+        declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
     bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out)
@@ -434,8 +433,7 @@ private:
         std::string glsl = real ? (components == 1 ? "float" : "vec" + suffix) : (components == 1 ? "int" : "ivec" + suffix);
         std::string name = attribute ? "a_" + field.name : field.name;
         bool fresh = !declared_.count(name);
-        if (!declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name))
-            return false;
+        declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name);
         if (fresh) {
             std::string common = "\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
                                  ", \"offset\": " + std::to_string(field.offset);
@@ -546,8 +544,7 @@ private:
             if (!binding)
                 return refuse("an argument with no metadata");
             if (binding->kind == "air.vertex_id") {
-                if (!declare("attribute float a_vertex_id;\n", "a_vertex_id"))
-                    return false;
+                declare("attribute float a_vertex_id;\n", "a_vertex_id");
                 out = "int(a_vertex_id)";
                 return true;
             }
@@ -557,8 +554,9 @@ private:
             }
             if (binding->kind == "air.fragment_input") {
                 std::string type = glslType(argument->getType());
-                if (type.empty() || !declare("varying " + type + " " + binding->name + ";\n", binding->name))
+                if (type.empty())
                     return refuse("a fragment input of a type this emitter does not hold");
+                declare("varying " + type + " " + binding->name + ";\n", binding->name);
                 out = binding->name;
                 return true;
             }
@@ -1147,8 +1145,7 @@ private:
                 return refuse("a width of something other than a texture");
             std::string size = texture->name + "_size";
             bool fresh = !declared_.count(size);
-            if (!declare("uniform vec2 " + size + ";\n", size))
-                return false;
+            declare("uniform vec2 " + size + ";\n", size);
             if (fresh)
                 sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
             if (!local(call, name))
@@ -1172,8 +1169,7 @@ private:
             return refuse("a sample with a level, bias, offset or unnormalized coordinate this emitter does not map");
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
-        if (!declare("uniform sampler2D " + texture->name + ";\n", texture->name))
-            return false;
+        declare("uniform sampler2D " + texture->name + ";\n", texture->name);
         if (!textures_.count(texture->name)) {
             textures_.insert(texture->name);
             textureLines_.push_back("{\"name\": " + jsonQuote(texture->name) + ", \"index\": " + std::to_string(texture->index) +
@@ -1209,8 +1205,9 @@ private:
             const Output &output = outputs_[k];
             std::string text;
             if (output.kind == "air.position" && stage_ == Stage::Vertex) {
-                if (!expression(fields[k], text) || !needFlip())
+                if (!expression(fields[k], text))
                     return false;
+                needFlip();
                 statement("gl_Position = " + text + ";\n");
                 statement("gl_Position.y *= revenant_flip;\n");
                 positioned = true;
@@ -1218,8 +1215,9 @@ private:
                 std::string type = glslType(fields[k]->getType());
                 if (output.name.empty() || type.empty())
                     return refuse("a vertex output without a name or of a type this emitter does not hold");
-                if (!expression(fields[k], text) || !declare("varying " + type + " " + output.name + ";\n", output.name))
+                if (!expression(fields[k], text))
                     return false;
+                declare("varying " + type + " " + output.name + ";\n", output.name);
                 statement(output.name + " = " + text + ";\n");
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
