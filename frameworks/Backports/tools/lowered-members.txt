@@ -1631,6 +1631,7 @@ class RevenantAVScheduledRemoval
 class RevenantAccessoryView
 class RevenantActionEntry
 class RevenantActiveFrameDurationInstaller
+class RevenantActivityIndicatorStyle13
 class RevenantAlertPopoverPresentation
 class RevenantAnimationGroup
 class RevenantAnimatorDriver
@@ -3779,6 +3780,8 @@ enum UIAccessibilityContrastHigh
 enum UIAccessibilityCustomSystemRotorTypeNone
 enum UIAccessibilityHearingDeviceEarNone
 enum UIActivityCategoryAction
+enum UIActivityIndicatorViewStyleLarge
+enum UIActivityIndicatorViewStyleMedium
 enum UIAlertActionStyleCancel
 enum UIAlertActionStyleDefault
 enum UIAlertActionStyleDestructive
@@ -25606,6 +25609,7 @@ member RevenantAccessoryView -setMarked:
 member RevenantAccessoryView -setRevenant_handler:
 member RevenantAccessoryView -tintColorDidChange
 member RevenantActiveFrameDurationInstaller +load
+member RevenantActivityIndicatorStyle13 +load
 member RevenantAlertPopoverPresentation -init
 member RevenantAlertPopoverPresentation -sourceView
 member RevenantAnimationGroup -autoreverses

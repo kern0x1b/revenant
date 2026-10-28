@@ -11,6 +11,22 @@ static void revenant_collect_descendants(UIView *view, NSMutableArray *found)
     }
 }
 
+static BOOL revenant_requires_failure(UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
+{
+    id delegate = recognizer.delegate;
+    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldRequireFailureOfGestureRecognizer:)] && [delegate gestureRecognizer:recognizer shouldRequireFailureOfGestureRecognizer:other])
+        return YES;
+    return [recognizer shouldRequireFailureOfGestureRecognizer:other];
+}
+
+static BOOL revenant_required_to_fail_by(UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
+{
+    id delegate = recognizer.delegate;
+    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:)] && [delegate gestureRecognizer:recognizer shouldBeRequiredToFailByGestureRecognizer:other])
+        return YES;
+    return [recognizer shouldBeRequiredToFailByGestureRecognizer:other];
+}
+
 static void revenant_arbitrate(UIView *view, UIGestureRecognizer *recognizer)
 {
     NSMutableArray *others = [NSMutableArray array];
@@ -20,9 +36,9 @@ static void revenant_arbitrate(UIView *view, UIGestureRecognizer *recognizer)
     for (UIGestureRecognizer *other in others) {
         if (other == recognizer)
             continue;
-        if ([recognizer shouldRequireFailureOfGestureRecognizer:other] || [other shouldBeRequiredToFailByGestureRecognizer:recognizer])
+        if (revenant_requires_failure(recognizer, other) || revenant_required_to_fail_by(other, recognizer))
             [recognizer requireGestureRecognizerToFail:other];
-        if ([other shouldRequireFailureOfGestureRecognizer:recognizer] || [recognizer shouldBeRequiredToFailByGestureRecognizer:other])
+        if (revenant_requires_failure(other, recognizer) || revenant_required_to_fail_by(recognizer, other))
             [other requireGestureRecognizerToFail:recognizer];
     }
 }
