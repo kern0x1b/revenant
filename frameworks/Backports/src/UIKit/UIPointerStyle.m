@@ -40,8 +40,10 @@ static const NSUInteger RevenantShapeDefaultRadius = 8;
 + (instancetype)shapeWithRoundedRect:(CGRect)rect cornerRadius:(CGFloat)cornerRadius
 {
     UIPointerShape *shape = [self shapeWithRoundedRect:rect];
-    shape->_cornerRadius = cornerRadius;
-    shape->_radiusSet = YES;
+    if (cornerRadius != CGFLOAT_MIN) {
+        shape->_cornerRadius = cornerRadius;
+        shape->_radiusSet = YES;
+    }
     return shape;
 }
 

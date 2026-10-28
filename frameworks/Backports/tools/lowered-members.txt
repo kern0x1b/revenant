@@ -1956,7 +1956,6 @@ class RevenantScrollGuideObserver
 class RevenantScrollWatcher
 class RevenantSearchBar
 class RevenantSearchParser
-class RevenantSecAccessControl
 class RevenantSecCertificate
 class RevenantSecIdentity
 class RevenantSecProtocolMetadata
@@ -3053,9 +3052,14 @@ enum LABiometryTypeNone
 enum LACompanionTypeMac
 enum LACompanionTypeWatch
 enum LACredentialTypeApplicationPassword
+enum LAErrorAppCancel
 enum LAErrorBiometryNotAvailable
 enum LAErrorInvalidContext
 enum LAErrorNotInteractive
+enum LAErrorSystemCancel
+enum LAErrorUserCancel
+enum LAErrorUserFallback
+enum LAPolicyDeviceOwnerAuthentication
 enum LPErrorMetadataFetchCancelled
 enum LPErrorMetadataFetchFailed
 enum LPErrorMetadataFetchTimedOut
@@ -3338,6 +3342,8 @@ enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
 enum MTLPrimitiveTypeTriangleStrip
+enum MTLPurgeableStateKeepCurrent
+enum MTLPurgeableStateNonVolatile
 enum MTLResourceStorageModePrivate
 enum MTLResourceStorageModeShared
 enum MTLSamplerAddressModeClampToEdge
@@ -4127,6 +4133,13 @@ enum kNEHotspotHelperResultSuccess
 enum kNEHotspotHelperResultTemporaryFailure
 enum kNEHotspotHelperResultUIRequired
 enum kNEHotspotHelperResultUnsupportedNetwork
+enum kSecAccessControlAnd
+enum kSecAccessControlBiometryAny
+enum kSecAccessControlBiometryCurrentSet
+enum kSecAccessControlCompanion
+enum kSecAccessControlDevicePasscode
+enum kSecAccessControlOr
+enum kSecAccessControlUserPresence
 enum kSecKeyOperationTypeDecrypt
 enum kSecKeyOperationTypeEncrypt
 enum kSecKeyOperationTypeKeyExchange
@@ -4443,7 +4456,13 @@ function NSExtensionMain
 function NSStringFromDirectionalEdgeInsets
 function RevenantASAppleIDButtonTitle
 function RevenantAURenderInput
+function RevenantAccessControlFlags
+function RevenantAccessControlProtection
 function RevenantAccessFromWord
+function RevenantAnimationDurationInherited
+function RevenantAnimationDurationPop
+function RevenantAnimationDurationPush
+function RevenantAnimationDurationSetCurrent
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -4644,6 +4663,7 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantPassKitNoHardwareError
+function RevenantPhotoLongestIncreasingSubsequence
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
 function RevenantQRDecode
@@ -4664,11 +4684,22 @@ function RevenantSCNReadVector
 function RevenantSCNRowTransform
 function RevenantSCNUnprojectPoint
 function RevenantSCNWorldBox
+function RevenantSecItemAuthenticate
+function RevenantSecItemFlagsRequireUser
+function RevenantSecItemSystemEnforcesAccessControl
 function RevenantSecKeyECCarries
 function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
 function RevenantSecKeyECVerify
 function RevenantSecKeyFail
+function RevenantSecureEnclaveKeyCopyPublic
+function RevenantSecureEnclaveKeyCreateRandom
+function RevenantSecureEnclaveKeyDelete
+function RevenantSecureEnclaveKeyIs
+function RevenantSecureEnclaveKeyIsPrivate
+function RevenantSecureEnclaveKeyLookup
+function RevenantSecureEnclaveKeyPoint
+function RevenantSecureEnclaveKeyScalar
 function RevenantSecurityAttributesFromItemResult
 function RevenantSecurityCarries
 function RevenantSecurityKeyIsPortEC
@@ -4731,6 +4762,10 @@ function SecCertificateCopyNormalizedSubjectSequence
 function SecCertificateCopySerialNumberData
 function SecCopyErrorMessageString
 function SecCreateSharedWebCredentialPassword
+function SecItemAdd
+function SecItemCopyMatching
+function SecItemDelete
+function SecItemUpdate
 function SecKeyCopyAttributes
 function SecKeyCopyExternalRepresentation
 function SecKeyCopyKeyExchangeResult
@@ -8854,6 +8889,7 @@ global RevenantASAppleIDButtonLogoCharacter
 global RevenantAVMetadataTimedItemsKey
 global RevenantAVMetadataTimedRangeKey
 global RevenantAXSettingsErrorDomain
+global RevenantAnimationDurationDefault
 global RevenantCKDevelopmentEnvironment
 global RevenantCKHost
 global RevenantCKProductionEnvironment
@@ -33236,6 +33272,8 @@ member UITextFormattingCoordinator -setSelectedAttributes:isMultiple:
 member UITextInputAssistantItem -allowsHidingShortcuts
 member UITextInputAssistantItem -init
 member UITextInputAssistantItem -leadingBarButtonGroups
+member UITextInputAssistantItem -revenant_attachToResponder:
+member UITextInputAssistantItem -revenant_shortcutsDidChange
 member UITextInputAssistantItem -setAllowsHidingShortcuts:
 member UITextInputAssistantItem -setLeadingBarButtonGroups:
 member UITextInputAssistantItem -setTrailingBarButtonGroups:
@@ -33623,6 +33661,12 @@ member UIView +load
 member UIView +modifyAnimationsWithRepeatCount:autoreverses:animations:
 member UIView +performSystemAnimation:onViews:options:animations:completion:
 member UIView +performWithoutAnimation:
+member UIView +revenant_animateWithDuration:animations:
+member UIView +revenant_animateWithDuration:animations:completion:
+member UIView +revenant_animateWithDuration:delay:options:animations:completion:
+member UIView +revenant_beginAnimations:context:
+member UIView +revenant_commitAnimations
+member UIView +revenant_setAnimationDuration:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:
 member UIView -accessibilityIgnoresInvertColors

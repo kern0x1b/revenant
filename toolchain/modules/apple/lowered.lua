@@ -136,6 +136,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSUnderlineStylePatternDot",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "NSAttributedString.h",
+            find = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+            replace = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+        },
+    },
+    {
         member = "LABiometryType",
         header = {
             name = "LocalAuthentication",
@@ -214,7 +224,7 @@ local MEMBERS = {
             find = "OS_OPTIONS(os_unfair_lock_flags, uint32_t,",
             replace = table.concat({
                 "#if defined(__OBJC__) || defined(__cplusplus)",
-                "#define REVENANT_OS_OPTIONS OS_OPTIONS",
+                "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef enum __OS_ENUM_ATTR __OS_OPTIONS_ATTR : _type { __VA_ARGS__ } _name##_t",
                 "#else",
                 "#define REVENANT_OS_OPTIONS(_name, _type, ...) typedef _type _name##_t; enum _name { __VA_ARGS__ } __OS_ENUM_ATTR __OS_OPTIONS_ATTR",
                 "#endif",
@@ -1726,6 +1736,10 @@ local function digest_of(base, files)
     return hash.strhash128(table.concat(parts, "\n"))
 end
 
+local function generator_files()
+    return {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
+end
+
 local function members_key(src, sdk)
     local sdk_files = table.join(framework_headers(sdk))
     for _, entry in ipairs(MEMBERS) do
@@ -1734,11 +1748,10 @@ local function members_key(src, sdk)
     byteorder.sort(sdk_files)
     local src_files = os.files(path.join(src, "**"))
     byteorder.sort(src_files)
-    local generator = {path.join(MODULE_DIR, "lowered.lua"), path.join(MODULE_DIR, "runtime_guards.lua"), path.join(MODULE_DIR, "flat_classes.lua")}
     local shared = {path.join(MODULE_DIR, "..", "byteorder.lua"), path.join(MODULE_DIR, "..", "workspace.lua")}
     local tools = {path.join(src, "..", "tools", "facts.lua"), path.join(src, "..", "tools", "ast.lua"), path.join(src, "..", "tools", "sdk.lua")}
     return hash.strhash128(table.concat({
-        "generator=" .. digest_of(MODULE_DIR, generator),
+        "generator=" .. digest_of(MODULE_DIR, generator_files()),
         "shared=" .. digest_of(path.join(MODULE_DIR, ".."), shared),
         "tools=" .. digest_of(path.join(src, ".."), tools),
         "device=" .. hash.sha256(device_members_file()),
@@ -1875,7 +1888,7 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, io.readfile(path.join(MODULE_DIR, "lowered.lua")), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
 end
 
 function overlay(sdk, out, set, subtrees)

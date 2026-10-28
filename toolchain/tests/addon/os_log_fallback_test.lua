@@ -27,6 +27,130 @@ int main(void) {
 }
 ]]
 
+local RENDER_PROBE = [[
+#import "RevenantOSOverlayShims.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void show(const char *label, const char *format, int count, int error, ...) {
+    va_list arguments;
+    va_start(arguments, error);
+    char *text = revenant_os_log_render_arguments(format, arguments, count, error);
+    va_end(arguments);
+    printf("%s\t%s\n", label, text ? text : "(failed)");
+    free(text);
+}
+
+/* Appends one argument to a buffer: the header byte (type in the high four bits, privacy flag in the low four), the size
+   byte and the bytes. The layout is the os_log ABI's (swiftlang/swift stdlib/private/OSLog/OSLogMessage.swift). */
+static size_t put(uint8_t *out, size_t at, uint8_t header, const void *data, uint8_t size) {
+    out[at] = header;
+    out[at + 1] = size;
+    memcpy(out + at + 2, data, size);
+    return at + 2 + size;
+}
+
+static void show_buffer(const char *label, const char *format, uint8_t count, const uint8_t *items, size_t length) {
+    uint8_t buffer[256];
+    buffer[0] = 0;
+    buffer[1] = count;
+    memcpy(buffer + 2, items, length);
+    char *text = revenant_os_log_render_buffer(format, buffer, (uint32_t)(length + 2), 0);
+    printf("%s\t%s\n", label, text ? text : "(failed)");
+    free(text);
+}
+
+int main(void) {
+    const void *object = (const void *)@"object text";
+    const void *hidden = (const void *)@"hidden";
+    const void *plain = (const void *)@"default object";
+    const void *nothing = NULL;
+    show("01", "%{public}s", 1, 0, "hello");
+    show("02", "%{private}s", 1, 0, "secret");
+    show("03", "%s", 1, 0, "plain");
+    show("04", "%{public}d", 1, 0, 42);
+    show("05", "%d", 1, 0, 7);
+    show("06", "%{private}d", 1, 0, 99);
+    show("07", "%{public}@", 1, 0, object);
+    show("08", "%{private}@", 1, 0, hidden);
+    show("09", "%@", 1, 0, plain);
+    show("10", "%{public}08X", 1, 0, 0xBEEF);
+    show("11", "%{public}lld", 1, 0, 1234567890123LL);
+    show("12", "%{public}.2f", 1, 0, 3.14159);
+    show("13", "%{public}5.1f|", 1, 0, 2.5);
+    show("14", "%{public}-5d|", 1, 0, 42);
+    show("15", "%{public}c", 1, 0, 'A');
+    show("16", "100%%", 0, 0);
+    show("17", "%{public}s and %{private}s", 2, 0, "a", "b");
+    show("18", "%{public}d %{private}d %{public}s", 3, 0, 1, 2, "three");
+    show("19", "%{public}s", 1, 0, (const char *)NULL);
+    show("20", "%{public}s  ", 1, 0, "trailing");
+    show("21", "%{public}u", 1, 0, 4294967295u);
+    show("22", "%{public}i", 1, 0, -5);
+    show("23", "%{public}ld", 1, 0, 123456L);
+    show("24", "%{public}o", 1, 0, 8);
+    show("25", "%{public}x", 1, 0, 255);
+    show("26", "%{sensitive}s", 1, 0, "sens");
+    show("27", "%{public}s", 1, 0, "tab\tand\x01" "control");
+    show("28", "%m", 0, ENOENT);
+    show("29", "%{private}@", 1, 0, nothing);
+    show("30", "%{public}@", 1, 0, nothing);
+    show("31", "%{private}.2s", 1, 0, "abcdef");
+    show("32", "%{public}*d", 2, 0, 4, 7);
+    show("33", "%{public}d", 0, 0);
+    show("34", "%{public}s", 2, 0, "first", "second");
+    show("35", "%{public}.3s", 1, 0, "abcdef");
+    show("36", "%{public}5s|", 1, 0, "ab");
+    show("37", "%{public}-5s|", 1, 0, "ab");
+    show("38", "%{public}+d", 1, 0, 5);
+    show("39", "%{public}e", 1, 0, 1.5);
+    show("40", "%{public}g", 1, 0, 0.0001);
+    show("41", "%{public}hhx", 1, 0, 0x1FF);
+    show("42", "%{public}zd", 1, 0, 9L);
+    show("59", "%{public}*d", 2, 0, 100000000, 1);
+    show("60", "%99999999999999d", 1, 0, 1);
+    {
+        uint8_t items[128];
+        int number = 42, seven = 7;
+        const char *literal = "plain";
+        size_t at;
+        at = put(items, 0, 0x01, &number, 4);
+        show_buffer("51", "%{private}d", 1, items, at);
+        at = put(items, 0, 0x02, &number, 4);
+        show_buffer("52", "%{public}d", 1, items, at);
+        at = put(items, 0, 0x00, &seven, 4);
+        show_buffer("53", "%d", 1, items, at);
+        at = put(items, 0, 0x20, &literal, sizeof literal);
+        show_buffer("54", "%s", 1, items, at);
+        at = put(items, 0, 0x22, &literal, sizeof literal);
+        show_buffer("55", "%{public}s", 1, items, at);
+        at = put(items, 0, 0x41, &object, sizeof object);
+        show_buffer("56", "%{private}@", 1, items, at);
+        at = put(items, 0, 0x42, &object, sizeof object);
+        show_buffer("57", "%{public}@", 1, items, at);
+        at = put(items, 0, 0x02, &number, 4);
+        at = put(items, at, 0x21, &literal, sizeof literal);
+        show_buffer("58", "%{public}d %{private}s", 2, items, at);
+    }
+    return 0;
+}
+]]
+
+local RENDER = {
+    {"01", "hello"}, {"02", "<private>"}, {"03", "<private>"}, {"04", "42"}, {"05", "7"}, {"06", "<private>"},
+    {"07", "object text"}, {"08", "<private>"}, {"09", "<private>"}, {"10", "0000BEEF"}, {"11", "1234567890123"},
+    {"12", "3.14"}, {"13", "  2.5|"}, {"14", "42   |"}, {"15", "A"}, {"16", "100%"}, {"17", "a and <private>"},
+    {"18", "1 <private> three"}, {"19", "(null)"}, {"20", "trailing"}, {"21", "4294967295"}, {"22", "-5"},
+    {"23", "123456"}, {"24", "10"}, {"25", "ff"}, {"26", "<private>"}, {"27", "tab\tand\\^Acontrol"},
+    {"28", "No such file or directory"}, {"29", "<private>"}, {"30", "(null)"}, {"31", "<private>"},
+    {"32", "   7"}, {"33", "<decode: missing data>"}, {"34", "first"}, {"35", "abc"}, {"36", "   ab|"},
+    {"37", "ab   |"}, {"38", "+5"}, {"39", "1.500000e+00"}, {"40", "0.0001"}, {"41", "ff"}, {"42", "9"},
+    {"51", "<private>"}, {"52", "42"}, {"53", "7"}, {"54", "<private>"}, {"55", "plain"}, {"56", "<private>"},
+    {"57", "object text"}, {"58", "42 <private>"},
+    {"59", string.rep(" ", 127) .. "1"}, {"60", string.rep(" ", 127) .. "1"},
+}
+
 local MODES = {
     {name = "absent", stubs = false, linked = "linked 0"},
     {name = "present", stubs = true, linked = "linked 1"},
@@ -37,7 +161,6 @@ local WANT = {"recorded 1 0 0 1 1", "levels 5 3 2"}
 local function probe_failures(folder, mode, found)
     local source = path.join(folder, mode.name .. ".c")
     local binary = path.join(folder, mode.name)
-    local log = path.join(folder, mode.name .. ".log")
     io.writefile(source, PROBE)
     local argv = {"--sdk", "macosx", "clang", "-std=c11", "-Wall", "-Werror", "-Wno-deprecated-declarations", "-I", SHIM}
     if mode.stubs then
@@ -49,8 +172,8 @@ local function probe_failures(folder, mode, found)
             table.join2(argv, {"-Wl,-U," .. symbol})
         end
     end
-    if os.execv("xcrun", argv, {try = true, stdout = log, stderr = log}) ~= 0 then
-        table.insert(found, string.format("the %s probe does not compile and link: %s", mode.name, io.readfile(log) or ""))
+    if os.execv("xcrun", argv, {try = true, stdout = path.join(folder, mode.name .. ".log"), stderr = path.join(folder, mode.name .. ".log")}) ~= 0 then
+        table.insert(found, string.format("the %s probe does not compile and link: %s", mode.name, io.readfile(path.join(folder, mode.name .. ".log")) or ""))
         return
     end
     local output = os.iorunv(binary, {})
@@ -63,12 +186,40 @@ local function probe_failures(folder, mode, found)
     end
 end
 
+local function render_failures(folder, found)
+    local source = path.join(folder, "render.m")
+    local binary = path.join(folder, "render")
+    local log = path.join(folder, "render.log")
+    io.writefile(source, RENDER_PROBE)
+    local argv = {"--sdk", "macosx", "clang", "-std=c11", "-Wall", "-Werror", "-Wno-deprecated-declarations", "-fno-objc-arc",
+                  "-framework", "Foundation", "-I", SHIM, source, "-o", binary}
+    if os.execv("xcrun", argv, {try = true, stdout = log, stderr = log}) ~= 0 then
+        table.insert(found, "the render probe does not compile and link: " .. (io.readfile(log) or ""))
+        return
+    end
+    local output = os.iorunv(binary, {})
+    local rendered = {}
+    for line in output:gmatch("[^\n]+") do
+        local label, text = line:match("^(%d%d)\t(.*)$")
+        if label then
+            rendered[label] = text
+        end
+    end
+    for _, case in ipairs(RENDER) do
+        local label, want = case[1], case[2]
+        if rendered[label] ~= want then
+            table.insert(found, string.format("format %s rendered %q and not %q", label, tostring(rendered[label]), want))
+        end
+    end
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
     for _, mode in ipairs(MODES) do
         probe_failures(folder, mode, found)
     end
+    render_failures(folder, found)
     os.tryrm(folder)
     return found
 end

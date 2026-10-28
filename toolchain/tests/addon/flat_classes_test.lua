@@ -4,6 +4,8 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..",
 
 local SYMBOL = "_OBJC_CLASS_$_NSURLComponents"
 
+local UIKIT_SYMBOL = "_OBJC_CLASS_$_UIPointerShape"
+
 local function ios6(sdk)
     return {"-target", "armv7-apple-ios6.0", "-miphoneos-version-min=6.0", "-Wno-incompatible-sysroot", "-isysroot", sdk}
 end
@@ -117,14 +119,45 @@ function failures(arguments)
         table.insert(found, "the probe with a flat-bound class outside the table did not link: " .. (io.readfile(outside_log) or ""))
         return found
     end
+    local uikit_main = path.join(output, "uikit.m")
+    io.writefile(uikit_main, "#import <UIKit/UIKit.h>\nint main(void) { return [UIPointerShape class] && [UIPointerStyle class] ? 0 : 1; }\n")
+    local uikit_object = path.join(output, "uikit.o")
+    local uikit_log = path.join(output, "uikit.log")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fobjc-arc", "-ivfsoverlay", overlay, "-I" .. include, "-c", uikit_main, "-o", uikit_object}),
+                {try = true, stdout = uikit_log, stderr = uikit_log}) ~= 0 then
+        table.insert(found, "the armv7 iOS 6 UIKit pointer probe does not compile: " .. (io.readfile(uikit_log) or ""))
+        return found
+    end
+    local uikit_plain = path.join(output, "uikit-plain")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fobjc-link-runtime", uikit_object, "-framework", "UIKit", "-o", uikit_plain}),
+                {try = true, stdout = uikit_log, stderr = uikit_log}) ~= 0 then
+        table.insert(found, "the UIKit control link failed: " .. (io.readfile(uikit_log) or ""))
+        return found
+    end
+    if not binding(uikit_plain, UIKIT_SYMBOL):find("(from UIKit)", 1, true) then
+        table.insert(found, "the control link does not bind UIPointerShape to UIKit: " .. binding(uikit_plain, UIKIT_SYMBOL))
+    end
+    local uikit_app = path.join(output, "uikit-app")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fobjc-link-runtime", uikit_object, "-framework", "UIKit", "-o", uikit_app}, flat.app_link_flags(arguments.sdk, stubs)),
+                {try = true, stdout = uikit_log, stderr = uikit_log}) ~= 0 then
+        table.insert(found, "the app link of the UIKit pointer probe with the flat-class stubs failed: " .. (io.readfile(uikit_log) or ""))
+        return found
+    end
+    local uikit_bound = binding(uikit_app, UIKIT_SYMBOL)
+    if uikit_bound:find("(from UIKit)", 1, true) or not uikit_bound:find("(dynamically looked up)", 1, true) then
+        table.insert(found, "the UIPointerShape reference binds to UIKit instead of the flat namespace: " .. uikit_bound)
+    end
     local cachefile = path.join(workspace.home(), "dyld", "6.0", "dyld_shared_cache_armv7")
     local reported = {}
-    for _, entry in ipairs((dyld.missing_imports(cachefile, {app, outside}, output))) do
+    for _, entry in ipairs((dyld.missing_imports(cachefile, {app, outside, uikit_app}, output))) do
         table.insert(reported, entry[1] .. " " .. entry[2])
     end
     local text = table.concat(reported, "\n")
     if not text:find("outside _OBJC_CLASS_$_RevenantNotFlat", 1, true) then
         table.insert(found, "a flat-bound class outside the table passed the install check: " .. text)
+    end
+    if text:find("UIPointer", 1, true) then
+        table.insert(found, "a flat-bound UIKit pointer class in the table was reported missing: " .. text)
     end
     if text:find("NSURLComponents", 1, true) then
         table.insert(found, "a flat-bound class in the table was reported missing: " .. text)
