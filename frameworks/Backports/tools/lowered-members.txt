@@ -1632,6 +1632,7 @@ class RevenantAccessoryView
 class RevenantActionEntry
 class RevenantActiveFrameDurationInstaller
 class RevenantAlertPopoverPresentation
+class RevenantAnimationGroup
 class RevenantAnimatorDriver
 class RevenantAnnotationState
 class RevenantAppearingInstaller
@@ -4463,6 +4464,12 @@ function RevenantAnimationDurationInherited
 function RevenantAnimationDurationPop
 function RevenantAnimationDurationPush
 function RevenantAnimationDurationSetCurrent
+function RevenantAnimationGroupAutoreverses
+function RevenantAnimationGroupRepeatCount
+function RevenantAnimationGroupSetAutoreverses
+function RevenantAnimationGroupSetRepeatCount
+function RevenantAudioUnitApplyPreset
+function RevenantAudioUnitReadPreset
 function RevenantBLEMIDIParse
 function RevenantBuildParameterTree
 function RevenantCKBadContainer
@@ -5931,6 +5938,7 @@ function revenant_task_progress_apply
 function revenant_task_progress_create
 function revenant_text
 function revenant_text_content_type
+function revenant_tightening_kern
 function revenant_track_bar
 function revenant_trait_classes
 function revenant_trait_collection_with
@@ -11682,6 +11690,7 @@ member AVAudioUnit -renderingAlgorithm
 member AVAudioUnit -revenant_applyPendingParameters
 member AVAudioUnit -revenant_inputParameter:
 member AVAudioUnit -revenant_readAzimuth:elevation:distance:
+member AVAudioUnit -revenant_setEngine:auNode:audioUnit:
 member AVAudioUnit -revenant_setInputParameter:value:
 member AVAudioUnit -reverbBlend
 member AVAudioUnit -setBypass:
@@ -31477,6 +31486,7 @@ member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -followsUndockedKeyboard
 member UIKeyboardLayoutGuide -setFollowsUndockedKeyboard:
+member UILabel +load
 member UILabel -adjustsFontForContentSizeCategory
 member UILabel -allowsDefaultTighteningForTruncation
 member UILabel -lineBreakStrategy
@@ -33667,6 +33677,8 @@ member UIView +revenant_animateWithDuration:delay:options:animations:completion:
 member UIView +revenant_beginAnimations:context:
 member UIView +revenant_commitAnimations
 member UIView +revenant_setAnimationDuration:
+member UIView +revenant_setAnimationRepeatAutoreverses:
+member UIView +revenant_setAnimationRepeatCount:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:
 member UIView +userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:
 member UIView -accessibilityIgnoresInvertColors

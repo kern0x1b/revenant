@@ -47,6 +47,20 @@ int main(int argc, char **argv)
         dispatch_semaphore_wait(finished, DISPATCH_TIME_FOREVER);
         expect_duration("another thread does not see this thread's duration", seenOnOtherThread, 0);
         RevenantAnimationDurationPop();
+
+        RevenantAnimationDurationPush(1);
+        revenant_check(RevenantAnimationGroupRepeatCount() == 0 && !RevenantAnimationGroupAutoreverses(), "a new group starts without a repeat", @"the new group does not start with UIKit's defaults");
+        RevenantAnimationGroupSetRepeatCount(3);
+        RevenantAnimationGroupSetAutoreverses(YES);
+        revenant_check(RevenantAnimationGroupRepeatCount() == 3 && RevenantAnimationGroupAutoreverses(), "the repeat count and autoreverse are kept on the group", @"the group did not keep 3 and YES");
+        RevenantAnimationDurationPush(0.5);
+        revenant_check(RevenantAnimationGroupRepeatCount() == 0 && !RevenantAnimationGroupAutoreverses(), "a nested group does not inherit the repeat count", @"the nested group inherited the repeat count");
+        RevenantAnimationGroupSetRepeatCount(7);
+        if (!revenant_negative)
+            RevenantAnimationDurationPop();
+        revenant_check(RevenantAnimationGroupRepeatCount() == 3 && RevenantAnimationGroupAutoreverses(), "pop restores the enclosing repeat count and autoreverse", @"the enclosing repeat count was not restored");
+        RevenantAnimationDurationPop();
+        RevenantAnimationDurationPop();
     }
     return revenant_finish();
 }

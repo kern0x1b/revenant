@@ -7,7 +7,7 @@ static const void *StrategyKey = &StrategyKey;
 static BOOL tightening_of(id style)
 {
     NSNumber *held = objc_getAssociatedObject(style, TighteningKey);
-    return held ? held.boolValue : YES;
+    return held ? held.boolValue : NO;
 }
 
 static NSInteger strategy_of(id style)
@@ -65,7 +65,7 @@ static BOOL is_equal(id self, SEL selector, id other)
 
 + (void)load
 {
-    if ([NSParagraphStyle instancesRespondToSelector:@selector(lineBreakStrategy)])
+    if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_0)
         return;
     Class base = [NSParagraphStyle class], mutable = [NSMutableParagraphStyle class];
     Method method = class_getInstanceMethod(base, @selector(copyWithZone:));

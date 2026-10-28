@@ -8,6 +8,8 @@
 + (void)revenant_animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay options:(UIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
 + (void)revenant_beginAnimations:(NSString *)animationID context:(void *)context;
 + (void)revenant_setAnimationDuration:(NSTimeInterval)duration;
++ (void)revenant_setAnimationRepeatCount:(float)count;
++ (void)revenant_setAnimationRepeatAutoreverses:(BOOL)autoreverses;
 + (void)revenant_commitAnimations;
 @end
 
@@ -28,6 +30,8 @@ static void RevenantExchangeViewClassMethods(SEL original, SEL replacement)
     RevenantExchangeViewClassMethods(@selector(animateWithDuration:delay:options:animations:completion:), @selector(revenant_animateWithDuration:delay:options:animations:completion:));
     RevenantExchangeViewClassMethods(@selector(beginAnimations:context:), @selector(revenant_beginAnimations:context:));
     RevenantExchangeViewClassMethods(@selector(setAnimationDuration:), @selector(revenant_setAnimationDuration:));
+    RevenantExchangeViewClassMethods(@selector(setAnimationRepeatCount:), @selector(revenant_setAnimationRepeatCount:));
+    RevenantExchangeViewClassMethods(@selector(setAnimationRepeatAutoreverses:), @selector(revenant_setAnimationRepeatAutoreverses:));
     RevenantExchangeViewClassMethods(@selector(commitAnimations), @selector(revenant_commitAnimations));
 }
 
@@ -76,6 +80,18 @@ static void RevenantExchangeViewClassMethods(SEL original, SEL replacement)
 {
     RevenantAnimationDurationSetCurrent(duration);
     [self revenant_setAnimationDuration:duration];
+}
+
++ (void)revenant_setAnimationRepeatCount:(float)count
+{
+    RevenantAnimationGroupSetRepeatCount(count);
+    [self revenant_setAnimationRepeatCount:count];
+}
+
++ (void)revenant_setAnimationRepeatAutoreverses:(BOOL)autoreverses
+{
+    RevenantAnimationGroupSetAutoreverses(autoreverses);
+    [self revenant_setAnimationRepeatAutoreverses:autoreverses];
 }
 
 + (void)revenant_commitAnimations
