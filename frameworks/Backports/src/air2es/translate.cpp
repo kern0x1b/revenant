@@ -28,6 +28,8 @@ namespace {
 
 using TagMap = std::map<std::string, std::vector<Metadata *>>;
 
+using BlockSets = std::map<BasicBlock *, std::set<BasicBlock *>>;
+
 TagMap parseTags(const MDNode *node, unsigned first)
 {
     TagMap tags;
@@ -247,9 +249,6 @@ public:
 
     bool translate(std::string &source, std::string &reflection)
     {
-        if (function_.size() != 1)
-            return refuse("control flow of " + std::to_string(function_.size()) +
-                          " blocks, which this emitter does not structure yet");
         for (Argument &argument : function_.args()) {
             size_t slot = 0;
             while (slot < bindings_.size() && argumentNumbers_[slot] != argument.getArgNo())
@@ -280,21 +279,21 @@ public:
             if (bindings_[slot].kind == "air.position" && !bindings_[slot].argument->use_empty()) {
                 if (!declareLocal("vec4 position;\n", "position"))
                     return false;
-                statements_.push_back("position = gl_FragCoord;\n");
+                statement("position = gl_FragCoord;\n");
                 if (!needFlip() || !needTarget())
                     return false;
-                statements_.push_back("position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;\n");
+                statement("position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;\n");
                 break;
             }
-        for (BasicBlock &block : function_)
-            for (Instruction &instruction : block)
-                if (!emit(instruction))
-                    return false;
+        if (!region(&function_.getEntryBlock(), nullptr))
+            return false;
+        if (!returned_)
+            return refuse("a function that never returns");
         std::string body;
         for (const std::string &line : locals_)
             body += "    " + line;
         for (const std::string &line : statements_)
-            body += "    " + line;
+            body += line;
         source = "#version 100\n";
         if (stage_ == Stage::Fragment)
             source += "precision mediump float;\n";
@@ -327,6 +326,9 @@ private:
 
     Binding *bindingOf(const Value *value)
     {
+        auto inlined = inlineBindings_.find(value);
+        if (inlined != inlineBindings_.end())
+            return inlined->second;
         auto found = argumentSlot_.find(value);
         return found == argumentSlot_.end() ? nullptr : &bindings_[found->second];
     }
@@ -546,6 +548,11 @@ private:
             return true;
         }
         if (auto *argument = dyn_cast<Argument>(value)) {
+            auto inlined = inlineValues_.find(argument);
+            if (inlined != inlineValues_.end()) {
+                out = inlined->second;
+                return true;
+            }
             Binding *binding = bindingOf(argument);
             if (!binding)
                 return refuse("an argument with no metadata");
@@ -615,6 +622,303 @@ private:
             return true;
         }
         return refuse("a value this emitter does not translate");
+    }
+
+    struct Loop {
+        PHINode *index = nullptr;
+        Instruction *next = nullptr;
+        Instruction *test = nullptr;
+        BasicBlock *exit = nullptr;
+        int64_t first = 0;
+        int64_t last = 0;
+    };
+
+    struct Frame {
+        const Function *function = nullptr;
+        std::string result;
+        bool returned = false;
+    };
+
+    void statement(const std::string &text)
+    {
+        statements_.push_back(std::string(4 * (depth_ + 1), ' ') + text);
+    }
+
+    BlockSets postDominators(Function &function)
+    {
+        BlockSets sets;
+        std::set<BasicBlock *> all;
+        for (BasicBlock &block : function)
+            all.insert(&block);
+        for (BasicBlock &block : function)
+            sets[&block] = all;
+        bool changed = true;
+        while (changed) {
+            changed = false;
+            for (BasicBlock &block : function) {
+                Instruction *terminator = block.getTerminator();
+                std::set<BasicBlock *> meet;
+                for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
+                    const std::set<BasicBlock *> next = sets[terminator->getSuccessor(i)];
+                    if (i == 0) {
+                        meet = next;
+                        continue;
+                    }
+                    std::set<BasicBlock *> common;
+                    for (BasicBlock *candidate : meet)
+                        if (next.count(candidate))
+                            common.insert(candidate);
+                    meet = common;
+                }
+                meet.insert(&block);
+                if (meet != sets[&block]) {
+                    sets[&block] = meet;
+                    changed = true;
+                }
+            }
+        }
+        return sets;
+    }
+
+    BasicBlock *postDominator(BasicBlock *block)
+    {
+        Function *function = block->getParent();
+        if (!postDominators_.count(function))
+            postDominators_[function] = postDominators(*function);
+        const BlockSets &sets = postDominators_[function];
+        BasicBlock *best = nullptr;
+        for (BasicBlock *candidate : sets.at(block))
+            if (candidate != block && (!best || sets.at(candidate).size() > sets.at(best).size()))
+                best = candidate;
+        return best;
+    }
+
+    bool loopOf(BasicBlock *header, Loop &loop)
+    {
+        auto *branch = dyn_cast<BranchInst>(header->getTerminator());
+        if (!branch || !branch->isConditional())
+            return false;
+        bool staysFirst = branch->getSuccessor(0) == header;
+        bool staysSecond = branch->getSuccessor(1) == header;
+        if (staysFirst == staysSecond)
+            return false;
+        bool exitOnTrue = !staysFirst;
+        loop.exit = branch->getSuccessor(staysFirst ? 1 : 0);
+        auto *test = dyn_cast<ICmpInst>(branch->getCondition());
+        if (!test || test->getPredicate() != (exitOnTrue ? ICmpInst::ICMP_EQ : ICmpInst::ICMP_NE))
+            return false;
+        auto *bound = dyn_cast<ConstantInt>(test->getOperand(1));
+        auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
+        if (!bound || !next || next->getParent() != header || next->getOpcode() != Instruction::Add)
+            return false;
+        auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
+        auto *index = dyn_cast<PHINode>(next->getOperand(0));
+        if (!step || !step->isOne() || !index || index->getParent() != header || index->getNumIncomingValues() != 2)
+            return false;
+        if (index->getIncomingValueForBlock(header) != next)
+            return false;
+        BasicBlock *before = nullptr;
+        Value *start = nullptr;
+        for (unsigned i = 0; i < 2; i++)
+            if (index->getIncomingBlock(i) != header) {
+                before = index->getIncomingBlock(i);
+                start = index->getIncomingValue(i);
+            }
+        auto *first = dyn_cast_or_null<ConstantInt>(start);
+        if (!before || !first || first->getSExtValue() >= bound->getSExtValue())
+            return false;
+        for (User *user : next->users())
+            if (user != index && user != test)
+                return false;
+        for (User *user : test->users())
+            if (user != branch)
+                return false;
+        for (User *user : index->users()) {
+            auto *inside = dyn_cast<Instruction>(user);
+            if (!inside || inside->getParent() != header)
+                return false;
+        }
+        if (isa<PHINode>(loop.exit->front()))
+            return false;
+        loop.index = index;
+        loop.next = next;
+        loop.test = test;
+        loop.first = first->getSExtValue();
+        loop.last = bound->getSExtValue();
+        return true;
+    }
+
+    bool emitLoop(BasicBlock *header, const Loop &loop)
+    {
+        std::string index = "t" + std::to_string(counter_++);
+        names_[loop.index] = index;
+        statement("for (int " + index + " = " + std::to_string(loop.first) + "; " + index + " < " +
+                  std::to_string(loop.last) + "; " + index + "++) {\n");
+        depth_++;
+        for (Instruction &instruction : *header) {
+            if (isa<PHINode>(instruction) || instruction.isTerminator() || &instruction == loop.next ||
+                &instruction == loop.test)
+                continue;
+            if (!emit(instruction))
+                return false;
+        }
+        if (!edgeCopies(header, header))
+            return false;
+        depth_--;
+        statement("}\n");
+        return true;
+    }
+
+    bool edgeCopies(BasicBlock *from, BasicBlock *to)
+    {
+        Loop loop;
+        bool counted = loopOf(to, loop);
+        struct Copy {
+            PHINode *phi;
+            std::string value;
+        };
+        std::vector<Copy> copies;
+        for (Instruction &instruction : *to) {
+            auto *phi = dyn_cast<PHINode>(&instruction);
+            if (!phi)
+                break;
+            if (counted && phi == loop.index)
+                continue;
+            if (!names_.count(phi)) {
+                std::string name;
+                if (!local(*phi, name))
+                    return false;
+            }
+            std::string value;
+            if (!expression(phi->getIncomingValueForBlock(from), value))
+                return false;
+            copies.push_back(Copy{phi, value});
+        }
+        if (copies.size() == 1) {
+            statement(names_[copies[0].phi] + " = " + copies[0].value + ";\n");
+            return true;
+        }
+        std::vector<std::string> temps;
+        for (const Copy &copy : copies) {
+            std::string temp = "t" + std::to_string(counter_++);
+            locals_.push_back(glslType(copy.phi->getType()) + " " + temp + ";\n");
+            statement(temp + " = " + copy.value + ";\n");
+            temps.push_back(temp);
+        }
+        for (size_t i = 0; i < copies.size(); i++)
+            statement(names_[copies[i].phi] + " = " + temps[i] + ";\n");
+        return true;
+    }
+
+    bool side(BasicBlock *from, BasicBlock *to, BasicBlock *join)
+    {
+        return edgeCopies(from, to) && region(to, join);
+    }
+
+    bool finish(ReturnInst &ret)
+    {
+        if (!frames_.empty()) {
+            frames_.back().returned = true;
+            if (!ret.getReturnValue())
+                return true;
+            std::string value;
+            if (!expression(ret.getReturnValue(), value))
+                return false;
+            if (!frames_.back().result.empty())
+                statement(frames_.back().result + " = " + value + ";\n");
+            return true;
+        }
+        returned_ = true;
+        return emitReturn(ret);
+    }
+
+    bool region(BasicBlock *block, BasicBlock *stop)
+    {
+        while (block && block != stop) {
+            if (!visited_.insert(block).second)
+                return refuse("control flow that reaches one block twice");
+            Loop loop;
+            if (loopOf(block, loop)) {
+                if (!emitLoop(block, loop))
+                    return false;
+                block = loop.exit;
+                continue;
+            }
+            for (Instruction &instruction : *block) {
+                if (isa<PHINode>(instruction) || instruction.isTerminator())
+                    continue;
+                if (!emit(instruction))
+                    return false;
+            }
+            Instruction *terminator = block->getTerminator();
+            if (auto *ret = dyn_cast<ReturnInst>(terminator))
+                return finish(*ret);
+            auto *branch = dyn_cast<BranchInst>(terminator);
+            if (!branch)
+                return refuse("a terminator this emitter does not structure");
+            if (branch->isUnconditional()) {
+                if (!edgeCopies(block, branch->getSuccessor(0)))
+                    return false;
+                block = branch->getSuccessor(0);
+                continue;
+            }
+            BasicBlock *join = postDominator(block);
+            if (!join)
+                return refuse("a branch that never rejoins");
+            std::string condition;
+            if (!expression(branch->getCondition(), condition))
+                return false;
+            statement("if (" + condition + ") {\n");
+            depth_++;
+            if (!side(block, branch->getSuccessor(0), join))
+                return false;
+            depth_--;
+            statement("} else {\n");
+            depth_++;
+            if (!side(block, branch->getSuccessor(1), join))
+                return false;
+            depth_--;
+            statement("}\n");
+            block = join;
+        }
+        return true;
+    }
+
+    bool inlineCall(CallInst &call, Function &callee)
+    {
+        for (const Frame &frame : frames_)
+            if (frame.function == &callee)
+                return refuse("a recursive call to " + callee.getName().str());
+        if (call.arg_size() != callee.arg_size())
+            return refuse("a call to " + callee.getName().str() + " with an argument count this emitter does not map");
+        for (unsigned i = 0; i < call.arg_size(); i++) {
+            Value *actual = call.getArgOperand(i);
+            Argument *formal = callee.getArg(i);
+            if (Binding *binding = bindingOf(actual)) {
+                inlineBindings_[formal] = binding;
+                continue;
+            }
+            std::string text;
+            if (!expression(actual, text))
+                return false;
+            inlineValues_[formal] = text;
+        }
+        Frame frame;
+        frame.function = &callee;
+        if (!callee.getReturnType()->isVoidTy() && !local(call, frame.result))
+            return false;
+        frames_.push_back(frame);
+        std::set<const BasicBlock *> outer;
+        outer.swap(visited_);
+        bool emitted = region(&callee.getEntryBlock(), nullptr);
+        visited_.swap(outer);
+        bool returned = frames_.back().returned;
+        frames_.pop_back();
+        if (!emitted)
+            return false;
+        if (!returned)
+            return refuse("a call to " + callee.getName().str() + " that never returns");
+        return true;
     }
 
     bool local(Instruction &instruction, std::string &name)
@@ -691,8 +995,8 @@ private:
             std::string name;
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = " + base + ";\n");
-            statements_.push_back(name + "." + kLanes[lane->getZExtValue()] + " = " + value + ";\n");
+            statement(name + " = " + base + ";\n");
+            statement(name + "." + kLanes[lane->getZExtValue()] + " = " + value + ";\n");
             return true;
         }
         if (auto *shuffle = dyn_cast<ShuffleVectorInst>(&instruction)) {
@@ -712,7 +1016,7 @@ private:
             std::string name;
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = " + glslType(shuffle->getType()) + "(" + list + ");\n");
+            statement(name + " = " + glslType(shuffle->getType()) + "(" + list + ");\n");
             return true;
         }
         if (auto *binary = dyn_cast<BinaryOperator>(&instruction)) {
@@ -729,7 +1033,7 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = (" + left + " " + op + " " + right + ");\n");
+            statement(name + " = (" + left + " " + op + " " + right + ");\n");
             return true;
         }
         if (auto *compare = dyn_cast<CmpInst>(&instruction)) {
@@ -748,7 +1052,7 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = (" + left + " " + op + " " + right + ");\n");
+            statement(name + " = (" + left + " " + op + " " + right + ");\n");
             return true;
         }
         if (auto *select = dyn_cast<SelectInst>(&instruction)) {
@@ -758,7 +1062,7 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = " + condition + " ? " + yes + " : " + no + ";\n");
+            statement(name + " = " + condition + " ? " + yes + " : " + no + ";\n");
             return true;
         }
         if (auto *cast = dyn_cast<CastInst>(&instruction)) {
@@ -776,13 +1080,11 @@ private:
                 return refuse("a cast to a type this emitter does not hold");
             if (!local(instruction, name))
                 return false;
-            statements_.push_back(name + " = " + type + "(" + operand + ");\n");
+            statement(name + " = " + type + "(" + operand + ");\n");
             return true;
         }
         if (auto *call = dyn_cast<CallInst>(&instruction))
             return emitCall(*call);
-        if (auto *ret = dyn_cast<ReturnInst>(&instruction))
-            return emitReturn(*ret);
         return refuse(std::string("an instruction this emitter does not translate: ") + instruction.getOpcodeName());
     }
 
@@ -792,6 +1094,8 @@ private:
         std::string called = callee ? callee->getName().str() : "";
         if (called.rfind("llvm.lifetime.", 0) == 0)
             return true;
+        if (callee && !callee->isDeclaration())
+            return inlineCall(call, *callee);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
@@ -814,7 +1118,7 @@ private:
         if (convert) {
             if (args.size() != 1 || !local(call, name))
                 return refuse("a conversion with an argument count this emitter does not map");
-            statements_.push_back(name + " = " + glslType(call.getType()) + "(" + args[0] + ");\n");
+            statement(name + " = " + glslType(call.getType()) + "(" + args[0] + ");\n");
             return true;
         }
         if (unary) {
@@ -822,7 +1126,7 @@ private:
                                  : called == "air.fast_fabs.f32" ? "abs" : called == "air.fast_fract.f32" ? "fract" : "floor";
             if (args.size() != 1 || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statements_.push_back(name + " = " + function + "(" + args[0] + ");\n");
+            statement(name + " = " + function + "(" + args[0] + ");\n");
             return true;
         }
         if (fmod) {
@@ -832,8 +1136,8 @@ private:
             locals_.push_back(glslType(call.getType()) + " " + quotient + ";\n");
             if (!local(call, name))
                 return false;
-            statements_.push_back(quotient + " = " + args[0] + " / " + args[1] + ";\n");
-            statements_.push_back(name + " = " + args[0] + " - " + args[1] + " * (sign(" + quotient + ") * floor(abs(" +
+            statement(quotient + " = " + args[0] + " / " + args[1] + ";\n");
+            statement(name + " = " + args[0] + " - " + args[1] + " * (sign(" + quotient + ") * floor(abs(" +
                                   quotient + ")));\n");
             return true;
         }
@@ -841,7 +1145,7 @@ private:
             std::string function = called == "air.dot.v3f32" ? "dot" : called == "air.mix.v3f32" ? "mix" : "clamp";
             if (args.size() != (called == "air.dot.v3f32" ? 2u : 3u) || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statements_.push_back(name + " = " + function + "(" + join(args) + ");\n");
+            statement(name + " = " + function + "(" + join(args) + ");\n");
             return true;
         }
         if (width) {
@@ -856,7 +1160,7 @@ private:
                 sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
             if (!local(call, name))
                 return false;
-            statements_.push_back(name + " = int(" + size + ".x);\n");
+            statement(name + " = int(" + size + ".x);\n");
             return true;
         }
         Binding *texture = bindingOf(call.getArgOperand(0));
@@ -882,7 +1186,7 @@ private:
         }
         if (!local(call, name))
             return false;
-        statements_.push_back(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
+        statement(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
         return true;
     }
 
@@ -912,8 +1216,8 @@ private:
             if (output.kind == "air.position" && stage_ == Stage::Vertex) {
                 if (!expression(fields[k], text) || !needFlip())
                     return false;
-                statements_.push_back("gl_Position = " + text + ";\n");
-                statements_.push_back("gl_Position.y *= revenant_flip;\n");
+                statement("gl_Position = " + text + ";\n");
+                statement("gl_Position.y *= revenant_flip;\n");
                 positioned = true;
             } else if (output.kind == "air.vertex_output" && stage_ == Stage::Vertex) {
                 std::string type = glslType(fields[k]->getType());
@@ -921,11 +1225,11 @@ private:
                     return refuse("a vertex output without a name or of a type this emitter does not hold");
                 if (!expression(fields[k], text) || !declare("varying " + type + " " + output.name + ";\n", output.name))
                     return false;
-                statements_.push_back(output.name + " = " + text + ";\n");
+                statement(output.name + " = " + text + ";\n");
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
-                statements_.push_back("gl_FragColor = " + text + ";\n");
+                statement("gl_FragColor = " + text + ";\n");
             } else {
                 return refuse("an output of kind " + output.kind + " in a " +
                               (stage_ == Stage::Vertex ? "vertex" : "fragment") + " function");
@@ -977,6 +1281,13 @@ private:
     std::vector<std::string> textureLines_;
     std::vector<std::string> sizes_;
     unsigned counter_ = 0;
+    unsigned depth_ = 0;
+    bool returned_ = false;
+    std::set<const BasicBlock *> visited_;
+    std::map<const Function *, BlockSets> postDominators_;
+    std::map<const Value *, Binding *> inlineBindings_;
+    std::map<const Value *, std::string> inlineValues_;
+    std::vector<Frame> frames_;
 };
 
 }
