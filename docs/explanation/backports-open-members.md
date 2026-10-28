@@ -152,8 +152,9 @@ Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports on
   `WKNavigationResponsePolicy` are lowered to iOS 6 (`toolchain/modules/apple/lowered.lua`).
   `WKNavigationResponse +revenant_policyAllowing:` maps allow and cancel.
 - `WKDownload` and `WKDownloadDelegate`: a download runs over `NSURLConnection` and writes to the path the delegate picks in
-  `download:decideDestinationUsingResponse:suggestedFilename:completionHandler:`. A nil destination fails it with
-  `NSURLErrorCancelled`. It reports `downloadDidFinish:` or `download:didFailWithError:resumeData:`, and its progress
+  `download:decideDestinationUsingResponse:suggestedFilename:completionHandler:`. A nil destination ends it with no callback,
+  as macOS does, and a destination that cannot be written fails it with `NSURLErrorCannotCreateFile`. It reports
+  `downloadDidFinish:` or `download:didFailWithError:resumeData:`, and its progress
   counts the bytes written. It is made in three ways: a navigation response the delegate answers with download (sent to
   `webView:navigationResponse:didBecomeDownload:`), `startDownloadUsingRequest:completionHandler:`, and
   `resumeDownloadFromResumeData:completionHandler:`. `cancel:` gives resume data only when the server sent
