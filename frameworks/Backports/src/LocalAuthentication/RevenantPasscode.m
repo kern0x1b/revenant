@@ -100,6 +100,10 @@ static RevenantPasscodePrompt *revenant_passcode_active = nil;
 
 @implementation RevenantPasscodePrompt
 
+@synthesize style = _style;
+@synthesize completion = _completion;
+@synthesize alert = _alert;
+
 - (void)alertView:(UIAlertView *)alert clickedButtonAtIndex:(NSInteger)index
 {
     BOOL cancelled = index == alert.cancelButtonIndex;
