@@ -38,6 +38,27 @@ function check(package, opt)
                         raise("the probe binds %s from the system, which this release does not have", symbol)
                     end
                 end
+                if opt.bound then
+                    local bindings = table.imap(os.iorunv("xcrun", {"dyld_info", "-imports", executable}):split("\n"),
+                                                function (_, line) return line:trim() end)
+                    for symbol, library in pairs(opt.bound) do
+                        if not table.contains(bindings, symbol .. "  (from " .. library .. ")") then
+                            local seen = {}
+                            for _, line in ipairs(bindings) do
+                                if line:find(symbol, 1, true) then
+                                    table.insert(seen, line)
+                                end
+                            end
+                            raise("the probe does not bind %s from %s; dyld_info says: %s", symbol, library, table.concat(seen, " | "))
+                        end
+                    end
+                end
+                if opt.linked then
+                    local libraries = os.iorunv("xcrun", {"otool", "-L", executable})
+                    if not libraries:find(opt.linked, 1, true) then
+                        raise("the probe does not link %s, the runtime it binds from", opt.linked)
+                    end
+                end
             end
             ok = true
         end,
