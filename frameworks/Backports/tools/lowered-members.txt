@@ -4683,6 +4683,7 @@ function RevenantMetal4SparseBufferUpdateRefusal
 function RevenantMetal4SparseTextureCopyRefusal
 function RevenantMetal4SparseTextureUpdateRefusal
 function RevenantMetalDecodeVertex
+function RevenantMetalDeviceHasExtension
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
@@ -26735,6 +26736,7 @@ member RevenantMetalCommandBuffer -commit
 member RevenantMetalCommandBuffer -computeCommandEncoder
 member RevenantMetalCommandBuffer -computeCommandEncoderWithDescriptor:
 member RevenantMetalCommandBuffer -computeCommandEncoderWithDispatchType:
+member RevenantMetalCommandBuffer -dealloc
 member RevenantMetalCommandBuffer -device
 member RevenantMetalCommandBuffer -enqueue
 member RevenantMetalCommandBuffer -error
