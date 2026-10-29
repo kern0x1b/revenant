@@ -163,6 +163,7 @@ static NSArray *revenant_no_collections(void)
     return _group;
 }
 
+// Favorites and Screenshots have no AssetsLibrary group or property, so they stay absent rather than faked.
 + (NSArray *)revenant_smartSubtypes
 {
     return @[@(PHAssetCollectionSubtypeSmartAlbumVideos)];
