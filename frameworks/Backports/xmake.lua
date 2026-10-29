@@ -360,6 +360,14 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("GLSyncProbe")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/sync_probe/main.m")
+        add_frameworks("Foundation", "OpenGLES")
+        add_syslinks("objc")
+    target_end()
+
     target("MetalDeviceProbe")
         set_default(false)
         add_rules("@addon/revenant/daemon")

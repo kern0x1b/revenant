@@ -4,6 +4,25 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
+static GLsync RevenantMetalCreateFence(void)
+{
+    if (!RevenantMetalDeviceHasExtension("GL_APPLE_sync"))
+        return NULL;
+    return glFenceSyncAPPLE(GL_SYNC_GPU_COMMANDS_COMPLETE_APPLE, 0);
+}
+
+static void RevenantMetalWaitFence(GLsync fence)
+{
+    GLenum result = GL_TIMEOUT_EXPIRED_APPLE;
+    while (result == GL_TIMEOUT_EXPIRED_APPLE)
+        result = glClientWaitSyncAPPLE(fence, GL_SYNC_FLUSH_COMMANDS_BIT_APPLE, 1000000000);
+    glDeleteSyncAPPLE(fence);
+    if (result == GL_WAIT_FAILED_APPLE) {
+        NSLog(@"Metal: waiting on the GL fence failed; the port waits for all GL work instead");
+        glFinish();
+    }
+}
+
 @implementation RevenantMetalQueue
 
 @synthesize label;
@@ -42,9 +61,20 @@
     NSError *_error;
     CFTimeInterval _startTime;
     CFTimeInterval _endTime;
+    GLsync _fence;
 }
 
 @synthesize label;
+
+- (void)dealloc
+{
+    if (_fence) {
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
+        [device acquire];
+        glDeleteSyncAPPLE(_fence);
+        [device relinquish];
+    }
+}
 
 - (instancetype)init
 {
@@ -130,6 +160,7 @@
         [self revenantBeginWork];
         if (_drawable)
             [_drawable present];
+        _fence = RevenantMetalCreateFence();
         glFlush();
         [device relinquish];
         _endTime = CACurrentMediaTime();
@@ -193,7 +224,12 @@
     }
     RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
-    glFinish();
+    if (_fence) {
+        RevenantMetalWaitFence(_fence);
+        _fence = NULL;
+    } else {
+        glFinish();
+    }
     [device relinquish];
 }
 

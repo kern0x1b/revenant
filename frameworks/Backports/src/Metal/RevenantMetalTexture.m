@@ -39,7 +39,7 @@ static BOOL formatFor(MTLPixelFormat pixelFormat, RevenantFormat *out)
     }
 }
 
-static BOOL RevenantMetalDeviceHasExtension(const char *required)
+BOOL RevenantMetalDeviceHasExtension(const char *required)
 {
     static char *extensions;
     static dispatch_once_t once;
