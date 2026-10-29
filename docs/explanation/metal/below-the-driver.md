@@ -17,10 +17,12 @@ Dossier items 37 and 38 are decided (section 2); the rest of this note is not a 
   end is inside `IMGSGX543GLDriver`. No image on the GL path imports Mach IPC.
 - **No binary path is offered to apps.** No ES program-binary entry point and no binary format name exist in any of the
   4S images. The dossier's negative (4.9) holds on the 4S, which the old cache could not show.
-- **The driver keeps compiled programs.** It has a program cache keyed by SHA-256, stored through `fscache`, and a
-  writer and loader for compiled compute programs. Whether a GL program lands on disk is inferred, not observed.
-- **Reuse of Apple's compiler offline is plausible, not shown.** The compile path has no IPC and the kernel is not on
-  it, but the call graph that would prove it is the next pass's work (section 9).
+- **The driver caches the linearized PP stream, not USSE code.** `_PrepareVendpipeprog` looks the stream up by a SHA-256
+  key in `fscache` and stores it there on a miss. A writer and loader for compiled compute programs exist too. Whether
+  a GL program lands on disk is inferred, not observed.
+- **Reuse of Apple's compiler offline is not shown.** The driver's compile entries do no compiling in this build. The
+  compile chain is in `libGLProgrammability`, and the USSE back end runs at draw time, inside the driver, with device
+  state behind it (section 5.3).
 - **The kernel checks the command stream.** The kext's assert strings name validation routines for vendor payloads and
   render commands (`copyAndValidateVendorPayload`, `validateRenderCommand`, `validateBind`), and the kext looks up the
   AMFI service. The routines were not read; the names are [static, strings only]. A command stream written from user
@@ -90,11 +92,10 @@ Dossier items 37 and 38 are decided (section 2); the rest of this note is not a 
   microkernel lockup, the hang poll and the power-off register access.
 - **Policy.** The driver logs "failed to look up AMFI service" and "failed to cast AMFI service". So it reads a service
   of the code-signing and entitlement subsystem. What it checks is not read.
-- **Not recovered: the selector table and the payload layouts.** The kext's external-method table answers question 2,
-  and it is not yet read. Radare2's auto-analysis of the kext found no code references to its class-name string, and
-  `ipsw kernel cpp` finds no classes in the prelinked kernel. The next step is to find the `IMGSGXSharedUserClient`
-  vtable: scan the kext's data for vtables (runs of kernel pointers, such as a 44-entry candidate at file offset
-  `0x27328`), match them against the kernel's `IOUserClient` slot layout, and read `getExternalMethodForIndex` from it.
+- **The selector tables (pass 3, section 4).** Radare2's auto-analysis found no code references to the class-name
+  strings, and `ipsw kernel cpp` finds no classes in the prelinked kernel. So the user-client vtables were found by
+  scanning the kext's data for vtable runs, matching them against the kernel's `IOUserClient` slot layout, and then
+  following the name-string references. The IMG table is recovered in full. The IOAccelerator tables are partly read.
 
 ## 3. Question 1: the stack, from an app's `glDrawElements` to the GPU
 
@@ -139,17 +140,18 @@ Side paths that sit under the same layers:
 - **Front end, in-process:** libGLProgrammability. It parses and links GLSL ES 1.00 and builds the PP stream. The
   `Sh*` names follow the public ANGLE and TI translator API [inference from names only].
 - **Back end, in-process:** IMGSGX543GLDriver. It generates the main, subroutine and SA-update USSE code and the PDS
-  constants, and it takes the front end's shader through `glpPPShaderLinearize` [static].
+  constants, and it takes the front end's shader through `glpPPShaderLinearize` [static]. In this build the generation
+  runs on the draw path, not in the driver's compile entries (section 5.3).
 - **No daemon on the GL path.** No GL image imports Mach IPC. libCoreVMClient, the image that talks to
   `com.apple.cvmsServ` through `bootstrap_look_up2` and `mach_msg`, is linked only by OpenCL [static]. The daemon `CVMServer`
   (IOKit-linked) and the armv7 agent `CVMCompiler` (which links `libLLVMContainer`) are real binaries in OpenGLES.framework
   [rootfs]. They serve the CL side [inference from who links the client].
-- **Where the output goes.** The driver keeps compiled programs through Mercury (`gpumGetCachedProgram`,
-  `gpumDeleteCachedProgram`) on `fscache`. It imports the `CC_SHA256_*` calls, which fits hashed keys, and
+- **Where the output goes.** The driver caches the linearized PP stream in `fscache`, keyed by SHA-256 (section 5.3).
+  It also imports Mercury's `gpumGetCachedProgram` and `gpumDeleteCachedProgram`, and
   carries the limit constant `SGX_MAX_SHADER_CACHE_SIZE` [static, use inferred]. It finds a directory with `NSSearchPathForDirectoriesInDomains` [static]. That
   the directory is the app's Caches folder, and that a GL program's compiled code lands in it, is [inference].
 
-## 4. Question 2: the user-client boundary (partly answered)
+## 4. Question 2: the user-client boundary (selectors recovered, payloads partly)
 
 - **As the tables show it.** IOAccelerator is the one user-client library. Its call sites are `IOServiceOpen`,
   `IOConnectAddClient`, `IOConnectMapMemory`, `IOConnectCallMethod`, the scalar and struct variants, and
@@ -161,10 +163,35 @@ Side paths that sit under the same layers:
 - **Can an unsandboxed process open it directly?** On a jailbroken device the probe opened types 0 to 2 as root, unsigned.
   Whether the kernel checks entitlements for those types is not known. The kext logs AMFI lookups (section 2.2), so a
   code-signing or entitlement check is likely, but the check was not read. Open.
-- **What is the minimum to submit work without GLEngine?** The path the tables show is IOAccelerator's context, then
-  resource create, then submit data buffers, which ends in `IOConnectCallStructMethod`. The payload layouts and the
-  selector table live in the kext. The kext is in hand (section 2.1), but the table is not yet recovered (section 2.2),
-  so the minimum is not known yet (section 9).
+- **The IMG user client's selector table (static, pass 3).** `IMGSGXSharedUserClient` has a candidate vtable at VM
+  `0x809dbcb8`, and its name string is referenced from three code addresses in the kext. Its init (`0x809bc464`)
+  stores a six-record table (VM `0x809dc090`) in the object when a global-object check passes. The table is a legacy
+  `IOExternalMethod` array of 24-byte records: function at +0x04, flags at +0x0c, counts at +0x10 and +0x14. Its
+  external-method override serves selectors 5 to 10 from it, and forwards 0 to 4 to the global object. The records:
+
+  | Selector | Function | Type (flags) | Input | Output |
+  | --- | --- | --- | --- | --- |
+  | 5 | `0x809bc49c` | 3, struct in and struct out | struct 124 bytes | struct 4 bytes |
+  | 6 | `0x809bc5a8` | 0, scalar in and scalar out | 1 scalar | 0 |
+  | 7 | `0x809bc694` | 3, struct in and struct out | struct 0 bytes | struct 4 bytes |
+  | 8 | `0x809bc70c` | 3, struct in and struct out | struct 48 bytes | struct 28 bytes |
+  | 9 | `0x809bc774` | 0, scalar in and scalar out | 1 scalar | 0 |
+  | 10 | `0x809bc7e0` | 0, scalar in and scalar out | 0 | 1 scalar |
+
+  For struct types the counts are byte sizes, so those rows are settled. The probe's type 2 uses selector 7, which
+  matches the row with struct out 4. [static, from the kext's data; the probe cross-check is consistent, not conclusive]
+
+- **The IOAccelerator user clients (partly read).** `IOAccelSharedUserClient` is the probable owner of a table at VM
+  `0x809ac450` with three live records: selector 0 (scalar in 0, scalar out 5), selector 1 (flags 2, count1 64) and
+  selector 2 (flags 2, count1 352). An init at `0x809a4bf4` stores this table in the object, and an override serves
+  indices up to 4 from it. The class identity is inferred from a candidate vtable at `0x809ac078`, not confirmed. What
+  the flags-2 counts mean is not settled, since their meaning for that type was not checked against the kernel's
+  handler. A second table at `0x809ac980` has two records and no owner. The probe's type 0 uses selectors 2 and 0, and
+  type 1 uses 0 and 2, which fits this table. [static; partly settled]
+
+- **What is the minimum to submit work without GLEngine?** Still open. The struct sizes above fix the IMG payload
+  sizes for selectors 5 to 10. The payload fields, the IOAccelerator tables past their sizes, and the kernel's checks
+  (section 2.2) are not read, so the minimum set is not known (section 9).
 
 ## 5. Question 3: are Apple's compiled shader binaries reachable?
 
@@ -184,9 +211,9 @@ Side paths that sit under the same layers:
 - **Compute binaries.** The driver exports a writer and loader for compiled compute programs,
   `gldWriteComputeProgramBinary` and `glrCompLoadBinary` [static]. The GL side's string table names them. Whether a
   GL program ever reaches the writer is not established, and the call graph would show it (section 9).
-- **The program cache.** The imports (`gpumGetCachedProgram`, `gpumDeleteCachedProgram`, the `fscache` set, `CC_SHA256_*`)
-  and the config names (`SGX_MAX_SHADER_CACHE_SIZE`, `SGX_MAX_STREAM_CACHE_SIZE`) fit compiled programs being kept
-  in a persistent, hashed store [static, inference on what it holds].
+- **The program cache.** `_sgxCachePPStream` and `_sgxLoadPPStream` store and read the linearized PP stream in `fscache`,
+  keyed by SHA-256 (section 5.3). The Mercury calls `gpumGetCachedProgram` and `gpumDeleteCachedProgram` are imported
+  too. The config names (`SGX_MAX_SHADER_CACHE_SIZE`, `SGX_MAX_STREAM_CACHE_SIZE`) fit a persistent, hashed store [static].
 - **OpenCL's binary builder.** `gclBuildProgramBinaryAPPLE` is the CL path. It is not usable on the SGX543: the compute
   user-client type is refused [probe].
 
@@ -196,12 +223,39 @@ Side paths that sit under the same layers:
   folder should gain a file in the `fscache` format. The test uses only files our own app causes. It needs no hook into
   Apple's code and no disassembly, so it does not touch gate 37. It runs only on the phone, when the owner sequences
   it.
-- **Offline reuse of Apple's compiler (inference).** The front end and the USSE back end are in-process libraries, with
-  no IPC on the GL compile path. So a process that loads the two from the dyld cache could compile without the kernel
-  or Mercury's submission. What the compile path still needs is unknown and must be read: (i) its call graph from the
-  compile entry points (`gldCreatePipelineProgram`, `gldCompileComputeModule`); (ii) the device description. The driver
-  reads it through `IORegistryEntryCreateCFProperty`, `IOServiceGetMatchingService` and `sysctl` [static]; (iii) the PP
-  stream's layout, which is private.
+- **Offline reuse of Apple's compiler (pass 3, static): not shown.**
+  - *The driver's compile entries do no compiling in this build.* `gldCompileComputeModule` and `gldLinkComputeModules`
+    return 0. `glrCompGetImageFormats`, `glrCompCreateProgram`, `glrCompBuildProgram`, `glrCompLoadBinary` and
+    `glrCompDeleteKernel` return -1. `gldCreatePipelineProgram` calls only `malloc_zone_calloc` and a pthread mutex.
+  - *The compiler is in libGLProgrammability, and the PP stream is its output.* `ShCompile` builds the AST
+    (`glpMakeCompiler`, `glpCompileShader`, `glpSerializeAST`). `ShGetCompilerPPStream` is a separate export. It calls
+    `glpShGetLinkerPPStreamCore`, which calls `glpPPShaderLinearize` and `glpPPShaderLinearizeEx` and builds the stream
+    with `PPStreamCreate` and `PPStreamAttachStream`. The five entries `ShCompile`, `ShConstructCompiler`,
+    `ShConstructLinker`, `PPStreamCreate` and `PPParserParse` reach 1,033 of the library's 3,606 text symbols by direct calls.
+  - *The driver consumes the PP stream on the draw path.* `gldUpdateDispatch` reaches `_PrepareVendpipeprog`, which
+    builds a SHA-256 key for the stream (`_sgxGeneratePPStreamCacheKey`), looks it up in `fscache` (`_sgxLoadPPStream`),
+    and on a miss calls `glpPPShaderLinearize` or `glpPPShaderLinearizeEx` and stores the result (`_sgxCachePPStream`,
+    which calls `msync`). The disk cache therefore holds linearized PP streams, not USSE code.
+  - *The USSE encoder is reached indirectly.* `_AppendInstruction` is called directly only from the callback group
+    `_CompileInstrsCB`, `_AlignToEvenHwCB`, `_NoSchedAlignToEvenCB` and `_SetNoSchedFlagForBasicBlock`. Those are named
+    callbacks, so a function-pointer table probably reaches them, and the direct-call walk does not follow it. Finding
+    that table is the next step for the main pixel shader. The `_Instruction*` and `_Register*` helpers of
+    libGLProgrammability are reached only from `ShGetCompilerPPStream`, not from `ShCompile`.
+  - *Device state.* `_ProcessUfConstLoads`, reached from `gldUpdateDispatch`, calls Mercury's `gpusPPParameterOffset`,
+    so the parameter layout comes from the device layer. The driver also imports the IOAccelerator, IOSurface,
+    IORegistry, `sysctl` and `mach_absolute_time` calls. Whether `ShGetCompilerPPStream`'s reach includes
+    libGLProgrammability's five `IOSurface` imports was not checked.
+  - *Verdict.* The front end is plausibly offline: `ShGetCompilerPPStream` yields the PP stream, and no device call is
+    known on that chain (not fully checked). The USSE step is not shown to be standalone. It runs at draw time through
+    driver callbacks, and it takes Mercury's parameter offsets, so offline emission of USSE binaries is not shown. The
+    reach counts follow direct `BL`, `BLX` and `B.W` edges only. Calls through function pointers are not followed, so
+    "not reached" means "not reached by direct calls".
+- **The command stream, as far as the writer goes (pass 3).** `_WritePixelEventPrograms`, called from
+  `gldBlitFramebufferData`, calls `_InternalGetDataBuffer`, which binds an IOAccelerator resource
+  (`IOAccelResourceGetClientSharedPrivate`, `gpusGetDataBuffer`). Then `_PDSGeneratePixelEventProgram` copies a PDS
+  program into the buffer with `memcpy`, and `_SetUSEExecutionAddress` sets the USSE execution address. So the PDS
+  words and the USSE address go into IOAccelerator shared buffers. The draw-state writer `_sgxEmitDrawState` calls
+  `_PDSGeneratePixelShaderProgram` [static]. The command words that the kernel parses are not yet read.
 - **Hybrid.** Skipping submission means writing our own command stream. That is the dossier's gate 1, and reusing the
   compiler does not remove it. So the shader half may be reusable, and the command half is not yet.
 
@@ -273,15 +327,16 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
 1. **The kernel extension.** Done in pass 2 (section 2.1). Items 37 and 38 are recorded as decided by the coordinator's
    relayed owner instruction of 2026-10-29. The iOS licence question (dossier item 36) is not analysed and stays open for
    the owner.
-2. **The compile-path call graph.** Settling section 5.3 needs disassembly of the driver and the front end. Item 38 now
-   allows it, and it is the next pass's work (question 3).
+2. **The compile-path call graph.** Done in pass 3 for the driver's compile entries and for the front end (section 5.3).
+   Open: the function-pointer table that reaches the USSE encoder callbacks (`_CompileInstrsCB`, which calls
+   `_AppendInstruction`), since the direct-call walk does not follow it, and whether an offline run is possible at all.
 3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it.
 4. **Where the document lives.** The brief gives `docs/explanation/metal/`. The sibling dossiers sit under
    `docs/explanation/backports/`. Metal is a part of the Backports component, so the coordinator may prefer the
    backports folder. This pass keeps the brief's path.
-5. **The GPUSupport folder in the firmware copy.** It holds a source-tree folder. The coordinator should decide how
-   that is to be handled, since the owner's rule is that leaked material is never opened (dossier 5.1).
+5. **The GPUSupport folder in the firmware copy.** Decided by the coordinator on 2026-10-29: it is not opened, read,
+   searched, hashed, copied or deleted (dossier item 39). Nothing in this study uses it.
 6. **An unresolved role.** `libGPUSupport.dylib` exports the same `gpum*` and `gld*` names as Mercury, but no GL image
    links it. Its role is not established.
-7. **The selector table.** The next step is in section 2.2 and needs no device. If the vtable search fails, the fallback
-   is to read the kext's `__DATA` vtable runs by hand against the `IOUserClient` slot layout from the kernel.
+7. **The selector tables.** The IMG table is recovered (section 4). Open: the owner of the IOAccelerator table at
+   `0x809ac980`, what the flags-2 counts mean, and the payload fields behind the struct sizes.

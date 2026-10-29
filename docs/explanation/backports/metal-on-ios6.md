@@ -450,6 +450,9 @@ Deduplicated across the five notes. Each is unverified unless it says otherwise.
     **Decided 2026-10-29:** by the same instruction, which covers disassembly of Apple's shipped binaries and the 4S
     kernelcache (`below-the-driver.md`, section 2.1). The licence question itself is not analysed.
 39. Whether leaked material is governed by AGENTS.md ("read for behaviour") or by the owner's rule ("never opened").
+    **Recorded 2026-10-29:** not opened; the coordinator will not use leaked or accidentally shipped vendor source.
+    The coordinator states this boundary as its own and final. The GPUSupport folder is not opened, read, searched,
+    hashed, copied or deleted.
 40. Whether the air2es harness may run in CI (its oracle is external).
 41. The "telegram-build wiring" steps, which no note records.
 
