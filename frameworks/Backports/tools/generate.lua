@@ -216,8 +216,8 @@ function everything()
     return everything_state
 end
 
-function skeleton_for(name)
-    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending_of(everything(), {name}), implemented_names())
+function skeleton_for(name, deferred)
+    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending_of(everything(), {name}), implemented_names(), deferred)
 end
 
 function declared_intros(state)

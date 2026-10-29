@@ -294,7 +294,13 @@ if is_plat("iphoneos") then
                 generator = import("generate", {rootdir = TOOLS, anonymous = true})
             end)
             on_config(function (target)
-                generator.skeleton_for(library.folder)
+                local deferred = {}
+                if library.name == "SecurityBackports" then
+                    local defer = import("defer", {rootdir = TOOLS, anonymous = true})
+                    deferred = defer.names(path.join(TOOLS, "security-deferred.txt"))
+                    defer.configure(target, deferred, path.join(target:autogendir(), "defer"))
+                end
+                generator.skeleton_for(library.folder, deferred)
                 local files = {}
                 for _, file in ipairs({path.join(SKELETON, library.folder .. ".m"), path.join(SKELETON, library.folder .. ".c")}) do
                     if os.isfile(file) then
@@ -733,4 +739,41 @@ if not is_plat("iphoneos") then
     host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}})
     host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}}, nil, {"Foundation"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
+end
+
+if not is_plat("iphoneos") then
+    local function security_defer(name, expected, probe)
+        target("security_defer_" .. name)
+            set_kind("binary")
+            set_plat("macosx")
+            set_arch("arm64")
+            set_default(false)
+            add_files(path.join(TESTS, "security_defer", "main.c"), path.join(TESTS, "security_defer", "impl.c"))
+            add_frameworks("CoreFoundation")
+            add_defines("REVENANT_DEFER_EXPECT_SYSTEM=" .. expected)
+            on_config(function (target)
+                local defer = import("defer", {rootdir = TOOLS, anonymous = true})
+                local _, source = defer.generate({"CFStringGetLength", "RevenantDeferFixtureAbsent"}, path.join(target:autogendir(), "defer"),
+                                                 "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation", probe)
+                target:add("files", source)
+            end)
+        target_end()
+    end
+    security_defer("forwarded", "1", "CFStringGetLength")
+    security_defer("absent", "0", "RevenantDeferProbeAbsent")
+    target("security_defer")
+        set_kind("phony")
+        set_default(false)
+        add_deps("security_defer_forwarded", "security_defer_absent")
+        add_tests("forwarded", "absent")
+        on_test(function (target, opt)
+            import("core.project.project")
+            local name = path.filename(opt.name)
+            local ok = os.execv(project.target("security_defer_" .. name):targetfile(), {}, {try = true})
+            if ok ~= 0 then
+                opt.errors = name .. " failed"
+            end
+            return ok == 0
+        end)
+    target_end()
 end

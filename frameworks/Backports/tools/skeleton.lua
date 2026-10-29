@@ -186,7 +186,7 @@ end
 local function c_source(functions, swift, data)
     local lines = {'#include "revenant_backports.h"', ""}
     for index, entry in ipairs(functions) do
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.impl)))
         table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
     end
     for index, entry in ipairs(swift) do
@@ -205,18 +205,23 @@ local function emit(file, text)
     end
 end
 
-function write(skeleton, frameworks, implemented)
+function write(skeleton, frameworks, implemented, deferred)
     os.mkdir(skeleton)
     emit(path.join(skeleton, "revenant_backports.h"), HEADER)
     emit(path.join(skeleton, "registrar.m"), REGISTRAR)
     local alias = path.join(sdkfiles.src_root(), "revenant_alias.h")
+    local renamed = {}
+    for _, name in ipairs(deferred or {}) do
+        renamed[name] = true
+    end
     local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, c = 0, swift = 0}
     for _, framework in ipairs(frameworks) do
         local functions, swift, data, protocols, globals = {}, {}, {}, {}, {}
         local classes, methods = objc_model(framework.rows, implemented, framework.unavailable)
         for _, row in ipairs(framework.rows) do
             if row.kind == "C function" then
-                table.insert(functions, {symbol = row.symbol, label = framework.name .. "." .. row.name})
+                local impl = renamed[row.symbol] and ("RevenantImpl_" .. row.symbol) or row.symbol
+                table.insert(functions, {symbol = row.symbol, impl = impl, label = framework.name .. "." .. row.name})
             elseif row.kind == "global variable" then
                 if not implemented[row.name] then
                     table.insert(globals, row.name)
