@@ -204,6 +204,17 @@ function main()
            and documented_lowering:find("API_AVAILABLE(macos(10.11), ios(8.0))\n@protocol MTLSkipped", 1, true)
            and documented_lowering:find("#endif\n@interface MTLConditional : NSObject", 1, true),
            "a protocol named in a doc comment before its declaration kept its availability:\n" .. documented_lowering)
+    local opened = table.concat({
+        "// a line comment that opens /* and never closes it",
+        "API_AVAILABLE(macos(10.11), ios(8.0))",
+        "@protocol MTLAfterOpen <NSObject>",
+        "@end",
+        "/* closes the comment that the line comment above opened */",
+        "",
+    }, "\n")
+    local opened_lowering = lowered.lower_header(opened, {classes = {}, functions = {}, globals = {}, protocols = {MTLAfterOpen = true}})
+    assert(count(opened_lowering, "AVAILABLE") == 0 and opened_lowering:find("@protocol MTLAfterOpen <NSObject>", 1, true),
+           "a declaration after a line comment that opens a block comment was taken for commented text:\n" .. opened_lowering)
     local typedefs = table.concat({
         "typedef NS_OPTIONS(NSUInteger, SampleOptions) {",
         "    SampleOne = 1UL << 0",

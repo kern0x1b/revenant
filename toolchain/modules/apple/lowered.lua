@@ -968,14 +968,22 @@ local function adopts_lowered_protocol(text, stop, implemented)
 end
 
 local function comment_spans(text)
-    local spans = {}
-    for start, after in text:gmatch("()/%*.-%*/()") do
-        table.insert(spans, {start, after - 1})
+    local spans, at = {}, 1
+    while true do
+        local start = text:find("/[/*]", at)
+        if not start then
+            return spans
+        end
+        local stop
+        if text:sub(start + 1, start + 1) == "/" then
+            stop = (text:find("\n", start, true) or #text + 1) - 1
+        else
+            local _, close = text:find("*/", start + 2, true)
+            stop = close or #text
+        end
+        table.insert(spans, {start, stop})
+        at = stop + 1
     end
-    for start, after in text:gmatch("()//[^\n]*()") do
-        table.insert(spans, {start, after - 1})
-    end
-    return spans
 end
 
 local function in_comment(spans, at)
