@@ -21,3 +21,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0013](0013-upstream-builds-keep-their-python.md) | An upstream's own build keeps its own tooling; ours is Lua | `repository/layout` (no tracked `.py` or shell files) |
 | [0014](0014-performance-is-a-requirement.md) | Speed and memory on the A5 are part of correctness; claims are measurements | not enforced (a benchmark group is the check it needs) |
 | [0015](0015-urlcomponents-follows-the-sdk-it-is-linked-against.md) | NSURLComponents parses as macOS does: the lenient grammar the 26.2-linked apps get | `frameworks/Backports/tests/url_components_oracle_test.lua` (run by hand; not in a group yet) |
+| [0016](0016-swift-overlays-self-contained.md) | A Swift overlay is self-contained over the backport's own layers on every release; no Swift symbol is forwarded to the system or to a renamed copy | not enforced |
