@@ -2103,7 +2103,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true, ["_time.h"] = true, ["os.apinotes"] = true, ["simd/math.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
@@ -2171,9 +2171,8 @@ end
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
-    local simd = path.join(include_directory(out), "simd", "math.h")
-    os.mkdir(path.directory(simd))
-    write_if_changed(simd, table.concat({
+    local simd = path.join(sdk, "usr", "include", "simd", "math.h")
+    changed[simd] = table.concat({
         "#if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 70000",
         "#ifdef __cplusplus",
         "extern \"C\" {",
@@ -2184,9 +2183,8 @@ function build_overlay(sdk, out, set, subtrees, modules)
         "}",
         "#endif",
         "#endif",
-        "#include_next <simd/math.h>",
         "",
-    }, "\n"))
+    }, "\n") .. io.readfile(simd)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local lowered = lowering_of(text, set)
