@@ -59,6 +59,31 @@ local function function_failures(arguments, output, stubs, found)
     end
 end
 
+local function shim_failures(arguments, output, stubs, overlay, include, found)
+    local shim = path.join(os.scriptdir(), "..", "..", "src", "swift-runtime", "overlay", "UIKit")
+    local source = path.join(output, "shim.m")
+    io.writefile(source, "#include \"RevenantUIKitOverlayShims.h\"\nint main(void) { return revenant_pointer_shape_class() == Nil ? 0 : 1; }\n")
+    local object = path.join(output, "shim.o")
+    local log = path.join(output, "shim.log")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fobjc-arc", "-Werror=unguarded-availability-new", "-Werror=unguarded-availability",
+                                                                  "-ivfsoverlay", overlay, "-I" .. include, "-I" .. shim, "-c", source, "-o", object}),
+                {try = true, stdout = log, stderr = log}) ~= 0 then
+        table.insert(found, "the armv7 iOS 6 overlay shim does not compile: " .. (io.readfile(log) or ""))
+        return
+    end
+    local app = path.join(output, "shim-app")
+    local app_log = path.join(output, "shim-app.log")
+    if os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fobjc-link-runtime", object, "-framework", "UIKit", "-o", app}, flat.app_link_flags(arguments.sdk, stubs)),
+                {try = true, stdout = app_log, stderr = app_log}) ~= 0 then
+        table.insert(found, "the app link of the overlay shim with the flat-class stubs failed: " .. (io.readfile(app_log) or ""))
+        return
+    end
+    local bound = binding(app, UIKIT_SYMBOL)
+    if not bound:find("weak external " .. UIKIT_SYMBOL, 1, true) or not bound:find("(dynamically looked up)", 1, true) then
+        table.insert(found, "the overlay shim's UIPointerShape reference is not a weak flat-namespace import, so an image without the Backports would abort at load: " .. bound)
+    end
+end
+
 function failures(arguments)
     local found = {}
     local output = workspace.run("flat-classes")
@@ -162,6 +187,7 @@ function failures(arguments)
     if text:find("NSURLComponents", 1, true) then
         table.insert(found, "a flat-bound class in the table was reported missing: " .. text)
     end
+    shim_failures(arguments, output, stubs, overlay, include, found)
     function_failures(arguments, output, stubs, found)
     return found
 end

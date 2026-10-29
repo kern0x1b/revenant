@@ -60,6 +60,10 @@ function weak_class_names()
     return names
 end
 
+function is_exported(name)
+    return EXPORTED[name] == true
+end
+
 function stubbed_symbols()
     local symbols, seen = {}, {}
     for _, entry in ipairs(STUBBED) do

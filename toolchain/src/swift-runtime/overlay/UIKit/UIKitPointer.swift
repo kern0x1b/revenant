@@ -14,16 +14,21 @@ public enum UIPointerShape {
     public static let defaultCornerRadius: CGFloat = .leastNormalMagnitude
 
     fileprivate var objectiveC: __UIPointerShape {
+        let shape: __UIPointerShape?
         switch self {
         case let .path(path):
-            return __UIPointerShape(path: path)
+            shape = revenantPointerShape(path: path)
         case let .roundedRect(rect, radius):
-            return __UIPointerShape(roundedRect: rect, cornerRadius: radius)
+            shape = revenantPointerShape(roundedRect: rect, cornerRadius: radius)
         case let .verticalBeam(length):
-            return __UIPointerShape.beam(withPreferredLength: length, axis: .vertical)
+            shape = revenantPointerShape(beamWithPreferredLength: length, axis: .vertical)
         case let .horizontalBeam(length):
-            return __UIPointerShape.beam(withPreferredLength: length, axis: .horizontal)
+            shape = revenantPointerShape(beamWithPreferredLength: length, axis: .horizontal)
         }
+        guard let object = shape else {
+            preconditionFailure("UIPointerShape is not on this iOS, and the Backports that provide it are not linked")
+        }
+        return object
     }
 }
 
