@@ -1,5 +1,6 @@
 #import "RevenantMetal.h"
 #import "RevenantMetalDebugGroups.h"
+#import "RevenantMetalLineEdges.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -49,6 +50,9 @@ static float halfToFloat(uint16_t h)
     __strong RevenantMetalHeap *_heaps[8];
     NSUInteger _heapCount;
     NSMutableArray *_groups;
+    MTLTriangleFillMode _fillMode;
+    __strong RevenantMetalBuffer *_arena;
+    NSUInteger _arenaSize, _arenaUsed;
 }
 
 @synthesize label;
@@ -195,8 +199,7 @@ static float halfToFloat(uint16_t h)
 
 - (void)setTriangleFillMode:(MTLTriangleFillMode)fillMode
 {
-    if (fillMode != MTLTriangleFillModeFill)
-        NSLog(@"Metal: a triangle fill mode of lines has no form in OpenGL ES 2.0");
+    _fillMode = fillMode;
 }
 
 - (void)setScissorRect:(MTLScissorRect)rect
@@ -245,9 +248,29 @@ static float halfToFloat(uint16_t h)
     }
 }
 
+- (RevenantMetalBuffer *)revenantArenaCopy:(const void *)bytes length:(NSUInteger)length offset:(NSUInteger *)offset
+{
+    NSUInteger size = (length + 15) & ~(NSUInteger)15;
+    if (!size)
+        size = 16;
+    if (!_arena || _arenaUsed + size > _arenaSize) {
+        _arenaSize = size > 65536 ? size : 65536;
+        _arena = [[RevenantMetalBuffer alloc] initWithLength:_arenaSize bytes:NULL];
+        _arenaUsed = 0;
+    }
+    *offset = _arenaUsed;
+    if (length)
+        memcpy((uint8_t *)_arena.bytes + _arenaUsed, bytes, length);
+    _arenaUsed += size;
+    return _arena;
+}
+
 - (void)setVertexBytes:(const void *)bytes length:(NSUInteger)length atIndex:(NSUInteger)index
 {
-    [self setVertexBuffer:(id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
+    if (index < 31) {
+        _vertexBuffers[index] = [self revenantArenaCopy:bytes length:length offset:&_vertexOffsets[index]];
+        _uniformsDirty = _attributesDirty = YES;
+    }
 }
 
 - (void)setFragmentBuffer:(id<MTLBuffer>)buffer offset:(NSUInteger)offset atIndex:(NSUInteger)index
@@ -262,7 +285,10 @@ static float halfToFloat(uint16_t h)
 
 - (void)setFragmentBytes:(const void *)bytes length:(NSUInteger)length atIndex:(NSUInteger)index
 {
-    [self setFragmentBuffer:(id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
+    if (index < 31) {
+        _fragmentBuffers[index] = [self revenantArenaCopy:bytes length:length offset:&_fragmentOffsets[index]];
+        _uniformsDirty = YES;
+    }
 }
 
 - (void)setFragmentTexture:(id<MTLTexture>)texture atIndex:(NSUInteger)index
@@ -540,6 +566,11 @@ static GLenum primitive(MTLPrimitiveType type)
     }
 }
 
+static BOOL RevenantMetalIsTriangles(MTLPrimitiveType type)
+{
+    return type == MTLPrimitiveTypeTriangle || type == MTLPrimitiveTypeTriangleStrip;
+}
+
 - (void)issue:(GLenum)mode first:(GLint)first count:(GLsizei)count indices:(const void *)indices type:(GLenum)type
 {
     const RevenantPlan *plan = _pipeline.plan;
@@ -581,10 +612,44 @@ static GLenum primitive(MTLPrimitiveType type)
     _applied = NULL;
 }
 
+- (void)issueEdgesOfPrimitive:(MTLPrimitiveType)primitiveType stream:(const uint32_t *)stream count:(NSUInteger)count
+{
+    uint32_t *edges = malloc(sizeof(uint32_t) * 6 * (count ? count : 1));
+    if (!edges)
+        return;
+    NSUInteger written = RevenantMetalTriangleEdges(primitiveType == MTLPrimitiveTypeTriangleStrip, stream, count, edges);
+    uint32_t largest = 0;
+    for (NSUInteger i = 0; i < written; i++)
+        if (edges[i] > largest)
+            largest = edges[i];
+    if (written && largest <= 0xFFFF) {
+        uint16_t *narrow = malloc(sizeof(uint16_t) * written);
+        if (narrow) {
+            for (NSUInteger i = 0; i < written; i++)
+                narrow[i] = (uint16_t)edges[i];
+            [self issue:GL_LINES first:0 count:(GLsizei)written indices:narrow type:GL_UNSIGNED_SHORT];
+            free(narrow);
+        }
+    } else if (written) {
+        [self issue:GL_LINES first:0 count:(GLsizei)written indices:edges type:GL_UNSIGNED_INT];
+    }
+    free(edges);
+}
+
 - (void)drawPrimitives:(MTLPrimitiveType)primitiveType vertexStart:(NSUInteger)vertexStart vertexCount:(NSUInteger)vertexCount
 {
     if (![self prepareForVertexCount:vertexStart + vertexCount])
         return;
+    if (_fillMode == MTLTriangleFillModeLines && RevenantMetalIsTriangles(primitiveType)) {
+        uint32_t *stream = malloc(sizeof(uint32_t) * (vertexCount ? vertexCount : 1));
+        if (!stream)
+            return;
+        for (NSUInteger i = 0; i < vertexCount; i++)
+            stream[i] = (uint32_t)(vertexStart + i);
+        [self issueEdgesOfPrimitive:primitiveType stream:stream count:vertexCount];
+        free(stream);
+        return;
+    }
     [self issue:primitive(primitiveType) first:(GLint)vertexStart count:(GLsizei)vertexCount indices:NULL type:0];
 }
 
@@ -624,6 +689,16 @@ static GLenum primitive(MTLPrimitiveType type)
     }
     if (![self prepareForVertexCount:maximum + 1])
         return;
+    if (_fillMode == MTLTriangleFillModeLines && RevenantMetalIsTriangles(primitiveType)) {
+        uint32_t *stream = malloc(sizeof(uint32_t) * (indexCount ? indexCount : 1));
+        if (!stream)
+            return;
+        for (NSUInteger i = 0; i < indexCount; i++)
+            stream[i] = indexType == MTLIndexTypeUInt16 ? ((const uint16_t *)indices)[i] : ((const uint32_t *)indices)[i];
+        [self issueEdgesOfPrimitive:primitiveType stream:stream count:indexCount];
+        free(stream);
+        return;
+    }
     [self issue:primitive(primitiveType) first:0 count:(GLsizei)indexCount indices:indices type:indexType == MTLIndexTypeUInt16 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT];
 }
 
