@@ -2232,8 +2232,11 @@ local function block_at(lines, index)
     while lines[first - 1] and lines[first - 1]:match("^@available") do
         first = first - 1
     end
-    while lines[last] ~= "}" do
+    while lines[last] and lines[last] ~= "}" do
         last = last + 1
+    end
+    if not lines[last] then
+        raise("the Swift interface has no closing brace for the declaration at line %d", index)
     end
     return table.concat(lines, "\n", first, last)
 end
