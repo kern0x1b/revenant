@@ -576,6 +576,13 @@ option("air2cpu", {default = false, showmenu = true,
 option("air2es", {default = false, showmenu = true,
     description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
+option("shader_harness", {default = false, showmenu = true,
+    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. It needs the angle package, so REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; the configure is not for iphoneos."})
+
+if not is_plat("iphoneos") and has_config("shader_harness") then
+    add_requires("revenant@angle 144.0.15.0", {alias = "angle", configs = {cef = os.getenv("REVENANT_ANGLE_CEF")}})
+end
+
 if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
     add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 end
@@ -612,6 +619,21 @@ if not is_plat("iphoneos") and has_config("air2es") then
         add_files(path.join(SRC, "air2es", "*.cpp"))
         add_packages("llvm")
         add_links("LLVM")
+    target_end()
+end
+
+if not is_plat("iphoneos") and has_config("shader_harness") then
+    target("metal_shader_harness")
+        set_kind("binary")
+        set_default(false)
+        add_files(path.join(os.scriptdir(), "tools", "shader_harness", "main.m"))
+        add_mflags("-fobjc-arc", "-Wno-deprecated-declarations")
+        add_frameworks("Foundation", "Metal")
+        add_packages("angle")
+        on_config(function (target)
+            local lib = path.join(target:pkg("angle"):installdir(), "lib")
+            target:add("defines", 'REVENANT_ANGLE_LIB="' .. lib .. '"')
+        end)
     target_end()
 end
 
