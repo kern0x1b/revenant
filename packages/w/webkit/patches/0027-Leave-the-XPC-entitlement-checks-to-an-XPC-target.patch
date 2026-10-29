@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 13:00:00 +0100
+Subject: [PATCH] Leave the XPC entitlement checks to an XPC target
+
+WTF's hasEntitlement overloads that take an xpc_connection_t call xpc_connection_copy_entitlement_value,
+xpc_get_type and xpc_bool_get_value. Those are not exported by iOS 6, and WTF is linked into every
+framework, so the engine imported them: a load failure on a phone that has no such symbols. Only the
+remote inspector, which the engine does not build, calls them. They are compiled only with HAVE(XPC_API),
+the same condition that selects the XPC header, and the SecTask overloads that the engine uses are unchanged.
+---
+ Source/WTF/wtf/cocoa/Entitlements.h | 2 ++
+ Source/WTF/wtf/cocoa/Entitlements.mm | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/Source/WTF/wtf/cocoa/Entitlements.h b/Source/WTF/wtf/cocoa/Entitlements.h
+index 63f929d..4118d40 100644
+@@ -40,8 +40,10 @@
+ 
+ WTF_EXPORT_PRIVATE bool hasEntitlement(SecTaskRef, ASCIILiteral entitlement);
+ WTF_EXPORT_PRIVATE bool hasEntitlement(audit_token_t, ASCIILiteral entitlement);
++#if HAVE(XPC_API)
+ WTF_EXPORT_PRIVATE bool hasEntitlement(xpc_connection_t, StringView entitlement);
+ WTF_EXPORT_PRIVATE bool hasEntitlement(xpc_connection_t, ASCIILiteral entitlement);
++#endif
+ WTF_EXPORT_PRIVATE bool processHasEntitlement(ASCIILiteral entitlement);
+ WTF_EXPORT_PRIVATE bool hasEntitlementValue(audit_token_t, ASCIILiteral entitlement, ASCIILiteral value);
+ WTF_EXPORT_PRIVATE bool hasEntitlementValueInArray(audit_token_t, ASCIILiteral entitlement, ASCIILiteral value);
+diff --git a/Source/WTF/wtf/cocoa/Entitlements.mm b/Source/WTF/wtf/cocoa/Entitlements.mm
+index 1544890..ab45a15 100644
+@@ -54,6 +54,7 @@
+     return hasEntitlement(adoptCF(SecTaskCreateWithAuditToken(kCFAllocatorDefault, token)).get(), entitlement);
+ }
+ 
++#if HAVE(XPC_API)
+ bool hasEntitlement(xpc_connection_t connection, StringView entitlement)
+ {
+     xpc_object_t value = xpc_connection_copy_entitlement_value(connection, entitlement.utf8().legacyCStringPointer());
+@@ -65,6 +66,7 @@
+     xpc_object_t value = xpc_connection_copy_entitlement_value(connection, entitlement.characters());
+     return value && xpc_get_type(value) == XPC_TYPE_BOOL && xpc_bool_get_value(value);
+ }
++#endif
+ 
+ bool processHasEntitlement(ASCIILiteral entitlement)
+ {
