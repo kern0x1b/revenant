@@ -102,7 +102,7 @@ struct Output {
 };
 
 const char *const kArgumentKinds[] = {"air.buffer", "air.texture", "air.sampler", "air.vertex_id",
-                                      "air.position", "air.fragment_input"};
+                                      "air.position", "air.fragment_input", "air.thread_position_in_grid"};
 
 const char *const kLanes[] = {"x", "y", "z", "w"};
 
@@ -209,6 +209,8 @@ public:
             if (!number)
                 return refuse("an argument without its position");
             TagMap tags = parseTags(node, 1);
+            if (tags.count("air.threadgroup"))
+                return refuse("threadgroup memory, which one fragment pass cannot hold; it needs a multi-pass design");
             Binding binding;
             for (const char *kind : kArgumentKinds)
                 if (tags.count(kind)) {
@@ -217,6 +219,8 @@ public:
                 }
             if (binding.kind.empty())
                 return refuse("an argument of a kind this emitter does not read");
+            if (binding.kind == "air.texture" && tags.count("air.write"))
+                binding.kind = "air.write_texture";
             tagString(tags, "air.arg_name", binding.name);
             tagInteger(tags, "air.location_index", binding.index);
             tagInteger(tags, "air.arg_type_size", binding.stride);
@@ -257,6 +261,12 @@ public:
                     }
         for (size_t slot = 0; slot < bindings_.size(); slot++) {
             const Binding &binding = bindings_[slot];
+            if (stage_ == Stage::Kernel && (binding.kind == "air.vertex_id" || binding.kind == "air.position" ||
+                                            binding.kind == "air.fragment_input"))
+                return refuse(binding.kind + " in a kernel, which has no vertex or fragment input");
+            if ((binding.kind == "air.write_texture" || binding.kind == "air.thread_position_in_grid") &&
+                stage_ != Stage::Kernel)
+                return refuse(binding.kind + " outside a kernel");
             if (binding.kind == "air.vertex_id" && stage_ != Stage::Vertex)
                 return refuse("a vertex id in a fragment function");
             if (binding.kind == "air.position" && stage_ != Stage::Fragment)
@@ -274,17 +284,31 @@ public:
                 statement("position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;\n");
                 break;
             }
+        for (size_t slot = 0; slot < bindings_.size(); slot++)
+            if (bindings_[slot].kind == "air.thread_position_in_grid" && !bindings_[slot].argument->use_empty()) {
+                if (!declareLocal("ivec2 gid;\n", "gid"))
+                    return false;
+                statement("gid = ivec2(floor(gl_FragCoord.xy));\n");
+                break;
+            }
+        if (stage_ == Stage::Kernel && !declareLocal("bool revenant_written = false;\n", "revenant_written"))
+            return false;
         if (!region(&function_.getEntryBlock(), nullptr))
             return false;
         if (!returned_)
             return refuse("a function that never returns");
+        if (stage_ == Stage::Kernel) {
+            if (output_.empty())
+                return refuse("a kernel that writes no texture");
+            statement("if (!revenant_written) discard;\n");
+        }
         std::string body;
         for (const std::string &line : locals_)
             body += "    " + line;
         for (const std::string &line : statements_)
             body += line;
         source = "#version 100\n";
-        if (stage_ == Stage::Fragment)
+        if (stage_ != Stage::Vertex)
             source += "precision mediump float;\n";
         source += join(declarations_, "") + "void main() {\n" + body + "}\n";
         reflection = this->reflection();
@@ -550,6 +574,10 @@ private:
             }
             if (binding->kind == "air.position") {
                 out = "position";
+                return true;
+            }
+            if (binding->kind == "air.thread_position_in_grid") {
+                out = "gid";
                 return true;
             }
             if (binding->kind == "air.fragment_input") {
@@ -818,6 +846,8 @@ private:
             return true;
         }
         returned_ = true;
+        if (stage_ == Stage::Kernel && !ret.getReturnValue())
+            return true;
         return emitReturn(ret);
     }
 
@@ -1077,6 +1107,30 @@ private:
         return refuse(std::string("an instruction this emitter does not translate: ") + instruction.getOpcodeName());
     }
 
+    bool writeTexture(CallInst &call)
+    {
+        if (call.arg_size() != 5)
+            return refuse("a write with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.write_texture")
+            return refuse("a write to something other than the output texture argument");
+        if (!output_.empty() && output_ != texture->name)
+            return refuse("a kernel that writes more than one texture");
+        Binding *coordinate = bindingOf(call.getArgOperand(1));
+        if (!coordinate || coordinate->kind != "air.thread_position_in_grid")
+            return refuse("a write at a coordinate other than the thread position");
+        auto *level = dyn_cast<ConstantInt>(call.getArgOperand(3));
+        if (!level || !level->isZero())
+            return refuse("a write at a level other than 0");
+        std::string value;
+        if (!expression(call.getArgOperand(2), value))
+            return false;
+        output_ = texture->name;
+        statement("gl_FragColor = " + value + ";\n");
+        statement("revenant_written = true;\n");
+        return true;
+    }
+
     bool emitCall(CallInst &call)
     {
         Function *callee = call.getCalledFunction();
@@ -1085,6 +1139,12 @@ private:
             return true;
         if (callee && !callee->isDeclaration())
             return inlineCall(call, *callee);
+        if (called.rfind("air.wg.barrier", 0) == 0)
+            return refuse("a threadgroup barrier, which one fragment pass cannot run; it needs a pass boundary");
+        if (called.rfind("air.atomic", 0) == 0)
+            return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
+        if (called == "air.write_texture_2d.v4f32")
+            return writeTexture(call);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
@@ -1276,6 +1336,7 @@ private:
     unsigned counter_ = 0;
     unsigned depth_ = 0;
     bool returned_ = false;
+    std::string output_;
     std::set<const BasicBlock *> visited_;
     std::map<const Function *, BlockSets> postDominators_;
     std::map<const Value *, Binding *> inlineBindings_;
@@ -1308,10 +1369,6 @@ bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
     out.name = entry.name;
     out.stage = entry.stage;
     refusal.name = entry.name;
-    if (entry.stage == Stage::Kernel) {
-        refusal.reason = "a kernel, which belongs to air2cpu";
-        return false;
-    }
     LLVMContext context;
     auto buffer = MemoryBuffer::getMemBuffer(StringRef((const char *)entry.bitcode.data(), entry.bitcode.size()), entry.name, false);
     Expected<std::unique_ptr<Module>> parsed = parseBitcodeFile(buffer->getMemBufferRef(), context);
@@ -1320,7 +1377,7 @@ bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
         return false;
     }
     std::unique_ptr<Module> module = std::move(*parsed);
-    const char *marker = entry.stage == Stage::Vertex ? "air.vertex" : "air.fragment";
+    const char *marker = entry.stage == Stage::Vertex ? "air.vertex" : entry.stage == Stage::Kernel ? "air.kernel" : "air.fragment";
     NamedMDNode *named = module->getNamedMetadata(marker);
     if (!named || named->getNumOperands() != 1) {
         refusal.reason = std::string("its module does not name it a ") + marker + " function";

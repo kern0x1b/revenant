@@ -16,6 +16,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
 | [AIR from Apple's Metal compiler: the metal-toolchain package](explanation/backports/metal-air-prebuilt.md) | the local package that would give AIR for Telegram's shaders, the official download it needs, and what it is blocked on (Xcode) |
+| [air2es kernels: the kernel lowering](explanation/backports/air2es-kernels.md) | how a Metal kernel becomes an ES 1.00 fragment pass, its named refusals, the measured Telegram kernel, and what is still open |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
