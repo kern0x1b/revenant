@@ -14,7 +14,7 @@ local AREAS = {
     },
     {
         name = "machine-readable code objects delivered by the metadata output",
-        sources = {"AVMetadataMachineReadableCodeObject7.m"},
+        sources = {"AVMetadataMachineReadableCodeObject7.m", "AVCaptureMetadataOutput+MachineReadableCode7.m"},
         members = {
             "-[AVMetadataMachineReadableCodeObject type]", "-[AVMetadataMachineReadableCodeObject stringValue]",
             "-[AVMetadataMachineReadableCodeObject corners]", "-[AVMetadataMachineReadableCodeObject bounds]",
