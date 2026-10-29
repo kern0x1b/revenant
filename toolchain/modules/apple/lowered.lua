@@ -65,6 +65,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "kCGColorSpaceSRGB",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGColorSpace.h",
+            find = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(9.0));",
+            replace = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(6.0)) __attribute__((weak_import));",
+        },
+    },
+    {
+        member = "UIKeyboardAppearanceDark",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITextInputTraits.h",
+            find = "UIKeyboardAppearanceDark API_AVAILABLE(ios(7.0)),",
+            replace = "UIKeyboardAppearanceDark API_AVAILABLE(ios(6.0)),",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",
