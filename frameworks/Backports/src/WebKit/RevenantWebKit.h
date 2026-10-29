@@ -7,37 +7,8 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)revenant_scriptsDidChange;
 @end
 
-@protocol WKNavigationDelegate <NSObject>
-@optional
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler;
-- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation;
-- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation;
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation;
-- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error;
-@end
-
-@protocol WKScriptMessageHandler <NSObject>
-@required
-- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message;
-@end
-
-@protocol WKUIDelegate <NSObject>
-@optional
-- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures;
-- (void)webViewDidClose:(WKWebView *)webView;
-- (void)webView:(WKWebView *)webView runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSArray<NSURL *> *URLs))completionHandler;
-- (void)webView:(WKWebView *)webView contextMenuConfigurationForElement:(WKContextMenuElementInfo *)elementInfo completionHandler:(void (^)(UIContextMenuConfiguration *configuration))completionHandler;
-@end
-
-@protocol WKDownloadDelegate <NSObject>
-@required
-- (void)download:(WKDownload *)download decideDestinationUsingResponse:(NSURLResponse *)response suggestedFilename:(NSString *)suggestedFilename completionHandler:(void (^)(NSURL *destination))completionHandler;
-@optional
-- (void)download:(WKDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
-- (void)downloadDidFinish:(WKDownload *)download;
-- (void)download:(WKDownload *)download didFailWithError:(NSError *)error resumeData:(NSData *)resumeData;
-@end
+// The WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate and WKDownloadDelegate protocols come from
+// the SDK's WebKit headers, which <WebKit/WebKit.h> imports above. They are not declared again here.
 
 @interface WKUserContentController (RevenantWebKit)
 - (NSArray<WKUserScript *> *)revenant_scripts;

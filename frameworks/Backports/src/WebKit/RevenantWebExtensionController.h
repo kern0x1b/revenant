@@ -19,10 +19,6 @@ extern WKWebExtensionDataType const WKWebExtensionDataTypeSynchronized;
 
 extern NSString *const WKWebExtensionDataRecordErrorDomain;
 
-
-@protocol WKWebExtensionControllerDelegate <NSObject>
-@end
-
 #endif
 
 @interface WKWebExtensionControllerConfiguration (RevenantInit)

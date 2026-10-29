@@ -11,17 +11,7 @@
 #include <dlfcn.h>
 #include <Security/SecureTransport.h>
 
-@protocol NSURLSessionStreamDelegate <NSObject>
-@optional
-- (void)URLSession:(NSURLSession *)session
-              streamTask:(NSURLSessionStreamTask *)streamTask
-    didBecomeInputStream:(NSInputStream *)inputStream
-            outputStream:(NSOutputStream *)outputStream;
-- (void)URLSession:(NSURLSession *)session betterRouteDiscoveredForStreamTask:(NSURLSessionStreamTask *)streamTask;
-- (void)URLSession:(NSURLSession *)session readClosedForStreamTask:(NSURLSessionStreamTask *)streamTask;
-- (void)URLSession:(NSURLSession *)session writeClosedForStreamTask:(NSURLSessionStreamTask *)streamTask;
-@end
-
+// NSURLSessionStreamDelegate comes from the SDK's Foundation headers, which <Foundation/Foundation.h> imports above.
 __attribute__((used)) static void revenantEmitProtocols(void)
 {
     (void)@protocol(NSURLSessionStreamDelegate);
