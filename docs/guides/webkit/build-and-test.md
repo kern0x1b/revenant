@@ -192,15 +192,15 @@ inside it, and its version is `version` in `xmake.lua`. It opens through its
 `revwebviewhost:` scheme. It needs the device address in `device.env` at the top of the
 checkout, as everything that reaches the phone does.
 
-**As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file
-carries no `main()`, and `RevWebViewHostControlling` in
-`examples/webview-host/RevWebViewHostEmbedding.h` is the whole interface another application
-drives it through — load, back, forward, reload, stop, a content frame, and a
-delegate that reports title, progress, URL, scroll offset and failures. That is
-the consumer the app-shell cache policy in [network.md](../../explanation/webkit/network.md) was written
-for: a wrapped site that has to launch like a native application. Nothing in
-this repository embeds it today; it is a capability, kept because the
-substitution path cannot serve an application that is not Safari.
+**As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file carries no
+`main()`. It declares no embedding interface any more: `RevWebViewHostEmbedding.h` is removed.
+An application that embeds the engine uses the `WKWebView` backport in
+`frameworks/Backports/src/WebKit` instead. It hosts the same engine through `RevenantEngineHost`
+and loads it at runtime from the `webkit-engine` root. That is the consumer the app-shell cache
+policy in [network.md](../../explanation/webkit/network.md) was written for: a wrapped site that
+has to launch like a native application. Nothing in this repository embeds it yet, and the
+backport's hosting has not run on a device. It is kept because the substitution path cannot
+serve an application that is not Safari.
 
 ### What hosting the engine by hand requires
 
