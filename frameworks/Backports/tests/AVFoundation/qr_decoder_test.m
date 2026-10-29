@@ -74,6 +74,24 @@ static NSString *revenant_text(NSUInteger length)
     return text;
 }
 
+static NSArray *revenant_region_texts(const uint8_t *pixels, int pairWidth, int height, float x, float regionWidth, float *smallestX, float *largestX)
+{
+    RevenantQRResult results[REVENANT_QR_MAX_RESULTS];
+    int found = revenant_qr_decode_region(pixels, pairWidth, height, pairWidth, x, 0, regionWidth, 1, results, REVENANT_QR_MAX_RESULTS);
+    NSMutableArray *texts = [NSMutableArray array];
+    *smallestX = (float)pairWidth;
+    *largestX = 0;
+    for (int index = 0; index < found; index++) {
+        [texts addObject:[[NSString alloc] initWithBytes:results[index].text length:results[index].length encoding:NSUTF8StringEncoding] ?: @""];
+        for (int corner = 0; corner < 4; corner++) {
+            *smallestX = MIN(*smallestX, results[index].corners[corner][0]);
+            *largestX = MAX(*largestX, results[index].corners[corner][0]);
+        }
+        revenant_qr_result_free(&results[index]);
+    }
+    return texts;
+}
+
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
@@ -155,5 +173,28 @@ int main(int argc, char **argv)
     NSData *two = revenant_render(@"first", @"L", 4, 0, 0, &width, &height, nil);
     NSString *expected = revenant_negative ? @"firsT" : @"first";
     revenant_check([revenant_decode(two, width, height, NULL, NULL) isEqualToString:expected], "the decoded text is the encoded text", @"differs");
+    NSData *leftPixels = revenant_render(@"LEFT-CODE-001", @"M", 4, 0, 0, &width, &height, nil);
+    int side = width;
+    NSData *rightPixels = revenant_render(@"RIGHT-CODE-02", @"M", 4, 0, 0, &width, &height, nil);
+    revenant_check(width == side && height == side, "two codes of one length render at one size", @"the sizes differ");
+    int pairWidth = side * 2;
+    NSMutableData *pair = [NSMutableData dataWithLength:(NSUInteger)pairWidth * side];
+    uint8_t *frame = pair.mutableBytes;
+    const uint8_t *leftBytes = leftPixels.bytes, *rightBytes = rightPixels.bytes;
+    for (int y = 0; y < side; y++) {
+        memcpy(frame + (size_t)y * pairWidth, leftBytes + (size_t)y * side, side);
+        memcpy(frame + (size_t)y * pairWidth + side, rightBytes + (size_t)y * side, side);
+    }
+    float smallest = 0, largest = 0;
+    NSArray *both = revenant_region_texts(frame, pairWidth, side, 0, 1, &smallest, &largest);
+    revenant_check(both.count == 2 && [both containsObject:@"LEFT-CODE-001"] && [both containsObject:@"RIGHT-CODE-02"], "a region of the whole frame reports both codes", [both componentsJoinedByString:@", "]);
+    NSArray *left = revenant_region_texts(frame, pairWidth, side, 0, 0.5f, &smallest, &largest);
+    revenant_check(left.count == 1 && [left.firstObject isEqualToString:@"LEFT-CODE-001"] && largest < side, "a region of the left half reports only the left code, inside it", [NSString stringWithFormat:@"%@, corners up to x %.1f", left, (double)largest]);
+    NSArray *right = revenant_region_texts(frame, pairWidth, side, 0.5f, 0.5f, &smallest, &largest);
+    revenant_check(right.count == 1 && [right.firstObject isEqualToString:@"RIGHT-CODE-02"] && smallest >= side, "a region of the right half reports its code at full-frame coordinates", [NSString stringWithFormat:@"%@, corners from x %.1f", right, (double)smallest]);
+    NSArray *cut = revenant_region_texts(frame, pairWidth, side, 0, 0.25f, &smallest, &largest);
+    revenant_check(cut.count == 0, "a code cut by the edge of the region is not reported", [NSString stringWithFormat:@"%lu reported", (unsigned long)cut.count]);
+    NSArray *outside = revenant_region_texts(frame, pairWidth, side, 1.5f, 0.5f, &smallest, &largest);
+    revenant_check(outside.count == 0, "a region past the frame reports nothing", [NSString stringWithFormat:@"%lu reported", (unsigned long)outside.count]);
     return revenant_finish();
 }

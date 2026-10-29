@@ -1506,6 +1506,34 @@ int revenant_qr_decode(const uint8_t *luma, int width, int height, int stride, R
     return found;
 }
 
+static int revenant_qr_region_edge(float edge, int limit)
+{
+    if (!(edge > 0))
+        return 0;
+    if (edge >= (float)limit)
+        return limit;
+    return (int)edge;
+}
+
+int revenant_qr_decode_region(const uint8_t *luma, int width, int height, int stride, float x, float y, float regionWidth, float regionHeight, RevenantQRResult *results, int capacity)
+{
+    if (!luma || width < 1 || height < 1)
+        return 0;
+    int left = revenant_qr_region_edge(floorf(x * width), width);
+    int top = revenant_qr_region_edge(floorf(y * height), height);
+    int right = revenant_qr_region_edge(ceilf((x + regionWidth) * width), width);
+    int bottom = revenant_qr_region_edge(ceilf((y + regionHeight) * height), height);
+    if (right <= left || bottom <= top)
+        return 0;
+    int found = revenant_qr_decode(luma + (size_t)top * stride + left, right - left, bottom - top, stride, results, capacity);
+    for (int index = 0; index < found; index++)
+        for (int corner = 0; corner < 4; corner++) {
+            results[index].corners[corner][0] += (float)left;
+            results[index].corners[corner][1] += (float)top;
+        }
+    return found;
+}
+
 void revenant_qr_result_free(RevenantQRResult *result)
 {
     free(result->text);

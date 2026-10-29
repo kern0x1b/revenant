@@ -18,4 +18,6 @@ void revenant_qr_set_converter(RevenantQRConverter converter);
 
 int revenant_qr_decode(const uint8_t *luma, int width, int height, int stride, RevenantQRResult *results, int capacity);
 
+int revenant_qr_decode_region(const uint8_t *luma, int width, int height, int stride, float x, float y, float regionWidth, float regionHeight, RevenantQRResult *results, int capacity);
+
 void revenant_qr_result_free(RevenantQRResult *result);
