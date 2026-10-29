@@ -333,16 +333,19 @@ function bind_stream(data, found, stream, lazy)
     end
     local pointer = found.wide and 8 or 4
     local at, finish = found.base + stream[1], found.base + stream[1] + stream[2]
-    local state, ordinal_at, ordinal_len
+    local state, ordinal_at, ordinal_len, span_start, span
     local function fresh()
         state = {ordinal = 0, flags = 0, type = 1, addend = 0, offset = 0}
+        span_start, span = at, {}
     end
     local function bind()
         if not state.name or not state.segment then
             raise("a bind opcode binds before naming its symbol and segment, so the stream is not one this toolchain reads")
         end
-        table.insert(entries, {name = state.name, ordinal = state.ordinal, flags = state.flags, type = state.type, addend = state.addend,
-                               segment = state.segment, offset = state.offset, ordinal_at = ordinal_at, ordinal_len = ordinal_len})
+        local entry = {name = state.name, ordinal = state.ordinal, flags = state.flags, type = state.type, addend = state.addend,
+                       segment = state.segment, offset = state.offset, ordinal_at = ordinal_at, ordinal_len = ordinal_len, span_start = span_start}
+        table.insert(entries, entry)
+        table.insert(span, entry)
         state.offset = state.offset + pointer
     end
     fresh()
@@ -354,6 +357,9 @@ function bind_stream(data, found, stream, lazy)
         if byte == 0x00 then
             if not lazy then
                 break
+            end
+            for _, described in ipairs(span) do
+                described.span_end = at
             end
             fresh()
             ordinal_at, ordinal_len = nil, nil
@@ -969,11 +975,17 @@ function rebind(file, moves, libraries)
                 local rest = fixed_uleb(target, entry.ordinal_len - 1)
                 op = rest and (string.char(0x20) .. rest) or nil
             end
-            if not op then
-                raise("%s binds %s lazily, from ordinal %d, and cannot bind it to %s in place: a lazy bind is reached by the offset its stub holds, so it cannot change its length",
-                      file, entry.name, entry.ordinal, install)
+            if op then
+                table.insert(edits, {entry.ordinal_at, op})
+            else
+                if not entry.span_end then
+                    raise("%s binds %s lazily in a stream that does not end in DONE, so the bind cannot be moved to %s", file, entry.name, install)
+                end
+                table.insert(binds, {name = entry.name, ordinal = target, flags = entry.flags, type = entry.type, addend = entry.addend,
+                                     segment = entry.segment, offset = entry.offset})
+                table.insert(edits, {entry.span_start, string.rep("\0", entry.span_end - entry.span_start)})
+                rewrite = true
             end
-            table.insert(edits, {entry.ordinal_at, op})
         end
     end
     local tail, tail_size, split = "", 0, limit

@@ -78,6 +78,12 @@ function failures(opt)
     local provider = built(folder, opt.ld64, "libAVFoundationBackports.dylib", "provider.c", PROVIDER, {"-L.", "-lSystem"})
     io.writefile(path.join(folder, "prebuilt.c"), PREBUILT)
     local prebuilt = fixtures.link(folder, opt.ld64, "prebuilt.dylib", TRIPLE, "prebuilt.c", {"-dynamiclib", "-lAVFoundation", "-Wl,-headerpad,0x1000"})
+    local padding = {}
+    for index = 1, 15 do
+        io.writefile(path.join(folder, "libPad" .. index .. ".tbd"), fixtures.system_stub("_pad_" .. index, "/usr/lib/libPad" .. index .. ".dylib"))
+        table.insert(padding, "-lPad" .. index)
+    end
+    local wide = fixtures.link(folder, opt.ld64, "wide.dylib", TRIPLE, "prebuilt.c", table.join({"-dynamiclib", "-lAVFoundation"}, padding, {"-Wl,-headerpad,0x1000"}))
 
     local before = fixtures.refusal(function () dyld.check(release, {prebuilt, provider}, nil, {release = true}) end) or ""
     if not before:find(FUNCTION, 1, true) or not before:find("revenant.rebind", 1, true) then
@@ -141,6 +147,30 @@ function failures(opt)
     end
     if io.readfile(tight, {encoding = "binary"}) ~= untouched then
         table.insert(found, "a refused rebind must leave the image as it was")
+    end
+
+    local wide_before_data = macho.read(wide)
+    local wide_before_image = macho.images(wide_before_data)[1]
+    local before_entry = bindings(macho, wide_before_data, wide_before_image, wide_before_image.lazy_bind, true)[FUNCTION]
+    local wide_moves, wide_libraries = dyld.rebind_plan(release, wide, {provider})
+    local wide_rebound = path.join(folder, "wide_rebound.dylib")
+    os.cp(wide, wide_rebound)
+    macho.rebind(wide_rebound, wide_moves, wide_libraries)
+    local wide_after_data = macho.read(wide_rebound)
+    local wide_after_image = macho.images(wide_after_data)[1]
+    if not before_entry then
+        table.insert(found, "the wide image must bind " .. FUNCTION .. " lazily, so the converted path is exercised")
+    elseif bindings(macho, wide_after_data, wide_after_image, wide_after_image.lazy_bind, true)[FUNCTION] then
+        table.insert(found, "a lazy bind whose provider ordinal does not fit one byte must leave the lazy stream, because it cannot keep its length")
+    else
+        local moved = bindings(macho, wide_after_data, wide_after_image, wide_after_image.bind, false)[FUNCTION]
+        local expected = {library = PROVIDER}
+        for _, field in ipairs(FIELDS) do
+            expected[field] = before_entry[field]
+        end
+        if not moved or described(moved) ~= described(expected) then
+            table.insert(found, "the converted bind must bind " .. FUNCTION .. " in the bind stream as " .. described(expected) .. ", and it binds as " .. described(moved))
+        end
     end
     os.tryrm(folder)
     return found
