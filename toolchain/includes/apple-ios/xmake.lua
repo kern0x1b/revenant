@@ -1,7 +1,7 @@
 includes(path.join(os.scriptdir(), "..", "..", "modules", "apple", "sdk.lua"))
 local named = get_config("apple_sdk") or ""
 local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or apple_sdk_release()}
-for _, name in ipairs({"apple-compat", "activitykit", "appintents", "authenticationservices", "cloudkit", "createml", "cryptokit", "musickit", "network", "realityfoundation", "realitykit", "spatial", "storekit", "swift-data", "swift-embedded", "swiftui", "tipkit", "uniformtypeidentifiers", "weatherkit", "widgetkit"}) do
+for _, name in ipairs({"apple-compat", "activitykit", "appintents", "authenticationservices", "backports", "cloudkit", "createml", "cryptokit", "musickit", "network", "realityfoundation", "realitykit", "spatial", "storekit", "swift-data", "swift-embedded", "swiftui", "tipkit", "uniformtypeidentifiers", "weatherkit", "widgetkit"}) do
     add_requireconfs(name, {configs = {apple_sdk = sdk.version}})
     add_requireconfs("**." .. name, {configs = {apple_sdk = sdk.version}})
 end
@@ -16,8 +16,12 @@ end
 
 add_requireconfs("**.iphoneos-sdk", {override = true, version = sdk.version})
 
+local backports_selected = (os.getenv("REVENANT_BACKPORTS_LIBRARIES") or "") ~= ""
 if not compat_only then
     add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
+    if not backports_selected then
+        add_requires("revenant@backports", {alias = "backports"})
+    end
 end
 
 add_requireconfs("**.m4", {system = false})
