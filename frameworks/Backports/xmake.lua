@@ -586,6 +586,7 @@ if not is_plat("iphoneos") and has_config("air2cpu") then
         set_default(false)
         add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
         add_packages("llvm")
+    target_end()
 end
 
 rule("air2es.llvm")
@@ -611,6 +612,7 @@ if not is_plat("iphoneos") and has_config("air2es") then
         add_files(path.join(SRC, "air2es", "*.cpp"))
         add_packages("llvm")
         add_links("LLVM")
+    target_end()
 end
 
 local FOUNDATION_TESTS = {
