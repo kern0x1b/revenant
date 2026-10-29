@@ -1727,7 +1727,9 @@ function read_all_members()
         for symbol in pairs(rows) do
             local class = symbol:match("^_OBJC_CLASS_%$_(.+)$")
             if class then
-                set.weak_classes[class] = true
+                if not flat_classes.is_exported(class) then
+                    set.weak_classes[class] = true
+                end
             elseif not symbol:find("^_OBJC_") then
                 set.globals[symbol:sub(2)] = nil
                 set.functions[symbol:sub(2)] = nil
