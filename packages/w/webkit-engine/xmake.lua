@@ -19,6 +19,7 @@ package("webkit-engine")
     end
     add_configs("sources", {description = "The digest of this recipe, the engine module, the compat library and the symbol baseline, so a changed flag or stub is a different engine.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
     add_configs("variant", {description = "system replaces the phone's frameworks beneath Mobile Safari; prefixed renames every class for an application that carries its own engine.", default = "system", type = "string", values = {"system", "prefixed"}})
+    add_configs("carried", {description = "all builds JavaScriptCore, WebCore and WebKitLegacy; jsc builds JavaScriptCore alone, the framework a React Native host links, and the prefixed bundle carries only that.", default = "all", type = "string", values = {"all", "jsc"}})
 
     add_deps("cmake", "ninja", {kind = "binary"})
     add_deps("revenant@webkit", "revenant@icu", "revenant@brotli", "revenant@libpsl", "revenant@libwebp", "revenant@libxml2", "revenant@libxslt", "revenant@woff2")
@@ -36,7 +37,8 @@ package("webkit-engine")
 
     on_test(function (package)
         if package:config("variant") == "prefixed" then
-            for _, framework in ipairs({"JavaScriptCore", "WebCore", "WebKitLegacy"}) do
+            local carried = package:config("carried") == "jsc" and {"JavaScriptCore"} or {"JavaScriptCore", "WebCore", "WebKitLegacy"}
+            for _, framework in ipairs(carried) do
                 assert(os.isfile(path.join(package:installdir("bundle"), "Frameworks", framework .. ".framework", framework)), framework .. " is not in the bundle")
                 assert(os.isdir(path.join(package:installdir("frameworks"), framework .. ".framework")), framework .. " is not linkable")
             end
@@ -52,6 +54,10 @@ package("webkit-engine")
             end
             for _, name in ipairs(JSC_API) do
                 assert(exported[name], name .. " is not exported by the prefixed JavaScriptCore")
+            end
+            -- iOS 6 exports no XPC, and a lazily bound import of it fails only when it is called on the phone.
+            for symbol in os.iorunv("nm", {"-u", jsc}):gmatch("%S+") do
+                assert(not symbol:find("^_?xpc_"), jsc .. " imports " .. symbol .. ", which iOS 6 does not export")
             end
             local identity = "@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore"
             assert(os.iorunv("otool", {"-D", jsc}):find(identity, 1, true), "the prefixed JavaScriptCore is not installed as " .. identity)

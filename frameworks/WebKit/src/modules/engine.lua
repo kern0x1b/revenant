@@ -279,6 +279,7 @@ function context(package, build)
     local source = path.join(dir("webkit"), "src")
     local ctx = {
         variant = package:config("variant"),
+        carried = package:config("carried"),
         sdk = chosen:config("sdkdir"),
         arch = package:arch(),
         deployment = chosen:config("deployment"),
@@ -462,11 +463,21 @@ function verify_exports(ctx)
     end
 end
 
+-- The engine's objects are LTO bitcode, which Apple's nm cannot read (it fails on LLVM 23's). llvm-nm of LLVM 23 or later can.
+local function object_nm()
+    local tool = find_tool("llvm-nm", {version = true})
+    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
+        raise("the compat audit reads the engine's bitcode with llvm-nm of LLVM 23 or later, which must be on PATH ahead of Apple's")
+    end
+    return tool.program
+end
+
 local function defined_symbols(files)
     local found = {}
     for first = 1, #files, 400 do
-        for line in nm({}, table.slice(files, first, first + 399)):gmatch("[^\n]+") do
-            local kind, symbol = line:match("^%x+ ([TDBSC]) (%S+)$")
+        local listing = os.iorunv(object_nm(), table.join({"--defined-only", "-g"}, table.slice(files, first, first + 399)))
+        for line in listing:gmatch("[^\n]+") do
+            local kind, symbol = line:match("^%S+ ([TDBSCWV]) (%S+)$")
             if kind then
                 found[symbol] = true
             end
@@ -510,6 +521,9 @@ function install(package)
     local build = path.absolute("build")
     os.mkdir(build)
     local ctx = context(package, build)
+    if ctx.carried == "jsc" and not variant(ctx.variant).prefixed then
+        raise("carried=jsc is the prefixed variant's JavaScriptCore alone: the system variant replaces all three frameworks")
+    end
     import("carry", {rootdir = os.scriptdir(), anonymous = true}).verify(ctx.source)
     compat(package, ctx)
     if variant(ctx.variant).prefixed then
@@ -529,8 +543,11 @@ function install(package)
     table.join2(argv, arguments(ctx))
     os.vrunv(cmake_program(), argv, {envs = environment})
     verify_configured(ctx)
-    build_with(package, build, nil, environment)
-    verify_exports(ctx)
+    local targets = ctx.carried == "jsc" and {"JavaScriptCore"} or nil
+    build_with(package, build, targets, environment)
+    if ctx.carried == "all" then
+        verify_exports(ctx)
+    end
     verify_compat(ctx)
     local stage = import("stage", {rootdir = os.scriptdir(), anonymous = true})
     if variant(ctx.variant).prefixed then

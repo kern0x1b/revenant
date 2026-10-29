@@ -147,16 +147,19 @@ cannot collide with the system engine's in one process. Its package has three fo
   engine embeds this folder; `RevWebViewHost` and a React Native host are built this way.
 - `frameworks/` holds the framework directories a link step names with `-F`.
 
+`carried=jsc` builds JavaScriptCore alone, and then the bundle and `frameworks/` hold that one framework.
+
 An application that embeds `bundle/` must not also load the deb engine in the same process: both
 register the same `Rev*` classes. The unprefixed build is the one that replaces the phone's frameworks
 under Mobile Safari; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
 
 **Consuming JavaScriptCore from an application.** A React Native host takes the prefixed engine as
-its own package and links the JavaScriptCore framework from it. The application's `xmake.lua`, with the
-Revenant addon loaded as the SwiftUI generator loads it, contains:
+its own package, configured `carried=jsc` so that only the JavaScriptCore framework is built, and links it
+from there. The application's `xmake.lua`, with the Revenant addon loaded as the SwiftUI generator loads it,
+contains:
 
 ```lua
-add_requires("revenant@webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})
+add_requires("revenant@webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed", carried = "jsc"}})
 add_requires("revenant@libcxx", {alias = "libcxx"})
 
 target("App")
@@ -173,12 +176,12 @@ target("App")
 ```
 
 The link takes JavaScriptCore from `frameworks/`, the app rule copies `bundle/` into the application's
-`Frameworks` folder, and the rpath lets dyld find it there. This is the pattern `RevWebViewHost` uses. The
-package carries WebKitLegacy and WebCore as well as JavaScriptCore, so the application embeds the whole
-engine; a JavaScriptCore-only variant does not exist. The `on_test` of the prefixed variant checks that its
-JavaScriptCore exports the JSC C API a React Native host calls and that it is installed as
-`@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore`. That test runs when the package is
-installed, so the consumer above is checked only once the package has been built on a host.
+`Frameworks` folder, and the rpath lets dyld find it there. This is the pattern `RevWebViewHost` uses, which
+takes the whole engine (`carried` left at its default `all`). The `on_test` of the prefixed variant checks what
+the package carries: each framework it builds is in the bundle and linkable, its JavaScriptCore exports the JSC C API
+a React Native host calls, it imports no `xpc_*` symbol (iOS 6 has none, and a lazy import of one fails only when called),
+and it is installed as `@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore`. That test runs when the
+package is installed, so the consumer above is checked only once the package has been built on a host.
 
 ## 4. The package
 

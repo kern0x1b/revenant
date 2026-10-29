@@ -223,13 +223,24 @@ function batteries(package, ctx)
     finish(package, signed)
 end
 
+-- The frameworks a build carries: carried=jsc carries JavaScriptCore alone, the one a React Native host links.
+local function carried(ctx)
+    local found = {}
+    for _, framework in ipairs(frameworks) do
+        if ctx.carried == "all" or framework.built == "JavaScriptCore" then
+            table.insert(found, framework)
+        end
+    end
+    return found
+end
+
 function bundle(package, ctx)
     -- A copy of the frameworks as the build left them, for the org.revenant.webkit-engine deb:
     -- the bundle below names the build's own binaries in place, so the deb must take its copy first.
     local deb = path.join(package:installdir(), "deb")
     os.tryrm(deb)
     os.mkdir(deb)
-    for _, framework in ipairs(frameworks) do
+    for _, framework in ipairs(carried(ctx)) do
         local copied = path.join(deb, framework.built .. ".framework")
         os.vcp(path.join(ctx.build, framework.built .. ".framework"), deb .. "/")
         for _, name in ipairs({"Headers", "PrivateHeaders", "Modules", "_CodeSignature"}) do
@@ -240,7 +251,7 @@ function bundle(package, ctx)
     os.tryrm(root)
     local folder = path.join(root, "Frameworks")
     local identities, binaries = {}, {}
-    for _, framework in ipairs(frameworks) do
+    for _, framework in ipairs(carried(ctx)) do
         local source = path.join(ctx.build, framework.built .. ".framework")
         local destination = path.join(folder, framework.built .. ".framework")
         os.vcp(source, folder .. "/", {symlink = true})
@@ -261,7 +272,7 @@ function bundle(package, ctx)
     finish(package, binaries)
     local frameworks_dir = path.join(package:installdir(), "frameworks")
     os.tryrm(frameworks_dir)
-    for _, framework in ipairs(frameworks) do
+    for _, framework in ipairs(carried(ctx)) do
         os.vcp(path.join(ctx.build, framework.built .. ".framework"), frameworks_dir .. "/", {symlink = true})
     end
     local headers = package:installdir("include")
