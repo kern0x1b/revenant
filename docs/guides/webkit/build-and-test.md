@@ -136,9 +136,49 @@ and then behaves wrongly — empty text in the interface, and a silent death wit
 crash log. This has cost more than one debugging session. The package builds the engine
 whole every time its identity changes.
 
-The prefixed variant builds the same source with the class prefix applied, for a build
-that has to coexist with the system engine in one process. The shipped build is the
-unprefixed one; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
+The prefixed variant builds the same source with the class prefix applied, so its classes
+cannot collide with the system engine's in one process. Its package has three folders:
+
+- `deb/` holds the frameworks that the `org.revenant.webkit-engine` package installs under
+  `/usr/lib/revenant/webkit-engine/`, with their install names rewritten to that folder. The
+  WKWebView backport loads them at runtime.
+- `bundle/` holds the same frameworks as an application's `Frameworks` folder, with identities
+  `@executable_path/Frameworks/<F>.framework/<F>`. A standalone application that carries its own
+  engine embeds this folder; `RevWebViewHost` and a React Native host are built this way.
+- `frameworks/` holds the framework directories a link step names with `-F`.
+
+An application that embeds `bundle/` must not also load the deb engine in the same process: both
+register the same `Rev*` classes. The unprefixed build is the one that replaces the phone's frameworks
+under Mobile Safari; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
+
+**Consuming JavaScriptCore from an application.** A React Native host takes the prefixed engine as
+its own package and links the JavaScriptCore framework from it. The application's `xmake.lua`, with the
+Revenant addon loaded as the SwiftUI generator loads it, contains:
+
+```lua
+add_requires("revenant@webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})
+add_requires("revenant@libcxx", {alias = "libcxx"})
+
+target("App")
+    add_rules("@addon/revenant/app")
+    add_packages("webkit-engine-prefixed", "libcxx")
+    add_frameworks("JavaScriptCore")
+    set_values("app.frameworks", "libcxx")
+    add_ldflags("-Wl,-rpath,@executable_path/Frameworks", {force = true})
+    on_load(function (target)
+        local engine = target:pkg("webkit-engine-prefixed"):installdir()
+        target:add("frameworkdirs", path.join(engine, "frameworks"))
+        target:add("values", "app.resources", path.relative(path.join(engine, "bundle"), target:scriptdir()))
+    end)
+```
+
+The link takes JavaScriptCore from `frameworks/`, the app rule copies `bundle/` into the application's
+`Frameworks` folder, and the rpath lets dyld find it there. This is the pattern `RevWebViewHost` uses. The
+package carries WebKitLegacy and WebCore as well as JavaScriptCore, so the application embeds the whole
+engine; a JavaScriptCore-only variant does not exist. The `on_test` of the prefixed variant checks that its
+JavaScriptCore exports the JSC C API a React Native host calls and that it is installed as
+`@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore`. That test runs when the package is
+installed, so the consumer above is checked only once the package has been built on a host.
 
 ## 4. The package
 
