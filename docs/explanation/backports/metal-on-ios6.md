@@ -1,6 +1,7 @@
 # Metal on iOS 6
 
-Status: decided by the owner, 2026-10-28. This is the one document for Metal on iOS 6. It consolidates five research
+Status: decided by the owner, 2026-10-28; sections 1 and 3 revised 2026-10-29 for the owner's goal that compute is in v1.
+This is the one document for Metal on iOS 6. It consolidates five research
 notes (compute, the re-landscape, the open-code sweep, the driver teardown and the device probe) and the probe code
 they produced. Once it is on main, those notes and their branches retire.
 
@@ -23,19 +24,26 @@ from a shipped image. **static** = a string or plist check on a local image. **f
 
 ## 1. Verdict
 
-- **v1, now: Metal renders through air2es.** air2es translates Metal render shaders from AIR to GLSL ES 1.00, and the
-  loader runs them through the closed iOS GL ES 2.0 driver. 11 of the 14 render functions in Telegram's metallib
-  already translate, pass the Appendix A checker and pass glslangValidator in ES mode [air2es]. v1 is ordinary backport
-  work: finish the three refused shaders and prove the render path on a device. **Compute is not in v1.**
-- **v2, later, after the whole backport works: all Metal compute.** The cheapest start is fragment-GPGPU: compute
-  written as ES 2.0 fragment shaders through the same GL driver. It needs no driver and no reverse engineering
-  (section 4.1).
+- **v1: Metal renders through air2es and computes through fragment-pass GPGPU.** Render: air2es translates Metal render
+  shaders from AIR to GLSL ES 1.00, and the loader runs them through the closed iOS GL ES 2.0 driver. 11 of the 14 render
+  functions in Telegram's metallib already translate, pass the Appendix A checker and pass glslangValidator in ES mode
+  [air2es]. Finish the three refused shaders and prove the render path on a device. Compute: each kernel becomes one ES
+  2.0 fragment shader that renders into a texture (section 4.1), run through the same GL driver. A translated kernel
+  never runs on the CPU.
+- **Coverage target.** Every shader and kernel in Telegram's Metal usage: 28 `.metal` files, 90 entry points and 4 MPS
+  operations, as counted in telegram-build's `overlays/MetalUsage.md`. A kernel that cannot be expressed gets a named
+  refusal at pipeline creation, never a silent fallback.
+- **Kernels that need threadgroup memory, atomics or barriers are work to do, not a permanent "no".** Reductions become
+  ping-pong passes, one per halving step. Histograms become a vertex scatter of points at computed positions,
+  accumulated with additive blending into a float or half-float target. Each design is measured for accuracy before it
+  is trusted [compute, landscape].
 - **Parked, not pursued now:** cracking the GL user client's selectors, reverse-engineering the kernel GPU service's
   method table, and writing a custom SGX driver. These are v2-or-never. Section 4 records each one so that nobody has
   to rediscover it.
 - **Compute is closed at the kernel on the device we have.** On an iPhone 4S running 6.1.3, the kernel GPU service
   refuses the compute user-client type that the shipped CL path uses. Mercury's `gldCreateQueue` returns no queue. The
-  GL user clients open, and GL work runs [probe, device].
+  GL user clients open, and GL work runs [probe, device]. This does not block v1: fragment-pass compute uses only the GL
+  user clients.
 - **Two decisions for the owner before v2 starts** (section 5): whether the device trace the probe ran, and the
   disassembly of Apple's images, are covered by the iOS licence; and which leaked-material rule governs, since
   AGENTS.md and the owner's instruction differ.
@@ -174,15 +182,17 @@ Measured on the oracle file, Telegram's `default.metallib` (air64, 15 modules) [
   layout was found.
 - **post_fragment_main** also has a nested loop whose back edge the structurer refuses. This comes from reading the CFG,
   not from a run.
-- **compute_main is a kernel that belongs to air2cpu.** Nothing in the five notes reads its contents [air2es].
+- **compute_main is a kernel.** air2es's notes placed it with air2cpu. Since 2026-10-29 it goes through the fragment
+  lowering (section 3, item 8). Nothing in the five notes reads its contents [air2es].
 - Telegram's compute use beyond `compute_main` is unverified. The Telegram checkout in the workspace has no `.metal`
   files, and GitHub code search gave no evidence [compute].
 
 ## 3. v1 scope
 
-**In v1:** Metal render through air2es, as normal backport work.
+**In v1:** Metal render through air2es, Metal compute through fragment-pass GPGPU (section 4.1), and the MPS operations
+on the GPU. The render items come first, from air2es's NOTES [air2es]. The compute and MPS items follow them.
 
-What remains to finish render, from air2es's NOTES [air2es]:
+Render:
 
 1. **Constexpr sampler.** Derive the table. That needs a Mac with Xcode, to compile known constexpr samplers with
    `xcrun metal` and map each configuration to its constant. The Mac used has only the Command Line Tools, which have no
@@ -201,16 +211,38 @@ What remains to finish render, from air2es's NOTES [air2es]:
    Half-precision vertex attributes are refused. Internal helpers are inlined. Constant tables read at variable indices
    become select chains.
 
+Compute and MPS (coordinator decision, 2026-10-29):
+
+8. **Kernel lowering.** air2es gets a kernel mode. Buffers become textures, the thread position becomes
+   `gl_FragCoord`, and the output goes to a render target: RGBA16F where `EXT_color_buffer_half_float` gives a complete
+   framebuffer, RGBA8 packing elsewhere [compute]. `compute_main`, which air2es's notes placed with air2cpu, goes through
+   this path. The air2cpu route is removed for translated kernels. A kernel that air2es cannot lower fails with a named
+   refusal at pipeline creation.
+9. **Threadgroup memory, atomics and barriers.** Each kernel that needs them gets a named refusal and a multi-pass design
+   (section 1). Vertex texture fetch on SGX5 is unverified. If `GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS` is 0, the histogram
+   positions are precomputed on the CPU, as section 4.1 allows.
+10. **MPS on the GPU.** GaussianBlur as a separable two-pass, BilinearScale, Convolution with every edge mode, Histogram
+    and HistogramInfo. The CPU paths (`RevenantMPSConvolveRegion`, the histogram write) and the GaussianBlur refusal are
+    removed, so no CPU path remains.
+11. **Degradations removed.** Triangle fill mode in line form, through GL_LINES index expansion, since GLES 2 has no
+    `glPolygonMode`. A real `waitUntilScheduled`. A ring allocator for `setVertexBytes` in place of one buffer per call.
+    A named pixel-format constant in place of the literal 250. One `glReadPixels` for the readback.
+12. **Host reference harness.** Host Metal output against the translated GLSL, on ANGLE or SwiftShader, vendored as a
+    toolchain package, with a stated tolerance. Not built yet: no independent GLES 2 oracle is vendored, and the choice between ANGLE and SwiftShader is open.
+13. **Oracle AIR.** Development needs AIR from Metal's compiler, and this Mac has no Metal compiler. The planned source is
+    an AIR build on a CI macOS runner with a pinned Xcode, keyed by source digest and published like the other prebuilts.
+    Local tools only download it. It is designed, not dispatched; CI order belongs to the coordinator.
+
 **Not sourced:** "telegram-build wiring" is not in air2es's NOTES or in any of the five notes. It is needed before v1
 ships, but its steps must come from the owner or the coordinator. This document does not invent them.
 
-**Out of v1:** all compute, including `compute_main`, which air2es's notes place with air2cpu.
+**Out of v1:** the GL user client and the custom driver paths (sections 4.5 and 4.7). Compute does not need either.
 
-## 4. v2 backlog
+## 4. Backlog (4.1 is v1; the rest is v2 or parked)
 
 Each entry gives what it is, its cost, its odds, what it needs to start, and where it stands.
 
-### 4.1 Fragment-GPGPU compute subset (recommended v2 start, no driver)
+### 4.1 Fragment-GPGPU compute subset (v1 compute lowering, no driver)
 
 - **What.** A kernel is one ES 2.0 fragment shader. Inputs are textures, at most 8 units. The output is one attachment,
   because there is no MRT. Loops have constant bounds, checked the way air2es's checker checks them. The output format is
@@ -229,8 +261,8 @@ Each entry gives what it is, its cost, its odds, what it needs to start, and whe
 - **Odds.** High for map, gather and reduction. Medium for kernels bound by exactness. Low for scatter-heavy kernels.
   Performance is unmeasured on SGX5.
 - **Needs to start.** (a) Device probes: GL_EXTENSIONS, GL_FRAGMENT_PRECISION_HIGH, GL_NUM_SHADER_BINARY_FORMATS, and an
-  RGBA16F completeness and blend test. (b) A target kernel. `compute_main` is unread, so the first target must be chosen
-  from the owner's list. (c) The packing scheme measured on the device. (d) Trompouki and Kosmidis (DATE 2017) and Brook
+  RGBA16F completeness and blend test. (b) Target kernels. Compute is in v1, so the targets are every kernel in
+  Telegram's coverage list, not a chosen subset. `compute_main` is unread, and the order is the coordinator's. (c) The packing scheme measured on the device. (d) Trompouki and Kosmidis (DATE 2017) and Brook
   GLES Pi (HPG 2018) as read-only method references; their numbers were not checked [landscape].
 
 ### 4.2 Oracle chain: validators, SGX profiler, device truth
@@ -466,7 +498,8 @@ Deduplicated across the five notes. Each is unverified unless it says otherwise.
 - **R6. A device trace against the licence gate (unreconciled; owner).** The probe ran a trace. Re-landscape says no trace
   should run until the owner decides. See section 5.2.
 - **R7. `compute_main` in the staged plan (resolved as scope).** Compute's plan said to decode `compute_main` as part of
-  the air2es stage. air2es's NOTES place it with air2cpu, so it is out of v1. Its contents are still unread.
+  the air2es stage. air2es's NOTES place it with air2cpu, so it was out of v1. The 2026-10-29 decision puts compute in v1,
+  so it now goes through the fragment lowering (section 3, item 8). Its contents are still unread.
 - **R8. The probe did not measure the planned queries (a gap, not a contradiction).** Re-landscape asked for
   GL_EXTENSIONS, GL_NUM_SHADER_BINARY_FORMATS and GL_FRAGMENT_PRECISION_HIGH. The probe's measured output has none of
   them. Section 4.6 carries them forward.
