@@ -279,15 +279,15 @@ Side paths that sit under the same layers:
 - **Hybrid.** Skipping submission means writing our own command stream. That is the dossier's gate 1, and reusing the
   compiler does not remove it. So the shader half may be reusable, and the command half is not yet.
 
-## 6. Question 4: the measurement design (not run)
+## 6. Question 4: the measurement design, and its first run
 
 The brief asks where the A5's CPU time goes per draw. The design keeps every step black-box, so it stays outside the
 trace gate.
 
 - **Probe.** One ARMv7 app, built with our toolchain, that calls only its own GL calls. No hook or patch goes into an Apple
   image. Run it on the owner's phone when the owner sequences it, under the device-session skill, with the claim
-  mandatory. On 2026-10-29 the claim tool refused a claim for the phone (held by the paseo-ios6 worker until 16:29:03), so the
-  probe has not run.
+  mandatory. On 2026-10-29 the phone was held by the paseo-ios6 worker until 16:29:03. The probe ran after the hold cleared, in one
+  claim of about 4 minutes, and released the phone (section 6.1).
 - **Timing.** `mach_absolute_time` around each call, over 20,000 draws per configuration, five repeats, median and
   spread. Also `thread_info` CPU time, so that time blocked in IOKit is separated from CPU time.
 - **Configurations.** C0 is a baseline draw with unchanged state. C1 switches between two programs per draw. C2 writes a
@@ -305,6 +305,29 @@ trace gate.
 - **Caveats.** The dossier's probe ran unsigned and as root. A signed app may get different answers (dossier 6.1,
   item 7). The A5 has two cores, and the samples cover only the main thread. Thermals can move the numbers, so repeats
   and spreads are part of the result.
+
+### 6.1 What ran, and the numbers (2026-10-29, iPhone 4S, iOS 6.1.3)
+
+The probe is `frameworks/Backports/tests/gpu_probe/q4probe.m`, built as `revenant-q4probe`. It is a plain ARMv7 binary,
+run from `/tmp` on the phone, which is left there. It rebinds the IOConnect imports of its own process only, draws a
+6 by 6 pixel quad into a 256 by 256 texture, and reads one pixel to check the draw (64 128 191 255, GL error 0). The
+renderer reports `OpenGL ES 2.0 IMGSGX543-73.16.1` and `PowerVR SGX 543`. Only three of the C0 to C8 configurations
+ran, namely scenarios 1 to 3 below, and no sampler ran. Medians with p10 to p90 spreads, in wall time:
+
+- *Scenario 3, submission against wait (2,000 rounds).* A `glFinish` with nothing queued takes 52 µs, of which 39 µs
+  is one IOConnect call. One draw, then `glFlush`, takes 477 µs, of which 426 µs is one IOConnect call. The
+  `glFinish` after that flush takes 434 µs, of which 418 µs is one IOConnect call.
+- *Scenario 1, one draw per frame (2,000 frames).* The draw call takes 24 µs (p10 24, p90 31) and makes no IOConnect
+  call. `glFinish` takes 937 µs (p10 903, p90 972), of which 860 µs is inside two IOConnect calls per frame.
+- *Scenario 2, 100 draws per frame (200 frames).* One draw takes 2.3 µs (p10 2.3, p90 2.6) on average once the first
+  draw has run, and the 100 draws take 413 µs in total. None of them makes an IOConnect call. `glFinish` takes
+  988 µs, of which 910 µs is inside IOConnect. The frame takes 1,405 µs (p10 1,378, p90 1,463). Two IOConnect calls
+  per frame: `IOConnectCallMethod` selector 0 at about 0.49 ms each, and `IOConnectCallStructMethod` selector 2 at about
+  0.42 ms each. Both come from the `IOAccelerator` image. GLEngine and the driver make no IOConnect call themselves.
+- *Not measured.* The thread CPU fields the probe prints are invalid. `thread_info` accounting on this kernel is stale
+  between context switches: a `glFinish` reads 25 to 41 ms of CPU in under 1 ms of wall time. So the split of each
+  IOConnect call into CPU work and waiting is unknown, and so is the split of the 2 to 24 µs draw path between GLEngine
+  and the driver, because only one caller image appears.
 
 ## 7. Question 5: the verdict, provisional and ranked
 
@@ -333,7 +356,15 @@ Pass 4 adds one fact. The compile output is a hardware record that the draw-time
 Apple's compile under (b) needs that record's layout, not only the PP stream. The flags-2 counts (section 4) do not
 change the ranking.
 
-Recommendation: do (a) now. Run the section 6 probe when the owner sequences it. Scope (b) only if its bar is met.
+The first measurement (section 6.1) sharpens the ranking. On the 4S, a 100-draw frame spends about 0.41 ms on the GL
+draw path (2 to 4 µs per draw) and makes no IOConnect call. It spends about 1.0 ms in `glFinish`: one submission and
+one wait, each about 0.4 ms through IOConnect. So (a) can cut only the draw-path share, plus the per-frame sync point.
+Replacing `glFinish` with `glFlush` removes the wait, about 0.42 ms in the test, but not the submission, if the
+presentation path does not need the GPU to have finished. (b) can save at most the draw-path share, at most about
+0.4 ms of the 1.4 ms frame, and only if it removed all of GLEngine and the driver. It would still pay the submission
+and the wait. (c) would still pay the same IOConnect round trips, so it is not justified.
+
+Recommendation: do (a) now, and test the sync point first. Run the section 6 probe when the owner sequences it. Scope (b) only if its bar is met.
 
 ## 8. What this changes in the existing notes
 
@@ -355,8 +386,8 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
 2. **The compile-path call graph.** Done in pass 3 for the driver's compile entries and for the front end (section 5.3).
    Pass 4: the callbacks are passed per call site, not read from a table, and the compile-to-draw chain is traced to the
    hardware record (section 5.3). Open: what that record holds, and whether an offline run is possible at all.
-3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it. Pass 4: the claim was
-   refused, so neither has run.
+3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it. Pass 4: the probe ran on
+   2026-10-29 (section 6.1). The Caches-folder test has not run.
 4. **Where the document lives.** The brief gives `docs/explanation/metal/`. The sibling dossiers sit under
    `docs/explanation/backports/`. Metal is a part of the Backports component, so the coordinator may prefer the
    backports folder. This pass keeps the brief's path.
