@@ -10,20 +10,6 @@
 #define REVENANT_ANGLE_LIB "."
 #endif
 
-// metal_shader_harness runs each vertex and fragment pair of a Metal library twice: once with the Mac's own Metal,
-// from the library's AIR, and once with the GLSL that air2es translated from that AIR, on ANGLE. It compares the
-// pixels.
-//
-//   metal_shader_harness <metallib> <es2 folder> [<ANGLE libraries folder>]
-//
-// The metallib is macOS AIR, so Metal is the reference here. The verdicts:
-//   PASS   every channel of every pixel is within TOLERANCE of Metal's.
-//   FAIL   some pixel differs by more than TOLERANCE.
-//   SKIP   the pair is outside the harness, or Metal's output is blank so it proves nothing.
-//   ERROR  one side did not compile, link, build a pipeline or draw.
-// Vertex layout comes from the air2es reflection on both sides. Metal can only check that layout against its own
-// attribute types and struct offsets, because AIR carries no stage_in offsets.
-
 #define W 64
 #define H 64
 #define TEX 8
@@ -56,7 +42,6 @@ enum {
     GL_VERTEX_SHADER = 0x8B31, GL_COMPILE_STATUS = 0x8B81, GL_LINK_STATUS = 0x8B82, GL_INFO_LOG_LENGTH = 0x8B84,
 };
 
-// The GL and EGL entry points the harness calls, loaded from ANGLE's libraries by name.
 typedef struct {
     void *(*eglGetPlatformDisplayEXT)(EGLenum, void *, const EGLint *);
     EGLBoolean (*eglInitialize)(EGLDisplay, EGLint *, EGLint *);
@@ -182,7 +167,6 @@ static void startANGLE(NSString *dir)
     LOAD(gles, glGetError);
 }
 
-// One context on a pbuffer for every pair. The texture is the same bytes Metal gets, so both sides sample alike.
 static NSData *testTexels(void)
 {
     NSMutableData *texels = [NSMutableData dataWithLength:TEX * TEX * 4];
@@ -293,7 +277,6 @@ static GLuint compileShader(GLenum type, NSString *source, NSString **log)
     return shader;
 }
 
-// The values written to every uniform, so both sides get the same numbers: component k is 0.25 * (k + 1).
 static float uniformValue(NSInteger k)
 {
     return 0.25f * (float)(k + 1);
@@ -322,7 +305,6 @@ static BOOL hasIntUniform(NSDictionary *shader)
     return NO;
 }
 
-// The uniform is supported when it is a float vector of 1 to 4 components or a single int.
 static BOOL uniformSupported(NSDictionary *u)
 {
     NSInteger comps = intValue(u, @"components");
@@ -331,8 +313,6 @@ static BOOL uniformSupported(NSDictionary *u)
     return isIntScalar(u[@"scalar"]) && comps == 1;
 }
 
-// The vertex data both sides read. Every attribute gets the values its name asks for: "pos" the quad's corners,
-// "tex" or "uv" its texture coordinates, anything else a grey.
 static NSDictionary<NSNumber *, NSMutableData *> *vertexBuffers(NSArray *attributes, NSString **detail)
 {
     NSMutableDictionary *buffers = [NSMutableDictionary dictionary];
@@ -380,9 +360,6 @@ static NSInteger metalComponents(MTLDataType type)
     }
 }
 
-// The vertex inputs are buffers, not stage_in: the AIR reads each attribute from a struct that the buffer argument
-// names, indexed by vertex_id. Metal's struct must agree with the air2es reflection on each field's offset, type and
-// the element size, which is the stride. The field names carry no "a_" in Metal.
 static NSString *checkVertexInputs(NSArray *arguments, NSArray *attributes, NSString **state)
 {
     NSMutableDictionary *byIndex = [NSMutableDictionary dictionary];
@@ -403,7 +380,6 @@ static NSString *checkVertexInputs(NSArray *arguments, NSArray *attributes, NSSt
         }
         NSString *name = [(NSString *)a[@"name"] substringFromIndex:2];
         if (!argument.bufferStructType) {
-            // A plain element pointer, such as packed_float2 *position: the argument itself is the attribute.
             if (![argument.name isEqualToString:name]) {
                 *state = @"FAIL";
                 return [NSString stringWithFormat:@"layout: buffer %ld is named %@ in Metal and %@ in air2es",
@@ -438,8 +414,6 @@ static NSString *checkVertexInputs(NSArray *arguments, NSArray *attributes, NSSt
     return nil;
 }
 
-// Writes the uniform's value into the blob at its reflected offset, and checks that Metal's struct agrees on
-// where the member sits.
 static NSString *placeUniform(NSDictionary *u, int ints, NSMutableData *blob, MTLArgument *argument, NSString **state)
 {
     NSInteger offset = intValue(u, @"offset");
@@ -470,7 +444,6 @@ static NSString *placeUniform(NSDictionary *u, int ints, NSMutableData *blob, MT
     return nil;
 }
 
-// The blobs for one stage: one per buffer argument Metal reports, sized as Metal sizes it.
 static NSString *uniformBlobs(NSArray *arguments, NSDictionary *shader, int ints, NSMutableDictionary *blobs,
                               NSString **state)
 {
@@ -697,7 +670,6 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
     api.glDrawArrays(GL_TRIANGLES, 0, VERTICES);
     GLenum error = api.glGetError();
 
-    // GL reads its rows from the bottom, Metal from the top.
     unsigned char *rows = malloc(W * H * 4);
     api.glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE, rows);
     unsigned char *out = pixels.mutableBytes;
@@ -767,7 +739,6 @@ static NSArray<NSString *> *varyingsOf(NSString *glsl)
     return out;
 }
 
-// A fragment can run with a vertex when every varying it reads is one the vertex writes.
 static BOOL covers(NSArray *outputs, NSArray *inputs)
 {
     for (NSString *input in inputs)
