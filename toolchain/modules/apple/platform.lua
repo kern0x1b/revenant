@@ -1,4 +1,5 @@
 import("core.base.option")
+import("core.base.task")
 import("core.project.config")
 import("core.project.project")
 import("macho")
@@ -11,6 +12,7 @@ import("bundle")
 import("runtime_guards")
 import("shared_runtime", {alias = "staged"})
 import("backports_package")
+import("webkit_engine_package")
 import("vision_text")
 
 function waivers(target)
@@ -268,9 +270,49 @@ function backports_deb(signer)
         identities[leaf] = identity
     end
     return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
-                                     runtime = backports_runtime(targets), depends = vision_text.depends(),
+                                     runtime = backports_runtime(targets), depends = table.join(vision_text.depends(), webkit_depends(signer)),
                                      recommends = vision_text.recommended(),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
+end
+
+local WEBKIT_BACKPORTS = "WebKitBackports"
+local WEBKIT_ENGINE = "WebKitEngine"
+
+function project_links_webkit()
+    for _, target in ipairs(project_backports()) do
+        if target:name() == WEBKIT_BACKPORTS then
+            return true
+        end
+    end
+    return false
+end
+
+-- The WebKit Backports library loads the engine when a page is shown, so the package that holds it
+-- names the engine package as a dependency: nothing links the engine, so no link analysis finds it.
+function webkit_depends(signer)
+    if not project_links_webkit() then
+        return {}
+    end
+    local engine = webkit_engine_deb(signer)
+    return {string.format("%s (= %s)", engine.name, engine.version)}
+end
+
+function webkit_engine_deb(signer)
+    local holder
+    for _, target in ipairs(project.ordertargets()) do
+        if target:name() == WEBKIT_ENGINE then
+            holder = target
+        end
+    end
+    if not holder then
+        raise("the WebKit Backports library needs the webkit-engine package, and the project has no %s target to hold it: include frameworks/WebKit", WEBKIT_ENGINE)
+    end
+    task.run("build", {target = WEBKIT_ENGINE})
+    local all, identities = shared_packages(holder)
+    return webkit_engine_package.ensure({installdir = holder:pkg("webkit-engine-prefixed"):installdir("deb"), ldid = ldid(signer),
+                                         packages = all, provided = identities,
+                                         workdir = path.join(config.builddir(), ".revenant", "webkit-engine", "work"),
+                                         outputdir = path.join(config.builddir(), ".revenant", "webkit-engine")})
 end
 
 function vision_text_debs(outputdir)

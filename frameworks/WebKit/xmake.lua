@@ -82,6 +82,13 @@ if is_plat("iphoneos") then
             target:add("shflags", "-undefined", "dynamic_lookup", "-flat_namespace", {force = true})
         end)
 
+    -- The packages the org.revenant.webkit-engine deb is written from, and nothing to compile: the
+    -- packaging step builds this target to install them, and reads the prefixed engine from it.
+    target("WebKitEngine")
+        set_kind("phony")
+        set_default(false)
+        add_packages("webkit-engine-prefixed", "libcxx")
+
     target("RevWebViewHost")
         add_rules("@addon/revenant/app")
         set_default(false)

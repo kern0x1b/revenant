@@ -224,6 +224,18 @@ function batteries(package, ctx)
 end
 
 function bundle(package, ctx)
+    -- A copy of the frameworks as the build left them, for the org.revenant.webkit-engine deb:
+    -- the bundle below names the build's own binaries in place, so the deb must take its copy first.
+    local deb = path.join(package:installdir(), "deb")
+    os.tryrm(deb)
+    os.mkdir(deb)
+    for _, framework in ipairs(frameworks) do
+        local copied = path.join(deb, framework.built .. ".framework")
+        os.vcp(path.join(ctx.build, framework.built .. ".framework"), deb .. "/")
+        for _, name in ipairs({"Headers", "PrivateHeaders", "Modules", "_CodeSignature"}) do
+            os.tryrm(path.join(copied, name))
+        end
+    end
     local root = path.join(package:installdir(), "bundle")
     os.tryrm(root)
     local folder = path.join(root, "Frameworks")

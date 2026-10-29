@@ -139,6 +139,7 @@ local RECIPES = {
                "frameworks/Backports/src/CryptoKit/*.swift"}},
     {folder = "packages/b/backports", variable = "backports_sources_digest",
      inputs = {"packages/b/backports/xmake.lua", "toolchain/modules/apple/wrapper.lua", "toolchain/modules/apple/backports_package.lua",
+               "toolchain/modules/apple/webkit_engine_package.lua",
                "frameworks/Backports/xmake.lua", "frameworks/Backports/tools/**", "frameworks/Backports/src/**"}}
 }
 
