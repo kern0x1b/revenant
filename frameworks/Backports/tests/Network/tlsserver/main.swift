@@ -65,6 +65,21 @@ func negotiatedVersion(_ connection: NWConnection) -> String {
     #endif
 }
 
+func negotiatedCipher(_ connection: NWConnection) -> String {
+    let tls13AEAD: [UInt16] = [0x1301, 0x1302, 0x1303]
+    #if REVENANT_BACKPORT
+    guard let suite = connection.negotiatedCipherSuite else {
+        return "none"
+    }
+    #else
+    guard let metadata = connection.metadata(definition: NWProtocolTLS.definition) as? NWProtocolTLS.Metadata else {
+        return "none"
+    }
+    let suite = sec_protocol_metadata_get_negotiated_tls_ciphersuite(metadata.securityProtocolMetadata).rawValue
+    #endif
+    return tls13AEAD.contains(suite) ? "tls13-aead" : String(suite, radix: 16)
+}
+
 let identity = loadIdentity(identityPath)
 let queue = DispatchQueue(label: "revenant.network.tls.listener")
 let listenerReady = DispatchSemaphore(value: 0)
@@ -74,9 +89,11 @@ let clientReceived = DispatchSemaphore(value: 0)
 var serverText = "none"
 var serverNegotiated = "none"
 var serverVersion = "none"
+var serverCipher = "none"
 var clientText = "none"
 var clientNegotiated = "none"
 var clientVersion = "none"
+var clientCipher = "none"
 
 let listener = try! NWListener(using: serverParameters(identity), on: 0)
 listener.stateUpdateHandler = { state in
@@ -90,6 +107,7 @@ listener.newConnectionHandler = { connection in
         serverText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
         serverNegotiated = negotiated(connection)
         serverVersion = negotiatedVersion(connection)
+        serverCipher = negotiatedCipher(connection)
         connection.send(content: Data("pong".utf8), completion: .contentProcessed { _ in
             serverReceived.signal()
         })
@@ -112,6 +130,7 @@ client.receive(minimumIncompleteLength: 1, maximumLength: 16) { data, _, _, _ in
     clientText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
     clientNegotiated = negotiated(client)
     clientVersion = negotiatedVersion(client)
+    clientCipher = negotiatedCipher(client)
     clientReceived.signal()
 }
 _ = clientReceived.wait(timeout: .now() + wait)
@@ -121,6 +140,8 @@ queue.sync {
     print("tls listener server negotiated \(serverNegotiated)")
     print("tls listener client version \(clientVersion)")
     print("tls listener server version \(serverVersion)")
+    print("tls listener client cipher \(clientCipher)")
+    print("tls listener server cipher \(serverCipher)")
     print("tls listener server received \(serverText)")
     print("tls listener client received \(clientText)")
 }
