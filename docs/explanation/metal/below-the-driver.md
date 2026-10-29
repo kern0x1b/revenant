@@ -187,10 +187,19 @@ Side paths that sit under the same layers:
 - **The IOAccelerator user clients (partly read).** `IOAccelSharedUserClient` is the probable owner of a table at VM
   `0x809ac450` with three live records: selector 0 (scalar in 0, scalar out 5), selector 1 (flags 2, count1 64) and
   selector 2 (flags 2, count1 352). An init at `0x809a4bf4` stores this table in the object, and an override serves
-  indices up to 4 from it. The class identity is inferred from a candidate vtable at `0x809ac078`, not confirmed. What
-  the flags-2 counts mean is not settled, since their meaning for that type was not checked against the kernel's
-  handler. A second table at `0x809ac980` has two records and no owner. The probe's type 0 uses selectors 2 and 0, and
-  type 1 uses 0 and 2, which fits this table. [static; partly settled]
+  indices up to 4 from it. The class identity is inferred from a candidate vtable at `0x809ac078`, not confirmed. The flags-2
+  counts are read from the kernel's legacy handler (the next bullet). A second table at `0x809ac980` has two records
+  and no owner. No reference to it is found in the kext: no literal, `movw`/`movt` pair or PC-relative build, and no
+  stored pointer in its data. It may be reached by an offset from the first table (not checked). The probe's type 0
+  uses selectors 2 and 0, and type 1 uses 0 and 2, which fits this table. [static]
+- **The flags field in the kernel's legacy dispatch (pass 4).** The legacy `externalMethod` path reads an
+  `IOExternalMethod` record: flags at +0x0c, count0 at +0x10, count1 at +0x14. It switches on `flags & 0xF` through a
+  byte table at `0x8026d614`. Types 0, 2 and 4 reach handlers, type 1 goes to the common exit, and type 3 was not traced.
+  For type 2, the handler at `0x8026c8bc` checks `count0` against a count the caller supplies, and dispatches on that
+  count for up to five scalar arguments. It then checks `count1` for exact equality with the caller's output count,
+  unless `count1` is -1. A scalar output count is at most 16, so 64 and 352 can only be byte sizes. Flags 2 is therefore
+  a scalar-in, struct-out selector with a fixed output size. [static: the reads are checked, the enum's name in the
+  kernel headers is not]
 
 - **What is the minimum to submit work without GLEngine?** Still open. The struct sizes above fix the IMG payload
   sizes for selectors 5 to 10. The payload fields, the IOAccelerator tables past their sizes, and the kernel's checks
@@ -241,8 +250,8 @@ Side paths that sit under the same layers:
     which calls `msync`). The disk cache therefore holds linearized PP streams, not USSE code.
   - *The USSE encoder is reached indirectly.* `_AppendInstruction` is called directly only from the callback group
     `_CompileInstrsCB`, `_AlignToEvenHwCB`, `_NoSchedAlignToEvenCB` and `_SetNoSchedFlagForBasicBlock`. Those are named
-    callbacks, so a function-pointer table probably reaches them, and the direct-call walk does not follow it. Finding
-    that table is the next step for the main pixel shader. The `_Instruction*` and `_Register*` helpers of
+    callbacks, and they are not read from a table: `_CompileToHw` and `_FinaliseShader` each build the address of their
+    callback pc-relative and pass it to `_LayoutProgram` (pass 4, below). The `_Instruction*` and `_Register*` helpers of
     libGLProgrammability are reached only from `ShGetCompilerPPStream`, not from `ShCompile`.
   - *Device state.* `_ProcessUfConstLoads`, reached from `gldUpdateDispatch`, calls Mercury's `gpusPPParameterOffset`,
     so the parameter layout comes from the device layer. The driver also imports the IOAccelerator, IOSurface,
@@ -259,6 +268,14 @@ Side paths that sit under the same layers:
   program into the buffer with `memcpy`, and `_SetUSEExecutionAddress` sets the USSE execution address. So the PDS
   words and the USSE address go into IOAccelerator shared buffers. The draw-state writer `_sgxEmitDrawState` calls
   `_PDSGeneratePixelShaderProgram` [static]. The command words that the kernel parses are not yet read.
+- **The compile output and the draw-time reader (pass 4, static).** The compile chain runs `_PVRUniFlexCompileToHw`
+  (0x30230a1c) -> `_CompileToHw` (0x30243444), which calls `_SetHwShdrPhasesInfo` (0x30243328). That function stores four
+  times into its object's `+0x178`. At draw time `_sgxEmitDrawState` calls `_sgxStitchUnpackAndCode` (0x3018fa28), which
+  loads `+0x178` through `this+0x14`, reads `+0xad8` from it, and emits the vertex and fragment main programs with
+  `_ppimgEmitVertexShaderMainProgram` and `_ppimgEmitFragmentShaderMainProgram`. Its buffer size comes from another
+  object, reached through `this+0x6c0`. That `this+0x14` is the object `_CompileToHw` writes is inferred from the offset,
+  not traced through the caller. The callbacks are per call site, as above, so there is no table to find. What the
+  phases record holds (USSE words, or pointers to them), and what `+0xad8` means, is not read. [static]
 - **Hybrid.** Skipping submission means writing our own command stream. That is the dossier's gate 1, and reusing the
   compiler does not remove it. So the shader half may be reusable, and the command half is not yet.
 
@@ -269,7 +286,8 @@ trace gate.
 
 - **Probe.** One ARMv7 app, built with our toolchain, that calls only its own GL calls. No hook or patch goes into an Apple
   image. Run it on the owner's phone when the owner sequences it, under the device-session skill, with the claim
-  mandatory. The phone is currently claimed by the paseo-ios6 worker.
+  mandatory. On 2026-10-29 the claim tool refused a claim for the phone (held by the paseo-ios6 worker until 16:29:03), so the
+  probe has not run.
 - **Timing.** `mach_absolute_time` around each call, over 20,000 draws per configuration, five repeats, median and
   spread. Also `thread_info` CPU time, so that time blocked in IOKit is separated from CPU time.
 - **Configurations.** C0 is a baseline draw with unchanged state. C1 switches between two programs per draw. C2 writes a
@@ -311,6 +329,10 @@ Pass 2 adds one fact to this ranking. The kernel validates vendor payloads and r
 would have to write a command stream that the kernel accepts, and (b) would reach the kernel through the same checks.
 Neither changes the ranking.
 
+Pass 4 adds one fact. The compile output is a hardware record that the draw-time stitch reads (section 5.3), so reusing
+Apple's compile under (b) needs that record's layout, not only the PP stream. The flags-2 counts (section 4) do not
+change the ranking.
+
 Recommendation: do (a) now. Run the section 6 probe when the owner sequences it. Scope (b) only if its bar is met.
 
 ## 8. What this changes in the existing notes
@@ -331,9 +353,10 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
    relayed owner instruction of 2026-10-29. The iOS licence question (dossier item 36) is not analysed and stays open for
    the owner.
 2. **The compile-path call graph.** Done in pass 3 for the driver's compile entries and for the front end (section 5.3).
-   Open: the function-pointer table that reaches the USSE encoder callbacks (`_CompileInstrsCB`, which calls
-   `_AppendInstruction`), since the direct-call walk does not follow it, and whether an offline run is possible at all.
-3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it.
+   Pass 4: the callbacks are passed per call site, not read from a table, and the compile-to-draw chain is traced to the
+   hardware record (section 5.3). Open: what that record holds, and whether an offline run is possible at all.
+3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it. Pass 4: the claim was
+   refused, so neither has run.
 4. **Where the document lives.** The brief gives `docs/explanation/metal/`. The sibling dossiers sit under
    `docs/explanation/backports/`. Metal is a part of the Backports component, so the coordinator may prefer the
    backports folder. This pass keeps the brief's path.
@@ -341,5 +364,6 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
    searched, hashed, copied or deleted (dossier item 39). Nothing in this study uses it.
 6. **An unresolved role.** `libGPUSupport.dylib` exports the same `gpum*` and `gld*` names as Mercury, but no GL image
    links it. Its role is not established.
-7. **The selector tables.** The IMG table is recovered (section 4). Open: the owner of the IOAccelerator table at
-   `0x809ac980`, what the flags-2 counts mean, and the payload fields behind the struct sizes.
+7. **The selector tables.** The IMG table is recovered (section 4), and the flags-2 counts are settled statically (section
+   4). Open: the owner of the IOAccelerator table at `0x809ac980`, which no reference in the kext reaches, and the payload
+   fields behind the struct sizes.
