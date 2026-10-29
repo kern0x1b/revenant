@@ -76,7 +76,7 @@ whether curl serves the same extract today. It is the `webkit-cacert` check:
 
 ## 3. The engine
 
-`src/engine/xmake.lua` is the `webkit-engine` package, and `src/modules/engine.lua` holds
+`packages/w/webkit-engine/xmake.lua` is the `webkit-engine` package, and `frameworks/WebKit/src/modules/engine.lua` holds
 what it does: the CMake options and tuning flags of each variant, and the steps, in the
 order that fails cheapest first:
 
