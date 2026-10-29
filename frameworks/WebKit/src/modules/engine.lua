@@ -35,6 +35,7 @@ local common = {
     {"ENABLE_WEBGPU", "OFF"},
     {"ENABLE_WEBDRIVER", "OFF"},
     {"ENABLE_WEBINSPECTORUI", "OFF"},
+    {"ENABLE_REMOTE_INSPECTOR", "OFF"},
     {"ENABLE_API_TESTS", "OFF"},
     {"ENABLE_TOOLS", "OFF"},
     {"ENABLE_MINIBROWSER", "OFF"},
@@ -213,7 +214,10 @@ function write_packages(ctx)
         "find_package(LibXml2 CONFIG REQUIRED)",
         "find_package(LibXslt CONFIG REQUIRED)",
         "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")",
-        "add_compile_definitions(" .. table.concat(IOS6_DEFINES, " ") .. ")"
+        "add_compile_definitions(" .. table.concat(IOS6_DEFINES, " ") .. ")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-isystem " .. ctx.stubs .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, variant(ctx.variant).prefix) .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, "ios6_dispatch_compat.h") .. ">\")"
     }
     io.writefile(path.join(dir, "project-include.cmake"), table.concat(include, "\n") .. "\n")
     return dir
