@@ -2188,6 +2188,36 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
+-- The SDK's Photos Swift overlay (which has PHChange.changeDetails(for:)) is arm64e only, so an armv7 build has no such
+-- member. The armv7 copy keeps the overlay's declarations, retargeted to armv7 ios 6.0 and without the library-evolution
+-- flags (revenant's armv7 Swift stdlib is not built with library evolution), and without the iOS 26 background upload
+-- extension, which needs ExtensionFoundation.
+local function photos_armv7_interface(text)
+    local lines, pending, skipping = {}, {}, false
+    for line in text:gmatch("([^\n]*)\n") do
+        if skipping then
+            skipping = line ~= "}"
+        elseif line:match("^@available") then
+            table.insert(pending, line)
+        elseif line == "public import ExtensionFoundation" then
+            pending = {}
+        elseif line:match("^public protocol PHBackgroundResourceUploadExtension") or line:match("^extension Photos%.PHBackgroundResourceUploadExtension") then
+            pending = {}
+            skipping = true
+        else
+            for _, attribute in ipairs(pending) do
+                table.insert(lines, attribute)
+            end
+            pending = {}
+            if line:match("^// swift%-module%-flags: ") then
+                line = line:gsub("arm64e%-apple%-ios26%.2", "armv7-apple-ios6.0"):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
+            end
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
@@ -2269,6 +2299,15 @@ function build_overlay(sdk, out, set, subtrees, modules)
         write_if_changed(copy, third_party_lowering(entry, consulted, set.markers))
         roots[entry.directory] = roots[entry.directory] or {}
         table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
+    end
+    local photos = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Modules", "Photos.swiftmodule")
+    local photos_source = path.join(photos, "arm64e-apple-ios.swiftinterface")
+    if os.isfile(photos_source) then
+        local copy = path.join(out, path.relative(photos, sdk), "armv7-apple-ios.swiftinterface")
+        os.mkdir(path.directory(copy))
+        write_if_changed(copy, photos_armv7_interface(io.readfile(photos_source)))
+        roots[photos] = roots[photos] or {}
+        table.insert(roots[photos], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
     end
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
