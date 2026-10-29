@@ -6,8 +6,8 @@ package("folly")
 
     add_urls("https://github.com/facebook/folly.git")
     add_versions("2024.11.18.00", "0660ead5b610047a279cc291129e98e3f2a1fc37")
-    add_cxxflags("-fno-aligned-allocation", {force = true})
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "4", readonly = true})
+    add_cxxflags("-faligned-allocation", {force = true})
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "5", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
@@ -45,7 +45,7 @@ package("folly")
     }
 
     local RN_COMPILE_FLAGS = {"-std=c++20", "-DFOLLY_MOBILE=1", "-DFOLLY_USE_LIBCPP=1", "-DFOLLY_CFG_NO_COROUTINES=1",
-                              "-Wno-comma", "-Wno-shorten-64-to-32", "-Wno-documentation", "-fno-aligned-allocation"}
+                              "-Wno-comma", "-Wno-shorten-64-to-32", "-Wno-documentation", "-faligned-allocation"}
 
     local PROBE_FLAGS = {"-Werror=unguarded-availability-new"}
 
@@ -221,4 +221,20 @@ int main(int argc, char **argv) {
             link = true, ldflags = {"-lfolly"}})
         assert(ok, "folly does not compile and link against armv7 libc++: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libfolly.a"), "armv7")
+        local aligned, output_aligned = probe.check(package, {source = [[
+#include <new>
+struct alignas(64) Wide {
+    char byte;
+};
+Wide *volatile slot;
+int main(int argc, char **argv) {
+    (void)argv;
+    slot = new Wide;
+    delete slot;
+    return argc - argc;
+}
+]], deps = {"libcxx"}, flags = {"-std=c++20", "-faligned-allocation"}, link = true,
+            bound = {["__ZnwmSt11align_val_t"] = "libc++", ["__ZdlPvSt11align_val_t"] = "libc++"},
+            linked = "@rpath/libc++.1.dylib"})
+        assert(aligned, "over-aligned new does not compile and bind to the bundled libc++abi: " .. output_aligned)
     end)
