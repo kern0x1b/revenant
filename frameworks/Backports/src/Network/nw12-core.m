@@ -9,6 +9,8 @@
 
 #undef nw_retain
 #undef nw_release
+#define nw_retain RevenantImpl_nw_retain
+#define nw_release RevenantImpl_nw_release
 
 void *nw_retain(void *object)
 {

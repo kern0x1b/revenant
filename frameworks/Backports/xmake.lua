@@ -12,6 +12,10 @@ local TESTS = path.absolute(path.join(os.scriptdir(), "tests"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
+local DEFERRED = {
+    SecurityBackports = {list = "security-deferred.txt", system = "Security"},
+    NetworkBackports = {list = "network-deferred.txt", system = "Network"},
+}
 
 local LIBRARIES = {
     {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {"sqlite3"}},
@@ -295,10 +299,10 @@ if is_plat("iphoneos") then
             end)
             on_config(function (target)
                 local deferred = {}
-                if library.name == "SecurityBackports" then
+                if DEFERRED[library.name] then
                     local defer = import("defer", {rootdir = TOOLS, anonymous = true})
-                    deferred = defer.names(path.join(TOOLS, "security-deferred.txt"))
-                    defer.configure(target, deferred, path.join(target:autogendir(), "defer"))
+                    deferred = defer.names(path.join(TOOLS, DEFERRED[library.name].list))
+                    defer.configure(target, deferred, path.join(target:autogendir(), "defer"), DEFERRED[library.name].system)
                 end
                 generator.skeleton_for(library.folder, deferred)
                 local files = {}
@@ -757,38 +761,45 @@ if not is_plat("iphoneos") then
 end
 
 if not is_plat("iphoneos") then
-    local function security_defer(name, expected, probe)
-        target("security_defer_" .. name)
+    local function defer_case(name, folder, names, system, define)
+        target(name)
             set_kind("binary")
             set_plat("macosx")
             set_arch("arm64")
             set_default(false)
-            add_files(path.join(TESTS, "security_defer", "main.c"), path.join(TESTS, "security_defer", "impl.c"))
+            add_files(path.join(TESTS, folder, "main.c"), path.join(TESTS, folder, "impl.c"))
             add_frameworks("CoreFoundation")
-            add_defines("REVENANT_DEFER_EXPECT_SYSTEM=" .. expected)
+            add_defines(define)
             on_config(function (target)
                 local defer = import("defer", {rootdir = TOOLS, anonymous = true})
-                local _, source = defer.generate({"CFStringGetLength", "RevenantDeferFixtureAbsent"}, path.join(target:autogendir(), "defer"),
-                                                 "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation", probe)
+                local _, source = defer.generate(names, path.join(target:autogendir(), "defer"), system)
                 target:add("files", source)
             end)
         target_end()
     end
-    security_defer("forwarded", "1", "CFStringGetLength")
-    security_defer("absent", "0", "RevenantDeferProbeAbsent")
-    target("security_defer")
-        set_kind("phony")
-        set_default(false)
-        add_deps("security_defer_forwarded", "security_defer_absent")
-        add_tests("forwarded", "absent")
-        on_test(function (target, opt)
-            import("core.project.project")
-            local name = path.filename(opt.name)
-            local ok = os.execv(project.target("security_defer_" .. name):targetfile(), {}, {try = true})
-            if ok ~= 0 then
-                opt.errors = name .. " failed"
-            end
-            return ok == 0
-        end)
-    target_end()
+    local function defer_group(group)
+        target(group)
+            set_kind("phony")
+            set_default(false)
+            add_deps(group .. "_forwarded", group .. "_absent")
+            add_tests("forwarded", "absent")
+            on_test(function (target, opt)
+                import("core.project.project")
+                local name = path.filename(opt.name)
+                local ok = os.execv(project.target(group .. "_" .. name):targetfile(), {}, {try = true})
+                if ok ~= 0 then
+                    opt.errors = name .. " failed"
+                end
+                return ok == 0
+            end)
+        target_end()
+    end
+    local CORE_FOUNDATION = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation"
+    local SECURITY_NAMES = {"CFStringGetLength", "RevenantDeferFixtureAbsent"}
+    defer_case("security_defer_forwarded", "security_defer", SECURITY_NAMES, {library = CORE_FOUNDATION, probe = "CFStringGetLength"}, "REVENANT_DEFER_EXPECT_SYSTEM=1")
+    defer_case("security_defer_absent", "security_defer", SECURITY_NAMES, {library = CORE_FOUNDATION, probe = "RevenantDeferProbeAbsent"}, "REVENANT_DEFER_EXPECT_SYSTEM=0")
+    defer_group("security_defer")
+    defer_case("network_defer_forwarded", "network_defer", {"nw_parameters_create"}, {library = "/System/Library/Frameworks/Network.framework/Network"}, "REVENANT_DEFER_EXPECT_BACKPORT=0")
+    defer_case("network_defer_absent", "network_defer", {"nw_parameters_create"}, {library = "/System/Library/Frameworks/NetworkMissing.framework/NetworkMissing"}, "REVENANT_DEFER_EXPECT_BACKPORT=1")
+    defer_group("network_defer")
 end

@@ -1,5 +1,7 @@
-local SECURITY = "/System/Library/Frameworks/Security.framework/Security"
-local SECURITY_PROBE = "SecTrustGetTrustResult"
+local SYSTEMS = {
+    Security = {library = "/System/Library/Frameworks/Security.framework/Security", probe = "SecTrustGetTrustResult"},
+    Network = {library = "/System/Library/Frameworks/Network.framework/Network"},
+}
 
 local function emit(file, text)
     if not os.isfile(file) or io.readfile(file) ~= text then
@@ -24,6 +26,14 @@ function rename_header(list)
         table.insert(lines, "#define " .. name .. " RevenantImpl_" .. name)
     end
     table.insert(lines, "#endif")
+    return table.concat(lines, "\n") .. "\n"
+end
+
+function unexported_list(list)
+    local lines = {}
+    for _, name in ipairs(list) do
+        table.insert(lines, "_RevenantImpl_" .. name)
+    end
     return table.concat(lines, "\n") .. "\n"
 end
 
@@ -65,7 +75,7 @@ local function arm32(name)
     }, "REVENANT_DEFER_RESTORE")
 end
 
-function trampoline_source(list, library, probe)
+function trampoline_source(list, system)
     local lines = {
         "#include <dlfcn.h>",
         "#include <stddef.h>",
@@ -77,8 +87,7 @@ function trampoline_source(list, library, probe)
         "#define REVENANT_DEFER_CODE(pointer) (pointer)",
         "#endif",
         "",
-        "#define REVENANT_DEFER_LIBRARY \"" .. library .. "\"",
-        "#define REVENANT_DEFER_PROBE \"" .. probe .. "\"",
+        "#define REVENANT_DEFER_LIBRARY \"" .. system.library .. "\"",
         "",
         "static void *revenant_defer_pick(void *library, const char *name, void *backport)",
         "{",
@@ -113,9 +122,12 @@ function trampoline_source(list, library, probe)
     table.insert(lines, "__attribute__((constructor(101))) static void revenant_defer_bind(void)")
     table.insert(lines, "{")
     table.insert(lines, "    void *library = dlopen(REVENANT_DEFER_LIBRARY, RTLD_LAZY);")
-    table.insert(lines, "    if (library && !dlsym(library, REVENANT_DEFER_PROBE)) {")
-    table.insert(lines, "        library = NULL;")
-    table.insert(lines, "    }")
+    if system.probe then
+        table.insert(lines, "#define REVENANT_DEFER_PROBE \"" .. system.probe .. "\"")
+        table.insert(lines, "    if (library && !dlsym(library, REVENANT_DEFER_PROBE)) {")
+        table.insert(lines, "        library = NULL;")
+        table.insert(lines, "    }")
+    end
     for _, name in ipairs(list) do
         table.insert(lines, string.format('    revenant_slot_%s = revenant_defer_pick(library, "%s", (void *)RevenantImpl_%s);', name, name, name))
     end
@@ -123,19 +135,22 @@ function trampoline_source(list, library, probe)
     return table.concat(lines, "\n") .. "\n"
 end
 
-function generate(list, folder, library, probe)
+function generate(list, folder, system)
     os.mkdir(folder)
     local header = path.join(folder, "revenant_defer_rename.h")
     local source = path.join(folder, "revenant_defer.c")
+    local unexport = path.join(folder, "revenant_defer_unexport.txt")
     emit(header, rename_header(list))
-    emit(source, trampoline_source(list, library, probe))
-    return header, source
+    emit(source, trampoline_source(list, system))
+    emit(unexport, unexported_list(list))
+    return header, source, unexport
 end
 
-function configure(target, list, folder)
-    local header, source = generate(list, folder, SECURITY, SECURITY_PROBE)
+function configure(target, list, folder, name)
+    local header, source, unexport = generate(list, folder, SYSTEMS[name])
     target:add("files", source)
     for _, kind in ipairs({"cflags", "cxxflags", "mflags", "mxxflags"}) do
         target:add(kind, "-include", header, {force = true})
     end
+    target:add("shflags", "-Wl,-unexported_symbols_list," .. unexport, {force = true})
 end
