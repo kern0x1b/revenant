@@ -4947,6 +4947,7 @@ function VTSessionCopyProperty
 function VTSessionSetProperty
 function _MXSignpostMetricsSnapshot
 function __attribute__
+function __darwin_check_fd_set_overflow
 function _os_log_create
 function _os_log_debug_impl
 function _os_log_error_impl
@@ -5629,6 +5630,7 @@ function revenant_edge_pop_interactor
 function revenant_elided_text
 function revenant_encode_trait_extras
 function revenant_ephemeral_cookie_storage
+function revenant_fd_set_in_range
 function revenant_feedback_motor_present
 function revenant_feedback_play
 function revenant_field_allows_copying

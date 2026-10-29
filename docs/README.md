@@ -28,6 +28,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Write a port](tutorials/toolchain/port.md) | a tutorial: an xmake project from an empty directory to a `.deb` |
 | [Checks and waivers](guides/toolchain/checks.md) | the checks a port runs, the waivers it states, and the release's libraries |
+| [Rebind a prebuilt image's imports](guides/toolchain/rebind.md) | `revenant.rebind`: moving a prebuilt armv7 image's imports to the Backports library that exports them, its limits, and the lines for Classicgram |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
 | [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
