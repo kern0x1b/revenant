@@ -21,7 +21,7 @@ local addon = {
 
 local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
 
-local UNCONVERTED = {"angle"}
+local UNCONVERTED = {}
 
 local ADDON_PATH = '"toolchain", "' .. "modules" .. '"'
 

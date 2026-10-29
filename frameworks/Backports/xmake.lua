@@ -585,11 +585,14 @@ option("air2es", {default = false, showmenu = true,
     description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
 option("shader_harness", {default = false, showmenu = true,
-    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. It needs the angle package, so REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; the configure is not for iphoneos."})
+    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; its four ANGLE files are checked against ANGLE_PINS before the build copies them; the configure is not for iphoneos."})
 
-if not is_plat("iphoneos") and has_config("shader_harness") then
-    add_requires("revenant@angle 144.0.15.0", {alias = "angle", configs = {cef = os.getenv("REVENANT_ANGLE_CEF")}})
-end
+local ANGLE_PINS = {
+    ["libEGL.dylib"] = "e2c562884bb6cdda6d191b451899a75727eaafce4256ad9474633058920c5152",
+    ["libGLESv2.dylib"] = "a237e9a51970a79e7534527665246fa4d93447e2bedb6809fdcb14a95f3443b2",
+    ["libvk_swiftshader.dylib"] = "ffa750fd2123ea58cd70ad854d8f40bf33e92d0cb034f46d7ee51c6be29ca8f5",
+    ["vk_swiftshader_icd.json"] = "d717d915e31e7c27948b80b36ab34e2d897888114c5c7d0af835f93eb53e58f5",
+}
 
 if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
     add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
@@ -637,10 +640,22 @@ if not is_plat("iphoneos") and has_config("shader_harness") then
         add_files(path.join(os.scriptdir(), "tools", "shader_harness", "main.m"))
         add_mflags("-fobjc-arc", "-Wno-deprecated-declarations")
         add_frameworks("Foundation", "Metal")
-        add_packages("angle")
+        before_build(function (target)
+            local source = os.getenv("REVENANT_ANGLE_CEF")
+            assert(source and os.isdir(source), "metal_shader_harness needs REVENANT_ANGLE_CEF=<the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle>")
+            local lib = path.join(target:targetdir(), "angle")
+            if not os.isdir(lib) then
+                os.mkdir(lib)
+            end
+            for name, digest in pairs(ANGLE_PINS) do
+                local file = path.join(source, name)
+                assert(os.isfile(file), "the CEF bundle has no " .. name)
+                assert(hash.sha256(file) == digest, name .. " is not the pinned file: its sha256 differs")
+                os.cp(file, path.join(lib, name))
+            end
+        end)
         on_config(function (target)
-            local lib = path.join(target:pkg("angle"):installdir(), "lib")
-            target:add("defines", 'REVENANT_ANGLE_LIB="' .. lib .. '"')
+            target:add("defines", 'REVENANT_ANGLE_LIB="' .. path.absolute(path.join(target:targetdir(), "angle")) .. '"')
         end)
     target_end()
 end
