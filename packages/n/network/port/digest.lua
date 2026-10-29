@@ -1,1 +1,1 @@
-network_sources_digest = "c63ae49da75f89e3020c6298a1b15ac8"
+network_sources_digest = "06e347de87202c4c594cf23a080271b1"
