@@ -13,8 +13,8 @@ local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 local DEFERRED = {
-    SecurityBackports = {list = "security-deferred.txt", system = "Security"},
-    NetworkBackports = {list = "network-deferred.txt", system = "Network"},
+    SecurityBackports = {list = "security-deferred.txt", data = "security-deferred-data.txt", system = "Security"},
+    NetworkBackports = {list = "network-deferred.txt", data = "network-deferred-data.txt", system = "Network"},
 }
 
 local LIBRARIES = {
@@ -302,7 +302,8 @@ if is_plat("iphoneos") then
                 if DEFERRED[library.name] then
                     local defer = import("defer", {rootdir = TOOLS, anonymous = true})
                     deferred = defer.names(path.join(TOOLS, DEFERRED[library.name].list))
-                    defer.configure(target, deferred, path.join(target:autogendir(), "defer"), DEFERRED[library.name].system)
+                    local data = defer.names(path.join(TOOLS, DEFERRED[library.name].data))
+                    defer.configure(target, deferred, path.join(target:autogendir(), "defer"), DEFERRED[library.name].system, data)
                 end
                 generator.skeleton_for(library.folder, deferred)
                 local files = {}
@@ -761,7 +762,7 @@ if not is_plat("iphoneos") then
 end
 
 if not is_plat("iphoneos") then
-    local function defer_case(name, folder, names, system, define)
+    local function defer_case(name, folder, names, system, define, data)
         target(name)
             set_kind("binary")
             set_plat("macosx")
@@ -772,8 +773,11 @@ if not is_plat("iphoneos") then
             add_defines(define)
             on_config(function (target)
                 local defer = import("defer", {rootdir = TOOLS, anonymous = true})
-                local _, source = defer.generate(names, path.join(target:autogendir(), "defer"), system)
+                local _, source = defer.generate(names, path.join(target:autogendir(), "defer"), system, data)
                 target:add("files", source)
+                if data and #data > 0 then
+                    target:add("ldflags", "-Wl,-no_data_const", {force = true})
+                end
             end)
         target_end()
     end
@@ -802,4 +806,7 @@ if not is_plat("iphoneos") then
     defer_case("network_defer_forwarded", "network_defer", {"nw_parameters_create"}, {library = "/System/Library/Frameworks/Network.framework/Network"}, "REVENANT_DEFER_EXPECT_BACKPORT=0")
     defer_case("network_defer_absent", "network_defer", {"nw_parameters_create"}, {library = "/System/Library/Frameworks/NetworkMissing.framework/NetworkMissing"}, "REVENANT_DEFER_EXPECT_BACKPORT=1")
     defer_group("network_defer")
+    defer_case("data_defer_forwarded", "data_defer", {"RevenantDeferDataUnused"}, {library = CORE_FOUNDATION, probe = "CFStringGetLength"}, "REVENANT_DEFER_EXPECT_SYSTEM=1", {"kCFErrorDomainPOSIX"})
+    defer_case("data_defer_absent", "data_defer", {"RevenantDeferDataUnused"}, {library = CORE_FOUNDATION, probe = "RevenantDeferProbeAbsent"}, "REVENANT_DEFER_EXPECT_SYSTEM=0", {"kCFErrorDomainPOSIX"})
+    defer_group("data_defer")
 end

@@ -75,7 +75,8 @@ local function arm32(name)
     }, "REVENANT_DEFER_RESTORE")
 end
 
-function trampoline_source(list, system)
+function trampoline_source(list, system, data)
+    data = data or {}
     local lines = {
         "#include <dlfcn.h>",
         "#include <stddef.h>",
@@ -96,9 +97,22 @@ function trampoline_source(list, system)
         "}",
         "",
     }
+    if #data > 0 then
+        table.insert(lines, "static void revenant_defer_copy(void *library, const char *name, void **storage)")
+        table.insert(lines, "{")
+        table.insert(lines, "    void *system = library ? dlsym(library, name) : NULL;")
+        table.insert(lines, "    if (system) {")
+        table.insert(lines, "        *storage = *(void **)system;")
+        table.insert(lines, "    }")
+        table.insert(lines, "}")
+        table.insert(lines, "")
+    end
     for _, name in ipairs(list) do
         table.insert(lines, "extern void RevenantImpl_" .. name .. "(void);")
         table.insert(lines, "void *revenant_slot_" .. name .. " __attribute__((visibility(\"hidden\")));")
+    end
+    for _, name in ipairs(data) do
+        table.insert(lines, "extern void *" .. name .. ";")
     end
     table.insert(lines, "")
     table.insert(lines, "#if defined(__arm64__)")
@@ -128,6 +142,9 @@ function trampoline_source(list, system)
         table.insert(lines, "        library = NULL;")
         table.insert(lines, "    }")
     end
+    for _, name in ipairs(data) do
+        table.insert(lines, string.format('    revenant_defer_copy(library, "%s", &%s);', name, name))
+    end
     for _, name in ipairs(list) do
         table.insert(lines, string.format('    revenant_slot_%s = revenant_defer_pick(library, "%s", (void *)RevenantImpl_%s);', name, name, name))
     end
@@ -135,22 +152,26 @@ function trampoline_source(list, system)
     return table.concat(lines, "\n") .. "\n"
 end
 
-function generate(list, folder, system)
+function generate(list, folder, system, data)
     os.mkdir(folder)
     local header = path.join(folder, "revenant_defer_rename.h")
     local source = path.join(folder, "revenant_defer.c")
     local unexport = path.join(folder, "revenant_defer_unexport.txt")
     emit(header, rename_header(list))
-    emit(source, trampoline_source(list, system))
+    emit(source, trampoline_source(list, system, data))
     emit(unexport, unexported_list(list))
     return header, source, unexport
 end
 
-function configure(target, list, folder, name)
-    local header, source, unexport = generate(list, folder, SYSTEMS[name])
+function configure(target, list, folder, name, data)
+    data = data or {}
+    local header, source, unexport = generate(list, folder, SYSTEMS[name], data)
     target:add("files", source)
     for _, kind in ipairs({"cflags", "cxxflags", "mflags", "mxxflags"}) do
         target:add(kind, "-include", header, {force = true})
     end
     target:add("shflags", "-Wl,-unexported_symbols_list," .. unexport, {force = true})
+    if #data > 0 then
+        target:add("shflags", "-Wl,-no_data_const", {force = true})
+    end
 end
