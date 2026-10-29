@@ -98,8 +98,8 @@ function failures(arguments)
     end
 
     local limit = with_env(LIMIT_VARIABLE, "", function () return cache.limit() end)
-    if limit ~= 15 * 1000 * 1000 * 1000 then
-        table.insert(found, "the cap is 15 GB by default: " .. tostring(limit))
+    if limit ~= 50 * 1000 * 1000 * 1000 then
+        table.insert(found, "the cap is 50 GB by default: " .. tostring(limit))
     end
     limit = with_env(LIMIT_VARIABLE, "0.5", function () return cache.limit() end)
     if limit ~= 500 * 1000 * 1000 then
