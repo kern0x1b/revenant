@@ -360,6 +360,21 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("BackportsQRMetadataProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/qr_metadata/main.m", "src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m",
+                  "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
+                  "src/AVFoundation/AVMetadataMachineReadableCodeObject7.m", "src/AVFoundation/AVFoundationNames7.m", "src/AVFoundation/RevenantQRCode.c", "src/AVFoundation/RevenantQRECI.c")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/qr_metadata/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.qrmetadata", "CFBundleDisplayName=BackportsQRMetadataProbe")
+        set_values("revenant.control", "tests/qr_metadata/control")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalDeviceProbe")
         set_default(false)
         add_rules("@addon/revenant/daemon")
@@ -703,7 +718,7 @@ end
 if not is_plat("iphoneos") then
     add_requires("revenant@ffmpeg", {alias = "ffmpeg"})
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
-    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
+    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c", "RevenantQRECI.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
     if is_arch("arm64", "x86_64") then
         host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm", "VNGrayscale.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
         host_tests("Vision", {text = {"VNTextRecognizerCore.cpp", "VNTextRecognizer.mm", "VNGrayscale.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo", "ImageIO"}, {extension = "mm", packages = {"tesseract", "leptonica", "tessdata"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}, arguments = function (target, tests) return {path.join(tests, "data", "text"), path.join(target:pkg("tessdata"):installdir(), "share", "tessdata")} end})
