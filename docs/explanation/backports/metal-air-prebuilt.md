@@ -1,55 +1,45 @@
-# AIR from Metal's compiler, as a prebuilt
+# AIR from Apple's Metal compiler: the metal-toolchain package
 
-Status: design only. Nothing here is built or dispatched. The recipe and the workflow input follow once the two owner
-decisions in the last section are made.
+Status: blocked. The package is not written yet, because it needs Xcode installed on this Mac, which the owner has been
+asked to do. Nothing here is built or published.
 
 ## Why
 
 Compute lowering (`metal-on-ios6.md` section 3, items 8 and 9) and the MPS checks both need AIR made by Apple's Metal
-compiler. This Mac has no such compiler: only the Command Line Tools are installed, and `MTLCompiler.framework` in the
-iPhoneOS SDK is a link stub with no compiler in it. So AIR has to come from a Mac that has Xcode, and the only machine
-the project has that way is a CI runner. The result is a prebuilt, as LLVM and Swift already are
-(`docs/guides/prebuilt.md`).
+compiler. This Mac has no such compiler: the Command Line Tools have none, `xcodebuild` is their stub, and
+`MTLCompiler.framework` in the iPhoneOS SDK is a link stub. Since Xcode 26 the Metal compiler is a separately
+downloadable component, so it has to come from Apple's component service.
 
 ## The package
 
-- **Name:** `metal-air`. A package in the prebuilt scheme, wired with `prebuilt.fetch`, `prebuilt.install` and
-  `prebuilt.pack`, as the guide describes for the other recipes.
-- **Input:** a set of `.metal` files, the compile flags, and a pinned Xcode.
-- **Output:** `metal-air-<key>-macosx-arm64.tar.xz` with its `.sha256`. The archive holds one `<name>.metallib`, the
-  per-file `.air` files, and `manifest.json`.
-- **Key:** the prebuilt key of the package's configs. The `sources` config is the sorted sha256 list of the `.metal`
-  files, so a changed shader is a new key. The `flags` config is the exact compile line, including the target triple
-  and the language standard. The `xcode` config is the build number from `xcodebuild -version`, and the `sdk` config
-  is the SDK version. An unchanged set is never compiled twice.
+- **Name:** `metal-toolchain`, a revenant toolchain package kept in the shared store, as `iphoneos-sdk` is.
+- **Source:** Apple's own component, fetched by the official `xcodebuild -downloadComponent metalToolchain`, with
+  `-exportPath` to write the bundle to a file. Nothing is downloaded from a host that is not Apple's, and no host is
+  guessed. The package takes `metal` and `metallib` from the exported bundle.
+- **Pin:** the toolchain version, which `xcrun metal --version` reports, and the sha256 of the `metal` and `metallib`
+  binaries. A different toolchain is a different package version.
+- **Publishes nothing.** Local tools use the installed package. No CI job runs and no release is made. (An earlier
+  design made the package a CI prebuilt. That design is replaced, because it would publish Telegram's shaders.)
 
-## The build, on CI only
+## What it compiles
 
-1. Select the pinned Xcode by path, then fail unless `xcodebuild -version` prints the pinned build number.
-2. For each file: `xcrun -sdk <sdk> metal -c <flags> file.metal -o file.air`.
-3. `xcrun -sdk <sdk> metallib file.air ... -o <name>.metallib`.
-4. Write `manifest.json`: `xcrun metal --version`, the Xcode build number, the SDK version, the flags, and the sha256
-   of every output.
-5. Compile the set a second time in the same job and compare. A mismatch fails the job. Whether Apple's output is
-   byte-identical across runs is not known; this check is how the project will learn it.
+- **Input:** Telegram's `.metal` files from the read-only reference checkout `~/Git/reference/Telegram-iOS-release-13.0.0`.
+  Of the 30 `.metal` files there, the two under `build-system/bazel-rules/rules_apple/test/` are test samples and are not
+  counted. The remaining 28 are `MetalUsage.md`'s set, provided the checkout matches the revision that the usage scan
+  used. One of the 28 is ffmpeg's `vf_yadif_videotoolbox.metal`, which is not Telegram's shader; the coverage count
+  needs to decide whether to keep it.
+- **Command:** `xcrun -sdk iphoneos metal -c -target air64-apple-ios8.0 <flags> file.metal -o file.air` for each file,
+  then `xcrun -sdk iphoneos metallib` for the set. The target is iOS 8.0 or later, as the Metal framework requires.
+- **Flags:** must be the ones Telegram's own Bazel Metal rules pass, read from the reference checkout, not guessed.
+  That reading is the next step after Xcode is installed.
+- **Output:** the `.air` files and the `.metallib` go to the scratch folder, keyed by the sha256 of each input, and are
+  never published.
 
-The flags must match the ones that made Telegram's metallib, since the oracle is macOS `air64` [air2es]. They have to be
-read from Telegram's Bazel Metal rules, not guessed here.
+## Before it can run
 
-## On a machine
+1. Xcode installed on this Mac (owner's action). Then `xcodebuild -downloadComponent metalToolchain -exportPath <folder>`
+   and the package records the exported toolchain's version and hashes.
+2. The Telegram flags read from the reference checkout's Bazel Metal rules.
 
-Local tools download the archive and check its sha256. No `.metal` file is needed and no compiler runs. With
-`REVENANT_PREBUILT_ONLY=metal-air`, a missing release is an error, so a local build can never fall back to compiling.
-air2es and the host harness read the `.metallib` from the unpacked folder.
-
-## Owner decisions before anything is dispatched
-
-1. **Where the sources come from.** The 28 `.metal` files belong to Telegram, in the `telegram-build` repository, not in
-   this one. CI would need a checkout of that repository and a credential for it. That is the owner's call.
-2. **Where the release goes.** `prebuilt.yml` publishes with `gh release create --prerelease` into
-   `kern0x1b/revenant`, which is a public repository. A public release of shaders compiled from Telegram's source would
-   republish Telegram's code in another form. The owner decides whether it may be published at all, and if not, where
-   the archive goes instead (a private release, or an artifact that stays in the owner's account).
-
-Until both are answered, the workflow stays as it is, `metal-air` is not added to its `package` list, and no
-recipe is wired.
+The macOS metallibs already in `/Applications/Telegram.app` are macOS AIR from Telegram's own build. They can teach the
+kernel metadata layout now, but they are not iOS AIR, so they are not the iOS oracle.
