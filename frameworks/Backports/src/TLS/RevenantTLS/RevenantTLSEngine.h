@@ -10,6 +10,9 @@
 
 typedef struct RevenantTLSEngine RevenantTLSEngine;
 
+typedef OSStatus (*RevenantTLSReadCallback)(const void *connection, void *data, size_t *length);
+typedef OSStatus (*RevenantTLSWriteCallback)(const void *connection, const void *data, size_t *length);
+
 REVENANT_TLS_EXPORT void *RevenantTLSOptionsCreate(void);
 REVENANT_TLS_EXPORT bool RevenantTLSOptionsHasServerCredentials(const void *options);
 
@@ -17,6 +20,12 @@ REVENANT_TLS_EXPORT RevenantTLSEngine *RevenantTLSEngineCreate(const void *optio
                                                                const char *defaultServerName, bool serverSide,
                                                                char *reason, size_t reasonCapacity,
                                                                OSStatus *status);
+REVENANT_TLS_EXPORT RevenantTLSEngine *RevenantTLSEngineCreateWithCallbacks(const void *options, const void *connection,
+                                                                            RevenantTLSReadCallback read,
+                                                                            RevenantTLSWriteCallback write,
+                                                                            const char *defaultServerName, bool serverSide,
+                                                                            char *reason, size_t reasonCapacity,
+                                                                            OSStatus *status);
 REVENANT_TLS_EXPORT void RevenantTLSEngineFree(RevenantTLSEngine *engine);
 
 REVENANT_TLS_EXPORT OSStatus RevenantTLSEngineHandshake(RevenantTLSEngine *engine);

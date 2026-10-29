@@ -276,6 +276,81 @@ static unsigned RevenantServerPreSharedKey(SSL *ssl, const char *identity, uint8
 static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLength, const uint8_t *input,
                                   unsigned inputLength, void *argument);
 
+typedef struct {
+    const void *connection;
+    RevenantTLSReadCallback read;
+    RevenantTLSWriteCallback write;
+    OSStatus failure;
+} RevenantTLSCallbacks;
+
+static int RevenantTransferred(size_t count, int length)
+{
+    return count < (size_t)length ? (int)count : length;
+}
+
+static int RevenantCallbackRead(BIO *bio, char *buffer, int length)
+{
+    RevenantTLSCallbacks *callbacks = BIO_get_data(bio);
+    size_t count = (size_t)length;
+    BIO_clear_retry_flags(bio);
+    OSStatus status = callbacks->read(callbacks->connection, buffer, &count);
+    if (status == errSSLWouldBlock) {
+        callbacks->failure = noErr;
+        if (count > 0)
+            return RevenantTransferred(count, length);
+        BIO_set_retry_read(bio);
+        return -1;
+    }
+    if (status != noErr) {
+        callbacks->failure = status;
+        return -1;
+    }
+    callbacks->failure = noErr;
+    return RevenantTransferred(count, length);
+}
+
+static int RevenantCallbackWrite(BIO *bio, const char *buffer, int length)
+{
+    RevenantTLSCallbacks *callbacks = BIO_get_data(bio);
+    size_t count = (size_t)length;
+    BIO_clear_retry_flags(bio);
+    OSStatus status = callbacks->write(callbacks->connection, buffer, &count);
+    if (status == errSSLWouldBlock) {
+        callbacks->failure = noErr;
+        if (count > 0)
+            return RevenantTransferred(count, length);
+        BIO_set_retry_write(bio);
+        return -1;
+    }
+    if (status != noErr) {
+        callbacks->failure = status;
+        return -1;
+    }
+    callbacks->failure = noErr;
+    return RevenantTransferred(count, length);
+}
+
+static long RevenantCallbackControl(BIO *bio, int command, long argument, void *pointer)
+{
+    (void)bio;
+    (void)argument;
+    (void)pointer;
+    return command == BIO_CTRL_FLUSH ? 1 : 0;
+}
+
+static BIO_METHOD *RevenantCallbackMethod(void)
+{
+    static BIO_METHOD *method;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        method = BIO_meth_new(BIO_TYPE_SOURCE_SINK, "revenant callbacks");
+        BIO_meth_set_read(method, RevenantCallbackRead);
+        BIO_meth_set_write(method, RevenantCallbackWrite);
+        BIO_meth_set_ctrl(method, RevenantCallbackControl);
+    });
+    return method;
+}
+
 @interface RevenantTLSSession : NSObject {
 @public
     SSL_CTX *_context;
@@ -296,8 +371,10 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
     SecKeyRef _signingKey;
     OSStatus _verifyFailure;
     SecTrustRef _pendingTrust;
+    RevenantTLSCallbacks _callbacks;
 }
 - (instancetype)initWithOptions:(RevenantSecProtocolOptions *)options descriptor:(int)descriptor
+                      callbacks:(const RevenantTLSCallbacks *)callbacks
               defaultServerName:(NSString *)defaultServerName serverSide:(BOOL)serverSide
                          reason:(NSString **)reason status:(OSStatus *)status;
 - (OSStatus)handshake;
@@ -317,6 +394,7 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
 @implementation RevenantTLSSession
 
 - (instancetype)initWithOptions:(RevenantSecProtocolOptions *)options descriptor:(int)descriptor
+                      callbacks:(const RevenantTLSCallbacks *)callbacks
               defaultServerName:(NSString *)defaultServerName serverSide:(BOOL)serverSide
                          reason:(NSString **)reason status:(OSStatus *)status
 {
@@ -326,6 +404,8 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
     _options = options;
     _serverSide = serverSide;
     _verifyFailure = 0;
+    if (callbacks)
+        _callbacks = *callbacks;
 
     const char *unsupported = [options revenantUnsupportedSettingForServer:serverSide];
     if (unsupported) {
@@ -461,7 +541,17 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         *status = errSSLInternal;
         return nil;
     }
-    if (SSL_set_fd(_ssl, descriptor) != 1) {
+    if (callbacks) {
+        BIO *bio = BIO_new(RevenantCallbackMethod());
+        if (!bio) {
+            *reason = @"BoringSSL could not allocate the callback transport";
+            *status = errSSLInternal;
+            return nil;
+        }
+        BIO_set_data(bio, &_callbacks);
+        BIO_set_init(bio, 1);
+        SSL_set_bio(_ssl, bio, bio);
+    } else if (SSL_set_fd(_ssl, descriptor) != 1) {
         *reason = @"BoringSSL could not attach the socket";
         *status = errSSLInternal;
         return nil;
@@ -561,6 +651,11 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         return errSSLClosedGraceful;
     case SSL_ERROR_SYSCALL:
         ERR_clear_error();
+        if (_callbacks.failure != noErr) {
+            OSStatus failure = _callbacks.failure;
+            _callbacks.failure = noErr;
+            return failure;
+        }
         return errSSLClosedNoNotify;
     default:
         return errSSLClosedAbort;
@@ -815,15 +910,16 @@ bool RevenantTLSOptionsHasServerCredentials(const void *options)
     return value.localIdentity != nil || value.preSharedKeys.count > 0;
 }
 
-RevenantTLSEngine *RevenantTLSEngineCreate(const void *options, int descriptor, const char *defaultServerName, bool serverSide,
-                                           char *reason, size_t reasonCapacity, OSStatus *status)
+static RevenantTLSEngine *RevenantCreateEngine(const void *options, int descriptor, const RevenantTLSCallbacks *callbacks,
+                                               const char *defaultServerName, bool serverSide, char *reason,
+                                               size_t reasonCapacity, OSStatus *status)
 {
     RevenantSecProtocolOptions *value = (__bridge RevenantSecProtocolOptions *)options;
     NSString *failure = nil;
     OSStatus failed = errSSLInternal;
     NSString *name = defaultServerName ? [NSString stringWithUTF8String:defaultServerName] : nil;
-    RevenantTLSSession *session = [[RevenantTLSSession alloc] initWithOptions:value descriptor:descriptor defaultServerName:name
-                                                                   serverSide:serverSide reason:&failure status:&failed];
+    RevenantTLSSession *session = [[RevenantTLSSession alloc] initWithOptions:value descriptor:descriptor callbacks:callbacks
+                                                            defaultServerName:name serverSide:serverSide reason:&failure status:&failed];
     if (!session) {
         if (status)
             *status = failed;
@@ -834,6 +930,27 @@ RevenantTLSEngine *RevenantTLSEngineCreate(const void *options, int descriptor, 
         return NULL;
     }
     return (RevenantTLSEngine *)(__bridge_retained void *)session;
+}
+
+RevenantTLSEngine *RevenantTLSEngineCreate(const void *options, int descriptor, const char *defaultServerName, bool serverSide,
+                                           char *reason, size_t reasonCapacity, OSStatus *status)
+{
+    return RevenantCreateEngine(options, descriptor, NULL, defaultServerName, serverSide, reason, reasonCapacity, status);
+}
+
+RevenantTLSEngine *RevenantTLSEngineCreateWithCallbacks(const void *options, const void *connection, RevenantTLSReadCallback read,
+                                                        RevenantTLSWriteCallback write, const char *defaultServerName, bool serverSide,
+                                                        char *reason, size_t reasonCapacity, OSStatus *status)
+{
+    if (!read || !write) {
+        if (status)
+            *status = errSecParam;
+        if (reason && reasonCapacity > 0)
+            strlcpy(reason, "the read and write callbacks are both required", reasonCapacity);
+        return NULL;
+    }
+    RevenantTLSCallbacks callbacks = {connection, read, write, noErr};
+    return RevenantCreateEngine(options, -1, &callbacks, defaultServerName, serverSide, reason, reasonCapacity, status);
 }
 
 void RevenantTLSEngineFree(RevenantTLSEngine *engine)

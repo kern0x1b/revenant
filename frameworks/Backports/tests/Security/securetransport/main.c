@@ -111,8 +111,12 @@ static int connectTo(unsigned short port)
 }
 
 #if defined(REVENANT_FIXTURE_IO_FUNCS)
+static unsigned reads;
+static unsigned writes;
+
 static OSStatus readDescriptor(SSLConnectionRef connection, void *data, size_t *length)
 {
+    reads++;
     ssize_t count = read((int)(intptr_t)connection, data, *length);
     *length = count > 0 ? (size_t)count : 0;
     return count > 0 ? noErr : count == 0 ? errSSLClosedGraceful : errSSLClosedAbort;
@@ -120,6 +124,7 @@ static OSStatus readDescriptor(SSLConnectionRef connection, void *data, size_t *
 
 static OSStatus writeDescriptor(SSLConnectionRef connection, const void *data, size_t *length)
 {
+    writes++;
     size_t sent = 0;
     while (sent < *length) {
         ssize_t count = write((int)(intptr_t)connection, (const char *)data + sent, *length - sent);
@@ -212,7 +217,7 @@ int main(int argc, char **argv)
     SSLContextRef client = newClient(descriptor, true);
     OSStatus status = drive(client);
     printf("break on server auth status %d\n", (int)status);
-#if !defined(REVENANT_FIXTURE_IO_FUNCS)
+#if defined(REVENANT_FIXTURE_VENEER)
     size_t refused = 0;
     printf("write before server auth accepted status %d\n", (int)SSLWrite(client, "ping", 4, &refused));
 #endif
@@ -256,6 +261,9 @@ int main(int argc, char **argv)
     printf("server context %s\n", server ? "created" : "refused");
     if (server)
         SSLDisposeContext(server);
+#if defined(REVENANT_FIXTURE_IO_FUNCS)
+    printf("io callbacks read %u write %u\n", reads, writes);
+#endif
 
     pthread_join(thread, NULL);
     return 0;

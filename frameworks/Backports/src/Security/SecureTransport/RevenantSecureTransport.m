@@ -20,6 +20,8 @@
 @public
     RevenantSecProtocolOptions *options;
     SSLConnectionRef connection;
+    SSLReadFunc readFunc;
+    SSLWriteFunc writeFunc;
     NSString *peerDomainName;
     RevenantTLSEngine *engine;
 }
@@ -188,6 +190,20 @@ OSStatus SSLGetConnection(SSLContextRef context, SSLConnectionRef *connection)
     return noErr;
 }
 
+OSStatus SSLSetIOFuncs(SSLContextRef context, SSLReadFunc readFunc, SSLWriteFunc writeFunc)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetIOFuncs, errSecParam, context, readFunc, writeFunc);
+    RevenantSSLContext *value = RevenantSSLOf(context);
+    if (!readFunc || !writeFunc)
+        return errSecParam;
+    if (value->engine)
+        return errSSLBadConfiguration;
+    value->readFunc = readFunc;
+    value->writeFunc = writeFunc;
+    return noErr;
+}
+
 OSStatus SSLSetPeerDomainName(SSLContextRef context, const char *peerName, size_t peerNameLen)
 {
     if (!RevenantOwnsContext(context))
@@ -296,8 +312,13 @@ OSStatus SSLHandshake(SSLContextRef context)
     if (!value->engine) {
         char reason[512] = "";
         OSStatus status = noErr;
-        value->engine = RevenantTLSEngineCreate((__bridge const void *)value->options, (int)(intptr_t)value->connection,
-                                                value->peerDomainName.UTF8String, false, reason, sizeof reason, &status);
+        if (value->readFunc)
+            value->engine = RevenantTLSEngineCreateWithCallbacks((__bridge const void *)value->options, value->connection,
+                                                                 value->readFunc, value->writeFunc, value->peerDomainName.UTF8String,
+                                                                 false, reason, sizeof reason, &status);
+        else
+            value->engine = RevenantTLSEngineCreate((__bridge const void *)value->options, (int)(intptr_t)value->connection,
+                                                    value->peerDomainName.UTF8String, false, reason, sizeof reason, &status);
         if (!value->engine) {
             fprintf(stderr, "SecureTransport: TLS setting refused: %s\n", reason);
             return status == noErr ? errSSLBadConfiguration : status;
@@ -372,4 +393,388 @@ OSStatus SSLCopyPeerTrust(SSLContextRef context, SecTrustRef *trust)
         return errSecParam;
     *trust = value->engine ? (SecTrustRef)RevenantTLSEngineCopyPeerTrust(value->engine) : NULL;
     return noErr;
+}
+
+OSStatus SSLGetSessionOption(SSLContextRef context, SSLSessionOption option, Boolean *value)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetSessionOption, errSecUnimplemented, context, option, value);
+    RevenantSSLContext *target = RevenantSSLOf(context);
+    if (!value)
+        return errSecParam;
+    if (option != kSSLSessionOptionBreakOnServerAuth)
+        return errSecUnimplemented;
+    *value = target->options.breaksOnServerAuth;
+    return noErr;
+}
+
+OSStatus SSLGetProtocolVersionMin(SSLContextRef context, SSLProtocol *minVersion)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetProtocolVersionMin, errSecUnimplemented, context, minVersion);
+    RevenantSSLContext *value = RevenantSSLOf(context);
+    if (!minVersion)
+        return errSecParam;
+    *minVersion = RevenantProtocolOfWireVersion(value->options.minTLSVersion);
+    return noErr;
+}
+
+OSStatus SSLGetProtocolVersionMax(SSLContextRef context, SSLProtocol *maxVersion)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetProtocolVersionMax, errSecUnimplemented, context, maxVersion);
+    RevenantSSLContext *value = RevenantSSLOf(context);
+    if (!maxVersion)
+        return errSecParam;
+    *maxVersion = RevenantProtocolOfWireVersion(value->options.maxTLSVersion);
+    return noErr;
+}
+
+OSStatus SSLSetALPNProtocols(SSLContextRef context, CFArrayRef protocols)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetALPNProtocols, errSecUnimplemented, context, protocols);
+    RevenantSSLContext *value = RevenantSSLOf(context);
+    if (value->engine)
+        return errSSLBadConfiguration;
+    NSMutableArray<NSString *> *names = [NSMutableArray array];
+    for (id name in (__bridge NSArray *)protocols) {
+        if (![name isKindOfClass:NSString.class])
+            return errSecParam;
+        NSUInteger length = [name lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        if (length == 0 || length > UINT8_MAX)
+            return errSecParam;
+        [names addObject:name];
+    }
+    value->options.applicationProtocols = names;
+    return noErr;
+}
+
+OSStatus SSLGetSessionState(SSLContextRef context, SSLSessionState *state)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetSessionState, errSecUnimplemented, context, state);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetSessionConfig(SSLContextRef context, CFStringRef config)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetSessionConfig, errSecUnimplemented, context, config);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetProtocolVersionEnabled(SSLContextRef context, SSLProtocol protocol, Boolean enable)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetProtocolVersionEnabled, errSecUnimplemented, context, protocol, enable);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetProtocolVersionEnabled(SSLContextRef context, SSLProtocol protocol, Boolean *enable)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetProtocolVersionEnabled, errSecUnimplemented, context, protocol, enable);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetProtocolVersion(SSLContextRef context, SSLProtocol version)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetProtocolVersion, errSecUnimplemented, context, version);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetProtocolVersion(SSLContextRef context, SSLProtocol *protocol)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetProtocolVersion, errSecUnimplemented, context, protocol);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetCertificate(SSLContextRef context, CFArrayRef certRefs)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetCertificate, errSecUnimplemented, context, certRefs);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyRequestedPeerNameLength(SSLContextRef ctx, size_t *peerNameLen)
+{
+    if (!RevenantOwnsContext(ctx))
+        RevenantDefer(SSLCopyRequestedPeerNameLength, errSecUnimplemented, ctx, peerNameLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyRequestedPeerName(SSLContextRef context, char *peerName, size_t *peerNameLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyRequestedPeerName, errSecUnimplemented, context, peerName, peerNameLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetDatagramHelloCookie(SSLContextRef dtlsContext, const void *cookie, size_t cookieLen)
+{
+    if (!RevenantOwnsContext(dtlsContext))
+        RevenantDefer(SSLSetDatagramHelloCookie, errSecUnimplemented, dtlsContext, cookie, cookieLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetMaxDatagramRecordSize(SSLContextRef dtlsContext, size_t maxSize)
+{
+    if (!RevenantOwnsContext(dtlsContext))
+        RevenantDefer(SSLSetMaxDatagramRecordSize, errSecUnimplemented, dtlsContext, maxSize);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetMaxDatagramRecordSize(SSLContextRef dtlsContext, size_t *maxSize)
+{
+    if (!RevenantOwnsContext(dtlsContext))
+        RevenantDefer(SSLGetMaxDatagramRecordSize, errSecUnimplemented, dtlsContext, maxSize);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetNumberSupportedCiphers(SSLContextRef context, size_t *numCiphers)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetNumberSupportedCiphers, errSecUnimplemented, context, numCiphers);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetSupportedCiphers(SSLContextRef context, SSLCipherSuite *ciphers, size_t *numCiphers)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetSupportedCiphers, errSecUnimplemented, context, ciphers, numCiphers);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetNumberEnabledCiphers(SSLContextRef context, size_t *numCiphers)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetNumberEnabledCiphers, errSecUnimplemented, context, numCiphers);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetEnabledCiphers(SSLContextRef context, SSLCipherSuite *ciphers, size_t *numCiphers)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetEnabledCiphers, errSecUnimplemented, context, ciphers, numCiphers);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetSessionTicketsEnabled(SSLContextRef context, Boolean enabled)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetSessionTicketsEnabled, errSecUnimplemented, context, enabled);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetEnableCertVerify(SSLContextRef context, Boolean enableVerify)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetEnableCertVerify, errSecUnimplemented, context, enableVerify);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetEnableCertVerify(SSLContextRef context, Boolean *enableVerify)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetEnableCertVerify, errSecUnimplemented, context, enableVerify);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetAllowsExpiredCerts(SSLContextRef context, Boolean allowsExpired)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetAllowsExpiredCerts, errSecUnimplemented, context, allowsExpired);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetAllowsExpiredCerts(SSLContextRef context, Boolean *allowsExpired)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetAllowsExpiredCerts, errSecUnimplemented, context, allowsExpired);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetAllowsExpiredRoots(SSLContextRef context, Boolean allowsExpired)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetAllowsExpiredRoots, errSecUnimplemented, context, allowsExpired);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetAllowsExpiredRoots(SSLContextRef context, Boolean *allowsExpired)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetAllowsExpiredRoots, errSecUnimplemented, context, allowsExpired);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetAllowsAnyRoot(SSLContextRef context, Boolean anyRoot)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetAllowsAnyRoot, errSecUnimplemented, context, anyRoot);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetAllowsAnyRoot(SSLContextRef context, Boolean *anyRoot)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetAllowsAnyRoot, errSecUnimplemented, context, anyRoot);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetTrustedRoots(SSLContextRef context, CFArrayRef trustedRoots, Boolean replaceExisting)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetTrustedRoots, errSecUnimplemented, context, trustedRoots, replaceExisting);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyTrustedRoots(SSLContextRef context, CFArrayRef *trustedRoots)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyTrustedRoots, errSecUnimplemented, context, trustedRoots);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyPeerCertificates(SSLContextRef context, CFArrayRef *certs)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyPeerCertificates, errSecUnimplemented, context, certs);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetPeerID(SSLContextRef context, const void *peerID, size_t peerIDLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetPeerID, errSecUnimplemented, context, peerID, peerIDLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetPeerID(SSLContextRef context, const void **peerID, size_t *peerIDLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetPeerID, errSecUnimplemented, context, peerID, peerIDLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyALPNProtocols(SSLContextRef context, CFArrayRef *protocols)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyALPNProtocols, errSecUnimplemented, context, protocols);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetOCSPResponse(SSLContextRef context, CFDataRef response)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetOCSPResponse, errSecUnimplemented, context, response);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetEncryptionCertificate(SSLContextRef context, CFArrayRef certRefs)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetEncryptionCertificate, errSecUnimplemented, context, certRefs);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetClientSideAuthenticate(SSLContextRef context, SSLAuthenticate auth)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetClientSideAuthenticate, errSecUnimplemented, context, auth);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLAddDistinguishedName(SSLContextRef context, const void *derDN, size_t derDNLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLAddDistinguishedName, errSecUnimplemented, context, derDN, derDNLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetCertificateAuthorities(SSLContextRef context, CFTypeRef certificateOrArray, Boolean replaceExisting)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetCertificateAuthorities, errSecUnimplemented, context, certificateOrArray, replaceExisting);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyCertificateAuthorities(SSLContextRef context, CFArrayRef *certificates)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyCertificateAuthorities, errSecUnimplemented, context, certificates);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLCopyDistinguishedNames(SSLContextRef context, CFArrayRef *names)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyDistinguishedNames, errSecUnimplemented, context, names);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetClientCertificateState(SSLContextRef context, SSLClientCertificateState *clientState)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetClientCertificateState, errSecUnimplemented, context, clientState);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetDiffieHellmanParams(SSLContextRef context, const void *dhParams, size_t dhParamsLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetDiffieHellmanParams, errSecUnimplemented, context, dhParams, dhParamsLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetDiffieHellmanParams(SSLContextRef context, const void **dhParams, size_t *dhParamsLen)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetDiffieHellmanParams, errSecUnimplemented, context, dhParams, dhParamsLen);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetRsaBlinding(SSLContextRef context, Boolean blinding)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetRsaBlinding, errSecUnimplemented, context, blinding);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetRsaBlinding(SSLContextRef context, Boolean *blinding)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetRsaBlinding, errSecUnimplemented, context, blinding);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLReHandshake(SSLContextRef context)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLReHandshake, errSecUnimplemented, context);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetBufferedReadSize(SSLContextRef context, size_t *bufferSize)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetBufferedReadSize, errSecUnimplemented, context, bufferSize);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLGetDatagramWriteSize(SSLContextRef dtlsContext, size_t *bufSize)
+{
+    if (!RevenantOwnsContext(dtlsContext))
+        RevenantDefer(SSLGetDatagramWriteSize, errSecUnimplemented, dtlsContext, bufSize);
+    return errSecUnimplemented;
+}
+
+OSStatus SSLSetError(SSLContextRef context, OSStatus status)
+{
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetError, errSecUnimplemented, context, status);
+    return errSecUnimplemented;
 }

@@ -6,34 +6,44 @@ local transport = path.join(security, "SecureTransport")
 local fixture = path.join(backports, "tests", "Security", "securetransport", "main.c")
 local identity = path.join(backports, "tests", "Network", "tls", "identity.p12")
 
+local veneerLines = {
+    "^strict untrusted handshake status %-9807$",
+    "^break on server auth status %-9841$",
+    "^write before server auth accepted status %-9800$",
+    "^anchored trust evaluation trusted$",
+    "^second handshake status 0$",
+    "^negotiated protocol 10$",
+    "^negotiated cipher 0x130[12]$",
+    "^client received pong$",
+    "^rejecting break on server auth status %-9841$",
+    "^rejected untrusted evaluation not trusted$",
+    "^client option status %-4$",
+    "^server context created$",
+}
+
+local systemLines = {
+    "^strict untrusted handshake status %-9807$",
+    "^break on server auth status %-9841$",
+    "^anchored trust evaluation trusted$",
+    "^second handshake status 0$",
+    "^negotiated protocol %d+$",
+    "^negotiated cipher 0x%x+$",
+    "^client received pong$",
+    "^rejecting break on server auth status %-9841$",
+    "^rejected untrusted evaluation not trusted$",
+    "^client option status 0$",
+    "^server context created$",
+}
+
+local callbackLines = {
+    "^io callbacks read [1-9]%d* write [1-9]%d*$",
+}
+
 local variants = {
-    {name = "veneer", probe = "RevenantAbsentSystemSymbol", lines = {
-        "^strict untrusted handshake status %-9807$",
-        "^break on server auth status %-9841$",
-        "^write before server auth accepted status %-9800$",
-        "^anchored trust evaluation trusted$",
-        "^second handshake status 0$",
-        "^negotiated protocol 10$",
-        "^negotiated cipher 0x130[12]$",
-        "^client received pong$",
-        "^rejecting break on server auth status %-9841$",
-        "^rejected untrusted evaluation not trusted$",
-        "^client option status %-4$",
-        "^server context created$",
-    }},
-    {name = "system", io = true, lines = {
-        "^strict untrusted handshake status %-9807$",
-        "^break on server auth status %-9841$",
-        "^anchored trust evaluation trusted$",
-        "^second handshake status 0$",
-        "^negotiated protocol %d+$",
-        "^negotiated cipher 0x%x+$",
-        "^client received pong$",
-        "^rejecting break on server auth status %-9841$",
-        "^rejected untrusted evaluation not trusted$",
-        "^client option status 0$",
-        "^server context created$",
-    }},
+    {name = "veneer", probe = "RevenantAbsentSystemSymbol", veneer = true, lines = veneerLines},
+    {name = "veneer-callbacks", probe = "RevenantAbsentSystemSymbol", io = true, veneer = true,
+     lines = table.join(veneerLines, callbackLines)},
+    {name = "system", io = true, lines = table.join(systemLines, callbackLines)},
 }
 
 local function clang(args)
@@ -62,7 +72,13 @@ function main()
         os.mkdir(folder)
         local defines = variant.probe and {"-DREVENANT_SYSTEM_PROBE=\"" .. variant.probe .. "\""} or {}
         local object = compile(path.join(transport, "RevenantSecureTransport.m"), table.join({"-fobjc-arc"}, include, defines), folder)
-        local fixtureDefines = variant.io and {"-DREVENANT_FIXTURE_IO_FUNCS=1"} or {}
+        local fixtureDefines = {}
+        if variant.io then
+            table.insert(fixtureDefines, "-DREVENANT_FIXTURE_IO_FUNCS=1")
+        end
+        if variant.veneer then
+            table.insert(fixtureDefines, "-DREVENANT_FIXTURE_VENEER=1")
+        end
         local fixtureObject = compile(fixture, table.join(include, fixtureDefines), folder)
         local program = path.join(folder, "securetransport")
         clang(table.join(shared, {object, fixtureObject}, libraries, {"-o", program}))
