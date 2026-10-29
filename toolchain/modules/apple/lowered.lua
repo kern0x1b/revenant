@@ -2218,6 +2218,85 @@ local function photos_armv7_interface(text)
     return table.concat(lines, "\n") .. "\n"
 end
 
+local function lines_of(text)
+    local lines = {}
+    for line in text:gmatch("([^\n]*)\n") do
+        table.insert(lines, line)
+    end
+    return lines
+end
+
+-- The declaration at index, with its @available attributes, up to its closing brace at column 0.
+local function block_at(lines, index)
+    local first, last = index, index
+    while lines[first - 1] and lines[first - 1]:match("^@available") do
+        first = first - 1
+    end
+    while lines[last] ~= "}" do
+        last = last + 1
+    end
+    return table.concat(lines, "\n", first, last)
+end
+
+local function block_starting(lines, prefix)
+    for i, line in ipairs(lines) do
+        if line:sub(1, #prefix) == prefix then
+            return block_at(lines, i)
+        end
+    end
+    raise("the Swift interface has no declaration starting %s", prefix)
+end
+
+local function block_enclosing(lines, opener, marker)
+    local start = nil
+    for i, line in ipairs(lines) do
+        if line == opener then
+            start = i
+        elseif start and line:find(marker, 1, true) then
+            return block_at(lines, start)
+        end
+    end
+    raise("the Swift interface has no %s in %s", marker, opener)
+end
+
+-- UIView.cornerConfiguration (refined for Swift, iOS 26) and the two types it needs are declared by the arm64e overlay
+-- only. The armv7 copy keeps those declarations, retargeted to armv7 ios 6.0 without the library-evolution flags (as for
+-- Photos); the rest of UIKit's overlay needs SwiftUI and the other modules armv7 does not have, so it is left out.
+local function uikit_armv7_interface(text)
+    local lines = lines_of(text)
+    return table.concat({
+        lines[1],
+        lines[2],
+        "// swift-module-flags: -target armv7-apple-ios6.0 -enable-objc-interop -swift-version 5 -module-name UIKit",
+        lines[4],
+        "public import Swift",
+        "public import _Concurrency",
+        "public import CoreFoundation",
+        "@_exported public import UIKit",
+        block_enclosing(lines, "extension UIView {", "var cornerConfiguration: UIKit.UICornerConfiguration"),
+        block_starting(lines, "public struct UICornerConfiguration "),
+        block_starting(lines, "public struct UICornerRadius "),
+        "",
+    }, "\n")
+end
+
+-- The SDK ships these Swift overlays for arm64e only, so an armv7 build lacks the declarations they add. Each armv7
+-- copy is mapped in the VFS as a file in the framework's Modules directory, next to the SDK's own arm64e interface.
+local function armv7_overlays(sdk, out, roots)
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}, {"UIKit", uikit_armv7_interface}}) do
+        local name, lower = overlay[1], overlay[2]
+        local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
+        local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
+        if os.isfile(source) then
+            local copy = path.join(out, path.relative(dir, sdk), "armv7-apple-ios.swiftinterface")
+            os.mkdir(path.directory(copy))
+            write_if_changed(copy, lower(io.readfile(source)))
+            roots[dir] = roots[dir] or {}
+            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
+        end
+    end
+end
+
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
@@ -2300,15 +2379,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
         roots[entry.directory] = roots[entry.directory] or {}
         table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
     end
-    local photos = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Modules", "Photos.swiftmodule")
-    local photos_source = path.join(photos, "arm64e-apple-ios.swiftinterface")
-    if os.isfile(photos_source) then
-        local copy = path.join(out, path.relative(photos, sdk), "armv7-apple-ios.swiftinterface")
-        os.mkdir(path.directory(copy))
-        write_if_changed(copy, photos_armv7_interface(io.readfile(photos_source)))
-        roots[photos] = roots[photos] or {}
-        table.insert(roots[photos], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
-    end
+    armv7_overlays(sdk, out, roots)
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
         if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
