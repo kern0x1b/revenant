@@ -39,10 +39,21 @@ local LC_ENCRYPTION_INFO_64 = 0x2C
 local LC_BUILD_VERSION = 0x32
 local LC_FUNCTION_STARTS = 0x26
 local LC_MAIN = 0x80000028
+local LC_CODE_SIGNATURE = 0x1D
+local MH_TWOLEVEL = 0x80
+local PAGE_SIZE = 0x1000
 
 local LIBRARY_COMMANDS = {
     [LC_LOAD_DYLIB] = true, [LC_LOAD_WEAK_DYLIB] = true, [LC_REEXPORT_DYLIB] = true,
     [LC_LAZY_LOAD_DYLIB] = true, [LC_UPWARD_DYLIB] = true
+}
+
+local LC_DATA_IN_CODE = 0x29
+local LC_DYLIB_CODE_SIGN_DRS = 0x2B
+local LC_LINKER_OPTIMIZATION_HINT = 0x2E
+local LINKEDIT_DATA = {
+    [LC_FUNCTION_STARTS] = true, [LC_DATA_IN_CODE] = true, [LC_DYLIB_CODE_SIGN_DRS] = true, [LC_LINKER_OPTIMIZATION_HINT] = true,
+    [LC_DYLD_EXPORTS_TRIE] = true, [LC_DYLD_CHAINED_FIXUPS] = true
 }
 
 local ARCHITECTURES = {[ARM] = {[6] = "armv6", [9] = "armv7", [11] = "armv7s"}, [ARM64] = {[0] = "arm64", [2] = "arm64e"}}
@@ -90,26 +101,27 @@ function image(data, base)
     local cputype, cpusubtype, filetype, ncmds, _, flags = string.unpack("<i4i4I4I4I4I4", data, base + 5)
     local found = {base = base, cputype = cputype, cpusubtype = cpusubtype & 0xFFFFFF, filetype = filetype, flags = flags,
                    wide = wide, segments = {}, sections = {}, libraries = {}, library_strength = {}, reexports = {},
-                   sub_names = {}, commands = {}, linker_options = {}}
+                   sub_names = {}, commands = {}, command_at = {}, linker_options = {}}
     local at = base + (wide and 32 or 28)
     for _ = 1, ncmds do
         local command, size = string.unpack("<I4I4", data, at + 1)
         table.insert(found.commands, command)
+        table.insert(found.command_at, at)
         if command == LC_SEGMENT or command == LC_SEGMENT_64 then
-            local name, vmaddr, vmsize, fileoff, nsects, first, entry, layout
+            local name, vmaddr, vmsize, fileoff, filesize, nsects, first, entry, layout
             if command == LC_SEGMENT_64 then
-                name, vmaddr, vmsize, fileoff = string.unpack("<c16I8I8I8", data, at + 9)
+                name, vmaddr, vmsize, fileoff, filesize = string.unpack("<c16I8I8I8I8", data, at + 9)
                 nsects = string.unpack("<I4", data, at + 9 + 56)
                 first, entry, layout = at + 72, 80, "<c16c16I8I8I4I4I4I4I4I4I4"
             else
-                name, vmaddr, vmsize, fileoff = string.unpack("<c16I4I4I4", data, at + 9)
+                name, vmaddr, vmsize, fileoff, filesize = string.unpack("<c16I4I4I4I4", data, at + 9)
                 nsects = string.unpack("<I4", data, at + 9 + 40)
                 first, entry, layout = at + 56, 68, "<c16c16I4I4I4I4I4I4I4I4I4"
             end
-            table.insert(found.segments, {name = name:gsub("%z+$", ""), vmaddr = vmaddr, vmsize = vmsize, fileoff = fileoff})
+            table.insert(found.segments, {name = name:gsub("%z+$", ""), vmaddr = vmaddr, vmsize = vmsize, fileoff = fileoff, filesize = filesize})
             for index = 0, nsects - 1 do
-                local sectname, segname, addr, sectsize, _, _, reloff, nreloc, flags, reserved1, reserved2 = string.unpack(layout, data, first + index * entry + 1)
-                table.insert(found.sections, {name = sectname:gsub("%z+$", ""), segment = segname:gsub("%z+$", ""), addr = addr, size = sectsize, flags = flags, reserved1 = reserved1, reserved2 = reserved2,
+                local sectname, segname, addr, sectsize, sectoffset, _, reloff, nreloc, flags, reserved1, reserved2 = string.unpack(layout, data, first + index * entry + 1)
+                table.insert(found.sections, {name = sectname:gsub("%z+$", ""), segment = segname:gsub("%z+$", ""), addr = addr, size = sectsize, offset = sectoffset, flags = flags, reserved1 = reserved1, reserved2 = reserved2,
                                               reloff = reloff, nreloc = nreloc})
             end
         elseif command == LC_SYMTAB then
@@ -147,6 +159,9 @@ function image(data, base)
             table.insert(found.linker_options, arguments)
         elseif command == LC_ID_DYLIB then
             found.identity = cstring(data, at + string.unpack("<I4", data, at + 9))
+            found.current_version, found.compatibility_version = string.unpack("<I4I4", data, at + 17)
+        elseif command == LC_CODE_SIGNATURE then
+            found.signature = {string.unpack("<I4I4", data, at + 9)}
         elseif LIBRARY_COMMANDS[command] then
             table.insert(found.libraries, cstring(data, at + string.unpack("<I4", data, at + 9)))
             table.insert(found.library_strength, command == LC_LOAD_DYLIB or command == LC_REEXPORT_DYLIB)
@@ -297,60 +312,108 @@ function weak_bindings(data, found)
     return order
 end
 
+local function sleb(data, at)
+    local value, shift, byte = 0, 0, 0x80
+    while byte & 0x80 ~= 0 do
+        byte = data:byte(at + 1)
+        at = at + 1
+        value = value | ((byte & 0x7F) << shift)
+        shift = shift + 7
+    end
+    if byte & 0x40 ~= 0 and shift < 64 then
+        value = value | (-1 << shift)
+    end
+    return value, at
+end
+
+function bind_stream(data, found, stream, lazy)
+    local entries = {}
+    if not stream or stream[2] == 0 then
+        return entries
+    end
+    local pointer = found.wide and 8 or 4
+    local at, finish = found.base + stream[1], found.base + stream[1] + stream[2]
+    local state, ordinal_at, ordinal_len
+    local function fresh()
+        state = {ordinal = 0, flags = 0, type = 1, addend = 0, offset = 0}
+    end
+    local function bind()
+        if not state.name or not state.segment then
+            raise("a bind opcode binds before naming its symbol and segment, so the stream is not one this toolchain reads")
+        end
+        table.insert(entries, {name = state.name, ordinal = state.ordinal, flags = state.flags, type = state.type, addend = state.addend,
+                               segment = state.segment, offset = state.offset, ordinal_at = ordinal_at, ordinal_len = ordinal_len})
+        state.offset = state.offset + pointer
+    end
+    fresh()
+    while at < finish do
+        local start = at
+        local byte = data:byte(at + 1)
+        at = at + 1
+        local opcode, immediate = byte & 0xF0, byte & 0x0F
+        if byte == 0x00 then
+            if not lazy then
+                break
+            end
+            fresh()
+            ordinal_at, ordinal_len = nil, nil
+        elseif opcode == 0x10 then
+            state.ordinal = immediate
+            ordinal_at, ordinal_len = start, 1
+        elseif opcode == 0x20 then
+            state.ordinal, at = uleb(data, at)
+            ordinal_at, ordinal_len = start, at - start
+        elseif opcode == 0x30 then
+            state.ordinal = immediate == 0 and 0 or ((0xF0 | immediate) - 0x100)
+            ordinal_at, ordinal_len = start, 1
+        elseif opcode == 0x40 then
+            local name = cstring(data, at)
+            state.name, state.flags = name, immediate
+            at = at + #name + 1
+        elseif opcode == 0x50 then
+            state.type = immediate
+        elseif opcode == 0x60 then
+            state.addend, at = sleb(data, at)
+        elseif opcode == 0x70 then
+            state.segment = immediate
+            state.offset, at = uleb(data, at)
+        elseif opcode == 0x80 then
+            local delta
+            delta, at = uleb(data, at)
+            state.offset = state.offset + delta
+        elseif opcode == 0x90 then
+            bind()
+        elseif opcode == 0xA0 then
+            local delta
+            delta, at = uleb(data, at)
+            bind()
+            state.offset = state.offset + delta
+        elseif opcode == 0xB0 then
+            bind()
+            state.offset = state.offset + immediate * pointer
+        elseif opcode == 0xC0 then
+            local count, skip
+            count, at = uleb(data, at)
+            skip, at = uleb(data, at)
+            for _ = 1, count do
+                bind()
+                state.offset = state.offset + skip
+            end
+        else
+            raise("bind opcode %#x is not one this toolchain reads", byte)
+        end
+    end
+    return entries
+end
+
 function bound_slots(data, found)
     local slots = {}
     local pointer = found.wide and 8 or 4
-    for _, stream in ipairs({found.bind, found.lazy_bind, found.weak_bind}) do
-        if stream and stream[2] > 0 then
-            local at, finish = found.base + stream[1], found.base + stream[1] + stream[2]
-            local name, address = nil, nil
-            local function bind()
-                if name and address then
-                    slots[address] = name
-                    address = address + pointer
-                end
-            end
-            while at < finish do
-                local byte = data:byte(at + 1)
-                at = at + 1
-                local opcode, immediate = byte & 0xF0, byte & 0x0F
-                if opcode == 0x00 then
-                    name, address = nil, nil
-                elseif opcode == 0x20 or opcode == 0x50 or opcode == 0x60 then
-                    if opcode ~= 0x50 then
-                        _, at = uleb(data, at)
-                    end
-                elseif opcode == 0x40 then
-                    name = cstring(data, at)
-                    at = at + #name + 1
-                elseif opcode == 0x70 then
-                    local offset
-                    offset, at = uleb(data, at)
-                    local segment = found.segments[immediate + 1]
-                    address = segment and (segment.vmaddr + offset) or nil
-                elseif opcode == 0x80 then
-                    local delta
-                    delta, at = uleb(data, at)
-                    address = address and (address + delta) or nil
-                elseif opcode == 0x90 then
-                    bind()
-                elseif opcode == 0xA0 then
-                    local delta
-                    delta, at = uleb(data, at)
-                    bind()
-                    address = address and (address + delta) or nil
-                elseif opcode == 0xB0 then
-                    bind()
-                    address = address and (address + immediate * pointer) or nil
-                elseif opcode == 0xC0 then
-                    local count, skip
-                    count, at = uleb(data, at)
-                    skip, at = uleb(data, at)
-                    for _ = 1, count do
-                        bind()
-                        address = address and (address + skip) or nil
-                    end
-                end
+    for _, stream in ipairs({{found.bind, false}, {found.lazy_bind, true}, {found.weak_bind, false}}) do
+        for _, entry in ipairs(bind_stream(data, found, stream[1], stream[2])) do
+            local segment = found.segments[entry.segment + 1]
+            if segment then
+                slots[segment.vmaddr + entry.offset] = entry.name
             end
         end
     end
@@ -693,4 +756,293 @@ function verify(binary, opt)
         local more = #problems > 5 and string.format("; and %d more", #problems - 5) or ""
         raise("%s is not what the platform runs: %s%s", binary, table.concat(shown, "; "), more)
     end
+end
+
+function encoded_uleb(value)
+    local bytes = {}
+    repeat
+        local byte = value & 0x7F
+        value = value >> 7
+        table.insert(bytes, string.char(value ~= 0 and (byte | 0x80) or byte))
+    until value == 0
+    return table.concat(bytes)
+end
+
+local function encoded_sleb(value)
+    local bytes = {}
+    while true do
+        local byte = value & 0x7F
+        value = value // 128
+        local last = (value == 0 and byte & 0x40 == 0) or (value == -1 and byte & 0x40 ~= 0)
+        table.insert(bytes, string.char(last and byte or (byte | 0x80)))
+        if last then
+            return table.concat(bytes)
+        end
+    end
+end
+
+local function fixed_uleb(value, width)
+    if value >> (7 * width) ~= 0 then
+        return nil
+    end
+    local bytes = {}
+    for index = 1, width do
+        local byte = (value >> (7 * (index - 1))) & 0x7F
+        table.insert(bytes, string.char(index < width and (byte | 0x80) or byte))
+    end
+    return table.concat(bytes)
+end
+
+local function encoded_binds(entries)
+    local pieces = {}
+    for _, entry in ipairs(entries) do
+        local ordinal = entry.ordinal
+        if ordinal >= 1 and ordinal <= 15 then
+            table.insert(pieces, string.char(0x10 | ordinal))
+        elseif ordinal > 15 then
+            table.insert(pieces, string.char(0x20) .. encoded_uleb(ordinal))
+        else
+            table.insert(pieces, string.char(0x30 | (ordinal & 0xF)))
+        end
+        table.insert(pieces, string.char(0x40 | entry.flags) .. entry.name .. "\0")
+        table.insert(pieces, string.char(0x50 | entry.type))
+        table.insert(pieces, string.char(0x60) .. encoded_sleb(entry.addend))
+        table.insert(pieces, string.char(0x70 | entry.segment) .. encoded_uleb(entry.offset))
+        table.insert(pieces, string.char(0x90))
+    end
+    table.insert(pieces, string.char(0x00))
+    return table.concat(pieces)
+end
+
+local function patched(data, edits)
+    table.sort(edits, function (a, b) return a[1] < b[1] end)
+    local pieces, at = {}, 0
+    for _, edit in ipairs(edits) do
+        table.insert(pieces, data:sub(at + 1, edit[1]))
+        table.insert(pieces, edit[2])
+        at = edit[1] + #edit[2]
+    end
+    table.insert(pieces, data:sub(at + 1))
+    return table.concat(pieces)
+end
+
+function rebind(file, moves, libraries)
+    local data = read(file)
+    if data:sub(1, 4) ~= MAGIC32 then
+        raise("%s is not a thin 32-bit Mach-O, so its imports cannot be rebound: rebind takes the armv7 slice of an image", file)
+    end
+    local found = image(data, 0)
+    if found.cputype ~= ARM then
+        raise("%s is not an armv7 image, so its imports cannot be rebound here", file)
+    end
+    if found.flags & MH_TWOLEVEL == 0 then
+        raise("%s is a flat-namespace image, which names no library for an import, so there is nothing to rebind", file)
+    end
+    local header_end = 28 + string.unpack("<I4", data, 21)
+    local commands, dyld_info, linkedit, signature = {}, nil, nil, nil
+    for index, at in ipairs(found.command_at) do
+        local command, size = string.unpack("<I4I4", data, at + 1)
+        local entry = {at = at, command = command, size = size, bytes = data:sub(at + 1, at + size)}
+        commands[index] = entry
+        if command == LC_DYLD_INFO or command == LC_DYLD_INFO_ONLY then
+            dyld_info = entry
+        elseif command == LC_SEGMENT and string.unpack("<c16", data, at + 9):gsub("%z+$", "") == "__LINKEDIT" then
+            linkedit = entry
+        elseif command == LC_CODE_SIGNATURE then
+            signature = entry
+        end
+    end
+    local linkedit_segment
+    for _, segment in ipairs(found.segments) do
+        if segment.name == "__LINKEDIT" then
+            linkedit_segment = segment
+        end
+    end
+    if not dyld_info or not linkedit or not linkedit_segment or not found.symtab then
+        raise("%s has no LC_DYLD_INFO, __LINKEDIT or symbol table, so its binds cannot be rebound", file)
+    end
+    if linkedit_segment.fileoff + linkedit_segment.filesize ~= #data then
+        raise("__LINKEDIT of %s does not run to the end of the file, so its binds cannot be moved to the end", file)
+    end
+    local limit = #data
+    if signature then
+        local dataoff, datasize = string.unpack("<I4I4", data, signature.at + 9)
+        if dataoff + datasize ~= #data then
+            raise("the code signature of %s is not the last part of it, so its binds cannot be moved to the end", file)
+        end
+        limit = dataoff
+    end
+    local first = #data
+    for _, section in ipairs(found.sections) do
+        if section.offset > 0 and section.size > 0 then
+            first = math.min(first, section.offset)
+        end
+    end
+    for _, segment in ipairs(found.segments) do
+        if segment.fileoff > 0 and segment.filesize > 0 then
+            first = math.min(first, segment.fileoff)
+        end
+    end
+    local existing = {}
+    for index, install in ipairs(found.libraries) do
+        existing[install] = existing[install] or index
+    end
+    local ordinal_of, added = {}, {}
+    for _, name in ipairs(table.orderkeys(moves)) do
+        local install = moves[name]
+        if not ordinal_of[install] then
+            if existing[install] then
+                ordinal_of[install] = existing[install]
+            else
+                table.insert(added, install)
+                ordinal_of[install] = #found.libraries + #added
+            end
+        end
+    end
+    local additions, added_bytes = {}, 0
+    for _, install in ipairs(added) do
+        local version = (libraries or {})[install]
+        if not version then
+            raise("%s is rebound to %s, whose current and compatibility versions are not given", file, install)
+        end
+        local name = install .. "\0"
+        local size = (24 + #name + 3) & ~3
+        table.insert(additions, string.pack("<I4I4I4I4I4I4", LC_LOAD_DYLIB, size, 24, 2, version.current, version.compatibility)
+                                .. name .. string.rep("\0", size - 24 - #name))
+        added_bytes = added_bytes + size
+    end
+    local cmds_end = header_end - (signature and signature.size or 0) + added_bytes
+    if cmds_end > first then
+        raise("%s has no room in its header for %d bytes of load command: its load commands end at %#x and its first section begins at %#x; relink it with -headerpad to make room",
+              file, added_bytes, header_end, first)
+    end
+    if cmds_end > header_end and data:sub(header_end + 1, cmds_end):find("[^%z]") then
+        raise("the bytes of %s between its load commands and its first section are not padding, so a load command cannot go there", file)
+    end
+    local edits, rewrite = {}, false
+    local symoff, nsyms, stroff = found.symtab[1], found.symtab[2], found.symtab[3]
+    local imported = {}
+    for index = 0, nsyms - 1 do
+        local at = symoff + index * 12
+        local strx, kind, _, desc = string.unpack("<I4BBI2", data, at + 1)
+        local name = kind & 0xE0 == 0 and kind & 0x0E == 0 and kind & 0x01 ~= 0 and cstring(data, stroff + strx) or nil
+        local install = name and moves[name]
+        if install then
+            imported[name] = true
+            if not found.libraries[desc >> 8] then
+                raise("%s imports %s from no library, so there is no ordinal to move it from", file, name)
+            end
+            if desc >> 8 ~= ordinal_of[install] then
+                table.insert(edits, {at + 6, string.pack("<I2", (desc & 0xFF) | (ordinal_of[install] << 8))})
+            end
+        end
+    end
+    for _, name in ipairs(table.orderkeys(moves)) do
+        if not imported[name] then
+            raise("%s imports no %s, so there is no import to rebind", file, name)
+        end
+    end
+    local binds = bind_stream(data, found, found.bind, false)
+    for _, entry in ipairs(binds) do
+        local install = moves[entry.name]
+        if install and found.libraries[entry.ordinal] ~= install then
+            if not found.libraries[entry.ordinal] then
+                raise("%s binds %s flat, not to a library, so it cannot be moved to %s", file, entry.name, install)
+            end
+            entry.ordinal = ordinal_of[install]
+            rewrite = true
+        end
+    end
+    for _, entry in ipairs(bind_stream(data, found, found.lazy_bind, true)) do
+        local install = moves[entry.name]
+        if install and found.libraries[entry.ordinal] ~= install then
+            if not found.libraries[entry.ordinal] then
+                raise("%s binds %s flat, not to a library, so it cannot be moved to %s", file, entry.name, install)
+            end
+            local target = ordinal_of[install]
+            local op
+            if not entry.ordinal_at then
+                op = nil
+            elseif entry.ordinal_len == 1 then
+                op = (target >= 1 and target <= 15) and string.char(0x10 | target) or nil
+            else
+                local rest = fixed_uleb(target, entry.ordinal_len - 1)
+                op = rest and (string.char(0x20) .. rest) or nil
+            end
+            if not op then
+                raise("%s binds %s lazily, from ordinal %d, and cannot bind it to %s in place: a lazy bind is reached by the offset its stub holds, so it cannot change its length",
+                      file, entry.name, entry.ordinal, install)
+            end
+            table.insert(edits, {entry.ordinal_at, op})
+        end
+    end
+    local tail, tail_size, split = "", 0, limit
+    if rewrite then
+        local stream = encoded_binds(binds)
+        tail_size = #stream
+        tail = stream .. string.rep("\0", (-#stream) & 7)
+        split = 0
+        for _, stream in ipairs({found.rebase, found.bind, found.weak_bind, found.lazy_bind}) do
+            if stream[2] > 0 then
+                split = math.max(split, stream[1] + stream[2])
+            end
+        end
+        local bind_off, bind_size = string.unpack("<I4I4", data, dyld_info.at + 17)
+        table.insert(edits, {bind_off, string.rep("\0", bind_size)})
+    end
+    local regions = {}
+    local function shifted(bytes, at, count_at, unit)
+        local offset = string.unpack("<I4", bytes, at + 1)
+        local count = string.unpack("<I4", bytes, count_at + 1)
+        if offset ~= 0 and count > 0 then
+            table.insert(regions, {offset, count * unit})
+        end
+        local moved = (offset ~= 0 and offset >= split) and offset + #tail or offset
+        return bytes:sub(1, at) .. string.pack("<I4", moved) .. bytes:sub(at + 5)
+    end
+    local function relocated(entry)
+        local bytes = entry.bytes
+        if entry.command == LC_DYLD_INFO or entry.command == LC_DYLD_INFO_ONLY then
+            bytes = shifted(bytes, 8, 12, 1)
+            bytes = shifted(bytes, 24, 28, 1)
+            bytes = shifted(bytes, 32, 36, 1)
+            bytes = shifted(bytes, 40, 44, 1)
+            if rewrite then
+                bytes = bytes:sub(1, 16) .. string.pack("<I4I4", split, tail_size) .. bytes:sub(25)
+            end
+        elseif entry.command == LC_SYMTAB then
+            bytes = shifted(bytes, 8, 12, 12)
+            bytes = shifted(bytes, 16, 20, 1)
+        elseif entry.command == LC_DYSYMTAB then
+            for _, field in ipairs({{32, 36, 8}, {40, 44, 52}, {48, 52, 4}, {56, 60, 4}, {64, 68, 8}, {72, 76, 8}}) do
+                bytes = shifted(bytes, field[1], field[2], field[3])
+            end
+        elseif LINKEDIT_DATA[entry.command] then
+            bytes = shifted(bytes, 8, 12, 1)
+        end
+        return bytes
+    end
+    local filesize = limit + #tail - linkedit_segment.fileoff
+    local vmsize = math.max(linkedit_segment.vmsize, (filesize + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
+    local linkedit_bytes = linkedit.bytes:sub(1, 28) .. string.pack("<I4", vmsize) .. linkedit.bytes:sub(33, 36) .. string.pack("<I4", filesize) .. linkedit.bytes:sub(41)
+    local parts = {}
+    for _, entry in ipairs(commands) do
+        if entry == linkedit then
+            table.insert(parts, linkedit_bytes)
+        elseif entry ~= signature then
+            table.insert(parts, relocated(entry))
+        end
+    end
+    for _, region in ipairs(regions) do
+        if region[1] < split and region[1] + region[2] > split then
+            raise("%s keeps LINKEDIT data across the end of its binds, so the binds cannot be placed there without moving it", file)
+        end
+    end
+    table.join2(parts, additions)
+    local body = table.concat(parts)
+    local head = data:sub(1, 16) .. string.pack("<I4I4", #parts, #body) .. data:sub(25, 28) .. body
+    local prefix = math.max(header_end, #head)
+    local edited = patched(data, edits)
+    local output = head .. string.rep("\0", prefix - #head) .. edited:sub(prefix + 1, split) .. tail .. edited:sub(split + 1, limit)
+    io.writefile(file, output, {encoding = "binary"})
 end
