@@ -5,7 +5,7 @@ if get_config("component") ~= "" then
     return
 end
 
-includes("src/engine", "src/device-tools")
+includes("src/device-tools")
 
 local stubs = path.join(os.scriptdir(), "src", "compat", "stubs")
 local version = "0.1.0"

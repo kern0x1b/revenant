@@ -4,8 +4,8 @@ package("webkit-engine")
     set_license("LGPL-2.1-or-later AND BSD-2-Clause")
     set_policy("package.strict_compatibility", true)
 
-    local member = path.join(os.scriptdir(), "..", "..")
-    local modules = path.join(os.scriptdir(), "..", "modules")
+    local member = path.join(os.scriptdir(), "..", "..", "..", "frameworks", "WebKit")
+    local modules = path.join(member, "src", "modules")
     local digests = {}
     local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(member, "tests", "data", "carry-symbols.txt")},
                               os.files(path.join(member, "src", "modules", "*.lua")), os.files(path.join(member, "src", "compat", "**")))
