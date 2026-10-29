@@ -26,7 +26,7 @@ func ioSurfaceTexture(device: MTLDevice, pixelFormat: MTLPixelFormat) -> MTLText
         kIOSurfaceBytesPerElement as String: 4,
         kIOSurfacePixelFormat as String: kCVPixelFormatType_32BGRA,
     ]
-    guard let ioSurface: IOSurfaceRef = IOSurfaceCreate(properties as CFDictionary) else {
+    guard let ioSurface: IOSurface = IOSurfaceCreate(properties as CFDictionary) else {
         return nil
     }
     if let colorSpace = CGColorSpace(name: CGColorSpace.extendedSRGB),
@@ -41,6 +41,11 @@ func ioSurfaceTexture(device: MTLDevice, pixelFormat: MTLPixelFormat) -> MTLText
     descriptor.storageMode = .shared
     descriptor.usage = .renderTarget
     return device.makeTexture(descriptor: descriptor, iosurface: ioSurface, plane: 0)
+}
+
+func ioSurfaceKeys() -> [CFString] {
+    return [kIOSurfaceWidth, kIOSurfaceHeight, kIOSurfaceBytesPerElement, kIOSurfaceBytesPerRow,
+            kIOSurfacePixelFormat, kIOSurfaceColorSpace, kIOSurfaceCacheMode]
 }
 
 func computePipeline(device: MTLDevice, descriptor: MTLComputePipelineDescriptor) -> MTLComputePipelineState? {
