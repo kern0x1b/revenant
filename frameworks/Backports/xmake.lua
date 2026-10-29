@@ -104,7 +104,36 @@ local LIBRARIES = {
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
 }
 
-if is_plat("iphoneos") then
+local SELECTED = os.getenv("REVENANT_BACKPORTS_LIBRARIES")
+SELECTED = SELECTED ~= "" and SELECTED or nil
+if SELECTED then
+    local byname = {}
+    for _, library in ipairs(LIBRARIES) do
+        byname[library.name] = library
+    end
+    local keep, pending = {}, SELECTED:split("%s*,%s*")
+    while #pending > 0 do
+        local name = table.remove(pending)
+        if not keep[name] then
+            local library = byname[name] or raise("REVENANT_BACKPORTS_LIBRARIES names %s, which is no Backports library", name)
+            keep[name] = true
+            for _, dependency in ipairs(library.libraries) do
+                if dependency:endswith("Backports") then
+                    table.insert(pending, dependency)
+                end
+            end
+        end
+    end
+    local kept = {}
+    for _, library in ipairs(LIBRARIES) do
+        if keep[library.name] then
+            table.insert(kept, library)
+        end
+    end
+    LIBRARIES = kept
+end
+
+if is_plat("iphoneos") and not SELECTED then
     add_requires("revenant@lzfse lzfse-1.0", {alias = "lzfse"})
     add_requires("revenant@zlib v1.3.2", {alias = "zlib"})
     add_requires("revenant@lz4 v1.9.2", {alias = "lz4"})
@@ -120,7 +149,9 @@ if is_plat("iphoneos") then
     add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
     add_requires("revenant@tessdata", {alias = "tessdata", configs = {languages = "eng,rus,ukr"}})
     add_requires("revenant@libcxx", {alias = "libcxx"})
+end
 
+if is_plat("iphoneos") then
     local generator
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
@@ -150,15 +181,17 @@ if is_plat("iphoneos") then
         add_headerfiles(path.join(CODING, "*.h"))
         add_includedirs(CODING, {public = true})
 
-    target("RevenantCKWebAuth")
-        set_kind("static")
-        add_rules("@addon/revenant/apple-ios")
-        set_optimize("smallest")
-        add_cflags("-Os", "-fvisibility=hidden", "-fno-strict-aliasing")
-        add_files(path.join(WEBAUTH, "RevenantCKWebAuth.c"))
-        add_headerfiles(path.join(WEBAUTH, "RevenantCKWebAuth.h"))
-        add_includedirs(WEBAUTH, {public = true})
-        add_packages("micro-ecc", {public = true})
+    if not SELECTED then
+        target("RevenantCKWebAuth")
+            set_kind("static")
+            add_rules("@addon/revenant/apple-ios")
+            set_optimize("smallest")
+            add_cflags("-Os", "-fvisibility=hidden", "-fno-strict-aliasing")
+            add_files(path.join(WEBAUTH, "RevenantCKWebAuth.c"))
+            add_headerfiles(path.join(WEBAUTH, "RevenantCKWebAuth.h"))
+            add_includedirs(WEBAUTH, {public = true})
+            add_packages("micro-ecc", {public = true})
+    end
 
     target("revenant-callkit-screen")
         set_default(false)
@@ -311,7 +344,7 @@ local function backports_tests(name, scripts)
     target_end()
 end
 
-if is_plat("iphoneos") then
+if is_plat("iphoneos") and not SELECTED then
     target("BackportsLayoutProbe")
         set_kind("binary")
         set_default(false)
@@ -405,7 +438,7 @@ local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
 local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports"}
 
-if is_plat("iphoneos") and get_config("tests") == "device" then
+if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
 
     target("backports_runtime_app")
@@ -499,7 +532,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" then
     target_end()
 end
 
-if is_plat("iphoneos") then
+if is_plat("iphoneos") and not SELECTED then
     target("BackportsProbe")
         set_kind("binary")
         set_default(false)

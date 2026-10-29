@@ -4,6 +4,8 @@ local PACKAGES = {
     StoreKit = "storekit", AuthenticationServices = "authenticationservices"
 }
 
+local FOUNDATION = "backports"
+
 local function swift_imports(file)
     local lines = try { function () return os.iorunv("grep", {"-E", "^[[:space:]]*import[[:space:]]", file}) end } or ""
     local modules = {}
@@ -20,11 +22,14 @@ function attach(target, project)
             wanted[PACKAGES[framework]] = "links " .. framework
         end
     end
+    local inside = path.absolute(target:scriptdir()):find(path.join("frameworks", "Backports"), 1, true)
     for _, file in ipairs(target:sourcefiles()) do
         if file:endswith(".swift") then
             for _, module in ipairs(swift_imports(file)) do
                 if PACKAGES[module] then
                     wanted[PACKAGES[module]] = "imports " .. module
+                elseif module == "Foundation" and not inside then
+                    wanted[FOUNDATION] = "imports Foundation"
                 end
             end
         end

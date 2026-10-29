@@ -153,12 +153,15 @@ function backport_libraries(target)
     return libraries
 end
 
-local SHARED = {"swift-runtime", "libcxx"}
+local SHARED = {"swift-runtime", "libcxx", "backports"}
 
 function shared_packages(target)
     local all, identities, libraries = {}, {}, {}
     for _, alias in ipairs(SHARED) do
         local package = target:pkg(alias)
+        if package and alias == "backports" and #backport_targets(target) > 0 then
+            package = nil
+        end
         for _, entry in ipairs(package and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1] and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1]:split(";") or {}) do
             local name, needs = entry:match("^([^=]+)=?(.*)$")
             local folder = "/usr/lib/revenant/" .. name

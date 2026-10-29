@@ -135,7 +135,10 @@ local RECIPES = {
                "frameworks/Backports/src/UniformTypeIdentifiers/*.swift"}},
     {folder = "packages/c/cryptokit", variable = "cryptokit_sources_digest",
      inputs = {"packages/c/cryptokit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
-               "frameworks/Backports/src/CryptoKit/*.swift"}}
+               "frameworks/Backports/src/CryptoKit/*.swift"}},
+    {folder = "packages/b/backports", variable = "backports_sources_digest",
+     inputs = {"packages/b/backports/xmake.lua", "toolchain/modules/apple/wrapper.lua", "toolchain/modules/apple/backports_package.lua",
+               "frameworks/Backports/xmake.lua", "frameworks/Backports/tools/**", "frameworks/Backports/src/**"}}
 }
 
 function recipes()
