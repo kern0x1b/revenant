@@ -178,6 +178,43 @@ function main()
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)
+    local documented = table.concat({
+        "/*!",
+        " @protocol MTLSample",
+        " @abstract A protocol that a doc comment names before its declaration",
+        " */",
+        "API_AVAILABLE(macos(10.11), ios(8.0)) NS_SWIFT_SENDABLE",
+        "@protocol MTLSample <NSObject>",
+        "- (void)run;",
+        "@end",
+        "API_AVAILABLE(macos(10.11), ios(8.0))",
+        "@protocol MTLSkipped <NSObject>",
+        "@end",
+        "#if TARGET_OS_SIMULATOR",
+        "API_AVAILABLE(macos(10.11), ios(13.0))",
+        "#else",
+        "API_AVAILABLE(macos(10.11), ios(8.0))",
+        "#endif",
+        "@interface MTLConditional : NSObject",
+        "@end",
+        "",
+    }, "\n")
+    local documented_lowering = lowered.lower_header(documented, {classes = {MTLConditional = {}}, functions = {}, globals = {}, protocols = {MTLSample = true}})
+    assert(count(documented_lowering, "AVAILABLE") == 1 and documented_lowering:find("NS_SWIFT_SENDABLE\n@protocol MTLSample <NSObject>", 1, true)
+           and documented_lowering:find("API_AVAILABLE(macos(10.11), ios(8.0))\n@protocol MTLSkipped", 1, true)
+           and documented_lowering:find("#endif\n@interface MTLConditional : NSObject", 1, true),
+           "a protocol named in a doc comment before its declaration kept its availability:\n" .. documented_lowering)
+    local opened = table.concat({
+        "// a line comment that opens /* and never closes it",
+        "API_AVAILABLE(macos(10.11), ios(8.0))",
+        "@protocol MTLAfterOpen <NSObject>",
+        "@end",
+        "/* closes the comment that the line comment above opened */",
+        "",
+    }, "\n")
+    local opened_lowering = lowered.lower_header(opened, {classes = {}, functions = {}, globals = {}, protocols = {MTLAfterOpen = true}})
+    assert(count(opened_lowering, "AVAILABLE") == 0 and opened_lowering:find("@protocol MTLAfterOpen <NSObject>", 1, true),
+           "a declaration after a line comment that opens a block comment was taken for commented text:\n" .. opened_lowering)
     local typedefs = table.concat({
         "typedef NS_OPTIONS(NSUInteger, SampleOptions) {",
         "    SampleOne = 1UL << 0",

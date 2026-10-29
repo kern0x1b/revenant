@@ -65,6 +65,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "kCGColorSpaceSRGB",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGColorSpace.h",
+            find = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(9.0));",
+            replace = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(6.0)) __attribute__((weak_import));",
+        },
+    },
+    {
+        member = "UIKeyboardAppearanceDark",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITextInputTraits.h",
+            find = "UIKeyboardAppearanceDark API_AVAILABLE(ios(7.0)),",
+            replace = "UIKeyboardAppearanceDark API_AVAILABLE(ios(6.0)),",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",
@@ -551,7 +571,7 @@ local function directive_end(text, at)
     return stop
 end
 
-local function statement_start(text, at, quiet)
+local function statement_start(text, at, quiet, past_directives)
     local low = math.max(1, at - WINDOW)
     local window = text:sub(low, at - 1)
     local best = nil
@@ -575,7 +595,7 @@ local function statement_start(text, at, quiet)
         directive = found
         i = found + 1
     end
-    if directive then
+    if directive and not past_directives then
         best = math.max(best or 0, directive_end(text, low + directive) + 1)
     end
     if best then
@@ -967,8 +987,47 @@ local function adopts_lowered_protocol(text, stop, implemented)
     return false
 end
 
+local function comment_spans(text)
+    local spans, at = {}, 1
+    while true do
+        local start = text:find("/[/*]", at)
+        if not start then
+            return spans
+        end
+        local stop
+        if text:sub(start + 1, start + 1) == "/" then
+            stop = (text:find("\n", start, true) or #text + 1) - 1
+        else
+            local _, close = text:find("*/", start + 2, true)
+            stop = close or #text
+        end
+        table.insert(spans, {start, stop})
+        at = stop + 1
+    end
+end
+
+local function in_comment(spans, at)
+    for _, span in ipairs(spans) do
+        if at >= span[1] and at <= span[2] then
+            return true
+        end
+    end
+    return false
+end
+
+local function find_outside_comments(text, pattern, position, spans)
+    while true do
+        local start, stop = text:find(pattern, position)
+        if not start or not in_comment(spans, start) then
+            return start, stop
+        end
+        position = start + 1
+    end
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
+    local spans = comment_spans(text)
     local globals, functions = implemented.globals or {}, implemented.functions or {}
     for position, word in text:gmatch("()([%a_][%w_]*)") do
         words[word] = true
@@ -991,12 +1050,14 @@ local function lowering_of(text, implemented, declarations)
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
         local members = implemented.classes[class]
-        if members then
+        if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
-            local first = statement_start(text, position, true)
+            local first = statement_start(text, position, true, true)
             local category = text:match("^%s*%(", stop + 1) ~= nil
             if first and (not category or adopts_lowered_protocol(text, stop, implemented)) and not (implemented.weak_classes and implemented.weak_classes[class]) then
-                lower(first, text:find("\n", stop, true) or #text)
+                for _, piece in ipairs(pieces_of(text, first, text:find("\n", stop, true) or #text)) do
+                    lower(piece[1], piece[2])
+                end
             end
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -1019,7 +1080,7 @@ local function lowering_of(text, implemented, declarations)
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
         local members = implemented.classes[class]
-        if members then
+        if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -1045,14 +1106,16 @@ local function lowering_of(text, implemented, declarations)
     for name in pairs(implemented.protocols or {}) do
         local position = words[name] and 1 or #text + 1
         while true do
-            local start, stop = text:find("@protocol%s+" .. name .. "[%s<]", position)
+            local start, stop = find_outside_comments(text, "@protocol%s+" .. name .. "[%s<]", position, spans)
             if not start then
                 break
             end
             local block_end = text:find("@end", stop, true) or #text
-            local first = statement_start(text, start, true)
+            local first = statement_start(text, start, true, true)
             if first then
-                lower(first, text:find("\n", stop, true) or #text)
+                for _, piece in ipairs(pieces_of(text, first, text:find("\n", stop, true) or #text)) do
+                    lower(piece[1], piece[2])
+                end
             end
             local members = (implemented.protocol_members or {})[name] or {}
             local at = stop
@@ -2060,7 +2123,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true, ["_time.h"] = true, ["os.apinotes"] = true, ["simd/math.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
@@ -2125,12 +2188,123 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
+-- The SDK's Photos Swift overlay (which has PHChange.changeDetails(for:)) is arm64e only, so an armv7 build has no such
+-- member. The armv7 copy keeps the overlay's declarations, retargeted to armv7 ios 6.0 and without the library-evolution
+-- flags (revenant's armv7 Swift stdlib is not built with library evolution), and without the iOS 26 background upload
+-- extension, which needs ExtensionFoundation.
+local function photos_armv7_interface(text)
+    local lines, pending, skipping = {}, {}, false
+    for line in text:gmatch("([^\n]*)\n") do
+        if skipping then
+            skipping = line ~= "}"
+        elseif line:match("^@available") then
+            table.insert(pending, line)
+        elseif line == "public import ExtensionFoundation" then
+            pending = {}
+        elseif line:match("^public protocol PHBackgroundResourceUploadExtension") or line:match("^extension Photos%.PHBackgroundResourceUploadExtension") then
+            pending = {}
+            skipping = true
+        else
+            for _, attribute in ipairs(pending) do
+                table.insert(lines, attribute)
+            end
+            pending = {}
+            if line:match("^// swift%-module%-flags: ") then
+                line = line:gsub("arm64e%-apple%-ios26%.2", "armv7-apple-ios6.0"):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
+            end
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function lines_of(text)
+    local lines = {}
+    for line in text:gmatch("([^\n]*)\n") do
+        table.insert(lines, line)
+    end
+    return lines
+end
+
+-- The declaration at index, with its @available attributes, up to its closing brace at column 0.
+local function block_at(lines, index)
+    local first, last = index, index
+    while lines[first - 1] and lines[first - 1]:match("^@available") do
+        first = first - 1
+    end
+    while lines[last] and lines[last] ~= "}" do
+        last = last + 1
+    end
+    if not lines[last] then
+        raise("the Swift interface has no closing brace for the declaration at line %d", index)
+    end
+    return table.concat(lines, "\n", first, last)
+end
+
+local function block_starting(lines, prefix)
+    for i, line in ipairs(lines) do
+        if line:sub(1, #prefix) == prefix then
+            return block_at(lines, i)
+        end
+    end
+    raise("the Swift interface has no declaration starting %s", prefix)
+end
+
+local function block_enclosing(lines, opener, marker)
+    local start = nil
+    for i, line in ipairs(lines) do
+        if line == opener then
+            start = i
+        elseif start and line:find(marker, 1, true) then
+            return block_at(lines, start)
+        end
+    end
+    raise("the Swift interface has no %s in %s", marker, opener)
+end
+
+-- UIView.cornerConfiguration (refined for Swift, iOS 26) and the two types it needs are declared by the arm64e overlay
+-- only. The armv7 copy keeps those declarations, retargeted to armv7 ios 6.0 without the library-evolution flags (as for
+-- Photos); the rest of UIKit's overlay needs SwiftUI and the other modules armv7 does not have, so it is left out.
+local function uikit_armv7_interface(text)
+    local lines = lines_of(text)
+    return table.concat({
+        lines[1],
+        lines[2],
+        "// swift-module-flags: -target armv7-apple-ios6.0 -enable-objc-interop -swift-version 5 -module-name UIKit",
+        lines[4],
+        "public import Swift",
+        "public import _Concurrency",
+        "public import CoreFoundation",
+        "@_exported public import UIKit",
+        block_enclosing(lines, "extension UIView {", "var cornerConfiguration: UIKit.UICornerConfiguration"),
+        block_starting(lines, "public struct UICornerConfiguration "),
+        block_starting(lines, "public struct UICornerRadius "),
+        "",
+    }, "\n")
+end
+
+-- The SDK ships these Swift overlays for arm64e only, so an armv7 build lacks the declarations they add. Each armv7
+-- copy is mapped in the VFS as a file in the framework's Modules directory, next to the SDK's own arm64e interface.
+local function armv7_overlays(sdk, out, roots)
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}, {"UIKit", uikit_armv7_interface}}) do
+        local name, lower = overlay[1], overlay[2]
+        local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
+        local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
+        if os.isfile(source) then
+            local copy = path.join(out, path.relative(dir, sdk), "armv7-apple-ios.swiftinterface")
+            os.mkdir(path.directory(copy))
+            write_if_changed(copy, lower(io.readfile(source)))
+            roots[dir] = roots[dir] or {}
+            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
+        end
+    end
+end
+
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
-    local simd = path.join(include_directory(out), "simd", "math.h")
-    os.mkdir(path.directory(simd))
-    write_if_changed(simd, table.concat({
+    local simd = path.join(sdk, "usr", "include", "simd", "math.h")
+    changed[simd] = table.concat({
         "#if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 70000",
         "#ifdef __cplusplus",
         "extern \"C\" {",
@@ -2141,9 +2315,8 @@ function build_overlay(sdk, out, set, subtrees, modules)
         "}",
         "#endif",
         "#endif",
-        "#include_next <simd/math.h>",
         "",
-    }, "\n"))
+    }, "\n") .. io.readfile(simd)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local lowered = lowering_of(text, set)
@@ -2209,6 +2382,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
         roots[entry.directory] = roots[entry.directory] or {}
         table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
     end
+    armv7_overlays(sdk, out, roots)
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
         if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
