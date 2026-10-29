@@ -3355,6 +3355,7 @@ enum MTLPrimitiveTopologyClassUnspecified
 enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
+enum MTLPrimitiveTypeTriangle
 enum MTLPrimitiveTypeTriangleStrip
 enum MTLPurgeableStateKeepCurrent
 enum MTLPurgeableStateNonVolatile
@@ -3383,7 +3384,7 @@ enum MTLTextureType2D
 enum MTLTextureUsageRenderTarget
 enum MTLTextureUsageShaderRead
 enum MTLTextureUsageShaderWrite
-enum MTLTriangleFillModeFill
+enum MTLTriangleFillModeLines
 enum MTLVertexFormatChar
 enum MTLVertexFormatChar2
 enum MTLVertexFormatChar2Normalized
@@ -4685,6 +4686,7 @@ function RevenantMetalDecodeVertex
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
+function RevenantMetalTriangleEdges
 function RevenantMetalVertexFormat
 function RevenantMusicKitSignES256
 function RevenantNDEFRecordDecode
@@ -26852,10 +26854,12 @@ member RevenantMetalEncoder -endEncoding
 member RevenantMetalEncoder -initWithDescriptor:
 member RevenantMetalEncoder -insertDebugSignpost:
 member RevenantMetalEncoder -issue:first:count:indices:type:
+member RevenantMetalEncoder -issueEdgesOfPrimitive:stream:count:
 member RevenantMetalEncoder -label
 member RevenantMetalEncoder -popDebugGroup
 member RevenantMetalEncoder -prepareForVertexCount:
 member RevenantMetalEncoder -pushDebugGroup:
+member RevenantMetalEncoder -revenantArenaCopy:length:offset:
 member RevenantMetalEncoder -revenantCheckHeapOf:what:
 member RevenantMetalEncoder -revenantHeapNames
 member RevenantMetalEncoder -revenantUseHeaps:count:
