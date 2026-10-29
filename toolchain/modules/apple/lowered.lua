@@ -551,7 +551,7 @@ local function directive_end(text, at)
     return stop
 end
 
-local function statement_start(text, at, quiet)
+local function statement_start(text, at, quiet, past_directives)
     local low = math.max(1, at - WINDOW)
     local window = text:sub(low, at - 1)
     local best = nil
@@ -575,7 +575,7 @@ local function statement_start(text, at, quiet)
         directive = found
         i = found + 1
     end
-    if directive then
+    if directive and not past_directives then
         best = math.max(best or 0, directive_end(text, low + directive) + 1)
     end
     if best then
@@ -1024,10 +1024,12 @@ local function lowering_of(text, implemented, declarations)
         local members = implemented.classes[class]
         if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
-            local first = statement_start(text, position, true)
+            local first = statement_start(text, position, true, true)
             local category = text:match("^%s*%(", stop + 1) ~= nil
             if first and (not category or adopts_lowered_protocol(text, stop, implemented)) and not (implemented.weak_classes and implemented.weak_classes[class]) then
-                lower(first, text:find("\n", stop, true) or #text)
+                for _, piece in ipairs(pieces_of(text, first, text:find("\n", stop, true) or #text)) do
+                    lower(piece[1], piece[2])
+                end
             end
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -1081,9 +1083,11 @@ local function lowering_of(text, implemented, declarations)
                 break
             end
             local block_end = text:find("@end", stop, true) or #text
-            local first = statement_start(text, start, true)
+            local first = statement_start(text, start, true, true)
             if first then
-                lower(first, text:find("\n", stop, true) or #text)
+                for _, piece in ipairs(pieces_of(text, first, text:find("\n", stop, true) or #text)) do
+                    lower(piece[1], piece[2])
+                end
             end
             local members = (implemented.protocol_members or {})[name] or {}
             local at = stop

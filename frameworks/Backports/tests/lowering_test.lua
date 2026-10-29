@@ -190,11 +190,19 @@ function main()
         "API_AVAILABLE(macos(10.11), ios(8.0))",
         "@protocol MTLSkipped <NSObject>",
         "@end",
+        "#if TARGET_OS_SIMULATOR",
+        "API_AVAILABLE(macos(10.11), ios(13.0))",
+        "#else",
+        "API_AVAILABLE(macos(10.11), ios(8.0))",
+        "#endif",
+        "@interface MTLConditional : NSObject",
+        "@end",
         "",
     }, "\n")
-    local documented_lowering = lowered.lower_header(documented, {classes = {}, functions = {}, globals = {}, protocols = {MTLSample = true}})
+    local documented_lowering = lowered.lower_header(documented, {classes = {MTLConditional = {}}, functions = {}, globals = {}, protocols = {MTLSample = true}})
     assert(count(documented_lowering, "AVAILABLE") == 1 and documented_lowering:find("NS_SWIFT_SENDABLE\n@protocol MTLSample <NSObject>", 1, true)
-           and documented_lowering:find("API_AVAILABLE(macos(10.11), ios(8.0))\n@protocol MTLSkipped", 1, true),
+           and documented_lowering:find("API_AVAILABLE(macos(10.11), ios(8.0))\n@protocol MTLSkipped", 1, true)
+           and documented_lowering:find("#endif\n@interface MTLConditional : NSObject", 1, true),
            "a protocol named in a doc comment before its declaration kept its availability:\n" .. documented_lowering)
     local typedefs = table.concat({
         "typedef NS_OPTIONS(NSUInteger, SampleOptions) {",
