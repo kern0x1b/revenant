@@ -828,3 +828,33 @@ function rootfs(identifier, minimum, opt)
     end
     return folder, firmware
 end
+
+local function kernelcache_folder(firmware)
+    return path.join(home(), "firmware", "kernelcache", firmware.identifier, firmware.version .. "_" .. firmware.build)
+end
+
+function kernelcache(identifier, minimum)
+    local firmware = device_firmware(identifier, minimum)
+    local held = os.files(path.join(kernelcache_folder(firmware), "kernelcache.release.*"))
+    if #held == 1 then
+        return held[1], firmware
+    end
+    local members = zip_members(firmware.url)
+    local names = {}
+    for name in pairs(members) do
+        if name:match("^kernelcache%.release%.%w+$") then
+            table.insert(names, name)
+        end
+    end
+    if #names ~= 1 then
+        raise("the firmware of %s %s holds %d kernelcache.release files, not one", firmware.identifier, firmware.build, #names)
+    end
+    local folder = kernelcache_folder(firmware)
+    local file = path.join(folder, names[1])
+    if not os.isfile(file) then
+        cache.reserve(members[names[1]].uncompressed, "the kernelcache of " .. firmware.identifier .. " " .. firmware.version)
+        os.mkdir(folder)
+        fetch_member(firmware.url, members[names[1]], file)
+    end
+    return file, firmware
+end
