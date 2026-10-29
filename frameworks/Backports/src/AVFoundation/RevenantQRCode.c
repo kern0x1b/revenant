@@ -886,6 +886,7 @@ typedef struct {
     char *bytes;
     size_t length;
     size_t capacity;
+    int undecodable;
 } Buffer;
 
 static void buffer_append(Buffer *buffer, const char *data, size_t length)
@@ -961,18 +962,13 @@ void revenant_qr_set_converter(RevenantQRConverter converter)
 
 static void append_converted(Buffer *buffer, int eci, const uint8_t *bytes, size_t length)
 {
-    if (converter_hook) {
-        char *converted = NULL;
-        size_t convertedLength = 0;
-        if (converter_hook(eci, bytes, length, &converted, &convertedLength) && converted) {
-            buffer_append(buffer, converted, convertedLength);
-            free(converted);
-            return;
-        }
-        free(converted);
-    }
-    for (size_t index = 0; index < length; index++)
-        buffer_utf8(buffer, bytes[index] < 0x80 ? bytes[index] : 0xFFFD);
+    char *converted = NULL;
+    size_t convertedLength = 0;
+    if (converter_hook && converter_hook(eci, bytes, length, &converted, &convertedLength) && converted)
+        buffer_append(buffer, converted, convertedLength);
+    else
+        buffer->undecodable = 1;
+    free(converted);
 }
 
 static const char alphanumeric_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
@@ -1357,6 +1353,12 @@ static int try_triple(const Grid *image, Pattern topLeft, Pattern topRight, Patt
         free(out.bytes);
         return 0;
     }
+    result->undecodable = out.undecodable;
+    if (out.undecodable) {
+        free(out.bytes);
+        out.bytes = NULL;
+        out.length = 0;
+    }
     result->text = out.bytes ? out.bytes : calloc(1, 1);
     result->length = out.length;
     result->version = decodedVersion;
@@ -1503,6 +1505,34 @@ int revenant_qr_decode(const uint8_t *luma, int width, int height, int stride, R
         found = decode_with(&image, results, capacity);
         grid_free(&image);
     }
+    return found;
+}
+
+static int revenant_qr_region_edge(float edge, int limit)
+{
+    if (!(edge > 0))
+        return 0;
+    if (edge >= (float)limit)
+        return limit;
+    return (int)edge;
+}
+
+int revenant_qr_decode_region(const uint8_t *luma, int width, int height, int stride, float x, float y, float regionWidth, float regionHeight, RevenantQRResult *results, int capacity)
+{
+    if (!luma || width < 1 || height < 1)
+        return 0;
+    int left = revenant_qr_region_edge(floorf(x * width), width);
+    int top = revenant_qr_region_edge(floorf(y * height), height);
+    int right = revenant_qr_region_edge(ceilf((x + regionWidth) * width), width);
+    int bottom = revenant_qr_region_edge(ceilf((y + regionHeight) * height), height);
+    if (right <= left || bottom <= top)
+        return 0;
+    int found = revenant_qr_decode(luma + (size_t)top * stride + left, right - left, bottom - top, stride, results, capacity);
+    for (int index = 0; index < found; index++)
+        for (int corner = 0; corner < 4; corner++) {
+            results[index].corners[corner][0] += (float)left;
+            results[index].corners[corner][1] += (float)top;
+        }
     return found;
 }
 

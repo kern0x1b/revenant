@@ -71,4 +71,12 @@ REVENANT_AVMETADATA_BODY_CONSTRUCTION(AVMetadataHumanBodyObject)
     __attribute__((objc_method_family(init)));
 @end
 
+@interface AVMetadataMachineReadableCodeObject (RevenantAVMetadataConstruction)
+- (instancetype)revenant_initWithType:(NSString *)type
+                          stringValue:(NSString *)stringValue
+                              corners:(NSArray<NSDictionary *> *)corners
+                                 time:(CMTime)time
+    __attribute__((objc_method_family(init)));
+@end
+
 #endif
