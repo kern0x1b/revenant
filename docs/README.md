@@ -13,10 +13,12 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Vision text recognition on iOS 6](explanation/backports/vision-text.md) | `VNRecognizeTextRequest` on Tesseract: the languages, the differences from Vision, the measurements, and the packaging |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
+| [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram 13.0.0's Photos use against the AssetsLibrary-backed backport, and the status of each gap |
+| [The Network framework surface Telegram 13.0.0 uses](explanation/backports/network-framework-surface.md) | the `Network` members Telegram calls, what the backport must answer, and why Reachability cannot find `NWPathMonitor` yet |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
-| [Below the driver: the SGX543 GL path on the iPhone 4S](explanation/metal/below-the-driver.md) | the stack from glDrawElements to the kernel, the in-process shader compiler, whether Apple's compiled shaders are reachable, and the ranked options below the driver |
+| [Below the driver: the SGX543 GL path on the iPhone 4S](explanation/backports/below-the-driver.md) | the stack from glDrawElements to the kernel, the in-process shader compiler, whether Apple's compiled shaders are reachable, and the ranked options below the driver |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
