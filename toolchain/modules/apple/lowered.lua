@@ -2191,7 +2191,8 @@ end
 -- The SDK's Photos Swift overlay (which has PHChange.changeDetails(for:)) is arm64e only, so an armv7 build has no such
 -- member. The armv7 copy keeps the overlay's declarations, retargeted to armv7 ios 6.0 and without the library-evolution
 -- flags (revenant's armv7 Swift stdlib is not built with library evolution), and without the iOS 26 background upload
--- extension, which needs ExtensionFoundation.
+-- extension, which needs ExtensionFoundation. The PHChange extension is gated at iOS 6.0, the release the backport
+-- implements changeDetails(for:) for (PHChange8.m).
 local function photos_armv7_interface(text)
     local lines, pending, skipping = {}, {}, false
     for line in text:gmatch("([^\n]*)\n") do
@@ -2206,6 +2207,9 @@ local function photos_armv7_interface(text)
             skipping = true
         else
             for _, attribute in ipairs(pending) do
+                if line == "extension Photos.PHChange {" and attribute:find("iOS 8.0", 1, true) then
+                    attribute = "@available(iOS 6.0, *)"
+                end
                 table.insert(lines, attribute)
             end
             pending = {}
@@ -2218,75 +2222,12 @@ local function photos_armv7_interface(text)
     return table.concat(lines, "\n") .. "\n"
 end
 
-local function lines_of(text)
-    local lines = {}
-    for line in text:gmatch("([^\n]*)\n") do
-        table.insert(lines, line)
-    end
-    return lines
-end
-
--- The declaration at index, with its @available attributes, up to its closing brace at column 0.
-local function block_at(lines, index)
-    local first, last = index, index
-    while lines[first - 1] and lines[first - 1]:match("^@available") do
-        first = first - 1
-    end
-    while lines[last] and lines[last] ~= "}" do
-        last = last + 1
-    end
-    if not lines[last] then
-        raise("the Swift interface has no closing brace for the declaration at line %d", index)
-    end
-    return table.concat(lines, "\n", first, last)
-end
-
-local function block_starting(lines, prefix)
-    for i, line in ipairs(lines) do
-        if line:sub(1, #prefix) == prefix then
-            return block_at(lines, i)
-        end
-    end
-    raise("the Swift interface has no declaration starting %s", prefix)
-end
-
-local function block_enclosing(lines, opener, marker)
-    local start = nil
-    for i, line in ipairs(lines) do
-        if line == opener then
-            start = i
-        elseif start and line:find(marker, 1, true) then
-            return block_at(lines, start)
-        end
-    end
-    raise("the Swift interface has no %s in %s", marker, opener)
-end
-
--- UIView.cornerConfiguration (refined for Swift, iOS 26) and the two types it needs are declared by the arm64e overlay
--- only. The armv7 copy keeps those declarations, retargeted to armv7 ios 6.0 without the library-evolution flags (as for
--- Photos); the rest of UIKit's overlay needs SwiftUI and the other modules armv7 does not have, so it is left out.
-local function uikit_armv7_interface(text)
-    local lines = lines_of(text)
-    return table.concat({
-        lines[1],
-        lines[2],
-        "// swift-module-flags: -target armv7-apple-ios6.0 -enable-objc-interop -swift-version 5 -module-name UIKit",
-        lines[4],
-        "public import Swift",
-        "public import _Concurrency",
-        "public import CoreFoundation",
-        "@_exported public import UIKit",
-        block_enclosing(lines, "extension UIView {", "var cornerConfiguration: UIKit.UICornerConfiguration"),
-        block_starting(lines, "public struct UICornerConfiguration "),
-        block_starting(lines, "public struct UICornerRadius "),
-        "",
-    }, "\n")
-end
-
--- The SDK ships these Swift overlays for arm64e only, so an armv7 build lacks the declarations they add. Each armv7
--- copy is mapped in the VFS as a file in the framework's Modules directory, next to the SDK's own arm64e interface.
+-- The SDK ships this Swift overlay for arm64e only, so an armv7 build lacks the declarations it adds. The armv7 copy is
+-- mapped in the VFS as a file in the framework's Modules directory, next to the SDK's own arm64e interface. UIKit has no
+-- such copy: revenant's runtime UIKit module (lib/swift/iphoneos, from toolchain/src/swift-runtime/overlay/UIKit) is
+-- the armv7 Swift overlay of UIKit, and it is found through -I before the VFS, so it declares UIView.cornerConfiguration.
 local function armv7_overlays(sdk, out, roots)
-    for _, overlay in ipairs({{"Photos", photos_armv7_interface}, {"UIKit", uikit_armv7_interface}}) do
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}}) do
         local name, lower = overlay[1], overlay[2]
         local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
         local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
