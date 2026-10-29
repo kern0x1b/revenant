@@ -15,12 +15,25 @@ Apple's iOS 6 documentation describes. The backport adds the QR type to that lis
 output.
 
 The backport swaps the implementations of availableMetadataObjectTypes, metadataObjectTypes, setMetadataObjectTypes:,
-setMetadataObjectsDelegate:queue:, addOutput: and removeOutput:. Each swap calls the native implementation it replaced. While
-the release lacks QR, the output has a delegate and it is in a session, the session gets one internal
+setMetadataObjectsDelegate:queue:, addOutput: and removeOutput:, with `method_setImplementation` at `+load`
+(`frameworks/Backports/src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m`). Each replacement calls the
+implementation it replaced. This is the only mechanism available: the class is a system class on iOS 6, so a link-time
+backport cannot override its existing methods. The crutch is entry C46 in `docs/reference/backports/crutches.md`.
+
+Guard: when the app requests no QR type, the type setter and getter forward to the native implementations with the arrays
+the app passed, the delegate setter forwards and then finds nothing to start, and addOutput:/removeOutput: forward and
+keep a weak session reference. No internal output is added. The one visible difference while QR is not requested is that
+availableMetadataObjectTypes lists QR on iOS 6, which is the point of the overlay. The probe checks the two halves on the
+device: a face request leaves one output in the session, and a QR request adds one.
+
+While the release lacks QR, the output has a delegate and it is in a session, the session gets one internal
 AVCaptureVideoDataOutput in NV12 (full range when the release offers it), with late frames discarded. Each frame's luma plane
 goes through revenant_qr_decode_region, limited to rectOfInterest, and each code is delivered as an
 AVMetadataMachineReadableCodeObject on the delegate's callback queue. The delegate gets an empty array once when the codes
 leave the frame. The internal output is removed when the metadata output loses its session, its delegate or the QR type.
+
+A code whose text is not UTF-8 after the engine's conversion is not delivered; the drop is logged on the first occurrence and
+every hundredth. The engine replaces non-ASCII bytes with U+FFFD for an ECI charset when no converter is registered (entry C47).
 
 Coordinates follow the iOS 7 convention as read: corners and bounds are normalized to the frame as the video data output
 delivers it, which is the sensor's landscape frame, and rectOfInterest is in the same space. A preview layer must convert
