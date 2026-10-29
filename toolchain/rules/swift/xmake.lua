@@ -175,7 +175,8 @@ rule("swift")
                         os.mkdir(path.directory(emitted[3]))
                     end
                     os.vrunv(swiftc, argv)
-                end, {files = table.join(sourcebatch.sourcefiles, imported), dependfile = objectfile .. ".d", values = argv, changed = target:is_rebuilt()})
+                end, {files = table.join(sourcebatch.sourcefiles, imported, table.wrap(target:values("swift.inputs"))),
+                      dependfile = objectfile .. ".d", values = argv, changed = target:is_rebuilt()})
                 return
             end
             local bitcode = objectfile .. ".bc"
@@ -198,7 +199,8 @@ rule("swift")
                 os.mkdir(path.directory(objectfile))
                 os.vrunv(swiftc, argv)
                 os.vrunv(toolchain:tool("cc"), codegen, {envs = {IPHONEOS_DEPLOYMENT_TARGET = toolchain:config("deployment")}})
-            end, {files = sourcebatch.sourcefiles, dependfile = objectfile .. ".d", values = table.join(argv, codegen), changed = target:is_rebuilt()})
+            end, {files = table.join(sourcebatch.sourcefiles, table.wrap(target:values("swift.inputs"))),
+                  dependfile = objectfile .. ".d", values = table.join(argv, codegen), changed = target:is_rebuilt()})
         end)
     end, {jobgraph = true, batch = true})
 

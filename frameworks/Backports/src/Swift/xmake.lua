@@ -260,11 +260,19 @@ local function overlay(name, folder, opt)
             if opt.stub then
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
-                for _, stub in ipairs(import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()) do
-                    io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), stub_text(stub))
-                    target:add("links", stub.library)
+                local tbds = {}
+                for _, entry in ipairs(import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()) do
+                    local file = path.join(folder, "lib" .. entry.library .. ".tbd")
+                    local text = stub_text(entry)
+                    if not os.isfile(file) or io.readfile(file) ~= text then
+                        io.writefile(file, text)
+                    end
+                    table.insert(tbds, file)
+                    target:add("links", entry.library)
                 end
                 target:add("linkdirs", folder)
+                target:data_set("linkdepfiles", tbds)
+                target:add("values", "swift.inputs", path.join(SWIFT_DIR, opt.stub .. ".lua"))
             end
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
@@ -284,6 +292,9 @@ local function overlay(name, folder, opt)
             add_flags(target, flags)
             if opt.cmodule then
                 add_flags(target, {"-I", path.join(SRC, opt.cmodule)})
+                for _, header in ipairs(os.files(path.join(SRC, opt.cmodule, "*"))) do
+                    target:add("values", "swift.inputs", header)
+                end
                 for _, name in ipairs(table.wrap(opt.packages)) do
                     local pkg = target:pkg(name)
                     if pkg then
