@@ -35,6 +35,40 @@ static Class RevenantEngineNew(NSString *name)
     return cls;
 }
 
+// The page's touches go to the engine's view, so the scroll view forwards every touch phase to the
+// next responder after UIKit has seen it. This is the class the example host has always used; it is
+// defined here, not looked up in the engine, because the engine has no such class.
+@interface RevenantContentScrollView : UIScrollView
+@end
+
+@implementation RevenantContentScrollView
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [super touchesBegan:touches withEvent:event];
+    [[self nextResponder] touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [super touchesMoved:touches withEvent:event];
+    [[self nextResponder] touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [super touchesEnded:touches withEvent:event];
+    [[self nextResponder] touchesEnded:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [super touchesCancelled:touches withEvent:event];
+    [[self nextResponder] touchesCancelled:touches withEvent:event];
+}
+
+@end
+
 @implementation RevenantEngineHost {
     id<RevenantEngineView> _webView;
     id<RevenantEngineWindow> _window;
@@ -78,7 +112,7 @@ static Class RevenantEngineNew(NSString *name)
     [_window setExposedScrollViewRect:CGRectMake(0, 0, frame.size.width, frame.size.height)];
     RevenantEngineFunction("WebThreadUnlock")();
 
-    _scrollView = [[RevenantEngineNew(@"WebContentScrollView") alloc] initWithFrame:frame];
+    _scrollView = [[RevenantContentScrollView alloc] initWithFrame:frame];
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.alwaysBounceHorizontal = NO;
     _scrollView.alwaysBounceVertical = YES;
