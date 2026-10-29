@@ -317,6 +317,15 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Gaps: the callback is meant to run before the page's own scripts. That order is not measured on a device, so the entry stands until it is.
 - Measurement: none for the WebKit1 hook. The host case `webkit_document_start` and its macOS oracle measured the removed rewrite and were deleted with it.
 - Removed by: a device run that shows a document-start script ordered before the page's scripts on a `file:` load, a `data:` load, a history load and a network load.
+
+### C46. Swizzled AVCaptureMetadataOutput and AVCaptureSession methods add QR codes on iOS 6
+
+- Stands in for: a QR path on the iOS 6 metadata output, which the release lacks; the class is present, so the overlay cannot add a type. `+load` in `frameworks/Backports/src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m` replaces six implementations with `method_setImplementation`: `availableMetadataObjectTypes`, `metadataObjectTypes`, `setMetadataObjectTypes:` and `setMetadataObjectsDelegate:queue:` on `AVCaptureMetadataOutput`, and `addOutput:` and `removeOutput:` on `AVCaptureSession`. Each replacement calls the implementation it replaced.
+- Why it cannot be avoided: an iOS 6 system class's existing methods have no link-time override, and the owner directed a standard-API shape, so an app's own `AVCaptureMetadataOutput` code gets QR unchanged.
+- Widens: `availableMetadataObjectTypes` lists QR on iOS 6 whether or not the app asks for it. The getter and setter otherwise pass through to the system: while QR is not requested and no internal output runs, the native implementations receive the arrays the app passed. Each metadata output also keeps a weak session reference, which is inert.
+- Measurement: the iOS 6.0 class inventory (`.cache/dyld/6.0/classes_armv7.json`, described in `docs/reference/backports/AVFoundation/README.md`) lists the owning classes of the six selectors and shows no QR path. `BackportsQRMetadataProbe` checks that a face request leaves the session with one output and a QR request adds one, and that the type reads back. Not run on a device.
+- Removed by: a system hook that makes QR available on iOS 6 `AVCaptureMetadataOutput`, which the 6.0 inventory shows does not exist; or an explicit backport class the app opts into instead of the transparent standard API.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
