@@ -24,6 +24,7 @@ extern const struct dispatch_source_type_s _dispatch_source_type_vm;
 #define VM_FLAGS_PERMANENT 0
 
 #include <stdint.h>
+#if __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #ifndef WEBKIT_IOS6_CMTAG_STUBS
 #define WEBKIT_IOS6_CMTAG_STUBS
 typedef uint32_t CMTagCategory;
@@ -31,6 +32,7 @@ typedef struct OpaqueCMTagCollection *CMTagCollectionRef;
 typedef struct OpaqueCMTaggedBufferGroup *CMTaggedBufferGroupRef;
 typedef struct OpaqueCMTaggedBufferGroupFormatDescription *CMTaggedBufferGroupFormatDescriptionRef;
 typedef struct { uint64_t value[2]; } CMTag;
+#endif
 #endif
 
 #include <mach/port.h>
