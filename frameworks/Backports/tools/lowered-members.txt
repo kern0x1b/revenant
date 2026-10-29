@@ -1917,6 +1917,9 @@ class RevenantProgressPatch
 class RevenantProgressSubscriber
 class RevenantProviderItem
 class RevenantPushBridge
+class RevenantQRMetadataFrames
+class RevenantQRMetadataInstall
+class RevenantQRMetadataState
 class RevenantQueueState
 class RevenantReceiptInstaller
 class RevenantReferenceViewWatch
@@ -5951,6 +5954,7 @@ function revenant_prewarmingToken
 function revenant_property_list_read
 function revenant_property_list_write
 function revenant_qr_decode
+function revenant_qr_decode_region
 function revenant_qr_result_free
 function revenant_qr_set_converter
 function revenant_quality_of_service
@@ -12382,11 +12386,16 @@ member AVMetadataItemValueRequest -revenant_responseError
 member AVMetadataItemValueRequest -revenant_responseValue
 member AVMetadataItemValueRequest -setMetadataItem:
 member AVMetadataItemValueRequest -specifier
+member AVMetadataMachineReadableCodeObject -bounds
 member AVMetadataMachineReadableCodeObject -corners
-member AVMetadataMachineReadableCodeObject -initWithStringValue:corners:
 member AVMetadataMachineReadableCodeObject -revenantCorners
 member AVMetadataMachineReadableCodeObject -revenantStringValue
+member AVMetadataMachineReadableCodeObject -revenantTime
+member AVMetadataMachineReadableCodeObject -revenantType
+member AVMetadataMachineReadableCodeObject -revenant_initWithType:stringValue:corners:time:
 member AVMetadataMachineReadableCodeObject -stringValue
+member AVMetadataMachineReadableCodeObject -time
+member AVMetadataMachineReadableCodeObject -type
 member AVMetadataSalientObject -copyWithZone:
 member AVMetadataSalientObject -faceID
 member AVMetadataSalientObject -hasRollAngle
@@ -27493,6 +27502,16 @@ member RevenantPushBridge +chainErrorSelectorOnClass:
 member RevenantPushBridge +chainTokenSelectorOnClass:
 member RevenantPushBridge +installOnDelegateClass:
 member RevenantPushBridge +load
+member RevenantQRMetadataFrames -captureOutput:didOutputSampleBuffer:fromConnection:
+member RevenantQRMetadataFrames -output
+member RevenantQRMetadataFrames -reported
+member RevenantQRMetadataFrames -undecodable
+member RevenantQRMetadataInstall +load
+member RevenantQRMetadataState -frames
+member RevenantQRMetadataState -session
+member RevenantQRMetadataState -types
+member RevenantQRMetadataState -video
+member RevenantQRMetadataState -videoSession
 member RevenantQueueState -init
 member RevenantReceiptInstaller +load
 member RevenantReferenceViewWatch -dealloc
