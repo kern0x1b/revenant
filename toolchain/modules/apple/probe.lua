@@ -14,7 +14,7 @@ function check(package, opt)
     os.mkdir(dir)
     local source = path.join(dir, opt.name or "probe.cpp")
     io.writefile(source, opt.source)
-    local cxx = path.extension(source) ~= ".c"
+    local cxx = not table.contains({".c", ".m"}, path.extension(source))
     local compiler = cxx and chosen:tool("cxx") or chosen:tool("cc")
     local envs = {IPHONEOS_DEPLOYMENT_TARGET = chosen:config("deployment")}
     local log = path.join(dir, "log.txt")
@@ -40,7 +40,7 @@ function check(package, opt)
                 end
                 if opt.bound then
                     local bindings = table.imap(os.iorunv("xcrun", {"dyld_info", "-imports", executable}):split("\n"),
-                                                function (_, line) return line:trim() end)
+                                                function (_, line) return (line:gsub("%[weak%-import%]", ""):trim()) end)
                     for symbol, library in pairs(opt.bound) do
                         if not table.contains(bindings, symbol .. "  (from " .. library .. ")") then
                             local seen = {}

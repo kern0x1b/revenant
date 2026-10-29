@@ -49,6 +49,7 @@ SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWe
 | --- | --- |
 | `box2d`, `ggml`, `lz4`, `lzfse`, `micro-ecc`, `monocypher`, `openssl`, `suitesparse-ordering`, `xz`, `zlib`, `zxing-cpp` | libraries a port links, each built for the target and carried into its program |
 | `folly`, `glog`, `fmt`, `double-conversion`, `fast_float`, `boost` | the C++ dependencies React Native 0.86 pins, at its versions: folly's `RCT-Folly` subset with its flags, and the libraries it uses, each built for armv7 and linked against `libcxx`; `boost` is the headers React Native ships, beside the release archive `dynarmic` takes |
+| `socketrocket` | the WebSocket client React Native 0.86 pins, as static `libSocketRocket` built with ARC for armv7, which names `CFNetwork` and `Security` as the frameworks it links |
 | `emulator` | the emulator, which boots a firmware's userland on macOS arm64 |
 | `emulator-guest` | the guest programs, `revenant-runner` and `revenant-sblaunch` |
 | `firmware-tools` | `revenant-firmware`, which decrypts the FileVault root filesystems and the Apple Encrypted Archives of firmware |
