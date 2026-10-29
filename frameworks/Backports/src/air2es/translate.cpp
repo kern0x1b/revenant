@@ -95,6 +95,11 @@ struct Address {
     bool indexed = false;
 };
 
+struct Local {
+    std::string name;
+    Type *type = nullptr;
+};
+
 struct Output {
     std::string kind;
     std::string name;
@@ -226,14 +231,22 @@ public:
             tagInteger(tags, "air.arg_type_size", binding.stride);
             std::string typeName;
             tagString(tags, "air.arg_type_name", typeName);
+            if (binding.kind == "air.texture" && typeName.compare(0, 11, "texturecube") == 0)
+                binding.kind = "air.texture_cube";
             auto info = tags.find("air.struct_type_info");
             if (info != tags.end() && !info->second.empty()) {
                 auto *fields = dyn_cast_or_null<MDNode>(info->second[0]);
                 if (!fields || !readMembers(fields, binding.members))
                     return refuse("a struct member this emitter does not read in " + binding.name);
             }
-            if (binding.kind == "air.buffer" && binding.members.empty())
-                binding.members.push_back(Member{binding.name, 0, binding.stride, typeName});
+            if (binding.kind == "air.buffer" && binding.members.empty()) {
+                std::string scalar;
+                unsigned components = 0;
+                uint64_t size = binding.stride;
+                if (scalarOf(typeName, scalar, components))
+                    size = components * scalarBytes(scalar);
+                binding.members.push_back(Member{binding.name, 0, size, typeName});
+            }
             bindings_.push_back(binding);
             argumentNumbers_.push_back((unsigned)number->getZExtValue());
         }
@@ -339,11 +352,24 @@ private:
 
     Binding *bindingOf(const Value *value)
     {
+        while (auto *cast = dyn_cast<BitCastInst>(value))
+            value = cast->getOperand(0);
         auto inlined = inlineBindings_.find(value);
         if (inlined != inlineBindings_.end())
             return inlined->second;
         auto found = argumentSlot_.find(value);
         return found == argumentSlot_.end() ? nullptr : &bindings_[found->second];
+    }
+
+    const Local *localOf(const Value *pointer)
+    {
+        while (auto *cast = dyn_cast<BitCastInst>(pointer))
+            pointer = cast->getOperand(0);
+        auto inlined = inlineLocals_.find(pointer);
+        if (inlined != inlineLocals_.end())
+            return inlined->second;
+        auto found = localPointers_.find(pointer);
+        return found == localPointers_.end() ? nullptr : &found->second;
     }
 
     uint64_t allocSize(Type *type)
@@ -533,6 +559,16 @@ private:
     {
         if (auto *gep = dyn_cast<GetElementPtrInst>(load->getPointerOperand()); gep && isa<GlobalVariable>(gep->getPointerOperand()))
             return tableLoad(gep, load->getType(), out);
+        if (const Local *slot = localOf(load->getPointerOperand())) {
+            if (slot->type != load->getType())
+                return refuse("a load of a local at another type");
+            std::string temp;
+            if (!local(*load, temp))
+                return false;
+            statement(temp + " = " + slot->name + ";\n");
+            out = temp;
+            return true;
+        }
         Address address;
         if (!resolve(load->getPointerOperand(), address) || !address.binding)
             return refuse("a load from an address this emitter does not read");
@@ -917,6 +953,10 @@ private:
                 inlineBindings_[formal] = binding;
                 continue;
             }
+            if (const Local *slot = localOf(actual)) {
+                inlineLocals_[formal] = slot;
+                continue;
+            }
             std::string text;
             if (!expression(actual, text))
                 return false;
@@ -953,6 +993,29 @@ private:
 
     bool emit(Instruction &instruction)
     {
+        if (auto *slot = dyn_cast<AllocaInst>(&instruction)) {
+            Type *type = slot->getAllocatedType();
+            std::string glsl = glslType(type);
+            if (glsl.empty() || type->isStructTy() || type->isArrayTy())
+                return refuse("a local of a type this emitter does not hold as a variable");
+            Local &local = localPointers_[slot];
+            local.name = "v" + std::to_string(counter_++);
+            local.type = type;
+            locals_.push_back(glsl + " " + local.name + ";\n");
+            return true;
+        }
+        if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy() && (localOf(cast) || bindingOf(cast)))
+            return true;
+        if (auto *store = dyn_cast<StoreInst>(&instruction)) {
+            const Local *slot = localOf(store->getPointerOperand());
+            if (!slot || slot->type != store->getValueOperand()->getType())
+                return refuse("a store to an address this emitter does not write as a local");
+            std::string text;
+            if (!expression(store->getValueOperand(), text))
+                return false;
+            statement(slot->name + " = " + text + ";\n");
+            return true;
+        }
         if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction)) {
             if (isa<GlobalVariable>(gep->getPointerOperand()))
                 return true;
@@ -1064,6 +1127,10 @@ private:
             case CmpInst::FCMP_OGT: op = ">"; break;
             case CmpInst::FCMP_OLE: op = "<="; break;
             case CmpInst::FCMP_OGE: op = ">="; break;
+            case CmpInst::ICMP_ULT: case CmpInst::ICMP_ULE: case CmpInst::ICMP_UGT: case CmpInst::ICMP_UGE:
+                if (!compare->getOperand(0)->getType()->isIntegerTy(32))
+                    return refuse("an unsigned comparison of integers other than 32 bits");
+                break;
             default: return refuse("a comparison this emitter does not map");
             }
             std::string left, right, name;
@@ -1071,7 +1138,21 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            statement(name + " = (" + left + " " + op + " " + right + ");\n");
+            if (op) {
+                statement(name + " = (" + left + " " + op + " " + right + ");\n");
+                return true;
+            }
+            auto below = [](const std::string &a, const std::string &b) {
+                return "(((" + a + " < 0) != (" + b + " < 0)) ? (" + a + " >= 0) : (" + a + " < " + b + "))";
+            };
+            std::string text;
+            switch (compare->getPredicate()) {
+            case CmpInst::ICMP_ULT: text = below(left, right); break;
+            case CmpInst::ICMP_UGT: text = below(right, left); break;
+            case CmpInst::ICMP_ULE: text = "!" + below(right, left); break;
+            default: text = "!" + below(left, right); break;
+            }
+            statement(name + " = " + text + ";\n");
             return true;
         }
         if (auto *select = dyn_cast<SelectInst>(&instruction)) {
@@ -1126,8 +1207,40 @@ private:
         if (!expression(call.getArgOperand(2), value))
             return false;
         output_ = texture->name;
+        outputIndex_ = texture->index;
         statement("gl_FragColor = " + value + ";\n");
         statement("revenant_written = true;\n");
+        return true;
+    }
+
+    bool sampleCube(CallInst &call)
+    {
+        if (call.arg_size() != 6)
+            return refuse("a cube sample with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.texture_cube")
+            return refuse("a cube sample of something other than a cube texture argument");
+        Binding *sampler = bindingOf(call.getArgOperand(1));
+        if (!sampler || sampler->kind != "air.sampler")
+            return refuse("a sample with a sampler built into the shader, which the library carries no state for");
+        auto *flag = dyn_cast<ConstantInt>(call.getArgOperand(3));
+        auto *bias = dyn_cast<ConstantFP>(call.getArgOperand(4));
+        auto *offset = dyn_cast<ConstantInt>(call.getArgOperand(5));
+        if (!flag || !flag->isZero() || !bias || !bias->isZero() || !offset || !offset->isZero())
+            return refuse("a cube sample with a flag, bias or offset this emitter does not map");
+        std::string coordinates;
+        if (!expression(call.getArgOperand(2), coordinates))
+            return false;
+        declare("uniform samplerCube " + texture->name + ";\n", texture->name);
+        if (!textures_.count(texture->name)) {
+            textures_.insert(texture->name);
+            textureLines_.push_back("{\"name\": " + jsonQuote(texture->name) + ", \"index\": " + std::to_string(texture->index) +
+                                    ", \"depth\": false, \"compare\": false, \"cube\": true}");
+        }
+        std::string name;
+        if (!local(call, name))
+            return false;
+        statement(name + " = textureCube(" + texture->name + ", " + coordinates + ");\n");
         return true;
     }
 
@@ -1145,11 +1258,13 @@ private:
             return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
         if (called == "air.write_texture_2d.v4f32")
             return writeTexture(call);
+        if (called == "air.sample_texture_cube.v4f32")
+            return sampleCube(call);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
         bool unary = called == "air.fast_sin.f32" || called == "air.fast_cos.f32" || called == "air.fast_fabs.f32" ||
-                     called == "air.fast_floor.v2f32" || called == "air.fast_fract.f32";
+                     called == "air.fast_floor.v2f32" || called == "air.fast_fract.f32" || called == "air.fast_rsqrt.f32";
         bool ternaryFunction = called == "air.dot.v3f32" || called == "air.mix.v3f32" || called == "air.fast_clamp.v3f32";
         bool fmod = called == "air.fast_fmod.f32" || called == "air.fast_fmod.v2f32";
         if (!sample && !width && !convert && !unary && !ternaryFunction && !fmod)
@@ -1172,7 +1287,8 @@ private:
         }
         if (unary) {
             std::string function = called == "air.fast_sin.f32" ? "sin" : called == "air.fast_cos.f32" ? "cos"
-                                 : called == "air.fast_fabs.f32" ? "abs" : called == "air.fast_fract.f32" ? "fract" : "floor";
+                                 : called == "air.fast_fabs.f32" ? "abs" : called == "air.fast_fract.f32" ? "fract"
+                                 : called == "air.fast_rsqrt.f32" ? "inversesqrt" : "floor";
             if (args.size() != 1 || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
             statement(name + " = " + function + "(" + args[0] + ");\n");
@@ -1309,6 +1425,8 @@ private:
             out += ", \"textures\": [" + join(textureLines_) + "]";
             out += ", \"sizes\": [" + join(sizes_) + "]";
             out += ", \"outputs\": [" + join(outputs) + "]";
+            if (stage_ == Stage::Kernel)
+                out += ", \"outputTexture\": {\"name\": " + jsonQuote(output_) + ", \"index\": " + std::to_string(outputIndex_) + "}";
             out += ", \"fetches\": []";
         }
         return out + ", \"constants\": []}";
@@ -1337,6 +1455,9 @@ private:
     unsigned depth_ = 0;
     bool returned_ = false;
     std::string output_;
+    uint64_t outputIndex_ = 0;
+    std::map<const Value *, Local> localPointers_;
+    std::map<const Value *, const Local *> inlineLocals_;
     std::set<const BasicBlock *> visited_;
     std::map<const Function *, BlockSets> postDominators_;
     std::map<const Value *, Binding *> inlineBindings_;
