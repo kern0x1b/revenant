@@ -55,9 +55,11 @@ add_requires("swiftui")
 add_packages("swiftui")
 ```
 
-`<checkout>` supplies the external packages the outside project also needs (the Swift runtime, libc++, the SDK), and `<dir>` supplies the packages generated from our targets. The mechanism was checked on a host library: a package generated with `./xmakew package -P . -o <dir>` was built and run by a separate project that named `<dir>` as its repository. The iOS route is not yet checked; see the status below.
+`<checkout>` supplies the external packages the outside project also needs (the Swift runtime, libc++, the SDK), and `<dir>` supplies the packages generated from our targets. The mechanism was checked on a host library: a package generated with `./xmakew package -P . -o <dir>` was built and run by a separate project that named `<dir>` as its repository. The iOS route is checked for the Backports only, through `revenant@backports` below; the other packages are not checked on iOS yet.
 
 The Backports libraries come as one package, `org.revenant.backports`, which `./xmakew deb -P .` writes; see [decision 0012](decisions/0012-one-backports-package.md).
+
+An app built outside the checkout gets the Backports through `revenant@backports` (alias `backports`), which the apple-ios include requires for every project that is not compat-only. A Swift target that imports Foundation, and is not one of the Backports' own targets, takes that package (`toolchain/modules/apple/backports.lua`), so it links `libFoundationBackports` from the package's links and link directories. The package is a shared package: packaging writes `org.revenant.backports` as a `Depends` of the app's deb when the binary records the library's path. The package builds only the libraries named by `REVENANT_BACKPORTS_LIBRARIES`, with the libraries they link from the same package. A scratch copy of paseo-ios6 was built this way against this checkout; its deb declared the dependency and needed no `revenant.waive` entry. Packaging does not refuse the flat-namespace `NSURLComponents` and `NSURLQueryItem` references of the Swift Foundation overlay, so on iOS 6 an app that uses them needs FoundationBackports loaded at launch. Refusing that case is a follow-up.
 
 Why packages and not a copy of our sources: a package names one target and its links, so an outside project takes exactly what the target builds, and the same target serves the checkout and every outside project.
 
