@@ -17,6 +17,28 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error;
 @end
 
+@protocol WKScriptMessageHandler <NSObject>
+@required
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message;
+@end
+
+@protocol WKUIDelegate <NSObject>
+@optional
+- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures;
+- (void)webViewDidClose:(WKWebView *)webView;
+- (void)webView:(WKWebView *)webView runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSArray<NSURL *> *URLs))completionHandler;
+- (void)webView:(WKWebView *)webView contextMenuConfigurationForElement:(WKContextMenuElementInfo *)elementInfo completionHandler:(void (^)(UIContextMenuConfiguration *configuration))completionHandler;
+@end
+
+@protocol WKDownloadDelegate <NSObject>
+@required
+- (void)download:(WKDownload *)download decideDestinationUsingResponse:(NSURLResponse *)response suggestedFilename:(NSString *)suggestedFilename completionHandler:(void (^)(NSURL *destination))completionHandler;
+@optional
+- (void)download:(WKDownload *)download didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
+- (void)downloadDidFinish:(WKDownload *)download;
+- (void)download:(WKDownload *)download didFailWithError:(NSError *)error resumeData:(NSData *)resumeData;
+@end
+
 @interface WKUserContentController (RevenantWebKit)
 - (NSArray<WKUserScript *> *)revenant_scripts;
 - (NSArray<NSString *> *)revenant_handlerNames;
@@ -51,6 +73,16 @@ extern NSString *const RevenantWebKitBridgeScheme;
 @interface WKBackForwardListItem (RevenantWebKit)
 + (instancetype)revenant_itemWithURL:(NSURL *)url title:(NSString *)title;
 @property (nonatomic, copy) NSString *revenant_title;
+@property (nonatomic, strong) id revenant_substitute;
+@end
+
+#import "RevenantHistoryPlan.h"
+
+@interface WKDownload (RevenantWebKit)
++ (instancetype)revenant_downloadWithRequest:(NSURLRequest *)request webView:(WKWebView *)webView;
++ (instancetype)revenant_resumeWithData:(NSData *)data webView:(WKWebView *)webView;
+- (void)revenant_start;
+- (void)revenant_setDecision:(void (^)(BOOL allowed))decision;
 @end
 
 @interface WKBackForwardList (RevenantWebKit)
@@ -58,5 +90,16 @@ extern NSString *const RevenantWebKitBridgeScheme;
 @end
 
 @interface WKNavigationResponse (RevenantWebKit)
++ (instancetype)revenant_responseWithResponse:(NSURLResponse *)response;
 + (WKNavigationResponsePolicy)revenant_policyAllowing:(BOOL)allowed;
+@end
+
+void RevenantSyncRegister(NSString *token, WKWebView *webView);
+
+@interface WKWebView (RevenantSync)
+- (NSString *)revenant_answerSynchronously:(NSDictionary *)message;
+@end
+
+@interface WKWindowFeatures (RevenantWebKit)
++ (instancetype)revenant_featuresWithString:(NSString *)string;
 @end

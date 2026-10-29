@@ -116,14 +116,15 @@ What is open:
 
 ## WebKit (`WK*`)
 
-What exists, from `frameworks/Backports/src/WebKit` (14 `WK*` source files):
+What exists, from `frameworks/Backports/src/WebKit`:
 
 - `WKWebView` is a `UIView` that owns a `UIWebView`. `WKWebView.m` creates `_web` (line 180) and makes the object a
   `UIWebViewDelegate` (line 119). Navigation is bridged through `WKNavigation` (`revenant_beginNavigation`). The
   demand map counts `WKWebView` as backported.
 - The delegate callbacks are sent by selector. `WKWebView.m` checks `respondsToSelector:` and then sends
   `webView:decidePolicyForNavigationAction:decisionHandler:` (lines 399, 630) and
-  `webView:didStartProvisionalNavigation:` (line 692). The protocol object itself is not declared (see below).
+  `webView:didStartProvisionalNavigation:` (line 692) and the other navigation callbacks. The protocols they belong to
+  are declared in `RevenantWebKit.h` (see below).
 - The engine under `UIWebView`: `docs/explanation/webkit/architecture.md` ("Two WebKits in one process") records that
   UIKit loads the system WebKit for `UIWebView`, and that the port's substitution replaces the WebKit UIKit loads.
   So a `WKWebView` reaches the revenant engine where that substitution is installed. This is documented, and it was
@@ -132,25 +133,213 @@ What exists, from `frameworks/Backports/src/WebKit` (14 `WK*` source files):
   `WKContentRuleList11.m`, `WKContentWorld14.m`, `WKWebpagePreferences13.m`, `WKWebsiteDataStore.m`, and the
   `WKWebExtension*` family.
 
-What is missing:
+Added on `work/wk-telegram`. Each is native in `src/WebKit`, and each reports only what the `UIWebView` engine can give:
 
-- Protocols with no `@protocol` definition in `src`: `WKNavigationDelegate` (8 files), `WKScriptMessageHandler` (7),
-  `WKUIDelegate` (4), `WKDownloadDelegate` (2), `WKURLSchemeHandler` (1), `WKURLSchemeTask` (1). The `WKWebExtension*`
-  protocols are not in this list: `RevenantWebExtensionController.h` defines `WKWebExtensionControllerDelegate`, and the
-  other extension protocols are only forward-declared.
-- Classes with no source file: `WKSecurityOrigin` (4 files), `WKWindowFeatures` (4), `WKDownload` (3),
-  `WKSnapshotConfiguration` (3), `WKContextMenuElementInfo` (1), `WKOpenPanelParameters` (1).
-- Global variables: `WKWebsiteDataTypeFetchCache` and `WKWebsiteDataTypeServiceWorkerRegistrations` (1 file each).
+- `WKWindowFeatures`: `revenant_featuresWithString:` parses the features string that the page passes to `window.open`.
+  `menubar`, `status`, `toolbar`, `resizable` are booleans (a bare key is yes); `width`, `height`, `left`/`screenX` and
+  `top`/`screenY` are numbers, and `innerWidth`/`innerHeight` set width and height. Unset values stay nil. The shim posts
+  the call through the bridge, and `WKWebView` sends `webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:`
+  with the parsed features and a copy of the configuration, then loads the request into the view that the delegate returns.
+  The page receives `null` when the delegate creates no `WKWebView` (or the request is malformed), and a WindowProxy otherwise. The features are checked
+  against macOS WKWebView in `tests/webkit_script_message`.
+- `WKNavigationResponse`: carries the response, and `canShowMIMEType` is true for `text/*`, `image/*`,
+  `application/xhtml+xml` and `application/pdf`. `WKWebView` asks `webView:decidePolicyForNavigationResponse:decisionHandler:`
+  for each main-frame response that `RevenantDocumentProtocol` claims. The protocol holds the response and its body until
+  the answer comes: allow forwards them (with the document-start rewrite when they are HTML), cancel fails the load with
+  `NSURLErrorCancelled`, and a download answer hands the response to a `WKDownload` (below). A main-frame load that the
+  protocol does not claim gets no response decision: a `file:` or `data:` load, and a main-frame load the engine starts
+  itself without a link click or form post, which is loaded untagged. `WKNavigationActionPolicy` and
+  `WKNavigationResponsePolicy` are lowered to iOS 6 (`toolchain/modules/apple/lowered.lua`).
+  `WKNavigationResponse +revenant_policyAllowing:` maps allow and cancel.
+- `WKDownload` and `WKDownloadDelegate`: a download runs over `NSURLConnection` and writes to the path the delegate picks in
+  `download:decideDestinationUsingResponse:suggestedFilename:completionHandler:`. A nil destination ends it with no callback,
+  as macOS does, and a destination that cannot be written fails it with `NSURLErrorCannotCreateFile`. It reports
+  `downloadDidFinish:` or `download:didFailWithError:resumeData:`, and its progress
+  counts the bytes written. It is made in three ways: a navigation response the delegate answers with download (sent to
+  `webView:navigationResponse:didBecomeDownload:`), `startDownloadUsingRequest:completionHandler:`, and
+  `resumeDownloadFromResumeData:completionHandler:`. `cancel:` gives resume data only when the server sent
+  `Accept-Ranges: bytes` and some bytes arrived; a resume sends `Range: bytes=N-` and appends only when the destination
+  is the same path and its size is N. A `file:` source has no resume data. `isUserInitiated` is NO and `originatingFrame`
+  is nil, because the engine does not report either.
+- `WKOpenPanelParameters`: both properties are NO. The engine shows no file picker and never sends `runOpenPanel`.
+- `window.open` returns a WindowProxy at once, before the native side has made the window. Its `closed`, `location`
+  (`href` read and set), `close()` and `postMessage(message, targetOrigin)` are bridged through the shim: each call posts an
+  envelope with the window's id (`w` 1 for open, 2 for close, 3 for a message, 4 for a navigation, 5 for the popup's own
+  `window.close()`). Native code answers by evaluating an update in the opener: `href` after each commit of the popup, and
+  `closed` when the popup closes. A message is delivered to the popup as a `message` event whose data is the encoded value
+  revived in script, so an object, array, `undefined`, `NaN`, `-0`, a date or a cycle arrives as it was sent. The
+  `targetOrigin` must be `*`, the popup's exact origin, or `/` for the sender's own origin, and anything else is dropped.
+  A `window.open` that is refused returns `null` at once, as WebKit does. The shim asks synchronously: a synchronous XHR to
+  `revenant-wkbridge://sync/<nonce>` on a page with a null origin, or to `/__revenant_sync/<nonce>` on the page's own origin
+  for an http(s) page (a custom scheme from an http origin fails with NETWORK_ERR 101). `RevenantSyncProtocol` answers
+  through `revenant_answerSynchronously:`, on the main thread. A plain `dispatch_sync` to main deadlocks, because the
+  WebThread holds WebKit's lock while the page runs; the answer goes through `WebThreadCallDelegate` instead, and a missing
+  symbol refuses the request rather than hanging. Nothing opens unless `WKPreferences javaScriptCanOpenWindowsAutomatically`
+  is YES, which is also WebKit's default (NO). A window starts at `about:blank` and takes the committed URL after load, as
+  WebKit does.
+- `window.opener` in a popup is a proxy with `closed`, `location` (read and set), and `postMessage(message, targetOrigin)`,
+  which reaches the opener as a `message` event under the same `targetOrigin` rule. Opener updates arrive through
+  `RevenantScriptCodec`'s `opener` update path. Host-tested, device-unverified: `initMessageEvent` on iOS 6 takes a `source`
+  that must be a real Window, so the shim builds the event with a null source and defines `source` on the event instance as
+  the same proxy object returned as `window.opener`. The JSContext harness checks `e.source === window.opener`. The iPad
+  `opener` probe measured `e.source === window.opener` as false before this change; the change has not been measured on the device.
+- `WKUIDelegate`: `createWebViewWithConfiguration:` is sent for `window.open` (see `WKWindowFeatures`), and `webViewDidClose:`
+  is sent to the closing view's `UIDelegate` when a popup closes, whether the opener or the popup closed it.
+  `runOpenPanelWithParameters:` and `contextMenuConfigurationForElement:` are declared and never sent: the engine shows no
+  picker and no context menu for a page element.
+- `WKURLSchemeHandler` and `WKURLSchemeTask`: declared to match the existing route. A scheme registered on a
+  `WKWebViewConfiguration` loads through `RevenantWebURLProtocol`, an `NSURLProtocol` scoped to that web view. It calls
+  the handler's start and stop, and passes the task's response, data, and finish or failure to the protocol client. This
+  is real for loads in that web view.
+- `WKPermissionDecision` and `WKMediaCaptureType`: the typedefs are lowered to iOS 6 (they are iOS 15 in the SDK). The
+  engine has no permission prompt, so no decision is asked. The media-capture delegate method takes a `WKSecurityOrigin`,
+  which is `47e86bd3` on `work/telegram-unblock`, not on this branch.
+- `WKWebsiteDataTypeFetchCache` and `WKWebsiteDataTypeServiceWorkerRegistrations`: constants. The engine keeps neither
+  kind of data, so removing these types removes nothing.
+- `WKWebpagePreferences.allowsContentJavaScript` (iOS 14): stored, default YES. Setting NO logs once: the engine cannot
+  switch JavaScript off for one page, so the page runs with it.
+- `WKWebpagePreferences.preferredContentMode`: stored, and logs once when set. The engine renders every page one way.
 
-Decisions still open:
+Already present, with the same limits:
 
-- The protocols. Declaring `WKNavigationDelegate` without `WKWebView` sending the callbacks through the protocol would
-  let conforming classes compile and then never be told what they need. `WKWebView.m` already sends the two callbacks
-  above, so the protocol can be declared with the same selectors. Which other delegate callbacks `WKWebView.m` sends is
-  not checked here, and must be before the protocol's method list is written.
-- `WKSecurityOrigin`, `WKWindowFeatures`, `WKDownload` and `WKSnapshotConfiguration` need a decision on what the
-  `UIWebView` engine can report: an origin, a download and a snapshot are not `UIWebView` features. A loud stub, named in
-  the open gaps of `frameworks/Backports/README.md`, is the default if the engine cannot report them.
+- `WKSnapshotConfiguration`: `rect` and `snapshotWidth` change the image `takeSnapshot` renders.
+  `afterScreenUpdates` is stored and has no effect, because the snapshot is taken from the layer at once.
+- `WKContextMenuElementInfo`: `linkURL` is always nil, since the engine shows no context menu.
+- `WKContentWorld`: named worlds are distinct objects, but the engine has one JavaScript world, so they share it.
+
+`WKUserContentController` and the page's messages, from `src/WebKit/WKWebView.m` and `RevenantScriptCodec.m`:
+
+- `addScriptMessageHandler:name:` (Swift `add(_:name:)`) registers a handler. The shim `window.webkit.messageHandlers.<name>.postMessage(body)`
+  encodes the body as tagged JSON (`RevenantEncoder`: dates, NaN, infinities, -0, and cycles survive), and navigates a hidden
+  iframe to `revenant-wkbridge://m/`. `shouldStartLoadWithRequest` reads that URL, never loads it, and delivers a
+  `WKScriptMessage` (name, body as Foundation objects, web view, frame) to `userContentController:didReceiveScriptMessage:`
+  on the main queue. A body that is not a string, or not JSON, is refused.
+- Document start on UIWebView: `WKWebView` tags the loads it starts itself (`loadRequest:`, and the replay of a navigation
+  the delegate approved) with a property that `RevenantDocumentProtocol` claims. The protocol loads the resource with
+  `NSURLConnection`, follows redirects through the client (each hop is tagged again), and forwards authentication
+  challenges, cookies and cache policy. A 200 `text/html` document is buffered and rewritten in `RevenantDocumentInjector.m`:
+  the shim and each `WKUserScript` at document start go in a `<script>` right after `<head>` (after the doctype, or at the
+  start, when there is no head), in front of the page's own scripts. The declared charset (or the `<meta charset>`) is kept, and
+  the body is re-encoded in it. A `gzip` body is inflated, and its `Content-Encoding` and `Content-Length` are replaced.
+  Non-HTML and non-200 responses go through unchanged. Each Content-Security-Policy `script-src` (or `default-src`) gets the
+  SHA-256 hash of each injected script, in the header and in a `<meta>` policy; WebKit runs `WKUserScript` without CSP, so
+  the backport adds the hashes to the policy the page carries.
+- A main-frame link click or form submission is not loaded by `UIWebView` directly. When `shouldStartLoadWithRequest`
+  sees one (http(s), `mainDocumentURL` equal to the URL, untagged, and no navigation in progress), it cancels the load and
+  replays it through the navigation path as a tagged `loadRequest:`, with the same method, body and headers. The replay
+  runs on the next turn of the main queue, so the delegate is asked about it asynchronously. If a navigation started in
+  between, the plain request is loaded and that page gets late injection.
+- `loadHTMLString:baseURL:` and `loadData:MIMEType:characterEncodingName:baseURL:` rewrite the content before `UIWebView`
+  gets it, with the same injector as the network path (charset, `<meta>` CSP, hashes). `loadData:` rewrites only `text/html`.
+  `loadFileURL:allowingReadAccessToURL:` reads an `.html` or `.htm` file and loads it through `loadData:` with the file URL as
+  base. Other files, and a file that cannot be read, go through `loadRequest:` as before. The read-access URL is ignored,
+  because `UIWebView` does not restrict file access.
+- `reload`, `goBack`, `goForward` and `goToBackForwardListItem` keep the `UIWebView` history by not replacing it with a
+  `loadRequest:`. Each one records the target URL with `RevenantDocumentExpect` before it calls the engine, and the protocol
+  claims the next untagged main-document load of that exact URL (and only one whose `mainDocumentURL` is that URL or absent).
+  Whatever claims or forgets it, the record is dropped when the navigation finishes, fails or is abandoned.
+- A history load that the engine serves from its page cache makes no network request, so the protocol sees nothing. The
+  document is then the one that was already loaded, with its start scripts and shim already run. To keep those from running
+  again, the shim sets a property named by the webview's token on `window` before anything else, and the late path checks it
+  (`RevenantDocumentStartedScript`) before it runs a document-start script. Measured on macOS WKWebView (the same loads as
+  the oracle in `tests/webkit_document_start/oracle.m`): `goBack` to a page that was loaded by `loadFileURL:` ran its start
+  script 0 more times, and its `window.early` was still set.
+- Measured on an iPhone 4S (iOS 6.1.3) with a bundle launched through `revenant-sblaunch`, and a loopback server inside
+  the probe serving two pages. Plain `UIWebView` (no backport): `loadRequest:` of each page reached the protocol once per
+  request, with `mainDocumentURL` equal to the page URL and cache policy 0. `goBack` made one server request and reached
+  the protocol with cache policy 2. `goForward` and `history.go(-1)` made no server request and no protocol call, so the
+  page cache restored both pages, and each kept the `window.marker` it had on its last visit. `reload` made one server
+  request and reached the protocol with cache policy 1, the reload-ignoring-cache policy. The `WKWebView` backport
+  (WebKitBackports armv7 build) ran the document-start script before the page's own scripts for `loadHTMLString:`,
+  `loadData:` (ISO-8859-1) and `loadFileURL:`, and for `reload`, so the four shared lines match the macOS oracle. The
+  backport's `goBack` on an iPad 2 (iOS 6.1.3) finished for pages loaded over HTTP: the page saw the value its start script
+  set. The `goBack` to a page loaded by `loadHTMLString:` or `loadFileURL:` did nothing, and the probe then waited for a
+  navigation that never came. The engine keeps no history entry for a string or data load (`canGoBack` stays 0 and
+  `history.length` stays 1 in a raw `UIWebView`), so its `goBack` could not go back to one. The process that disappeared
+  about 8 to 18 seconds later was the probe's own launch watchdog (`0x8badf00d` in `AppleSupport/general.log`), because
+  the probe ran inside `applicationDidFinishLaunching`. The backport now keeps each string or data load on its history
+  item and replays it on a move back or forward, or on a reload; a `file:` document is read again on each replay. After
+  such a load it stops asking the engine to move, and loads each entry's URL instead, because the engine's list no longer
+  matches the backport's. Measured on the device: `goBack` to a string page and to a file page finishes with the page's
+  start script run and its page script saw `set-by-start`; the full probe (string, data, file, reload, file, goBack)
+  finishes with every load seeing `set-by-start`, and `reload` of a `file:` document goes through the rewrite. The
+  fallback message about a document-start script the rewrite did not reach now names its document and navigation type,
+  and it has not fired in these runs. The load-by-URL path (an http entry moved to after a string load) is not measured
+  on the device yet.
+- Response decisions reach `file:`, `data:` and engine-started main-frame loads too. A string, data or file document
+  (`loadHTMLString:`, `loadData:`, `loadFileURL:`, and a `loadRequest:` of a `file:` or `data:` URL) asks the delegate's
+  `decidePolicyForNavigationResponse:` with a response built from its MIME type; a deny fails the navigation with
+  `NSURLErrorCancelled` and leaves the page as it was. A main-frame load the engine starts by itself (a script's
+  `location` change, not a fragment) is replayed through the protocol, so it gets the same decision as a link. Measured on
+  the device: an engine-started `location.href` load was decided, a denied `file:` load and a denied `data:` load failed
+  with `-999` and kept the page, and an allowed `file:` load ran its start script.
+- Measured on the same iPad with the `download` probe mode: a navigation whose response the delegate sent to download
+  (a 300000-byte `application/octet-stream` file) reached `didBecomeDownload`, and the file on disk matched the bytes
+  served. `startDownloadUsingRequest:` on a server that honours `Range` was cancelled after 19821 bytes (the cancel
+  reported `NSURLErrorCancelled` with resume data), and `resumeDownloadFromResumeData:` sent `bytes=19821-`, got 206 for
+  the remaining 280179 bytes, and the file on disk matched the whole body. The probe still waited its full 20 seconds
+  after the navigation download, because the backport reports neither `didFinish` nor `didFail` for that navigation.
+  On macOS WKWebView, a navigation response the delegate sends to download produces, in order: `decidePolicyForNavigationResponse`
+  with download, `navigationResponse:didBecomeDownload:`, the destination question, and `didFailProvisionalNavigation` with
+  `WebKitErrorDomain` 102 (frame load interrupted by policy change); the download's finish races the 102 failure. The backport
+  reports the same order (`tests/webkit_navigation/oracle.m` records the macOS run). The backport's `WKDownload` runs its
+  connection on the main run loop, so the decision cannot race the data. Measured on the iPad, a 300000-byte download
+  matched its bytes. A nil destination: the backport now sends no download callback, as macOS does (host-tested,
+  device-unverified; the nil-destination path has no device probe mode).
+- Measured on the iPad with the `window` probe mode: a popup created by `window.open` with a delegate that returns a
+  view; `location` reflected the first commit; `postMessage` reached the popup with the sent value (a nested object and
+  array with `null` and a number), and a `targetOrigin` that did not match was dropped; the opener's `close()` called
+  `webViewDidClose:` and set `closed`; the popup's own `window.close()` did the same for the opener; a popup navigating
+  itself updated the opener's `location`; and setting the opener's `location` navigated the popup. An earlier run showed
+  the opener's `closed` and `location` not updating, because the shim runs again after the document rewrite, and the
+  second run replaced the table of proxies. The table now lives on `window` under the nonce-named property, so both runs
+  share it (host test `webkit_script_message_test`, check "survives a second install").
+- Measured on the iPad (iPad2,2, iOS 6.1.3) with the `opener`, `popups-off` and `string-back` probe modes. In `opener`, a page
+  served over http opened a popup and a refused `window.open` (the delegate returned nil): the refused call was null, the
+  popup's `window.opener` was an object whose `href` is the opener's URL and whose `closed` is false, a popup `postMessage`
+  reached the opener under the matching origin and a mismatched origin was dropped, the opener's `close()` called
+  `webViewDidClose:`, and `window.open` refused from a page script returned null. The one failing check is the
+  `event.source` identity described above. In `popups-off` (the flag at its default NO) no popup was created and
+  `window.open` returned null. In `string-back` (a `loadRequest` of `a.html`, then `loadHTMLString`, then `goBack`), `goBack`
+  started one load of `a.html` over the network, the page was a fresh document (its own start script ran), and the URL was
+  `a.html`. No macOS run of that sequence exists: the macOS `goBack` oracle in `tests/webkit_document_start` covers a
+  file-URL sequence, so the two are not compared.
+- The shim carries a per-web-view nonce that it removes from the document once it has run. A bridge URL without that nonce
+  is refused, so a frame in the page cannot forge a message. The `WKScriptMessage` frame is main-frame for every accepted
+  message, and the payload does not set it. Why this is the real frame: only the main document gets the shim (the
+  protocol rewrites main-frame HTML and the late path evaluates in the main frame), and the nonce is removed from the DOM
+  after the shim runs, so a subframe cannot read it and cannot send a message the bridge accepts. The codec refuses a value
+  whose type is not what the tag says, and stops decoding at 64 levels of nesting.
+- The host test `tests/webkit_document_start_test.lua` serves the pages from a local HTTP server on a thread and pulls them
+  through the protocol with `NSURLConnection`. It covers a page whose own first script reads a value a document-start script
+  set, a redirect chain, a link GET and a POST form (both tagged the way the replay tags them, with the method, body and a
+  header kept), gzip, a header charset in ISO-8859-1 and a `<meta>` charset, a JSON resource and a 404 (both untouched), a CSP
+  header and a CSP `<meta>`, and the placement rules. A negative control turns the start scripts off. The host test does not
+  run the `UIKit` side: the choice of which `UIWebView` load to replay is checked by the armv7 build and by reading the code.
+  Authentication challenges and cookies are not exercised by the host test.
+- The host test `tests/webkit_script_message_test.lua` runs the shim in JavaScriptCore and decodes its bridge URL. The
+  macOS build posts the same 17 values through a real `WKWebView`, and the bodies agree line by line. Four backport-only
+  checks cover cycles, the refused bodies and a foreign URL, and a damaged bridge URL is detected.
+
+The protocols `src` declares (`WKNavigationDelegate`, `WKUIDelegate`, `WKDownloadDelegate`, `WKScriptMessageHandler`,
+`WKURLSchemeHandler`, `WKURLSchemeTask`) use the SDK's selectors. Clang ignores each copy in a translation unit that also imports WebKit
+(`duplicate protocol definition ... is ignored`), so the SDK's declarations are the ones compiled. The copies put the
+names in `lowered-members.txt`.
+
+Checks: `tests/webkit_window_test.lua` compares the window and opener checks with macOS WKWebView by name (the macOS side is
+`tests/webkit_window/oracle.m`, which opens a popup over loopback and runs the same checks), and
+`tests/webkit_values_test.lua` compares the snapshot defaults with macOS, and checks the values of `WKDownload`,
+`WKOpenPanelParameters` and `WKWindowFeatures` against the list above. It has a negative control that flips one default.
+`WKWebpagePreferences` and `WKContentWorld` have no host oracle. The armv7 Swift typecheck of Telegram's call shapes covers
+them, and it compiles; its link needs the WebKit backport library, which the typecheck target does not link.
+
+Still missing:
+
+- Measured on a device: the `UIWebView` history and page-cache behaviour that the document-start claim depends on (see above).
+  The macOS WKWebView measurement is the only one here.
+- `WKSecurityOrigin` (4 files), which is on `work/telegram-unblock` as `47e86bd3`.
+- Behaviour that `UIWebView` does not have, and which the classes above report honestly rather than fake: response
+  decisions, downloads, new windows, file pickers, context menus, separate JavaScript worlds, and per-page JavaScript.
 
 ## Telegram 13.0 members: the crutches left
 

@@ -4,13 +4,32 @@
 @implementation WKWebpagePreferences {
 @private
     WKContentMode _preferredContentMode;
+    BOOL _allowsContentJavaScript;
 }
 
 - (instancetype)init
 {
-    if ((self = [super init]))
+    if ((self = [super init])) {
         _preferredContentMode = WKContentModeRecommended;
+        _allowsContentJavaScript = YES;
+    }
     return self;
+}
+
+- (BOOL)allowsContentJavaScript
+{
+    return _allowsContentJavaScript;
+}
+
+- (void)setAllowsContentJavaScript:(BOOL)allowsContentJavaScript
+{
+    if (!allowsContentJavaScript) {
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{
+            NSLog(@"WKWebpagePreferences: this engine cannot switch JavaScript off for one page, so a page runs with JavaScript whatever allowsContentJavaScript says.");
+        });
+    }
+    _allowsContentJavaScript = allowsContentJavaScript;
 }
 
 - (WKContentMode)preferredContentMode

@@ -1701,6 +1701,7 @@ class RevenantDeferral
 class RevenantDisplayLinkRate
 class RevenantDocumentMenuOption
 class RevenantDocumentProgress9
+class RevenantDocumentProtocol
 class RevenantDragDropBox
 class RevenantDragSession
 class RevenantDropSession
@@ -1994,12 +1995,14 @@ class RevenantSpotlightBridge
 class RevenantSpotlightStore
 class RevenantSpringCompletion
 class RevenantStringDrawing
+class RevenantSubstitute
 class RevenantSuiteDefaults
 class RevenantSwipeButton
 class RevenantSwipeContainer
 class RevenantSwipeController
 class RevenantSwipeInstaller
 class RevenantSwipeItem
+class RevenantSyncProtocol
 class RevenantTLSSession
 class RevenantTableDropCoordinator
 class RevenantTableDropItem
@@ -2671,10 +2674,12 @@ class WKContentRuleList
 class WKContentRuleListStore
 class WKContentWorld
 class WKContextMenuElementInfo
+class WKDownload
 class WKFrameInfo
 class WKNavigation
 class WKNavigationAction
 class WKNavigationResponse
+class WKOpenPanelParameters
 class WKPreferences
 class WKProcessPool
 class WKScriptMessage
@@ -4070,9 +4075,11 @@ enum WKErrorUnknown
 enum WKNavigationActionPolicyAllow
 enum WKNavigationResponsePolicyAllow
 enum WKNavigationResponsePolicyCancel
+enum WKNavigationResponsePolicyDownload
 enum WKNavigationTypeBackForward
 enum WKNavigationTypeOther
 enum WKNavigationTypeReload
+enum WKUserScriptInjectionTimeAtDocumentStart
 enum WKWebExtensionErrorInvalidManifest
 enum WKWebExtensionErrorResourceNotFound
 enum WKWebExtensionMatchPatternErrorInvalidHost
@@ -4534,11 +4541,28 @@ function RevenantCKZoneWithDocument
 function RevenantCertificateNameTLV
 function RevenantCertificateReadTLV
 function RevenantChannelsForLayoutTag
+function RevenantCodecBridgeMessage
+function RevenantCodecDecoded
+function RevenantCodecMessageBody
+function RevenantCodecParsed
 function RevenantCreatePhotoImage
 function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
 function RevenantCustomPronounSupportedLanguage
 function RevenantDataTypeFromScalar
+function RevenantDocumentCSPWithHashes
+function RevenantDocumentExpect
+function RevenantDocumentForget
+function RevenantDocumentHash
+function RevenantDocumentInnerCopy
+function RevenantDocumentInsert
+function RevenantDocumentIsTagged
+function RevenantDocumentIsWebURL
+function RevenantDocumentRegister
+function RevenantDocumentRewrite
+function RevenantDocumentStartedScript
+function RevenantDocumentTagRequest
+function RevenantDocumentTaggedCopy
 function RevenantGKBufferedCorners
 function RevenantGKCellCeiling
 function RevenantGKCellFloor
@@ -4568,6 +4592,7 @@ function RevenantHKQuantityTypeEntry
 function RevenantHKQuantityTypeEntryAt
 function RevenantHKSetClassResolver
 function RevenantHKStorePath
+function RevenantHistoryPlanMove
 function RevenantHomeKitAccessory
 function RevenantHomeKitAccessoryCategory
 function RevenantHomeKitAction
@@ -4677,6 +4702,7 @@ function RevenantNWConnectionTakeSocket
 function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
+function RevenantOriginOf
 function RevenantPassKitNoHardwareError
 function RevenantPasscodeCurrentStyle
 function RevenantPasscodeIsValid
@@ -4731,6 +4757,7 @@ function RevenantSecurityPaddingFor
 function RevenantSensorKitMonotonicSeconds
 function RevenantSignpostMetrics
 function RevenantSpotlightDefaultItems
+function RevenantSyncRegister
 function RevenantTLSEngineClose
 function RevenantTLSEngineCreate
 function RevenantTLSEngineFree
@@ -4747,6 +4774,7 @@ function RevenantTLSOptionsCreate
 function RevenantTLSOptionsHasServerCredentials
 function RevenantTagForChannelCount
 function RevenantTagFromName
+function RevenantTargetAllows
 function RevenantTypedNode
 function RevenantVTConvertBiPlanarNEON
 function RevenantVTConvertBiPlanarScalar
@@ -9592,10 +9620,12 @@ global WKWebExtensionPermissionWebNavigation
 global WKWebExtensionPermissionWebRequest
 global WKWebsiteDataTypeCookies
 global WKWebsiteDataTypeDiskCache
+global WKWebsiteDataTypeFetchCache
 global WKWebsiteDataTypeIndexedDBDatabases
 global WKWebsiteDataTypeLocalStorage
 global WKWebsiteDataTypeMemoryCache
 global WKWebsiteDataTypeOfflineWebApplicationCache
+global WKWebsiteDataTypeServiceWorkerRegistrations
 global WKWebsiteDataTypeSessionStorage
 global WKWebsiteDataTypeWebSQLDatabases
 global _nw_data_transfer_report_all_paths
@@ -26028,6 +26058,24 @@ member RevenantDeferral -owners
 member RevenantDeferral -pending
 member RevenantDocumentMenuOption -title
 member RevenantDocumentProgress9 +load
+member RevenantDocumentProtocol +canInitWithRequest:
+member RevenantDocumentProtocol +canonicalRequestForRequest:
+member RevenantDocumentProtocol -cancelAuthenticationChallenge:
+member RevenantDocumentProtocol -completeDocument
+member RevenantDocumentProtocol -connection:canAuthenticateAgainstProtectionSpace:
+member RevenantDocumentProtocol -connection:didFailWithError:
+member RevenantDocumentProtocol -connection:didReceiveAuthenticationChallenge:
+member RevenantDocumentProtocol -connection:didReceiveData:
+member RevenantDocumentProtocol -connection:didReceiveResponse:
+member RevenantDocumentProtocol -connection:willSendRequest:redirectResponse:
+member RevenantDocumentProtocol -connectionDidFinishLoading:
+member RevenantDocumentProtocol -continueWithoutCredentialForAuthenticationChallenge:
+member RevenantDocumentProtocol -decided:
+member RevenantDocumentProtocol -finishDocument
+member RevenantDocumentProtocol -rewrittenResponse:scripts:
+member RevenantDocumentProtocol -startLoading
+member RevenantDocumentProtocol -stopLoading
+member RevenantDocumentProtocol -useCredential:forAuthenticationChallenge:
 member RevenantDragSession -allowsMoveOperation
 member RevenantDragSession -canLoadObjectsOfClass:
 member RevenantDragSession -hasItemsConformingToTypeIdentifiers:
@@ -27877,6 +27925,8 @@ member RevenantSpringCompletion -animationDidStart:
 member RevenantSpringCompletion -animationDidStop:finished:
 member RevenantSpringCompletion -completion
 member RevenantStringDrawing +load
+member RevenantSubstitute -revenant_document
+member RevenantSubstitute -string
 member RevenantSuiteDefaults -URLForKey:
 member RevenantSuiteDefaults -arrayForKey:
 member RevenantSuiteDefaults -boolForKey:
@@ -27961,6 +28011,11 @@ member RevenantSwipeItem -color
 member RevenantSwipeItem -image
 member RevenantSwipeItem -title
 member RevenantSwipeItem -width
+member RevenantSyncProtocol +answerForView:message:
+member RevenantSyncProtocol +canInitWithRequest:
+member RevenantSyncProtocol +canonicalRequestForRequest:
+member RevenantSyncProtocol -startLoading
+member RevenantSyncProtocol -stopLoading
 member RevenantTLSSession -clientPreSharedKeyIdentity:maximumIdentity:key:maximumKey:
 member RevenantTLSSession -close
 member RevenantTLSSession -dataArray:kind:
@@ -34751,7 +34806,9 @@ member WKBackForwardList -revenant_setItems:index:
 member WKBackForwardListItem +revenant_itemWithURL:title:
 member WKBackForwardListItem -URL
 member WKBackForwardListItem -initialURL
+member WKBackForwardListItem -revenant_substitute
 member WKBackForwardListItem -revenant_title
+member WKBackForwardListItem -setRevenant_substitute:
 member WKBackForwardListItem -setRevenant_title:
 member WKBackForwardListItem -title
 member WKContentRuleList -description
@@ -34768,6 +34825,29 @@ member WKContentWorld +pageWorld
 member WKContentWorld +worldWithName:
 member WKContentWorld -name
 member WKContextMenuElementInfo -linkURL
+member WKDownload +revenant_downloadWithRequest:webView:
+member WKDownload +revenant_resumeWithData:webView:
+member WKDownload -cancel:
+member WKDownload -connection:didFailWithError:
+member WKDownload -connection:didReceiveData:
+member WKDownload -connection:didReceiveResponse:
+member WKDownload -connectionDidFinishLoading:
+member WKDownload -delegate
+member WKDownload -isUserInitiated
+member WKDownload -originalRequest
+member WKDownload -originatingFrame
+member WKDownload -progress
+member WKDownload -revenant_decided:
+member WKDownload -revenant_failWithError:resumeData:
+member WKDownload -revenant_finish
+member WKDownload -revenant_resumeData
+member WKDownload -revenant_setDecision:
+member WKDownload -revenant_settle:
+member WKDownload -revenant_start
+member WKDownload -revenant_stop
+member WKDownload -revenant_updateProgress
+member WKDownload -setDelegate:
+member WKDownload -webView
 member WKFrameInfo +revenant_frameWithMainFrame:request:
 member WKFrameInfo -copyWithZone:
 member WKFrameInfo -isMainFrame
@@ -34782,9 +34862,13 @@ member WKNavigationAction -request
 member WKNavigationAction -sourceFrame
 member WKNavigationAction -targetFrame
 member WKNavigationResponse +revenant_policyAllowing:
+member WKNavigationResponse +revenant_responseWithResponse:
 member WKNavigationResponse -canShowMIMEType
+member WKNavigationResponse -copyWithZone:
 member WKNavigationResponse -isForMainFrame
 member WKNavigationResponse -response
+member WKOpenPanelParameters -allowsDirectories
+member WKOpenPanelParameters -allowsMultipleSelection
 member WKPreferences +supportsSecureCoding
 member WKPreferences -encodeWithCoder:
 member WKPreferences -init
@@ -35032,25 +35116,49 @@ member WKWebView -loadRequest:
 member WKWebView -navigationDelegate
 member WKWebView -reload
 member WKWebView -reloadFromOrigin
+member WKWebView -resumeDownloadFromResumeData:completionHandler:
 member WKWebView -revenant_abandonNavigation
+member WKWebView -revenant_answerSynchronously:
 member WKWebView -revenant_beginNavigation:type:
 member WKWebView -revenant_beginNavigation:type:index:
+member WKWebView -revenant_closeOpenedWindow:
+member WKWebView -revenant_closeWindow
 member WKWebView -revenant_commit
+member WKWebView -revenant_committedURLString
+member WKWebView -revenant_decideLocal:MIMEType:length:encoding:load:
+member WKWebView -revenant_decideResponse:completion:
+member WKWebView -revenant_denyNavigation:
+member WKWebView -revenant_documentDidInject
+member WKWebView -revenant_documentStartScripts
+member WKWebView -revenant_downloadResponse:request:
 member WKWebView -revenant_emitCommit
+member WKWebView -revenant_failNavigation:interruptedAt:
 member WKWebView -revenant_installScripts:
 member WKWebView -revenant_isMainFrameRequest:
 member WKWebView -revenant_itemsReplacingCurrent:
+member WKWebView -revenant_loadSubstitute:URL:type:index:
+member WKWebView -revenant_moveToIndex:
+member WKWebView -revenant_navigateOpenedWindow:
+member WKWebView -revenant_navigateOpener:
 member WKWebView -revenant_navigateWithRequest:type:index:perform:
+member WKWebView -revenant_notifyOpener
+member WKWebView -revenant_openWindowFromMessage:
+member WKWebView -revenant_openerInfo
+member WKWebView -revenant_postMessageToOpenedWindow:
+member WKWebView -revenant_postMessageToOpener:
 member WKWebView -revenant_receiveBridgeURL:
 member WKWebView -revenant_refreshTitle
 member WKWebView -revenant_replay:
 member WKWebView -revenant_scriptsDidChange
+member WKWebView -revenant_sendUpdate:
 member WKWebView -revenant_setItems:index:
 member WKWebView -revenant_setLoading:
 member WKWebView -revenant_setProgress:
 member WKWebView -revenant_setTitle:
 member WKWebView -revenant_setURL:
 member WKWebView -revenant_setUpWithConfiguration:
+member WKWebView -revenant_shimWithNames:
+member WKWebView -revenant_taggedRequest:
 member WKWebView -scrollView
 member WKWebView -setAllowsBackForwardNavigationGestures:
 member WKWebView -setAllowsLinkPreview:
@@ -35058,6 +35166,7 @@ member WKWebView -setCustomUserAgent:
 member WKWebView -setFindInteractionEnabled:
 member WKWebView -setNavigationDelegate:
 member WKWebView -setUIDelegate:
+member WKWebView -startDownloadUsingRequest:completionHandler:
 member WKWebView -stopLoading
 member WKWebView -takeSnapshotWithConfiguration:completionHandler:
 member WKWebView -title
@@ -35101,8 +35210,10 @@ member WKWebViewConfiguration -suppressesIncrementalRendering
 member WKWebViewConfiguration -urlSchemeHandlerForURLScheme:
 member WKWebViewConfiguration -userContentController
 member WKWebViewConfiguration -websiteDataStore
+member WKWebpagePreferences -allowsContentJavaScript
 member WKWebpagePreferences -init
 member WKWebpagePreferences -preferredContentMode
+member WKWebpagePreferences -setAllowsContentJavaScript:
 member WKWebpagePreferences -setPreferredContentMode:
 member WKWebsiteDataStore +allWebsiteDataTypes
 member WKWebsiteDataStore +defaultDataStore
@@ -35114,6 +35225,7 @@ member WKWebsiteDataStore -initWithCoder:
 member WKWebsiteDataStore -isPersistent
 member WKWebsiteDataStore -removeDataOfTypes:forDataRecords:completionHandler:
 member WKWebsiteDataStore -removeDataOfTypes:modifiedSince:completionHandler:
+member WKWindowFeatures +revenant_featuresWithString:
 member WKWindowFeatures -allowsResizing
 member WKWindowFeatures -copyWithZone:
 member WKWindowFeatures -height
@@ -35247,6 +35359,7 @@ protocol PKPushRegistryDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
 protocol RevenantBrailleMapPinStore
+protocol RevenantDocumentSource
 protocol RevenantHKRunnableQuery
 protocol RevenantHKStorable
 protocol RevenantHKStoreObserver
@@ -35336,7 +35449,11 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
+protocol WKDownloadDelegate
 protocol WKNavigationDelegate
+protocol WKScriptMessageHandler
+protocol WKUIDelegate
+protocol WKURLSchemeHandler
 protocol WKURLSchemeTask
 protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:

@@ -304,6 +304,19 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: none on a device for the backport. The iPad2,2 run measured the system find's methods (C38), not the backport's search. The host test passes (`backports_avfoundation`, `backports_uikit`, symbol gate).
 - Removed by: a device run of the find test app whose results file has the counts of C38 and the centred offsets of C40.
 
+### C44. WKWebpagePreferences stores JavaScript and content-mode choices the engine does not apply
+
+- Stands in for: `WKWebpagePreferences.allowsContentJavaScript` (JavaScript off for one page) and `preferredContentMode` (desktop or mobile rendering for one page).
+- Gaps: both values read back as set. The engine has one JavaScript state and one rendering mode for every page, so a page always runs JavaScript and renders the same way whatever the value. Setting `allowsContentJavaScript` to NO logs once, and setting `preferredContentMode` at all logs once (`src/WebKit/WKWebpagePreferences13.m`).
+- Measurement: none. No test reads these two members back or loads a page with JavaScript off, and the effect is not measured, because there is none.
+- Removed by: a per-page JavaScript switch in the engine, with a host or device test that loads a page with `allowsContentJavaScript` NO and checks that its script did not run; or the owner's decision to answer NO for both members as unsupported.
+
+### C45. A document-start script that the rewrite does not reach runs after the page's own scripts
+
+- Stands in for: `WKUserScriptInjectionTimeAtDocumentStart`, for a main-frame load the document rewrite does not claim: a load the engine starts itself without a link click or form post, and `file:` or `data:` loads (`docs/explanation/backports-open-members.md`).
+- Gaps: the script runs after the page's own scripts, where Apple's runs before them. `revenant_installScripts:` logs once that the rewrite did not reach the page (`src/WebKit/WKWebView.m`).
+- Measurement: the rewrite path is measured by the host case `webkit_document_start` (44 checks through the protocol and the rewrite, negative control detected 22). The fallback path is not measured.
+- Removed by: a loader that tags every main-frame load before it starts, measured by `webkit_document_start` with those loads added; or a device run that shows a document-start script ordered before the page's scripts on each of those loads.
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install

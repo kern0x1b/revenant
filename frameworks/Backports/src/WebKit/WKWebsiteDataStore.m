@@ -8,6 +8,8 @@ NSString *const WKWebsiteDataTypeLocalStorage = @"WKWebsiteDataTypeLocalStorage"
 NSString *const WKWebsiteDataTypeSessionStorage = @"WKWebsiteDataTypeSessionStorage";
 NSString *const WKWebsiteDataTypeWebSQLDatabases = @"WKWebsiteDataTypeWebSQLDatabases";
 NSString *const WKWebsiteDataTypeIndexedDBDatabases = @"WKWebsiteDataTypeIndexedDBDatabases";
+NSString *const WKWebsiteDataTypeFetchCache = @"WKWebsiteDataTypeFetchCache";
+NSString *const WKWebsiteDataTypeServiceWorkerRegistrations = @"WKWebsiteDataTypeServiceWorkerRegistrations";
 
 @implementation WKWebsiteDataStore {
     BOOL _persistent;

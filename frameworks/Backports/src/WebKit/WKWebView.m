@@ -1,29 +1,7 @@
 #import "RevenantWebKit.h"
 #import "RevenantWebFind.h"
-
-NSString *const RevenantWebKitBridgeScheme = @"revenant-wkbridge";
-
-static NSString *const RevenantEncoder =
-    @"function(v){"
-    @"var seen=[];"
-    @"function walk(x,top,inArray){"
-    @"var t=typeof x;"
-    @"if(x===undefined){if(top){return {'$revenant':'u'};}return inArray?null:undefined;}"
-    @"if(x===null||t==='string'||t==='boolean'){return x;}"
-    @"if(t==='number'){if(!isFinite(x)){return {'$revenant':'n','v':String(x)};}if(x===0&&1/x<0){return {'$revenant':'n','v':'-0'};}return x;}"
-    @"if(t==='function'){throw {unsupported:1};}"
-    @"var tag=Object.prototype.toString.call(x);"
-    @"if(tag==='[object Date]'){return isNaN(x.getTime())?null:{'$revenant':'d','v':x.getTime()};}"
-    @"if(tag==='[object Arguments]'){throw {unsupported:1};}"
-    @"var seenAt=seen.indexOf(x);"
-    @"if(seenAt>=0){return {'$revenant':'r','i':seenAt};}"
-    @"seen.push(x);"
-    @"if(Array.isArray(x)){var items=[];for(var j=0;j<x.length;j++){items.push(walk(x[j],false,true));}return {'$revenant':'a','v':items};}"
-    @"var keys=[],values=[];"
-    @"for(var k in x){if(Object.prototype.hasOwnProperty.call(x,k)&&typeof x[k]!=='function'){var w=walk(x[k],false,false);if(w!==undefined){keys.push(k);values.push(w);}}}"
-    @"return {'$revenant':'o','k':keys,'v':values};"
-    @"}"
-    @"return JSON.stringify(walk(v,true,false));}";
+#import "RevenantDocument.h"
+#import "RevenantScriptCodec.h"
 
 static NSString *const RevenantEvaluate =
     @"(function(src){"
@@ -34,74 +12,6 @@ static NSString *const RevenantEvaluate =
     @"try{text=encode(value);}catch(e){return JSON.stringify({'unsupported':1});}"
     @"return '{\"ok\":'+text+'}';"
     @"})(%@)";
-
-static NSString *const RevenantShim =
-    @"(function(names){"
-    @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
-    @"var encode=%@;"
-    @"var top=window===window.top;"
-    @"var handlers={};"
-    @"names.forEach(function(name){handlers[name]={postMessage:function(body){"
-    @"var text=encode(body);"
-    @"var frame=document.createElement('iframe');"
-    @"frame.style.display='none';"
-    @"frame.src='" @"revenant-wkbridge" @"://m/'+encodeURIComponent(JSON.stringify({n:name,b:text,m:top}));"
-    @"(document.documentElement||document.body).appendChild(frame);"
-    @"setTimeout(function(){if(frame.parentNode){frame.parentNode.removeChild(frame);}},0);"
-    @"}};});"
-    @"if(!window.webkit){window.webkit={};}"
-    @"window.webkit.messageHandlers=handlers;"
-    @"})(%@)";
-
-static id decode(id value, NSMutableArray *ids)
-{
-    if (![value isKindOfClass:[NSDictionary class]])
-        return value;
-    NSString *kind = value[@"$revenant"];
-    if ([kind isEqualToString:@"d"])
-        return [NSDate dateWithTimeIntervalSince1970:[value[@"v"] doubleValue] / 1000];
-    if ([kind isEqualToString:@"n"]) {
-        NSString *name = value[@"v"];
-        if ([name isEqualToString:@"NaN"])
-            return @(NAN);
-        if ([name isEqualToString:@"-0"])
-            return @(-0.0);
-        return [name hasPrefix:@"-"] ? @(-INFINITY) : @(INFINITY);
-    }
-    if ([kind isEqualToString:@"r"]) {
-        NSUInteger index = [value[@"i"] unsignedIntegerValue];
-        return index < ids.count ? ids[index] : nil;
-    }
-    if ([kind isEqualToString:@"a"]) {
-        NSMutableArray *array = [NSMutableArray array];
-        [ids addObject:array];
-        for (id item in value[@"v"])
-            [array addObject:decode(item, ids) ?: [NSNull null]];
-        return array;
-    }
-    if ([kind isEqualToString:@"o"]) {
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [ids addObject:dictionary];
-        NSArray *keys = value[@"k"], *values = value[@"v"];
-        for (NSUInteger index = 0; index < keys.count && index < values.count; index++)
-            dictionary[keys[index]] = decode(values[index], ids) ?: [NSNull null];
-        return dictionary;
-    }
-    return nil;
-}
-
-static id decoded(id value)
-{
-    return decode(value, [NSMutableArray array]);
-}
-
-static id parsed(NSString *text, BOOL *valid)
-{
-    NSData *data = [text dataUsingEncoding:NSUTF8StringEncoding];
-    id object = data ? [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:NULL] : nil;
-    *valid = object != nil;
-    return object;
-}
 
 static NSString *literal(NSString *string)
 {
@@ -117,7 +27,30 @@ static NSURL *withoutFragment(NSURL *url)
     return range.location == NSNotFound ? url : [NSURL URLWithString:[string substringToIndex:range.location]];
 }
 
-@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost, UIFindInteractionDelegate>
+@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost, RevenantDocumentSource, UIFindInteractionDelegate>
+@end
+
+@interface RevenantSubstitute : NSObject
+@property (nonatomic, copy) NSString *string;
+@property (nonatomic, copy) NSData *data;
+@property (nonatomic, copy) NSString *MIMEType;
+@property (nonatomic, copy) NSString *encoding;
+@property (nonatomic, copy) NSURL *baseURL;
+@property (nonatomic, copy) NSURL *fileURL;
+- (NSData *)revenant_document;
+@end
+
+@implementation RevenantSubstitute
+
+@synthesize string = _string, data = _data, MIMEType = _MIMEType, encoding = _encoding, baseURL = _baseURL, fileURL = _fileURL;
+
+- (NSData *)revenant_document
+{
+    if (self.fileURL)
+        return [NSData dataWithContentsOfURL:self.fileURL] ?: [NSData data];
+    return self.data ?: [NSData data];
+}
+
 @end
 
 @implementation WKWebView {
@@ -125,6 +58,9 @@ static NSURL *withoutFragment(NSURL *url)
     WKWebViewConfiguration *_configuration;
     __weak id<WKNavigationDelegate> _navigationDelegate;
     __weak id<WKUIDelegate> _UIDelegate;
+    __weak WKWebView *_opener;
+    NSString *_openerWindow;
+    NSMapTable *_windows;
     NSURL *_URL;
     NSURL *_committedURL;
     NSString *_title;
@@ -144,8 +80,11 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _documentReady;
     NSInteger _previousIndex;
     BOOL _decided;
-    BOOL _shimmed;
     BOOL _didCommit;
+    NSString *_token;
+    BOOL _documentInjected;
+    RevenantSubstitute *_pendingSubstitute;
+    BOOL _substituteHistory;
     UIFindInteraction *_findInteraction;
     RevenantWebFindSession *_findSession;
 }
@@ -173,6 +112,8 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
 {
+    _token = RevenantDocumentRegister(self);
+    RevenantSyncRegister(_token, self);
     [configuration revenant_bindURLSchemeHandlersToWebView:self];
     _configuration = [configuration copy];
     _title = @"";
@@ -369,6 +310,8 @@ static NSURL *withoutFragment(NSURL *url)
     _started = NO;
     _decided = NO;
     _didCommit = NO;
+    _documentInjected = NO;
+    _pendingSubstitute = nil;
     _navigationType = type;
     _previousIndex = -1;
     if (index >= 0 && index != _index) {
@@ -383,6 +326,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)revenant_abandonNavigation
 {
+    RevenantDocumentForget(_token);
     if (_previousIndex >= 0)
         [self revenant_setItems:_items index:_previousIndex];
     _previousIndex = -1;
@@ -440,31 +384,155 @@ static NSURL *withoutFragment(NSURL *url)
     return navigation;
 }
 
+- (NSURLRequest *)revenant_taggedRequest:(NSURLRequest *)request
+{
+    return RevenantDocumentTaggedCopy(request, _token);
+}
+
+static NSString *MIMETypeForLocalURL(NSURL *URL)
+{
+    if (URL.isFileURL) {
+        static NSDictionary *types;
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{
+            types = @{@"html": @"text/html", @"htm": @"text/html", @"txt": @"text/plain", @"css": @"text/css",
+                      @"js": @"application/javascript", @"json": @"application/json", @"xml": @"text/xml",
+                      @"svg": @"image/svg+xml", @"png": @"image/png", @"jpg": @"image/jpeg", @"jpeg": @"image/jpeg",
+                      @"gif": @"image/gif", @"pdf": @"application/pdf", @"mp4": @"video/mp4"};
+        });
+        return types[URL.pathExtension.lowercaseString] ?: @"application/octet-stream";
+    }
+    if ([URL.scheme.lowercaseString isEqualToString:@"data"]) {
+        NSString *specifier = URL.resourceSpecifier;
+        NSRange end = [specifier rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@";,"]];
+        NSString *type = end.location == NSNotFound ? specifier : [specifier substringToIndex:end.location];
+        return type.length ? type : @"text/plain";
+    }
+    return nil;
+}
+
+- (void)revenant_denyNavigation:(WKNavigation *)navigation
+{
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    [self revenant_abandonNavigation];
+    NSURL *failing = _URL ?: [NSURL URLWithString:@"about:blank"];
+    NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSURLErrorFailingURLErrorKey: failing}];
+    if ([delegate respondsToSelector:@selector(webView:didFailProvisionalNavigation:withError:)])
+        [delegate webView:self didFailProvisionalNavigation:navigation withError:error];
+}
+
+- (void)revenant_decideLocal:(NSURL *)URL MIMEType:(NSString *)MIMEType length:(long long)length encoding:(NSString *)encoding load:(void (^)(void))load
+{
+    NSURLResponse *response = [[NSURLResponse alloc] initWithURL:URL MIMEType:MIMEType expectedContentLength:length textEncodingName:encoding];
+    WKNavigation *navigation = _navigation;
+    [self revenant_decideResponse:response completion:^(NSInteger policy) {
+        if (policy == WKNavigationResponsePolicyAllow)
+            load();
+        else if (policy == WKNavigationResponsePolicyDownload)
+            [self revenant_downloadResponse:response request:[NSURLRequest requestWithURL:URL]];
+        else
+            [self revenant_denyNavigation:navigation];
+    }];
+}
+
 - (WKNavigation *)loadRequest:(NSURLRequest *)request
 {
+    NSURL *URL = request.URL;
+    NSString *MIMEType = MIMETypeForLocalURL(URL);
     return [self revenant_navigateWithRequest:request type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadRequest:request];
+        if (!MIMEType) {
+            [self->_web loadRequest:[self revenant_taggedRequest:request]];
+            return;
+        }
+        [self revenant_decideLocal:URL MIMEType:MIMEType length:-1 encoding:nil load:^{
+            [self->_web loadRequest:[self revenant_taggedRequest:request]];
+        }];
     }];
 }
 
 - (WKNavigation *)loadFileURL:(NSURL *)URL allowingReadAccessToURL:(NSURL *)readAccessURL
 {
-    return [self loadRequest:[NSURLRequest requestWithURL:URL]];
+    NSString *extension = URL.pathExtension.lowercaseString;
+    BOOL page = [extension isEqualToString:@"html"] || [extension isEqualToString:@"htm"];
+    NSData *data = URL.isFileURL && page ? [NSData dataWithContentsOfURL:URL] : nil;
+    if (!data)
+        return [self loadRequest:[NSURLRequest requestWithURL:URL]];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.fileURL = URL;
+    substitute.MIMEType = @"text/html";
+    substitute.baseURL = URL;
+    return [self revenant_loadSubstitute:substitute URL:URL type:WKNavigationTypeOther index:-1];
 }
 
 - (WKNavigation *)loadHTMLString:(NSString *)string baseURL:(NSURL *)baseURL
 {
-    NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadHTMLString:string baseURL:baseURL];
-    }];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.string = string ?: @"";
+    substitute.baseURL = baseURL;
+    return [self revenant_loadSubstitute:substitute URL:baseURL ?: [NSURL URLWithString:@"about:blank"] type:WKNavigationTypeOther index:-1];
 }
 
 - (WKNavigation *)loadData:(NSData *)data MIMEType:(NSString *)MIMEType characterEncodingName:(NSString *)characterEncodingName baseURL:(NSURL *)baseURL
 {
-    NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
-        [_web loadData:data MIMEType:MIMEType textEncodingName:characterEncodingName baseURL:baseURL];
+    RevenantSubstitute *substitute = [[RevenantSubstitute alloc] init];
+    substitute.data = data ?: [NSData data];
+    substitute.MIMEType = MIMEType;
+    substitute.encoding = characterEncodingName;
+    substitute.baseURL = baseURL;
+    return [self revenant_loadSubstitute:substitute URL:baseURL ?: [NSURL URLWithString:@"about:blank"] type:WKNavigationTypeOther index:-1];
+}
+
+- (WKNavigation *)revenant_loadSubstitute:(RevenantSubstitute *)substitute URL:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
+{
+    _substituteHistory = YES;
+    if (substitute.string) {
+        NSString *html = RevenantDocumentInsert(substitute.string, [self revenant_documentStartScripts]);
+        return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
+            [self revenant_decideLocal:URL MIMEType:@"text/html" length:html.length encoding:@"utf-8" load:^{
+                self->_pendingSubstitute = substitute;
+                [self revenant_documentDidInject];
+                [self->_web loadHTMLString:html baseURL:substitute.baseURL];
+            }];
+        }];
+    }
+    NSData *document = [substitute revenant_document];
+    BOOL injected = NO;
+    if ([substitute.MIMEType.lowercaseString isEqualToString:@"text/html"]) {
+        NSData *rewritten = RevenantDocumentRewrite(document, nil, substitute.encoding, [self revenant_documentStartScripts]);
+        if (rewritten) {
+            document = rewritten;
+            injected = YES;
+        }
+    }
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
+        [self revenant_decideLocal:URL MIMEType:substitute.MIMEType length:document.length encoding:substitute.encoding load:^{
+            self->_pendingSubstitute = substitute;
+            if (injected)
+                [self revenant_documentDidInject];
+            [self->_web loadData:document MIMEType:substitute.MIMEType textEncodingName:substitute.encoding baseURL:substitute.baseURL];
+        }];
+    }];
+}
+
+- (WKNavigation *)revenant_moveToIndex:(NSInteger)index
+{
+    WKBackForwardListItem *item = _items[index];
+    NSURL *target = item.URL;
+    RevenantHistoryMove move = RevenantHistoryPlanMove(item.revenant_substitute != nil, !_substituteHistory);    if (move == RevenantHistoryMoveReplay)
+        return [self revenant_loadSubstitute:item.revenant_substitute URL:target type:WKNavigationTypeBackForward index:index];
+    if (move == RevenantHistoryMoveLoad)
+        return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:index perform:^{
+            [self->_web loadRequest:[self revenant_taggedRequest:[NSURLRequest requestWithURL:target]]];
+        }];
+    NSInteger delta = index - _index;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeBackForward index:index perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        if (delta == -1)
+            [self->_web goBack];
+        else if (delta == 1)
+            [self->_web goForward];
+        else
+            [self->_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
     }];
 }
 
@@ -472,18 +540,14 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoBack)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index - 1].URL] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
-        [_web goBack];
-    }];
+    return [self revenant_moveToIndex:_index - 1];
 }
 
 - (WKNavigation *)goForward
 {
     if (!self.canGoForward)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index + 1].URL] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
-        [_web goForward];
-    }];
+    return [self revenant_moveToIndex:_index + 1];
 }
 
 - (WKNavigation *)goToBackForwardListItem:(WKBackForwardListItem *)item
@@ -491,18 +555,19 @@ static NSURL *withoutFragment(NSURL *url)
     NSUInteger position = [_items indexOfObjectIdenticalTo:item];
     if (position == NSNotFound || (NSInteger)position == _index)
         return nil;
-    NSInteger delta = (NSInteger)position - _index;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:item.URL] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
-        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
-    }];
+    return [self revenant_moveToIndex:(NSInteger)position];
 }
 
 - (WKNavigation *)reload
 {
     if (!_committedURL)
         return nil;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_committedURL] type:WKNavigationTypeReload index:-1 perform:^{
-        [_web reload];
+    if (_index >= 0 && _index < (NSInteger)_items.count && _items[_index].revenant_substitute)
+        return [self revenant_loadSubstitute:_items[_index].revenant_substitute URL:_committedURL type:WKNavigationTypeReload index:-1];
+    NSURL *target = _committedURL;
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeReload index:-1 perform:^{
+        RevenantDocumentExpect(self->_token, target);
+        [self->_web reload];
     }];
 }
 
@@ -525,7 +590,7 @@ static NSURL *withoutFragment(NSURL *url)
     id result = nil;
     NSError *error = nil;
     BOOL valid = NO;
-    id envelope = answer.length ? parsed(answer, &valid) : nil;
+    id envelope = answer.length ? RevenantCodecParsed(answer, &valid) : nil;
     if (!valid || ![envelope isKindOfClass:[NSDictionary class]]) {
         error = [NSError errorWithDomain:WKErrorDomain code:WKErrorUnknown userInfo:nil];
     } else if (envelope[@"error"]) {
@@ -533,7 +598,7 @@ static NSURL *withoutFragment(NSURL *url)
     } else if (envelope[@"unsupported"]) {
         error = [NSError errorWithDomain:WKErrorDomain code:WKErrorJavaScriptResultTypeIsUnsupported userInfo:@{NSLocalizedDescriptionKey: @"JavaScript execution returned a result of an unsupported type"}];
     } else {
-        result = decoded(envelope[@"ok"]);
+        result = RevenantCodecDecoded(envelope[@"ok"]);
     }
     if (_documentReady)
         [self revenant_refreshTitle];
@@ -587,18 +652,107 @@ static NSURL *withoutFragment(NSURL *url)
         _items[_index].revenant_title = title;
 }
 
+- (NSString *)revenant_shimWithNames:(NSArray *)names
+{
+    NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
+    NSDictionary *opener = [self revenant_openerInfo];
+    NSData *openerData = opener ? [NSJSONSerialization dataWithJSONObject:opener options:0 error:NULL] : nil;
+    NSString *openerJSON = openerData ? [[NSString alloc] initWithData:openerData encoding:NSUTF8StringEncoding] : @"null";
+    return [NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], _token, openerJSON];
+}
+
+- (NSArray<NSString *> *)revenant_documentStartScripts
+{
+    WKUserContentController *controller = _configuration.userContentController;
+    NSMutableArray<NSString *> *scripts = [NSMutableArray arrayWithObject:[self revenant_shimWithNames:controller.revenant_handlerNames]];
+    for (WKUserScript *script in controller.revenant_scripts) {
+        if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart)
+            [scripts addObject:script.source];
+    }
+    return scripts;
+}
+
+- (void)revenant_documentDidInject
+{
+    _documentInjected = YES;
+}
+
+- (void)revenant_decideResponse:(NSURLResponse *)response completion:(void (^)(NSInteger))completion
+{
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if (![delegate respondsToSelector:@selector(webView:decidePolicyForNavigationResponse:decisionHandler:)]) {
+        completion(WKNavigationResponsePolicyAllow);
+        return;
+    }
+    WKNavigationResponse *navigationResponse = [WKNavigationResponse revenant_responseWithResponse:response];
+    void (^decide)(void) = ^{
+        [delegate webView:self decidePolicyForNavigationResponse:navigationResponse decisionHandler:^(WKNavigationResponsePolicy policy) {
+            completion(policy);
+        }];
+    };
+    if ([NSThread isMainThread])
+        decide();
+    else
+        dispatch_async(dispatch_get_main_queue(), decide);
+}
+
+- (void)revenant_failNavigation:(WKNavigation *)navigation interruptedAt:(NSURL *)URL
+{
+    NSDictionary *userInfo = URL ? @{NSURLErrorFailingURLErrorKey: URL} : nil;
+    NSError *error = [NSError errorWithDomain:@"WebKitErrorDomain" code:102 userInfo:userInfo];
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if ([delegate respondsToSelector:@selector(webView:didFailProvisionalNavigation:withError:)])
+        [delegate webView:self didFailProvisionalNavigation:navigation withError:error];
+}
+
+- (void)revenant_downloadResponse:(NSURLResponse *)response request:(NSURLRequest *)request
+{
+    WKNavigation *navigation = _navigation;
+    NSURL *URL = response.URL;
+    [self revenant_abandonNavigation];
+    WKDownload *download = [WKDownload revenant_downloadWithRequest:RevenantDocumentInnerCopy(request) webView:self];
+    __weak WKWebView *weak = self;
+    [download revenant_setDecision:^(BOOL allowed) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weak revenant_failNavigation:navigation interruptedAt:URL];
+        });
+    }];
+    id<WKNavigationDelegate> delegate = _navigationDelegate;
+    if ([delegate respondsToSelector:@selector(webView:navigationResponse:didBecomeDownload:)])
+        [delegate webView:self navigationResponse:[WKNavigationResponse revenant_responseWithResponse:response] didBecomeDownload:download];
+    [download revenant_start];
+}
+
+- (void)startDownloadUsingRequest:(NSURLRequest *)request completionHandler:(void (^)(WKDownload *))completionHandler
+{
+    WKDownload *download = [WKDownload revenant_downloadWithRequest:RevenantDocumentInnerCopy(request) webView:self];
+    [download revenant_start];
+    if (completionHandler)
+        completionHandler(download);
+}
+
+- (void)resumeDownloadFromResumeData:(NSData *)resumeData completionHandler:(void (^)(WKDownload *))completionHandler
+{
+    WKDownload *download = [WKDownload revenant_resumeWithData:resumeData webView:self];
+    [download revenant_start];
+    if (completionHandler)
+        completionHandler(download);
+}
+
 - (void)revenant_installScripts:(BOOL)userScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
-    NSArray *names = controller.revenant_handlerNames;
-    if (names.count || _shimmed) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
-        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
-        _shimmed = names.count > 0;
-    }
+    BOOL started = _documentInjected || [[_web stringByEvaluatingJavaScriptFromString:RevenantDocumentStartedScript(_token)] isEqualToString:@"true"];
+    [_web stringByEvaluatingJavaScriptFromString:[self revenant_shimWithNames:controller.revenant_handlerNames]];
     if (userScripts)
-        for (WKUserScript *script in controller.revenant_scripts)
+        for (WKUserScript *script in controller.revenant_scripts) {
+            if (script.injectionTime == WKUserScriptInjectionTimeAtDocumentStart) {
+                if (started)
+                    continue;
+                NSLog(@"WKUserScript: the document rewrite did not reach %@ (navigation type %ld), so a document-start script runs after the page's own scripts.", _web.request.URL.absoluteString ?: @"nil", (long)_navigationType);
+            }
             [_web stringByEvaluatingJavaScriptFromString:script.source];
+        }
 }
 
 - (void)revenant_scriptsDidChange
@@ -613,21 +767,192 @@ static NSURL *withoutFragment(NSURL *url)
     return main == nil || [withoutFragment(main) isEqual:withoutFragment(request.URL)];
 }
 
+- (void)revenant_sendUpdate:(NSDictionary *)update
+{
+    NSData *data = [NSJSONSerialization dataWithJSONObject:update options:0 error:NULL];
+    if (!data)
+        return;
+    NSString *JSON = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"try{if(window['%@w']){window['%@w'](%@);}}catch(e){}", _token, _token, JSON]];
+}
+
+- (void)revenant_notifyOpener
+{
+    NSString *href = _committedURL.absoluteString;
+    if (!href)
+        return;
+    if (_opener)
+        [_opener revenant_sendUpdate:@{@"i": _openerWindow, @"href": href}];
+    for (WKWebView *popup in _windows.objectEnumerator) {
+        if (popup->_opener == self)
+            [popup revenant_sendUpdate:@{@"opener": @YES, @"href": href}];
+    }
+}
+
+- (void)revenant_closeWindow
+{
+    WKWebView *opener = _opener;
+    NSString *identifier = _openerWindow;
+    if (!opener)
+        return;
+    _opener = nil;
+    _openerWindow = nil;
+    [opener->_windows removeObjectForKey:identifier];
+    [opener revenant_sendUpdate:@{@"i": identifier, @"closed": @YES}];
+    for (WKWebView *popup in _windows.objectEnumerator) {
+        if (popup->_opener == self) {
+            popup->_opener = nil;
+            [popup revenant_sendUpdate:@{@"opener": @YES, @"closed": @YES}];
+        }
+    }
+    id<WKUIDelegate> UIDelegate = self.UIDelegate;
+    if ([UIDelegate respondsToSelector:@selector(webViewDidClose:)])
+        [UIDelegate webViewDidClose:self];
+}
+
+- (BOOL)revenant_openWindowFromMessage:(NSDictionary *)message
+{
+    if (!_configuration.preferences.javaScriptCanOpenWindowsAutomatically)
+        return NO;
+    NSString *identifier = message[@"i"];
+    if (![identifier isKindOfClass:[NSString class]])
+        return NO;
+    BOOL valid = NO;
+    NSDictionary *request = RevenantCodecMessageBody(message[@"b"], &valid);
+    NSString *target = request[@"u"];
+    NSString *name = request[@"t"];
+    NSString *features = request[@"f"];
+    NSURL *URL = [target isKindOfClass:[NSString class]] ? [NSURL URLWithString:target] : nil;
+    id<WKUIDelegate> UIDelegate = self.UIDelegate;
+    if (!valid || ![request isKindOfClass:[NSDictionary class]] || !URL || ![name isKindOfClass:[NSString class]]
+        || ![features isKindOfClass:[NSString class]] || ![UIDelegate respondsToSelector:@selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:)])
+        return NO;
+    NSURLRequest *window = [NSURLRequest requestWithURL:URL];
+    WKNavigationAction *action = [WKNavigationAction revenant_actionWithRequest:window type:WKNavigationTypeOther mainFrame:YES];
+    WKWindowFeatures *windowFeatures = [WKWindowFeatures revenant_featuresWithString:features];
+    WKWebView *created = [UIDelegate webView:self createWebViewWithConfiguration:[_configuration copy] forNavigationAction:action windowFeatures:windowFeatures];
+    if (![created isKindOfClass:[WKWebView class]])
+        return NO;
+    if (!_windows)
+        _windows = [NSMapTable strongToWeakObjectsMapTable];
+    [_windows setObject:created forKey:identifier];
+    created->_opener = self;
+    created->_openerWindow = identifier;
+    [created loadRequest:window];
+    return YES;
+}
+
+- (NSString *)revenant_answerSynchronously:(NSDictionary *)message
+{
+    if (![message[@"w"] isEqual:@1])
+        return @"0";
+    return [self revenant_openWindowFromMessage:message] ? @"1" : @"0";
+}
+
+- (NSDictionary *)revenant_openerInfo
+{
+    NSString *href = _opener.revenant_committedURLString;
+    if (!href)
+        return nil;
+    return @{@"href": href};
+}
+
+- (NSString *)revenant_committedURLString
+{
+    return _committedURL.absoluteString;
+}
+
+- (void)revenant_closeOpenedWindow:(NSDictionary *)message
+{
+    WKWebView *popup = [_windows objectForKey:message[@"i"]];
+    if (popup && popup->_opener == self)
+        [popup revenant_closeWindow];
+}
+
+- (void)revenant_navigateOpenedWindow:(NSDictionary *)message
+{
+    WKWebView *popup = [_windows objectForKey:message[@"i"]];
+    NSString *target = message[@"u"];
+    NSURL *URL = [target isKindOfClass:[NSString class]] ? [NSURL URLWithString:target] : nil;
+    if (popup && URL)
+        [popup loadRequest:[NSURLRequest requestWithURL:URL]];
+}
+
+- (void)revenant_postMessageToOpenedWindow:(NSDictionary *)message
+{
+    WKWebView *popup = [_windows objectForKey:message[@"i"]];
+    BOOL valid = NO;
+    RevenantCodecMessageBody(message[@"b"], &valid);
+    NSString *target = message[@"o"];
+    if (!popup || !valid || ![target isKindOfClass:[NSString class]])
+        return;
+    NSString *origin = RevenantOriginOf(_committedURL);
+    NSString *popupOrigin = RevenantOriginOf(popup->_committedURL);
+    if (!RevenantTargetAllows(target, origin, popupOrigin))
+        return;
+    [popup revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"t": target, @"s": @"opener"}];
+}
+
+- (void)revenant_postMessageToOpener:(NSDictionary *)message
+{
+    WKWebView *opener = _opener;
+    BOOL valid = NO;
+    RevenantCodecMessageBody(message[@"b"], &valid);
+    NSString *target = message[@"o"];
+    if (!opener || !valid || ![target isKindOfClass:[NSString class]])
+        return;
+    NSString *origin = RevenantOriginOf(_committedURL);
+    NSString *openerOrigin = RevenantOriginOf(opener->_committedURL);
+    if (!RevenantTargetAllows(target, origin, openerOrigin))
+        return;
+    [opener revenant_sendUpdate:@{@"m": message[@"b"], @"o": origin ?: @"null", @"t": target, @"s": _openerWindow}];
+}
+
+- (void)revenant_navigateOpener:(NSDictionary *)message
+{
+    NSString *target = message[@"u"];
+    NSURL *URL = [target isKindOfClass:[NSString class]] ? [NSURL URLWithString:target] : nil;
+    if (_opener && URL)
+        [_opener loadRequest:[NSURLRequest requestWithURL:URL]];
+}
+
 - (void)revenant_receiveBridgeURL:(NSURL *)URL
 {
-    NSString *prefix = [RevenantWebKitBridgeScheme stringByAppendingString:@"://m/"];
-    NSString *encoded = [URL.absoluteString substringFromIndex:MIN(prefix.length, URL.absoluteString.length)];
-    BOOL valid = NO;
-    NSDictionary *message = parsed([encoded stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], &valid);
-    if (!valid || ![message isKindOfClass:[NSDictionary class]])
+    NSDictionary *message = RevenantCodecBridgeMessage(URL, _token);
+    NSNumber *kind = message[@"w"];
+    if ([kind isEqual:@6]) {
+        [self revenant_postMessageToOpener:message];
         return;
+    }
+    if ([kind isEqual:@7]) {
+        [self revenant_navigateOpener:message];
+        return;
+    }
+    if ([kind isEqual:@2]) {
+        [self revenant_closeOpenedWindow:message];
+        return;
+    }
+    if ([kind isEqual:@3]) {
+        [self revenant_postMessageToOpenedWindow:message];
+        return;
+    }
+    if ([kind isEqual:@4]) {
+        [self revenant_navigateOpenedWindow:message];
+        return;
+    }
+    if ([kind isEqual:@5]) {
+        [self revenant_closeWindow];
+        return;
+    }
     NSString *name = message[@"n"];
+    if (![name isKindOfClass:[NSString class]])
+        return;
     id<WKScriptMessageHandler> handler = [_configuration.userContentController revenant_handlerNamed:name];
     if (!handler)
         return;
     BOOL bodyValid = NO;
-    id body = decoded(parsed(message[@"b"], &bodyValid));
-    WKScriptMessage *object = [WKScriptMessage revenant_messageWithBody:body name:name webView:self mainFrame:[message[@"m"] boolValue]];
+    id body = RevenantCodecMessageBody(message[@"b"], &bodyValid);
+    WKScriptMessage *object = [WKScriptMessage revenant_messageWithBody:body name:name webView:self mainFrame:YES];
     dispatch_async(dispatch_get_main_queue(), ^{
         [handler userContentController:_configuration.userContentController didReceiveScriptMessage:object];
     });
@@ -638,7 +963,7 @@ static NSURL *withoutFragment(NSURL *url)
     _approved = request;
     if (!_navigation)
         [self revenant_beginNavigation:request.URL type:_navigationType];
-    [_web loadRequest:request];
+    [_web loadRequest:[self revenant_taggedRequest:request]];
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)type
@@ -648,6 +973,23 @@ static NSURL *withoutFragment(NSURL *url)
         return NO;
     }
     BOOL main = [self revenant_isMainFrameRequest:request];
+    BOOL inPage = request.URL.fragment && _committedURL && [withoutFragment(request.URL) isEqual:withoutFragment(_committedURL)];
+    BOOL engineStarted = type == UIWebViewNavigationTypeLinkClicked || type == UIWebViewNavigationTypeFormSubmitted
+        || (type == UIWebViewNavigationTypeOther && !inPage);
+    if (!_navigation && main && [request.mainDocumentURL isEqual:request.URL] && !RevenantDocumentIsTagged(request)
+        && RevenantDocumentIsWebURL(request.URL) && engineStarted) {
+        WKNavigationType replayType = type == UIWebViewNavigationTypeOther ? WKNavigationTypeOther : (WKNavigationType)type;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self->_navigation) {
+                [self->_web loadRequest:request];
+                return;
+            }
+            [self revenant_navigateWithRequest:request type:replayType index:-1 perform:^{
+                [self->_web loadRequest:[self revenant_taggedRequest:request]];
+            }];
+        });
+        return NO;
+    }
     WKNavigationType wkType = type == UIWebViewNavigationTypeOther ? WKNavigationTypeOther : (WKNavigationType)type;
     if (main && _navigation)
         wkType = _navigationType == WKNavigationTypeOther ? wkType : _navigationType;
@@ -750,6 +1092,9 @@ static NSURL *withoutFragment(NSURL *url)
     }
     _previousIndex = -1;
     _committedURL = URL;
+    [self revenant_notifyOpener];
+    item.revenant_substitute = _pendingSubstitute;
+    _pendingSubstitute = nil;
     [self revenant_setTitle:@""];
     [self revenant_setItems:items index:index];
 }
@@ -779,6 +1124,7 @@ static NSURL *withoutFragment(NSURL *url)
     }
     _documentReady = YES;
     [self revenant_installScripts:YES];
+    RevenantDocumentForget(_token);
     [self revenant_emitCommit];
     _navigation = nil;
     _didCommit = NO;
