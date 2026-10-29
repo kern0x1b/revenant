@@ -119,20 +119,22 @@
 
 - (void)commit
 {
-    if (_status != MTLCommandBufferStatusNotEnqueued && _status != MTLCommandBufferStatusEnqueued) {
-        NSLog(@"Metal: a command buffer is committed once, and this one was committed already (status %ld)", (long)_status);
-        return;
+    @synchronized (self) {
+        if (_status != MTLCommandBufferStatusNotEnqueued && _status != MTLCommandBufferStatusEnqueued) {
+            NSLog(@"Metal: a command buffer is committed once, and this one was committed already (status %ld)", (long)_status);
+            return;
+        }
+        _status = MTLCommandBufferStatusCommitted;
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
+        [device acquire];
+        [self revenantBeginWork];
+        if (_drawable)
+            [_drawable present];
+        glFlush();
+        [device relinquish];
+        _endTime = CACurrentMediaTime();
+        _status = MTLCommandBufferStatusScheduled;
     }
-    _status = MTLCommandBufferStatusCommitted;
-    RevenantMetalDevice *device = [RevenantMetalDevice shared];
-    [device acquire];
-    [self revenantBeginWork];
-    if (_drawable)
-        [_drawable present];
-    glFlush();
-    [device relinquish];
-    _endTime = CACurrentMediaTime();
-    _status = MTLCommandBufferStatusScheduled;
     for (void (^handler)(id<MTLCommandBuffer>) in _scheduled)
         handler(self);
     _status = MTLCommandBufferStatusCompleted;
@@ -177,8 +179,10 @@
 
 - (void)waitUntilScheduled
 {
-    if (_status < MTLCommandBufferStatusCommitted)
-        NSLog(@"Metal: waitUntilScheduled on a command buffer that was never committed: it would wait for ever");
+    @synchronized (self) {
+        if (_status < MTLCommandBufferStatusCommitted)
+            NSLog(@"Metal: waitUntilScheduled on a command buffer that was never committed: it would wait for ever");
+    }
 }
 
 - (void)waitUntilCompleted
