@@ -360,6 +360,21 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("BackportsQRMetadataProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/qr_metadata/main.m", "src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m",
+                  "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
+                  "src/AVFoundation/AVMetadataMachineReadableCodeObject7.m", "src/AVFoundation/AVFoundationNames7.m", "src/AVFoundation/RevenantQRCode.c")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/qr_metadata/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.qrmetadata", "CFBundleDisplayName=BackportsQRMetadataProbe")
+        set_values("revenant.control", "tests/qr_metadata/control")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalDeviceProbe")
         set_default(false)
         add_rules("@addon/revenant/daemon")

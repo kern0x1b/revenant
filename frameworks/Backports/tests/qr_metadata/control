@@ -1,0 +1,6 @@
+Package: space.kern0x1b.backports.qrmetadata
+Name: BackportsQRMetadataProbe
+Architecture: iphoneos-arm
+Description: Reads a QR code through AVCaptureMetadataOutput on iOS 6: the type is available, the delegate receives
+ the code with its string, type and corners, and a rectOfInterest limits what is delivered. Writes PASS and FAIL
+ lines to /var/revenant/qr-metadata.txt, so that the Backports' QR path can be checked on a device.
