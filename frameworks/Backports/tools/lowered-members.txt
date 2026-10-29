@@ -1701,7 +1701,6 @@ class RevenantDeferral
 class RevenantDisplayLinkRate
 class RevenantDocumentMenuOption
 class RevenantDocumentProgress9
-class RevenantDocumentProtocol
 class RevenantDragDropBox
 class RevenantDragSession
 class RevenantDropSession
@@ -4552,19 +4551,6 @@ function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
 function RevenantCustomPronounSupportedLanguage
 function RevenantDataTypeFromScalar
-function RevenantDocumentCSPWithHashes
-function RevenantDocumentExpect
-function RevenantDocumentForget
-function RevenantDocumentHash
-function RevenantDocumentInnerCopy
-function RevenantDocumentInsert
-function RevenantDocumentIsTagged
-function RevenantDocumentIsWebURL
-function RevenantDocumentRegister
-function RevenantDocumentRewrite
-function RevenantDocumentStartedScript
-function RevenantDocumentTagRequest
-function RevenantDocumentTaggedCopy
 function RevenantGKBufferedCorners
 function RevenantGKCellCeiling
 function RevenantGKCellFloor
@@ -26088,24 +26074,6 @@ member RevenantDeferral -owners
 member RevenantDeferral -pending
 member RevenantDocumentMenuOption -title
 member RevenantDocumentProgress9 +load
-member RevenantDocumentProtocol +canInitWithRequest:
-member RevenantDocumentProtocol +canonicalRequestForRequest:
-member RevenantDocumentProtocol -cancelAuthenticationChallenge:
-member RevenantDocumentProtocol -completeDocument
-member RevenantDocumentProtocol -connection:canAuthenticateAgainstProtectionSpace:
-member RevenantDocumentProtocol -connection:didFailWithError:
-member RevenantDocumentProtocol -connection:didReceiveAuthenticationChallenge:
-member RevenantDocumentProtocol -connection:didReceiveData:
-member RevenantDocumentProtocol -connection:didReceiveResponse:
-member RevenantDocumentProtocol -connection:willSendRequest:redirectResponse:
-member RevenantDocumentProtocol -connectionDidFinishLoading:
-member RevenantDocumentProtocol -continueWithoutCredentialForAuthenticationChallenge:
-member RevenantDocumentProtocol -decided:
-member RevenantDocumentProtocol -finishDocument
-member RevenantDocumentProtocol -rewrittenResponse:scripts:
-member RevenantDocumentProtocol -startLoading
-member RevenantDocumentProtocol -stopLoading
-member RevenantDocumentProtocol -useCredential:forAuthenticationChallenge:
 member RevenantDragSession -allowsMoveOperation
 member RevenantDragSession -canLoadObjectsOfClass:
 member RevenantDragSession -hasItemsConformingToTypeIdentifiers:
@@ -35409,7 +35377,6 @@ protocol PKPushRegistryDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
 protocol RevenantBrailleMapPinStore
-protocol RevenantDocumentSource
 protocol RevenantHKRunnableQuery
 protocol RevenantHKStorable
 protocol RevenantHKStoreObserver

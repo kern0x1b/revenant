@@ -311,12 +311,12 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: none. No test reads these two members back or loads a page with JavaScript off, and the effect is not measured, because there is none.
 - Removed by: a per-page JavaScript switch in the engine, with a host or device test that loads a page with `allowsContentJavaScript` NO and checks that its script did not run; or the owner's decision to answer NO for both members as unsupported.
 
-### C45. A document-start script that the rewrite does not reach runs after the page's own scripts
+### C45. The document-start hook is assumed to run before the page's own scripts
 
-- Stands in for: `WKUserScriptInjectionTimeAtDocumentStart`, for a main-frame load the document rewrite does not claim: a load the engine starts itself without a link click or form post, and `file:` or `data:` loads (`docs/explanation/backports-open-members.md`).
-- Gaps: the script runs after the page's own scripts, where Apple's runs before them. `revenant_installScripts:` logs once that the rewrite did not reach the page (`src/WebKit/WKWebView.m`).
-- Measurement: the rewrite path is measured by the host case `webkit_document_start` (44 checks through the protocol and the rewrite, negative control detected 22). The fallback path is not measured.
-- Removed by: a loader that tags every main-frame load before it starts, measured by `webkit_document_start` with those loads added; or a device run that shows a document-start script ordered before the page's scripts on each of those loads.
+- Stands in for: `WKUserScriptInjectionTimeAtDocumentStart`, for every main-frame load, through the WebKit1 `webView:didClearWindowObject:forFrame:` delegate callback (`src/WebKit/WKWebView.m`). The `NSURLProtocol` rewrite that stood in before was removed with `RevenantDocumentProtocol.m`.
+- Gaps: the callback is meant to run before the page's own scripts. That order is not measured on a device, so the entry stands until it is.
+- Measurement: none for the WebKit1 hook. The host case `webkit_document_start` and its macOS oracle measured the removed rewrite and were deleted with it.
+- Removed by: a device run that shows a document-start script ordered before the page's scripts on a `file:` load, a `data:` load, a history load and a network load.
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
