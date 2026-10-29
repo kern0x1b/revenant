@@ -44,6 +44,19 @@ typedef mach_port_t task_id_token_t;
 #define UIUserInterfaceIdiomVision ((UIUserInterfaceIdiom)6)
 #endif
 
+// The 26.2 simd/math.h calls these in its sincospi templates, and the iOS 6 deployment target hides them from math.h.
+// They are declared so the header parses; a call that reached one would be an import the phone does not export.
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 70000
+#ifdef __cplusplus
+extern "C" {
+#endif
+void __sincospif(float, float *, float *);
+void __sincospi(double, double *, double *);
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 
 #if defined(__cplusplus)
 #include <pthread.h>
