@@ -22,10 +22,16 @@ function main()
         end
         return
     end
-    if action ~= "fetch" and action ~= "rootfs" and action ~= "classes" and action ~= "extract" then
-        raise("xmake firmware takes fetch, rootfs, classes, extract or list, not %s", tostring(action))
+    if action ~= "fetch" and action ~= "rootfs" and action ~= "classes" and action ~= "extract" and action ~= "kernelcache" then
+        raise("xmake firmware takes fetch, rootfs, classes, extract, kernelcache or list, not %s", tostring(action))
     end
     local release = option.get("release") or raise("xmake firmware fetch needs the release")
+    if action == "kernelcache" then
+        local device = option.get("device") or raise("xmake firmware kernelcache needs --device=IDENTIFIER, e.g. iPhone4,1")
+        local file, chosen = firmware.kernelcache(device, release)
+        cprint("${bright}%s${clear}: the kernelcache of %s iOS %s (%s)", file, chosen.identifier, chosen.version, chosen.build)
+        return
+    end
     config.load()
     local architecture = option.get("arch") or config.get("arch") or raise("xmake firmware fetch needs --arch or a configured architecture")
     task.run("config", {plat = "macosx", component = "firmware-tools"}, {disable_dump = true})
