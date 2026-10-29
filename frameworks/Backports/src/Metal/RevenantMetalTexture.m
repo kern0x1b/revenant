@@ -21,8 +21,6 @@ typedef struct {
     const char *linearExtension;
 } RevenantFormat;
 
-// The CoreVideo format of an IOSurface whose pixels are this Metal format. Only the formats the OpenGL ES form above
-// reads directly from a surface are listed.
 static BOOL surfaceFormatFor(MTLPixelFormat pixelFormat, OSType *out)
 {
     switch ((NSUInteger)pixelFormat) {
@@ -243,8 +241,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return self;
 }
 
-// The texture is the OpenGL ES texture CoreVideo maps onto the surface's memory, so a write to either side is seen by
-// the other without a copy. CoreVideo owns its name, so dealloc releases the mapping rather than deleting the name.
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane
 {
     RevenantFormat format;

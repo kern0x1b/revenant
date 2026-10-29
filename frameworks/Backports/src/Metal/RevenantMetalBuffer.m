@@ -61,9 +61,6 @@
     return _bytes;
 }
 
-// A texture that shares the buffer's bytes needs storage that OpenGL ES can map in place. These bytes are ordinary
-// calloc memory, so the only other option is a copy, which would miss later writes to either side. Refused by name
-// until the buffer's storage is IOSurface-backed.
 - (id<MTLTexture>)newTextureWithDescriptor:(MTLTextureDescriptor *)descriptor offset:(NSUInteger)offset bytesPerRow:(NSUInteger)bytesPerRow
 {
     NSLog(@"Metal: a texture on a buffer's bytes is not supported: the buffer's storage cannot be mapped into OpenGL ES in place");

@@ -390,8 +390,6 @@ kern_return_t IOSurfaceSetPurgeable(IOSurfaceRef buffer, uint32_t newState, uint
     return function(buffer, newState, oldState);
 }
 
-// The key strings are the iOS 6.1.3 IOSurface library's own: its export table names these constants, and the Mac
-// framework and the iOS 26.2 SDK agree on the strings. Only the keys the SDK declares are here.
 const CFStringRef kIOSurfaceWidth = CFSTR("IOSurfaceWidth");
 const CFStringRef kIOSurfaceHeight = CFSTR("IOSurfaceHeight");
 const CFStringRef kIOSurfaceBytesPerElement = CFSTR("IOSurfaceBytesPerElement");
