@@ -37,6 +37,7 @@ REVENANT_TLS_EXPORT uint16_t RevenantTLSEngineNegotiatedCipherSuite(const Revena
 REVENANT_TLS_EXPORT const uint8_t *RevenantTLSEngineNegotiatedProtocol(const RevenantTLSEngine *engine,
                                                                        size_t *length);
 REVENANT_TLS_EXPORT const uint8_t *RevenantTLSEngineOCSPResponse(const RevenantTLSEngine *engine, size_t *length);
+REVENANT_TLS_EXPORT const void *RevenantTLSEngineCopyPeerTrust(const RevenantTLSEngine *engine);
 
 #ifdef __cplusplus
 }

@@ -287,12 +287,15 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
     BOOL _verifies;
     BOOL _challenges;
     BOOL _peerRequired;
+    BOOL _breaksOnServerAuth;
+    BOOL _serverAuthPaused;
     NSString *_serverName;
     NSData *_applicationProtocolOffer;
     NSArray<NSData *> *_preSharedKeys;
     NSArray<NSData *> *_preSharedKeyIdentities;
     SecKeyRef _signingKey;
     OSStatus _verifyFailure;
+    SecTrustRef _pendingTrust;
 }
 - (instancetype)initWithOptions:(RevenantSecProtocolOptions *)options descriptor:(int)descriptor
               defaultServerName:(NSString *)defaultServerName serverSide:(BOOL)serverSide
@@ -370,6 +373,7 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
 
     _peerRequired = options.peerAuthenticationRequired;
     _verifies = verifies;
+    _breaksOnServerAuth = options.breaksOnServerAuth;
     _challenges = challenges;
     _serverName = serverSide ? nil : (options.serverName ?: defaultServerName);
     NSString *serverName = options.serverName ?: defaultServerName;
@@ -497,6 +501,8 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         SSL_CTX_free(_context);
     if (_signingKey)
         CFRelease(_signingKey);
+    if (_pendingTrust)
+        CFRelease(_pendingTrust);
 }
 
 - (OSStatus)handshake
@@ -508,7 +514,7 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         return noErr;
     }
     OSStatus status = [self statusForResult:result];
-    if (status == errSSLWouldBlock)
+    if (status == errSSLWouldBlock || status == errSSLServerAuthCompleted)
         return status;
     return _verifyFailure ? _verifyFailure : RevenantPeerFailure();
 }
@@ -549,6 +555,8 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
     case SSL_ERROR_WANT_WRITE:
         _wantsWrite = YES;
         return errSSLWouldBlock;
+    case SSL_ERROR_WANT_CERTIFICATE_VERIFY:
+        return errSSLServerAuthCompleted;
     case SSL_ERROR_ZERO_RETURN:
         return errSSLClosedGraceful;
     case SSL_ERROR_SYSCALL:
@@ -561,6 +569,8 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
 
 - (enum ssl_verify_result_t)verifyChain
 {
+    if (_serverAuthPaused)
+        return ssl_verify_ok;
     STACK_OF(X509) *chain = SSL_get_peer_full_cert_chain(_ssl);
     if (!chain) {
         _verifyFailure = kRevenantCertificateChainInvalid;
@@ -593,6 +603,11 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         _verifyFailure = kRevenantCertificateChainInvalid;
         return ssl_verify_invalid;
     }
+    if (_breaksOnServerAuth) {
+        _pendingTrust = trust;
+        _serverAuthPaused = YES;
+        return ssl_verify_retry;
+    }
     enum ssl_verify_result_t result = ssl_verify_invalid;
     if (_verifies) {
         result = [_options revenantVerifyTrust:trust] ? ssl_verify_ok : ssl_verify_invalid;
@@ -601,7 +616,9 @@ static int RevenantSelectProtocol(SSL *ssl, const uint8_t **out, uint8_t *outLen
         if (SecTrustEvaluate(trust, &trustResult) == errSecSuccess && (trustResult == kSecTrustResultProceed || trustResult == kSecTrustResultUnspecified))
             result = ssl_verify_ok;
     }
-    CFRelease(trust);
+    if (_pendingTrust)
+        CFRelease(_pendingTrust);
+    _pendingTrust = trust;
     if (result != ssl_verify_ok)
         _verifyFailure = kRevenantCertificateChainInvalid;
     return result;
@@ -823,6 +840,12 @@ void RevenantTLSEngineFree(RevenantTLSEngine *engine)
 {
     RevenantTLSSession *session = (__bridge_transfer RevenantTLSSession *)(void *)engine;
     (void)session;
+}
+
+const void *RevenantTLSEngineCopyPeerTrust(const RevenantTLSEngine *engine)
+{
+    SecTrustRef trust = RevenantSession(engine)->_pendingTrust;
+    return trust ? (const void *)CFRetain(trust) : NULL;
 }
 
 OSStatus RevenantTLSEngineHandshake(RevenantTLSEngine *engine)

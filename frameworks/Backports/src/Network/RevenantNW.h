@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <Security/Security.h>
-#import <Security/SecureTransport.h>
 #import "../Security/RevenantSecProtocolOptions.h"
 #import "../Security/RevenantSecProtocolMetadata.h"
 
