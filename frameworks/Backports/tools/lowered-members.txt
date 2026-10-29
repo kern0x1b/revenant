@@ -14760,6 +14760,7 @@ member CTCellularData -restrictedState
 member CTCellularData -revenant_checkForChange
 member CTCellularData -setCellularDataRestrictionDidUpdateNotifier:
 member CTTelephonyNetworkInfo -currentRadioAccessTechnology
+member CTTelephonyNetworkInfo -serviceCurrentRadioAccessTechnology
 member CXAction +revenant_timeout
 member CXAction +supportsSecureCoding
 member CXAction -UUID

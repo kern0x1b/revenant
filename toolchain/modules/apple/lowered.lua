@@ -233,6 +233,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "CLOCK_UPTIME_RAW",
+        header = {
+            name = "Darwin",
+            directory = {"usr", "include"},
+            file = "_time.h",
+            find = "_CLOCK_UPTIME_RAW __CLOCK_AVAILABILITY = 8,",
+            replace = "_CLOCK_UPTIME_RAW = 8,",
+        },
+    },
+    {
+        member = "clock_gettime_nsec_np",
+        header = {
+            name = "Darwin",
+            directory = {"usr", "include"},
+            file = "_time.h",
+            find = "__CLOCK_AVAILABILITY\n__uint64_t clock_gettime_nsec_np(clockid_t __clock_id);",
+            replace = "__uint64_t clock_gettime_nsec_np(clockid_t __clock_id) __asm(\"_revenant_clock_gettime_nsec_np\");",
+        },
+    },
+    {
         member = "CAFrameRateRange",
         header = {
             name = "QuartzCore",
@@ -290,6 +310,24 @@ local MEMBERS = {
             file = "CAFrameRateRange.h",
             find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
             replace = "",
+        },
+    },
+    {
+        member = "CTTelephonyNetworkInfo serviceCurrentRadioAccessTechnology",
+        header = {
+            name = "CoreTelephony",
+            directory = {"System", "Library", "Frameworks", "CoreTelephony.framework", "Headers"},
+            file = "CTTelephonyNetworkInfo.h",
+            find = "serviceCurrentRadioAccessTechnology API_AVAILABLE(ios(12.0), watchos(5.0)) API_UNAVAILABLE(macos, tvos);",
+            replace = "serviceCurrentRadioAccessTechnology API_UNAVAILABLE(macos, tvos);",
+        },
+    },
+    {
+        member = "Scanner",
+        overlay = {
+            file = {"stdlib", "public", "Darwin", "Foundation", "Scanner.swift"},
+            find = "@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)\nextension Scanner {",
+            replace = "extension Scanner {",
         },
     },
     {
@@ -1544,8 +1582,10 @@ local function member_headers(sdk)
     local changed = {}
     for _, entry in ipairs(MEMBERS) do
         local header = entry.header
-        local file = path.join(directory_of(sdk, header), header.file)
-        changed[file] = replaced(changed[file] or io.readfile(file), header, "the iPhoneOS SDK at " .. sdk .. " in " .. header.file, entry.member)
+        if header then
+            local file = path.join(directory_of(sdk, header), header.file)
+            changed[file] = replaced(changed[file] or io.readfile(file), header, "the iPhoneOS SDK at " .. sdk .. " in " .. header.file, entry.member)
+        end
     end
     return changed
 end
@@ -1765,7 +1805,9 @@ end
 local function members_key(src, sdk)
     local sdk_files = table.join(framework_headers(sdk))
     for _, entry in ipairs(MEMBERS) do
-        table.insert(sdk_files, path.join(directory_of(sdk, entry.header), entry.header.file))
+        if entry.header then
+            table.insert(sdk_files, path.join(directory_of(sdk, entry.header), entry.header.file))
+        end
     end
     byteorder.sort(sdk_files)
     local src_files = os.files(path.join(src, "**"))

@@ -2,7 +2,7 @@ import("retention")
 import("generations")
 
 local GIGABYTE = 1000 * 1000 * 1000
-local DEFAULT_GIGABYTES = 15
+local DEFAULT_GIGABYTES = 50
 local DEFAULT_GROWTH = 2 * GIGABYTE
 local ROOT_VARIABLE = "REVENANT_CACHE"
 local LIMIT_VARIABLE = "REVENANT_CACHE_GB"
