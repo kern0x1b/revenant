@@ -120,8 +120,12 @@ static NSTimeInterval const REVENANT_QR_PHASE = 20.0;
 
     [self check:[self.metadata.availableMetadataObjectTypes containsObject:AVMetadataObjectTypeQRCode] name:@"QR is an available metadata type"];
     [self.metadata setMetadataObjectsDelegate:self.recorder queue:dispatch_get_main_queue()];
+    self.metadata.metadataObjectTypes = @[AVMetadataObjectTypeFace];
+    [self check:(self.session.outputs.count == 1 && [self.metadata.metadataObjectTypes isEqualToArray:@[AVMetadataObjectTypeFace]])
+           name:@"a face request leaves the session with only the metadata output"];
     self.metadata.metadataObjectTypes = @[AVMetadataObjectTypeQRCode];
-    [self check:[self.metadata.metadataObjectTypes isEqualToArray:@[AVMetadataObjectTypeQRCode]] name:@"the requested type reads back"];
+    [self check:(self.session.outputs.count == 2 && [self.metadata.metadataObjectTypes isEqualToArray:@[AVMetadataObjectTypeQRCode]])
+           name:@"a QR request adds one internal output, and the type reads back"];
 
     AVCaptureVideoPreviewLayer *preview = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
     preview.frame = controller.view.bounds;
