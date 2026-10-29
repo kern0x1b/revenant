@@ -32,8 +32,11 @@ goes through revenant_qr_decode_region, limited to rectOfInterest, and each code
 AVMetadataMachineReadableCodeObject on the delegate's callback queue. The delegate gets an empty array once when the codes
 leave the frame. The internal output is removed when the metadata output loses its session, its delegate or the QR type.
 
-A code whose text is not UTF-8 after the engine's conversion is not delivered; the drop is logged on the first occurrence and
-every hundredth. The engine replaces non-ASCII bytes with U+FFFD for an ECI charset when no converter is registered (entry C47).
+A code's bytes are converted to UTF-8 from the charset its ECI declares. The metadata path registers the converter at load
+(`frameworks/Backports/src/AVFoundation/RevenantQRECI.c`, `revenant_qr_install_default_converter`), which maps the ECI to an
+IANA charset name and resolves it with CoreFoundation's `CFStringConvertIANACharSetNameToEncoding`. A code whose bytes do
+not decode in the charset it declares is not delivered, and the engine flags it; the drop is logged on the first occurrence
+and every hundredth. The engine never guesses: with no converter registered, a non-UTF-8 ECI code is flagged the same way.
 
 Coordinates follow the iOS 7 convention as read: corners and bounds are normalized to the frame as the video data output
 delivers it, which is the sensor's landscape frame, and rectOfInterest is in the same space. A preview layer must convert

@@ -886,6 +886,7 @@ typedef struct {
     char *bytes;
     size_t length;
     size_t capacity;
+    int undecodable;
 } Buffer;
 
 static void buffer_append(Buffer *buffer, const char *data, size_t length)
@@ -961,18 +962,13 @@ void revenant_qr_set_converter(RevenantQRConverter converter)
 
 static void append_converted(Buffer *buffer, int eci, const uint8_t *bytes, size_t length)
 {
-    if (converter_hook) {
-        char *converted = NULL;
-        size_t convertedLength = 0;
-        if (converter_hook(eci, bytes, length, &converted, &convertedLength) && converted) {
-            buffer_append(buffer, converted, convertedLength);
-            free(converted);
-            return;
-        }
-        free(converted);
-    }
-    for (size_t index = 0; index < length; index++)
-        buffer_utf8(buffer, bytes[index] < 0x80 ? bytes[index] : 0xFFFD);
+    char *converted = NULL;
+    size_t convertedLength = 0;
+    if (converter_hook && converter_hook(eci, bytes, length, &converted, &convertedLength) && converted)
+        buffer_append(buffer, converted, convertedLength);
+    else
+        buffer->undecodable = 1;
+    free(converted);
 }
 
 static const char alphanumeric_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
@@ -1356,6 +1352,12 @@ static int try_triple(const Grid *image, Pattern topLeft, Pattern topRight, Patt
     if (!sample_and_decode(image, &transform, dimension, 0, &out, &decodedVersion, &level, &mirrored)) {
         free(out.bytes);
         return 0;
+    }
+    result->undecodable = out.undecodable;
+    if (out.undecodable) {
+        free(out.bytes);
+        out.bytes = NULL;
+        out.length = 0;
     }
     result->text = out.bytes ? out.bytes : calloc(1, 1);
     result->length = out.length;

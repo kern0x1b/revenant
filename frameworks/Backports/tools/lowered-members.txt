@@ -5955,6 +5955,7 @@ function revenant_property_list_read
 function revenant_property_list_write
 function revenant_qr_decode
 function revenant_qr_decode_region
+function revenant_qr_install_default_converter
 function revenant_qr_result_free
 function revenant_qr_set_converter
 function revenant_quality_of_service

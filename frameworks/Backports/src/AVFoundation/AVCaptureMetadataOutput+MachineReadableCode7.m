@@ -42,7 +42,7 @@
     CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
     NSMutableArray *objects = [NSMutableArray arrayWithCapacity:found];
     for (int index = 0; index < found; index++) {
-        NSString *text = [[NSString alloc] initWithBytes:results[index].text length:results[index].length encoding:NSUTF8StringEncoding];
+        NSString *text = results[index].undecodable ? nil : [[NSString alloc] initWithBytes:results[index].text length:results[index].length encoding:NSUTF8StringEncoding];
         NSMutableArray *corners = [NSMutableArray arrayWithCapacity:4];
         for (int corner = 0; corner < 4; corner++) {
             CGPoint point = CGPointMake((CGFloat)results[index].corners[corner][0] / width, (CGFloat)results[index].corners[corner][1] / height);
@@ -53,7 +53,7 @@
         } else {
             self.undecodable += 1;
             if (self.undecodable == 1 || self.undecodable % 100 == 0)
-                NSLog(@"revenant: a QR code's bytes are not UTF-8 under the encoding it declares, so it is not delivered (%lu so far)", (unsigned long)self.undecodable);
+                NSLog(@"revenant: a QR code's bytes do not decode in the charset it declares, so it is not delivered (%lu so far)", (unsigned long)self.undecodable);
         }
         revenant_qr_result_free(&results[index]);
     }
@@ -237,6 +237,7 @@ static IMP revenant_qr_swizzle(Class cls, SEL selector, IMP replacement)
 
 + (void)load
 {
+    revenant_qr_install_default_converter();
     Class output = [AVCaptureMetadataOutput class];
     qr_native_available_types = revenant_qr_swizzle(output, @selector(availableMetadataObjectTypes), (IMP)revenant_qr_available_types);
     qr_native_metadata_types = revenant_qr_swizzle(output, @selector(metadataObjectTypes), (IMP)revenant_qr_metadata_types);
