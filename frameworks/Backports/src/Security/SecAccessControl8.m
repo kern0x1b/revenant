@@ -4,11 +4,11 @@
 #import "../RevenantCFRuntime.h"
 #import "RevenantSecAccessControl.h"
 
-const CFStringRef kSecAttrAccessControl = CFSTR("accc");
-const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR("aku");
-const CFStringRef kSecUseOperationPrompt = CFSTR("u_OpPrompt");
-const CFStringRef kSecUseNoAuthenticationUI = CFSTR("u_NoAuthUI");
-const CFStringRef kSecSharedPassword = CFSTR("spwd");
+const CFStringRef kSecAttrAccessControl __attribute__((section("__DATA,__data"))) = CFSTR("accc");
+const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly __attribute__((section("__DATA,__data"))) = CFSTR("aku");
+const CFStringRef kSecUseOperationPrompt __attribute__((section("__DATA,__data"))) = CFSTR("u_OpPrompt");
+const CFStringRef kSecUseNoAuthenticationUI __attribute__((section("__DATA,__data"))) = CFSTR("u_NoAuthUI");
+const CFStringRef kSecSharedPassword __attribute__((section("__DATA,__data"))) = CFSTR("spwd");
 
 struct RevenantAccessControlState {
     CFStringRef protection;

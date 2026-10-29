@@ -26,4 +26,4 @@ OSStatus SecTrustEvaluateAsyncWithError(SecTrustRef trust, dispatch_queue_t queu
     return errSecSuccess;
 }
 
-const CFStringRef kSecUseDataProtectionKeychain = CFSTR("nleg");
+const CFStringRef kSecUseDataProtectionKeychain __attribute__((section("__DATA,__data"))) = CFSTR("nleg");

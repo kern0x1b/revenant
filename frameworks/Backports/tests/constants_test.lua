@@ -18,7 +18,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecAccessControl8.m",
-        line = "const CFStringRef kSecAttrAccessControl = CFSTR(\"accc\");",
+        line = "const CFStringRef kSecAttrAccessControl __attribute__((section(\"__DATA,__data\"))) = CFSTR(\"accc\");",
         mutant = {"\"accc\"", "\"acc\""},
     },
     {
@@ -27,7 +27,7 @@ local CASES = {
         library = SECURITY,
         oracle = "kSecAttrAccessibleWhenUnlockedThisDeviceOnly",
         source = "src/Security/SecAccessControl8.m",
-        line = "const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR(\"aku\");",
+        line = "const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly __attribute__((section(\"__DATA,__data\"))) = CFSTR(\"aku\");",
         mutant = {"\"aku\"", "\"akpu\""},
     },
     {
@@ -35,7 +35,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecUseAuthentication9.m",
-        line = "const CFStringRef kSecUseAuthenticationContext = CFSTR(\"u_AuthCtx\");",
+        line = "const CFStringRef kSecUseAuthenticationContext __attribute__((section(\"__DATA,__data\"))) = CFSTR(\"u_AuthCtx\");",
         mutant = {"\"u_AuthCtx\"", "\"u_AuthUI\""},
     },
     {
@@ -43,7 +43,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecurityKeychain13_0.m",
-        line = "const CFStringRef kSecUseDataProtectionKeychain = CFSTR(\"nleg\");",
+        line = "const CFStringRef kSecUseDataProtectionKeychain __attribute__((section(\"__DATA,__data\"))) = CFSTR(\"nleg\");",
         mutant = {"\"nleg\"", "\"nlg\""},
     },
 }

@@ -171,7 +171,4 @@ function configure(target, list, folder, name, data)
         target:add(kind, "-include", header, {force = true})
     end
     target:add("shflags", "-Wl,-unexported_symbols_list," .. unexport, {force = true})
-    if #data > 0 then
-        target:add("shflags", "-Wl,-no_data_const", {force = true})
-    end
 end

@@ -775,9 +775,6 @@ if not is_plat("iphoneos") then
                 local defer = import("defer", {rootdir = TOOLS, anonymous = true})
                 local _, source = defer.generate(names, path.join(target:autogendir(), "defer"), system, data)
                 target:add("files", source)
-                if data and #data > 0 then
-                    target:add("ldflags", "-Wl,-no_data_const", {force = true})
-                end
             end)
         target_end()
     end
