@@ -390,13 +390,12 @@ kern_return_t IOSurfaceSetPurgeable(IOSurfaceRef buffer, uint32_t newState, uint
     return function(buffer, newState, oldState);
 }
 
-const CFStringRef kIOSurfaceWidth = CFSTR("Width");
-const CFStringRef kIOSurfaceHeight = CFSTR("Height");
-const CFStringRef kIOSurfaceBytesPerElement = CFSTR("BytesPerElement");
-const CFStringRef kIOSurfaceBytesPerRow = CFSTR("BytesPerRow");
-const CFStringRef kIOSurfacePlaneCount = CFSTR("PlaneCount");
-const CFStringRef kIOSurfacePixelFormat = CFSTR("PixelFormat");
-const CFStringRef kIOSurfaceColorSpace = CFSTR("ColorSpace");
-const CFStringRef kIOSurfaceAlphaInfo = CFSTR("AlphaInfo");
-const CFStringRef kIOSurfaceYCbCrMatrix = CFSTR("YCbCrMatrix");
-const CFStringRef kIOSurfaceCacheMode = CFSTR("CacheMode");
+// The key strings are the iOS 6.1.3 IOSurface library's own: its export table names these constants, and the Mac
+// framework and the iOS 26.2 SDK agree on the strings. Only the keys the SDK declares are here.
+const CFStringRef kIOSurfaceWidth = CFSTR("IOSurfaceWidth");
+const CFStringRef kIOSurfaceHeight = CFSTR("IOSurfaceHeight");
+const CFStringRef kIOSurfaceBytesPerElement = CFSTR("IOSurfaceBytesPerElement");
+const CFStringRef kIOSurfaceBytesPerRow = CFSTR("IOSurfaceBytesPerRow");
+const CFStringRef kIOSurfacePixelFormat = CFSTR("IOSurfacePixelFormat");
+const CFStringRef kIOSurfaceColorSpace = CFSTR("IOSurfaceColorSpace");
+const CFStringRef kIOSurfaceCacheMode = CFSTR("IOSurfaceCacheMode");
