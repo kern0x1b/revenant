@@ -1,10 +1,20 @@
 #import <Foundation/Foundation.h>
 #import <Security/SecureTransport.h>
 #import <Security/SecTrust.h>
+#import <dispatch/dispatch.h>
+#import <dlfcn.h>
 #import <stdio.h>
 #import <string.h>
 #import "../../TLS/RevenantSecProtocolOptions.h"
 #import "../../TLS/RevenantTLS/RevenantTLSEngine.h"
+
+#if !defined(REVENANT_SECURITY_LIBRARY)
+#define REVENANT_SECURITY_LIBRARY "/System/Library/Frameworks/Security.framework/Security"
+#endif
+
+#if !defined(REVENANT_SYSTEM_PROBE)
+#define REVENANT_SYSTEM_PROBE "SecTrustGetTrustResult"
+#endif
 
 @interface RevenantSSLContext : NSObject {
 @public
@@ -29,6 +39,71 @@ static RevenantSSLContext *RevenantSSLOf(SSLContextRef context)
 {
     return (__bridge RevenantSSLContext *)(void *)context;
 }
+
+static void *RevenantSecurityLibrary(void)
+{
+    static void *library;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        library = dlopen(REVENANT_SECURITY_LIBRARY, RTLD_LAZY);
+    });
+    return library;
+}
+
+static void *RevenantSystemSymbol(const char *name)
+{
+    void *library = RevenantSecurityLibrary();
+    return library ? dlsym(library, name) : NULL;
+}
+
+static BOOL RevenantSystemTransportIsAdequate(void)
+{
+    static BOOL adequate;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        adequate = RevenantSystemSymbol(REVENANT_SYSTEM_PROBE) != NULL;
+    });
+    return adequate;
+}
+
+static CFMutableSetRef RevenantVeneerContexts(void)
+{
+    static CFMutableSetRef contexts;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        contexts = CFSetCreateMutable(NULL, 0, NULL);
+    });
+    return contexts;
+}
+
+static void RevenantRememberContext(SSLContextRef context)
+{
+    @synchronized (RevenantSSLContext.class) {
+        CFSetAddValue(RevenantVeneerContexts(), context);
+    }
+}
+
+static void RevenantForgetContext(SSLContextRef context)
+{
+    @synchronized (RevenantSSLContext.class) {
+        CFSetRemoveValue(RevenantVeneerContexts(), context);
+    }
+}
+
+static BOOL RevenantOwnsContext(SSLContextRef context)
+{
+    if (!context || RevenantSystemTransportIsAdequate())
+        return NO;
+    @synchronized (RevenantSSLContext.class) {
+        return CFSetContainsValue(RevenantVeneerContexts(), context);
+    }
+}
+
+#define RevenantDefer(Name, Unavailable, ...) \
+    do { \
+        __typeof__(&Name) function = (__typeof__(&Name))RevenantSystemSymbol(#Name); \
+        return function ? function(__VA_ARGS__) : (Unavailable); \
+    } while (0)
 
 static BOOL RevenantWireVersion(SSLProtocol protocol, uint16_t *version)
 {
@@ -73,26 +148,29 @@ static SSLProtocol RevenantProtocolOfWireVersion(uint16_t version)
 
 SSLContextRef SSLCreateContext(CFAllocatorRef alloc, SSLProtocolSide protocolSide, SSLConnectionType connectionType)
 {
-    if (protocolSide != kSSLClientSide || connectionType != kSSLStreamType)
-        return NULL;
+    if (RevenantSystemTransportIsAdequate() || protocolSide != kSSLClientSide || connectionType != kSSLStreamType)
+        RevenantDefer(SSLCreateContext, NULL, alloc, protocolSide, connectionType);
     RevenantSSLContext *context = [[RevenantSSLContext alloc] init];
     context->options = [[RevenantSecProtocolOptions alloc] init];
-    return (SSLContextRef)(__bridge_retained void *)context;
+    SSLContextRef reference = (SSLContextRef)(__bridge_retained void *)context;
+    RevenantRememberContext(reference);
+    return reference;
 }
 
 OSStatus SSLDisposeContext(SSLContextRef context)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLDisposeContext, errSecParam, context);
+    RevenantForgetContext(context);
     RevenantSSLContext *value = (__bridge_transfer RevenantSSLContext *)(void *)context;
-    if (!value)
-        return errSecParam;
-    return noErr;
+    return value ? noErr : errSecParam;
 }
 
 OSStatus SSLSetConnection(SSLContextRef context, SSLConnectionRef connection)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetConnection, errSecParam, context, connection);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value)
-        return errSecParam;
     if (value->engine)
         return errSSLBadConfiguration;
     value->connection = connection;
@@ -101,8 +179,10 @@ OSStatus SSLSetConnection(SSLContextRef context, SSLConnectionRef connection)
 
 OSStatus SSLGetConnection(SSLContextRef context, SSLConnectionRef *connection)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetConnection, errSecParam, context, connection);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !connection)
+    if (!connection)
         return errSecParam;
     *connection = value->connection;
     return noErr;
@@ -110,8 +190,10 @@ OSStatus SSLGetConnection(SSLContextRef context, SSLConnectionRef *connection)
 
 OSStatus SSLSetPeerDomainName(SSLContextRef context, const char *peerName, size_t peerNameLen)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetPeerDomainName, errSecParam, context, peerName, peerNameLen);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || (!peerName && peerNameLen))
+    if (!peerName && peerNameLen)
         return errSecParam;
     if (value->engine)
         return errSSLBadConfiguration;
@@ -125,8 +207,10 @@ OSStatus SSLSetPeerDomainName(SSLContextRef context, const char *peerName, size_
 
 OSStatus SSLGetPeerDomainNameLength(SSLContextRef context, size_t *peerNameLen)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetPeerDomainNameLength, errSecParam, context, peerNameLen);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !peerNameLen)
+    if (!peerNameLen)
         return errSecParam;
     *peerNameLen = [value->peerDomainName lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
     return noErr;
@@ -134,8 +218,10 @@ OSStatus SSLGetPeerDomainNameLength(SSLContextRef context, size_t *peerNameLen)
 
 OSStatus SSLGetPeerDomainName(SSLContextRef context, char *peerName, size_t *peerNameLen)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetPeerDomainName, errSecParam, context, peerName, peerNameLen);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !peerName || !peerNameLen)
+    if (!peerName || !peerNameLen)
         return errSecParam;
     size_t length = [value->peerDomainName lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
     if (*peerNameLen < length)
@@ -147,9 +233,11 @@ OSStatus SSLGetPeerDomainName(SSLContextRef context, char *peerName, size_t *pee
 
 OSStatus SSLSetProtocolVersionMin(SSLContextRef context, SSLProtocol minVersion)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetProtocolVersionMin, errSecParam, context, minVersion);
     RevenantSSLContext *value = RevenantSSLOf(context);
     uint16_t version = 0;
-    if (!value || !RevenantWireVersion(minVersion, &version))
+    if (!RevenantWireVersion(minVersion, &version))
         return errSecParam;
     if (value->engine)
         return errSSLBadConfiguration;
@@ -159,9 +247,11 @@ OSStatus SSLSetProtocolVersionMin(SSLContextRef context, SSLProtocol minVersion)
 
 OSStatus SSLSetProtocolVersionMax(SSLContextRef context, SSLProtocol maxVersion)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetProtocolVersionMax, errSecParam, context, maxVersion);
     RevenantSSLContext *value = RevenantSSLOf(context);
     uint16_t version = 0;
-    if (!value || !RevenantWireVersion(maxVersion, &version))
+    if (!RevenantWireVersion(maxVersion, &version))
         return errSecParam;
     if (value->engine)
         return errSSLBadConfiguration;
@@ -171,8 +261,10 @@ OSStatus SSLSetProtocolVersionMax(SSLContextRef context, SSLProtocol maxVersion)
 
 OSStatus SSLSetEnabledCiphers(SSLContextRef context, const SSLCipherSuite *ciphers, size_t numCiphers)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetEnabledCiphers, errSecParam, context, ciphers, numCiphers);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || (!ciphers && numCiphers))
+    if (!ciphers && numCiphers)
         return errSecParam;
     if (value->engine)
         return errSSLBadConfiguration;
@@ -185,9 +277,9 @@ OSStatus SSLSetEnabledCiphers(SSLContextRef context, const SSLCipherSuite *ciphe
 
 OSStatus SSLSetSessionOption(SSLContextRef context, SSLSessionOption option, Boolean value)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLSetSessionOption, errSecParam, context, option, value);
     RevenantSSLContext *target = RevenantSSLOf(context);
-    if (!target)
-        return errSecParam;
     if (target->engine)
         return errSSLBadConfiguration;
     if (option != kSSLSessionOptionBreakOnServerAuth)
@@ -198,9 +290,9 @@ OSStatus SSLSetSessionOption(SSLContextRef context, SSLSessionOption option, Boo
 
 OSStatus SSLHandshake(SSLContextRef context)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLHandshake, errSecParam, context);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value)
-        return errSecParam;
     if (!value->engine) {
         char reason[512] = "";
         OSStatus status = noErr;
@@ -216,8 +308,10 @@ OSStatus SSLHandshake(SSLContextRef context)
 
 OSStatus SSLRead(SSLContextRef context, void *data, size_t dataLength, size_t *processed)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLRead, errSecParam, context, data, dataLength, processed);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !processed)
+    if (!processed)
         return errSecParam;
     if (!value->engine || !RevenantTLSEngineIsEstablished(value->engine))
         return errSSLProtocol;
@@ -226,8 +320,10 @@ OSStatus SSLRead(SSLContextRef context, void *data, size_t dataLength, size_t *p
 
 OSStatus SSLWrite(SSLContextRef context, const void *data, size_t dataLength, size_t *processed)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLWrite, errSecParam, context, data, dataLength, processed);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !processed)
+    if (!processed)
         return errSecParam;
     if (!value->engine || !RevenantTLSEngineIsEstablished(value->engine))
         return errSSLProtocol;
@@ -236,9 +332,9 @@ OSStatus SSLWrite(SSLContextRef context, const void *data, size_t dataLength, si
 
 OSStatus SSLClose(SSLContextRef context)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLClose, errSecParam, context);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value)
-        return errSecParam;
     if (value->engine)
         RevenantTLSEngineClose(value->engine);
     return noErr;
@@ -246,8 +342,10 @@ OSStatus SSLClose(SSLContextRef context)
 
 OSStatus SSLGetNegotiatedProtocolVersion(SSLContextRef context, SSLProtocol *protocol)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetNegotiatedProtocolVersion, errSecParam, context, protocol);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !protocol)
+    if (!protocol)
         return errSecParam;
     uint16_t version = value->engine ? RevenantTLSEngineNegotiatedVersion(value->engine) : 0;
     *protocol = RevenantProtocolOfWireVersion(version);
@@ -256,8 +354,10 @@ OSStatus SSLGetNegotiatedProtocolVersion(SSLContextRef context, SSLProtocol *pro
 
 OSStatus SSLGetNegotiatedCipher(SSLContextRef context, SSLCipherSuite *cipherSuite)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLGetNegotiatedCipher, errSecParam, context, cipherSuite);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !cipherSuite)
+    if (!cipherSuite)
         return errSecParam;
     *cipherSuite = value->engine ? RevenantTLSEngineNegotiatedCipherSuite(value->engine) : 0;
     return noErr;
@@ -265,8 +365,10 @@ OSStatus SSLGetNegotiatedCipher(SSLContextRef context, SSLCipherSuite *cipherSui
 
 OSStatus SSLCopyPeerTrust(SSLContextRef context, SecTrustRef *trust)
 {
+    if (!RevenantOwnsContext(context))
+        RevenantDefer(SSLCopyPeerTrust, errSecParam, context, trust);
     RevenantSSLContext *value = RevenantSSLOf(context);
-    if (!value || !trust)
+    if (!trust)
         return errSecParam;
     *trust = value->engine ? (SecTrustRef)RevenantTLSEngineCopyPeerTrust(value->engine) : NULL;
     return noErr;
