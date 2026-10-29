@@ -46,7 +46,7 @@ The rebind changes only the armv7 slice of an image, so a universal image is ref
 
 ## Classicgram
 
-Classicgram's `libTGCallsEngine.dylib` is a prebuilt image, so its header room is set when it was linked. If the packaging step refuses it for header room, the prebuilt has to be relinked with `-Wl,-headerpad,0x1000` before it is named here. The rebind of that image has not been run against the real binary; the host tests cover a synthetic armv7 image with the same imports.
+Classicgram's `libTGCallsEngine.dylib` is a prebuilt image. Measured on a copy of a Classicgram armv7 build of `Telegram.app`, checked against the iOS 6.1.3 cache: the image has 1,776 bytes of header room, and the new load command needs 100 bytes. The rebind moves its three weak AVFoundation imports to `libAVFoundationBackports.dylib`: `_AVAudioSessionMediaServicesWereLostNotification`, `_AVAudioSessionSilenceSecondaryAudioHintNotification` and `_AVAudioSessionSilenceSecondaryAudioHintTypeKey`. The image's `otool -L` then names the provider, and the copy is signed again.
 
 The app-side lines are:
 
@@ -55,4 +55,4 @@ target("Classicgram")
     set_values("revenant.rebind", "Frameworks/libTGCallsEngine.dylib")
 ```
 
-Keep the `weak-imports` check on. The rebind removes the NULL weak import, so the check passes on the rebound image without a waiver. See [Checks and waivers](checks.md).
+The import check still refuses the image after the rebind, for one weak import that iOS 6.1.3 does not export: `___darwin_check_fd_set_overflow` from libSystem. The rebind does not cover it. Before the gate passes, the Classicgram target either waives it with `set_values("revenant.waive.weak-imports", "why every call is guarded")`, or the prebuilt is rebuilt without it. Neither is set here; that choice belongs to the Classicgram owner. See [Checks and waivers](checks.md).
