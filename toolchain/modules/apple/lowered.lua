@@ -967,8 +967,39 @@ local function adopts_lowered_protocol(text, stop, implemented)
     return false
 end
 
+local function comment_spans(text)
+    local spans = {}
+    for start, after in text:gmatch("()/%*.-%*/()") do
+        table.insert(spans, {start, after - 1})
+    end
+    for start, after in text:gmatch("()//[^\n]*()") do
+        table.insert(spans, {start, after - 1})
+    end
+    return spans
+end
+
+local function in_comment(spans, at)
+    for _, span in ipairs(spans) do
+        if at >= span[1] and at <= span[2] then
+            return true
+        end
+    end
+    return false
+end
+
+local function find_outside_comments(text, pattern, position, spans)
+    while true do
+        local start, stop = text:find(pattern, position)
+        if not start or not in_comment(spans, start) then
+            return start, stop
+        end
+        position = start + 1
+    end
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
+    local spans = comment_spans(text)
     local globals, functions = implemented.globals or {}, implemented.functions or {}
     for position, word in text:gmatch("()([%a_][%w_]*)") do
         words[word] = true
@@ -991,7 +1022,7 @@ local function lowering_of(text, implemented, declarations)
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
         local members = implemented.classes[class]
-        if members then
+        if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local first = statement_start(text, position, true)
             local category = text:match("^%s*%(", stop + 1) ~= nil
@@ -1019,7 +1050,7 @@ local function lowering_of(text, implemented, declarations)
     end
     for position, class in text:gmatch("()@interface%s+([%w_]+)") do
         local members = implemented.classes[class]
-        if members then
+        if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
             local block_end = text:find("@end", stop, true) or #text
             local at = stop
@@ -1045,7 +1076,7 @@ local function lowering_of(text, implemented, declarations)
     for name in pairs(implemented.protocols or {}) do
         local position = words[name] and 1 or #text + 1
         while true do
-            local start, stop = text:find("@protocol%s+" .. name .. "[%s<]", position)
+            local start, stop = find_outside_comments(text, "@protocol%s+" .. name .. "[%s<]", position, spans)
             if not start then
                 break
             end
