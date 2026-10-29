@@ -72,7 +72,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
   Its package store is `.cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
   `.cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back. The whole of `.cache` is capped at
-  15 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
+  50 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
   shows what is there. It is in `docs/guides/machine.md`.
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are

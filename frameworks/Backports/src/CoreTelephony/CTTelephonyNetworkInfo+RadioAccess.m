@@ -21,4 +21,10 @@
     return technology;
 }
 
+- (NSDictionary<NSString *, NSString *> *)serviceCurrentRadioAccessTechnology
+{
+    NSString *technology = self.currentRadioAccessTechnology;
+    return technology ? @{ @"": technology } : @{};
+}
+
 @end

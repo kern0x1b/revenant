@@ -9,7 +9,7 @@ the checkout uses that folder: `toolchain/modules/cache.lua` finds the checkout 
 `git rev-parse --git-common-dir`, and git ignores `.cache` (`.gitignore`). `REVENANT_CACHE` names another folder for all
 of it, and `./xmakew` exports the folder it uses, so each tool and test it runs reads the same one.
 
-The folder is capped at 15 GB, and the cap counts the build outputs as well: each `build/` and `.xmake/` that git ignores,
+The folder is capped at 50 GB, and the cap counts the build outputs as well: each `build/` and `.xmake/` that git ignores,
 in the main checkout, in every worktree, and in every framework of each. `REVENANT_CACHE_GB` sets the cap in decimal
 gigabytes. The size is counted with `du`, which counts an APFS clone at its full size although the clone takes no room;
 the count can be above what the disk holds, so a write can be refused that would fit.
