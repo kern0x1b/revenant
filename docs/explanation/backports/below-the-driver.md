@@ -4,8 +4,8 @@ Status: research, 2026-10-29, pass 2 for the coordinator. Pass 1 answered questi
 firmware, statically. Pass 2 takes the 4S kernelcache (section 2.1), reads the kernel extensions' names and strings,
 and answers question 2 in part. Nothing ran on a device, in CI, or in any build. No disassembly listing was read.
 Dossier items 37 and 38 are decided (section 2); the rest of this note is not a decision. It sits beside
-[Metal on iOS 6](../backports/metal-on-ios6.md) and
-[the GPU-driver landscape](../backports/metal-v2-driver-re-landscape.md), which it extends.
+[Metal on iOS 6](metal-on-ios6.md) and
+[the GPU-driver landscape](metal-v2-driver-re-landscape.md), which it extends.
 
 ## 1. The answer in brief
 
@@ -309,8 +309,10 @@ trace gate.
 ### 6.1 What ran, and the numbers (2026-10-29, iPhone 4S, iOS 6.1.3)
 
 The probe is `frameworks/Backports/tests/gpu_probe/q4probe.m`, built as `revenant-q4probe`. It is a plain ARMv7 binary,
-run from `/tmp` on the phone, which is left there. It rebinds the IOConnect imports of its own process only, draws a
-6 by 6 pixel quad into a 256 by 256 texture, and reads one pixel to check the draw (64 128 191 255, GL error 0). The
+run from `/tmp` on the phone, which is left there. It rebinds the IOConnect imports of its own process only, on private
+copies of their pages, so no Apple code is patched, and it writes nothing to the phone except its stdout. Its counters
+are not locked, so calls from other threads may be missed or merged. It draws a 6 by 6 pixel quad into a 256 by 256
+texture, and reads one pixel to check the draw (64 128 191 255, GL error 0). The
 renderer reports `OpenGL ES 2.0 IMGSGX543-73.16.1` and `PowerVR SGX 543`. Only three of the C0 to C8 configurations
 ran, namely scenarios 1 to 3 below, and no sampler ran. Medians with p10 to p90 spreads, in wall time:
 
