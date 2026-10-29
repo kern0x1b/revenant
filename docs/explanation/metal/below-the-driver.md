@@ -57,14 +57,17 @@ Dossier items 37 and 38 are decided (section 2); the rest of this note is not a 
 - **Source.** `kernelcache.release.n94` for iPhone4,1, iOS 6.1.3 (10B329), 7,754,020 bytes, an IMG3 container. It was
   fetched by byte range from Apple's IPSW with the firmware tool's new `kernelcache` action
   (`xmake firmware --device=iPhone4,1 kernelcache 6.1.3`). The file is in the shared cache, not the repository.
-- **Decryption.** `ipsw img3 info` reads the tags: a `krnl` DATA payload of 7,751,607 bytes and two KBAG entries. The
-  payload was decrypted with openssl (AES-256-CBC), using the published key and IV for this build. The first block
-  decrypts to the `complzss` magic, which checks the key.
-- **Decompression.** The `complzss` container has a 24-byte header: magic, an Adler-32 field, big-endian sizes
-  (14,053,376 uncompressed, 7,751,223 compressed) and version 1. The decrypted blob was wrapped in a DER IM4P in scratch,
-  and `ipsw kernel dec` (v3.1.739) decompressed it. The result is an ARMv7 `MH_EXECUTABLE` Mach-O of 14,053,376 bytes,
-  SHA-256 `f4013bc0d9483418f57114c12e70763203d1b2726f749663458a322079f96ec9`. A hand-written LZSS decoder in scratch
-  did not reach a valid Mach-O and was dropped; the tool's output is the one used.
+- **Decryption.** The IMG3 holds a `krnl` DATA payload of 7,751,607 bytes. Its two KBAG entries go unused, since the key
+  and IV are published. The payload is AES-256-CBC, with the key and IV that the Apple Wiki publishes for this build's
+  `kernelcache.release.n94`. The first block decrypts to the `complzss` magic, which checks the key.
+- **Decompression.** The `complzss` container has a 24-byte header: magic, a big-endian Adler-32, big-endian sizes
+  (14,053,376 uncompressed, 7,751,223 compressed) and version 1. The packed stream is the last 7,751,223 bytes of the
+  payload, after zero padding. The result is an ARMv7 `MH_EXECUTABLE` Mach-O of 14,053,376 bytes, SHA-256
+  `f4013bc0d9483418f57114c12e70763203d1b2726f749663458a322079f96ec9`. The earlier `ipsw` output and the repository's
+  native path below give the same bytes.
+- **Tooling.** `xmake firmware --device=iPhone4,1 kernelcache 6.1.3` now does the whole chain natively: it fetches the
+  IMG3, reads the key and IV from the wiki, decrypts with the system `openssl`, decodes complzss, checks its Adler-32,
+  and writes `kernel.macho` beside the IMG3. `ipsw` is not a dependency of the repository.
 - **Extraction.** `ipsw kernel extract` takes only MH_FILESET kernelcaches, and this one is prelinked, so the kexts were
   carved by address. A kext's file offset is 3,485,696 plus its load address minus `0x80394000` (the start of
   `__PRELINK_TEXT`); its size is the gap to the next kext's load address. Two kexts were carved, and both have Mach-O
