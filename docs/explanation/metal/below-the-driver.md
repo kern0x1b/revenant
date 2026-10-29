@@ -1,16 +1,18 @@
 # Below the driver: the SGX543 GL path on the iPhone 4S
 
-Status: research, 2026-10-29, pass 1 for the coordinator. It answers questions 1 and 3 of the brief from the
-firmware, statically, and sketches 2, 4 and 5. Nothing ran on a device, in CI, or in any build. No disassembly was
-run. Nothing in it is a decision. It sits beside [Metal on iOS 6](../backports/metal-on-ios6.md) and
+Status: research, 2026-10-29, pass 2 for the coordinator. Pass 1 answered questions 1 and 3 of the brief from the
+firmware, statically. Pass 2 takes the 4S kernelcache (section 2.1), reads the kernel extensions' names and strings,
+and answers question 2 in part. Nothing ran on a device, in CI, or in any build. No disassembly listing was read.
+Dossier items 37 and 38 are decided (section 2); the rest of this note is not a decision. It sits beside
+[Metal on iOS 6](../backports/metal-on-ios6.md) and
 [the GPU-driver landscape](../backports/metal-v2-driver-re-landscape.md), which it extends.
 
 ## 1. The answer in brief
 
 - **The stack is ten layers, not four.** The brief's chain (OpenGLES, GLEngine, the driver plugin, IOKit, kernel)
   is right in order but leaves out the plugin loader, the GLSL front end, Mercury (the device and submission layer),
-  and the IOAccelerator user-client library. The kernel extension is named by the probe and is not in the firmware
-  copy we hold.
+  and the IOAccelerator user-client library. The kernel extension is in the 4S kernelcache, which pass 2 obtained and
+  decompressed: `com.apple.driver.IMGSGX543` (73.16.1), beside `IOAcceleratorFamily` (20.0.9).
 - **Apple's shader compiler is in-process.** Its GLSL ES front end is `libGLProgrammability`. Its SGX543 USSE back
   end is inside `IMGSGX543GLDriver`. No image on the GL path imports Mach IPC.
 - **No binary path is offered to apps.** No ES program-binary entry point and no binary format name exist in any of the
@@ -18,9 +20,14 @@ run. Nothing in it is a decision. It sits beside [Metal on iOS 6](../backports/m
 - **The driver keeps compiled programs.** It has a program cache keyed by SHA-256, stored through `fscache`, and a
   writer and loader for compiled compute programs. Whether a GL program lands on disk is inferred, not observed.
 - **Reuse of Apple's compiler offline is plausible, not shown.** The compile path has no IPC and the kernel is not on
-  it, but the call graph that would prove it needs disassembly, which is gated (section 9).
+  it, but the call graph that would prove it is the next pass's work (section 9).
+- **The kernel checks the command stream.** The kext's assert strings name validation routines for vendor payloads and
+  render commands (`copyAndValidateVendorPayload`, `validateRenderCommand`, `validateBind`), and the kext looks up the
+  AMFI service. The routines were not read; the names are [static, strings only]. A command stream written from user
+  space would meet these checks.
 - **Provisional verdict:** (a) first, then (b) only if the measurement in section 6 says GLEngine and the plugin loader
-  carry the cost. (c), a full driver, is not justified now (section 7).
+  carry the cost. (c), a full driver, is not justified now (section 7). Pass 2 does not change this. It adds the kernel
+  check above, which weighs against (c).
 
 ## 2. Method, evidence labels and limits
 
@@ -34,13 +41,60 @@ run. Nothing in it is a decision. It sits beside [Metal on iOS 6](../backports/m
 - **Labels.** [static] means read from those tables or strings. [rootfs] means a file in the firmware copy. [probe] is the
   dossier's device result, not re-measured here. [inference] means reasoned from names or import patterns, with no code
   read. [device] means measured on the phone; none in this pass.
-- **Licence gate.** The brief directs static reading of the shipped images. Dossier section 5.2 still lists two owner
-  decisions as open: items 37 (the device trace) and 38 (disassembly of Apple's images). This pass reads symbol tables
-  and strings only. Anything that needs code reading waits for the owner (section 9).
+- **Licence gate.** The brief directs static reading of the shipped images. Dossier items 37 (the device trace) and 38
+  (disassembly of Apple's images) are decided: the coordinator relayed the owner's instruction of 2026-10-29 to pursue the
+  below-the-driver path and recorded both as decided by it. The iOS licence question (dossier item 36) is not analysed
+  and stays with the owner. Pass 2 reads symbol tables, strings and load commands; it reads no code listing.
 - **Excluded by rule.** The `GPUSupport.framework` folder in the firmware copy holds a source-tree folder and build
   and export resources. They are excluded under the leaked-source rule. One directory listing showed their names; none
   was opened, and nothing from them is used here. The `.exp` lists in `OpenGLES.framework` were not read either. Their
   symbols come from the binaries' own tables.
+
+### 2.1 The 4S kernelcache (pass 2)
+
+- **Source.** `kernelcache.release.n94` for iPhone4,1, iOS 6.1.3 (10B329), 7,754,020 bytes, an IMG3 container. It was
+  fetched by byte range from Apple's IPSW with the firmware tool's new `kernelcache` action
+  (`xmake firmware --device=iPhone4,1 kernelcache 6.1.3`). The file is in the shared cache, not the repository.
+- **Decryption.** `ipsw img3 info` reads the tags: a `krnl` DATA payload of 7,751,607 bytes and two KBAG entries. The
+  payload was decrypted with openssl (AES-256-CBC), using the published key and IV for this build. The first block
+  decrypts to the `complzss` magic, which checks the key.
+- **Decompression.** The `complzss` container has a 24-byte header: magic, an Adler-32 field, big-endian sizes
+  (14,053,376 uncompressed, 7,751,223 compressed) and version 1. The decrypted blob was wrapped in a DER IM4P in scratch,
+  and `ipsw kernel dec` (v3.1.739) decompressed it. The result is an ARMv7 `MH_EXECUTABLE` Mach-O of 14,053,376 bytes,
+  SHA-256 `f4013bc0d9483418f57114c12e70763203d1b2726f749663458a322079f96ec9`. A hand-written LZSS decoder in scratch
+  did not reach a valid Mach-O and was dropped; the tool's output is the one used.
+- **Extraction.** `ipsw kernel extract` takes only MH_FILESET kernelcaches, and this one is prelinked, so the kexts were
+  carved by address. A kext's file offset is 3,485,696 plus its load address minus `0x80394000` (the start of
+  `__PRELINK_TEXT`); its size is the gap to the next kext's load address. Two kexts were carved, and both have Mach-O
+  kext-bundle headers: `com.apple.driver.IMGSGX543` (73.16.1) at `0x809b4000`, 180,224 bytes, and
+  `com.apple.iokit.IOAcceleratorFamily` (20.0.9) at `0x80997000`, 118,784 bytes. The kernel's own symbol table has 4,072
+  exports and none from the kexts. The IMGSGX543 kext has 1,490 local relocations, and their targets are already
+  resolved in the file.
+- **Where it lives.** `.cache/firmware/kernelcache/iPhone4,1/6.1.3_10B329/`: `kernel.macho` and `kexts/`. Not in the
+  repository.
+
+### 2.2 What the kernel extensions say (pass 2, [static], from names and strings)
+
+- **Classes.** IMGSGX543 names `SGXDriver543` (`initSGX`, `deinitSGX`, `setProperties`) and these C++ classes:
+  `IMGSGXSharedUserClient`, `IMGSGXGLContext`, `IMGSGXChannel` with the 3D, TA and TQ variants, `IMGSGXResource`,
+  `IMGSGXEventMachine`, `IMGSGXParameterBuffer`, `IMGSGXRenderTarget`, `IMGSGXStatistics` and `IMGSGXShared`.
+  IOAcceleratorFamily names `IOAccelSharedUserClient`, `IOAccelContext`, `IOAccelResource`, `IOAccelEventMachine` and
+  `IOAccelDevice`. The kernel exports the `IOUserClient` methods that dispatch external calls, at these addresses:
+  `getExternalMethodForIndex` `0x80269e68`, `getTargetAndMethodForIndex` `0x80269e70`, `externalMethod` `0x8026d4e8`.
+- **Property keys.** `setProperties` checks keys for `DisableChannelOverlap`, `EnableAutoClockGating`,
+  `EnableDriverClockGating`, `ResetAveragePower`, `SetGPUPower` (with `PowerTarget`) and `SetPIControllerOverride`
+  (checked against `MaxPower`). The kext's statistics use the names `AvgPower`, `AvgComputeClocks`,
+  `CommandBufferSubmitCount` and others. `SGXDutyValues` and the `SGXParamBufferMin/MaxSize*` names are tuning values.
+- **Validation and faults.** `IMGSGXGLContext` has `copyAndValidateVendorPayload`, `validateRenderCommand`,
+  `processHardwareCommand` and `validateBind`, and the kext logs "too many TA Kicks". Fault messages name the
+  microkernel lockup, the hang poll and the power-off register access.
+- **Policy.** The driver logs "failed to look up AMFI service" and "failed to cast AMFI service". So it reads a service
+  of the code-signing and entitlement subsystem. What it checks is not read.
+- **Not recovered: the selector table and the payload layouts.** The kext's external-method table answers question 2,
+  and it is not yet read. Radare2's auto-analysis of the kext found no code references to its class-name string, and
+  `ipsw kernel cpp` finds no classes in the prelinked kernel. The next step is to find the `IMGSGXSharedUserClient`
+  vtable: scan the kext's data for vtables (runs of kernel pointers, such as a 44-entry candidate at file offset
+  `0x27328`), match them against the kernel's `IOUserClient` slot layout, and read `getExternalMethodForIndex` from it.
 
 ## 3. Question 1: the stack, from an app's `glDrawElements` to the GPU
 
@@ -58,7 +112,7 @@ run. Nothing in it is a decision. It sits beside [Metal on iOS 6](../backports/m
 | 7. Mercury, the device and submission layer | `/System/Library/PrivateFrameworks/GPUSupport.framework/libGPUSupportMercury.dylib` | 138 exports. `gpum*` covers the device, pixel formats, queries, the program cache (`gpumGetCachedProgram`, `gpumDeleteCachedProgram`) and IO data. `gpus*` covers submission (`gpusSubmitDataBuffers`, `gpusGetKernelBufferResource`). 62 undefined symbols, 40 of them resolving to IOAccelerator [static] | IOAccelerator, IOSurface, libGLImage |
 | 8. User-client library | `/System/Library/PrivateFrameworks/IOAccelerator.framework/IOAccelerator` | 100 exports: `IOAccelGLContextCreate`, `IOAccelContextSubmitDataBuffers`, `IOAccelResourceCreate`, `IOAccelSharedCreate`, and CL and video variants. Imports `IOServiceOpen`, `IOConnectCallMethod`, `IOConnectCallScalarMethod`, `IOConnectCallStructMethod`, `IOConnectMapMemory`, `IOConnectAddClient`, `IOConnectRelease` [static] | IOKit |
 | 9. IOKit | `/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit` | the `IOConnect*` and `IOService*` calls | the kernel |
-| 10. Kernel extension | the service `IOAcceleratorES` (and `IOAcceleratorESLegacy`), literal in OpenGLES [static]; class `SGXDriver543` [probe] | the kext is not in the firmware copy: the 4S rootfs kernelcache directory is empty, and the iPad 2 rootfs has none [rootfs] | not read |
+| 10. Kernel extension | the service `IOAcceleratorES` (and `IOAcceleratorESLegacy`), literal in OpenGLES [static]; class `SGXDriver543` [probe, and in the kext's method names] | `com.apple.driver.IMGSGX543` 73.16.1 and `com.apple.iokit.IOAcceleratorFamily` 20.0.9 from the 4S kernelcache (section 2.1). The rootfs kernelcache directory is still empty [rootfs] | class, property and validation names, not the code (section 2.2) |
 
 Side paths that sit under the same layers:
 
@@ -105,10 +159,12 @@ Side paths that sit under the same layers:
   2 open. Types 3 to 8 are refused with `0xe00002c7`. Selectors seen: type 0 uses 2 and 0; type 1 uses 0 and 2; type 2
   uses 1 and 7. Each call appears twice in the log, and the cause is not known.
 - **Can an unsandboxed process open it directly?** On a jailbroken device the probe opened types 0 to 2 as root, unsigned.
-  Whether the kernel checks entitlements for those types is not known, because the kernel side was not read. Open.
+  Whether the kernel checks entitlements for those types is not known. The kext logs AMFI lookups (section 2.2), so a
+  code-signing or entitlement check is likely, but the check was not read. Open.
 - **What is the minimum to submit work without GLEngine?** The path the tables show is IOAccelerator's context, then
   resource create, then submit data buffers, which ends in `IOConnectCallStructMethod`. The payload layouts and the
-  selector table live in the kext, which is not in the firmware copy, so the minimum is not known yet (section 9).
+  selector table live in the kext. The kext is in hand (section 2.1), but the table is not yet recovered (section 2.2),
+  so the minimum is not known yet (section 9).
 
 ## 5. Question 3: are Apple's compiled shader binaries reachable?
 
@@ -186,12 +242,17 @@ years.
 2. **(b) Bypass one expensive layer, keeping Apple's compiler and kernel interface.** Effort L. The candidate is the
    GLEngine and libGFXShared dispatch and validation layer, reached through the driver's dispatch table. Pays off if
    those two layers carry most of the state-change overhead in C1 to C5 (a proposed bar: over 30 percent), and if the
-   table's layout can be recovered and called from our process. Both need code reading, which is gated. The compile
-   reuse of section 5.3 belongs here. It removes the front end's cost only if the measurement shows the compile is hot.
+   table's layout can be recovered and called from our process. Both need code reading, which is now allowed (item 38)
+   and not yet done. The compile reuse of section 5.3 belongs here. It removes the front end's cost only if the
+   measurement shows the compile is hot.
 3. **(c) A full own driver.** Effort XL. The kext's method table, the command stream and the USSE encodings are all
    unread. The command stream is not documented anywhere the research found. Pays off only if (a) and (b) are capped
    below the target, the kernel interface proves simple, and the command stream can be read from shared memory. Not
    justified now.
+
+Pass 2 adds one fact to this ranking. The kernel validates vendor payloads and render commands (section 2.2). So (c)
+would have to write a command stream that the kernel accepts, and (b) would reach the kernel through the same checks.
+Neither changes the ranking.
 
 Recommendation: do (a) now. Run the section 6 probe when the owner sequences it. Scope (b) only if its bar is met.
 
@@ -201,18 +262,19 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
   own cache is in `.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`.
 - **Dossier 4.9 holds on the 4S.** The binary-format absence was measured on the 3GS, and it is confirmed here on the 4S.
 - **Dossier R5 is resolved on the 4S.** The kernel service literal `IOAcceleratorES` is in OpenGLES. The class
-  `SGXDriver543` remains [probe].
-- **Dossier R1 (the kernelcache) stays open.** The 4S rootfs has an empty kernelcache directory, and the iPad 2 rootfs has none.
+  `SGXDriver543` is also in the kext's method names (section 2.2). Its device-side use stays [probe].
+- **Dossier R1 (the kernelcache) is resolved for the 4S.** The kernelcache was fetched and decompressed (section 2.1).
+  The 4S rootfs's kernelcache directory is still empty, and the iPad 2 rootfs has none.
 - **The "cheapest observable step" in dossier 4.7 is cheaper for shaders.** The cache-folder test answers the shader
   question without the payload trace. The dump test in the landscape note still matters for the command stream.
 
 ## 9. Open items, and what the coordinator must decide
 
-1. **The kernel extension.** The kernelcache is not in the rootfs, and `xmake firmware` does not fetch it. The IPSW
-   would supply it, by byte range as the firmware tool does for the system image. Reading it is reverse engineering,
-   so this needs the owner's decision (dossier 5.2, items 37 and 38) before anyone fetches or decodes it.
-2. **The compile-path call graph.** Settling section 5.3 needs disassembly of the driver and the front end. That is
-   item 38 again, and it waits for the owner.
+1. **The kernel extension.** Done in pass 2 (section 2.1). Items 37 and 38 are recorded as decided by the coordinator's
+   relayed owner instruction of 2026-10-29. The iOS licence question (dossier item 36) is not analysed and stays open for
+   the owner.
+2. **The compile-path call graph.** Settling section 5.3 needs disassembly of the driver and the front end. Item 38 now
+   allows it, and it is the next pass's work (question 3).
 3. **The device run.** The Caches-folder test and the section 6 probe need the phone. The coordinator sequences it.
 4. **Where the document lives.** The brief gives `docs/explanation/metal/`. The sibling dossiers sit under
    `docs/explanation/backports/`. Metal is a part of the Backports component, so the coordinator may prefer the
@@ -221,3 +283,5 @@ Recommendation: do (a) now. Run the section 6 probe when the owner sequences it.
    that is to be handled, since the owner's rule is that leaked material is never opened (dossier 5.1).
 6. **An unresolved role.** `libGPUSupport.dylib` exports the same `gpum*` and `gld*` names as Mercury, but no GL image
    links it. Its role is not established.
+7. **The selector table.** The next step is in section 2.2 and needs no device. If the vtable search fails, the fallback
+   is to read the kext's `__DATA` vtable runs by hand against the `IOUserClient` slot layout from the kernel.
