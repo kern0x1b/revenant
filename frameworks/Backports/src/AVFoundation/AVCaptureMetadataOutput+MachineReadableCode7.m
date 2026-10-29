@@ -7,6 +7,7 @@
 @interface RevenantQRMetadataFrames : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (nonatomic, weak) AVCaptureMetadataOutput *output;
 @property (nonatomic, assign) BOOL reported;
+@property (nonatomic, assign) NSUInteger undecodable;
 @end
 
 @interface RevenantQRMetadataState : NSObject
@@ -21,6 +22,7 @@
 
 @synthesize output = _output;
 @synthesize reported = _reported;
+@synthesize undecodable = _undecodable;
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
@@ -46,8 +48,13 @@
             CGPoint point = CGPointMake((CGFloat)results[index].corners[corner][0] / width, (CGFloat)results[index].corners[corner][1] / height);
             [corners addObject:CFBridgingRelease(CGPointCreateDictionaryRepresentation(point))];
         }
-        if (text)
+        if (text) {
             [objects addObject:[[AVMetadataMachineReadableCodeObject alloc] revenant_initWithType:AVMetadataObjectTypeQRCode stringValue:text corners:corners time:time]];
+        } else {
+            self.undecodable += 1;
+            if (self.undecodable == 1 || self.undecodable % 100 == 0)
+                NSLog(@"revenant: a QR code's bytes are not UTF-8 under the encoding it declares, so it is not delivered (%lu so far)", (unsigned long)self.undecodable);
+        }
         revenant_qr_result_free(&results[index]);
     }
     CVPixelBufferUnlockBaseAddress(image, kCVPixelBufferLock_ReadOnly);
@@ -162,14 +169,20 @@ static NSArray *revenant_qr_available_types(AVCaptureMetadataOutput *self, SEL _
 static NSArray *revenant_qr_metadata_types(AVCaptureMetadataOutput *self, SEL _cmd)
 {
     RevenantQRMetadataState *state = objc_getAssociatedObject(self, &RevenantQRMetadataStateKey);
-    if (state.types)
+    if ([state.types containsObject:AVMetadataObjectTypeQRCode])
         return state.types;
     return ((NSArray *(*)(id, SEL))qr_native_metadata_types)(self, _cmd);
 }
 
 static void revenant_qr_set_metadata_types(AVCaptureMetadataOutput *self, SEL _cmd, NSArray *types)
 {
-    RevenantQRMetadataState *state = revenant_qr_state(self);
+    RevenantQRMetadataState *state = objc_getAssociatedObject(self, &RevenantQRMetadataStateKey);
+    if (![types containsObject:AVMetadataObjectTypeQRCode] && !state.video) {
+        state.types = nil;
+        ((void (*)(id, SEL, NSArray *))qr_native_set_metadata_types)(self, _cmd, types);
+        return;
+    }
+    state = revenant_qr_state(self);
     state.types = types;
     BOOL native = revenant_qr_native_supports(self);
     NSMutableArray *nativeTypes = [NSMutableArray array];
