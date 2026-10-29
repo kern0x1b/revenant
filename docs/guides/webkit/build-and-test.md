@@ -173,11 +173,18 @@ target("App")
         target:add("frameworkdirs", path.join(engine, "frameworks"))
         target:add("values", "app.resources", path.relative(path.join(engine, "bundle"), target:scriptdir()))
     end)
+    after_build(function (target)
+        -- The link records the build's own install name, the system's: the binary must name the copy in Frameworks.
+        os.vrunv("xcrun", {"install_name_tool", "-change", "/System/Library/Frameworks/JavaScriptCore.framework/JavaScriptCore",
+                           "@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore", target:targetfile()})
+    end)
 ```
 
-The link takes JavaScriptCore from `frameworks/`, the app rule copies `bundle/` into the application's
-`Frameworks` folder, and the rpath lets dyld find it there. This is the pattern `RevWebViewHost` uses, which
-takes the whole engine (`carried` left at its default `all`). The `on_test` of the prefixed variant checks what
+The link takes JavaScriptCore from `frameworks/`, whose framework is the build's own and so records the system's
+install name; the `after_build` step names the copy in the application's `Frameworks` folder instead, which
+`bundle/` supplies, and the rpath lets dyld find it there. A plain binary built this way, calling the eight
+names, links and imports no `xpc_*` symbol; the application-bundle form of the snippet is not checked yet.
+`RevWebViewHost` takes the whole engine (`carried` left at its default `all`). The `on_test` of the prefixed variant checks what
 the package carries: each framework it builds is in the bundle and linkable, its JavaScriptCore exports the JSC C API
 a React Native host calls, it imports no `xpc_*` symbol (iOS 6 has none, and a lazy import of one fails only when called),
 and it is installed as `@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore`. That test runs when the
