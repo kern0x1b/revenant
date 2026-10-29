@@ -258,12 +258,13 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.stub then
-                local stub = import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
-                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), stub_text(stub))
+                for _, stub in ipairs(import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()) do
+                    io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), stub_text(stub))
+                    target:add("links", stub.library)
+                end
                 target:add("linkdirs", folder)
-                target:add("links", stub.library)
             end
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
@@ -282,7 +283,7 @@ local function overlay(name, folder, opt)
             end
             add_flags(target, flags)
             if opt.cmodule then
-                add_flags(target, {"-I", path.join(SRC, folder, opt.cmodule)})
+                add_flags(target, {"-I", path.join(SRC, opt.cmodule)})
                 for _, name in ipairs(table.wrap(opt.packages)) do
                     local pkg = target:pkg(name)
                     if pkg then
@@ -314,7 +315,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = "RevenantTLS", stub = "network_stub"})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = "TLS/RevenantTLS", stub = "network_stub"})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

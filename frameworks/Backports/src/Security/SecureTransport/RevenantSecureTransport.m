@@ -3,8 +3,8 @@
 #import <Security/SecTrust.h>
 #import <stdio.h>
 #import <string.h>
-#import "RevenantSecProtocolOptions.h"
-#import "RevenantTLS/RevenantTLSEngine.h"
+#import "../../TLS/RevenantSecProtocolOptions.h"
+#import "../../TLS/RevenantTLS/RevenantTLSEngine.h"
 
 @interface RevenantSSLContext : NSObject {
 @public

@@ -32,7 +32,8 @@ local LIBRARIES = {
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
     {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports", "LocalAuthenticationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
+    {name = "TLSBackports", folder = "TLS", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"boringssl"}, system = {}},
+    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports", "LocalAuthenticationBackports", "TLSBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
     {name = "CoreBluetoothBackports", folder = "CoreBluetooth", frameworks = {"Foundation"}, libraries = {}, archives = {}, system = {}},
     {name = "CompressionBackports", folder = "Compression", frameworks = {}, libraries = {}, archives = {"lzfse", "zlib", "lz4", "xz"}, system = {}},
@@ -89,7 +90,7 @@ local LIBRARIES = {
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports", "SecurityBackports"}, archives = {"boringssl"}, system = {}},
+    {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports", "SecurityBackports", "TLSBackports"}, archives = {}, system = {}},
     {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
     {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
@@ -240,13 +241,19 @@ if is_plat("iphoneos") then
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
-            if library.name == "NetworkBackports" then
+            if library.name == "SecurityBackports" then
+                add_files(os.files(path.join(SRC, "Security", "SecureTransport", "*.m")))
+            end
+            if library.name == "TLSBackports" then
                 after_build(function (target)
-                    local stub = import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
-                    for _, symbol in ipairs(stub.symbols) do
-                        if not exported:find(" " .. symbol .. "\n", 1, true) then
-                            raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                    for _, stub in ipairs(import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()) do
+                        if stub.library == library.name then
+                            for _, symbol in ipairs(stub.symbols) do
+                                if not exported:find(" " .. symbol .. "\n", 1, true) then
+                                    raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                                end
+                            end
                         end
                     end
                 end)
@@ -299,7 +306,7 @@ if is_plat("iphoneos") then
                     target:add("files", table.unpack(files))
                 end
             end)
-            if library.name == "NetworkBackports" then
+            if library.name == "TLSBackports" then
                 before_build(function (target)
                     local boringssl = target:pkg("boringssl")
                     if not boringssl then
@@ -307,7 +314,7 @@ if is_plat("iphoneos") then
                         for _, pkg in pairs(target:pkgs() or {}) do
                             table.insert(names, tostring(pkg:name()))
                         end
-                        raise("NetworkBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
+                        raise("TLSBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
                               table.concat(table.wrap(target:get("packages")), ","))
                     end
                     target:add("cflags", "-I" .. boringssl:installdir() .. "/include")

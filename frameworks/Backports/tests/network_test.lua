@@ -1,8 +1,8 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "Network")
-local security = path.join(backports, "src", "Security")
-local securityObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
+local tls = path.join(backports, "src", "TLS")
+local tlsObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
 local fixture = path.join(backports, "tests", "Network", "main.swift")
 local mapping = path.join(backports, "tests", "Network", "mapping", "main.swift")
 local live = path.join(backports, "tests", "Network", "live", "main.swift")
@@ -30,11 +30,11 @@ end
 
 local function native_objects(folder, boringssl)
     local engine = path.join(folder, "RevenantTLSEngine.o")
-    os.vrunv("xcrun", {"clang", "-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(src, "RevenantTLSEngine.m"), "-o", engine})
+    os.vrunv("xcrun", {"clang", "-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(tls, "RevenantTLSEngine.m"), "-o", engine})
     local objects = {engine}
-    for _, file in ipairs(securityObjects) do
+    for _, file in ipairs(tlsObjects) do
         local object = path.join(folder, path.basename(file) .. ".o")
-        os.vrunv("xcrun", {"clang", "-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
+        os.vrunv("xcrun", {"clang", "-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(tls, file), "-o", object})
         table.insert(objects, object)
     end
     return objects
@@ -44,7 +44,7 @@ local function backport_program(source, files, output)
     local boringssl = workspace.package_of("boringssl", true)
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     local objects = native_objects(path.directory(output), boringssl)
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(tls, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       files, objects, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
     return output
 end

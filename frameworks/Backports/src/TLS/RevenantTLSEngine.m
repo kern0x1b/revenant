@@ -1,5 +1,5 @@
 #import "RevenantTLS/RevenantTLSEngine.h"
-#import "../Security/RevenantSecProtocolOptions.h"
+#import "RevenantSecProtocolOptions.h"
 
 #include <CommonCrypto/CommonDigest.h>
 #include <TargetConditionals.h>

@@ -1,6 +1,6 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
-local network = path.join(backports, "src", "Network")
+local tls = path.join(backports, "src", "TLS")
 local security = path.join(backports, "src", "Security")
 local transport = path.join(security, "SecureTransport")
 local fixture = path.join(backports, "tests", "Security", "securetransport", "main.c")
@@ -34,11 +34,11 @@ function main()
         clang(table.join({"-c", "-Wno-deprecated-declarations"}, args, {source, "-o", object}))
         table.insert(objects, object)
     end
-    compile(path.join(network, "RevenantTLSEngine.m"), table.join({"-fobjc-arc"}, include))
+    compile(path.join(tls, "RevenantTLSEngine.m"), table.join({"-fobjc-arc"}, include))
     for _, file in ipairs({"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}) do
-        compile(path.join(security, file), {"-fobjc-arc"})
+        compile(path.join(tls, file), {"-fobjc-arc"})
     end
-    compile(path.join(transport, "RevenantSecureTransport.m"), table.join({"-fobjc-arc", "-I" .. security, "-I" .. network}, include))
+    compile(path.join(transport, "RevenantSecureTransport.m"), table.join({"-fobjc-arc"}, include))
     compile(fixture, include)
     local program = path.join(out, "securetransport")
     clang(table.join(objects, {path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"),

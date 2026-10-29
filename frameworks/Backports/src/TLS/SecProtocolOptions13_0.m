@@ -30,7 +30,8 @@ static BOOL RevenantTLSVersionForSSLProtocol(SSLProtocol protocol, tls_protocol_
 
 @synthesize minTLSVersion = _minTLSVersion, maxTLSVersion = _maxTLSVersion;
 @synthesize serverName = _serverName, applicationProtocols = _applicationProtocols;
-@synthesize peerAuthenticationRequired = _peerAuthenticationRequired, localIdentity = _localIdentity;
+@synthesize peerAuthenticationRequired = _peerAuthenticationRequired, breaksOnServerAuth = _breaksOnServerAuth;
+@synthesize localIdentity = _localIdentity;
 @synthesize ticketsEnabled = _ticketsEnabled, fallbackAttempt = _fallbackAttempt;
 @synthesize resumptionEnabled = _resumptionEnabled, falseStartEnabled = _falseStartEnabled;
 @synthesize ocspEnabled = _ocspEnabled, sctEnabled = _sctEnabled, renegotiationEnabled = _renegotiationEnabled;
