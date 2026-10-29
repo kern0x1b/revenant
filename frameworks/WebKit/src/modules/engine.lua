@@ -147,9 +147,16 @@ function options(ctx)
     return found
 end
 
+-- The iOS 6 defines for every language. WebKit's iOS options enable Objective-C++ after the toolchain sets its
+-- flags, so the flags alone do not reach the .mm precompiled header: the project carries them as definitions too.
+local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION"}
+
 function flags(ctx)
     local chosen = variant(ctx.variant)
-    local defines = {"-DWEBKIT_IOS6=1", "-DENABLE_UNFAIR_LOCK=0", "-DWEBKIT_IOS6_NO_READLINE", "-DU_STATIC_IMPLEMENTATION"}
+    local defines = {}
+    for _, define in ipairs(IOS6_DEFINES) do
+        table.insert(defines, "-D" .. define)
+    end
     local cflags = table.join({"-flto=thin", "-mllvm", "-hot-cold-split=false"}, tuning,
                               {"-isystem", ctx.stubs, "-include", path.join(ctx.stubs, chosen.prefix)}, defines)
     local cxxflags = {"-nostdinc++", "-isystem", path.join(ctx.libcxx, "include", "c++", "v1"),
@@ -205,7 +212,8 @@ function write_packages(ctx)
     local include = {
         "find_package(LibXml2 CONFIG REQUIRED)",
         "find_package(LibXslt CONFIG REQUIRED)",
-        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")"
+        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")",
+        "add_compile_definitions(" .. table.concat(IOS6_DEFINES, " ") .. ")"
     }
     io.writefile(path.join(dir, "project-include.cmake"), table.concat(include, "\n") .. "\n")
     return dir
