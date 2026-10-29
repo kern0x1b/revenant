@@ -218,8 +218,8 @@ function failures(opt)
         table.insert(found, "the libraries of a held cache come from the firmware of any architecture that carries it: " .. tostring(errors))
     end
 
-    local kernel = path.join(folder, "home", "firmware", "kernelcache", "iPhone5,1", "9.8_98A1", "kernelcache.release.s5l8950x")
-    io.writefile(kernel, "the kernelcache of a 32-bit device")
+    local kernel = path.join(folder, "home", "firmware", "kernelcache", "iPhone5,1", "9.8_98A1", "kernel.macho")
+    io.writefile(kernel, "the kernel of a 32-bit device")
     local held = firmware.kernelcache("iPhone5,1", "9.8")
     if held ~= kernel then
         table.insert(found, "a kernelcache already in the cache is returned without asking the firmware: " .. tostring(held))
