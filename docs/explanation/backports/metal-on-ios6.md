@@ -227,8 +227,14 @@ Compute and MPS (coordinator decision, 2026-10-29):
 11. **Degradations removed.** Triangle fill mode in line form, through GL_LINES index expansion, since GLES 2 has no
     `glPolygonMode`. A real `waitUntilScheduled`. A ring allocator for `setVertexBytes` in place of one buffer per call.
     A named pixel-format constant in place of the literal 250. One `glReadPixels` for the readback.
-12. **Host reference harness.** Host Metal output against the translated GLSL, on ANGLE or SwiftShader, vendored as a
-    toolchain package, with a stated tolerance. Not built yet: no independent GLES 2 oracle is vendored, and the choice between ANGLE and SwiftShader is open.
+12. **Host reference harness.** `metal_shader_harness` (`frameworks/Backports/tools/shader_harness/main.m`, the
+    `shader_harness` option) runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then
+    compares the pixels. ANGLE is a development-only dependency, not a package: `REVENANT_ANGLE_CEF` names the Libraries
+    folder of a Chromium Embedded Framework 144.0.15.0 bundle, and `ANGLE_PINS` in `frameworks/Backports/xmake.lua` checks
+    the four files by sha256 before the build copies them. It stays out of `packages/` because no fetchable source
+    reproduces the pinned bytes: the pins match the JetBrains JCEF bundle, and the official CEF 144.0.15 macOS arm64
+    archives carry different `libEGL`, `libGLESv2` and `libvk_swiftshader` (`vk_swiftshader_icd.json` matches). The
+    tolerance is not stated yet.
 13. **Oracle AIR.** Development needs AIR from Metal's compiler, and this Mac has no Metal compiler. The planned source is
     an AIR build on a CI macOS runner with a pinned Xcode, keyed by source digest and published like the other prebuilts.
     Local tools only download it. It is designed, not dispatched; CI order belongs to the coordinator.
