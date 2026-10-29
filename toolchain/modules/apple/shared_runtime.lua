@@ -71,6 +71,11 @@ function stage(opt)
         for _, library in ipairs(described.extra or {}) do
             place(library.source, library.leaf)
         end
+        local documents = path.join(opt.root, "usr", "share", "doc", described.name)
+        for _, license in ipairs(described.licenses or {}) do
+            os.mkdir(documents)
+            os.vcp(license, documents .. "/")
+        end
         table.insert(held, entry)
     end
     for _, entry in ipairs(held) do
@@ -88,7 +93,8 @@ function stage(opt)
         end
         json.savefile(path.join(opt.metadata, entry.described.name .. ".json"),
                       {name = entry.described.name, version = entry.described.version, title = entry.described.title,
-                       description = entry.described.description, depends = entry.described.depends or {}, folder = entry.folder})
+                       description = entry.described.description, depends = entry.described.depends or {}, folder = entry.folder,
+                       note = entry.described.note})
     end
 end
 
@@ -109,13 +115,19 @@ function deb(described, root, ldid, workdir, outputdir)
     for _, library in ipairs(os.files(path.join(tree, described.folder, "*.dylib"))) do
         signing.sign(ldid, library)
     end
+    local documents = path.join(root, "usr", "share", "doc", described.name)
+    if os.isdir(documents) then
+        os.mkdir(path.join(tree, "usr", "share", "doc"))
+        os.vcp(documents, path.join(tree, "usr", "share", "doc") .. "/")
+    end
     local control = path.join(workdir, described.name .. ".control")
     io.writefile(control, table.concat({
         "Package: " .. described.name,
         "Name: " .. described.title,
         "Architecture: iphoneos-arm",
         "Section: System",
-        "Description: " .. described.description .. " in " .. described.folder .. "; the runtime is named after the build that holds it (by default without library evolution) and cannot be replaced by another build"
+        "Description: " .. described.description .. " in " .. described.folder .. "; " ..
+            (described.note or "the runtime is named after the build that holds it (by default without library evolution) and cannot be replaced by another build")
     }, "\n") .. "\n")
     local written = debian.write({control = control, version = described.version, root = tree, depends = described.depends, outputdir = outputdir})
     os.tryrm(workdir)

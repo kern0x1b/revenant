@@ -68,6 +68,9 @@ function failures(opt)
     if table.concat(written.depends, ", ") ~= BASE .. " (= 1.0+11111111)" then
         table.insert(found, "the package needs the shared package whose library it names, and no other: " .. table.concat(written.depends, ", "))
     end
+    if #written.shared ~= 1 or written.shared[1] ~= packages[1] then
+        table.insert(found, "the package hands the shared package it needs to the program that writes it beside the package: " .. tostring(#written.shared))
+    end
     if path.filename(written.deb) ~= NAME .. "_" .. written.version .. "_iphoneos-arm.deb" or not os.isfile(written.deb) then
         table.insert(found, "the package is written as Package_Version_Architecture.deb: " .. written.deb)
     end

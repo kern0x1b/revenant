@@ -79,6 +79,22 @@ function write(opt)
     task.run("config", {}, {disable_dump = true})
     import("apple.platform")
     local written, carried = {}, {}
+    local function carry(dependency, signer)
+        if carried[dependency.name] then
+            return
+        end
+        carried[dependency.name] = true
+        local outputdir = opt.outputdir or config.builddir()
+        local copied
+        if dependency.meta then
+            copied = import("apple.shared_runtime").deb(dependency.meta, dependency.root, platform.ldid(signer),
+                                                        path.join(config.builddir(), ".revenant", "shared", dependency.name), outputdir)
+        else
+            copied = platform.copy_program(dependency.deb, path.join(outputdir, path.filename(dependency.deb)), dependency.name)
+        end
+        cprint("${bright green}deb${clear} %s", copied)
+        table.insert(written, {deb = copied})
+    end
     local grouped = packages()
     for _, control in ipairs(table.orderkeys(grouped)) do
         local described = grouped[control]
@@ -106,19 +122,10 @@ function write(opt)
                 table.join2(dependencies, shared and shared.packages or {})
                 for _, dependency in ipairs(dependencies) do
                     table.insert(depends, string.format("%s (%s %s)", dependency.name, dependency.relation, dependency.version))
-                    if not carried[dependency.name] then
-                        carried[dependency.name] = true
-                        local outputdir = opt.outputdir or config.builddir()
-                        local copied
-                        if dependency.meta then
-                            copied = import("apple.shared_runtime").deb(dependency.meta, dependency.root, platform.ldid(target),
-                                                                        path.join(config.builddir(), ".revenant", "shared", dependency.name), outputdir)
-                        else
-                            copied = platform.copy_program(dependency.deb, path.join(outputdir, path.filename(dependency.deb)), dependency.name)
-                        end
-                        cprint("${bright green}deb${clear} %s", copied)
-                        table.insert(written, {deb = copied})
-                    end
+                    carry(dependency, target)
+                end
+                for _, owned in ipairs(backports and backports.shared or {}) do
+                    carry(owned, target)
                 end
                 task.run("install", {target = target:name(), installdir = stage})
                 local architectures = table.wrap(target:values("apple.architectures"))
@@ -156,11 +163,9 @@ function write(opt)
             raise("the project builds Backports libraries, and no target carries ldid to sign their package with")
         end
         local described = platform.backports_deb(signer)
-        if not carried[described.name] then
-            carried[described.name] = true
-            local copied = platform.copy_program(described.deb, path.join(opt.outputdir or config.builddir(), path.filename(described.deb)), described.name)
-            cprint("${bright green}deb${clear} %s", copied)
-            table.insert(written, {deb = copied})
+        carry(described, signer)
+        for _, owned in ipairs(described.shared) do
+            carry(owned, signer)
         end
         for _, deb in ipairs(platform.vision_text_debs(opt.outputdir or config.builddir())) do
             cprint("${bright green}deb${clear} %s", deb)

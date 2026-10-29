@@ -111,8 +111,12 @@ What is open:
 - sRGB without the buffer's colour attachments: every image is tagged sRGB. A buffer's own colour attachments (primaries,
   transfer function) are not read, only the matrix.
 - Hardware: the H.264 check is verified on the host only. The session with the hardware requirement has not been run on an
-  A5 device, so the device answer is unknown until it is. HEVC and AV1 report no by design: the A5 has no hardware decoder
-  for either, and Telegram asks only about AV1.
+  A5 device, so the device answer is unknown until it is. HEVC and AV1 report no, as the A5 has no hardware decoder for
+  either. HEVC does not need one: the backport's session decodes it in software, through the `hevc` decoder of the FFmpeg
+  package, so `VTDecompressionSessionCreate` with an `hvcC` format description succeeds where the hardware is absent.
+  AV1 has no software path here. Telegram 13.0.0 asks `VTIsHardwareDecodeSupported` about AV1 alone
+  (`submodules/MediaPlayer/Sources/MediaDataReader.swift:9`, `ChunkMediaPlayerV2.swift:10`) and decodes AV1 with its own
+  dav1d through FFmpeg when the answer is no.
 
 ## WebKit (`WK*`)
 

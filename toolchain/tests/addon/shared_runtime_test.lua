@@ -13,11 +13,13 @@ function failures(opt)
                   {"-dynamiclib", "-install_name", "@rpath/libtop.1.dylib", "-L.", "-lbase.1"})
     local first, second = "org.example.base-11111111", "org.example.top-11111111"
     local root, described = path.join(folder, "root"), path.join(folder, "shared-packages")
+    io.writefile(path.join(folder, "LICENSE.md"), "the licence text\n")
     shared.stage({packages = {
                       {name = first, version = "1.0+11111111", title = "Base", description = "The base library",
                        libraries = {path.join(folder, "libbase.1.dylib")}},
                       {name = second, version = "1.0+11111111", title = "Top", description = "The library above it",
-                       depends = {first .. " (= 1.0+11111111)"}, libraries = {path.join(folder, "libtop.1.dylib")}}},
+                       depends = {first .. " (= 1.0+11111111)"}, libraries = {path.join(folder, "libtop.1.dylib")},
+                       note = "a replaceable library, its licence beside it", licenses = {path.join(folder, "LICENSE.md")}}},
                   root = root, metadata = described, strip = {"-x"}})
 
     local top = path.join(root, "usr", "lib", "revenant", second, "libtop.1.dylib")
@@ -44,11 +46,17 @@ function failures(opt)
     if not members:find("usr/lib/revenant/" .. second .. "/libtop.1.dylib", 1, true) or members:find(first, 1, true) then
         table.insert(found, "a package holds its own folder and nothing of another's: " .. members)
     end
+    if not members:find("usr/share/doc/" .. second .. "/LICENSE.md", 1, true) then
+        table.insert(found, "a package ships the licence it names beside its library, in its own documents: " .. members)
+    end
     fixtures.run(extracted, "tar", {"xzf", "data.tar.gz"})
     fixtures.run(extracted, "tar", {"xzf", "control.tar.gz"})
     local control = io.readfile(path.join(extracted, "control"))
     if not control:find("Package: " .. second, 1, true) or not control:find("Depends: " .. first .. " (= 1.0+11111111)", 1, true) then
         table.insert(found, "the control file names the package and the exact package it needs: " .. control)
+    end
+    if not control:find("; a replaceable library, its licence beside it", 1, true) or control:find("cannot be replaced", 1, true) then
+        table.insert(found, "the control file says what the package names, and not the runtime's default: " .. control)
     end
     local inside = path.join(extracted, "usr", "lib", "revenant", second, "libtop.1.dylib")
     local signed = fixtures.run(extracted, "xcrun", {"otool", "-l", inside})

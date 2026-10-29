@@ -29,6 +29,24 @@ int main(int argc, char **argv)
     if (hostSource) {
         CFRelease(hostSource);
     }
+    CMTimebaseRef released = NULL;
+    OSStatus releasedStatus = CMTimebaseCreateWithSourceClock(kCFAllocatorDefault, clock, &released);
+    revenant_check(releasedStatus == noErr && released != NULL, "a second timebase is created from the same clock", @"no second timebase");
+    CFRelease(released);
+    CMTimebaseRef later = NULL;
+    OSStatus laterStatus = CMTimebaseCreateWithSourceClock(kCFAllocatorDefault, clock, &later);
+    revenant_check(laterStatus == noErr && later != NULL, "a timebase is created after another was released", @"no later timebase");
+    CMClockOrTimebaseRef laterSource = CMTimebaseCopySource(later);
+    revenant_check(laterSource != NULL && CFEqual(laterSource, clock), "the timebase created after a release answers its clock", @"later source differs");
+    CMClockOrTimebaseRef survivor = CMTimebaseCopySource(timebase);
+    revenant_check(survivor != NULL && CFEqual(survivor, clock), "a live timebase keeps its source after another timebase is released", @"live source lost");
+    if (laterSource) {
+        CFRelease(laterSource);
+    }
+    if (survivor) {
+        CFRelease(survivor);
+    }
+    CFRelease(later);
     CFRelease(oracle);
     CFRelease(timebase);
     return revenant_finish();

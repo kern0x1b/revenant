@@ -6,6 +6,9 @@
 #include <VideoToolbox/VTDecompressionSession.h>
 #include <VideoToolbox/VTErrors.h>
 
+#import "VTDecompressionSessionHEVC.h"
+#import "VTSystem.h"
+
 OSStatus VTCompressionSessionEncodeFrameWithOutputHandler(
     VTCompressionSessionRef session, CVImageBufferRef imageBuffer, CMTime presentationTimeStamp,
     CMTime duration, CFDictionaryRef CM_NULLABLE frameProperties,
@@ -16,10 +19,20 @@ OSStatus VTCompressionSessionEncodeFrameWithOutputHandler(
     return kVTVideoEncoderNotAvailableNowErr;
 }
 
+typedef OSStatus (*RevenantVTDecodeWithHandlerFunction)(VTDecompressionSessionRef, CMSampleBufferRef, VTDecodeFrameFlags, VTDecodeInfoFlags *, VTDecompressionOutputHandler);
+
 OSStatus VTDecompressionSessionDecodeFrameWithOutputHandler(
     VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags,
     VTDecodeInfoFlags * CM_NULLABLE infoFlagsOut, VTDecompressionOutputHandler outputHandler)
 {
-    (void)session; (void)sampleBuffer; (void)decodeFlags; (void)infoFlagsOut; (void)outputHandler;
-    return kVTVideoDecoderNotAvailableNowErr;
+    if (RevenantVTSoftwareSessionOwns(session)) {
+        if (!outputHandler)
+            return kVTParameterErr;
+        return RevenantVTSoftwareSessionDecode(session, sampleBuffer, decodeFlags, NULL, infoFlagsOut, ^(void *sourceFrameRefCon, OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef imageBuffer, CMTime presentationTimeStamp, CMTime presentationDuration) {
+            (void)sourceFrameRefCon;
+            outputHandler(status, infoFlags, imageBuffer, presentationTimeStamp, presentationDuration);
+        });
+    }
+    RevenantVTDecodeWithHandlerFunction decode = (RevenantVTDecodeWithHandlerFunction)RevenantVTSystemSymbol("VTDecompressionSessionDecodeFrameWithOutputHandler");
+    return decode ? decode(session, sampleBuffer, decodeFlags, infoFlagsOut, outputHandler) : kVTVideoDecoderNotAvailableNowErr;
 }
