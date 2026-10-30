@@ -100,6 +100,8 @@ struct Address {
 struct Local {
     std::string name;
     Type *type = nullptr;
+    // An element that a dynamic index chooses is a select over the constant elements, so it can be read but not written.
+    bool selected = false;
 };
 
 struct Output {
@@ -1325,6 +1327,7 @@ private:
             return refuse("an element of a local at a depth this emitter does not map");
         std::string name = base.name;
         Type *type = base.type;
+        bool selected = false;
         for (unsigned i = 2; i < gep.getNumOperands(); i++) {
             Value *index = gep.getOperand(i);
             if (auto *structure = dyn_cast<StructType>(type)) {
@@ -1341,8 +1344,28 @@ private:
                 std::string text;
                 if (!expression(index, text))
                     return false;
-                name += "[" + text + "]";
+                if (isa<ConstantInt>(index)) {
+                    name += "[" + text + "]";
+                } else {
+                    // Appendix A, section 5 allows only constant indexes, so a dynamic index that ends the path selects
+                    // among the constant elements, from the last one down to the first.
+                    if (i + 1 != gep.getNumOperands() || selected || array->getNumElements() > 64 || array->getElementType()->isAggregateType())
+                        return refuse("a dynamic index into a local that this emitter does not map");
+                    std::string chain;
+                    for (uint64_t k = array->getNumElements(); k-- > 0;) {
+                        std::string element = name + "[" + std::to_string(k) + "]";
+                        chain = chain.empty() ? element : "((" + text + " == " + std::to_string(k) + ") ? " + element + " : " + chain + ")";
+                    }
+                    name = chain;
+                    selected = true;
+                }
                 type = array->getElementType();
+            } else if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+                auto *lane = dyn_cast<ConstantInt>(index);
+                if (!lane || lane->getZExtValue() >= std::min<uint64_t>(vector->getNumElements(), 4))
+                    return refuse("a vector lane this emitter does not map");
+                name += std::string(".") + "xyzw"[lane->getZExtValue()];
+                type = vector->getElementType();
             } else {
                 return refuse("an element of a local at a depth this emitter does not map");
             }
@@ -1350,6 +1373,7 @@ private:
         Local &element = localPointers_[&gep];
         element.name = name;
         element.type = type;
+        element.selected = selected;
         return true;
     }
 
@@ -1384,7 +1408,7 @@ private:
         if (auto *store = dyn_cast<StoreInst>(&instruction)) {
             const Local *slot = localOf(store->getPointerOperand());
             bool narrowed = slot && paddedVectorOf(slot->type, store->getValueOperand()->getType());
-            if (!slot || (slot->type != store->getValueOperand()->getType() && !narrowed))
+            if (!slot || slot->selected || (slot->type != store->getValueOperand()->getType() && !narrowed))
                 return refuse("a store to an address this emitter does not write as a local");
             std::string text;
             if (!expression(store->getValueOperand(), text))
@@ -1649,12 +1673,35 @@ private:
         return true;
     }
 
+    // A memset of a local array to zero is a store of zero into each element it covers. The zero is 0.0 for a float or
+    // a vector of floats, which is the zero bytes of the memset.
+    bool zeroLocal(CallInst &call)
+    {
+        auto *fill = dyn_cast<ConstantInt>(call.getArgOperand(1));
+        auto *length = dyn_cast<ConstantInt>(call.getArgOperand(2));
+        const Local *base = localOf(call.getArgOperand(0));
+        if (!fill || !fill->isZero() || !length || !base || !base->type->isArrayTy())
+            return refuse("a memset this emitter does not map");
+        Type *element = base->type->getArrayElementType();
+        bool floats = element->isFloatingPointTy() || (element->isVectorTy() && cast<VectorType>(element)->getElementType()->isFloatingPointTy());
+        uint64_t size = allocSize(element);
+        uint64_t covered = size ? length->getZExtValue() / size : 0;
+        if (!floats || !size || length->getZExtValue() % size || covered > cast<ArrayType>(base->type)->getNumElements())
+            return refuse("a memset of a local that this emitter does not map");
+        std::string zero = element->isVectorTy() ? glslType(element) + "(0.0)" : "0.0";
+        for (uint64_t i = 0; i < covered; i++)
+            statement(base->name + "[" + std::to_string(i) + "] = " + zero + ";\n");
+        return true;
+    }
+
     bool emitCall(CallInst &call)
     {
         Function *callee = call.getCalledFunction();
         std::string called = callee ? callee->getName().str() : "";
         if (called.rfind("llvm.lifetime.", 0) == 0)
             return true;
+        if (called.rfind("llvm.memset.", 0) == 0)
+            return zeroLocal(call);
         if (callee && !callee->isDeclaration())
             return inlineCall(call, *callee);
         if (called.rfind("air.wg.barrier", 0) == 0)
