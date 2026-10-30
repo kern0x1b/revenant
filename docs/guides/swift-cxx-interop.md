@@ -50,10 +50,11 @@ Measured in `toolchain/tests/swift_cxx/main.swift`, which compiles and links for
 
 - The importer's clang ignores `-femulated-tls` for the TLS check. Measured: the LLVM 23.1.3 clang of revenant accepts the
   header with `-femulated-tls` for armv7 iOS 6.0 (`__has_feature(tls)` turns on), and the Swift 6.4 importer does not, with
-  or without the flag. The clang-level bridge is `packages/l/llvm/patches/clang-emulated-tls-without-dyld.patch`, which the
-  Swift 6.4 compiler does not carry. Its patch for the compiler is `packages/s/swift/patches/clang-emulated-tls-without-dyld.patch`,
-  checked with `patch -p2 --dry-run` against the Swift 6.4.0 fork's four files, which applies cleanly. Building the Swift
-  compiler is needed to verify it, and it is not built here.
+  or without the flag. The clang-level bridge is `packages/l/llvm/patches/clang-emulated-tls-without-dyld.patch`. The Swift
+  6.4 compiler did not carry it. `packages/s/swift/patches/clang-emulated-tls-without-dyld.patch` is the same change for the
+  fork's clang, applied with `git apply -p2` in llvm-project after the other compiler patches; it applies cleanly to the
+  6.4.0 fork's four files. The compiler is built by CI (package=swift), and the thread_local test stays red until that build
+  is installed and verified.
 - arm64: the SDK has no `CxxStdlib` overlay either, so the same two overlays are needed there. They are not built for arm64.
 - `-clang-target armv7-apple-ios9.0` makes the importer accept `thread_local`, but it changes the availability the importer
   sees. It is not a fix.
