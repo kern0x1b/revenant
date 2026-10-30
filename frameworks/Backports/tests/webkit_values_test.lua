@@ -1,3 +1,4 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "WebKit")
@@ -58,9 +59,7 @@ local function compare(expected, actual)
 end
 
 function main()
-    local work = path.join(os.tmpdir(), "webkit-values")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("webkit-values")
 
     local backport_sources = {MAIN, path.join(SRC, "WKSnapshotConfiguration.m"), path.join(SRC, "WKDownload.m"),
                               path.join(SRC, "WKOpenPanelParameters.m"), path.join(SRC, "WKWindowFeatures.m")}
