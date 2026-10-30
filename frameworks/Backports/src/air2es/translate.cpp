@@ -110,7 +110,7 @@ struct Output {
 
 const char *const kArgumentKinds[] = {"air.buffer", "air.texture", "air.sampler", "air.vertex_id",
                                       "air.position", "air.fragment_input", "air.thread_position_in_grid",
-                                      "air.point_coord"};
+                                      "air.point_coord", "air.instance_id"};
 
 const char *const kLanes[] = {"x", "y", "z", "w"};
 
@@ -374,6 +374,8 @@ public:
                 return refuse("a fragment input in a vertex function");
             if (binding.kind == "air.point_coord" && stage_ != Stage::Fragment)
                 return refuse("a point coordinate outside a fragment function");
+            if (binding.kind == "air.instance_id" && stage_ != Stage::Vertex)
+                return refuse("an instance id outside a vertex function");
         }
         for (size_t slot = 0; slot < bindings_.size(); slot++)
             if (bindings_[slot].kind == "air.position" && !bindings_[slot].argument->use_empty()) {
@@ -746,6 +748,11 @@ private:
             }
             if (binding->kind == "air.point_coord") {
                 out = "gl_PointCoord";
+                return true;
+            }
+            if (binding->kind == "air.instance_id") {
+                declare("uniform float revenant_instance;\n", "revenant_instance");
+                out = "int(revenant_instance)";
                 return true;
             }
             if (binding->kind == "air.fragment_input") {

@@ -105,6 +105,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | baseline | 32 | 57 | none |
 | `air.point_coord` lowered to `gl_PointCoord` (`translate.cpp`) | 33 | 56 | `fragment_point_func`, REFUSED to OK |
 | fragment outputs narrower than four lanes padded to `vec4(…, 0.0, 0.0, 1.0)` (`colorOf`) | 33 | 56 | none; the GLSL of `histogramPrepareFragmentShader` changed from `gl_FragColor = t9;` |
+| `air.instance_id` lowered to `int(revenant_instance)`, a `uniform float` that the host sets once per instance (`translate.cpp`) | 33 | 56 | none to OK; six vertex functions leave the argument-kind reason: `dustEffectVertex` to a urem, `backgroundStarVertex` and `walletAmountVertex` and `walletAmountLayerVertex` to a local, `referenceHighlightVertex` and `sparkleVertex` to an address |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
@@ -114,9 +115,27 @@ Checks on the state the table shows:
 - `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 56 refusals have 22 reasons. The argument-kind group (8, from 9) is what is left of the first group:
+The 56 refusals have 22 reasons. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
-- six vertex functions use `air.instance_id`: `dustEffectVertex`, `backgroundStarVertex`, `sparkleVertex`, `referenceHighlightVertex`, `walletAmountVertex`, `walletAmountLayerVertex`. OpenGL ES 2 has no instancing, so these need a decision on how instances are drawn, not a mapping;
-- `dctKernel` and `idctKernel` use `air.thread_position_in_threadgroup`, and they also use threadgroup memory, so they need the multi-pass design.
+`instance_id` (decision: a host-filled uniform, looped per instance):
 
-The next groups in the order set for the work are the width refusals (8), the locals of a type this emitter does not hold (6), and the clamp-to-zero samples (5).
+- the emitter declares `uniform float revenant_instance;` and reads `int(revenant_instance)`. The name is the one the host already sets (`RevenantMetalPipeline.m`, `revenant_instance`), so the host needed no change;
+- `RevenantMetalEncoder.m` draws an instanced call as one GL draw per instance, setting the uniform to `0 … instanceCount - 1` in order. That is the Metal value for a draw with no base instance. The backport has no `baseInstance` overloads, so the loop starts at 0; if overloads are added the loop must start at `baseInstance`;
+- the three-instance check is `frameworks/Backports/tests/device_probe/instance_main.m`: a 3-instance draw must write the columns `1`, `2`, `3` in order, and an indexed draw must match. It has not run on the 4S yet.
+
+`dctKernel` and `idctKernel` (`submodules/AnimationCompression/Resources/DCT.metal`) stay in the later group. What they need:
+
+- a threadgroup of 8×8 threads (`BLOCK_SIZE` 8); `thread_position_in_threadgroup` gives the position in the 8×8 block, and `thread_position_in_grid` gives the pixel;
+- two `threadgroup float[64]` arrays (`CurBlockLocal1`, `CurBlockLocal2`), written by one thread and read by others in the same block;
+- barriers, `threadgroup_barrier(mem_flags::mem_threadgroup)`: `dctKernel` has four in its body (lines 417, 425, 430, 434: after copy-in, after the DCT, after quantize, after the zigzag reorder), plus one in the `DCT` helper (line 296); `idctKernel` has two in its body (469, 477), plus one in the `IDCT` helper (line 335). Each barrier needs every thread of the block to arrive, and a read after it sees the writes made before it by the other threads;
+- the zigzag reorder permutes the block across threads, so one output pixel depends on all 64 inputs;
+- the intermediate values are `float`, and the output is `half4` per pixel (`copyTextureBlockOutFloat`).
+
+Two ways to meet that without a compute shader:
+
+- (a) per pixel, with no shared memory and no barriers: each fragment reads its 8×8 block (64 texels), computes its own coefficient and writes it. Cost: 64 reads and a full 8-point transform per output pixel and per frame;
+- (b) multi-pass: one draw per barrier interval, with intermediate render targets. Needs a float or wide render target. On ES 2 (iOS 6, PowerVR SGX 543) an RGBA8 target would hold the coefficients at 8 bits. Not measured: whether the 4S renders to `OES_texture_float`.
+
+The decision between (a) and leaving the two kernels unsupported is open.
+
+The next groups in the order set for the work are the width refusals (8), the locals of a type this emitter does not hold (9, six before plus three from `instance_id`), and the clamp-to-zero samples (5).
