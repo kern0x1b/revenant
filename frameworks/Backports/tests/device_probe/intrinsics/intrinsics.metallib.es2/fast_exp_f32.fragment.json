@@ -1,0 +1,1 @@
+{"uniforms": [], "textures": [{"name": "src", "index": 0, "depth": false, "compare": false, "sampler": {"wrapS": "clamp_to_edge", "wrapT": "clamp_to_edge", "minFilter": "nearest", "magFilter": "nearest"}}], "sizes": [{"name": "src_size", "texture": 0}], "outputs": [0], "fetches": [], "constants": []}

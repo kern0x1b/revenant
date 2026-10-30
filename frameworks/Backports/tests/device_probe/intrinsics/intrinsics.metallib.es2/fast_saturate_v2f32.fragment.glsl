@@ -1,0 +1,47 @@
+#version 100
+precision highp float;
+precision highp int;
+uniform float revenant_flip;
+uniform vec2 revenant_target;
+uniform vec2 src_size;
+uniform sampler2D src;
+void main() {
+    vec4 position;
+    int t0;
+    float t1;
+    vec2 t2;
+    int t3;
+    float t4;
+    vec2 t5;
+    vec2 t6;
+    vec2 t7;
+    vec4 t8;
+    vec2 t9;
+    vec2 t10;
+    vec2 t11;
+    vec2 t12;
+    vec2 t13;
+    vec4 t14;
+    vec4 t15;
+    position = gl_FragCoord;
+    position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;
+    t0 = int(src_size.x);
+    t1 = float(t0);
+    t2 = vec2(0.0);
+    t2.x = t1;
+    t3 = int(src_size.y);
+    t4 = float(t3);
+    t5 = t2;
+    t5.y = t4;
+    t6 = vec2((position).x, (position).y);
+    t7 = (t6 / t5);
+    t8 = texture2D(src, t7);
+    t9 = vec2((t8).x, (t8).y);
+    t10 = vec2(t9);
+    t11 = (t10 * vec2(2.0, 2.0));
+    t12 = (t11 + vec2((-0.5), (-0.5)));
+    t13 = clamp(t12, 0.0, 1.0);
+    t14 = vec4((t13).x, (t13).y, 0.0, 0.0);
+    t15 = vec4((t14).x, (t14).y, (vec4(0.0, 0.0, 0.0, 1.0)).z, (vec4(0.0, 0.0, 0.0, 1.0)).w);
+    gl_FragColor = t15;
+}

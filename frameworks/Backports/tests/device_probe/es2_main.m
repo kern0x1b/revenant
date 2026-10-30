@@ -295,8 +295,9 @@ static void revenant_exact(NSString *name, NSString *fragmentSource)
 
 // The texture stage runs a translated fragment shader over a render target. The input texture holds a byte pattern
 // that the host computes, so each output pixel has one expected value: the texel at the same position, or at half the
-// position for map=half. The spec is "out=WxH in=NAME:WxH map=identity|half", and the uniforms NAME_size and
-// <output>_size are set from it. A pixel that differs in any channel is a failure, and the first failures are logged.
+// position for map=half. The spec is "out=WxH in=NAME:WxH map=identity|half", or a value map of the list above, and the
+// uniforms NAME_size and <output>_size are set from it. A pixel that differs in any channel is a failure, and the first
+// failures are logged. identity and half must match exactly; a value map allows one byte.
 static const char *REVENANT_TEXTURE_VERTEX =
     "attribute vec2 a_position;\n"
     "void main() {\n"
@@ -306,6 +307,119 @@ static const char *REVENANT_TEXTURE_VERTEX =
 static uint8_t revenant_texel(size_t x, size_t y, size_t channel)
 {
     return (uint8_t)(x * 73 + y * 151 + channel * 47);
+}
+
+// The value maps check an intrinsic against the host's own computation of it, with a tolerance of one byte because the
+// device computes mediump. Each name is the fragment function of intrinsics.metal that it checks, and r8 and rg8 check
+// a plane read through a texture of that format. The output is clamped to [0, 1] and rounded to a byte.
+static double revenant_unit(size_t x, size_t y, size_t c)
+{
+    return revenant_texel(x, y, c) / 255.0;
+}
+
+static double revenant_clamp(double v)
+{
+    return v < 0.0 ? 0.0 : v > 1.0 ? 1.0 : v;
+}
+
+static void revenant_expect(const char *map, size_t x, size_t y, double out[4])
+{
+    double v0 = revenant_unit(x, y, 0), v1 = revenant_unit(x, y, 1);
+    double v2 = revenant_unit(x, y, 2), v3 = revenant_unit(x, y, 3);
+    out[0] = out[1] = out[2] = 0.0;
+    out[3] = 1.0;
+    if (strcmp(map, "fast_saturate_f32") == 0) {
+        out[0] = revenant_clamp(2.0 * v0 - 0.5);
+    } else if (strcmp(map, "fast_saturate_v2f32") == 0) {
+        out[0] = revenant_clamp(2.0 * v0 - 0.5);
+        out[1] = revenant_clamp(2.0 * v1 - 0.5);
+    } else if (strcmp(map, "fast_saturate_v3f32") == 0) {
+        out[0] = revenant_clamp(2.0 * v0 - 0.5);
+        out[1] = revenant_clamp(2.0 * v1 - 0.5);
+        out[2] = revenant_clamp(2.0 * v2 - 0.5);
+    } else if (strcmp(map, "fabs_v3f16") == 0) {
+        out[0] = fabs(v0 - 0.5);
+        out[1] = fabs(v1 - 0.5);
+        out[2] = fabs(v2 - 0.5);
+    } else if (strcmp(map, "dot_v2f16") == 0) {
+        out[0] = (v0 * v2 + v1 * v3) * 0.5;
+    } else if (strcmp(map, "mix_v2f32") == 0) {
+        out[0] = v0 * (1.0 - v3) + v2 * v3;
+        out[1] = v1 * (1.0 - v3) + v3 * v3;
+    } else if (strcmp(map, "mix_v3f16") == 0) {
+        out[0] = v0 * (1.0 - v3) + 0.25 * v3;
+        out[1] = v1 * (1.0 - v3) + 0.25 * v3;
+        out[2] = v2 * (1.0 - v3) + 0.25 * v3;
+    } else if (strcmp(map, "mix_v4f16") == 0) {
+        out[0] = (v0 + v3) * 0.5;
+        out[1] = (v1 + v2) * 0.5;
+        out[2] = (v2 + v1) * 0.5;
+        out[3] = (v3 + v0) * 0.5;
+    } else if (strcmp(map, "fmin_v3f16") == 0) {
+        out[0] = fmin(v0, 0.5);
+        out[1] = fmin(v1, 0.5);
+        out[2] = fmin(v2, 0.5);
+    } else if (strcmp(map, "fmin_f16") == 0) {
+        out[0] = fmin(v0, v1);
+    } else if (strcmp(map, "tan_f16") == 0 || strcmp(map, "fast_tan_f32") == 0) {
+        out[0] = tan(0.7 * v0);
+    } else if (strcmp(map, "sqrt_f16") == 0) {
+        out[0] = sqrt(v0);
+    } else if (strcmp(map, "sqrt_f16_control") == 0) {
+        out[0] = 0.5 * sqrt(v0);
+    } else if (strcmp(map, "clamp_v3f16") == 0) {
+        out[0] = revenant_clamp(v0 < 0.25 ? 0.25 : v0 > 0.75 ? 0.75 : v0);
+        out[1] = revenant_clamp(v1 < 0.25 ? 0.25 : v1 > 0.75 ? 0.75 : v1);
+        out[2] = revenant_clamp(v2 < 0.25 ? 0.25 : v2 > 0.75 ? 0.75 : v2);
+    } else if (strcmp(map, "fast_exp_f32") == 0) {
+        out[0] = exp(-3.0 * v0);
+    } else if (strcmp(map, "sin_f16") == 0) {
+        out[0] = sin(3.0 * v0) * 0.5 + 0.5;
+    } else if (strcmp(map, "cos_f16") == 0) {
+        out[0] = cos(3.0 * v0) * 0.5 + 0.5;
+    } else if (strcmp(map, "fast_floor_f32") == 0) {
+        out[0] = floor(4.0 * v0) * 0.25;
+    } else if (strcmp(map, "fast_fmax_v3f32") == 0) {
+        out[0] = fmax(v0, 0.5);
+        out[1] = fmax(v1, 0.5);
+        out[2] = fmax(v2, 0.5);
+    } else if (strcmp(map, "fast_pow_v3f32") == 0) {
+        out[0] = pow(v0, 2.0);
+        out[1] = pow(v1, 2.0);
+        out[2] = pow(v2, 2.0);
+    } else if (strcmp(map, "fwidth_f32") == 0) {
+        // fwidth of the ramp of intrinsics.metal: 0.75 / 64 per pixel, times 16 in the shader.
+        out[0] = 16.0 * 0.75 / 64.0;
+    } else if (strcmp(map, "switch_f32") == 0) {
+        int branch = (int)floor(3.0 * v0 + 0.5);
+        out[0] = branch == 0 ? v1 : branch == 1 ? v2 * 0.5 : branch == 2 ? 1.0 - v3 : 0.25;
+    } else if (strcmp(map, "diag") == 0) {
+        // Derivatives of the texel value across the quad: the even and odd pixel of a row or column differ by the
+        // same signed step, so each pixel's dFdx is the odd minus the even neighbour in its row.
+        out[0] = 0.5 + 0.5 * (revenant_unit(x | 1, y, 0) - revenant_unit(x & ~(size_t)1, y, 0));
+        out[1] = 0.5 + 0.5 * (revenant_unit(x, y | 1, 0) - revenant_unit(x, y & ~(size_t)1, 0));
+    } else if (strcmp(map, "r8") == 0) {
+        out[0] = v0;
+    } else if (strcmp(map, "rg8") == 0) {
+        out[0] = v0;
+        out[1] = v1;
+    }
+}
+
+static BOOL revenant_identity(const char *map)
+{
+    return strcmp(map, "identity") == 0 || strcmp(map, "half") == 0;
+}
+
+static int revenant_expected(const char *map, size_t x, size_t y, size_t c)
+{
+    if (strcmp(map, "half") == 0)
+        return revenant_texel(x / 2, y / 2, c);
+    if (strcmp(map, "identity") == 0)
+        return revenant_texel(x, y, c);
+    double out[4];
+    revenant_expect(map, x, y, out);
+    return (int)lround(255.0 * revenant_clamp(out[c]));
 }
 
 static void revenant_texture(NSString *name, NSString *fragmentSource, NSString *spec)
@@ -318,7 +432,6 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
         revenant_flush();
         return;
     }
-    BOOL half = strcmp(map, "half") == 0;
     BOOL fragmentOK = NO, vertexOK = NO, linked = NO;
     NSString *fragmentLog = @"", *vertexLog = @"", *linkLog = @"";
     GLuint fragment = revenant_compile(GL_FRAGMENT_SHADER, fragmentSource, &fragmentOK, &fragmentLog);
@@ -341,11 +454,20 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
     }
     glUseProgram(program);
 
-    uint8_t *input = malloc((size_t)inW * inH * 4);
+    GLenum format = GL_RGBA;
+    size_t channels = 4;
+    if (strcmp(map, "r8") == 0) {
+        format = GL_RED_EXT;
+        channels = 1;
+    } else if (strcmp(map, "rg8") == 0) {
+        format = GL_RG_EXT;
+        channels = 2;
+    }
+    uint8_t *input = malloc((size_t)inW * inH * channels);
     for (size_t y = 0; y < inH; y++)
         for (size_t x = 0; x < inW; x++)
-            for (size_t c = 0; c < 4; c++)
-                input[(y * inW + x) * 4 + c] = revenant_texel(x, y, c);
+            for (size_t c = 0; c < channels; c++)
+                input[(y * inW + x) * channels + c] = revenant_texel(x, y, c);
     GLuint texture = 0;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0);
@@ -354,7 +476,7 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, inW, inH, 0, GL_RGBA, GL_UNSIGNED_BYTE, input);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, inW, inH, 0, format, GL_UNSIGNED_BYTE, input);
     free(input);
     GLint location = glGetUniformLocation(program, inName);
     if (location >= 0)
@@ -406,13 +528,13 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
     int maxDifference = 0;
     for (size_t y = 0; y < outH; y++) {
         for (size_t x = 0; x < outW; x++) {
-            size_t sx = half ? x / 2 : x, sy = half ? y / 2 : y;
+            int tolerance = revenant_identity(map) ? 0 : 1;
             BOOL same = YES;
             for (size_t c = 0; c < 4; c++) {
-                int got = pixels[(y * outW + x) * 4 + c], expected = revenant_texel(sx, sy, c);
+                int got = pixels[(y * outW + x) * 4 + c], expected = revenant_expected(map, x, y, c);
                 if (abs(got - expected) > maxDifference)
                     maxDifference = abs(got - expected);
-                if (got != expected)
+                if (abs(got - expected) > tolerance)
                     same = NO;
             }
             if (same) {
@@ -422,8 +544,8 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
                 if (failed <= 8) {
                     uint8_t *got = pixels + (y * outW + x) * 4;
                     [REVENANT_LOG appendFormat:@"  TEXTURE-FAIL %@ x=%zu y=%zu got=%d,%d,%d,%d expected=%d,%d,%d,%d\n", name, x, y,
-                        got[0], got[1], got[2], got[3], revenant_texel(sx, sy, 0), revenant_texel(sx, sy, 1),
-                        revenant_texel(sx, sy, 2), revenant_texel(sx, sy, 3)];
+                        got[0], got[1], got[2], got[3], revenant_expected(map, x, y, 0), revenant_expected(map, x, y, 1),
+                        revenant_expected(map, x, y, 2), revenant_expected(map, x, y, 3)];
                 }
             }
         }
