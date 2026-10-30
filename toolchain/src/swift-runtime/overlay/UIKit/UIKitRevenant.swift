@@ -31,10 +31,6 @@ extension UITraitChangeObservable {
     }
 }
 
-// Telegram reads and writes UIView.cornerConfiguration only under #available(iOS 26.0). These declarations let the code
-// compile for armv7. Nothing stores or draws a corner configuration, so the accessors trap if they are reached. Only the
-// four-corner form Telegram calls is declared, with non-optional radii; the SDK's other forms are left out, so code that
-// uses them fails to compile instead of running against a stand-in.
 @available(iOS 26.0, *)
 extension UIView {
     public var cornerConfiguration: UICornerConfiguration {
