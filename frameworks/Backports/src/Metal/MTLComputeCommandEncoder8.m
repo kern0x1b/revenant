@@ -79,6 +79,8 @@ static void *RevenantMetalRunOneThread(void *argument)
     NSMutableArray *_threads;
     NSMutableArray *_threadgroups;
     NSMutableArray *_groups;
+    NSMutableArray *_textures;
+    NSMutableArray *_samplers;
     uint32_t _blockBytes;
 }
 
@@ -92,6 +94,8 @@ static void *RevenantMetalRunOneThread(void *argument)
         _threads = [NSMutableArray array];
         _threadgroups = [NSMutableArray array];
         _groups = [NSMutableArray array];
+        _textures = [NSMutableArray array];
+        _samplers = [NSMutableArray array];
     }
     return self;
 }
@@ -140,6 +144,28 @@ static void *RevenantMetalRunOneThread(void *argument)
     [self setBuffer:(id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
 }
 
+- (void)setTexture:(id<MTLTexture>)texture atIndex:(NSUInteger)index
+{
+    if (index >= RevenantMetalComputeBufferSlots) {
+        NSLog(@"Metal: a compute texture at index %lu is refused: this encoder keeps %lu texture slots", (unsigned long)index, (unsigned long)RevenantMetalComputeBufferSlots);
+        return;
+    }
+    while (_textures.count <= index)
+        [_textures addObject:[NSNull null]];
+    [_textures replaceObjectAtIndex:index withObject:texture ? (id)texture : [NSNull null]];
+}
+
+- (void)setSamplerState:(id<MTLSamplerState>)sampler atIndex:(NSUInteger)index
+{
+    if (index >= RevenantMetalComputeBufferSlots) {
+        NSLog(@"Metal: a compute sampler at index %lu is refused: this encoder keeps %lu sampler slots", (unsigned long)index, (unsigned long)RevenantMetalComputeBufferSlots);
+        return;
+    }
+    while (_samplers.count <= index)
+        [_samplers addObject:[NSNull null]];
+    [_samplers replaceObjectAtIndex:index withObject:sampler ? (id)sampler : [NSNull null]];
+}
+
 - (void)setThreadgroupMemoryLength:(NSUInteger)length atIndex:(NSUInteger)index
 {
     if (index != 0) {
@@ -166,6 +192,10 @@ static void *RevenantMetalRunOneThread(void *argument)
               (unsigned long)threads.width, (unsigned long)threads.height, (unsigned long)threads.depth);
         return;
     }
+    if ([_pipeline revenantTranslatedFunction]) {
+        [self revenantDispatchTranslatedGrid:MTLSizeMake(groups.width * threads.width, groups.height * threads.height, groups.depth * threads.depth)];
+        return;
+    }
     uint32_t each = (uint32_t)(threads.width * threads.height * threads.depth);
     [_pipeline revenantSetThreads:each];
     uint32_t group = 0;
@@ -177,10 +207,62 @@ static void *RevenantMetalRunOneThread(void *argument)
 
 - (void)dispatchThreads:(MTLSize)threadsPerThreadgroup threadsPerGrid:(MTLSize)threadsPerGrid
 {
+    if ([_pipeline revenantTranslatedFunction]) {
+        [self revenantDispatchTranslatedGrid:threadsPerGrid];
+        return;
+    }
     uint32_t each = (uint32_t)threadsPerThreadgroup.width;
     uint32_t wide = each ? each : 1;
     MTLSize groups = MTLSizeMake((uint32_t)threadsPerGrid.width / wide, threadsPerGrid.height, threadsPerGrid.depth);
     [self dispatchThreadgroups:groups threadsPerThreadgroup:threadsPerThreadgroup];
+}
+
+- (void)revenantDispatchTranslatedGrid:(MTLSize)grid
+{
+    NSString *kernel = [_pipeline kernelName] ?: @"the kernel";
+    if (_blockBytes) {
+        NSLog(@"Metal: %@ is translated and has no threadgroup block, so the threadgroup memory set for it is refused and the dispatch is not run", kernel);
+        return;
+    }
+    if (!grid.width || !grid.height)
+        return;
+    if (grid.depth != 1) {
+        NSLog(@"Metal: %@ is a translated two-dimensional kernel, so a grid of depth %lu is refused and the dispatch is not run", kernel, (unsigned long)grid.depth);
+        return;
+    }
+    NSDictionary *output = [_pipeline revenantTranslatedFunction].reflection[@"outputTexture"];
+    NSUInteger index = [output[@"index"] unsignedIntegerValue];
+    if (!output || index >= _textures.count || ![_textures[index] isKindOfClass:[RevenantMetalTexture class]]) {
+        NSLog(@"Metal: %@ writes an output texture that is not bound to the encoder, so the dispatch is not run", kernel);
+        return;
+    }
+    RevenantMetalTexture *target = _textures[index];
+    RevenantMetalPipeline *pipeline = [_pipeline revenantRenderPipeline];
+    if (!pipeline)
+        return;
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = target;
+    pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    RevenantMetalEncoder *render = [[RevenantMetalEncoder alloc] initWithDescriptor:pass];
+    if (!render)
+        return;
+    [render setRenderPipelineState:pipeline];
+    for (NSUInteger slot = 0; slot < _buffers.count && slot < RevenantMetalComputeBufferSlots; slot++)
+        if ([_buffers[slot] isKindOfClass:[RevenantMetalBuffer class]])
+            [render setFragmentBuffer:_buffers[slot] offset:[_offsets[slot] unsignedIntegerValue] atIndex:slot];
+    for (NSUInteger slot = 0; slot < _textures.count && slot < RevenantMetalComputeBufferSlots; slot++)
+        if (slot != index && [_textures[slot] isKindOfClass:[RevenantMetalTexture class]])
+            [render setFragmentTexture:_textures[slot] atIndex:slot];
+    for (NSUInteger slot = 0; slot < _samplers.count && slot < RevenantMetalComputeBufferSlots; slot++)
+        if ([_samplers[slot] isKindOfClass:[RevenantMetalSampler class]])
+            [render setFragmentSamplerState:_samplers[slot] atIndex:slot];
+    static const GLfloat corners[8] = {-1, -1, 1, -1, -1, 1, 1, 1};
+    [render setVertexBytes:corners length:sizeof corners atIndex:0];
+    [render setViewport:(MTLViewport){0, 0, (double)target.width, (double)target.height, 0, 1}];
+    [render setScissorRect:(MTLScissorRect){0, 0, grid.width < target.width ? grid.width : target.width, grid.height < target.height ? grid.height : target.height}];
+    [render drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [render endEncoding];
 }
 
 - (void)revenantRunGroup:(uint32_t)each atGroup:(uint32_t)group atGroupPosition:(revenant_v4i)position threads:(MTLSize)threads

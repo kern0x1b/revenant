@@ -6,11 +6,26 @@
 
 #include <dlfcn.h>
 
+static RevenantMetalFunction *RevenantMetalCornerFunction(void)
+{
+    static RevenantMetalFunction *corners;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        NSString *source = @"#version 100\nattribute vec2 revenant_corner;\nvoid main() {\n    gl_Position = vec4(revenant_corner, 0.0, 1.0);\n}\n";
+        NSDictionary *attribute = @{@"name": @"revenant_corner", @"buffer": @0, @"offset": @0, @"stride": @8, @"components": @2, @"scalar": @"float"};
+        NSDictionary *reflection = @{@"usesVertexId": @NO, @"uniforms": @[], @"inputs": @[], @"attributes": @[attribute]};
+        corners = [[RevenantMetalFunction alloc] initWithName:@"revenant_corners" stage:@"vertex" source:source reflection:reflection];
+    });
+    return corners;
+}
+
 @implementation RevenantMetalComputePipeline {
     void *_function;
     uint32_t _threads;
     uint32_t _blockBytes;
     NSString *_kernel;
+    RevenantMetalFunction *_translated;
+    RevenantMetalPipeline *_render;
 }
 
 @synthesize label;
@@ -18,6 +33,13 @@
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error
 {
     NSString *name = function.name;
+    if ([function isKindOfClass:[RevenantMetalFunction class]] && [[(RevenantMetalFunction *)function stage] isEqualToString:@"kernel"] && [(RevenantMetalFunction *)function source]) {
+        if ((self = [super init])) {
+            _kernel = name;
+            _translated = (RevenantMetalFunction *)function;
+        }
+        return self;
+    }
     struct KernelEntry { const char *name; void *function; uint32_t buffers; uint32_t block; uint32_t reserved; };
     static const struct KernelEntry *table;
     static unsigned count;
@@ -104,6 +126,32 @@
 - (NSString *)kernelName
 {
     return _kernel;
+}
+
+- (RevenantMetalFunction *)revenantTranslatedFunction
+{
+    return _translated;
+}
+
+- (RevenantMetalPipeline *)revenantRenderPipeline
+{
+    if (_render)
+        return _render;
+    for (NSDictionary *texture in _translated.reflection[@"textures"]) {
+        if ([texture[@"cube"] boolValue]) {
+            NSLog(@"Metal: %@ samples a cube texture, which the GL dispatch does not bind yet, so the dispatch is not run", _kernel ?: @"the kernel");
+            return nil;
+        }
+    }
+    MTLRenderPipelineDescriptor *descriptor = [[MTLRenderPipelineDescriptor alloc] init];
+    descriptor.vertexFunction = RevenantMetalCornerFunction();
+    descriptor.fragmentFunction = _translated;
+    descriptor.colorAttachments[0].writeMask = MTLColorWriteMaskAll;
+    NSError *error = nil;
+    _render = [[RevenantMetalPipeline alloc] initWithDescriptor:descriptor error:&error];
+    if (!_render)
+        NSLog(@"Metal: %@ does not link as a render pass, so the dispatch is not run: %@", _kernel ?: @"the kernel", error.localizedDescription);
+    return _render;
 }
 
 @end

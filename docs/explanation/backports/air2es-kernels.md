@@ -61,13 +61,19 @@ the corpus is refused by name (see "Still refused"). The Metal port still runs k
 - It samples its cube through the constexpr sampler `@__air_sampler_state`, which is not an argument. The sampler
   table cannot be derived without a Metal toolchain, so that gate stays until one exists.
 
-## Port (not done)
+## Port
 
-- `frameworks/Backports/src/Metal/MTLComputePipeline8.m` still looks up `air2cpu_kernels`. A kernel air2es translates
-  must load its `.es2` fragment and run through the GL path, and must not reach the table. The silent route stays
-  until that exists. The air2es refusal text no longer says "belongs to air2cpu".
-- The loader contract is open: `library.json` needs a kernel kind, its bindings and the grid rule. The reflection
-  carries the output texture (`outputTexture`), but no loader reads it yet.
+- A translated kernel dispatches as one render pass. `MTLComputePipeline8.m` takes a kernel whose function is a
+  translated fragment shader and links it as the fragment stage of a render pipeline, with a full-viewport quad as
+  the vertex stage. `MTLComputeCommandEncoder8.m` draws the grid into `outputTexture`: the grid is the viewport and
+  the scissor, and each buffer, texture and sampler binds to the fragment slot the reflection names. The compute
+  encoder gains `setTexture:atIndex:` and `setSamplerState:atIndex:`.
+- Refused by name at dispatch: a cube texture (the GL binding does not select a cube map yet), a threadgroup block,
+  and a grid of depth other than 1.
+- The air2cpu table still serves the kernels that are not translated. It is removed after a translated kernel
+  draws on the 4S. This note does not claim that yet.
+- The grid is the dispatch size, `threadsPerGrid` for `dispatchThreads`, so a grid that does not divide evenly is
+  run exactly; the air2cpu path still truncates it.
 
 ## Multi-pass designs (design, not implemented)
 

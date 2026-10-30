@@ -208,6 +208,8 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 - (void)revenantSetThreads:(uint32_t)threads;
 - (void)revenantSetBlockBytes:(uint32_t)bytes;
 - (NSString *)kernelName;
+- (RevenantMetalFunction *)revenantTranslatedFunction;
+- (RevenantMetalPipeline *)revenantRenderPipeline;
 @end
 
 @interface RevenantMetalComputeEncoder : NSObject <MTLComputeCommandEncoder>
