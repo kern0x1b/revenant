@@ -179,6 +179,12 @@ function runtime_flags(opt)
     if not opt.has_main then
         table.insert(flags, "-parse-as-library")
     end
+    if opt.cxx_headers then
+        table.join2(flags, {"-Xcc", "-nostdinc++", "-Xcc", "-isystem", "-Xcc", opt.cxx_headers})
+    end
+    if opt.emulated_tls then
+        table.join2(flags, {"-Xcc", "-femulated-tls"})
+    end
     return flags
 end
 

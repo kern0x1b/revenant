@@ -160,6 +160,8 @@ rule("swift")
                     deployment = toolchain:config("deployment"),
                     sdk = toolchain:config("sdkdir"),
                     resources = path.join(package:installdir(), "lib", "swift"),
+                    cxx_headers = target:pkg("libcxx"):installdir("include", "c++", "v1"),
+                    emulated_tls = toolchain:config("emulated_tls"),
                     plugins = table.wrap((package:envs() or {}).SWIFT_PLUGIN_PATH)[1],
                     module = target:values("swift.module") or target:name(),
                     optimize = target:get("optimize"),
