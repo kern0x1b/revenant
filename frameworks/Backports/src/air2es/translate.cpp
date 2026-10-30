@@ -413,7 +413,7 @@ public:
             body += line;
         source = "#version 100\n";
         if (stage_ != Stage::Vertex)
-            source += highp_ ? "precision highp float;\n" : "precision mediump float;\n";
+            source += highp_ ? "precision highp float;\nprecision highp int;\n" : "precision mediump float;\n";
         source += join(declarations_, "") + "void main() {\n" + body + "}\n";
         reflection = this->reflection();
         return true;
@@ -1250,9 +1250,11 @@ private:
     }
 
     // GLSL ES 1.00 has no integer bit operations. A constant mask clears a fixed set of bits, and bit b of x is
-    // floor(mod(x, 2^(b+1)) / 2^b), so the and is written in floats. The operand must be the result of a
-    // float-to-integer conversion: that integer is always a float32 value, so the float arithmetic is exact, and
-    // the shader is declared highp, because mediump holds integers only up to 2048.
+    // floor(mod(x, 2^(b+1)) / 2^b), so the and is written in floats. The operand must be the result of an unsigned
+    // float-to-integer conversion: that integer is a float32 value, so the float arithmetic is exact for it. A
+    // negative operand is out of range for that conversion, and it takes the saturated value 0, because the device
+    // computes floor and mod of negative floats inexactly. The shader is declared highp in float and in int,
+    // because mediump holds integers only up to 2048.
     bool maskAnd(Instruction &instruction, BinaryOperator &binary)
     {
         if (!binary.getType()->isIntegerTy(32))
@@ -1267,22 +1269,22 @@ private:
             return refuse("a bitwise and with no constant mask");
         auto *convert = dyn_cast<CallInst>(operand);
         if (!convert || !convert->getCalledFunction() ||
-            !(convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f.") ||
-              convert->getCalledFunction()->getName().starts_with("air.convert.s.i32.f.")))
-            return refuse("a bitwise and of an integer that is not a float conversion");
+            !convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f."))
+            return refuse("a bitwise and of an integer that is not an unsigned float conversion");
         uint64_t bits = mask->getZExtValue();
         if (!(bits & 0x80000000u))
             return refuse("a bitwise and that clears the sign bit");
         std::string source, name;
         if (!expression(operand, source))
             return false;
-        std::string value = "float(" + source + ")";
+        std::string clamped = "max(float(" + source + "), 0.0)";
+        std::string value = clamped;
         for (unsigned bit = 0; bit < 31; ++bit) {
             if (bits & (uint64_t(1) << bit))
                 continue;
             std::string weight = std::to_string(uint64_t(1) << bit) + ".0";
             std::string period = std::to_string(uint64_t(1) << (bit + 1)) + ".0";
-            value += " - " + weight + " * floor(mod(float(" + source + "), " + period + ") / " + weight + ")";
+            value += " - " + weight + " * floor(mod(" + clamped + ", " + period + ") / " + weight + ")";
         }
         if (!local(instruction, name))
             return false;
