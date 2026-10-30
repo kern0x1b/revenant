@@ -129,6 +129,8 @@ struct PlainFunction {
     const char *air;
     const char *glsl;
     unsigned arguments;
+    const char *tail = ""; // constant arguments after the operands
+    bool derivative = false; // needs GL_OES_standard_derivatives, in a fragment function only
 };
 
 const PlainFunction kPlainFunctions[] = {
@@ -158,6 +160,25 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fmin.f16", "min", 2},
     {"air.fmax.f16", "max", 2},
     {"air.fract.f16", "fract", 1},
+    {"air.fast_saturate.f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fast_saturate.v2f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fast_saturate.v3f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fabs.v3f16", "abs", 1},
+    {"air.dot.v2f16", "dot", 2},
+    {"air.mix.v2f32", "mix", 3},
+    {"air.tan.f16", "tan", 1},
+    {"air.sqrt.f16", "sqrt", 1},
+    {"air.clamp.v3f16", "clamp", 3},
+    {"air.mix.v3f16", "mix", 3},
+    {"air.sin.f16", "sin", 1},
+    {"air.cos.f16", "cos", 1},
+    {"air.fmin.v3f16", "min", 2},
+    {"air.fast_fmax.v3f32", "max", 2},
+    {"air.fast_pow.v3f32", "pow", 2},
+    {"air.fast_floor.f32", "floor", 1},
+    {"air.fast_exp.f32", "exp", 1},
+    {"air.fast_tan.f32", "tan", 1},
+    {"air.fwidth.f32", "fwidth", 1, "", true},
 };
 
 const PlainFunction *plainFunction(const std::string &name)
@@ -442,6 +463,8 @@ public:
         for (const std::string &line : statements_)
             body += line;
         source = "#version 100\n";
+        if (derivatives_)
+            source += "#extension GL_OES_standard_derivatives : enable\n";
         if (stage_ != Stage::Vertex)
             source += highp_ ? "precision highp float;\nprecision highp int;\n" : "precision mediump float;\n";
         source += join(declarations_, "") + "void main() {\n" + body + "}\n";
@@ -944,6 +967,15 @@ private:
                 std::string type = glslType(argument->getType());
                 if (type.empty())
                     return refuse("a fragment input of a type this emitter does not hold");
+                if (type == "int") {
+                    // ES 1.00 has no integer varyings. A flat integer is the same at every fragment of its
+                    // primitive, so it travels as a float and is rounded back.
+                    declare("varying float " + binding->name + ";\n", binding->name);
+                    out = "int(floor(" + binding->name + " + 0.5))";
+                    return true;
+                }
+                if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
+                    return refuse("an integer or bool fragment input, which ES 1.00 has no varying for");
                 declare("varying " + type + " " + binding->name + ";\n", binding->name);
                 out = binding->name;
                 return true;
@@ -1320,6 +1352,65 @@ private:
         return emitReturn(ret);
     }
 
+    bool rejoin(BasicBlock *block, BasicBlock *&join)
+    {
+        join = postDominator(block);
+        if (!join)
+            return refuse("a branch that never rejoins");
+        if (!loops_.empty() && join == loops_.back().exit)
+            join = loops_.back().header;
+        if (!insideLoop(join))
+            return refuse("a branch that rejoins outside its loop");
+        return true;
+    }
+
+    // A switch becomes an if / else if chain on its value. Cases that share a target are one arm, and a case
+    // whose target is the default is left to the else, so each arm runs exactly one target.
+    bool multiway(BasicBlock *block, SwitchInst &sw, BasicBlock *&join)
+    {
+        if (!rejoin(block, join))
+            return false;
+        std::string value;
+        if (!expression(sw.getCondition(), value))
+            return false;
+        BasicBlock *fallback = sw.getDefaultDest();
+        std::vector<std::pair<BasicBlock *, std::string>> arms;
+        for (auto &kase : sw.cases()) {
+            BasicBlock *target = kase.getCaseSuccessor();
+            if (target == fallback)
+                continue;
+            std::string test = value + " == " + std::to_string(kase.getCaseValue()->getSExtValue());
+            auto arm = arms.begin();
+            while (arm != arms.end() && arm->first != target)
+                arm++;
+            if (arm == arms.end())
+                arms.push_back({target, test});
+            else
+                arm->second += " || " + test;
+        }
+        if (arms.empty())
+            return side(block, fallback, join);
+        bool first = true;
+        for (auto &arm : arms) {
+            statement(std::string(first ? "if (" : "} else if (") + arm.second + ") {\n");
+            first = false;
+            depth_++;
+            if (!side(block, arm.first, join))
+                return false;
+            depth_--;
+        }
+        // The else is needed for the default's phi copies even when the default is the join itself.
+        if (fallback != join || isa<PHINode>(join->front())) {
+            statement("} else {\n");
+            depth_++;
+            if (!side(block, fallback, join))
+                return false;
+            depth_--;
+        }
+        statement("}\n");
+        return true;
+    }
+
     bool region(BasicBlock *block, BasicBlock *stop)
     {
         bool entering = true;
@@ -1353,6 +1444,13 @@ private:
             Instruction *terminator = block->getTerminator();
             if (auto *ret = dyn_cast<ReturnInst>(terminator))
                 return finish(*ret);
+            if (auto *sw = dyn_cast<SwitchInst>(terminator)) {
+                BasicBlock *join = nullptr;
+                if (!multiway(block, *sw, join))
+                    return false;
+                block = join;
+                continue;
+            }
             auto *branch = dyn_cast<BranchInst>(terminator);
             if (!branch)
                 return refuse("a terminator this emitter does not structure");
@@ -1366,13 +1464,9 @@ private:
                 block = branch->getSuccessor(0);
                 continue;
             }
-            BasicBlock *join = postDominator(block);
-            if (!join)
-                return refuse("a branch that never rejoins");
-            if (!loops_.empty() && join == loops_.back().exit)
-                join = loops_.back().header;
-            if (!insideLoop(join))
-                return refuse("a branch that rejoins outside its loop");
+            BasicBlock *join = nullptr;
+            if (!rejoin(block, join))
+                return false;
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
@@ -1955,6 +2049,12 @@ private:
             return refuse("a threadgroup barrier, which one fragment pass cannot run; it needs a pass boundary");
         if (called.rfind("air.atomic", 0) == 0)
             return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
+        if (called == "air.discard_fragment") {
+            if (stage_ != Stage::Fragment || call.arg_size() != 0)
+                return refuse("a discard outside a fragment function");
+            statement("discard;\n");
+            return true;
+        }
         if (called == "air.write_texture_2d.v4f32" || called == "air.write_texture_2d.v4f16")
             return writeTexture(call);
         if (called == "air.read_texture_2d.v4f16")
@@ -2000,7 +2100,12 @@ private:
         if (plain) {
             if (args.size() != plain->arguments || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statement(name + " = " + plain->glsl + "(" + join(args) + ");\n");
+            if (plain->derivative) {
+                if (stage_ != Stage::Fragment)
+                    return refuse("a derivative outside a fragment function");
+                derivatives_ = true;
+            }
+            statement(name + " = " + plain->glsl + "(" + join(args) + plain->tail + ");\n");
             return true;
         }
         if (width || height) {
@@ -2082,10 +2187,17 @@ private:
                 std::string type = glslType(fields[k]->getType());
                 if (output.name.empty() || type.empty())
                     return refuse("a vertex output without a name or of a type this emitter does not hold");
+                if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
+                    return refuse("an integer or bool vertex output, which ES 1.00 has no varying for");
                 if (!expression(fields[k], text))
                     return false;
-                declare("varying " + type + " " + output.name + ";\n", output.name);
-                statement(output.name + " = " + text + ";\n");
+                if (type == "int") {
+                    declare("varying float " + output.name + ";\n", output.name);
+                    statement(output.name + " = float(" + text + ");\n");
+                } else {
+                    declare("varying " + type + " " + output.name + ";\n", output.name);
+                    statement(output.name + " = " + text + ";\n");
+                }
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
@@ -2146,6 +2258,7 @@ private:
     unsigned depth_ = 0;
     bool returned_ = false;
     bool highp_ = false;
+    bool derivatives_ = false;
     std::string output_;
     uint64_t outputIndex_ = 0;
     std::map<const Value *, Local> localPointers_;
