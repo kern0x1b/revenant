@@ -1,0 +1,5 @@
+module TlsCxx {
+  header "Tls.h"
+  requires cplusplus
+  export *
+}

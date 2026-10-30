@@ -1,6 +1,12 @@
 function failures(opt)
     local found = {}
     local text = io.readfile(path.join(opt.modules, "..", "rules", "swift", "xmake.lua"))
+    local guard = text:find("if not package then", 1, true)
+    local indexed = text:find("local swiftc = table.wrap((package:envs()", 1, true)
+    if not guard or not indexed or guard > indexed
+        or not text:find("needs swift-runtime or swift-embedded installed", 1, true) or not text:find("REVENANT_PREBUILT_ONLY", 1, true) then
+        table.insert(found, "a Swift target with neither swift-runtime nor swift-embedded installed must raise a message that names the package, its prebuilt key and REVENANT_PREBUILT_ONLY, before the rule indexes the package's envs")
+    end
     if not text:find('target:add("scarflags", "-cr"', 1, true) then
         table.insert(found, "a static library of Swift is archived by the Swift language's archiver, whose flags (scarflags) are empty: given the library's path and no -cr, ar reads the path as options")
     end

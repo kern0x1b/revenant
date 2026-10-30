@@ -179,7 +179,27 @@ function runtime_flags(opt)
     if not opt.has_main then
         table.insert(flags, "-parse-as-library")
     end
+    if opt.underlying then
+        table.join2(flags, {"-Xfrontend", "-import-underlying-module"})
+    end
+    if opt.cxx_headers then
+        table.join2(flags, {"-cxx-interoperability-mode=default", "-Xcc", "-nostdinc++", "-Xcc", "-isystem", "-Xcc", opt.cxx_headers})
+    end
+    if opt.emulated_tls then
+        table.join2(flags, {"-Xcc", "-femulated-tls"})
+    end
     return flags
+end
+
+function underlying_module(name, folders)
+    local identifier = module_identifier(name)
+    for _, folder in ipairs(folders) do
+        local map = path.join(folder, "module.modulemap")
+        if os.isfile(map) and io.readfile(map):find("module%s+" .. identifier .. "%s*{") then
+            return true
+        end
+    end
+    return false
 end
 
 function codegen_flags(opt)

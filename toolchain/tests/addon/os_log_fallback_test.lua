@@ -213,6 +213,17 @@ local function render_failures(folder, found)
     end
 end
 
+local function cxx_failures(folder, found)
+    local source = path.join(folder, "shims.cc")
+    local log = path.join(folder, "shims.log")
+    io.writefile(source, '#include "RevenantOSOverlayShims.h"\n')
+    local argv = {"--sdk", "macosx", "clang", "-x", "c++", "-std=c++17", "-Wall", "-Werror", "-Wno-deprecated-declarations",
+                  "-fsyntax-only", "-I", SHIM, source}
+    if os.execv("xcrun", argv, {try = true, stdout = log, stderr = log}) ~= 0 then
+        table.insert(found, "the os_log shims do not compile as C++, which Swift's C++ interop compiles them as: " .. (io.readfile(log) or ""))
+    end
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
@@ -220,6 +231,7 @@ function failures(opt)
         probe_failures(folder, mode, found)
     end
     render_failures(folder, found)
+    cxx_failures(folder, found)
     os.tryrm(folder)
     return found
 end
