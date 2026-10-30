@@ -136,6 +136,8 @@ scrolls the page. The host connects to the engine in four places:
 - **Touch.** `RevenantContentScrollView` passes each touch phase to the host after UIKit has seen it. The host sends a touch event to the engine's window on the web thread. A touch the page does not handle becomes a mouse click.
 - **Keyboard.** The host is the engine's form delegate. A focused field raises the keyboard through `RevenantKeyInputView`, a view that is never shown and takes the keyboard's input. Typing sets the field's value and fires `input`, and return fires `change`, both on the web thread, so the page's own handlers run.
 
+**Threads.** The engine runs the page on its web thread. The navigation policy and frame-load delegate calls are made from WebCore on that thread: `WebFrameLoaderClient.mm` calls the policy forwarder (lines 874 to 938) and the frame-load callbacks (lines 676 to 780) directly, with no hop to the main thread. The web thread holds the engine's recursive lock (`webLock`, `WebCoreThread.mm`) while it runs them. The host takes the same lock on the main thread, through `RevenantWithWebLock`, around each synchronous engine call and around the state a navigation changes. On the main thread the take is released at the end of the run loop turn (`MainRunLoopAutoUnlock`, `WebCoreThread.mm`), so `WebThreadUnlock` does nothing. The navigation delegate's decisions that the app makes synchronously run under the lock, as WebKit's own delegate calls do, so a decision that waits on the web thread would deadlock. The thread of each callback is read from the pinned source (c70a794), not measured on a device.
+
 These paths compile and link into `libWebKitBackports.dylib` for armv7. They have not
 yet run against a built engine on a device.
 

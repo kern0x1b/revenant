@@ -3,6 +3,8 @@
 #import "RevenantKeyInputView.h"
 #import "RevenantUIKitDelegate.h"
 
+// The engine's WAKWindowTilingMode, in the order of WAKWindow.h at the pin. tests/webkit_tiling_test.lua checks these values
+// against that header, since the backport cannot include it.
 typedef NS_ENUM(NSInteger, RevenantWAKWindowTilingMode) {
     RevenantWAKWindowTilingModeNormal,
     RevenantWAKWindowTilingModeMinimal,
@@ -47,6 +49,44 @@ static void RevenantEngineRunOnWebThread(void (^block)(void))
     if (!symbol)
         [NSException raise:NSInternalInconsistencyException format:@"the revenant WebKit engine exports no WebThreadRun"];
     ((RevenantEngineBlockFunction)symbol)(block);
+}
+
+// On the main thread the engine releases this lock at the end of the run loop turn, so WebThreadUnlock does nothing on
+// this engine. The pair is kept so each call reads as the engine's own example does.
+static void RevenantEngineLock(void)
+{
+    static RevenantEngineVoidFunction lock;
+    if (!lock)
+        lock = RevenantEngineFunction("WebThreadLock");
+    lock();
+}
+
+static void RevenantEngineUnlock(void)
+{
+    static RevenantEngineVoidFunction unlock;
+    if (!unlock)
+        unlock = RevenantEngineFunction("WebThreadUnlock");
+    unlock();
+}
+
+void RevenantWithWebLock(void (^work)(void))
+{
+    RevenantEngineLock();
+    @try {
+        work();
+    } @finally {
+        RevenantEngineUnlock();
+    }
+}
+
+id RevenantWithWebLockValue(id (^work)(void))
+{
+    RevenantEngineLock();
+    @try {
+        return work();
+    } @finally {
+        RevenantEngineUnlock();
+    }
 }
 
 static id<RevenantEngineEvent> RevenantTouchEvent(RevenantWebEventType type, RevenantWebEventTouchPhase phase, CGPoint point)
@@ -156,37 +196,37 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
         [NSException raise:NSInternalInconsistencyException format:@"WKWebView needs the revenant WebKit engine, expected under %@ (REVENANT_WEBKIT_ENGINE names another folder): %@. The org.revenant.webkit-engine package installs it, so a missing engine means that package is absent or damaged.", RevenantWebEngineRoot(), error.localizedDescription];
     RevenantEngineStart();
 
-    RevenantEngineFunction("WebThreadLock")();
-    _webView = [[RevenantEngineNew(@"RevWebView") alloc] initWithFrame:frame frameName:nil groupName:nil];
-    id<RevenantEnginePreferences> preferences = [_webView preferences];
-    [preferences setJavaScriptEnabled:YES];
-    [preferences setDatabasesEnabled:YES];
-    [preferences setLocalStorageEnabled:YES];
-    [preferences setAcceleratedCompositingEnabled:YES];
-    [preferences setVideoPlaybackRequiresUserGesture:YES];
-    [preferences setAudioPlaybackRequiresUserGesture:YES];
-    [preferences _setTextAutosizingEnabled:NO];
+    RevenantWithWebLock(^{
+        _webView = [[RevenantEngineNew(@"RevWebView") alloc] initWithFrame:frame frameName:nil groupName:nil];
+        id<RevenantEnginePreferences> preferences = [_webView preferences];
+        [preferences setJavaScriptEnabled:YES];
+        [preferences setDatabasesEnabled:YES];
+        [preferences setLocalStorageEnabled:YES];
+        [preferences setAcceleratedCompositingEnabled:YES];
+        [preferences setVideoPlaybackRequiresUserGesture:YES];
+        [preferences setAudioPlaybackRequiresUserGesture:YES];
+        [preferences _setTextAutosizingEnabled:NO];
 
-    _hostLayer = [[CALayer alloc] init];
-    _hostLayer.anchorPoint = CGPointZero;
-    _hostLayer.position = CGPointZero;
-    _hostLayer.bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
-    _window = [[RevenantEngineNew(@"RevWAKWindow") alloc] initWithLayer:_hostLayer];
-    [_window setScreenSize:frame.size];
-    [_window setAvailableScreenSize:frame.size];
-    [_window setScreenScale:[UIScreen mainScreen].scale];
-    [_window setVisible:YES];
-    [_window setTilesOpaque:YES];
-    [_window setTilingMode:RevenantWAKWindowTilingModeDisabled];
-    [_window setContentView:_webView];
-    [_window setExposedScrollViewRect:CGRectMake(0, 0, frame.size.width, frame.size.height)];
-    _viewportSize = frame.size;
-    _documentSize = frame.size;
-    _uiKitDelegate = [[RevenantUIKitDelegate alloc] init];
-    _uiKitDelegate.handler = self;
-    [_webView _setUIKitDelegate:_uiKitDelegate];
-    [_webView _setFormDelegate:self];
-    RevenantEngineFunction("WebThreadUnlock")();
+        _hostLayer = [[CALayer alloc] init];
+        _hostLayer.anchorPoint = CGPointZero;
+        _hostLayer.position = CGPointZero;
+        _hostLayer.bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
+        _window = [[RevenantEngineNew(@"RevWAKWindow") alloc] initWithLayer:_hostLayer];
+        [_window setScreenSize:frame.size];
+        [_window setAvailableScreenSize:frame.size];
+        [_window setScreenScale:[UIScreen mainScreen].scale];
+        [_window setVisible:YES];
+        [_window setTilesOpaque:YES];
+        [_window setTilingMode:RevenantWAKWindowTilingModeDisabled];
+        [_window setContentView:_webView];
+        [_window setExposedScrollViewRect:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        _viewportSize = frame.size;
+        _documentSize = frame.size;
+        _uiKitDelegate = [[RevenantUIKitDelegate alloc] init];
+        _uiKitDelegate.handler = self;
+        [_webView _setUIKitDelegate:_uiKitDelegate];
+        [_webView _setFormDelegate:self];
+    });
 
     _scrollView = [[RevenantContentScrollView alloc] initWithFrame:frame];
     _scrollView.touchHandler = self;
@@ -222,8 +262,11 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
 
 - (void)dealloc
 {
-    [_webView _setFormDelegate:nil];
-    [_webView _setUIKitDelegate:nil];
+    id<RevenantEngineView> webView = _webView;
+    RevenantWithWebLock(^{
+        [webView _setFormDelegate:nil];
+        [webView _setUIKitDelegate:nil];
+    });
     [_keyInput resignFirstResponder];
 }
 

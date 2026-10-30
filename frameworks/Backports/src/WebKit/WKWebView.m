@@ -129,16 +129,21 @@ static NSURL *withoutFragment(NSURL *url)
     _host = [[RevenantEngineHost alloc] initWithFrame:self.bounds];
     _web = _host.webView;
     _host.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [_web setFrameLoadDelegate:self];
-    [_web setPolicyDelegate:self];
+    RevenantWithWebLock(^{
+        [self->_web setFrameLoadDelegate:self];
+        [self->_web setPolicyDelegate:self];
+    });
     [self addSubview:_host.scrollView];
     [_configuration.userContentController revenant_attach:self];
 }
 
 - (void)dealloc
 {
-    [_web setFrameLoadDelegate:nil];
-    [_web setPolicyDelegate:nil];
+    id<RevenantEngineView> web = _web;
+    RevenantWithWebLock(^{
+        [web setFrameLoadDelegate:nil];
+        [web setPolicyDelegate:nil];
+    });
 }
 
 - (WKWebViewConfiguration *)configuration
@@ -346,6 +351,14 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (WKNavigation *)revenant_navigateWithRequest:(NSURLRequest *)request type:(WKNavigationType)type index:(NSInteger)index perform:(void (^)(void))perform cancel:(void (^)(void))cancel
 {
+    return RevenantWithWebLockValue(^id {
+        return [self revenant_navigateLockedWithRequest:request type:type index:index perform:perform cancel:cancel];
+    });
+}
+
+// Called with the web lock held: the navigation changes the state that the web thread's callbacks read.
+- (WKNavigation *)revenant_navigateLockedWithRequest:(NSURLRequest *)request type:(WKNavigationType)type index:(NSInteger)index perform:(void (^)(void))perform cancel:(void (^)(void))cancel
+{
     WKNavigation *navigation = [self revenant_beginNavigation:request.URL type:type index:index];
     navigation.revenant_request = request;
     id<WKNavigationDelegate> delegate = _navigationDelegate;
@@ -363,18 +376,20 @@ static NSURL *withoutFragment(NSURL *url)
         allowed = policy == WKNavigationActionPolicyAllow;
         if (returned) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                WKWebView *view = weak;
-                if (!view || view->_navigation != navigation)
-                    return;
-                if (allowed) {
-                    view->_accepted = YES;
-                    view->_decided = YES;
-                    perform();
-                } else {
-                    if (cancel)
-                        cancel();
-                    [view revenant_abandonNavigation];
-                }
+                RevenantWithWebLock(^{
+                    WKWebView *view = weak;
+                    if (!view || view->_navigation != navigation)
+                        return;
+                    if (allowed) {
+                        view->_accepted = YES;
+                        view->_decided = YES;
+                        perform();
+                    } else {
+                        if (cancel)
+                            cancel();
+                        [view revenant_abandonNavigation];
+                    }
+                });
             });
         }
     }];
@@ -449,7 +464,9 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
             return;
         }
         [self revenant_decideLocal:URL MIMEType:MIMEType length:-1 encoding:nil load:^{
-            [[self->_web mainFrame] loadRequest:request];
+            RevenantWithWebLock(^{
+                [[self->_web mainFrame] loadRequest:request];
+            });
         }];
     }];
 }
@@ -488,13 +505,23 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (WKNavigation *)revenant_loadSubstitute:(RevenantSubstitute *)substitute URL:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
 {
+    return RevenantWithWebLockValue(^id {
+        return [self revenant_loadSubstituteLocked:substitute URL:URL type:type index:index];
+    });
+}
+
+// Called with the web lock held.
+- (WKNavigation *)revenant_loadSubstituteLocked:(RevenantSubstitute *)substitute URL:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
+{
     _substituteHistory = YES;
     if (substitute.string) {
         NSString *html = substitute.string;
         return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
             [self revenant_decideLocal:URL MIMEType:@"text/html" length:html.length encoding:@"utf-8" load:^{
                 self->_pendingSubstitute = substitute;
-                [[self->_web mainFrame] loadHTMLString:html baseURL:substitute.baseURL];
+                RevenantWithWebLock(^{
+                    [[self->_web mainFrame] loadHTMLString:html baseURL:substitute.baseURL];
+                });
             }];
         }];
     }
@@ -502,7 +529,9 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:type index:index perform:^{
         [self revenant_decideLocal:URL MIMEType:substitute.MIMEType length:document.length encoding:substitute.encoding load:^{
             self->_pendingSubstitute = substitute;
-            [[self->_web mainFrame] loadData:document MIMEType:substitute.MIMEType textEncodingName:substitute.encoding baseURL:substitute.baseURL];
+            RevenantWithWebLock(^{
+                [[self->_web mainFrame] loadData:document MIMEType:substitute.MIMEType textEncodingName:substitute.encoding baseURL:substitute.baseURL];
+            });
         }];
     }];
 }
@@ -530,36 +559,44 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (WKNavigation *)goBack
 {
-    if (!self.canGoBack)
-        return nil;
-    return [self revenant_moveToIndex:_index - 1];
+    return RevenantWithWebLockValue(^id {
+        if (!self.canGoBack)
+            return nil;
+        return [self revenant_moveToIndex:self->_index - 1];
+    });
 }
 
 - (WKNavigation *)goForward
 {
-    if (!self.canGoForward)
-        return nil;
-    return [self revenant_moveToIndex:_index + 1];
+    return RevenantWithWebLockValue(^id {
+        if (!self.canGoForward)
+            return nil;
+        return [self revenant_moveToIndex:self->_index + 1];
+    });
 }
 
 - (WKNavigation *)goToBackForwardListItem:(WKBackForwardListItem *)item
 {
-    NSUInteger position = [_items indexOfObjectIdenticalTo:item];
-    if (position == NSNotFound || (NSInteger)position == _index)
-        return nil;
-    return [self revenant_moveToIndex:(NSInteger)position];
+    return RevenantWithWebLockValue(^id {
+        NSUInteger position = [self->_items indexOfObjectIdenticalTo:item];
+        if (position == NSNotFound || (NSInteger)position == self->_index)
+            return nil;
+        return [self revenant_moveToIndex:(NSInteger)position];
+    });
 }
 
 - (WKNavigation *)reload
 {
-    if (!_committedURL)
-        return nil;
-    if (_index >= 0 && _index < (NSInteger)_items.count && _items[_index].revenant_substitute)
-        return [self revenant_loadSubstitute:_items[_index].revenant_substitute URL:_committedURL type:WKNavigationTypeReload index:-1];
-    NSURL *target = _committedURL;
-    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeReload index:-1 perform:^{
-        [[self->_web mainFrame] reload];
-    }];
+    return RevenantWithWebLockValue(^id {
+        if (!self->_committedURL)
+            return nil;
+        if (self->_index >= 0 && self->_index < (NSInteger)self->_items.count && self->_items[self->_index].revenant_substitute)
+            return [self revenant_loadSubstitute:self->_items[self->_index].revenant_substitute URL:self->_committedURL type:WKNavigationTypeReload index:-1];
+        NSURL *target = self->_committedURL;
+        return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:target] type:WKNavigationTypeReload index:-1 perform:^{
+            [[self->_web mainFrame] reload];
+        }];
+    });
 }
 
 - (WKNavigation *)reloadFromOrigin
@@ -569,15 +606,20 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)stopLoading
 {
-    [[_web mainFrame] stopLoading];
-    if (_navigation)
-        [self revenant_abandonNavigation];
+    RevenantWithWebLock(^{
+        [[self->_web mainFrame] stopLoading];
+        if (self->_navigation)
+            [self revenant_abandonNavigation];
+    });
 }
 
 - (void)evaluateJavaScript:(NSString *)javaScriptString completionHandler:(void (^)(id, NSError *))completionHandler
 {
     NSString *script = [NSString stringWithFormat:RevenantEvaluate, RevenantEncoder, literal(javaScriptString)];
-    NSString *answer = [_web stringByEvaluatingJavaScriptFromString:script];
+    __block NSString *answer = nil;
+    RevenantWithWebLock(^{
+        answer = [self->_web stringByEvaluatingJavaScriptFromString:script];
+    });
     id result = nil;
     NSError *error = nil;
     BOOL valid = NO;
@@ -629,7 +671,11 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     if (!_findSession) {
         id<RevenantEngineView> web = _web;
         _findSession = [[RevenantWebFindSession alloc] initWithEvaluator:^NSString *(NSString *script) {
-            return [web stringByEvaluatingJavaScriptFromString:script];
+            __block NSString *answer = nil;
+            RevenantWithWebLock(^{
+                answer = [web stringByEvaluatingJavaScriptFromString:script];
+            });
+            return answer;
         }];
     }
     return _findSession;
@@ -637,10 +683,12 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)revenant_refreshTitle
 {
-    NSString *title = [_web stringByEvaluatingJavaScriptFromString:@"document.title"];
-    [self revenant_setTitle:title];
-    if (_index >= 0 && _index < (NSInteger)_items.count)
-        _items[_index].revenant_title = title;
+    RevenantWithWebLock(^{
+        NSString *title = [self->_web stringByEvaluatingJavaScriptFromString:@"document.title"];
+        [self revenant_setTitle:title];
+        if (self->_index >= 0 && self->_index < (NSInteger)self->_items.count)
+            self->_items[self->_index].revenant_title = title;
+    });
 }
 
 - (NSString *)revenant_shimWithNames:(NSArray *)names
@@ -751,8 +799,10 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)revenant_scriptsDidChange
 {
-    if (_documentReady)
-        [self revenant_installScripts:NO];
+    RevenantWithWebLock(^{
+        if (self->_documentReady)
+            [self revenant_installScripts:NO];
+    });
 }
 
 - (BOOL)revenant_isMainFrameRequest:(NSURLRequest *)request
@@ -767,7 +817,10 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     if (!data)
         return;
     NSString *JSON = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"try{if(window['%@w']){window['%@w'](%@);}}catch(e){}", _token, _token, JSON]];
+    NSString *script = [NSString stringWithFormat:@"try{if(window['%@w']){window['%@w'](%@);}}catch(e){}", _token, _token, JSON];
+    RevenantWithWebLock(^{
+        [self->_web stringByEvaluatingJavaScriptFromString:script];
+    });
 }
 
 - (void)revenant_notifyOpener

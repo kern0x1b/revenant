@@ -1690,6 +1690,7 @@ class RevenantContacts
 class RevenantContactsBook
 class RevenantContactsHistory
 class RevenantContactsKeyDescriptor
+class RevenantContentScrollView
 class RevenantContentUnavailable17
 class RevenantContextMenuAnimator
 class RevenantContextMenuSheet
@@ -1713,6 +1714,7 @@ class RevenantEdgePopGate
 class RevenantEdgePopInstaller
 class RevenantEdgePopState
 class RevenantEndEditingReason
+class RevenantEngineHost
 class RevenantEnvironmentFilterParameters
 class RevenantEphemeralCookieStorage
 class RevenantEphemeralCredentialStorage
@@ -1753,6 +1755,7 @@ class RevenantIntentsUIHostedViewController
 class RevenantItemProxy
 class RevenantJSONReader
 class RevenantKeyCommandInstaller
+class RevenantKeyInputView
 class RevenantKeyboardDismissTracker
 class RevenantKeyboardLocalInstaller
 class RevenantKeyframe
@@ -2040,6 +2043,7 @@ class RevenantTransitionContext
 class RevenantTransitionCoordinator
 class RevenantTransitionCoordinatorInstaller
 class RevenantTransitionPair
+class RevenantUIKitDelegate
 class RevenantURLSessionLoader
 class RevenantURLSessionStreamReply
 class RevenantUnderlyingQueuePatch
@@ -4068,7 +4072,6 @@ enum UNShowPreviewsSettingWhenAuthenticated
 enum VNErrorUnsupportedRequest
 enum VNErrorUnsupportedRevision
 enum WKAudiovisualMediaTypeAll
-enum WKAudiovisualMediaTypeNone
 enum WKContentModeRecommended
 enum WKErrorContentRuleListStoreCompileFailed
 enum WKErrorContentRuleListStoreLookUpFailed
@@ -4798,6 +4801,12 @@ function RevenantVisionRectangles
 function RevenantVisionTextLanguages
 function RevenantVisionTextLines
 function RevenantVisionTextModelRoot
+function RevenantWebEngineClass
+function RevenantWebEngineLoad
+function RevenantWebEngineRoot
+function RevenantWebEngineSymbol
+function RevenantWithWebLock
+function RevenantWithWebLockValue
 function SCNMatrix4EqualToMatrix4
 function SCNMatrix4FromGLKMatrix4
 function SCNMatrix4Invert
@@ -8993,6 +9002,8 @@ global RevenantHomeKitHomeOrderKey
 global RevenantMetalErrorDomain
 global RevenantMetalHeapAlignment
 global RevenantSpotlightSharedRoot
+global RevenantWebActionNavigationTypeKey
+global RevenantWebEngineErrorDomain
 global RevenantWebKitBridgeScheme
 global SCNErrorDomain
 global SCNGeometrySourceSemanticColor
@@ -26065,6 +26076,11 @@ member RevenantContactsKeyDescriptor -copyWithZone:
 member RevenantContactsKeyDescriptor -encodeWithCoder:
 member RevenantContactsKeyDescriptor -initWithCoder:
 member RevenantContactsKeyDescriptor -keys
+member RevenantContentScrollView -touchHandler
+member RevenantContentScrollView -touchesBegan:withEvent:
+member RevenantContentScrollView -touchesCancelled:withEvent:
+member RevenantContentScrollView -touchesEnded:withEvent:
+member RevenantContentScrollView -touchesMoved:withEvent:
 member RevenantContentUnavailable17 +load
 member RevenantContextMenuAnimator -addAnimations:
 member RevenantContextMenuAnimator -addCompletion:
@@ -26177,6 +26193,32 @@ member RevenantEdgePopGate -navigation
 member RevenantEdgePopInstaller +load
 member RevenantEdgePopState -animator
 member RevenantEndEditingReason +load
+member RevenantEngineHost -applyDocumentHeight:
+member RevenantEngineHost -attachRootLayer:
+member RevenantEngineHost -contentsSizeChanged:
+member RevenantEngineHost -dealloc
+member RevenantEngineHost -didFocusTextField:inFrame:
+member RevenantEngineHost -dragMode
+member RevenantEngineHost -editFocusedInput:
+member RevenantEngineHost -initWithFrame:
+member RevenantEngineHost -lowerKeyboard
+member RevenantEngineHost -raiseKeyboardForType:
+member RevenantEngineHost -scrollView
+member RevenantEngineHost -scrollViewDidScroll:
+member RevenantEngineHost -sendTouch:phase:at:
+member RevenantEngineHost -sendTouchEndThenTapAt:
+member RevenantEngineHost -setDocumentSize:
+member RevenantEngineHost -textFieldDidBeginEditing:inFrame:
+member RevenantEngineHost -textFieldDidEndEditing:inFrame:
+member RevenantEngineHost -touchesBegan:withEvent:
+member RevenantEngineHost -touchesCancelled:withEvent:
+member RevenantEngineHost -touchesEnded:withEvent:
+member RevenantEngineHost -touchesMoved:withEvent:
+member RevenantEngineHost -trackFocusedInput:
+member RevenantEngineHost -typeBackspace
+member RevenantEngineHost -typeCharacters:
+member RevenantEngineHost -typeReturn
+member RevenantEngineHost -webView
 member RevenantEnvironmentFilterParameters -initWithRevenantOwner:
 member RevenantEnvironmentFilterParameters -setBandwidth:
 member RevenantEnvironmentFilterParameters -setBypass:
@@ -26387,6 +26429,18 @@ member RevenantJSONReader -peekAt:
 member RevenantJSONReader -readHex4
 member RevenantJSONReader -skipWhitespaceAndComments
 member RevenantKeyCommandInstaller +load
+member RevenantKeyInputView -autocapitalizationType
+member RevenantKeyInputView -autocorrectionType
+member RevenantKeyInputView -canBecomeFirstResponder
+member RevenantKeyInputView -configureForType:
+member RevenantKeyInputView -consumer
+member RevenantKeyInputView -deleteBackward
+member RevenantKeyInputView -hasText
+member RevenantKeyInputView -insertText:
+member RevenantKeyInputView -isSecureTextEntry
+member RevenantKeyInputView -keyboardType
+member RevenantKeyInputView -setKeyboardType:
+member RevenantKeyInputView -setSecureTextEntry:
 member RevenantKeyboardDismissTracker -pan:
 member RevenantKeyboardDismissTracker -scrollView
 member RevenantKeyboardLocalInstaller +load
@@ -28257,6 +28311,58 @@ member RevenantTransitionCoordinator -viewForKey:
 member RevenantTransitionCoordinatorInstaller +load
 member RevenantTransitionPair -from
 member RevenantTransitionPair -to
+member RevenantUIKitDelegate -_webthread_webView:attachRootLayer:
+member RevenantUIKitDelegate -addInputString:withFlags:
+member RevenantUIKitDelegate -checkSpellingOfString:
+member RevenantUIKitDelegate -deleteFromInput
+member RevenantUIKitDelegate -deleteFromInputWithFlags:
+member RevenantUIKitDelegate -deviceOrientation
+member RevenantUIKitDelegate -getPasteboardChangeCount
+member RevenantUIKitDelegate -getPasteboardItemsCount
+member RevenantUIKitDelegate -handleKeyAppCommandForCurrentEvent
+member RevenantUIKitDelegate -handleKeyTextCommandForCurrentEvent
+member RevenantUIKitDelegate -handler
+member RevenantUIKitDelegate -hasRichlyEditableSelection
+member RevenantUIKitDelegate -interactionLocation
+member RevenantUIKitDelegate -performTwoStepDrop:atDestination:isMove:
+member RevenantUIKitDelegate -performsTwoStepPaste:
+member RevenantUIKitDelegate -readDataFromPasteboard:withIndex:
+member RevenantUIKitDelegate -revealedSelectionByScrollingWebFrame:
+member RevenantUIKitDelegate -shouldRevealCurrentSelectionAfterInsertion
+member RevenantUIKitDelegate -shouldSuppressPasswordEcho
+member RevenantUIKitDelegate -showPlaybackTargetPicker:fromRect:
+member RevenantUIKitDelegate -supportedPasteboardTypesForCurrentSelection
+member RevenantUIKitDelegate -webThreadWebViewDidLayout:byScrolling:
+member RevenantUIKitDelegate -webView:addMessageToConsole:withSource:
+member RevenantUIKitDelegate -webView:contentsSizeChanged:forFrame:
+member RevenantUIKitDelegate -webView:didChangeLocationWithinPageForFrame:
+member RevenantUIKitDelegate -webView:didCommitLoadForFrame:
+member RevenantUIKitDelegate -webView:didCreateOrUpdateScrollingLayer:withContentsLayer:scrollSize:forNode:allowHorizontalScrollbar:allowVerticalScrollbar:
+member RevenantUIKitDelegate -webView:didFailLoadWithError:forFrame:
+member RevenantUIKitDelegate -webView:didFinishLoadForFrame:
+member RevenantUIKitDelegate -webView:didFirstLayoutInFrame:
+member RevenantUIKitDelegate -webView:didFirstVisuallyNonEmptyLayoutInFrame:
+member RevenantUIKitDelegate -webView:didHideFullScreenForPlugInView:
+member RevenantUIKitDelegate -webView:didReceiveMessage:
+member RevenantUIKitDelegate -webView:didReceiveViewportArguments:
+member RevenantUIKitDelegate -webView:elementDidBlurNode:
+member RevenantUIKitDelegate -webView:elementDidFocusNode:
+member RevenantUIKitDelegate -webView:needsScrollNotifications:forFrame:
+member RevenantUIKitDelegate -webView:restoreStateFromHistoryItem:forFrame:force:
+member RevenantUIKitDelegate -webView:saveStateToHistoryItem:forFrame:
+member RevenantUIKitDelegate -webView:shouldScrollToPoint:forFrame:
+member RevenantUIKitDelegate -webView:willAddPlugInView:
+member RevenantUIKitDelegate -webView:willCloseFrame:
+member RevenantUIKitDelegate -webView:willRemoveScrollingLayer:withContentsLayer:forNode:
+member RevenantUIKitDelegate -webView:willShowFullScreenForPlugInView:
+member RevenantUIKitDelegate -webViewDidCommitCompositingLayerChanges:
+member RevenantUIKitDelegate -webViewDidDrawTiles:
+member RevenantUIKitDelegate -webViewDidEndOverflowScroll:
+member RevenantUIKitDelegate -webViewDidPreventDefaultForEvent:
+member RevenantUIKitDelegate -webViewDidReceiveMobileDocType:
+member RevenantUIKitDelegate -webViewDidRestoreFromPageCache:
+member RevenantUIKitDelegate -webViewDidStartOverflowScroll:
+member RevenantUIKitDelegate -writeDataToPasteboard:
 member RevenantURLSessionLoader -URLProtocol:cachedResponseIsValid:
 member RevenantURLSessionLoader -URLProtocol:didCancelAuthenticationChallenge:
 member RevenantURLSessionLoader -URLProtocol:didFailWithError:
@@ -35184,19 +35290,22 @@ member WKWebView -revenant_committedURLString
 member WKWebView -revenant_decideLocal:MIMEType:length:encoding:load:
 member WKWebView -revenant_decideResponse:completion:
 member WKWebView -revenant_denyNavigation:
-member WKWebView -revenant_documentDidInject
 member WKWebView -revenant_documentStartScripts
 member WKWebView -revenant_downloadResponse:request:
 member WKWebView -revenant_emitCommit
+member WKWebView -revenant_failLoad:forFrame:
 member WKWebView -revenant_failNavigation:interruptedAt:
 member WKWebView -revenant_installScripts:
 member WKWebView -revenant_isMainFrameRequest:
 member WKWebView -revenant_itemsReplacingCurrent:
 member WKWebView -revenant_loadSubstitute:URL:type:index:
+member WKWebView -revenant_loadSubstituteLocked:URL:type:index:
 member WKWebView -revenant_moveToIndex:
+member WKWebView -revenant_navigateLockedWithRequest:type:index:perform:cancel:
 member WKWebView -revenant_navigateOpenedWindow:
 member WKWebView -revenant_navigateOpener:
 member WKWebView -revenant_navigateWithRequest:type:index:perform:
+member WKWebView -revenant_navigateWithRequest:type:index:perform:cancel:
 member WKWebView -revenant_notifyOpener
 member WKWebView -revenant_openWindowFromMessage:
 member WKWebView -revenant_openerInfo
@@ -35204,7 +35313,6 @@ member WKWebView -revenant_postMessageToOpenedWindow:
 member WKWebView -revenant_postMessageToOpener:
 member WKWebView -revenant_receiveBridgeURL:
 member WKWebView -revenant_refreshTitle
-member WKWebView -revenant_replay:
 member WKWebView -revenant_scriptsDidChange
 member WKWebView -revenant_sendUpdate:
 member WKWebView -revenant_setItems:index:
@@ -35214,7 +35322,6 @@ member WKWebView -revenant_setTitle:
 member WKWebView -revenant_setURL:
 member WKWebView -revenant_setUpWithConfiguration:
 member WKWebView -revenant_shimWithNames:
-member WKWebView -revenant_taggedRequest:
 member WKWebView -scrollView
 member WKWebView -setAllowsBackForwardNavigationGestures:
 member WKWebView -setAllowsLinkPreview:
@@ -35226,10 +35333,13 @@ member WKWebView -startDownloadUsingRequest:completionHandler:
 member WKWebView -stopLoading
 member WKWebView -takeSnapshotWithConfiguration:completionHandler:
 member WKWebView -title
-member WKWebView -webView:didFailLoadWithError:
-member WKWebView -webView:shouldStartLoadWithRequest:navigationType:
-member WKWebView -webViewDidFinishLoad:
-member WKWebView -webViewDidStartLoad:
+member WKWebView -webView:decidePolicyForNavigationAction:request:frame:decisionListener:
+member WKWebView -webView:didClearWindowObject:forFrame:
+member WKWebView -webView:didCommitLoadForFrame:
+member WKWebView -webView:didFailLoadWithError:forFrame:
+member WKWebView -webView:didFailProvisionalLoadWithError:forFrame:
+member WKWebView -webView:didFinishLoadForFrame:
+member WKWebView -webView:didStartProvisionalLoadForFrame:
 member WKWebViewConfiguration +supportsSecureCoding
 member WKWebViewConfiguration -allowsAirPlayForMediaPlayback
 member WKWebViewConfiguration -allowsInlineMediaPlayback
@@ -35396,7 +35506,6 @@ protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
 protocol NSURLProtocolClient
-protocol NSURLSessionStreamDelegate
 protocol OS_nw_browser
 protocol OS_nw_connection
 protocol OS_nw_connection_group
@@ -35415,10 +35524,20 @@ protocol PKPushRegistryDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
 protocol RevenantBrailleMapPinStore
+protocol RevenantDOMDocument
+protocol RevenantDOMEvent
+protocol RevenantDOMInputElement
+protocol RevenantEngineDataSource
+protocol RevenantEngineEvent
+protocol RevenantEngineFrame
+protocol RevenantEnginePreferences
+protocol RevenantEngineView
+protocol RevenantEngineWindow
 protocol RevenantHKRunnableQuery
 protocol RevenantHKStorable
 protocol RevenantHKStoreObserver
 protocol RevenantHKTyped
+protocol RevenantKeyInputConsumer
 protocol RevenantMDLTransformOpRecord
 protocol RevenantMPSCommandBufferDebugging
 protocol RevenantMPSCommitAndContinuing
@@ -35426,8 +35545,11 @@ protocol RevenantMPSImageThresholdHooks
 protocol RevenantMPSNDArrayAxisKernel
 protocol RevenantOverlayView
 protocol RevenantPhotosChange
+protocol RevenantPolicyListener
+protocol RevenantRootLayerHandler
 protocol RevenantSCNAnimatable
 protocol RevenantTaskControl
+protocol RevenantTouchHandler
 protocol RevenantVoiceServicesListing
 protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
@@ -35465,6 +35587,7 @@ protocol UIFocusItem
 protocol UIGestureRecognizerDelegate
 protocol UIImagePickerControllerDelegate
 protocol UIInteraction
+protocol UIKeyInput
 protocol UILargeContentViewerItem
 protocol UILayoutSupport
 protocol UIMutableTraits
@@ -35473,6 +35596,7 @@ protocol UINavigationControllerDelegate
 protocol UIObjectTraitDefinition
 protocol UIPopoverControllerDelegate
 protocol UIPreviewActionItem
+protocol UIScrollViewDelegate
 protocol UISearchBarDelegate
 protocol UISearchSuggestion
 protocol UIShapeProvider
@@ -35504,13 +35628,7 @@ protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
 protocol VTFrameProcessorConfiguration
-protocol WKDownloadDelegate
-protocol WKNavigationDelegate
-protocol WKScriptMessageHandler
-protocol WKUIDelegate
-protocol WKURLSchemeHandler
 protocol WKURLSchemeTask
-protocol WKWebExtensionControllerDelegate
 protocol_member ARAnchorCopying -initWithAnchor:
 protocol_member ARTrackable -isTracked
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
@@ -36052,6 +36170,9 @@ protocol_member UIImagePickerControllerDelegate -imagePickerControllerDidCancel:
 protocol_member UIInteraction -didMoveToView:
 protocol_member UIInteraction -view
 protocol_member UIInteraction -willMoveToView:
+protocol_member UIKeyInput -deleteBackward
+protocol_member UIKeyInput -hasText
+protocol_member UIKeyInput -insertText:
 protocol_member UILargeContentViewerItem -largeContentImage
 protocol_member UILargeContentViewerItem -largeContentImageInsets
 protocol_member UILargeContentViewerItem -largeContentTitle
@@ -36077,6 +36198,7 @@ protocol_member UIPopoverControllerDelegate -popoverController:willRepositionPop
 protocol_member UIPopoverControllerDelegate -popoverControllerDidDismissPopover:
 protocol_member UIPopoverControllerDelegate -popoverControllerShouldDismissPopover:
 protocol_member UIPreviewActionItem -title
+protocol_member UIScrollViewDelegate -scrollViewDidScroll:
 protocol_member UISearchBarDelegate -searchBar:shouldChangeTextInRanges:replacementText:
 protocol_member UISearchBarDelegate -searchBar:textDidChange:
 protocol_member UISearchBarDelegate -searchBarCancelButtonClicked:
@@ -36195,10 +36317,7 @@ protocol_member UIViewControllerTransitioningDelegate -animationControllerForPre
 protocol_member UIViewControllerTransitioningDelegate -interactionControllerForDismissal:
 protocol_member UIViewControllerTransitioningDelegate -interactionControllerForPresentation:
 protocol_member UIViewControllerTransitioningDelegate -presentationControllerForPresentedViewController:presentingViewController:sourceViewController:
-protocol_member UIWebViewDelegate -webView:didFailLoadWithError:
-protocol_member UIWebViewDelegate -webView:shouldStartLoadWithRequest:navigationType:
 protocol_member UIWebViewDelegate -webViewDidFinishLoad:
-protocol_member UIWebViewDelegate -webViewDidStartLoad:
 protocol_member VTFrameProcessorConfiguration +isSupported
 protocol_member VTFrameProcessorConfiguration +maximumDimensions
 protocol_member VTFrameProcessorConfiguration +minimumDimensions
