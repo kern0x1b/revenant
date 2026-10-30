@@ -128,7 +128,7 @@ The 56 refusals have 23 reasons. The argument-kind group is down from 9 to 2, an
 
 - the emitter declares `uniform float revenant_instance;` and reads `int(revenant_instance)`. The name is the one the host already sets (`RevenantMetalPipeline.m`, `revenant_instance`), so the host needed no change;
 - `RevenantMetalEncoder.m` draws an instanced call as one GL draw per instance, setting the uniform to `0 … instanceCount - 1` in order. That is the Metal value for a draw with no base instance. The backport has no `baseInstance` overloads, so the loop starts at 0; if overloads are added the loop must start at `baseInstance`;
-- the three-instance check is `frameworks/Backports/tests/device_probe/instance_main.m`: a 3-instance draw must write the columns `1`, `2`, `3` in order, and an indexed draw must match. It has not run on the 4S yet.
+- the three-instance check is `frameworks/Backports/tests/device_probe/instance_main.m`: a 3-instance draw must write the columns `1`, `2`, `3` in order, and an indexed draw must match. On the 4S (iPhone4,1, iOS 6.1.3) all five checks pass and `REVENANT-DONE failures 0`. The probe ran from `/var/revenant/MetalInstanceProbe.app`, with the build's four backport dylibs next to the binary (install names rewritten to `@executable_path` and re-signed with `ldid`); `/usr/lib/revenant` and the platform package were not changed. The run logs `objc` warnings that `NSJSONSerialization`, `NSProgress` and `NSUUID` exist in both the system Foundation and the bundled `libFoundationBackports`; the Metal checks do not use those classes.
 
 `dctKernel` and `idctKernel` (`submodules/AnimationCompression/Resources/DCT.metal`) stay in the later group. What they need:
 
