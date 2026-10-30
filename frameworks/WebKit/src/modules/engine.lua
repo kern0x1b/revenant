@@ -107,14 +107,12 @@ local function quoted(text)
     return "\"" .. text:gsub("\\", "/") .. "\""
 end
 
--- Apple's libtool drops the engine's LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides it. llvm-libtool-darwin
--- of LLVM 23 or later keeps every member, so the engine's archives are made with it.
-local function libtool_program()
-    local tool = find_tool("llvm-libtool-darwin", {version = true})
-    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
-        raise("the engine's archives are LTO bitcode that Apple's libtool drops, so llvm-libtool-darwin of LLVM 23 or later must be on PATH ahead of Apple's")
-    end
-    return tool.program
+-- Apple's libtool drops the engine's LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides it. The llvm
+-- package's llvm-libtool-darwin keeps every member, so the engine's archives are made with it.
+local function llvm_libtool(package)
+    local tool = path.join(package:dep("llvm"):installdir("bin"), "llvm-libtool-darwin")
+    assert(os.isfile(tool), "the llvm package has no llvm-libtool-darwin, which the engine's LTO bitcode archives are made with")
+    return tool
 end
 
 function options(ctx)
@@ -137,7 +135,7 @@ function options(ctx)
         table.insert(found, {option[1], chosen.options[option[1]] or option[2]})
     end
     table.join2(found, {
-        {"CMAKE_LIBTOOL", libtool_program()},
+        {"CMAKE_LIBTOOL", ctx.libtool},
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
@@ -296,6 +294,7 @@ function context(package, build)
         deployment = chosen:config("deployment"),
         cc = chosen:tool("cc"),
         cxx = chosen:tool("cxx"),
+        libtool = llvm_libtool(package),
         source = source,
         build = build,
         stubs = path.join(member, "compat", "stubs"),

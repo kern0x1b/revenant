@@ -38,6 +38,7 @@ package("webkit-engine")
     add_deps("revenant@openssl", {alias = "openssl"})
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid", host = true})
+    add_deps("revenant@llvm 23.1.3", {alias = "llvm", host = true})
 
     on_install("iphoneos", function (package)
         if import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
