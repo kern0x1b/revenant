@@ -11,7 +11,7 @@ local llvm = {name = "llvm", version = "23.1.3"}
 
 local compat_only = get_config("apple_compat_only")
 for _, tool in ipairs(compat_only and {sdk, ld64, llvm} or {sdk, ld64, ldid, llvm}) do
-    add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name})
+    add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name, host = tool == ldid})
 end
 
 add_requireconfs("**.iphoneos-sdk", {override = true, version = sdk.version})
