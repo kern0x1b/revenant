@@ -412,7 +412,7 @@ public:
             body += line;
         source = "#version 100\n";
         if (stage_ != Stage::Vertex)
-            source += "precision mediump float;\n";
+            source += highp_ ? "precision highp float;\n" : "precision mediump float;\n";
         source += join(declarations_, "") + "void main() {\n" + body + "}\n";
         reflection = this->reflection();
         return true;
@@ -1249,6 +1249,48 @@ private:
     }
 
     bool local(Instruction &instruction, std::string &name)
+    // GLSL ES 1.00 has no integer bit operations. A constant mask clears a fixed set of bits, and bit b of x is
+    // floor(mod(x, 2^(b+1)) / 2^b), so the and is written in floats. The operand must be the result of a
+    // float-to-integer conversion: that integer is always a float32 value, so the float arithmetic is exact, and
+    // the shader is declared highp, because mediump holds integers only up to 2048.
+    bool maskAnd(Instruction &instruction, BinaryOperator &binary)
+    {
+        if (!binary.getType()->isIntegerTy(32))
+            return refuse("a bitwise and of integers other than 32 bits");
+        Value *operand = binary.getOperand(0);
+        auto *mask = dyn_cast<ConstantInt>(binary.getOperand(1));
+        if (!mask) {
+            operand = binary.getOperand(1);
+            mask = dyn_cast<ConstantInt>(binary.getOperand(0));
+        }
+        if (!mask)
+            return refuse("a bitwise and with no constant mask");
+        auto *convert = dyn_cast<CallInst>(operand);
+        if (!convert || !convert->getCalledFunction() ||
+            !(convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f.") ||
+              convert->getCalledFunction()->getName().starts_with("air.convert.s.i32.f.")))
+            return refuse("a bitwise and of an integer that is not a float conversion");
+        uint64_t bits = mask->getZExtValue();
+        if (!(bits & 0x80000000u))
+            return refuse("a bitwise and that clears the sign bit");
+        std::string source, name;
+        if (!expression(operand, source))
+            return false;
+        std::string value = "float(" + source + ")";
+        for (unsigned bit = 0; bit < 31; ++bit) {
+            if (bits & (uint64_t(1) << bit))
+                continue;
+            std::string weight = std::to_string(uint64_t(1) << bit) + ".0";
+            std::string period = std::to_string(uint64_t(1) << (bit + 1)) + ".0";
+            value += " - " + weight + " * floor(mod(float(" + source + "), " + period + ") / " + weight + ")";
+        }
+        if (!local(instruction, name))
+            return false;
+        highp_ = true;
+        statement(name + " = int(" + value + ");\n");
+        return true;
+    }
+
     {
         std::string type = glslType(instruction.getType());
         if (type.empty())
@@ -1372,6 +1414,8 @@ private:
         }
         if (auto *binary = dyn_cast<BinaryOperator>(&instruction)) {
             const char *op = nullptr;
+            if (binary->getOpcode() == Instruction::And)
+                return maskAnd(instruction, *binary);
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
             case Instruction::FSub: case Instruction::Sub: op = "-"; break;
@@ -1738,6 +1782,7 @@ std::string jsonQuote(const std::string &text)
             out += c;
         }
     }
+    bool highp_ = false;
     return out + "\"";
 }
 
