@@ -1,7 +1,13 @@
 #import "RevenantMetal.h"
 
 
-@implementation MTLTextureDescriptor
+@implementation MTLTextureDescriptor {
+    MTLTextureUsage _usage;
+    MTLStorageMode _storageMode;
+}
+
+@synthesize usage = _usage;
+@synthesize storageMode = _storageMode;
 
 + (MTLTextureDescriptor *)texture2DDescriptorWithPixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height mipmapped:(BOOL)mipmapped
 {
@@ -26,6 +32,7 @@
         self.sampleCount = 1;
         self.arrayLength = 1;
         self.usage = MTLTextureUsageShaderRead;
+        self.storageMode = MTLStorageModeShared;
     }
     return self;
 }
@@ -42,6 +49,7 @@
     d.sampleCount = self.sampleCount;
     d.arrayLength = self.arrayLength;
     d.usage = self.usage;
+    d.storageMode = self.storageMode;
     return d;
 }
 

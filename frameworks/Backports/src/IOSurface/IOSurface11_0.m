@@ -389,3 +389,11 @@ kern_return_t IOSurfaceSetPurgeable(IOSurfaceRef buffer, uint32_t newState, uint
     }
     return function(buffer, newState, oldState);
 }
+
+const CFStringRef kIOSurfaceWidth = CFSTR("IOSurfaceWidth");
+const CFStringRef kIOSurfaceHeight = CFSTR("IOSurfaceHeight");
+const CFStringRef kIOSurfaceBytesPerElement = CFSTR("IOSurfaceBytesPerElement");
+const CFStringRef kIOSurfaceBytesPerRow = CFSTR("IOSurfaceBytesPerRow");
+const CFStringRef kIOSurfacePixelFormat = CFSTR("IOSurfacePixelFormat");
+const CFStringRef kIOSurfaceColorSpace = CFSTR("IOSurfaceColorSpace");
+const CFStringRef kIOSurfaceCacheMode = CFSTR("IOSurfaceCacheMode");
