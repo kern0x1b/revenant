@@ -44,7 +44,6 @@ function main()
     local elsewhere = facts.constant_intros(other)
     assert(elsewhere.FixtureValue and tonumber(elsewhere.FixtureValue.intro) == 6000,"another SDK of the same version was given the constant intros of the first one: " .. describe(elsewhere))
 
-    -- A cache folder is keyed by the real path of its SDK, so it is found while that SDK still exists.
     local other_cache = sdkfiles.cache_folder(other)
     local sdk_cache = sdkfiles.cache_folder(sdk)
     os.tryrm(other)
