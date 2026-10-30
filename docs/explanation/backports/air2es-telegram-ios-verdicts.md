@@ -1,8 +1,8 @@
 # air2es on Telegram's iOS Metal sources: per-shader verdicts
 
-Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included.
+Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel); 32 translate (18 fragment, 14 vertex); 57 are refused by name, including all 19 kernels. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes at the end, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 33 translate (19 fragment, 14 vertex) and 56 are refused, still including all 19 kernels. The table shows the state after the changes. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel); 32 translate (18 fr
 | submodules_DrawingUI_MetalResources | vertex_render_target | vertex | REFUSED | a member of type float4x4 in uniforms |
 | submodules_DrawingUI_MetalResources | vertex_point_func | vertex | REFUSED | a member of type float4x4 in uniforms |
 | submodules_DrawingUI_MetalResources | fragment_render_target | fragment | OK |  |
-| submodules_DrawingUI_MetalResources | fragment_point_func | fragment | REFUSED | an argument of a kind this emitter does not read |
+| submodules_DrawingUI_MetalResources | fragment_point_func | fragment | OK |  |
 | submodules_MetalEngine_Sources | clearVertex | vertex | OK |  |
 | submodules_MetalEngine_Sources | clearFragment | fragment | OK |  |
 | submodules_PremiumUI_MetalResources | matrixVertex | vertex | OK |  |
@@ -95,3 +95,28 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel); 32 translate (18 fr
 | submodules_WallpaperBackgroundNode_Resources | wallpaperVertex | vertex | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment1 | fragment | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment | fragment | REFUSED | a call to air.tan.f16 |
+
+## Changes measured against the corpus
+
+Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFUSED. Its 89 verdict rows (library, name, stage, verdict, reason) match the table above, after sorting, so that run is the baseline. Each change was measured with the same tool, `frameworks/Backports/tools/metal_corpus.lua`, into its own verdict file.
+
+| Change | OK | REFUSED | Rows that moved |
+| --- | --- | --- | --- |
+| baseline | 32 | 57 | none |
+| `air.point_coord` lowered to `gl_PointCoord` (`translate.cpp`) | 33 | 56 | `fragment_point_func`, REFUSED to OK |
+| fragment outputs narrower than four lanes padded to `vec4(…, 0.0, 0.0, 1.0)` (`colorOf`) | 33 | 56 | none; the GLSL of `histogramPrepareFragmentShader` changed from `gl_FragColor = t9;` |
+
+A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
+
+Checks on the state the table shows:
+
+- the ES 2 probe on the 4S (iPhone4,1, iOS 6.1.3, PowerVR SGX 543) over the 33 OK entries: 33 PASS, 0 FAIL; before `colorOf` it was 32 PASS, 1 FAIL;
+- `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
+- `air2es_test.lua`: 15 cases pass.
+
+The 56 refusals have 22 reasons. The argument-kind group (8, from 9) is what is left of the first group:
+
+- six vertex functions use `air.instance_id`: `dustEffectVertex`, `backgroundStarVertex`, `sparkleVertex`, `referenceHighlightVertex`, `walletAmountVertex`, `walletAmountLayerVertex`. OpenGL ES 2 has no instancing, so these need a decision on how instances are drawn, not a mapping;
+- `dctKernel` and `idctKernel` use `air.thread_position_in_threadgroup`, and they also use threadgroup memory, so they need the multi-pass design.
+
+The next groups in the order set for the work are the width refusals (8), the locals of a type this emitter does not hold (6), and the clamp-to-zero samples (5).

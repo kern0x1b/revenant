@@ -109,7 +109,8 @@ struct Output {
 };
 
 const char *const kArgumentKinds[] = {"air.buffer", "air.texture", "air.sampler", "air.vertex_id",
-                                      "air.position", "air.fragment_input", "air.thread_position_in_grid"};
+                                      "air.position", "air.fragment_input", "air.thread_position_in_grid",
+                                      "air.point_coord"};
 
 const char *const kLanes[] = {"x", "y", "z", "w"};
 
@@ -235,6 +236,21 @@ std::string glslType(Type *type)
     return "";
 }
 
+std::string colorOf(Type *type, const std::string &text)
+{
+    unsigned lanes = type->isVectorTy() ? cast<FixedVectorType>(type)->getNumElements() : 1;
+    switch (lanes) {
+    case 1:
+        return "vec4(" + text + ", 0.0, 0.0, 1.0)";
+    case 2:
+        return "vec4(" + text + ", 0.0, 1.0)";
+    case 3:
+        return "vec4(" + text + ", 1.0)";
+    default:
+        return text;
+    }
+}
+
 std::string floatLiteral(double value)
 {
     char text[64];
@@ -356,6 +372,8 @@ public:
                 return refuse("a position argument in a vertex function");
             if (binding.kind == "air.fragment_input" && stage_ != Stage::Fragment)
                 return refuse("a fragment input in a vertex function");
+            if (binding.kind == "air.point_coord" && stage_ != Stage::Fragment)
+                return refuse("a point coordinate outside a fragment function");
         }
         for (size_t slot = 0; slot < bindings_.size(); slot++)
             if (bindings_[slot].kind == "air.position" && !bindings_[slot].argument->use_empty()) {
@@ -724,6 +742,10 @@ private:
             }
             if (binding->kind == "air.thread_position_in_grid") {
                 out = "gid";
+                return true;
+            }
+            if (binding->kind == "air.point_coord") {
+                out = "gl_PointCoord";
                 return true;
             }
             if (binding->kind == "air.fragment_input") {
@@ -1620,7 +1642,7 @@ private:
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
-                statement("gl_FragColor = " + text + ";\n");
+                statement("gl_FragColor = " + colorOf(fields[k]->getType(), text) + ";\n");
             } else {
                 return refuse("an output of kind " + output.kind + " in a " +
                               (stage_ == Stage::Vertex ? "vertex" : "fragment") + " function");
