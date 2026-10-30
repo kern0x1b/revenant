@@ -227,8 +227,14 @@ Compute and MPS (coordinator decision, 2026-10-29):
    (section 1). Vertex texture fetch on SGX5 is unverified. If `GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS` is 0, the histogram
    positions are precomputed on the CPU, as section 4.1 allows.
 10. **MPS on the GPU.** GaussianBlur as a separable two-pass, BilinearScale, Convolution with every edge mode, Histogram
-    and HistogramInfo. The CPU paths (`RevenantMPSConvolveRegion`, the histogram write) and the GaussianBlur refusal are
-    removed, so no CPU path remains.
+    and HistogramInfo. Done on the iPhone 4S (`MPSConvolveProbe`, 9 of 9 checks): MPSImageConvolution, MPSImageBox and
+    MPSImageLaplacian run as one GL fragment pass for single-slice 4-channel RGBA8 images, edge mode zero, with a clip
+    rect. Every other image takes the CPU route, and that route logs on each call, so it is known debt and registered in
+    `coordination/crutches.md`. RGBA32F readback is refused by name on the device (`getBytes`: OpenGL ES 2.0 reads only
+    8-bit channels), and the CPU route reads through the same call, so any image wider than 8 bits per channel is refused
+    by name and nothing is written. Before this change the CPU loop wrote its bias over zeros in that case. RGBA16F was
+    not measured. GaussianBlur is still refused, because the release's headers do not state its tap count and the owner has to
+    choose it. BilinearScale and the histograms are not started.
 11. **Degradations removed.** Triangle fill mode in line form, through GL_LINES index expansion, since GLES 2 has no
     `glPolygonMode`. A real `waitUntilScheduled`. A ring allocator for `setVertexBytes` in place of one buffer per call.
     A named pixel-format constant in place of the literal 250. One `glReadPixels` for the readback.

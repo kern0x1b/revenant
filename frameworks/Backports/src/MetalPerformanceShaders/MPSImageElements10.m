@@ -9,13 +9,14 @@ static const float kRevenantMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                                                            0.0f, 1.0f, 0.0f };
 
 @interface MPSUnaryImageKernel (RevenantMPSConvolutionSeam)
-- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
-                                destination:(MPSImage *)destination
-                                 kernelWidth:(NSUInteger)kernelWidth
-                                kernelHeight:(NSUInteger)kernelHeight
-                                    weights:(const float *)weights
-                                        bias:(double)bias
-                                        what:(NSString *)what;
+- (void)revenant_mps_convolveRegionWithCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                                              source:(MPSImage *)source
+                                         destination:(MPSImage *)destination
+                                         kernelWidth:(NSUInteger)kernelWidth
+                                        kernelHeight:(NSUInteger)kernelHeight
+                                             weights:(const float *)weights
+                                                bias:(double)bias
+                                                what:(NSString *)what;
 @end
 
 @implementation MPSImageLaplacian {
@@ -36,8 +37,9 @@ static const float kRevenantMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    [self revenant_mps_convolveRegionWithSource:sourceImage
-                                  destination:destinationImage
+    [self revenant_mps_convolveRegionWithCommandBuffer:commandBuffer
+                                                source:sourceImage
+                                           destination:destinationImage
                                    kernelWidth:3
                                   kernelHeight:3
                                       weights:kRevenantMPSImageLaplacianWeights

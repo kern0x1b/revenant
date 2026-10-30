@@ -195,6 +195,7 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 @property (nonatomic, readonly) NSDictionary *fragmentReflection;
 @property (nonatomic, readonly) MTLRenderPipelineDescriptor *descriptor;
 - (instancetype)initWithDescriptor:(MTLRenderPipelineDescriptor *)descriptor error:(NSError **)error;
++ (instancetype)fullscreenWithFragment:(RevenantMetalFunction *)fragment error:(NSError **)error;
 - (GLint)locationForName:(NSString *)name;
 - (GLint)attributeForName:(NSString *)name;
 - (const RevenantPlan *)plan;

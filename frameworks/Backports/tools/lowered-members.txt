@@ -20155,7 +20155,7 @@ member MPSImageArithmetic -encodeToCommandBuffer:primaryImage:secondaryImage:des
 member MPSImageArithmetic -initWithDevice:
 member MPSImageBox -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageBox -initWithDevice:
-member MPSImageBox -initWithDevice:kernelHeight:kernelWidth:
+member MPSImageBox -initWithDevice:kernelWidth:kernelHeight:
 member MPSImageBox -kernelHeight
 member MPSImageBox -kernelWidth
 member MPSImageBox -revenant_makeTentWeights
@@ -20272,7 +20272,7 @@ member MPSImageStatisticsMinAndMax -initWithCoder:device:
 member MPSImageStatisticsMinAndMax -initWithDevice:
 member MPSImageSubtract +revenant_mps_operation
 member MPSImageSubtract -initWithDevice:
-member MPSImageTent -initWithDevice:kernelHeight:kernelWidth:
+member MPSImageTent -initWithDevice:kernelWidth:kernelHeight:
 member MPSImageThresholdBinary -RevenantMPSThreshold:
 member MPSImageThresholdBinary -initWithDevice:thresholdValue:linearGrayColorTransform:
 member MPSImageThresholdBinary -initWithDevice:thresholdValue:maximumValue:linearGrayColorTransform:
@@ -20979,7 +20979,7 @@ member MPSUnaryImageKernel -encodeToCommandBuffer:sourceTexture:destinationTextu
 member MPSUnaryImageKernel -initWithCoder:device:
 member MPSUnaryImageKernel -initWithDevice:
 member MPSUnaryImageKernel -offset
-member MPSUnaryImageKernel -revenant_mps_convolveRegionWithSource:destination:kernelWidth:kernelHeight:weights:bias:what:
+member MPSUnaryImageKernel -revenant_mps_convolveRegionWithCommandBuffer:source:destination:kernelWidth:kernelHeight:weights:bias:what:
 member MPSUnaryImageKernel -sourceRegionForDestinationSize:
 member MPSVector -data
 member MPSVector -dataType
@@ -26979,6 +26979,7 @@ member RevenantMetalLogContainer -logs
 member RevenantMetalObjectPayloadBinding -objectPayloadAlignment
 member RevenantMetalObjectPayloadBinding -objectPayloadDataSize
 member RevenantMetalObjectPayloadBinding -type
+member RevenantMetalPipeline +fullscreenWithFragment:error:
 member RevenantMetalPipeline -attributeForName:
 member RevenantMetalPipeline -buildPlan
 member RevenantMetalPipeline -dealloc

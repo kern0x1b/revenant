@@ -3,6 +3,19 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
+static RevenantMetalFunction *RevenantMetalCornerFunction(void)
+{
+    static RevenantMetalFunction *corners;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        NSString *source = @"#version 100\nattribute vec2 revenant_corner;\nvoid main() {\n    gl_Position = vec4(revenant_corner, 0.0, 1.0);\n}\n";
+        NSDictionary *attribute = @{@"name": @"revenant_corner", @"buffer": @0, @"offset": @0, @"stride": @8, @"components": @2, @"scalar": @"float"};
+        NSDictionary *reflection = @{@"usesVertexId": @NO, @"uniforms": @[], @"inputs": @[], @"attributes": @[attribute]};
+        corners = [[RevenantMetalFunction alloc] initWithName:@"revenant_corners" stage:@"vertex" source:source reflection:reflection];
+    });
+    return corners;
+}
+
 static GLuint compile(GLenum type, NSString *source, NSString **log)
 {
     GLuint shader = glCreateShader(type);
@@ -437,6 +450,15 @@ static NSMutableDictionary *programs(void)
 - (id<MTLDevice>)device
 {
     return [RevenantMetalDevice shared];
+}
+
++ (instancetype)fullscreenWithFragment:(RevenantMetalFunction *)fragment error:(NSError **)error
+{
+    MTLRenderPipelineDescriptor *descriptor = [[MTLRenderPipelineDescriptor alloc] init];
+    descriptor.vertexFunction = RevenantMetalCornerFunction();
+    descriptor.fragmentFunction = fragment;
+    descriptor.colorAttachments[0].writeMask = MTLColorWriteMaskAll;
+    return [[RevenantMetalPipeline alloc] initWithDescriptor:descriptor error:error];
 }
 
 @end
