@@ -1,5 +1,5 @@
 #import "RevenantUserNotifications.h"
-#import "RevenantScenes.h"
+#import "../UIKit/RevenantScenes.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
