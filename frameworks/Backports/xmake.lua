@@ -84,7 +84,7 @@ local LIBRARIES = {
     {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
+    {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
@@ -471,6 +471,19 @@ if is_plat("iphoneos") and not SELECTED then
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.cvplanesprobe", "CFBundleDisplayName=CVPlanesProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("CVMetalProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/cvmetal_main.m", "src/CoreVideo/CVMetalTexture80.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.cvmetalprobe", "CFBundleDisplayName=CVMetalProbe")
         set_values("revenant.version", "1.0.0")
     target_end()
 

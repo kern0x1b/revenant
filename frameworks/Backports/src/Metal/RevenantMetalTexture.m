@@ -270,20 +270,48 @@ static int depthKind(MTLPixelFormat pixelFormat)
         NSLog(@"Metal: the IOSurface cannot be bound as an OpenGL ES texture: CoreVideo returned %d", (int)status);
         return nil;
     }
+    return [self initWithOpenGLESTexture:texture pixelFormat:descriptor.pixelFormat width:descriptor.width height:descriptor.height usage:descriptor.usage];
+}
+
++ (instancetype)revenantTextureFromImage:(CVImageBufferRef)image device:(RevenantMetalDevice *)device pixelFormat:(MTLPixelFormat)pixelFormat width:(size_t)width height:(size_t)height plane:(size_t)plane status:(CVReturn *)status
+{
+    RevenantFormat format;
+    if (!formatFor(pixelFormat, &format)) {
+        NSLog(@"Metal: pixel format %d has no OpenGL ES form for a CoreVideo texture on this backport", (int)pixelFormat);
+        *status = kCVReturnInvalidPixelFormat;
+        return nil;
+    }
+    [device acquire];
+    CVOpenGLESTextureCacheRef cache = [device textureCache];
+    CVOpenGLESTextureRef texture = NULL;
+    *status = cache ? CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, image, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)width, (GLsizei)height, format.format, format.type, plane, &texture) : kCVReturnError;
+    [device relinquish];
+    if (*status != kCVReturnSuccess)
+        return nil;
+    return [[self alloc] initWithOpenGLESTexture:texture pixelFormat:pixelFormat width:width height:height usage:MTLTextureUsageShaderRead | MTLTextureUsageRenderTarget];
+}
+
+- (instancetype)initWithOpenGLESTexture:(CVOpenGLESTextureRef)texture pixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height usage:(MTLTextureUsage)usage
+{
     if ((self = [super init])) {
         _surfaceTexture = texture;
         _name = CVOpenGLESTextureGetName(texture);
-        _pixelFormat = descriptor.pixelFormat;
-        _width = descriptor.width;
-        _height = descriptor.height;
+        _pixelFormat = pixelFormat;
+        _width = width;
+        _height = height;
         _levels = 1;
-        _usage = descriptor.usage;
+        _usage = usage;
         _attachedLevel = NSNotFound;
         RevenantMetalBindEpoch++;
     } else {
         CFRelease(texture);
     }
     return self;
+}
+
+- (CVOpenGLESTextureRef)revenantOpenGLESTexture
+{
+    return _surfaceTexture;
 }
 
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format

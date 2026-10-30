@@ -142,6 +142,9 @@ typedef struct {
 @property (nonatomic, readonly) NSUInteger height;
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor;
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane;
++ (instancetype)revenantTextureFromImage:(CVImageBufferRef)image device:(RevenantMetalDevice *)device pixelFormat:(MTLPixelFormat)pixelFormat width:(size_t)width height:(size_t)height plane:(size_t)plane status:(CVReturn *)status;
+- (instancetype)initWithOpenGLESTexture:(CVOpenGLESTextureRef)texture pixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height usage:(MTLTextureUsage)usage;
+- (CVOpenGLESTextureRef)revenantOpenGLESTexture;
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format;
 - (GLuint)renderTarget;
 @property (nonatomic, readonly) int attachmentKind;
