@@ -129,8 +129,26 @@ function failures(opt)
         end
     end
     kept("rebound")
+    local stripped = path.join(folder, "stripped.dylib")
+    os.cp(rebound, stripped)
+    local unstrippable = fixtures.refusal(function () fixtures.run(folder, "xcrun", {"strip", "-S", "-x", stripped}) end)
+    if unstrippable then
+        table.insert(found, "the rebound image must strip, so its link edit data fills its __LINKEDIT and nothing is left between the streams: " .. unstrippable)
+    end
     fixtures.run(folder, opt.ldid, {"-S", rebound})
     kept("signed")
+
+    local signed = path.join(folder, "signed.dylib")
+    os.cp(prebuilt, signed)
+    fixtures.run(folder, opt.ldid, {"-S", signed})
+    local signed_moves, signed_libraries = dyld.rebind_plan(release, signed, {provider})
+    macho.rebind(signed, signed_moves, signed_libraries)
+    local signed_stripped = path.join(folder, "signed_stripped.dylib")
+    os.cp(signed, signed_stripped)
+    local signed_unstrippable = fixtures.refusal(function () fixtures.run(folder, "xcrun", {"strip", "-S", "-x", signed_stripped}) end)
+    if signed_unstrippable then
+        table.insert(found, "a signed image must still strip after the rebind, so the old signature's padding is not left in __LINKEDIT: " .. signed_unstrippable)
+    end
 
     local refused = fixtures.refusal(function () dyld.check(release, {rebound, provider}, nil, {release = true}) end)
     if refused then
