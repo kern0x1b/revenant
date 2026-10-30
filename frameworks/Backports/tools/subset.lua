@@ -1,10 +1,5 @@
--- The libraries a build selects, and the packages they need. A build that selects a subset of the libraries
--- (REVENANT_BACKPORTS_LIBRARIES, which the out-of-tree revenant@backports package sets) must require the packages
--- that the selected libraries and their dependencies use, so every requirement is derived from the library table.
--- The archives that are targets of this project rather than packages.
 local TARGETS = {RevenantCoding = true, RevenantCKWebAuth = true}
 
--- How each package is required, by the name the library table uses for it.
 local PACKAGES = {
     ["lzfse"] = {"revenant@lzfse lzfse-1.0"},
     ["zlib"] = {"revenant@zlib v1.3.2"},
@@ -25,8 +20,6 @@ local PACKAGES = {
     ["apple-compat"] = {"revenant@apple-compat"},
 }
 
--- The rows a selection needs: the named libraries and every library they use, in table order. No selection is
--- every library.
 function backports_subset(rows, selected)
     if selected == nil then
         return rows
@@ -61,7 +54,6 @@ function backports_is_target(name)
     return TARGETS[name] == true
 end
 
--- Whether a row of the rows links the project's own target of that name.
 function backports_uses(rows, target)
     for _, library in ipairs(rows) do
         if table.contains(library.archives, target) then
@@ -71,7 +63,6 @@ function backports_uses(rows, target)
     return false
 end
 
--- The packages the rows use, once each, in table order. Every archive that is not a target must have a requirement.
 function backports_requires(rows)
     local out, seen = {}, {}
     for _, library in ipairs(rows) do
