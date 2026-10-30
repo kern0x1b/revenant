@@ -56,6 +56,19 @@ Measured in `toolchain/tests/swift_cxx/main.swift`, which compiles and links for
 - C++ exceptions cannot be caught in Swift. Swift does not translate a thrown C++ exception into a Swift error, so a C++
   function that throws must not be called from Swift. This was not measured with a throwing function here.
 
+## Types without a public destructor
+
+The Swift importer does not import a C++ record that has no public destructor. The note reads "record 'X' is not automatically
+available: it must have a copy/move constructor and a destructor; does this type have reference semantics?", and a Swift
+reference to it fails with "'X' is not a member type of enum '__ObjC.facebook.jsi'". The jsi headers declare their interface
+bases with protected destructors on purpose ("Interfaces are not destructible"): `ICast`, `IRuntime` and `ISerialization`
+(the last one is also under `JSI_UNSTABLE`). So `facebook.jsi.IRuntime` cannot be named from Swift. Measured: with the three
+destructors public and `JSI_UNSTABLE` defined, the jsi probe compiles with no errors; the unchanged header fails with the same
+error under Apple's `swiftc` (via `xcrun`, iPhoneOS SDK, arm64), so this is the importer's rule, not the fork's. Swift code
+names `facebook.jsi.Runtime` instead: it is concrete, has a public destructor, derives from `IRuntime`, and imports. The jsi
+header and the fork are not patched for this. Changing the header would be a react-native patch owned by the consuming app,
+and is the fallback only if `Runtime` cannot serve.
+
 ## Why the fork carries the compiler patch
 
 Each row is a host compile (`-c`, no link) for armv7 iOS 6.0, with the flags `apple.swift.runtime_flags` gives when
