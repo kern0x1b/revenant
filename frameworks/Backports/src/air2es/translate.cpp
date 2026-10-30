@@ -804,6 +804,7 @@ private:
     struct ActiveLoop {
         BasicBlock *header = nullptr;
         BasicBlock *exit = nullptr;
+        std::set<const BasicBlock *> body;
     };
 
     struct Frame {
@@ -1036,13 +1037,32 @@ private:
         return false;
     }
 
+    bool insideLoop(const BasicBlock *block)
+    {
+        if (loops_.empty())
+            return true;
+        const ActiveLoop &loop = loops_.back();
+        return block == loop.header || block == loop.exit || loop.body.count(block) > 0;
+    }
+
     bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
     {
         std::string index = "t" + std::to_string(counter_++);
         statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
                   std::to_string(cycle.last) + "; " + index + "++) {\n");
         depth_++;
-        loops_.push_back(ActiveLoop{header, cycle.exit});
+        ActiveLoop loop{header, cycle.exit, {}};
+        std::vector<const BasicBlock *> pending = {header};
+        while (!pending.empty()) {
+            const Instruction *terminator = pending.back()->getTerminator();
+            pending.pop_back();
+            for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
+                const BasicBlock *next = terminator->getSuccessor(i);
+                if (next != header && next != cycle.exit && loop.body.insert(next).second)
+                    pending.push_back(next);
+            }
+        }
+        loops_.push_back(loop);
         bool emitted = region(header, nullptr);
         loops_.pop_back();
         depth_--;
@@ -1062,6 +1082,8 @@ private:
     {
         if (!loops_.empty() && to == loops_.back().exit)
             return leave(from, to);
+        if (!insideLoop(to))
+            return refuse("a branch that leaves a loop somewhere other than its exit");
         return edgeCopies(from, to) && region(to, join);
     }
 
@@ -1123,6 +1145,8 @@ private:
             if (branch->isUnconditional()) {
                 if (!loops_.empty() && branch->getSuccessor(0) == loops_.back().exit)
                     return leave(block, branch->getSuccessor(0));
+                if (!insideLoop(branch->getSuccessor(0)))
+                    return refuse("a branch that leaves a loop somewhere other than its exit");
                 if (!edgeCopies(block, branch->getSuccessor(0)))
                     return false;
                 block = branch->getSuccessor(0);
@@ -1133,6 +1157,8 @@ private:
                 return refuse("a branch that never rejoins");
             if (!loops_.empty() && join == loops_.back().exit)
                 join = loops_.back().header;
+            if (!insideLoop(join))
+                return refuse("a branch that rejoins outside its loop");
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
