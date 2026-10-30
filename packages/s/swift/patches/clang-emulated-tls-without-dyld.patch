@@ -1,5 +1,5 @@
 diff --git a/llvm-project/clang/include/clang/Basic/TargetOptions.h b/llvm-project/clang/include/clang/Basic/TargetOptions.h
-index 51a2cfe1..9e07f85a 100644
+index 51a2cfe14..9e07f85a8 100644
 --- a/llvm-project/clang/include/clang/Basic/TargetOptions.h
 +++ b/llvm-project/clang/include/clang/Basic/TargetOptions.h
 @@ -50,6 +50,10 @@ public:
@@ -14,10 +14,10 @@ index 51a2cfe1..9e07f85a 100644
    std::vector<std::string> FeaturesAsWritten;
  
 diff --git a/llvm-project/clang/lib/Basic/Targets/OSTargets.h b/llvm-project/clang/lib/Basic/Targets/OSTargets.h
-index 7c466660..159ff5c8 100644
+index 988dea3de..7de84695e 100644
 --- a/llvm-project/clang/lib/Basic/Targets/OSTargets.h
 +++ b/llvm-project/clang/lib/Basic/Targets/OSTargets.h
-@@ -111,6 +111,12 @@ public:
+@@ -104,6 +104,12 @@ public:
      } else if (Triple.isXROS())
        this->TLSSupported = true;
  
@@ -31,10 +31,10 @@ index 7c466660..159ff5c8 100644
    }
  
 diff --git a/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp b/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
-index 2f43eb6e..117e0304 100644
+index baca4e4f1..05c5029fc 100644
 --- a/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
 +++ b/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
-@@ -2959,7 +2959,11 @@ static void emitGlobalDtorWithCXAAtExit(CodeGenFunction &CGF,
+@@ -2879,7 +2879,11 @@ static void emitGlobalDtorWithCXAAtExit(CodeGenFunction &CGF,
    const char *Name = "__cxa_atexit";
    if (TLS) {
      const llvm::Triple &T = CGF.getTarget().getTriple();
@@ -48,11 +48,11 @@ index 2f43eb6e..117e0304 100644
  
    // We're assuming that the destructor function is something we can
 diff --git a/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp b/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
-index 8898e63a..55a9dd15 100644
+index 436422a1c..fed09c1e6 100644
 --- a/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
 +++ b/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
-@@ -5038,6 +5038,11 @@ static bool ParseTargetArgs(TargetOptions &Opts, ArgList &Args,
- #include "clang/Options/Options.inc"
+@@ -5456,6 +5456,11 @@ static bool ParseTargetArgs(TargetOptions &Opts, ArgList &Args,
+ #include "clang/Driver/Options.inc"
  #undef TARGET_OPTION_WITH_MARSHALLING
  
 +  // The code generator owns -femulated-tls and writes it back; the target only
