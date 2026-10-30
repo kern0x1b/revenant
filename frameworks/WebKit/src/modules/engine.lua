@@ -139,6 +139,7 @@ function options(ctx)
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
+        {"IOSURFACE_LIBRARY", ctx.iosurface},
         {"WEBKIT_IOS6_LIBCXX_DIR", ctx.libcxx},
         {"WebP_INCLUDE_DIR", path.join(ctx.libwebp, "include")},
         {"WebP_LIBRARY", library(ctx.libwebp, "webp")},
@@ -298,6 +299,10 @@ function context(package, build)
         source = source,
         build = build,
         stubs = path.join(member, "compat", "stubs"),
+        -- WebCore's IOSurface load command names the private image. iOS 6 has no
+        -- public IOSurface.framework (neither dyld cache holds it), so the public
+        -- name would stop the engine loading. The stub lists what WebCore imports.
+        iosurface = path.join(member, "compat", "stubs", "IOSurfacePrivate.tbd"),
         libcxx = dir("libcxx"),
         icu = dir("icu"),
         icu_version = package:dep("icu"):version_str(),
@@ -416,6 +421,9 @@ function verify_configured(ctx)
     end
     if not values.WEBKIT_IOS6_EXPORTS or values.WEBKIT_IOS6_EXPORTS.value ~= ctx.exports then
         table.insert(problems, string.format("WEBKIT_IOS6_EXPORTS is not %s", ctx.exports))
+    end
+    if not values.IOSURFACE_LIBRARY or values.IOSURFACE_LIBRARY.value ~= ctx.iosurface then
+        table.insert(problems, string.format("IOSURFACE_LIBRARY is not %s, so WebCore would name the public IOSurface.framework", ctx.iosurface))
     end
     local include = values.CMAKE_PROJECT_WebKit_INCLUDE
     if not include or not os.isfile(include.value) then

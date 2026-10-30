@@ -202,6 +202,12 @@ The refusals in `B/Security` (SecAccessControl, SecKey, SharedWebCredentials) ar
 - Telegram's own gates: `VNRecognizeTextRequest` sits behind `#available(iOS 13.0)` (`ImageContentAnalysis.swift:307`), and `VNDetectRectanglesRequest` behind `@available(iOS 11.0)` (`PGRectangleDetector.m:306-310`). The rectangle request is implemented (`B/Vision/VNHandlers.m:170, 280`), so it is not a finding.
 - `accessibilityIgnoresInvertColors` (24 Telegram files): iOS 6 has no Smart Invert, so no effect is the true answer. Its body was not read.
 
+## Open gaps
+
+Found while linking the engine. Not blocking the engine.
+
+- **IOSurface constants.** `frameworks/Backports/src/IOSurface/IOSurface11_0.m` defines 7 of the 15 `IOSurface` constants that WebCore imports, and all 22 functions. The 8 it lacks are `kIOSurfaceAllocSize`, `kIOSurfaceElementHeight`, `kIOSurfacePlaneBytesPerRow`, `kIOSurfacePlaneHeight`, `kIOSurfacePlaneInfo`, `kIOSurfacePlaneOffset`, `kIOSurfacePlaneSize` and `kIOSurfacePlaneWidth`. Their string values are `IOSurface` plus the suffix, as the 6.1.3 image holds them (`strings` of the extracted image). The engine does not need them from the backport: WebCore links the private IOSurface image directly (`IOSURFACE_LIBRARY` in `frameworks/WebKit/src/compat/stubs/IOSurfacePrivate.tbd`), and that image exports all of them on 6.0 and 6.1.3. The gap matters only to a native app that imports one of the 8 through the backport. The fix is a constant per name in `IOSurface11_0.m`, when a native app needs it.
+
 ## Not verified
 
 - The constant scan covers 1172 rows (903 constant, 269 empty). The rows in this table were read individually. The remaining 235 non-UIKit, non-AV, non-Metal constants (`rest.txt` in scratch) were not classified one by one.
