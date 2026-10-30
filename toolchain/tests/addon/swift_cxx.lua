@@ -21,22 +21,16 @@ local function installed()
            libcxx and path.directory(path.directory(path.directory(path.directory(libcxx))))
 end
 
-local function needs_emulated_tls(architecture, deployment)
-    local native = architecture == "arm64" and "8.0" or "9.0"
-    return semver.compare(deployment, native) < 0
-end
-
 local function build(folder, opt, swift, runtime, libcxx, fixture, architecture, deployment)
     local work = path.join(folder, fixture, architecture)
     os.mkdir(work)
     local source = path.join(FIXTURES, fixture)
     local binary = path.join(work, "probe")
+    local emulated = import("apple.architectures", {rootdir = opt.modules, anonymous = true}).emulated_tls(architecture, deployment)
     local argv = table.join(swift.runtime_flags({architecture = architecture, deployment = deployment, sdk = opt.sdk,
                                                  resources = runtime, module = "probe", has_main = true,
-                                                 cxx_headers = path.join(libcxx, "include", "c++", "v1"),
-                                                 emulated_tls = needs_emulated_tls(architecture, deployment)}),
-                            {"-cxx-interoperability-mode=default",
-                             "-tools-directory", path.directory(opt.clang), "-use-ld=" .. opt.ld64,
+                                                 cxx_headers = path.join(libcxx, "include", "c++", "v1"), emulated_tls = emulated}),
+                            {"-tools-directory", path.directory(opt.clang), "-use-ld=" .. opt.ld64,
                              "-Xclang-linker", "-mlinker-version=" .. fixtures.linker_version(opt.ld64),
                              "-Xcc", "-fmodule-map-file=" .. path.join(source, "module.modulemap"),
                              "-L", path.join(runtime, "iphoneos"), "-L", path.join(libcxx, "lib"),

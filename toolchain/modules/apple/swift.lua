@@ -180,7 +180,7 @@ function runtime_flags(opt)
         table.insert(flags, "-parse-as-library")
     end
     if opt.cxx_headers then
-        table.join2(flags, {"-Xcc", "-nostdinc++", "-Xcc", "-isystem", "-Xcc", opt.cxx_headers})
+        table.join2(flags, {"-cxx-interoperability-mode=default", "-Xcc", "-nostdinc++", "-Xcc", "-isystem", "-Xcc", opt.cxx_headers})
     end
     if opt.emulated_tls then
         table.join2(flags, {"-Xcc", "-femulated-tls"})
