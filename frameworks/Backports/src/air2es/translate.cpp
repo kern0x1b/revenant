@@ -87,6 +87,7 @@ struct Binding {
     uint64_t index = 0;
     uint64_t stride = 0;
     bool indexedByVertex = false;
+    bool indexedByInstance = false;
     std::vector<Member> members;
     Argument *argument = nullptr;
 };
@@ -95,6 +96,14 @@ struct Address {
     Binding *binding = nullptr;
     uint64_t offset = 0;
     bool indexed = false;
+    bool instanced = false;
+    // A dynamic index into an array member: the element it names is one of `selectCount` elements of `selectStride`
+    // bytes from `offset`, and `inner` is the offset within that element.
+    Value *selector = nullptr;
+    uint64_t selectCount = 0;
+    uint64_t selectStride = 0;
+    Type *selectType = nullptr;
+    uint64_t inner = 0;
 };
 
 struct Local {
@@ -363,8 +372,12 @@ public:
                 if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction))
                     if (!gep->hasAllConstantIndices()) {
                         Address address;
-                        if (resolve(gep, address) && address.indexed)
-                            address.binding->indexedByVertex = true;
+                        if (resolve(gep, address)) {
+                            if (address.indexed)
+                                address.binding->indexedByVertex = true;
+                            if (address.instanced)
+                                address.binding->indexedByInstance = true;
+                        }
                     }
         for (size_t slot = 0; slot < bindings_.size(); slot++) {
             const Binding &binding = bindings_[slot];
@@ -509,7 +522,7 @@ private:
         return layout_.getTypeAllocSize(type).getFixedValue();
     }
 
-    bool isVertexIndex(const Value *index)
+    bool isIndexOf(const Value *index, const char *kind)
     {
         const Value *source = index;
         if (auto *extend = dyn_cast<ZExtInst>(index))
@@ -517,7 +530,23 @@ private:
         else if (auto *extend = dyn_cast<SExtInst>(index))
             source = extend->getOperand(0);
         const Binding *binding = bindingOf(source);
-        return binding && binding->kind == "air.vertex_id";
+        return binding && binding->kind == kind;
+    }
+
+    bool isVertexIndex(const Value *index)
+    {
+        return isIndexOf(index, "air.vertex_id");
+    }
+
+    // An i32 sign-extended to i64 that only addresses memory. The address reads the i32, as a widened index does.
+    bool isAddressIndex(const SExtInst &extend)
+    {
+        if (!extend.getOperand(0)->getType()->isIntegerTy(32))
+            return false;
+        for (const User *user : extend.users())
+            if (!isa<GetElementPtrInst>(user))
+                return false;
+        return true;
     }
 
     bool resolve(const Value *pointer, Address &out)
@@ -536,27 +565,50 @@ private:
             return false;
         Type *type = gep->getSourceElementType();
         for (unsigned i = 0; i < gep->getNumIndices(); i++) {
-            const Value *index = gep->getOperand(i + 1);
+            Value *index = gep->getOperand(i + 1);
             if (i == 0 && !isa<ConstantInt>(index)) {
-                if (!isVertexIndex(index) || allocSize(type) != out.binding->stride)
+                bool vertex = isVertexIndex(index);
+                bool instance = !vertex && isIndexOf(index, "air.instance_id");
+                if (!(vertex || instance) || allocSize(type) != out.binding->stride)
                     return false;
-                out.indexed = true;
+                out.indexed = vertex;
+                out.instanced = instance;
                 continue;
             }
+            uint64_t &where = out.selector ? out.inner : out.offset;
             auto *constant = dyn_cast<ConstantInt>(index);
-            if (!constant)
-                return false;
+            if (!constant) {
+                // A dynamic index into an array member selects one of its elements, once per address.
+                auto *array = dyn_cast<ArrayType>(type);
+                if (!array || out.selector || out.indexed)
+                    return false;
+                // An i32 index widened to i64 is that i32, as the vertex index is.
+                Value *selector = index;
+                if (auto *extend = dyn_cast<CastInst>(index);
+                    extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt) &&
+                    extend->getOperand(0)->getType()->isIntegerTy(32))
+                    selector = extend->getOperand(0);
+                out.selector = selector;
+                out.selectCount = array->getNumElements();
+                out.selectStride = allocSize(array->getElementType());
+                out.selectType = array->getElementType();
+                type = array->getElementType();
+                continue;
+            }
             uint64_t element = constant->getZExtValue();
             if (i == 0) {
                 out.offset += element * allocSize(type);
             } else if (auto *structure = dyn_cast<StructType>(type)) {
                 if (element >= structure->getNumElements())
                     return false;
-                out.offset += layout_.getStructLayout(structure)->getElementOffset((unsigned)element).getFixedValue();
+                where += layout_.getStructLayout(structure)->getElementOffset((unsigned)element).getFixedValue();
                 type = structure->getElementType((unsigned)element);
             } else if (auto *array = dyn_cast<ArrayType>(type)) {
-                out.offset += element * allocSize(array->getElementType());
+                where += element * allocSize(array->getElementType());
                 type = array->getElementType();
+            } else if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+                where += element * allocSize(vector->getElementType());
+                type = vector->getElementType();
             } else {
                 return false;
             }
@@ -599,7 +651,8 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
-    bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out)
+    // `scoped` names the uniform after its buffer, so members of different buffers that share a name stay apart.
+    bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped = false)
     {
         std::string scalar;
         unsigned components = 0;
@@ -615,7 +668,7 @@ private:
         bool real = attribute || scalar == "float" || scalar == "half";
         std::string suffix = std::to_string(components);
         std::string glsl = real ? (components == 1 ? "float" : "vec" + suffix) : (components == 1 ? "int" : "ivec" + suffix);
-        std::string name = attribute ? "a_" + field.name : field.name;
+        std::string name = attribute ? "a_" + field.name : scoped ? binding.name + "_" + field.name : field.name;
         bool fresh = !declared_.count(name);
         declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name);
         if (fresh) {
@@ -625,7 +678,8 @@ private:
             if (attribute)
                 attributeLines_.push_back("{" + common + ", \"stride\": " + std::to_string(binding.stride) + tail);
             else
-                uniformLines_.push_back("{" + common + ", \"instanceStride\": 0" + tail);
+                uniformLines_.push_back("{" + common + ", \"instanceStride\": " +
+                                        std::to_string(binding.indexedByInstance ? binding.stride : 0) + tail);
         }
         uint64_t within = offset - field.offset;
         if (components == 1) {
@@ -716,10 +770,66 @@ private:
             return refuse("a load from " + address.binding->kind);
         if (address.indexed != address.binding->indexedByVertex)
             return refuse("a buffer read both per vertex and at a fixed place: " + address.binding->name);
+        if (address.instanced != address.binding->indexedByInstance)
+            return refuse("a buffer read both per instance and at a fixed place: " + address.binding->name);
+        if (address.selector)
+            return selectMember(address, *load, out);
         const Member *field = memberAt(*address.binding, address.offset);
         if (!field)
             return refuse("a load outside the members of " + address.binding->name);
-        return accessMember(*address.binding, *field, address.offset, load->getType(), out);
+        return accessMember(*address.binding, *field, address.offset, load->getType(), out, address.binding->indexedByInstance);
+    }
+
+    bool metalNameOf(Type *type, std::string &name)
+    {
+        unsigned count = 1;
+        if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+            count = vector->getNumElements();
+            type = vector->getElementType();
+        }
+        std::string scalar;
+        if (type->isFloatTy())
+            scalar = "float";
+        else if (type->isHalfTy())
+            scalar = "half";
+        else if (type->isIntegerTy(32))
+            scalar = "int";
+        else
+            return false;
+        name = count == 1 ? scalar : scalar + std::to_string(count);
+        return true;
+    }
+
+    // A load through a dynamic index into an array member of a buffer. Each element is a uniform of its own, and a
+    // select chain over them picks the element the index names. The last element is the default, as for a table.
+    bool selectMember(const Address &address, LoadInst &load, std::string &out)
+    {
+        Binding &binding = *address.binding;
+        const Member *field = memberAt(binding, address.offset);
+        if (!field)
+            return refuse("a load outside the members of " + binding.name);
+        if (address.selectCount == 0 || address.selectCount > 64)
+            return refuse("an array member of " + binding.name + " with " + std::to_string(address.selectCount) + " elements");
+        std::string type;
+        if (!metalNameOf(address.selectType, type))
+            return refuse("an array member of a type this emitter does not hold in " + binding.name);
+        std::string selector;
+        if (!expression(address.selector, selector))
+            return false;
+        std::string chain;
+        for (uint64_t k = address.selectCount; k-- > 0;) {
+            Member element{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride, address.selectStride, type};
+            std::string value;
+            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, true))
+                return false;
+            chain = chain.empty() ? value : "((" + selector + " == " + std::to_string(k) + ") ? " + value + " : " + chain + ")";
+        }
+        std::string temp;
+        if (!local(load, temp))
+            return false;
+        statement(temp + " = " + chain + ";\n");
+        out = temp;
+        return true;
     }
 
     bool expression(Value *value, std::string &out)
@@ -1431,6 +1541,8 @@ private:
             return true;
         }
         if (auto *extend = dyn_cast<ZExtInst>(&instruction); extend && isVertexIndex(extend))
+            return true;
+        if (auto *extend = dyn_cast<SExtInst>(&instruction); extend && isAddressIndex(*extend))
             return true;
         if (auto *insert = dyn_cast<InsertValueInst>(&instruction)) {
             if (insert->getNumIndices() != 1)

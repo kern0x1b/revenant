@@ -71,6 +71,10 @@ and why, so it is not rediscovered later.
   An index outside the table takes the last entry. LLVM calls that case undefined, so
   the choice is ours.
 - A variable read from an empty constant table is refused by name.
+- A buffer read at the instance id is read as uniforms of that instance's element: the uniform carries
+  `instanceStride` set to the element size, and the host offsets it by the instance of each draw. A dynamic index into an
+  array member of a buffer is a select chain over one uniform per element, as for a constant table. The instance probe
+  checks both on the 4S through the Metal backport.
 - A read of a texture at the thread position is a nearest fetch of the texel centre, with the size from the host. A
   logical shift right of a thread position, or of one of its lanes, by a constant is an integer division by 2^k. The
   texture stage of the ES 2 probe checks both on the 4S: exact for the sizes it runs, which are up to 1024 by 1024.
