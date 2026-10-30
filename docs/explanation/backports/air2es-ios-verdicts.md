@@ -107,6 +107,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | fragment outputs narrower than four lanes padded to `vec4(…, 0.0, 0.0, 1.0)` (`colorOf`) | 33 | 56 | none; the GLSL of `histogramPrepareFragmentShader` changed from `gl_FragColor = t9;` |
 | `air.instance_id` lowered to `int(revenant_instance)`, a `uniform float` that the host sets once per instance (`translate.cpp`) | 33 | 56 | none to OK; six vertex functions leave the argument-kind reason: `dustEffectVertex` to a urem, `backgroundStarVertex` and `walletAmountVertex` and `walletAmountLayerVertex` to a local, `referenceHighlightVertex` and `sparkleVertex` to an address |
 | `width` and `height` queries of the output texture lowered to `<tex>_size.x` and `.y` (`translate.cpp`, `air2es_check.lua`); the host sets the size of an output texture from its render target (`RevenantMetalEncoder.m`) | 33 | 56 | none to OK; the eight kernels with an output-size query leave the width refusal: `convertNV12`, `downsampleNV12` and `compositeRoundVideo` to `and`, `gaussianBlurHorizontal` and `gaussianBlurVertical` (two libraries) to an unsigned comparison, `walletAmountBlur` to a comparison |
+| bitwise `and` with a constant mask in floats, signed and unordered compares, per-lane vector compares, `air.all.v2i1` to `all` (`translate.cpp`; three commits, measured after the last) | 33 | 56 | none to OK; `convertNV12`, `downsampleNV12` and `compositeRoundVideo` leave the `and` for a `switch` terminator; the gaussian blurs leave the vector compare for `air.write_texture_2d.v4f16`; `walletAmountBlur` leaves the comparison for a sign extension to i64; `sparkleFragment` leaves it for `air.fast_saturate.f32` |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
@@ -116,13 +117,29 @@ Checks on the state the table shows:
 - `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 56 refusals have 23 reasons. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
+The 56 refusals have 24 reasons after the bitwise `and` and comparison changes below. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
 `width` and `height` of an output texture (the width group, decision: host loader sets `<tex>_size`):
 
 - the translator accepts a size query on a `texture2d<..., access::write>` argument and emits `uniform vec2 <name>_size` with `"output": true` in the sizes entry of the reflection;
 - the host sets that uniform from the render target of the pass (`_target`), and for a translated kernel the output texture is the color attachment (`MTLComputeCommandEncoder8.m`). The iOS build of `MetalInstanceProbe` compiles the host loader (`RevenantMetalEncoder.m`, `RevenantMetalPipeline.m`); the 4S has not run this yet, and no entry is OK in this group, so the 33 OK entries and their 33/33 probe are unchanged;
-- the eight kernels now stop at a different operation each, which is their next blocker: a bitwise `and` (three), an unsigned comparison of integers other than 32 bits (four, the two gaussian blurs in two libraries), and a comparison (`walletAmountBlur`).
+- the eight kernels stop at a different operation each: a bitwise `and` (three), an unsigned comparison of integers other than 32 bits (four, the two gaussian blurs in two libraries), and a comparison (`walletAmountBlur`). The next section lowers the first two and records where all eight stop now.
+
+Bitwise `and`, comparisons and `all` (decision: an exact float emulation of a constant-mask `and`, and per-lane vector compares):
+
+- `x & m` with a constant `m` that keeps bit 31 is written as `int(float(x) - S)`, where `S` is the sum over the cleared bits `b` of `2^b * floor(mod(float(x), 2^(b+1)) / 2^b)`. GLSL ES 1.00 has no integer bit operators and reserves `%`, so the emitter has no other exact form.
+- The operand must be the result of a float-to-integer conversion (`air.convert.u.i32.f` or `s`). The integer part of a float32 is always a float32 value, so the float arithmetic on it is exact. Any other operand, a mask that clears bit 31, and a non-constant mask are refused by name.
+- The shader is declared `precision highp float` when the emulation is used. The default `mediump` holds integers only up to 2048.
+- Checks: on the host, in single precision with `-ffp-contract=off`, the formula equals `x & ~2` for every integer below 2^24 in magnitude and for 20 million truncated floats (53,554,495 values, 0 mismatches). The emitted statements compile as ES 1.00 under `glslangValidator`; a control shader with a native `&` is rejected, as expected. Not verified: highp fragment shaders and this `mod` on the 4S (SGX 543).
+- Signed `slt`, `sgt`, `sle` and `sge` map to the GLSL operators. An unordered float predicate maps to its ordered form only with `nnan`, where no operand is NaN; without it, it is refused by name. The ordered `one` maps to `!=`.
+- A vector compare builds its `bvec` from one comparison per lane, because GLSL ES 1.00 compares vectors only with functions. The unsigned predicates on 32-bit lanes use the sign split of each lane, which is exact for every int32. `air.all.v2i1` maps to `all`.
+
+The blockers these kernels stop at now:
+
+- `convertNV12`, `downsampleNV12` and `compositeRoundVideo`: a `switch` terminator on the convert result, which the structurer does not handle;
+- `gaussianBlurHorizontal` and `gaussianBlurVertical` in both libraries: `air.write_texture_2d.v4f16`;
+- `walletAmountBlur`: `sext i32` to `i64`, used as a constant-buffer index;
+- `sparkleFragment`: `air.fast_saturate.f32`.
 
 `instance_id` (decision: a host-filled uniform, looped per instance):
 
@@ -145,4 +162,4 @@ Two ways to meet that without a compute shader:
 
 The decision between (a) and leaving the two kernels unsupported is open.
 
-The next groups in the order set for the work are the locals of a type this emitter does not hold (9, six before plus three from `instance_id`), the clamp-to-zero samples (5), and then the operations the width group now stops at: the unsigned comparisons (4), the bitwise `and` (3) and the comparison (1).
+The next groups in the order set for the work are the locals of a type this emitter does not hold (9, six before plus three from `instance_id`) and the clamp-to-zero samples (5). The bitwise `and` and comparison group is translated; the blockers it leaves are listed above, and they belong to the later groups.
