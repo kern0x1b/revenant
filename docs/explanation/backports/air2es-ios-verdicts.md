@@ -167,6 +167,14 @@ Clamp-to-zero samples (decision: kept refused, with the reason named; an exact e
 - A nearest-filter clamp-to-zero sample needs no size: a coordinate in [0, 1) indexes a texel, and any other coordinate reads zero. No corpus entry uses one, so it is not implemented.
 - Measured: 33 OK and 56 REFUSED before and after. The five rows keep their refusal, and the reason changed only for them. `air2es_test.lua`: 15 cases pass.
 
+Integer operations, the first refusal of four kernels (decision: none translated yet; the owner decides one assumption):
+
+- `callBlobVertex` divides the vertex index by constants (`udiv` by 3 and 24, `urem` by 3). Its next refusal is a `srem` by a value loaded from a buffer, and that value has no bound the translator can see. A division of the vertex index by a constant could be GLSL int division, but the translator refuses this kernel at the `srem` first, so no entry uses it, and the 4S has not checked int division. It is not translated.
+- `dustEffectVertex` and `dustEffectUpdateParticle` divide by a value loaded from a buffer. The divisor may be zero or negative, and the translator cannot bound it.
+- `dustEffectInitializeParticle` and `backgroundStarVertex` compute a 32-bit hash with xor, shifts and a wrap-around multiply. GLSL ES 1.00 has no bit operators, and float arithmetic does not give a 32-bit wrap-around multiply exactly without multi-precision steps. They stay refused.
+- Decision for the owner: whether a buffer divisor may be assumed positive and below 2^24. The float attribute holds a vertex index exactly only below 2^24. Accepting the assumption would move `callBlobVertex` to its next blocker and lower the two dust divisions; it would not make any entry OK by itself. The hashes need another approach.
+- Measured: 33 OK and 56 REFUSED, the same as before this group.
+
 `instance_id` (decision: a host-filled uniform, looped per instance):
 
 - the emitter declares `uniform float revenant_instance;` and reads `int(revenant_instance)`. The name is the one the host already sets (`RevenantMetalPipeline.m`, `revenant_instance`), so the host needed no change;
