@@ -71,8 +71,7 @@ toolchain("apple-ios")
         toolchain:add("runenvs", "IPHONEOS_DEPLOYMENT_TARGET", minimum)
         local target = table.join({"-target", toolchain:arch() .. "-apple-ios", "-miphoneos-version-min=" .. minimum, "-isysroot", found.sdk},
                                   found.linker and {"-mlinker-version=" .. toolchain:config("ld64")} or {})
-        local native_tls = toolchain:is_arch("arm64") and "8.0" or "9.0"
-        local emulated_tls = semver.compare(minimum, native_tls) < 0
+        local emulated_tls = import("@self.apple.architectures").emulated_tls(toolchain:arch(), minimum)
         local thread_local = emulated_tls and {"-femulated-tls"} or {}
         toolchain:config_set("emulated_tls", emulated_tls)
         toolchain:config_set("atomic_libcalls", semver.compare(minimum, "7.0") < 0)
