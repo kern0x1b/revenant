@@ -142,9 +142,10 @@ function verify_plists(root, location)
                 checked = checked + 1
                 local missing = {}
                 for _, key in ipairs(table.join(plist_keys, {"CFBundleName"})) do
-                    local value = try { function () return os.iorunv("plutil", {"-extract", key, "json", "-o", "-", plist}) end }
+                    -- json fails on a plist with any object JSON cannot hold; raw prints an array's count, so 0 is empty
+                    local value = try { function () return os.iorunv("plutil", {"-extract", key, "raw", "-o", "-", plist}) end }
                     local text = value and value:trim() or ""
-                    if text == "" or text == "\"\"" or text == "[]" then
+                    if text == "" or text == "0" then
                         table.insert(missing, key)
                     end
                 end
