@@ -1,0 +1,36 @@
+--- a/stdlib/public/Cxx/std/String.swift
++++ b/stdlib/public/Cxx/std/String.swift
+@@ -24,16 +24,14 @@
+     self = string.withCString(encodedAs: UTF8.self) { buffer in
+       // MSVC STL has a enable_if template guard on the 3-parameter constructor,
+       // and thus it's not imported into Swift.
+-      // libc++ provides both 2-parameter and 3-parameter constructors.
+-      // libstdc++ only provides the 3-parameter constructor.
++      // libc++ 23 provides only the 3-parameter constructor, with a defaulted
++      // allocator that Swift does not import, and libstdc++ provides only the
++      // 3-parameter constructor too. The 3-parameter form is therefore spelled
++      // out on every platform.
+ 
+       // Note that we might be compiling with libc++ on Linux, even if it's not
+-      // the default stdlib on a particular distro. 
+-#if os(Linux)
++      // the default stdlib on a particular distro.
+       unsafe std.string(buffer, string.utf8.count, .init())
+-#else
+-      unsafe std.string(buffer, string.utf8.count)
+-#endif
+     }
+   }
+ 
+@@ -46,11 +44,7 @@
+ 
+   @_alwaysEmitIntoClient
+   public init(_ string: UnsafePointer<CChar>) {
+-#if os(Linux)
+     unsafe self.init(string, UTF8._nullCodeUnitOffset(in: string), .init())
+-#else
+-    unsafe self.init(string, UTF8._nullCodeUnitOffset(in: string))
+-#endif
+   }
+ 
+   @_alwaysEmitIntoClient
