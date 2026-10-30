@@ -794,6 +794,18 @@ private:
         int64_t last = 0;
     };
 
+    struct Cycle {
+        PHINode *index = nullptr;
+        BasicBlock *exit = nullptr;
+        int64_t first = 0;
+        int64_t last = 0;
+    };
+
+    struct ActiveLoop {
+        BasicBlock *header = nullptr;
+        BasicBlock *exit = nullptr;
+    };
+
     struct Frame {
         const Function *function = nullptr;
         std::string result;
@@ -973,8 +985,83 @@ private:
         return true;
     }
 
+    bool cycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        auto *branch = dyn_cast<BranchInst>(header->getTerminator());
+        if (!branch || !branch->isConditional())
+            return false;
+        for (unsigned i = 0; i < 2; i++) {
+            BasicBlock *latch = branch->getSuccessor(i);
+            BasicBlock *exit = branch->getSuccessor(1 - i);
+            auto *back = dyn_cast<BranchInst>(latch->getTerminator());
+            if (latch == header || !back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond || back->getSuccessor(backFirst ? 1 : 0) != exit)
+                continue;
+            bool exitOnTrue = !backFirst;
+            auto *test = dyn_cast<ICmpInst>(back->getCondition());
+            if (!test || test->getPredicate() != (exitOnTrue ? ICmpInst::ICMP_EQ : ICmpInst::ICMP_NE))
+                return false;
+            auto *bound = dyn_cast<ConstantInt>(test->getOperand(1));
+            auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
+            if (!bound || !next || next->getParent() != latch || next->getOpcode() != Instruction::Add)
+                return false;
+            auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
+            auto *index = dyn_cast<PHINode>(next->getOperand(0));
+            if (!step || !step->isOne() || !index || index->getParent() != header || index->getNumIncomingValues() != 2)
+                return false;
+            if (index->getIncomingValueForBlock(latch) != next)
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (index->getIncomingBlock(j) != latch)
+                    start = index->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            if (!first || first->getSExtValue() >= bound->getSExtValue())
+                return false;
+            for (User *user : next->users())
+                if (user != index && user != test)
+                    return false;
+            for (User *user : test->users())
+                if (user != back)
+                    return false;
+            cycle.index = index;
+            cycle.exit = exit;
+            cycle.first = first->getSExtValue();
+            cycle.last = bound->getSExtValue();
+            return true;
+        }
+        return false;
+    }
+
+    bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
+    {
+        std::string index = "t" + std::to_string(counter_++);
+        statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
+                  std::to_string(cycle.last) + "; " + index + "++) {\n");
+        depth_++;
+        loops_.push_back(ActiveLoop{header, cycle.exit});
+        bool emitted = region(header, nullptr);
+        loops_.pop_back();
+        depth_--;
+        statement("}\n");
+        return emitted;
+    }
+
+    bool leave(BasicBlock *from, BasicBlock *to)
+    {
+        if (!edgeCopies(from, to))
+            return false;
+        statement("break;\n");
+        return true;
+    }
+
     bool side(BasicBlock *from, BasicBlock *to, BasicBlock *join)
     {
+        if (!loops_.empty() && to == loops_.back().exit)
+            return leave(from, to);
         return edgeCopies(from, to) && region(to, join);
     }
 
@@ -999,7 +1086,19 @@ private:
 
     bool region(BasicBlock *block, BasicBlock *stop)
     {
+        bool entering = true;
         while (block && block != stop) {
+            bool iterating = !loops_.empty() && block == loops_.back().header;
+            if (iterating && !entering)
+                return true;
+            entering = false;
+            Cycle cycle;
+            if (!iterating && cycleOf(block, cycle)) {
+                if (!emitCountedCycle(block, cycle))
+                    return false;
+                block = cycle.exit;
+                continue;
+            }
             if (!visited_.insert(block).second)
                 return refuse("control flow that reaches one block twice");
             Loop loop;
@@ -1022,6 +1121,8 @@ private:
             if (!branch)
                 return refuse("a terminator this emitter does not structure");
             if (branch->isUnconditional()) {
+                if (!loops_.empty() && branch->getSuccessor(0) == loops_.back().exit)
+                    return leave(block, branch->getSuccessor(0));
                 if (!edgeCopies(block, branch->getSuccessor(0)))
                     return false;
                 block = branch->getSuccessor(0);
@@ -1030,6 +1131,8 @@ private:
             BasicBlock *join = postDominator(block);
             if (!join)
                 return refuse("a branch that never rejoins");
+            if (!loops_.empty() && join == loops_.back().exit)
+                join = loops_.back().header;
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
@@ -1552,6 +1655,7 @@ private:
     std::map<const Value *, Local> localPointers_;
     std::map<const Value *, const Local *> inlineLocals_;
     std::set<const BasicBlock *> visited_;
+    std::vector<ActiveLoop> loops_;
     std::map<const Function *, BlockSets> postDominators_;
     std::map<const Value *, Binding *> inlineBindings_;
     std::map<const Value *, std::string> inlineValues_;

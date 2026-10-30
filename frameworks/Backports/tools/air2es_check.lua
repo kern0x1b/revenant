@@ -134,15 +134,16 @@ local function reflectionProblems(stage, source, reflection)
                 fail("a texture entry with a missing or malformed field")
             else
                 local item = declared[entry.name]
-                if not item or item.glsl ~= "sampler2D" then
-                    fail("texture " .. entry.name .. " is reflected but not declared as sampler2D")
+                local expected = entry.cube == true and "samplerCube" or "sampler2D"
+                if not item or item.glsl ~= expected then
+                    fail("texture " .. entry.name .. " is reflected but not declared as " .. expected)
                 end
                 textureByIndex[entry.index] = entry.name
                 textureNamed[entry.name] = true
             end
         end
         for _, item in ipairs(declarations(source)) do
-            if item.glsl == "sampler2D" and not textureNamed[item.name] then
+            if (item.glsl == "sampler2D" or item.glsl == "samplerCube") and not textureNamed[item.name] then
                 fail("sampler " .. item.name .. " is declared but missing from reflection")
             end
         end
@@ -155,7 +156,11 @@ local function reflectionProblems(stage, source, reflection)
             end
         end
         local outputs = listOf(reflection, "outputs", fail)
-        if #outputs == 0 then
+        if stage == "kernel" then
+            if type(reflection.outputTexture) ~= "table" then
+                fail("a kernel with no outputTexture")
+            end
+        elseif #outputs == 0 then
             fail("a fragment function with no outputs")
         end
         for _, output in ipairs(outputs) do
@@ -169,7 +174,7 @@ local function reflectionProblems(stage, source, reflection)
         listOf(reflection, "fetches", fail)
     end
     for _, item in ipairs(declarations(source)) do
-        local special = SPECIAL[item.name] or sizes[item.name] or item.glsl == "sampler2D" or item.qualifier ~= "uniform"
+        local special = SPECIAL[item.name] or sizes[item.name] or item.glsl == "sampler2D" or item.glsl == "samplerCube" or item.qualifier ~= "uniform"
         if not special and not seen[item.name] then
             fail("uniform " .. item.name .. " is declared but missing from reflection")
         end
@@ -225,7 +230,7 @@ function main(folder, glslang)
         local problems = {}
         local label = tostring(entry.name) .. " (" .. tostring(entry.stage) .. ")"
         local valid = type(entry.name) == "string" and not names[entry.name] and
-            (entry.stage == "vertex" or entry.stage == "fragment")
+            (entry.stage == "vertex" or entry.stage == "fragment" or entry.stage == "kernel")
         if not valid then
             table.insert(problems, "a function entry with a bad or repeated name or stage")
         else
