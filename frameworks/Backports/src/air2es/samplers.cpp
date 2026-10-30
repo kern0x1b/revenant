@@ -21,6 +21,8 @@ std::string hex(uint64_t value)
     return text;
 }
 
+const char *const kClampToZero = "a clamp-to-zero address, which OpenGL ES 2 does not have";
+
 bool wrapping(const std::string &mode, std::string &glsl, std::string &refusal)
 {
     if (mode == "clamp_to_edge" || mode == "repeat") {
@@ -30,7 +32,7 @@ bool wrapping(const std::string &mode, std::string &glsl, std::string &refusal)
     if (mode == "mirrored_repeat")
         refusal = "a mirrored repeat address, which OpenGL ES 2 does not have";
     else if (mode == "clamp_to_zero")
-        refusal = "a clamp-to-zero address, which OpenGL ES 2 does not have";
+        refusal = kClampToZero;
     else
         refusal = "an address mode this emitter does not know: " + mode;
     return false;
@@ -51,8 +53,12 @@ bool decodeSampler(uint64_t state, const std::vector<SamplerRow> &table, GLESSam
     for (const SamplerRow &row : table) {
         if (row.state != state)
             continue;
-        if (!wrapping(row.s, out.wrapS, refusal) || !wrapping(row.t, out.wrapT, refusal))
+        if (!wrapping(row.s, out.wrapS, refusal) || !wrapping(row.t, out.wrapT, refusal)) {
+            // A linear filter blends the edge texels with the zero border, and an emulation of that needs the texture size.
+            if (refusal == kClampToZero && (std::string(row.min) == "linear" || std::string(row.mag) == "linear"))
+                refusal = "a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture";
             return false;
+        }
         if (!filtering(row.min, out.minFilter) || !filtering(row.mag, out.magFilter)) {
             refusal = std::string("a filter this emitter does not know: ") + row.min + " and " + row.mag;
             return false;
