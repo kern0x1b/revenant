@@ -1,9 +1,10 @@
 #import <Foundation/Foundation.h>
+#include <math.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
-static NSString *const REVENANT_ROOT = @"/var/revenant/es2";
+static NSString *REVENANT_ROOT;
 static NSMutableString *REVENANT_LOG;
 static NSUInteger REVENANT_FAILURES;
 
@@ -122,9 +123,179 @@ static void revenant_limits(void)
         (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION), (const char *)glGetString(GL_EXTENSIONS)];
 }
 
+static const char *REVENANT_EXACT_VERTEX =
+    "attribute vec2 a_position;\n"
+    "attribute float a_x;\n"
+    "attribute float a_expected;\n"
+    "varying float v_x;\n"
+    "varying float v_expected;\n"
+    "void main() {\n"
+    "    gl_Position = vec4(a_position, 0.0, 1.0);\n"
+    "    gl_PointSize = 1.0;\n"
+    "    v_x = a_x;\n"
+    "    v_expected = a_expected;\n"
+    "}\n";
+
+#define REVENANT_EXACT_SIDE 1024
+#define REVENANT_EXACT_COUNT (REVENANT_EXACT_SIDE * REVENANT_EXACT_SIDE)
+#define REVENANT_EXACT_SETS 3
+
+typedef struct {
+    GLfloat position[2];
+    GLfloat x;
+    GLfloat expected;
+} RevenantExactVertex;
+
+// Each set holds integers that a float-to-integer conversion can produce, so each is a float32 value.
+// The sets are: every integer from -2^19 up, the integers that straddle 2^24 (the even ones above it), and random
+// float truncations with the largest and smallest int32 values in front.
+static void revenant_exact_values(int32_t *values, int set)
+{
+    uint32_t state = 2463534242u;
+    for (size_t k = 0; k < REVENANT_EXACT_COUNT; k++) {
+        int32_t x = 0;
+        if (set == 0) {
+            x = (int32_t)k - (1 << 19);
+        } else if (set == 1) {
+            x = k < (1 << 19) ? (1 << 24) - (1 << 19) + (int32_t)k : (1 << 24) + 2 * ((int32_t)k - (1 << 19));
+        } else {
+            state ^= state << 13;
+            state ^= state >> 17;
+            state ^= state << 5;
+            float f = (float)state / 4294967296.0f * 2147483648.0f;
+            if (f > 2147483520.0f)
+                f = 2147483520.0f;
+            x = (int32_t)truncf(state & 1 ? -f : f);
+        }
+        values[k] = x;
+    }
+    if (set == 2) {
+        values[0] = INT32_MIN;
+        values[1] = -2147483520;
+        values[2] = 2147483520;
+    }
+}
+
+static void revenant_exact_fill(RevenantExactVertex *vertices, const int32_t *values, NSUInteger *unrepresentable)
+{
+    for (size_t k = 0; k < REVENANT_EXACT_COUNT; k++) {
+        size_t column = k % REVENANT_EXACT_SIDE, row = k / REVENANT_EXACT_SIDE;
+        int32_t expected = values[k] & ~((int32_t)2);
+        vertices[k].position[0] = ((GLfloat)column + 0.5f) / REVENANT_EXACT_SIDE * 2.0f - 1.0f;
+        vertices[k].position[1] = ((GLfloat)row + 0.5f) / REVENANT_EXACT_SIDE * 2.0f - 1.0f;
+        vertices[k].x = (GLfloat)values[k];
+        vertices[k].expected = (GLfloat)expected;
+        if ((int64_t)(GLfloat)values[k] != values[k] || (int64_t)(GLfloat)expected != expected)
+            (*unrepresentable)++;
+    }
+}
+
+// Runs a fragment shader over one point per pixel of a 1024x1024 target, each point carrying its integer and the
+// expected value, and counts the pixels the shader marks as equal (green) or not (red).
+static void revenant_exact(NSString *name, NSString *fragmentSource)
+{
+    BOOL fragmentOK = NO, vertexOK = NO, linked = NO;
+    NSString *fragmentLog = @"", *vertexLog = @"", *linkLog = @"";
+    GLuint fragment = revenant_compile(GL_FRAGMENT_SHADER, fragmentSource, &fragmentOK, &fragmentLog);
+    GLuint vertex = revenant_compile(GL_VERTEX_SHADER, [NSString stringWithUTF8String:REVENANT_EXACT_VERTEX], &vertexOK, &vertexLog);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    if (fragmentOK && vertexOK) {
+        glLinkProgram(program);
+        GLint status = GL_FALSE;
+        glGetProgramiv(program, GL_LINK_STATUS, &status);
+        linked = status == GL_TRUE;
+        linkLog = revenant_log(program, YES);
+    }
+    if (!linked) {
+        REVENANT_FAILURES++;
+        [REVENANT_LOG appendFormat:@"FAIL %@ exact fragment=%@ vertex=%@ link=%@\n", name,
+            fragmentOK ? @"ok" : @"fail", vertexOK ? @"ok" : @"fail", revenant_one_line(fragmentLog.length ? fragmentLog : linkLog)];
+        revenant_flush();
+        glDeleteProgram(program);
+        glDeleteShader(fragment);
+        glDeleteShader(vertex);
+        return;
+    }
+    GLint aPosition = glGetAttribLocation(program, "a_position");
+    GLint aX = glGetAttribLocation(program, "a_x");
+    GLint aExpected = glGetAttribLocation(program, "a_expected");
+
+    GLuint texture = 0, framebuffer = 0, buffer = 0;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, REVENANT_EXACT_SIDE, REVENANT_EXACT_SIDE, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+    GLenum complete = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glViewport(0, 0, REVENANT_EXACT_SIDE, REVENANT_EXACT_SIDE);
+    glUseProgram(program);
+    glEnableVertexAttribArray((GLuint)aPosition);
+    glEnableVertexAttribArray((GLuint)aX);
+    glEnableVertexAttribArray((GLuint)aExpected);
+
+    int32_t *values = malloc(sizeof(int32_t) * REVENANT_EXACT_COUNT);
+    RevenantExactVertex *vertices = malloc(sizeof(RevenantExactVertex) * REVENANT_EXACT_COUNT);
+    GLubyte *pixels = malloc(4 * REVENANT_EXACT_COUNT);
+    for (int set = 0; set < REVENANT_EXACT_SETS; set++) {
+        NSUInteger unrepresentable = 0, passed = 0, failed = 0, other = 0;
+        revenant_exact_values(values, set);
+        revenant_exact_fill(vertices, values, &unrepresentable);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(RevenantExactVertex) * REVENANT_EXACT_COUNT, vertices, GL_STATIC_DRAW);
+        glVertexAttribPointer((GLuint)aPosition, 2, GL_FLOAT, GL_FALSE, sizeof(RevenantExactVertex), (const void *)offsetof(RevenantExactVertex, position));
+        glVertexAttribPointer((GLuint)aX, 1, GL_FLOAT, GL_FALSE, sizeof(RevenantExactVertex), (const void *)offsetof(RevenantExactVertex, x));
+        glVertexAttribPointer((GLuint)aExpected, 1, GL_FLOAT, GL_FALSE, sizeof(RevenantExactVertex), (const void *)offsetof(RevenantExactVertex, expected));
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_POINTS, 0, REVENANT_EXACT_COUNT);
+        glReadPixels(0, 0, REVENANT_EXACT_SIDE, REVENANT_EXACT_SIDE, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        GLenum error = glGetError();
+        NSUInteger negative = 0, printed = 0;
+        for (size_t k = 0; k < REVENANT_EXACT_COUNT; k++) {
+            GLubyte red = pixels[4 * k], green = pixels[4 * k + 1];
+            if (green == 255 && red == 0) {
+                passed++;
+            } else if (red == 255 && green == 0) {
+                failed++;
+                if (values[k] < 0)
+                    negative++;
+                if (printed < 8) {
+                    [REVENANT_LOG appendFormat:@"  EXACT-FAIL %@ set=%d x=%d expected=%d\n",
+                        name, set, (int)values[k], (int)(values[k] & ~((int32_t)2))];
+                    printed++;
+                }
+            } else {
+                other++;
+            }
+        }
+        [REVENANT_LOG appendFormat:@"EXACT %@ set=%d points=%d pass=%lu fail=%lu negative=%lu other=%lu unrepresentable=%lu framebuffer=%x glerror=%x\n",
+            name, set, REVENANT_EXACT_COUNT, (unsigned long)passed, (unsigned long)failed, (unsigned long)negative,
+            (unsigned long)other, (unsigned long)unrepresentable, complete, error];
+    }
+    free(values);
+    free(vertices);
+    free(pixels);
+    glDeleteBuffers(1, &buffer);
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteTextures(1, &texture);
+    glDeleteProgram(program);
+    glDeleteShader(fragment);
+    glDeleteShader(vertex);
+    revenant_flush();
+}
+
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
+        REVENANT_ROOT = argc > 1 ? [NSString stringWithUTF8String:argv[1]] : @"/var/revenant/es2";
         REVENANT_LOG = [NSMutableString string];
         EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         if (!context || ![EAGLContext setCurrentContext:context]) {
@@ -142,6 +313,17 @@ int main(int argc, char *argv[])
             if (fields.count != 4 || [line hasPrefix:@"#"])
                 continue;
             NSString *translated = [NSString stringWithContentsOfFile:fields[2] encoding:NSUTF8StringEncoding error:NULL];
+            if ([fields[1] isEqualToString:@"exact"]) {
+                programs++;
+                if (!translated) {
+                    REVENANT_FAILURES++;
+                    [REVENANT_LOG appendFormat:@"FAIL %@ unreadable source\n", fields[0]];
+                    revenant_flush();
+                    continue;
+                }
+                revenant_exact(fields[0], translated);
+                continue;
+            }
             NSString *companion = [NSString stringWithContentsOfFile:fields[3] encoding:NSUTF8StringEncoding error:NULL];
             programs++;
             if (!translated || !companion) {
