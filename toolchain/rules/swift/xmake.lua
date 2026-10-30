@@ -164,6 +164,10 @@ rule("swift")
                     emitted = {"-emit-module", "-emit-module-path", path.join(moduledir, (target:values("swift.module") or target:name()) .. ".swiftmodule",
                                                                               target:arch() .. "-apple-ios.swiftmodule")}
                 end
+                local searched = {}
+                for index = 2, #modules, 2 do
+                    table.insert(searched, modules[index])
+                end
                 local argv = table.join(swift.runtime_flags({
                     architecture = target:arch(),
                     deployment = toolchain:config("deployment"),
@@ -173,6 +177,7 @@ rule("swift")
                     emulated_tls = toolchain:config("emulated_tls"),
                     plugins = table.wrap((package:envs() or {}).SWIFT_PLUGIN_PATH)[1],
                     module = target:values("swift.module") or target:name(),
+                    underlying = swift.underlying_module(target:values("swift.module") or target:name(), searched),
                     optimize = target:get("optimize"),
                     symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                     prefix_map = os.projectdir() .. "=/port",

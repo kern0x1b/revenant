@@ -20,5 +20,17 @@ function failures(opt)
                                               case[1], case[2], tostring(case[3]), case[1] == "arm64" and "iOS 8.0" or "iOS 9.0"))
         end
     end
+    if table.concat(swift.runtime_flags(base), " "):find("-import-underlying-module", 1, true) then
+        table.insert(found, "a Swift target without an underlying clang module must not pass -import-underlying-module: the compiler "
+                            .. "refuses it when no clang module of the Swift module's name exists")
+    end
+    if not table.concat(swift.runtime_flags(table.join(base, {underlying = true})), " "):find("-Xfrontend -import-underlying-module", 1, true) then
+        table.insert(found, "a Swift target whose module has an underlying clang module must pass -Xfrontend -import-underlying-module, "
+                            .. "as Xcode does for a framework target")
+    end
+    local tests = path.join(opt.modules, "..", "tests", "swift_cxx", "std")
+    if not swift.underlying_module("ProbeCxx", {tests}) or swift.underlying_module("Consumer", {tests}) then
+        table.insert(found, "a module map on the Swift search path declares the Swift module's clang module only when it names it")
+    end
     return found
 end
