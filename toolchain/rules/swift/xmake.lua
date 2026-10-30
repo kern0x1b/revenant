@@ -115,6 +115,15 @@ rule("swift")
             local toolchain = target:toolchain("apple-ios")
             toolchain:load()
             local package = target:pkg("swift-runtime") or target:pkg("swift-embedded")
+            if not package then
+                local key = "not computable here, REVENANT_PREBUILT_TRACE=1 prints it"
+                try {function ()
+                    key = import("@self.prebuilt", {anonymous = true}).key(import("core.project.project").required_package("swift-runtime"))
+                end, catch {function () end}}
+                raise("%s is Swift and needs swift-runtime or swift-embedded installed for %s iOS %s, and neither is: install swift-runtime "
+                      .. "(its prebuilt key is %s, fetched from REVENANT_PREBUILT); with REVENANT_PREBUILT_ONLY set, a missing prebuilt is an error "
+                      .. "and nothing is built from source", target:name(), toolchain:arch(), toolchain:config("deployment"), key)
+            end
             local swiftc = table.wrap((package:envs() or {}).SWIFT_EXEC)[1]
             if not swiftc or not os.isfile(swiftc) then
                 raise("%s at %s names no compiler its Swift was built with; reinstall it", package:name(), package:installdir())
