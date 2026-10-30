@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes at the end, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 33 translate (19 fragment, 14 vertex) and 56 are refused, still including all 19 kernels. The table shows the state after the changes. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 37 translate (19 fragment, 14 vertex, 4 kernel) and 52 are refused; 15 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -12,9 +12,9 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_AnimationCompression_Resources | samplingIdctShader | fragment | OK |  |
 | submodules_AnimationCompression_Resources | samplingRgbShader | fragment | OK |  |
 | submodules_AnimationCompression_Resources | samplingYuvaShader | fragment | REFUSED | a sdiv this emitter does not map |
-| submodules_Camera_CameraNeo_MetalResources | convertNV12 | kernel | REFUSED | a width of something other than a texture |
-| submodules_Camera_CameraNeo_MetalResources | downsampleNV12 | kernel | REFUSED | a width of something other than a texture |
-| submodules_Camera_CameraNeo_MetalResources | compositeRoundVideo | kernel | REFUSED | a width of something other than a texture |
+| submodules_Camera_CameraNeo_MetalResources | convertNV12 | kernel | REFUSED | a terminator this emitter does not structure |
+| submodules_Camera_CameraNeo_MetalResources | downsampleNV12 | kernel | REFUSED | a terminator this emitter does not structure |
+| submodules_Camera_CameraNeo_MetalResources | compositeRoundVideo | kernel | REFUSED | a terminator this emitter does not structure |
 | submodules_Camera_MetalResources | vertexPassThrough | vertex | OK |  |
 | submodules_Camera_MetalResources | fragmentPassThrough | fragment | OK |  |
 | submodules_DrawingUI_MetalResources | vertex_render_target | vertex | REFUSED | a member of type float4x4 in uniforms |
@@ -32,10 +32,10 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramCallsUI_Resources | i420FragmentColorConversion | fragment | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoBiPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoTriPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurHorizontal | kernel | REFUSED | a width of something other than a texture |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurVertical | kernel | REFUSED | a width of something other than a texture |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurHorizontal | kernel | OK |  |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | REFUSED | a local of a type this emitter does not hold as a variable |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | REFUSED | a udiv this emitter does not map |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundFragment | fragment | REFUSED | a call to air.dot.v2f16 |
@@ -44,15 +44,15 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | videoBiPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | videoTriPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
-| submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurHorizontal | kernel | REFUSED | a width of something other than a texture |
-| submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurVertical | kernel | REFUSED | a width of something other than a texture |
+| submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurHorizontal | kernel | OK |  |
+| submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | cameraBlobVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | cameraBlobFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoFragment | fragment | REFUSED | a call to air.mix.v4f16 |
-| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectInitializeParticle | kernel | REFUSED | a local of a type this emitter does not hold as a variable |
+| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectInitializeParticle | kernel | REFUSED | a shl this emitter does not map |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectUpdateParticle | kernel | REFUSED | a urem this emitter does not map |
-| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
+| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectVertex | vertex | REFUSED | a urem this emitter does not map |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassCrestKernel | kernel | REFUSED | a struct member this emitter does not read in parameters |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassRadialKernel | kernel | REFUSED | a struct member this emitter does not read in parameters |
@@ -70,28 +70,28 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | adjustmentsFragmentShader | fragment | REFUSED | a call to air.fmin.f16 |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceGenerateLUT | kernel | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | rgbToLightnessFragmentShader | fragment | REFUSED | a call to air.fmin.f16 |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceColorLookupFragmentShader | fragment | REFUSED | a sample with a clamp-to-zero address, which OpenGL ES 2 does not have |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurRadialFragmentShader | fragment | REFUSED | a sample with a clamp-to-zero address, which OpenGL ES 2 does not have |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | REFUSED | a sample with a clamp-to-zero address, which OpenGL ES 2 does not have |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | REFUSED | a sample with a clamp-to-zero address, which OpenGL ES 2 does not have |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeVertex | vertex | REFUSED | a local of a type this emitter does not hold as a variable |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceColorLookupFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurRadialFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeVertex | vertex | REFUSED | a call to llvm.memset.p0.i64 |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | a lshr this emitter does not map |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondVertex | vertex | REFUSED | a member of type float4x4 in u |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | referenceHighlightVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleVertex | vertex | REFUSED | an address this emitter does not read |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | referenceHighlightVertex | vertex | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarFragment | fragment | REFUSED | a call to air.fwidth.f32 |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondFragment | fragment | REFUSED | a local of a type this emitter does not hold as a variable |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondLensFragment | fragment | REFUSED | a local of a type this emitter does not hold as a variable |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleFragment | fragment | REFUSED | a comparison this emitter does not map |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondFragment | fragment | REFUSED | a member of type float4x4 in u |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondLensFragment | fragment | REFUSED | a member of type float4x4 in u |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleFragment | fragment | REFUSED | a call to air.fast_saturate.f32 |
 | submodules_TelegramUI_Components_Stories_StoryPeerListComponent_MetalResources | cameraBlobVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Stories_StoryPeerListComponent_MetalResources | cameraBlobFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_Wallet_WalletCardComponent_Resources | walletCardBackgroundVertex | vertex | REFUSED | a struct member this emitter does not read in uniforms |
-| submodules_TelegramUI_Components_Wallet_WalletCardComponent_Resources | walletCardBackgroundFragment | fragment | REFUSED | a local of a type this emitter does not hold as a variable |
-| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountBlur | kernel | REFUSED | a width of something other than a texture |
-| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
-| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountLayerVertex | vertex | REFUSED | an argument of a kind this emitter does not read |
-| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountFragment | fragment | REFUSED | a sample with a clamp-to-zero address, which OpenGL ES 2 does not have |
+| submodules_TelegramUI_Components_Wallet_WalletCardComponent_Resources | walletCardBackgroundFragment | fragment | REFUSED | a call to air.discard_fragment |
+| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountBlur | kernel | REFUSED | a cast this emitter does not map |
+| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountVertex | vertex | REFUSED | an address this emitter does not read |
+| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountLayerVertex | vertex | REFUSED | an address this emitter does not read |
+| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountFragment | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperVertex | vertex | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment1 | fragment | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment | fragment | REFUSED | a call to air.tan.f16 |
@@ -110,6 +110,9 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | bitwise `and` with a constant mask in floats, signed and unordered compares, per-lane vector compares, `air.all.v2i1` to `all` (`translate.cpp`; measured after the group's last translator commit) | 33 | 56 | none to OK; `convertNV12`, `downsampleNV12` and `compositeRoundVideo` leave the `and` for a `switch` terminator; the gaussian blurs leave the vector compare for `air.write_texture_2d.v4f16`; `walletAmountBlur` leaves the comparison for a sign extension to i64; `sparkleFragment` leaves it for `air.fast_saturate.f32` |
 | array and struct locals of the held types, declared as `T name[n]` and as a GLSL struct, each element named by its indices (`translate.cpp`; measured after this change) | 33 | 56 | none to OK; the nine kernels of the locals group leave the local refusal: `callBlobVertex` to a `udiv`, `backgroundStarVertex` to a `lshr`, `diamondFragment` and `diamondLensFragment` to a `float4x4` member in `uniforms`, `gramDiamondCompositeVertex` to `llvm.memset`, `walletCardBackgroundFragment` to `air.fast_clamp.v2f32`, `walletAmountVertex` and `walletAmountLayerVertex` to an address, `dustEffectInitializeParticle` to a `shl` |
 | the clamp-to-zero samples, reason named: a linear filter with a clamp-to-zero address, which needs the texture size (`samplers.cpp`) | 33 | 56 | none; the five samples keep the refusal, and their reason now names the linear filter and the size |
+| `air.fast_clamp` of a float2 lowered to GLSL `clamp` (`translate.cpp`) | 33 | 56 | none to OK; `walletCardBackgroundFragment` leaves the call for `air.discard_fragment` |
+| `air.write_texture_2d.v4f16` written as the output, as the v4f32 write is (`translate.cpp`) | 37 | 52 | `gaussianBlurHorizontal` and `gaussianBlurVertical` in both libraries, REFUSED to OK |
+| sample coordinates and size queries declared `precision highp float` and `highp int` (`translate.cpp`) | 37 | 52 | none; the precision line of 18 OK shaders changed and nothing else in them; the 4S compiles and links all 37 OK programs |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
@@ -119,7 +122,7 @@ Checks on the state the table shows:
 - `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 56 refusals have 28 reasons after the locals change below (24 after the bitwise `and` and comparison changes). The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
+The 52 refusals have 27 reasons after the changes below (24 after the bitwise `and` and comparison changes, 28 after the locals change). The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
 `width` and `height` of an output texture (the width group, decision: host loader sets `<tex>_size`):
 
@@ -167,6 +170,15 @@ Clamp-to-zero samples (decision: kept refused, with the reason named; an exact e
 - A nearest-filter clamp-to-zero sample needs no size: a coordinate in [0, 1) indexes a texel, and any other coordinate reads zero. No corpus entry uses one, so it is not implemented.
 - Measured: 33 OK and 56 REFUSED before and after. The five rows keep their refusal, and the reason changed only for them. `air2es_test.lua`: 15 cases pass.
 
+Texture writes of half4, and highp for sampled coordinates:
+
+- `air.write_texture_2d.v4f16` writes the output the same way `v4f32` does, so the two gaussian blurs of each library are translated. They read their input through `inTexture_size` and sample it, and the host sets that uniform from the bound texture's width and height (`RevenantMetalEncoder.m`). That host path has not run on the 4S yet, and the output-size path of the width group has not either.
+- A sample coordinate is computed from the position and a size, and the default mediump float rounds it to 10 mantissa bits. Samples and size queries therefore declare `precision highp float` and `precision highp int`, as the and emulation does. A diff of the 18 changed OK shaders shows only the precision line changed.
+- Measured on the 4S: all 37 OK programs compile and link under the ES 2 probe (`REVENANT-DONE programs 37 failures 0`). That is compile and link only. Whether the 4S samples the same values as Metal is not measured, so an OK entry means translated, compiled and structurally checked; it does not mean the sampled values are equal.
+- `air2es_check.lua` with `glslangValidator`: 0 folders fail; `air2es_test.lua`: 15 cases pass.
+
+Texture reads (`air.read_texture_2d.v4f16`, four rows: `videoBiPlanarToRGBA` and `videoTriPlanarToRGBA` in two libraries) are not translated yet. A read at the thread position is a nearest fetch at the texel centre, which needs the input size, and the chroma planes read at the position shifted right by one. The probe cannot upload a texture, so the exactness of that fetch on the 4S cannot be measured yet. Decision for the owner: whether to add a texture upload and readback to the probe first.
+
 Integer operations, the first refusal of four kernels (decision: none translated yet; the owner decides one assumption):
 
 - `callBlobVertex` divides the vertex index by constants (`udiv` by 3 and 24, `urem` by 3). Its next refusal is a `srem` by a value loaded from a buffer, and that value has no bound the translator can see. A division of the vertex index by a constant could be GLSL int division, but the translator refuses this kernel at the `srem` first, so no entry uses it, and the 4S has not checked int division. It is not translated.
@@ -196,4 +208,4 @@ Two ways to meet that without a compute shader:
 
 The decision between (a) and leaving the two kernels unsupported is open.
 
-The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the largest remaining are an address this emitter does not read (6), a texture read or write of `v4f16` (8 together), and the integer operations `udiv`, `urem`, `sdiv`, `lshr` and `shl` (6 together).
+The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the largest remaining are an address this emitter does not read (6), the texture reads of `v4f16` (4, see above), and the integer operations `udiv`, `urem`, `sdiv`, `lshr` and `shl` (6 together).

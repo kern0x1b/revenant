@@ -449,6 +449,8 @@ private:
 
     bool sampledBy(const Binding &texture, const std::string &json, const std::string &fields)
     {
+        // A sample coordinate is computed from the position and a size, which mediump rounds to 10 bits.
+        highp_ = true;
         auto known = textures_.find(texture.name);
         if (known != textures_.end())
             return known->second == json || refuse("a texture sampled with two different samplers");
@@ -1659,7 +1661,7 @@ private:
             return refuse("a threadgroup barrier, which one fragment pass cannot run; it needs a pass boundary");
         if (called.rfind("air.atomic", 0) == 0)
             return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
-        if (called == "air.write_texture_2d.v4f32")
+        if (called == "air.write_texture_2d.v4f32" || called == "air.write_texture_2d.v4f16")
             return writeTexture(call);
         if (called == "air.sample_texture_cube.v4f32")
             return sampleCube(call);
@@ -1712,6 +1714,7 @@ private:
             if (!texture || (texture->kind != "air.texture" && texture->kind != "air.write_texture"))
                 return refuse("a size of something other than a texture");
             std::string size = texture->name + "_size";
+            highp_ = true;
             bool fresh = !declared_.count(size);
             declare("uniform vec2 " + size + ";\n", size);
             if (fresh) {
