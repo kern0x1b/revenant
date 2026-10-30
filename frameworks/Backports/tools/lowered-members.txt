@@ -4236,6 +4236,7 @@ function CGAnimateImageAtURLWithBlock
 function CGAnimateImageDataWithBlock
 function CGColorCreateCopyByMatchingToColorSpace
 function CGColorSpaceCopyICCData
+function CGColorSpaceCopyPropertyList
 function CGColorSpaceGetName
 function CGColorSpaceIsHDR
 function CGColorSpaceIsHLGBased
@@ -4932,6 +4933,7 @@ function VTSessionCopyProperty
 function VTSessionSetProperty
 function _MXSignpostMetricsSnapshot
 function __attribute__
+function __darwin_check_fd_set_overflow
 function _os_log_create
 function _os_log_debug_impl
 function _os_log_error_impl
@@ -5614,6 +5616,7 @@ function revenant_edge_pop_interactor
 function revenant_elided_text
 function revenant_encode_trait_extras
 function revenant_ephemeral_cookie_storage
+function revenant_fd_set_in_range
 function revenant_feedback_motor_present
 function revenant_feedback_play
 function revenant_field_allows_copying
@@ -10418,6 +10421,13 @@ global kIIOCameraModel_ModelType
 global kIIOMetadata_CameraExtrinsicsKey
 global kIIOMetadata_CameraModelKey
 global kIOMainPortDefault
+global kIOSurfaceBytesPerElement
+global kIOSurfaceBytesPerRow
+global kIOSurfaceCacheMode
+global kIOSurfaceColorSpace
+global kIOSurfaceHeight
+global kIOSurfacePixelFormat
+global kIOSurfaceWidth
 global kMIDIPropertyAssociatedEndpoint
 global kMIDIPropertyNameConfigurationDictionary
 global kMIDIPropertyProtocolID
@@ -21900,6 +21910,8 @@ member MTLStructType -members
 member MTLTextureDescriptor +texture2DDescriptorWithPixelFormat:width:height:mipmapped:
 member MTLTextureDescriptor -copyWithZone:
 member MTLTextureDescriptor -init
+member MTLTextureDescriptor -storageMode
+member MTLTextureDescriptor -usage
 member MTLTextureReferenceType -access
 member MTLTextureReferenceType -isDepthTexture
 member MTLTextureReferenceType -textureDataType
@@ -26688,6 +26700,7 @@ member RevenantMetalBuffer -isAliasable
 member RevenantMetalBuffer -label
 member RevenantMetalBuffer -length
 member RevenantMetalBuffer -makeAliasable
+member RevenantMetalBuffer -newTextureWithDescriptor:offset:bytesPerRow:
 member RevenantMetalBuffer -removeAllDebugMarkers
 member RevenantMetalBuffer -resourceOptions
 member RevenantMetalBuffer -setPurgeableState:
@@ -26786,6 +26799,7 @@ member RevenantMetalDevice -newBufferWithBytes:length:options:
 member RevenantMetalDevice -newBufferWithLength:options:
 member RevenantMetalDevice -newCommandQueue
 member RevenantMetalDevice -newCommandQueueWithMaxCommandBufferCount:
+member RevenantMetalDevice -newComputePipelineStateWithDescriptor:options:reflection:error:
 member RevenantMetalDevice -newComputePipelineStateWithFunction:completionHandler:
 member RevenantMetalDevice -newComputePipelineStateWithFunction:error:
 member RevenantMetalDevice -newComputePipelineStateWithFunction:options:reflection:error:
@@ -26805,11 +26819,13 @@ member RevenantMetalDevice -newSamplerStateWithDescriptor:
 member RevenantMetalDevice -newSharedEvent
 member RevenantMetalDevice -newSharedEventWithHandle:
 member RevenantMetalDevice -newTextureWithDescriptor:
+member RevenantMetalDevice -newTextureWithDescriptor:iosurface:plane:
 member RevenantMetalDevice -registryID
 member RevenantMetalDevice -relinquish
 member RevenantMetalDevice -supportsFamily:
 member RevenantMetalDevice -supportsFeatureSet:
 member RevenantMetalDevice -supportsTextureSampleCount:
+member RevenantMetalDevice -textureCache
 member RevenantMetalDrawable -addPresentedHandler:
 member RevenantMetalDrawable -drawableID
 member RevenantMetalDrawable -initWithTexture:layer:context:
@@ -27002,6 +27018,7 @@ member RevenantMetalTexture -height
 member RevenantMetalTexture -initScreenWithFramebuffer:width:height:pixelFormat:
 member RevenantMetalTexture -initWithDepthDescriptor:kind:
 member RevenantMetalTexture -initWithDescriptor:
+member RevenantMetalTexture -initWithDescriptor:iosurface:plane:
 member RevenantMetalTexture -isFramebufferOnly
 member RevenantMetalTexture -label
 member RevenantMetalTexture -mipmapLevelCount
@@ -35648,6 +35665,7 @@ protocol_member MTLBuffer -contents
 protocol_member MTLBuffer -didModifyRange:
 protocol_member MTLBuffer -gpuAddress
 protocol_member MTLBuffer -length
+protocol_member MTLBuffer -newTextureWithDescriptor:offset:bytesPerRow:
 protocol_member MTLBuffer -removeAllDebugMarkers
 protocol_member MTLBufferBinding -bufferAlignment
 protocol_member MTLBufferBinding -bufferDataSize
@@ -35719,6 +35737,7 @@ protocol_member MTLDevice -newBufferWithBytes:length:options:
 protocol_member MTLDevice -newBufferWithLength:options:
 protocol_member MTLDevice -newCommandQueue
 protocol_member MTLDevice -newCommandQueueWithMaxCommandBufferCount:
+protocol_member MTLDevice -newComputePipelineStateWithDescriptor:options:reflection:error:
 protocol_member MTLDevice -newComputePipelineStateWithFunction:completionHandler:
 protocol_member MTLDevice -newComputePipelineStateWithFunction:error:
 protocol_member MTLDevice -newComputePipelineStateWithFunction:options:reflection:error:
@@ -35738,6 +35757,7 @@ protocol_member MTLDevice -newSamplerStateWithDescriptor:
 protocol_member MTLDevice -newSharedEvent
 protocol_member MTLDevice -newSharedEventWithHandle:
 protocol_member MTLDevice -newTextureWithDescriptor:
+protocol_member MTLDevice -newTextureWithDescriptor:iosurface:plane:
 protocol_member MTLDevice -registryID
 protocol_member MTLDevice -supportsFamily:
 protocol_member MTLDevice -supportsFeatureSet:

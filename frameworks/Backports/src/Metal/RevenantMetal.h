@@ -1,5 +1,7 @@
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
+#import <CoreVideo/CoreVideo.h>
+#import <IOSurface/IOSurfaceRef.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -114,6 +116,7 @@ typedef struct {
 + (RevenantMetalDevice *)shared;
 - (void)acquire;
 - (void)relinquish;
+- (CVOpenGLESTextureCacheRef)textureCache;
 @end
 
 @interface RevenantMetalBuffer : NSObject <MTLBuffer>
@@ -131,6 +134,7 @@ typedef struct {
 @property (nonatomic, readonly) NSUInteger width;
 @property (nonatomic, readonly) NSUInteger height;
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor;
+- (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane;
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format;
 - (GLuint)renderTarget;
 @property (nonatomic, readonly) int attachmentKind;
