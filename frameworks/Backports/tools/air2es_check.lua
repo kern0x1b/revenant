@@ -2,7 +2,7 @@ local limits = import("air2es_limits", {rootdir = os.scriptdir()})
 local json = import("core.base.json")
 
 local BYTES = {float = 4, i32 = 4, half = 2, i16 = 2, i8 = 1}
-local SPECIAL = {revenant_flip = true, revenant_target = true}
+local SPECIAL = {revenant_flip = true, revenant_target = true, revenant_instance = true}
 
 local function shape(glsl)
     if glsl == "float" then

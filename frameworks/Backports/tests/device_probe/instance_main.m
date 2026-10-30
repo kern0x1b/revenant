@@ -16,12 +16,12 @@ static void revenant_check(BOOL ok, NSString *name)
 static const float REVENANT_CORNERS[8] = {0.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
 static const uint16_t REVENANT_INDICES[4] = {0, 1, 2, 3};
 
-static id<MTLRenderPipelineState> revenant_pipeline(id<MTLDevice> device)
+static id<MTLRenderPipelineState> revenant_pipeline(id<MTLDevice> device, NSString *vertexName, NSString *fragmentName)
 {
     NSError *error = nil;
     id<MTLLibrary> library = [device newLibraryWithURL:[NSURL fileURLWithPath:@"/var/revenant/instance/instance.metallib"] error:&error];
-    id<MTLFunction> vertex = [library newFunctionWithName:@"instance_column_vertex"];
-    id<MTLFunction> fragment = [library newFunctionWithName:@"instance_column_fragment"];
+    id<MTLFunction> vertex = [library newFunctionWithName:vertexName];
+    id<MTLFunction> fragment = [library newFunctionWithName:fragmentName];
     if (!vertex || !fragment) {
         [REVENANT_LOG appendFormat:@"INFO no instance functions in the library: %@\n", error];
         return nil;
@@ -80,9 +80,62 @@ static NSUInteger revenant_mismatches(id<MTLTexture> texture, const uint8_t expe
     return bad;
 }
 
+// The element draw binds the corners at 0, the quads at 1, the frame at 2 and the pick at 3. The quad of each instance
+// is its own element, so the instance count sets how many elements are read.
+static void revenant_element_draw(id<MTLDevice> device, id<MTLRenderPipelineState> pipeline, id<MTLTexture> target, NSUInteger instances, const float quads[24], const float frame[12], int pick)
+{
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = target;
+    pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+    pass.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    id<MTLBuffer> corners = [device newBufferWithBytes:REVENANT_CORNERS length:sizeof REVENANT_CORNERS options:MTLResourceStorageModeShared];
+    id<MTLBuffer> quadBuffer = [device newBufferWithBytes:quads length:24 * sizeof(float) options:MTLResourceStorageModeShared];
+    id<MTLBuffer> frameBuffer = [device newBufferWithBytes:frame length:12 * sizeof(float) options:MTLResourceStorageModeShared];
+    id<MTLBuffer> pickBuffer = [device newBufferWithBytes:&pick length:sizeof pick options:MTLResourceStorageModeShared];
+    id<MTLCommandBuffer> buffer = [[device newCommandQueue] commandBuffer];
+    id<MTLRenderCommandEncoder> encoder = [buffer renderCommandEncoderWithDescriptor:pass];
+    [encoder setRenderPipelineState:pipeline];
+    [encoder setVertexBuffer:corners offset:0 atIndex:0];
+    [encoder setVertexBuffer:quadBuffer offset:0 atIndex:1];
+    [encoder setVertexBuffer:frameBuffer offset:0 atIndex:2];
+    [encoder setVertexBuffer:pickBuffer offset:0 atIndex:3];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4 instanceCount:instances];
+    [encoder endEncoding];
+    [buffer commit];
+    [buffer waitUntilCompleted];
+}
+
+static void revenant_element_checks(id<MTLDevice> device)
+{
+    id<MTLRenderPipelineState> pipeline = revenant_pipeline(device, @"element_column_vertex", @"element_column_fragment");
+    revenant_check(pipeline != nil, @"the translated element shaders link as a render pipeline");
+    if (!pipeline)
+        return;
+
+    // Instance i has tint (1,0,0), (0,1,0), (0,0,1) in its x, y and z. The color of a column is (tint.x, gain[pick].y, tint.z),
+    // so gain[1].y = 1 is the only green, and the blue of column 2 comes from its own element.
+    const float quads[24] = {0, 0, 0, 0, 1, 0, 0, 1,  0, 0, 0, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 1, 1};
+    const float frame[12] = {0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1};
+    const uint8_t lit[12] = {255, 255, 0, 255, 0, 255, 0, 255, 0, 255, 255, 255};
+    id<MTLTexture> target = revenant_target(device);
+    revenant_element_draw(device, pipeline, target, 3, quads, frame, 1);
+    revenant_check(revenant_mismatches(target, lit) == 0, @"an instanced draw reads each instance's element and picks gain[1] for pick 1");
+
+    const uint8_t dark[12] = {255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255};
+    target = revenant_target(device);
+    revenant_element_draw(device, pipeline, target, 3, quads, frame, 2);
+    revenant_check(revenant_mismatches(target, dark) == 0, @"pick 2 picks gain[2], so the green of every column is 0");
+
+    const uint8_t first[12] = {255, 255, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0};
+    target = revenant_target(device);
+    revenant_element_draw(device, pipeline, target, 1, quads, frame, 1);
+    revenant_check(revenant_mismatches(target, first) == 0, @"a 1-instance draw reads element 0 only");
+}
+
 static void revenant_instance_checks(id<MTLDevice> device)
 {
-    id<MTLRenderPipelineState> pipeline = revenant_pipeline(device);
+    id<MTLRenderPipelineState> pipeline = revenant_pipeline(device, @"instance_column_vertex", @"instance_column_fragment");
     revenant_check(pipeline != nil, @"the translated instance shaders link as a render pipeline");
     if (!pipeline)
         return;
@@ -108,8 +161,10 @@ int main(int argc, char *argv[])
         REVENANT_LOG = [NSMutableString string];
         id<MTLDevice> device = MTLCreateSystemDefaultDevice();
         revenant_check(device != nil, @"MTLCreateSystemDefaultDevice returns a device");
-        if (device)
+        if (device) {
             revenant_instance_checks(device);
+            revenant_element_checks(device);
+        }
         [REVENANT_LOG appendFormat:@"REVENANT-DONE failures %lu\n", (unsigned long)REVENANT_FAILURES];
         [REVENANT_LOG writeToFile:@"/var/revenant/instance-probe.txt" atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         printf("%s", [REVENANT_LOG UTF8String]);
