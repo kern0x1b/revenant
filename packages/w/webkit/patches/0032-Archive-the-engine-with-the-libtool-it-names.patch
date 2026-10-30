@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 30 Oct 2026 13:10:00 +0100
+Subject: [PATCH] Archive the engine with the libtool it names
+
+The engine's static archives were made with the libtool that xcrun finds. Apple's libtool drops the LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides the drop, so libPAL.a lost its TextEncoding members and the link failed on them. OptionsCocoa.cmake now uses CMAKE_LIBTOOL when the build names one, which the engine sets to llvm-libtool-darwin of LLVM 23 or later, and keeps the xcrun lookup otherwise.
+
+---
+--- a/Source/cmake/OptionsCocoa.cmake
++++ b/Source/cmake/OptionsCocoa.cmake
+@@ -401,7 +401,12 @@
+     add_link_options(-nostdlib++ -L${WEBKIT_IOS6_LIBCXX_DIR}/lib -lc++ -lc++abi)
+ endif ()
+ 
+-WEBKIT_XCRUN(_libtool -f libtool)
++# The engine names an LLVM libtool, which keeps the LTO bitcode members the Xcode one drops; Xcode's is the fallback.
++if (CMAKE_LIBTOOL)
++    set(_libtool "${CMAKE_LIBTOOL}")
++else ()
++    WEBKIT_XCRUN(_libtool -f libtool)
++endif ()
+ if (TRUE)
+     set(CMAKE_CXX_ARCHIVE_CREATE "${_libtool} -static -no_warning_for_no_symbols -o <TARGET> <OBJECTS>")
+     set(CMAKE_C_ARCHIVE_CREATE "${_libtool} -static -no_warning_for_no_symbols -o <TARGET> <OBJECTS>")
