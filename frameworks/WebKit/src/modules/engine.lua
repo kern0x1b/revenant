@@ -107,6 +107,16 @@ local function quoted(text)
     return "\"" .. text:gsub("\\", "/") .. "\""
 end
 
+-- Apple's libtool drops the engine's LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides it. llvm-libtool-darwin
+-- of LLVM 23 or later keeps every member, so the engine's archives are made with it.
+local function libtool_program()
+    local tool = find_tool("llvm-libtool-darwin", {version = true})
+    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
+        raise("the engine's archives are LTO bitcode that Apple's libtool drops, so llvm-libtool-darwin of LLVM 23 or later must be on PATH ahead of Apple's")
+    end
+    return tool.program
+end
+
 function options(ctx)
     local chosen = variant(ctx.variant)
     local found = {
@@ -127,6 +137,7 @@ function options(ctx)
         table.insert(found, {option[1], chosen.options[option[1]] or option[2]})
     end
     table.join2(found, {
+        {"CMAKE_LIBTOOL", libtool_program()},
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
@@ -150,7 +161,7 @@ end
 
 -- The iOS 6 defines for every language. WebKit's iOS options enable Objective-C++ after the toolchain sets its
 -- flags, so the flags alone do not reach the .mm precompiled header: the project carries them as definitions too.
-local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION"}
+local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION", "U_DISABLE_RENAMING=1"}
 
 function flags(ctx)
     local chosen = variant(ctx.variant)
@@ -486,6 +497,11 @@ local function defined_symbols(files)
     return found
 end
 
+-- The compiler emits these block-runtime helpers in each unit that uses a block of that layout, so the compat library's copies and the engine's are the same compiler output.
+local function compiler_block_helper(symbol)
+    return symbol:startswith("___block_descriptor_") or symbol:startswith("___copy_helper_block_") or symbol:startswith("___destroy_helper_block_")
+end
+
 function verify_compat(ctx)
     local objects = {}
     for _, object in ipairs(os.files(path.join(ctx.build, "**.o"))) do
@@ -502,7 +518,7 @@ function verify_compat(ctx)
     local clash, count, total = {}, 0, 0
     for symbol in pairs(stubs) do
         count = count + 1
-        if engine[symbol] and not symbol:startswith("__OBJC_") then
+        if engine[symbol] and not symbol:startswith("__OBJC_") and not compiler_block_helper(symbol) then
             table.insert(clash, symbol)
         end
     end
