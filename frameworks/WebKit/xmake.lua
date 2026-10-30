@@ -11,7 +11,6 @@ local stubs = path.join(os.scriptdir(), "src", "compat", "stubs")
 local version = "0.1.0"
 
 if is_plat("iphoneos") then
-    add_requires("webkit-engine", {alias = "webkit-engine"})
     add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})
     add_requires("webkit-device-tools")
     add_requires("revenant@wasm3", {alias = "wasm3"})
@@ -28,18 +27,8 @@ if is_plat("iphoneos") then
         target:set("values", "revenant.licenses", "LICENSE", "../../docs/reference/webkit/third-party.md")
     end
 
-    target("RevSafari")
-        add_rules("@addon/revenant/tweak")
-        add_files("src/platform/safari/rev-safari-tweak.c")
-        add_cflags("-Wall")
-        set_optimize("faster")
-        add_frameworks("CoreFoundation")
-        add_packages("webkit-engine")
-        set_values("tweak.filter", "src/platform/safari/rev-safari.plist")
-        on_load(packaged)
-        on_config(function (target)
-            target:add("installfiles", path.join(target:pkg("webkit-engine"):installdir(), "stage", "(**)"), {prefixdir = "/"})
-        end)
+    -- RevSafari, the loader, is in its own project at src/platform/safari: it carries the system webkit-engine, and this
+    -- project holds one instance of that package name.
 
     target("rev-safari-compat")
         add_rules("@addon/revenant/tweak")

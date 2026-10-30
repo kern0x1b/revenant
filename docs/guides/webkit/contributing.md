@@ -25,7 +25,7 @@ A loader is injected into the launching app, sets `DYLD_FRAMEWORK_PATH` /
 
 | Source | Built by | On device | Job |
 | --- | --- | --- | --- |
-| `src/platform/safari/rev-safari-tweak.c` | target `RevSafari` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
+| `src/platform/safari/rev-safari-tweak.c` | target `RevSafari`, in the nested project `src/platform/safari/xmake.lua` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
 | `src/platform/safari/safari-compat.mm` | target `rev-safari-compat` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
 | `packages/w/webkit` and its patches | package `webkit-engine`, its `stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
 

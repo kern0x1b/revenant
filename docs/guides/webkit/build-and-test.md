@@ -196,11 +196,14 @@ package is installed, so the consumer above is checked only once the package has
 ./xmakew deb -P .
 ```
 
-`RevSafari` carries the package: its target names `src/packaging/control` and
-`src/packaging/DEBIAN`, and installs the engine package's `stage/` tree at the root of the
-`.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter, `rev-safari-compat.dylib`,
-`rev-TLS.dylib` and `RevPrefs.bundle` with its PreferenceLoader entry. The version is
-`version` in `xmake.lua`; `src/packaging/control` carries none of its own.
+`RevSafari` is in its own project, `src/platform/safari/xmake.lua`, because it carries the
+system `webkit-engine` and the root project holds the prefixed one. Its target names
+`src/packaging/control` and `src/packaging/DEBIAN`, and installs the engine package's `stage/`
+tree at the root of the `.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter. `deb -P .`
+reads the root project's targets only, so the `.deb` it writes has `rev-safari-compat.dylib`,
+`rev-TLS.dylib` and `RevPrefs.bundle` but not the loader or the engine stage until the nested
+project's files are added to it. The version is `version` in `xmake.lua`; `src/packaging/control`
+carries none of its own.
 
 Two settings on the `rev-safari-compat` target are not optional: the compat dylib is
 built without `_FORTIFY_SOURCE` and without libc++ (`-nostdlib++`), because the `__*_chk` symbols

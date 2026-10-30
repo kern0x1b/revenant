@@ -27,7 +27,7 @@ re-execs. The second launch loads the new engine first.
 
 | Artifact | On device | Built by | Role |
 | --- | --- | --- | --- |
-| Loader | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | `src/platform/safari/rev-safari-tweak.c`, the `RevSafari` target in `xmake.lua` | Reads the enabled-apps preference, re-execs an enabled app with the engine's `DYLD_*` set, skips SpringBoard |
+| Loader | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | `src/platform/safari/rev-safari-tweak.c`, the `RevSafari` target in the nested project `src/platform/safari/xmake.lua` | Reads the enabled-apps preference, re-execs an enabled app with the engine's `DYLD_*` set, skips SpringBoard |
 | Engine | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | the `webkit-engine` package, which lays it out under the system's names | The WebKit build itself |
 | Compat | `/usr/lib/rev-safari-compat.dylib` | `src/platform/safari/safari-compat.mm`, the `rev-safari-compat` target in `xmake.lua` | The ABI iOS 6 predates, the bookmarks start page, WebAssembly, preference reads |
 
