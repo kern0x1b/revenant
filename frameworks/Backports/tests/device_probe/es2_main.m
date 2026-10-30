@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #include <math.h>
+#include <string.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -292,6 +293,158 @@ static void revenant_exact(NSString *name, NSString *fragmentSource)
     revenant_flush();
 }
 
+// The texture stage runs a translated fragment shader over a render target. The input texture holds a byte pattern
+// that the host computes, so each output pixel has one expected value: the texel at the same position, or at half the
+// position for map=half. The spec is "out=WxH in=NAME:WxH map=identity|half", and the uniforms NAME_size and
+// <output>_size are set from it. A pixel that differs in any channel is a failure, and the first failures are logged.
+static const char *REVENANT_TEXTURE_VERTEX =
+    "attribute vec2 a_position;\n"
+    "void main() {\n"
+    "    gl_Position = vec4(a_position, 0.0, 1.0);\n"
+    "}\n";
+
+static uint8_t revenant_texel(size_t x, size_t y, size_t channel)
+{
+    return (uint8_t)(x * 73 + y * 151 + channel * 47);
+}
+
+static void revenant_texture(NSString *name, NSString *fragmentSource, NSString *spec)
+{
+    unsigned outW = 0, outH = 0, inW = 0, inH = 0;
+    char inName[64] = "", map[32] = "";
+    if (sscanf([spec UTF8String], "out=%ux%u in=%63[^:]:%ux%u map=%31s", &outW, &outH, inName, &inW, &inH, map) != 6) {
+        REVENANT_FAILURES++;
+        [REVENANT_LOG appendFormat:@"FAIL %@ texture bad spec %@\n", name, spec];
+        revenant_flush();
+        return;
+    }
+    BOOL half = strcmp(map, "half") == 0;
+    BOOL fragmentOK = NO, vertexOK = NO, linked = NO;
+    NSString *fragmentLog = @"", *vertexLog = @"", *linkLog = @"";
+    GLuint fragment = revenant_compile(GL_FRAGMENT_SHADER, fragmentSource, &fragmentOK, &fragmentLog);
+    GLuint vertex = revenant_compile(GL_VERTEX_SHADER, [NSString stringWithUTF8String:REVENANT_TEXTURE_VERTEX], &vertexOK, &vertexLog);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+    GLint status = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    linked = status == GL_TRUE;
+    linkLog = revenant_log(program, YES);
+    if (!fragmentOK || !vertexOK || !linked) {
+        REVENANT_FAILURES++;
+        [REVENANT_LOG appendFormat:@"FAIL %@ texture fragment=%d vertex=%d link=%d\n", name, fragmentOK, vertexOK, linked];
+        if (fragmentLog.length) [REVENANT_LOG appendFormat:@"  fragment log: %@\n", revenant_one_line(fragmentLog)];
+        if (linkLog.length) [REVENANT_LOG appendFormat:@"  link log: %@\n", revenant_one_line(linkLog)];
+        revenant_flush();
+        return;
+    }
+    glUseProgram(program);
+
+    uint8_t *input = malloc((size_t)inW * inH * 4);
+    for (size_t y = 0; y < inH; y++)
+        for (size_t x = 0; x < inW; x++)
+            for (size_t c = 0; c < 4; c++)
+                input[(y * inW + x) * 4 + c] = revenant_texel(x, y, c);
+    GLuint texture = 0;
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, inW, inH, 0, GL_RGBA, GL_UNSIGNED_BYTE, input);
+    free(input);
+    GLint location = glGetUniformLocation(program, inName);
+    if (location >= 0)
+        glUniform1i(location, 0);
+
+    GLint uniformCount = 0;
+    glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
+    for (GLint i = 0; i < uniformCount; i++) {
+        GLchar uniform[128];
+        GLsizei length = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        glGetActiveUniform(program, i, sizeof uniform, &length, &size, &type, uniform);
+        size_t count = strlen(uniform);
+        if (count <= 5 || strcmp(uniform + count - 5, "_size") != 0)
+            continue;
+        BOOL isInput = strlen(inName) == count - 5 && strncmp(uniform, inName, count - 5) == 0;
+        glUniform2f(glGetUniformLocation(program, uniform), isInput ? inW : outW, isInput ? inH : outH);
+    }
+
+    // The render target lives on unit 1, so binding it does not replace the input on unit 0.
+    GLuint framebuffer = 0, target = 0;
+    glActiveTexture(GL_TEXTURE1);
+    glGenTextures(1, &target);
+    glBindTexture(GL_TEXTURE_2D, target);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, outW, outH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, target, 0);
+    GLenum complete = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glActiveTexture(GL_TEXTURE0);
+    glViewport(0, 0, outW, outH);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    static const GLfloat quad[8] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
+    GLint position = glGetAttribLocation(program, "a_position");
+    glEnableVertexAttribArray((GLuint)position);
+    glVertexAttribPointer((GLuint)position, 2, GL_FLOAT, GL_FALSE, 0, quad);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glFinish();
+
+    uint8_t *pixels = malloc((size_t)outW * outH * 4);
+    glReadPixels(0, 0, outW, outH, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    GLenum error = glGetError();
+    NSUInteger passed = 0, failed = 0;
+    int maxDifference = 0;
+    for (size_t y = 0; y < outH; y++) {
+        for (size_t x = 0; x < outW; x++) {
+            size_t sx = half ? x / 2 : x, sy = half ? y / 2 : y;
+            BOOL same = YES;
+            for (size_t c = 0; c < 4; c++) {
+                int got = pixels[(y * outW + x) * 4 + c], expected = revenant_texel(sx, sy, c);
+                if (abs(got - expected) > maxDifference)
+                    maxDifference = abs(got - expected);
+                if (got != expected)
+                    same = NO;
+            }
+            if (same) {
+                passed++;
+            } else {
+                failed++;
+                if (failed <= 8) {
+                    uint8_t *got = pixels + (y * outW + x) * 4;
+                    [REVENANT_LOG appendFormat:@"  TEXTURE-FAIL %@ x=%zu y=%zu got=%d,%d,%d,%d expected=%d,%d,%d,%d\n", name, x, y,
+                        got[0], got[1], got[2], got[3], revenant_texel(sx, sy, 0), revenant_texel(sx, sy, 1),
+                        revenant_texel(sx, sy, 2), revenant_texel(sx, sy, 3)];
+                }
+            }
+        }
+    }
+    free(pixels);
+    [REVENANT_LOG appendFormat:@"%@ %@ texture map=%s out=%ux%u in=%s:%ux%u pass=%lu fail=%lu maxdiff=%d framebuffer=%x glerror=%x\n",
+        failed ? @"FAIL" : @"PASS", name, map, outW, outH, inName, inW, inH, (unsigned long)passed, (unsigned long)failed,
+        maxDifference, (unsigned)complete, (unsigned)error];
+    if (failed)
+        REVENANT_FAILURES++;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteTextures(1, &target);
+    glDeleteTextures(1, &texture);
+    glDeleteProgram(program);
+    glDeleteShader(fragment);
+    glDeleteShader(vertex);
+    revenant_flush();
+}
+
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
@@ -313,6 +466,17 @@ int main(int argc, char *argv[])
             if (fields.count != 4 || [line hasPrefix:@"#"])
                 continue;
             NSString *translated = [NSString stringWithContentsOfFile:fields[2] encoding:NSUTF8StringEncoding error:NULL];
+            if ([fields[1] isEqualToString:@"texture"]) {
+                programs++;
+                if (!translated) {
+                    REVENANT_FAILURES++;
+                    [REVENANT_LOG appendFormat:@"FAIL %@ unreadable source\n", fields[0]];
+                    revenant_flush();
+                    continue;
+                }
+                revenant_texture(fields[0], translated, fields[3]);
+                continue;
+            }
             if ([fields[1] isEqualToString:@"exact"]) {
                 programs++;
                 if (!translated) {
