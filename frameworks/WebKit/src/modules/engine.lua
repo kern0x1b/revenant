@@ -35,6 +35,7 @@ local common = {
     {"ENABLE_WEBGPU", "OFF"},
     {"ENABLE_WEBDRIVER", "OFF"},
     {"ENABLE_WEBINSPECTORUI", "OFF"},
+    {"ENABLE_REMOTE_INSPECTOR", "OFF"},
     {"ENABLE_API_TESTS", "OFF"},
     {"ENABLE_TOOLS", "OFF"},
     {"ENABLE_MINIBROWSER", "OFF"},
@@ -106,6 +107,16 @@ local function quoted(text)
     return "\"" .. text:gsub("\\", "/") .. "\""
 end
 
+-- Apple's libtool drops the engine's LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides it. llvm-libtool-darwin
+-- of LLVM 23 or later keeps every member, so the engine's archives are made with it.
+local function libtool_program()
+    local tool = find_tool("llvm-libtool-darwin", {version = true})
+    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
+        raise("the engine's archives are LTO bitcode that Apple's libtool drops, so llvm-libtool-darwin of LLVM 23 or later must be on PATH ahead of Apple's")
+    end
+    return tool.program
+end
+
 function options(ctx)
     local chosen = variant(ctx.variant)
     local found = {
@@ -126,6 +137,7 @@ function options(ctx)
         table.insert(found, {option[1], chosen.options[option[1]] or option[2]})
     end
     table.join2(found, {
+        {"CMAKE_LIBTOOL", libtool_program()},
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
@@ -147,9 +159,16 @@ function options(ctx)
     return found
 end
 
+-- The iOS 6 defines for every language. WebKit's iOS options enable Objective-C++ after the toolchain sets its
+-- flags, so the flags alone do not reach the .mm precompiled header: the project carries them as definitions too.
+local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION", "U_DISABLE_RENAMING=1"}
+
 function flags(ctx)
     local chosen = variant(ctx.variant)
-    local defines = {"-DWEBKIT_IOS6=1", "-DENABLE_UNFAIR_LOCK=0", "-DWEBKIT_IOS6_NO_READLINE", "-DU_STATIC_IMPLEMENTATION"}
+    local defines = {}
+    for _, define in ipairs(IOS6_DEFINES) do
+        table.insert(defines, "-D" .. define)
+    end
     local cflags = table.join({"-flto=thin", "-mllvm", "-hot-cold-split=false"}, tuning,
                               {"-isystem", ctx.stubs, "-include", path.join(ctx.stubs, chosen.prefix)}, defines)
     local cxxflags = {"-nostdinc++", "-isystem", path.join(ctx.libcxx, "include", "c++", "v1"),
@@ -205,7 +224,11 @@ function write_packages(ctx)
     local include = {
         "find_package(LibXml2 CONFIG REQUIRED)",
         "find_package(LibXslt CONFIG REQUIRED)",
-        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")"
+        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")",
+        "add_compile_definitions(" .. table.concat(IOS6_DEFINES, " ") .. ")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-isystem " .. ctx.stubs .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, variant(ctx.variant).prefix) .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, "ios6_dispatch_compat.h") .. ">\")"
     }
     io.writefile(path.join(dir, "project-include.cmake"), table.concat(include, "\n") .. "\n")
     return dir
@@ -267,6 +290,7 @@ function context(package, build)
     local source = path.join(dir("webkit"), "src")
     local ctx = {
         variant = package:config("variant"),
+        carried = package:config("carried"),
         sdk = chosen:config("sdkdir"),
         arch = package:arch(),
         deployment = chosen:config("deployment"),
@@ -450,17 +474,32 @@ function verify_exports(ctx)
     end
 end
 
+-- The engine's objects are LTO bitcode, which Apple's nm cannot read (it fails on LLVM 23's). llvm-nm of LLVM 23 or later can.
+local function object_nm()
+    local tool = find_tool("llvm-nm", {version = true})
+    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
+        raise("the compat audit reads the engine's bitcode with llvm-nm of LLVM 23 or later, which must be on PATH ahead of Apple's")
+    end
+    return tool.program
+end
+
 local function defined_symbols(files)
     local found = {}
     for first = 1, #files, 400 do
-        for line in nm({}, table.slice(files, first, first + 399)):gmatch("[^\n]+") do
-            local kind, symbol = line:match("^%x+ ([TDBSC]) (%S+)$")
+        local listing = os.iorunv(object_nm(), table.join({"--defined-only", "-g"}, table.slice(files, first, first + 399)))
+        for line in listing:gmatch("[^\n]+") do
+            local kind, symbol = line:match("^%S+ ([TDBSCWV]) (%S+)$")
             if kind then
                 found[symbol] = true
             end
         end
     end
     return found
+end
+
+-- The compiler emits these block-runtime helpers in each unit that uses a block of that layout, so the compat library's copies and the engine's are the same compiler output.
+local function compiler_block_helper(symbol)
+    return symbol:startswith("___block_descriptor_") or symbol:startswith("___copy_helper_block_") or symbol:startswith("___destroy_helper_block_")
 end
 
 function verify_compat(ctx)
@@ -479,7 +518,7 @@ function verify_compat(ctx)
     local clash, count, total = {}, 0, 0
     for symbol in pairs(stubs) do
         count = count + 1
-        if engine[symbol] and not symbol:startswith("__OBJC_") then
+        if engine[symbol] and not symbol:startswith("__OBJC_") and not compiler_block_helper(symbol) then
             table.insert(clash, symbol)
         end
     end
@@ -498,6 +537,9 @@ function install(package)
     local build = path.absolute("build")
     os.mkdir(build)
     local ctx = context(package, build)
+    if ctx.carried == "jsc" and not variant(ctx.variant).prefixed then
+        raise("carried=jsc is the prefixed variant's JavaScriptCore alone: the system variant replaces all three frameworks")
+    end
     import("carry", {rootdir = os.scriptdir(), anonymous = true}).verify(ctx.source)
     compat(package, ctx)
     if variant(ctx.variant).prefixed then
@@ -517,8 +559,11 @@ function install(package)
     table.join2(argv, arguments(ctx))
     os.vrunv(cmake_program(), argv, {envs = environment})
     verify_configured(ctx)
-    build_with(package, build, nil, environment)
-    verify_exports(ctx)
+    local targets = ctx.carried == "jsc" and {"JavaScriptCore"} or nil
+    build_with(package, build, targets, environment)
+    if ctx.carried == "all" then
+        verify_exports(ctx)
+    end
     verify_compat(ctx)
     local stage = import("stage", {rootdir = os.scriptdir(), anonymous = true})
     if variant(ctx.variant).prefixed then

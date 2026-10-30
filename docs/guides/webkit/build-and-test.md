@@ -76,7 +76,7 @@ whether curl serves the same extract today. It is the `webkit-cacert` check:
 
 ## 3. The engine
 
-`src/engine/xmake.lua` is the `webkit-engine` package, and `src/modules/engine.lua` holds
+`packages/w/webkit-engine/xmake.lua` is the `webkit-engine` package, and `frameworks/WebKit/src/modules/engine.lua` holds
 what it does: the CMake options and tuning flags of each variant, and the steps, in the
 order that fails cheapest first:
 
@@ -136,9 +136,59 @@ and then behaves wrongly — empty text in the interface, and a silent death wit
 crash log. This has cost more than one debugging session. The package builds the engine
 whole every time its identity changes.
 
-The prefixed variant builds the same source with the class prefix applied, for a build
-that has to coexist with the system engine in one process. The shipped build is the
-unprefixed one; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
+The prefixed variant builds the same source with the class prefix applied, so its classes
+cannot collide with the system engine's in one process. Its package has three folders:
+
+- `deb/` holds the frameworks that the `org.revenant.webkit-engine` package installs under
+  `/usr/lib/revenant/webkit-engine/`, with their install names rewritten to that folder. The
+  WKWebView backport loads them at runtime.
+- `bundle/` holds the same frameworks as an application's `Frameworks` folder, with identities
+  `@executable_path/Frameworks/<F>.framework/<F>`. A standalone application that carries its own
+  engine embeds this folder; `RevWebViewHost` and a React Native host are built this way.
+- `frameworks/` holds the framework directories a link step names with `-F`.
+
+`carried=jsc` builds JavaScriptCore alone, and then the bundle and `frameworks/` hold that one framework.
+
+An application that embeds `bundle/` must not also load the deb engine in the same process: both
+register the same `Rev*` classes. The unprefixed build is the one that replaces the phone's frameworks
+under Mobile Safari; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
+
+**Consuming JavaScriptCore from an application.** A React Native host takes the prefixed engine as
+its own package, configured `carried=jsc` so that only the JavaScriptCore framework is built, and links it
+from there. The application's `xmake.lua`, with the Revenant addon loaded as the SwiftUI generator loads it,
+contains:
+
+```lua
+add_requires("revenant@webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed", carried = "jsc"}})
+add_requires("revenant@libcxx", {alias = "libcxx"})
+
+target("App")
+    add_rules("@addon/revenant/app")
+    add_packages("webkit-engine-prefixed", "libcxx")
+    add_frameworks("JavaScriptCore")
+    set_values("app.frameworks", "libcxx")
+    add_ldflags("-Wl,-rpath,@executable_path/Frameworks", {force = true})
+    on_load(function (target)
+        local engine = target:pkg("webkit-engine-prefixed"):installdir()
+        target:add("frameworkdirs", path.join(engine, "frameworks"))
+        target:add("values", "app.resources", path.relative(path.join(engine, "bundle"), target:scriptdir()))
+    end)
+    after_build(function (target)
+        -- The link records the build's own install name, the system's: the binary must name the copy in Frameworks.
+        os.vrunv("xcrun", {"install_name_tool", "-change", "/System/Library/Frameworks/JavaScriptCore.framework/JavaScriptCore",
+                           "@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore", target:targetfile()})
+    end)
+```
+
+The link takes JavaScriptCore from `frameworks/`, whose framework is the build's own and so records the system's
+install name; the `after_build` step names the copy in the application's `Frameworks` folder instead, which
+`bundle/` supplies, and the rpath lets dyld find it there. A plain binary built this way, calling the eight
+names, links and imports no `xpc_*` symbol; the application-bundle form of the snippet is not checked yet.
+`RevWebViewHost` takes the whole engine (`carried` left at its default `all`). The `on_test` of the prefixed variant checks what
+the package carries: each framework it builds is in the bundle and linkable, its JavaScriptCore exports the JSC C API
+a React Native host calls, it imports no `xpc_*` symbol (iOS 6 has none, and a lazy import of one fails only when called),
+and it is installed as `@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore`. That test runs when the
+package is installed, so the consumer above is checked only once the package has been built on a host.
 
 ## 4. The package
 
@@ -192,15 +242,15 @@ inside it, and its version is `version` in `xmake.lua`. It opens through its
 `revwebviewhost:` scheme. It needs the device address in `device.env` at the top of the
 checkout, as everything that reaches the phone does.
 
-**As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file
-carries no `main()`, and `RevWebViewHostControlling` in
-`examples/webview-host/RevWebViewHostEmbedding.h` is the whole interface another application
-drives it through — load, back, forward, reload, stop, a content frame, and a
-delegate that reports title, progress, URL, scroll offset and failures. That is
-the consumer the app-shell cache policy in [network.md](../../explanation/webkit/network.md) was written
-for: a wrapped site that has to launch like a native application. Nothing in
-this repository embeds it today; it is a capability, kept because the
-substitution path cannot serve an application that is not Safari.
+**As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file carries no
+`main()`. It declares no embedding interface any more: `RevWebViewHostEmbedding.h` is removed.
+An application that embeds the engine uses the `WKWebView` backport in
+`frameworks/Backports/src/WebKit` instead. It hosts the same engine through `RevenantEngineHost`
+and loads it at runtime from the `webkit-engine` root. That is the consumer the app-shell cache
+policy in [network.md](../../explanation/webkit/network.md) was written for: a wrapped site that
+has to launch like a native application. Nothing in this repository embeds it yet, and the
+backport's hosting has not run on a device. It is kept because the substitution path cannot
+serve an application that is not Safari.
 
 ### What hosting the engine by hand requires
 

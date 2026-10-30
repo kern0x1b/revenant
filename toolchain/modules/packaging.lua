@@ -167,6 +167,13 @@ function write(opt)
         for _, owned in ipairs(described.shared) do
             carry(owned, signer)
         end
+        if platform.project_links_webkit() then
+            local engine = platform.webkit_engine_deb(signer)
+            carry(engine, signer)
+            for _, owned in ipairs(engine.shared) do
+                carry(owned, signer)
+            end
+        end
         for _, deb in ipairs(platform.vision_text_debs(opt.outputdir or config.builddir())) do
             cprint("${bright green}deb${clear} %s", deb)
             table.insert(written, {deb = deb})

@@ -31,6 +31,8 @@ re-execs. The second launch loads the new engine first.
 | Engine | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | the `webkit-engine` package, which lays it out under the system's names | The WebKit build itself |
 | Compat | `/usr/lib/rev-safari-compat.dylib` | `src/platform/safari/safari-compat.mm`, the `rev-safari-compat` target in `xmake.lua` | The ABI iOS 6 predates, the bookmarks start page, WebAssembly, preference reads |
 
+The table is the Safari substitution's. The WKWebView host loads a separate, prefixed build of the same engine, described in [The WKWebView host](#the-wkwebview-host).
+
 ### Framework names have to be the system's
 
 UIKit asks for the frameworks by their system install names, so the build is laid
@@ -115,6 +117,27 @@ and the status bar draw nothing, while web text is fine. So
 `Rev…` when `IOS6_CLASS_PREFIX_H` is defined; under substitution the real names
 stay, because there they are meant to replace the system's. A new category
 method on a system class in the prefixed build needs the same treatment.
+
+## The WKWebView host
+
+Apps that use `WKWebView` do not go through the Safari substitution. The backport's
+`WKWebView` runs its own host on the same engine: a prefixed (`Rev*`) WebKit1 build
+that the `org.revenant.webkit-engine` package installs under
+`/usr/lib/revenant/webkit-engine/`. `RevenantWebEngine` opens each framework with
+`dlopen`, resolves the C symbols with `dlsym` and looks classes up by name, so the
+backport links no engine symbol. `REVENANT_WEBKIT_ENGINE` names another folder. When
+the engine is missing, the host raises an error that names the folder it expected.
+
+`RevenantEngineHost` owns the engine's view and window, and a scroll view that
+scrolls the page. The host connects to the engine in four places:
+
+- **Screen.** `RevenantUIKitDelegate` is the engine's UIKit delegate. The engine calls it on its web thread, and the root layer and content size reach the host on the main thread. The other callbacks are declared and do nothing.
+- **Scrolling.** The scroll view's offset becomes the window's exposed rect, set on the web thread. The document's height sets the scroll content size. Once the page has grown past the viewport, its tallest height is kept, so a page that shrinks while it loads does not jump back.
+- **Touch.** `RevenantContentScrollView` passes each touch phase to the host after UIKit has seen it. The host sends a touch event to the engine's window on the web thread. A touch the page does not handle becomes a mouse click.
+- **Keyboard.** The host is the engine's form delegate. A focused field raises the keyboard through `RevenantKeyInputView`, a view that is never shown and takes the keyboard's input. Typing sets the field's value and fires `input`, and return fires `change`, both on the web thread, so the page's own handlers run.
+
+These paths compile and link into `libWebKitBackports.dylib` for armv7. They have not
+yet run against a built engine on a device.
 
 ## What UIKit actually needs from an engine
 

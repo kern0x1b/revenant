@@ -132,7 +132,6 @@ examples/webview-host/  The standalone application: the embeddable host for the 
 src/                    The port's code: its packages, modules, compat library, platform targets and licence
   compat/       Symbols iOS 6 does not have, built into libios6compat.a
   device-tools/ The webkit-device-tools package: the phone's probes, their C sources and entitlements
-  engine/       The webkit-engine package's recipe
   modules/      What the engine package does: options, checks, staging, the carry manifest
   packaging/    The package's control file and DEBIAN scripts
   platform/     The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
