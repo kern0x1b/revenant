@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 46 translate (21 fragment, 17 vertex, 8 kernel) and 43 are refused; 11 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 48 translate (21 fragment, 19 vertex, 8 kernel) and 41 are refused; 11 of the 19 kernels are still refused. The table shows this state. Which of the 41 block the app, and in what order, is in the last section. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -17,8 +17,8 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_Camera_CameraNeo_MetalResources | compositeRoundVideo | kernel | REFUSED | a terminator this emitter does not structure |
 | submodules_Camera_MetalResources | vertexPassThrough | vertex | OK |  |
 | submodules_Camera_MetalResources | fragmentPassThrough | fragment | OK |  |
-| submodules_DrawingUI_MetalResources | vertex_render_target | vertex | REFUSED | a member of type float4x4 in uniforms |
-| submodules_DrawingUI_MetalResources | vertex_point_func | vertex | REFUSED | a member of type float4x4 in uniforms |
+| submodules_DrawingUI_MetalResources | vertex_render_target | vertex | OK |  |
+| submodules_DrawingUI_MetalResources | vertex_point_func | vertex | REFUSED | an output of kind air.point_size in a vertex function |
 | submodules_DrawingUI_MetalResources | fragment_render_target | fragment | OK |  |
 | submodules_DrawingUI_MetalResources | fragment_point_func | fragment | OK |  |
 | submodules_MetalEngine_Sources | clearVertex | vertex | OK |  |
@@ -76,13 +76,13 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | a logical shift right other than of a thread position or its lane by a constant |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondVertex | vertex | REFUSED | a member of type float4x4 in u |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleVertex | vertex | REFUSED | a member of type float4x4 in u |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | referenceHighlightVertex | vertex | REFUSED | a member of type float4x4 in u |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondVertex | vertex | OK |  |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleVertex | vertex | REFUSED | a call to air.mix.v2f32 |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | referenceHighlightVertex | vertex | REFUSED | a terminator this emitter does not structure |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarFragment | fragment | REFUSED | a call to air.fwidth.f32 |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondFragment | fragment | REFUSED | a member of type float4x4 in u |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondLensFragment | fragment | REFUSED | a member of type float4x4 in u |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondFragment | fragment | REFUSED | a call to air.fast_saturate.f32 |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondLensFragment | fragment | REFUSED | a call to air.fast_saturate.f32 |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleFragment | fragment | REFUSED | a call to air.fast_saturate.f32 |
 | submodules_TelegramUI_Components_Stories_StoryPeerListComponent_MetalResources | cameraBlobVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Stories_StoryPeerListComponent_MetalResources | cameraBlobFragment | fragment | OK |  |
@@ -119,14 +119,18 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | a logical shift right of a thread position, or of one of its lanes, by a constant, as an integer division by 2^k (`translate.cpp`, `shiftRight`) | 44 | 45 | `videoBiPlanarToRGBA` and `videoTriPlanarToRGBA` in CallScreen and CameraScreen, REFUSED to OK; the 4S compiles and links all 44 OK programs; `backgroundStarVertex` keeps its refusal (a hash, see below) |
 | a buffer indexed by the instance id read as uniforms of that instance's element, with `instanceStride` set to the element size (`translate.cpp`, `resolve`, `accessMember`); `air2es_check.lua` accepts `revenant_instance`, which the host sets (`RevenantMetalPipeline.m`) | 46 | 43 | `walletAmountVertex` and `walletAmountLayerVertex` in WalletSendScreen, REFUSED to OK; the 4S compiles and links all 46 OK programs; `instance_main.m` checks the element path through the Metal backport on the 4S (9 PASS) |
 | a dynamic index into an array member of a buffer, as a select chain over one uniform per element (`selectMember`), and an i32 index widened to i64 read as the i32 (`isAddressIndex`) | 46 | 43 | none to OK; `adjustmentsFragmentShader` and `walletAmountBlur` leave the cast for an address this emitter does not read, a buffer read at a data-dependent index; `liquidGlassShapesDisplacementFragment` leaves the uniform index for a value of a struct type |
+| square float matrix uniforms: a `float2x2`, `float3x3` or `float4x4` member of a constant buffer as one `uniform matN`, its column and lane loads as indexes, the host uploads it with `glUniformMatrixNfv` and packs the padded `float3` column (`translate.cpp`, `accessMatrix`; `RevenantMetalPipeline.m`, `RevenantMetalEncoder.m`); a pointer bitcast is an address, not a value (`translate.cpp`, the instruction pass) | 48 | 41 | `vertex_render_target` (DrawingUI) and `diamondVertex` (PremiumDiamondComponent), REFUSED to OK; `vertex_point_func` leaves the matrix for `air.point_size`; `sparkleVertex` leaves it for `air.mix.v2f32`, `referenceHighlightVertex` for a terminator, `diamondFragment` and `diamondLensFragment` for `air.fast_saturate.f32`; the 4S compiles and links all 48 OK programs, and the matrix probe checks the products on the 4S (see the matrix section) |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
-Checks on the state the table shows (46 OK, 43 REFUSED):
+Checks on the state the table shows (48 OK, 41 REFUSED):
 
-- the ES 2 probe on the 4S (iPhone4,1, iOS 6.1.3, PowerVR SGX 543) over the 46 OK entries: 46 PASS, 0 FAIL (`REVENANT-DONE programs 46 failures 0`). It compiles and links each one; it does not compare values. At the 44-entry state it was 44 PASS; at the earlier 33-entry state 33 PASS, and before `colorOf` 32 PASS, 1 FAIL;
-- `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 46 of 46 functions pass, and 0 folders fail; before `colorOf` 1 failed;
-- `air2es_test.lua`: 15 cases pass.
+- the ES 2 probe on the 4S (iPhone4,1, iOS 6.1.3, PowerVR SGX 543) over the 48 OK entries: 48 PASS, 0 FAIL (`REVENANT-DONE programs 48 failures 0`). It compiles and links each one; it does not compare values. At the 46-entry state it was 46 PASS; at the 44-entry state 44 PASS; at the earlier 33-entry state 33 PASS, and before `colorOf` 32 PASS, 1 FAIL;
+- `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 48 of 48 functions pass, and 0 folders fail; before `colorOf` 1 failed;
+- `air2es_test.lua`: 15 cases pass;
+- the instance probe on the 4S, with the matrix shaders added: 12 PASS, `REVENANT-DONE failures 0`. The nine earlier checks are the device, two pipelines, three instance draws and three element draws; the three matrix checks are the pipeline, the column-major product against the host reference, and the transposed negative control;
+- the full corpus rerun (`metal_corpus.lua`): 48 OK and 41 REFUSED. Two verdicts changed to OK (`vertex_render_target`, `diamondVertex`), five entries moved to a later refusal (`vertex_point_func`, `sparkleVertex`, `referenceHighlightVertex`, `diamondFragment`, `diamondLensFragment`), and no OK entry became REFUSED;
+- the commit message of `b67923084` lists the element checks incompletely: it names three draws and three element draws and leaves out the device and pipeline checks. The count of nine PASS is right. The commit is not amended.
 
 The 49 refusals had 25 reasons after the half-precision maps. After the texture reads they have 24 reasons, and after the lane shift 45 refusals have 24. After the address changes the 43 refusals have 23 reasons. The earlier counts were 24 after the bitwise `and` and comparison changes, 28 after the locals change, 27 after the texture writes and 26 after the memset. The half-precision maps compute in the float or mediump precision of the GLSL they become; the rounding of Metal's half is not compared, so the compile on the 4S is the only device check of them. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
@@ -232,4 +236,50 @@ Two ways to meet that without a compute shader:
 
 The decision between (a) and leaving the two kernels unsupported is open.
 
-The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the largest remaining are a linear filter with a clamp-to-zero address (5), a `float4x4` member (7), a value of a type this emitter does not hold (4), and the integer operations `udiv`, `urem`, `sdiv`, `shl` and a shift of a non-thread operand (6 together). An address this emitter does not read is three rows now, and the texture reads are translated (see above).
+The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the 41 refusals are: 12 intrinsic gaps (four `fast_saturate`, two `fabs` on half vectors, and one each of `dot`, `mix`, `fwidth`, `tan`, `discard_fragment` and the `point_size` output), 6 liquid glass values and members, 6 integer operations (`udiv`, `urem`, `shl`, `lshr`, `sdiv`), 5 clamp-to-zero linear samples, 4 control-flow terminators, 3 addresses this emitter does not read, 3 argument kinds and constant tables, 1 struct member and 1 linear mipmap sample. The `float4x4` group is gone.
+
+## Matrix uniforms (the `float4x4` rows)
+
+Square float matrix members of a constant buffer (`float2x2`, `float3x3`, `float4x4`) are translated (`translate.cpp`, `accessMatrix`) and uploaded by the host (`RevenantMetalEncoder.m`, `uploadUniforms`).
+
+- Translator: the member is one `uniform matN`. A load of a column is `name[c]`, and a load of one lane is `name[c][r]`. A `float3` column is padded to four floats in Metal, so when the padded lane is read it loads as `vec4(name[c], 0.0)`. A matrix that is a vertex attribute is refused.
+- Reflection: the uniform entry carries `"columns": N` beside `"components": N`, the row count. `air2es_check.lua` accepts it only for a float `matN` with equal rows and columns.
+- Host: `RevenantUniformPlan` has a `columns` field, read from the reflection. For a matrix, `uploadUniforms` packs each column's rows in column-major order (two floats for `float2`, three for `float3`, four for `float4`) and calls `glUniformMatrix2fv`, `3fv` or `4fv` without transposing.
+- A pointer bitcast is an address, not a value, so the instruction pass accepts it. The loads and stores through it are checked where they are read. The padded column of the probe's `float3x3` needs this.
+- Corpus: `vertex_render_target` (DrawingUI) and `diamondVertex` (PremiumDiamondComponent) are OK. The other matrix rows stop at their next blocker, listed in the changes table.
+- Probe: the instance probe has `matrix_column_vertex` and `matrix_column_fragment` (`frameworks/Backports/tests/device_probe/instance/instance.metal`). The vertex stage multiplies `(1, 2, 3, 1)` by `model` and then by `projection`, and writes the product's x and y, `model[3][1]` and `normal[2][1]` (a `float3x3`) into the colour. The host computes the same values in column-major order and expects them in each of the three pixels. A second draw uploads the transposed matrices, and it must fail the same reference. On the 4S the pipeline links, the products and the element reads match, and the transposed draw fails (its first pixel reads `(14,54,1,3)`), so the check tells a layout error from the right layout. Result: 12 PASS, `REVENANT-DONE failures 0`.
+- Not measured: a matrix in a fragment shader. No OK fragment uses one, and fragments default to `mediump` float, so a matrix product there needs its own precision check. The values of `vertex_render_target` and `diamondVertex` are not compared with Metal (both are compile and link checked). The host path of `render_target_uniform` in `DrawingMetalView` has not run.
+
+## enhanceGenerateLUT
+
+Still refused, with `an address this emitter does not read`. The kernel reads and writes a histogram buffer in place, and ES 2 has no form for that. The design is in [`air2es-enhance-lut-design.md`](air2es-enhance-lut-design.md): one render pass onto the LUT, one fragment per texel, with each fragment recomputing its tile's clipped histogram, so no fragment depends on another, and the histogram supplied as a texture. It is not built, and it waits for the owner's go. Two decisions come with it. A hand-written replacement is not a translation, so it needs its own verdict word, since OK here means translated. And the enhance lookup that reads the LUT is refused for its clamp-to-zero sampler, so the LUT alone changes no output the user sees.
+
+## What blocks the app: the 41 refusals by user impact
+
+The order is by what the app does with each entry, not by the count. The entries were checked against the release-13.0.0 sources (the read-only reference `Telegram-iOS-release-13.0.0`). Each name was looked up in the Swift and Objective-C sources: every entry has a `makeFunction` call, except `wallpaperFragment`, which has none in this release. Reach on the target (iOS 6.1.3 with the backport) comes from the `#available` gates around the call. The fallback is what the code does at the call site; where a fallback is not traced, the row says so. This is a reading of the code, not a run on a device.
+
+| Priority | Entries | Call site (release-13.0.0) | Reached on iOS 6 | Without it | First refusal | Next step |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `convertNV12`, `downsampleNV12`, `compositeRoundVideo` (CameraNeo) | `RoundVideoFrameProcessor.swift:194`; `CameraNeo.swift:319–334` | yes; the iOS 13 and 18 gates in `CameraNeo` are multicam and frame rate | round video recording fails with `videoRecorderInitializationError` | a terminator this emitter does not structure (a `switch` on the convert result) | structurer support for that control flow |
+| 2 | `mainVideoFragment` (CallScreen and CameraScreen) | `PrivateCallVideoLayer.swift:91`; `CameraVideoLayer.swift:148` | yes; calls on iOS 6 are not checked | the guard returns nil before the render state exists; the caller's handling is not traced | `air.fabs.v3f16` | map `fabs` of half vectors, then check the next blocker |
+| 3 | `bt709ToRGBFragmentShader` (MediaEditor) | `VideoInputPass.swift:11` | yes | the editor's video input pass has no conversion (fallback not traced) | `air.fast_saturate.v3f32` | map `fast_saturate` to a clamp, then check |
+| 4 | `callBlobVertex`, `callBackgroundFragment` (voice call) | `CallBlobsLayer.swift:48`; `CallBackgroundLayer.swift:56` | yes | no animated blobs and no animated background on each call (the layer returns nil) | `udiv` (integer, refused by decision); `air.dot.v2f16` | the `dot` map is cheap; the blobs stay off while integer division is refused |
+| 5 | `adjustmentsFragmentShader`, `blurRadialFragmentShader`, `blurLinearFragmentShader`, `blurPortraitFragmentShader`, `enhanceColorLookupFragmentShader`, `enhanceGenerateLUT` (MediaEditor) | `AdjustmentsRenderPass.swift:96`; `BlurRenderPass.swift:103`; `EnhanceRenderPass.swift:196` and the LUT pass | yes | the adjust, blur and enhance tools have no output (fallback not traced) | address (adjustments, LUT); clamp-to-zero linear samples (the blurs and the lookup) | the clamp-to-zero decision; the LUT design (linked above) |
+| 6 | `diamondFragment`, `diamondLensFragment`, `sparkleFragment`, `sparkleVertex`, `referenceHighlightVertex`, `backgroundStarVertex`, `backgroundStarFragment` (Premium gem) | `DiamondRenderer.swift:117–120` (`try? make(...)`, so nil on failure) | yes; no gate in the file | the gem's lazy layers are nil, so the gem and the sparkles are not drawn (the rest of the screen is not traced) | `air.fast_saturate.f32` (three), `air.mix.v2f32`, `air.fwidth.f32`, a terminator, and `lshr` (integer) | the float maps are cheap; `fwidth` needs the derivative extension, not checked |
+| 7 | `vertex_point_func` (DrawingUI) | `DrawingMetalView.swift:344` (`if let`) | yes | the point vertex function is not set (fallback not traced) | an output of kind `air.point_size` | point size as `gl_PointSize`, then check |
+| 8 | `dustEffectVertex`, `dustEffectInitializeParticle`, `dustEffectUpdateParticle` (DustEffect) | `DustEffectLayer.swift` (the file's iOS 15 gate is the signposter only) | yes | the dust effect is not shown (fallback not traced) | `urem`, `shl` and a divisor read from a buffer (integer, refused by decision) | stays refused by decision |
+| 9 | `matrixFragment` (PremiumUI, DataRain) | `DataRainView.swift:51` (`guard`) | yes | the background is not drawn (fallback not traced) | a linear sample with a mipmap filter, and GLES 2 has no mipmaps | a rewrite without mipmaps, by design |
+| 10 | `walletAmountBlur`, `walletAmountFragment` (Wallet send) | `WalletSendAmountCanvas.swift:36` (`guard`) | yes; the file has no gate | the amount blur is not shown (fallback not traced) | an address this emitter does not read; clamp-to-zero linear samples | last: a rare feature, and both blockers are decisions |
+| 11 | liquid glass: `liquidGlassShapesContentFragment`, `liquidGlassShapesMultiplyFragment`, `liquidGlassShapesMaskFragment`, `liquidGlassShapesDisplacementFragment`, `liquidGlassCrestKernel`, `liquidGlassRadialKernel` | `LiquidGlassShapesLayer.swift:234` (`#available(iOS 26.0)`) | no | not reached | struct values and members | none needed for iOS 6 |
+| 12 | sticker compression: `dctKernel`, `idctKernel`, `vertexShader`, `samplingYuvaShader` | `AnimatedStickerNode.swift:296–300` (`#available(iOS 10.0)`; otherwise the software renderer) | no | not reached | an argument kind, a constant table, and `sdiv` | none needed for iOS 6 |
+| 13 | wallet card background: `walletCardBackgroundVertex`, `walletCardBackgroundFragment` | `WalletCardBackgroundView.swift:231` (the file has an iOS 13 gate; the Metal path was not traced to it) | probably no | not reached | a struct member; `air.discard_fragment` | none needed for iOS 6 |
+| 14 | `wallpaperFragment` | none in release-13.0.0 | no | nothing calls it | `air.tan.f16` | none |
+
+Order of work, for the owner to set:
+
+1. Round video recording (rows 1): the app's own recording path fails, and the blocker is control flow, not a map.
+2. Video frames (row 2) and video in the editor (row 3): both need only a half-precision or a `fast_saturate` map to get further, so they are the cheapest large gains. Each still needs a device check, and the next blocker behind each is unknown until its first one is fixed.
+3. The call blobs (row 4) and the premium gem (row 6): cheap float maps, but the blobs also need integer division.
+4. The rest, in the order above. Rows 4, 5, 8 and 10 each include a blocker that is a decision: integer operations, clamp-to-zero samples, or the address rules. Those stay refused until the decision changes.
+
+Cheap intrinsic maps (`fast_saturate` to a clamp, `fabs` and `dot` and `mix` and `tan` to their GLSL forms) are not built yet. Each one needs its own device check before it counts as OK.
