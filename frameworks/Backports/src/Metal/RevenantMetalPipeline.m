@@ -340,7 +340,7 @@ static NSMutableDictionary *programs(void)
     for (NSDictionary *size in sizes) {
         GLint location = [self locationForName:size[@"name"]];
         if (location >= 0)
-            _plan.sizes[_plan.sizeCount++] = (RevenantSizePlan){location, (unsigned)[size[@"texture"] unsignedIntegerValue]};
+            _plan.sizes[_plan.sizeCount++] = (RevenantSizePlan){location, (unsigned)[size[@"texture"] unsignedIntegerValue], [size[@"output"] boolValue]};
     }
     for (NSNumber *o in _fragmentReflection[@"outputs"]) {
         if (_plan.outputCount < 4 && o.unsignedIntValue < 4)

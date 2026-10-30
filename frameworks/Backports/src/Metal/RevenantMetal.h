@@ -72,6 +72,7 @@ typedef struct {
 typedef struct {
     GLint location;
     unsigned unit;
+    BOOL output;
 } RevenantSizePlan;
 
 typedef struct {

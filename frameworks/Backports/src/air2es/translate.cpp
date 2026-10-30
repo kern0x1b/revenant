@@ -1528,14 +1528,15 @@ private:
             return sampleCube(call);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
+        bool height = called == "air.get_height_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
         const PlainFunction *plain = plainFunction(called);
         bool fmod = called == "air.fast_fmod.f32" || called == "air.fast_fmod.v2f32";
-        if (!sample && !width && !convert && !plain && !fmod)
+        if (!sample && !width && !height && !convert && !plain && !fmod)
             return refuse("a call to " + (called.empty() ? std::string("an indirect target") : called));
         std::vector<std::string> args;
         for (unsigned i = 0; i < call.arg_size(); i++) {
-            if (width || (sample && i != 2))
+            if (width || height || (sample && i != 2))
                 continue;
             std::string text;
             if (!expression(call.getArgOperand(i), text))
@@ -1567,20 +1568,23 @@ private:
             statement(name + " = " + plain->glsl + "(" + join(args) + ");\n");
             return true;
         }
-        if (width) {
+        if (width || height) {
             if (call.arg_size() != 2)
-                return refuse("a width with an argument count this emitter does not map");
+                return refuse("a size with an argument count this emitter does not map");
             Binding *texture = bindingOf(call.getArgOperand(0));
-            if (!texture || texture->kind != "air.texture")
-                return refuse("a width of something other than a texture");
+            if (!texture || (texture->kind != "air.texture" && texture->kind != "air.write_texture"))
+                return refuse("a size of something other than a texture");
             std::string size = texture->name + "_size";
             bool fresh = !declared_.count(size);
             declare("uniform vec2 " + size + ";\n", size);
-            if (fresh)
-                sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
+            if (fresh) {
+                bool output = texture->kind == "air.write_texture";
+                sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) +
+                                 (output ? ", \"output\": true" : "") + "}");
+            }
             if (!local(call, name))
                 return false;
-            statement(name + " = int(" + size + ".x);\n");
+            statement(name + " = int(" + size + (width ? ".x" : ".y") + ");\n");
             return true;
         }
         if (call.arg_size() != 8)

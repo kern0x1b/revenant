@@ -569,6 +569,10 @@ static const GLfloat *rampOf(NSUInteger count)
             glUniform1i(plan->fetches[k].location, (GLint)unit);
         }
         for (unsigned k = 0; k < plan->sizeCount; k++) {
+            if (plan->sizes[k].output) {
+                glUniform2f(plan->sizes[k].location, (GLfloat)_target.width, (GLfloat)_target.height);
+                continue;
+            }
             unsigned unit = plan->sizes[k].unit;
             if (unit < 16 && _fragmentTextures[unit])
                 glUniform2f(plan->sizes[k].location, (GLfloat)_fragmentTextures[unit].width, (GLfloat)_fragmentTextures[unit].height);

@@ -149,7 +149,8 @@ local function reflectionProblems(stage, source, reflection)
         end
         for _, entry in ipairs(listOf(reflection, "sizes", fail)) do
             local item = type(entry.name) == "string" and declared[entry.name]
-            if not item or item.glsl ~= "vec2" or not isInteger(entry.texture) or not textureByIndex[entry.texture] then
+            local output = entry.output == true and type(reflection.outputTexture) == "table" and entry.texture == reflection.outputTexture.index
+            if not item or item.glsl ~= "vec2" or not isInteger(entry.texture) or not (output or textureByIndex[entry.texture]) then
                 fail("a size entry that names no declared vec2 or an unknown texture")
             else
                 sizes[entry.name] = true
