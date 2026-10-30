@@ -22,13 +22,14 @@ on the patched compiler it compiles with the consumer flags and imports `___emut
   `redefinition of module 'std'`, and a consumer built against the bundled headers while the overlay used the SDK's
   crashed the frontend (`ModularizationError` in `SILDeserializer`).
 - Emulated TLS: iOS 6 armv7 has no TLS, so the toolchain sets `emulated_tls` for it, as it does for the C and CMake builds.
-  The Swift rule passes `-Xcc -femulated-tls` to the importer through `swift.runtime_flags`, and that flag alone does not
-  work: the importer's clang reads it only with the compiler patch in `packages/s/swift/patches`. Measured with the consumer
-  flags on the 6.4.0 compiler, a class-template `thread_local` header is refused with and without `-femulated-tls` on the
-  pre-patch compiler; with the patch and the flag it compiles and imports `___emutls_get_address` only.
-- C++ interop is not in `swift.runtime_flags`. A consumer adds `-cxx-interoperability-mode=default` itself, as the overlay
-  build does (`packages/s/swift-runtime/xmake.lua`) and the tests do. Without it a module that says `requires cplusplus` is
-  refused with `requires feature 'cplusplus'`.
+  The value comes from `apple.architectures`' `emulated_tls`, the function the apple-ios toolchain's `on_load` calls. The
+  Swift rule passes `-Xcc -femulated-tls` through `swift.runtime_flags`, but that flag works only with the compiler patch
+  in `packages/s/swift/patches`. The table below shows both compilers.
+- C++ interop: `swift.runtime_flags` adds `-cxx-interoperability-mode=default` when `cxx_headers` is set. The Swift rule
+  always sets `cxx_headers` for a target that carries the runtime, so every such target compiles with C++ interoperability.
+  Measured on both compilers: a plain Swift file and one with `import Foundation` compile the same with and without the flag.
+  The overlay build sets the flag itself (`packages/s/swift-runtime/xmake.lua`). Without it a module that says
+  `requires cplusplus` is refused with `requires feature 'cplusplus'`.
 
 ## Supported surface
 
@@ -55,12 +56,29 @@ Measured in `toolchain/tests/swift_cxx/main.swift`, which compiles and links for
 - C++ exceptions cannot be caught in Swift. Swift does not translate a thrown C++ exception into a Swift error, so a C++
   function that throws must not be called from Swift. This was not measured with a throwing function here.
 
+## Why the fork carries the compiler patch
+
+Each row is a host compile (`-c`, no link) for armv7 iOS 6.0, with the flags `apple.swift.runtime_flags` gives when
+`cxx_headers` is set, `has_main` true and the module `probe`. Each compile gets a fresh `-module-cache-path`. This matters:
+with a shared clang module cache, the pre-patch compiler reused a module the patched compiler had built and passed the
+header it refuses, so earlier runs without a fresh cache were wrong. Compilers: the pre-patch 6.4.0 package (recipe
+`aa42d3e4`), and the patched one (recipe `e75ce6bf`, which applies `packages/s/swift/patches/clang-emulated-tls-without-dyld.patch`).
+
+| Compiler | `-femulated-tls` | Class template `Tls<int>::value` (`toolchain/tests/swift_cxx/thread_local`) | Plain struct `S::v` (paseo repro) |
+| --- | --- | --- | --- |
+| Pre-patch | without | refused: `thread-local storage is not supported for the current target` | refused, same error |
+| Pre-patch | with | refused, same error | refused, same error |
+| Patched | without | refused, same error | refused, same error |
+| Patched | with | compiles; `nm -u` imports `___emutls_get_address`, not `__tlv_bootstrap` | compiles; same `nm -u` result |
+
+Only the patched compiler with the flag compiles. The flag alone does not change the pre-patch result. The patch makes the
+compiler read `-femulated-tls` into the target options (`CompilerInvocation.cpp`), which the unpatched importer does not
+do. The patch changes four clang files in the fork: `TargetOptions.h`, `OSTargets.h`, `ItaniumCXXABI.cpp` and
+`CompilerInvocation.cpp`. It applies with `git apply -p2` in llvm-project after the other compiler patches.
+
 ## Open items
 
-- The importer's clang ignores `-femulated-tls` unless the compiler carries
-  `packages/s/swift/patches/clang-emulated-tls-without-dyld.patch`, the same change as the LLVM one in
-  `packages/l/llvm/patches`. The patch is applied with `git apply -p2` in llvm-project after the other compiler patches, and
-  it applies cleanly to the 6.4.0 fork's four files. CI built that compiler (package=swift, run 41072834350). The
+- The compiler patch is built by CI (package=swift, run 41072834350), and the table above is the host evidence for it. The
   `thread_local` device test has not run yet. The runtime build that carries the overlays for the `std` probe (run
   41103082464) was cancelled, so no installed runtime has them.
 - arm64: the SDK has no `CxxStdlib` overlay either, so the same two overlays are needed there. They are not built for arm64.
@@ -70,11 +88,13 @@ Measured in `toolchain/tests/swift_cxx/main.swift`, which compiles and links for
 ## Tests
 
 Both tests live in the device group with `swift_test` and share `toolchain/tests/addon/swift_cxx.lua`. Each compiles its
-fixture (`toolchain/tests/swift_cxx/std` or `thread_local`) through `swift.runtime_flags` with
-`-cxx-interoperability-mode=default`, links it against the installed `swift-runtime` and `libcxx`, and checks the minimum
-version, the libraries it must load, and the dyld imports for iOS 6.0. `emulated_tls` follows the toolchain's rule (below
-9.0 on armv7, `toolchains/apple-ios/xmake.lua`), because the test runner does not pass the live toolchain config to the
-addon. The `thread_local` fixture is a class template (`Tls<int>`).
+fixture (`toolchain/tests/swift_cxx/std` or `thread_local`) through `swift.runtime_flags`, which adds the interop mode for
+`cxx_headers`, links it against the installed `swift-runtime` and `libcxx`, and checks the minimum version, the libraries
+it must load, and the dyld imports for iOS 6.0. Its `emulated_tls` is `apple.architectures`' `emulated_tls` for the
+deployment. The suite runs under the host configuration, where the apple-ios toolchain instance is not loaded, so the
+function is shared rather than read from the live config. The `thread_local` fixture is a class template (`Tls<int>`).
+`swift_flags_test` (`toolchain_light`, host) checks the interop flag with and without `cxx_headers`, the `-femulated-tls`
+pass-through and the emulated TLS value per architecture.
 `swift_cxx_thread_local_test` also checks that the binary imports `___emutls_get_address` and not `__tlv_bootstrap`, that
 the bundled libc++abi exports `___emutls_get_address`, and that the dyld check binds the import through that libc++abi,
 which it passes to the check as a provided binary. No binary runs. They need both packages installed for iphoneos first: `./xmakew f -p iphoneos -a armv7`, then
