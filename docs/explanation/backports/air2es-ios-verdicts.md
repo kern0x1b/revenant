@@ -108,6 +108,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | `air.instance_id` lowered to `int(revenant_instance)`, a `uniform float` that the host sets once per instance (`translate.cpp`) | 33 | 56 | none to OK; six vertex functions leave the argument-kind reason: `dustEffectVertex` to a urem, `backgroundStarVertex` and `walletAmountVertex` and `walletAmountLayerVertex` to a local, `referenceHighlightVertex` and `sparkleVertex` to an address |
 | `width` and `height` queries of the output texture lowered to `<tex>_size.x` and `.y` (`translate.cpp`, `air2es_check.lua`); the host sets the size of an output texture from its render target (`RevenantMetalEncoder.m`) | 33 | 56 | none to OK; the eight kernels with an output-size query leave the width refusal: `convertNV12`, `downsampleNV12` and `compositeRoundVideo` to `and`, `gaussianBlurHorizontal` and `gaussianBlurVertical` (two libraries) to an unsigned comparison, `walletAmountBlur` to a comparison |
 | bitwise `and` with a constant mask in floats, signed and unordered compares, per-lane vector compares, `air.all.v2i1` to `all` (`translate.cpp`; measured after the group's last translator commit) | 33 | 56 | none to OK; `convertNV12`, `downsampleNV12` and `compositeRoundVideo` leave the `and` for a `switch` terminator; the gaussian blurs leave the vector compare for `air.write_texture_2d.v4f16`; `walletAmountBlur` leaves the comparison for a sign extension to i64; `sparkleFragment` leaves it for `air.fast_saturate.f32` |
+| array and struct locals of the held types, declared as `T name[n]` and as a GLSL struct, each element named by its indices (`translate.cpp`; measured after this change) | 33 | 56 | none to OK; the nine kernels of the locals group leave the local refusal: `callBlobVertex` to a `udiv`, `backgroundStarVertex` to a `lshr`, `diamondFragment` and `diamondLensFragment` to a `float4x4` member in `uniforms`, `gramDiamondCompositeVertex` to `llvm.memset`, `walletCardBackgroundFragment` to `air.fast_clamp.v2f32`, `walletAmountVertex` and `walletAmountLayerVertex` to an address, `dustEffectInitializeParticle` to a `shl` |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
@@ -117,7 +118,7 @@ Checks on the state the table shows:
 - `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 56 refusals have 24 reasons after the bitwise `and` and comparison changes below. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
+The 56 refusals have 28 reasons after the locals change below (24 after the bitwise `and` and comparison changes). The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
 `width` and `height` of an output texture (the width group, decision: host loader sets `<tex>_size`):
 
@@ -142,6 +143,21 @@ The blockers these kernels stop at now:
 - `walletAmountBlur`: `sext i32` to `i64`, used as a constant-buffer index;
 - `sparkleFragment`: `air.fast_saturate.f32`.
 
+Locals of a type this emitter did not hold (decision: arrays and structs of the GLSL types it holds, each element named by its indices):
+
+- An alloca of an array of a held type is declared as `T vN[n];`. A struct local is a GLSL struct `SN` with a field `fI` for each member, and an array member is an array field. Struct members and arrays of structs are refused by name.
+- A GEP into a local follows its indices: a struct field by its constant index, an array element by a constant or a dynamic index. An i32 widened to i64 is that i32, because GLSL ES 1.00 has no i64. The element is a local of its own, so loads and stores of it take the path of any local.
+- Dynamic indexing of a local array is translated, and `glslangValidator` accepts it for ES 1.00 in fragment and vertex shaders. The 4S has not compiled it. No OK entry uses a local array (before this change every array local was refused), so no device result depends on it yet.
+- Measured: every `.glsl` and `.json` file of the 18 translated folders is byte-identical to the state before this change, so the 33 OK entries keep their 4S probe result (33 PASS) without a new run. `air2es_check.lua` with `glslangValidator`: 0 folders fail. `air2es_test.lua`: 15 cases pass.
+- The nine kernels of the group leave the local refusal, and none is OK yet. They stop at these now:
+  - `callBlobVertex`: `udiv`;
+  - `backgroundStarVertex`: `lshr`;
+  - `diamondFragment` and `diamondLensFragment`: a `float4x4` member in `uniforms`;
+  - `gramDiamondCompositeVertex`: `llvm.memset.p0.i64`;
+  - `walletCardBackgroundFragment`: `air.fast_clamp.v2f32`;
+  - `walletAmountVertex` and `walletAmountLayerVertex`: an address this emitter does not read;
+  - `dustEffectInitializeParticle`: `shl`.
+
 `instance_id` (decision: a host-filled uniform, looped per instance):
 
 - the emitter declares `uniform float revenant_instance;` and reads `int(revenant_instance)`. The name is the one the host already sets (`RevenantMetalPipeline.m`, `revenant_instance`), so the host needed no change;
@@ -163,4 +179,4 @@ Two ways to meet that without a compute shader:
 
 The decision between (a) and leaving the two kernels unsupported is open.
 
-The next groups in the order set for the work are the locals of a type this emitter does not hold (9, six before plus three from `instance_id`) and the clamp-to-zero samples (5). The bitwise `and` and comparison group is translated; the blockers it leaves are listed above, and they belong to the later groups.
+The next group in the order set for the work is the clamp-to-zero samples (5). The bitwise `and`, comparison and locals groups are translated as far as the table shows; the blockers they leave are listed above, and they belong to the later groups.

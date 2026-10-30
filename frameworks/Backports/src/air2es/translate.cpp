@@ -1293,6 +1293,63 @@ private:
         return true;
     }
 
+    // A struct local is a GLSL struct with a field per member, and an array member is an array field.
+    std::string structOf(Type *type)
+    {
+        auto *structure = cast<StructType>(type);
+        std::string fields;
+        for (unsigned i = 0; i < structure->getNumElements(); i++) {
+            Type *member = structure->getElementType(i);
+            Type *element = member->isArrayTy() ? member->getArrayElementType() : member;
+            std::string glsl = glslType(element);
+            if (glsl.empty() || element->isStructTy() || element->isArrayTy())
+                return "";
+            std::string dimension = member->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(member)->getNumElements()) + "]" : "";
+            fields += "    " + glsl + " f" + std::to_string(i) + dimension + ";\n";
+        }
+        std::string name = "S" + std::to_string(counter_++);
+        declare("struct " + name + " {\n" + fields + "};\n", name);
+        return name;
+    }
+
+    // An element of a local is a local of its own, named by the local and the indices, so the loads and stores of it
+    // take the paths of any local. A struct field is named by its constant index, and an array element by a constant
+    // or a dynamic index. GLSL ES 1.00 has no i64, so an index that widens an i32 is that i32.
+    bool localElement(GetElementPtrInst &gep, const Local &base)
+    {
+        auto *first = dyn_cast<ConstantInt>(gep.getOperand(1));
+        if (!first || !first->isZero() || gep.getSourceElementType() != base.type)
+            return refuse("an element of a local at a depth this emitter does not map");
+        std::string name = base.name;
+        Type *type = base.type;
+        for (unsigned i = 2; i < gep.getNumOperands(); i++) {
+            Value *index = gep.getOperand(i);
+            if (auto *structure = dyn_cast<StructType>(type)) {
+                auto *field = dyn_cast<ConstantInt>(index);
+                if (!field || field->getZExtValue() >= structure->getNumElements())
+                    return refuse("a struct field this emitter does not map");
+                name += ".f" + std::to_string(field->getZExtValue());
+                type = structure->getElementType((unsigned)field->getZExtValue());
+            } else if (auto *array = dyn_cast<ArrayType>(type)) {
+                if (auto *extend = dyn_cast<ZExtInst>(index); extend && extend->getOperand(0)->getType()->isIntegerTy(32))
+                    index = extend->getOperand(0);
+                else if (auto *extend = dyn_cast<SExtInst>(index); extend && extend->getOperand(0)->getType()->isIntegerTy(32))
+                    index = extend->getOperand(0);
+                std::string text;
+                if (!expression(index, text))
+                    return false;
+                name += "[" + text + "]";
+                type = array->getElementType();
+            } else {
+                return refuse("an element of a local at a depth this emitter does not map");
+            }
+        }
+        Local &element = localPointers_[&gep];
+        element.name = name;
+        element.type = type;
+        return true;
+    }
+
     bool local(Instruction &instruction, std::string &name)
     {
         std::string type = glslType(instruction.getType());
@@ -1308,13 +1365,15 @@ private:
     {
         if (auto *slot = dyn_cast<AllocaInst>(&instruction)) {
             Type *type = slot->getAllocatedType();
-            std::string glsl = glslType(type);
-            if (glsl.empty() || type->isStructTy() || type->isArrayTy())
+            Type *element = type->isArrayTy() ? type->getArrayElementType() : type;
+            std::string glsl = type->isStructTy() ? structOf(type) : glslType(element);
+            if (glsl.empty() || (type->isArrayTy() && (element->isStructTy() || element->isArrayTy())))
                 return refuse("a local of a type this emitter does not hold as a variable");
             Local &local = localPointers_[slot];
             local.name = "v" + std::to_string(counter_++);
             local.type = type;
-            locals_.push_back(glsl + " " + local.name + ";\n");
+            std::string dimension = type->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(type)->getNumElements()) + "]" : "";
+            locals_.push_back(glsl + " " + local.name + dimension + ";\n");
             return true;
         }
         if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy() && (localOf(cast) || bindingOf(cast)))
@@ -1333,6 +1392,8 @@ private:
         if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction)) {
             if (isa<GlobalVariable>(gep->getPointerOperand()))
                 return true;
+            if (const Local *base = localOf(gep->getPointerOperand()); base && (base->type->isArrayTy() || base->type->isStructTy()))
+                return localElement(*gep, *base);
             Address address;
             if (!resolve(gep, address))
                 return refuse("an address this emitter does not read");
