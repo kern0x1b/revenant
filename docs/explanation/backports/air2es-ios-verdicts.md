@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 38 translate (19 fragment, 15 vertex, 4 kernel) and 51 are refused; 15 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 40 translate (21 fragment, 15 vertex, 4 kernel) and 49 are refused; 15 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundFragment | fragment | REFUSED | a call to air.dot.v2f16 |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobFragment | fragment | OK |  |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoFragment | fragment | REFUSED | a call to air.mix.v4f16 |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoFragment | fragment | REFUSED | a call to air.fabs.v3f16 |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | videoBiPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | videoTriPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
@@ -49,7 +49,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | cameraBlobVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | cameraBlobFragment | fragment | OK |  |
-| submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoFragment | fragment | REFUSED | a call to air.mix.v4f16 |
+| submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoFragment | fragment | REFUSED | a call to air.fabs.v3f16 |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectInitializeParticle | kernel | REFUSED | a shl this emitter does not map |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectUpdateParticle | kernel | REFUSED | a urem this emitter does not map |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectVertex | vertex | REFUSED | a urem this emitter does not map |
@@ -61,15 +61,15 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMultiplyFragment | fragment | REFUSED | a value of a type this emitter does not hold |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMaskFragment | fragment | REFUSED | a value of a type this emitter does not hold |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesDisplacementFragment | fragment | REFUSED | an address this emitter does not read |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | dualFragmentShader | fragment | REFUSED | a call to air.mix.v4f16 |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | dualFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | bt709ToRGBFragmentShader | fragment | REFUSED | a call to air.fast_saturate.v3f32 |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | defaultVertexShader | vertex | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | defaultFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | histogramPrepareFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | gradientFragmentShader | fragment | OK |  |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | adjustmentsFragmentShader | fragment | REFUSED | a call to air.fmin.f16 |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | adjustmentsFragmentShader | fragment | REFUSED | a cast this emitter does not map |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceGenerateLUT | kernel | REFUSED | an address this emitter does not read |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | rgbToLightnessFragmentShader | fragment | REFUSED | a call to air.fmin.f16 |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | rgbToLightnessFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceColorLookupFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | blurRadialFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
@@ -114,6 +114,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | `air.write_texture_2d.v4f16` written as the output, as the v4f32 write is (`translate.cpp`) | 37 | 52 | `gaussianBlurHorizontal` and `gaussianBlurVertical` in both libraries, REFUSED to OK |
 | sample coordinates and size queries declared `precision highp float` and `highp int` (`translate.cpp`) | 37 | 52 | none; the precision line of 18 OK shaders changed and nothing else in them; the 4S compiles and links all 37 OK programs |
 | `llvm.memset` of a local to zero, a constant lane of a local as `.x` to `.w`, and a dynamic index that ends a local's path as a select over its constant elements (`translate.cpp`) | 38 | 51 | `gramDiamondCompositeVertex`, REFUSED to OK; the 4S compiles and links it; a store through a dynamic index is refused |
+| the half-precision `air.mix.v4f16`, `air.fmin.f16`, `air.fmax.f16` and `air.fract.f16` mapped to `mix`, `min`, `max` and `fract` (`translate.cpp`) | 40 | 49 | `dualFragmentShader` and `rgbToLightnessFragmentShader` in MediaEditor, REFUSED to OK; `mainVideoFragment` (two libraries) leaves the mix for `air.fabs.v3f16`; `adjustmentsFragmentShader` leaves the max for a cast; the 4S compiles and links the six MediaEditor programs |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
@@ -123,7 +124,7 @@ Checks on the state the table shows:
 - `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 51 refusals have 26 reasons after the changes below (24 after the bitwise `and` and comparison changes, 28 after the locals change, 27 after the texture writes). The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
+The 49 refusals have 25 reasons after the changes below (24 after the bitwise `and` and comparison changes, 28 after the locals change, 27 after the texture writes, 26 after the memset). The half-precision maps compute in the float or mediump precision of the GLSL they become; the rounding of Metal's half is not compared, so the compile on the 4S is the only device check of them. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
 `width` and `height` of an output texture (the width group, decision: host loader sets `<tex>_size`):
 

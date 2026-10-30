@@ -145,6 +145,10 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_clamp.v3f32", "clamp", 3},
     {"air.mix.f32", "mix", 3},
     {"air.mix.v3f32", "mix", 3},
+    {"air.mix.v4f16", "mix", 3},
+    {"air.fmin.f16", "min", 2},
+    {"air.fmax.f16", "max", 2},
+    {"air.fract.f16", "fract", 1},
 };
 
 const PlainFunction *plainFunction(const std::string &name)
