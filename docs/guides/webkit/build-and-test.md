@@ -19,8 +19,11 @@ top of the checkout:
 ```sh
 ./xmakew f -P . -p iphoneos -a armv7
 ./xmakew -P .                      # the engine packages, the tweaks and the Settings bundle
-./xmakew deb -P .                  # space.kern0x1b.rev_<version>_iphoneos-arm.deb
-./xmakew device install -P .       # the same, then dpkg -i on the phone device.env names
+./xmakew deb -P .                  # space.kern0x1b.rev_<version>_iphoneos-arm.deb: compat, TLS and Settings
+./xmakew f -P frameworks/WebKit/src/platform/safari -p iphoneos -a armv7
+./xmakew deb -P frameworks/WebKit/src/platform/safari   # space.kern0x1b.rev-safari_<version>_iphoneos-arm.deb: the loader and the engine
+./xmakew device install -P .       # the root package, then dpkg -i on the phone device.env names
+./xmakew device install -P frameworks/WebKit/src/platform/safari   # the loader package, after the root one
 ```
 
 Host requirements: the Command Line Tools. xmake fetches the rest: the SDK, `cmake` and
@@ -194,16 +197,16 @@ package is installed, so the consumer above is checked only once the package has
 
 ```sh
 ./xmakew deb -P .
+./xmakew deb -P frameworks/WebKit/src/platform/safari
 ```
 
-`RevSafari` is in its own project, `src/platform/safari/xmake.lua`, because it carries the
-system `webkit-engine` and the root project holds the prefixed one. Its target names
-`src/packaging/control` and `src/packaging/DEBIAN`, and installs the engine package's `stage/`
-tree at the root of the `.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter. `deb -P .`
-reads the root project's targets only, so the `.deb` it writes has `rev-safari-compat.dylib`,
-`rev-TLS.dylib` and `RevPrefs.bundle` but not the loader or the engine stage until the nested
-project's files are added to it. The version is `version` in `xmake.lua`; `src/packaging/control`
-carries none of its own.
+The loader and the engine are a second package, `space.kern0x1b.rev-safari`. Its target is `RevSafari`, in its
+own project, `src/platform/safari/xmake.lua`, because that project carries the system `webkit-engine` and the
+root holds the prefixed one. The target names `src/packaging/safari/control`, and installs the engine
+package's `stage/` tree at the root of the `.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter,
+the C++ runtime included. The `.deb` depends on `space.kern0x1b.rev`, which the root project writes with
+`rev-safari-compat.dylib`, `rev-TLS.dylib` and `RevPrefs.bundle`. The two versions are kept equal by hand, in
+`frameworks/WebKit/xmake.lua` and in the loader's `xmake.lua`. Install the root package first.
 
 Two settings on the `rev-safari-compat` target are not optional: the compat dylib is
 built without `_FORTIFY_SOURCE` and without libc++ (`-nostdlib++`), because the `__*_chk` symbols
@@ -217,7 +220,10 @@ address; neither is in the repository.
 
 ```sh
 ./xmakew device install -P .
+./xmakew device install -P frameworks/WebKit/src/platform/safari
 ```
+
+The root package goes first: the loader's package depends on it.
 
 ## The engine without Safari
 
@@ -386,11 +392,12 @@ The device address and password are not in the repository. Copy the example and 
 cp frameworks/WebKit/tests/data/device.env.example device.env    # at the top of revenant: DEVICE_HOST / DEVICE_PORT
 ```
 
-Then build and install the package, which carries the loader, the compatibility dylib, the TLS dylib and the Settings
-pane, and can be removed again:
+Then build and install the two packages, the root's, which carries the compatibility dylib, the TLS dylib and the Settings
+pane, and the loader's, which carries the loader and the engine. Both can be removed again:
 
 ```sh
 ./xmakew device install -P .
+./xmakew device install -P frameworks/WebKit/src/platform/safari
 ```
 
 **Verify it took.** Open any page in Safari and check the user agent: a request to a service that echoes it, or the

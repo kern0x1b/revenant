@@ -18,13 +18,14 @@ set_defaultarchs("iphoneos|armv7")
 add_cxflags("-mcpu=cortex-a9", "-mfpu=neon")
 add_defines("WEBKIT_IOS6_NO_READLINE")
 
--- The package paths are absolute: a relative one would resolve against this project, not frameworks/WebKit.
+-- The package paths are absolute: a relative one would resolve against this project, not frameworks/WebKit. The loader is its
+-- own package, space.kern0x1b.rev-safari, which depends on the root's space.kern0x1b.rev at the same version.
 local webkit = path.join(os.scriptdir(), "../../..")
 local version = "0.1.0"
 
 local function packaged(target)
     target:set("values", "revenant.version", version)
-    target:set("values", "revenant.control", path.join(webkit, "src", "packaging", "control"))
+    target:set("values", "revenant.control", path.join(webkit, "src", "packaging", "safari", "control"))
     target:set("values", "revenant.maintainer-scripts", path.join(webkit, "src", "packaging", "DEBIAN"))
     target:set("values", "revenant.licenses", path.join(webkit, "LICENSE"), path.join(webkit, "..", "..", "docs", "reference", "webkit", "third-party.md"))
 end

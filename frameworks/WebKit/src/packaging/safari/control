@@ -1,0 +1,13 @@
+Package: space.kern0x1b.rev-safari
+Name: Revenant WebKit Safari
+Architecture: iphoneos-arm
+Description: The loader of the Revenant WebKit engine under Mobile Safari, with the engine.
+ The loader re-execs Safari with the engine's DYLD_* set, so Safari renders
+ today's web: modern CSS and layout, Web Crypto, WebAssembly, inline video and
+ audio. The compat dylib, TLS and the Settings pane come from space.kern0x1b.rev,
+ which this package depends on.
+Depends: space.kern0x1b.rev (= 0.1.0), mobilesubstrate, firmware (>= 6.0), firmware (<< 7.0)
+Section: Tweaks
+Priority: optional
+Author: kern0x1b
+Maintainer: kern0x1b

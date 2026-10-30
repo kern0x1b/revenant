@@ -110,11 +110,14 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Build: `./xmakew f -P . -p iphoneos -a armv7 && ./xmakew -P .` at the top of revenant;
   see [build and test](build-and-test.md). The engine's device filesystem tree is the `stage/` folder of
   the `webkit-engine` package.
-- Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb`,
-  engine frameworks included; `src/packaging/` holds only the `control` file and the
-  `DEBIAN/postinst` script. The version is `version` in `xmake.lua`.
-- Deploy: `./xmakew device install -P .` builds the package, runs `dpkg -i` on the phone
-  `device.env` names, and refuses a .deb whose app would replace another bundle id.
+- Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb` with the compat dylib, TLS and
+  the Settings pane. `./xmakew deb -P frameworks/WebKit/src/platform/safari` writes
+  `space.kern0x1b.rev-safari_<version>_iphoneos-arm.deb` with the loader and the engine frameworks; it depends on the
+  first. `src/packaging/` holds the two `control` files, `safari/control` for the loader, and the `DEBIAN/postinst`
+  script that both share. The versions are `version` in `frameworks/WebKit/xmake.lua` and in the loader's `xmake.lua`.
+- Deploy: `./xmakew device install -P .`, then `./xmakew device install -P frameworks/WebKit/src/platform/safari`.
+  Each builds its package, runs `dpkg -i` on the phone `device.env` names, and refuses a .deb whose app would replace
+  another bundle id. The root first: the loader depends on it.
   Claim the device first (`./xmakew device -P . claim`). The package's `postinst` kills MobileSafari and
   Preferences: the engine loads when an injected app launches, so a new one needs the browser restarted, and
   a respring would re-lock the phone.
