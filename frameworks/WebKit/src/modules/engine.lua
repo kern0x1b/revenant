@@ -150,7 +150,7 @@ end
 
 -- The iOS 6 defines for every language. WebKit's iOS options enable Objective-C++ after the toolchain sets its
 -- flags, so the flags alone do not reach the .mm precompiled header: the project carries them as definitions too.
-local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION"}
+local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION"}
 
 function flags(ctx)
     local chosen = variant(ctx.variant)
