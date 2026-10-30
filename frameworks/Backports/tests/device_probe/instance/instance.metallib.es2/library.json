@@ -1,0 +1,1 @@
+{"functions": [{"name": "instance_column_vertex", "stage": "vertex", "source": "instance_column_vertex.vertex.glsl", "reflection": "instance_column_vertex.vertex.json"}, {"name": "instance_column_fragment", "stage": "fragment", "source": "instance_column_fragment.fragment.glsl", "reflection": "instance_column_fragment.fragment.json"}]}
