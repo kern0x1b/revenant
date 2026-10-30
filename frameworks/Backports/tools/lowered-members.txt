@@ -3332,6 +3332,7 @@ enum MTLIndexTypeUInt16
 enum MTLIndexTypeUInt32
 enum MTLLibraryTypeExecutable
 enum MTLLoadActionClear
+enum MTLLoadActionLoad
 enum MTLMatrixLayoutColumnMajor
 enum MTLMatrixLayoutRowMajor
 enum MTLMutabilityDefault
@@ -26775,10 +26776,13 @@ member RevenantMetalComputeEncoder -label
 member RevenantMetalComputeEncoder -memoryBarrierWithScope:afterStages:beforeStages:
 member RevenantMetalComputeEncoder -popDebugGroup
 member RevenantMetalComputeEncoder -pushDebugGroup:
+member RevenantMetalComputeEncoder -revenantDispatchTranslatedGrid:
 member RevenantMetalComputeEncoder -revenantRunGroup:atGroup:atGroupPosition:threads:
 member RevenantMetalComputeEncoder -setBuffer:offset:atIndex:
 member RevenantMetalComputeEncoder -setBytes:length:atIndex:
 member RevenantMetalComputeEncoder -setComputePipelineState:
+member RevenantMetalComputeEncoder -setSamplerState:atIndex:
+member RevenantMetalComputeEncoder -setTexture:atIndex:
 member RevenantMetalComputeEncoder -setThreadgroupMemoryLength:atIndex:
 member RevenantMetalComputePipeline -device
 member RevenantMetalComputePipeline -initWithFunction:error:
@@ -26788,9 +26792,11 @@ member RevenantMetalComputePipeline -maxThreadgroupsPerThreadgroup
 member RevenantMetalComputePipeline -maxTotalThreadsPerThreadgroup
 member RevenantMetalComputePipeline -revenantBlockBytes
 member RevenantMetalComputePipeline -revenantKernelFunction
+member RevenantMetalComputePipeline -revenantRenderPipeline
 member RevenantMetalComputePipeline -revenantSetBlockBytes:
 member RevenantMetalComputePipeline -revenantSetThreads:
 member RevenantMetalComputePipeline -revenantThreads
+member RevenantMetalComputePipeline -revenantTranslatedFunction
 member RevenantMetalComputePipeline -threadExecutionWidth
 member RevenantMetalComputePipeline -threadgroupMemoryLengthForIndex:
 member RevenantMetalDepthStencil -device
@@ -35720,6 +35726,8 @@ protocol_member MTLComputeCommandEncoder -dispatchThreadgroups:threadsPerThreadg
 protocol_member MTLComputeCommandEncoder -setBuffer:offset:atIndex:
 protocol_member MTLComputeCommandEncoder -setBytes:length:atIndex:
 protocol_member MTLComputeCommandEncoder -setComputePipelineState:
+protocol_member MTLComputeCommandEncoder -setSamplerState:atIndex:
+protocol_member MTLComputeCommandEncoder -setTexture:atIndex:
 protocol_member MTLComputeCommandEncoder -setThreadgroupMemoryLength:atIndex:
 protocol_member MTLComputePipelineState -device
 protocol_member MTLComputePipelineState -label
