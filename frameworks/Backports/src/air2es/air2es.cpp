@@ -60,8 +60,33 @@ int usage()
 {
     fprintf(stderr, "usage: air2es METALLIB OUT.es2\n"
                     "       air2es --list METALLIB\n"
-                    "       air2es --extract DIR METALLIB\n");
+                    "       air2es --extract DIR METALLIB\n"
+                    "       air2es --ir METALLIB NAME\n");
     return 2;
+}
+
+int dump(const char *path, const char *name)
+{
+    std::vector<uint8_t> file;
+    std::vector<Entry> entries;
+    std::string error;
+    if (!readFile(path, file) || !splitMetallib(file, entries, error)) {
+        fprintf(stderr, "%s: %s\n", path, error.c_str());
+        return 1;
+    }
+    for (const Entry &entry : entries) {
+        if (entry.name != name)
+            continue;
+        std::string text;
+        if (!dumpEntry(entry, text, error)) {
+            fprintf(stderr, "%s: %s: %s\n", path, name, error.c_str());
+            return 1;
+        }
+        fputs(text.c_str(), stdout);
+        return 0;
+    }
+    fprintf(stderr, "%s: no module named %s\n", path, name);
+    return 1;
 }
 
 int list(const char *path)
@@ -163,6 +188,8 @@ int main(int argc, char **argv) {
         return list(argv[2]);
     if (argc == 4 && strcmp(argv[1], "--extract") == 0)
         return extract(argv[2], argv[3]);
+    if (argc == 4 && strcmp(argv[1], "--ir") == 0)
+        return dump(argv[2], argv[3]);
     if (argc == 3 && argv[1][0] != '-')
         return translate(argv[1], argv[2]);
     return usage();

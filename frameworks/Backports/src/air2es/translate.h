@@ -22,6 +22,8 @@ struct Translation {
 
 bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal);
 
+bool dumpEntry(const Entry &entry, std::string &text, std::string &error);
+
 std::string jsonQuote(const std::string &text);
 
 }

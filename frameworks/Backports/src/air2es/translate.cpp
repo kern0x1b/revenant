@@ -19,6 +19,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 
@@ -110,6 +111,51 @@ const char *const kArgumentKinds[] = {"air.buffer", "air.texture", "air.sampler"
                                       "air.position", "air.fragment_input", "air.thread_position_in_grid"};
 
 const char *const kLanes[] = {"x", "y", "z", "w"};
+
+struct PlainFunction {
+    const char *air;
+    const char *glsl;
+    unsigned arguments;
+};
+
+const PlainFunction kPlainFunctions[] = {
+    {"air.fast_sin.f32", "sin", 1},
+    {"air.fast_cos.f32", "cos", 1},
+    {"air.fast_fabs.f32", "abs", 1},
+    {"air.fast_fabs.v2f32", "abs", 1},
+    {"air.fast_fabs.v3f32", "abs", 1},
+    {"air.fast_floor.v2f32", "floor", 1},
+    {"air.fast_fract.f32", "fract", 1},
+    {"air.fast_fract.v3f32", "fract", 1},
+    {"air.fast_rsqrt.f32", "inversesqrt", 1},
+    {"air.fast_sqrt.f32", "sqrt", 1},
+    {"air.fast_fmax.f32", "max", 2},
+    {"air.fast_fmax.v2f32", "max", 2},
+    {"air.fast_fmin.f32", "min", 2},
+    {"air.fast_pow.f32", "pow", 2},
+    {"air.dot.v2f32", "dot", 2},
+    {"air.dot.v3f32", "dot", 2},
+    {"air.fast_clamp.f32", "clamp", 3},
+    {"air.fast_clamp.v3f32", "clamp", 3},
+    {"air.mix.f32", "mix", 3},
+    {"air.mix.v3f32", "mix", 3},
+};
+
+const PlainFunction *plainFunction(const std::string &name)
+{
+    for (const PlainFunction &function : kPlainFunctions)
+        if (name == function.air)
+            return &function;
+    return nullptr;
+}
+
+bool paddedVectorOf(Type *narrow, Type *wide)
+{
+    auto *from = dyn_cast<FixedVectorType>(narrow);
+    auto *to = dyn_cast<FixedVectorType>(wide);
+    return from && to && from->getNumElements() == 3 && to->getNumElements() == 4 &&
+           from->getElementType() == to->getElementType();
+}
 
 bool scalarOf(const std::string &typeName, std::string &scalar, unsigned &components)
 {
@@ -390,6 +436,8 @@ private:
 
     bool resolve(const Value *pointer, Address &out)
     {
+        while (auto *cast = dyn_cast<BitCastInst>(pointer))
+            pointer = cast->getOperand(0);
         if (const auto *argument = dyn_cast<Argument>(pointer)) {
             Binding *binding = bindingOf(argument);
             if (!binding || binding->kind != "air.buffer")
@@ -507,6 +555,11 @@ private:
             return true;
         }
         unsigned count = cast<FixedVectorType>(loaded)->getNumElements();
+        bool packedFloat3 = within == 0 && components == 3 && count == 4 && scalar == "float";
+        if (packedFloat3 && !memberAt(binding, field.offset + field.size)) {
+            out = glslType(loaded) + "(" + name + ", 0.0)";
+            return true;
+        }
         if (within % width != 0 || within / width + count > components)
             return refuse("a vector load of " + name + " that this emitter does not map to lanes");
         unsigned first = (unsigned)(within / width);
@@ -560,12 +613,13 @@ private:
         if (auto *gep = dyn_cast<GetElementPtrInst>(load->getPointerOperand()); gep && isa<GlobalVariable>(gep->getPointerOperand()))
             return tableLoad(gep, load->getType(), out);
         if (const Local *slot = localOf(load->getPointerOperand())) {
-            if (slot->type != load->getType())
+            bool padded = paddedVectorOf(slot->type, load->getType());
+            if (slot->type != load->getType() && !padded)
                 return refuse("a load of a local at another type");
             std::string temp;
             if (!local(*load, temp))
                 return false;
-            statement(temp + " = " + slot->name + ";\n");
+            statement(temp + " = " + (padded ? glslType(load->getType()) + "(" + slot->name + ", 0.0)" : slot->name) + ";\n");
             out = temp;
             return true;
         }
@@ -1008,12 +1062,13 @@ private:
             return true;
         if (auto *store = dyn_cast<StoreInst>(&instruction)) {
             const Local *slot = localOf(store->getPointerOperand());
-            if (!slot || slot->type != store->getValueOperand()->getType())
+            bool narrowed = slot && paddedVectorOf(slot->type, store->getValueOperand()->getType());
+            if (!slot || (slot->type != store->getValueOperand()->getType() && !narrowed))
                 return refuse("a store to an address this emitter does not write as a local");
             std::string text;
             if (!expression(store->getValueOperand(), text))
                 return false;
-            statement(slot->name + " = " + text + ";\n");
+            statement(slot->name + " = " + (narrowed ? glslType(slot->type) + "(" + text + ")" : text) + ";\n");
             return true;
         }
         if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction)) {
@@ -1263,11 +1318,9 @@ private:
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
-        bool unary = called == "air.fast_sin.f32" || called == "air.fast_cos.f32" || called == "air.fast_fabs.f32" ||
-                     called == "air.fast_floor.v2f32" || called == "air.fast_fract.f32" || called == "air.fast_rsqrt.f32";
-        bool ternaryFunction = called == "air.dot.v3f32" || called == "air.mix.v3f32" || called == "air.fast_clamp.v3f32";
+        const PlainFunction *plain = plainFunction(called);
         bool fmod = called == "air.fast_fmod.f32" || called == "air.fast_fmod.v2f32";
-        if (!sample && !width && !convert && !unary && !ternaryFunction && !fmod)
+        if (!sample && !width && !convert && !plain && !fmod)
             return refuse("a call to " + (called.empty() ? std::string("an indirect target") : called));
         std::vector<std::string> args;
         for (unsigned i = 0; i < call.arg_size(); i++) {
@@ -1285,15 +1338,6 @@ private:
             statement(name + " = " + glslType(call.getType()) + "(" + args[0] + ");\n");
             return true;
         }
-        if (unary) {
-            std::string function = called == "air.fast_sin.f32" ? "sin" : called == "air.fast_cos.f32" ? "cos"
-                                 : called == "air.fast_fabs.f32" ? "abs" : called == "air.fast_fract.f32" ? "fract"
-                                 : called == "air.fast_rsqrt.f32" ? "inversesqrt" : "floor";
-            if (args.size() != 1 || !local(call, name))
-                return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statement(name + " = " + function + "(" + args[0] + ");\n");
-            return true;
-        }
         if (fmod) {
             if (args.size() != 2 || call.getType() != call.getArgOperand(0)->getType())
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
@@ -1306,11 +1350,10 @@ private:
                                   quotient + ")));\n");
             return true;
         }
-        if (ternaryFunction) {
-            std::string function = called == "air.dot.v3f32" ? "dot" : called == "air.mix.v3f32" ? "mix" : "clamp";
-            if (args.size() != (called == "air.dot.v3f32" ? 2u : 3u) || !local(call, name))
+        if (plain) {
+            if (args.size() != plain->arguments || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statement(name + " = " + function + "(" + join(args) + ");\n");
+            statement(name + " = " + plain->glsl + "(" + join(args) + ");\n");
             return true;
         }
         if (width) {
@@ -1483,6 +1526,20 @@ std::string jsonQuote(const std::string &text)
         }
     }
     return out + "\"";
+}
+
+bool dumpEntry(const Entry &entry, std::string &text, std::string &error)
+{
+    LLVMContext context;
+    auto buffer = MemoryBuffer::getMemBuffer(StringRef((const char *)entry.bitcode.data(), entry.bitcode.size()), entry.name, false);
+    Expected<std::unique_ptr<Module>> parsed = parseBitcodeFile(buffer->getMemBufferRef(), context);
+    if (!parsed) {
+        error = "its bitcode does not read: " + toString(parsed.takeError());
+        return false;
+    }
+    raw_string_ostream stream(text);
+    (*parsed)->print(stream, nullptr);
+    return true;
 }
 
 bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
