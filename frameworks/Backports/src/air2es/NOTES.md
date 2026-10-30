@@ -34,8 +34,9 @@ and why, so it is not rediscovered later.
 - The generator needs the toolchain's `metal` and `metallib`. The image is pinned in
   `tools/metal_toolchain.lua`. Run it with
   `./xmakew l frameworks/Backports/tools/metal_sampler_table.lua DMG build/macosx/arm64/release/air2es src/air2es/samplers.inc WORKDIR [MOUNT]`.
-  Pass MOUNT when the image is already attached read-only, because a second attach of
-  the same image is refused.
+  DMG may be empty, and then `REVENANT_METAL_TOOLCHAIN_DMG` names the image. Pass MOUNT
+  when the image is already attached read-only, because a second attach of the same
+  image is refused.
 - The table's rows are checked against the Telegram constants 0x807bff0000080a49 and
   0x807bff0000084a92: the generator stops if the compiler does not produce them.
 - The reflection of a texture carries the decoded wrap and filter. The loader applies

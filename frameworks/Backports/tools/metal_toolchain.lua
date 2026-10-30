@@ -31,6 +31,9 @@ function verify(dmg)
 end
 
 function mount(dmg, where)
+    if not dmg or dmg == "" then
+        dmg = os.getenv(ENVIRONMENT)
+    end
     verify(dmg)
     where = where or mountPoint()
     if not os.isfile(path.join(binDirectory(where), "metal")) then
