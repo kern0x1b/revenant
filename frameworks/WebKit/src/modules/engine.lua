@@ -422,8 +422,11 @@ function verify_configured(ctx)
     if not values.WEBKIT_IOS6_EXPORTS or values.WEBKIT_IOS6_EXPORTS.value ~= ctx.exports then
         table.insert(problems, string.format("WEBKIT_IOS6_EXPORTS is not %s", ctx.exports))
     end
-    if not values.IOSURFACE_LIBRARY or values.IOSURFACE_LIBRARY.value ~= ctx.iosurface then
-        table.insert(problems, string.format("IOSURFACE_LIBRARY is not %s, so WebCore would name the public IOSurface.framework", ctx.iosurface))
+    -- CMake stores the path it resolved, which is absolute, so the check matches the stub's relative suffix
+    -- rather than the path as written (its src/modules/.. and packages/.. segments resolve against the cwd).
+    local iosurface = values.IOSURFACE_LIBRARY and values.IOSURFACE_LIBRARY.value or "unset"
+    if not iosurface:endswith(path.join("compat", "stubs", "IOSurfacePrivate.tbd")) or not os.isfile(iosurface) then
+        table.insert(problems, string.format("IOSURFACE_LIBRARY is %s, not the private compat stub, so WebCore would name the public IOSurface.framework", iosurface))
     end
     local include = values.CMAKE_PROJECT_WebKit_INCLUDE
     if not include or not os.isfile(include.value) then
