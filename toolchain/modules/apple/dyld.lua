@@ -982,8 +982,8 @@ function missing_imports(cachefile, binaries, root)
             if symbol.weak and bound and cache.libraries[bound] and not exports_symbol(lookup, bound, symbol.name, {}) then
                 for _, install in ipairs(table.orderkeys(provided)) do
                     if install ~= bound and provided[install].exports[symbol.name] then
-                        table.insert(ordering, {named(entry.binary), string.format("%s (weakly bound to %s, which does not export it, while %s does; link %s before %s)",
-                                                                                  symbol.name, bound, install, path.filename(install), path.filename(bound)), symbol.name})
+                        table.insert(ordering, {named(entry.binary), string.format("%s (weakly bound to %s, which does not export it, while %s does; link %s before %s, or name the image in revenant.rebind on its target to bind it to %s)",
+                                                                                  symbol.name, bound, install, path.filename(install), path.filename(bound), install), symbol.name})
                         break
                     end
                 end
@@ -1111,14 +1111,40 @@ function check(cachefile, binaries, folder, opt)
     return warnings
 end
 
-local function encoded_uleb(value)
-    local bytes = {}
-    repeat
-        local byte = value & 0x7F
-        value = value >> 7
-        table.insert(bytes, string.char(value ~= 0 and (byte | 0x80) or byte))
-    until value == 0
-    return table.concat(bytes)
+function rebind_plan(cachefile, binary, providers)
+    local cache = load(cachefile)
+    local data = macho.read(binary)
+    local image = loaded_image(macho.images(data), cache.architecture)
+    local moves, libraries = {}, {}
+    if not image or image.flags & 0x80 == 0 then
+        return moves, libraries
+    end
+    local provided = {}
+    for _, provider in ipairs(providers) do
+        local other = macho.read(provider)
+        local found = loaded_image(macho.images(other), cache.architecture)
+        if not found or not found.identity then
+            raise("%s is a library this build provides, and it holds no %s image with an install name to bind imports to", provider, cache.architecture)
+        end
+        provided[found.identity] = library_of(other, found, found.base)
+        libraries[found.identity] = {current = found.current_version, compatibility = found.compatibility_version}
+    end
+    local function lookup(install)
+        return provided[install]
+    end
+    local installs = table.orderkeys(provided)
+    for _, symbol in ipairs(undefined_imports(data, image)) do
+        local bound = image.libraries[symbol.ordinal]
+        if bound and cache.libraries[bound] and not exported_by(cache, bound, symbol.name) then
+            for _, install in ipairs(installs) do
+                if exports_symbol(lookup, install, symbol.name, {}) then
+                    moves[symbol.name] = install
+                    break
+                end
+            end
+        end
+    end
+    return moves, libraries
 end
 
 local function slid_slots(cache, segments)
@@ -1172,18 +1198,18 @@ local function rebase_stream(segments, slots, wide)
     for index, segment in ipairs(segments) do
         local held = slots[segment.name] or {}
         if #held > 0 then
-            table.insert(stream, string.char(0x70 | (index - 1)) .. encoded_uleb(held[1]))
+            table.insert(stream, string.char(0x70 | (index - 1)) .. macho.encoded_uleb(held[1]))
             local at, run = held[1], 0
             for position = 1, #held do
                 if held[position] == at + run * pointer then
                     run = run + 1
                 else
-                    table.insert(stream, string.char(0x50) .. encoded_uleb(run))
-                    table.insert(stream, string.char(0x20) .. encoded_uleb(held[position] - (at + run * pointer)))
+                    table.insert(stream, string.char(0x50) .. macho.encoded_uleb(run))
+                    table.insert(stream, string.char(0x20) .. macho.encoded_uleb(held[position] - (at + run * pointer)))
                     at, run = held[position], 1
                 end
             end
-            table.insert(stream, string.char(0x50) .. encoded_uleb(run))
+            table.insert(stream, string.char(0x50) .. macho.encoded_uleb(run))
         end
     end
     table.insert(stream, string.char(0))
