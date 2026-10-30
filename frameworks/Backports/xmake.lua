@@ -408,6 +408,18 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("MetalDispatchProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/dispatch_main.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.metaldispatchprobe", "CFBundleDisplayName=MetalDispatchProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("BackportsSceneKitProbe")
         set_kind("binary")
         set_default(false)

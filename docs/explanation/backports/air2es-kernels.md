@@ -48,8 +48,9 @@ the corpus is refused by name (see "Still refused"). The Metal port still runs k
   package's `clang`. The success cases (including the alloca local, the cube sample and the unsigned compare) pass
   `glslangValidator -S frag`; a control with a `1u` literal fails it, so the check is live. The level, coordinate,
   barrier, threadgroup, no-write and array-alloca cases return their named refusals. The barrier and atomic intrinsic
-  names are assumed; the Telegram corpus has neither. The fixtures and their driver are in the worktree's scratch
-  folder, not in the tests; a tracked regression test is open.
+  names are assumed; the Telegram corpus has neither. The four success fixtures are tracked in
+  `frameworks/Backports/tests/device_probe/dispatch/fixtures`, with the kernel library their translation produced in
+  `dispatch/dispatch.metallib.es2`; the driver that splits the output is a scratch tool.
 
 ## Still refused
 
@@ -70,8 +71,10 @@ the corpus is refused by name (see "Still refused"). The Metal port still runs k
   encoder gains `setTexture:atIndex:` and `setSamplerState:atIndex:`.
 - Refused by name at dispatch: a cube texture (the GL binding does not select a cube map yet), a threadgroup block,
   and a grid of depth other than 1.
-- The air2cpu table still serves the kernels that are not translated. It is removed after a translated kernel
-  draws on the 4S. This note does not claim that yet.
+- A translated kernel draws on the 4S (see Verification). The air2cpu table is not removed yet. The Telegram kernel
+  `compute_main` is one kernel air2es refuses on its constexpr sampler, and it is not verified here whether the
+  Telegram build puts it in the air2cpu table. If it does, removing the table turns that kernel into a named refusal,
+  which is the owner's decision.
 - The grid is the dispatch size, `threadsPerGrid` for `dispatchThreads`, so a grid that does not divide evenly is
   run exactly; the air2cpu path still truncates it.
 
@@ -93,8 +96,11 @@ These replace the refused constructs. The kernel's barrier becomes a pass bounda
 - `digest_test`: the backports digest changed with `translate.cpp`; regenerated under the host config with
   `./xmakew l -P . toolchain/tools/recipe_digests.lua` and passes.
 - Accuracy against Metal needs a Metal compiler and the owner's Xcode; neither is on this Mac.
-- Performance is measured per kernel on the iPhone 4S, before and after, as ADR 0014 requires. No kernel is on the GL
-  path yet, so there is nothing to measure.
+- Device: on the iPhone 4S (iPhone4,1, iOS 6.1.3), `MetalDispatchProbe` loads the kernel library and dispatches the
+  translated `k_ok`, `k_local` and `k_ult` over 4x4 textures through the GL route, with 2x2 grids and grouped dispatch
+  too. All 10 checks pass, and the cube kernel `k_cube` is refused by name and leaves its texture as it was.
+  The probe is built with `./xmakew build -P . MetalDispatchProbe` and copied to the phone with the device module.
+- Performance is measured per kernel on the iPhone 4S, before and after, as ADR 0014 requires. Not measured yet.
 
 ## Open items
 
