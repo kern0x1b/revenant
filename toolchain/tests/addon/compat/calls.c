@@ -36,6 +36,11 @@ static void expect(int holds, const char *what)
     }
 }
 
+static int ran_within(dispatch_semaphore_t done)
+{
+    return dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC)) == 0;
+}
+
 static const char *program;
 
 static int dies(const char *scenario)
@@ -146,11 +151,11 @@ static void *plain_thread(void *unused)
             mine = qos_class_self();
             dispatch_semaphore_signal(finished);
         });
-        dispatch_semaphore_wait(finished, DISPATCH_TIME_FOREVER);
+        int ran = ran_within(finished);
         char what[160];
         snprintf(what, sizeof what, "a worker of the global queue of priority %ld has class 0x%x, the SDK's constant for it, not 0x%x",
                  priorities[index], classes[index], mine);
-        expect(mine == classes[index], what);
+        expect(ran && mine == classes[index], what);
     }
     return NULL;
 }
@@ -218,38 +223,43 @@ static void global_queues(void)
 static void activations(void)
 {
     __block _Atomic int fired = 0;
+    dispatch_semaphore_t firedSignal = dispatch_semaphore_create(0);
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(0, 0));
     dispatch_source_set_timer(source, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_MSEC), DISPATCH_TIME_FOREVER, 0);
     dispatch_source_set_event_handler(source, ^{
         atomic_fetch_add(&fired, 1);
+        dispatch_semaphore_signal(firedSignal);
     });
     usleep(50000);
     expect(atomic_load(&fired) == 0, "a source nobody activated does not fire");
     shim_activate(source);
     shim_activate(source);
-    for (int tick = 0; tick < 200 && atomic_load(&fired) == 0; tick++)
-        usleep(5000);
-    expect(atomic_load(&fired) == 1, "an activated source fires, and a second activation resumes nothing more");
+    int firedInTime = ran_within(firedSignal);
+    usleep(50000);
+    expect(firedInTime && atomic_load(&fired) == 1, "an activated source fires, and a second activation resumes nothing more");
     dispatch_source_cancel(source);
     dispatch_queue_t queue = dispatch_queue_create("revenant.activate", NULL);
     shim_activate(queue);
     __block int ran = 0;
-    dispatch_sync(queue, ^{
+    dispatch_semaphore_t ranSignal = dispatch_semaphore_create(0);
+    dispatch_async(queue, ^{
         ran = 1;
+        dispatch_semaphore_signal(ranSignal);
     });
-    expect(ran, "activating a queue, which starts active, leaves it running blocks");
+    int ranInTime = ran_within(ranSignal);
+    expect(ranInTime && ran, "activating a queue, which starts active, leaves it running blocks");
 }
 
 static dispatch_queue_t serial, inner;
 
-static void on_worker(void (^body)(void))
+static int on_worker(void (^body)(void))
 {
     dispatch_semaphore_t finished = dispatch_semaphore_create(0);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         body();
         dispatch_semaphore_signal(finished);
     });
-    dispatch_semaphore_wait(finished, DISPATCH_TIME_FOREVER);
+    return ran_within(finished);
 }
 
 static int scenario(const char *name)
@@ -290,7 +300,7 @@ static void assertions(void)
     dispatch_sync(inner, ^{ shim_assert_queue(serial); darwin(serial); shim_assert_queue(inner); });
     dispatch_sync(serial, ^{ shim_assert_queue(dispatch_get_main_queue()); darwin(dispatch_get_main_queue()); });
     dispatch_queue_t global = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-    on_worker(^{ shim_assert_queue(global); darwin(global); });
+    expect(on_worker(^{ shim_assert_queue(global); darwin(global); }), "a worker of the low-priority global queue runs the block");
     static const char *crashes[][2] = {
         {"main-thread-on-serial", "the main thread outside a block is not on another queue"},
         {"target-on-targeting", "a block on a target queue is not on the queue that targets it"},
