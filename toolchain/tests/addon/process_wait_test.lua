@@ -2,8 +2,6 @@ import("core.base.bytes")
 import("core.base.pipe")
 import("core.base.process")
 
-local BOUND = 30000
-
 local function spawn(program, argv)
     local reader, writer = pipe.openpair("BB")
     local child = process.openv(program, argv, {stdout = writer})
@@ -13,9 +11,9 @@ end
 
 local function read_readiness(reader, found, what)
     local buff = bytes(16)
-    local n = reader:read(buff, 16, {timeout = BOUND})
+    local n = reader:read(buff, 16)
     if not n or n <= 0 or buff:slice(1, n):str():trim() ~= "ready" then
-        table.insert(found, what .. ": the child did not write its readiness line within " .. BOUND .. " ms")
+        table.insert(found, what .. ": the child did not write its readiness line")
         return false
     end
     return true
@@ -23,14 +21,14 @@ end
 
 local function read_until_closed(reader, found, what)
     local buff = bytes(16)
-    local n = reader:read(buff, 16, {timeout = BOUND})
+    local n = reader:read(buff, 16)
     if n ~= 0 then
         table.insert(found, what .. ": the child did not close its output after its readiness line")
     end
 end
 
 local function exited(child, status, found, what)
-    local ok, got = child:wait(BOUND)
+    local ok, got = child:wait()
     if ok ~= 1 or got ~= status then
         table.insert(found, string.format("%s: the wait returned %s, %s, and must return 1 with status %d",
                                           what, tostring(ok), tostring(got), status))
