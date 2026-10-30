@@ -119,6 +119,13 @@ typedef NSString *NSTextListMarkerFormat;
 #define NS_SWIFT_SENDABLE
 #endif
 
+// The 26.2 AVFAudio umbrella parses AVAudioSessionDeprecated.h, which adds a category to AVAudioSession, before the class is
+// declared, so any unit that imports AVFoundation first fails with "cannot define category for undefined class". The class
+// header comes first here, in every Objective-C unit that gets this header.
+#if defined(__OBJC__)
+#import <AVFoundation/AVAudioSession.h>
+#endif
+
 #if defined(__OBJC__) && defined(WEBKIT_IOS6_OBJC_EXTRAS)
 #import <AVFoundation/AVAudioSession.h>
 #import <AVFoundation/AVFoundation.h>
