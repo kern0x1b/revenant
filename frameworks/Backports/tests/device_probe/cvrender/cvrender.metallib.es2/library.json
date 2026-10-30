@@ -1,0 +1,1 @@
+{"functions": [{"name": "cv_quad_vertex", "stage": "vertex", "source": "cv_quad_vertex.vertex.glsl", "reflection": "cv_quad_vertex.vertex.json"}, {"name": "cv_fill", "stage": "fragment", "source": "cv_fill.fragment.glsl", "reflection": "cv_fill.fragment.json"}, {"name": "cv_copy", "stage": "fragment", "source": "cv_copy.fragment.glsl", "reflection": "cv_copy.fragment.json"}]}
