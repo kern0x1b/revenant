@@ -14,6 +14,7 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     EAGLContext *_context;
     NSRecursiveLock *_lock;
     NSMutableDictionary *_pipelines;
+    CVOpenGLESTextureCacheRef _textureCache;
 }
 
 + (RevenantMetalDevice *)shared
@@ -130,6 +131,23 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     return (id<MTLTexture>)[[RevenantMetalTexture alloc] initWithDescriptor:descriptor];
 }
 
+- (id<MTLTexture>)newTextureWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane
+{
+    return (id<MTLTexture>)[[RevenantMetalTexture alloc] initWithDescriptor:descriptor iosurface:iosurface plane:plane];
+}
+
+- (CVOpenGLESTextureCacheRef)textureCache
+{
+    if (!_textureCache) {
+        CVReturn status = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
+        if (status != kCVReturnSuccess) {
+            NSLog(@"Metal: the OpenGL ES texture cache cannot be created: CoreVideo returned %d", (int)status);
+            return NULL;
+        }
+    }
+    return _textureCache;
+}
+
 - (id<MTLSamplerState>)newSamplerStateWithDescriptor:(MTLSamplerDescriptor *)descriptor
 {
     return (id<MTLSamplerState>)[[RevenantMetalSampler alloc] initWithDescriptor:descriptor];
@@ -143,6 +161,16 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 - (id<MTLComputePipelineState>)newComputePipelineStateWithFunction:(id<MTLFunction>)computeFunction options:(MTLPipelineOption)options reflection:(MTLAutoreleasedComputePipelineReflection *)reflection error:(NSError **)error
 {
     return [self newComputePipelineStateWithFunction:computeFunction error:error];
+}
+
+- (id<MTLComputePipelineState>)newComputePipelineStateWithDescriptor:(MTLComputePipelineDescriptor *)descriptor options:(MTLPipelineOption)options reflection:(MTLAutoreleasedComputePipelineReflection *)reflection error:(NSError **)error
+{
+    if (!descriptor.computeFunction) {
+        if (error)
+            *error = RevenantMetalError(23, @"the compute pipeline descriptor has no compute function");
+        return nil;
+    }
+    return [self newComputePipelineStateWithFunction:descriptor.computeFunction options:options reflection:reflection error:error];
 }
 
 - (void)newComputePipelineStateWithFunction:(id<MTLFunction>)computeFunction completionHandler:(MTLNewComputePipelineStateCompletionHandler)completionHandler

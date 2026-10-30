@@ -65,6 +65,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "kCGColorSpaceSRGB",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGColorSpace.h",
+            find = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(9.0));",
+            replace = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(6.0)) __attribute__((weak_import));",
+        },
+    },
+    {
+        member = "UIKeyboardAppearanceDark",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITextInputTraits.h",
+            find = "UIKeyboardAppearanceDark API_AVAILABLE(ios(7.0)),",
+            replace = "UIKeyboardAppearanceDark API_AVAILABLE(ios(6.0)),",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",
@@ -2103,7 +2123,7 @@ end
 
 VFS_SUBTREES = {}
 
-VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true}
+VFS_FILES = {["os/lock.h"] = true, ["compression.h"] = true, ["_time.h"] = true, ["os.apinotes"] = true, ["simd/math.h"] = true}
 
 LOWERED_FILES = {["compression.h"] = true, ["os/lock.h"] = true}
 
@@ -2168,12 +2188,55 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
+local function photos_armv7_interface(text)
+    local lines, pending, skipping = {}, {}, false
+    for line in text:gmatch("([^\n]*)\n") do
+        if skipping then
+            skipping = line ~= "}"
+        elseif line:match("^@available") then
+            table.insert(pending, line)
+        elseif line == "public import ExtensionFoundation" then
+            pending = {}
+        elseif line:match("^public protocol PHBackgroundResourceUploadExtension") or line:match("^extension Photos%.PHBackgroundResourceUploadExtension") then
+            pending = {}
+            skipping = true
+        else
+            for _, attribute in ipairs(pending) do
+                if line == "extension Photos.PHChange {" and attribute:find("iOS 8.0", 1, true) then
+                    attribute = "@available(iOS 6.0, *)"
+                end
+                table.insert(lines, attribute)
+            end
+            pending = {}
+            if line:match("^// swift%-module%-flags: ") then
+                line = line:gsub("arm64e%-apple%-ios26%.2", "armv7-apple-ios6.0"):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
+            end
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function armv7_overlays(sdk, out, roots)
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}}) do
+        local name, lower = overlay[1], overlay[2]
+        local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
+        local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
+        if os.isfile(source) then
+            local copy = path.join(out, path.relative(dir, sdk), "armv7-apple-ios.swiftinterface")
+            os.mkdir(path.directory(copy))
+            write_if_changed(copy, lower(io.readfile(source)))
+            roots[dir] = roots[dir] or {}
+            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
+        end
+    end
+end
+
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
-    local simd = path.join(include_directory(out), "simd", "math.h")
-    os.mkdir(path.directory(simd))
-    write_if_changed(simd, table.concat({
+    local simd = path.join(sdk, "usr", "include", "simd", "math.h")
+    changed[simd] = table.concat({
         "#if defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 70000",
         "#ifdef __cplusplus",
         "extern \"C\" {",
@@ -2184,9 +2247,8 @@ function build_overlay(sdk, out, set, subtrees, modules)
         "}",
         "#endif",
         "#endif",
-        "#include_next <simd/math.h>",
         "",
-    }, "\n"))
+    }, "\n") .. io.readfile(simd)
     for _, file in ipairs(framework_headers(sdk)) do
         local text = changed[file] or io.readfile(file)
         local lowered = lowering_of(text, set)
@@ -2252,6 +2314,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
         roots[entry.directory] = roots[entry.directory] or {}
         table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
     end
+    armv7_overlays(sdk, out, roots)
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
         if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then

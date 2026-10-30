@@ -14,7 +14,8 @@ local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {
-    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports"}, archives = {}, system = {"sqlite3"}},
+    {name = "SystemBackports", folder = "libSystem", frameworks = {}, libraries = {}, archives = {}, system = {}},
+    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports", "SystemBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "AdServicesBackports", folder = "AdServices", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -54,7 +55,7 @@ local LIBRARIES = {
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp", "tesseract", "leptonica"}, system = {}},
-    {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "CoreVideo", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {}, system = {}},
     {name = "MetalKitBackports", folder = "MetalKit", frameworks = {"MetalKit", "Metal", "ModelIO", "UIKit", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "ModelIOBackports"}, archives = {}, system = {}},
     {name = "MPSBackports", folder = "MetalPerformanceShaders", frameworks = {"Metal", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {}, system = {}},
     {name = "MPSGraphBackports", folder = "MetalPerformanceShadersGraph", frameworks = {"Metal", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "MPSBackports"}, archives = {}, system = {}},
@@ -368,6 +369,21 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("BackportsQRMetadataProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/qr_metadata/main.m", "src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m",
+                  "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
+                  "src/AVFoundation/AVMetadataMachineReadableCodeObject7.m", "src/AVFoundation/AVFoundationNames7.m", "src/AVFoundation/RevenantQRCode.c", "src/AVFoundation/RevenantQRECI.c")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/qr_metadata/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.qrmetadata", "CFBundleDisplayName=BackportsQRMetadataProbe")
+        set_values("revenant.control", "tests/qr_metadata/control")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalDeviceProbe")
         set_default(false)
         add_rules("@addon/revenant/daemon")
@@ -466,7 +482,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   members = "lowered_members_test.lua", device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
@@ -771,7 +787,7 @@ end
 if not is_plat("iphoneos") then
     add_requires("revenant@ffmpeg", {alias = "ffmpeg"})
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
-    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
+    host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c", "RevenantQRECI.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
     if is_arch("arm64", "x86_64") then
         host_tests("Vision", {barcode = {"VNBarcodeDecoderCore.cpp", "VNBarcodeDecoder.mm", "VNGrayscale.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm", packages = {"zxing-cpp"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}})
         host_tests("Vision", {text = {"VNTextRecognizerCore.cpp", "VNTextRecognizer.mm", "VNGrayscale.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo", "ImageIO"}, {extension = "mm", packages = {"tesseract", "leptonica", "tessdata"}, cxxflags = {"-std=c++20", "-Wno-deprecated-declarations"}, arguments = function (target, tests) return {path.join(tests, "data", "text"), path.join(target:pkg("tessdata"):installdir(), "share", "tessdata")} end})

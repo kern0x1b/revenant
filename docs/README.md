@@ -30,6 +30,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Write a port](tutorials/toolchain/port.md) | a tutorial: an xmake project from an empty directory to a `.deb` |
 | [Checks and waivers](guides/toolchain/checks.md) | the checks a port runs, the waivers it states, and the release's libraries |
+| [Rebind a prebuilt image's imports](guides/toolchain/rebind.md) | `revenant.rebind`: moving a prebuilt armv7 image's imports to the Backports library that exports them, its limits, and the lines for Classicgram |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
 | [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
@@ -111,6 +112,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
+| [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |

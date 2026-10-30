@@ -23,6 +23,15 @@ typedef struct {
     const char *linearExtension;
 } RevenantFormat;
 
+static BOOL surfaceFormatFor(MTLPixelFormat pixelFormat, OSType *out)
+{
+    switch ((NSUInteger)pixelFormat) {
+    case 70: *out = kCVPixelFormatType_32RGBA; return YES;
+    case 80: *out = kCVPixelFormatType_32BGRA; return YES;
+    default: return NO;
+    }
+}
+
 static BOOL formatFor(MTLPixelFormat pixelFormat, RevenantFormat *out)
 {
     switch ((NSUInteger)pixelFormat) {
@@ -89,6 +98,7 @@ NSUInteger RevenantMetalBindEpoch;
 @implementation RevenantMetalTexture {
     GLuint _name;
     GLuint _framebuffer;
+    CVOpenGLESTextureRef _surfaceTexture;
     BOOL _screen;
     MTLPixelFormat _pixelFormat;
     NSUInteger _width;
@@ -233,6 +243,49 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return self;
 }
 
+- (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane
+{
+    RevenantFormat format;
+    OSType surfaceFormat;
+    if (descriptor.textureType != MTLTextureType2D || descriptor.sampleCount != 1 || descriptor.mipmapLevelCount > 1 || plane != 0 || !formatFor(descriptor.pixelFormat, &format) || !surfaceFormatFor(descriptor.pixelFormat, &surfaceFormat)) {
+        NSLog(@"Metal: pixel format %d, %d samples, plane %lu has no IOSurface texture form on this backport", (int)descriptor.pixelFormat, (int)descriptor.sampleCount, (unsigned long)plane);
+        return nil;
+    }
+    if (IOSurfaceGetWidth(iosurface) != descriptor.width || IOSurfaceGetHeight(iosurface) != descriptor.height || IOSurfaceGetPixelFormat(iosurface) != surfaceFormat) {
+        NSLog(@"Metal: the IOSurface is %lux%lu in format %u, which does not match the texture descriptor", (unsigned long)IOSurfaceGetWidth(iosurface), (unsigned long)IOSurfaceGetHeight(iosurface), (unsigned)IOSurfaceGetPixelFormat(iosurface));
+        return nil;
+    }
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
+    [device acquire];
+    CVOpenGLESTextureCacheRef cache = [device textureCache];
+    CVPixelBufferRef pixelBuffer = NULL;
+    CVReturn status = cache ? CVPixelBufferCreateWithIOSurface(kCFAllocatorDefault, iosurface, NULL, &pixelBuffer) : kCVReturnError;
+    CVOpenGLESTextureRef texture = NULL;
+    if (status == kCVReturnSuccess)
+        status = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, pixelBuffer, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)descriptor.width, (GLsizei)descriptor.height, format.format, format.type, 0, &texture);
+    if (pixelBuffer)
+        CVPixelBufferRelease(pixelBuffer);
+    [device relinquish];
+    if (status != kCVReturnSuccess) {
+        NSLog(@"Metal: the IOSurface cannot be bound as an OpenGL ES texture: CoreVideo returned %d", (int)status);
+        return nil;
+    }
+    if ((self = [super init])) {
+        _surfaceTexture = texture;
+        _name = CVOpenGLESTextureGetName(texture);
+        _pixelFormat = descriptor.pixelFormat;
+        _width = descriptor.width;
+        _height = descriptor.height;
+        _levels = 1;
+        _usage = descriptor.usage;
+        _attachedLevel = NSNotFound;
+        RevenantMetalBindEpoch++;
+    } else {
+        CFRelease(texture);
+    }
+    return self;
+}
+
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format
 {
     if ((self = [super init])) {
@@ -250,7 +303,14 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (void)dealloc
 {
-    if (!_screen && (_name || _renderbuffer)) {
+    if (_surfaceTexture) {
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
+        [device acquire];
+        if (_framebuffer)
+            glDeleteFramebuffers(1, &_framebuffer);
+        CFRelease(_surfaceTexture);
+        [device relinquish];
+    } else if (!_screen && (_name || _renderbuffer)) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         if (_framebuffer)
