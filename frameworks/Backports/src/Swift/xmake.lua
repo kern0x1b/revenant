@@ -11,6 +11,7 @@ add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
 add_requires("revenant@libcxx", {alias = "libcxx"})
 add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
 add_requires("revenant@swift 6.4.0", {alias = "swift", host = true, system = false})
+add_requires("revenant@swiftui", {alias = "swiftui"})
 
 local LOCALIZED_STRING = "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }"
 
@@ -322,19 +323,29 @@ overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit",
 
 overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, frameworks = {"Foundation"}})
 
+overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swiftui"}})
+
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "metallowering")
+    add_tests("oslock", "uikittraits", "uikitpointer", "metallowering", "translation")
     on_test(function (target, opt)
         import("core.project.project")
-        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", metallowering = "metal_lowering_test.lua"}
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua"}
         local name = path.filename(opt.name)
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()
         local compiler = path.join(project.required_package("swift"):installdir(), "bin", "swiftc")
+        local folders = {}
+        for _, package in ipairs({"swift-runtime", "swiftui", "combine"}) do
+            local required = project.required_package(package)
+            for _, folder in ipairs(required and table.wrap((required:envs() or {}).REVENANT_SWIFT_MODULES) or {}) do
+                table.insert(folders, folder)
+            end
+        end
         local ok = os.execv(os.programfile(), {"l", "-P", root, path.join(SRC, "..", "tests", scripts[name])},
-                            {try = true, curdir = root, envs = {REVENANT_SWIFT_RUNTIME = runtime, REVENANT_SWIFT_COMPILER = compiler}})
+                            {try = true, curdir = root, envs = {REVENANT_SWIFT_RUNTIME = runtime, REVENANT_SWIFT_COMPILER = compiler,
+                                                                REVENANT_TEST_MODULES = table.concat(folders, ":")}})
         if ok ~= 0 then
             opt.errors = name .. " failed"
         end
