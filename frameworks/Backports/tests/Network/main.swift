@@ -366,7 +366,7 @@ func framedExchange() {
     let clientReceived = DispatchSemaphore(value: 0)
     var serverText = "none"
     var clientText = "none"
-    var parameters = NWParameters.tcp
+    let parameters = NWParameters.tcp
     parameters.defaultProtocolStack.applicationProtocols.insert(NWProtocolFramer.Options(definition: LengthPrefixFramer.definition), at: 0)
     guard let listener = try? NWListener(using: parameters, on: 0) else {
         print("framed listener could not start")
@@ -408,6 +408,53 @@ func framedExchange() {
     listener.cancel()
 }
 
+func contextAndViability() {
+    print("default message final \(NWConnection.ContentContext.defaultMessage.isFinal) default stream final \(NWConnection.ContentContext.defaultStream.isFinal)")
+    print("constructed final \(NWConnection.ContentContext(identifier: "x").isFinal) \(NWConnection.ContentContext(identifier: "x", isFinal: true).isFinal)")
+    let shared = NWParameters.tcp
+    let alias = shared
+    alias.preferNoProxies = true
+    print("parameters shared \(shared.preferNoProxies)")
+
+    let port = serve(SOCK_STREAM, echoTCP)
+    let parameters = NWParameters.tcp
+    let connection = NWConnection(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port)!, using: parameters)
+    print("connection holds parameters \(connection.parameters === parameters)")
+    let ready = DispatchSemaphore(value: 0)
+    let viable = DispatchSemaphore(value: 0)
+    let received = DispatchSemaphore(value: 0)
+    let cancelled = DispatchSemaphore(value: 0)
+    var viability: [Bool] = []
+    connection.viabilityUpdateHandler = { isViable in
+        viability.append(isViable)
+        viable.signal()
+    }
+    connection.stateUpdateHandler = { state in
+        switch state {
+        case .ready:
+            ready.signal()
+        case .cancelled:
+            cancelled.signal()
+        default:
+            break
+        }
+    }
+    connection.start(queue: queue)
+    print(ready.wait(timeout: .now() + wait) == .success ? "viability tcp reached ready" : "viability tcp never ready")
+    print(viable.wait(timeout: .now() + wait) == .success ? "viability tcp reported" : "viability tcp never reported")
+    connection.send(content: Data("hello world".utf8), completion: .contentProcessed { _ in })
+    connection.receive(minimumIncompleteLength: 11, maximumLength: 11) { data, context, complete, _ in
+        print("final tcp received \(String(data: data ?? Data(), encoding: .utf8) ?? "nil") final \(context?.isFinal ?? false) complete \(complete)")
+        received.signal()
+    }
+    _ = received.wait(timeout: .now() + wait)
+    connection.cancel()
+    _ = cancelled.wait(timeout: .now() + wait)
+    queue.sync {
+        print("viability tcp values \(viability)")
+    }
+}
+
 tcpExchange()
 udpExchange()
 refusedConnection()
@@ -416,3 +463,4 @@ endpoints()
 tcpOptionDefaults()
 listenerExchange()
 framedExchange()
+contextAndViability()

@@ -31,12 +31,14 @@ public final class NWConnection: @unchecked Sendable {
 
     public struct ContentContext: Hashable, Sendable {
         public static let defaultMessage = ContentContext(identifier: "defaultMessage")
-        public static let defaultStream = ContentContext(identifier: "defaultStream")
+        public static let defaultStream = ContentContext(identifier: "defaultStream", isFinal: true)
 
         public let identifier: String
+        public let isFinal: Bool
 
-        public init(identifier: String) {
+        public init(identifier: String, isFinal: Bool = false) {
             self.identifier = identifier
+            self.isFinal = isFinal
         }
     }
 
@@ -62,6 +64,7 @@ public final class NWConnection: @unchecked Sendable {
     public private(set) var state: State = .setup
     public private(set) var currentPath: NWPath?
     public var stateUpdateHandler: ((State) -> Void)?
+    public var viabilityUpdateHandler: ((Bool) -> Void)?
     public var pathUpdateHandler: ((NWPath) -> Void)?
 
     private var queue: DispatchQueue?
@@ -72,6 +75,7 @@ public final class NWConnection: @unchecked Sendable {
     private var writeActive = false
     private var connecting = false
     private var endOfStream = false
+    private var viable = false
     private var sends: [PendingSend] = []
     private var receives: [PendingReceive] = []
     private var inbound = Data()
@@ -189,6 +193,26 @@ public final class NWConnection: @unchecked Sendable {
     private func setState(_ next: State) {
         state = next
         stateUpdateHandler?(next)
+        switch next {
+        case .ready:
+            setViable(true)
+        case .waiting, .failed:
+            setViable(false)
+        case .setup, .preparing, .cancelled:
+            break
+        }
+    }
+
+    private func setViable(_ next: Bool) {
+        guard next != viable else {
+            return
+        }
+        viable = next
+        viabilityUpdateHandler?(next)
+    }
+
+    private var receiveContext: ContentContext {
+        parameters.transport == .tcp ? .defaultStream : ContentContext(identifier: "defaultStream")
     }
 
     private func hostText(_ host: NWEndpoint.Host) -> String {
@@ -528,7 +552,7 @@ public final class NWConnection: @unchecked Sendable {
 
     private func deliverReceive(_ data: Data?, complete: Bool, error: NWError?) {
         let pending = receives.removeFirst()
-        pending.completion(data, .defaultStream, complete, error)
+        pending.completion(data, receiveContext, complete, error)
     }
 
     private func fail(_ error: NWError) {
@@ -622,10 +646,10 @@ public final class NWConnection: @unchecked Sendable {
                     framedHead = 0
                 }
                 let pending = receives.removeFirst()
-                pending.completion(message, .defaultStream, false, nil)
+                pending.completion(message, receiveContext, false, nil)
             } else if endOfStream {
                 let pending = receives.removeFirst()
-                pending.completion(nil, .defaultStream, true, nil)
+                pending.completion(nil, receiveContext, true, nil)
             } else {
                 break
             }
