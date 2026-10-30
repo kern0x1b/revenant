@@ -2202,6 +2202,9 @@ local function photos_armv7_interface(text)
             skipping = true
         else
             for _, attribute in ipairs(pending) do
+                if line == "extension Photos.PHChange {" and attribute:find("iOS 8.0", 1, true) then
+                    attribute = "@available(iOS 6.0, *)"
+                end
                 table.insert(lines, attribute)
             end
             pending = {}
@@ -2214,69 +2217,8 @@ local function photos_armv7_interface(text)
     return table.concat(lines, "\n") .. "\n"
 end
 
-local function lines_of(text)
-    local lines = {}
-    for line in text:gmatch("([^\n]*)\n") do
-        table.insert(lines, line)
-    end
-    return lines
-end
-
-local function block_at(lines, index)
-    local first, last = index, index
-    while lines[first - 1] and lines[first - 1]:match("^@available") do
-        first = first - 1
-    end
-    while lines[last] and lines[last] ~= "}" do
-        last = last + 1
-    end
-    if not lines[last] then
-        raise("the Swift interface has no closing brace for the declaration at line %d", index)
-    end
-    return table.concat(lines, "\n", first, last)
-end
-
-local function block_starting(lines, prefix)
-    for i, line in ipairs(lines) do
-        if line:sub(1, #prefix) == prefix then
-            return block_at(lines, i)
-        end
-    end
-    raise("the Swift interface has no declaration starting %s", prefix)
-end
-
-local function block_enclosing(lines, opener, marker)
-    local start = nil
-    for i, line in ipairs(lines) do
-        if line == opener then
-            start = i
-        elseif start and line:find(marker, 1, true) then
-            return block_at(lines, start)
-        end
-    end
-    raise("the Swift interface has no %s in %s", marker, opener)
-end
-
-local function uikit_armv7_interface(text)
-    local lines = lines_of(text)
-    return table.concat({
-        lines[1],
-        lines[2],
-        "// swift-module-flags: -target armv7-apple-ios6.0 -enable-objc-interop -swift-version 5 -module-name UIKit",
-        lines[4],
-        "public import Swift",
-        "public import _Concurrency",
-        "public import CoreFoundation",
-        "@_exported public import UIKit",
-        block_enclosing(lines, "extension UIView {", "var cornerConfiguration: UIKit.UICornerConfiguration"),
-        block_starting(lines, "public struct UICornerConfiguration "),
-        block_starting(lines, "public struct UICornerRadius "),
-        "",
-    }, "\n")
-end
-
 local function armv7_overlays(sdk, out, roots)
-    for _, overlay in ipairs({{"Photos", photos_armv7_interface}, {"UIKit", uikit_armv7_interface}}) do
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}}) do
         local name, lower = overlay[1], overlay[2]
         local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
         local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
