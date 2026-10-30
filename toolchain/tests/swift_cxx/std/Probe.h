@@ -30,6 +30,7 @@ inline std::vector<std::string> split(const std::string &text) {
   parts.push_back(current);
   return parts;
 }
+inline std::vector<std::string> names() { return {"ada", "grace", "edsger"}; }
 inline std::function<int(int)> adder(int n) { return [n](int x) { return x + n; }; }
 inline int apply(std::function<int(int)> f, int x) { return f(x); }
 inline std::optional<int> maybe(int x) { if (x > 0) return x * 2; return std::nullopt; }

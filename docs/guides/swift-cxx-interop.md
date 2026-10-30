@@ -89,6 +89,29 @@ compiler read `-femulated-tls` into the target options (`CompilerInvocation.cpp`
 do. The patch changes four clang files in the fork: `TargetOptions.h`, `OSTargets.h`, `ItaniumCXXABI.cpp` and
 `CompilerInvocation.cpp`. It applies with `git apply -p2` in llvm-project after the other compiler patches.
 
+## Why the fork carries the operator- patch
+
+On armv7 iOS 6.0, `std::vector<std::string>` and `std::vector<int>` lose `CxxSequence` and `CxxRandomAccessCollection`, so
+`for`-in and `.count` do not compile. The cause is in the importer, not in the module map, the overlays or the flags.
+`ptrdiff_t` is C `int` on armv7 and `long` on arm64. The importer maps the typedef name `ptrdiff_t` to `Int`
+(`lib/ClangImporter/MappedTypes.def:107`), but the canonical builtin `int` imports as `Int32`. For a C++ iterator the random-access
+conformance (`conformToCxxIteratorIfNeeded` in `lib/ClangImporter/ClangDerivedConformances.cpp`) needs the result of `operator-`
+and the parameter of `operator+=` to be the same Swift type. The `+=` parameter is the iterator's `difference_type`, which
+imports as `Int`; the `-` result arrived as `Int32`, so the conformance was dropped without a diagnostic.
+
+| Target | `last - first` | `iterator += d` | `UnsafeCxxRandomAccessIterator` |
+| --- | --- | --- | --- |
+| armv7 iOS 6.0 (pre-patch) | `Int32` | takes `Int` | not satisfied |
+| arm64 iOS 27.0 | `Int` | takes `Int` | satisfied |
+
+`patches/cxx-minus-keeps-the-difference-type.patch` makes `importFunctionReturnType` import an `operator-` result as the
+`difference_type` typedef of its first parameter's record when the canonical types match. The `-` result and the `+=` parameter
+then go through the same typedef import and agree on every target. Targets whose `difference_type` already imports as `Int`
+do not change. The patch is against the pinned tag `swift-6.4.0-RELEASE` (`b8189d766d`); `git apply` accepts it on a clean
+copy. A syntax check against LLVM 23.1.3 headers reports no diagnostic in `ImportType.cpp`; the LLVM headers do not match the
+pinned LLVM fork, so the rest of the check is not a build. The compiler build and the `std` probe in
+`toolchain/tests/swift_cxx/std` (the `std::vector<std::string>` lines) are the verification.
+
 ## Open items
 
 - The compiler patch is built by CI (package=swift, run 41072834350), and the table above is the host evidence for it. The
