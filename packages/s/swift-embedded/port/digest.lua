@@ -1,1 +1,1 @@
-swift_embedded_sources_digest = "0fba9f6e9ded0b5ea7befd9c35215cd5"
+swift_embedded_sources_digest = "22e2417b492da95267c9574920f467b3"
