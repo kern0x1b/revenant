@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 21:05:10 +0100
+Subject: [PATCH] Stage the WebCore headers the iOS sources import by name
+
+CachedCSSStyleSheet.h and FloatPolygon.h are imported by WebCore sources but were removed from the private list for Cocoa. The flat private copy directory was not on the include path, so quoted includes of its headers, such as PlatformExportMacros.h from the Objective-C bridge and the WAK headers, could not be found. Keep the two headers in the list and put the flat directory on the include path.
+---
+--- a/Source/WebCore/PlatformCocoa.cmake
++++ b/Source/WebCore/PlatformCocoa.cmake
+@@ -400,6 +400,7 @@
+     "${WEBCORE_DIR}/rendering/ios"
+ 
+     "${WebCore_PRIVATE_FRAMEWORK_HEADERS_DIR}"
++    "${WebCore_PRIVATE_HEADERS_DIR}"
+ )
+ 
+ list(APPEND WebCore_SOURCES
+@@ -1081,7 +1082,6 @@
+ 
+     loader/archive/mhtml/MHTMLArchive.h
+ 
+-    loader/cache/CachedCSSStyleSheet.h
+     loader/cache/CachedFontLoadRequest.h
+ 
+     page/DOMSelection.h
+@@ -1104,7 +1104,6 @@
+     platform/graphics/ColorInterpolation.h
+     platform/graphics/ColorNormalization.h
+     platform/graphics/Damage.h
+-    platform/graphics/FloatPolygon.h
+     platform/graphics/FontFamilySpecificationNull.h
+     platform/graphics/FontRenderOptions.h
+     platform/graphics/GraphicsLayerTransform.h

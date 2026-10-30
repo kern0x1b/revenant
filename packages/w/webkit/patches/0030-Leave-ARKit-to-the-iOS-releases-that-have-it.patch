@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 30 Oct 2026 11:10:56 +0100
+Subject: [PATCH] Leave ARKit to the iOS releases that have it
+
+ARKit exists from iOS 11 and its QuickLook preview item from iOS 12, and the engine targets iOS 6, so HAVE(ARKIT) and HAVE(ARKIT_QUICK_LOOK_PREVIEW_ITEM) are now also gated by the deployment version. Without the gate the soft-link unit imports the ARKit umbrella, which pulls in AVFAudio, and the 26.2 SDK then fails with cannot define category for undefined class AVAudioSession.
+---
+--- a/Source/WTF/wtf/PlatformHave.h
++++ b/Source/WTF/wtf/PlatformHave.h
+@@ -506,11 +506,11 @@
+ #define HAVE_MDNS_FAST_REGISTRATION 1
+ #endif
+ 
+-#if (PLATFORM(IOS) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV)) || PLATFORM(VISION)
++#if (PLATFORM(IOS) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 110000) || PLATFORM(VISION)
+ #define HAVE_ARKIT 1
+ #endif
+ 
+-#if PLATFORM(IOS) || PLATFORM(VISION)
++#if (PLATFORM(IOS) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000) || PLATFORM(VISION)
+ #define HAVE_ARKIT_QUICK_LOOK_PREVIEW_ITEM 1
+ #endif
+ 

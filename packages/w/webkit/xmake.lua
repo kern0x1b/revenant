@@ -40,7 +40,11 @@ package("webkit")
         {"0024-Keep-the-webkitglib-2.54-state-these-files-had-in-th.patch", "8061a88fd3852a8693aec123336b2fb8895984aad4ffba334aed517d624e864d"},
         {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"},
         {"0026-Take-the-XPC-declarations-the-SDK-already-has.patch", "115c06b90f9b580c9871957383130cb793d38468063ab07baa81d2463d1f26bb"},
-        {"0027-Leave-the-XPC-entitlement-checks-to-an-XPC-target.patch", "43b40060cf9ca97b4bcbc8f1c299619057a775f1e641e7b687041d8497bd8329"}}
+        {"0027-Leave-the-XPC-entitlement-checks-to-an-XPC-target.patch", "43b40060cf9ca97b4bcbc8f1c299619057a775f1e641e7b687041d8497bd8329"},
+        {"0028-Stage-the-WebKit1-headers-the-iOS-sources-import.patch", "6c99b3b29250f01386df1c17864479746000a716862c9acacc649c8a91f564b5"},
+        {"0029-Stage-the-WebCore-headers-the-iOS-sources-import-by-name.patch", "84df315e0d54d9be5efeaf8cf101f9e85b1308de24c707835ecdfc8be0491a46"},
+        {"0030-Leave-ARKit-to-the-iOS-releases-that-have-it.patch", "80f9115f81a20b3b739a7866f6f6f5991b672161183b3445b6beef13aeb94528"},
+        {"0031-Set-the-accessibility-importance-only-where-iOS-has-it.patch", "48ad029ea6f481c96983bff53afb225aa2da2084e6524aee77d37abf31bab31a"}}
 
     local digests = {table.concat(tree, ",")}
     for _, patch in ipairs(patches) do

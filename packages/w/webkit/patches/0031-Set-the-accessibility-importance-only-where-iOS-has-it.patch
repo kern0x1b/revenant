@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 30 Oct 2026 11:24:57 +0100
+Subject: [PATCH] Set the accessibility importance only where iOS has it
+
+AXCustomContentImportanceHigh is declared by the SDK only for the iOS 13 deployment target, so the engine's iOS 6 target cannot compile the line. On iOS 6 there is no AXCustomContent class, so the custom content item is nil and setting its importance does nothing: the line is compiled out below iOS 13.
+---
+--- a/Source/WebCore/accessibility/cocoa/WebAccessibilityObjectWrapperBase.mm
++++ b/Source/WebCore/accessibility/cocoa/WebAccessibilityObjectWrapperBase.mm
+@@ -446,8 +446,10 @@
+         accessibilityCustomContent = adoptNS([[NSMutableArray alloc] init]);
+         Class customContentClass = PAL::getAXCustomContentClassSingleton();
+         AXCustomContent *contentItem = [customContentClass customContentWithLabel:WEB_UI_STRING("description", "description detail").createNSString().get() value:extendedDescription.createNSString().get()];
++#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000
+         // Set this to high, so that it's always spoken.
+         [contentItem setImportance:AXCustomContentImportanceHigh];
++#endif
+         [accessibilityCustomContent addObject:contentItem];
+     }
+ 
