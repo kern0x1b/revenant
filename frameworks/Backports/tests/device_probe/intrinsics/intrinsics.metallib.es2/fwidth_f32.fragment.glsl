@@ -1,7 +1,7 @@
 #version 100
 #extension GL_OES_standard_derivatives : enable
 precision mediump float;
-uniform float revenant_flip;
+uniform highp float revenant_flip;
 uniform vec2 revenant_target;
 void main() {
     vec4 position;

@@ -387,6 +387,15 @@ static void revenant_expect(const char *map, size_t x, size_t y, double out[4])
         out[0] = pow(v0, 2.0);
         out[1] = pow(v1, 2.0);
         out[2] = pow(v2, 2.0);
+    } else if (strcmp(map, "max_u_i32") == 0) {
+        unsigned p = revenant_texel(x, y, 0), q = revenant_texel(x, y, 1);
+        out[0] = (double)(p > q ? p : q) / 255.0;
+    } else if (strcmp(map, "udiv_u_i32") == 0) {
+        unsigned p = revenant_texel(x, y, 0), q = revenant_texel(x, y, 1);
+        out[0] = (double)(p / (q > 1 ? q : 1)) / 255.0;
+    } else if (strcmp(map, "urem_u_i32") == 0) {
+        unsigned p = revenant_texel(x, y, 0), q = revenant_texel(x, y, 1);
+        out[0] = (double)(p % (q > 1 ? q : 1)) / 255.0;
     } else if (strcmp(map, "fwidth_f32") == 0) {
         // fwidth of the ramp of intrinsics.metal: 0.75 / 64 per pixel, times 16 in the shader.
         out[0] = 16.0 * 0.75 / 64.0;
@@ -409,6 +418,12 @@ static void revenant_expect(const char *map, size_t x, size_t y, double out[4])
 static BOOL revenant_identity(const char *map)
 {
     return strcmp(map, "identity") == 0 || strcmp(map, "half") == 0;
+}
+
+// The integer maps are exact: a difference of one in their byte is a wrong quotient or remainder, not rounding.
+static BOOL revenant_integer(const char *map)
+{
+    return strcmp(map, "max_u_i32") == 0 || strcmp(map, "udiv_u_i32") == 0 || strcmp(map, "urem_u_i32") == 0;
 }
 
 static int revenant_expected(const char *map, size_t x, size_t y, size_t c)
@@ -528,7 +543,7 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
     int maxDifference = 0;
     for (size_t y = 0; y < outH; y++) {
         for (size_t x = 0; x < outW; x++) {
-            int tolerance = revenant_identity(map) ? 0 : 1;
+            int tolerance = revenant_identity(map) || revenant_integer(map) ? 0 : 1;
             BOOL same = YES;
             for (size_t c = 0; c < 4; c++) {
                 int got = pixels[(y * outW + x) * 4 + c], expected = revenant_expected(map, x, y, c);

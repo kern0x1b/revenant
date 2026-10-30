@@ -196,3 +196,29 @@ fragment float4 rg8(float4 position [[position]], texture2d<half> src [[texture(
     half4 v = texel(src, position);
     return float4(float(v.x), float(v.y), 0.0, 1.0);
 }
+
+// The unsigned integer max, divide and remainder of compositeRoundVideo. Both operands are bytes of the texel, converted
+// from float the way the kernel converts its own operands, and the divisor is a maximum, so it is never zero.
+fragment float4 max_u_i32(float4 position [[position]], texture2d<half> src [[texture(0)]])
+{
+    half4 v = texel(src, position);
+    uint p = uint(float(v.x) * 255.0 + 0.5);
+    uint q = uint(float(v.y) * 255.0 + 0.5);
+    return float4(float(max(p, q)) / 255.0, 0.0, 0.0, 1.0);
+}
+
+fragment float4 udiv_u_i32(float4 position [[position]], texture2d<half> src [[texture(0)]])
+{
+    half4 v = texel(src, position);
+    uint p = uint(float(v.x) * 255.0 + 0.5);
+    uint q = uint(float(v.y) * 255.0 + 0.5);
+    return float4(float(p / max(q, 1u)) / 255.0, 0.0, 0.0, 1.0);
+}
+
+fragment float4 urem_u_i32(float4 position [[position]], texture2d<half> src [[texture(0)]])
+{
+    half4 v = texel(src, position);
+    uint p = uint(float(v.x) * 255.0 + 0.5);
+    uint q = uint(float(v.y) * 255.0 + 0.5);
+    return float4(float(p % max(q, 1u)) / 255.0, 0.0, 0.0, 1.0);
+}

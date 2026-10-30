@@ -1,7 +1,7 @@
 #version 100
 precision highp float;
 precision highp int;
-uniform float revenant_flip;
+uniform highp float revenant_flip;
 uniform vec2 revenant_target;
 uniform vec2 src_size;
 uniform sampler2D src;

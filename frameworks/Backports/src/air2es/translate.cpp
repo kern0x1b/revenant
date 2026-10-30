@@ -674,9 +674,11 @@ private:
         return true;
     }
 
+    // The flip is read by the vertex and the fragment stage, which must declare it at one precision: a mediump fragment
+    // default against the vertex default of highp fails to link ("Uniform precision mismatch").
     void needFlip()
     {
-        declare("uniform float revenant_flip;\n", "revenant_flip");
+        declare("uniform highp float revenant_flip;\n", "revenant_flip");
     }
 
     void needTarget()
@@ -1571,6 +1573,63 @@ private:
         return true;
     }
 
+    // An operand bounded below 2^31: a constant, an unsigned float conversion, or an unsigned max of bounded operands.
+    bool bounded(Value *value)
+    {
+        if (auto *constant = dyn_cast<ConstantInt>(value))
+            return constant->getZExtValue() < 0x80000000u;
+        auto *call = dyn_cast<CallInst>(value);
+        if (!call || !call->getCalledFunction())
+            return false;
+        auto name = call->getCalledFunction()->getName();
+        if (name.starts_with("air.convert.u.i32.f."))
+            return true;
+        return name == "air.max.u.i32" && bounded(call->getArgOperand(0)) && bounded(call->getArgOperand(1));
+    }
+
+    // A divisor that is provably non-zero: a non-zero constant, or an unsigned max with a non-zero operand.
+    bool nonZero(Value *value)
+    {
+        if (auto *constant = dyn_cast<ConstantInt>(value))
+            return !constant->isZero();
+        auto *call = dyn_cast<CallInst>(value);
+        if (!call || !call->getCalledFunction() || call->getCalledFunction()->getName() != "air.max.u.i32")
+            return false;
+        return nonZero(call->getArgOperand(0)) || nonZero(call->getArgOperand(1));
+    }
+
+    // An operand that is a constant at or above 2^23 cannot take the float quotient below, so it is refused.
+    bool smallEnough(Value *value)
+    {
+        auto *constant = dyn_cast<ConstantInt>(value);
+        return !constant || constant->getZExtValue() < (1u << 23);
+    }
+
+    // An unsigned division of bounded integers. ES 1.00 has no integer %, and the device's integer / is off by one at
+    // exact multiples (220 / 11 gives 19), so the quotient is taken in float: (a + 0.5) / b rounds down to a / b for
+    // every a below 2^23, since the fraction of a / b is either 0 or at least 1/b away from the next integer. A remainder
+    // is a - b * quotient, which is exact for the same operands.
+    bool unsignedDivide(Instruction &instruction, BinaryOperator &binary)
+    {
+        if (!binary.getType()->isIntegerTy(32))
+            return refuse("an unsigned division of integers other than 32 bits");
+        if (!bounded(binary.getOperand(0)) || !bounded(binary.getOperand(1)) || !nonZero(binary.getOperand(1)))
+            return refuse("an unsigned division that is not of bounded integers with a non-zero divisor");
+        if (!smallEnough(binary.getOperand(0)) || !smallEnough(binary.getOperand(1)))
+            return refuse("an unsigned division of a constant at or above 2^23");
+        std::string left, right, name;
+        if (!expression(binary.getOperand(0), left) || !expression(binary.getOperand(1), right))
+            return false;
+        if (!local(instruction, name))
+            return false;
+        std::string quotient = "int((float(" + left + ") + 0.5) / float(" + right + "))";
+        if (binary.getOpcode() == Instruction::UDiv)
+            statement(name + " = " + quotient + ";\n");
+        else
+            statement(name + " = (" + left + " - " + right + " * " + quotient + ");\n");
+        return true;
+    }
+
     // A struct local is a GLSL struct with a field per member, and an array member is an array field.
     std::string structOf(Type *type)
     {
@@ -1784,6 +1843,8 @@ private:
                 return maskAnd(instruction, *binary);
             if (binary->getOpcode() == Instruction::LShr)
                 return shiftRight(instruction, *binary);
+            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem)
+                return unsignedDivide(instruction, *binary);
             const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
@@ -2067,7 +2128,8 @@ private:
         bool convert = called.rfind("air.convert.", 0) == 0;
         const PlainFunction *plain = plainFunction(called);
         bool fmod = called == "air.fast_fmod.f32" || called == "air.fast_fmod.v2f32";
-        if (!sample && !width && !height && !convert && !plain && !fmod)
+        bool maxUnsigned = called == "air.max.u.i32";
+        if (!sample && !width && !height && !convert && !plain && !fmod && !maxUnsigned)
             return refuse("a call to " + (called.empty() ? std::string("an indirect target") : called));
         std::vector<std::string> args;
         for (unsigned i = 0; i < call.arg_size(); i++) {
@@ -2083,6 +2145,15 @@ private:
             if (args.size() != 1 || !local(call, name))
                 return refuse("a conversion with an argument count this emitter does not map");
             statement(name + " = " + glslType(call.getType()) + "(" + args[0] + ");\n");
+            return true;
+        }
+        if (maxUnsigned) {
+            // ES 1.00 has no integer max. The unsigned max is the signed one for operands below 2^31.
+            if (args.size() != 2 || !local(call, name))
+                return refuse("a call to " + called + " with an argument count this emitter does not map");
+            if (!bounded(call.getArgOperand(0)) || !bounded(call.getArgOperand(1)))
+                return refuse("an unsigned max of an operand that is not bounded below 2^31");
+            statement(name + " = (" + args[0] + " > " + args[1] + ") ? " + args[0] + " : " + args[1] + ";\n");
             return true;
         }
         if (fmod) {
