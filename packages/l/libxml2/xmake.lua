@@ -11,6 +11,7 @@ package("libxml2")
     add_links("xml2")
     add_includedirs("include", "include/libxml2")
     add_defines("LIBXML_STATIC")
+    add_configs("recipe", {description = "The digest of this recipe, so a changed build flag is a different libxml2.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     on_install("iphoneos", function (package)
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
@@ -21,7 +22,7 @@ package("libxml2")
                                 "-DICU_I18N_LIBRARY=" .. path.join(package:dep("icu"):installdir(), "lib", "libicui18n.a"),
                                 "-DICU_DATA_LIBRARY=" .. path.join(package:dep("icu"):installdir(), "lib", "libicudata.a"),
                                 "-DCMAKE_INSTALL_SYSCONFDIR=/etc"},
-                      {cflags = {"-fvisibility=hidden"}, licenses = "Copyright", prune = {"lib/pkgconfig", "share", "bin"}})
+                      {cflags = {"-fvisibility=hidden", "-DU_DISABLE_RENAMING=1"}, licenses = "Copyright", prune = {"lib/pkgconfig", "share", "bin"}})
     end)
 
     on_test(function (package)
