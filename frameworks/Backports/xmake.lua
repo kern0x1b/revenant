@@ -414,9 +414,10 @@ if is_plat("iphoneos") and not SELECTED then
         add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m", "src/UIKit/UIView+iOS13.m",
                   "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
                   "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/UIKit/UILabel+Tightening9.m",
-                  "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+                  "src/UIKit/RevenantTightening.m", "src/UIKit/UITraitCollection*.m", "src/UIKit/RevenantTraitObservers.m", "src/Metal/*.m", "src/Metal/*.c")
         add_mflags("-fobjc-arc")
-        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES", "CoreVideo")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.deviceprobe", "CFBundleDisplayName=BackportsDeviceProbe")
         set_values("revenant.control", "tests/device_probe/control")
