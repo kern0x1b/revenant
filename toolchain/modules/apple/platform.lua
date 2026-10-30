@@ -287,8 +287,6 @@ function project_links_webkit()
     return false
 end
 
--- The WebKit Backports library loads the engine when a page is shown, so the package that holds it
--- names the engine package as a dependency: nothing links the engine, so no link analysis finds it.
 function webkit_depends(signer)
     if not project_links_webkit() then
         return {}

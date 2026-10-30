@@ -142,7 +142,6 @@ function verify_plists(root, location)
                 checked = checked + 1
                 local missing = {}
                 for _, key in ipairs(table.join(plist_keys, {"CFBundleName"})) do
-                    -- json fails on a plist with any object JSON cannot hold; raw prints an array's count, so 0 is empty
                     local value = try { function () return os.iorunv("plutil", {"-extract", key, "raw", "-o", "-", plist}) end }
                     local text = value and value:trim() or ""
                     if text == "" or text == "0" then
@@ -224,7 +223,6 @@ function batteries(package, ctx)
     finish(package, signed)
 end
 
--- The frameworks a build carries: carried=jsc carries JavaScriptCore alone, the one a React Native host links.
 local function carried(ctx)
     local found = {}
     for _, framework in ipairs(frameworks) do
@@ -236,8 +234,6 @@ local function carried(ctx)
 end
 
 function bundle(package, ctx)
-    -- A copy of the frameworks as the build left them, for the org.revenant.webkit-engine deb:
-    -- the bundle below names the build's own binaries in place, so the deb must take its copy first.
     local deb = path.join(package:installdir(), "deb")
     os.tryrm(deb)
     os.mkdir(deb)
@@ -275,8 +271,6 @@ function bundle(package, ctx)
     os.tryrm(frameworks_dir)
     for _, framework in ipairs(carried(ctx)) do
         os.vcp(path.join(ctx.build, framework.built .. ".framework"), frameworks_dir .. "/", {symlink = true})
-        -- A consumer links these, and the link records the install name in the binary: the build's own is the phone's
-        -- framework, so the binary takes the bundle's, the name the application embeds it under.
         local binary = framework.built
         os.cp(path.join(root, "Frameworks", framework.built .. ".framework", binary), path.join(frameworks_dir, framework.built .. ".framework", binary))
     end

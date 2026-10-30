@@ -2,9 +2,6 @@ set_project("webkit-safari")
 set_version("0.1.0")
 add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
--- The loader carries the system variant of webkit-engine, the engine that replaces the phone's frameworks beneath Mobile
--- Safari. The root project holds one instance of webkit-engine, the prefixed variant, so the loader is its own project,
--- as the JavaScriptCore consumer is.
 local root = os.getenv("REVENANT_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("revenant " .. root)
 add_addons("revenant", {sourcedir = path.join(root, "toolchain")})
@@ -18,8 +15,6 @@ set_defaultarchs("iphoneos|armv7")
 add_cxflags("-mcpu=cortex-a9", "-mfpu=neon")
 add_defines("WEBKIT_IOS6_NO_READLINE")
 
--- The package paths are absolute: a relative one would resolve against this project, not frameworks/WebKit. The loader is its
--- own package, space.kern0x1b.rev-safari, which depends on the root's space.kern0x1b.rev at the same version.
 local webkit = path.join(os.scriptdir(), "../../..")
 local version = "0.1.0"
 

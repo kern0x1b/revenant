@@ -1,14 +1,8 @@
--- The WKWebView host passes the engine's WAKWindowTilingMode values to the engine's window. The backport cannot include the
--- engine's header, since the backport does not depend on the engine's source, so the host mirrors the enum. This test checks
--- the mirror against tests/data/webkit-tiling-modes.txt, which holds the enum as the pinned WebKit declares it. That file is
--- checked in, so CI runs the check. When REVENANT_WEBKIT_HEADER names the pinned WAKWindow.h, the file is also checked against
--- that header, names and lines.
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local HOST = path.join(BACKPORTS, "src", "WebKit", "RevenantEngineHost.m")
 local FACTS = path.join(TESTS, "data", "webkit-tiling-modes.txt")
 
--- The text between the opening and closing patterns, both Lua patterns.
 local function block(text, opening, closing)
     local body = text:match(opening .. "(.-)" .. closing)
     assert(body, "no block between the patterns " .. opening .. " and " .. closing)
@@ -23,7 +17,6 @@ local function names(body, prefix)
     return found
 end
 
--- The modes of the facts file in declaration order, each with the line it is declared on in the engine's header.
 local function facts()
     local found = {}
     for line in io.readfile(FACTS):gmatch("[^\n]+") do
@@ -36,7 +29,6 @@ local function facts()
     return found
 end
 
--- The modes of the header's WAKWindowTilingMode enum, each with the line it is declared on.
 local function header_modes(text)
     local found, number, open = {}, 0, false
     for line in (text .. "\n"):gmatch("([^\n]*)\n") do

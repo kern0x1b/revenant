@@ -1,6 +1,5 @@
 #include <JavaScriptCore/JavaScriptCore.h>
 
-// The JSC C API a React Native host calls. Taking their addresses makes the link resolve each one.
 static void *const names[] __attribute__((used)) = {
     (void *)JSValueMakeSymbol, (void *)JSValueIsSymbol, (void *)JSObjectGetPropertyForKey,
     (void *)JSObjectSetPropertyForKey, (void *)JSObjectGetArrayBufferByteLength,

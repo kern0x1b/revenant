@@ -356,7 +356,6 @@ static NSURL *withoutFragment(NSURL *url)
     });
 }
 
-// Called with the web lock held: the navigation changes the state that the web thread's callbacks read.
 - (WKNavigation *)revenant_navigateLockedWithRequest:(NSURLRequest *)request type:(WKNavigationType)type index:(NSInteger)index perform:(void (^)(void))perform cancel:(void (^)(void))cancel
 {
     WKNavigation *navigation = [self revenant_beginNavigation:request.URL type:type index:index];
@@ -510,7 +509,6 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
     });
 }
 
-// Called with the web lock held.
 - (WKNavigation *)revenant_loadSubstituteLocked:(RevenantSubstitute *)substitute URL:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
 {
     _substituteHistory = YES;

@@ -64,8 +64,6 @@ function info(target, deployment)
     return content
 end
 
--- A package that keeps frameworks as bundles, the webkit-engine package does, offers each one whole: the application takes the
--- folder with its Info.plist, and the binary keeps the install name the bundle gave it.
 local function package_frameworks(package, name)
     local carried = {}
     for _, folder in ipairs(os.dirs(path.join(package:installdir("bundle"), "Frameworks", "*.framework"))) do

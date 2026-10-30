@@ -3,8 +3,6 @@
 #import "RevenantKeyInputView.h"
 #import "RevenantUIKitDelegate.h"
 
-// The engine's WAKWindowTilingMode, in the order of WAKWindow.h at the pin. tests/webkit_tiling_test.lua checks these values
-// against tests/data/webkit-tiling-modes.txt, the header's enum, since the backport cannot include the header.
 typedef NS_ENUM(NSInteger, RevenantWAKWindowTilingMode) {
     RevenantWAKWindowTilingModeNormal,
     RevenantWAKWindowTilingModeMinimal,
@@ -42,7 +40,6 @@ static Class RevenantEngineNew(NSString *name)
 
 typedef void (*RevenantEngineBlockFunction)(void (^)(void));
 
-// Runs a block on the engine's web thread, which is where it touches the engine's objects.
 static void RevenantEngineRunOnWebThread(void (^block)(void))
 {
     void *symbol = RevenantWebEngineSymbol("WebThreadRun");
@@ -51,8 +48,6 @@ static void RevenantEngineRunOnWebThread(void (^block)(void))
     ((RevenantEngineBlockFunction)symbol)(block);
 }
 
-// On the main thread the engine releases this lock at the end of the run loop turn, so WebThreadUnlock does nothing on
-// this engine. The pair is kept so each call reads as the engine's own example does.
 static void RevenantEngineLock(void)
 {
     static RevenantEngineVoidFunction lock;
@@ -115,7 +110,6 @@ static id<RevenantEngineEvent> RevenantMouseEvent(RevenantWebEventType type, CGP
         modifiers:0];
 }
 
-// Fires an event on a field the way the page sees the user's typing, so the page's own handlers run.
 static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMInputElement> input, NSString *type)
 {
     id<RevenantDOMEvent> event = [[[webView mainFrame] DOMDocument] createEvent:@"Event"];
@@ -130,9 +124,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
 @end
 
-// The scroll view hands every touch phase to the host after UIKit has seen it. The host is not a view in
-// the responder chain, so the scroll view calls it directly. This class is defined here, not looked up in
-// the engine, because the engine has no class of this name.
 @interface RevenantContentScrollView : UIScrollView
 @property (nonatomic, weak) id<RevenantTouchHandler> touchHandler;
 @end
@@ -177,7 +168,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     RevenantContentScrollView *_scrollView;
     RevenantUIKitDelegate *_uiKitDelegate;
     RevenantKeyInputView *_keyInput;
-    // The field the page focused. Only the web thread reads and writes it.
     id<RevenantDOMInputElement> _focusedInput;
     CALayer *_compositingRootLayer;
     CGSize _viewportSize;
@@ -242,8 +232,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     _scrollView.clipsToBounds = YES;
     [_scrollView.layer addSublayer:_hostLayer];
 
-    // The keyboard's input view never shows. It sits off the visible part of the scroll view and takes
-    // the software keyboard when the page focuses a field.
     _keyInput = [[RevenantKeyInputView alloc] initWithFrame:CGRectMake(-20, -20, 1, 1)];
     _keyInput.consumer = self;
     [_scrollView addSubview:_keyInput];
@@ -288,8 +276,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     [self applyDocumentHeight:content.height];
 }
 
-// The document keeps the tallest height it has had once it has grown past the viewport, so a page
-// that shrinks while it loads does not jump back to the viewport. The rule is the example host's.
 - (void)applyDocumentHeight:(CGFloat)height
 {
     if (height > _viewportSize.height)
@@ -350,7 +336,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     });
 }
 
-// A touch the page does not handle becomes a click, so links and buttons still work.
 - (void)sendTouchEndThenTapAt:(CGPoint)point
 {
     id<RevenantEngineWindow> window = _window;
@@ -394,7 +379,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     [self sendTouch:RevenantWebEventTouchCancel phase:RevenantWebEventTouchPhaseCancelled at:point];
 }
 
-// The engine draws only the part of the page the scroll view exposes, so the window follows the scroll.
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     CGPoint offset = scrollView.contentOffset;
@@ -421,7 +405,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     [_keyInput resignFirstResponder];
 }
 
-// The engine calls the form delegate on the web thread, with the field the page focused.
 - (void)trackFocusedInput:(id<RevenantDOMInputElement>)element
 {
     _focusedInput = element;
@@ -446,7 +429,6 @@ static void RevenantFireDOMEvent(id<RevenantEngineView> webView, id<RevenantDOMI
     });
 }
 
-// Edits the focused field's value on the web thread, where the engine's objects are safe to touch.
 - (void)editFocusedInput:(NSString *(^)(NSString *current))transform
 {
     id<RevenantEngineView> webView = _webView;

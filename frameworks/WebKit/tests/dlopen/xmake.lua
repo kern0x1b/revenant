@@ -1,6 +1,5 @@
 set_project("webkit-dlopen-probe")
 set_version("0.0.1")
--- The device's own dyld decides whether a framework loads, so this probe only calls dlopen on the names it is given.
 local root = os.getenv("REVENANT_ROOT") or path.join(os.scriptdir(), "../../../..")
 add_repositories("revenant " .. root)
 add_addons("revenant", {sourcedir = path.join(root, "toolchain")})

@@ -52,7 +52,6 @@ function surface(build)
         end
     end
     for _, item in ipairs(imports) do
-        -- a carried framework that defines the symbol itself is an engine-internal import, not something iOS 6 must provide
         if not defined[item[2]] then
             entries["undefined " .. item[1] .. " " .. item[2]] = true
         end
