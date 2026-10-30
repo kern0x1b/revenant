@@ -139,6 +139,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.dot.v3f32", "dot", 2},
     {"air.all.v2i1", "all", 1},
     {"air.fast_clamp.f32", "clamp", 3},
+    {"air.fast_clamp.v2f32", "clamp", 3},
     {"air.fast_clamp.v3f32", "clamp", 3},
     {"air.mix.f32", "mix", 3},
     {"air.mix.v3f32", "mix", 3},
