@@ -4,7 +4,7 @@
 #import "RevenantUIKitDelegate.h"
 
 // The engine's WAKWindowTilingMode, in the order of WAKWindow.h at the pin. tests/webkit_tiling_test.lua checks these values
-// against that header, since the backport cannot include it.
+// against tests/data/webkit-tiling-modes.txt, the header's enum, since the backport cannot include the header.
 typedef NS_ENUM(NSInteger, RevenantWAKWindowTilingMode) {
     RevenantWAKWindowTilingModeNormal,
     RevenantWAKWindowTilingModeMinimal,

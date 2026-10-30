@@ -1,0 +1,10 @@
+# The WAKWindowTilingMode enum that the pinned WebKit declares: Source/WebCore/platform/ios/wak/WAKWindow.h at
+# c70a794b03410d0a7e8e134d35441139dfc5d502 (packages/w/webkit), lines 49 to 56. One mode per line: the line it is declared
+# on in that header, then its name. Its value is its position, 0 to 5. tests/webkit_tiling_test.lua checks the host's
+# mirror against this file on every run, and checks this file against the header when REVENANT_WEBKIT_HEADER names it.
+50 kWAKWindowTilingModeNormal
+51 kWAKWindowTilingModeMinimal
+52 kWAKWindowTilingModePanning
+53 kWAKWindowTilingModeZooming
+54 kWAKWindowTilingModeDisabled
+55 kWAKWindowTilingModeScrollToTop
