@@ -22,7 +22,10 @@ local function shape(glsl)
     return nil, nil
 end
 
-local function compatible(glsl, scalar, components, attribute)
+local function compatible(glsl, scalar, components, attribute, columns)
+    if columns then
+        return not attribute and scalar == "float" and glsl == string.format("mat%d", columns) and components == columns
+    end
     local kind, count = shape(glsl)
     if not kind or count ~= components then
         return false
@@ -78,15 +81,16 @@ local function reflectionProblems(stage, source, reflection)
     local uniforms = listOf(reflection, "uniforms", fail)
     for _, entry in ipairs(uniforms) do
         if type(entry.name) ~= "string" or not isInteger(entry.buffer) or not isInteger(entry.offset) or
-           not isInteger(entry.instanceStride) or not BYTES[entry.scalar] or not isComponents(entry.components) then
+           not isInteger(entry.instanceStride) or not BYTES[entry.scalar] or not isComponents(entry.components) or
+           (entry.columns ~= nil and (not isComponents(entry.columns) or entry.columns < 2 or entry.columns ~= entry.components)) then
             fail("a uniform entry with a missing or malformed field")
         else
             local item = declared[entry.name]
             if not item or item.qualifier ~= "uniform" then
                 fail("uniform " .. entry.name .. " is reflected but not declared in the source")
-            elseif not compatible(item.glsl, entry.scalar, entry.components, false) then
+            elseif not compatible(item.glsl, entry.scalar, entry.components, false, entry.columns) then
                 fail("uniform " .. entry.name .. " is declared " .. item.glsl .. " but reflected as " ..
-                     entry.scalar .. " x" .. entry.components)
+                     entry.scalar .. " x" .. entry.components .. (entry.columns and (" columns " .. entry.columns) or ""))
             end
             seen[entry.name] = true
         end

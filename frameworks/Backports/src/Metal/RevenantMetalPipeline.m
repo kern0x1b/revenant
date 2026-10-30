@@ -173,7 +173,7 @@ static RevenantUniformPlan *uniformPlans(RevenantMetalPipeline *pipeline, NSArra
         GLint location = [pipeline locationForName:u[@"name"]];
         if (location < 0)
             continue;
-        plans[n++] = (RevenantUniformPlan){location, (unsigned)[u[@"buffer"] unsignedIntegerValue], [u[@"offset"] unsignedIntegerValue], [u[@"instanceStride"] unsignedIntegerValue], scalarKind(u[@"scalar"]), [u[@"components"] intValue]};
+        plans[n++] = (RevenantUniformPlan){location, (unsigned)[u[@"buffer"] unsignedIntegerValue], [u[@"offset"] unsignedIntegerValue], [u[@"instanceStride"] unsignedIntegerValue], scalarKind(u[@"scalar"]), [u[@"components"] intValue], [u[@"columns"] intValue]};
     }
     *count = n;
     return plans;

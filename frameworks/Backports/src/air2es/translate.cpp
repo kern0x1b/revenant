@@ -199,6 +199,16 @@ std::string samplerJson(const GLESSampler &sampler)
            ", \"minFilter\": " + jsonQuote(sampler.minFilter) + ", \"magFilter\": " + jsonQuote(sampler.magFilter) + "}";
 }
 
+// float2x2, float3x3 and float4x4. Other matrix types are not read.
+bool matrixOf(const std::string &typeName, unsigned &columns)
+{
+    if (typeName.size() != 8 || typeName.compare(0, 5, "float") != 0 || typeName[6] != 'x' || typeName[7] != typeName[5] ||
+        typeName[5] < '2' || typeName[5] > '4')
+        return false;
+    columns = (unsigned)(typeName[5] - '0');
+    return true;
+}
+
 bool scalarOf(const std::string &typeName, std::string &scalar, unsigned &components)
 {
     std::string base = typeName.compare(0, 7, "packed_") == 0 ? typeName.substr(7) : typeName;
@@ -651,9 +661,64 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
+    // A matrix member is one uniform mat. Its loads are columns or lanes of a column. Metal pads a column with three rows to
+    // four floats, so the column stride is four floats for 3 and 4 rows and two floats for 2 rows.
+    bool accessMatrix(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped)
+    {
+        unsigned columns = 0;
+        matrixOf(field.type, columns);
+        unsigned rows = columns;
+        uint64_t stride = (rows == 3 ? 4 : rows) * 4;
+        if (field.size != columns * stride)
+            return refuse("a matrix whose size does not match its type in " + binding.name);
+        if (binding.indexedByVertex)
+            return refuse("a matrix vertex attribute in " + binding.name);
+        std::string name = scoped ? binding.name + "_" + field.name : field.name;
+        bool fresh = !declared_.count(name);
+        declare("uniform mat" + std::to_string(columns) + " " + name + ";\n", name);
+        if (fresh)
+            uniformLines_.push_back("{\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
+                                    ", \"offset\": " + std::to_string(field.offset) + ", \"instanceStride\": " +
+                                    std::to_string(binding.indexedByInstance ? binding.stride : 0) +
+                                    ", \"scalar\": \"float\", \"components\": " + std::to_string(rows) +
+                                    ", \"columns\": " + std::to_string(columns) + "}");
+        uint64_t within = offset - field.offset;
+        uint64_t column = within / stride;
+        uint64_t rest = within % stride;
+        if (column >= columns || rest % 4 != 0)
+            return refuse("a load of " + name + " that this emitter does not map to a column");
+        uint64_t lane = rest / 4;
+        std::string part = name + "[" + std::to_string(column) + "]";
+        if (!loaded->isVectorTy()) {
+            if (lane >= rows)
+                return refuse("a load of " + name + " that this emitter does not map to a component");
+            out = part + "[" + std::to_string(lane) + "]";
+            return true;
+        }
+        unsigned count = cast<FixedVectorType>(loaded)->getNumElements();
+        if (lane == 0 && count == rows) {
+            out = part;
+            return true;
+        }
+        if (lane == 0 && count == 4 && rows == 3) {
+            out = glslType(loaded) + "(" + part + ", 0.0)";
+            return true;
+        }
+        if (lane + count > rows)
+            return refuse("a vector load of " + name + " that this emitter does not map to lanes");
+        std::string list;
+        for (unsigned i = 0; i < count; i++)
+            list += (i ? ", " : "") + part + "[" + std::to_string(lane + i) + "]";
+        out = glslType(loaded) + "(" + list + ")";
+        return true;
+    }
+
     // `scoped` names the uniform after its buffer, so members of different buffers that share a name stay apart.
     bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped = false)
     {
+        unsigned columns = 0;
+        if (matrixOf(field.type, columns))
+            return accessMatrix(binding, field, offset, loaded, out, scoped);
         std::string scalar;
         unsigned components = 0;
         if (!scalarOf(field.type, scalar, components))
@@ -1517,7 +1582,8 @@ private:
             locals_.push_back(glsl + " " + local.name + dimension + ";\n");
             return true;
         }
-        if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy() && (localOf(cast) || bindingOf(cast)))
+        // A pointer cast is an address, not a value. The loads and stores through it are checked where they are read.
+        if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy())
             return true;
         if (auto *store = dyn_cast<StoreInst>(&instruction)) {
             const Local *slot = localOf(store->getPointerOperand());

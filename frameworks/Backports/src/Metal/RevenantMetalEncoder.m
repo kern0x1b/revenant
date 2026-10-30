@@ -319,6 +319,20 @@ static void uploadUniforms(const RevenantUniformPlan *plans, unsigned count, Rev
             continue;
         const uint8_t *p = (const uint8_t *)buffer.bytes + offsets[u->buffer] + u->offset + u->instanceStride * instance;
         int n = u->components;
+        if (u->columns) {
+            // Metal pads a column with three rows to four floats; GL takes the matrix as its columns, one after the other.
+            GLfloat packed[16];
+            int stride = n == 3 ? 4 : n;
+            for (int c = 0; c < u->columns; c++)
+                for (int r = 0; r < n; r++)
+                    packed[c * n + r] = ((const GLfloat *)(p + c * stride * sizeof(GLfloat)))[r];
+            switch (u->columns) {
+            case 2: glUniformMatrix2fv(u->location, 1, GL_FALSE, packed); break;
+            case 3: glUniformMatrix3fv(u->location, 1, GL_FALSE, packed); break;
+            default: glUniformMatrix4fv(u->location, 1, GL_FALSE, packed); break;
+            }
+            continue;
+        }
         if (u->scalar == RevenantScalarFloat || u->scalar == RevenantScalarHalf) {
             GLfloat converted[4];
             const GLfloat *f = (const GLfloat *)p;

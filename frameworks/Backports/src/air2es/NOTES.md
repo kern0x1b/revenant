@@ -75,6 +75,10 @@ and why, so it is not rediscovered later.
   `instanceStride` set to the element size, and the host offsets it by the instance of each draw. A dynamic index into an
   array member of a buffer is a select chain over one uniform per element, as for a constant table. The instance probe
   checks both on the 4S through the Metal backport.
+- A square float matrix member (`float2x2`, `float3x3`, `float4x4`) is one `uniform matN`. A load of a column, or of a lane
+  of one, becomes an index into it. Metal pads a column of a float3 matrix to four floats, so the host packs only the three
+  floats of each column for `glUniformMatrix3fv`. The instance probe checks the column-major product on the 4S against a
+  host reference, and a transposed upload must fail the same reference.
 - A read of a texture at the thread position is a nearest fetch of the texel centre, with the size from the host. A
   logical shift right of a thread position, or of one of its lanes, by a constant is an integer division by 2^k. The
   texture stage of the ES 2 probe checks both on the 4S: exact for the sizes it runs, which are up to 1024 by 1024.

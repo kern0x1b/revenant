@@ -35,6 +35,7 @@ typedef struct {
     NSUInteger instanceStride;
     int scalar;
     int components;
+    int columns; // 0 for a vector or a scalar; the column count of a matrix, whose components are its rows
 } RevenantUniformPlan;
 
 typedef struct {
