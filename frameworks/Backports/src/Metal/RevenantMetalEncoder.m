@@ -502,7 +502,30 @@ static const GLfloat *rampOf(NSUInteger count)
                 glBindTexture(GL_TEXTURE_2D, texture.name);
                 _boundTexture[unit] = texture.name;
             }
-            RevenantMetalSampler *sampler = _fragmentSamplers[unit];
+            if (plan->textures[k].constant) {
+                RevenantTexturePlan *planned = &plan->textures[k];
+                GLint wrapS = planned->wrapS;
+                GLint wrapT = planned->wrapT;
+                BOOL powerOfTwo = !(texture.width & (texture.width - 1)) && !(texture.height & (texture.height - 1));
+                if ((wrapS == GL_REPEAT || wrapT == GL_REPEAT) && !powerOfTwo) {
+                    static NSMutableSet *repeated;
+                    static dispatch_once_t once;
+                    dispatch_once(&once, ^{ repeated = [NSMutableSet set]; });
+                    if (![repeated containsObject:(id)texture]) {
+                        [repeated addObject:(id)texture];
+                        NSLog(@"Metal: a repeat address samples a %lux%lu texture, and OpenGL ES 2 repeats only power-of-two textures: the draw is clamped instead",
+                              (unsigned long)texture.width, (unsigned long)texture.height);
+                    }
+                    wrapS = GL_CLAMP_TO_EDGE;
+                    wrapT = GL_CLAMP_TO_EDGE;
+                }
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, planned->minFilter);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, planned->magFilter);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+                texture.appliedSampler = nil;
+            }
+            RevenantMetalSampler *sampler = plan->textures[k].constant ? nil : _fragmentSamplers[unit];
             int compare = plan->textures[k].compare ? 1 : 0;
             if (sampler && (texture.appliedSampler != sampler || texture.appliedCompare != compare)) {
                 BOOL depth = texture.attachmentKind != 0;

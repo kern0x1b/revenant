@@ -60,6 +60,11 @@ typedef struct {
     unsigned unit;
     BOOL depth;
     BOOL compare;
+    BOOL constant;
+    GLint minFilter;
+    GLint magFilter;
+    GLint wrapS;
+    GLint wrapT;
 } RevenantTexturePlan;
 
 typedef struct {

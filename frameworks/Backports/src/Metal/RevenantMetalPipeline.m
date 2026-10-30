@@ -322,8 +322,18 @@ static NSMutableDictionary *programs(void)
     _plan.textures = calloc(textures.count ? textures.count : 1, sizeof(RevenantTexturePlan));
     for (NSDictionary *t in textures) {
         GLint location = [self locationForName:t[@"name"]];
-        if (location >= 0)
-            _plan.textures[_plan.textureCount++] = (RevenantTexturePlan){location, (unsigned)[t[@"index"] unsignedIntegerValue], [t[@"depth"] boolValue], [t[@"compare"] boolValue]};
+        if (location < 0)
+            continue;
+        RevenantTexturePlan texture = {location, (unsigned)[t[@"index"] unsignedIntegerValue], [t[@"depth"] boolValue], [t[@"compare"] boolValue]};
+        NSDictionary *sampler = t[@"sampler"];
+        if (sampler) {
+            texture.constant = YES;
+            texture.minFilter = [sampler[@"minFilter"] isEqualToString:@"linear"] ? GL_LINEAR : GL_NEAREST;
+            texture.magFilter = [sampler[@"magFilter"] isEqualToString:@"linear"] ? GL_LINEAR : GL_NEAREST;
+            texture.wrapS = [sampler[@"wrapS"] isEqualToString:@"repeat"] ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+            texture.wrapT = [sampler[@"wrapT"] isEqualToString:@"repeat"] ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+        }
+        _plan.textures[_plan.textureCount++] = texture;
     }
     NSArray *sizes = _fragmentReflection[@"sizes"];
     _plan.sizes = calloc(sizes.count ? sizes.count : 1, sizeof(RevenantSizePlan));
