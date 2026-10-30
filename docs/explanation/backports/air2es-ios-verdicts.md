@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 40 translate (21 fragment, 15 vertex, 4 kernel) and 49 are refused; 15 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After them, 44 translate (21 fragment, 15 vertex, 8 kernel) and 45 are refused; 11 of the 19 kernels are still refused. The table shows this state. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -30,8 +30,8 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramCallsUI_Resources | blitFragmentColorConversion | fragment | OK |  |
 | submodules_TelegramCallsUI_Resources | i420VertexPassthrough | vertex | OK |  |
 | submodules_TelegramCallsUI_Resources | i420FragmentColorConversion | fragment | OK |  |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoBiPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoTriPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoBiPlanarToRGBA | kernel | OK |  |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | videoTriPlanarToRGBA | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurHorizontal | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundVertex | vertex | OK |  |
@@ -42,8 +42,8 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoFragment | fragment | REFUSED | a call to air.fabs.v3f16 |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestFragment | fragment | OK |  |
-| submodules_TelegramUI_Components_CameraScreen_MetalResources | videoBiPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
-| submodules_TelegramUI_Components_CameraScreen_MetalResources | videoTriPlanarToRGBA | kernel | REFUSED | a call to air.read_texture_2d.v4f16 |
+| submodules_TelegramUI_Components_CameraScreen_MetalResources | videoBiPlanarToRGBA | kernel | OK |  |
+| submodules_TelegramUI_Components_CameraScreen_MetalResources | videoTriPlanarToRGBA | kernel | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurHorizontal | kernel | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | cameraBlobVertex | vertex | OK |  |
@@ -75,7 +75,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | a lshr this emitter does not map |
+| submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | a logical shift right other than of a thread position or its lane by a constant |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondVertex | vertex | REFUSED | a member of type float4x4 in u |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | sparkleVertex | vertex | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | referenceHighlightVertex | vertex | REFUSED | an address this emitter does not read |
@@ -115,16 +115,18 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | sample coordinates and size queries declared `precision highp float` and `highp int` (`translate.cpp`) | 37 | 52 | none; the precision line of 18 OK shaders changed and nothing else in them; the 4S compiles and links all 37 OK programs |
 | `llvm.memset` of a local to zero, a constant lane of a local as `.x` to `.w`, and a dynamic index that ends a local's path as a select over its constant elements (`translate.cpp`) | 38 | 51 | `gramDiamondCompositeVertex`, REFUSED to OK; the 4S compiles and links it; a store through a dynamic index is refused |
 | the half-precision `air.mix.v4f16`, `air.fmin.f16`, `air.fmax.f16` and `air.fract.f16` mapped to `mix`, `min`, `max` and `fract` (`translate.cpp`) | 40 | 49 | `dualFragmentShader` and `rgbToLightnessFragmentShader` in MediaEditor, REFUSED to OK; `mainVideoFragment` (two libraries) leaves the mix for `air.fabs.v3f16`; `adjustmentsFragmentShader` leaves the max for a cast; the 4S compiles and links the six MediaEditor programs |
+| texture reads: `air.read_texture_2d.v4f16` at the thread position, level 0, as a nearest fetch of the texel centre with the texture's size (`translate.cpp`, `readTexture`); measured before the next row | 40 | 49 | none to OK; the four video kernels leave the read for the shift of a thread lane |
+| a logical shift right of a thread position, or of one of its lanes, by a constant, as an integer division by 2^k (`translate.cpp`, `shiftRight`) | 44 | 45 | `videoBiPlanarToRGBA` and `videoTriPlanarToRGBA` in CallScreen and CameraScreen, REFUSED to OK; the 4S compiles and links all 44 OK programs; `backgroundStarVertex` keeps its refusal (a hash, see below) |
 
 A verdict does not show that the GLSL compiles. `histogramPrepareFragmentShader` was OK at baseline, and its GLSL assigned a `float` to `gl_FragColor`. On the 4S it fails the ES 2 probe (`ERROR: 0:26: Incompatible types (vec4 and float)`), and `glslangValidator` rejects it for ES 1.00. After `colorOf` both accept it.
 
-Checks on the state the table shows:
+Checks on the state the table shows (44 OK, 45 REFUSED):
 
-- the ES 2 probe on the 4S (iPhone4,1, iOS 6.1.3, PowerVR SGX 543) over the 33 OK entries: 33 PASS, 0 FAIL; before `colorOf` it was 32 PASS, 1 FAIL;
-- `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 0 folders fail; before `colorOf` 1 failed;
+- the ES 2 probe on the 4S (iPhone4,1, iOS 6.1.3, PowerVR SGX 543) over the 44 OK entries: 44 PASS, 0 FAIL (`REVENANT-DONE programs 44 failures 0`). It compiles and links each one; it does not compare values. At the earlier 33-entry state it was 33 PASS, and before `colorOf` 32 PASS, 1 FAIL;
+- `air2es_check.lua` with `glslangValidator` over the 18 translated folders: 44 of 44 functions pass, and 0 folders fail; before `colorOf` 1 failed;
 - `air2es_test.lua`: 15 cases pass.
 
-The 49 refusals have 25 reasons after the changes below (24 after the bitwise `and` and comparison changes, 28 after the locals change, 27 after the texture writes, 26 after the memset). The half-precision maps compute in the float or mediump precision of the GLSL they become; the rounding of Metal's half is not compared, so the compile on the 4S is the only device check of them. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
+The 49 refusals had 25 reasons after the half-precision maps. After the texture reads they have 24 reasons, and after the lane shift 45 refusals have 24. The earlier counts were 24 after the bitwise `and` and comparison changes, 28 after the locals change, 27 after the texture writes and 26 after the memset. The half-precision maps compute in the float or mediump precision of the GLSL they become; the rounding of Metal's half is not compared, so the compile on the 4S is the only device check of them. The argument-kind group is down from 9 to 2, and both are the threadgroup kernels below.
 
 `width` and `height` of an output texture (the width group, decision: host loader sets `<tex>_size`):
 
@@ -168,7 +170,7 @@ Clamp-to-zero samples (decision: kept refused, with the reason named; an exact e
 
 - Five entries use one constexpr sampler: clamp to zero on s and t, linear minification and magnification. They are `enhanceColorLookupFragmentShader`, `blurRadialFragmentShader`, `blurLinearFragmentShader` and `blurPortraitFragmentShader` (MediaEditor), and `walletAmountFragment` (WalletSendScreen).
 - With a linear filter, a sample near the edge blends the edge texels with the zero border, so its value depends on the texture size. OpenGL ES 2 clamps to the edge texel and has no zero border.
-- An emulation would fetch the four texels around each sample with a nearest fetch and weight them by the texture size. The host would have to set that size for each input texture; the width group's size uniform covers only output textures. The weights are computed in float, so the result is an approximation of the hardware filter, not a bit-exact match. Whether to accept that approximation is the owner's decision.
+- An emulation would fetch the four texels around each sample with a nearest fetch and weight them by the texture size. The host would have to set that size for each input texture; the width group's size uniform covers only output textures. The weights are computed in float, so the result is an approximation of the hardware filter, not a bit-exact match. Decision (coordinator): keep these refused, with the reason named. They return only with an exact emulation that can be measured on the 4S with a small deviation. Low priority.
 - A nearest-filter clamp-to-zero sample needs no size: a coordinate in [0, 1) indexes a texel, and any other coordinate reads zero. No corpus entry uses one, so it is not implemented.
 - Measured: 33 OK and 56 REFUSED before and after. The five rows keep their refusal, and the reason changed only for them. `air2es_test.lua`: 15 cases pass.
 
@@ -179,7 +181,11 @@ Texture writes of half4, and highp for sampled coordinates:
 - Measured on the 4S: all 37 OK programs compile and link under the ES 2 probe (`REVENANT-DONE programs 37 failures 0`). That is compile and link only. Whether the 4S samples the same values as Metal is not measured, so an OK entry means translated, compiled and structurally checked; it does not mean the sampled values are equal.
 - `air2es_check.lua` with `glslangValidator`: 0 folders fail; `air2es_test.lua`: 15 cases pass.
 
-Texture reads (`air.read_texture_2d.v4f16`, four rows: `videoBiPlanarToRGBA` and `videoTriPlanarToRGBA` in two libraries) are not translated yet. A read at the thread position is a nearest fetch at the texel centre, which needs the input size, and the chroma planes read at the position shifted right by one. The probe cannot upload a texture, so the exactness of that fetch on the 4S cannot be measured yet. Decision for the owner: whether to add a texture upload and readback to the probe first.
+Texture reads (`air.read_texture_2d.v4f16`, four rows: `videoBiPlanarToRGBA` and `videoTriPlanarToRGBA` in two libraries) are translated (`translate.cpp`, `readTexture`). A read at a thread position, of a texture argument at level 0, is a nearest fetch of the texel centre, `texture2D(tex, (vec2(p) + vec2(0.5)) / tex_size)`, with a nearest sampler that clamps to the edge. The size is the host's, as for a size query. The chroma planes read at the position halved, a logical shift right of a thread lane, which is the next row of the table.
+
+- Measured on the 4S with the texture stage of `Es2ProgramProbe` (`frameworks/Backports/tests/device_probe/es2_main.m`). The host writes a texel pattern into an RGBA8 input texture, the translated shader renders into an RGBA8 target, and the probe compares every output byte with the value the host computes. `readIdentity` at 1024×1024 and at 250×130 passes all 1,081,076 pixels with a maximum difference of 0. `readHalfResolution`, which reads at the position halved, passes 98,036 pixels with 0 difference at 256×256 from 128×128 and at 250×130 from 125×65. The nearest fetch and the integer division by 2 are exact on this device for these sizes.
+- Negative control on the same phone: the half-resolution shader compared with the identity mapping fails 65,282 of 65,536 pixels, with a maximum difference of 251. So the comparison can fail.
+- Not measured: the formats of the planes. The probe uses RGBA8 only. The video kernels read the luminance plane through `.x` and the chroma through `.xy`. The host must bind those planes so the sampled channels hold the plane's values. `RevenantMetalEncoder.m` sets the input sizes from the bound textures; that path has not run on the 4S. The 4S compile of the two kernels does not show the binding.
 
 Memset of a local and dynamic indexes (decision: the project's Appendix A rule for array indexes applies to locals too):
 
@@ -188,18 +194,18 @@ Memset of a local and dynamic indexes (decision: the project's Appendix A rule f
 - Metal leaves an index past the six elements undefined, and the translation returns the last element there. The caller that draws this pass is not in the reference checkout, so whether it ever draws more than six vertices is not checked.
 - Measured: 38 OK and 51 REFUSED. On the 4S the new vertex and the existing fragment compile and link (`REVENANT-DONE programs 2 failures 0`). `air2es_check.lua` with `glslangValidator` passes on all 18 folders, and `air2es_test.lua` passes 15 cases.
 
-Addresses this emitter does not read (six rows; decision: the owner chooses, nothing is changed here):
+Addresses this emitter does not read (six rows; decided by the coordinator, not built yet):
 
-- `sparkleVertex`, `referenceHighlightVertex`, `walletAmountVertex` and `walletAmountLayerVertex` read a buffer at the vertex id divided by a constant (a quad index). The translator reads a buffer only at the vertex id itself. A host expansion of the per-vertex data by that divisor would make them translatable, but it is a host change that the device has to check.
-- `enhanceGenerateLUT` is a kernel that reads a buffer at an index computed from the thread position. The translated kernels write one output per thread, so this read needs a different pass design.
-- `liquidGlassShapesDisplacementFragment` indexes a uniform array with a computed index. Appendix A allows only constant indexes, so it needs a select chain over the uniform's elements, which is not built.
+- `sparkleVertex`, `referenceHighlightVertex`, `walletAmountVertex` and `walletAmountLayerVertex` read a buffer at the vertex id divided by a constant (a quad index). The translator reads a buffer only at the vertex id itself. Decided: the host expands the per-vertex data by that divisor, so each vertex reads its own element. That is a host change in `RevenantMetalEncoder.m`, and the 4S has to check it. Not built yet.
+- `enhanceGenerateLUT` is a kernel that reads a buffer at an index computed from the thread position. The translated kernels write one output per thread, so this read needs a different pass design. Decided: later, and only with a written design of that pass. Not built.
+- `liquidGlassShapesDisplacementFragment` indexes a uniform array with a computed index. Appendix A allows only constant indexes. Decided: a select chain over the uniform's elements, as for local arrays. Not built yet.
 
-Integer operations, the first refusal of four kernels (decision: none translated yet; the owner decides one assumption):
+Integer operations, the first refusal of four kernels (decision: they stay refused; no buffer divisor is assumed):
 
 - `callBlobVertex` divides the vertex index by constants (`udiv` by 3 and 24, `urem` by 3). Its next refusal is a `srem` by a value loaded from a buffer, and that value has no bound the translator can see. A division of the vertex index by a constant could be GLSL int division, but the translator refuses this kernel at the `srem` first, so no entry uses it, and the 4S has not checked int division. It is not translated.
 - `dustEffectVertex` and `dustEffectUpdateParticle` divide by a value loaded from a buffer. The divisor may be zero or negative, and the translator cannot bound it.
 - `dustEffectInitializeParticle` and `backgroundStarVertex` compute a 32-bit hash with xor, shifts and a wrap-around multiply. GLSL ES 1.00 has no bit operators, and float arithmetic does not give a 32-bit wrap-around multiply exactly without multi-precision steps. They stay refused.
-- Decision for the owner: whether a buffer divisor may be assumed positive and below 2^24. The float attribute holds a vertex index exactly only below 2^24. Accepting the assumption would move `callBlobVertex` to its next blocker and lower the two dust divisions; it would not make any entry OK by itself. The hashes need another approach.
+- Decision (coordinator): a buffer divisor is not assumed positive and below 2^24, so these stay refused. The float attribute holds a vertex index exactly only below 2^24, which is why the assumption was asked about. The hashes need another approach and stay refused.
 - Measured: 33 OK and 56 REFUSED, the same as before this group.
 
 `instance_id` (decision: a host-filled uniform, looped per instance):
@@ -223,4 +229,4 @@ Two ways to meet that without a compute shader:
 
 The decision between (a) and leaving the two kernels unsupported is open.
 
-The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the largest remaining are an address this emitter does not read (6), the texture reads of `v4f16` (4, see above), and the integer operations `udiv`, `urem`, `sdiv`, `lshr` and `shl` (6 together).
+The bitwise `and`, comparison and locals groups are translated as far as the table shows, and the clamp-to-zero samples are kept refused with their reason named (decision above). The blockers listed above are the first refusal of each kernel. Counted by reason, the largest remaining are an address this emitter does not read (6), a linear filter with a clamp-to-zero address (5), a `float4x4` member (5), and the integer operations `udiv`, `urem`, `sdiv`, `lshr` and `shl` (6 together). The texture reads are translated now (see above).

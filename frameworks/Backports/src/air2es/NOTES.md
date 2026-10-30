@@ -71,6 +71,9 @@ and why, so it is not rediscovered later.
   An index outside the table takes the last entry. LLVM calls that case undefined, so
   the choice is ours.
 - A variable read from an empty constant table is refused by name.
+- A read of a texture at the thread position is a nearest fetch of the texel centre, with the size from the host. A
+  logical shift right of a thread position, or of one of its lanes, by a constant is an integer division by 2^k. The
+  texture stage of the ES 2 probe checks both on the 4S: exact for the sizes it runs, which are up to 1024 by 1024.
 - Internal helper functions are inlined at each call site. They are not emitted as GLSL
   functions, so their sampler and texture parameters map to the caller's bindings.
 - Control flow: an if/else region ends at the branch's immediate post-dominator. Phi

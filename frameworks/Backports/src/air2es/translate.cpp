@@ -1510,6 +1510,8 @@ private:
         if (auto *binary = dyn_cast<BinaryOperator>(&instruction)) {
             if (binary->getOpcode() == Instruction::And)
                 return maskAnd(instruction, *binary);
+            if (binary->getOpcode() == Instruction::LShr)
+                return shiftRight(instruction, *binary);
             const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
@@ -1649,6 +1651,69 @@ private:
         return true;
     }
 
+    // A read at an integer position is a nearest fetch at the centre of that texel, which is the texel itself. The size
+    // comes from the host as for a size query, and the nearest sampler clamps to the edge, so the fetch stays inside.
+    bool readTexture(CallInst &call)
+    {
+        if (stage_ != Stage::Kernel && stage_ != Stage::Fragment)
+            return refuse("a read of a texture in a vertex shader, which OpenGL ES 2 does not sample");
+        if (call.arg_size() != 4)
+            return refuse("a read with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.texture")
+            return refuse("a read of something other than a texture argument");
+        auto *level = dyn_cast<ConstantInt>(call.getArgOperand(2));
+        if (!level || !level->isZero())
+            return refuse("a read at a level other than 0");
+        std::string position;
+        if (!expression(call.getArgOperand(1), position))
+            return false;
+        std::string size = texture->name + "_size";
+        bool fresh = !declared_.count(size);
+        declare("uniform vec2 " + size + ";\n", size);
+        if (fresh)
+            sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
+        declare("uniform sampler2D " + texture->name + ";\n", texture->name);
+        GLESSampler nearest;
+        nearest.wrapS = nearest.wrapT = "clamp_to_edge";
+        nearest.minFilter = nearest.magFilter = "nearest";
+        if (!sampledBy(*texture, samplerJson(nearest), ", \"depth\": false, \"compare\": false"))
+            return false;
+        std::string name;
+        if (!local(call, name))
+            return false;
+        statement(name + " = texture2D(" + texture->name + ", (vec2(" + position + ") + vec2(0.5)) / " + size + ");\n");
+        return true;
+    }
+
+    // A thread position, or one of its lanes as `threadPosition.x` compiles to.
+    const Binding *threadPositionOf(const Value *value)
+    {
+        if (auto *extract = dyn_cast<ExtractElementInst>(value))
+            value = extract->getVectorOperand();
+        const Binding *binding = bindingOf(value);
+        return binding && binding->kind == "air.thread_position_in_grid" ? binding : nullptr;
+    }
+
+    // A logical shift right by a constant of a thread position, or of one of its lanes, is an integer division by 2^k.
+    // The position is a non-negative integer below the size of the render target, so the division is exact in int
+    // arithmetic.
+    bool shiftRight(Instruction &instruction, BinaryOperator &binary)
+    {
+        auto *constant = dyn_cast<Constant>(binary.getOperand(1));
+        auto *amount = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
+        if (!amount || amount->getZExtValue() >= 31 || !threadPositionOf(binary.getOperand(0)))
+            return refuse("a logical shift right other than of a thread position or its lane by a constant");
+        std::string left, name;
+        if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+            return false;
+        std::string divisor = std::to_string(uint64_t(1) << amount->getZExtValue());
+        if (instruction.getType()->isVectorTy())
+            divisor = glslType(instruction.getType()) + "(" + divisor + ")";
+        statement(name + " = (" + left + " / " + divisor + ");\n");
+        return true;
+    }
+
     bool sampleCube(CallInst &call)
     {
         if (call.arg_size() != 6)
@@ -1714,6 +1779,8 @@ private:
             return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
         if (called == "air.write_texture_2d.v4f32" || called == "air.write_texture_2d.v4f16")
             return writeTexture(call);
+        if (called == "air.read_texture_2d.v4f16")
+            return readTexture(call);
         if (called == "air.sample_texture_cube.v4f32")
             return sampleCube(call);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
