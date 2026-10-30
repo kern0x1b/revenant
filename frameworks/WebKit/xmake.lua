@@ -16,6 +16,7 @@ if is_plat("iphoneos") then
     add_requires("webkit-device-tools")
     add_requires("revenant@wasm3", {alias = "wasm3"})
     add_requires("revenant@openssl", {alias = "openssl"})
+    add_requires("revenant@openssl-host 4.0.2", {alias = "openssl-host", host = true})
 
     add_cxflags("-mcpu=cortex-a9", "-mfpu=neon")
     add_defines("WEBKIT_IOS6_NO_READLINE")
@@ -115,6 +116,7 @@ elseif has_config("webkit_host_tests") then
     target("icu-sanity")
         set_kind("binary")
         set_default(false)
+        set_languages("c++17")
         add_files("tests/host/icu-sanity.cpp")
         add_packages("icu")
         add_tests("encodings", {runargs = {path.join(os.scriptdir(), "tests", "host", "required-encodings.txt"),
@@ -123,6 +125,7 @@ elseif has_config("webkit_host_tests") then
     target("icu-locales")
         set_kind("binary")
         set_default(false)
+        set_languages("c++17")
         add_files("tests/host/icu-locales.cpp")
         add_packages("icu")
         add_tests("locales")
