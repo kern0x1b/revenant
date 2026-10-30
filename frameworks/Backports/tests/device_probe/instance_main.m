@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -133,6 +134,89 @@ static void revenant_element_checks(id<MTLDevice> device)
     revenant_check(revenant_mismatches(target, first) == 0, @"a 1-instance draw reads element 0 only");
 }
 
+// The matrix frame as Metal lays it out: model and projection as column-major float4x4, then a float3x3 whose three columns
+// are each padded to four floats.
+static const float REVENANT_MATRIX_FRAME[44] = {
+    1, 0, 2, 0,  0, 3, 0, 1,  4, 0, 1, 0,  0, 2, 0, 1,
+    1, 1, 0, 0,  0, 2, 5, 1,  3, 0, 1, 0,  0, 0, 2, 1,
+    1, 2, 0, 0,  0, 1, 3, 0,  2, 4, 1, 0};
+
+// The reference product of the shader, with the same column-major reading as Metal: out[r] = sum over c of m[c][r] * v[c].
+static void revenant_multiply(const float *m, const float *v, float *out)
+{
+    for (int r = 0; r < 4; r++) {
+        out[r] = 0;
+        for (int c = 0; c < 4; c++)
+            out[r] += m[c * 4 + r] * v[c];
+    }
+}
+
+// The bytes the matrix draw must write into each of its three pixels: the products x and y, model[3][1] and normal[2][1].
+static void revenant_matrix_expected(const float *frame, uint8_t expected[12])
+{
+    float v[4] = {1, 2, 3, 1}, mv[4], p[4];
+    revenant_multiply(frame, v, mv);
+    revenant_multiply(frame + 16, mv, p);
+    uint8_t pixel[4] = {(uint8_t)lrintf(p[0]), (uint8_t)lrintf(p[1]), (uint8_t)lrintf(frame[13]), (uint8_t)lrintf(frame[41])};
+    memcpy(expected, pixel, sizeof pixel);
+    memcpy(expected + 4, pixel, sizeof pixel);
+    memcpy(expected + 8, pixel, sizeof pixel);
+}
+
+// The same matrices stored transposed, which is the layout error the matrix check must catch.
+static void revenant_matrix_transposed(const float *frame, float *out)
+{
+    memset(out, 0, 44 * sizeof(float));
+    for (int c = 0; c < 4; c++)
+        for (int r = 0; r < 4; r++) {
+            out[c * 4 + r] = frame[r * 4 + c];
+            out[16 + c * 4 + r] = frame[16 + r * 4 + c];
+        }
+    for (int c = 0; c < 3; c++)
+        for (int r = 0; r < 3; r++)
+            out[32 + c * 4 + r] = frame[32 + r * 4 + c];
+}
+
+static void revenant_matrix_draw(id<MTLDevice> device, id<MTLRenderPipelineState> pipeline, id<MTLTexture> target, const float *frame)
+{
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = target;
+    pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+    pass.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    id<MTLBuffer> corners = [device newBufferWithBytes:REVENANT_CORNERS length:sizeof REVENANT_CORNERS options:MTLResourceStorageModeShared];
+    id<MTLBuffer> frameBuffer = [device newBufferWithBytes:frame length:44 * sizeof(float) options:MTLResourceStorageModeShared];
+    id<MTLCommandBuffer> buffer = [[device newCommandQueue] commandBuffer];
+    id<MTLRenderCommandEncoder> encoder = [buffer renderCommandEncoderWithDescriptor:pass];
+    [encoder setRenderPipelineState:pipeline];
+    [encoder setVertexBuffer:corners offset:0 atIndex:0];
+    [encoder setVertexBuffer:frameBuffer offset:0 atIndex:1];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4 instanceCount:3];
+    [encoder endEncoding];
+    [buffer commit];
+    [buffer waitUntilCompleted];
+}
+
+static void revenant_matrix_checks(id<MTLDevice> device)
+{
+    id<MTLRenderPipelineState> pipeline = revenant_pipeline(device, @"matrix_column_vertex", @"matrix_column_fragment");
+    revenant_check(pipeline != nil, @"the translated matrix shaders link as a render pipeline");
+    if (!pipeline)
+        return;
+
+    uint8_t expected[12];
+    revenant_matrix_expected(REVENANT_MATRIX_FRAME, expected);
+    id<MTLTexture> target = revenant_target(device);
+    revenant_matrix_draw(device, pipeline, target, REVENANT_MATRIX_FRAME);
+    revenant_check(revenant_mismatches(target, expected) == 0, @"model and projection multiply a known vector in column-major order, and the element reads match the reference");
+
+    float transposed[44];
+    revenant_matrix_transposed(REVENANT_MATRIX_FRAME, transposed);
+    target = revenant_target(device);
+    revenant_matrix_draw(device, pipeline, target, transposed);
+    revenant_check(revenant_mismatches(target, expected) > 0, @"negative control: the transposed matrices fail the same reference");
+}
+
 static void revenant_instance_checks(id<MTLDevice> device)
 {
     id<MTLRenderPipelineState> pipeline = revenant_pipeline(device, @"instance_column_vertex", @"instance_column_fragment");
@@ -164,6 +248,7 @@ int main(int argc, char *argv[])
         if (device) {
             revenant_instance_checks(device);
             revenant_element_checks(device);
+            revenant_matrix_checks(device);
         }
         [REVENANT_LOG appendFormat:@"REVENANT-DONE failures %lu\n", (unsigned long)REVENANT_FAILURES];
         [REVENANT_LOG writeToFile:@"/var/revenant/instance-probe.txt" atomically:YES encoding:NSUTF8StringEncoding error:NULL];
