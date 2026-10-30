@@ -274,6 +274,10 @@ function bundle(package, ctx)
     os.tryrm(frameworks_dir)
     for _, framework in ipairs(carried(ctx)) do
         os.vcp(path.join(ctx.build, framework.built .. ".framework"), frameworks_dir .. "/", {symlink = true})
+        -- A consumer links these, and the link records the install name in the binary: the build's own is the phone's
+        -- framework, so the binary takes the bundle's, the name the application embeds it under.
+        local binary = framework.built
+        os.cp(path.join(root, "Frameworks", framework.built .. ".framework", binary), path.join(frameworks_dir, framework.built .. ".framework", binary))
     end
     local headers = package:installdir("include")
     for _, folder_name in ipairs({{"WebKitLegacy", "Headers"}, {"WTF", "Headers"}}) do
