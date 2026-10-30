@@ -29,7 +29,7 @@ function binary(build, framework)
 end
 
 function surface(build)
-    local entries = {}
+    local entries, imports, defined = {}, {}, {}
     for _, framework in ipairs(frameworks) do
         local file = binary(build, framework)
         if not file then
@@ -38,14 +38,23 @@ function surface(build)
         for line in nm({"-u"}, file):gmatch("[^\n]+") do
             local symbol = line:trim()
             if symbol ~= "" then
-                entries["undefined " .. framework .. " " .. symbol] = true
+                table.insert(imports, {framework, symbol})
             end
         end
         for line in nm({"-gU"}, file):gmatch("[^\n]+") do
             local symbol = line:match("(%S+)%s*$")
-            if symbol and symbol:startswith("_OBJC_CLASS_$_") then
-                entries["class " .. framework .. " " .. symbol] = true
+            if symbol then
+                defined[symbol] = true
+                if symbol:startswith("_OBJC_CLASS_$_") then
+                    entries["class " .. framework .. " " .. symbol] = true
+                end
             end
+        end
+    end
+    for _, item in ipairs(imports) do
+        -- a carried framework that defines the symbol itself is an engine-internal import, not something iOS 6 must provide
+        if not defined[item[2]] then
+            entries["undefined " .. item[1] .. " " .. item[2]] = true
         end
     end
     return entries
