@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "samplers.h"
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
@@ -155,6 +156,29 @@ bool paddedVectorOf(Type *narrow, Type *wide)
     auto *to = dyn_cast<FixedVectorType>(wide);
     return from && to && from->getNumElements() == 3 && to->getNumElements() == 4 &&
            from->getElementType() == to->getElementType();
+}
+
+bool samplerStateOf(const GlobalVariable &global, uint64_t &state)
+{
+    const NamedMDNode *states = global.getParent()->getNamedMetadata("air.sampler_states");
+    if (!states)
+        return false;
+    bool listed = false;
+    for (const MDNode *entry : states->operands())
+        for (const MDOperand &operand : entry->operands())
+            if (auto *value = dyn_cast<ConstantAsMetadata>(operand.get()); value && value->getValue() == &global)
+                listed = true;
+    auto *initializer = dyn_cast_or_null<ConstantInt>(global.getInitializer());
+    if (!listed || !initializer)
+        return false;
+    state = initializer->getZExtValue();
+    return true;
+}
+
+std::string samplerJson(const GLESSampler &sampler)
+{
+    return "{\"wrapS\": " + jsonQuote(sampler.wrapS) + ", \"wrapT\": " + jsonQuote(sampler.wrapT) +
+           ", \"minFilter\": " + jsonQuote(sampler.minFilter) + ", \"magFilter\": " + jsonQuote(sampler.magFilter) + "}";
 }
 
 bool scalarOf(const std::string &typeName, std::string &scalar, unsigned &components)
@@ -380,6 +404,38 @@ private:
         if (refusal_.empty())
             refusal_ = reason;
         return false;
+    }
+
+    bool samplerOf(const Value *operand, std::string &json)
+    {
+        Binding *bound = bindingOf(operand);
+        if (bound && bound->kind == "air.sampler") {
+            json.clear();
+            return true;
+        }
+        uint64_t state = 0;
+        auto *global = dyn_cast<GlobalVariable>(operand);
+        if (!global || !samplerStateOf(*global, state))
+            return refuse("a sample with a sampler this emitter cannot read");
+        GLESSampler sampler;
+        std::string reason;
+        if (!decodeSampler(state, samplerTable(), sampler, reason))
+            return refuse("a sample with " + reason);
+        json = samplerJson(sampler);
+        return true;
+    }
+
+    bool sampledBy(const Binding &texture, const std::string &json, const std::string &fields)
+    {
+        auto known = textures_.find(texture.name);
+        if (known != textures_.end())
+            return known->second == json || refuse("a texture sampled with two different samplers");
+        textures_[texture.name] = json;
+        std::string line = "{\"name\": " + jsonQuote(texture.name) + ", \"index\": " + std::to_string(texture.index) + fields;
+        if (!json.empty())
+            line += ", \"sampler\": " + json;
+        textureLines_.push_back(line + "}");
+        return true;
     }
 
     bool readMembers(const MDNode *fields, std::vector<Member> &members)
@@ -1275,9 +1331,9 @@ private:
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture_cube")
             return refuse("a cube sample of something other than a cube texture argument");
-        Binding *sampler = bindingOf(call.getArgOperand(1));
-        if (!sampler || sampler->kind != "air.sampler")
-            return refuse("a sample with a sampler built into the shader, which the library carries no state for");
+        std::string sampler;
+        if (!samplerOf(call.getArgOperand(1), sampler))
+            return false;
         auto *flag = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *bias = dyn_cast<ConstantFP>(call.getArgOperand(4));
         auto *offset = dyn_cast<ConstantInt>(call.getArgOperand(5));
@@ -1287,11 +1343,8 @@ private:
         if (!expression(call.getArgOperand(2), coordinates))
             return false;
         declare("uniform samplerCube " + texture->name + ";\n", texture->name);
-        if (!textures_.count(texture->name)) {
-            textures_.insert(texture->name);
-            textureLines_.push_back("{\"name\": " + jsonQuote(texture->name) + ", \"index\": " + std::to_string(texture->index) +
-                                    ", \"depth\": false, \"compare\": false, \"cube\": true}");
-        }
+        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false, \"cube\": true"))
+            return false;
         std::string name;
         if (!local(call, name))
             return false;
@@ -1377,9 +1430,9 @@ private:
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
             return refuse("a sample of something other than a texture argument");
-        Binding *sampler = bindingOf(call.getArgOperand(1));
-        if (!sampler || sampler->kind != "air.sampler")
-            return refuse("a sample with a sampler built into the shader, which the library carries no state for");
+        std::string sampler;
+        if (!samplerOf(call.getArgOperand(1), sampler))
+            return false;
         auto *normalized = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *hasLevel = dyn_cast<ConstantInt>(call.getArgOperand(5));
         auto *level = dyn_cast<ConstantFP>(call.getArgOperand(6));
@@ -1389,11 +1442,8 @@ private:
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
         declare("uniform sampler2D " + texture->name + ";\n", texture->name);
-        if (!textures_.count(texture->name)) {
-            textures_.insert(texture->name);
-            textureLines_.push_back("{\"name\": " + jsonQuote(texture->name) + ", \"index\": " + std::to_string(texture->index) +
-                                    ", \"depth\": false, \"compare\": false}");
-        }
+        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false"))
+            return false;
         if (!local(call, name))
             return false;
         statement(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
@@ -1486,7 +1536,7 @@ private:
     std::map<const Value *, std::vector<Value *>> aggregates_;
     std::map<const Value *, std::string> names_;
     std::set<std::string> declared_;
-    std::set<std::string> textures_;
+    std::map<std::string, std::string> textures_;
     std::vector<std::string> declarations_;
     std::vector<std::string> locals_;
     std::vector<std::string> statements_;
@@ -1528,17 +1578,49 @@ std::string jsonQuote(const std::string &text)
     return out + "\"";
 }
 
-bool dumpEntry(const Entry &entry, std::string &text, std::string &error)
+std::unique_ptr<Module> parseEntry(const Entry &entry, LLVMContext &context, std::string &error)
 {
-    LLVMContext context;
     auto buffer = MemoryBuffer::getMemBuffer(StringRef((const char *)entry.bitcode.data(), entry.bitcode.size()), entry.name, false);
     Expected<std::unique_ptr<Module>> parsed = parseBitcodeFile(buffer->getMemBufferRef(), context);
     if (!parsed) {
         error = "its bitcode does not read: " + toString(parsed.takeError());
-        return false;
+        return nullptr;
     }
+    return std::move(*parsed);
+}
+
+bool dumpEntry(const Entry &entry, std::string &text, std::string &error)
+{
+    LLVMContext context;
+    std::unique_ptr<Module> module = parseEntry(entry, context, error);
+    if (!module)
+        return false;
     raw_string_ostream stream(text);
-    (*parsed)->print(stream, nullptr);
+    module->print(stream, nullptr);
+    return true;
+}
+
+bool samplerStatesOf(const Entry &entry, std::vector<SamplerUse> &uses, std::string &error)
+{
+    LLVMContext context;
+    std::unique_ptr<Module> module = parseEntry(entry, context, error);
+    if (!module)
+        return false;
+    for (const Function &function : *module)
+        for (const BasicBlock &block : function)
+            for (const Instruction &instruction : block)
+                for (const Use &use : instruction.operands()) {
+                    uint64_t state = 0;
+                    auto *global = dyn_cast<GlobalVariable>(use.get());
+                    if (!global || !samplerStateOf(*global, state))
+                        continue;
+                    SamplerUse found{entry.name, function.getName().str(), state};
+                    bool seen = false;
+                    for (const SamplerUse &known : uses)
+                        seen = seen || (known.function == found.function && known.state == found.state);
+                    if (!seen)
+                        uses.push_back(found);
+                }
     return true;
 }
 
