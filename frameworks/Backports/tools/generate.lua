@@ -5,6 +5,7 @@ local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
+local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 
 local SHARDS = 4
 
@@ -260,9 +261,8 @@ local folders_cache = nil
 function library_folders()
     if folders_cache == nil then
         folders_cache = {}
-        local text = io.readfile(path.join(sdkfiles.root(), "frameworks", "Backports", "xmake.lua"))
-        for folder in string.gmatch(text, 'folder = "([%w_]+)"') do
-            folders_cache[folder] = true
+        for _, library in ipairs(libraries) do
+            folders_cache[library.folder] = true
         end
     end
     return folders_cache

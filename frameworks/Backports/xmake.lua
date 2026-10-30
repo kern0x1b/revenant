@@ -13,144 +13,16 @@ local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
-local LIBRARIES = {
-    {name = "SystemBackports", folder = "libSystem", frameworks = {}, libraries = {}, archives = {}, system = {}},
-    {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports", "SystemBackports"}, archives = {}, system = {"sqlite3"}},
-    {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
-    {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "AdServicesBackports", folder = "AdServices", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "AppClipBackports", folder = "AppClip", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "AccountsBackports", folder = "Accounts", frameworks = {"Accounts", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CFNetworkBackports", folder = "CFNetwork", frameworks = {"CFNetwork", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "IOSurfaceBackports", folder = "IOSurface", frameworks = {"IOSurface", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreServicesBackports", folder = "CoreServices", frameworks = {"CoreServices", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "IOKitBackports", folder = "IOKit", frameworks = {"IOKit", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "BrowserKitBackports", folder = "BrowserKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreNFCBackports", folder = "CoreNFC", frameworks = {"Foundation", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "GameKitBackports", folder = "GameKit", frameworks = {"GameKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "GraphicsBackports", folder = "Graphics", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports", "CoreGraphicsBackports"}, archives = {"box2d"}, system = {}},
-    {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
-    {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SecurityBackports", folder = "Security", frameworks = {"Security", "Foundation"}, libraries = {"FoundationBackports", "LocalAuthenticationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
-    {name = "CommonCryptoBackports", folder = "CommonCrypto", frameworks = {"Security"}, libraries = {}, archives = {}, system = {}},
-    {name = "CoreBluetoothBackports", folder = "CoreBluetooth", frameworks = {"Foundation"}, libraries = {}, archives = {}, system = {}},
-    {name = "CompressionBackports", folder = "Compression", frameworks = {}, libraries = {}, archives = {"lzfse", "zlib", "lz4", "xz"}, system = {}},
-    {name = "SpatialBackports", folder = "Spatial", frameworks = {}, libraries = {}, archives = {}, system = {}},
-    {name = "SQLite3Backports", folder = "SQLite3", frameworks = {}, libraries = {"sqlite3"}, archives = {}, system = {}},
-    {name = "SpriteKitBackports", folder = "SpriteKit", frameworks = {"Foundation", "CoreGraphics", "UIKit", "QuartzCore", "OpenGLES"}, libraries = {}, archives = {}, system = {}},
-    {name = "AccelerateBackports", folder = "Accelerate", frameworks = {"Accelerate", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"suitesparse-ordering"}, system = {}},
-    {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "CoreFoundationBackports", "CoreMediaBackports"}, archives = {"RevenantCoding"}, system = {}},
-    {name = "AVFAudioBackports", folder = "AVFAudio", frameworks = {"AudioToolbox", "CoreAudio", "AVFoundation", "UIKit", "Foundation", "Accelerate", "QuartzCore"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "AVFoundationBackports"}, archives = {}, system = {}},
-    {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation", "CoreGraphics", "QuartzCore"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {"z"}},
-    {name = "LocalAuthenticationBackports", folder = "LocalAuthentication", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "OpenGLESBackports", folder = "OpenGLES", frameworks = {"OpenGLES", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SafariServicesBackports", folder = "SafariServices", frameworks = {"SafariServices", "UIKit", "Foundation", "CoreGraphics", "QuartzCore", "MobileCoreServices"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "AuthenticationServicesBackports", folder = "AuthenticationServices", frameworks = {"UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "SafariServicesBackports"}, archives = {}, system = {}},
-    {name = "BackgroundTasksBackports", folder = "BackgroundTasks", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "DeviceCheckBackports", folder = "DeviceCheck", frameworks = {"DeviceCheck", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation", "PhotosUI"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionBackports", folder = "Vision", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "CoreML", "Foundation"}, libraries = {"FoundationBackports", "CoreMLBackports"}, archives = {"zxing-cpp", "tesseract", "leptonica"}, system = {}},
-    {name = "MetalBackports", folder = "Metal", frameworks = {"QuartzCore", "CoreGraphics", "CoreVideo", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {}, system = {}},
-    {name = "MetalKitBackports", folder = "MetalKit", frameworks = {"MetalKit", "Metal", "ModelIO", "UIKit", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "ModelIOBackports"}, archives = {}, system = {}},
-    {name = "MPSBackports", folder = "MetalPerformanceShaders", frameworks = {"Metal", "QuartzCore", "CoreGraphics", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {}, system = {}},
-    {name = "MPSGraphBackports", folder = "MetalPerformanceShadersGraph", frameworks = {"Metal", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports", "MPSBackports"}, archives = {}, system = {}},
-    {name = "CoreTelephonyBackports", folder = "CoreTelephony", frameworks = {"CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreMIDIBackports", folder = "CoreMIDI", frameworks = {"CoreMIDI", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CallKitBackports", folder = "CallKit", frameworks = {"CoreTelephony", "AVFoundation", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "ContactsBackports", folder = "Contacts", frameworks = {"AddressBook", "CoreFoundation", "Foundation"}, libraries = {"FoundationBackports", "CoreFoundationBackports"}, archives = {}, system = {}},
-    {name = "HomeKitBackports", folder = "HomeKit", frameworks = {"CoreLocation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"monocypher"}, system = {}},
-    {name = "CoreSpotlightBackports", folder = "CoreSpotlight", frameworks = {"CoreSpotlight", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PushKitBackports", folder = "PushKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "JavaScriptCoreBackports", folder = "JavaScriptCore", frameworks = {"JavaScriptCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SceneKitBackports", folder = "SceneKit", frameworks = {"UIKit", "QuartzCore", "OpenGLES", "CoreGraphics", "Foundation", "OpenAL", "AudioToolbox", "AVFoundation"}, libraries = {"FoundationBackports", "OpenGLESBackports", "AVFoundationBackports"}, archives = {}, system = {}},
-    {name = "MediaPlayerBackports", folder = "MediaPlayer", frameworks = {"MediaPlayer", "AVFoundation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "MessageUIBackports", folder = "MessageUI", frameworks = {"MessageUI", "MobileCoreServices", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "MessagesBackports", folder = "Messages", frameworks = {"MessageUI", "Messages", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "MetricKitBackports", folder = "MetricKit", frameworks = {"MetricKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SensorKitBackports", folder = "SensorKit", frameworks = {"SensorKit", "CoreMedia", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SecurityUIBackports", folder = "SecurityUI", frameworks = {"SecurityUI", "Security", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "UserNotificationsUIBackports", folder = "UserNotificationsUI", frameworks = {"UserNotificationsUI", "UserNotifications", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
-    {name = "NotificationCenterBackports", folder = "NotificationCenter", frameworks = {"NotificationCenter", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {}, system = {}},
-    {name = "AVKitBackports", folder = "AVKit", frameworks = {"UIKit", "AVFoundation", "CoreMedia", "CoreVideo", "CoreImage", "MediaPlayer", "QuartzCore", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports", "CoreMediaBackports"}, archives = {}, system = {}},
-    {name = "MapKitBackports", folder = "MapKit", frameworks = {"MapKit", "UIKit", "CoreGraphics", "CoreLocation", "QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PassKitBackports", folder = "PassKit", frameworks = {"PassKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreMediaBackports", folder = "CoreMedia", frameworks = {"CoreMedia", "CoreVideo", "AudioToolbox", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "CoreVideoBackports"}, archives = {}, system = {}},
-    {name = "CoreFoundationBackports", folder = "CoreFoundation", frameworks = {"CoreFoundation", "Foundation"}, libraries = {}, archives = {}, system = {}},
-    {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},
-    {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports", "SecurityBackports"}, archives = {"boringssl"}, system = {}},
-    {name = "LinkPresentationBackports", folder = "LinkPresentation", frameworks = {"LinkPresentation", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"RevenantCoding"}, system = {}},
-    {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCoding"}, system = {}},
-    {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}, archives = {}, system = {}},
-    {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "SpriteKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}, archives = {}, system = {}},
-    {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"HealthKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"sqlite3"}},
-    {name = "MLComputeBackports", folder = "MLCompute", frameworks = {"Accelerate", "Foundation"}, libraries = {"FoundationBackports", "AccelerateBackports"}, archives = {"ggml"}, system = {}},
-    {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {"ffmpeg-hevc"}, system = {}},
-    {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-}
-
 local SELECTED = os.getenv("REVENANT_BACKPORTS_LIBRARIES")
 SELECTED = SELECTED ~= "" and SELECTED or nil
-if SELECTED then
-    local byname = {}
-    for _, library in ipairs(LIBRARIES) do
-        byname[library.name] = library
-    end
-    local keep, pending = {}, SELECTED:split("%s*,%s*")
-    while #pending > 0 do
-        local name = table.remove(pending)
-        if not keep[name] then
-            local library = byname[name] or raise("REVENANT_BACKPORTS_LIBRARIES names %s, which is no Backports library", name)
-            keep[name] = true
-            for _, dependency in ipairs(library.libraries) do
-                if dependency:endswith("Backports") then
-                    table.insert(pending, dependency)
-                end
-            end
-        end
-    end
-    local kept = {}
-    for _, library in ipairs(LIBRARIES) do
-        if keep[library.name] then
-            table.insert(kept, library)
-        end
-    end
-    LIBRARIES = kept
-end
+includes("tools/library_list.lua")
+includes("tools/subset.lua")
+local LIBRARIES = backports_subset(backports_libraries(), SELECTED)
 
-if is_plat("iphoneos") and not SELECTED then
-    add_requires("revenant@lzfse lzfse-1.0", {alias = "lzfse"})
-    add_requires("revenant@zlib v1.3.2", {alias = "zlib"})
-    add_requires("revenant@lz4 v1.9.2", {alias = "lz4"})
-    add_requires("revenant@xz v5.8.4", {alias = "xz"})
-    add_requires("revenant@box2d 2.2.1", {alias = "box2d"})
-    add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
-    add_requires("revenant@boringssl", {alias = "boringssl"})
-    add_requires("revenant@monocypher 4.0.2", {alias = "monocypher"})
-    add_requires("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
-    add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
-    add_requires("revenant@zxing-cpp v3.1.1", {alias = "zxing-cpp"})
-    add_requires("revenant@tesseract 5.5.3", {alias = "tesseract"})
-    add_requires("revenant@leptonica 1.85.0", {alias = "leptonica"})
-    add_requires("revenant@tessdata", {alias = "tessdata", configs = {languages = "eng,rus,ukr"}})
-    add_requires("revenant@libcxx", {alias = "libcxx"})
-    add_requires("revenant@ffmpeg-hevc", {alias = "ffmpeg-hevc"})
+if is_plat("iphoneos") then
+    for _, package in ipairs(backports_requires(LIBRARIES)) do
+        add_requires(package.requirement, {alias = package.name, configs = package.configs})
+    end
 end
 
 if is_plat("iphoneos") then
@@ -158,8 +30,6 @@ if is_plat("iphoneos") then
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
-    local OURS = {RevenantCoding = true, RevenantCKWebAuth = true}
-
     local function open_gap(name, cause)
         before_build(function (target)
             local toolchain = target:toolchain("apple-ios")
@@ -183,7 +53,7 @@ if is_plat("iphoneos") then
         add_headerfiles(path.join(CODING, "*.h"))
         add_includedirs(CODING, {public = true})
 
-    if not SELECTED then
+    if backports_uses(LIBRARIES, "RevenantCKWebAuth") then
         target("RevenantCKWebAuth")
             set_kind("static")
             add_rules("@addon/revenant/apple-ios")
@@ -230,6 +100,10 @@ if is_plat("iphoneos") then
             if library.folder == "Vision" then
                 add_cxxflags("-std=c++20", "-fvisibility-inlines-hidden")
             end
+            if library.name == "MLComputeBackports" then
+                add_files(path.join(SRC, "MLCompute", "ggml", "ggml-libcxx.cpp"))
+                add_cxxflags("-std=c++17", "-fno-exceptions", "-fno-rtti", "-fvisibility=hidden", "-fvisibility-inlines-hidden")
+            end
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             if library.name == "NetworkBackports" then
@@ -271,15 +145,11 @@ if is_plat("iphoneos") then
                 add_shflags("-Wl,-weak_framework," .. framework, {force = true})
             end
             for _, name in ipairs(library.archives) do
-                if OURS[name] then
+                if backports_is_target(name) then
                     add_deps(name)
                 else
                     add_packages(name)
                 end
-            end
-            if library.folder == "Vision" then
-                add_packages("libcxx")
-                add_packages("tessdata")
             end
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
@@ -315,11 +185,6 @@ if is_plat("iphoneos") then
                 end)
             end
     end
-
-    target("MLComputeBackports")
-        add_files(path.join(SRC, "MLCompute", "ggml", "ggml-libcxx.cpp"))
-        add_cxxflags("-std=c++17", "-fno-exceptions", "-fno-rtti", "-fvisibility=hidden", "-fvisibility-inlines-hidden")
-    target_end()
 end
 
 if not is_plat("iphoneos") and is_arch("arm64", "x86_64") then
@@ -344,6 +209,10 @@ local function backports_tests(name, scripts)
             return ok == 0
         end)
     target_end()
+end
+
+if is_plat("iphoneos") then
+    backports_tests("subset", {subset = "subset_test.lua"})
 end
 
 if is_plat("iphoneos") and not SELECTED then
