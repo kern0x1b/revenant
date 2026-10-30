@@ -61,6 +61,12 @@
     return _bytes;
 }
 
+- (id<MTLTexture>)newTextureWithDescriptor:(MTLTextureDescriptor *)descriptor offset:(NSUInteger)offset bytesPerRow:(NSUInteger)bytesPerRow
+{
+    NSLog(@"Metal: a texture on a buffer's bytes is not supported: the buffer's storage cannot be mapped into OpenGL ES in place");
+    return nil;
+}
+
 - (NSUInteger)length
 {
     return _length;
