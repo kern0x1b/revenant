@@ -10,6 +10,7 @@ How a symbol that iOS 6 lacks resolves to a backports library, and which option 
 so its iOS 7+ classes bind from the backports, and `-dead_strip_dylibs` keeps only the libraries it uses. The relink against the backports is gated on `BACKPORTS_DIR`. A framework
 the target lacks, such as WebKit for `WKWebView`, is linked weakly, whatever `BACKPORTS_DIR` says: the image loads and faults only if that API is
 called.
+- **Notifications.** The UserNotifications classes are in `UserNotificationsBackports`, not `UIKitBackports`, so an app that uses them links that library as well, and its package is the same `org.revenant.backports`.
 - **Gaps.** The real-path install of an absent framework (Metal in `backports-open-members.md`) is not built. The C and Swift stubs are weak definitions bound by name, and whether the system's definition wins is not measured (`frameworks/Backports/README.md`).
 
 ## Options

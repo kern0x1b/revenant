@@ -50,7 +50,7 @@
         _badge = [content.badge copy];
         _body = [content.body copy];
         _categoryIdentifier = [content.categoryIdentifier copy];
-        _launchImageName = [content.launchImageName copy];
+        _launchImageName = [content->_launchImageName copy];
         _sound = content.sound;
         _subtitle = [content.subtitle copy];
         _threadIdentifier = [content.threadIdentifier copy];
@@ -215,7 +215,7 @@ static BOOL revenant_same(id a, id b)
     UNNotificationContent *other = object;
     return revenant_same(_userInfo, other.userInfo) && revenant_same(_title, other.title) && revenant_same(_body, other.body)
         && revenant_same(_subtitle, other.subtitle) && revenant_same(_threadIdentifier, other.threadIdentifier)
-        && revenant_same(_sound, other.sound) && revenant_same(_launchImageName, other.launchImageName)
+        && revenant_same(_sound, other.sound) && revenant_same(_launchImageName, other->_launchImageName)
         && revenant_same(_categoryIdentifier, other.categoryIdentifier) && revenant_same(_badge, other.badge)
         && revenant_same(_attachments, other.attachments) && revenant_same(_summaryArgument, other.summaryArgument)
         && _summaryArgumentCount == other.summaryArgumentCount && revenant_same(_targetContentIdentifier, other.targetContentIdentifier)
