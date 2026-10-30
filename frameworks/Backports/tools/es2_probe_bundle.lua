@@ -46,9 +46,9 @@ function main(out, ...)
     local manifest = {"# name\tstage\ttranslated\tcompanion"}
     local programs = 0
     for _, folder in ipairs(folders) do
-        local prefix = string.gsub(path.basename(folder), "%.es2$", "")
+        local prefix = string.gsub(path.filename(folder), "%.es2$", "")
         for _, file in ipairs(os.files(path.join(folder, "*.glsl"))) do
-            local name, stage = string.match(path.basename(file), "^(.+)%.(%a+)%.glsl$")
+            local name, stage = string.match(path.filename(file), "^(.+)%.(%a+)%.glsl$")
             local kind = STAGES[stage]
             if name and kind then
                 local source = io.readfile(file)
