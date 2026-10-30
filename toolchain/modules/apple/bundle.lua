@@ -64,6 +64,17 @@ function info(target, deployment)
     return content
 end
 
+-- A package that keeps frameworks as bundles, the webkit-engine package does, offers each one whole: the application takes the
+-- folder with its Info.plist, and the binary keeps the install name the bundle gave it.
+local function package_frameworks(package, name)
+    local carried = {}
+    for _, folder in ipairs(os.dirs(path.join(package:installdir("bundle"), "Frameworks", "*.framework"))) do
+        table.insert(carried, {source = path.join(folder, path.basename(folder)), name = path.filename(folder) .. "/" .. path.basename(folder),
+                               folder = folder, package = name})
+    end
+    return carried
+end
+
 local function package_libraries(target, package, name)
     local libraries = {}
     for _, file in ipairs(os.files(path.join(package:installdir(), "lib", "**.dylib"))) do
@@ -71,7 +82,8 @@ local function package_libraries(target, package, name)
             table.insert(libraries, file)
         end
     end
-    if #libraries == 0 then
+    local frameworks = package_frameworks(package, name)
+    if #libraries == 0 and #frameworks == 0 then
         raise("target(%s) bundles the libraries of %s, and it installs no shared library", target:name(), name)
     end
     byteorder.sort(libraries)
@@ -80,7 +92,7 @@ local function package_libraries(target, package, name)
         local image = macho.images(macho.read(file))[1]
         table.insert(carried, {source = file, name = path.filename(image.identity or file), package = name})
     end
-    return carried
+    return table.join(carried, frameworks)
 end
 
 function carried_libraries(target, key)
