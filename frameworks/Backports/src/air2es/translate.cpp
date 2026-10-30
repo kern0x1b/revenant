@@ -1248,7 +1248,6 @@ private:
         return true;
     }
 
-    bool local(Instruction &instruction, std::string &name)
     // GLSL ES 1.00 has no integer bit operations. A constant mask clears a fixed set of bits, and bit b of x is
     // floor(mod(x, 2^(b+1)) / 2^b), so the and is written in floats. The operand must be the result of a
     // float-to-integer conversion: that integer is always a float32 value, so the float arithmetic is exact, and
@@ -1291,6 +1290,7 @@ private:
         return true;
     }
 
+    bool local(Instruction &instruction, std::string &name)
     {
         std::string type = glslType(instruction.getType());
         if (type.empty())
@@ -1413,9 +1413,9 @@ private:
             return true;
         }
         if (auto *binary = dyn_cast<BinaryOperator>(&instruction)) {
-            const char *op = nullptr;
             if (binary->getOpcode() == Instruction::And)
                 return maskAnd(instruction, *binary);
+            const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
             case Instruction::FSub: case Instruction::Sub: op = "-"; break;
@@ -1433,15 +1433,31 @@ private:
         }
         if (auto *compare = dyn_cast<CmpInst>(&instruction)) {
             const char *op = nullptr;
-            switch (compare->getPredicate()) {
+            CmpInst::Predicate predicate = compare->getPredicate();
+            if (CmpInst::isFPPredicate(predicate) && !CmpInst::isOrdered(predicate)) {
+                // With nnan no operand is NaN, so an unordered predicate is the ordered one.
+                if (!compare->hasNoNaNs())
+                    return refuse("an unordered comparison of floats that may be NaN");
+                switch (predicate) {
+                case CmpInst::FCMP_UEQ: predicate = CmpInst::FCMP_OEQ; break;
+                case CmpInst::FCMP_UNE: predicate = CmpInst::FCMP_ONE; break;
+                case CmpInst::FCMP_ULT: predicate = CmpInst::FCMP_OLT; break;
+                case CmpInst::FCMP_UGT: predicate = CmpInst::FCMP_OGT; break;
+                case CmpInst::FCMP_ULE: predicate = CmpInst::FCMP_OLE; break;
+                case CmpInst::FCMP_UGE: predicate = CmpInst::FCMP_OGE; break;
+                default: return refuse("a comparison this emitter does not map");
+                }
+            }
+            switch (predicate) {
             case CmpInst::ICMP_EQ: case CmpInst::FCMP_OEQ: op = "=="; break;
             case CmpInst::ICMP_NE: op = "!="; break;
-            case CmpInst::FCMP_OLT: op = "<"; break;
-            case CmpInst::FCMP_OGT: op = ">"; break;
-            case CmpInst::FCMP_OLE: op = "<="; break;
-            case CmpInst::FCMP_OGE: op = ">="; break;
+            case CmpInst::FCMP_ONE: op = "!="; break;
+            case CmpInst::FCMP_OLT: case CmpInst::ICMP_SLT: op = "<"; break;
+            case CmpInst::FCMP_OGT: case CmpInst::ICMP_SGT: op = ">"; break;
+            case CmpInst::FCMP_OLE: case CmpInst::ICMP_SLE: op = "<="; break;
+            case CmpInst::FCMP_OGE: case CmpInst::ICMP_SGE: op = ">="; break;
             case CmpInst::ICMP_ULT: case CmpInst::ICMP_ULE: case CmpInst::ICMP_UGT: case CmpInst::ICMP_UGE:
-                if (!compare->getOperand(0)->getType()->isIntegerTy(32))
+                if (!compare->getOperand(0)->getType()->getScalarType()->isIntegerTy(32))
                     return refuse("an unsigned comparison of integers other than 32 bits");
                 break;
             default: return refuse("a comparison this emitter does not map");
@@ -1451,21 +1467,33 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            if (op) {
-                statement(name + " = (" + left + " " + op + " " + right + ");\n");
-                return true;
-            }
+            // GLSL ES 1.00 compares vectors only with functions, so a vector compares component by component.
+            auto *vector = dyn_cast<FixedVectorType>(compare->getOperand(0)->getType());
+            auto part = [&](const std::string &value, unsigned index) {
+                return vector ? "(" + value + ")." + std::string(1, "xyzw"[index]) : value;
+            };
             auto below = [](const std::string &a, const std::string &b) {
                 return "(((" + a + " < 0) != (" + b + " < 0)) ? (" + a + " >= 0) : (" + a + " < " + b + "))";
             };
-            std::string text;
-            switch (compare->getPredicate()) {
-            case CmpInst::ICMP_ULT: text = below(left, right); break;
-            case CmpInst::ICMP_UGT: text = below(right, left); break;
-            case CmpInst::ICMP_ULE: text = "!" + below(right, left); break;
-            default: text = "!" + below(left, right); break;
+            auto element = [&](unsigned index) {
+                std::string a = part(left, index), b = part(right, index);
+                if (op)
+                    return "(" + a + " " + op + " " + b + ")";
+                switch (compare->getPredicate()) {
+                case CmpInst::ICMP_ULT: return below(a, b);
+                case CmpInst::ICMP_UGT: return below(b, a);
+                case CmpInst::ICMP_ULE: return "!" + below(b, a);
+                default: return "!" + below(a, b);
+                }
+            };
+            if (!vector) {
+                statement(name + " = " + element(0) + ";\n");
+                return true;
             }
-            statement(name + " = " + text + ";\n");
+            std::string list;
+            for (unsigned index = 0; index < vector->getNumElements(); ++index)
+                list += (list.empty() ? "" : ", ") + element(index);
+            statement(name + " = " + glslType(compare->getType()) + "(" + list + ");\n");
             return true;
         }
         if (auto *select = dyn_cast<SelectInst>(&instruction)) {
@@ -1753,6 +1781,7 @@ private:
     unsigned counter_ = 0;
     unsigned depth_ = 0;
     bool returned_ = false;
+    bool highp_ = false;
     std::string output_;
     uint64_t outputIndex_ = 0;
     std::map<const Value *, Local> localPointers_;
@@ -1782,7 +1811,6 @@ std::string jsonQuote(const std::string &text)
             out += c;
         }
     }
-    bool highp_ = false;
     return out + "\"";
 }
 
