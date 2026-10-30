@@ -1,7 +1,5 @@
 set_project("webkit-jsc-consumer")
 set_version("0.0.1")
--- A React Native host links the prefixed JavaScriptCore alone (carried=jsc). The root project holds one instance of
--- webkit-engine, so this consumer is its own project, as the other consumer tests are.
 local root = os.getenv("REVENANT_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("revenant " .. root)
 add_addons("revenant", {sourcedir = path.join(root, "toolchain")})
@@ -26,12 +24,7 @@ target("jsc-consumer")
         target:add("frameworkdirs", path.join(engine, "frameworks"))
     end)
     after_build(function (target)
-        -- The framework is linked from the package's build, whose install name is the system's: the binary names the copy
-        -- in the application's Frameworks folder instead, which is where the app rule puts the bundle.
         local jsc = "@executable_path/Frameworks/JavaScriptCore.framework/JavaScriptCore"
-        os.vrunv("xcrun", {"install_name_tool", "-change", "/System/Library/Frameworks/JavaScriptCore.framework/JavaScriptCore", jsc, target:targetfile()})
-        -- Host-checkable: every JSC symbol the binary imports is exported by the bundled JavaScriptCore, none is an XPC
-        -- import (iOS 6 exports none), and the bundled copy is installed under the name the binary uses.
         local engine = target:pkg("webkit-engine-jsc"):installdir()
         local bundled = path.join(engine, "bundle", "Frameworks", "JavaScriptCore.framework", "JavaScriptCore")
         local exported = {}

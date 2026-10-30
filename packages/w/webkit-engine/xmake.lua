@@ -38,6 +38,7 @@ package("webkit-engine")
     add_deps("revenant@openssl", {alias = "openssl"})
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid", host = true})
+    add_deps("revenant@llvm 23.1.3", {alias = "llvm", host = true})
 
     on_install("iphoneos", function (package)
         if import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
@@ -54,8 +55,6 @@ package("webkit-engine")
                 assert(os.isfile(path.join(package:installdir("bundle"), "Frameworks", framework .. ".framework", framework)), framework .. " is not in the bundle")
                 assert(os.isdir(path.join(package:installdir("frameworks"), framework .. ".framework")), framework .. " is not linkable")
             end
-            -- The JSC C API a React Native host calls. Each is declared with JS_EXPORT in the pinned
-            -- JavaScriptCore/API headers and absent from iOS 6's own JavaScriptCore, so the prefixed build must export it.
             local jsc = path.join(package:installdir("bundle"), "Frameworks", "JavaScriptCore.framework", "JavaScriptCore")
             local exported = {}
             for line in os.iorunv("nm", {"-gU", jsc}):gmatch("[^\n]+") do
@@ -71,7 +70,6 @@ package("webkit-engine")
                 end
             end
             assert(#missing == 0, "the prefixed JavaScriptCore does not export " .. table.concat(missing, ", "))
-            -- iOS 6 exports no XPC, and a lazily bound import of it fails only when it is called on the phone.
             for symbol in os.iorunv("nm", {"-u", jsc}):gmatch("%S+") do
                 assert(not symbol:find("^_?xpc_"), jsc .. " imports " .. symbol .. ", which iOS 6 does not export")
             end

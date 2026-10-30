@@ -287,8 +287,6 @@ function project_links_webkit()
     return false
 end
 
--- The WebKit Backports library loads the engine when a page is shown, so the package that holds it
--- names the engine package as a dependency: nothing links the engine, so no link analysis finds it.
 function webkit_depends(signer)
     if not project_links_webkit() then
         return {}
@@ -449,7 +447,7 @@ end
 function reached(offered, roots)
     local byname = {}
     for _, library in ipairs(offered) do
-        byname[library.name] = library
+        byname[path.filename(library.name)] = library
     end
     local libraries, taken, pending = {}, {}, table.copy(roots)
     while #pending > 0 do
@@ -647,7 +645,11 @@ function application(target)
     for _, library in ipairs(carried) do
         local destination = path.join(frameworks, library.name)
         os.mkdir(frameworks)
-        os.vcp(library.source, destination)
+        if library.folder then
+            os.vcp(library.folder, frameworks .. "/")
+        else
+            os.vcp(library.source, destination)
+        end
         identities[destination] = "@executable_path/Frameworks/" .. library.name
         table.insert(binaries, destination)
         if carries_guarded(library) then

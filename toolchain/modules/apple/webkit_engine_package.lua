@@ -26,8 +26,6 @@ function folder()
     return FOLDER
 end
 
--- The prefixed variant's frameworks, as the engine recipe copies them into its deb folder: one
--- directory per framework, holding the binary and its resources.
 function frameworks(installdir)
     local found = {}
     for _, framework in ipairs(FRAMEWORKS) do
@@ -69,10 +67,6 @@ function needs(files, packages)
     return depends, shared
 end
 
--- Copies each framework into the package's folder and names it by that folder: the frameworks
--- find one another there, and the C++ runtime is the shared package's file, named where it is
--- installed. The engine recipe's deb folder is a copy that nothing has changed yet, so this works
--- from it on every run.
 function stage(found, root, provided)
     local destination = path.join(root, FOLDER)
     os.mkdir(destination)
@@ -112,8 +106,6 @@ function write(opt)
     return {name = NAME, relation = "=", version = version, deb = deb, depends = depends, shared = shared}
 end
 
--- The package is written once per run: the backports package names it as a dependency, and the
--- packaging step carries the written file beside the others.
 function ensure(opt)
     if written then
         return written

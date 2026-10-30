@@ -54,7 +54,6 @@ Class RevenantWebEngineClass(NSString *name);
 - (void)_setFixedLayoutSize:(CGSize)size;
 @end
 
-// The values of the engine's WebEventType and WebEventTouchPhaseType (WebEvent.h at the pinned commit).
 typedef NS_ENUM(NSInteger, RevenantWebEventType) {
     RevenantWebEventMouseDown,
     RevenantWebEventMouseUp,
@@ -82,8 +81,6 @@ typedef NS_ENUM(NSUInteger, RevenantWebEventTouchPhase) {
 @property (nonatomic) BOOL wasHandled;
 @end
 
-// The DOM the page's focused field is edited through: the field's value, and the events that tell the
-// page it changed.
 @protocol RevenantDOMEvent <NSObject>
 - (void)initEvent:(NSString *)eventType canBubbleArg:(BOOL)canBubble cancelableArg:(BOOL)cancelable;
 @end

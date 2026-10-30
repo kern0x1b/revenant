@@ -15,6 +15,7 @@ on:
           - ld64
           - webkit-engine
           - webkit-engine-prefixed
+          - webkit-engine-jsc
         default: llvm
 
 permissions:
@@ -130,6 +131,7 @@ jobs:
               ld64) ./xmakew require -P . -y -v --extra="{system=false}" revenant@ld64 ;;
               webkit-engine) ./xmakew require -P . -y -v --extra="{system=false,configs={variant=system}}" revenant@webkit-engine ;;
               webkit-engine-prefixed) ./xmakew require -P . -y -v --extra="{system=false,configs={variant=prefixed}}" revenant@webkit-engine ;;
+              webkit-engine-jsc) ./xmakew require -P . -y -v --extra="{system=false,configs={variant=prefixed,carried=jsc}}" revenant@webkit-engine ;;
               *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
             esac
           } 2>&1 | tee "$RUNNER_TEMP/build.log"

@@ -25,7 +25,6 @@ function failures(opt)
     local engine = import("apple.webkit_engine_package", {rootdir = opt.modules, anonymous = true})
     import("apple.platform", {rootdir = opt.modules, anonymous = true})
     import("packaging", {rootdir = opt.modules, anonymous = true})
-    -- The recipe's bundle step, parsed from the engine package's modules: it runs only at a build.
     import("stage", {rootdir = path.join(path.directory(path.directory(opt.modules)), "frameworks", "WebKit", "src", "modules"), anonymous = true})
     local found = {}
     local folder = fixtures.scratch()
@@ -36,9 +35,6 @@ function failures(opt)
     io.writefile(path.join(folder, "webkit.c"), "extern int webcore(void);\nextern int jsc(void);\nint webkit(void) { return webcore() + jsc(); }\n")
     fixtures.link(folder, opt.ld64, "libc++.1.dylib", TRIPLE, "cxx.c", {"-dynamiclib", "-install_name", "@rpath/libc++.1.dylib"})
 
-    -- The frameworks as the prefixed build leaves them: siblings named by @executable_path, the C++
-    -- runtime named by its install name. WebKitLegacy links the built siblings themselves, so it
-    -- records their install names.
     local build = path.join(folder, "build")
     for _, framework in ipairs(FRAMEWORKS) do
         os.mkdir(path.join(build, framework .. ".framework"))
@@ -51,7 +47,6 @@ function failures(opt)
                   {"-dynamiclib", "-install_name", "@executable_path/Frameworks/WebKitLegacy.framework/WebKitLegacy", "-L.", "-lc++.1",
                    path.join(build, "WebCore.framework", "WebCore"), path.join(build, "JavaScriptCore.framework", "JavaScriptCore")})
 
-    -- The engine recipe copies the frameworks into its deb folder before the bundle names them.
     local deb = path.join(folder, "engine", "deb")
     os.mkdir(deb)
     for _, framework in ipairs(FRAMEWORKS) do

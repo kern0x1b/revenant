@@ -11,7 +11,6 @@ local stubs = path.join(os.scriptdir(), "src", "compat", "stubs")
 local version = "0.1.0"
 
 if is_plat("iphoneos") then
-    add_requires("webkit-engine", {alias = "webkit-engine"})
     add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})
     add_requires("webkit-device-tools")
     add_requires("revenant@wasm3", {alias = "wasm3"})
@@ -27,19 +26,6 @@ if is_plat("iphoneos") then
         target:set("values", "revenant.maintainer-scripts", "src/packaging/DEBIAN")
         target:set("values", "revenant.licenses", "LICENSE", "../../docs/reference/webkit/third-party.md")
     end
-
-    target("RevSafari")
-        add_rules("@addon/revenant/tweak")
-        add_files("src/platform/safari/rev-safari-tweak.c")
-        add_cflags("-Wall")
-        set_optimize("faster")
-        add_frameworks("CoreFoundation")
-        add_packages("webkit-engine")
-        set_values("tweak.filter", "src/platform/safari/rev-safari.plist")
-        on_load(packaged)
-        on_config(function (target)
-            target:add("installfiles", path.join(target:pkg("webkit-engine"):installdir(), "stage", "(**)"), {prefixdir = "/"})
-        end)
 
     target("rev-safari-compat")
         add_rules("@addon/revenant/tweak")
@@ -83,8 +69,6 @@ if is_plat("iphoneos") then
             target:add("shflags", "-undefined", "dynamic_lookup", "-flat_namespace", {force = true})
         end)
 
-    -- The packages the org.revenant.webkit-engine deb is written from, and nothing to compile: the
-    -- packaging step builds this target to install them, and reads the prefixed engine from it.
     target("WebKitEngine")
         set_kind("phony")
         set_default(false)
@@ -102,13 +86,12 @@ if is_plat("iphoneos") then
         set_values("revenant.entitlements", "examples/webview-host/entitlements.xml")
         set_values("app.plist-file", "examples/webview-host/Info.plist")
         set_values("app.url-scheme", "revwebviewhost")
-        set_values("app.frameworks", "libcxx")
+        set_values("app.frameworks", "libcxx", "webkit-engine-prefixed")
         add_values("app.resources", "examples/webview-host/cacert.pem", "examples/webview-host/start.html")
         on_config(function (target)
             local engine = target:pkg("webkit-engine-prefixed"):installdir()
             target:add("frameworkdirs", path.join(engine, "frameworks"))
             target:add("sysincludedirs", path.join(engine, "webcore", "PrivateHeaders"))
-            target:add("values", "app.resources", path.relative(path.join(engine, "bundle"), target:scriptdir()))
         end)
 elseif has_config("webkit_host_tests") then
     add_requires("revenant@icu", {alias = "icu"})

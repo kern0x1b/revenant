@@ -46,6 +46,5 @@ if minimum then
         table.insert(digests, file .. "=" .. hash.sha256(path.join(root, file)))
     end
     local toolchain = string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s,optimize=packages,flags=%s]", minimum, sdk.version, ld64.version, llvm.version, hash.strhash128(table.concat(digests, ";")))
-    -- The host tools ldid signs with, and the libraries only ldid links, are built for the host, not with the iPhoneOS toolchain.
     add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader|libplist|openssl-host", {configs = {toolchains = toolchain}})
 end

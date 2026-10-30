@@ -11,7 +11,6 @@
 #include <dlfcn.h>
 #include <Security/SecureTransport.h>
 
-// NSURLSessionStreamDelegate comes from the SDK's Foundation headers, which <Foundation/Foundation.h> imports above.
 __attribute__((used)) static void revenantEmitProtocols(void)
 {
     (void)@protocol(NSURLSessionStreamDelegate);

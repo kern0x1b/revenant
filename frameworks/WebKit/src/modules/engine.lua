@@ -107,14 +107,10 @@ local function quoted(text)
     return "\"" .. text:gsub("\\", "/") .. "\""
 end
 
--- Apple's libtool drops the engine's LTO bitcode members it cannot read, and -no_warning_for_no_symbols hides it. llvm-libtool-darwin
--- of LLVM 23 or later keeps every member, so the engine's archives are made with it.
-local function libtool_program()
-    local tool = find_tool("llvm-libtool-darwin", {version = true})
-    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
-        raise("the engine's archives are LTO bitcode that Apple's libtool drops, so llvm-libtool-darwin of LLVM 23 or later must be on PATH ahead of Apple's")
-    end
-    return tool.program
+local function llvm_libtool(package)
+    local tool = path.join(package:dep("llvm"):installdir("bin"), "llvm-libtool-darwin")
+    assert(os.isfile(tool), "the llvm package has no llvm-libtool-darwin, which the engine's LTO bitcode archives are made with")
+    return tool
 end
 
 function options(ctx)
@@ -137,10 +133,11 @@ function options(ctx)
         table.insert(found, {option[1], chosen.options[option[1]] or option[2]})
     end
     table.join2(found, {
-        {"CMAKE_LIBTOOL", libtool_program()},
+        {"CMAKE_LIBTOOL", ctx.libtool},
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
+        {"IOSURFACE_LIBRARY", ctx.iosurface},
         {"WEBKIT_IOS6_LIBCXX_DIR", ctx.libcxx},
         {"WebP_INCLUDE_DIR", path.join(ctx.libwebp, "include")},
         {"WebP_LIBRARY", library(ctx.libwebp, "webp")},
@@ -159,8 +156,6 @@ function options(ctx)
     return found
 end
 
--- The iOS 6 defines for every language. WebKit's iOS options enable Objective-C++ after the toolchain sets its
--- flags, so the flags alone do not reach the .mm precompiled header: the project carries them as definitions too.
 local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION", "U_DISABLE_RENAMING=1"}
 
 function flags(ctx)
@@ -296,9 +291,11 @@ function context(package, build)
         deployment = chosen:config("deployment"),
         cc = chosen:tool("cc"),
         cxx = chosen:tool("cxx"),
+        libtool = llvm_libtool(package),
         source = source,
         build = build,
         stubs = path.join(member, "compat", "stubs"),
+        iosurface = path.join(member, "compat", "stubs", "IOSurfacePrivate.tbd"),
         libcxx = dir("libcxx"),
         icu = dir("icu"),
         icu_version = package:dep("icu"):version_str(),
@@ -409,6 +406,19 @@ function verify_configured(ctx)
             end
         end
     end
+    local prefix = path.join(ctx.stubs, variant(ctx.variant).prefix)
+    for _, name in ipairs({"CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_OBJC_FLAGS", "CMAKE_OBJCXX_FLAGS"}) do
+        if not (values[name] and values[name].value:find(prefix, 1, true)) then
+            table.insert(problems, string.format("%s does not include %s, so the build directory was configured for another variant", name, prefix))
+        end
+    end
+    if not values.WEBKIT_IOS6_EXPORTS or values.WEBKIT_IOS6_EXPORTS.value ~= ctx.exports then
+        table.insert(problems, string.format("WEBKIT_IOS6_EXPORTS is not %s", ctx.exports))
+    end
+    local iosurface = values.IOSURFACE_LIBRARY and values.IOSURFACE_LIBRARY.value or "unset"
+    if not iosurface:endswith(path.join("compat", "stubs", "IOSurfacePrivate.tbd")) or not os.isfile(iosurface) then
+        table.insert(problems, string.format("IOSURFACE_LIBRARY is %s, not the private compat stub, so WebCore would name the public IOSurface.framework", iosurface))
+    end
     local include = values.CMAKE_PROJECT_WebKit_INCLUDE
     if not include or not os.isfile(include.value) then
         table.insert(problems, "CMAKE_PROJECT_WebKit_INCLUDE is not a file, so find_package was never told to prefer the packages' own configurations")
@@ -474,7 +484,6 @@ function verify_exports(ctx)
     end
 end
 
--- The engine's objects are LTO bitcode, which Apple's nm cannot read (it fails on LLVM 23's). llvm-nm of LLVM 23 or later can.
 local function object_nm()
     local tool = find_tool("llvm-nm", {version = true})
     if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
@@ -497,7 +506,6 @@ local function defined_symbols(files)
     return found
 end
 
--- The compiler emits these block-runtime helpers in each unit that uses a block of that layout, so the compat library's copies and the engine's are the same compiler output.
 local function compiler_block_helper(symbol)
     return symbol:startswith("___block_descriptor_") or symbol:startswith("___copy_helper_block_") or symbol:startswith("___destroy_helper_block_")
 end
@@ -534,7 +542,7 @@ end
 
 function install(package)
     local cmake = toolchain_module("apple.cmake")
-    local build = path.absolute("build")
+    local build = path.absolute("build-" .. package:config("variant"))
     os.mkdir(build)
     local ctx = context(package, build)
     if ctx.carried == "jsc" and not variant(ctx.variant).prefixed then

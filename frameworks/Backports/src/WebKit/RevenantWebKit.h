@@ -7,9 +7,6 @@ extern NSString *const RevenantWebKitBridgeScheme;
 - (void)revenant_scriptsDidChange;
 @end
 
-// The WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate and WKDownloadDelegate protocols come from
-// the SDK's WebKit headers, which <WebKit/WebKit.h> imports above. They are not declared again here.
-
 @interface WKUserContentController (RevenantWebKit)
 - (NSArray<WKUserScript *> *)revenant_scripts;
 - (NSArray<NSString *> *)revenant_handlerNames;
