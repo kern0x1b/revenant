@@ -409,6 +409,15 @@ function verify_configured(ctx)
             end
         end
     end
+    local prefix = path.join(ctx.stubs, variant(ctx.variant).prefix)
+    for _, name in ipairs({"CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_OBJC_FLAGS", "CMAKE_OBJCXX_FLAGS"}) do
+        if not (values[name] and values[name].value:find(prefix, 1, true)) then
+            table.insert(problems, string.format("%s does not include %s, so the build directory was configured for another variant", name, prefix))
+        end
+    end
+    if not values.WEBKIT_IOS6_EXPORTS or values.WEBKIT_IOS6_EXPORTS.value ~= ctx.exports then
+        table.insert(problems, string.format("WEBKIT_IOS6_EXPORTS is not %s", ctx.exports))
+    end
     local include = values.CMAKE_PROJECT_WebKit_INCLUDE
     if not include or not os.isfile(include.value) then
         table.insert(problems, "CMAKE_PROJECT_WebKit_INCLUDE is not a file, so find_package was never told to prefer the packages' own configurations")
@@ -534,7 +543,9 @@ end
 
 function install(package)
     local cmake = toolchain_module("apple.cmake")
-    local build = path.absolute("build")
+    -- CMake keeps the flags of its first configure in the cache, so the variants cannot share a build directory: the
+    -- second one would compile with the first one's prefix header.
+    local build = path.absolute("build-" .. package:config("variant"))
     os.mkdir(build)
     local ctx = context(package, build)
     if ctx.carried == "jsc" and not variant(ctx.variant).prefixed then
