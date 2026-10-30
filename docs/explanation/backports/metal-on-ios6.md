@@ -182,8 +182,8 @@ Measured on the oracle file, Telegram's `default.metallib` (air64, 15 modules) [
   layout was found.
 - **post_fragment_main** also has a nested loop whose back edge the structurer refuses. This comes from reading the CFG,
   not from a run.
-- **compute_main is a kernel.** air2es's notes placed it with air2cpu. Since 2026-10-29 it goes through the fragment
-  lowering (section 3, item 8). Nothing in the five notes reads its contents [air2es].
+- **compute_main is a kernel.** air2es's notes placed it with air2cpu. It is not lowered yet: air2es refuses it (section 3,
+  item 8). Whether the Telegram build puts it in the air2cpu table is not verified. Nothing in the five notes reads its contents [air2es].
 - Telegram's compute use beyond `compute_main` is unverified. The Telegram checkout in the workspace has no `.metal`
   files, and GitHub code search gave no evidence [compute].
 
@@ -215,9 +215,14 @@ Compute and MPS (coordinator decision, 2026-10-29):
 
 8. **Kernel lowering.** air2es gets a kernel mode. Buffers become textures, the thread position becomes
    `gl_FragCoord`, and the output goes to a render target: RGBA16F where `EXT_color_buffer_half_float` gives a complete
-   framebuffer, RGBA8 packing elsewhere [compute]. `compute_main`, which air2es's notes placed with air2cpu, goes through
-   this path. The air2cpu route is removed for translated kernels. A kernel that air2es cannot lower fails with a named
-   refusal at pipeline creation.
+   framebuffer, RGBA8 packing elsewhere [compute]. A translated kernel dispatches as one render pass on the GL route,
+   checked on the iPhone 4S against analytic values. `compute_main`, which air2es's notes placed with air2cpu, is not
+   lowered yet: air2es refuses it at a load from an address it does not read, at ten unmapped intrinsics, and on its
+   constexpr sampler. Until it is lowered, the air2cpu route stays as known debt. Every pipeline that runs through it logs
+   once (`Metal: <kernel> runs on the air2cpu CPU route`), and the route is registered in `coordination/crutches.md` in
+   the workspace root, with what removes it: the sampler table from an Xcode MetalToolchain, then the translation of
+   `compute_main`, then its translated GL dispatch. A kernel that air2es cannot lower and that is not in the air2cpu
+   table fails with a named refusal at pipeline creation.
 9. **Threadgroup memory, atomics and barriers.** Each kernel that needs them gets a named refusal and a multi-pass design
    (section 1). Vertex texture fetch on SGX5 is unverified. If `GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS` is 0, the histogram
    positions are precomputed on the CPU, as section 4.1 allows.

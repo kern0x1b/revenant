@@ -26,6 +26,7 @@ static RevenantMetalFunction *RevenantMetalCornerFunction(void)
     NSString *_kernel;
     RevenantMetalFunction *_translated;
     RevenantMetalPipeline *_render;
+    BOOL _announcedCPURoute;
 }
 
 @synthesize label;
@@ -152,6 +153,15 @@ static RevenantMetalFunction *RevenantMetalCornerFunction(void)
     if (!_render)
         NSLog(@"Metal: %@ does not link as a render pass, so the dispatch is not run: %@", _kernel ?: @"the kernel", error.localizedDescription);
     return _render;
+}
+
+- (void)revenantAnnounceCPURoute
+{
+    if (_announcedCPURoute)
+        return;
+    _announcedCPURoute = YES;
+    NSLog(@"Metal: %@ runs on the air2cpu CPU route, with one CPU thread per kernel instance and not on the GPU. This is known debt, registered in docs/explanation/backports/metal-on-ios6.md section 3, item 8",
+          _kernel ?: @"the kernel");
 }
 
 @end

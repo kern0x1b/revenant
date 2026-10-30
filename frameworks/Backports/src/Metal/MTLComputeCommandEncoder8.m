@@ -272,6 +272,7 @@ static void *RevenantMetalRunOneThread(void *argument)
         NSLog(@"Metal: the pipeline holds no kernel, so this dispatch is not run");
         return;
     }
+    [_pipeline revenantAnnounceCPURoute];
     RevenantMetalKernel kernel = (RevenantMetalKernel)raw;
     RevenantMetalRendezvous *rendezvous = calloc(1, sizeof(*rendezvous));
     pthread_mutex_init(&rendezvous->mutex, NULL);

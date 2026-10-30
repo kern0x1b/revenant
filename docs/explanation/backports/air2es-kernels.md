@@ -74,7 +74,8 @@ the corpus is refused by name (see "Still refused"). The Metal port still runs k
 - A translated kernel draws on the 4S (see Verification). The air2cpu table is not removed yet. The Telegram kernel
   `compute_main` is one kernel air2es refuses on its constexpr sampler, and it is not verified here whether the
   Telegram build puts it in the air2cpu table. If it does, removing the table turns that kernel into a named refusal,
-  which is the owner's decision.
+  which is the owner's decision. Until then the route is known debt: each pipeline that runs through it logs once, and
+  `docs/explanation/backports/metal-on-ios6.md` section 3, item 8 registers it.
 - The grid is the dispatch size, `threadsPerGrid` for `dispatchThreads`, so a grid that does not divide evenly is
   run exactly; the air2cpu path still truncates it.
 

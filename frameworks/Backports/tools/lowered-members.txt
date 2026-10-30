@@ -26790,6 +26790,7 @@ member RevenantMetalComputePipeline -kernelName
 member RevenantMetalComputePipeline -label
 member RevenantMetalComputePipeline -maxThreadgroupsPerThreadgroup
 member RevenantMetalComputePipeline -maxTotalThreadsPerThreadgroup
+member RevenantMetalComputePipeline -revenantAnnounceCPURoute
 member RevenantMetalComputePipeline -revenantBlockBytes
 member RevenantMetalComputePipeline -revenantKernelFunction
 member RevenantMetalComputePipeline -revenantRenderPipeline

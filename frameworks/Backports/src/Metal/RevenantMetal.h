@@ -210,6 +210,7 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 - (NSString *)kernelName;
 - (RevenantMetalFunction *)revenantTranslatedFunction;
 - (RevenantMetalPipeline *)revenantRenderPipeline;
+- (void)revenantAnnounceCPURoute;
 @end
 
 @interface RevenantMetalComputeEncoder : NSObject <MTLComputeCommandEncoder>
