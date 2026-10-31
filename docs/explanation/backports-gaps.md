@@ -159,7 +159,7 @@ A grep of `docs/` for hardware-limit phrases ("hardware limit", "iOS 6 lacks", "
 | Where | Gate | Member hidden from iOS 6 | Telegram | Verdict |
 |---|---|---|---|---|
 | B/StoreKit/AppStore.swift:5 | iOS 15.0 | `AppStore.showManageSubscriptions(in:)` | yes, submodules/TelegramUI/Sources/AppDelegate.swift:939 | fixed, T03 |
-| B/AppIntents/Spotlight.swift:150 | iOS 8.0 | `NSUserActivity.appEntityIdentifier` | no | gap, N06 |
+| B/AppIntents/Spotlight.swift:150 | iOS 8.0 | `NSUserActivity.appEntityIdentifier` | no | fixed, N06 |
 | O/Foundation/PresentationIntent.swift:239, 281, 314, 336 | iOS 15.0, macOS 12.0 | four PresentationIntent members | yes, submodules/BrowserUI/Sources/BrowserMarkdown.swift:8-9 | gap, T30 |
 | B/RealityKit/ARView.swift:148, 177 | unavailable | `init?(coder:)` with a fatal error | no | not verified (below) |
 | B/AppIntents/Entity.swift:148 | unavailable | transient entity, made by the app | no | by design; no gap |

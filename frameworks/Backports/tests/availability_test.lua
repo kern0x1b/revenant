@@ -7,6 +7,7 @@ local fixtures = path.join(backports, "tests", "availability")
 local FAMILIES = {
     {fixture = "background_fetch.swift", lowered = true},
     {fixture = "user_activity.swift", lowered = true},
+    {fixture = "user_activity_members.swift", lowered = true},
     {fixture = "url_session.swift", lowered = true},
     {fixture = "app_delegate.swift", lowered = true},
     {fixture = "dispatch.swift", lowered = false},
