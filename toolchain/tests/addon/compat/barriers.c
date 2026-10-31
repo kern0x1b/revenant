@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 dispatch_queue_t revenant_dispatch_queue_create(const char *, dispatch_queue_attr_t);
 void revenant_dispatch_resume(dispatch_object_t);
@@ -26,7 +25,7 @@ struct api {
 static struct api ours, darwins, control;
 static int fails;
 
-struct seen { char order[16]; int inside; int otherAtEntry; };
+struct seen { char order[16]; };
 static struct seen *revenant_next_seen(void)
 {
     static struct seen slots[16];
@@ -35,7 +34,6 @@ static struct seen *revenant_next_seen(void)
         abort();
     struct seen *s = &slots[used++];
     memset(s, 0, sizeof *s);
-    s->otherAtEntry = -1;
     return s;
 }
 
@@ -61,8 +59,7 @@ static void scenario(const struct api *api, int concurrent, int late, char *answ
         snprintf(answer, size, "no queue");
         return;
     }
-    dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-    dispatch_source_set_timer(source, dispatch_time(DISPATCH_TIME_NOW, 100 * NSEC_PER_MSEC), DISPATCH_TIME_FOREVER, 0);
+    dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, queue);
     struct seen *s = revenant_next_seen();
     dispatch_semaphore_t started = dispatch_semaphore_create(0);
     dispatch_semaphore_t release = dispatch_semaphore_create(0);
@@ -72,7 +69,6 @@ static void scenario(const struct api *api, int concurrent, int late, char *answ
 #define RECORD(c) do { size_t length = strlen(s->order); \
         if (length + 2 < sizeof s->order) { s->order[length] = (c); s->order[length + 1] = 0; } } while (0)
     dispatch_block_t handler = api->block_create(DISPATCH_BLOCK_BARRIER, ^{
-        s->otherAtEntry = s->inside;
         RECORD('H');
         dispatch_semaphore_signal(entered);
         dispatch_semaphore_signal(handlerDone);
@@ -84,21 +80,19 @@ static void scenario(const struct api *api, int concurrent, int late, char *answ
         api->set_event_handler(source, handler);
 
     dispatch_async(queue, ^{
-        s->inside = 1;
         RECORD('A');
         dispatch_semaphore_signal(started);
-        dispatch_semaphore_wait(release, DISPATCH_TIME_FOREVER);
-        s->inside = 0;
+        dispatch_semaphore_wait(release, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
     });
-    dispatch_semaphore_wait(started, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(started, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));
     dispatch_async(queue, ^{
         RECORD('B');
         dispatch_semaphore_signal(done);
     });
-    usleep(300000);
+    dispatch_source_merge_data(source, 1);
 
-    long enteredInTime = dispatch_semaphore_wait(entered, dispatch_time(DISPATCH_TIME_NOW, 500 * NSEC_PER_MSEC));
-    int alone = concurrent ? (enteredInTime != 0 ? s->otherAtEntry == 0 : 1) : 1;
+    long enteredInTime = concurrent ? dispatch_semaphore_wait(entered, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) : 1;
+    int alone = concurrent ? enteredInTime == 0 : 1;
     dispatch_semaphore_signal(release);
     dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));
     dispatch_semaphore_wait(handlerDone, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));

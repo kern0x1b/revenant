@@ -2227,9 +2227,53 @@ local function armv7_overlays(sdk, out, roots)
             os.mkdir(path.directory(copy))
             write_if_changed(copy, lower(io.readfile(source)))
             roots[dir] = roots[dir] or {}
-            table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], "armv7-apple-ios.swiftinterface", copy))
+            roots[dir]["armv7-apple-ios.swiftinterface"] = copy
         end
     end
+end
+
+local function nested_in(dir, roots)
+    for root in pairs(roots) do
+        if dir:sub(1, #root + 1) == root .. "/" then
+            return true
+        end
+    end
+    return false
+end
+
+local function listing_of(dir, roots)
+    local copies = roots[dir] or {}
+    local entries, named = {}, {}
+    for _, file in ipairs(os.files(path.join(dir, "*"))) do
+        local name = path.filename(file)
+        named[name] = true
+        table.insert(entries, string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], name, copies[name] or file))
+    end
+    for name, copy in pairs(copies) do
+        if not named[name] then
+            table.insert(entries, string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], name, copy))
+        end
+    end
+    for _, folder in ipairs(os.dirs(path.join(dir, "*"))) do
+        table.insert(entries, string.format([[{"name": "%s", "type": "directory", "contents": [%s]}]], path.filename(folder), table.concat(listing_of(folder, roots), ", ")))
+    end
+    byteorder.sort(entries)
+    return entries
+end
+
+function directory_roots(roots)
+    local dirs = {}
+    for dir in pairs(roots) do
+        if not nested_in(dir, roots) then
+            table.insert(dirs, dir)
+        end
+    end
+    byteorder.sort(dirs)
+    local entries = {}
+    for _, dir in ipairs(dirs) do
+        table.insert(entries, string.format([[    {"name": "%s", "type": "directory", "contents": [%s]}]], dir, table.concat(listing_of(dir, roots), ", ")))
+    end
+    return entries
 end
 
 function build_overlay(sdk, out, set, subtrees, modules)
@@ -2301,7 +2345,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
             else
                 local dir = path.directory(file)
                 roots[dir] = roots[dir] or {}
-                table.insert(roots[dir], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], path.filename(file), copy))
+                roots[dir][path.filename(file)] = copy
             end
         end
     end
@@ -2312,7 +2356,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
         os.mkdir(path.directory(copy))
         write_if_changed(copy, third_party_lowering(entry, consulted, set.markers))
         roots[entry.directory] = roots[entry.directory] or {}
-        table.insert(roots[entry.directory], string.format([[{"name": "%s", "type": "file", "external-contents": "%s"}]], entry.file, copy))
+        roots[entry.directory][entry.file] = copy
     end
     armv7_overlays(sdk, out, roots)
     for dir in pairs(roots) do
@@ -2321,16 +2365,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
             raise("the lowering would remap %s into the overlay; system headers reach the compile through the include directory", dir)
         end
     end
-    local dirs = {}
-    for dir in pairs(roots) do
-        table.insert(dirs, dir)
-    end
-    byteorder.sort(dirs)
-    local entries = {}
-    for _, dir in ipairs(dirs) do
-        byteorder.sort(roots[dir])
-        table.insert(entries, string.format([[    {"name": "%s", "type": "directory", "contents": [%s]}]], dir, table.concat(roots[dir], ", ")))
-    end
+    local entries = directory_roots(roots)
     byteorder.sort(file_roots)
     for _, root in ipairs(file_roots) do
         table.insert(entries, "    " .. root)

@@ -40,6 +40,9 @@ off, as CI does.
 The last line reads `100% tests passed, 0 test(s) failed`. A count of expected failures is reported on the same
 line, and it does not make the run red.
 
+A test name or pattern that matches no suite prints `nothing to test` and exits 0. That exit status is not a pass: no
+test ran. Read the summary line as well, and check that it counts at least one test passed.
+
 To see the cheap checks first, which take seconds:
 
     ./xmakew test -P . 'repository/*'

@@ -8,7 +8,7 @@ local FLAT_SYMBOLS = flat_classes.flat_symbols()
 
 local caches = {}
 
-local cstring, uleb = macho.cstring, macho.uleb
+local cstring = macho.cstring
 
 function root()
     return path.join(workspace.home(), "dyld")
@@ -102,54 +102,108 @@ local function defined_exports(data, image, linkedit)
     return defined
 end
 
-local function trie_payloads(data)
-    local payloads = {}
+local function trie_fault(owner, message, ...)
+    raise("%s has a malformed export trie: " .. message, owner, ...)
+end
+
+local function trie_byte(data, at, owner)
+    if at < 0 or at >= #data then
+        trie_fault(owner, "it reads at offset %d, past its %d bytes", at, #data)
+    end
+    return data:byte(at + 1)
+end
+
+local function trie_uleb(data, at, owner)
+    local value, shift = 0, 0
+    while true do
+        local byte = trie_byte(data, at, owner)
+        at = at + 1
+        if shift > 63 then
+            trie_fault(owner, "a number ending at offset %d is longer than 64 bits", at)
+        end
+        value = value | ((byte & 0x7F) << shift)
+        shift = shift + 7
+        if byte < 0x80 then
+            return value, at
+        end
+    end
+end
+
+local function trie_string(data, at, owner)
+    local finish = data:find("\0", at + 1, true)
+    if not finish then
+        trie_fault(owner, "a string at offset %d is not terminated", at)
+    end
+    return data:sub(at + 1, finish - 1)
+end
+
+local function trie_slice(data, offset, size, owner)
+    if offset < 0 or size < 0 or offset + size > #data then
+        raise("%s has an export trie of %d bytes at offset %d, which runs past its %d bytes", owner, size, offset, #data)
+    end
+    return data:sub(offset + 1, offset + size)
+end
+
+local function trie_payloads(data, owner)
+    local payloads, visited = {}, {}
     local stack = {{0, ""}}
     while #stack > 0 do
         local node = table.remove(stack)
-        local cursor = node[1]
-        local terminal
-        terminal, cursor = uleb(data, cursor)
+        local at = node[1]
+        if at < 0 or at >= #data then
+            trie_fault(owner, "a node at offset %d lies outside its %d bytes", at, #data)
+        end
+        if visited[at] then
+            trie_fault(owner, "the node at offset %d is reached twice, on the path to \"%s\"", at, node[2])
+        end
+        visited[at] = true
+        local terminal, cursor = trie_uleb(data, at, owner)
         if terminal ~= 0 then
             payloads[node[2]] = cursor
         end
+        if cursor + terminal >= #data then
+            trie_fault(owner, "the terminal info of %d bytes at offset %d runs past its %d bytes", terminal, cursor, #data)
+        end
         cursor = cursor + terminal
-        local children = data:byte(cursor + 1)
+        local children = trie_byte(data, cursor, owner)
         cursor = cursor + 1
         for _ = 1, children do
             local finish = data:find("\0", cursor + 1, true)
+            if not finish then
+                trie_fault(owner, "a label of the node at offset %d is not terminated", at)
+            end
             local label = data:sub(cursor + 1, finish - 1)
             local child
-            child, cursor = uleb(data, finish)
+            child, cursor = trie_uleb(data, finish, owner)
             table.insert(stack, {child, node[2] .. label})
         end
     end
     return payloads
 end
 
-local function trie_exports(data, offset, size)
+local function trie_exports(data, offset, size, owner)
     local exports = {}
     if size > 0 then
-        for name in pairs(trie_payloads(data:sub(offset + 1, offset + size))) do
+        for name in pairs(trie_payloads(trie_slice(data, offset, size, owner), owner)) do
             exports[name] = true
         end
     end
     return exports
 end
 
-local function single_reexports(data, image)
+local function single_reexports(data, image, owner)
     local found = {}
     if not image.export_trie or image.export_trie[2] == 0 then
         return found
     end
-    local trie = data:sub(image.base + image.export_trie[1] + 1, image.base + image.export_trie[1] + image.export_trie[2])
-    for name, cursor in pairs(trie_payloads(trie)) do
+    local trie = trie_slice(data, image.base + image.export_trie[1], image.export_trie[2], owner)
+    for name, cursor in pairs(trie_payloads(trie, owner)) do
         local flags
-        flags, cursor = uleb(trie, cursor)
+        flags, cursor = trie_uleb(trie, cursor, owner)
         if flags & 0x08 ~= 0 then
             local ordinal
-            ordinal, cursor = uleb(trie, cursor)
-            local imported = cstring(trie, cursor)
+            ordinal, cursor = trie_uleb(trie, cursor, owner)
+            local imported = trie_string(trie, cursor, owner)
             table.insert(found, {name = name, ordinal = ordinal, imported = imported ~= "" and imported or name})
         end
     end
@@ -157,10 +211,10 @@ local function single_reexports(data, image)
     return found
 end
 
-local function library_of(data, image, linkedit)
+local function library_of(data, image, linkedit, owner)
     local exports
     if image.export_trie and image.export_trie[2] ~= 0 then
-        exports = trie_exports(data, linkedit + image.export_trie[1], image.export_trie[2])
+        exports = trie_exports(data, linkedit + image.export_trie[1], image.export_trie[2], owner)
     else
         exports = defined_exports(data, image, linkedit)
     end
@@ -207,7 +261,7 @@ local function read_libraries(folder, architecture, libraries, keep, by_path)
         local image = loaded_image(macho.images(data), architecture)
         local name = image and image.identity and (by_path and ("/" .. path.relative(binary, folder)) or image.identity)
         if name and not (keep and keep[name]) then
-            libraries[name] = library_of(data, image, image.base)
+            libraries[name] = library_of(data, image, image.base, binary)
         end
     end
 end
@@ -505,7 +559,7 @@ function open_cache(cachefile)
     return cache
 end
 
-local function cached_library(cache, address)
+local function cached_library(cache, address, owner)
     local magic = string.unpack("<I4", cache.read_address(address, 4))
     local wide = magic == 0xFEEDFACF
     if magic ~= 0xFEEDFACE and not wide then
@@ -525,7 +579,7 @@ local function cached_library(cache, address)
     end
     local exports = {}
     if image.export_trie and image.export_trie[2] ~= 0 and linkedit then
-        exports = trie_exports(cache.read_address(linkedit_address(image.export_trie[1]), image.export_trie[2]), 0, image.export_trie[2])
+        exports = trie_exports(cache.read_address(linkedit_address(image.export_trie[1]), image.export_trie[2]), 0, image.export_trie[2], owner)
     elseif image.symtab and linkedit then
         local symoff, nsyms, stroff = image.symtab[1], image.symtab[2], image.symtab[3]
         local first, count = 0, nsyms
@@ -557,20 +611,20 @@ local function load_cache(cachefile)
     local by_address, by_index, libraries = {}, {}, {}
     for index = 0, images_count - 1 do
         local address, _, _, path_offset = string.unpack("<I8I8I8I4", entries, index * 32 + 1)
+        local install = cache.read(cache.main, path_offset, math.min(1024, cache.main.size - path_offset)):match("^([^%z]*)")
         local library = by_address[address]
         if not library then
-            library = cached_library(cache, address)
+            library = cached_library(cache, address, install)
             by_address[address] = library
         end
         by_index[index] = library
-        local install = cache.read(cache.main, path_offset, math.min(1024, cache.main.size - path_offset)):match("^([^%z]*)")
         libraries[install] = library
     end
     local trie_address, trie_size = cache.field(cache.main, 0x108, "<I8"), cache.field(cache.main, 0x110, "<I8")
     if trie_address and trie_size and trie_size > 0 then
         local trie = cache.read_address(trie_address, trie_size)
-        for install, value in pairs(trie_payloads(trie)) do
-            local index = uleb(trie, value)
+        for install, value in pairs(trie_payloads(trie, cachefile)) do
+            local index = trie_uleb(trie, value, cachefile)
             if by_index[index] then
                 libraries[install] = libraries[install] or by_index[index]
             end
@@ -949,7 +1003,7 @@ function missing_imports(cachefile, binaries, root)
     for _, entry in ipairs(found) do
         table.join2(own, defined_exports(entry.data, entry.image, entry.image.base))
         if entry.image.identity then
-            local library = library_of(entry.data, entry.image, entry.image.base)
+            local library = library_of(entry.data, entry.image, entry.image.base, named(entry.binary))
             provided[entry.image.identity] = library
             provided_names[path.filename(entry.image.identity)] = library
         end
@@ -970,7 +1024,7 @@ function missing_imports(cachefile, binaries, root)
         end
         local twolevel = entry.image.flags & 0x80 ~= 0
         local reexported = {}
-        for _, reexport in ipairs(single_reexports(entry.data, entry.image)) do
+        for _, reexport in ipairs(single_reexports(entry.data, entry.image, named(entry.binary))) do
             reexported[reexport.imported] = true
             local library = entry.image.libraries[reexport.ordinal]
             if library and lookup(library) and not exports_symbol(lookup, library, reexport.imported, {}) then
@@ -1178,7 +1232,7 @@ function rebind_plan(cachefile, binary, providers)
         if not found or not found.identity then
             raise("%s is a library this build provides, and it holds no %s image with an install name to bind imports to", provider, cache.architecture)
         end
-        provided[found.identity] = library_of(other, found, found.base)
+        provided[found.identity] = library_of(other, found, found.base, provider)
         libraries[found.identity] = {current = found.current_version, compatibility = found.compatibility_version}
     end
     local function lookup(install)

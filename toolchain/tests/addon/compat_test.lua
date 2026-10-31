@@ -603,7 +603,7 @@ local function definition_failures(folder, shims, headers)
             local line = ending(listing, " " .. defined)
             if shim.code ~= 0 or line == "" or (line:find("private external", 1, true) ~= nil) == process_wide then
                 table.insert(found, string.format("%s must compile for %s on iOS %s as %s definition: %s %s", symbol, architecture, release,
-                                                  process_wide and "an exported" or "a hidden", shim.stderr:sub(-300), listing))
+                                                  process_wide and "an exported" or "a hidden", (shim.stderr .. shim.stdout):sub(-300), listing))
             else
                 local undefined = words(tool(folder, "nm", {"-u", object}))
                 local atomic, objc = false, false

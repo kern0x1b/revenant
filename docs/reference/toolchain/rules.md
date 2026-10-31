@@ -20,7 +20,7 @@ The target rules and the values each one reads, the settings a port sets for the
 
 `app.plist` takes `KEY=VALUE` lines over `app.plist-file`. `app.resources` copies folders flat into the bundle. `app.frameworks` puts the shared libraries of packages into `Frameworks` under their install names, and each shared-library target the application `add_deps()` is loaded through `@executable_path`. Info.plist keys that neither file gives are derived: the bundle and executable names, the project version, and `MinimumOSVersion`.
 
-`swift` compiles the target's `.swift` files as one module. It compiles the whole language when the project requires `revenant@swift-runtime` (with `revenant@libcxx`), and Embedded Swift when it requires `revenant@swift-embedded`. It refuses both, or neither.
+`swift` compiles the target's `.swift` files as one module. It compiles the whole language when the project requires `revenant@swift-runtime` (with `revenant@libcxx`), and Embedded Swift when it requires `revenant@swift-embedded`. It refuses both, or neither. When a `module.modulemap` on the compiler's search path declares a clang module with the Swift module's name, it passes `-Xfrontend -import-underlying-module`, as Xcode does for a framework: the files of the module then see the imports of that clang module. A module whose header imports `Foundation` (through an umbrella header) therefore lets a file with no import use `DispatchQueue`. A module whose header imports nothing does not. Without a clang module of that name the flag is not passed, because the compiler refuses it.
 
 Files a tweak, daemon or app names with `add_installfiles` go into its package at the path given, under the package root.
 

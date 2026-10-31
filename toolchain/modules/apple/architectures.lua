@@ -17,6 +17,11 @@ local function runs(architecture, release)
     return semver.compare(release, bounds.first) >= 0 and (not bounds.last or semver.compare(release, bounds.last) <= 0)
 end
 
+function emulated_tls(architecture, minimum)
+    local native = architecture == "arm64" and "8.0" or "9.0"
+    return semver.compare(minimum, native) < 0
+end
+
 function deployment(architecture, declared)
     local bounds = ARCHITECTURES[architecture]
     if not bounds then

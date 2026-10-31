@@ -832,6 +832,32 @@ local function patched(data, edits)
     return table.concat(pieces)
 end
 
+local function linkedit_ranges(entry)
+    if entry.command == LC_DYLD_INFO or entry.command == LC_DYLD_INFO_ONLY then
+        return {{8, 12, 1}, {24, 28, 1}, {32, 36, 1}, {40, 44, 1}}
+    elseif entry.command == LC_SYMTAB then
+        return {{8, 12, 12}, {16, 20, 1}}
+    elseif entry.command == LC_DYSYMTAB then
+        return {{32, 36, 8}, {40, 44, 52}, {48, 52, 4}, {56, 60, 4}, {64, 68, 8}, {72, 76, 8}}
+    elseif LINKEDIT_DATA[entry.command] then
+        return {{8, 12, 1}}
+    end
+    return {}
+end
+
+local function linkedit_reach(commands)
+    local reach = 0
+    for _, entry in ipairs(commands) do
+        for _, range in ipairs(linkedit_ranges(entry)) do
+            local offset, count = string.unpack("<I4I4", entry.bytes, range[1] + 1)
+            if offset ~= 0 and count > 0 then
+                reach = math.max(reach, offset + count * range[3])
+            end
+        end
+    end
+    return reach
+end
+
 function rebind(file, moves, libraries)
     local data = read(file)
     if data:sub(1, 4) ~= MAGIC32 then
@@ -878,6 +904,7 @@ function rebind(file, moves, libraries)
         end
         limit = dataoff
     end
+    limit = math.min(limit, linkedit_reach(commands))
     local first = #data
     for _, section in ipairs(found.sections) do
         if section.offset > 0 and section.size > 0 then
@@ -988,20 +1015,24 @@ function rebind(file, moves, libraries)
             end
         end
     end
-    local tail, tail_size, split = "", 0, limit
+    local tail, tail_size, cut_at, cut_end = "", 0, limit, limit
     if rewrite then
         local stream = encoded_binds(binds)
         tail_size = #stream
         tail = stream .. string.rep("\0", (-#stream) & 7)
-        split = 0
-        for _, stream in ipairs({found.rebase, found.bind, found.weak_bind, found.lazy_bind}) do
-            if stream[2] > 0 then
-                split = math.max(split, stream[1] + stream[2])
+        if found.bind[2] > 0 then
+            cut_at, cut_end = found.bind[1], found.bind[1] + found.bind[2]
+        else
+            cut_at = 0
+            for _, stream in ipairs({found.rebase, found.weak_bind, found.lazy_bind}) do
+                if stream[2] > 0 then
+                    cut_at = math.max(cut_at, stream[1] + stream[2])
+                end
             end
+            cut_end = cut_at
         end
-        local bind_off, bind_size = string.unpack("<I4I4", data, dyld_info.at + 17)
-        table.insert(edits, {bind_off, string.rep("\0", bind_size)})
     end
+    local grown = #tail - (cut_end - cut_at)
     local regions = {}
     local function shifted(bytes, at, count_at, unit)
         local offset = string.unpack("<I4", bytes, at + 1)
@@ -1009,7 +1040,7 @@ function rebind(file, moves, libraries)
         if offset ~= 0 and count > 0 then
             table.insert(regions, {offset, count * unit})
         end
-        local moved = (offset ~= 0 and offset >= split) and offset + #tail or offset
+        local moved = (offset ~= 0 and offset >= cut_end) and offset + grown or offset
         return bytes:sub(1, at) .. string.pack("<I4", moved) .. bytes:sub(at + 5)
     end
     local function relocated(entry)
@@ -1020,7 +1051,7 @@ function rebind(file, moves, libraries)
             bytes = shifted(bytes, 32, 36, 1)
             bytes = shifted(bytes, 40, 44, 1)
             if rewrite then
-                bytes = bytes:sub(1, 16) .. string.pack("<I4I4", split, tail_size) .. bytes:sub(25)
+                bytes = bytes:sub(1, 16) .. string.pack("<I4I4", cut_at, tail_size) .. bytes:sub(25)
             end
         elseif entry.command == LC_SYMTAB then
             bytes = shifted(bytes, 8, 12, 12)
@@ -1034,7 +1065,7 @@ function rebind(file, moves, libraries)
         end
         return bytes
     end
-    local filesize = limit + #tail - linkedit_segment.fileoff
+    local filesize = limit + grown - linkedit_segment.fileoff
     local vmsize = math.max(linkedit_segment.vmsize, (filesize + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
     local linkedit_bytes = linkedit.bytes:sub(1, 28) .. string.pack("<I4", vmsize) .. linkedit.bytes:sub(33, 36) .. string.pack("<I4", filesize) .. linkedit.bytes:sub(41)
     local parts = {}
@@ -1046,7 +1077,7 @@ function rebind(file, moves, libraries)
         end
     end
     for _, region in ipairs(regions) do
-        if region[1] < split and region[1] + region[2] > split then
+        if region[1] < cut_end and region[1] + region[2] > cut_at then
             raise("%s keeps LINKEDIT data across the end of its binds, so the binds cannot be placed there without moving it", file)
         end
     end
@@ -1055,6 +1086,6 @@ function rebind(file, moves, libraries)
     local head = data:sub(1, 16) .. string.pack("<I4I4", #parts, #body) .. data:sub(25, 28) .. body
     local prefix = math.max(header_end, #head)
     local edited = patched(data, edits)
-    local output = head .. string.rep("\0", prefix - #head) .. edited:sub(prefix + 1, split) .. tail .. edited:sub(split + 1, limit)
+    local output = head .. string.rep("\0", prefix - #head) .. edited:sub(prefix + 1, cut_at) .. tail .. edited:sub(cut_end + 1, limit)
     io.writefile(file, output, {encoding = "binary"})
 end

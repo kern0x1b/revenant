@@ -218,17 +218,19 @@ static void global_queues(void)
 static void activations(void)
 {
     __block _Atomic int fired = 0;
+    dispatch_semaphore_t firedSignal = dispatch_semaphore_create(0);
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(0, 0));
     dispatch_source_set_timer(source, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_MSEC), DISPATCH_TIME_FOREVER, 0);
     dispatch_source_set_event_handler(source, ^{
         atomic_fetch_add(&fired, 1);
+        dispatch_semaphore_signal(firedSignal);
     });
     usleep(50000);
     expect(atomic_load(&fired) == 0, "a source nobody activated does not fire");
     shim_activate(source);
     shim_activate(source);
-    for (int tick = 0; tick < 200 && atomic_load(&fired) == 0; tick++)
-        usleep(5000);
+    dispatch_semaphore_wait(firedSignal, DISPATCH_TIME_FOREVER);
+    usleep(50000);
     expect(atomic_load(&fired) == 1, "an activated source fires, and a second activation resumes nothing more");
     dispatch_source_cancel(source);
     dispatch_queue_t queue = dispatch_queue_create("revenant.activate", NULL);
@@ -255,7 +257,6 @@ static void on_worker(void (^body)(void))
 static int scenario(const char *name)
 {
     freopen("/dev/null", "w", stderr);
-    alarm(10);
     void (*darwin)(dispatch_queue_t) = dlsym(RTLD_DEFAULT, "dispatch_assert_queue$V2");
     serial = dispatch_queue_create("revenant.serial", NULL);
     inner = dispatch_queue_create("revenant.inner", NULL);

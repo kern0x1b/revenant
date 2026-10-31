@@ -86,7 +86,7 @@ static inline void revenant_os_log_text_append(revenant_os_log_text *text, const
     }
     if (text->length + length + 1 > text->capacity) {
         size_t capacity = (text->length + length + 1) * 2;
-        char *grown = realloc(text->bytes, capacity);
+        char *grown = (char *)realloc(text->bytes, capacity);
         if (!grown) {
             return;
         }
@@ -108,7 +108,7 @@ static inline void revenant_os_log_text_appendf(revenant_os_log_text *text, cons
     if (written > 0 && (size_t)written < sizeof buffer) {
         revenant_os_log_text_append(text, buffer, (size_t)written);
     } else if (written > 0) {
-        char *large = malloc((size_t)written + 1);
+        char *large = (char *)malloc((size_t)written + 1);
         if (large) {
             vsnprintf(large, (size_t)written + 1, format, again);
             revenant_os_log_text_append(text, large, (size_t)written);
@@ -381,7 +381,7 @@ static inline int revenant_os_log_item_fits(const revenant_os_log_spec *spec, ch
 }
 
 static inline unsigned long long revenant_os_log_wide_text_size(const void *_Nullable pointer) {
-    const unsigned char *units = pointer;
+    const unsigned char *units = (const unsigned char *)pointer;
     if (!units) {
         return 0;
     }
@@ -435,7 +435,7 @@ static inline void revenant_os_log_append_mismatch(revenant_os_log_text *text, c
     if (level == 3) {
         size = 0;
     } else if (item->type == 2) {
-        const char *string = pointer;
+        const char *string = (const char *)pointer;
         size = string ? strlen(string) + 1 : 0;
     } else if (item->type == 5) {
         size = revenant_os_log_wide_text_size(pointer);
@@ -876,7 +876,7 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
         }
         case 's': case 'S': {
             if (conversion == 'S' || !strcmp(spec.length, "l")) {
-                const wchar_t *wide = revenant_os_log_take_pointer(ap);
+                const wchar_t *wide = (const wchar_t *)revenant_os_log_take_pointer(ap);
                 char spec_format[32];
                 revenant_os_log_spec_string(&spec, 's', spec_format, sizeof spec_format, "l");
                 if (wide) {
@@ -886,7 +886,7 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
                 }
                 break;
             }
-            const char *string = revenant_os_log_take_pointer(ap);
+            const char *string = (const char *)revenant_os_log_take_pointer(ap);
             revenant_os_log_text_padded(&text, &spec, string ? string : "(null)");
             break;
         }
@@ -906,7 +906,7 @@ static inline char *_Nullable revenant_os_log_format_arguments(const char *forma
             break;
         }
         case 'P': {
-            const unsigned char *bytes = revenant_os_log_take_pointer(ap);
+            const unsigned char *bytes = (const unsigned char *)revenant_os_log_take_pointer(ap);
             revenant_os_log_append_bytes(&text, &spec, bytes, spec.precision > 0 ? spec.precision : 0);
             break;
         }
