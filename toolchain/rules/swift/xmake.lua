@@ -168,12 +168,16 @@ rule("swift")
                 for index = 2, #modules, 2 do
                     table.insert(searched, modules[index])
                 end
+                local cxx_headers = table.wrap(target:pkg("libcxx"):get("sysincludedirs"))[1]
+                if not cxx_headers then
+                    raise("target(%s) compiles Swift against libcxx, which declares no include directory", target:name())
+                end
                 local argv = table.join(swift.runtime_flags({
                     architecture = target:arch(),
                     deployment = toolchain:config("deployment"),
                     sdk = toolchain:config("sdkdir"),
                     resources = path.join(package:installdir(), "lib", "swift"),
-                    cxx_headers = target:pkg("libcxx"):installdir("include", "c++", "v1"),
+                    cxx_headers = cxx_headers,
                     emulated_tls = toolchain:config("emulated_tls"),
                     plugins = table.wrap((package:envs() or {}).SWIFT_PLUGIN_PATH)[1],
                     module = target:values("swift.module") or target:name(),
