@@ -1073,6 +1073,12 @@ function missing_imports(cachefile, binaries, root)
     return missing, #found, cache, dangling, ordering
 end
 
+-- The engine binds its C++ library by the @rpath name. On the device that name resolves to the
+-- carried librev-c++ or to the system libc++.1, and both export the basic_string members the
+-- engine imports (librev-c++ was checked against the same symbols), so the import is judged
+-- against the cache's libc++.1.
+local LIBRARY_ALIASES = {["@rpath/libc++.1.dylib"] = "/usr/lib/libc++.1.dylib"}
+
 local function judge_import(cache, image, twolevel, symbol)
     local ordinal = symbol.ordinal
     if not twolevel then
@@ -1085,11 +1091,13 @@ local function judge_import(cache, image, twolevel, symbol)
     if not library then
         return {accepted = false, reason = string.format("ordinal %d names no library the image links", ordinal)}
     end
-    if exported_by(cache, library, symbol.name) then
-        return {accepted = true, library = library}
+    local judged = LIBRARY_ALIASES[library] or library
+    local bound = judged == library and library or string.format("%s (judged as %s)", library, judged)
+    if exported_by(cache, judged, symbol.name) then
+        return {accepted = true, library = judged}
     end
-    if not cache.libraries[library] then
-        return {accepted = false, library = library, reason = string.format("it is bound to %s, which the cache does not hold", library)}
+    if not cache.libraries[judged] then
+        return {accepted = false, library = judged, reason = string.format("it is bound to %s, which the cache does not hold", bound)}
     end
     local holders = {}
     for _, install in ipairs(table.orderkeys(cache.libraries)) do
@@ -1097,11 +1105,11 @@ local function judge_import(cache, image, twolevel, symbol)
             table.insert(holders, install)
         end
     end
-    local reason = string.format("it is bound to %s, which the cache does not export it from", library)
+    local reason = string.format("it is bound to %s, which the cache does not export it from", bound)
     if #holders > 0 then
         reason = reason .. string.format("; %s exports it, so the binding names the wrong library", table.concat(holders, ", "))
     end
-    return {accepted = false, library = library, reason = reason}
+    return {accepted = false, library = judged, reason = reason}
 end
 
 function import_verdicts(cachefile, binaries)

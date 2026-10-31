@@ -73,6 +73,12 @@ function main()
         "int __ashldi3(void);\nint use(void) { return __ashldi3(); }\n", {"-L" .. links, "-lgcc_s.1"})
     local flat = library(work, ld, path.join(work, "probes"), "flat", "/usr/lib/libflat.dylib",
         "int __ashldi3(void);\nint use(void) { return __ashldi3(); }\n", {"-L" .. links, "-lgcc_s.1", "-flat_namespace", "-undefined", "suppress"})
+    library(work, ld, links, "cxx", "@rpath/libc++.1.dylib", "int cxx_exported(void) { return 7; }\nint cxx_absent(void) { return 8; }\n")
+    library(work, ld, links, "unk", "@rpath/libunk.dylib", "int unk_sym(void) { return 9; }\n")
+    library(work, ld, cache, "cxx", "/usr/lib/libc++.1.dylib", "int cxx_exported(void) { return 10; }\n")
+    local cxx_probe = library(work, ld, path.join(work, "probes"), "cxxprobe", "/usr/lib/libcxxprobe.dylib",
+        "int cxx_exported(void);\nint cxx_absent(void);\nint unk_sym(void);\nint use(void) { return cxx_exported() + cxx_absent() + unk_sym(); }\n",
+        {"-L" .. links, "-lc++.1", "-lunk"})
 
     local symbols = import("symbols", {rootdir = MODULES, anonymous = true})
     local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
@@ -88,6 +94,13 @@ function main()
     assert(not gone.accepted and contains(gone.reason, "does not hold"), "an import from a library the cache does not hold is accepted: " .. tostring(gone.reason))
     local flat_verdict = verdict_of(verdicts, flat, "___ashldi3")
     assert(not flat_verdict.accepted and contains(flat_verdict.reason, "flat namespace"), "a flat-namespace import is accepted: " .. tostring(flat_verdict.reason))
+    local cxx_verdicts = dyld.import_verdicts(cache, {cxx_probe})
+    local cxx_exported_verdict = verdict_of(cxx_verdicts, cxx_probe, "_cxx_exported")
+    assert(cxx_exported_verdict.accepted and cxx_exported_verdict.library == "/usr/lib/libc++.1.dylib", "an @rpath libc++ import the cache's libc++ exports is not accepted: " .. tostring(cxx_exported_verdict.reason))
+    local cxx_absent_verdict = verdict_of(cxx_verdicts, cxx_probe, "_cxx_absent")
+    assert(not cxx_absent_verdict.accepted and contains(cxx_absent_verdict.reason, "/usr/lib/libc++.1.dylib") and contains(cxx_absent_verdict.reason, "@rpath/libc++.1.dylib"), "an @rpath libc++ import the cache's libc++ does not export is accepted: " .. tostring(cxx_absent_verdict.reason))
+    local unknown_verdict = verdict_of(cxx_verdicts, cxx_probe, "_unk_sym")
+    assert(not unknown_verdict.accepted and contains(unknown_verdict.reason, "does not hold") and contains(unknown_verdict.reason, "@rpath/libunk.dylib"), "an import from an @rpath library the cache does not hold is accepted: " .. tostring(unknown_verdict.reason))
 
     local function stage(binary)
         local build = path.join(work, "build", path.filename(binary) .. "-build")
