@@ -105,6 +105,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "UIBackgroundFetchResult",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "    UIBackgroundFetchResultFailed\n} API_AVAILABLE(ios(7.0)) API_UNAVAILABLE(watchos);",
+            replace = "    UIBackgroundFetchResultFailed\n} API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",
