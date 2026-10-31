@@ -48,6 +48,8 @@ A key is public when the SDK both declares it and exports it: a class, C functio
 
 Methods of a `Revenant<Name>` proxy count as methods of `Name` when the library also exports `_OBJC_CLASS_$_<Name>`: the alias makes the proxy the class at run time (`revenant_alias.h`).
 
+`NSUUID`, `NSProgress` and `NSJSONSerialization` are not defined twice. Each publishes through `revenant_alias.h`, so the system class answers wherever it exists, and their methods are category methods that the loader adds only where the system lacks the selector. An option bit is a capability rather than a version, so `NSJSONSerialization.m` probes the system method for each bit it may need to wrap, once, in a constructor, before any wrapper is installed: unescaped slashes (`{"a/b":1}` must come back without `\/`), sorted keys (sixteen keys must come back in byte order), JSON5 reading (`{a:1}` must parse) and top-level dictionary reading (`"a":1` must parse as a dictionary). A probe that fails installs the wrapper for that bit only, and the wrapper hands every other option to the system method. A probe answers yes when the system method is absent, because the category method is then the implementation.
+
 Methods are read from the libraries with `toolchain/modules/apple/objc.lua` (`binary_inventory`), which folds categories into their class, and from the objects with `nm`, which lists each method implementation as `-[Class sel]` or `+[Class sel]`. The objects are read once, in batches, for both reports.
 
 ## Limits

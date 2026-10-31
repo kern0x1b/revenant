@@ -8,6 +8,8 @@
 
 REVENANT_ALIAS(NSJSONSerialization)
 
+NSData *revenant_sorted_keys_data(id object, NSUInteger options, NSError **error);
+
 static NSStringEncoding RevenantJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
 {
     const unsigned char *b = (const unsigned char *)data.bytes;
@@ -935,26 +937,71 @@ static NSInteger revenant_json_write_all(NSData *data, NSOutputStream *stream, N
 
 @end
 
-#define REVENANT_JSON_FOUNDATION_IOS_11 1443.0
-#define REVENANT_JSON_FOUNDATION_IOS_13 1666.0
-#define REVENANT_JSON_FOUNDATION_IOS_15 1854.0
+static BOOL revenant_json_slashes_native;
+static BOOL revenant_json_sorted_native;
+static BOOL revenant_json_json5_native;
+static BOOL revenant_json_top_level_native;
 
 static IMP revenant_json_original_data;
 static IMP revenant_json_original_write;
 static IMP revenant_json_original_object_data;
 static IMP revenant_json_original_object_stream;
 
+static BOOL revenant_json_writes_natively(Class cls, NSJSONWritingOptions option, id object, NSString *expected)
+{
+    if (!class_getClassMethod(cls, @selector(dataWithJSONObject:options:error:)))
+        return YES;
+    NSData *data = nil;
+    @try {
+        data = [cls dataWithJSONObject:object options:option error:nil];
+    } @catch (NSException *exception) {
+        return NO;
+    }
+    return data != nil && [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] isEqualToString:expected];
+}
+
+static BOOL revenant_json_sorts_natively(Class cls)
+{
+    NSMutableDictionary *object = [NSMutableDictionary dictionary];
+    NSMutableString *expected = [NSMutableString stringWithString:@"{"];
+    for (int index = 0; index < 16; index++) {
+        NSString *key = [NSString stringWithFormat:@"k%02d", index];
+        object[key] = @(index);
+        [expected appendFormat:@"%@\"%@\":%d", index ? @"," : @"", key, index];
+    }
+    [expected appendString:@"}"];
+    return revenant_json_writes_natively(cls, NSJSONWritingSortedKeys, object, expected);
+}
+
+static BOOL revenant_json_reads_natively(Class cls, NSJSONReadingOptions option, NSString *text)
+{
+    if (!class_getClassMethod(cls, @selector(JSONObjectWithData:options:error:)))
+        return YES;
+    id object = nil;
+    @try {
+        object = [cls JSONObjectWithData:[text dataUsingEncoding:NSUTF8StringEncoding] options:option error:nil];
+    } @catch (NSException *exception) {
+        return NO;
+    }
+    return [object isKindOfClass:[NSDictionary class]] && [[object objectForKey:@"a"] isEqual:@1];
+}
+
 static NSData *revenant_json_data_with_json_object(id self, SEL _cmd, id object, NSUInteger options, NSError **error)
 {
-    if (!(options & NSJSONWritingWithoutEscapingSlashes))
+    BOOL slashes = (options & NSJSONWritingWithoutEscapingSlashes) != 0 && !revenant_json_slashes_native;
+    BOOL sorted = (options & NSJSONWritingSortedKeys) != 0 && !revenant_json_sorted_native;
+    if (!slashes && !sorted)
         return ((NSData * (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_data)(self, _cmd, object, options, error);
+    if (!slashes)
+        return revenant_sorted_keys_data(object, options, error);
     return revenant_json_encode(object, options);
 }
 
 static NSInteger revenant_json_write_with_stream(id self, SEL _cmd, id object, NSOutputStream *stream, NSUInteger options, NSError **error)
 {
-    BOOL sortedNeedsBackport = (options & NSJSONWritingSortedKeys) != 0 && NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_11;
-    if (!(options & NSJSONWritingWithoutEscapingSlashes) && !sortedNeedsBackport)
+    BOOL slashes = (options & NSJSONWritingWithoutEscapingSlashes) != 0 && !revenant_json_slashes_native;
+    BOOL sorted = (options & NSJSONWritingSortedKeys) != 0 && !revenant_json_sorted_native;
+    if (!slashes && !sorted)
         return ((NSInteger (*)(id, SEL, id, id, NSUInteger, NSError **))revenant_json_original_write)(self, _cmd, object, stream, options, error);
     NSData *data = [self dataWithJSONObject:object options:options error:error];
     if (!data)
@@ -964,14 +1011,18 @@ static NSInteger revenant_json_write_with_stream(id self, SEL _cmd, id object, N
 
 static id revenant_json_object_with_data(id self, SEL _cmd, NSData *data, NSUInteger options, NSError **error)
 {
-    if (!(options & (RevenantJSONJSON5Allowed | RevenantJSONTopLevelDictionaryAssumed)))
+    BOOL json5 = (options & RevenantJSONJSON5Allowed) != 0 && !revenant_json_json5_native;
+    BOOL topLevel = (options & RevenantJSONTopLevelDictionaryAssumed) != 0 && !revenant_json_top_level_native;
+    if (!json5 && !topLevel)
         return ((id (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_object_data)(self, _cmd, data, options, error);
     return revenant_json_decode(data, options, error);
 }
 
 static id revenant_json_object_with_stream(id self, SEL _cmd, NSInputStream *stream, NSUInteger options, NSError **error)
 {
-    if (!(options & (RevenantJSONJSON5Allowed | RevenantJSONTopLevelDictionaryAssumed)))
+    BOOL json5 = (options & RevenantJSONJSON5Allowed) != 0 && !revenant_json_json5_native;
+    BOOL topLevel = (options & RevenantJSONTopLevelDictionaryAssumed) != 0 && !revenant_json_top_level_native;
+    if (!json5 && !topLevel)
         return ((id (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_object_stream)(self, _cmd, stream, options, error);
     return revenant_json_decode(revenant_json_read_all(stream), options, error);
 }
@@ -987,11 +1038,16 @@ static void revenant_json_wrap(SEL selector, IMP wrapper, IMP *original)
 
 __attribute__((constructor)) static void revenant_json_options_install(void)
 {
-    if (NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_13) {
+    Class cls = [NSJSONSerialization class];
+    revenant_json_slashes_native = revenant_json_writes_natively(cls, NSJSONWritingWithoutEscapingSlashes, @{@"a/b": @1}, @"{\"a/b\":1}");
+    revenant_json_sorted_native = revenant_json_sorts_natively(cls);
+    revenant_json_json5_native = revenant_json_reads_natively(cls, RevenantJSONJSON5Allowed, @"{a:1}");
+    revenant_json_top_level_native = revenant_json_reads_natively(cls, RevenantJSONTopLevelDictionaryAssumed, @"\"a\":1");
+    if (!revenant_json_slashes_native || !revenant_json_sorted_native) {
         revenant_json_wrap(@selector(dataWithJSONObject:options:error:), (IMP)revenant_json_data_with_json_object, &revenant_json_original_data);
         revenant_json_wrap(@selector(writeJSONObject:toStream:options:error:), (IMP)revenant_json_write_with_stream, &revenant_json_original_write);
     }
-    if (NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_15) {
+    if (!revenant_json_json5_native || !revenant_json_top_level_native) {
         revenant_json_wrap(@selector(JSONObjectWithData:options:error:), (IMP)revenant_json_object_with_data, &revenant_json_original_object_data);
         revenant_json_wrap(@selector(JSONObjectWithStream:options:error:), (IMP)revenant_json_object_with_stream, &revenant_json_original_object_stream);
     }

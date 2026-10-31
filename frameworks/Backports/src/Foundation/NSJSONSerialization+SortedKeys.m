@@ -1,19 +1,13 @@
 #import <Foundation/Foundation.h>
-#import <objc/runtime.h>
 
 #define REVENANT_JSON_PRETTY (1UL << 0)
 #define REVENANT_JSON_SORTED_KEYS (1UL << 1)
 #define REVENANT_JSON_FRAGMENTS (1UL << 2)
 #define REVENANT_BACKPORT_EXPORT __attribute__((visibility("default")))
-#define REVENANT_FOUNDATION_IOS_11 1443.0
 
-typedef NSData *(*revenant_data_function)(id, SEL, id, NSUInteger, NSError **);
-
-static revenant_data_function revenant_original_data;
-
-static NSData *revenant_original(id object, NSUInteger options, NSError **error)
+static NSData *revenant_unsorted_data(id object, NSUInteger options, NSError **error)
 {
-    return revenant_original_data([NSJSONSerialization class], @selector(dataWithJSONObject:options:error:), object, options, error);
+    return [NSJSONSerialization dataWithJSONObject:object options:options error:error];
 }
 
 static NSString *revenant_indentation(NSUInteger depth)
@@ -39,7 +33,7 @@ static NSComparisonResult revenant_compare_keys(id left, id right)
 
 static BOOL revenant_scalar(id value, NSMutableString *out, NSError **error)
 {
-    NSData *wrapped = revenant_original(@[value], REVENANT_JSON_FRAGMENTS, error);
+    NSData *wrapped = revenant_unsorted_data(@[value], REVENANT_JSON_FRAGMENTS, error);
     if (wrapped == nil)
         return NO;
     NSString *text = [[NSString alloc] initWithData:wrapped encoding:NSUTF8StringEncoding];
@@ -104,27 +98,9 @@ REVENANT_BACKPORT_EXPORT NSData *revenant_sorted_keys_data(id object, NSUInteger
 {
     BOOL container = [object isKindOfClass:[NSDictionary class]] || [object isKindOfClass:[NSArray class]];
     if (!container && !(options & REVENANT_JSON_FRAGMENTS))
-        return revenant_original(object, options & ~REVENANT_JSON_SORTED_KEYS, error);
+        return revenant_unsorted_data(object, options & ~REVENANT_JSON_SORTED_KEYS, error);
     NSMutableString *out = [NSMutableString string];
     if (!revenant_write(object, 0, (options & REVENANT_JSON_PRETTY) != 0, out, error))
         return nil;
     return [out dataUsingEncoding:NSUTF8StringEncoding];
-}
-
-static NSData *revenant_data_with_json_object(id self, SEL _cmd, id object, NSUInteger options, NSError **error)
-{
-    if (!(options & REVENANT_JSON_SORTED_KEYS) || (options & NSJSONWritingWithoutEscapingSlashes))
-        return revenant_original_data(self, _cmd, object, options, error);
-    return revenant_sorted_keys_data(object, options, error);
-}
-
-__attribute__((constructor)) static void revenant_sorted_keys_install(void)
-{
-    Method method = class_getClassMethod([NSJSONSerialization class], @selector(dataWithJSONObject:options:error:));
-    if (method == NULL)
-        return;
-    revenant_original_data = (revenant_data_function)method_getImplementation(method);
-    if (NSFoundationVersionNumber >= REVENANT_FOUNDATION_IOS_11)
-        return;
-    method_setImplementation(method, (IMP)revenant_data_with_json_object);
 }
