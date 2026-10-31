@@ -108,6 +108,23 @@ prints each result, so one run lists all the failures:
   check that never fails; the host run does.
 
 `./xmakew l -P . tools/prepush.lua test` tests the tool itself, and `repository/prepush` runs that test in the `repository` group.
+The two log tools below are tested by prepush too.
+
+## Reading a failed run
+
+`./xmakew l -P . tools/ci_errors.lua <run-id|job-id>` reads the logs of a run, or of one job, through `gh api`, and for each
+job that did not succeed prints the failed tests, the errors the log prints, and for each Swift module that failed its
+first diagnostics. It keeps the probe output of configure and of the Swift overlay out of the list: the feature probes
+under `build/.gens/**/probes`, the `libplist`, `-fuse-ld`, `generic.swift`, `libfoo.a` and `AR-NOTFOUND` lines of the
+configure, and the `curl` 404 of a prebuilt that is looked up. Each saved log is in `.cache/scratch/ci/<job-id>.log`.
+A test that expects a compiler to reject a file prints that rejection in a passing run too, so the failed tests list is what
+says which errors matter.
+
+`./xmakew l -P . tools/ci_swiftc_replay.lua <job-log> [module]` takes the `swiftc failed for <module> with:` line of a saved
+log, maps the runner's paths to the local checkout and cache, sends the outputs to `.cache/scratch/swiftc-replay/<module>/`,
+and runs the same compiler on the same arguments, so a Swift fix is checked in seconds. It needs the local Swift package
+and the lowered overlay `build/generated/backports/overlay/vfs.yaml` of the checkout, so it runs after the Swift component
+has been configured here.
 
 ## Fetching a branch's artifacts
 

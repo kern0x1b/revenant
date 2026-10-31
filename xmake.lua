@@ -55,6 +55,8 @@ if whole or component == "emulator" then
         add_tests("docs_commands")
         add_tests("snapshot_diff")
         add_tests("prepush")
+        add_tests("ci_errors")
+        add_tests("ci_swiftc_replay")
         on_test(function (target, opt)
             local root = os.projectdir()
             local commands = {layout = {path.join(root, "tools", "layout.lua")},
@@ -65,7 +67,9 @@ if whole or component == "emulator" then
                               snapshot_diff = {path.join(root, "tools", "snapshot_diff.lua"), "test"},
                               credentials = {path.join(root, "agent-skills", "tests", "credentials.lua"), "test"},
                               copied_text = {path.join(root, "agent-skills", "tests", "copied_text.lua"), "test"},
-                              prepush = {path.join(root, "tools", "prepush.lua"), "test"}}
+                              prepush = {path.join(root, "tools", "prepush.lua"), "test"},
+                              ci_errors = {path.join(root, "tools", "ci_errors.lua"), "test"},
+                              ci_swiftc_replay = {path.join(root, "tools", "ci_swiftc_replay.lua"), "test"}}
             local ok = os.execv(os.programfile(), table.join({"l", "-P", root}, commands[path.filename(opt.name)]), {try = true, curdir = root})
             if ok ~= 0 then
                 opt.errors = path.filename(opt.name) .. " failed"
