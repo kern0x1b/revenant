@@ -1,18 +1,44 @@
-diff --git a/stdlib/public/Darwin/Dispatch/Queue.swift b/stdlib/public/Darwin/Dispatch/Queue.swift
---- a/stdlib/public/Darwin/Dispatch/Queue.swift
-+++ b/stdlib/public/Darwin/Dispatch/Queue.swift
-@@ -266,3 +266,3 @@
+--- a/stdlib/public/Darwin/Dispatch/Queue.swift	2026-10-31 14:53:41
++++ b/stdlib/public/Darwin/Dispatch/Queue.swift	2026-10-31 14:53:45
+@@ -260,11 +260,11 @@
+ 	/// - SeeAlso: `DispatchQoS`
+ 	/// - SeeAlso: `DispatchWorkItemFlags`
+ 	///
+-	public func async(
++	@preconcurrency public func async(
+ 		group: DispatchGroup? = nil,
+ 		qos: DispatchQoS = .unspecified,
  		flags: DispatchWorkItemFlags = [],
 -		execute work: @escaping @convention(block) () -> Void)
-+		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
++		execute work: @escaping @Sendable @convention(block) () -> Void)
  	{
-@@ -400,3 +400,3 @@
+ 		if group == nil && qos == .unspecified {
+ 			// Fast-path route for the most common API usage
+@@ -394,11 +394,11 @@
+ 	/// - SeeAlso: `DispatchWorkItemFlags`
+ 	/// - SeeAlso: `DispatchTime`
+ 	///
+-	public func asyncAfter(
++	@preconcurrency public func asyncAfter(
+ 		deadline: DispatchTime,
+ 		qos: DispatchQoS = .unspecified,
  		flags: DispatchWorkItemFlags = [],
 -		execute work: @escaping @convention(block) () -> Void)
-+		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
++		execute work: @escaping @Sendable @convention(block) () -> Void)
  	{
-@@ -431,3 +431,3 @@
+ 		if #available(macOS 10.10, iOS 8.0, *), qos != .unspecified || !flags.isEmpty {
+ 			let item = DispatchWorkItem(qos: qos, flags: flags, block: work)
+@@ -425,11 +425,11 @@
+ 	/// - SeeAlso: `DispatchWorkItemFlags`
+ 	/// - SeeAlso: `DispatchWallTime`
+ 	///
+-	public func asyncAfter(
++	@preconcurrency public func asyncAfter(
+ 		wallDeadline: DispatchWallTime,
+ 		qos: DispatchQoS = .unspecified,
  		flags: DispatchWorkItemFlags = [],
 -		execute work: @escaping @convention(block) () -> Void)
-+		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
++		execute work: @escaping @Sendable @convention(block) () -> Void)
  	{
+ 		if #available(macOS 10.10, iOS 8.0, *), qos != .unspecified || !flags.isEmpty {
+ 			let item = DispatchWorkItem(qos: qos, flags: flags, block: work)
