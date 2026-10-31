@@ -230,46 +230,26 @@ extension View {
     }
 }
 
-struct GeometryChangeModifier: NodeModifier {
-    let geometry: (GeometryProxy) -> Any
-    let action: (Any) -> Void
-    func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { GeometryChangeNode() }
+struct GeometryChangeModifier<Value: Equatable>: NodeModifier {
+    let geometry: (GeometryProxy) -> Value
+    let action: (Value) -> Void
+    func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { GeometryChangeNode<Value>() }
 }
 
-final class GeometryChangeNode: ContainerNode {
-    var lastValue: Any?
-    override var flattened: [LayoutNode] { child?.flattened ?? [] }
-    override var disposableChildren: [Node] { child.map { [$0] } ?? [] }
+final class GeometryChangeNode<Value: Equatable>: ContainerNode {
+    var lastValue: Value?
     override func update(_ view: any View, _ env: EnvironmentValues) {
         super.update(view, env)
         let m = view as! ModifiedViewLike
-        child = adopt(reconcile(child, m.modifiedContent, env))
-        let modifier = m.modifierValue as! GeometryChangeModifier
-        let proxy = GeometryProxyImpl(size: child?.sizeThatFits(ProposedSize(width: nil, height: nil)) ?? .zero)
+        content = adopt(reconcile(content, m.modifiedContent, env))
+        let modifier = m.modifierValue as! GeometryChangeModifier<Value>
+        let proxy = GeometryProxy(size: children.first?.sizeThatFits(ProposedSize(width: nil, height: nil)) ?? .zero)
         let value = modifier.geometry(proxy)
-        if lastValue == nil || !(lastValue! as! AnyHashable == value as! AnyHashable) {
+        if lastValue != value {
             lastValue = value
             DispatchQueue.main.async { modifier.action(value) }
         }
     }
-    override func mountContents() { child?.mount() }
-}
-
-struct GeometryProxyImpl: GeometryProxy {
-    let size: CGSize
-    var safeAreaInsets: EdgeInsets { EdgeInsets() }
-    func frame(in coordinateSpace: CoordinateSpace) -> CGRect { CGRect(origin: .zero, size: size) }
-}
-
-public protocol GeometryProxy {
-    var size: CGSize { get }
-    var safeAreaInsets: EdgeInsets { get }
-    func frame(in coordinateSpace: CoordinateSpace) -> CGRect
-}
-
-public enum CoordinateSpace {
-    case local
-    case global
 }
 
 public enum TextAlignment { case leading, center, trailing }

@@ -2165,7 +2165,6 @@ class UIActivityViewController
 class UIAlertAction
 class UIAlertController
 class UIApplication
-class UIApplicationDelegate
 class UIApplicationShortcutIcon
 class UIApplicationShortcutItem
 class UIAttachmentBehavior
@@ -29530,15 +29529,6 @@ member UIApplication -setShortcutItems:
 member UIApplication -shortcutItems
 member UIApplication -supportsAlternateIcons
 member UIApplication -supportsMultipleScenes
-member UIApplicationDelegate -application:continueUserActivity:restorationHandler:
-member UIApplicationDelegate -application:didFailToContinueUserActivityWithType:error:
-member UIApplicationDelegate -application:didReceiveRemoteNotification:fetchCompletionHandler:
-member UIApplicationDelegate -application:didUpdateUserActivity:
-member UIApplicationDelegate -application:handleEventsForBackgroundURLSession:completionHandler:
-member UIApplicationDelegate -application:openURL:options:
-member UIApplicationDelegate -application:performActionForShortcutItem:completionHandler:
-member UIApplicationDelegate -application:performFetchWithCompletionHandler:
-member UIApplicationDelegate -application:willContinueUserActivityWithType:
 member UIApplicationShortcutIcon +iconWithSystemImageName:
 member UIApplicationShortcutIcon +iconWithTemplateImageName:
 member UIApplicationShortcutIcon +iconWithType:

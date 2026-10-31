@@ -1,11 +1,5 @@
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, UIBackgroundFetchResult) {
-    UIBackgroundFetchResultNewData = 0,
-    UIBackgroundFetchResultNoData = 1,
-    UIBackgroundFetchResultFailed = 2,
-};
-
 const char *revenant_background_fetch_result_name(UIBackgroundFetchResult result)
 {
     switch (result) {

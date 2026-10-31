@@ -318,21 +318,6 @@ local AREAS = {
         },
     },
     {
-        name = "UIApplicationDelegate backport: background fetch, open URL, user activity, shortcut actions",
-        sources = {"UIApplicationDelegate+Backport.m"},
-        members = {
-            "-[UIApplicationDelegate application:performFetchWithCompletionHandler:]",
-            "-[UIApplicationDelegate application:didReceiveRemoteNotification:fetchCompletionHandler:]",
-            "-[UIApplicationDelegate application:handleEventsForBackgroundURLSession:completionHandler:]",
-            "-[UIApplicationDelegate application:openURL:options:]",
-            "-[UIApplicationDelegate application:continueUserActivity:restorationHandler:]",
-            "-[UIApplicationDelegate application:willContinueUserActivityWithType:]",
-            "-[UIApplicationDelegate application:didFailToContinueUserActivityWithType:error:]",
-            "-[UIApplicationDelegate application:didUpdateUserActivity:]",
-            "-[UIApplicationDelegate application:performActionForShortcutItem:completionHandler:]",
-        },
-    },
-    {
         name = "iOS 13 large content viewer: the interaction and the item properties of views",
         sources = {"UILargeContentViewer.m"},
         members = {

@@ -114,13 +114,4 @@ open class UIHostingController<Content: View>: _HostingViewController {
         return items.first?.sizeThatFits(proposal) ?? .zero
     }
     required public init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
-    
-    open override var contentView: UIView? {
-        get { view }
-        set { }
-    }
-    
-    open override var intrinsicContentSize: CGSize {
-        sizeThatFits(in: CGSize(width: 320, height: 1e6))
-    }
 }
