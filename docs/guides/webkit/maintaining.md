@@ -96,6 +96,19 @@ The judgement is `dyld.import_verdicts` in `toolchain/modules/apple/dyld.lua`, a
 `./xmakew l frameworks/WebKit/tests/gate/symbols_test.lua` tests it on fixtures
 (it needs `REVENANT_LD64` set to the `bin/ld` of the `revenant@ld64` package).
 
+### The C++ library
+
+The engine binds its C++ library as `@rpath/libc++.1.dylib`, while the iOS 6.0 cache holds
+that library as `/usr/lib/libc++.1.dylib`. The gate therefore judges an import bound to the
+`@rpath` name against the cache's `libc++.1` (`LIBRARY_ALIASES` in `dyld.lua`). No other
+`@rpath` name is remapped, and an `@rpath` library the cache does not hold is still rejected.
+This is a judgment rule, not a device check. On the phone the name resolves to the carried
+`librev-c++` or to the system `libc++.1`; the cache's library and the `librev-c++` the port
+builds both export the `basic_string` members the engine imports, and the fixture test
+covers an exported, a missing and an unheld `@rpath` import. The rule holds while
+`librev-c++` exports what the cache's `libc++.1` does for the engine's imports. For a new
+C++ import, check it with `nm -gU` on the `librev-c++` build as well before pinning it.
+
 The first time this ran in anger, on 2026-09-11, it was the second case: an
 ANGLE roll had started calling `crc32_z`, which zlib gained in 1.2.9 and this
 system's 1.2.5 does not have. Nothing in a build would have said so. On the
