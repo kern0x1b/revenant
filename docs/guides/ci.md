@@ -110,6 +110,52 @@ prints each result, so one run lists all the failures:
 `./xmakew l -P . tools/prepush.lua test` tests the tool itself, and `repository/prepush` runs that test in the `repository` group.
 The two log tools below are tested by prepush too.
 
+## Verifying Swift here
+
+The Swift configure of the `swift` job runs on this machine too. CI installs its packages; a checkout gets them by cloning the
+main checkout's store into a private cache of its own, the `.cache` of the worktree (never the main checkout's). The clones are
+APFS copies: they take no space until a configure writes to them, and removing them leaves nothing behind.
+
+```sh
+W=$PWD M=path/to/the/main/checkout
+mkdir -p "$W/.cache/xmake" "$W/.cache/xmake-global/.xmake/packages" "$W/.cache/dyld" "$W/.cache/scratch"
+cp -c -R "$M/.cache/xmake/." "$W/.cache/xmake/"
+cp -c -R "$M/.cache/xmake-global/.xmake/repositories" "$W/.cache/xmake-global/.xmake/"
+cp -c -R "$M/.cache/dyld/6.0" "$W/.cache/dyld/"
+cp -c -R "$M/.cache/scratch/lowered-members" "$W/.cache/scratch/"
+for n in ld64 iphoneos-sdk llvm micro-ecc apple-compat box2d lzfse zlib lz4 xz suitesparse-ordering libcxx zxing-cpp leptonica tesseract tessdata monocypher boringssl ggml ffmpeg-hevc libplist openssl ldid firmware-tools backports ffmpeg swift-bootstrap swift swift-runtime combine swiftui; do
+    l=$(echo "$n" | cut -c1); mkdir -p "$W/.cache/xmake-global/.xmake/packages/$l"; cp -c -R "$M/.cache/xmake-global/.xmake/packages/$l/$n" "$W/.cache/xmake-global/.xmake/packages/$l/"
+done
+REVENANT_CACHE="$W/.cache" REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64,swift-runtime,libcxx ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v
+./xmakew l -P . tools/prepush.lua
+rm -rf "$W/.cache" "$W/build" "$W/.xmake"
+```
+
+The list is the set of packages that the `swift` job of CI installs (its log's `install <name> .. ok` lines). The configure
+prunes the generations that the kept releases do not need, in this private store only. The Swift configure evaluates none of the
+device Vision packages (zxing-cpp, tesseract, leptonica, tessdata); a device configure that selects `VisionBackports` requires
+them by design, since `backports_requires` in `frameworks/Backports/tools/subset.lua` turns each archive into a requirement.
+The removal line is the end of a task: the three folders are the worktree's own, and the main checkout's `.cache` is never
+a target.
+
+Measured on the replay change `e45fd10ba`, in a worktree with a fresh private cache, and set against run `41207675148` for
+the CI column, since CI is not dispatched for this branch:
+
+| | local | CI (run 41207675148) |
+|---|---|---|
+| clone of the store | 11 s, 4 MB of disk | none |
+| Swift configure | 48 s, 34 package checks, nothing installed, 35 MB | `Configure the Swift component` 4 min 19 s, after 26 min 13 s of `Install the firmware tools` |
+| prepush | 5 min 7 s: the lowered members 299 s, the other checks 8 s | the `quick` job did not exist yet |
+| the round | 6 min 6 s for clone, configure and prepush | 41 min 25 s, of which the `swift` job 33 min 43 s |
+
+The lowered members missed the cache: the worktree's Backports sources differed from the last run that the main checkout's
+cache holds, and the check is keyed by the sources it reads. A hit takes about 2 seconds, measured on the main checkout's
+cache. A configure that installed `combine` and `backports` again (the timed run after `-c`, offline) took 4 min 30 s.
+
+Disk: `df` measured the clone and configure and prepush together at 48 MB, and the removal at 62 MB; `df` counts every writer
+on the volume, so these are approximate. `du` reports the private cache at 7.6 GB, because it counts each clone at full size;
+the blocks are shared with the main store.
+
 ## Reading a failed run
 
 `./xmakew l -P . tools/ci_errors.lua <run-id|job-id>` reads the logs of a run, or of one job, through `gh api`, and for each
