@@ -1,1 +1,1 @@
-cryptokit_sources_digest = "e6789e122f4240f2bc549caee2069840"
+cryptokit_sources_digest = "04e6a77d36bdddc68e125a0d0c9d58de"
