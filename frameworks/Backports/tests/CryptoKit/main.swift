@@ -138,3 +138,33 @@ let rfcOne = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, salt: rfcSalt, inf
 print("hkdf rfc5869 1 \(hex(rfcOne.withUnsafeBytes { Array($0) }) == "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865")")
 let rfcThree = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, outputByteCount: 42)
 print("hkdf rfc5869 3 \(hex(rfcThree.withUnsafeBytes { Array($0) }) == "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8")")
+
+let md5Vectors: [(Data, String)] = [
+    (Data(), "d41d8cd98f00b204e9800998ecf8427e"),
+    (Data("a".utf8), "0cc175b9c0f1b6a831c399e269772661"),
+    (Data("abc".utf8), "900150983cd24fb0d6963f7d28e17f72"),
+    (Data("message digest".utf8), "f96b697d7cb7938d525a2f31aaf161d0"),
+    (Data("abcdefghijklmnopqrstuvwxyz".utf8), "c3fcd3d76192e4007dfb496cca67e13b"),
+    (Data("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".utf8), "d174ab98d277d9f5a5611c2c9f419d9f"),
+    (Data(String(repeating: "1234567890", count: 8).utf8), "57edf4a22be3c955ac49da2e2107b67a"),
+    (Data("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".utf8), "8215ef0796a20bcaaae116d3876c664a"),
+    (Data(repeating: 0x61, count: 1_000_000), "7707d6ae4e027c70eea2a935c2296f21"),
+]
+let sha1Vectors: [(Data, String)] = [
+    (Data(), "da39a3ee5e6b4b0d3255bfef95601890afd80709"),
+    (Data("abc".utf8), "a9993e364706816aba3e25717850c26c9cd0d89d"),
+    (Data("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".utf8), "84983e441c3bd26ebaae4aa1f95129e5e54670f1"),
+    (Data(repeating: 0x61, count: 1_000_000), "34aa973cd4c4daa4f61eeb2bdbad27316534016f"),
+]
+print("md5 vectors \(md5Vectors.allSatisfy { Insecure.MD5.hash(data: $0.0).description == "MD5 digest: " + $0.1 })")
+print("sha1 vectors \(sha1Vectors.allSatisfy { Insecure.SHA1.hash(data: $0.0).description == "SHA1 digest: " + $0.1 })")
+print("insecure sizes \(Insecure.MD5Digest.byteCount) \(Insecure.MD5.byteCount) \(Insecure.MD5.blockByteCount) \(Insecure.SHA1Digest.byteCount) \(Insecure.SHA1.byteCount) \(Insecure.SHA1.blockByteCount)")
+print("insecure as data \(Data(Insecure.MD5.hash(data: Data("abc".utf8))).count) \(Array(Insecure.SHA1.hash(data: Data("abc".utf8))).count)")
+var md5Incremental = Insecure.MD5()
+md5Incremental.update(data: pattern(70, 8))
+md5Incremental.update(data: pattern(130, 9))
+print("md5 incremental \(md5Incremental.finalize().description == Insecure.MD5.hash(data: joined).description)")
+var sha1Incremental = Insecure.SHA1()
+sha1Incremental.update(data: pattern(70, 8))
+sha1Incremental.update(data: pattern(130, 9))
+print("sha1 incremental \(sha1Incremental.finalize().description == Insecure.SHA1.hash(data: joined).description)")
