@@ -1,0 +1,22 @@
+2026-10-31T14:03:05.1527400Z checking for pkg-config ... /opt/homebrew/bin/pkg-config
+2026-10-31T14:03:05.2553300Z checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang ... ok
+2026-10-31T14:03:05.2554870Z checking for the c compiler (cc) ... clang
+2026-10-31T14:03:05.2666710Z checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang ... ok
+2026-10-31T14:03:05.3546650Z checking for flags (-fPIC) ... ok
+2026-10-31T14:03:05.4144780Z checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ ... ok
+2026-10-31T14:03:05.4146600Z checking for the linker (ld) ... clang++
+2026-10-31T14:03:05.4288800Z checking for /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ ... ok
+2026-10-31T14:03:05.4395570Z checking for openssl ... no
+2026-10-31T14:03:05.4398080Z checking for xmake::blocksruntime ... no
+2026-10-31T14:03:05.6157040Z checking for flags (-fPIC) ... ok
+2026-10-31T14:03:05.6434130Z ld: library 'libplist' not found
+2026-10-31T14:03:05.6460210Z clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+2026-10-31T14:31:33.3973330Z   deps = { }, 
+2026-10-31T14:31:33.3973800Z }
+2026-10-31T14:31:33.3973920Z 
+2026-10-31T14:31:33.5427620Z /Users/runner/work/revenant/revenant/.cache/xmake-global/.xmake/packages/s/swift/6.4.0/4fa8886ffd5a4d16abc7350b436185fb.g10732bf4/bin/swift-frontend -frontend -typecheck -parse-stdlib -module-name Swift -target armv7-apple-ios6.0 /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/.xmake501/261031/_9d9a790c57b0675688fe684eab03692f.dir/generic.swift
+2026-10-31T14:31:33.5919240Z /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/.xmake501/261031/_9d9a790c57b0675688fe684eab03692f.dir/generic.swift:2:20: error: values in generic types are only available in iOS 26.0.0 or newer
+2026-10-31T14:31:33.5920070Z 1 | public struct Int { public var _value: Builtin.Word }
+2026-10-31T14:31:33.5920480Z 2 | public struct Held<let count: Int> { public var value: Int }
+2026-10-31T14:31:33.5921390Z   |               |    `- error: values in generic types are only available in iOS 26.0.0 or newer
+2026-10-31T14:31:37.1920120Z curl: (56) The requested URL returned error: 404

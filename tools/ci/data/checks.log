@@ -1,0 +1,18 @@
+2026-10-31T17:11:53.4067560Z [ 64%]: running.test repository/comments_check
+2026-10-31T17:11:54.7156070Z xlate: lifted 201 functions, 2 direct calls, 0 jump table targets, 0 failures
+2026-10-31T17:11:55.5524020Z ok: 200 LSE functions, each lifted to the atomic of its operation, width and ordering
+2026-10-31T17:11:56.4829210Z ok: the lifted code compiles for armv7 to byte, halfword, word and doubleword exclusive pairs
+2026-10-31T17:11:56.4931950Z [ 65%]: running.test repository/comments_test
+2026-10-31T17:11:56.7270070Z comments: 20 tests passed
+2026-10-31T17:11:56.7475340Z [ 65%]: running.test repository/copied_text
+2026-10-31T17:11:57.2042850Z [ 65%]: running.test repository/credentials
+2026-10-31T17:11:57.8736130Z [ 66%]: running.test repository/docs_commands
+2026-10-31T17:11:58.6655640Z frameworks/Backports/tests/Foundation/iso8601_date_formatter_test.m: 2
+2026-10-31T17:11:58.6756610Z error: 1 files carry comments
+2026-10-31T17:22:13.8379720Z error: frameworks/Backports/lowered-members.txt no longer matches frameworks/Backports/src: run ./xmakew l -P . frameworks/Backports/tools/lowered_members.lua and commit the result
+2026-10-31T17:22:13.9242540Z errors: run FoundationBackports_iso8601_date_formatter_test/negative exited 0, but a negative case must fail
+2026-10-31T17:22:13.9252280Z errors: run FoundationBackports_nsurlsession_delegates_test/negative exited 0, but a negative case must fail
+2026-10-31T17:22:13.9418530Z [ 66%]: repository/comments_check ................................................................ failed 5.272s
+2026-10-31T17:22:13.9419040Z errors: comments_check failed
+2026-10-31T17:22:13.9579320Z [100%]: backports/members ........................................................................ failed 987.185s
+2026-10-31T17:22:13.9580100Z errors: members failed

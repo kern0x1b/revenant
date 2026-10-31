@@ -78,6 +78,24 @@ local function leaked(file, dir)
     end
 end
 
+local function self_test()
+    local data = path.join(os.scriptdir(), "data", "credentials")
+    local login = path.join(data, "login.json")
+    local errors = {}
+    if #leaked_paths(login, path.join(data, "leaky")) == 0 then
+        table.insert(errors, "a transcript that holds the access token must be reported as leaked")
+    end
+    if #leaked_paths(login, path.join(data, "clean")) > 0 then
+        table.insert(errors, "a transcript with no token must not be reported")
+    end
+    if seconds_left(login) <= 0 then
+        table.insert(errors, "the fixture's token must have time left")
+    end
+    if #errors > 0 then
+        fail(table.concat(errors, "; "))
+    end
+end
+
 function main(command, ...)
     local args = {...}
     if command == "store" and #args == 1 then
@@ -86,7 +104,9 @@ function main(command, ...)
         left(args[1])
     elseif command == "leaked" and #args == 2 then
         leaked(args[1], args[2])
+    elseif command == "test" and #args == 0 then
+        self_test()
     else
-        fail("usage: credentials.lua store FILE | left FILE | leaked FILE DIR")
+        fail("usage: credentials.lua store FILE | left FILE | leaked FILE DIR | test")
     end
 end
