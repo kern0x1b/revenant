@@ -12,12 +12,14 @@ runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
 - `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
   `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
 
-Every run starts with `quick` on `macos-26`: `./xmakew l -P . tools/prepush.lua`, the checks of [Before a push](#before-a-push-prepush).
-It is on macOS because the lowered-members check reads the SDK. `repository`, `checks`, `backports`, `package` and `swift`
-all `need` it, so a failure that prepush finds costs one short job and starts none of the macOS jobs of the run. The
-other jobs are not cancelled when one of them fails, on purpose: a cancelled job skips every save step that is not
-`always()`, and `backports` (its store and its objects), `package` (its facts, its objects and its store) and `swift`
-(its store) save only on success. A cancel would lose the caches that a sibling still running saves today.
+Every run starts with `quick` on `macos-26`: `./xmakew l -P . tools/prepush.lua`, the checks of [Before a push](#before-a-push-prepush),
+with a 20-minute limit. It is on macOS because the lowered-members check reads the SDK. Its result is cached under
+`.cache/scratch/lowered-members`, keyed by the iOS SDK package and by the files the check reads, so a run whose inputs did not
+change does not regenerate it. `repository`, `checks`, `backports`, `package` and `swift` all `need` it, so a failure that
+prepush finds costs one short job and starts none of the macOS jobs of the run. `package` and `swift` also `need` `backports`
+(see [Backports in CI](#backports-in-ci)). The other jobs are not cancelled when one of them fails, on purpose: a cancelled job
+skips every save step that is not `always()`, and `backports` (its store and its objects), `package` (its facts, its objects
+and its store) and `swift` (its store) save only on success. A cancel would lose the caches that a sibling still running saves today.
 
 A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
@@ -100,7 +102,10 @@ prints each result, so one run lists all the failures:
 - `frameworks/Backports/tests/lowered_members_test.lua`: `frameworks/Backports/tools/lowered-members.txt` equals the
   members generated from `frameworks/Backports/src`. The generator reads the whole SDK header set, so the first run on
   a cold disk is the slow one; measured locally, the generation took about 30 seconds on warm files and the scratch
-  cache returns the result in about 2 seconds;
+  cache returns the result in about 2 seconds. This is the one CI run of the check, in `quick`: `checks` used to run the same
+  script again as its `backports/members` test (781 s of its test step on run `41207675148`), so that test is no longer
+  registered, and `./xmakew test -P .` does not run it. `./xmakew l -P . frameworks/Backports/tests/lowered_members_test.lua`
+  runs it alone;
 - the negative shape: every test source that runs with `--negative` (the host tests declared in
   `frameworks/Backports/xmake.lua` and the emulator's negative targets) must read the flag, itself or through `check.h`,
   and a `check.h` test must return `revenant_finish()`. A test that ignores the flag runs its positive case under
@@ -186,6 +191,31 @@ gh run download "$run" --name backports-libraries --dir ".cache/scratch/ci/$run"
 The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job reached
 the upload, so a run that stopped earlier has none.
 
+## Backports in CI
+
+`backports`, `package` and `swift` each configure the Backports component. `backports` builds its libraries; `package` builds
+the SwiftUI demo against them; `swift` installs the firmware tools through the same configuration. On run `41207675148`, where
+no cache matched, the three jobs did the same work more than once:
+
+| job | step | objects compiled |
+| --- | --- | --- |
+| `backports` | `Configure the Backports component` | 291 of the `backports` store package, 92 of other packages |
+| `package` | `Configure the SwiftUI demo's component` | 292 and 92 |
+| `swift` | `Install the firmware tools through the Backports configuration` | 291 and 92 |
+| `backports` | `Build the Backports component` | 2883 in `build/.objs` |
+| `package` | `Build the demo and package it with its platform package` | 2883 |
+
+`package` restores the Backports objects that `backports` saved in the same run, under the key `backports` saves them with
+(`backports-objects-v2`, the same expression and the same hash of the SDK and linker keys). `backports` saves them before it
+ends, and `needs` starts `package` after it ends, so the entry is there. `swift` has no build step of Backports objects, so it
+reuses the package store: xmake installs a package only when the hash of its configuration is missing from the store, so any
+store that holds the `backports` package is safe to restore, and `swift` restores the newest store of the OS, which is the one
+`backports` saved in the run. Both jobs run after a failed `backports` too, and rebuild what their cache lacks.
+
+Measured on run `41207675148`, not yet on a run of this workflow: the first CI run that restores these caches should show no
+Backports compile in `package`'s build step and no backports install in `swift`'s firmware step. Their wall time grows, since
+they start after `backports`, which took about 30 minutes on that run.
+
 ## What a warm push costs
 
 Measured on one branch with no change to a package recipe, so every store and cache the jobs restore is a hit. The
@@ -207,6 +237,11 @@ time is in the iOS configure itself, in a stretch where xmake prints nothing for
 change skips that configure when the inventory is cached, and `swift` skips it on a dyld hit, which removes it from
 both jobs on a warm push. The first run after the change to the inventory and objects keys, `40045244974`, ran the
 configure and the Backports build once; those entries are now cached.
+
+The table above predates `package` and `swift` needing `backports`. On a warm push they now start when `backports` ends
+(3 min 34 s in the after row), so the wall time is `quick`, then `backports`, then the longer of `package` and `swift`,
+instead of the longest of the parallel jobs. The row does not record `package`'s warm time, so the trade is not measured
+yet: the first CI run that restores the objects and store records it, and this section takes that number when it lands.
 
 ## The emulator workflow
 
