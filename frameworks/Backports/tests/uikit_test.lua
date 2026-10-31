@@ -304,6 +304,42 @@ local AREAS = {
         },
     },
     {
+        name = "UIKeyboardType backport: webSearch and asciiCapableNumberPad",
+        sources = {"UIKeyboardType+Backport.m"},
+        members = {
+            "revenant_keyboard_type_fallback", "revenant_keyboard_type_name",
+        },
+    },
+    {
+        name = "UIBackgroundFetchResult enum backport",
+        sources = {"UIBackgroundFetchResult+Backport.m"},
+        members = {
+            "revenant_background_fetch_result_name",
+        },
+    },
+    {
+        name = "UIUserActivityRestoring protocol backport",
+        sources = {"UIUserActivityRestoring+Backport.m"},
+        members = {
+            "@UIUserActivityRestoring", "revenant_emit_UIUserActivityRestoring",
+        },
+    },
+    {
+        name = "UIApplicationDelegate backport: background fetch, open URL, user activity, shortcut actions",
+        sources = {"UIApplicationDelegate+Backport.m"},
+        members = {
+            "-[UIApplicationDelegate application:performFetchWithCompletionHandler:]",
+            "-[UIApplicationDelegate application:didReceiveRemoteNotification:fetchCompletionHandler:]",
+            "-[UIApplicationDelegate application:handleEventsForBackgroundURLSession:completionHandler:]",
+            "-[UIApplicationDelegate application:openURL:options:]",
+            "-[UIApplicationDelegate application:continueUserActivity:restorationHandler:]",
+            "-[UIApplicationDelegate application:willContinueUserActivityWithType:]",
+            "-[UIApplicationDelegate application:didFailToContinueUserActivityWithType:error:]",
+            "-[UIApplicationDelegate application:didUpdateUserActivity:]",
+            "-[UIApplicationDelegate application:performActionForShortcutItem:completionHandler:]",
+        },
+    },
+    {
         name = "iOS 13 large content viewer: the interaction and the item properties of views",
         sources = {"UILargeContentViewer.m"},
         members = {
