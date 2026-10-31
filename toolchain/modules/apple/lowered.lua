@@ -75,6 +75,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSISO8601DateFormatter",
+        header = {
+            name = "Foundation",
+            directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
+            file = "NSISO8601DateFormatter.h",
+            find = "@interface NSISO8601DateFormatter : NSFormatter <NSSecureCoding> {",
+            replace = "__attribute__((weak_import))\n@interface NSISO8601DateFormatter : NSFormatter <NSSecureCoding> {",
+        },
+    },
+    {
+        member = "kCFISO8601DateFormatWithFractionalSeconds",
+        header = {
+            name = "CoreFoundation",
+            directory = {"System", "Library", "Frameworks", "CoreFoundation.framework", "Headers"},
+            file = "CFDateFormatter.h",
+            find = "kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(macosx(10.13), ios(11.0), watchos(4.0), tvos(11.0))",
+            replace = "kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(macosx(10.13), ios(6.0), watchos(4.0), tvos(11.0))",
+        },
+    },
+    {
         member = "UIKeyboardAppearanceDark",
         header = {
             name = "UIKit",
