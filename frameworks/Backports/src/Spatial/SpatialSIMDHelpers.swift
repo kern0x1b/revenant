@@ -13,12 +13,6 @@ extension simd_double3x3 {
     }
 }
 
-extension simd_float3 {
-    func isApproximatelyEqual(to other: simd_float3, tolerance: Float) -> Bool {
-        abs(x - other.x) < tolerance && abs(y - other.y) < tolerance && abs(z - other.z) < tolerance
-    }
-}
-
 extension simd_float4x3 {
     func isApproximatelyEqual(to other: simd_float4x3, tolerance: Float) -> Bool {
         columns.0.isApproximatelyEqual(to: other.columns.0, tolerance: tolerance) &&
