@@ -4,6 +4,9 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
+#import "../revenant_alias.h"
+
+REVENANT_ALIAS(NSJSONSerialization)
 
 static NSStringEncoding RevenantJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
 {
@@ -855,14 +858,7 @@ static void RevenantJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOp
     [NSException raise:NSInvalidArgumentException format:@"Invalid type in JSON write (%@)", NSStringFromClass([obj class])];
 }
 
-@implementation NSJSONSerialization
-
-+ (BOOL)isValidJSONObject:(id)obj
-{
-    return RevenantJSONValidValue(obj, YES);
-}
-
-+ (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error
+static NSData *revenant_json_encode(id obj, NSJSONWritingOptions opt)
 {
     BOOL fragmentsOK = (opt & NSJSONWritingFragmentsAllowed) != 0;
     if (!fragmentsOK && ![obj isKindOfClass:[NSArray class]] && ![obj isKindOfClass:[NSDictionary class]])
@@ -872,7 +868,7 @@ static void RevenantJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOp
     return [out dataUsingEncoding:NSUTF8StringEncoding];
 }
 
-+ (nullable id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error
+static id revenant_json_decode(NSData *data, NSJSONReadingOptions opt, NSError **error)
 {
     if ((opt & RevenantJSONTopLevelDictionaryAssumed) != 0 && (opt & NSJSONReadingFragmentsAllowed) != 0)
         [NSException raise:NSInvalidArgumentException
@@ -880,11 +876,18 @@ static void RevenantJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOp
     return RevenantJSONParse(data, opt, error);
 }
 
-+ (NSInteger)writeJSONObject:(id)obj toStream:(NSOutputStream *)stream options:(NSJSONWritingOptions)opt error:(NSError **)error
+static NSData *revenant_json_read_all(NSInputStream *stream)
 {
-    NSData *data = [self dataWithJSONObject:obj options:opt error:error];
-    if (!data)
-        return 0;
+    NSMutableData *data = [NSMutableData new];
+    uint8_t buffer[4096];
+    NSInteger read;
+    while ((read = [stream read:buffer maxLength:sizeof(buffer)]) > 0)
+        [data appendBytes:buffer length:(NSUInteger)read];
+    return data;
+}
+
+static NSInteger revenant_json_write_all(NSData *data, NSOutputStream *stream, NSError **error)
+{
     NSInteger total = 0;
     const uint8_t *bytes = data.bytes;
     NSInteger remaining = (NSInteger)data.length;
@@ -900,14 +903,96 @@ static void RevenantJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOp
     return total;
 }
 
+@implementation NSJSONSerialization (RevenantJSON)
+
++ (BOOL)isValidJSONObject:(id)obj
+{
+    return RevenantJSONValidValue(obj, YES);
+}
+
++ (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error
+{
+    return revenant_json_encode(obj, opt);
+}
+
++ (nullable id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error
+{
+    return revenant_json_decode(data, opt, error);
+}
+
++ (NSInteger)writeJSONObject:(id)obj toStream:(NSOutputStream *)stream options:(NSJSONWritingOptions)opt error:(NSError **)error
+{
+    NSData *data = [self dataWithJSONObject:obj options:opt error:error];
+    if (!data)
+        return 0;
+    return revenant_json_write_all(data, stream, error);
+}
+
 + (nullable id)JSONObjectWithStream:(NSInputStream *)stream options:(NSJSONReadingOptions)opt error:(NSError **)error
 {
-    NSMutableData *data = [NSMutableData new];
-    uint8_t buffer[4096];
-    NSInteger read;
-    while ((read = [stream read:buffer maxLength:sizeof(buffer)]) > 0)
-        [data appendBytes:buffer length:(NSUInteger)read];
-    return RevenantJSONParse(data, opt, error);
+    return revenant_json_decode(revenant_json_read_all(stream), opt, error);
 }
 
 @end
+
+#define REVENANT_JSON_FOUNDATION_IOS_11 1443.0
+#define REVENANT_JSON_FOUNDATION_IOS_13 1666.0
+#define REVENANT_JSON_FOUNDATION_IOS_15 1854.0
+
+static IMP revenant_json_original_data;
+static IMP revenant_json_original_write;
+static IMP revenant_json_original_object_data;
+static IMP revenant_json_original_object_stream;
+
+static NSData *revenant_json_data_with_json_object(id self, SEL _cmd, id object, NSUInteger options, NSError **error)
+{
+    if (!(options & NSJSONWritingWithoutEscapingSlashes))
+        return ((NSData * (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_data)(self, _cmd, object, options, error);
+    return revenant_json_encode(object, options);
+}
+
+static NSInteger revenant_json_write_with_stream(id self, SEL _cmd, id object, NSOutputStream *stream, NSUInteger options, NSError **error)
+{
+    BOOL sortedNeedsBackport = (options & NSJSONWritingSortedKeys) != 0 && NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_11;
+    if (!(options & NSJSONWritingWithoutEscapingSlashes) && !sortedNeedsBackport)
+        return ((NSInteger (*)(id, SEL, id, id, NSUInteger, NSError **))revenant_json_original_write)(self, _cmd, object, stream, options, error);
+    NSData *data = [self dataWithJSONObject:object options:options error:error];
+    if (!data)
+        return 0;
+    return revenant_json_write_all(data, stream, error);
+}
+
+static id revenant_json_object_with_data(id self, SEL _cmd, NSData *data, NSUInteger options, NSError **error)
+{
+    if (!(options & (RevenantJSONJSON5Allowed | RevenantJSONTopLevelDictionaryAssumed)))
+        return ((id (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_object_data)(self, _cmd, data, options, error);
+    return revenant_json_decode(data, options, error);
+}
+
+static id revenant_json_object_with_stream(id self, SEL _cmd, NSInputStream *stream, NSUInteger options, NSError **error)
+{
+    if (!(options & (RevenantJSONJSON5Allowed | RevenantJSONTopLevelDictionaryAssumed)))
+        return ((id (*)(id, SEL, id, NSUInteger, NSError **))revenant_json_original_object_stream)(self, _cmd, stream, options, error);
+    return revenant_json_decode(revenant_json_read_all(stream), options, error);
+}
+
+static void revenant_json_wrap(SEL selector, IMP wrapper, IMP *original)
+{
+    Method method = class_getClassMethod([NSJSONSerialization class], selector);
+    if (method == NULL)
+        return;
+    *original = method_getImplementation(method);
+    method_setImplementation(method, wrapper);
+}
+
+__attribute__((constructor)) static void revenant_json_options_install(void)
+{
+    if (NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_13) {
+        revenant_json_wrap(@selector(dataWithJSONObject:options:error:), (IMP)revenant_json_data_with_json_object, &revenant_json_original_data);
+        revenant_json_wrap(@selector(writeJSONObject:toStream:options:error:), (IMP)revenant_json_write_with_stream, &revenant_json_original_write);
+    }
+    if (NSFoundationVersionNumber < REVENANT_JSON_FOUNDATION_IOS_15) {
+        revenant_json_wrap(@selector(JSONObjectWithData:options:error:), (IMP)revenant_json_object_with_data, &revenant_json_original_object_data);
+        revenant_json_wrap(@selector(JSONObjectWithStream:options:error:), (IMP)revenant_json_object_with_stream, &revenant_json_original_object_stream);
+    }
+}

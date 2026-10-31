@@ -1,4 +1,8 @@
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+#import "../revenant_alias.h"
+
+REVENANT_ALIAS(NSProgress)
 
 @interface RevenantProgressFrame : NSObject
 @property (nonatomic, strong) NSProgress *progress;
@@ -10,27 +14,50 @@
 @synthesize progress = _progress, pendingUnitCount = _pendingUnitCount, childAttached = _childAttached, next = _next;
 @end
 
-static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSProgress.current";
+@interface RevenantProgressState : NSObject
+@property (nonatomic) int64_t totalUnitCount;
+@property (nonatomic) int64_t completedUnitCount;
+@property (nonatomic) BOOL cancellable;
+@property (nonatomic) BOOL pausable;
+@property (nonatomic) BOOL cancelled;
+@property (nonatomic) BOOL paused;
+@property (nonatomic, copy) void (^cancellationHandler)(void);
+@property (nonatomic, copy) void (^pausingHandler)(void);
+@property (nonatomic, copy) void (^resumingHandler)(void);
+@property (nonatomic, copy) NSProgressKind kind;
+@property (nonatomic, copy) NSString *localizedDescription;
+@property (nonatomic, copy) NSString *localizedAdditionalDescription;
+@property (nonatomic, strong) NSMutableDictionary<NSProgressUserInfoKey, id> *userInfo;
+@property (nonatomic, strong) NSMutableArray<RevenantProgressFrame *> *implicitChildFrames;
+@end
 
-@implementation NSProgress {
-    int64_t _totalUnitCount;
-    int64_t _completedUnitCount;
-    BOOL _cancellable;
-    BOOL _pausable;
-    BOOL _cancelled;
-    BOOL _paused;
-    void (^_cancellationHandler)(void);
-    void (^_pausingHandler)(void);
-    void (^_resumingHandler)(void);
-    NSProgressKind _kind;
-    NSString *_localizedDescription;
-    NSString *_localizedAdditionalDescription;
-    NSMutableDictionary<NSProgressUserInfoKey, id> *_userInfo;
-    NSMutableArray<RevenantProgressFrame *> *_implicitChildFrames;
+@implementation RevenantProgressState
+- (instancetype)init
+{
+    if ((self = [super init])) {
+        _cancellable = YES;
+        _userInfo = [NSMutableDictionary dictionary];
+    }
+    return self;
+}
+@end
+
+static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSProgress.current";
+static const char RevenantProgressStateKey;
+
+static RevenantProgressState *revenant_progress_state(NSProgress *progress)
+{
+    @synchronized (progress) {
+        RevenantProgressState *state = objc_getAssociatedObject(progress, &RevenantProgressStateKey);
+        if (!state) {
+            state = [[RevenantProgressState alloc] init];
+            objc_setAssociatedObject(progress, &RevenantProgressStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+        return state;
+    }
 }
 
-@dynamic estimatedTimeRemaining, throughput, fileOperationKind, fileURL, fileTotalCount, fileCompletedCount;
-@dynamic cancellationHandler, pausingHandler;
+@implementation NSProgress (RevenantCore)
 
 #pragma mark - The current-progress stack
 
@@ -84,12 +111,13 @@ static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSPr
     if (!frame || frame.progress != self || frame.childAttached)
         return;
     frame.childAttached = YES;
-    if (!_implicitChildFrames)
-        _implicitChildFrames = [NSMutableArray array];
+    RevenantProgressState *state = revenant_progress_state(self);
+    if (!state.implicitChildFrames)
+        state.implicitChildFrames = [NSMutableArray array];
     RevenantProgressFrame *held = [[RevenantProgressFrame alloc] init];
     held.progress = child;
     held.pendingUnitCount = frame.pendingUnitCount;
-    [_implicitChildFrames addObject:held];
+    [state.implicitChildFrames addObject:held];
     if (self.isCancelled)
         [child cancel];
     if (self.isPaused)
@@ -106,9 +134,10 @@ static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSPr
 - (instancetype)initWithParent:(NSProgress *)parentProgressOrNil userInfo:(NSDictionary<NSProgressUserInfoKey, id> *)userInfoOrNil
 {
     if ((self = [super init])) {
-        _userInfo = userInfoOrNil ? [userInfoOrNil mutableCopy] : [NSMutableDictionary dictionary];
-        _cancellable = YES;
-        _pausable = NO;
+        RevenantProgressState *state = revenant_progress_state(self);
+        state.userInfo = userInfoOrNil ? [userInfoOrNil mutableCopy] : [NSMutableDictionary dictionary];
+        state.cancellable = YES;
+        state.pausable = NO;
         if (parentProgressOrNil)
             [parentProgressOrNil revenant_attachImplicitChild:self];
     }
@@ -119,31 +148,32 @@ static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSPr
 
 - (int64_t)totalUnitCount
 {
-    return _totalUnitCount;
+    return revenant_progress_state(self).totalUnitCount;
 }
 
 - (void)setTotalUnitCount:(int64_t)totalUnitCount
 {
-    _totalUnitCount = totalUnitCount;
+    revenant_progress_state(self).totalUnitCount = totalUnitCount;
 }
 
 - (int64_t)completedUnitCount
 {
-    return _completedUnitCount;
+    return revenant_progress_state(self).completedUnitCount;
 }
 
 - (void)setCompletedUnitCount:(int64_t)completedUnitCount
 {
-    _completedUnitCount = completedUnitCount;
+    revenant_progress_state(self).completedUnitCount = completedUnitCount;
 }
 
 - (double)fractionCompleted
 {
-    if (_totalUnitCount <= 0)
+    RevenantProgressState *state = revenant_progress_state(self);
+    if (state.totalUnitCount <= 0)
         return NAN;
-    double total = (double)_totalUnitCount;
-    double fraction = (double)_completedUnitCount;
-    for (RevenantProgressFrame *frame in _implicitChildFrames) {
+    double total = (double)state.totalUnitCount;
+    double fraction = (double)state.completedUnitCount;
+    for (RevenantProgressFrame *frame in state.implicitChildFrames) {
         double childFraction = frame.progress.fractionCompleted;
         if (isnan(childFraction) || childFraction < 0)
             childFraction = 0;
@@ -161,135 +191,167 @@ static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSPr
 
 - (BOOL)isIndeterminate
 {
-    return _totalUnitCount < 0;
+    int64_t total = self.totalUnitCount;
+    int64_t completed = self.completedUnitCount;
+    return total < 0 || completed < 0 || (total == 0 && completed == 0);
 }
 
 #pragma mark - Cancelling and pausing
 
 - (BOOL)isCancellable
 {
-    return _cancellable;
+    return revenant_progress_state(self).cancellable;
 }
 
 - (void)setCancellable:(BOOL)cancellable
 {
-    _cancellable = cancellable;
+    revenant_progress_state(self).cancellable = cancellable;
 }
 
 - (BOOL)isPausable
 {
-    return _pausable;
+    return revenant_progress_state(self).pausable;
 }
 
 - (void)setPausable:(BOOL)pausable
 {
-    _pausable = pausable;
+    revenant_progress_state(self).pausable = pausable;
 }
 
 - (BOOL)isCancelled
 {
-    return _cancelled;
+    return revenant_progress_state(self).cancelled;
 }
 
 - (BOOL)isPaused
 {
-    return _paused;
+    return revenant_progress_state(self).paused;
+}
+
+- (void (^)(void))cancellationHandler
+{
+    return revenant_progress_state(self).cancellationHandler;
 }
 
 - (void)setCancellationHandler:(void (^)(void))cancellationHandler
 {
-    _cancellationHandler = [cancellationHandler copy];
+    revenant_progress_state(self).cancellationHandler = cancellationHandler;
+}
+
+- (void (^)(void))pausingHandler
+{
+    return revenant_progress_state(self).pausingHandler;
 }
 
 - (void)setPausingHandler:(void (^)(void))pausingHandler
 {
-    _pausingHandler = [pausingHandler copy];
+    revenant_progress_state(self).pausingHandler = pausingHandler;
 }
 
 - (void (^)(void))resumingHandler
 {
-    return _resumingHandler;
+    return revenant_progress_state(self).resumingHandler;
 }
 
 - (void)setResumingHandler:(void (^)(void))resumingHandler
 {
-    _resumingHandler = [resumingHandler copy];
+    revenant_progress_state(self).resumingHandler = resumingHandler;
 }
 
 - (void)cancel
 {
-    if (!_cancelled) {
+    RevenantProgressState *state = revenant_progress_state(self);
+    if (!state.cancelled) {
         [self willChangeValueForKey:@"cancelled"];
-        _cancelled = YES;
+        state.cancelled = YES;
         [self didChangeValueForKey:@"cancelled"];
-        if (_cancellationHandler)
-            _cancellationHandler();
+        if (state.cancellationHandler)
+            state.cancellationHandler();
     }
-    for (RevenantProgressFrame *frame in _implicitChildFrames)
+    for (RevenantProgressFrame *frame in state.implicitChildFrames)
         [frame.progress cancel];
 }
 
 - (void)pause
 {
-    if (!_paused) {
+    RevenantProgressState *state = revenant_progress_state(self);
+    if (!state.paused) {
         [self willChangeValueForKey:@"paused"];
-        _paused = YES;
+        state.paused = YES;
         [self didChangeValueForKey:@"paused"];
-        if (_pausingHandler)
-            _pausingHandler();
+        if (state.pausingHandler)
+            state.pausingHandler();
     }
-    for (RevenantProgressFrame *frame in _implicitChildFrames)
+    for (RevenantProgressFrame *frame in state.implicitChildFrames)
         [frame.progress pause];
 }
 
 - (void)resume
 {
+    RevenantProgressState *state = revenant_progress_state(self);
+    if (state.paused) {
+        [self willChangeValueForKey:@"paused"];
+        state.paused = NO;
+        [self didChangeValueForKey:@"paused"];
+        if (state.resumingHandler)
+            state.resumingHandler();
+    }
+    for (RevenantProgressFrame *frame in state.implicitChildFrames)
+        [frame.progress resume];
 }
 
 #pragma mark - Description, kind, userInfo
 
 - (NSString *)localizedDescription
 {
-    return _localizedDescription ?: @"";
+    return revenant_progress_state(self).localizedDescription ?: @"";
 }
 
 - (void)setLocalizedDescription:(NSString *)localizedDescription
 {
-    _localizedDescription = [localizedDescription copy];
+    revenant_progress_state(self).localizedDescription = localizedDescription;
 }
 
 - (NSString *)localizedAdditionalDescription
 {
-    return _localizedAdditionalDescription ?: @"";
+    return revenant_progress_state(self).localizedAdditionalDescription ?: @"";
 }
 
 - (void)setLocalizedAdditionalDescription:(NSString *)localizedAdditionalDescription
 {
-    _localizedAdditionalDescription = [localizedAdditionalDescription copy];
+    NSString *description = localizedAdditionalDescription;
+    if (!description) {
+        NSNumber *total = [self.userInfo objectForKey:NSProgressFileTotalCountKey];
+        NSNumber *done = [self.userInfo objectForKey:NSProgressFileCompletedCountKey];
+        if (total && done)
+            description = [NSString stringWithFormat:@"%@ of %@", done, total];
+    }
+    revenant_progress_state(self).localizedAdditionalDescription = description;
 }
 
 - (NSProgressKind)kind
 {
-    return _kind;
+    return revenant_progress_state(self).kind;
 }
 
 - (void)setKind:(NSProgressKind)kind
 {
-    _kind = [kind copy];
+    revenant_progress_state(self).kind = kind;
 }
 
 - (NSDictionary<NSProgressUserInfoKey, id> *)userInfo
 {
-    return [_userInfo copy];
+    return [revenant_progress_state(self).userInfo copy];
 }
 
 - (void)setUserInfoObject:(id)objectOrNil forKey:(NSProgressUserInfoKey)key
 {
+    NSMutableDictionary *userInfo = revenant_progress_state(self).userInfo;
     [self willChangeValueForKey:@"userInfo"];
     if (objectOrNil)
-        _userInfo[key] = objectOrNil;
+        userInfo[key] = objectOrNil;
     else
-        [_userInfo removeObjectForKey:key];
+        [userInfo removeObjectForKey:key];
     [self didChangeValueForKey:@"userInfo"];
 }
 

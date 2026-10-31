@@ -1,9 +1,11 @@
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 #include <uuid/uuid.h>
+#import "../revenant_alias.h"
 
-__attribute__((visibility("hidden")))
-@interface __NSConcreteUUID : NSUUID
-@end
+REVENANT_ALIAS(NSUUID)
+
+static char RevenantUUIDBytesKey;
 
 static NSUInteger revenant_uuid_hash(const uint8_t *bytes)
 {
@@ -23,48 +25,92 @@ static NSException *revenant_uuid_unreadable(NSString *reason)
     return [NSException exceptionWithName:NSInvalidUnarchiveOperationException reason:reason userInfo:nil];
 }
 
-@implementation NSUUID
+static void revenant_uuid_store(NSUUID *uuid, const uuid_t bytes)
+{
+    objc_setAssociatedObject(uuid, &RevenantUUIDBytesKey, [NSData dataWithBytes:bytes length:sizeof(uuid_t)], OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+static void revenant_uuid_load(NSUUID *uuid, uuid_t bytes)
+{
+    NSData *stored = objc_getAssociatedObject(uuid, &RevenantUUIDBytesKey);
+    if (stored.length == sizeof(uuid_t))
+        memcpy(bytes, stored.bytes, sizeof(uuid_t));
+    else
+        memset(bytes, 0, sizeof(uuid_t));
+}
+
+@interface NSUUID (RevenantCore) <NSCopying, NSSecureCoding>
+@end
+
+@implementation NSUUID (RevenantCore)
 
 + (instancetype)UUID
 {
     return [[self alloc] init];
 }
 
-+ (id)allocWithZone:(NSZone *)zone
++ (BOOL)supportsSecureCoding
 {
-    if (self == [NSUUID class])
-        return [__NSConcreteUUID allocWithZone:zone];
-    return [super allocWithZone:zone];
+    return YES;
 }
 
 - (instancetype)init
 {
+    if ((self = [super init])) {
+        uuid_t bytes;
+        uuid_generate_random(bytes);
+        revenant_uuid_store(self, bytes);
+    }
     return self;
 }
 
 - (instancetype)initWithUUIDString:(NSString *)string
 {
-    return nil;
+    if (!(self = [self init]))
+        return nil;
+    uuid_t bytes;
+    const char *characters = string.UTF8String;
+    if (!characters || uuid_parse(characters, bytes) != 0)
+        return nil;
+    revenant_uuid_store(self, bytes);
+    return self;
 }
 
 - (instancetype)initWithUUIDBytes:(const uuid_t)bytes
 {
-    return nil;
+    if (!(self = [self init]))
+        return nil;
+    uuid_t copy;
+    if (bytes)
+        memcpy(copy, bytes, sizeof(uuid_t));
+    else
+        memset(copy, 0, sizeof(uuid_t));
+    revenant_uuid_store(self, copy);
+    return self;
 }
 
 - (void)getUUIDBytes:(uuid_t)bytes
 {
-    memset(bytes, 0, sizeof(uuid_t));
+    revenant_uuid_load(self, bytes);
 }
 
 - (NSString *)UUIDString
 {
-    return @"";
+    uuid_t bytes;
+    revenant_uuid_load(self, bytes);
+    uuid_string_t text;
+    uuid_unparse_upper(bytes, text);
+    return [NSString stringWithUTF8String:text];
+}
+
+- (NSString *)description
+{
+    return [self UUIDString];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return nil;
+    return self;
 }
 
 - (NSUInteger)hash
@@ -86,11 +132,6 @@ static NSException *revenant_uuid_unreadable(NSString *reason)
     return memcmp(mine, theirs, sizeof(uuid_t)) == 0;
 }
 
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     uuid_t bytes;
@@ -107,67 +148,6 @@ static NSException *revenant_uuid_unreadable(NSString *reason)
     if (length != sizeof(uuid_t))
         [revenant_uuid_unreadable(@"The data couldn’t be read because it isn’t in the correct format.") raise];
     return [self initWithUUIDBytes:bytes];
-}
-
-@end
-
-@implementation __NSConcreteUUID {
-    uuid_t _uuidBytes;
-}
-
-- (instancetype)init
-{
-    if ((self = [super init]))
-        uuid_generate_random(_uuidBytes);
-    return self;
-}
-
-- (instancetype)initWithUUIDString:(NSString *)string
-{
-    if (!(self = [super init]))
-        return nil;
-    const char *characters = string.UTF8String;
-    if (!characters || uuid_parse(characters, _uuidBytes) != 0)
-        return nil;
-    return self;
-}
-
-- (instancetype)initWithUUIDBytes:(const uuid_t)bytes
-{
-    if (!(self = [super init]))
-        return nil;
-    if (bytes)
-        memcpy(_uuidBytes, bytes, sizeof(uuid_t));
-    else
-        memset(_uuidBytes, 0, sizeof(uuid_t));
-    return self;
-}
-
-- (void)getUUIDBytes:(uuid_t)bytes
-{
-    memcpy(bytes, _uuidBytes, sizeof(uuid_t));
-}
-
-- (NSString *)UUIDString
-{
-    uuid_string_t text;
-    uuid_unparse_upper(_uuidBytes, text);
-    return [NSString stringWithUTF8String:text];
-}
-
-- (NSString *)description
-{
-    return [self UUIDString];
-}
-
-- (id)copyWithZone:(NSZone *)zone
-{
-    return self;
-}
-
-- (Class)classForCoder
-{
-    return [NSUUID class];
 }
 
 @end

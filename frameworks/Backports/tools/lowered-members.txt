@@ -1914,6 +1914,7 @@ class RevenantProgressFrame
 class RevenantProgressLink
 class RevenantProgressObserver
 class RevenantProgressPatch
+class RevenantProgressState
 class RevenantProgressSubscriber
 class RevenantProviderItem
 class RevenantPushBridge
@@ -2708,7 +2709,6 @@ class WKWebViewConfiguration
 class WKWebpagePreferences
 class WKWebsiteDataStore
 class WKWindowFeatures
-class __NSConcreteUUID
 class cls
 enum AAAttributionErrorCodePlatformNotSupported
 enum APActivationPayloadErrorCodeDisallowed
@@ -23877,7 +23877,6 @@ member NSProgress -resignCurrent
 member NSProgress -resume
 member NSProgress -resumingHandler
 member NSProgress -revenant_attachImplicitChild:
-member NSProgress -revenant_progressResumingHandler
 member NSProgress -setCancellable:
 member NSProgress -setCancellationHandler:
 member NSProgress -setCompletedUnitCount:
@@ -24559,11 +24558,11 @@ member NSURLSessionWebSocketTask -suspend
 member NSURLSessionWebSocketTask -taskDescription
 member NSURLSessionWebSocketTask -taskIdentifier
 member NSUUID +UUID
-member NSUUID +allocWithZone:
 member NSUUID +supportsSecureCoding
 member NSUUID -UUIDString
 member NSUUID -compare:
 member NSUUID -copyWithZone:
+member NSUUID -description
 member NSUUID -encodeWithCoder:
 member NSUUID -getUUIDBytes:
 member NSUUID -hash
@@ -27517,6 +27516,7 @@ member RevenantProgressObserver -start
 member RevenantProgressObserver -stop
 member RevenantProgressObserver -view
 member RevenantProgressPatch +load
+member RevenantProgressState -init
 member RevenantProviderItem -activityViewController:itemForActivityType:
 member RevenantProviderItem -activityViewControllerPlaceholderItem:
 member RevenantProviderItem -initWithProvider:
@@ -35336,14 +35336,6 @@ member WKWindowFeatures -toolbarsVisibility
 member WKWindowFeatures -width
 member WKWindowFeatures -x
 member WKWindowFeatures -y
-member __NSConcreteUUID -UUIDString
-member __NSConcreteUUID -classForCoder
-member __NSConcreteUUID -copyWithZone:
-member __NSConcreteUUID -description
-member __NSConcreteUUID -getUUIDBytes:
-member __NSConcreteUUID -init
-member __NSConcreteUUID -initWithUUIDBytes:
-member __NSConcreteUUID -initWithUUIDString:
 member cls -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
 protocol ARAnchorCopying
 protocol ARTrackable

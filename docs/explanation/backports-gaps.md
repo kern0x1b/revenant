@@ -188,7 +188,6 @@ The refusals in `B/Security` (SecAccessControl, SecKey, SharedWebCredentials) ar
 
 ## Reviewed, not findings
 
-- `B/Foundation/NSUUID.m:60-63`: the base `UUIDString` returns @"". It is unreachable, because `+allocWithZone:` (`NSUUID.m:33-38`) routes every `NSUUID` to `__NSConcreteUUID`.
 - `B/Contacts/CNChangeHistoryEvent13.m`: the base visitor and encoder are empty, and that is an abstract base. The subclasses implement them.
 - `B/AVKit/AVPictureInPictureController.m:60-63`: `+isPictureInPictureSupported` answers YES because the in-app picture-in-picture window is implemented (pan, double-tap close). The honest limit is that there is no system-wide picture-in-picture.
 - `B/Metal/RevenantMetalDrawable.m:37-47` (`present`) is real. The `endEncoding` no-ops in `MTLComputeCommandEncoder8.m` and `MTLBlitCommandEncoder8.m` are correct, because the GLES dispatch runs synchronously (`MTLComputeCommandEncoder8.m:153-176`).

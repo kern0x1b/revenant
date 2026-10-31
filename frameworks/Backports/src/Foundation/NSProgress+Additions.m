@@ -14,12 +14,6 @@ static void revenant_progress_set(NSProgress *progress, NSString *key, id value)
     [progress setUserInfoObject:value forKey:key];
 }
 
-static id revenant_progress_handler(NSProgress *progress, const char *name)
-{
-    Ivar ivar = class_getInstanceVariable([progress class], name);
-    return ivar ? object_getIvar(progress, ivar) : nil;
-}
-
 @implementation NSProgress (RevenantAdditions)
 
 + (NSProgress *)discreteProgressWithTotalUnitCount:(int64_t)unitCount
@@ -52,16 +46,6 @@ static id revenant_progress_handler(NSProgress *progress, const char *name)
     int64_t completed = self.completedUnitCount;
     BOOL indeterminate = total < 0 || (total == 0 && completed == 0);
     return !indeterminate && completed >= total;
-}
-
-- (void (^)(void))cancellationHandler
-{
-    return revenant_progress_handler(self, "_cancellationHandler");
-}
-
-- (void (^)(void))pausingHandler
-{
-    return revenant_progress_handler(self, "_pausingHandler");
 }
 
 - (NSNumber *)estimatedTimeRemaining

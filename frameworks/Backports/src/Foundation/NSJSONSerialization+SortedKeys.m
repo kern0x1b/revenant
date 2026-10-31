@@ -113,7 +113,7 @@ REVENANT_BACKPORT_EXPORT NSData *revenant_sorted_keys_data(id object, NSUInteger
 
 static NSData *revenant_data_with_json_object(id self, SEL _cmd, id object, NSUInteger options, NSError **error)
 {
-    if (!(options & REVENANT_JSON_SORTED_KEYS))
+    if (!(options & REVENANT_JSON_SORTED_KEYS) || (options & NSJSONWritingWithoutEscapingSlashes))
         return revenant_original_data(self, _cmd, object, options, error);
     return revenant_sorted_keys_data(object, options, error);
 }
