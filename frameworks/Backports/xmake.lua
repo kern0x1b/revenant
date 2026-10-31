@@ -423,6 +423,8 @@ local FOUNDATION_TESTS = {
     file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
     header_bytes = {"RevenantHeaderBytes.m"},
     metadata_items = {"NSMetadataQuery+Items7.m"},
+    nsurlsession_delegates = {"nsurlsession_delegates_test.m"},
+    iso8601_date_formatter = {"iso8601_date_formatter_test.m"},
 }
 
 local QUARTZCORE_TESTS = {
