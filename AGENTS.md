@@ -74,6 +74,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `.cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back. The whole of `.cache` is capped at
   50 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
   shows what is there. It is in `docs/guides/machine.md`.
+  A linked worktree has no cache of its own, and `./xmakew` refuses to run there without `REVENANT_CACHE`: it would otherwise use
+  the main checkout's `.cache`, which every worker shares. Set `REVENANT_CACHE=<worktree>/.cache-private` for each run, echo it first,
+  and never point it at the main checkout's `.cache`.
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that

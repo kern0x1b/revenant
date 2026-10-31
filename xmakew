@@ -14,7 +14,15 @@ if [ -n "$common" ]; then
 else
     checkout=$root
 fi
-cache=${REVENANT_CACHE:-$checkout/.cache}
+gitdir=$(git -C "$root" rev-parse --path-format=absolute --git-dir 2>/dev/null || true)
+if [ -n "${REVENANT_CACHE:-}" ]; then
+    cache=$REVENANT_CACHE
+elif [ -n "$common" ] && [ "$gitdir" != "$common" ]; then
+    echo "xmakew: $root is a linked worktree, and its cache must not fall back to the main checkout's $checkout/.cache: set REVENANT_CACHE to a directory of this worktree" >&2
+    exit 1
+else
+    cache=$checkout/.cache
+fi
 case $cache in
     /*) ;;
     *) cache=$(pwd)/$cache ;;

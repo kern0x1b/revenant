@@ -18,3 +18,4 @@ device.env*
 device.*.env
 !device.env.example
 local.env
+/.cache-private/
