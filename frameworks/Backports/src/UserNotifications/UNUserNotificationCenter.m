@@ -1,4 +1,4 @@
-#import "RevenantUserNotifications.h"
+#import "RevenantUserNotificationCenter.h"
 #import "../RevenantSayOnce.h"
 #import <objc/runtime.h>
 
@@ -205,23 +205,9 @@ static dispatch_queue_t revenant_center_queue(void)
     return queue;
 }
 
-void revenant_on_main(void (^work)(void))
-{
-    if ([NSThread isMainThread])
-        work();
-    else
-        dispatch_sync(dispatch_get_main_queue(), work);
-}
-
 static void revenant_say_once(NSString *key, NSString *text)
 {
     revenant_say_once_for(key, text);
-}
-
-NSError *revenant_unsupported(NSString *reason)
-{
-    return [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError
-                           userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
 static UNNotificationRequest *revenant_request_of(UILocalNotification *notification)
@@ -573,6 +559,22 @@ static void revenant_hook_delegate(void)
                 [application cancelLocalNotification:pending];
     });
     [[RevenantRegionMonitor revenant_sharedMonitor] revenant_removeRequestsWithIdentifiers:nil];
+}
+
+- (void)getDeliveredNotificationsWithCompletionHandler:(void (^)(NSArray<UNNotification *> *notifications))completionHandler
+{
+    void (^done)(NSArray *) = [completionHandler copy];
+    dispatch_async(revenant_center_queue(), ^{
+        done(@[]);
+    });
+}
+
+- (void)removeDeliveredNotificationsWithIdentifiers:(NSArray<NSString *> *)identifiers
+{
+}
+
+- (void)removeAllDeliveredNotifications
+{
 }
 
 - (void)revenant_deliver:(UILocalNotification *)local state:(UIApplicationState)state

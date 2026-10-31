@@ -308,7 +308,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
     backports_tests("backports", {generator = "backports_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
-                                  uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua",
+                                  uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
@@ -529,6 +529,8 @@ local FOUNDATION_TESTS = {
     file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
     header_bytes = {"RevenantHeaderBytes.m"},
     metadata_items = {"NSMetadataQuery+Items7.m"},
+    nsurlsession_delegates = {},
+    iso8601_date_formatter = {},
 }
 
 local QUARTZCORE_TESTS = {

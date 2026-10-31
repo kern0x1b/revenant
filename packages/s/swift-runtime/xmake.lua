@@ -467,6 +467,10 @@ package("swift-runtime")
             build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift"), path.join(revenant_overlay, "QuartzCore", "CAFrameRateRange.swift")},
                           table.join(foundation_links, {"-framework", "QuartzCore"}), nil,
                           {module_cache = quartzcore_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+            local coremedia_cache = path.join(generated, "module-cache-coremedia")
+            os.mkdir(coremedia_cache)
+            build_overlay("CoreMedia", {path.join(revenant_overlay, "CoreMedia", "CMTime.swift")}, {"-framework", "CoreMedia"}, nil,
+                          {module_cache = coremedia_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),

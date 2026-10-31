@@ -293,7 +293,8 @@ local AREAS = {
     },
     {
         name = "user notifications: the notification center over local notifications",
-        sources = {"UNUserNotificationCenter.m"},
+        library = "UserNotifications",
+        sources = {"UNUserNotificationCenter.m", "RevenantUserNotificationSupport.m", "UNNotificationTrigger.m"},
         members = {
             "@UNUserNotificationCenter", "+[UNUserNotificationCenter currentNotificationCenter]", "-[UNUserNotificationCenter delegate]",
             "-[UNUserNotificationCenter setDelegate:]", "-[UNUserNotificationCenter requestAuthorizationWithOptions:completionHandler:]",
@@ -301,6 +302,58 @@ local AREAS = {
             "-[UNUserNotificationCenter setNotificationCategories:]", "-[UNUserNotificationCenter getNotificationCategoriesWithCompletionHandler:]",
             "-[UNUserNotificationCenter getPendingNotificationRequestsWithCompletionHandler:]",
             "-[UNUserNotificationCenter removePendingNotificationRequestsWithIdentifiers:]", "-[UNUserNotificationCenter removeAllPendingNotificationRequests]",
+            "-[UNUserNotificationCenter getDeliveredNotificationsWithCompletionHandler:]",
+            "-[UNUserNotificationCenter removeDeliveredNotificationsWithIdentifiers:]", "-[UNUserNotificationCenter removeAllDeliveredNotifications]",
+            "-[UNNotificationSettings authorizationStatus]", "-[UNNotificationSettings soundSetting]", "-[UNNotificationSettings alertSetting]",
+            "-[UNNotificationSettings badgeSetting]",
+        },
+    },
+    {
+        name = "user notifications: content, sound and the mutable content",
+        library = "UserNotifications",
+        sources = {"UNNotificationContent.m"},
+        members = {
+            "@UNNotificationContent", "-[UNNotificationContent title]", "-[UNNotificationContent subtitle]", "-[UNNotificationContent body]",
+            "-[UNNotificationContent badge]", "-[UNNotificationContent sound]", "-[UNNotificationContent userInfo]",
+            "-[UNNotificationContent categoryIdentifier]", "-[UNNotificationContent threadIdentifier]", "-[UNNotificationContent attachments]",
+            "@UNMutableNotificationContent", "-[UNMutableNotificationContent setTitle:]", "-[UNMutableNotificationContent setSubtitle:]",
+            "-[UNMutableNotificationContent setBody:]", "-[UNMutableNotificationContent setBadge:]", "-[UNMutableNotificationContent setSound:]",
+            "-[UNMutableNotificationContent setUserInfo:]", "-[UNMutableNotificationContent setCategoryIdentifier:]",
+            "-[UNMutableNotificationContent setThreadIdentifier:]", "-[UNMutableNotificationContent setAttachments:]",
+            "@UNNotificationSound", "+[UNNotificationSound defaultSound]", "+[UNNotificationSound soundNamed:]",
+        },
+    },
+    {
+        name = "user notifications: requests, notifications and responses",
+        library = "UserNotifications",
+        sources = {"UNNotificationRequest.m", "UNNotificationResponse+Scene13.m"},
+        members = {
+            "@UNNotificationRequest", "+[UNNotificationRequest requestWithIdentifier:content:trigger:]", "-[UNNotificationRequest identifier]",
+            "-[UNNotificationRequest content]", "-[UNNotificationRequest trigger]", "@UNNotification", "-[UNNotification request]",
+            "-[UNNotification date]", "@UNNotificationResponse", "-[UNNotificationResponse notification]", "-[UNNotificationResponse actionIdentifier]",
+            "-[UNNotificationResponse targetScene]", "@UNTextInputNotificationResponse", "-[UNTextInputNotificationResponse userText]",
+        },
+    },
+    {
+        name = "user notifications: time interval, calendar and push triggers",
+        library = "UserNotifications",
+        sources = {"UNNotificationTrigger.m", "UNPushNotificationTrigger10.m"},
+        members = {
+            "@UNNotificationTrigger", "-[UNNotificationTrigger repeats]", "@UNTimeIntervalNotificationTrigger",
+            "+[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:repeats:]", "-[UNTimeIntervalNotificationTrigger timeInterval]",
+            "-[UNTimeIntervalNotificationTrigger nextTriggerDate]", "@UNCalendarNotificationTrigger",
+            "+[UNCalendarNotificationTrigger triggerWithDateMatchingComponents:repeats:]", "-[UNCalendarNotificationTrigger dateComponents]",
+            "-[UNCalendarNotificationTrigger nextTriggerDate]", "@UNPushNotificationTrigger",
+        },
+    },
+    {
+        name = "user notifications: categories, actions and the service extension",
+        library = "UserNotifications",
+        sources = {"UNNotificationCategory.m", "UNNotificationCategory+HiddenPreviews.m", "UNNotificationAction.m", "UNNotificationServiceExtension.m"},
+        members = {
+            "@UNNotificationCategory", "+[UNNotificationCategory categoryWithIdentifier:actions:intentIdentifiers:options:]", "-[UNNotificationCategory identifier]",
+            "-[UNNotificationCategory actions]", "-[UNNotificationCategory intentIdentifiers]", "-[UNNotificationCategory options]",
+            "@UNNotificationAction", "@UNTextInputNotificationAction", "@UNNotificationServiceExtension",
         },
     },
     {

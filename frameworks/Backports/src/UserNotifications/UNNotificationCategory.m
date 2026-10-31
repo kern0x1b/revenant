@@ -93,9 +93,14 @@
 
 - (NSString *)description
 {
+#if TARGET_OS_IPHONE
+    NSString *carPlay = (_options & UNNotificationCategoryOptionAllowInCarPlay) ? @"YES" : @"NO";
+#else
+    NSString *carPlay = @"NO";
+#endif
     return [NSString stringWithFormat:@"<%@: %p; identifier: %@, actions: %@, minimalAction: %@, intentIdentifiers: %@, custom dismiss: %@, CarPlay: %@>",
                                       [self class], self, _identifier, _actions, @[], _intentIdentifiers, (_options & UNNotificationCategoryOptionCustomDismissAction) ? @"YES" : @"NO",
-                                      (_options & UNNotificationCategoryOptionAllowInCarPlay) ? @"YES" : @"NO"];
+                                      carPlay];
 }
 
 @end

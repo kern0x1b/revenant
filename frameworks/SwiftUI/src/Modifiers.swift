@@ -225,6 +225,31 @@ extension View {
     public func onAppear(perform action: (() -> Void)? = nil) -> some View {
         _ModifiedView(content: self, modifier: AppearModifier(action: action, disappear: nil))
     }
+    public func onGeometryChange<Value>(for type: Value.Type, of transform: @escaping @Sendable (GeometryProxy) -> Value, action: @escaping (_ newValue: Value) -> Void) -> some View where Value: Equatable, Value: Sendable {
+        _ModifiedView(content: self, modifier: GeometryChangeModifier(geometry: transform, action: action))
+    }
+}
+
+struct GeometryChangeModifier<Value: Equatable>: NodeModifier {
+    let geometry: (GeometryProxy) -> Value
+    let action: (Value) -> Void
+    func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { GeometryChangeNode<Value>() }
+}
+
+final class GeometryChangeNode<Value: Equatable>: ContainerNode {
+    var lastValue: Value?
+    override func update(_ view: any View, _ env: EnvironmentValues) {
+        super.update(view, env)
+        let m = view as! ModifiedViewLike
+        content = adopt(reconcile(content, m.modifiedContent, env))
+        let modifier = m.modifierValue as! GeometryChangeModifier<Value>
+        let proxy = GeometryProxy(size: children.first?.sizeThatFits(ProposedSize(width: nil, height: nil)) ?? .zero)
+        let value = modifier.geometry(proxy)
+        if lastValue != value {
+            lastValue = value
+            DispatchQueue.main.async { modifier.action(value) }
+        }
+    }
 }
 
 public enum TextAlignment { case leading, center, trailing }

@@ -3804,6 +3804,9 @@ enum UIAlertControllerStyleActionSheet
 enum UIAlertControllerStyleAlert
 enum UIAxisHorizontal
 enum UIAxisVertical
+enum UIBackgroundFetchResultFailed
+enum UIBackgroundFetchResultNewData
+enum UIBackgroundFetchResultNoData
 enum UIBackgroundRefreshStatusDenied
 enum UIBarPositionAny
 enum UIBarPositionBottom
@@ -5551,6 +5554,7 @@ function revenant_apply_trait_extras
 function revenant_attributes_carried
 function revenant_attributes_merge
 function revenant_attributes_text
+function revenant_background_fetch_result_name
 function revenant_bar_at_edge
 function revenant_bar_needs_refresh
 function revenant_bar_say_once
@@ -30784,6 +30788,10 @@ member UIControl -setToolTip:
 member UIControl -showsMenuAsPrimaryAction
 member UIControl -toolTip
 member UIControl -toolTipInteraction
+member UICornerConfiguration +capsuleConfiguration
+member UICornerConfiguration +capsuleConfigurationWithMaximumRadius:
+member UICornerConfiguration -copyWithZone:
+member UICornerConfiguration -initWithMaximumRadius:
 member UICubicTimingParameters -_setAnimationCurve:
 member UICubicTimingParameters -animationCurve
 member UICubicTimingParameters -controlPoint1
@@ -33919,6 +33927,7 @@ member UIView -convertPoint:fromCoordinateSpace:
 member UIView -convertPoint:toCoordinateSpace:
 member UIView -convertRect:fromCoordinateSpace:
 member UIView -convertRect:toCoordinateSpace:
+member UIView -cornerConfiguration
 member UIView -directionalLayoutMargins
 member UIView -drawViewHierarchyInRect:afterScreenUpdates:
 member UIView -effectiveUserInterfaceLayoutDirection
@@ -33969,6 +33978,7 @@ member UIView -scalesLargeContentImage
 member UIView -semanticContentAttribute
 member UIView -setAccessibilityIgnoresInvertColors:
 member UIView -setAnchorPoint:
+member UIView -setCornerConfiguration:
 member UIView -setDirectionalLayoutMargins:
 member UIView -setFocusEffect:
 member UIView -setFocusGroupIdentifier:
@@ -34492,11 +34502,14 @@ member UNUserNotificationCenter +currentNotificationCenter
 member UNUserNotificationCenter +load
 member UNUserNotificationCenter -addNotificationRequest:withCompletionHandler:
 member UNUserNotificationCenter -delegate
+member UNUserNotificationCenter -getDeliveredNotificationsWithCompletionHandler:
 member UNUserNotificationCenter -getNotificationCategoriesWithCompletionHandler:
 member UNUserNotificationCenter -getNotificationSettingsWithCompletionHandler:
 member UNUserNotificationCenter -getPendingNotificationRequestsWithCompletionHandler:
 member UNUserNotificationCenter -initRevenant
+member UNUserNotificationCenter -removeAllDeliveredNotifications
 member UNUserNotificationCenter -removeAllPendingNotificationRequests
+member UNUserNotificationCenter -removeDeliveredNotificationsWithIdentifiers:
 member UNUserNotificationCenter -removePendingNotificationRequestsWithIdentifiers:
 member UNUserNotificationCenter -requestAuthorizationWithOptions:completionHandler:
 member UNUserNotificationCenter -revenant_deliver:state:
@@ -35428,7 +35441,11 @@ protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
 protocol NSURLProtocolClient
+protocol NSURLSessionDataDelegate
+protocol NSURLSessionDelegate
+protocol NSURLSessionDownloadDelegate
 protocol NSURLSessionStreamDelegate
+protocol NSURLSessionTaskDelegate
 protocol OS_nw_browser
 protocol OS_nw_connection
 protocol OS_nw_connection_group
@@ -35527,6 +35544,7 @@ protocol UITraitChangeRegistration
 protocol UITraitDefinition
 protocol UITraitEnvironment
 protocol UITraitOverrides
+protocol UIUserActivityRestoring
 protocol UIViewControllerAnimatedTransitioning
 protocol UIViewControllerContextTransitioning
 protocol UIViewControllerInteractiveTransitioning
@@ -36183,6 +36201,7 @@ protocol_member UITraitEnvironment -traitCollection
 protocol_member UITraitEnvironment -traitCollectionDidChange:
 protocol_member UITraitOverrides -containsTrait:
 protocol_member UITraitOverrides -removeTrait:
+protocol_member UIUserActivityRestoring -restoreUserActivityState:
 protocol_member UIViewControllerAnimatedTransitioning -animateTransition:
 protocol_member UIViewControllerAnimatedTransitioning -transitionDuration:
 protocol_member UIViewControllerContextTransitioning -cancelInteractiveTransition

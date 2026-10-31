@@ -109,6 +109,15 @@ open class UIHostingController<Content: View>: _HostingViewController {
             if #available(iOS 7.0, *) { preferredContentSize = size } else { setValue(NSValue(cgSize: size), forKey: "contentSizeForViewInPopover") }
         }
     }
+    var storedSafeAreaRegions: SafeAreaRegions = .all
+    @available(iOS 16.4, *)
+    public var safeAreaRegions: SafeAreaRegions {
+        get { storedSafeAreaRegions }
+        set {
+            storedSafeAreaRegions = newValue
+            _Unsupported.note("UIHostingController.safeAreaRegions", "this release has no safe area to ignore: a UIHostingController of iOS 6 lays its content out below the status bar and below the navigation bar, so the regions it is given change nothing")
+        }
+    }
     public func sizeThatFits(in size: CGSize) -> CGSize {
         let proposal = ProposedSize(width: size.width, height: size.height >= 1e5 ? nil : size.height)
         return items.first?.sizeThatFits(proposal) ?? .zero
