@@ -1,4 +1,4 @@
-#import "RevenantUserNotifications.h"
+#import "RevenantUserNotificationCenter.h"
 #import "../RevenantSayOnce.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

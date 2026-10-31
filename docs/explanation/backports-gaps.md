@@ -316,9 +316,24 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UIView+iOS13.m:34 | @"modify-animations" |
 | frameworks/Backports/src/UIKit/UIViewController+Previewing.m:8 | @"previewing" |
 | frameworks/Backports/src/UIKit/UIViewController+iOS13.m:22 | @"dark-override" |
-| frameworks/Backports/src/UIKit/UNLocationNotificationTrigger10.m:146 | @"region" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:218 | (no literal) |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:324 | @"title" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:326 | @"category" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:516 | @"categories" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:599 | @"present" |
+| frameworks/Backports/src/UserNotifications/UNLocationNotificationTrigger10.m:146 | @"region" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:210 | (no literal) |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:310 | @"title" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:312 | @"category" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:502 | @"categories" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:601 | @"present" |
+
+## UserNotifications on iOS 6
+
+`UserNotificationsBackports` (`src/UserNotifications`) gives the notification center, its requests, contents, triggers, categories and settings over `UILocalNotification`, the only scheduling iOS 6 has. A request is kept in the local notification's user info as an archive, so the pending list is the system's own. The members are checked by `tests/uikit_test.lua`, and the value classes and the trigger-to-date conversion by `tests/user_notifications_test.lua`.
+
+What iOS 6 does not do, and what the backport answers in its place:
+
+- Titles and subtitles are kept with the request and not shown; the say-once message names the release.
+- Categories and thread identifiers are kept and handed back, and change nothing: iOS 6 has no notification categories, threads or actions on a notification, so the actions a category names are never shown.
+- A notification that arrives while the application is in front is not shown or played. The center calls the delegate's `willPresentNotification`, and only the badge of the presentation options is applied.
+- Delivered notifications: `getDeliveredNotificationsWithCompletionHandler:` answers an empty list, and `removeDeliveredNotificationsWithIdentifiers:` and `removeAllDeliveredNotifications` do nothing. iOS 6 keeps no list of the notifications it has shown, so a program that needs that list must keep its own.
+- A repeat that is not a minute, hour, day or week of the local notification, or a calendar repeat by one unit from its first date, is refused when the request is added, with `NSFeatureUnsupportedError` and the reason in the description.
+- A location trigger is watched with CoreLocation where the device can watch the region. Where it cannot, the request stays pending and the say-once message names the region.
+- The trigger-to-date conversion follows the calendar. A day the month does not have fires on the first day after the month ends, at the requested time. This is the rule the conversion implements. Apple's reference pages for `UNCalendarNotificationTrigger` and `nextTriggerDate()` do not state the case (they returned only their titles when read in this pass), so the real behaviour is unspecified in public documentation, and the rule is not checked on a device.
+- Nothing here is measured on a device in this change: the host test compares the value classes with the macOS framework, and the schedule check runs on the host.

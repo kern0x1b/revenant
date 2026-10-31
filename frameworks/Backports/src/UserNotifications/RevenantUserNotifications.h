@@ -1,5 +1,4 @@
-#import <UIKit/UIKit.h>
-#import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 #import <UserNotifications/UserNotifications.h>
 
 NSDate *revenant_next_date_matching(NSCalendar *calendar, NSDateComponents *components, NSDate *after);
@@ -35,20 +34,4 @@ NSError *revenant_unsupported(NSString *reason);
 @interface UNTextInputNotificationAction (RevenantUserNotifications)
 - (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
                     textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder;
-@end
-
-@interface UNUserNotificationCenter (RevenantUserNotifications)
-- (UILocalNotification *)revenant_localNotificationForRequest:(UNNotificationRequest *)request;
-- (void)revenant_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state;
-@end
-
-@interface RevenantRegionMonitor : NSObject <CLLocationManagerDelegate> {
-@private
-    CLLocationManager *_manager;
-    NSMutableDictionary<NSString *, NSMutableArray *> *_byRegion;
-}
-+ (RevenantRegionMonitor *)revenant_sharedMonitor;
-- (NSError *)revenant_monitorRequest:(UNNotificationRequest *)request;
-- (NSArray<UNNotificationRequest *> *)revenant_requests;
-- (void)revenant_removeRequestsWithIdentifiers:(NSSet<NSString *> *)identifiers;
 @end

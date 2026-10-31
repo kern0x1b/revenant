@@ -3,7 +3,7 @@ local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
 local src = path.absolute(path.join(os.scriptdir(), "..", "src"))
 
 local PROTOCOLS = {
-    {name = "UNUserNotificationCenterDelegate", framework = "UserNotifications", header = "UNUserNotificationCenter.h", source = "UIKit/UNUserNotificationCenterDelegate10.m"},
+    {name = "UNUserNotificationCenterDelegate", framework = "UserNotifications", header = "UNUserNotificationCenter.h", source = "UserNotifications/UNUserNotificationCenterDelegate10.m"},
     {name = "PKPushRegistryDelegate", framework = "PushKit", header = "PKPushRegistry.h", source = "PushKit/PKPushRegistryDelegate8.m"},
     {name = "CXProviderDelegate", framework = "CallKit", header = "CXProvider.h", source = "CallKit/CXProviderDelegate10.m"},
     {name = "AVCapturePhotoCaptureDelegate", framework = "AVFoundation", header = "AVCapturePhotoOutput.h", source = "AVFoundation/AVCapturePhotoCaptureDelegate10.m"},
