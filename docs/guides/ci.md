@@ -78,6 +78,30 @@ A warm run that restores its store writes nothing back. The backports job instal
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
 `REVENANT_PREBUILT_ONLY` names the packages whose missing release is an error instead of a source build; `1` names all of them.
 
+## Before a push: prepush
+
+`./xmakew l -P . tools/prepush.lua` runs the host checks that CI would otherwise find only after its macOS jobs have started.
+It needs no configure and no package, and with the caches warm it takes about 15 seconds. It runs every check and
+prints each result, so one run lists all the failures:
+
+- `tools/comments.lua check` and `test`: no comments in the tracked files, and the tool's own tests;
+- `tools/layout.lua`, `tools/docs_commands.lua` and `tools/open_gaps.lua`: the layout, the commands the documents name, and
+  the open gaps the Backports README names;
+- `agent-skills/tests/credentials.lua test` and `copied_text.lua test`: their fixtures;
+- `toolchain/tools/recipe_digests.lua`: the digests of the recipes are regenerated, and a `port/digest.lua` that differs
+  from the committed one fails the run, so the change that moved an input commits its digest;
+- `frameworks/Backports/tests/lowered_members_test.lua`: `frameworks/Backports/tools/lowered-members.txt` equals the
+  members generated from `frameworks/Backports/src`. The generator reads the whole SDK header set, so the first run on
+  a cold disk is the slow one; measured locally, the generation took about 30 seconds on warm files and the scratch
+  cache returns the result in about 2 seconds;
+- the negative shape: every test source that runs with `--negative` (the host tests declared in
+  `frameworks/Backports/xmake.lua` and the emulator's negative targets) must read the flag, itself or through `check.h`,
+  and a `check.h` test must return `revenant_finish()`. A test that ignores the flag runs its positive case under
+  `--negative` and exits 0, which the host run reports as a failure only after its macOS job. The shape check cannot see a
+  check that never fails; the host run does.
+
+`./xmakew l -P . tools/prepush.lua test` tests the tool itself, and `repository/prepush` runs that test in the `repository` group.
+
 ## Fetching a branch's artifacts
 
 The latest run of a branch holds its artifact even when its `checks` job is red:

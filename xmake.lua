@@ -54,49 +54,18 @@ if whole or component == "emulator" then
         add_tests("open_gaps")
         add_tests("docs_commands")
         add_tests("snapshot_diff")
+        add_tests("prepush")
         on_test(function (target, opt)
             local root = os.projectdir()
-            if path.filename(opt.name) == "credentials" then
-                local data = path.join(root, "agent-skills", "tests", "data", "credentials")
-                local script = path.join(root, "agent-skills", "tests", "credentials.lua")
-                local login = path.join(data, "login.json")
-                local function run(...)
-                    return os.iorunv(os.programfile(), table.join({"l", "-P", root, script}, {...}), {curdir = root}):trim()
-                end
-                local errors = {}
-                if not run("leaked", login, path.join(data, "leaky")):find("transcript.txt", 1, true) then
-                    table.insert(errors, "a transcript that holds the access token must be reported as leaked")
-                end
-                if run("leaked", login, path.join(data, "clean")) ~= "" then
-                    table.insert(errors, "a transcript with no token must not be reported")
-                end
-                if (tonumber(run("left", login)) or 0) <= 0 then
-                    table.insert(errors, "the fixture's token must have time left")
-                end
-                if #errors > 0 then
-                    opt.errors = table.concat(errors, "; ")
-                    return false
-                end
-                return true
-            end
-            if path.filename(opt.name) == "copied_text" then
-                local data = path.join(root, "agent-skills", "tests", "data", "copied_text")
-                local script = path.join(root, "agent-skills", "tests", "copied_text.lua")
-                local function report(project)
-                    return os.iorunv(os.programfile(), {"l", "-P", root, script, path.join(data, "plugin"), path.join(data, project)}, {curdir = root})
-                end
-                if not report("copies"):find("repeats", 1, true) or report("clean"):find("repeats", 1, true) then
-                    opt.errors = "copied_text must report the copied fixture and not the clean one"
-                    return false
-                end
-                return true
-            end
             local commands = {layout = {path.join(root, "tools", "layout.lua")},
                               comments_check = {path.join(root, "tools", "comments.lua"), "check"},
                               comments_test = {path.join(root, "tools", "comments.lua"), "test"},
                               open_gaps = {path.join(root, "tools", "open_gaps.lua")},
                               docs_commands = {path.join(root, "tools", "docs_commands.lua")},
-                              snapshot_diff = {path.join(root, "tools", "snapshot_diff.lua"), "test"}}
+                              snapshot_diff = {path.join(root, "tools", "snapshot_diff.lua"), "test"},
+                              credentials = {path.join(root, "agent-skills", "tests", "credentials.lua"), "test"},
+                              copied_text = {path.join(root, "agent-skills", "tests", "copied_text.lua"), "test"},
+                              prepush = {path.join(root, "tools", "prepush.lua"), "test"}}
             local ok = os.execv(os.programfile(), table.join({"l", "-P", root}, commands[path.filename(opt.name)]), {try = true, curdir = root})
             if ok ~= 0 then
                 opt.errors = path.filename(opt.name) .. " failed"

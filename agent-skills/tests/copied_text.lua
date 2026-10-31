@@ -52,7 +52,7 @@ local function read_text(file)
     return data
 end
 
-function main(plugin, project)
+local function repeats(plugin, project)
     local known = {}
     for _, file in ipairs(files_under(plugin, {".git", "scenarios", ".agent-work"})) do
         local text = read_text(file)
@@ -65,6 +65,7 @@ function main(plugin, project)
             end
         end
     end
+    local found = {}
     for _, file in ipairs(files_under(project, {"build", ".xmake", ".logs", ".git"})) do
         local base = string.match(file, "([^/]+)$")
         local text = base ~= "answers.md" and read_text(file)
@@ -76,10 +77,37 @@ function main(plugin, project)
                     if cut then
                         first = string.sub(first, 1, cut - 1)
                     end
-                    print(file .. " repeats " .. known[key] .. ": " .. first)
+                    found[#found + 1] = file .. " repeats " .. known[key] .. ": " .. first
                     break
                 end
             end
         end
+    end
+    return found
+end
+
+local function self_test()
+    local data = path.join(os.scriptdir(), "data", "copied_text")
+    local plugin = path.join(data, "plugin")
+    local errors = {}
+    if #repeats(plugin, path.join(data, "copies")) == 0 then
+        table.insert(errors, "copied_text must report the copied fixture")
+    end
+    if #repeats(plugin, path.join(data, "clean")) > 0 then
+        table.insert(errors, "copied_text must not report the clean fixture")
+    end
+    if #errors > 0 then
+        raise(table.concat(errors, "; "))
+    end
+end
+
+function main(...)
+    local args = {...}
+    if args[1] == "test" and #args == 1 then
+        self_test()
+        return
+    end
+    for _, line in ipairs(repeats(args[1], args[2])) do
+        print(line)
     end
 end
