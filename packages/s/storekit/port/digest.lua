@@ -1,1 +1,1 @@
-storekit_sources_digest = "06a1d9d06f2e322761e9953da82f57be"
+storekit_sources_digest = "77fcb1b500fb7fc9276fa5ddbb82b90c"
