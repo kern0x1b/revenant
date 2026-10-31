@@ -183,3 +183,95 @@ public struct SHA512: HashFunction, Sendable {
     }
 }
 
+private struct MD5State: @unchecked Sendable {
+    var context = CC_MD5_CTX()
+}
+
+private struct SHA1State: @unchecked Sendable {
+    var context = CC_SHA1_CTX()
+}
+
+public enum Insecure {
+    public struct MD5Digest: Digest {
+        fileprivate let bytes: [UInt8]
+
+        public static var byteCount: Int { 16 }
+
+        public var description: String {
+            "MD5 digest: " + revenantHex(bytes)
+        }
+
+        public func makeIterator() -> Array<UInt8>.Iterator {
+            bytes.makeIterator()
+        }
+
+        public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+            try bytes.withUnsafeBytes(body)
+        }
+    }
+
+    public struct SHA1Digest: Digest {
+        fileprivate let bytes: [UInt8]
+
+        public static var byteCount: Int { 20 }
+
+        public var description: String {
+            "SHA1 digest: " + revenantHex(bytes)
+        }
+
+        public func makeIterator() -> Array<UInt8>.Iterator {
+            bytes.makeIterator()
+        }
+
+        public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+            try bytes.withUnsafeBytes(body)
+        }
+    }
+
+    public struct MD5: HashFunction, Sendable {
+        public static let blockByteCount = 64
+        public static let byteCount = 16
+        public typealias Digest = MD5Digest
+
+        private var state = MD5State()
+
+        public init() {
+            CC_MD5_Init(&state.context)
+        }
+
+        public mutating func update(bufferPointer: UnsafeRawBufferPointer) {
+            updateInChunks(bufferPointer) { CC_MD5_Update(&state.context, $0, $1) }
+        }
+
+        public func finalize() -> MD5Digest {
+            var output = [UInt8](repeating: 0, count: MD5.byteCount)
+            var context = state.context
+            CC_MD5_Final(&output, &context)
+            return MD5Digest(bytes: output)
+        }
+    }
+
+    public struct SHA1: HashFunction, Sendable {
+        public static let blockByteCount = 64
+        public static let byteCount = 20
+        public typealias Digest = SHA1Digest
+
+        private var state = SHA1State()
+
+        public init() {
+            CC_SHA1_Init(&state.context)
+        }
+
+        public mutating func update(bufferPointer: UnsafeRawBufferPointer) {
+            updateInChunks(bufferPointer) { CC_SHA1_Update(&state.context, $0, $1) }
+        }
+
+        public func finalize() -> SHA1Digest {
+            var output = [UInt8](repeating: 0, count: SHA1.byteCount)
+            var context = state.context
+            CC_SHA1_Final(&output, &context)
+            return SHA1Digest(bytes: output)
+        }
+    }
+}
+

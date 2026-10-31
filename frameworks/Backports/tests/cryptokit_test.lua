@@ -20,5 +20,7 @@ function main()
     assert(#expected > 0, "the host CryptoKit program printed nothing")
     assert(expected:find("hkdf rfc5869 1 true", 1, true), "the host HKDF misses RFC 5869 test case 1")
     assert(expected:find("hkdf rfc5869 3 true", 1, true), "the host HKDF misses RFC 5869 test case 3")
+    assert(expected:find("md5 vectors true", 1, true), "the host MD5 misses the RFC 1321 vectors")
+    assert(expected:find("sha1 vectors true", 1, true), "the host SHA-1 misses the FIPS 180 vectors")
     assert(expected == got, "the backport CryptoKit differs from the host in " .. out)
 end
