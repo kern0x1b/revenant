@@ -44,6 +44,10 @@ local function rewrite(argv, mapping)
         next_is_output = token == "-o" or token:find("^%-emit%-.*%-path$") ~= nil
         table.insert(tokens, value)
     end
+    if not argv:find("-module-cache-path", 1, true) then
+        table.insert(tokens, "-module-cache-path")
+        table.insert(tokens, path.join(mapping.scratch, "modules"))
+    end
     return tokens, outputs
 end
 
@@ -75,6 +79,9 @@ local function test_suite()
     check("the object goes to the scratch folder", written:find("/local/scratch/swiftSpatial/build/.objs/swiftSpatial/iphoneos/armv7/release/swift/swiftSpatial.o", 1, true) ~= nil, true)
     check("the module goes to the scratch folder", written:find("/local/scratch/swiftSpatial/build/.gens/swiftSpatial/", 1, true) ~= nil, true)
     check("only the outputs move", #outputs, 2)
+    check("the compiler gets a fresh module cache in the scratch folder", table.concat(tokens, " "):find("-module-cache-path /local/scratch/swiftSpatial/modules", 1, true) ~= nil, true)
+    local pinned = table.concat((rewrite(argv .. " -module-cache-path /pinned", mapping)), " ")
+    check("an argv that pins its module cache keeps it", pinned:find("-module-cache-path /pinned", 1, true) ~= nil and not pinned:find("/modules", 1, true), true)
     check("replace_all replaces every occurrence", replace_all("a.b.a", "a", "X"), "X.b.X")
 
     print("ci_swiftc_replay: %d tests passed", count)
@@ -107,6 +114,8 @@ function main(...)
     for _, output in ipairs(outputs) do
         os.mkdir(path.directory(output))
     end
+    os.tryrm(path.join(mapping.scratch, "modules"))
+    os.mkdir(path.join(mapping.scratch, "modules"))
     local command = {}
     for index = 2, #tokens do
         table.insert(command, tokens[index])

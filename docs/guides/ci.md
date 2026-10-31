@@ -122,7 +122,9 @@ says which errors matter.
 
 `./xmakew l -P . tools/ci_swiftc_replay.lua <job-log> [module]` takes the `swiftc failed for <module> with:` line of a saved
 log, maps the runner's paths to the local checkout and cache, sends the outputs to `.cache/scratch/swiftc-replay/<module>/`,
-and runs the same compiler on the same arguments, so a Swift fix is checked in seconds. It needs the local Swift package
+and runs the same compiler on the same arguments, so a Swift fix is checked in seconds. The compiler gets a fresh clang module
+cache in that folder, as a runner starts with an empty one: the per-user cache of a developer's machine can hold two `.pcm`
+variants of one module, and the compile then fails with `is defined in both`. It needs the local Swift package
 and the lowered overlay `build/generated/backports/overlay/vfs.yaml` of the checkout, so it runs after the Swift component
 has been configured here.
 
