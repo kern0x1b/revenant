@@ -35443,6 +35443,7 @@ protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
 protocol NSURLProtocolClient
 protocol NSURLSessionDataDelegate
+protocol NSURLSessionDelegate
 protocol NSURLSessionDownloadDelegate
 protocol NSURLSessionStreamDelegate
 protocol NSURLSessionTaskDelegate

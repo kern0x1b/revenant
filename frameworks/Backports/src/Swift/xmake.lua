@@ -328,10 +328,10 @@ overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swi
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "metallowering", "translation")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation")
     on_test(function (target, opt)
         import("core.project.project")
-        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua"}
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua"}
         local name = path.filename(opt.name)
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()

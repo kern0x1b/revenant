@@ -1,6 +1,18 @@
 #import <Foundation/Foundation.h>
 
-@protocol NSURLSessionTaskDelegate <NSObject>
+@protocol NSURLSessionDelegate <NSObject>
+
+@optional
+
+- (void)URLSession:(NSURLSession *)session didBecomeInvalidWithError:(nullable NSError *)error;
+
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completionHandler;
+
+- (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session;
+
+@end
+
+@protocol NSURLSessionTaskDelegate <NSURLSessionDelegate>
 
 @optional
 
@@ -48,6 +60,7 @@
 
 static void revenant_emit_URLSession_delegates(void)
 {
+    (void)@protocol(NSURLSessionDelegate);
     (void)@protocol(NSURLSessionTaskDelegate);
     (void)@protocol(NSURLSessionDataDelegate);
     (void)@protocol(NSURLSessionDownloadDelegate);
