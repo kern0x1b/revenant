@@ -32,6 +32,8 @@ REVENANT_ALIAS(NSProgress)
 @end
 
 @implementation RevenantProgressState
+@synthesize totalUnitCount = _totalUnitCount, completedUnitCount = _completedUnitCount, cancellable = _cancellable, pausable = _pausable, cancelled = _cancelled, paused = _paused, cancellationHandler = _cancellationHandler, pausingHandler = _pausingHandler, resumingHandler = _resumingHandler, kind = _kind, localizedDescription = _localizedDescription, localizedAdditionalDescription = _localizedAdditionalDescription, userInfo = _userInfo, implicitChildFrames = _implicitChildFrames;
+
 - (instancetype)init
 {
     if ((self = [super init])) {
