@@ -115,6 +115,96 @@ local MEMBERS = {
         },
     },
     {
+        member = "UIApplicationDelegate application:continue:restorationHandler:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_DEPRECATED(\"Use UIScene lifecycle and scene(_:continue:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_DEPRECATED(\"Use UIScene lifecycle and scene(_:continue:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:didFailToContinueUserActivityWithType:error:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didFailToContinueUserActivityWithType:error:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            replace = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didFailToContinueUserActivityWithType:error:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:didUpdateUserActivity:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didUpdate) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            replace = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didUpdate) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:willContinueUserActivityWithType:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED(\"Use UIScene lifecycle and scene(_:willContinueUserActivityWithType:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED(\"Use UIScene lifecycle and scene(_:willContinueUserActivityWithType:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:didReceiveRemoteNotification:fetchCompletionHandler:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler API_AVAILABLE(ios(7.0));",
+            replace = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler API_AVAILABLE(ios(6.0));",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:handleEventsForBackgroundURLSession:completionHandler:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(7.0));",
+            replace = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(6.0));",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:performFetchWithCompletionHandler:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_DEPRECATED(\"Use a BGAppRefreshTask in the BackgroundTasks framework instead\", ios(7.0, 13.0), tvos(11.0, 13.0)) API_UNAVAILABLE(visionos, watchos);",
+            replace = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_DEPRECATED(\"Use a BGAppRefreshTask in the BackgroundTasks framework instead\", ios(6.0, 13.0), tvos(11.0, 13.0)) API_UNAVAILABLE(visionos, watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:openURL:options:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_DEPRECATED(\"Use UIScene lifecycle and scene(_:openURLContexts:) from UISceneDelegate instead.\", ios(9.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_DEPRECATED(\"Use UIScene lifecycle and scene(_:openURLContexts:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+        },
+    },
+    {
+        member = "UIApplicationDelegate application:performActionForShortcutItem:completionHandler:",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UIApplication.h",
+            find = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_DEPRECATED(\"Use UIScene lifecycle and windowScene(_:performActionFor:completionHandler:) from UIWindowSceneDelegate instead.\", ios(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(tvos, watchos);",
+            replace = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_DEPRECATED(\"Use UIScene lifecycle and windowScene(_:performActionFor:completionHandler:) from UIWindowSceneDelegate instead.\", ios(6.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(tvos, watchos);",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",

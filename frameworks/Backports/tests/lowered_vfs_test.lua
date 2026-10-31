@@ -42,6 +42,21 @@ function main()
     assert(numberPad and not numberPad:find("ios(10.0)", 1, true) and numberPad:find("API_UNAVAILABLE(watchos)", 1, true), "the enumerator UIKeyboardTypeASCIICapableNumberPad keeps its iOS 10 introduction or loses the watchOS attribute")
     local application = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIApplication.h"))
     assert(application:find("} API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos);", 1, true) and not application:find("} API_AVAILABLE(ios(7.0)) API_UNAVAILABLE(watchos);", 1, true), "the enum UIBackgroundFetchResult keeps its iOS 7 introduction, so Swift cannot name it at deployment target 6.0")
+    for _, requirement in ipairs({
+        {"continueUserActivity:(NSUserActivity *)userActivity restorationHandler:", "ios(6.0, 26.0)"},
+        {"didFailToContinueUserActivityWithType:(NSString *)userActivityType error:", "ios(6.0, 26.0)"},
+        {"didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED", "ios(6.0, 26.0)"},
+        {"willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED", "ios(6.0, 26.0)"},
+        {"didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:", "API_AVAILABLE(ios(6.0))"},
+        {"handleEventsForBackgroundURLSession:(NSString *)identifier", "API_AVAILABLE(ios(6.0))"},
+        {"performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC", "ios(6.0, 13.0)"},
+        {"openURL:(NSURL *)url options:", "ios(6.0, 26.0)"},
+        {"performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem", "ios(6.0, 26.0)"},
+    }) do
+        local at = assert(application:find(requirement[1], 1, true), "UIApplication.h does not declare " .. requirement[1])
+        local line = application:match("[^\n]*", at)
+        assert(line:find(requirement[2], 1, true) and not line:find("ios(7.0", 1, true) and not line:find("ios(8.0", 1, true) and not line:find("ios(9.0", 1, true), "the UIApplicationDelegate requirement " .. requirement[1] .. " keeps its iOS 7-9 introduction, so Swift cannot use it at deployment target 6.0")
+    end
     local session = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSURLSession.h"))
     for _, protocol in ipairs({"NSURLSessionDelegate <NSObject>", "NSURLSessionTaskDelegate <NSURLSessionDelegate>", "NSURLSessionDataDelegate <NSURLSessionTaskDelegate>", "NSURLSessionDownloadDelegate <NSURLSessionTaskDelegate>"}) do
         local start = session:find("@protocol " .. protocol, 1, true)
