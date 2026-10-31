@@ -85,11 +85,16 @@ merge quietly take away from us".
 
 ### When the symbol gate fires
 
-It is a question, not a verdict. Each new undefined symbol is looked up against
-what iOS 6 has, and there are only two outcomes: either the system has it - the
-engine loads, the suite passes, and the pin is regenerated with
-`tools/symbol_check.lua --pin` so the new baseline is one the device has
-verified - or it does not, and something has to provide it.
+It is a question, not a verdict. The gate prints every new undefined import, and
+judges each one against the iOS 6.0 armv7 cache (`xmake firmware --arch=armv7 fetch 6.0`
+fetches it): an import is accepted when the library its binary names for it, by the
+two-level ordinal, exports the symbol in that cache, and rejected with the reason otherwise.
+A flat-namespace import, an ordinal that names no library, or a library the cache does not
+hold is rejected too. Only a rejected import needs a decision: a device check that shows
+the device resolves it, then `tools/symbol_check.lua --pin` so the baseline records it.
+The judgement is `dyld.import_verdicts` in `toolchain/modules/apple/dyld.lua`, and
+`./xmakew l frameworks/WebKit/tests/gate/symbols_test.lua` tests it on fixtures
+(it needs `REVENANT_LD64` set to the `bin/ld` of the `revenant@ld64` package).
 
 The first time this ran in anger, on 2026-09-11, it was the second case: an
 ANGLE roll had started calling `crc32_z`, which zlib gained in 1.2.9 and this

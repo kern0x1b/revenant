@@ -113,6 +113,14 @@ local function llvm_libtool(package)
     return tool
 end
 
+local function llvm_nm(package)
+    local tool = path.join(package:dep("llvm"):installdir("bin"), "llvm-nm")
+    assert(os.isfile(tool), "the llvm package has no llvm-nm, which the compat audit reads the engine's bitcode with: the libraries config installs it")
+    local major = os.iorunv(tool, {"--version"}):match("LLVM version (%d+)")
+    assert(tonumber(major or 0) >= 23, "the compat audit reads the engine's bitcode with llvm-nm of LLVM 23 or later, and the llvm package's llvm-nm is older")
+    return tool
+end
+
 function options(ctx)
     local chosen = variant(ctx.variant)
     local found = {
@@ -292,6 +300,7 @@ function context(package, build)
         cc = chosen:tool("cc"),
         cxx = chosen:tool("cxx"),
         libtool = llvm_libtool(package),
+        nm = llvm_nm(package),
         source = source,
         build = build,
         stubs = path.join(member, "compat", "stubs"),
@@ -484,18 +493,10 @@ function verify_exports(ctx)
     end
 end
 
-local function object_nm()
-    local tool = find_tool("llvm-nm", {version = true})
-    if not tool or not tool.version or tonumber(tool.version:match("^(%d+)") or 0) < 23 then
-        raise("the compat audit reads the engine's bitcode with llvm-nm of LLVM 23 or later, which must be on PATH ahead of Apple's")
-    end
-    return tool.program
-end
-
-local function defined_symbols(files)
+local function defined_symbols(nm, files)
     local found = {}
     for first = 1, #files, 400 do
-        local listing = os.iorunv(object_nm(), table.join({"--defined-only", "-g"}, table.slice(files, first, first + 399)))
+        local listing = os.iorunv(nm, table.join({"--defined-only", "-g"}, table.slice(files, first, first + 399)))
         for line in listing:gmatch("[^\n]+") do
             local kind, symbol = line:match("^%S+ ([TDBSCWV]) (%S+)$")
             if kind then
@@ -521,8 +522,8 @@ function verify_compat(ctx)
         raise("no object files under %s to audit the compat library against", ctx.build)
     end
     table.join2(objects, os.files(path.join(ctx.icu, "lib", "*.a")))
-    local stubs = defined_symbols({ctx.compat})
-    local engine = defined_symbols(objects)
+    local stubs = defined_symbols(ctx.nm, {ctx.compat})
+    local engine = defined_symbols(ctx.nm, objects)
     local clash, count, total = {}, 0, 0
     for symbol in pairs(stubs) do
         count = count + 1
