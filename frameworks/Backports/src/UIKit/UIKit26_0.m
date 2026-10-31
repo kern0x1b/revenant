@@ -19,6 +19,7 @@ static inline id RevenantBox(id value) { return value; }
 @end
 
 @implementation UICornerConfiguration
+@synthesize maximumRadius = _maximumRadius;
 
 + (instancetype)capsuleConfiguration
 {
