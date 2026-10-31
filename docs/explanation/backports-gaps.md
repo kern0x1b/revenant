@@ -28,19 +28,19 @@ Sizes: S is under a day; M is a few days, including a device test; L is a week o
 
 | Category | Telegram-used | Not Telegram | Total |
 |---|---:|---:|---:|
-| F | 6 | 4 | 10 |
+| F | 7 | 4 | 11 |
 | E | 7 | 5 | 12 |
 | C | 8 | 9 | 17 |
 | S | 4 | 2 | 6 |
 | A | 2 | 1 | 3 |
 | H | 3 | 3 | 6 |
 | D | 0 | 1 | 1 |
-| Total | 30 | 25 | 55 |
+| Total | 31 | 25 | 56 |
 
 | Size | Telegram-used | Not Telegram | Total |
 |---|---:|---:|---:|
 | S | 9 | 11 | 20 |
-| M | 9 | 7 | 16 |
+| M | 10 | 7 | 17 |
 | L | 12 | 7 | 19 |
 
 ## Top 15 (Telegram-used, by what a user sees)
@@ -124,6 +124,7 @@ Sorted by size: S, then M, then L.
 | N16 | B/AVFoundation/AVAudioUnit.m:46-50 | `-loadAudioUnitPresetAtURL:error:` | returns NO with `kAudio_UnimplementedError` (NSOSStatusErrorDomain) | loads a preset file into the unit (AVAudioUnit) | no (0 files) | F | M | fixed: the preset plist is read (`RevenantAudioUnitReadPreset`, B/AVFoundation/RevenantAudioUnitPreset.m), and its dictionary is set as the unit's `kAudioUnitProperty_ClassInfo` (`RevenantAudioUnitApplyPreset`). A unit the engine has not attached yet keeps the preset and applies it when the engine attaches it (AVAudioUnit.m). Read errors are the file system's and the plist parser's; a set the unit refuses is an NSOSStatusErrorDomain error with its status. Verified: host test `AVFoundationBackports_audio_preset_test` on macOS (Apple's delay unit: a 1.5 s delay time written to a preset file and applied to a new unit reads back 1.5 s; a missing file and a non-dictionary plist are refused; the negative run fails as designed). The iOS 6 build compiles AVAudioUnit.m and the helper for armv7. Not run on the phone, and the attach-time apply is not exercised by any run yet |
 | N17 | B/Network/NWListener.swift:40-41; B/Network/NWConnection.swift:133 | `NWListener` start; `NWConnection` server side | ENOTSUP when TLS has no server identity | the TLS error the identity check reports (Network, NWListener); the exact error is not verified | no; submodules/TelegramCore/Sources/Network/NetworkFrameworkTcpConnectionInterface.swift:140-147 uses `NWParameters(tls: nil)` | F | M | server-side SecureTransport on iOS 6 takes an identity; ENOTSUP is invented |
 | N18 | B/Metal/RevenantMetalDrawable.m:49-57 | `-presentAtTime:`, `-presentAfterMinimumDuration:` | present now; the time is ignored | present at the time, and not before the minimum duration (MTLDrawable) | no (presentAtTime is not used) | E | M | fixed for `presentAtTime:`: the present runs on the main queue at the time, and never before it (device probe run 3: 3 PASS checks). `presentAfterMinimumDuration:` is fixed too: the layer keeps the time of its last presentation (an associated object set by `present`), and the drawable presents at that time plus the duration. Device probe on iPhone4,1 (iOS 6.1.3): it does not present at once after a previous presentation, and it presents no earlier than the duration after it (2 PASS) |
+| N26 | O/UIKit/UIKitRevenant.swift:55-57 (`corners(topLeftRadius:...)`); the SDK's `corners(radius:)` and per-corner factories are unbacked in B/UIKit/UIKit26_0.m | `UICornerConfiguration.corners(topLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:)` traps (`preconditionFailure`); `corners(radius:)` has no member on iOS 6 | per-corner radii of a view's corner configuration (UICornerConfiguration, configurationWithTopLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:, UICornerConfiguration.h:26) | yes, submodules/TelegramUI/Components/GlassBackgroundComponent/Sources/GlassBackgroundComponent.swift:427 calls the per-corner form only inside `if #available(iOS 26.0, *)`, with a CAShapeLayer fallback below; prototypes/ContextMenuMorph/Sources/App.swift:83 calls `corners(radius:)` | F | M | open: unbacked. The overlay declares the per-corner form so iOS 26-guarded code compiles on iOS 6, and it traps if called there. `configurationWithRadius:` (`corners(radius:)`) and the per-corner factory are not in the lowered member list, so iOS 6 does not see them. Per-corner radii need a CAShapeLayer mask on the view's layer, in B/UIKit/UIKit26_0.m. Paseo-app and Expo were not searched in this change |
 | N19 | B/UIKit/UIContextMenuInteraction.m:19, 233; B/UIKit/UIControl+Menus14.m:167-186 | `previewViewController` (nil); `willMoveToView:` (empty); the delegate callbacks (nil or empty) | no menu is ever presented | presents the context menu and its preview (UIContextMenuInteraction, iOS 13) | no (prototype doc only) | C | L | deferred: depends on UIMenu, which is another worker's (UIMenuElement is skipped in this brief) |
 | N20 | B/UIKit/UIEditMenuInteraction.m:26, 42, 46, 50; B/UIKit/UITextView+EditMenu16.m:10, 14; B/UIKit/UITextField+EditMenu16.m:10, 14 | `dismissMenu`, `reloadVisibleMenu`, `updateVisibleMenuPositionAnimated:`, the will-present and will-dismiss callbacks | empty; no menu appears | shows the edit menu over the text (UIEditMenuInteraction, iOS 16) | no (docs only) | E | L | deferred: depends on UIMenu, skipped in this brief |
 | N21 | B/UIKit/UIFieldBehavior.m:528-537 | `-childBehaviors` (empty array); `-addChildBehavior:`, `-removeChildBehavior:` | empty | field behaviours with child behaviours (UIFieldBehavior, iOS 9) | no (0 files) | C | L | open: needs a dynamics engine behind the behaviour; not done |
