@@ -1,5 +1,23 @@
 import("core.package.addon")
 
+local function built_library(project, name)
+    local found = {}
+    for _, extension in ipairs({"dylib", "a"}) do
+        table.join2(found, os.files(path.join(project, "build", "**", "lib" .. name .. "." .. extension)))
+    end
+    if #found ~= 1 then
+        raise("target(%s) builds %d library files named lib%s, and the wrapper installs exactly one", name, #found, name)
+    end
+    return found[1]
+end
+
+function copy_own_libraries(project, libdir, targets)
+    for _, name in ipairs(targets) do
+        os.mkdir(libdir)
+        os.vcp(built_library(project, name), libdir)
+    end
+end
+
 function install(package, opt)
     local toolchain = assert(package:toolchains(), package:name() .. " is built with the apple-ios toolchain")[1]
     toolchain:load()
@@ -22,7 +40,8 @@ function install(package, opt)
     io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
     os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
     os.vrunv(os.programfile(), table.join({"build", "-P", project, "-y"}, opt.targets), {curdir = project, envs = {REVENANT_RELEASE = "1"}})
-    os.vrunv(os.programfile(), table.join({"install", "-P", project, "-y", "-o", package:installdir()}, opt.targets), {curdir = project})
+    os.vrunv(os.programfile(), table.join({"install", "-P", project, "-y", "--libraries=n", "-o", package:installdir()}, opt.targets), {curdir = project})
+    copy_own_libraries(project, package:installdir("lib"), opt.targets)
     if opt.modules then
         package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"))
     end

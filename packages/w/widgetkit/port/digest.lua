@@ -1,1 +1,1 @@
-widgetkit_sources_digest = "5c9ce0e2a78c8524c746cabe9cd3991b"
+widgetkit_sources_digest = "97a74cf041c1daa3fc7a3f586d4373c5"

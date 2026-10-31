@@ -407,20 +407,41 @@ end
 function reached(offered, roots)
     local byname = {}
     for _, library in ipairs(offered) do
-        byname[library.name] = library
+        byname[library.name] = byname[library.name] or {}
+        table.insert(byname[library.name], library)
     end
     local libraries, taken, pending = {}, {}, table.copy(roots)
     while #pending > 0 do
         for _, reference in ipairs(macho.images(macho.read(table.remove(pending)))[1].libraries) do
-            local library = byname[path.filename(reference)]
-            if library and not taken[library] then
-                taken[library] = true
-                table.insert(libraries, library)
-                table.insert(pending, library.source)
+            for _, library in ipairs(byname[path.filename(reference)] or {}) do
+                if not taken[library] then
+                    taken[library] = true
+                    table.insert(libraries, library)
+                    table.insert(pending, library.source)
+                end
             end
         end
     end
     return libraries
+end
+
+local function origin(library)
+    return library.package or library.source
+end
+
+function distinct(libraries, folder)
+    local kept, placed = {}, {}
+    for _, library in ipairs(libraries) do
+        local destination = path.join(folder, library.name)
+        local first = placed[destination]
+        if not first then
+            placed[destination] = library
+            table.insert(kept, library)
+        elseif hash.sha256(first.source) ~= hash.sha256(library.source) then
+            raise("%s is carried by %s and by %s, and their copies differ: a program carries one copy of each library, so both packages must carry the same build of it", destination, origin(first), origin(library))
+        end
+    end
+    return kept
 end
 
 function rebind(target, binaries, folder, provided)
@@ -459,7 +480,7 @@ function place_carried(target, root, binary)
     end
     local folder = carried_folder(target)
     local identities, binaries, runtime = {}, {binary}, {}
-    for _, library in ipairs(libraries) do
+    for _, library in ipairs(distinct(libraries, path.join(root, folder))) do
         local destination = path.join(root, folder, library.name)
         os.mkdir(path.directory(destination))
         os.vcp(library.source, destination)
@@ -601,8 +622,7 @@ function application(target)
             table.insert(roots, library.source)
         end
     end
-    table.join2(carried, reached(held, roots))
-    for _, library in ipairs(carried) do
+    for _, library in ipairs(distinct(table.join(reached(held, roots), carried), frameworks)) do
         local destination = path.join(frameworks, library.name)
         os.mkdir(frameworks)
         os.vcp(library.source, destination)
