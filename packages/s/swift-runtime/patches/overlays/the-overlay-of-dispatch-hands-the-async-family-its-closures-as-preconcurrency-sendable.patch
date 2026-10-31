@@ -1,0 +1,18 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Queue.swift b/stdlib/public/Darwin/Dispatch/Queue.swift
+--- a/stdlib/public/Darwin/Dispatch/Queue.swift
++++ b/stdlib/public/Darwin/Dispatch/Queue.swift
+@@ -266,3 +266,3 @@
+ 		flags: DispatchWorkItemFlags = [],
+-		execute work: @escaping @convention(block) () -> Void)
++		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
+ 	{
+@@ -400,3 +400,3 @@
+ 		flags: DispatchWorkItemFlags = [],
+-		execute work: @escaping @convention(block) () -> Void)
++		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
+ 	{
+@@ -431,3 +431,3 @@
+ 		flags: DispatchWorkItemFlags = [],
+-		execute work: @escaping @convention(block) () -> Void)
++		execute work: @escaping @preconcurrency @Sendable @convention(block) () -> Void)
+ 	{
