@@ -1,4 +1,5 @@
 #import "RevenantUIKit26.h"
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
 static inline id RevenantBox(id value) { return value; }
@@ -12,7 +13,36 @@ static inline id RevenantBox(id value) { return value; }
 @implementation UICornerRadius
 @end
 
+@interface UICornerConfiguration ()
+@property (nonatomic) CGFloat maximumRadius;
+- (instancetype)initWithMaximumRadius:(CGFloat)maximumRadius;
+@end
+
 @implementation UICornerConfiguration
+
++ (instancetype)capsuleConfiguration
+{
+    return [self capsuleConfigurationWithMaximumRadius:CGFLOAT_MAX];
+}
+
++ (instancetype)capsuleConfigurationWithMaximumRadius:(CGFloat)maximumRadius
+{
+    return [[self alloc] initWithMaximumRadius:maximumRadius];
+}
+
+- (instancetype)initWithMaximumRadius:(CGFloat)maximumRadius
+{
+    self = [super init];
+    if (self)
+        _maximumRadius = maximumRadius;
+    return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    return self;
+}
+
 @end
 
 @implementation UIScrollEdgeEffect
@@ -557,6 +587,47 @@ static char RevenantViewNeedsUpdatePropertiesKey;
     }
 }
 - (void)updateProperties { }
+@end
+
+@implementation UIView (RevenantUIKit26_CornerConfiguration)
+
+static char RevenantViewCornerConfigurationKey;
+
+static void revenant_apply_corner_configuration(UIView *view)
+{
+    UICornerConfiguration *configuration = objc_getAssociatedObject(view, &RevenantViewCornerConfigurationKey);
+    if (configuration == nil)
+        return;
+    CGSize size = view.bounds.size;
+    view.layer.cornerRadius = MIN(MIN(size.width, size.height) / 2, configuration.maximumRadius);
+}
+
+static void revenant_install_corner_configuration_hook(void)
+{
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        Method method = class_getInstanceMethod([CALayer class], @selector(setBounds:));
+        IMP original = method_getImplementation(method);
+        method_setImplementation(method, imp_implementationWithBlock(^(CALayer *layer, CGRect bounds) {
+            ((void (*)(CALayer *, SEL, CGRect))original)(layer, @selector(setBounds:), bounds);
+            if ([layer.delegate isKindOfClass:[UIView class]])
+                revenant_apply_corner_configuration((UIView *)layer.delegate);
+        }));
+    });
+}
+
+- (UICornerConfiguration *)cornerConfiguration
+{
+    return objc_getAssociatedObject(self, &RevenantViewCornerConfigurationKey);
+}
+
+- (void)setCornerConfiguration:(UICornerConfiguration *)configuration
+{
+    revenant_install_corner_configuration_hook();
+    objc_setAssociatedObject(self, &RevenantViewCornerConfigurationKey, [configuration copy],
+                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_apply_corner_configuration(self);
+}
 @end
 
 @implementation UIViewController (RevenantUIKit26)

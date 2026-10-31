@@ -30788,6 +30788,10 @@ member UIControl -setToolTip:
 member UIControl -showsMenuAsPrimaryAction
 member UIControl -toolTip
 member UIControl -toolTipInteraction
+member UICornerConfiguration +capsuleConfiguration
+member UICornerConfiguration +capsuleConfigurationWithMaximumRadius:
+member UICornerConfiguration -copyWithZone:
+member UICornerConfiguration -initWithMaximumRadius:
 member UICubicTimingParameters -_setAnimationCurve:
 member UICubicTimingParameters -animationCurve
 member UICubicTimingParameters -controlPoint1
@@ -33923,6 +33927,7 @@ member UIView -convertPoint:fromCoordinateSpace:
 member UIView -convertPoint:toCoordinateSpace:
 member UIView -convertRect:fromCoordinateSpace:
 member UIView -convertRect:toCoordinateSpace:
+member UIView -cornerConfiguration
 member UIView -directionalLayoutMargins
 member UIView -drawViewHierarchyInRect:afterScreenUpdates:
 member UIView -effectiveUserInterfaceLayoutDirection
@@ -33973,6 +33978,7 @@ member UIView -scalesLargeContentImage
 member UIView -semanticContentAttribute
 member UIView -setAccessibilityIgnoresInvertColors:
 member UIView -setAnchorPoint:
+member UIView -setCornerConfiguration:
 member UIView -setDirectionalLayoutMargins:
 member UIView -setFocusEffect:
 member UIView -setFocusGroupIdentifier:
