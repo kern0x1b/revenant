@@ -1,4 +1,4 @@
-import CoreMedia
+@_exported import CoreMedia
 
 extension CMTime {
     public init(seconds: Float64, preferredTimescale: CMTimeScale) {
