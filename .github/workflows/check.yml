@@ -752,7 +752,7 @@ jobs:
 
       - name: Configure the Swift component
         id: configure-swift
-        timeout-minutes: 20
+        timeout-minutes: 60
         run: |
           ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | tee "$RUNNER_TEMP/swift-configure.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
           if grep -q 'install .* \.\. ' "$RUNNER_TEMP/swift-configure.log"; then
