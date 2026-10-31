@@ -304,20 +304,6 @@ local AREAS = {
         },
     },
     {
-        name = "UIBackgroundFetchResult enum backport",
-        sources = {"UIBackgroundFetchResult+Backport.m"},
-        members = {
-            "revenant_background_fetch_result_name",
-        },
-    },
-    {
-        name = "UIUserActivityRestoring protocol backport",
-        sources = {"UIUserActivityRestoring+Backport.m"},
-        members = {
-            "@UIUserActivityRestoring", "revenant_emit_UIUserActivityRestoring",
-        },
-    },
-    {
         name = "iOS 13 large content viewer: the interaction and the item properties of views",
         sources = {"UILargeContentViewer.m"},
         members = {
