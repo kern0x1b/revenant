@@ -31,13 +31,13 @@ extension UITraitChangeObservable {
     }
 }
 
-@available(iOS 26.0, *)
 extension UIView {
     public var cornerConfiguration: UICornerConfiguration {
-        get { preconditionFailure("UIView.cornerConfiguration is iOS 26 API; check #available(iOS 26.0) first") }
-        set { preconditionFailure("UIView.cornerConfiguration is iOS 26 API; check #available(iOS 26.0) first") }
+        get { __cornerConfiguration }
+        set { __cornerConfiguration = newValue }
     }
 }
+
 
 @available(iOS 26.0, *)
 public struct UICornerRadius: Equatable, Hashable {
@@ -48,14 +48,11 @@ public struct UICornerRadius: Equatable, Hashable {
     }
 }
 
-@available(iOS 26.0, *)
-public struct UICornerConfiguration: Equatable, Hashable {
-    private let topLeft: UICornerRadius
-    private let topRight: UICornerRadius
-    private let bottomLeft: UICornerRadius
-    private let bottomRight: UICornerRadius
+public typealias UICornerConfiguration = __UICornerConfiguration
 
+@available(iOS 26.0, *)
+extension UICornerConfiguration {
     public static func corners(topLeftRadius: UICornerRadius, topRightRadius: UICornerRadius, bottomLeftRadius: UICornerRadius, bottomRightRadius: UICornerRadius) -> UICornerConfiguration {
-        UICornerConfiguration(topLeft: topLeftRadius, topRight: topRightRadius, bottomLeft: bottomLeftRadius, bottomRight: bottomRightRadius)
+        preconditionFailure("UICornerConfiguration.corners(...) has no backing: per-corner radii need CAShapeLayer-mask backing")
     }
 }
