@@ -8,6 +8,7 @@ build/
 xcuserdata/
 DerivedData/
 *.log
+!/tools/ci/data/*.log
 *.swiftmodule
 !/frameworks/Backports/tests/data/**/*.swiftmodule/
 *.swiftdoc
