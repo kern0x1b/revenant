@@ -30792,6 +30792,7 @@ member UICornerConfiguration +capsuleConfiguration
 member UICornerConfiguration +capsuleConfigurationWithMaximumRadius:
 member UICornerConfiguration -copyWithZone:
 member UICornerConfiguration -initWithMaximumRadius:
+member UICornerConfiguration -maximumRadius
 member UICubicTimingParameters -_setAnimationCurve:
 member UICubicTimingParameters -animationCurve
 member UICubicTimingParameters -controlPoint1
