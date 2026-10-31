@@ -190,7 +190,10 @@ rule("swift")
                     if #emitted > 0 then
                         os.mkdir(path.directory(emitted[3]))
                     end
-                    os.vrunv(swiftc, argv)
+                    if os.execv(swiftc, argv, {try = true}) ~= 0 then
+                        print("swiftc failed for %s with: %s %s", target:name(), swiftc, table.concat(argv, " "))
+                        raise("swiftc failed for %s", target:name())
+                    end
                 end, {files = table.join(sourcebatch.sourcefiles, imported), dependfile = objectfile .. ".d", values = argv, changed = target:is_rebuilt()})
                 return
             end
