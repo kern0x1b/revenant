@@ -27517,6 +27517,7 @@ member RevenantProgressObserver -stop
 member RevenantProgressObserver -view
 member RevenantProgressPatch +load
 member RevenantProgressState -init
+member RevenantProgressState -totalUnitCount
 member RevenantProviderItem -activityViewController:itemForActivityType:
 member RevenantProviderItem -activityViewControllerPlaceholderItem:
 member RevenantProviderItem -initWithProvider:
