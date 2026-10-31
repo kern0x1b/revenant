@@ -1,0 +1,13 @@
+diff --git a/stdlib/public/Darwin/Foundation/CharacterSet.swift b/stdlib/public/Darwin/Foundation/CharacterSet.swift
+--- a/stdlib/public/Darwin/Foundation/CharacterSet.swift
++++ b/stdlib/public/Darwin/Foundation/CharacterSet.swift
+@@ -34,3 +34,3 @@
+ // was renamed. The old name must not be used in the new runtime.
+-private final class __CharacterSetStorage : Hashable {
++private final class __CharacterSetStorage : Hashable, @unchecked Sendable {
+     enum Backing {
+@@ -365,3 +365,3 @@
+ */
+-public struct CharacterSet : ReferenceConvertible, Equatable, Hashable, SetAlgebra {
++public struct CharacterSet : ReferenceConvertible, Equatable, Hashable, SetAlgebra, Sendable {
+     public typealias ReferenceType = NSCharacterSet
