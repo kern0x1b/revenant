@@ -304,13 +304,6 @@ local AREAS = {
         },
     },
     {
-        name = "UIKeyboardType backport: webSearch and asciiCapableNumberPad",
-        sources = {"UIKeyboardType+Backport.m"},
-        members = {
-            "revenant_keyboard_type_fallback", "revenant_keyboard_type_name",
-        },
-    },
-    {
         name = "UIBackgroundFetchResult enum backport",
         sources = {"UIBackgroundFetchResult+Backport.m"},
         members = {

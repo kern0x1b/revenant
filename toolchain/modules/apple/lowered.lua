@@ -85,6 +85,26 @@ local MEMBERS = {
         },
     },
     {
+        member = "UIKeyboardTypeWebSearch",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITextInputTraits.h",
+            find = "UIKeyboardTypeWebSearch API_AVAILABLE(ios(7.0)),",
+            replace = "UIKeyboardTypeWebSearch API_AVAILABLE(ios(6.0)),",
+        },
+    },
+    {
+        member = "UIKeyboardTypeASCIICapableNumberPad",
+        header = {
+            name = "UIKit",
+            directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
+            file = "UITextInputTraits.h",
+            find = "UIKeyboardTypeASCIICapableNumberPad API_AVAILABLE(ios(10.0)) API_UNAVAILABLE(watchos),",
+            replace = "UIKeyboardTypeASCIICapableNumberPad API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos),",
+        },
+    },
+    {
         member = "UIEditMenuConfiguration",
         header = {
             name = "UIKit",

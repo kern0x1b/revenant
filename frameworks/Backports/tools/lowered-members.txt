@@ -2165,6 +2165,7 @@ class UIActivityViewController
 class UIAlertAction
 class UIAlertController
 class UIApplication
+class UIApplicationDelegate
 class UIApplicationShortcutIcon
 class UIApplicationShortcutItem
 class UIAttachmentBehavior
@@ -3804,6 +3805,9 @@ enum UIAlertControllerStyleActionSheet
 enum UIAlertControllerStyleAlert
 enum UIAxisHorizontal
 enum UIAxisVertical
+enum UIBackgroundFetchResultFailed
+enum UIBackgroundFetchResultNewData
+enum UIBackgroundFetchResultNoData
 enum UIBackgroundRefreshStatusDenied
 enum UIBarPositionAny
 enum UIBarPositionBottom
@@ -5551,6 +5555,7 @@ function revenant_apply_trait_extras
 function revenant_attributes_carried
 function revenant_attributes_merge
 function revenant_attributes_text
+function revenant_background_fetch_result_name
 function revenant_bar_at_edge
 function revenant_bar_needs_refresh
 function revenant_bar_say_once
@@ -29525,6 +29530,15 @@ member UIApplication -setShortcutItems:
 member UIApplication -shortcutItems
 member UIApplication -supportsAlternateIcons
 member UIApplication -supportsMultipleScenes
+member UIApplicationDelegate -application:continueUserActivity:restorationHandler:
+member UIApplicationDelegate -application:didFailToContinueUserActivityWithType:error:
+member UIApplicationDelegate -application:didReceiveRemoteNotification:fetchCompletionHandler:
+member UIApplicationDelegate -application:didUpdateUserActivity:
+member UIApplicationDelegate -application:handleEventsForBackgroundURLSession:completionHandler:
+member UIApplicationDelegate -application:openURL:options:
+member UIApplicationDelegate -application:performActionForShortcutItem:completionHandler:
+member UIApplicationDelegate -application:performFetchWithCompletionHandler:
+member UIApplicationDelegate -application:willContinueUserActivityWithType:
 member UIApplicationShortcutIcon +iconWithSystemImageName:
 member UIApplicationShortcutIcon +iconWithTemplateImageName:
 member UIApplicationShortcutIcon +iconWithType:
@@ -35428,7 +35442,10 @@ protocol NSTextLocation
 protocol NSTextStorageDelegate
 protocol NSURLConnectionDataDelegate
 protocol NSURLProtocolClient
+protocol NSURLSessionDataDelegate
+protocol NSURLSessionDownloadDelegate
 protocol NSURLSessionStreamDelegate
+protocol NSURLSessionTaskDelegate
 protocol OS_nw_browser
 protocol OS_nw_connection
 protocol OS_nw_connection_group
@@ -35527,6 +35544,7 @@ protocol UITraitChangeRegistration
 protocol UITraitDefinition
 protocol UITraitEnvironment
 protocol UITraitOverrides
+protocol UIUserActivityRestoring
 protocol UIViewControllerAnimatedTransitioning
 protocol UIViewControllerContextTransitioning
 protocol UIViewControllerInteractiveTransitioning
@@ -36183,6 +36201,7 @@ protocol_member UITraitEnvironment -traitCollection
 protocol_member UITraitEnvironment -traitCollectionDidChange:
 protocol_member UITraitOverrides -containsTrait:
 protocol_member UITraitOverrides -removeTrait:
+protocol_member UIUserActivityRestoring -restoreUserActivityState:
 protocol_member UIViewControllerAnimatedTransitioning -animateTransition:
 protocol_member UIViewControllerAnimatedTransitioning -transitionDuration:
 protocol_member UIViewControllerContextTransitioning -cancelInteractiveTransition
