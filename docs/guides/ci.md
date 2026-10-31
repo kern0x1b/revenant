@@ -12,6 +12,13 @@ runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
 - `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
   `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
 
+Every run starts with `quick` on `macos-26`: `./xmakew l -P . tools/prepush.lua`, the checks of [Before a push](#before-a-push-prepush).
+It is on macOS because the lowered-members check reads the SDK. `repository`, `checks`, `backports`, `package` and `swift`
+all `need` it, so a failure that prepush finds costs one short job and starts none of the macOS jobs of the run. The
+other jobs are not cancelled when one of them fails, on purpose: a cancelled job skips every save step that is not
+`always()`, and `backports` (its store and its objects), `package` (its facts, its objects and its store) and `swift`
+(its store) save only on success. A cancel would lose the caches that a sibling still running saves today.
+
 A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
 choose a runner, so each job keeps its own `runs-on`.

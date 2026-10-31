@@ -52,8 +52,31 @@ jobs:
             echo "docs=true" >> "$GITHUB_OUTPUT"
           fi
 
+  quick:
+    runs-on: macos-26
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/revenant-setup
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Run the prepush checks
+        run: ./xmakew l -P . tools/prepush.lua
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
   repository:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.docs == 'true'
     runs-on: macos-26
     timeout-minutes: 20
@@ -156,7 +179,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   checks:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.docs != 'true'
     runs-on: macos-26
     timeout-minutes: 60
@@ -317,7 +340,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   backports:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 60
@@ -560,7 +583,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   package:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 120
@@ -695,7 +718,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   swift:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 120
