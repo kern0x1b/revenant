@@ -68,7 +68,7 @@ Of what Apple declares available on iOS: **646 of 1208 types** and **289 of 289 
 `presentedWindowStyle`, `presentedWindowToolbarStyle`, `previewContext`, `previewDevice`, `previewDisplayName`, `previewInterfaceOrientation`,
 `previewLayout`, `renameAction`, `replaceDisabled`, `speechAdjustedPitch`, `speechAlwaysIncludesPunctuation`, `speechAnnouncementsQueued`,
 `speechSpellsOutCharacters`, `symbolRenderingMode`, `symbolVariant`, `textContentType`, `textSelection`, `toolbarRole`, `toolbarTitleMenu`,
-`touchBar`, `touchBarCustomizationLabel`, `touchBarItemPresence`, `touchBarItemPrincipal`, `userActivity`
+`touchBar`, `touchBarCustomizationLabel`, `touchBarItemPresence`, `touchBarItemPrincipal`, `UIHostingController.safeAreaRegions`, `userActivity`
 
 `accessibilityAction` (custom accessibility actions appeared in iOS 8; in iOS 6 VoiceOver double-taps the view itself). `Image(systemName:)` with a name outside the set (iOS 6 has no SF Symbols; about 80 common symbols are drawn by the built-in `SymbolGlyphs` set; for the rest the name is looked up in the bundle, and then a square with a question mark is drawn). `swipeActions(edge: .leading)` (a `UITableView` row in iOS 6 swipes only from the right). `listRowSeparator(edges:)` and `listRowSeparatorTint(edges:)` (the line is drawn under the row, not over it: the iOS 6 table does not draw a line above a row). `datePickerStyle(.compact)` and `datePickerStyle(.graphical)` (`UIDatePicker` in iOS 6 has only the wheel).
 

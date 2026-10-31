@@ -225,8 +225,8 @@ extension View {
     public func onAppear(perform action: (() -> Void)? = nil) -> some View {
         _ModifiedView(content: self, modifier: AppearModifier(action: action, disappear: nil))
     }
-    public func onGeometryChange<Value: Equatable>(of geometry: @escaping (GeometryProxy) -> Value, action: @escaping (Value) -> Void) -> some View {
-        _ModifiedView(content: self, modifier: GeometryChangeModifier(geometry: geometry, action: action))
+    public func onGeometryChange<Value>(for type: Value.Type, of transform: @escaping @Sendable (GeometryProxy) -> Value, action: @escaping (_ newValue: Value) -> Void) -> some View where Value: Equatable, Value: Sendable {
+        _ModifiedView(content: self, modifier: GeometryChangeModifier(geometry: transform, action: action))
     }
 }
 

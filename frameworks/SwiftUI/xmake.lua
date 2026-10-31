@@ -99,6 +99,8 @@ if is_plat("iphoneos") then
                                                       rejected = "could not be inferred", swiftflags = {"-disable-availability-checking"}})
         add_tests("tabs-positive", {source = "tests/typechecks/tabs/positive.swift"})
         add_tests("tabs-negative", {source = "tests/typechecks/tabs/negative.swift", rejected = "conform to specified type 'TabContent'"})
+        add_tests("geometry-positive", {source = "tests/typechecks/geometry/positive.swift"})
+        add_tests("hosting-positive", {source = "tests/typechecks/hosting/positive.swift"})
         on_test(function (target, opt)
             local swift = import("@addon.revenant.apple.swift")
             local module = target:dep("SwiftUI")
