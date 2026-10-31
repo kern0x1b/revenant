@@ -1,4 +1,5 @@
 local checkout = import("@addon.revenant.checkout", {anonymous = true})
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
@@ -100,9 +101,7 @@ end
 
 function main()
     local lzfse, lz4, xz = sources()
-    local work = path.join(os.tmpdir(), "compression-roundtrip")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("compression-roundtrip")
     local include = shim(work, path.join(lzfse, "src"), lz4, xz)
     local lzfse_sources = {}
     for _, name in ipairs({"lzfse_decode.c", "lzfse_decode_base.c", "lzfse_encode.c", "lzfse_encode_base.c", "lzfse_fse.c", "lzvn_decode_base.c", "lzvn_encode_base.c"}) do
@@ -170,5 +169,6 @@ function main()
     end
 
     assert(#failures == 0, "the Compression backport and macOS libcompression disagree:\n  " .. table.concat(failures, "\n  "))
+    os.tryrm(work)
     print("COMPRESSION_ROUNDTRIP_TEST passed")
 end

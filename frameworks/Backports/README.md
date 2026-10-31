@@ -78,6 +78,10 @@ These framework targets fail before building on iOS 6 while Telegram's demanded 
 
 `WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
 
+## Compile-only declarations
+
+`Translation` (`swiftTranslation`, wrapper `revenant@translation`) is the one entry that builds with a body that does nothing, so it is not an open gap: the gap rule above would refuse it. Its only member, `translationPresentation(isPresented:text:)`, is declared as the SDK declares it, for iOS 17.4 and later. A use guarded by `#available(iOS 17.4, *)` therefore typechecks and builds for armv7. The member presents no translation sheet and does not change the binding. The SDK ships `Translation` for arm64e only, so without this entry the module is missing on armv7. Telegram's Translate action calls the member only under the same guard, so on armv7 the action is not offered. `tests/translation_test.lua` checks that the shim compiles for armv7, that a guarded use typechecks, and that an unguarded use fails with the iOS 17.4 availability error.
+
 ## Lowering gaps
 
 These demand-map references are SDK declarations whose availability lowering belongs to `toolchain/modules/apple/lowered.lua`:

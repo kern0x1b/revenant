@@ -367,6 +367,39 @@ package("swift-runtime")
                 end
                 return found
             end
+            local cxx = path.join(source, "stdlib", "public", "Cxx")
+            for _, header in ipairs({"libcxxshim.h", "libcxxstdlibshim.h"}) do
+                os.vcp(path.join(cxx, "cxxshim", header), installed_shims .. "/")
+            end
+            for _, entry in ipairs({{"CxxShim", "libcxxshim.h"}, {"CxxStdlibShim", "libcxxstdlibshim.h"}}) do
+                if not io.readfile(shim_modules):find(entry[1], 1, true) then
+                    io.writefile(shim_modules, io.readfile(shim_modules) ..
+                                 string.format("\nmodule %s {\n  header \"%s\"\n  requires cplusplus\n}\n", entry[1], entry[2]))
+                end
+            end
+            local cxx_flags = {"-cxx-interoperability-mode=default", "-strict-memory-safety", "-Xfrontend", "-empty-abi-descriptor",
+                               "-Xcc", "-nostdinc++"}
+            for _, feature in ipairs({"AllowUnsafeAttribute", "SuppressedAssociatedTypesWithDefaults", "NonescapableTypes",
+                                      "LifetimeDependence", "InoutLifetimeDependence", "LifetimeDependenceMutableAccessors", "Lifetimes"}) do
+                table.join2(cxx_flags, {"-enable-experimental-feature", feature})
+            end
+            local cxx_sources = {}
+            for _, file in ipairs({"CxxConvertibleToBool.swift", "CxxConvertibleToCollection.swift", "CxxDictionary.swift", "CxxPair.swift",
+                                   "CxxOptional.swift", "CxxSet.swift", "CxxRandomAccessCollection.swift", "CxxSequence.swift",
+                                   "CxxBorrowingSequence.swift", "CxxVector.swift", "CxxSpan.swift", "UnsafeCxxIterators.swift"}) do
+                table.insert(cxx_sources, path.join(cxx, file))
+            end
+            build_overlay("Cxx", cxx_sources, {}, nil, {extra_flags = table.join(cxx_flags,
+                          {"-enable-experimental-feature", "BuiltinModule", "-enable-upcoming-feature", "MemberImportVisibility"})})
+            local std_sources = {}
+            for _, file in ipairs({"std.swift", "Chrono.swift", "String.swift"}) do
+                table.insert(std_sources, path.join(cxx, "std", file))
+            end
+            build_overlay("CxxStdlib", std_sources, {"-lswiftCxx"}, nil, {extra_flags = table.join(cxx_flags,
+                          {"-enable-experimental-feature", "AssumeResilientCxxTypes", "-disable-upcoming-feature", "MemberImportVisibility",
+                           "-Xfrontend", "-module-interface-preserve-types-as-written",
+                           "-Xfrontend", "-disable-module-selectors-in-module-interface",
+                           "-Xcc", "-isystem", "-Xcc", libcxx:installdir("include", "c++", "v1")})})
             build_overlay("ObjectiveC", overlay_sources_of("ObjectiveC", {"ObjectiveC.swift"}), {"-lswiftDarwin"})
             local dispatch_object = path.join(generated, "Dispatch.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",

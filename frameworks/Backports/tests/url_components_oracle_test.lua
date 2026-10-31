@@ -1,3 +1,4 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "Foundation")
@@ -65,9 +66,7 @@ local function compare(oracle, backport, urls)
 end
 
 function main()
-    local work = path.join(os.tmpdir(), "url-components-oracle")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("url-components-oracle")
 
     local oracle_program = build(work, "oracle_url", {DUMP})
     local backport_sources = {DUMP, path.join(SRC, "NSURLComponents.m"), path.join(SRC, "RevenantURLGrammar.m")}

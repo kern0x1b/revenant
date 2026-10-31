@@ -134,10 +134,10 @@ final class IntentDonationStore {
 
     func all() -> [IntentDonation] {
         guard let data = FileManager.default.contents(atPath: path) else { return [] }
-        guard let list = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [[String: Any]] else {
+        guard let list = try? PropertyListSerialization.propertyList(from: data, options: 0, format: nil) as? [[String: Any]] else {
             return []
         }
-        return list.compactMap { entry in
+        return list.compactMap { (entry: [String: Any]) -> IntentDonation? in
             guard let identifier = entry["identifier"] as? String,
                   let intentType = entry["intentType"] as? String else { return nil }
             return IntentDonation(identifier: IntentDonationIdentifier(identifier: identifier, intentType: intentType),
@@ -395,6 +395,6 @@ final class RelevantIntentStore {
 
     func read() -> [[String: Any]] {
         guard let data = FileManager.default.contents(atPath: path) else { return [] }
-        return (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [[String: Any]]) ?? []
+        return (try? PropertyListSerialization.propertyList(from: data, options: 0, format: nil) as? [[String: Any]]) ?? []
     }
 }

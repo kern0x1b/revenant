@@ -1,0 +1,46 @@
+diff --git a/lib/ClangImporter/ImportType.cpp b/lib/ClangImporter/ImportType.cpp
+index d48beba..80b3e1a 100644
+--- a/lib/ClangImporter/ImportType.cpp
++++ b/lib/ClangImporter/ImportType.cpp
+@@ -2319,6 +2319,33 @@ applyImportTypeAttrs(ImportTypeAttrs attrs, Type type,
+   return type;
+ }
+ 
++static clang::QualType
++cxxMinusOperatorResult(const clang::FunctionDecl *clangDecl,
++                       clang::QualType returnType) {
++  if (clangDecl->getOverloadedOperator() !=
++          clang::OverloadedOperatorKind::OO_Minus ||
++      clangDecl->getNumParams() != 2)
++    return returnType;
++  auto *record = clangDecl->getParamDecl(0)
++                     ->getType()
++                     .getNonReferenceType()
++                     ->getAsCXXRecordDecl();
++  if (!record || !record->getDefinition())
++    return returnType;
++  clang::ASTContext &clangCtx = clangDecl->getASTContext();
++  auto members = record->getDefinition()->lookup(
++      &clangCtx.Idents.get("difference_type"));
++  auto *difference = members.empty()
++                         ? nullptr
++                         : dyn_cast<clang::TypedefNameDecl>(members.front());
++  if (!difference)
++    return returnType;
++  clang::QualType differenceType = clangCtx.getTypeDeclType(difference);
++  if (differenceType.getCanonicalType() != returnType.getCanonicalType())
++    return returnType;
++  return differenceType;
++}
++
+ ImportedType ClangImporter::Implementation::importFunctionReturnType(
+     DeclContext *dc, const clang::FunctionDecl *clangDecl,
+     bool allowNSUIntegerAsInt) {
+@@ -2369,6 +2396,7 @@ ImportedType ClangImporter::Implementation::importFunctionReturnType(
+ 
+   clang::QualType returnType = desugarIfElaborated(clangDecl->getReturnType());
+   returnType = desugarIfBoundsAttributed(returnType);
++  returnType = cxxMinusOperatorResult(clangDecl, returnType);
+   // In C interop mode, the return type of library builtin functions
+   // like 'memcpy' from headers like 'string.h' drops
+   // any nullability specifiers from their return type, and preserves it on the

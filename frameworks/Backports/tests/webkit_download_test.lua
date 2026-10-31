@@ -1,3 +1,4 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "WebKit")
@@ -55,9 +56,7 @@ local function compare(expected, actual)
 end
 
 function main()
-    local work = path.join(os.tmpdir(), "webkit-download")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("webkit-download")
 
     local lines = lines_of(os.iorunv(build(work, "download"), {}))
     local differing = compare(EXPECTED, lines)

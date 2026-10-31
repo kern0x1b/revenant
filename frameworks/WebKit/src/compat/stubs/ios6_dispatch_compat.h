@@ -24,6 +24,7 @@ extern const struct dispatch_source_type_s _dispatch_source_type_vm;
 #define VM_FLAGS_PERMANENT 0
 
 #include <stdint.h>
+#if __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #ifndef WEBKIT_IOS6_CMTAG_STUBS
 #define WEBKIT_IOS6_CMTAG_STUBS
 typedef uint32_t CMTagCategory;
@@ -31,6 +32,7 @@ typedef struct OpaqueCMTagCollection *CMTagCollectionRef;
 typedef struct OpaqueCMTaggedBufferGroup *CMTaggedBufferGroupRef;
 typedef struct OpaqueCMTaggedBufferGroupFormatDescription *CMTaggedBufferGroupFormatDescriptionRef;
 typedef struct { uint64_t value[2]; } CMTag;
+#endif
 #endif
 
 #include <mach/port.h>
@@ -40,6 +42,17 @@ typedef mach_port_t task_id_token_t;
 #endif
 #if defined(__OBJC__) && __IPHONE_OS_VERSION_MAX_ALLOWED <= 160400
 #define UIUserInterfaceIdiomVision ((UIUserInterfaceIdiom)6)
+#endif
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 70000
+#ifdef __cplusplus
+extern "C" {
+#endif
+void __sincospif(float, float *, float *);
+void __sincospi(double, double *, double *);
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 
@@ -102,6 +115,10 @@ typedef NSString *NSTextListMarkerFormat;
 
 #ifndef NS_SWIFT_SENDABLE
 #define NS_SWIFT_SENDABLE
+#endif
+
+#if defined(__OBJC__)
+#import <AVFoundation/AVAudioSession.h>
 #endif
 
 #if defined(__OBJC__) && defined(WEBKIT_IOS6_OBJC_EXTRAS)
