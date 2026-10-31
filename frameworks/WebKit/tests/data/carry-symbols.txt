@@ -2,9 +2,10 @@
 # build known to load on the device. tools/symbol_check.lua compares a
 # fresh build against this, and so does every build of the engine.
 #
-# undefined <framework> <symbol>  something iOS 6 must already have.
-#   A new one means an upstream change reached for API this system may
-#   not have, and dyld kills the process at load with no crash log.
+# undefined <framework> <symbol>  an import the device has been checked against. A new
+#   import is not added here: the gate judges it against the iOS 6.0 cache and accepts it
+#   when the library it names exports it there, and rejects it otherwise. A rejected import
+#   joins this list only after a device check that resolves it.
 # class <framework> <symbol>      an Objective-C class UIKit and Safari
 #   link by name. Losing one is the same death, from the other side.
 class JavaScriptCore _OBJC_CLASS_$_JSContext
@@ -564,6 +565,12 @@ undefined JavaScriptCore __ZNSt13runtime_errorD2Ev
 undefined JavaScriptCore __ZNSt3__111__call_onceERVmPvPFvS2_E
 undefined JavaScriptCore __ZNSt3__112__next_primeEm
 undefined JavaScriptCore __ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE21__grow_by_and_replaceEmmmmmmPKc
+# The two basic_string<char> overloads below are bound by JavaScriptCore to the libcxx package's libc++, which the
+#   system variant stages as /usr/lib/librev-c++.1.dylib, a path iOS 6.0's cache does not hold, so the gate rejects
+#   them. The device resolves them: the carried librev-c++ and the system libc++.1 both export them (checked on an
+#   iPhone 4S running iOS 6.1.3, and in the iOS 6.0 cache's libc++.1, on 2026-10-31).
+undefined JavaScriptCore __ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6appendEmc
+undefined JavaScriptCore __ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6insertEmmc
 undefined JavaScriptCore __ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE9__grow_byEmmmmmm
 undefined JavaScriptCore __ZNSt3__113__hash_memoryEPKvm
 undefined JavaScriptCore __ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEE6sentryC1ERS3_

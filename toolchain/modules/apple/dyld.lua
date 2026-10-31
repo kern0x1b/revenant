@@ -1019,6 +1019,58 @@ function missing_imports(cachefile, binaries, root)
     return missing, #found, cache, dangling, ordering
 end
 
+local function judge_import(cache, image, twolevel, symbol)
+    local ordinal = symbol.ordinal
+    if not twolevel then
+        return {accepted = false, reason = "the image uses the flat namespace, so it names no library for this import"}
+    end
+    if ordinal == 0xFE then
+        return {accepted = false, reason = "the image binds it by dynamic lookup, so it names no library for it"}
+    end
+    local library = image.libraries[ordinal]
+    if not library then
+        return {accepted = false, reason = string.format("ordinal %d names no library the image links", ordinal)}
+    end
+    if exported_by(cache, library, symbol.name) then
+        return {accepted = true, library = library}
+    end
+    if not cache.libraries[library] then
+        return {accepted = false, library = library, reason = string.format("it is bound to %s, which the cache does not hold", library)}
+    end
+    local holders = {}
+    for _, install in ipairs(table.orderkeys(cache.libraries)) do
+        if cache.libraries[install].exports[symbol.name] then
+            table.insert(holders, install)
+        end
+    end
+    local reason = string.format("it is bound to %s, which the cache does not export it from", library)
+    if #holders > 0 then
+        reason = reason .. string.format("; %s exports it, so the binding names the wrong library", table.concat(holders, ", "))
+    end
+    return {accepted = false, library = library, reason = reason}
+end
+
+function import_verdicts(cachefile, binaries)
+    local cache = load(cachefile)
+    local verdicts = {}
+    for _, binary in ipairs(binaries) do
+        local data = macho.read(binary)
+        local image = loaded_image(macho.images(data), cache.architecture)
+        if not image then
+            raise("%s has no slice a %s device loads", binary, cache.architecture)
+        end
+        local twolevel = image.flags & 0x80 ~= 0
+        local found = {}
+        for _, symbol in ipairs(undefined_imports(data, image)) do
+            local verdict = judge_import(cache, image, twolevel, symbol)
+            verdict.name = symbol.name
+            table.insert(found, verdict)
+        end
+        verdicts[binary] = found
+    end
+    return verdicts
+end
+
 function check(cachefile, binaries, folder, opt)
     opt = opt or {}
     if not os.exists(cachefile) then
