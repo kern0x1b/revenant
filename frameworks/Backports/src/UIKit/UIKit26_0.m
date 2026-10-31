@@ -13,13 +13,14 @@ static inline id RevenantBox(id value) { return value; }
 @implementation UICornerRadius
 @end
 
-@interface UICornerConfiguration ()
-@property (nonatomic) CGFloat maximumRadius;
+@interface UICornerConfiguration () {
+    @package
+    CGFloat _maximumRadius;
+}
 - (instancetype)initWithMaximumRadius:(CGFloat)maximumRadius;
 @end
 
 @implementation UICornerConfiguration
-@synthesize maximumRadius = _maximumRadius;
 
 + (instancetype)capsuleConfiguration
 {
@@ -600,7 +601,7 @@ static void revenant_apply_corner_configuration(UIView *view)
     if (configuration == nil)
         return;
     CGSize size = view.bounds.size;
-    view.layer.cornerRadius = MIN(MIN(size.width, size.height) / 2, configuration.maximumRadius);
+    view.layer.cornerRadius = MIN(MIN(size.width, size.height) / 2, configuration->_maximumRadius);
 }
 
 static void revenant_install_corner_configuration_hook(void)
