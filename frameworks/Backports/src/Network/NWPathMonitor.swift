@@ -398,7 +398,11 @@ public final class NWPathMonitor {
                 return
             }
             let box = Unmanaged<PathCallbackBox>.fromOpaque(info).takeUnretainedValue()
+            #if os(iOS)
+            box.monitor?.deliver(flags: SCNetworkReachabilityFlags(rawValue: flags), generation: box.generation)
+            #else
             box.monitor?.deliver(flags: flags, generation: box.generation)
+            #endif
         }, &context)
         SCNetworkReachabilitySetDispatchQueue(reachability, queue)
         queue.async { [weak self] in
@@ -497,7 +501,13 @@ extension NWPathMonitor: AsyncSequence {
 }
 
 private func revenantCurrentFlags(_ reachability: SCNetworkReachability) -> SCNetworkReachabilityFlags {
+    #if os(iOS)
+    var flags: UInt32 = 0
+    _ = SCNetworkReachabilityGetFlags(reachability, &flags)
+    return SCNetworkReachabilityFlags(rawValue: flags)
+    #else
     var flags: SCNetworkReachabilityFlags = []
     _ = SCNetworkReachabilityGetFlags(reachability, &flags)
     return flags
+    #endif
 }

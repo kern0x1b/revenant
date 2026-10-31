@@ -133,5 +133,5 @@ function is shared rather than read from the live config. The `thread_local` fix
 pass-through and the emulated TLS value per architecture.
 `swift_cxx_thread_local_test` also checks that the binary imports `___emutls_get_address` and not `__tlv_bootstrap`, that
 the bundled libc++abi exports `___emutls_get_address`, and that the dyld check binds the import through that libc++abi,
-which it passes to the check as a provided binary. No binary runs. They need both packages installed for iphoneos first: `./xmakew f -p iphoneos -a armv7`, then
+which it passes to the check as a provided binary. No binary runs. They need both packages installed for iphoneos first: `./xmakew f -P . -p iphoneos -a armv7`, then
 `./xmakew require -P . -y revenant@swift-runtime` and `revenant@libcxx`.
