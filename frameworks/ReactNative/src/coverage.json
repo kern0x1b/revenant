@@ -576,9 +576,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch."
+   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Missing: the map is SwiftUI MapKit, iOS 17/18 only (AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available), and frameworks/SwiftUI has none of the 29 Map types the package uses (Map, MapCameraPosition, MapSelection, MapProperties, MapUISettings, MapReader, MapContent, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle, MapPolyline, MapPolygon, MapCircle, MapMarker, MapAnnotation, Marker, Annotation, Polygon, Circle, MapColorScheme, MapCamera, MapStyle, MapStyleEmphasis, MapStyleElevation, MapContourStyle, MapPointOfInterestCategories, MapPointOfInterestCategory, MapType). Needed: a SwiftUI Map on MKMapView in frameworks/SwiftUI. Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch."
   },
   {
    "id": "expo-mcp",

@@ -10,8 +10,8 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 5 |
-| missing | native code that is not built yet | 45 |
-| evaluate | not attempted; the note says what iOS 6 offers | 36 |
+| missing | native code that is not built yet | 46 |
+| evaluate | not attempted; the note says what iOS 6 offers | 35 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 158 |
@@ -124,7 +124,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-location | ~57.0.21 | yes | evaluate | none | CoreLocation exists on iOS 6. |
 | expo-mail-composer | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-manifests | ~57.0.2 | yes | missing | none | Not built; expo-constants runs without it. |
-| expo-maps | ~57.0.4 | yes | evaluate | none | Not built; package packages/e/expo-maps (57.0.4, unpatched). Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch. |
+| expo-maps | ~57.0.4 | yes | missing | none | Not built; package packages/e/expo-maps (57.0.4, unpatched). Missing: the map is SwiftUI MapKit, iOS 17/18 only (AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available), and frameworks/SwiftUI has none of the 29 Map types the package uses (Map, MapCameraPosition, MapSelection, MapProperties, MapUISettings, MapReader, MapContent, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle, MapPolyline, MapPolygon, MapCircle, MapMarker, MapAnnotation, Marker, Annotation, Polygon, Circle, MapColorScheme, MapCamera, MapStyle, MapStyleEmphasis, MapStyleElevation, MapContourStyle, MapPointOfInterestCategories, MapPointOfInterestCategory, MapType). Needed: a SwiftUI Map on MKMapView in frameworks/SwiftUI. Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch. |
 | expo-mcp | ~0.2.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-media-library | ~57.0.5 | yes | evaluate | none | Uses Photos (iOS 8); AssetsLibrary exists on iOS 6. |
 | expo-mesh-gradient | ~57.0.2 | yes | impossible | none | MeshGradient is SwiftUI, iOS 18. |
