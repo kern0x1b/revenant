@@ -64,6 +64,22 @@ the fence and sync functions (`APPLE_sync`), and the queries in `src/OpenGLES/ES
 only. Revenant has no GLSL ES 3.00 to 1.00 translator (the only GLSL to SPIR-V path is the host emulator's), so that context
 would fail at shader compile. It is not created until such a translator exists.
 
+### The translator this needs
+
+The gap is the shader language, not the entry points. A GLSL ES 3.00 to GLSL ES 1.00 translator would be the missing step.
+Its candidate parts, both in xmake-repo:
+
+- glslang, the front end: GLSL ES 3.00 to SPIR-V. The emulator already uses it on the host (`emulator/src/glsl/glsl_to_spirv.cpp`,
+  a 104-line wrapper behind the `emulator_vulkan` option), so the host half exists. The iOS 6 half does not: glslang would
+  have to be built for armv7 as a package.
+- SPIRV-Cross, the back end: SPIR-V to GLSL with `version 100` and `es`. It is not in the tree. Its ES 1.00 output rejects
+  integer bit operations, uniform blocks, and some dynamic indexing, so those shaders would be refused by name, not
+  translated.
+
+The first measure is the shader corpus. The expo-gl package (57.0.2) has no ES 3.00 shader: its only shader text is the
+ES 1.00 camera shader in `android/src/main/java/expo/modules/gl/GLCameraObject.java`. A prototype therefore needs shaders
+chosen by someone who knows the apps that use expo-gl. Until that choice is made, no translation result is claimed.
+
 `GL_VERSION` and `GL_SHADING_LANGUAGE_VERSION` are not changed: the backport passes the driver's own strings through, and
 the driver is an ES 2.0 driver with a GLSL ES 1.00 compiler.
 
