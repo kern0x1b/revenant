@@ -255,7 +255,30 @@ function main()
     local base64_lowered = lowered.lower_swift_text(base64, base64_names, {NSDataBase64DecodingOptions = true})
     assert(count(base64_lowered, "@available") == 1 and base64_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public init?(base64Encoded base64Data", 1, true),
            "the Swift base64 initializer and the typealias of its options lower with the Objective-C member, and the Data overload keeps its availability:\n" .. base64_lowered)
-    local released = {AVSampleWriter = {instance = {"addInput:", "count", "oldMethod:"}, ["class"] = {}},
+    local measurement = table.concat({
+        "@available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)",
+        "public struct Measurement<UnitType : Unit> : Comparable {",
+        "}",
+        "@available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)",
+        "extension MeasurementFormatter {",
+        "    public func string<UnitType>(from measurement: Measurement<UnitType>) -> String {",
+        "    }",
+        "}",
+        "@available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)",
+        "extension MeasurementFormatter {",
+        "    public func string<UnitType>(from measurement: Measurement<UnitType>) -> String {",
+        "    }",
+        "    public var unlisted: Int {",
+        "    }",
+        "}",
+        "",
+    }, "\n")
+    local measurement_names = lowered.swift_names({classes = {NSMeasurement = {}, NSMeasurementFormatter = {["-stringFromMeasurement:"] = true}},
+                                                   functions = {}, globals = {}})
+    local measurement_lowered = lowered.lower_swift_text(measurement, measurement_names)
+    assert(count(measurement_lowered, "@available") == 1 and measurement_lowered:find("@available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)\nextension MeasurementFormatter {\n    public func string<UnitType>(from measurement: Measurement<UnitType>) -> String {\n    }\n    public var unlisted", 1, true),
+           "the Measurement struct and a MeasurementFormatter extension whose members are all implemented lower, and an extension with an unimplemented member keeps its availability:\n" .. measurement_lowered)
+    local released ={AVSampleWriter = {instance = {"addInput:", "count", "oldMethod:"}, ["class"] = {}},
                       AVSampleLater = {instance = {}, ["class"] = {}}}
     local device_sample = table.concat({
         "API_AVAILABLE(ios(8.0))",
