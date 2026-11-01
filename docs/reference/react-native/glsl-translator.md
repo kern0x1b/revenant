@@ -187,8 +187,18 @@ An automated review of the commit flagged three upstream glslang paths. Their st
 
 ## Not measured yet
 
-- **The device compiler.** The phone is claimed by another worker, so the ES 1.00 outputs have not been compiled by the
-  SGX543 driver. That is the acceptance test for this prototype: the six outputs compile on the phone.
+- **The device compiler: measured once, on an iPhone 4S (iPhone4,1) with iOS 6.1.3.** A probe that creates an
+  `EAGLContext` (`kEAGLRenderingAPIOpenGLES2`), compiles each file with `glShaderSource` and `glCompileShader`, and prints
+  `GL_COMPILE_STATUS` with the info log, ran on the phone. The six ES 1.00 outputs (`expected/*.es100`) all compile:
+  `COMPILE_STATUS = TRUE`, `glError = 0`, empty log. The driver reports `GL_VERSION = OpenGL ES 2.0 IMGSGX543-73.16.1`,
+  `GL_RENDERER = PowerVR SGX 543`, `GL_VENDOR = Imagination Technologies`. Its `GL_EXTENSIONS` string has 35 names, from
+  `GL_OES_depth_texture` to `GL_IMG_texture_compression_pvrtc`; it is kept in the session log, not copied here.
+  As a control, the six raw ES 3.00 corpus sources compile to `FALSE`, each with `version '300' is not supported`, so
+  translation is needed. The ES 1.00 outputs are not yet proven through the intercept on the phone: the probe calls the
+  driver directly, and the intercept's translation of the corpus is tested on the host.
+- **A linker note, not isolated.** A probe linked with the host's default linker stopped with `Illegal instruction`
+  before `main` and printed nothing. The same source linked with the revenant `ld64` 956.6 (the one the xmake build uses)
+  ran. The cause was not isolated; the working link is the one to use for device probes.
 - **The rendered result.** The stub renders nothing, so no output image exists yet.
 - **The device run.** The armv7 static libraries build and link, and the C++ imports are checked (above), but the thread-free
   configuration has not run on the device, and the 74 C library imports are not yet checked against iOS 6.1.3.
