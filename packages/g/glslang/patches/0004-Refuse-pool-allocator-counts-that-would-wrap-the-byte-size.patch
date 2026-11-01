@@ -1,0 +1,17 @@
+diff --git a/glslang/Include/PoolAlloc.h b/glslang/Include/PoolAlloc.h
+index 6b6dfd6..b460989 100644
+--- a/glslang/Include/PoolAlloc.h
++++ b/glslang/Include/PoolAlloc.h
+@@ -294,8 +294,12 @@ public:
+         pool_allocator(const pool_allocator<Other>& p) : allocator(p.getAllocator()) { }
+     
+     pointer allocate(size_type n) {
++        if (n > max_size())
++            return nullptr;
+         return reinterpret_cast<pointer>(getAllocator().allocate(n * sizeof(T))); }
+     pointer allocate(size_type n, const void*) {
++        if (n > max_size())
++            return nullptr;
+         return reinterpret_cast<pointer>(getAllocator().allocate(n * sizeof(T))); }
+ 
+     void deallocate(void*, size_type) { }
