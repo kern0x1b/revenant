@@ -21,7 +21,7 @@ public enum NWError: Error, Equatable, CustomDebugStringConvertible {
     }
 }
 
-public struct NWParameters: Sendable {
+public final class NWParameters: @unchecked Sendable {
     enum Transport: Sendable {
         case tcp
         case udp
