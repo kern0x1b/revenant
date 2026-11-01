@@ -1,16 +1,26 @@
-#include "glsl_translator.h"
+#include "RevenantGLSLTranslator.h"
 
 #include "glslang/Public/ResourceLimits.h"
 #include "glslang/Public/ShaderLang.h"
 #include "glslang/SPIRV/GlslangToSpv.h"
 #include "spirv_cross/spirv_glsl.hpp"
 
+#include <cstdlib>
+#include <cstring>
 #include <exception>
+#include <string>
 #include <utility>
 #include <vector>
 
-namespace revenant::glsl {
 namespace {
+
+constexpr std::size_t max_source_bytes = 1024 * 1024;
+
+struct Translation {
+    bool ok;
+    std::string glsl;
+    std::string log;
+};
 
 std::string replace_all(const std::string& text, const std::string& from, const std::string& to)
 {
@@ -38,9 +48,9 @@ std::string to_es310(const std::string& source)
     return renamed;
 }
 
-EShLanguage language_of(Stage stage)
+EShLanguage language_of(enum revenant_glsl_stage stage)
 {
-    return stage == Stage::vertex ? EShLangVertex : EShLangFragment;
+    return stage == REVENANT_GLSL_VERTEX ? EShLangVertex : EShLangFragment;
 }
 
 bool initialize()
@@ -49,9 +59,7 @@ bool initialize()
     return initialized;
 }
 
-}
-
-Translation translate_es300(Stage stage, const std::string& source)
+Translation translate(enum revenant_glsl_stage stage, const std::string& source)
 {
     if (source.size() > max_source_bytes) {
         return Translation{false, std::string(), "REJECTED: the source is over the source limit"};
@@ -109,4 +117,43 @@ Translation translate_es300(Stage stage, const std::string& source)
     }
 }
 
+char* copy_out(const std::string& text, size_t* length)
+{
+    char* out = static_cast<char*>(std::malloc(text.size() + 1));
+    if (out == nullptr) {
+        return nullptr;
+    }
+    std::memcpy(out, text.c_str(), text.size() + 1);
+    *length = text.size();
+    return out;
+}
+
+}
+
+extern "C" void revenant_glsl_translate_es300(enum revenant_glsl_stage stage, const char* source, size_t length,
+                                              struct revenant_glsl_translation* result)
+{
+    result->ok = 0;
+    result->glsl = nullptr;
+    result->glsl_length = 0;
+    result->log = nullptr;
+    try {
+        const std::string text(source == nullptr ? "" : source, length);
+        Translation translation = translate(stage, text);
+        result->ok = translation.ok ? 1 : 0;
+        size_t log_length = 0;
+        result->glsl = copy_out(translation.glsl, &result->glsl_length);
+        result->log = copy_out(translation.log, &log_length);
+    } catch (...) {
+        result->ok = 0;
+    }
+}
+
+extern "C" void revenant_glsl_translation_free(struct revenant_glsl_translation* result)
+{
+    std::free(result->glsl);
+    std::free(result->log);
+    result->glsl = nullptr;
+    result->log = nullptr;
+    result->glsl_length = 0;
 }

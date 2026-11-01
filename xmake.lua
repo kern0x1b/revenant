@@ -39,9 +39,6 @@ if is_plat("iphoneos") then
 end
 
 includes("frameworks/Backports")
-if component == "ReactNative" then
-    includes("frameworks/ReactNative")
-end
 includes("emulator", "recompiler", "neon", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
 on_config(function () import("@addon.revenant.binding", {anonymous = true}).check() end)
 

@@ -18,6 +18,8 @@ local PACKAGES = {
     ["libcxx"] = {"revenant@libcxx"},
     ["ffmpeg-hevc"] = {"revenant@ffmpeg-hevc"},
     ["apple-compat"] = {"revenant@apple-compat"},
+    ["glslang"] = {"revenant@glslang"},
+    ["spirv-cross"] = {"revenant@spirv-cross"},
 }
 
 function backports_subset(rows, selected)
