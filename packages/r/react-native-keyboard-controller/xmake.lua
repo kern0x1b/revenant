@@ -1,0 +1,22 @@
+package("react-native-keyboard-controller")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/kirillzyusko/react-native-keyboard-controller")
+    set_description("react-native-keyboard-controller 1.21.12, the keyboard handling the paseo app pins, from its npm tarball: the Swift and Objective-C++ iOS half and the Fabric specs. Its iOS 26 glass code is only reached under @available(iOS 26.0), so it needs no patch on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/react-native-keyboard-controller/-/react-native-keyboard-controller-$(version).tgz")
+    add_versions("1.21.12", "b6f1ce08f34834227b6f13a5be9ddb3898aa38b0cf91e6766dcde1f84691a650")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "react-native-keyboard-controller" and manifest.version == "1.21.12", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "views", "KeyboardExtenderContainerView.swift")), "the Swift sources of react-native-keyboard-controller are not installed")
+        assert(manifest.codegenConfig, "react-native-keyboard-controller has no codegenConfig")
+    end)

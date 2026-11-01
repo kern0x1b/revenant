@@ -952,11 +952,11 @@
   {
    "id": "react-native-keyboard-controller",
    "group": "sdk",
-   "version": "1.21.9",
+   "version": "1.21.12",
    "native": true,
    "status": "stub",
-   "verified": "phone",
-   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications."
+   "verified": "build",
+   "note": "Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 (keyboard-probe, build ok): the one blocker in the old note, UICornerConfiguration.capsule(), is not reached, and the iOS 26 glass code is under @available(iOS 26.0). The app still runs plain-view stubs (ios6/KeyboardControllerStubs.mm); the real ObjC++ half and the Swift-generated header are not built yet."
   },
   {
    "id": "react-native-maps",
@@ -1001,7 +1001,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Built without the gamma folder (it needs Swift types from newer iOS); the stack and the sheets work."
+   "note": "Built without the gamma folder; the stack and the sheets work on the phone. gamma/ does not compile yet: gamma/split/RNSSplitHostComponentView.mm imports RNScreens-Swift.h, and the module's Swift half (10 files in ios/) has no probe. Its code uses UIKit types of iOS 13 to 15 (UIAction, UISheetPresentationController, split-view columns)."
   },
   {
    "id": "react-native-safe-area-context",
@@ -1420,11 +1420,11 @@
   {
    "id": "react-native-paste-input",
    "group": "community",
-   "version": "",
+   "version": "2.0.1",
    "native": true,
    "status": "partial",
-   "verified": "phone",
-   "note": "Built without the ImageEffects category (it needs @import with modules enabled)."
+   "verified": "build",
+   "note": "Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error."
   }
  ]
 }
