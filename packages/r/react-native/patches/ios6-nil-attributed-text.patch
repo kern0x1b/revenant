@@ -1,0 +1,22 @@
+--- a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm
++++ b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm
+@@ -15,7 +15,7 @@
+ {
+   // Here we need to remove text attributes specific to particular kind of TextInput on iOS (e.g. limiting line number).
+   // TODO: Implement it properly.
+-  return [[NSAttributedString alloc] initWithString:attributedString.string];
++  return [[NSAttributedString alloc] initWithString:attributedString.string ?: @""];
+ }
+ 
+ void RCTCopyBackedTextInput(
+--- a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
++++ b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
+@@ -710,7 +710,7 @@
+ - (TextInputEventEmitter::Metrics)_textInputMetrics
+ {
+   return {
+-      .text = RCTStringFromNSString(_backedTextInputView.attributedText.string),
++      .text = RCTStringFromNSString(_backedTextInputView.attributedText.string ?: @""),
+       .selectionRange = [self _selectionRange],
+       .contentSize = RCTSizeFromCGSize(_backedTextInputView.contentSize),
+       .contentOffset = RCTPointFromCGPoint(_backedTextInputView.contentOffset),

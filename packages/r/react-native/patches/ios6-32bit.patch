@@ -1,0 +1,63 @@
+--- a/React/Fabric/Utils/RCTGradientUtils.mm	2026-10-29 20:33:18
++++ b/React/Fabric/Utils/RCTGradientUtils.mm	2026-10-29 20:33:18
+@@ -46,7 +46,7 @@
+   CGFloat getSlope() const
+   {
+     CGFloat dx = p2.x - p1.x;
+-    if (floatEquality(dx, 0.0)) {
++    if (floatEquality<CGFloat>(dx, 0.0)) {
+       return std::numeric_limits<CGFloat>::infinity();
+     }
+     return (p2.y - p1.y) / dx;
+@@ -58,7 +58,7 @@
+     if (std::isinf(slope)) {
+       return 0.0;
+     }
+-    if (floatEquality(slope, 0.0)) {
++    if (floatEquality<CGFloat>(slope, 0.0)) {
+       return -std::numeric_limits<CGFloat>::infinity();
+     }
+     return -1 / slope;
+@@ -123,7 +123,7 @@
+   CGPoint measuringPoint = line.point(p1.x + 1);
+   LineSegment measuringSegment(p1, measuringPoint);
+   CGFloat measuringDeltaH = measuringSegment.getDistance();
+-  CGFloat deltaX = !floatEquality(measuringDeltaH, 0.0) ? distance / measuringDeltaH : 0.0;
++  CGFloat deltaX = !floatEquality<CGFloat>(measuringDeltaH, 0.0) ? distance / measuringDeltaH : 0.0;
+   p2 = line.point(p1.x + deltaX);
+ }
+ 
+@@ -191,12 +191,12 @@
+       continue;
+     }
+ 
+-    if (floatEquality(leftDist, 0.0)) {
++    if (floatEquality<CGFloat>(leftDist, 0.0)) {
+       colorStops[x].color = rightSharedColor;
+       continue;
+     }
+ 
+-    if (floatEquality(rightDist, 0.0)) {
++    if (floatEquality<CGFloat>(rightDist, 0.0)) {
+       colorStops[x].color = leftSharedColor;
+       continue;
+     }
+@@ -409,7 +409,7 @@
+     if (!isTransparentBlack) {
+       lastColor = currentColor;
+     }
+-    [locations addObject:@(std::max(std::min(colorStop.position.value(), 1.0), 0.0))];
++    [locations addObject:@(std::max(std::min<double>(colorStop.position.value(), 1.0), 0.0))];
+   }
+ }
+ @end
+--- a/React/CxxBridge/RCTCxxBridge.mm	2026-10-30 11:45:02
++++ b/React/CxxBridge/RCTCxxBridge.mm	2026-10-30 11:45:02
+@@ -31,6 +31,7 @@
+ #import <React/RCTRedBoxSetEnabled.h>
+ #import <React/RCTReloadCommand.h>
+ #import <React/RCTTurboModuleRegistry.h>
++#import <ReactCommon/RCTTurboModule.h>
+ #import <React/RCTUtils.h>
+ #import <cxxreact/CxxNativeModule.h>
+ #import <cxxreact/Instance.h>

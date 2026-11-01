@@ -1,0 +1,69 @@
+--- a/React/CoreModules/RCTAccessibilityManager.mm	2026-10-30 20:59:14
++++ b/React/CoreModules/RCTAccessibilityManager.mm	2026-10-30 20:59:14
+@@ -46,10 +46,13 @@
+     _multiplier = 1.0;
+ 
+     // TODO: can this be moved out of the startup path?
+-    [[NSNotificationCenter defaultCenter] addObserver:self
+-                                             selector:@selector(didReceiveNewContentSizeCategory:)
+-                                                 name:UIContentSizeCategoryDidChangeNotification
+-                                               object:nil];
++    // iOS 6: UIContentSizeCategoryDidChangeNotification does not exist (NULL); a nil name would observe every notification
++    if (&UIContentSizeCategoryDidChangeNotification != NULL) {
++      [[NSNotificationCenter defaultCenter] addObserver:self
++                                               selector:@selector(didReceiveNewContentSizeCategory:)
++                                                   name:UIContentSizeCategoryDidChangeNotification
++                                                 object:nil];
++    }
+ 
+     [[NSNotificationCenter defaultCenter] addObserver:self
+                                              selector:@selector(accessibilityAnnouncementDidFinish:)
+@@ -105,7 +108,9 @@
+ 
+ - (void)didReceiveNewContentSizeCategory:(NSNotification *)note
+ {
+-  self.contentSizeCategory = note.userInfo[UIContentSizeCategoryNewValueKey];
++  if (&UIContentSizeCategoryNewValueKey != NULL) {
++    self.contentSizeCategory = note.userInfo[UIContentSizeCategoryNewValueKey];
++  }
+ }
+ 
+ - (void)accessibilityAnnouncementDidFinish:(__unused NSNotification *)notification
+--- a/React/Fabric/Surface/RCTFabricSurface.mm	2026-10-30 20:59:14
++++ b/React/Fabric/Surface/RCTFabricSurface.mm	2026-10-30 20:59:14
+@@ -68,10 +68,13 @@
+ 
+     [self _updateLayoutContext];
+ 
+-    [[NSNotificationCenter defaultCenter] addObserver:self
+-                                             selector:@selector(handleContentSizeCategoryDidChangeNotification:)
+-                                                 name:UIContentSizeCategoryDidChangeNotification
+-                                               object:nil];
++    // iOS 6: the notification does not exist (NULL); a nil name would observe every notification
++    if (&UIContentSizeCategoryDidChangeNotification != NULL) {
++      [[NSNotificationCenter defaultCenter] addObserver:self
++                                               selector:@selector(handleContentSizeCategoryDidChangeNotification:)
++                                                   name:UIContentSizeCategoryDidChangeNotification
++                                                 object:nil];
++    }
+   }
+ 
+   return self;
+--- a/Libraries/LinkingIOS/RCTLinkingManager.mm	2026-10-30 20:59:14
++++ b/Libraries/LinkingIOS/RCTLinkingManager.mm	2026-10-30 20:59:14
+@@ -154,9 +154,12 @@
+   if (self.bridge.launchOptions[UIApplicationLaunchOptionsURLKey] != nullptr) {
+     initialURL = self.bridge.launchOptions[UIApplicationLaunchOptionsURLKey];
+   } else {
+-    NSDictionary *userActivityDictionary =
+-        self.bridge.launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];
+-    if ([userActivityDictionary[UIApplicationLaunchOptionsUserActivityTypeKey] isEqual:NSUserActivityTypeBrowsingWeb]) {
++    // iOS 6: the user activity launch option keys do not exist (NULL)
++    NSDictionary *userActivityDictionary = &UIApplicationLaunchOptionsUserActivityDictionaryKey != NULL
++        ? self.bridge.launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey]
++        : nil;
++    if (&UIApplicationLaunchOptionsUserActivityTypeKey != NULL &&
++        [userActivityDictionary[UIApplicationLaunchOptionsUserActivityTypeKey] isEqual:NSUserActivityTypeBrowsingWeb]) {
+       initialURL = ((NSUserActivity *)userActivityDictionary[@"UIApplicationLaunchOptionsUserActivityKey"]).webpageURL;
+     }
+   }
