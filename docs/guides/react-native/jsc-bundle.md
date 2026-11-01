@@ -4,7 +4,7 @@ The React Native host of revenant runs the application's JavaScript on JavaScrip
 does not run correctly there, and `frameworks/ReactNative/tools/export_bundle.lua` makes the one that does.
 
 ```
-./xmakew l frameworks/ReactNative/tools/export_bundle.lua [--output DIR] APP_DIR
+./xmakew l -P . frameworks/ReactNative/tools/export_bundle.lua [--output DIR] APP_DIR
 ```
 
 APP_DIR is the application's folder with its `babel.config.js`. The result is `DIR/bundle.js`, by default
@@ -17,7 +17,7 @@ APP_DIR is the application's folder with its `babel.config.js`. The result is `D
 | babel profile `hermes-stable` | profile `default` | With the Hermes profile async functions stay native and return the engine's own promises. React Native replaces `global.Promise` with its polyfill unless `HermesInternal` says the engine owns it, so `result instanceof Promise` is false for every async result. The `default` profile compiles async functions to generators over `global.Promise`, as for any JavaScriptCore target. |
 | bytecode | none | JavaScriptCore reads source. |
 | `inlineRequires: false` | `inlineRequires: true` | With it off every module of the 24 MB bundle runs at start. With it on a module runs at its first use. On an iPhone 4S the time from launch to `Running "main"` went from 16.9 to 7.8 seconds, and the resident memory after start from about 200 MB to about 100 MB. |
-| nothing in front | `host/jsc-prelude.js` | Hermes has `atob` and `btoa`; JavaScriptCore does not, and the application's relay handshake calls them. |
+| nothing in front | `src/jsc-prelude.js` | Hermes has `atob` and `btoa`; JavaScriptCore does not, and the application's relay handshake calls them. |
 
 No `HermesInternal` object is faked: the engine is what it is, and the bundle is made for it.
 

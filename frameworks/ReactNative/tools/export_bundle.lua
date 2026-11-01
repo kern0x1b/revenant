@@ -1,10 +1,10 @@
-local USAGE = [[usage: ./xmakew l frameworks/ReactNative/tools/export_bundle.lua [--output DIR] APP_DIR
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/export_bundle.lua [--output DIR] APP_DIR
   exports the iOS JavaScript bundle of an Expo application for the JavaScriptCore host, as DIR/bundle.js (default DIR is APP_DIR/dist-jsc).
   APP_DIR is the folder with the application's babel.config.js.
   Two things differ from the Hermes export. The babel profile is 'default' instead of 'hermes-stable': with the Hermes profile async
   functions stay native and return the engine's own promises, React Native replaces global.Promise because no HermesInternal says it
   owns it, and `result instanceof Promise` is false for every async result. And the bundle is not compiled to bytecode.
-  frameworks/ReactNative/host/jsc-prelude.js, which defines atob and btoa that Hermes has and JavaScriptCore does not, is put in front of the bundle.]]
+  frameworks/ReactNative/src/jsc-prelude.js, which defines atob and btoa that Hermes has and JavaScriptCore does not, is put in front of the bundle.]]
 
 local WRAPPER = [[const original = require("./babel.config.hermes.js");
 module.exports = function (api) {
@@ -45,7 +45,7 @@ function metro_config(app)
 end
 
 function prelude()
-    return path.join(os.scriptdir(), "..", "host", "jsc-prelude.js")
+    return path.join(os.scriptdir(), "..", "src", "jsc-prelude.js")
 end
 
 function joined(front, bundle)
