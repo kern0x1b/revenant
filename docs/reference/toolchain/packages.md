@@ -51,6 +51,7 @@ SwiftUI, the coding library `RevenantCoding`, the CloudKit wrapper `RevenantCKWe
 | `folly`, `glog`, `fmt`, `double-conversion`, `fast_float`, `boost` | the C++ dependencies React Native 0.86 pins, at its versions: folly's `RCT-Folly` subset with its flags, and the libraries it uses, each built for armv7 and linked against `libcxx`; `boost` is the headers React Native ships, beside the release archive `dynarmic` takes |
 | `socketrocket` | the WebSocket client React Native 0.86 pins, as static `libSocketRocket` built with ARC for armv7, which names `CFNetwork` and `Security` as the frameworks it links |
 | `yoga` | the flexbox layout engine React Native 0.86 ships, at its 0.86.3 release, as static `libyoga` built for armv7 and linked against `libcxx`, its headers under `include/yoga`; a port requires it as `revenant@yoga` |
+| `react-native` | the headers of React Native 0.86.3, with no code compiled or linked: React's Objective-C headers flattened under `include/React` as CocoaPods exposes them, the `ReactCommon` tree under `include/` with its `<ReactCommon/...>` spellings as symlinks, and `jsi` under `include/jsi`; `yoga` is the `yoga` package's, and the generated Fabric and codegen headers are not in it. A port requires it as `revenant@react-native` |
 | `emulator` | the emulator, which boots a firmware's userland on macOS arm64 |
 | `emulator-guest` | the guest programs, `revenant-runner` and `revenant-sblaunch` |
 | `firmware-tools` | `revenant-firmware`, which decrypts the FileVault root filesystems and the Apple Encrypted Archives of firmware |
