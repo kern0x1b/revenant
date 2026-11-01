@@ -9,10 +9,10 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | real | built from the module's own sources, with no stub and no substitute | 35 |
 | partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 5 |
 | missing | native code that is not built yet | 44 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
-| impossible | the system service does not exist before the iOS release the note names | 8 |
+| impossible | the system service does not exist before the iOS release the note names | 9 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 158 |
 
@@ -83,7 +83,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-apple-authentication | ~57.0.2 | yes | impossible | none | Sign in with Apple needs AuthenticationServices (iOS 13). |
 | expo-application | ~57.0.3 | yes | real | build | Compiled; not exercised. |
 | expo-asset | ~57.0.20 | yes | real | build | Compiled; its use is not exercised by a screen. |
-| expo-audio | ~57.0.5 | yes | stub | none | A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
+| expo-audio | ~57.0.5 | yes | stub | none | Name only; the package is at packages/e/expo-audio, unpatched. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. Not built. |
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-background-fetch | ~57.0.21 | yes | evaluate | none | Background fetch is iOS 7. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. |
@@ -102,7 +102,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-dev-client | ~57.0.20 | yes | impossible | none | A development tool; one file of iOS code, no meaning in a release host. |
 | expo-device | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-document-picker | ~57.0.3 | yes | stub | none | Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system. |
+| expo-document-picker | ~57.0.3 | yes | impossible | none | The picker is UIDocumentPickerViewController, which the iPhoneOS 26.2 SDK header marks available from iOS 8.0; iOS 6 has no document picker, and a substitute that picks from the media library would not be this module. Not built; no package is pinned. |
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-file-system | ~57.0.7 | yes | partial | build | Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch. |
 | expo-font | ~57.0.4 | yes | real | phone | Built from its own sources. |
@@ -113,7 +113,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | real | build | Built; not exercised. |
-| expo-image-picker | ~57.0.20 | yes | stub | none | Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system. |
+| expo-image-picker | ~57.0.20 | yes | stub | none | Name only; the package is at packages/e/expo-image-picker, unpatched. The module's multi-select path is PHPickerViewController (iOS 14) and its asset path uses PHAssetResourceManager writeData (iOS 13), UTType (iOS 14) and NSItemProvider file loading. The single-picker path is UIImagePickerController, which iOS 6 has (UIImagePickerController.h: iOS 4.0), so the patch is to route to it below iOS 14. Not built. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |

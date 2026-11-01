@@ -1,0 +1,21 @@
+package("expo-image-picker")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-image-picker")
+    set_description("expo-image-picker 57.0.20, the Expo SDK picker of photos and videos, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-image-picker/-/expo-image-picker-$(version).tgz")
+    add_versions("57.0.20", "98249e2e89f8ad15c9ca427dc76ba018e5dcd8677d78ff230f7a8780f1d48b29")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-image-picker" and manifest.version == "57.0.20", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "ImagePickerModule.swift")), "expo-image-picker has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-image-picker has no expo-module.config.json")
+    end)

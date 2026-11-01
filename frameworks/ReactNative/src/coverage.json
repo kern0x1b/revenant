@@ -209,7 +209,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+   "note": "Name only; the package is at packages/e/expo-audio, unpatched. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. Not built."
   },
   {
    "id": "expo-auth-session",
@@ -378,9 +378,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "stub",
+   "status": "impossible",
    "verified": "none",
-   "note": "Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system."
+   "note": "The picker is UIDocumentPickerViewController, which the iPhoneOS 26.2 SDK header marks available from iOS 8.0; iOS 6 has no document picker, and a substitute that picks from the media library would not be this module. Not built; no package is pinned."
   },
   {
    "id": "expo-eas-client",
@@ -479,7 +479,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system."
+   "note": "Name only; the package is at packages/e/expo-image-picker, unpatched. The module's multi-select path is PHPickerViewController (iOS 14) and its asset path uses PHAssetResourceManager writeData (iOS 13), UTType (iOS 14) and NSItemProvider file loading. The single-picker path is UIImagePickerController, which iOS 6 has (UIImagePickerController.h: iOS 4.0), so the patch is to route to it below iOS 14. Not built."
   },
   {
    "id": "expo-intent-launcher",
