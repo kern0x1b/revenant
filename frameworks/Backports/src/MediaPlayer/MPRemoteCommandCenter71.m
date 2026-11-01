@@ -47,12 +47,40 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
 
 @interface MPRemoteCommand ()
 @property (nonatomic, strong) NSMutableArray<RevenantRemoteCommandTarget *> *revenantTargets;
+@property (nonatomic) BOOL revenantActive;
 @end
+
+static NSUInteger revenant_active_command_count;
+
+static void revenant_command_state_changed(MPRemoteCommand *command)
+{
+    @synchronized ([MPRemoteCommand class]) {
+        BOOL active;
+        @synchronized (command.revenantTargets) {
+            active = command.isEnabled && command.revenantTargets.count > 0;
+        }
+        if (active == command.revenantActive)
+            return;
+        command.revenantActive = active;
+        if (active) {
+            if (revenant_active_command_count++ == 0)
+                [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+        } else if (--revenant_active_command_count == 0) {
+            [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+        }
+    }
+}
 
 @implementation MPRemoteCommand
 
 @synthesize enabled = _enabled;
 @synthesize revenantTargets = _revenantTargets;
+
+- (void)setEnabled:(BOOL)enabled
+{
+    _enabled = enabled;
+    revenant_command_state_changed(self);
+}
 
 - (instancetype)initRevenant
 {
@@ -72,6 +100,7 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
     @synchronized (self.revenantTargets) {
         [self.revenantTargets addObject:entry];
     }
+    revenant_command_state_changed(self);
 }
 
 - (void)removeTarget:(id)target action:(SEL)action
@@ -79,11 +108,12 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
     @synchronized (self.revenantTargets) {
         NSMutableArray *doomed = [NSMutableArray array];
         for (RevenantRemoteCommandTarget *entry in self.revenantTargets) {
-            if (entry.target == target && (!action || entry.action == action))
+            if (entry == target || (entry.target == target && (!action || entry.action == action)))
                 [doomed addObject:entry];
         }
         [self.revenantTargets removeObjectsInArray:doomed];
     }
+    revenant_command_state_changed(self);
 }
 
 - (void)removeTarget:(id)target
@@ -98,6 +128,7 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
     @synchronized (self.revenantTargets) {
         [self.revenantTargets addObject:entry];
     }
+    revenant_command_state_changed(self);
     return entry;
 }
 

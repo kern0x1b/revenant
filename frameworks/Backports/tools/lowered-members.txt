@@ -19502,6 +19502,7 @@ member MPRemoteCommand -removeTarget:
 member MPRemoteCommand -removeTarget:action:
 member MPRemoteCommand -revenantTargets
 member MPRemoteCommand -revenant_dispatch:
+member MPRemoteCommand -setEnabled:
 member MPRemoteCommandCenter +sharedCommandCenter
 member MPRemoteCommandCenter -bookmarkCommand
 member MPRemoteCommandCenter -changePlaybackPositionCommand
