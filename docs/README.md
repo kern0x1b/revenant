@@ -159,6 +159,12 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [WidgetKit: providers](reference/backports/WidgetKit/WidgetKit/Providers.md) | the two intent providers, and the spellings they do not share with the timeline provider |
 | [WidgetKit: reuse](reference/backports/WidgetKit/WidgetKit/Reuse.md) | what WidgetKit was compared against, and why |
 
+## React Native
+
+| Document | About |
+| --- | --- |
+| [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
+
 ## WebKit
 
 | Document | About |
