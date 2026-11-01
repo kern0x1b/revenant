@@ -19,6 +19,7 @@ These run on the build machine. Only the compiler runtimes reach the device.
 | `libplist` | | the plist library `ldid` and the emulator use |
 | `iphoneos-sdk` | 26.2 (16.4 with `apple_sdk`) | the iOS SDK from theos/sdks, laid out as Xcode lays it out, with the `crt1` and `libgcc_s` files of iPhone OS 2 to iOS 6 and the library stubs of older releases |
 | `rust` | nightly-2026-10-22 | the Rust toolchain of that nightly (rustc 1.101.0-nightly) with rust-src, installed for the host by rustup 1.29.2, whose installer is pinned by checksum. The `channel` config names it; it exports `REVENANT_RUST_BIN` and `REVENANT_RUST_CARGO_HOME` |
+| `node` | 26.13.0 | the JavaScript runtime the build's JavaScript tools run under, the node binary of the official darwin-arm64 release; `react-native-codegen` runs its codegen with it |
 
 ## Runtimes
 
