@@ -3,10 +3,8 @@
 #import <OpenGLES/ES2/glext.h>
 #import <IOKit/IOKitLib.h>
 #include <dlfcn.h>
-#include <pthread.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
-#include <mach/thread_info.h>
 #include <mach/vm_map.h>
 #include <mach/vm_prot.h>
 #include <mach-o/dyld.h>
@@ -27,10 +25,10 @@ enum { SEL_MAX = 64, CALLERS_MAX = 16, SINGLE_FRAMES = 2000, FRAMES_100 = 200, D
 static const char *kind_name[KINDS] = {"CallMethod", "CallScalar", "CallStruct"};
 
 static mach_timebase_info_data_t timebase;
-static uint64_t io_ticks, io_cpu_ns, io_calls;
-static uint64_t sel_calls[KINDS][SEL_MAX], sel_ticks[KINDS][SEL_MAX], sel_cpu_ns[KINDS][SEL_MAX];
+static uint64_t io_ticks, io_calls;
+static uint64_t sel_calls[KINDS][SEL_MAX], sel_ticks[KINDS][SEL_MAX];
 static char caller_name[CALLERS_MAX][64];
-static uint64_t caller_calls[CALLERS_MAX], caller_ticks[CALLERS_MAX], caller_cpu_ns[CALLERS_MAX];
+static uint64_t caller_calls[CALLERS_MAX], caller_ticks[CALLERS_MAX];
 static int callers;
 
 static call_method_fn real_call_method;
@@ -38,15 +36,6 @@ static call_scalar_fn real_call_scalar;
 static call_struct_fn real_call_struct;
 
 static double ns(uint64_t ticks) { return (double)ticks * timebase.numer / timebase.denom; }
-
-static uint64_t thread_cpu_ns(void)
-{
-    thread_basic_info_data_t info;
-    mach_msg_type_number_t count = THREAD_BASIC_INFO_COUNT;
-    if (thread_info(pthread_mach_thread_np(pthread_self()), THREAD_BASIC_INFO, (thread_info_t)&info, &count) != KERN_SUCCESS) return 0;
-    return ((uint64_t)info.user_time.seconds + info.system_time.seconds) * 1000000000ULL
-         + ((uint64_t)info.user_time.microseconds + info.system_time.microseconds) * 1000ULL;
-}
 
 static int caller_slot(void *ret)
 {
@@ -63,49 +52,43 @@ static int caller_slot(void *ret)
     return callers++;
 }
 
-static void account(int kind, uint32_t sel, uint64_t ticks, uint64_t cpu, void *ret)
+static void account(int kind, uint32_t sel, uint64_t ticks, void *ret)
 {
     int slot = caller_slot(ret);
     io_ticks += ticks;
-    io_cpu_ns += cpu;
     io_calls++;
     if (sel < SEL_MAX) {
         sel_calls[kind][sel]++;
         sel_ticks[kind][sel] += ticks;
-        sel_cpu_ns[kind][sel] += cpu;
     }
     caller_calls[slot]++;
     caller_ticks[slot] += ticks;
-    caller_cpu_ns[slot] += cpu;
 }
 
 static kern_return_t hook_call_method(mach_port_t c, uint32_t sel, const uint64_t *in, uint32_t inc, const void *ins, size_t insz, uint64_t *out, uint32_t *outc, void *outs, size_t *outsz)
 {
     void *ret = __builtin_return_address(0);
-    uint64_t t0 = mach_absolute_time(), k0 = thread_cpu_ns();
+    uint64_t t0 = mach_absolute_time();
     kern_return_t kr = real_call_method(c, sel, in, inc, ins, insz, out, outc, outs, outsz);
-    uint64_t k1 = thread_cpu_ns(), t1 = mach_absolute_time();
-    account(KIND_METHOD, sel, t1 - t0, k1 - k0, ret);
+    account(KIND_METHOD, sel, mach_absolute_time() - t0, ret);
     return kr;
 }
 
 static kern_return_t hook_call_scalar(mach_port_t c, uint32_t sel, const uint64_t *in, uint32_t inc, uint64_t *out, uint32_t *outc)
 {
     void *ret = __builtin_return_address(0);
-    uint64_t t0 = mach_absolute_time(), k0 = thread_cpu_ns();
+    uint64_t t0 = mach_absolute_time();
     kern_return_t kr = real_call_scalar(c, sel, in, inc, out, outc);
-    uint64_t k1 = thread_cpu_ns(), t1 = mach_absolute_time();
-    account(KIND_SCALAR, sel, t1 - t0, k1 - k0, ret);
+    account(KIND_SCALAR, sel, mach_absolute_time() - t0, ret);
     return kr;
 }
 
 static kern_return_t hook_call_struct(mach_port_t c, uint32_t sel, const void *ins, size_t insz, void *outs, size_t *outsz)
 {
     void *ret = __builtin_return_address(0);
-    uint64_t t0 = mach_absolute_time(), k0 = thread_cpu_ns();
+    uint64_t t0 = mach_absolute_time();
     kern_return_t kr = real_call_struct(c, sel, ins, insz, outs, outsz);
-    uint64_t k1 = thread_cpu_ns(), t1 = mach_absolute_time();
-    account(KIND_STRUCT, sel, t1 - t0, k1 - k0, ret);
+    account(KIND_STRUCT, sel, mach_absolute_time() - t0, ret);
     return kr;
 }
 
@@ -283,92 +266,69 @@ static void draw_once(void)
 static void run_single(void)
 {
     int n = SINGLE_FRAMES, i;
-    uint64_t *draw = series(n), *draw_cpu = series(n), *draw_io = series(n), *draw_io_cpu = series(n);
-    uint64_t *finish = series(n), *finish_cpu = series(n), *finish_io = series(n), *finish_io_cpu = series(n);
+    uint64_t *draw = series(n), *draw_io = series(n);
+    uint64_t *finish = series(n), *finish_io = series(n);
     uint64_t calls_draw = 0, calls_finish = 0, calls_before = io_calls;
 
     for (i = 0; i < n; i++) {
-        uint64_t k0 = thread_cpu_ns(), t0 = mach_absolute_time(), i0 = io_ticks, q0 = io_cpu_ns, c0 = io_calls;
-        uint64_t t1, k1, i1, q1, c1, t2, k2, i2, q2;
+        uint64_t t0 = mach_absolute_time(), i0 = io_ticks, c0 = io_calls;
+        uint64_t t1, i1, c1, t2, i2;
         draw_once();
         t1 = mach_absolute_time();
-        k1 = thread_cpu_ns();
         i1 = io_ticks;
-        q1 = io_cpu_ns;
         c1 = io_calls;
         glFinish();
         t2 = mach_absolute_time();
-        k2 = thread_cpu_ns();
         i2 = io_ticks;
-        q2 = io_cpu_ns;
         draw[i] = t1 - t0;
-        draw_cpu[i] = k1 - k0;
         draw_io[i] = i1 - i0;
-        draw_io_cpu[i] = q1 - q0;
         finish[i] = t2 - t1;
-        finish_cpu[i] = k2 - k1;
         finish_io[i] = i2 - i1;
-        finish_io_cpu[i] = q2 - q1;
         calls_draw += c1 - c0;
         calls_finish += io_calls - c1;
     }
     printf("\nscenario 1: one trivial draw per frame, %d frames\n", n);
     report("draw call, wall", draw, n);
-    report("  draw call, thread CPU", draw_cpu, n);
     report("  IOConnect* in the draw, wall", draw_io, n);
-    report("  IOConnect* in the draw, CPU", draw_io_cpu, n);
     report("glFinish, wall", finish, n);
-    report("  glFinish, thread CPU", finish_cpu, n);
     report("  IOConnect* in glFinish, wall", finish_io, n);
-    report("  IOConnect* in glFinish, CPU", finish_io_cpu, n);
     printf("IOConnect calls per draw %.3f, per glFinish %.3f (total %llu)\n",
            (double)calls_draw / n, (double)calls_finish / n, (unsigned long long)(io_calls - calls_before));
-    free(draw); free(draw_cpu); free(draw_io); free(draw_io_cpu);
-    free(finish); free(finish_cpu); free(finish_io); free(finish_io_cpu);
+    free(draw); free(draw_io);
+    free(finish); free(finish_io);
 }
 
 static void run_frames(void)
 {
     int frames = FRAMES_100, f, d, draws = frames * DRAWS_PER_FRAME, k, s, slot;
     uint64_t *per_draw = series(draws);
-    uint64_t *frame = series(frames), *draws_wall = series(frames), *draws_cpu = series(frames);
-    uint64_t *draws_io = series(frames), *draws_io_cpu = series(frames);
-    uint64_t *fin = series(frames), *fin_cpu = series(frames), *fin_io = series(frames), *fin_io_cpu = series(frames);
+    uint64_t *frame = series(frames), *draws_wall = series(frames), *draws_io = series(frames);
+    uint64_t *fin = series(frames), *fin_io = series(frames);
     uint64_t calls_total = 0;
 
     memset(sel_calls, 0, sizeof sel_calls);
     memset(sel_ticks, 0, sizeof sel_ticks);
-    memset(sel_cpu_ns, 0, sizeof sel_cpu_ns);
     memset(caller_calls, 0, sizeof caller_calls);
     memset(caller_ticks, 0, sizeof caller_ticks);
-    memset(caller_cpu_ns, 0, sizeof caller_cpu_ns);
 
     for (f = 0; f < frames; f++) {
-        uint64_t t0 = mach_absolute_time(), k0 = thread_cpu_ns(), i0 = io_ticks, q0 = io_cpu_ns, c0 = io_calls;
-        uint64_t t1, k1, i1, q1, t2, k2, i2, q2;
+        uint64_t t0 = mach_absolute_time(), i0 = io_ticks, c0 = io_calls;
+        uint64_t t1, i1, t2, i2;
         for (d = 0; d < DRAWS_PER_FRAME; d++) {
             uint64_t a = mach_absolute_time();
             draw_once();
             per_draw[f * DRAWS_PER_FRAME + d] = mach_absolute_time() - a;
         }
         t1 = mach_absolute_time();
-        k1 = thread_cpu_ns();
         i1 = io_ticks;
-        q1 = io_cpu_ns;
         glFinish();
         t2 = mach_absolute_time();
-        k2 = thread_cpu_ns();
         i2 = io_ticks;
-        q2 = io_cpu_ns;
         frame[f] = t2 - t0;
         draws_wall[f] = t1 - t0;
-        draws_cpu[f] = k1 - k0;
         draws_io[f] = i1 - i0;
-        draws_io_cpu[f] = q1 - q0;
         fin[f] = t2 - t1;
-        fin_cpu[f] = k2 - k1;
         fin_io[f] = i2 - i1;
-        fin_io_cpu[f] = q2 - q1;
         calls_total += io_calls - c0;
     }
 
@@ -376,31 +336,27 @@ static void run_frames(void)
     report("one draw, wall (each)", per_draw, draws);
     report("frame, wall (draws + glFinish)", frame, frames);
     report("  draws, wall", draws_wall, frames);
-    report("    draws, thread CPU", draws_cpu, frames);
     report("    IOConnect* in the draws, wall", draws_io, frames);
-    report("    IOConnect* in the draws, CPU", draws_io_cpu, frames);
     report("  glFinish, wall", fin, frames);
-    report("    glFinish, thread CPU", fin_cpu, frames);
     report("    IOConnect* in glFinish, wall", fin_io, frames);
-    report("    IOConnect* in glFinish, CPU", fin_io_cpu, frames);
     printf("IOConnect calls per draw %.3f, per frame %.2f\n",
            (double)calls_total / draws, (double)calls_total / frames);
 
-    printf("per caller image (calls per draw; ns per draw inside IOConnect*, wall; CPU):\n");
+    printf("per caller image (calls per draw; ns per draw inside IOConnect*, wall):\n");
     for (slot = 0; slot < callers; slot++) {
-        printf("  %-28s %8.3f  %12.0f  %12.0f\n", caller_name[slot], (double)caller_calls[slot] / draws,
-               ns(caller_ticks[slot]) / draws, (double)caller_cpu_ns[slot] / draws);
+        printf("  %-28s %8.3f  %12.0f\n", caller_name[slot], (double)caller_calls[slot] / draws,
+               ns(caller_ticks[slot]) / draws);
     }
-    printf("per selector (calls per draw; ns per call, wall; CPU):\n");
+    printf("per selector (calls per draw; ns per call, wall):\n");
     for (k = 0; k < KINDS; k++) {
         for (s = 0; s < SEL_MAX; s++) {
             if (sel_calls[k][s] == 0) continue;
-            printf("  %-12s sel %2d  %8.3f  %12.0f  %12.0f\n", kind_name[k], s, (double)sel_calls[k][s] / draws,
-                   ns(sel_ticks[k][s]) / sel_calls[k][s], (double)sel_cpu_ns[k][s] / sel_calls[k][s]);
+            printf("  %-12s sel %2d  %8.3f  %12.0f\n", kind_name[k], s, (double)sel_calls[k][s] / draws,
+                   ns(sel_ticks[k][s]) / sel_calls[k][s]);
         }
     }
-    free(per_draw); free(frame); free(draws_wall); free(draws_cpu); free(draws_io); free(draws_io_cpu);
-    free(fin); free(fin_cpu); free(fin_io); free(fin_io_cpu);
+    free(per_draw); free(frame); free(draws_wall); free(draws_io);
+    free(fin); free(fin_io);
 }
 
 static void run_sync(void)
