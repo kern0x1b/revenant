@@ -10,8 +10,6 @@ add_requires("revenant@double-conversion 1.1.6", {alias = "double-conversion"})
 add_requires("revenant@fast_float 8.0.0", {alias = "fast_float"})
 add_requires("revenant@yoga 0.86.3", {alias = "yoga"})
 
--- The react-native-screens pod as CocoaPods builds it by default: the ios sources outside the Swift gamma project, the
--- stubs that stand in for that project, and the common subspec, whose headers CocoaPods flattens under rnscreens/.
 target("rnscreens")
     add_rules("@addon/revenant/apple-ios")
     add_rules("@addon/revenant/rn-codegen")
