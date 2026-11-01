@@ -88,7 +88,7 @@ local function package_libraries(target, package, name)
         local image = macho.images(macho.read(file))[1]
         table.insert(carried, {source = file, name = path.filename(image.identity or file), package = name})
     end
-    table.sort(frameworks, function (a, b) return a.name < b.name end)
+    table.sort(frameworks, function (a, b) return byteorder.less(a.name, b.name) end)
     for _, framework in ipairs(frameworks) do
         table.insert(carried, {source = framework.file, name = framework.name, leaf = framework.leaf, package = name})
     end
