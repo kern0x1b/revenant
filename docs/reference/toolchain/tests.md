@@ -44,7 +44,7 @@ yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emu
 its probe line), `baseline` (a UIKit string, and a CoreText line, run and frame, drawn with and without `NSBaselineOffsetAttributeName`
 lands at two heights, and their line metrics and frame origins are read with and without it; the run says whether the system
 honours the attribute and what the CoreText backport does with it), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
-that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
+that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), `classpair` (a Swift program makes five subclasses of a Swift class with `objc_allocateClassPair`, and each line says `OK` when the Swift metatype it gets is the class object, not its Objective-C wrapper; the run fails on a `WRONG`, an `ERROR` or a missing line), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
 limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
 are `.cache/scratch/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
 
