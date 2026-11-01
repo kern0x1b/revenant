@@ -32610,6 +32610,7 @@ member UIResponder -inputAccessoryViewController
 member UIResponder -inputAssistantItem
 member UIResponder -inputViewController
 member UIResponder -keyCommands
+member UIResponder -pasteConfiguration
 member UIResponder -pressesBegan:withEvent:
 member UIResponder -pressesCancelled:withEvent:
 member UIResponder -pressesChanged:withEvent:
@@ -32618,6 +32619,7 @@ member UIResponder -providerForDeferredMenuElement:
 member UIResponder -restoreUserActivityState:
 member UIResponder -revenant_captureFirstResponder:
 member UIResponder -setActivityItemsConfiguration:
+member UIResponder -setPasteConfiguration:
 member UIResponder -setUserActivity:
 member UIResponder -targetForAction:withSender:
 member UIResponder -textInputContextIdentifier
@@ -35521,6 +35523,7 @@ protocol UIMutableTraits
 protocol UINSIntegerTraitDefinition
 protocol UINavigationControllerDelegate
 protocol UIObjectTraitDefinition
+protocol UIPasteConfigurationSupporting
 protocol UIPopoverControllerDelegate
 protocol UIPreviewActionItem
 protocol UISearchBarDelegate
@@ -36124,6 +36127,7 @@ protocol_member UIMutableTraits -valueForCGFloatTrait:
 protocol_member UIMutableTraits -valueForNSIntegerTrait:
 protocol_member UINSIntegerTraitDefinition +defaultValue
 protocol_member UIObjectTraitDefinition +defaultValue
+protocol_member UIPasteConfigurationSupporting -pasteConfiguration
 protocol_member UIPopoverControllerDelegate -popoverController:willRepositionPopoverToRect:inView:
 protocol_member UIPopoverControllerDelegate -popoverControllerDidDismissPopover:
 protocol_member UIPopoverControllerDelegate -popoverControllerShouldDismissPopover:
