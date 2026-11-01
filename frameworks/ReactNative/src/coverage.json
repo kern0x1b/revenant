@@ -416,7 +416,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-gl (57.0.2, unpatched). Its EAGL and CAEAGLLayer calls exist on iOS 6, but it includes the OpenGLES ES3 headers and calls ES3 entry points. The Backports ES3Functions.m entries refuse by setting a GL error, so they are not an implementation: the ES2 path needs real extension mappings, not a substitute."
+   "note": "Not built; package packages/e/expo-gl (57.0.2, unpatched). Evaluate, not partial: partial means built and running. Done on work/rn-media-gles2 (commit 92f69f4b9, pushed): ES3Functions.m emulates the ES3 calls that ES2 expresses exactly and refuses the rest with a GL error; EAGL and CAEAGLLayer exist on iOS 6. Missing: the shader language. Shaders written as #version 300 es are not translated to GLSL ES 1.00 (no translator in revenant), so expo-gl keeps its ES2 fallback for EAGL (EXGLContext.mm) and no ES3 context is created. Reasons and the translator plan: docs/reference/backports/opengles-es3.md."
   },
   {
    "id": "expo-glass-effect",
@@ -1082,7 +1082,7 @@
    "native": false,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not built; package packages/r/react-native-skia (2.6.2, unpatched). Its Apple renderer is Metal only (apple/MetalContext.mm: GrDirectContexts::MakeMetal over CAMetalLayer), and iOS 6 has no Metal: the Metal route is air2es, still in progress (docs/explanation/backports/metal-on-ios6.md). A GL route over EAGL (ES2) needs a renderer the package does not have."
+   "note": "Not built; package packages/r/react-native-skia (2.6.2, unpatched). ждёт Metal (air2es). apple/MetalContext.mm uses MTLCreateSystemDefaultDevice, MTLDevice, MTLCommandQueue, MTLCommandBuffer, MTLTexture, MTLTextureDescriptor, MTLBuffer, MTLPixelFormat, MTLStorageMode, MTLResourceOptions, MTLTextureUsage, MTLSharedEvent, MTLEvent and CAMetalLayer, plus GrDirectContexts::MakeMetal in libskia. The Backports cover all of these except MTLEvent (no class in frameworks/Backports/src). air2es does not reach Skia's shaders: it translates AIR from a precompiled metallib, while Skia builds MSL source at run time (Skia's Metal backend; not verified in this tree, since the libskia xcframework comes from npm install-skia), so a run-time MSL to GLSL ES route is needed as well. No GL renderer is written. Metal on iOS 6: docs/explanation/backports/metal-on-ios6.md."
   },
   {
    "id": "@shopify/flash-list",
