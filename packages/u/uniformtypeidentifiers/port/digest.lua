@@ -1,1 +1,1 @@
-uniformtypeidentifiers_sources_digest = "0a4f535fbb979c38e1adb6678697217c"
+uniformtypeidentifiers_sources_digest = "fb88b3a45b8396ab73c759a30730d750"
