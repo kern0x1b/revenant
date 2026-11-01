@@ -551,14 +551,25 @@ local SCENEKIT_TESTS = {
     audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
 }
 
-local SCENEKIT_TESTS_MACOS = {
-    action_math = {"RevenantSCNActionMath.m"},
-    clock = {"RevenantSCNClock.m"},
-    jitter = {"RevenantSCNJitter.m"},
-    picking = {"RevenantSCNGeometry.m"},
-    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource+Revenant.m", "SCNAudioPlayer+Revenant.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
-    audio = {"SCNAudioSource+Revenant.m", "SCNAudioPlayer+Revenant.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
-}
+if not is_plat("iphoneos") then
+    local STUBS = path.join(os.scriptdir(), "src", "SceneKit")
+    
+    target("SceneKitBackports_prefixed")
+        set_kind("static")
+        set_plat("macosx")
+        set_arch("arm64")
+        set_default(false)
+        add_files(path.join(SRC, "SceneKit", "SCNAudioSource.m"))
+        add_files(path.join(SRC, "SceneKit", "SCNAudioPlayer.m"))
+        add_files(path.join(SRC, "SceneKit", "RevenantSCNSoundEngine.m"))
+        add_files(path.join(SRC, "SceneKit", "RevenantSCNStream.m"))
+        add_includedirs(STUBS, path.join(SRC, "SceneKit"))
+        add_mflags("-fobjc-arc", "-include " .. path.join(STUBS, "ios6_class_prefix.h"))
+        add_ldflags("-fobjc-arc")
+        add_frameworks("Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation")
+        add_syslinks("objc")
+    target_end()
+end
 
 local function host_tests(folder, tests, library, frameworks, options)
     options = options or {}
@@ -611,7 +622,36 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
-    host_tests("SceneKit", SCENEKIT_TESTS_MACOS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
+    local SCENEKIT_TESTS_NO_AUDIO = {}
+    for name, sources in pairs(SCENEKIT_TESTS) do
+        if name ~= "audio" then
+            SCENEKIT_TESTS_NO_AUDIO[name] = sources
+        end
+    end
+    host_tests("SceneKit", SCENEKIT_TESTS_NO_AUDIO, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
+    
+    local STUBS = path.join(os.scriptdir(), "src", "SceneKit")
+    local TESTS = path.join(os.scriptdir(), "tests", "SceneKit")
+    
+    target("SceneKitBackports_audio_test")
+        set_kind("binary")
+        set_plat("macosx")
+        set_arch("arm64")
+        set_default(false)
+        add_files(path.join(TESTS, "audio_test.m"))
+        add_deps("SceneKitBackports_prefixed")
+        add_includedirs(TESTS, path.join(os.scriptdir(), "tests", "Foundation"), path.join(SRC, "Foundation"), STUBS)
+        add_mflags("-fobjc-arc", "-include " .. path.join(STUBS, "ios6_class_prefix.h"))
+        add_ldflags("-fobjc-arc")
+        add_frameworks("SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation")
+        add_syslinks("objc")
+        add_tests("default")
+        add_tests("negative", {runargs = {"--negative"}, expect_failure = true})
+        on_test(function (target, opt)
+            return import("@addon.revenant.host_test", {anonymous = true}).run(target, opt)
+        end)
+    target_end()
+    
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
