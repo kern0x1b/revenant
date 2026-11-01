@@ -6,11 +6,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 35 |
-| partial | built and running, with a named part left out or rewritten | 6 |
+| real | built from the module's own sources, with no stub and no substitute | 45 |
+| partial | built and running, with a named part left out or rewritten | 7 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 44 |
+| missing | native code that is not built yet | 33 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -66,14 +66,14 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | @expo/metro-runtime | ~57.0.17 | no | js | phone | Runs in the bundle. |
 | @expo/vector-icons | ^15.0.2 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | @expo/ui | ~57.0.25 | yes | missing | none | 157 files of SwiftUI; needs the SwiftUI backport of this repository to cover the views it uses. |
-| @react-native-async-storage/async-storage | 2.2.0 | yes | missing | none | Five files of iOS code, not built. |
-| @react-native-community/datetimepicker | 9.1.0 | yes | missing | none | Has 14 files of iOS code and is not built. |
+| @react-native-async-storage/async-storage | 2.2.0 | yes | real | build | Built from its own sources (4 files, rn-lib-probe with the spike's codegen); not exercised on the phone. |
+| @react-native-community/datetimepicker | 9.1.0 | yes | real | build | Built from its own sources (12 ObjC and Fabric files, rn-lib-probe with folly and glog); not exercised on the phone. |
 | @react-native-masked-view/masked-view | 0.3.2 | yes | real | build | Built with the other community views; the mask is not exercised. |
-| @react-native-community/slider | 5.2.0 | yes | missing | none | Has 5 files of iOS code and is not built. |
-| @react-native-community/netinfo | 12.0.1 | yes | missing | none | Has 8 files of iOS code and is not built. |
-| @react-native-community/viewpager | 5.0.11 | yes | missing | none | Has 22 files of iOS code and is not built. |
-| @react-native-picker/picker | 2.11.4 | yes | missing | none | Has 10 files of iOS code and is not built. |
-| @react-native-segmented-control/segmented-control | 2.5.7 | yes | missing | none | Has 5 files of iOS code and is not built. |
+| @react-native-community/slider | 5.2.0 | yes | real | build | Built from its own sources with patches/0001 (isSliding declared BOOL to match its 32-bit ivar); not exercised on the phone. |
+| @react-native-community/netinfo | 12.0.1 | yes | real | build | Built from its own sources (6 files); network-state calls not exercised on the phone. |
+| @react-native-community/viewpager | 5.0.11 | yes | real | build | Built from its own sources (8 files); not exercised on the phone. |
+| @react-native-picker/picker | 2.11.4 | yes | real | build | Built from its own sources (10 files, Fabric); not exercised on the phone. |
+| @react-native-segmented-control/segmented-control | 2.5.7 | yes | real | build | Built from its own sources (2 files); not exercised on the phone. |
 | @stripe/stripe-react-native | 0.64.0 | yes | missing | none | Has 84 files of iOS code and is not built. |
 | eslint-config-expo | ~57.0.2 | no | n/a | none | Lint configuration. |
 | expo-analytics-amplitude | ~11.3.0 | yes | missing | none | Has 3 files of iOS code and is not built. |
@@ -88,7 +88,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-background-fetch | ~57.0.21 | yes | evaluate | none | Background fetch is iOS 7. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. |
 | expo-battery | ~57.0.3 | yes | missing | none | Has 2 files of iOS code and is not built. |
-| expo-blur | ~57.0.3 | yes | missing | none | Has 5 files of iOS code and is not built. |
+| expo-blur | ~57.0.3 | yes | missing | none | Swift only (4 files plus the ExpoBlur podspec). Not compiled: needs expo-modules-core Swift for iOS 6, which is still open. |
 | expo-brightness | ~57.0.2 | yes | missing | none | Has 3 files of iOS code and is not built. |
 | expo-brownfield | ~57.0.24 | yes | missing | none | Has 7 files of iOS code and is not built. |
 | expo-build-properties | ~57.0.22 | no | n/a | none | Build-time config plugin. |
@@ -110,14 +110,14 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-haptics | ~57.0.3 | yes | real | build | Built; iOS 6 has no haptic engine, so what it does there is undecided. |
-| expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
+| expo-image | ~57.0.5 | yes | missing | none | Swift only (25 files plus the SDWebImage coders). Not compiled: needs expo-modules-core Swift for iOS 6 and the SDWebImage package; SF Symbols loader in it is a separate question. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | real | build | Built; not exercised. |
 | expo-image-picker | ~57.0.20 | yes | stub | none | Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |
-| expo-linear-gradient | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
+| expo-linear-gradient | ~57.0.2 | yes | missing | none | Swift only (3 files). Not compiled: needs expo-modules-core Swift for iOS 6. |
 | expo-linking | ~57.0.13 | yes | real | phone | The manifest lookup works after the staged config. |
 | expo-local-authentication | ~57.0.3 | yes | evaluate | none | LocalAuthentication is iOS 8; on iOS 6 'no hardware' is the honest answer. |
 | expo-localization | ~57.0.2 | yes | real | build | Compiled; not exercised. |
@@ -149,7 +149,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |
-| expo-symbols | ~57.0.3 | yes | missing | none | SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons). |
+| expo-symbols | ~57.0.3 | yes | missing | none | Swift only (4 files); the symbol set is undecided: SF Symbols do not exist before iOS 13. Not compiled. |
 | expo-system-ui | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-task-manager | ~57.0.21 | yes | evaluate | none | Depends on background modes available on iOS 6. |
 | expo-tracking-transparency | ~57.0.2 | yes | evaluate | none | ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module. |
@@ -159,22 +159,22 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-web-browser | ~57.0.3 | yes | evaluate | none | Uses SFSafariViewController (iOS 9); the fallback is the system browser. |
 | expo-widgets | ~57.0.26 | yes | impossible | none | WidgetKit, iOS 14. |
 | jest-expo | ~57.0.6 | yes | n/a | none | A test-runner preset; no native code. |
-| lottie-react-native | ~7.3.8 | yes | missing | none | Has 16 files of iOS code and is not built. |
+| lottie-react-native | ~7.3.8 | yes | partial | build | The ObjC and Fabric part (7 files plus the component view) compiles; the Swift part (3 files) and the lottie-ios pod are not built, so the animation view is not usable yet. |
 | react | 19.2.3 | no | js | phone | Runs in the bundle. |
 | react-dom | 19.2.3 | no | n/a | none | Web only. |
 | react-native | 0.86.3 | no | partial | phone | See the core table. |
 | react-native-web | ~0.21.0 | no | n/a | none | Web only. |
 | react-native-gesture-handler | ~2.32.0 | no | real | phone | Built; the app's gestures run on it. |
-| react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
+| react-native-get-random-values | ~1.11.0 | yes | real | build | Built from its own sources (1 file); not exercised on the phone. |
 | react-native-keyboard-controller | 1.21.9 | yes | stub | phone | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. |
 | react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
-| react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
+| react-native-pager-view | 8.0.2 | yes | missing | none | Its component view imports react_native_pager_view-Swift.h, so the Swift part (5 files) has to compile first; not built. |
 | react-native-worklets | 0.10.1 | no | real | phone | Built. |
 | react-native-reanimated | 4.5.1 | no | real | phone | Built; the bottom sheets animate on it. |
 | react-native-screens | ~4.26.0 | yes | partial | phone | Built without the gamma folder (it needs Swift types from newer iOS); the stack and the sheets work. |
 | react-native-safe-area-context | ~5.7.0 | yes | real | phone | Built. |
 | react-native-svg | 15.15.4 | no | real | phone | Built; the logo and icons draw. |
-| react-native-view-shot | 5.1.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
+| react-native-view-shot | 5.1.0 | yes | real | build | Built from its own sources (1 file, codegen spec rnviewshot); capture not exercised on the phone. |
 | react-native-webview | 13.16.1 | yes | real | build | Built; a page load on iOS 6 is not exercised. |
 | react-server-dom-webpack | ~19.2.4 | no | n/a | none | Server components runtime. |
 | sentry-expo | ~7.0.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
@@ -183,7 +183,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | @shopify/react-native-skia | 2.6.2 | no | evaluate | none | Draws with Metal (iOS 8); would need a GL or software backend. |
 | @shopify/flash-list | 2.0.2 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | @sentry/react-native | ~7.11.0 | yes | missing | none | Has 38 files of iOS code and is not built. |
-| react-native-bootsplash | ^6.3.10 | yes | missing | none | Has 5 files of iOS code and is not built. |
+| react-native-bootsplash | 6.3.12 | yes | real | build | Built from its own sources (1 file, with codegen spec RNBootSplashSpec); not exercised on the phone. |
 
 ## Other native libraries applications use
 

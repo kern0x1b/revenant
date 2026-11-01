@@ -1,0 +1,22 @@
+--- a/ios/RNCSlider.h
++++ b/ios/RNCSlider.h
+@@ -10,7 +10,7 @@
+ 
+ @property (nonatomic, assign) float step;
+ @property (nonatomic, assign) float lastValue;
+-@property (nonatomic, assign) bool isSliding;
++@property (nonatomic, assign) BOOL isSliding;
+ 
+ @property (nonatomic, assign) float lowerLimit;
+ @property (nonatomic, assign) float upperLimit;
+--- a/ios/RNCSliderComponentView.h
++++ b/ios/RNCSliderComponentView.h
+@@ -15,7 +15,7 @@
+ 
+ @property (nonatomic, assign) float step;
+ @property (nonatomic, assign) float lastValue;
+-@property (nonatomic, assign) bool isSliding;
++@property (nonatomic, assign) BOOL isSliding;
+ 
+ @property (nonatomic, assign) float lowerLimit;
+ @property (nonatomic, assign) float upperLimit;
