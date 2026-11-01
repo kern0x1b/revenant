@@ -182,9 +182,14 @@ function install_react_native(folder, cache)
     return sources
 end
 
-local function newest(pattern)
-    local found = os.dirs(pattern)
-    table.sort(found)
+function newest(pattern, marker)
+    local found = {}
+    for _, dir in ipairs(os.dirs(pattern)) do
+        if path.filename(dir):match("^%x+$") and os.exists(path.join(dir, marker)) then
+            table.insert(found, dir)
+        end
+    end
+    table.sort(found, function (a, b) return os.mtime(a) < os.mtime(b) end)
     return found[#found]
 end
 
@@ -193,8 +198,8 @@ function build(folder, cache, options)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local env = build_environment({
         folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods, pkgdirs = options.pkgdirs,
-        engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*[0-9a-f]")),
-        swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*[0-9a-f]")), "lib", "swift", "iphoneos"),
+        engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
+        swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),
         backports = options.backports or path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     })
     local log = options.log or path.join(folder, "build", "isolated.log")
@@ -241,10 +246,10 @@ function main(...)
     if command == "copy" and #positional == 2 and options.cache then
         local result = copy_project(positional[1], positional[2])
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
-        print("isolated %s: %d files rewritten, %d links retargeted, rn-src %s", positional[2], result.rewritten, result.relinked, sources)
+        print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s", positional[2], result.rewritten, result.relinked, sources))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log})
-        print("exit %d, log %s", code, log)
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared})
+        print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()
                 return os.iorunv("sh", {"-c", "sed 's/\\x1b\\[[0-9;]*m//g' \"$1\" | grep -E 'error:|undefined|Undefined|uplicate' | grep -v 'warning:' | cut -c1-300 | sort -u | head -20", "sh", log})
