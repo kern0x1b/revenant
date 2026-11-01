@@ -7,13 +7,19 @@ package("react-native")
 
     add_urls("https://registry.npmjs.org/react-native/-/react-native-$(version).tgz")
     add_versions("0.86.3", "04e0ef4284ef9e2fb94075b0f98c6371d12ea1b31c2e42540a900a1e86ea46f5")
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "2", readonly = true})
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "6", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
     end)
 
     local FLAT_HEADERS = {"React/**.h", "Libraries/Image/*.h"}
+    local SUBSPEC_HEADERS = {
+        {path.join("ReactApple", "Libraries", "RCTFoundation", "RCTDeprecation", "Exported"), "RCTDeprecation"},
+        {path.join("Libraries", "Required"), "RCTRequired"},
+        {path.join("Libraries", "TypeSafety"), "RCTTypeSafety"},
+        {path.join("Libraries", "FBLazyVector"), "FBLazyVector"},
+    }
 
     on_install(function (package)
         local include = package:installdir("include")
@@ -46,13 +52,33 @@ package("react-native")
         for _, header in ipairs(os.files(path.join(jsi, "**.h"))) do
             os.cp(header, path.join(include, path.relative(header, jsi)))
         end
+        for _, subspec in ipairs(SUBSPEC_HEADERS) do
+            local folder, name = subspec[1], subspec[2]
+            os.mkdir(path.join(include, name))
+            for _, header in ipairs(os.files(path.join(folder, "**.h"))) do
+                local destination = path.join(include, name, path.filename(header))
+                assert(not os.isfile(destination), path.filename(header) .. " is in two folders of " .. name)
+                os.cp(header, destination)
+            end
+        end
+        for _, platform in ipairs({"ios", "cxx"}) do
+            for _, header in ipairs(os.files(path.join(include, "**.h"))) do
+                local inside = header:match("/platform/" .. platform .. "/(.+)$")
+                local destination = inside and path.join(include, inside)
+                if destination and not os.isfile(destination) then
+                    os.mkdir(path.directory(destination))
+                    os.ln(header, destination)
+                end
+            end
+        end
         os.cp("LICENSE", package:installdir("licenses") .. "/")
     end)
 
     on_test(function (package)
         for _, file in ipairs({"include/React/RCTLog.h", "include/React/RCTImageLoader.h", "include/React/RCTViewComponentView.h",
                                "include/jsi/jsi.h", "include/react/renderer/mapbuffer/MapBuffer.h", "include/ReactCommon/TurboModuleUtils.h",
-                               "include/ReactCommon/RuntimeExecutor.h"}) do
+                               "include/ReactCommon/RuntimeExecutor.h", "include/RCTDeprecation/RCTDeprecation.h", "include/RCTRequired/RCTRequired.h",
+                               "include/React/renderer/components/view/platform/cxx/react/renderer/components/view/HostPlatformViewEventEmitter.h"}) do
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
         assert(not os.isfile(path.join(package:installdir("include"), "yoga", "Yoga.h")), "yoga belongs to the yoga package")
