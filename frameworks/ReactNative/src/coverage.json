@@ -244,8 +244,8 @@
    "version": "~57.0.3",
    "native": true,
    "status": "missing",
-   "verified": "none",
-   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Source package only; not built, not probed."
+   "verified": "build",
+   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Built into RNHost for armv7 iOS 6.0 from the package (isolated build, RN_EXPO_REAL=expo-battery; the module's symbols are in the binary). Not probed on the phone: the probe harness does not install the expo JSI global yet."
   },
   {
    "id": "expo-blur",
