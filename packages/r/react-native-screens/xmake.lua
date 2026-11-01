@@ -1,0 +1,22 @@
+package("react-native-screens")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/software-mansion/react-native-screens")
+    set_description("react-native-screens 4.26.2, the native screen containers expo-router navigates with, from its npm tarball: the source tree that the codegen of its Fabric components reads, and that the RNScreens module builds from")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/react-native-screens/-/react-native-screens-$(version).tgz")
+    add_versions("4.26.2", "0343ca1cb07ee9e40594bc1f6e07de0cd3ee5e937f88bb7555f14e8e283a1ea3")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "react-native-screens" and manifest.version == "4.26.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(manifest.codegenConfig and manifest.codegenConfig.name == "rnscreens", "react-native-screens has no codegenConfig for rnscreens")
+        assert(os.isdir(path.join(package:installdir(), "src", "fabric")), "the Fabric specs of react-native-screens are not installed")
+    end)

@@ -13,9 +13,16 @@ reference says what runs where.
 | `toolchain_device` | six suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `port_test`, `swift_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs | only with `./xmakew f -P . --tests=device` |
 | `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |
 | `recompiler_device` | `classpair` and `ordinal` | the prebuilt packages and a claimed device | only with `./xmakew f -P . --tests=device` |
+| `packages` | `sdwebimage`, `sdwebimage_webp`, `libwebp` and `zxingobjc`: each a binary of `toolchain/tests/packages/` that links its package for iphoneos armv7, and the test checks the architecture; `rnscreens`: a static library of react-native-screens' sources and its codegen output, compiled for armv7 iOS 6 against React Native 0.86.3, with `-Werror=unguarded-availability-new`, and the test checks the archive's architecture | the packages, for iphoneos | only with an iphoneos configure of the whole build or `--component=packages` |
+| `codegen` | `rnscreens_headers`: the codegen of react-native-screens writes the Fabric headers of its `rnscreens` component | `node`, `react-native-codegen` and `react-native-screens`, on the host | always |
 | `bench` | five workloads of `tests/bench/workloads/` (`msgsend`, `alloc`, `collections`, `strings` and the C `compute`, a package-style kernel of CRC-32, FNV-1a and a matrix product), run as the first process of an iPhone 4S boot of iOS 6.1.3 under the emulator; each one fails when its guest instructions, the calls to its own methods or its resident memory grow beyond the tolerance in `tests/data/bench/baselines.json` | the packages, the emulator built by `./xmakew build -P . emulator`, and the root filesystem from `./xmakew firmware -P . --device=iPhone4,1 rootfs 6.1.3` | only with `./xmakew f -P . --tests=device` |
 
 The `bench` tests measure what the emulator counts: guest instructions are its CPU ticks for the boot, and a call count is the number of runs of the entry block of a method, which the block profile reports for the top 30 blocks of a run. A count is never a time. `REVENANT_BENCH_RECORD=1` records the baselines of the workloads that run, and `REVENANT_BENCH_REPORT=1` prints the counts, the resident size and the size of each binary without comparing them, which is how a compiler setting is measured. `REVENANT_BENCH_FLAGS` replaces the compiler flags of the workloads (default `-Os`).
+
+The `rnscreens` build supplies two things a CocoaPods build gets from its environment rather than from the sources: a
+prefix include of `UIKit/UIKit.h`, which makes Foundation visible to `RNSEnums.h` in the translation units that import
+it first, and folly's mobile defines with `-faligned-allocation`, as folly's own package compiles. Both are set in
+`toolchain/tests/packages/rnscreens.lua`, and the sources are not changed for them.
 
 Each toolchain suite is a module of `tests/addon/` with `failures(options)`, which returns the failures it found. A test
 prints each failure and fails. Run one target with `./xmakew test -P . 'toolchain_light/*'`, or one suite with
