@@ -97,7 +97,8 @@ ARRIVED = {
     renamex_np = {iOS = "10.0"},
     fclonefileat = {iOS = "10.0"},
     sysdir_start_search_path_enumeration = {iOS = "10.0"},
-    sysdir_get_next_search_path_enumeration = {iOS = "10.0"}
+    sysdir_get_next_search_path_enumeration = {iOS = "10.0"},
+    dirstat_np = {iOS = "11.0", Macos = "10.13"}
 }
 
 PROCESS_WIDE = {
