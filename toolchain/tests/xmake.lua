@@ -7,6 +7,8 @@ if get_config("component") ~= "" then
     return
 end
 
+includes("codegen")
+
 local addon = path.join(os.scriptdir(), "addon")
 local toolchain = path.directory(os.scriptdir())
 add_requires("revenant@ld64 956.6", {alias = "ld64"})
