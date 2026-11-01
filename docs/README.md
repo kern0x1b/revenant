@@ -113,6 +113,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
+| [OpenGL ES 3 on iOS 6](reference/backports/opengles-es3.md) | the ES3 entry points on the ES2 driver: what is forwarded, emulated and refused, and why no ES3 EAGL context yet |
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
