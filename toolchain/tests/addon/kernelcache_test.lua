@@ -5,7 +5,6 @@ local IV = "8a2c03ef8a0e45947780cdde01be40fb"
 local OTHER_KEY = string.rep("11", 32)
 local MACH_O = "\206\250\237\254"
 
--- literals encodes plain as an LZSS stream of literals only: each flag byte marks the bytes that follow it.
 local function literals(plain)
     local parts = {}
     for first = 1, #plain, 8 do
@@ -15,7 +14,6 @@ local function literals(plain)
     return table.concat(parts)
 end
 
--- container wraps a complzss stream with the header and the zero padding that Apple's files carry.
 local function container(complzss, plain, stream)
     local header = "complzss" .. string.pack(">I4I4I4I4", complzss.adler32(plain), #plain, #stream, 1)
     return header .. string.rep("\0", 384 - #header) .. stream
@@ -36,7 +34,6 @@ local function encrypt(bytes, key)
     return encrypted
 end
 
--- img3 wraps an encrypted DATA payload in an IMG3 file with a TYPE element before it, as Apple's kernelcaches do.
 local function img3(encrypted, size)
     local total = 20 + 32 + 12 + #encrypted
     return "3gmI" .. string.pack("<I4I4I4", total, total - 20, 0) .. "krnl"

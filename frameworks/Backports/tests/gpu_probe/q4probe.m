@@ -1,11 +1,3 @@
-// q4probe.m: read-only measurement of one trivial GLES2 draw on the phone, and of a 100-draw frame.
-//
-// The probe rebinds the IOConnect imports of every image loaded in this process to counting wrappers. It changes
-// only this process's own indirect-symbol pointers, on private copies of their pages. No Apple code is patched, and
-// the probe writes nothing to the phone except its stdout. The draw is a small quad (about 6 by 6 pixels of a
-// 256 by 256 offscreen texture), so GPU fill stays small. Each phase is timed in wall time and in thread CPU time,
-// because a call that blocks on the GPU shows wall time without CPU time. IOConnect calls are counted by the image
-// that made them and by selector. Counters are not locked, so calls from other threads may be missed or merged.
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -47,8 +39,6 @@ static call_struct_fn real_call_struct;
 
 static double ns(uint64_t ticks) { return (double)ticks * timebase.numer / timebase.denom; }
 
-// thread_cpu_ns is the user and system CPU time of the calling thread. The port comes from pthread_mach_thread_np,
-// which does not add a send right, so calling it on every sample leaks nothing.
 static uint64_t thread_cpu_ns(void)
 {
     thread_basic_info_data_t info;
@@ -138,8 +128,6 @@ static void make_writable(void *address)
     vm_protect(mach_task_self(), start, page, FALSE, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY);
 }
 
-// rebind_image replaces the lazy and non-lazy pointers of one image's imports that name an IOConnect function.
-// It is called for every image already loaded, and for each image loaded later.
 static void rebind_image(const struct mach_header *mh, intptr_t slide)
 {
     const struct segment_command *segs[64];
@@ -292,7 +280,6 @@ static void draw_once(void)
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
 }
 
-// run_single: one draw, then one glFinish, per frame.
 static void run_single(void)
 {
     int n = SINGLE_FRAMES, i;
@@ -340,8 +327,6 @@ static void run_single(void)
     free(finish); free(finish_cpu); free(finish_io); free(finish_io_cpu);
 }
 
-// run_frames: 100 draws, then one glFinish, per frame. Each draw is timed on its own; CPU is read per frame,
-// because a thread_info call per draw would cost as much as the draw.
 static void run_frames(void)
 {
     int frames = FRAMES_100, f, d, draws = frames * DRAWS_PER_FRAME, k, s, slot;
@@ -418,8 +403,6 @@ static void run_frames(void)
     free(fin); free(fin_cpu); free(fin_io); free(fin_io_cpu);
 }
 
-// run_sync splits a glFinish into submission and wait. Each round times (a) a glFinish with nothing queued, then
-// (b) one draw, a glFlush (submission without waiting), and a glFinish (the wait for the GPU to finish).
 static void run_sync(void)
 {
     int n = SINGLE_FRAMES, i;
