@@ -18,6 +18,7 @@ struct darwin_dirstat {
 };
 
 #define REVENANT_DIRSTAT_FAST_ONLY 0x1
+#define REVENANT_DIRSTAT_MAX_DEPTH 128
 
 struct revenant_inode_slot {
     ino_t inode;
@@ -70,6 +71,11 @@ static int revenant_inode_insert(struct revenant_inode_set *set, ino_t inode)
     return 1;
 }
 
+static int revenant_expected_error(int error)
+{
+    return error == ENOENT || error == ENOTDIR || error == ELOOP || error == EACCES || error == EPERM;
+}
+
 struct revenant_listing_request {
     DIR *listing;
 };
@@ -91,17 +97,24 @@ static DIR *revenant_listing(int descriptor)
     return request.listing;
 }
 
-static int revenant_walk_folder(struct revenant_walk *walk, DIR *folder)
+static int revenant_walk_folder(struct revenant_walk *walk, DIR *folder, int depth)
 {
     int descriptor = dirfd(folder);
     struct dirent *entry;
-    while ((entry = readdir(folder)) != NULL) {
+    for (;;) {
+        errno = 0;
+        entry = readdir(folder);
+        if (entry == NULL)
+            return errno == 0 ? 0 : -1;
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
         walk->descendants++;
         struct stat info;
-        if (revenant_fstatat(descriptor, entry->d_name, &info, AT_SYMLINK_NOFOLLOW) == -1)
-            continue;
+        if (revenant_fstatat(descriptor, entry->d_name, &info, AT_SYMLINK_NOFOLLOW) == -1) {
+            if (revenant_expected_error(errno))
+                continue;
+            return -1;
+        }
         if (!S_ISDIR(info.st_mode)) {
             int fresh = info.st_nlink > 1 ? revenant_inode_insert(&walk->inodes, info.st_ino) : 1;
             if (fresh == -1)
@@ -112,23 +125,38 @@ static int revenant_walk_folder(struct revenant_walk *walk, DIR *folder)
         }
         if (info.st_dev != walk->device)
             continue;
+        if (depth >= REVENANT_DIRSTAT_MAX_DEPTH) {
+            errno = ELOOP;
+            return -1;
+        }
         int child = revenant_openat(descriptor, entry->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
-        if (child == -1)
-            continue;
+        if (child == -1) {
+            if (revenant_expected_error(errno))
+                continue;
+            return -1;
+        }
         struct stat opened;
-        if (fstat(child, &opened) == -1 || opened.st_dev != info.st_dev || opened.st_ino != info.st_ino) {
+        if (fstat(child, &opened) == -1) {
+            int failure = errno;
+            close(child);
+            errno = failure;
+            return -1;
+        }
+        if (opened.st_dev != info.st_dev || opened.st_ino != info.st_ino) {
             close(child);
             continue;
         }
         DIR *nested = revenant_listing(child);
-        if (nested == NULL)
-            continue;
-        int status = revenant_walk_folder(walk, nested);
+        if (nested == NULL) {
+            if (revenant_expected_error(errno))
+                continue;
+            return -1;
+        }
+        int status = revenant_walk_folder(walk, nested, depth + 1);
         closedir(nested);
         if (status == -1)
             return -1;
     }
-    return 0;
 }
 
 static int revenant_walk_root(const char *path, struct darwin_dirstat *result)
@@ -147,7 +175,7 @@ static int revenant_walk_root(const char *path, struct darwin_dirstat *result)
     if (listing == NULL)
         return -1;
     struct revenant_walk walk = {{NULL, 0, 0}, info.st_dev, 0, 0};
-    int status = revenant_walk_folder(&walk, listing);
+    int status = revenant_walk_folder(&walk, listing, 0);
     int failure = errno;
     closedir(listing);
     free(walk.inodes.slots);
