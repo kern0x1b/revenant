@@ -1,0 +1,40 @@
+diff --git a/stdlib/public/runtime/Casting.cpp b/stdlib/public/runtime/Casting.cpp
+index 5e639d8..d1cb217 100644
+--- a/stdlib/public/runtime/Casting.cpp
++++ b/stdlib/public/runtime/Casting.cpp
+@@ -978,6 +978,9 @@ static const Metadata *
+ swift_dynamicCastMetatypeImpl(const Metadata *sourceType,
+                               const Metadata *targetType) {
+   auto origSourceType = sourceType;
++#if SWIFT_OBJC_INTEROP
++  bool destinationIsWrapper = targetType->getKind() == MetadataKind::ObjCClassWrapper;
++#endif
+ 
+   // Identical types always succeed
+   if (sourceType == targetType)
+@@ -1004,7 +1007,7 @@ swift_dynamicCastMetatypeImpl(const Metadata *sourceType,
+       // land.
+       if (swift_dynamicCastObjCClassMetatype((const ClassMetadata*)sourceType,
+                                              (const ClassMetadata*)targetType))
+-        return origSourceType;
++        return destinationIsWrapper ? origSourceType : sourceType;
+ #else
+       if (_dynamicCastClassMetatype((const ClassMetadata*)sourceType,
+                                     (const ClassMetadata*)targetType))
+@@ -1069,6 +1072,7 @@ swift_dynamicCastMetatypeUnconditionalImpl(
+     const Metadata *targetType,
+     const char *file, unsigned line, unsigned column) {
+   auto origSourceType = sourceType;
++  bool destinationIsWrapper = targetType->getKind() == MetadataKind::ObjCClassWrapper;
+ 
+   // Identical types always succeed
+   if (sourceType == targetType)
+@@ -1103,7 +1107,7 @@ swift_dynamicCastMetatypeUnconditionalImpl(
+         swift_dynamicCastFailure(sourceType, targetType);
+ #endif
+       // If we returned, then the cast succeeded.
+-      return origSourceType;
++      return destinationIsWrapper ? origSourceType : sourceType;
+     }
+     case MetadataKind::ForeignClass: {
+       // Check if the source is a subclass of the target.
