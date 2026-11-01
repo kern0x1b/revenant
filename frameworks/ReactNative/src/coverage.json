@@ -650,7 +650,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m."
+   "note": "Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-observe",
@@ -776,7 +776,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql."
+   "note": "Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-status-bar",
@@ -857,7 +857,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports)."
+   "note": "Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). Measured: 5961 Swift lines, no Objective-C; its availability checks are iOS 16 and iOS 26 (#available), which are false on iOS 6, so the fallback paths must compile. No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-web-browser",
