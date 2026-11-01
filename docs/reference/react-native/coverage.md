@@ -113,7 +113,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | real | build | Built; not exercised. |
-| expo-image-picker | ~57.0.20 | yes | stub | none | Name only; the package is at packages/e/expo-image-picker, unpatched. The module's multi-select path is PHPickerViewController (iOS 14) and its asset path uses PHAssetResourceManager writeData (iOS 13), UTType (iOS 14) and NSItemProvider file loading. The single-picker path is UIImagePickerController, which iOS 6 has (UIImagePickerController.h: iOS 4.0), so the patch is to route to it below iOS 14. Not built. |
+| expo-image-picker | ~57.0.20 | yes | stub | none | Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |

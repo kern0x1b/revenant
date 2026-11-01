@@ -479,7 +479,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name only; the package is at packages/e/expo-image-picker, unpatched. The module's multi-select path is PHPickerViewController (iOS 14) and its asset path uses PHAssetResourceManager writeData (iOS 13), UTType (iOS 14) and NSItemProvider file loading. The single-picker path is UIImagePickerController, which iOS 6 has (UIImagePickerController.h: iOS 4.0), so the patch is to route to it below iOS 14. Not built."
+   "note": "Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
   },
   {
    "id": "expo-intent-launcher",
