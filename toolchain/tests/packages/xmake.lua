@@ -19,6 +19,7 @@ local SUITES = {
     {name = "zxingobjc", source = "zxingobjc.m", packages = {"zxingobjc"}, mflags = {"-fobjc-arc"},
      defines = {"ZXINGOBJC_USE_SUBSPECS", "ZXINGOBJC_ONED", "ZXINGOBJC_PDF417"},
      frameworks = {"Foundation", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "ImageIO", "QuartzCore"}},
+    {name = "libsql", source = "libsql.c", packages = {"libsql"}, cflags = {}},
 }
 
 local names = {}
