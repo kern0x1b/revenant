@@ -1,0 +1,73 @@
+--- a/Common/cpp/worklets/WorkletRuntime/WorkletRuntime.cpp
++++ b/Common/cpp/worklets/WorkletRuntime/WorkletRuntime.cpp
+@@ -5,7 +5,7 @@
+ #include <worklets/Tools/WorkletsJSIUtils.h>
+ #include <worklets/WorkletRuntime/RuntimeHolder.h>
+ #include <worklets/WorkletRuntime/ScriptLoader.h>
+-#include <worklets/WorkletRuntime/WorkletHermesRuntime.h>
++#include <jsc/JSCRuntime.h>
+ #include <worklets/WorkletRuntime/WorkletRuntime.h>
+ #include <worklets/WorkletRuntime/WorkletRuntimeCollector.h>
+ #include <worklets/WorkletRuntime/WorkletRuntimeDecorator.h>
+@@ -47,8 +47,8 @@
+ };
+ 
+ static std::shared_ptr<jsi::Runtime> makeRuntime(const std::shared_ptr<std::recursive_mutex> &runtimeMutex) {
+-  auto hermesRuntime = facebook::hermes::makeHermesRuntime();
+-  std::shared_ptr<jsi::Runtime> jsiRuntime = std::make_shared<WorkletHermesRuntime>(std::move(hermesRuntime));
++  // iOS 6 port: worklets run on JavaScriptCore; the scripts are plain JS source (ScriptBuffer), no Hermes bytecode is involved.
++  std::shared_ptr<jsi::Runtime> jsiRuntime = facebook::jsc::makeJSCRuntime();
+   return std::make_shared<LockableRuntime>(jsiRuntime, runtimeMutex);
+ }
+ 
+--- a/Common/cpp/worklets/WorkletRuntime/HermesProfiling.cpp
++++ b/Common/cpp/worklets/WorkletRuntime/HermesProfiling.cpp
+@@ -1,45 +1,14 @@
+ #include <worklets/WorkletRuntime/HermesProfiling.h>
+ 
+-#include <hermes/hermes.h>
+-
+-#include <chrono>
+-#include <filesystem>
+-#include <sstream>
+ #include <string>
+ 
+ namespace worklets {
+ 
+-static std::string generateUniqueProfilePath() {
+-  auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+-  std::ostringstream oss;
+-  oss << "profile-" << now << ".cpuprofile";
+-  std::filesystem::path dir = std::filesystem::temp_directory_path();
+-  return (dir / oss.str()).string();
+-}
++// iOS 6 port: JavaScriptCore has no sampling profiler hook here; profiling is a no-op.
++void startProfiling(facebook::jsi::Runtime &rt, double meanHzFreq) {}
+ 
+-void startProfiling(facebook::jsi::Runtime &rt, double meanHzFreq) {
+-  auto *ihermes = facebook::jsi::castInterface<facebook::hermes::IHermes>(&rt);
+-  if (ihermes) {
+-    ihermes->registerForProfiling();
+-  }
+-  auto *api = facebook::jsi::castInterface<facebook::hermes::IHermesRootAPI>(facebook::hermes::makeHermesRootAPI());
+-  if (api) {
+-    api->enableSamplingProfiler(meanHzFreq);
+-  }
+-}
+-
+ std::string stopProfiling(facebook::jsi::Runtime &rt) {
+-  std::string path = generateUniqueProfilePath();
+-  auto *api = facebook::jsi::castInterface<facebook::hermes::IHermesRootAPI>(facebook::hermes::makeHermesRootAPI());
+-  if (api) {
+-    api->dumpSampledTraceToFile(path);
+-    api->disableSamplingProfiler();
+-  }
+-  auto *ihermes = facebook::jsi::castInterface<facebook::hermes::IHermes>(&rt);
+-  if (ihermes) {
+-    ihermes->unregisterForProfiling();
+-  }
+-  return path;
++  return std::string();
+ }
+ 
+ } // namespace worklets

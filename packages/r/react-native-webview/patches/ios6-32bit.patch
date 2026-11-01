@@ -1,0 +1,17 @@
+--- a/apple/RNCWebView.mm
++++ b/apple/RNCWebView.mm
+@@ -371,10 +371,10 @@
+ 
+     if (oldViewProps.contentInset.top != newViewProps.contentInset.top || oldViewProps.contentInset.left != newViewProps.contentInset.left || oldViewProps.contentInset.right != newViewProps.contentInset.right || oldViewProps.contentInset.bottom != newViewProps.contentInset.bottom) {
+         UIEdgeInsets edgesInsets = {
+-            .top = newViewProps.contentInset.top,
+-            .left = newViewProps.contentInset.left,
+-            .right = newViewProps.contentInset.right,
+-            .bottom = newViewProps.contentInset.bottom
++            .top = (CGFloat)newViewProps.contentInset.top,
++            .left = (CGFloat)newViewProps.contentInset.left,
++            .right = (CGFloat)newViewProps.contentInset.right,
++            .bottom = (CGFloat)newViewProps.contentInset.bottom
+         };
+         [_view setContentInset: edgesInsets];
+     }
