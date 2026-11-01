@@ -1,10 +1,3 @@
--- complzss is the compression Apple wraps kernelcaches in. The container starts with a 24-byte header: the magic
--- "complzss", then the Adler-32 of the plain bytes, the plain size, the packed size and a version, all big-endian.
--- Zero padding follows, and the packed stream ends where the payload ends. The stream is the classic
--- LZSS: a 4096-byte window, first written at offset 4078 and filled with spaces, and flag bytes read least
--- significant bit first, where a set bit is a literal byte and a clear bit is a match. A match is two bytes: the low
--- twelve bits are the window offset, and the high nibble of the second byte is the length minus three.
-
 local HEADER = 24
 local WINDOW = 4096
 local FILL = 0x20
@@ -82,7 +75,6 @@ local function lzss(source, plain_size)
     return table.concat(parts)
 end
 
--- unwrap returns the plain bytes of a complzss container, checked against its header.
 function unwrap(bytes)
     if #bytes < HEADER or bytes:sub(1, 8) ~= "complzss" then
         raise("the bytes are not a complzss container (they start %q)", bytes:sub(1, 8))
