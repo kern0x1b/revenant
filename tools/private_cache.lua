@@ -71,7 +71,8 @@ local function links(folder)
 end
 
 local function cmake_caches(folder)
-    return lines(os.iorunv("find", {folder, "-name", "CMakeCache.txt", "-type", "f"}))
+    return lines(os.iorunv("find", {folder, "-type", "f", "(", "-name", "CMakeCache.txt", "-o", "-name", "manifest.txt", "-o", "-name", "references.txt",
+                                   "-o", "-name", "*.pc", "-o", "-name", "cmake_install.cmake", ")"}))
 end
 
 local function target_of(link)
@@ -186,6 +187,32 @@ function clone(source, folder)
     return {folder = folder, source = roots[1], links = rewritten, dangling = dangling, stale = stale, cmake = cmake}
 end
 
+function repair(folder)
+    folder = absolute(folder)
+    local marker = path.join(folder, MARKER)
+    if not os.isfile(marker) then
+        raise("%s is not a private cache made by tools/private_cache.lua (it has no %s), so it is kept", folder, MARKER)
+    end
+    local source = io.readfile(marker):match("^source (.-)\n")
+    if not source then
+        raise("%s does not name its source cache", marker)
+    end
+    local roots = roots_of(source)
+    local count = 0
+    for _, file in ipairs(cmake_caches(folder)) do
+        local text = io.readfile(file)
+        local changed = text
+        for _, root in ipairs(roots) do
+            changed = replace(changed, root, folder)
+        end
+        if changed ~= text then
+            io.writefile(file, changed)
+            count = count + 1
+        end
+    end
+    return count
+end
+
 function remove(folder)
     folder = absolute(folder)
     local checkout = absolute(cache().checkout())
@@ -234,6 +261,9 @@ local function test_suite()
     local build = path.join(source, "xmake-global", ".xmake", "cache", "build")
     os.mkdir(build)
     io.writefile(path.join(build, "CMakeCache.txt"), "CMAKE_CACHEFILE_DIR:INTERNAL=" .. build .. "\n")
+    io.writefile(path.join(store, "manifest.txt"), "installdir = \"" .. install .. "\"\n")
+    os.mkdir(path.join(install, "lib", "pkgconfig"))
+    io.writefile(path.join(install, "lib", "pkgconfig", "alpha.pc"), "Libs: -L" .. path.join(install, "lib") .. "\n")
     io.writefile(path.join(source, "note.txt"), "kept " .. source .. "\n")
     local sealed = path.join(store, "sealed")
     os.mkdir(sealed)
@@ -246,7 +276,7 @@ local function test_suite()
     check(result.links == 4, "four absolute links into the source are rewritten, got " .. result.links)
     check(result.dangling == 1, "the link into the excluded folder dangles in the clone only, got " .. result.dangling)
     check(result.stale == 1, "the link to a path the source never had is stale, got " .. result.stale)
-    check(result.cmake == 1, "one CMakeCache.txt is rewritten, got " .. result.cmake)
+    check(result.cmake == 3, "CMakeCache.txt, the package manifest and the pkg-config file are rewritten, got " .. result.cmake)
 
     local cloned_store = path.join(absolute(folder), "xmake-global", ".xmake", "packages", "a", "alpha", "1.0")
     for _, link in ipairs(links(folder)) do
@@ -260,6 +290,9 @@ local function test_suite()
     local cloned_cmake = path.join(absolute(folder), "xmake-global", ".xmake", "cache", "build", "CMakeCache.txt")
     check(not io.readfile(cloned_cmake):find(source, 1, true), "CMakeCache.txt names no source path")
     check(io.readfile(cloned_cmake):find(absolute(folder), 1, true) ~= nil, "CMakeCache.txt names the clone")
+    check(not io.readfile(path.join(cloned_store, "manifest.txt")):find(source, 1, true), "the package manifest names no source path")
+    check(io.readfile(path.join(cloned_store, "manifest.txt")):find(absolute(folder), 1, true) ~= nil, "the package manifest names the clone")
+    check(not io.readfile(path.join(cloned_store, "install", "lib", "pkgconfig", "alpha.pc")):find(source, 1, true), "the pkg-config file names no source path")
     check(io.readfile(path.join(absolute(folder), "note.txt")):find(source, 1, true) ~= nil, "a text file that is not a CMake cache is copied unchanged")
     check(not os.isdir(path.join(folder, "devices")), "an excluded folder is left out of the clone")
     check(io.readfile(path.join(cloned_store, "sealed", "data")) == "sealed", "a read-only folder is cloned")
@@ -277,6 +310,9 @@ local function test_suite()
     check(refused(function () remove(source) end), "the source is not removed")
     check(refused(function () remove(base) end), "a folder without the marker is not removed")
     os.vrunv("ln", {"-s", install, path.join(folder, "escape-link")})
+    io.writefile(path.join(cloned_store, "manifest.txt"), "installdir = \"" .. install .. "\"\n")
+    check(repair(folder) == 1, "repair rewrites a manifest that still names the source")
+    check(not io.readfile(path.join(cloned_store, "manifest.txt")):find(source, 1, true), "the repaired manifest names no source path")
     remove(folder)
     check(not os.isdir(folder), "the private cache is removed")
     check(os.isfile(path.join(install, "lib", "libx.dylib")), "removing a clone that links into the source leaves the source's library in place")
@@ -296,6 +332,8 @@ function main(...)
             command = "test"
         elseif arg == "--remove" then
             command = "remove"
+        elseif arg == "--repair" then
+            command = "repair"
         elseif arg == "--from" then
             index = index + 1
             source = args[index]
@@ -310,6 +348,11 @@ function main(...)
 
     if command == "test" then
         test_suite()
+    elseif command == "repair" then
+        if not folder then
+            raise("usage: ./xmakew l -P . tools/private_cache.lua --repair <folder>")
+        end
+        print("repaired %d files of %s", repair(folder), folder)
     elseif command == "remove" then
         if not folder then
             raise("usage: ./xmakew l -P . tools/private_cache.lua --remove <folder>")
