@@ -48,6 +48,10 @@ The first build compiles `core`, `alloc`, `std` and `panic_abort` for the target
 
 The linked binary is checked as any other: every non-weak import must exist on the device's iOS 6.0 release, and a missing one stops the build and names the shim that provides it.
 
+## Host programs are not armv7 targets
+
+The rule builds staticlibs, and rustc cannot link a dylib or a binary for the armv7 target; the reason is in [What the armv7 target builds](../../explanation/toolchain/rust.md#what-the-armv7-target-builds). A build script, a proc-macro or any tool that runs on the Mac is built for the host, never for `armv7`. A build system that names one of them as an armv7 target fails with `unsupported architecture in Apple target: thumbv7-apple-ios`. Name the library for the armv7 target, and let the host build make the host programs.
+
 ## What the build prints
 
 Two messages are expected and are not suppressed:
