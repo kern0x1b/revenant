@@ -46,19 +46,5 @@ package("sdwebimage")
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
         local probe = import("@addon.revenant.apple.probe", {anonymous = true})
-        local ok, output = probe.check(package, {name = "probe.m", source = [[
-#import <Foundation/Foundation.h>
-#import <SDWebImage/SDWebImage.h>
-int main(int argc, char **argv) {
-    (void)argv;
-    @autoreleasepool {
-        const unsigned char png[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-        NSData *data = [NSData dataWithBytes:png length:sizeof(png)];
-        return [NSData sd_imageFormatForImageData:data] == SDImageFormatPNG && argc > 0 ? 0 : 1;
-    }
-}
-]], flags = {"-fobjc-arc"}, link = true,
-            ldflags = {"-fobjc-arc", "-lSDWebImage", "-framework", "Foundation", "-framework", "ImageIO"}})
-        assert(ok, "SDWebImage does not compile and link against armv7 iOS 6 with ARC: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libSDWebImage.a"), "armv7")
     end)

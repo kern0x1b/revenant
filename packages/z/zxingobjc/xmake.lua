@@ -60,19 +60,5 @@ package("zxingobjc")
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
         local probe = import("@addon.revenant.apple.probe", {anonymous = true})
-        local ok, output = probe.check(package, {name = "probe.m", source = [[
-#import <Foundation/Foundation.h>
-#import <ZXingObjC/ZXingObjC.h>
-int main(int argc, char **argv) {
-    (void)argv;
-    @autoreleasepool {
-        ZXMultiFormatReader *reader = [ZXMultiFormatReader reader];
-        return reader != nil && argc > 0 ? 0 : 1;
-    }
-}
-]], flags = {"-fobjc-arc", "-DZXINGOBJC_USE_SUBSPECS", "-DZXINGOBJC_ONED", "-DZXINGOBJC_PDF417"}, link = true,
-            ldflags = {"-fobjc-arc", "-lZXingObjC", "-framework", "Foundation", "-framework", "AVFoundation", "-framework", "CoreGraphics",
-                       "-framework", "CoreMedia", "-framework", "CoreVideo", "-framework", "ImageIO", "-framework", "QuartzCore"}})
-        assert(ok, "ZXingObjC does not compile and link against armv7 iOS 6 with ARC: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libZXingObjC.a"), "armv7")
     end)

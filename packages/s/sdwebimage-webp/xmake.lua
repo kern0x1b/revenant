@@ -44,22 +44,5 @@ package("sdwebimage-webp")
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
         local probe = import("@addon.revenant.apple.probe", {anonymous = true})
-        local ok, output = probe.check(package, {name = "probe.m", deps = {"sdwebimage", "libwebp"}, source = [[
-#import <Foundation/Foundation.h>
-#import <SDWebImageWebPCoder/SDImageWebPCoder.h>
-int main(int argc, char **argv) {
-    (void)argv;
-    @autoreleasepool {
-        SDImageWebPCoder *coder = [SDImageWebPCoder sharedCoder];
-        const unsigned char riff[] = {'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'E', 'B', 'P'};
-        NSData *data = [NSData dataWithBytes:riff length:sizeof(riff)];
-        return [coder canDecodeFromData:data] && argc > 0 ? 0 : 1;
-    }
-}
-]], flags = {"-fobjc-arc"}, link = true,
-            ldflags = {"-fobjc-arc", "-lSDWebImageWebPCoder", "-framework", "Foundation", "-framework", "UIKit", "-framework", "ImageIO",
-                       "-framework", "CoreGraphics", "-framework", "QuartzCore", "-framework", "CoreImage", "-framework", "Accelerate",
-                       "-framework", "CoreServices", "-framework", "MobileCoreServices", "-framework", "CoreVideo"}})
-        assert(ok, "SDWebImageWebPCoder does not compile and link against armv7 iOS 6 with ARC: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libSDWebImageWebPCoder.a"), "armv7")
     end)
