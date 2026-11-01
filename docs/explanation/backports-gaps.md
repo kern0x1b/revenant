@@ -375,3 +375,23 @@ Added in `src/UIKit/`: `NSSymbolEffect17.m`, `NSSymbolEffectOptions17.m`, `UIIma
 - `addSymbolEffect:options:animated:` ignores `animated`. The effects have no lead-in to skip.
 
 Not backed, because expo-symbols 57.0.3 does not call them: `removeSymbolEffectOfType:` (four variants), `setSymbolImage:withContentTransition:` (two variants), `NSSymbolEffectOptions optionsWithRepeatBehavior:` (iOS 18), the iOS 14 to 26 effects other than these (appear, disappear, wiggle, rotate, breathe, draw), and secure coding for the option and effect classes.
+
+## SDWebImage 5.21.7 on iOS 6: Accelerate, CoreGraphics and the lock
+
+Source: SDWebImage 5.21.7 (`2de3a496`), `SDWebImage/Core`, 60 files. Each file was syntax-compiled for armv7 iOS 6.0 against the lowered overlay with `-Werror=unguarded-availability` and `-Werror=unguarded-availability-new`, and the errors were grouped by name.
+
+Covered without a change, with no unguarded error at iOS 6.0: `NSURLSession`, `NSURLSessionConfiguration`, `NSURLComponents` (Foundation); `UIGraphicsImageRenderer`, `UIGraphicsImageRendererFormat` (UIKit). `SDGraphicsImageRenderer.m` guards the iOS 10 names with `respondsToSelector:` and `@available`.
+
+Changed:
+
+- `vImageScale_ARGB16U` (iOS 7) and `vImageScale_Planar16U` (iOS 8) were not backed. `src/Accelerate/vImageScale7.m` and `vImageScale8.m` share `RevenantScale.h`. The filter is area averaging when downscaling (exact for integer ratios) and bilinear when upscaling, computed in float and rounded half up, clamped to 0 to 65535. `kvImageNoFlags` and `kvImageHighQualityResampling` select this same filter. `kvImageDoNotTile` is accepted. `kvImageGetTempBufferSize` returns without scaling. Unknown flags are refused. The `tempBuffer` argument is not used. An empty destination is a no-op; an empty source is refused.
+- `CGColorSpaceUsesITUR_2100TF` (iOS 14) was a constant `false`. It now takes the colour space's name from `CGColorSpaceCopyName` (iOS 10) and compares it with `kCGColorSpaceITUR_2100_PQ` and `kCGColorSpaceITUR_2100_HLG`, inside `@available(iOS 14.0)`, since those names do not exist before iOS 14. Limit: an ICC-based colour space with a PQ or HLG transfer that carries no such name is not detected. On iOS 6 a colour space never carries these names, so the answer there is NO.
+- `CGImageGetUTType` (iOS 9) was not backed. It now returns NULL for every image. Limit, decided with the coordinator: Apple returns the UTI of the ImageIO source for an image decoded by ImageIO. iOS 6 keeps no per-image record of its source. SDWebImage creates its images with `CGImageSourceCreateImageAtIndex`, and the Backports cannot wrap that: `src/attach.c` and `src/revenant_alias.h` alias Objective-C classes, not C functions. So `UIImage (Metadata)` `sd_imageFormat` gets `SDImageFormatUndefined`, and the lazy-decode check in `SDImageCoderHelper` reads "not lazily decoded". NULL is Apple's answer for images not created through ImageIO, not for these.
+
+The scalers were measured against Apple's in process: `tests/vimage_scale/scale_test.c`, run by `tests/vimage_scale_test.lua`, which loads vImage with `dlopen`. Impulse responses show Apple's kernel is wider than ours: one source pixel spreads over neighbouring outputs when downscaling, and over more outputs, with wrap-around at the far edge, when upscaling. The difference is a kernel difference, not rounding, so there is no rounding bound. The test pins the measured worst case on each fixed input. On a linear ramp that is 33 (8x6 to 4x3), 116 (9x7 to 4x3), 151 (3x2 to 7x5) and 139 (4x4 to 8x8), out of 65535; interior pixels of a ramp agree within rounding. On pseudo-random noise it is 4645 to 12031.
+
+Not ours: SDWebImage declares its own iOS 8 API with `API_DEPRECATED(... ios(8.0, 8.0))` (`SDWebImageAvoidDecodeImage`, `SDWebImageDownloaderAvoidDecodeImage`, `SDImageCacheAvoidDecodeImage`, `SDWebImageContextCustomManager`, the `shouldBlockFailedURLWithURL:error:` protocol method and the `options:context:` prefetch selectors) and calls it without a guard. Twelve of the 60 Core files fail `-Werror=unguarded-availability` for that reason; in a default build those are warnings.
+
+Not checked here: `SDWebImageWebPCoder`, whose sources need libwebp headers on the include path that this check did not add; and anything on a device.
+
+Lock at runtime: `SDInternalMacros.h` sets `SD_USE_OS_UNFAIR_LOCK` to 0 below iOS 10, so on iOS 6 SDWebImage locks with `OSSpinLock` and only links the `os_unfair_lock_*` symbols. `apple-compat` provides those symbols (`src/os_unfair_lock_*.c`, `unfair_lock.h`), with a host test that runs four threads against the system lock.

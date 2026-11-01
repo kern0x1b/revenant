@@ -4262,6 +4262,7 @@ function CGColorSpaceUsesExtendedRange
 function CGColorSpaceUsesITUR_2100TF
 function CGImageGetByteOrderInfo
 function CGImageGetPixelFormatInfo
+function CGImageGetUTType
 function CGImageSourceRemoveCacheAtIndex
 function CGPDFArrayApplyBlock
 function CGPDFDictionaryApplyBlock
@@ -6450,6 +6451,8 @@ function vImageRotate90_ARGB16S
 function vImageRotate90_ARGB16U
 function vImageRotate90_CbCr16F
 function vImageRotate90_Planar16F
+function vImageScale_ARGB16U
+function vImageScale_Planar16U
 function vImageVerticalShearD_ARGB16F
 function vImageVerticalShearD_ARGB16S
 function vImageVerticalShearD_ARGB16U

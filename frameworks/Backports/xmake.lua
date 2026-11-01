@@ -215,6 +215,8 @@ if is_plat("iphoneos") then
     backports_tests("subset", {subset = "subset_test.lua"})
 end
 
+backports_tests("vimage_scale", {vimage_scale = "vimage_scale_test.lua"})
+
 if is_plat("iphoneos") and not SELECTED then
     target("BackportsLayoutProbe")
         set_kind("binary")
