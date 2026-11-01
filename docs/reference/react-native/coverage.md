@@ -171,7 +171,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | react-native-worklets | 0.10.1 | no | real | phone | Built. |
 | react-native-reanimated | 4.5.1 | no | real | phone | Built; the bottom sheets animate on it. |
-| react-native-screens | ~4.26.0 | yes | partial | phone | Built without the gamma folder; the stack and the sheets work on the phone. gamma/ does not compile yet: gamma/split/RNSSplitHostComponentView.mm imports RNScreens-Swift.h, and the module's Swift half (10 files in ios/) has no probe. Its code uses UIKit types of iOS 13 to 15 (UIAction, UISheetPresentationController, split-view columns). |
+| react-native-screens | ~4.26.0 | yes | partial | phone | Built without the gamma folder; the stack and the sheets work on the phone. gamma/ does not compile yet. Its 10 Swift files (all under gamma/) need the Fabric component views as Swift classes: RNSSplitScreenComponentView derives from RCTViewComponentView, whose header imports react/renderer C++ headers. With C++ interop off the Swift importer cannot parse them; with interop on the emitted header's C++ section fails under ObjC++ (see the keyboard-controller row). Its UIKit types of iOS 13 to 15 compile against the SDK 26.2 and are not yet checked at run time. |
 | react-native-safe-area-context | ~5.7.0 | yes | real | phone | Built. |
 | react-native-svg | 15.15.4 | no | real | phone | Built; the logo and icons draw. |
 | react-native-view-shot | 5.1.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
