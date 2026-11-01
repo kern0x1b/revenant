@@ -19,7 +19,7 @@ Only an app bundle takes `revenant.rebind`. A tweak or a daemon is refused, beca
 
 ## What the rebind does
 
-When the app is packaged, after the libraries are copied into `Frameworks/` and their install names are retargeted, the named image is rebound in place in that copy:
+When the app is packaged, after the libraries are copied into `Frameworks/` and their install names are retargeted and the images are stripped, the named image is rebound in place in that copy (`strip` rewrites the symbol table of an image whose binds were re-encoded and corrupts it, so the rebind comes after it):
 
 1. Each import the release does not export is moved to the Backports library of the build that exports it. The provider is installed at `/usr/lib/revenant/org.revenant.backports/<name>`.
 2. An `LC_LOAD_DYLIB` for that provider is added to the image's load commands, unless the image already names it.

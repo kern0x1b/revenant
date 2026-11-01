@@ -407,8 +407,9 @@ end
 function reached(offered, roots)
     local byname = {}
     for _, library in ipairs(offered) do
-        byname[library.name] = byname[library.name] or {}
-        table.insert(byname[library.name], library)
+        local leaf = library.leaf or library.name
+        byname[leaf] = byname[leaf] or {}
+        table.insert(byname[leaf], library)
     end
     local libraries, taken, pending = {}, {}, table.copy(roots)
     while #pending > 0 do
@@ -624,7 +625,7 @@ function application(target)
     end
     for _, library in ipairs(distinct(table.join(reached(held, roots), carried), frameworks)) do
         local destination = path.join(frameworks, library.name)
-        os.mkdir(frameworks)
+        os.mkdir(path.directory(destination))
         os.vcp(library.source, destination)
         identities[destination] = "@executable_path/Frameworks/" .. library.name
         table.insert(binaries, destination)
@@ -634,13 +635,13 @@ function application(target)
     end
     local shared = shared_runtime(target)
     bundle.retarget(binaries, identities, {provided = shared and shared.identities})
-    rebind(target, binaries, folder, provided_libraries(target))
     bundle.copy_resources(target, folder)
     bundle.write_plist(path.join(folder, "Info.plist"), bundle.info(target, deployment(target)))
     for _, binary in ipairs(binaries) do
         verify(target, binary, {imports = false})
         strip(target, binary)
     end
+    rebind(target, binaries, folder, provided_libraries(target))
     for index = #binaries, 1, -1 do
         sign(target, binaries[index], binaries[index] == executable and target:values("revenant.entitlements") or nil)
     end

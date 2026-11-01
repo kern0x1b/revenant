@@ -71,14 +71,26 @@ local function package_libraries(target, package, name)
             table.insert(libraries, file)
         end
     end
-    if #libraries == 0 then
-        raise("target(%s) bundles the libraries of %s, and it installs no shared library", target:name(), name)
+    local frameworks = {}
+    for _, directory in ipairs(os.dirs(path.join(package:installdir(), "bundle", "Frameworks", "*.framework"))) do
+        local stem = path.basename(directory)
+        local file = path.join(directory, stem)
+        if os.isfile(file) and not os.islink(file) then
+            table.insert(frameworks, {file = file, name = path.filename(directory) .. "/" .. stem, leaf = stem})
+        end
+    end
+    if #libraries == 0 and #frameworks == 0 then
+        raise("target(%s) bundles the libraries of %s, and it installs no shared library and no framework under bundle/Frameworks", target:name(), name)
     end
     byteorder.sort(libraries)
     local carried = {}
     for _, file in ipairs(libraries) do
         local image = macho.images(macho.read(file))[1]
         table.insert(carried, {source = file, name = path.filename(image.identity or file), package = name})
+    end
+    table.sort(frameworks, function (a, b) return a.name < b.name end)
+    for _, framework in ipairs(frameworks) do
+        table.insert(carried, {source = framework.file, name = framework.name, leaf = framework.leaf, package = name})
     end
     return carried
 end
