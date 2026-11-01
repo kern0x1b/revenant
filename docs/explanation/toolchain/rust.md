@@ -14,6 +14,12 @@ rustc 1.74 removed `armv7-apple-ios`. `armv7s-apple-ios` remains as tier 3 and n
 
 Building std with `-Zbuild-std` needs the nightly, because the build-std and JSON target specs are unstable. The stable toolchain with `RUSTC_BOOTSTRAP` is not a documented path, so it is not used.
 
+## What the armv7 target builds
+
+The rule makes staticlibs, and the spec is for libraries. The pinned nightly cannot link a dylib or a binary for the spec. The probe is a `#![no_core]` crate with the four lang items the spec needs (`pointee_sized`, `meta_sized`, `sized`, `copy`) and a `main` for the binary. Built with `-Zunstable-options --target <spec>`, `--crate-type=rlib` and `staticlib` compile, and `dylib` and `bin` panic in rustc's Apple linker, `rustc_codegen_ssa/src/back/link.rs:3838`, with `unsupported architecture in Apple target: thumbv7-apple-ios` (exit 101). The panic is for the spec's `llvm-target`, `thumbv7-apple-ios`. Earlier probes in the Telegram build recorded the same panic for `armv7-apple-ios` and none for `armv7s-apple-ios`; this page did not run those again. The `llvm-target` cannot carry a version (see the minimum below), and `armv7s` was not taken: that arch name selects the armv7s subtarget, whose features were not measured against the A5.
+
+So a program that runs on the Mac is never built for this target. A build script, a proc-macro (a dylib), a process wrapper and a host cdylib each have to be built for the host, and asking for one of them for armv7 panics the same way. A library crate is fine: the `libc` 0.2.189 crate of Telegram's wallet engine builds for armv7 as an rlib, with its build script run on the host and no panic. The package's test builds the probe and checks both results: the staticlib builds, and the dylib and the binary stop at this panic. If a nightly links them, that test fails and this section changes with it.
+
 ## The toolchain
 
 The package pins `nightly-2026-10-22`, which is rustc 1.101.0-nightly (1a2c4797e, 2026-10-21), with its `rust-src`. rustup 1.29.2 installs it, and its installer is pinned by checksum (the aarch64 and x86_64 archives). The version is the nightly, not rustup.
@@ -88,4 +94,4 @@ The undefined symbols that need an OS above 6.0 are the table's entries: the 13 
 
 ## Packaging
 
-The rule and package are `@addon/revenant/rust` and `revenant@rust`. The rule builds the crate with the package's cargo, through `REVENANT_RUST_BIN` and `REVENANT_RUST_CARGO_HOME`, which the package exports, and it takes C flags and the deployment target from the apple-ios toolchain, so cargo's build scripts compile for the device with the same clang. The crate's sources are tracked through a stamp of their hashes, because xmake's own Rust language support tries to find `rustc` on the path for `.rs` files. The package's test runs `rustc --print cfg` on the spec under the pinned nightly.
+The rule and package are `@addon/revenant/rust` and `revenant@rust`. The rule builds the crate with the package's cargo, through `REVENANT_RUST_BIN` and `REVENANT_RUST_CARGO_HOME`, which the package exports, and it takes C flags and the deployment target from the apple-ios toolchain, so cargo's build scripts compile for the device with the same clang. The crate's sources are tracked through a stamp of their hashes, because xmake's own Rust language support tries to find `rustc` on the path for `.rs` files. The package's test runs `rustc --print cfg` on the spec under the pinned nightly, builds the probe of the section above as a staticlib, and checks that the dylib and the binary stop at the link panic.
