@@ -4995,10 +4995,12 @@ function glClearBufferfv
 function glClearBufferiv
 function glClearBufferuiv
 function glClientWaitSync
+function glCompileShader
 function glCopyBufferSubData
 function glCopyTexSubImage3D
 function glDeleteQueries
 function glDeleteSamplers
+function glDeleteShader
 function glDeleteSync
 function glDeleteTransformFeedbacks
 function glDeleteVertexArrays
@@ -5028,6 +5030,8 @@ function glGetQueryObjectuiv
 function glGetQueryiv
 function glGetSamplerParameterfv
 function glGetSamplerParameteriv
+function glGetShaderInfoLog
+function glGetShaderiv
 function glGetStringi
 function glGetSynciv
 function glGetTransformFeedbackVarying
@@ -5054,6 +5058,7 @@ function glSamplerParameterf
 function glSamplerParameterfv
 function glSamplerParameteri
 function glSamplerParameteriv
+function glShaderSource
 function glTexImage3D
 function glTexStorage2D
 function glTexStorage3D
