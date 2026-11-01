@@ -10,6 +10,7 @@ local FAMILIES = {
     {fixture = "user_activity_members.swift", lowered = true},
     {fixture = "url_session.swift", lowered = true},
     {fixture = "app_delegate.swift", lowered = true},
+    {fixture = "haptics.swift", lowered = true},
     {fixture = "dispatch.swift", lowered = false},
     {fixture = "locale_language.swift", lowered = false, sources = {"Foundation/LocaleLanguage.swift"}},
 }

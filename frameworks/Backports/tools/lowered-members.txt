@@ -3894,6 +3894,8 @@ enum UIImageSymbolWeightUnspecified
 enum UIImpactFeedbackStyleHeavy
 enum UIImpactFeedbackStyleLight
 enum UIImpactFeedbackStyleMedium
+enum UIImpactFeedbackStyleRigid
+enum UIImpactFeedbackStyleSoft
 enum UIInputViewStyleKeyboard
 enum UIKeyModifierAlphaShift
 enum UIKeyModifierAlternate
