@@ -578,7 +578,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Its MapKit classes (MKMapItem and the map view) are backported in frameworks/Backports/src/MapKit. Its Swift imports SwiftUI in six files, which is iOS 13 and later, so the SwiftUI component must cover those views."
+   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch."
   },
   {
    "id": "expo-mcp",
@@ -965,7 +965,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Not built; package packages/r/react-native-maps (1.27.2, unpatched). Its MapKit calls (MKMapView, MKMapCamera, MKMapSnapshotter, MKOverlayPathRenderer) are backported in frameworks/Backports/src/MapKit. It imports GoogleMaps in 19 places: the Google provider needs the GoogleMaps SDK, which this repository does not carry, so its guard must keep it out of the iOS 6 build."
+   "note": "Not built; package packages/r/react-native-maps (1.27.2). The Google provider is switched off by patch 0001 (ios/AirMaps/RNMapsDefines.h: HAVE_GOOGLE_MAPS 0, so the placeholders compile), and the Google subspec (ios/AirGoogleMaps, GoogleMaps 9.4.0) is not built, because the GoogleMaps SDK is not carried for iOS 6. The Apple path (ios/AirMaps) is not yet clean on iOS 6: it uses MapKit symbols from iOS 7 to iOS 16 (MKMapCameraZoomRange and MKMapCameraZoomDefault from 13, MKPointOfInterestCategory from 13, MKStandardMapConfiguration, MKHybridMapConfiguration and MKMapConfiguration from 16, MKFeatureVisibility from 16, MKMapTypeMutedStandard and MKFeatureDisplayPriorityRequired from 11, MKAnnotationViewDragState from 11), and MKMarkerAnnotationView is deprecated from 16. The Backports cover the MKMapView, MKMapCamera, MKMapSnapshotter and MKOverlayPathRenderer core, not the newer symbols. Those need a guard or a Backport before it is built."
   },
   {
    "id": "react-native-pager-view",
