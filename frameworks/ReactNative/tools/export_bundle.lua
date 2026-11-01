@@ -18,8 +18,30 @@ module.exports = function (api) {
 };
 ]]
 
+local METRO_WRAPPER = [[const config = require("./metro.config.original.%s");
+const previous = config.transformer.getTransformOptions;
+config.transformer.getTransformOptions = async (...args) => {
+  const base = previous ? await previous(...args) : { transform: {} };
+  return { ...base, transform: { ...base.transform, inlineRequires: true } };
+};
+module.exports = config;
+]]
+
 function wrapper()
     return WRAPPER
+end
+
+function metro_wrapper(extension)
+    return METRO_WRAPPER:format(extension)
+end
+
+function metro_config(app)
+    for _, extension in ipairs({"cjs", "js"}) do
+        local file = path.join(app, "metro.config." .. extension)
+        if os.isfile(file) then
+            return file, extension
+        end
+    end
 end
 
 function prelude()
@@ -40,15 +62,24 @@ function main(...)
     local app = path.absolute(words[1])
     local config = path.join(app, "babel.config.js")
     local saved = path.join(app, "babel.config.hermes.js")
+    local metro, extension = metro_config(app)
+    local metro_saved = metro and path.join(app, "metro.config.original." .. extension)
     if not os.isfile(config) then
         raise("%s has no babel.config.js", app)
     end
-    if os.isfile(saved) then
-        raise("%s exists: a previous export did not restore babel.config.js, look at both files", saved)
+    if not metro then
+        raise("%s has no metro.config.cjs or metro.config.js", app)
+    end
+    for _, left in ipairs({saved, metro_saved}) do
+        if os.isfile(left) then
+            raise("%s exists: a previous export did not restore the configuration, look at it and its original", left)
+        end
     end
     local output = path.absolute(given.output or path.join(app, "dist-jsc"))
     os.cp(config, saved)
+    os.cp(metro, metro_saved)
     io.writefile(config, wrapper())
+    io.writefile(metro, metro_wrapper(extension))
     local ok, failure = true, nil
     try {
         function ()
@@ -63,6 +94,8 @@ function main(...)
     }
     os.cp(saved, config)
     os.rm(saved)
+    os.cp(metro_saved, metro)
+    os.rm(metro_saved)
     if not ok then
         raise("expo export failed: %s", failure)
     end

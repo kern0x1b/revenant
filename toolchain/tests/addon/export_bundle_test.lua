@@ -8,6 +8,13 @@ function failures(opt)
     if not export.wrapper():find('"babel-preset-expo"', 1, true) then
         table.insert(found, "the babel wrapper must change only babel-preset-expo")
     end
+    local metro = export.metro_wrapper("cjs")
+    if not metro:find('require("./metro.config.original.cjs")', 1, true) then
+        table.insert(found, "the metro wrapper must load the original configuration with its extension")
+    end
+    if not metro:find("inlineRequires: true", 1, true) then
+        table.insert(found, "the metro wrapper must turn inline requires on")
+    end
     local front = io.readfile(export.prelude())
     for _, name in ipairs({"atob", "btoa"}) do
         if not front or not front:find("g." .. name .. " = function", 1, true) then
