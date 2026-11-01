@@ -7,10 +7,14 @@ function main()
     local header = path.join(compat, "include", "revenant", "dirstat_np.h")
     local out = workspace.run("apple-compat-dirstat")
     local apple, ours = path.join(out, "apple"), path.join(out, "ours")
-    local object = path.join(out, "dirstat_np.o")
+    local objects = {}
+    for _, name in ipairs({"dirstat_np", "openat", "fstatat"}) do
+        local object = path.join(out, name .. ".o")
+        os.vrunv("xcrun", {"clang", "-O1", "-c", path.join(compat, "src", name .. ".c"), "-o", object})
+        table.insert(objects, object)
+    end
+    os.vrunv("xcrun", table.join({"clang", "-O1", "-I", path.join(compat, "include"), "-include", header, "-o", ours, test}, objects))
     os.vrunv("xcrun", {"clang", "-O1", "-o", apple, test})
-    os.vrunv("xcrun", {"clang", "-O1", "-c", path.join(compat, "src", "dirstat_np.c"), "-o", object})
-    os.vrunv("xcrun", {"clang", "-O1", "-I", path.join(compat, "include"), "-include", header, "-o", ours, test, object})
     local tree_apple, tree_ours = path.join(out, "tree-apple"), path.join(out, "tree-ours")
     os.tryrm(tree_apple)
     os.tryrm(tree_ours)

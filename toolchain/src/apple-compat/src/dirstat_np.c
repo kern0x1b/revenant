@@ -8,7 +8,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int __pthread_fchdir(int descriptor);
+int revenant_at_within(int directory, int (*operation)(void *context), void *context);
+int revenant_openat(int directory, const char *path, int flags, ...);
+int revenant_fstatat(int directory, const char *path, struct stat *buffer, int flags);
 
 struct darwin_dirstat {
     off_t total_size;
@@ -28,21 +30,8 @@ struct revenant_inode_set {
     size_t count;
 };
 
-struct revenant_pending {
-    char *path;
-    dev_t device;
-    ino_t inode;
-};
-
-struct revenant_stack {
-    struct revenant_pending *items;
-    size_t count;
-    size_t capacity;
-};
-
 struct revenant_walk {
     struct revenant_inode_set inodes;
-    struct revenant_stack pending;
     dev_t device;
     off_t total_size;
     uint64_t descendants;
@@ -81,136 +70,86 @@ static int revenant_inode_insert(struct revenant_inode_set *set, ino_t inode)
     return 1;
 }
 
-static int revenant_stack_push(struct revenant_stack *stack, struct revenant_pending pending)
+struct revenant_listing_request {
+    DIR *listing;
+};
+
+static int revenant_listing_operation(void *context)
 {
-    if (stack->count == stack->capacity) {
-        size_t capacity = stack->capacity ? stack->capacity * 2 : 64;
-        struct revenant_pending *items = realloc(stack->items, capacity * sizeof *items);
-        if (items == NULL) {
-            errno = ENOMEM;
-            return -1;
-        }
-        stack->items = items;
-        stack->capacity = capacity;
-    }
-    stack->items[stack->count++] = pending;
-    return 0;
+    struct revenant_listing_request *request = context;
+    request->listing = opendir(".");
+    return request->listing == NULL ? -1 : 0;
 }
 
-static int revenant_stack_pop(struct revenant_stack *stack, struct revenant_pending *pending)
+static DIR *revenant_listing(int descriptor)
 {
-    if (stack->count == 0)
-        return 0;
-    *pending = stack->items[--stack->count];
-    return 1;
+    struct revenant_listing_request request = {NULL};
+    revenant_at_within(descriptor, revenant_listing_operation, &request);
+    int failure = errno;
+    close(descriptor);
+    errno = failure;
+    return request.listing;
 }
 
-static char *revenant_join(const char *folder, const char *name)
+static int revenant_walk_folder(struct revenant_walk *walk, DIR *folder)
 {
-    size_t folder_length = strlen(folder);
-    size_t separator = folder_length ? 1 : 0;
-    size_t name_length = strlen(name);
-    char *joined = malloc(folder_length + separator + name_length + 1);
-    if (joined == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
-    memcpy(joined, folder, folder_length);
-    if (separator)
-        joined[folder_length] = '/';
-    memcpy(joined + folder_length + separator, name, name_length + 1);
-    return joined;
-}
-
-static int revenant_walk_folder(struct revenant_walk *walk, const char *folder, const struct revenant_pending *expected)
-{
-    DIR *directory = opendir(folder[0] ? folder : ".");
-    if (directory == NULL)
-        return expected ? 0 : -1;
-    if (expected) {
-        struct stat opened;
-        if (fstat(dirfd(directory), &opened) == -1 || opened.st_dev != expected->device || opened.st_ino != expected->inode) {
-            closedir(directory);
-            return 0;
-        }
-    }
-    int status = 0;
+    int descriptor = dirfd(folder);
     struct dirent *entry;
-    while ((entry = readdir(directory)) != NULL) {
+    while ((entry = readdir(folder)) != NULL) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
         walk->descendants++;
-        char *child = revenant_join(folder, entry->d_name);
-        if (child == NULL) {
-            status = -1;
-            break;
-        }
         struct stat info;
-        if (lstat(child, &info) == -1) {
-            free(child);
+        if (revenant_fstatat(descriptor, entry->d_name, &info, AT_SYMLINK_NOFOLLOW) == -1)
+            continue;
+        if (!S_ISDIR(info.st_mode)) {
+            int fresh = info.st_nlink > 1 ? revenant_inode_insert(&walk->inodes, info.st_ino) : 1;
+            if (fresh == -1)
+                return -1;
+            if (fresh)
+                walk->total_size += (off_t)info.st_blocks * 512;
             continue;
         }
-        if (S_ISDIR(info.st_mode)) {
-            if (info.st_dev == walk->device) {
-                struct revenant_pending pending = {child, info.st_dev, info.st_ino};
-                if (revenant_stack_push(&walk->pending, pending) == -1) {
-                    free(child);
-                    status = -1;
-                    break;
-                }
-            } else {
-                free(child);
-            }
+        if (info.st_dev != walk->device)
+            continue;
+        int child = revenant_openat(descriptor, entry->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+        if (child == -1)
+            continue;
+        struct stat opened;
+        if (fstat(child, &opened) == -1 || opened.st_dev != info.st_dev || opened.st_ino != info.st_ino) {
+            close(child);
             continue;
         }
-        int fresh = info.st_nlink > 1 ? revenant_inode_insert(&walk->inodes, info.st_ino) : 1;
-        free(child);
-        if (fresh == -1) {
-            status = -1;
-            break;
-        }
-        if (fresh)
-            walk->total_size += (off_t)info.st_blocks * 512;
-    }
-    closedir(directory);
-    return status;
-}
-
-static int revenant_walk_tree(struct revenant_walk *walk)
-{
-    if (revenant_walk_folder(walk, "", NULL) == -1)
-        return -1;
-    struct revenant_pending pending;
-    while (revenant_stack_pop(&walk->pending, &pending)) {
-        int status = revenant_walk_folder(walk, pending.path, &pending);
-        free(pending.path);
+        DIR *nested = revenant_listing(child);
+        if (nested == NULL)
+            continue;
+        int status = revenant_walk_folder(walk, nested);
+        closedir(nested);
         if (status == -1)
             return -1;
     }
     return 0;
 }
 
-static int revenant_walk_pinned(const char *path, struct darwin_dirstat *result)
+static int revenant_walk_root(const char *path, struct darwin_dirstat *result)
 {
-    int folder = open(path, O_RDONLY | O_DIRECTORY);
-    if (folder == -1)
+    int root = open(path, O_RDONLY | O_DIRECTORY);
+    if (root == -1)
         return -1;
     struct stat info;
-    if (fstat(folder, &info) == -1 || __pthread_fchdir(folder) == -1) {
+    if (fstat(root, &info) == -1) {
         int failure = errno;
-        close(folder);
+        close(root);
         errno = failure;
         return -1;
     }
-    struct revenant_walk walk = {{NULL, 0, 0}, {NULL, 0, 0}, info.st_dev, 0, 0};
-    int status = revenant_walk_tree(&walk);
+    DIR *listing = revenant_listing(root);
+    if (listing == NULL)
+        return -1;
+    struct revenant_walk walk = {{NULL, 0, 0}, info.st_dev, 0, 0};
+    int status = revenant_walk_folder(&walk, listing);
     int failure = errno;
-    if (__pthread_fchdir(-1) == -1)
-        abort();
-    close(folder);
-    for (size_t index = 0; index < walk.pending.count; index++)
-        free(walk.pending.items[index].path);
-    free(walk.pending.items);
+    closedir(listing);
     free(walk.inodes.slots);
     if (status == -1) {
         errno = failure;
@@ -233,7 +172,7 @@ int revenant_dirstat_np(const char *path, int flags, struct darwin_dirstat *ds, 
         return -1;
     }
     struct darwin_dirstat result;
-    if (revenant_walk_pinned(path, &result) == -1)
+    if (revenant_walk_root(path, &result) == -1)
         return -1;
     memcpy(ds, &result, dirstat_size < sizeof result ? dirstat_size : sizeof result);
     return 0;
