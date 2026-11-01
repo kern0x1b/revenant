@@ -551,6 +551,15 @@ local SCENEKIT_TESTS = {
     audio = {"SCNAudioSource.m", "SCNAudioPlayer.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
 }
 
+local SCENEKIT_TESTS_MACOS = {
+    action_math = {"RevenantSCNActionMath.m"},
+    clock = {"RevenantSCNClock.m"},
+    jitter = {"RevenantSCNJitter.m"},
+    picking = {"RevenantSCNGeometry.m"},
+    action_run = {"SCNAction.m", "RevenantSCNActionRun.m", "RevenantSCNActionMath.m", "SCNAudioSource+Revenant.m", "SCNAudioPlayer+Revenant.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
+    audio = {"SCNAudioSource+Revenant.m", "SCNAudioPlayer+Revenant.m", "RevenantSCNSoundEngine.m", "RevenantSCNStream.m"},
+}
+
 local function host_tests(folder, tests, library, frameworks, options)
     options = options or {}
     local TESTS = path.join(os.scriptdir(), "tests", folder)
@@ -602,7 +611,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
-    host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
+    host_tests("SceneKit", SCENEKIT_TESTS_MACOS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
