@@ -165,7 +165,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native | 0.86.3 | no | partial | phone | See the core table. |
 | react-native-web | ~0.21.0 | no | n/a | none | Web only. |
 | react-native-gesture-handler | ~2.32.0 | no | real | phone | Built; the app's gestures run on it. |
-| react-native-enriched-markdown | 1.2.0-nightly-20261014-766fc0e67 | yes | partial | none | Chat markdown. The 160 sources compile (not link) for armv7 iOS 6.0 with five patches. Not linked: the recipe does not yet install the tree-sitter runtime and grammars that code highlighting needs, and the math (RaTeX) part is not vendored. Not on the phone. |
+| react-native-enriched-markdown | 1.2.0-nightly-20261014-766fc0e67 | yes | partial | none | Chat markdown. The 160 sources compiled for armv7 iOS 6.0 with five patches. The tree-sitter runtime and the 14 default grammars are vendored from their own packages and compile for armv7; the highlighter's tree-sitter symbols all resolve against them. Not linked into the host yet, the math (RaTeX) part is not vendored, and it is not on the phone. |
 | react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | react-native-keyboard-controller | 1.21.9 | yes | stub | phone | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. |
 | react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
