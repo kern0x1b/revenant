@@ -1,0 +1,29 @@
+--- a/ios/EnrichedMarkdown.mm
++++ b/ios/EnrichedMarkdown.mm
+@@ -411,7 +411,7 @@
+     if (strongSelf)
+       [strongSelf emitCodeBlockPress:code language:language];
+   };
+-  view.onLinkPress = ^(NSString *url) {
++  view.onLinkPress = ^(NSString *url, NSString *sourceType) {
+     EnrichedMarkdown *strongSelf = weakSelf;
+     if (strongSelf && url)
+       [strongSelf emitLinkPress:url];
+@@ -986,7 +986,7 @@
+ 
+   __weak EnrichedMarkdown *weakSelf = self;
+ 
+-  tableView.onLinkPress = ^(NSString *url) {
++  tableView.onLinkPress = ^(NSString *url, NSString *sourceType) {
+     EnrichedMarkdown *strongSelf = weakSelf;
+     if (strongSelf && url)
+       [strongSelf emitLinkPress:url];
+@@ -1575,7 +1575,7 @@
+     }
+   }
+ 
+-  if (ENRMHandleTapOnTextView(textView, recognizer, ^(NSString *url) { [self emitLinkPress:url]; })) {
++  if (ENRMHandleTapOnTextView(textView, recognizer, ^(NSString *url, NSString *sourceType) { [self emitLinkPress:url]; })) {
+     return;
+   }
+ 

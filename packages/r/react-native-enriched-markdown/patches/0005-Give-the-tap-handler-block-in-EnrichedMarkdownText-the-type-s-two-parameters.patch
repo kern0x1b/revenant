@@ -1,0 +1,11 @@
+--- a/ios/EnrichedMarkdownText.mm
++++ b/ios/EnrichedMarkdownText.mm
+@@ -994,7 +994,7 @@
+     return;
+   }
+ 
+-  if (ENRMHandleTapOnTextView(textView, recognizer, ^(NSString *url) { [self emitLinkPress:url]; })) {
++  if (ENRMHandleTapOnTextView(textView, recognizer, ^(NSString *url, NSString *sourceType) { [self emitLinkPress:url]; })) {
+     return;
+   }
+ 

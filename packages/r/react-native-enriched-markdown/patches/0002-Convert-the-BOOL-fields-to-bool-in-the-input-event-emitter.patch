@@ -1,0 +1,50 @@
+--- a/ios/input/ENRMInputEventEmitter.mm
++++ b/ios/input/ENRMInputEventEmitter.mm
+@@ -5,15 +5,15 @@
+ static EnrichedMarkdownTextInputEventEmitter::OnChangeState ENRMFabricChangeState(ENRMInputStyleSnapshot s)
+ {
+   return {
+-      .bold = {.isActive = s.bold},
+-      .italic = {.isActive = s.italic},
+-      .underline = {.isActive = s.underline},
+-      .strikethrough = {.isActive = s.strikethrough},
+-      .spoiler = {.isActive = s.spoiler},
+-      .link = {.isActive = s.link, .destination = s.linkDestination},
++      .bold = {.isActive = static_cast<bool>(s.bold)},
++      .italic = {.isActive = static_cast<bool>(s.italic)},
++      .underline = {.isActive = static_cast<bool>(s.underline)},
++      .strikethrough = {.isActive = static_cast<bool>(s.strikethrough)},
++      .spoiler = {.isActive = static_cast<bool>(s.spoiler)},
++      .link = {.isActive = static_cast<bool>(s.link), .destination = s.linkDestination},
+       .heading = {.isActive = s.headingLevel > 0, .level = static_cast<int>(s.headingLevel)},
+-      .unorderedList = {.isActive = s.unorderedList, .depth = static_cast<int>(s.unorderedList ? s.listDepth : 0)},
+-      .orderedList = {.isActive = s.orderedList, .depth = static_cast<int>(s.orderedList ? s.listDepth : 0)},
++      .unorderedList = {.isActive = static_cast<bool>(s.unorderedList), .depth = static_cast<int>(s.unorderedList ? s.listDepth : 0)},
++      .orderedList = {.isActive = static_cast<bool>(s.orderedList), .depth = static_cast<int>(s.orderedList ? s.listDepth : 0)},
+   };
+ }
+ 
+@@ -21,15 +21,15 @@
+ ENRMFabricContextMenuStyleState(ENRMInputStyleSnapshot s)
+ {
+   return {
+-      .bold = {.isActive = s.bold},
+-      .italic = {.isActive = s.italic},
+-      .underline = {.isActive = s.underline},
+-      .strikethrough = {.isActive = s.strikethrough},
+-      .spoiler = {.isActive = s.spoiler},
+-      .link = {.isActive = s.link, .destination = s.linkDestination},
++      .bold = {.isActive = static_cast<bool>(s.bold)},
++      .italic = {.isActive = static_cast<bool>(s.italic)},
++      .underline = {.isActive = static_cast<bool>(s.underline)},
++      .strikethrough = {.isActive = static_cast<bool>(s.strikethrough)},
++      .spoiler = {.isActive = static_cast<bool>(s.spoiler)},
++      .link = {.isActive = static_cast<bool>(s.link), .destination = s.linkDestination},
+       .heading = {.isActive = s.headingLevel > 0, .level = static_cast<int>(s.headingLevel)},
+-      .unorderedList = {.isActive = s.unorderedList, .depth = static_cast<int>(s.unorderedList ? s.listDepth : 0)},
+-      .orderedList = {.isActive = s.orderedList, .depth = static_cast<int>(s.orderedList ? s.listDepth : 0)},
++      .unorderedList = {.isActive = static_cast<bool>(s.unorderedList), .depth = static_cast<int>(s.unorderedList ? s.listDepth : 0)},
++      .orderedList = {.isActive = static_cast<bool>(s.orderedList), .depth = static_cast<int>(s.orderedList ? s.listDepth : 0)},
+   };
+ }
+ 
