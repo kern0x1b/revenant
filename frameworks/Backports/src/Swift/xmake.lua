@@ -226,7 +226,7 @@ local function overlay(name, folder, opt)
         add_rules("@addon/revenant/swift")
         set_optimize("fastest")
         set_values("swift.module", name:sub(#"swift" + 1))
-        set_values("swift.cxx_interop", opt.cxx_interop or "off")
+        set_values("swift.cxx_interop", "off")
         add_shflags("-dynamiclib", "-install_name", "@rpath/lib" .. name .. ".dylib", "-Wl,-dead_strip_dylibs", {force = true})
         if opt.generate then
             add_packages("swift")
@@ -324,7 +324,7 @@ overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit",
 
 overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, frameworks = {"Foundation"}})
 
-overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swiftui"}, cxx_interop = "default"})
+overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swiftui"}})
 
 target("swift_backports_tests")
     set_kind("phony")
