@@ -323,3 +323,23 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:326 | @"category" |
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:516 | @"categories" |
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:599 | @"present" |
+
+## Expo modules: document picker delegates (expo-file-system 57.0.7)
+
+Source: `expo-file-system` 57.0.7, `ios/FilePickingUtils.swift` and `ios/FilePickingHandler.swift`.
+
+Delivered at run time, so the callbacks reach an app on iOS 6:
+
+- `B/UIKit/UIDocumentPickerViewController.m:273-278` calls `documentPicker:didPickDocumentsAtURLs:`, and falls back to the deprecated `documentPicker:didPickDocumentAtURL:`. `:323-326` calls `documentPickerWasCancelled:`.
+- `B/UIKit/UISheetPresentationController.m` calls `presentationControllerShouldDismiss:`, `presentationControllerWillDismiss:`, `presentationControllerDidDismiss:` and `presentationControllerDidAttemptToDismiss:` on the presentation delegate (lines 1036, 1301, 1396, 1457, 1587).
+- `B/UIKit/UIViewController+Popover.m:98-104` calls `adaptivePresentationStyleForPresentationController:` and `presentationController:viewControllerForAdaptivePresentationStyle:`.
+
+Not delivered, so not declared: `presentationController:willPresentWithAdaptiveStyle:transitionCoordinator:` (iOS 8.3), `adaptivePresentationStyleForPresentationController:traitCollection:` and `presentationController:prepareAdaptivePresentationController:` (iOS 15). Nothing in `B/` calls them. UIKit calls the trait-collection variant first when an app implements it, so an app that implements only that variant gets no callback on iOS 6.
+
+Open at compile time, CI only:
+
+- `frameworks/Backports/tools/lowered-members.txt` has no `protocol UIDocumentPickerDelegate` and no `protocol UIAdaptivePresentationControllerDelegate`. `toolchain/modules/apple/lowered.lua` (`protocol_status`) lowers a protocol member only when a backport class that adopts the protocol implements that method. The backport calls these delegate methods but never implements them, so nothing is lowered. The Expo conformance at `FilePickingUtils.swift:36` (`documentPicker(_:didPickDocumentsAt:)`, iOS 11) and `:66` (`presentationControllerDidDismiss(_:)`, iOS 13) therefore keep their SDK availability at deployment 6.0. The armv7 typecheck decides whether that is an error.
+- A declaration-only header in `src/UIKit` was tried and reverted: a bare `protocol` line lowers only the protocol declaration, so it changes no member's availability and would only claim backing.
+- Fix direction, not done: lower delegate members that the backport calls, which is a change to the lowering rule in `toolchain/modules/apple/lowered.lua`, or a backport class that implements them with real behaviour.
+
+The task's cited lines `FilePickingHandler.swift:9` and `:12` are `private weak var module: FileSystemModule?` and `init(module: FileSystemModule)`. They reference `FileSystemModule` (declared at `FileSystemModule.swift:6`), not a picker API, so they are not evidence of a missing picker member. The picker-related lines are `FilePickingUtils.swift:25,36,62,66` and `FilePickingHandler.swift:49-51`.
