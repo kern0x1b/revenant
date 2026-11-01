@@ -90,6 +90,7 @@ end
 local STEPS = {
     {name = "comments", run = function () return lua("tools/comments.lua", "check") end},
     {name = "comments test", run = function () return lua("tools/comments.lua", "test") end},
+    {name = "private cache test", run = function () return lua("tools/private_cache.lua", "test") end},
     {name = "layout", run = function () return lua("tools/layout.lua") end},
     {name = "docs_commands", run = function () return lua("tools/docs_commands.lua") end},
     {name = "open_gaps", run = function () return lua("tools/open_gaps.lua") end},
