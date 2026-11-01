@@ -75,6 +75,7 @@ static void revenant_command_state_changed(MPRemoteCommand *command)
 
 @synthesize enabled = _enabled;
 @synthesize revenantTargets = _revenantTargets;
+@synthesize revenantActive = _revenantActive;
 
 - (void)setEnabled:(BOOL)enabled
 {

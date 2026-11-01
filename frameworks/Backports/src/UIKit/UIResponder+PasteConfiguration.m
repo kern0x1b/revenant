@@ -1,5 +1,6 @@
-#import "RevenantPasteMatching.h"
+#import <UIKit/UIKit.h>
 #import <objc/runtime.h>
+#import "RevenantPasteMatching.h"
 
 static const char revenant_paste_configuration_key;
 

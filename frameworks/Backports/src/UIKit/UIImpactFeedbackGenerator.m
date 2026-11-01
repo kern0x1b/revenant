@@ -1,5 +1,7 @@
 #import "RevenantFeedbackGenerator.h"
 
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+
 @implementation UIImpactFeedbackGenerator {
 @private
     float _intensity;
