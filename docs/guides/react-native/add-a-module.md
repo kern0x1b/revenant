@@ -23,7 +23,8 @@ at once, which a patch does not.
 
 ## 3. Build it as the real module
 
-Until the host build is a component of this repository, it lives in the spike (`paseo-app/rn-spike`). A module is added to its build
+Until the host build is a component of this repository, it lives in the spike (`paseo-app/rn-spike`), and you build it in your
+own folder as [the isolated build](isolated-build.md) says. A module is added to its build
 with `RN_EXPO_REAL=<package>` (Expo packages) or the `PODS` list of the build script (community libraries). Build, and collect all
 errors of the module at once, not one by one. Each error is one of:
 
