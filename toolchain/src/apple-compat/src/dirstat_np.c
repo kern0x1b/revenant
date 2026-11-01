@@ -28,8 +28,14 @@ struct revenant_inode_set {
     size_t count;
 };
 
+struct revenant_pending {
+    char *path;
+    dev_t device;
+    ino_t inode;
+};
+
 struct revenant_stack {
-    char **paths;
+    struct revenant_pending *items;
     size_t count;
     size_t capacity;
 };
@@ -75,25 +81,28 @@ static int revenant_inode_insert(struct revenant_inode_set *set, ino_t inode)
     return 1;
 }
 
-static int revenant_stack_push(struct revenant_stack *stack, char *path)
+static int revenant_stack_push(struct revenant_stack *stack, struct revenant_pending pending)
 {
     if (stack->count == stack->capacity) {
         size_t capacity = stack->capacity ? stack->capacity * 2 : 64;
-        char **paths = realloc(stack->paths, capacity * sizeof *paths);
-        if (paths == NULL) {
+        struct revenant_pending *items = realloc(stack->items, capacity * sizeof *items);
+        if (items == NULL) {
             errno = ENOMEM;
             return -1;
         }
-        stack->paths = paths;
+        stack->items = items;
         stack->capacity = capacity;
     }
-    stack->paths[stack->count++] = path;
+    stack->items[stack->count++] = pending;
     return 0;
 }
 
-static char *revenant_stack_pop(struct revenant_stack *stack)
+static int revenant_stack_pop(struct revenant_stack *stack, struct revenant_pending *pending)
 {
-    return stack->count ? stack->paths[--stack->count] : NULL;
+    if (stack->count == 0)
+        return 0;
+    *pending = stack->items[--stack->count];
+    return 1;
 }
 
 static char *revenant_join(const char *folder, const char *name)
@@ -113,11 +122,18 @@ static char *revenant_join(const char *folder, const char *name)
     return joined;
 }
 
-static int revenant_walk_folder(struct revenant_walk *walk, const char *folder, int top)
+static int revenant_walk_folder(struct revenant_walk *walk, const char *folder, const struct revenant_pending *expected)
 {
     DIR *directory = opendir(folder[0] ? folder : ".");
     if (directory == NULL)
-        return top ? -1 : 0;
+        return expected ? 0 : -1;
+    if (expected) {
+        struct stat opened;
+        if (fstat(dirfd(directory), &opened) == -1 || opened.st_dev != expected->device || opened.st_ino != expected->inode) {
+            closedir(directory);
+            return 0;
+        }
+    }
     int status = 0;
     struct dirent *entry;
     while ((entry = readdir(directory)) != NULL) {
@@ -136,7 +152,8 @@ static int revenant_walk_folder(struct revenant_walk *walk, const char *folder, 
         }
         if (S_ISDIR(info.st_mode)) {
             if (info.st_dev == walk->device) {
-                if (revenant_stack_push(&walk->pending, child) == -1) {
+                struct revenant_pending pending = {child, info.st_dev, info.st_ino};
+                if (revenant_stack_push(&walk->pending, pending) == -1) {
                     free(child);
                     status = -1;
                     break;
@@ -161,12 +178,12 @@ static int revenant_walk_folder(struct revenant_walk *walk, const char *folder, 
 
 static int revenant_walk_tree(struct revenant_walk *walk)
 {
-    if (revenant_walk_folder(walk, "", 1) == -1)
+    if (revenant_walk_folder(walk, "", NULL) == -1)
         return -1;
-    char *folder;
-    while ((folder = revenant_stack_pop(&walk->pending)) != NULL) {
-        int status = revenant_walk_folder(walk, folder, 0);
-        free(folder);
+    struct revenant_pending pending;
+    while (revenant_stack_pop(&walk->pending, &pending)) {
+        int status = revenant_walk_folder(walk, pending.path, &pending);
+        free(pending.path);
         if (status == -1)
             return -1;
     }
@@ -192,8 +209,8 @@ static int revenant_walk_pinned(const char *path, struct darwin_dirstat *result)
         abort();
     close(folder);
     for (size_t index = 0; index < walk.pending.count; index++)
-        free(walk.pending.paths[index]);
-    free(walk.pending.paths);
+        free(walk.pending.items[index].path);
+    free(walk.pending.items);
     free(walk.inodes.slots);
     if (status == -1) {
         errno = failure;
