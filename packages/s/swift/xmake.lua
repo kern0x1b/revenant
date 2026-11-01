@@ -73,8 +73,11 @@ package("swift")
         end
         for _, patch in ipairs({{"swift", "a-runtime-the-program-brings-with-it.patch"},
                                 {"swift", "application-availability-floor.patch"},
-                                {"swift-driver", "no-minimum-ios-for-a-bundled-runtime.patch"}}) do
-            os.vrunv("git", {"-C", patch[1], "apply", path.join(package:scriptdir(), "patches", patch[2])})
+                                {"swift", "cxx-minus-keeps-the-difference-type.patch"},
+                                {"swift-driver", "no-minimum-ios-for-a-bundled-runtime.patch"},
+                                {"llvm-project", "clang-emulated-tls-without-dyld.patch", "-p2"}}) do
+            os.vrunv("git", table.join({"-C", patch[1], "apply"}, patch[3] and {patch[3]} or {},
+                     {path.join(package:scriptdir(), "patches", patch[2])}))
         end
 
         local sdk = os.iorunv("xcrun", {"--sdk", "macosx", "--show-sdk-path"}):trim()

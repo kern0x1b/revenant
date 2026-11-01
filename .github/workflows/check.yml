@@ -2,7 +2,7 @@ name: check
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -52,8 +52,52 @@ jobs:
             echo "docs=true" >> "$GITHUB_OUTPUT"
           fi
 
+  quick:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/revenant-setup
+
+      - uses: actions/cache/restore@v4
+        id: xmake
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
+      - name: Key the lowered members by the SDK they read
+        id: lowered_keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 1
+          echo "hash=$({ cat "$RUNNER_TEMP/key-lines.txt"; xcodebuild -version; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: lowered
+        with:
+          path: .cache/scratch/lowered-members
+          key: lowered-members-${{ runner.os }}-${{ steps.lowered_keys.outputs.hash }}-${{ hashFiles('toolchain/modules/apple/lowered.lua', 'toolchain/modules/apple/runtime_guards.lua', 'toolchain/modules/apple/flat_classes.lua', 'toolchain/modules/byteorder.lua', 'toolchain/modules/workspace.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/sdk.lua', 'frameworks/Backports/tools/device-members.txt', 'frameworks/Backports/src/**') }}
+
+      - name: Run the prepush checks
+        run: ./xmakew l -P . tools/prepush.lua
+
+      - uses: actions/cache/save@v4
+        if: success() && steps.lowered.outputs.cache-hit != 'true'
+        with:
+          path: .cache/scratch/lowered-members
+          key: lowered-members-${{ runner.os }}-${{ steps.lowered_keys.outputs.hash }}-${{ hashFiles('toolchain/modules/apple/lowered.lua', 'toolchain/modules/apple/runtime_guards.lua', 'toolchain/modules/apple/flat_classes.lua', 'toolchain/modules/byteorder.lua', 'toolchain/modules/workspace.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/sdk.lua', 'frameworks/Backports/tools/device-members.txt', 'frameworks/Backports/src/**') }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: .cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
+
   repository:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.docs == 'true'
     runs-on: macos-26
     timeout-minutes: 20
@@ -156,7 +200,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   checks:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.docs != 'true'
     runs-on: macos-26
     timeout-minutes: 60
@@ -317,7 +361,7 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   backports:
-    needs: changes
+    needs: [changes, quick]
     if: needs.changes.outputs.native == 'true'
     runs-on: macos-26
     timeout-minutes: 60
@@ -560,8 +604,8 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   package:
-    needs: changes
-    if: needs.changes.outputs.native == 'true'
+    needs: [changes, quick, backports]
+    if: ${{ !cancelled() && needs.changes.outputs.native == 'true' && needs.quick.result == 'success' }}
     runs-on: macos-26
     timeout-minutes: 120
     steps:
@@ -587,6 +631,7 @@ jobs:
           key: xmake-global-package-${{ runner.os }}-latest
           restore-keys: |
             xmake-global-package-${{ runner.os }}-
+            xmake-global-${{ runner.os }}-
 
       - name: Update the package repositories for the keys
         run: ./xmakew repo -u
@@ -631,6 +676,26 @@ jobs:
         with:
           path: build/generated/backports
           key: backports-facts-${{ runner.os }}-${{ steps.facts_keys.outputs.hash }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'frameworks/Backports/tools/ast.lua', 'frameworks/Backports/tools/facts.lua', 'frameworks/Backports/tools/generate.lua', 'frameworks/Backports/tools/skeleton.lua', 'frameworks/Backports/tools/sdk.lua') }}
+
+      - name: Key the Backports objects the way the backports job keys them
+        id: backports_keys
+        run: |
+          ./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 > "$RUNNER_TEMP/keys.txt" 2>&1 || { cat "$RUNNER_TEMP/keys.txt"; exit 1; }
+          cat "$RUNNER_TEMP/keys.txt"
+          grep -E '^[a-z0-9-]+ [^ ]+ [0-9a-f]{32}$' "$RUNNER_TEMP/keys.txt" > "$RUNNER_TEMP/key-lines.txt"
+          test "$(wc -l < "$RUNNER_TEMP/key-lines.txt")" -eq 2
+          echo "hash=$(shasum -a 256 < "$RUNNER_TEMP/key-lines.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: backports_objects
+        if: steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+            build/backports-sources.txt
+          key: backports-objects-v2-${{ runner.os }}-${{ steps.backports_keys.outputs.hash }}-${{ hashFiles('toolchain/addon.lua', 'toolchain/includes/**', 'toolchain/modules/**', 'toolchain/plugins/**', 'toolchain/rules/**', 'toolchain/src/**', 'toolchain/toolchains/**', 'toolchain/tools/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew', 'frameworks/Backports/xmake.lua') }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - name: Configure the SwiftUI demo's component
         timeout-minutes: 45
@@ -695,10 +760,10 @@ jobs:
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   swift:
-    needs: changes
-    if: needs.changes.outputs.native == 'true'
+    needs: [changes, quick, backports]
+    if: ${{ !cancelled() && needs.changes.outputs.native == 'true' && needs.quick.result == 'success' }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
@@ -752,7 +817,7 @@ jobs:
 
       - name: Configure the Swift component
         id: configure-swift
-        timeout-minutes: 20
+        timeout-minutes: 60
         run: |
           ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v 2>&1 | tee "$RUNNER_TEMP/swift-configure.log" | while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done
           if grep -q 'install .* \.\. ' "$RUNNER_TEMP/swift-configure.log"; then

@@ -423,7 +423,32 @@ function reached(offered, roots)
     return libraries
 end
 
+function rebind(target, binaries, folder, provided)
+    local declared = table.wrap(target:values("revenant.rebind"))
+    if #declared == 0 then
+        return
+    end
+    local source = imports_source(target)
+    for _, relative in ipairs(declared) do
+        local binary = path.join(folder, relative)
+        if not table.contains(binaries, binary) then
+            raise("target(%s) names %s for revenant.rebind, and the bundle holds no such image; name it as the bundle has it, such as Frameworks/libName.dylib", target:name(), relative)
+        end
+        local moves, libraries = dyld.rebind_plan(source, binary, provided)
+        local names = table.orderkeys(moves)
+        if #names == 0 then
+            wprint("%s: revenant.rebind names it, and none of its imports needs a library of this build: remove the declaration", relative)
+        else
+            macho.rebind(binary, moves, libraries)
+            cprint("${bright green}rebind${clear} %s: %s", relative, table.concat(names, " "))
+        end
+    end
+end
+
 function place_carried(target, root, binary)
+    if #table.wrap(target:values("revenant.rebind")) > 0 then
+        raise("target(%s) names revenant.rebind, which rebinds the images of an app bundle; a tweak or daemon places its libraries under its package root, and nothing rebinds them there yet", target:name())
+    end
     local libraries = reached(bundle.carried_libraries(target, "revenant.libraries"), {binary})
     local shared = shared_runtime(target)
     if #libraries == 0 then
@@ -589,6 +614,7 @@ function application(target)
     end
     local shared = shared_runtime(target)
     bundle.retarget(binaries, identities, {provided = shared and shared.identities})
+    rebind(target, binaries, folder, provided_libraries(target))
     bundle.copy_resources(target, folder)
     bundle.write_plist(path.join(folder, "Info.plist"), bundle.info(target, deployment(target)))
     for _, binary in ipairs(binaries) do

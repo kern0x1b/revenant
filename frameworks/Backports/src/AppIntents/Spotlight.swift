@@ -128,7 +128,7 @@ public enum RevenantSpotlightJournal {
         for path in paths where path.hasSuffix(".plist") {
             let full = (root as NSString).appendingPathComponent(path)
             guard let data = FileManager.default.contents(atPath: full),
-                  let propertyList = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                  let propertyList = try? PropertyListSerialization.propertyList(from: data, options: 0, format: nil),
                   let entries = propertyList as? [String: Any] else { continue }
             for (identifier, entry) in entries {
                 guard let archive = entry as? [String: Any] else { continue }

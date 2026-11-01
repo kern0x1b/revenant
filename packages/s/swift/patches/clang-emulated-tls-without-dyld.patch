@@ -1,0 +1,65 @@
+diff --git a/llvm-project/clang/include/clang/Basic/TargetOptions.h b/llvm-project/clang/include/clang/Basic/TargetOptions.h
+index 51a2cfe14..9e07f85a8 100644
+--- a/llvm-project/clang/include/clang/Basic/TargetOptions.h
++++ b/llvm-project/clang/include/clang/Basic/TargetOptions.h
+@@ -50,6 +50,10 @@ public:
+   /// If given, the version string of the linker in use.
+   std::string LinkerVersion;
+ 
++  /// Whether thread-local variables are lowered to __emutls_get_address calls,
++  /// which need no thread-local support from the operating system's loader.
++  bool EmulatedTLS = false;
++
+   /// The list of target specific features to enable or disable, as written on the command line.
+   std::vector<std::string> FeaturesAsWritten;
+ 
+diff --git a/llvm-project/clang/lib/Basic/Targets/OSTargets.h b/llvm-project/clang/lib/Basic/Targets/OSTargets.h
+index 988dea3de..7de84695e 100644
+--- a/llvm-project/clang/lib/Basic/Targets/OSTargets.h
++++ b/llvm-project/clang/lib/Basic/Targets/OSTargets.h
+@@ -104,6 +104,12 @@ public:
+     } else if (Triple.isXROS())
+       this->TLSSupported = true;
+ 
++    // The releases above are the ones whose dyld implements __thread_vars.
++    // Emulated TLS keeps its storage behind pthread keys instead, which every
++    // Darwin release has, so it does not depend on the loader at all.
++    if (Opts.EmulatedTLS && !Triple.isDriverKit())
++      this->TLSSupported = true;
++
+     this->MCountName = "\01mcount";
+   }
+ 
+diff --git a/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp b/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
+index baca4e4f1..05c5029fc 100644
+--- a/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
++++ b/llvm-project/clang/lib/CodeGen/ItaniumCXXABI.cpp
+@@ -2879,7 +2879,11 @@ static void emitGlobalDtorWithCXAAtExit(CodeGenFunction &CGF,
+   const char *Name = "__cxa_atexit";
+   if (TLS) {
+     const llvm::Triple &T = CGF.getTarget().getTriple();
+-    Name = T.isOSDarwin() ?  "_tlv_atexit" : "__cxa_thread_atexit";
++    // _tlv_atexit registers with dyld's native TLV storage; emulated TLS has
++    // none, and older Darwin releases ship _tlv_atexit as an empty stub.
++    Name = T.isOSDarwin() && !CGF.CGM.getCodeGenOpts().EmulatedTLS
++               ? "_tlv_atexit"
++               : "__cxa_thread_atexit";
+   }
+ 
+   // We're assuming that the destructor function is something we can
+diff --git a/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp b/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
+index 436422a1c..fed09c1e6 100644
+--- a/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
++++ b/llvm-project/clang/lib/Frontend/CompilerInvocation.cpp
+@@ -5456,6 +5456,11 @@ static bool ParseTargetArgs(TargetOptions &Opts, ArgList &Args,
+ #include "clang/Driver/Options.inc"
+ #undef TARGET_OPTION_WITH_MARSHALLING
+ 
++  // The code generator owns -femulated-tls and writes it back; the target only
++  // reads it to know whether TLS needs the loader.
++  Opts.EmulatedTLS = Args.hasFlag(options::OPT_femulated_tls,
++                                  options::OPT_fno_emulated_tls, false);
++
+   if (Arg *A = Args.getLastArg(options::OPT_target_sdk_version_EQ)) {
+     llvm::VersionTuple Version;
+     if (Version.tryParse(A->getValue()))

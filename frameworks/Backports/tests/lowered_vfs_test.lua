@@ -21,6 +21,16 @@ function main()
     local frameworks = path.join(out, "System", "Library", "Frameworks")
     local interface = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSURL.h"))
     assert(interface:find("@interface NSURLComponents", 1, true) and not interface:find("ios(7.0), watchos(2.0), tvos(9.0))\n@interface NSURLComponents", 1, true), "NSURLComponents keeps its iOS 7 gate: its alias exports the class, so the reference is strong and the gate is lowered")
+    local iso = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSISO8601DateFormatter.h"))
+    assert(iso:find("__attribute__((weak_import))\n@interface NSISO8601DateFormatter", 1, true) and not iso:find("ios(10.0", 1, true), "NSISO8601DateFormatter keeps its iOS 10 gate or loses its weak import: libswiftFoundation imports the class weakly, so a strong lowered reference would fail to load where no provider exports it")
+    local activity = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSUserActivity.h"))
+    assert(activity:find("\n\n@interface NSUserActivity : NSObject\n", 1, true), "NSUserActivity keeps its iOS 8 gate: Swift at deployment target 6.0 cannot name the class, and the Spotlight extension of AppIntents needs it")
+    for _, declaration in ipairs({"@property (nullable, copy) NSURL *referrerURL ;", "@property (nullable, copy) NSString* targetContentIdentifier ;", "@property (copy, nullable) NSUserActivityPersistentIdentifier persistentIdentifier"}) do
+        local at = assert(activity:find(declaration, 1, true), "NSUserActivity.h does not declare " .. declaration)
+        assert(not activity:match("[^\n]*", at):find("ios(", 1, true), declaration .. " keeps its iOS introduction, so Swift cannot use the member at deployment target 6.0")
+    end
+    local date_format = io.readfile(path.join(frameworks, "CoreFoundation.framework", "Headers", "CFDateFormatter.h"))
+    assert(date_format:find("kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(macosx(10.13), ios(6.0)", 1, true), "the CF constant kCFISO8601DateFormatWithFractionalSeconds keeps its iOS 11 gate, which NSISO8601DateFormatWithFractionalSeconds inherits")
     local property = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIInterface.h")):match("[^\n]*UIColor %*systemBackgroundColor[^\n]*")
     assert(property and not property:find("ios(13.0)", 1, true) and property:find("API_UNAVAILABLE(tvos, watchos)", 1, true), "the class property systemBackgroundColor keeps its iOS 13 introduction or loses the other platforms' attributes")
     local notes = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIKit.apinotes"))
@@ -35,6 +45,34 @@ function main()
     local protocol = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UITraitCollection.h"))
     assert(protocol:find("withHandler:(UITraitChangeHandler)handler NS_SWIFT_NAME(registerForTraitChanges(_:handler:));", 1, true), "UITraitCollection.h does not name the handler method of UITraitChangeObservable registerForTraitChanges(_:handler:), so Swift imports it as register(forTraitChanges:withHandler:)")
     assert(protocol:find("unregisterForTraitChanges:(id<UITraitChangeRegistration>)registration NS_SWIFT_NAME(unregisterForTraitChanges(_:));", 1, true), "UITraitCollection.h does not name unregisterForTraitChanges(_:)")
+    local traits = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UITextInputTraits.h"))
+    local webSearch = traits:match("[^\n]*UIKeyboardTypeWebSearch[^\n]*")
+    assert(webSearch and not webSearch:find("ios(7.0)", 1, true), "the enumerator UIKeyboardTypeWebSearch keeps its iOS 7 introduction, so Swift cannot name .webSearch at deployment target 6.0")
+    local numberPad = traits:match("[^\n]*UIKeyboardTypeASCIICapableNumberPad[^\n]*")
+    assert(numberPad and not numberPad:find("ios(10.0)", 1, true) and numberPad:find("API_UNAVAILABLE(watchos)", 1, true), "the enumerator UIKeyboardTypeASCIICapableNumberPad keeps its iOS 10 introduction or loses the watchOS attribute")
+    local application = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIApplication.h"))
+    assert(application:find("} API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos);", 1, true) and not application:find("} API_AVAILABLE(ios(7.0)) API_UNAVAILABLE(watchos);", 1, true), "the enum UIBackgroundFetchResult keeps its iOS 7 introduction, so Swift cannot name it at deployment target 6.0")
+    for _, requirement in ipairs({
+        {"continueUserActivity:(NSUserActivity *)userActivity restorationHandler:", "ios(6.0, 26.0)"},
+        {"didFailToContinueUserActivityWithType:(NSString *)userActivityType error:", "ios(6.0, 26.0)"},
+        {"didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED", "ios(6.0, 26.0)"},
+        {"willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED", "ios(6.0, 26.0)"},
+        {"didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:", "API_AVAILABLE(ios(6.0))"},
+        {"handleEventsForBackgroundURLSession:(NSString *)identifier", "API_AVAILABLE(ios(6.0))"},
+        {"performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC", "ios(6.0, 13.0)"},
+        {"openURL:(NSURL *)url options:", "ios(6.0, 26.0)"},
+        {"performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem", "ios(6.0, 26.0)"},
+    }) do
+        local at = assert(application:find(requirement[1], 1, true), "UIApplication.h does not declare " .. requirement[1])
+        local line = application:match("[^\n]*", at)
+        assert(line:find(requirement[2], 1, true) and not line:find("ios(7.0", 1, true) and not line:find("ios(8.0", 1, true) and not line:find("ios(9.0", 1, true), "the UIApplicationDelegate requirement " .. requirement[1] .. " keeps its iOS 7-9 introduction, so Swift cannot use it at deployment target 6.0")
+    end
+    local session = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSURLSession.h"))
+    for _, protocol in ipairs({"NSURLSessionDelegate <NSObject>", "NSURLSessionTaskDelegate <NSURLSessionDelegate>", "NSURLSessionDataDelegate <NSURLSessionTaskDelegate>", "NSURLSessionDownloadDelegate <NSURLSessionTaskDelegate>"}) do
+        local start = session:find("@protocol " .. protocol, 1, true)
+        assert(start, "NSURLSession.h does not declare @protocol " .. protocol)
+        assert(not session:sub(math.max(1, start - 120), start - 1):find("API_AVAILABLE", 1, true), "@protocol " .. protocol .. " keeps its iOS 7 introduction, so Swift cannot name the protocol at deployment target 6.0")
+    end
     local constant = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "NSAttributedString.h")):match("[^\n]*const NSAttachmentAttributeName[^\n]*")
     assert(constant and not constant:find("ios(7.0)", 1, true), "the extern constant NSAttachmentAttributeName keeps its iOS 7 introduction")
     local weight = io.readfile(path.join(frameworks, "UIKit.framework", "Headers", "UIFontDescriptor.h")):match("[^\n]*const UIFontWeight UIFontWeightRegular[^\n]*")

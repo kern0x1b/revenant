@@ -15,6 +15,7 @@ local NOT_STRINGS = {
     ["modules/apple/dyld.lua|table.sort(dangling, function (a, b)"] = "byteorder.less on both names",
     ["modules/apple/dyld.lua|table.sort(ordering, function (a, b)"] = "byteorder.less on both names",
     ["modules/apple/dyld.lua|table.sort(slots)"] = "numbers",
+    ["modules/apple/macho.lua|table.sort(edits, function (a, b) return a[1] < b[1] end)"] = "numbers",
     ["modules/apple/firmware.lua|table.sort(chosen, function (a, b) return a.size < b.size end)"] = "sizes",
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
     ["modules/cache.lua|table.sort(all, function (a, b) return a.bytes > b.bytes end)"] = "sizes",

@@ -8,6 +8,10 @@
 
 #define REVENANT_TLS_EXPORT __attribute__((visibility("default")))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct RevenantTLSEngine RevenantTLSEngine;
 
 typedef OSStatus (*RevenantTLSReadCallback)(const void *connection, void *data, size_t *length);
@@ -43,5 +47,9 @@ REVENANT_TLS_EXPORT const uint8_t *RevenantTLSEngineNegotiatedProtocol(const Rev
                                                                        size_t *length);
 REVENANT_TLS_EXPORT const uint8_t *RevenantTLSEngineOCSPResponse(const RevenantTLSEngine *engine, size_t *length);
 REVENANT_TLS_EXPORT const void *RevenantTLSEngineCopyPeerTrust(const RevenantTLSEngine *engine);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -60,10 +60,52 @@ local function public_path_step(dyld, folder, found)
         table.insert(found, "a cache that holds VideoToolbox under Frameworks does not answer for the name it holds")
     end
 end
+local function reshaped(macho, file, change)
+    local data = io.readfile(file, {encoding = "binary"})
+    for _, at in ipairs(macho.images(data)[1].command_at) do
+        local command = string.unpack("<I4", data, at + 1)
+        if command == 0x22 or command == 0x80000022 then
+            local offset, size = string.unpack("<I4I4", data, at + 41)
+            local moved, resized = change(offset, size, #data)
+            io.writefile(file, data:sub(1, at + 40) .. string.pack("<I4I4", moved, resized) .. data:sub(at + 49), {encoding = "binary"})
+            return
+        end
+    end
+    raise("%s has no LC_DYLD_INFO whose export trie can be moved", file)
+end
+
+local function malformed_trie_step(opt, dyld, found)
+    local macho = import("apple.macho", {rootdir = opt.modules, anonymous = true})
+    local folder = fixtures.scratch()
+    local armv7 = cache(path.join(folder, "dyld_shared_cache_armv7"), "armv7", "_trie_exported")
+    io.writefile(path.join(folder, "libSystem.tbd"), fixtures.system_stub("dyld_stub_binder"))
+    io.writefile(path.join(folder, "trie.c"), "int trie_exported(void) { return 1; }\n")
+    local install = "/usr/lib/revenant/trie-armv7.dylib"
+    local good = fixtures.link(folder, opt.ld64, "trie-armv7.dylib", "armv7-apple-ios6.0", "trie.c", {"-dynamiclib", "-install_name", install})
+    local cases = {
+        {"an export trie cut short inside its first label", function (offset) return offset, 2 end, "is not terminated"},
+        {"an export trie that starts past the end of its file", function (offset, size, length) return length + 16, size end, "runs past its"}
+    }
+    if fixtures.refusal(function () dyld.missing_imports(armv7, {good}) end) then
+        table.insert(found, "an image whose export trie is well formed must parse")
+    end
+    for index, case in ipairs(cases) do
+        local bad = path.join(folder, "bad" .. index .. ".dylib")
+        os.cp(good, bad)
+        reshaped(macho, bad, case[2])
+        local errors = fixtures.refusal(function () dyld.missing_imports(armv7, {bad}) end) or ""
+        if not errors:find(case[3], 1, true) or not errors:find(bad, 1, true) then
+            table.insert(found, case[1] .. " must be refused as a malformed export trie that names the image: " .. errors)
+        end
+    end
+    os.tryrm(folder)
+end
+
 function failures(opt)
     local dyld = import("apple.dyld", {rootdir = opt.modules, anonymous = true})
     local found = {}
     public_path_step(dyld, fixtures.scratch(), found)
+    malformed_trie_step(opt, dyld, found)
     local folder = fixtures.scratch()
     local armv7 = cache(path.join(folder, "dyld_shared_cache_armv7"), "armv7", "_exported")
     io.writefile(path.join(folder, "libSystem.tbd"), fixtures.system_stub("dyld_stub_binder, _exported, _nested, ___divti3, _arrived, _objc_storeStrong, __availability_version_check"))

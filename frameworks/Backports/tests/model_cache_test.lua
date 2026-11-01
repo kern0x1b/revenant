@@ -8,8 +8,7 @@ local function sdk_at(folder)
 end
 
 function main()
-    local base = path.join(os.tmpdir(), "model-cache-test")
-    os.tryrm(base)
+    local base = workspace.fresh("model-cache-test")
     local real = sdk_at(path.join(base, "sdk"))
     local copy = sdk_at(path.join(base, "copy"))
     os.ln(real, path.join(base, "link"))

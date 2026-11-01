@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 static volatile int holderInside;
 static volatile int handlerAlone;
@@ -16,6 +15,7 @@ static int never;
 static int onQueue;
 static dispatch_source_t source;
 static const char *width;
+static dispatch_semaphore_t returnedSem;
 
 static void tag(dispatch_queue_t queue, const void *value)
 {
@@ -37,6 +37,7 @@ static void call_under_test(void)
     else
         dispatch_source_cancel(source);
     returned = 1;
+    dispatch_semaphore_signal(returnedSem);
 }
 
 static void *runner(void *ignored)
@@ -70,6 +71,7 @@ int main(int argc, char **argv)
     handlerRan = 0;
     handlerOnSecond = -1;
     returned = 0;
+    returnedSem = dispatch_semaphore_create(0);
 
     dispatch_queue_attr_t attr = strcmp(width, "serial") == 0 ? DISPATCH_QUEUE_SERIAL : DISPATCH_QUEUE_CONCURRENT;
     dispatch_queue_t queue = dispatch_queue_create("target", attr);
@@ -111,12 +113,12 @@ int main(int argc, char **argv)
         dispatch_async(held, ^{
             holderInside = 1;
             dispatch_semaphore_signal(entered);
-            dispatch_semaphore_wait(release, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(release, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
             holderInside = 0;
             call_under_test();
             dispatch_semaphore_signal(callReturned);
         });
-        dispatch_semaphore_wait(entered, DISPATCH_TIME_FOREVER);
+        dispatch_semaphore_wait(entered, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));
         dispatch_semaphore_signal(release);
         long called = dispatch_semaphore_wait(callReturned, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
         dispatch_semaphore_wait(handlerDone, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
@@ -127,19 +129,20 @@ int main(int argc, char **argv)
     dispatch_async(held, ^{
         holderInside = 1;
         dispatch_semaphore_signal(entered);
-        dispatch_semaphore_wait(release, DISPATCH_TIME_FOREVER);
+        dispatch_semaphore_wait(release, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
         holderInside = 0;
     });
-    dispatch_semaphore_wait(entered, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(entered, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));
 
     pthread_t thread;
     pthread_create(&thread, NULL, runner, NULL);
-    for (int waited = 0; waited < 2000 && !returned; waited++)
-        usleep(1000);
+    dispatch_semaphore_wait(returnedSem, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC));
     int returnedWhileHeld = returned;
+    long ranWhileHeld = strcmp(width, "serial") == 0 ? 1 : dispatch_semaphore_wait(handlerDone, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC));
     dispatch_semaphore_signal(release);
     pthread_join(thread, NULL);
-    long ranLater = dispatch_semaphore_wait(handlerDone, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
-    say(which, returnedWhileHeld ? "yes" : "no", (ranLater == 0 || handlerRan) ? "yes" : "no");
+    if (ranWhileHeld != 0)
+        dispatch_semaphore_wait(handlerDone, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
+    say(which, returnedWhileHeld ? "yes" : "no", handlerRan ? "yes" : "no");
     return 0;
 }

@@ -1,8 +1,9 @@
 # Continuous checks
 
-`.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
-`gh workflow run check.yml --ref <branch>`. All of its jobs but one run on `macos-26`: an `ubuntu-latest` job named `changes`
-decides from the diff against the merge base with `main` which of them a branch push needs, and a public repository
+`.github/workflows/check.yml` runs on every push to `main`, and on demand from the Actions tab or with
+`gh workflow run check.yml --ref <branch>`. A push to any other branch starts nothing: a full run is four macOS jobs of
+30 to 40 minutes, and a branch is checked once, when it is ready to land. All of its jobs but one run on `macos-26`: an `ubuntu-latest` job named `changes`
+decides from the diff against the merge base with `main` which of them a branch run needs, and a public repository
 runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
 
 - a change that touches only `docs/` or a Markdown file at the top of the repository runs `repository` alone, which is
@@ -10,6 +11,15 @@ runs five macOS jobs at a time, so a job whose inputs did not change is skipped:
 - `checks` runs for every other change;
 - `backports`, `package` and `swift` run only when the change reaches the native builds: a change outside `docs/`,
   `emulator/`, `recompiler/`, `toolchain/tests/emulate/` and Markdown. Those folders never reach the native builds.
+
+Every run starts with `quick` on `macos-26`: `./xmakew l -P . tools/prepush.lua`, the checks of [Before a push](#before-a-push-prepush),
+with a 20-minute limit. It is on macOS because the lowered-members check reads the SDK. Its result is cached under
+`.cache/scratch/lowered-members`, keyed by the iOS SDK package and by the files the check reads, so a run whose inputs did not
+change does not regenerate it. `repository`, `checks`, `backports`, `package` and `swift` all `need` it, so a failure that
+prepush finds costs one short job and starts none of the macOS jobs of the run. `package` and `swift` also `need` `backports`
+(see [Backports in CI](#backports-in-ci)). The other jobs are not cancelled when one of them fails, on purpose: a cancelled job
+skips every save step that is not `always()`, and `backports` (its store and its objects), `package` (its facts, its objects
+and its store) and `swift` (its store) save only on success. A cancel would lose the caches that a sibling still running saves today.
 
 A push to `main` and a dispatch run every job. Each selects Xcode 26.6
 and sets the prebuilt variables through the composite action `.github/actions/revenant-setup`; a composite action cannot
@@ -77,6 +87,98 @@ A warm run that restores its store writes nothing back. The backports job instal
 toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
 `REVENANT_PREBUILT_ONLY` names the packages whose missing release is an error instead of a source build; `1` names all of them.
 
+## Before a push: prepush
+
+`./xmakew l -P . tools/prepush.lua` runs the host checks that CI would otherwise find only after its macOS jobs have started.
+It needs no configure and no package, and with the caches warm it takes about 15 seconds. It runs every check and
+prints each result, so one run lists all the failures:
+
+- `tools/comments.lua check` and `test`: no comments in the tracked files, and the tool's own tests;
+- `tools/layout.lua`, `tools/docs_commands.lua` and `tools/open_gaps.lua`: the layout, the commands the documents name, and
+  the open gaps the Backports README names;
+- `agent-skills/tests/credentials.lua test` and `copied_text.lua test`: their fixtures;
+- `toolchain/tools/recipe_digests.lua`: the digests of the recipes are regenerated, and a `port/digest.lua` that differs
+  from the committed one fails the run, so the change that moved an input commits its digest;
+- `frameworks/Backports/tests/lowered_members_test.lua`: `frameworks/Backports/tools/lowered-members.txt` equals the
+  members generated from `frameworks/Backports/src`. The generator reads the whole SDK header set, so the first run on
+  a cold disk is the slow one; measured locally, the generation took about 30 seconds on warm files and the scratch
+  cache returns the result in about 2 seconds. This is the one CI run of the check, in `quick`: `checks` used to run the same
+  script again as its `backports/members` test (781 s of its test step on run `41207675148`), so that test is no longer
+  registered, and `./xmakew test -P .` does not run it. `./xmakew l -P . frameworks/Backports/tests/lowered_members_test.lua`
+  runs it alone;
+- the negative shape: every test source that runs with `--negative` (the host tests declared in
+  `frameworks/Backports/xmake.lua` and the emulator's negative targets) must read the flag, itself or through `check.h`,
+  and a `check.h` test must return `revenant_finish()`. A test that ignores the flag runs its positive case under
+  `--negative` and exits 0, which the host run reports as a failure only after its macOS job. The shape check cannot see a
+  check that never fails; the host run does.
+
+`./xmakew l -P . tools/prepush.lua test` tests the tool itself, and `repository/prepush` runs that test in the `repository` group.
+The two log tools below are tested by prepush too.
+
+## Verifying Swift here
+
+The Swift configure of the `swift` job runs on this machine too. CI installs its packages; a checkout gets them by cloning the
+main checkout's store into a private cache of its own, the `.cache` of the worktree (never the main checkout's). The clones are
+APFS copies: they take no space until a configure writes to them, and removing them leaves nothing behind.
+
+```sh
+W=$PWD M=path/to/the/main/checkout
+mkdir -p "$W/.cache/xmake" "$W/.cache/xmake-global/.xmake/packages" "$W/.cache/dyld" "$W/.cache/scratch"
+cp -c -R "$M/.cache/xmake/." "$W/.cache/xmake/"
+cp -c -R "$M/.cache/xmake-global/.xmake/repositories" "$W/.cache/xmake-global/.xmake/"
+cp -c -R "$M/.cache/dyld/6.0" "$W/.cache/dyld/"
+cp -c -R "$M/.cache/scratch/lowered-members" "$W/.cache/scratch/"
+for n in ld64 iphoneos-sdk llvm micro-ecc apple-compat box2d lzfse zlib lz4 xz suitesparse-ordering libcxx zxing-cpp leptonica tesseract tessdata monocypher boringssl ggml ffmpeg-hevc libplist openssl ldid firmware-tools backports ffmpeg swift-bootstrap swift swift-runtime combine swiftui; do
+    l=$(echo "$n" | cut -c1); mkdir -p "$W/.cache/xmake-global/.xmake/packages/$l"; cp -c -R "$M/.cache/xmake-global/.xmake/packages/$l/$n" "$W/.cache/xmake-global/.xmake/packages/$l/"
+done
+REVENANT_CACHE="$W/.cache" REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64,swift-runtime,libcxx ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v
+./xmakew l -P . tools/prepush.lua
+rm -rf "$W/.cache" "$W/build" "$W/.xmake"
+```
+
+The list is the set of packages that the `swift` job of CI installs (its log's `install <name> .. ok` lines). The configure
+prunes the generations that the kept releases do not need, in this private store only. The Swift configure evaluates none of the
+device Vision packages (zxing-cpp, tesseract, leptonica, tessdata); a device configure that selects `VisionBackports` requires
+them by design, since `backports_requires` in `frameworks/Backports/tools/subset.lua` turns each archive into a requirement.
+The removal line is the end of a task: the three folders are the worktree's own, and the main checkout's `.cache` is never
+a target.
+
+Measured on the replay change `e45fd10ba`, in a worktree with a fresh private cache, and set against run `41207675148` for
+the CI column, since CI is not dispatched for this branch:
+
+| | local | CI (run 41207675148) |
+|---|---|---|
+| clone of the store | 11 s, 4 MB of disk | none |
+| Swift configure | 48 s, 34 package checks, nothing installed, 35 MB | `Configure the Swift component` 4 min 19 s, after 26 min 13 s of `Install the firmware tools` |
+| prepush | 5 min 7 s: the lowered members 299 s, the other checks 8 s | the `quick` job did not exist yet |
+| the round | 6 min 6 s for clone, configure and prepush | 41 min 25 s, of which the `swift` job 33 min 43 s |
+
+The lowered members missed the cache: the worktree's Backports sources differed from the last run that the main checkout's
+cache holds, and the check is keyed by the sources it reads. A hit takes about 2 seconds, measured on the main checkout's
+cache. A configure that installed `combine` and `backports` again (the timed run after `-c`, offline) took 4 min 30 s.
+
+Disk: `df` measured the clone and configure and prepush together at 48 MB, and the removal at 62 MB; `df` counts every writer
+on the volume, so these are approximate. `du` reports the private cache at 7.6 GB, because it counts each clone at full size;
+the blocks are shared with the main store.
+
+## Reading a failed run
+
+`./xmakew l -P . tools/ci_errors.lua <run-id|job-id>` reads the logs of a run, or of one job, through `gh api`, and for each
+job that did not succeed prints the failed tests, the errors the log prints, and for each Swift module that failed its
+first diagnostics. It keeps the probe output of configure and of the Swift overlay out of the list: the feature probes
+under `build/.gens/**/probes`, the `libplist`, `-fuse-ld`, `generic.swift`, `libfoo.a` and `AR-NOTFOUND` lines of the
+configure, and the `curl` 404 of a prebuilt that is looked up. Each saved log is in `.cache/scratch/ci/<job-id>.log`.
+A test that expects a compiler to reject a file prints that rejection in a passing run too, so the failed tests list is what
+says which errors matter.
+
+`./xmakew l -P . tools/ci_swiftc_replay.lua <job-log> [module]` takes the `swiftc failed for <module> with:` line of a saved
+log, maps the runner's paths to the local checkout and cache, sends the outputs to `.cache/scratch/swiftc-replay/<module>/`,
+and runs the same compiler on the same arguments, so a Swift fix is checked in seconds. The compiler gets a fresh clang module
+cache in that folder, as a runner starts with an empty one: the per-user cache of a developer's machine can hold two `.pcm`
+variants of one module, and the compile then fails with `is defined in both`. It needs the local Swift package
+and the lowered overlay `build/generated/backports/overlay/vfs.yaml` of the checkout, so it runs after the Swift component
+has been configured here.
+
 ## Fetching a branch's artifacts
 
 The latest run of a branch holds its artifact even when its `checks` job is red:
@@ -88,6 +190,31 @@ gh run download "$run" --name backports-libraries --dir ".cache/scratch/ci/$run"
 
 The download is scratch: delete it when the task ends. An artifact exists only for a run whose `backports` job reached
 the upload, so a run that stopped earlier has none.
+
+## Backports in CI
+
+`backports`, `package` and `swift` each configure the Backports component. `backports` builds its libraries; `package` builds
+the SwiftUI demo against them; `swift` installs the firmware tools through the same configuration. On run `41207675148`, where
+no cache matched, the three jobs did the same work more than once:
+
+| job | step | objects compiled |
+| --- | --- | --- |
+| `backports` | `Configure the Backports component` | 291 of the `backports` store package, 92 of other packages |
+| `package` | `Configure the SwiftUI demo's component` | 292 and 92 |
+| `swift` | `Install the firmware tools through the Backports configuration` | 291 and 92 |
+| `backports` | `Build the Backports component` | 2883 in `build/.objs` |
+| `package` | `Build the demo and package it with its platform package` | 2883 |
+
+`package` restores the Backports objects that `backports` saved in the same run, under the key `backports` saves them with
+(`backports-objects-v2`, the same expression and the same hash of the SDK and linker keys). `backports` saves them before it
+ends, and `needs` starts `package` after it ends, so the entry is there. `swift` has no build step of Backports objects, so it
+reuses the package store: xmake installs a package only when the hash of its configuration is missing from the store, so any
+store that holds the `backports` package is safe to restore, and `swift` restores the newest store of the OS, which is the one
+`backports` saved in the run. Both jobs run after a failed `backports` too, and rebuild what their cache lacks.
+
+Measured on run `41207675148`, not yet on a run of this workflow: the first CI run that restores these caches should show no
+Backports compile in `package`'s build step and no backports install in `swift`'s firmware step. Their wall time grows, since
+they start after `backports`, which took about 30 minutes on that run.
 
 ## What a warm push costs
 
@@ -110,6 +237,11 @@ time is in the iOS configure itself, in a stretch where xmake prints nothing for
 change skips that configure when the inventory is cached, and `swift` skips it on a dyld hit, which removes it from
 both jobs on a warm push. The first run after the change to the inventory and objects keys, `40045244974`, ran the
 configure and the Backports build once; those entries are now cached.
+
+The table above predates `package` and `swift` needing `backports`. On a warm push they now start when `backports` ends
+(3 min 34 s in the after row), so the wall time is `quick`, then `backports`, then the longer of `package` and `swift`,
+instead of the longest of the parallel jobs. The row does not record `package`'s warm time, so the trade is not measured
+yet: the first CI run that restores the objects and store records it, and this section takes that number when it lands.
 
 ## The emulator workflow
 

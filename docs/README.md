@@ -28,9 +28,11 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Write a port](tutorials/toolchain/port.md) | a tutorial: an xmake project from an empty directory to a `.deb` |
 | [Checks and waivers](guides/toolchain/checks.md) | the checks a port runs, the waivers it states, and the release's libraries |
+| [Rebind a prebuilt image's imports](guides/toolchain/rebind.md) | `revenant.rebind`: moving a prebuilt armv7 image's imports to the Backports library that exports them, its limits, and the lines for Classicgram |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
 | [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
+| [Swift C++ interoperability on iOS 6](guides/toolchain/swift-cxx-interop.md) | the armv7 iOS 6.0 interop mode against the bundled libc++, and the thread-local and std checks |
 | [Working on the toolchain](guides/toolchain/contributing.md) | the contributor guide |
 | [The toolchain's tests](reference/toolchain/tests.md) | the suites, and what runs where |
 | [Rules, values and checks](reference/toolchain/rules.md) | the target rules and the values each one reads |
@@ -108,6 +110,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | Document | About |
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
+| [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |

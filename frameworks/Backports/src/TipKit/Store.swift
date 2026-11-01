@@ -174,7 +174,7 @@ extension Tips {
 
         public mutating func load() {
             guard let data = FileManager.default.contents(atPath: defaultURL.path),
-                  let propertyList = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+                  let propertyList = try? PropertyListSerialization.propertyList(from: data, options: 0, format: nil),
                   let entry = propertyList as? [String: Any] else { return }
             invalidated = (entry["invalidated"] as? [String: String] ?? [:]).reduce(into: [:]) {
                 $0[$1.key] = Tips.InvalidationReason(rawRevenantValue: $1.value)

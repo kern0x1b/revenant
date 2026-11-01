@@ -1,3 +1,4 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local TESTS = path.absolute(os.scriptdir())
 local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "WebKit")
@@ -54,9 +55,7 @@ local function index_by_name(lines)
 end
 
 function main()
-    local work = path.join(os.tmpdir(), "webkit-window")
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = workspace.fresh("webkit-window")
 
     local oracle_program = build(work, "oracle_window", {ORACLE}, {"-framework", "WebKit", "-framework", "AppKit"})
     local backport_flags = {"-I", SRC, "-framework", "JavaScriptCore", "-framework", "WebKit", "-framework", "AppKit", "-DREVENANT_HOST_BUILD"}

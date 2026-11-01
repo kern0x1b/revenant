@@ -1,0 +1,5 @@
+module ProbeCxx {
+  header "Probe.h"
+  requires cplusplus
+  export *
+}

@@ -21,7 +21,7 @@ A check that the port cannot meet is waived by name, with the reason, and the re
 
     set_values("revenant.waive.pagezero", "why the executable's first segment is not at its place")
 
-- `revenant.waive.weak-imports`: a weak import of a symbol the checked release lacks, which is refused when the image is released. Say why every call is guarded.
+- `revenant.waive.weak-imports`: a weak import of a symbol the checked release lacks, which is refused when the image is released. Say why every call is guarded. If a Backports library of the build exports the symbol, name the image in `revenant.rebind` instead of waiving it; see [Rebind a prebuilt image's imports](rebind.md).
 - `revenant.waive.input-minimum.<package>`: a package whose objects do not record the port's minimum release.
 - `revenant.waive.<check>`: any other named check.
 
