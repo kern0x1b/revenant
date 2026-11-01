@@ -5,9 +5,10 @@ package("boost")
     set_license("BSL-1.0")
 
     add_urls("https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.bz2")
-    add_urls("https://github.com/react-native-community/boost-for-react-native.git", {alias = "react-native"})
+    add_urls("https://github.com/react-native-community/boost-for-react-native.git", {submodules = false,
+             version = function (version) return "v" .. version end})
     add_versions("1.81.0", "71feeed900fbccca04a3b4f2f84a7c217186f28a940ed8b7ed4725986baf99fa")
-    add_versions("react-native:1.84.0", "59ed9e589e222fb6d54b3e0a81d510190801b1d9")
+    add_versions("1.84.0", "59ed9e589e222fb6d54b3e0a81d510190801b1d9")
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
