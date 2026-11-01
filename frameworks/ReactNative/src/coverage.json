@@ -245,7 +245,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9 and needs a guard that answers not enabled. Not built."
+   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Source package only; not built, not probed."
   },
   {
    "id": "expo-blur",

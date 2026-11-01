@@ -87,7 +87,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so the system has no fetch wake-up. The backport UIApplication+BackgroundFetch7 keeps the interval and never calls performFetch. A wake would need a platform scheduler, which is not in the repository. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24). |
-| expo-battery | ~57.0.3 | yes | missing | none | Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9 and needs a guard that answers not enabled. Not built. |
+| expo-battery | ~57.0.3 | yes | missing | none | Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Source package only; not built, not probed. |
 | expo-blur | ~57.0.3 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-brightness | ~57.0.2 | yes | missing | none | UIScreen brightness is present in the iOS 6.1.3 cache. Not built. |
 | expo-brownfield | ~57.0.24 | yes | missing | none | Has 7 files of iOS code and is not built. |
