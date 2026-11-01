@@ -360,3 +360,18 @@ Added, with the iOS 6 behaviour stated:
 - Fixed while doing this: `@synthesize a, b;` lowered only `a`, because the generator reads the first name (`toolchain/modules/apple/lowered.lua`, `implemented_in`). `PHAssetResourceRequestOptions.progressHandler` and `PHContentEditingInputRequestOptions` were affected; each property now has its own line.
 
 CI only: the armv7 typecheck of `tests/availability/photos_picker.swift` decides whether `NSItemProviderReading` conformance of `PHLivePhoto` and `PHAssetResourceType.pairedVideo` are visible at iOS 6.0. The host check is a syntax-only compile of the five touched sources against the lowered VFS with the iOS 26.2 SDK.
+
+## Expo modules: SF Symbol effects (expo-symbols 57.0.3)
+
+Source: `expo-symbols` 57.0.3, `ios/SymbolEffects.swift`, `ios/SymbolRecords.swift`, `ios/SymbolView.swift`. The effect types are the `Symbols` framework's `NSSymbolBounceEffect`, `NSSymbolPulseEffect`, `NSSymbolScaleEffect`, `NSSymbolVariableColorEffect` and `NSSymbolEffectOptions`, which Swift imports as `BounceSymbolEffect` and so on. The UIKit methods are on `UIImageView` (`UIImageView.h:76-113`).
+
+Added in `src/UIKit/`: `NSSymbolEffect17.m`, `NSSymbolEffectOptions17.m`, `UIImageView+SymbolEffects17.m`, with the internal header `RevenantSymbolEffects.h`.
+
+- Bounce, pulse and scale are CoreAnimation keyframes on the image view's layer: `transform.translation.y`, `opacity` and `transform.scale`. Options set the repeat count (none: once; repeating: until removed; a count: that many cycles) and the speed (the cycle is 0.6 s divided by the speed).
+- `removeAllSymbolEffects` and its options variants remove the animations this backport added. A removed animation completes with `finished` NO.
+- Approximations, not checked on a device: the 0.6 s cycle, the 15% bounce height, the 1.1 and 0.9 scale peaks, and the 1 to 0.5 to 1 opacity pulse. The "up" bounce and "up" scale are the defaults when no direction is given.
+- `wholeSymbol` and `byLayer` behave the same. A `UIImage` is one rendered image with no layers, so there is only one thing to animate.
+- `NSSymbolVariableColorEffect` keeps its flags but does not animate. Layer-by-layer colour cycling has no CoreAnimation equivalent for a flattened image, so the view is not changed and a completion block gets `finished` NO.
+- `addSymbolEffect:options:animated:` ignores `animated`. The effects have no lead-in to skip.
+
+Not backed, because expo-symbols 57.0.3 does not call them: `removeSymbolEffectOfType:` (four variants), `setSymbolImage:withContentTransition:` (two variants), `NSSymbolEffectOptions optionsWithRepeatBehavior:` (iOS 18), the iOS 14 to 26 effects other than these (appear, disappear, wiggle, rotate, breathe, draw), and secure coding for the option and effect classes.

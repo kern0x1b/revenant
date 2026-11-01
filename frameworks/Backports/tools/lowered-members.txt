@@ -1461,6 +1461,12 @@ class NSSecureUnarchiveFromDataTransformer
 class NSSortDescriptor
 class NSStream
 class NSString
+class NSSymbolBounceEffect
+class NSSymbolEffect
+class NSSymbolEffectOptions
+class NSSymbolPulseEffect
+class NSSymbolScaleEffect
+class NSSymbolVariableColorEffect
 class NSTermOfAddress
 class NSTextAttachment
 class NSTextCheckingResult
@@ -2008,6 +2014,7 @@ class RevenantSwipeContainer
 class RevenantSwipeController
 class RevenantSwipeInstaller
 class RevenantSwipeItem
+class RevenantSymbolEffectRun
 class RevenantSyncProtocol
 class RevenantTLSSession
 class RevenantTableDropCoordinator
@@ -23979,6 +23986,51 @@ member NSString -stringByApplyingTransform:reverse:
 member NSString -stringByRemovingPercentEncoding
 member NSString -variantFittingPresentationWidth:
 member NSString -writableTypeIdentifiersForItemProvider
+member NSSymbolBounceEffect +bounceDownEffect
+member NSSymbolBounceEffect +bounceUpEffect
+member NSSymbolBounceEffect +effect
+member NSSymbolBounceEffect -effectWithByLayer
+member NSSymbolBounceEffect -effectWithWholeSymbol
+member NSSymbolBounceEffect -revenant_animationForView:options:
+member NSSymbolEffect -copyWithZone:
+member NSSymbolEffect -initRevenantWithWholeSymbol:direction:
+member NSSymbolEffect -revenant_animationForView:options:
+member NSSymbolEffect -revenant_direction
+member NSSymbolEffect -revenant_wholeSymbol
+member NSSymbolEffectOptions +options
+member NSSymbolEffectOptions +optionsWithNonRepeating
+member NSSymbolEffectOptions +optionsWithRepeatCount:
+member NSSymbolEffectOptions +optionsWithRepeating
+member NSSymbolEffectOptions +optionsWithSpeed:
+member NSSymbolEffectOptions -copyWithZone:
+member NSSymbolEffectOptions -initRevenantWithRepeating:repeatCount:speed:
+member NSSymbolEffectOptions -optionsWithNonRepeating
+member NSSymbolEffectOptions -optionsWithRepeatCount:
+member NSSymbolEffectOptions -optionsWithRepeating
+member NSSymbolEffectOptions -optionsWithSpeed:
+member NSSymbolEffectOptions -revenant_optionsWithRepeating:repeatCount:speed:
+member NSSymbolEffectOptions -revenant_repeatCount
+member NSSymbolEffectOptions -revenant_repeating
+member NSSymbolEffectOptions -revenant_speed
+member NSSymbolPulseEffect +effect
+member NSSymbolPulseEffect -effectWithByLayer
+member NSSymbolPulseEffect -effectWithWholeSymbol
+member NSSymbolPulseEffect -revenant_animationForView:options:
+member NSSymbolScaleEffect +effect
+member NSSymbolScaleEffect +scaleDownEffect
+member NSSymbolScaleEffect +scaleUpEffect
+member NSSymbolScaleEffect -effectWithByLayer
+member NSSymbolScaleEffect -effectWithWholeSymbol
+member NSSymbolScaleEffect -revenant_animationForView:options:
+member NSSymbolVariableColorEffect +effect
+member NSSymbolVariableColorEffect -effectWithCumulative
+member NSSymbolVariableColorEffect -effectWithDimInactiveLayers
+member NSSymbolVariableColorEffect -effectWithHideInactiveLayers
+member NSSymbolVariableColorEffect -effectWithIterative
+member NSSymbolVariableColorEffect -effectWithNonReversing
+member NSSymbolVariableColorEffect -effectWithReversing
+member NSSymbolVariableColorEffect -revenant_animationForView:options:
+member NSSymbolVariableColorEffect -revenant_effectWithFlags:
 member NSTermOfAddress +currentUser
 member NSTermOfAddress +feminine
 member NSTermOfAddress +localizedForLanguageIdentifier:withPronouns:
@@ -28105,6 +28157,9 @@ member RevenantSwipeItem -color
 member RevenantSwipeItem -image
 member RevenantSwipeItem -title
 member RevenantSwipeItem -width
+member RevenantSymbolEffectRun -animationDidStop:finished:
+member RevenantSymbolEffectRun -completion
+member RevenantSymbolEffectRun -view
 member RevenantSyncProtocol +answerForView:message:
 member RevenantSyncProtocol +canInitWithRequest:
 member RevenantSyncProtocol +canonicalRequestForRequest:
@@ -31651,7 +31706,14 @@ member UIImageSymbolConfiguration -revenant_symbolPointSize
 member UIImageSymbolConfiguration -revenant_symbolScale
 member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
+member UIImageView -addSymbolEffect:
+member UIImageView -addSymbolEffect:options:
+member UIImageView -addSymbolEffect:options:animated:
+member UIImageView -addSymbolEffect:options:animated:completion:
 member UIImageView -preferredSymbolConfiguration
+member UIImageView -removeAllSymbolEffects
+member UIImageView -removeAllSymbolEffectsWithOptions:
+member UIImageView -removeAllSymbolEffectsWithOptions:animated:
 member UIImageView -setPreferredSymbolConfiguration:
 member UIImageView -setTintColor:
 member UIImageView -tintColor
