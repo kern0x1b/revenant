@@ -32,6 +32,10 @@ function failures(opt)
         table.insert(found, "--real must reach RN_EXPO_REAL")
     end
 
+    if isolate.build_environment({folder = "/f", pkgdirs = "a=/d"}).RN_PKG_DIRS ~= "a=/d" then
+        table.insert(found, "--pkgdirs must reach RN_PKG_DIRS")
+    end
+
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local project = path.join(base, "project")
     local folder = path.join(base, "copy")

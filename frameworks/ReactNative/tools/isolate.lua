@@ -1,10 +1,11 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache>
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--log file]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--pkgdirs name=dir,...] [--log file]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example".
   build  builds the host (or another target, for example expo-jsi-probe) from that copy with this checkout's toolchain. Expo packages
-         named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.]]
+         named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.
+         --pkgdirs takes the sources of a named package from a directory (an installed revenant package) instead of the application's.]]
 
 local INPUTS = {"app-assets", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "rn-spike-gen", "screens", "unistyles"}
 
@@ -78,6 +79,9 @@ function build_environment(options)
     }
     if options.real and options.real ~= "" then
         env.RN_EXPO_REAL = options.real
+    end
+    if options.pkgdirs and options.pkgdirs ~= "" then
+        env.RN_PKG_DIRS = options.pkgdirs
     end
     return env
 end
@@ -188,7 +192,7 @@ function build(folder, cache, options)
     folder = path.absolute(folder)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local env = build_environment({
-        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods,
+        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods, pkgdirs = options.pkgdirs,
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*[0-9a-f]")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*[0-9a-f]")), "lib", "swift", "iphoneos"),
         backports = options.backports or path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
@@ -197,10 +201,24 @@ function build(folder, cache, options)
     os.cd(folder)
     os.vrunv("sh", {"rn-spike/tools/patch-provider.sh"})
     local xmakew = path.join(checkout(), "xmakew")
-    local configured = os.execv("sh", {"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+    local function status(...)
+        local arguments = {...}
+        return try {
+            function ()
+                os.execv("sh", arguments[1], arguments[2])
+                return 0
+            end,
+            catch {
+                function ()
+                    return 1
+                end
+            }
+        }
+    end
+    local configured = status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
     if configured == 0 then
-        built = os.execv("sh", {"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
+        built = status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
     end
     return built, log
 end
@@ -225,7 +243,7 @@ function main(...)
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         print("isolated %s: %d files rewritten, %d links retargeted, rn-src %s", positional[2], result.rewritten, result.relinked, sources)
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log})
         print("exit %d, log %s", code, log)
         local errors = try {
             function ()
