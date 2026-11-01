@@ -159,6 +159,12 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [WidgetKit: providers](reference/backports/WidgetKit/WidgetKit/Providers.md) | the two intent providers, and the spellings they do not share with the timeline provider |
 | [WidgetKit: reuse](reference/backports/WidgetKit/WidgetKit/Reuse.md) | what WidgetKit was compared against, and why |
 
+## React Native
+
+| Document | About |
+| --- | --- |
+| [Driving a host by touch](guides/react-native/touch.md) | the touch injector and its command line for a phone without XCUITest |
+
 ## WebKit
 
 | Document | About |
