@@ -8,6 +8,7 @@ add_requires("revenant@sdwebimage 5.21.7", {alias = "sdwebimage"})
 add_requires("revenant@libwebp 1.6.0", {alias = "libwebp"})
 add_requires("revenant@sdwebimage-webp 0.14.6", {alias = "sdwebimage-webp"})
 add_requires("revenant@zxingobjc 3.6.4", {alias = "zxingobjc"})
+includes("rnscreens.lua")
 
 local SUITES = {
     {name = "sdwebimage", source = "sdwebimage.m", packages = {"sdwebimage"}, mflags = {"-fobjc-arc"},
@@ -34,6 +35,8 @@ for _, suite in ipairs(SUITES) do
         add_frameworks(table.unpack(suite.frameworks or {}))
     target_end()
 end
+
+table.insert(names, "rnscreens")
 
 target("packages")
     set_kind("phony")
