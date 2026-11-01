@@ -1,7 +1,7 @@
 # Driving a React Native host by touch
 
 A phone on iOS 6 has no XCUITest, and a synthesized `UIEvent` sent through `-[UIApplication sendEvent:]` faults inside UIKit
-because the event has no `GSEvent` behind it. `frameworks/ReactNative/host/RNHostTouch.m` is the injector that gets around
+because the event has no `GSEvent` behind it. `frameworks/ReactNative/src/RNHostTouch.m` is the injector that gets around
 that, and `frameworks/ReactNative/tools/touch.lua` is the command line for it.
 
 ## How it works
@@ -33,7 +33,7 @@ native `UIScrollView` pan or a `UIControl`.
 With the phone claimed:
 
 ```
-./xmakew l frameworks/ReactNative/tools/touch.lua --before before.png --after after.png taptext "Direct connection"
+./xmakew l -P . frameworks/ReactNative/tools/touch.lua --before before.png --after after.png taptext "Direct connection"
 ```
 
 `--before` and `--after` take a screenshot of the phone before the command and after `--wait` seconds (4 by default). The

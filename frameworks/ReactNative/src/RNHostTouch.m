@@ -1,15 +1,3 @@
-// Touch and text injection for the host on a phone without a touch tool.
-//
-// The host reads /var/tmp/rnhost.cmd every 300 ms. A line is one command:
-//   tap X Y                 a touch down and up at the point (X, Y) of the key window, in points
-//   swipe X1 Y1 X2 Y2 [MS]  a touch that moves from one point to the other in MS milliseconds (default 300)
-//   text STRING             inserts STRING into the first responder, as the keyboard would
-//   key delete              deletes one character backwards
-// The file is removed when read, and the result of each line is appended to /var/tmp/rnhost.cmd.out.
-//
-// A tap is a real UITouch in a real UIEvent given to -[UIApplication sendEvent:], as UIKit gives it from the hardware, so
-// the gesture recognizers of React Native's touch handler see it. UITouch has no public initializer, so its fields are set
-// through the private setters iOS 6 has (the approach of the KIF test framework).
 
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
@@ -85,7 +73,6 @@ static void RNHostSendTouch(UITouch *touch, CGPoint point, UITouchPhase phase, U
     if ([touch respondsToSelector:@selector(_setLocationInWindow:resetPrevious:)]) {
         [touch _setLocationInWindow:point resetPrevious:phase == UITouchPhaseBegan];
     } else {
-        // the ivars UIKit reads the location from
         if (phase == UITouchPhaseBegan) {
             [touch setValue:[NSValue valueWithCGPoint:point] forKey:@"_previousLocationInWindow"];
         } else {
@@ -98,14 +85,10 @@ static void RNHostSendTouch(UITouch *touch, CGPoint point, UITouchPhase phase, U
     [event _setTimestamp:[NSProcessInfo processInfo].systemUptime];
     [event _clearTouches];
     [event _addTouch:touch forDelayedDelivery:NO];
-    // -[UIApplication sendEvent:] needs the GSEvent the hardware makes (UIKit reads it and faults on a synthesized event), so
-    // the touch goes to the gesture recognizers of the window's views directly, as UIWindow would give it to them.
     NSSet *touches = [NSSet setWithObject:touch];
     RNHostDeliver(window, touches, event, phase);
 }
 
-// The deepest view in the tree whose accessibility label is TEXT, found without the clipping of its parents: the view of a
-// button the layout put below the screen.
 static UIView *RNHostFindLabel(UIView *view, NSString *text)
 {
     for (UIView *subview in [view.subviews reverseObjectEnumerator]) {
@@ -177,7 +160,6 @@ static void RNHostRun(NSString *line)
             RNHostCommandResult([NSString stringWithFormat:@"ok tap %@ view %@", line, NSStringFromClass([[window hitTest:point withEvent:nil] class])]);
         });
     } else if ([verb isEqualToString:@"taptext"] && line.length > 8) {
-        // taptext LABEL: a tap on the view with that accessibility label, wherever the layout put it
         UIView *target = RNHostFindLabel(window, [line substringFromIndex:8]);
         if (!target) {
             RNHostCommandResult(@"error: no view with that label");
@@ -192,7 +174,6 @@ static void RNHostRun(NSString *line)
             });
         }
     } else if ([verb isEqualToString:@"scroll"] && words.count >= 4) {
-        // scroll X Y DY: moves the content of the nearest scroll view under the point by DY points (a pan needs the hardware path)
         CGPoint point = CGPointMake([words[1] floatValue], [words[2] floatValue]);
         UIView *view = [window hitTest:point withEvent:nil];
         while (view && ![view isKindOfClass:[UIScrollView class]]) {
@@ -208,7 +189,6 @@ static void RNHostRun(NSString *line)
             RNHostCommandResult(@"error: no scroll view under the point");
         }
     } else if ([verb isEqualToString:@"methods"] && words.count >= 2) {
-        // diagnostics: the methods and instance variables of a class, for a release whose private selectors differ
         Class cls = NSClassFromString(words[1]);
         NSMutableString *out = [NSMutableString stringWithFormat:@"%@:", words[1]];
         unsigned count = 0;
@@ -268,7 +248,6 @@ static void RNHostRun(NSString *line)
     if (text.length == 0) {
         return;
     }
-    // the file is made by another user in a sticky directory, so it is emptied, not removed
     [@"" writeToFile:path atomically:NO encoding:NSUTF8StringEncoding error:NULL];
     for (NSString *line in [text componentsSeparatedByString:@"\n"]) {
         if (line.length > 0) {
