@@ -322,3 +322,75 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:326 | @"category" |
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:516 | @"categories" |
 | frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:599 | @"present" |
+
+## Expo modules: document picker delegates (expo-file-system 57.0.7)
+
+Source: `expo-file-system` 57.0.7, `ios/FilePickingUtils.swift` and `ios/FilePickingHandler.swift`.
+
+Delivered at run time, so the callbacks reach an app on iOS 6:
+
+- `B/UIKit/UIDocumentPickerViewController.m:273-278` calls `documentPicker:didPickDocumentsAtURLs:`, and falls back to the deprecated `documentPicker:didPickDocumentAtURL:`. `:323-326` calls `documentPickerWasCancelled:`.
+- `B/UIKit/UISheetPresentationController.m` calls `presentationControllerShouldDismiss:`, `presentationControllerWillDismiss:`, `presentationControllerDidDismiss:` and `presentationControllerDidAttemptToDismiss:` on the presentation delegate (lines 1036, 1301, 1396, 1457, 1587).
+- `B/UIKit/UIViewController+Popover.m:98-104` calls `adaptivePresentationStyleForPresentationController:` and `presentationController:viewControllerForAdaptivePresentationStyle:`.
+
+Not delivered, so not declared: `presentationController:willPresentWithAdaptiveStyle:transitionCoordinator:` (iOS 8.3), `adaptivePresentationStyleForPresentationController:traitCollection:` and `presentationController:prepareAdaptivePresentationController:` (iOS 15). Nothing in `B/` calls them. UIKit calls the trait-collection variant first when an app implements it, so an app that implements only that variant gets no callback on iOS 6.
+
+Open at compile time, CI only:
+
+- `frameworks/Backports/tools/lowered-members.txt` has no `protocol UIDocumentPickerDelegate` and no `protocol UIAdaptivePresentationControllerDelegate`. `toolchain/modules/apple/lowered.lua` (`protocol_status`) lowers a protocol member only when a backport class that adopts the protocol implements that method. The backport calls these delegate methods but never implements them, so nothing is lowered. The Expo conformance at `FilePickingUtils.swift:36` (`documentPicker(_:didPickDocumentsAt:)`, iOS 11) and `:66` (`presentationControllerDidDismiss(_:)`, iOS 13) therefore keep their SDK availability at deployment 6.0. The armv7 typecheck decides whether that is an error.
+- A declaration-only header in `src/UIKit` was tried and reverted: a bare `protocol` line lowers only the protocol declaration, so it changes no member's availability and would only claim backing.
+- Fix direction, not done: lower delegate members that the backport calls, which is a change to the lowering rule in `toolchain/modules/apple/lowered.lua`, or a backport class that implements them with real behaviour.
+
+The task's cited lines `FilePickingHandler.swift:9` and `:12` are `private weak var module: FileSystemModule?` and `init(module: FileSystemModule)`. They reference `FileSystemModule` (declared at `FileSystemModule.swift:6`), not a picker API, so they are not evidence of a missing picker member. The picker-related lines are `FilePickingUtils.swift:25,36,62,66` and `FilePickingHandler.swift:49-51`.
+
+## Expo modules: PHPicker and Photos types (expo-image-picker 57.0.20)
+
+Source: `expo-image-picker` 57.0.20, `ios/ImagePickerHandler.swift`, `ImagePickerModule.swift`, `ImagePickerOptions.swift`, `MediaHandler.swift`, `ImageUtils.swift`.
+
+Already backed before this change: `PHPickerViewController`, `PHPickerConfiguration`, `PHPickerFilter`, `PHPickerResult`, `PHAsset`, `PHAssetResource`, `PHAssetResourceManager`, `PHPhotoLibrary`, `PHImageManager`.
+
+Added, with the iOS 6 behaviour stated:
+
+- `PHLivePhoto` (`src/Photos/PHLivePhoto9.m`). iOS 6 has no Live Photos, so no instance can exist: `readableTypeIdentifiersForItemProvider` is empty, so `NSItemProvider canLoadObjectOfClass:` answers NO for it, and `objectWithItemProviderData:` returns an `NSCocoaErrorDomain` `NSFeatureUnsupportedError`. `size` is backed by an ivar that no code path sets.
+- `PHAssetResourceTypePairedVideo`: `PHAssetCreationRequest` refuses it with a reason that names Live Photos (`src/Photos/PHAssetCreationRequest9.m`).
+- `PHAsset fetchAssetsWithALAssetURLs:options:` (`src/Photos/PHAsset8.m`): looks each URL up through `RevenantPhotosStore assetWithIdentifier:`, the same path as `fetchAssetsWithLocalIdentifiers:`.
+- `PHContentEditingInput`, `PHContentEditingInputRequestOptions` and `PHAsset requestContentEditingInputWithOptions:completionHandler:` (`src/Photos/PHContentEditingInput8.m`). The full-size image is the original bytes of the asset from `requestImageDataForAsset:`, written to a file under `NSTemporaryDirectory()`. Videos complete with a nil `fullSizeImageURL`. The info dictionary carries only `PHContentEditingInputErrorKey` and `PHContentEditingInputCancelledKey`; `PHContentEditingInputResultIsInCloudKey` is not set. A request for a video completes synchronously and returns request ID 0. `networkAccessAllowed` is accepted and passed on, but every AssetsLibrary asset is local, so there is nothing to download.
+- `PHPickerViewControllerDelegate` (`src/Photos/PHPickerViewControllerDelegate.h`): the backport calls `picker:didFinishPicking:` at `src/Photos/PHPickerViewController14.m:83`.
+- Fixed while doing this: `@synthesize a, b;` lowered only `a`, because the generator reads the first name (`toolchain/modules/apple/lowered.lua`, `implemented_in`). `PHAssetResourceRequestOptions.progressHandler` and `PHContentEditingInputRequestOptions` were affected; each property now has its own line.
+
+CI only: the armv7 typecheck of `tests/availability/photos_picker.swift` decides whether `NSItemProviderReading` conformance of `PHLivePhoto` and `PHAssetResourceType.pairedVideo` are visible at iOS 6.0. The host check is a syntax-only compile of the five touched sources against the lowered VFS with the iOS 26.2 SDK.
+
+## Expo modules: SF Symbol effects (expo-symbols 57.0.3)
+
+Source: `expo-symbols` 57.0.3, `ios/SymbolEffects.swift`, `ios/SymbolRecords.swift`, `ios/SymbolView.swift`. The effect types are the `Symbols` framework's `NSSymbolBounceEffect`, `NSSymbolPulseEffect`, `NSSymbolScaleEffect`, `NSSymbolVariableColorEffect` and `NSSymbolEffectOptions`, which Swift imports as `BounceSymbolEffect` and so on. The UIKit methods are on `UIImageView` (`UIImageView.h:76-113`).
+
+Added in `src/UIKit/`: `NSSymbolEffect17.m`, `NSSymbolEffectOptions17.m`, `UIImageView+SymbolEffects17.m`, with the internal header `RevenantSymbolEffects.h`.
+
+- Bounce, pulse and scale are CoreAnimation keyframes on the image view's layer: `transform.translation.y`, `opacity` and `transform.scale`. Options set the repeat count (none: once; repeating: until removed; a count: that many cycles) and the speed (the cycle is 0.6 s divided by the speed).
+- `removeAllSymbolEffects` and its options variants remove the animations this backport added. A removed animation completes with `finished` NO.
+- Approximations, not checked on a device: the 0.6 s cycle, the 15% bounce height, the 1.1 and 0.9 scale peaks, and the 1 to 0.5 to 1 opacity pulse. The "up" bounce and "up" scale are the defaults when no direction is given.
+- `wholeSymbol` and `byLayer` behave the same. A `UIImage` is one rendered image with no layers, so there is only one thing to animate.
+- `NSSymbolVariableColorEffect` keeps its flags but does not animate. Layer-by-layer colour cycling has no CoreAnimation equivalent for a flattened image, so the view is not changed and a completion block gets `finished` NO.
+- `addSymbolEffect:options:animated:` ignores `animated`. The effects have no lead-in to skip.
+
+Not backed, because expo-symbols 57.0.3 does not call them: `removeSymbolEffectOfType:` (four variants), `setSymbolImage:withContentTransition:` (two variants), `NSSymbolEffectOptions optionsWithRepeatBehavior:` (iOS 18), the iOS 14 to 26 effects other than these (appear, disappear, wiggle, rotate, breathe, draw), and secure coding for the option and effect classes.
+
+## SDWebImage 5.21.7 on iOS 6: Accelerate, CoreGraphics and the lock
+
+Source: SDWebImage 5.21.7 (`2de3a496`), `SDWebImage/Core`, 60 files. Each file was syntax-compiled for armv7 iOS 6.0 against the lowered overlay with `-Werror=unguarded-availability` and `-Werror=unguarded-availability-new`, and the errors were grouped by name.
+
+Covered without a change, with no unguarded error at iOS 6.0: `NSURLSession`, `NSURLSessionConfiguration`, `NSURLComponents` (Foundation); `UIGraphicsImageRenderer`, `UIGraphicsImageRendererFormat` (UIKit). `SDGraphicsImageRenderer.m` guards the iOS 10 names with `respondsToSelector:` and `@available`.
+
+Changed:
+
+- `vImageScale_ARGB16U` (iOS 7) and `vImageScale_Planar16U` (iOS 8) were not backed. `src/Accelerate/vImageScale7.m` and `vImageScale8.m` share `RevenantScale.h`. The filter is area averaging when downscaling (exact for integer ratios) and bilinear when upscaling, computed in float and rounded half up, clamped to 0 to 65535. `kvImageNoFlags` and `kvImageHighQualityResampling` select this same filter. `kvImageDoNotTile` is accepted. `kvImageGetTempBufferSize` returns without scaling. Unknown flags are refused. The `tempBuffer` argument is not used. An empty destination is a no-op; an empty source is refused.
+- `CGColorSpaceUsesITUR_2100TF` (iOS 14) was a constant `false`. It now takes the colour space's name from `CGColorSpaceCopyName` (iOS 10) and compares it with `kCGColorSpaceITUR_2100_PQ` and `kCGColorSpaceITUR_2100_HLG`, inside `@available(iOS 14.0)`, since those names do not exist before iOS 14. Limit: an ICC-based colour space with a PQ or HLG transfer that carries no such name is not detected. On iOS 6 a colour space never carries these names, so the answer there is NO.
+- `CGImageGetUTType` (iOS 9) was not backed. It now returns NULL for every image. Limit, decided with the coordinator: Apple returns the UTI of the ImageIO source for an image decoded by ImageIO. iOS 6 keeps no per-image record of its source. SDWebImage creates its images with `CGImageSourceCreateImageAtIndex`, and the Backports cannot wrap that: `src/attach.c` and `src/revenant_alias.h` alias Objective-C classes, not C functions. So `UIImage (Metadata)` `sd_imageFormat` gets `SDImageFormatUndefined`, and the lazy-decode check in `SDImageCoderHelper` reads "not lazily decoded". NULL is Apple's answer for images not created through ImageIO, not for these.
+
+The scalers were measured against Apple's in process: `tests/vimage_scale/scale_test.c`, run by `tests/vimage_scale_test.lua`, which loads vImage with `dlopen`. Impulse responses show Apple's kernel is wider than ours: one source pixel spreads over neighbouring outputs when downscaling, and over more outputs, with wrap-around at the far edge, when upscaling. The difference is a kernel difference, not rounding, so there is no rounding bound. The test pins the measured worst case on each fixed input. On a linear ramp that is 33 (8x6 to 4x3), 116 (9x7 to 4x3), 151 (3x2 to 7x5) and 139 (4x4 to 8x8), out of 65535; interior pixels of a ramp agree within rounding. On pseudo-random noise it is 4645 to 12031.
+
+Not ours: SDWebImage declares its own iOS 8 API with `API_DEPRECATED(... ios(8.0, 8.0))` (`SDWebImageAvoidDecodeImage`, `SDWebImageDownloaderAvoidDecodeImage`, `SDImageCacheAvoidDecodeImage`, `SDWebImageContextCustomManager`, the `shouldBlockFailedURLWithURL:error:` protocol method and the `options:context:` prefetch selectors) and calls it without a guard. Twelve of the 60 Core files fail `-Werror=unguarded-availability` for that reason; in a default build those are warnings.
+
+Not checked here: `SDWebImageWebPCoder`, whose sources need libwebp headers on the include path that this check did not add; and anything on a device.
+
+Lock at runtime: `SDInternalMacros.h` sets `SD_USE_OS_UNFAIR_LOCK` to 0 below iOS 10, so on iOS 6 SDWebImage locks with `OSSpinLock` and only links the `os_unfair_lock_*` symbols. `apple-compat` provides those symbols (`src/os_unfair_lock_*.c`, `unfair_lock.h`), with a host test that runs four threads against the system lock.

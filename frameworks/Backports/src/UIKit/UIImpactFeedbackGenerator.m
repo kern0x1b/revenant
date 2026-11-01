@@ -1,5 +1,7 @@
 #import "RevenantFeedbackGenerator.h"
 
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+
 @implementation UIImpactFeedbackGenerator {
 @private
     float _intensity;
@@ -13,6 +15,8 @@
             case UIImpactFeedbackStyleLight:  _intensity = 0.45f; _milliseconds = 40;  break;
             case UIImpactFeedbackStyleMedium: _intensity = 0.70f; _milliseconds = 65;  break;
             case UIImpactFeedbackStyleHeavy:  _intensity = 1.00f; _milliseconds = 100; break;
+            case UIImpactFeedbackStyleSoft:   _intensity = 0.30f; _milliseconds = 60;  break;
+            case UIImpactFeedbackStyleRigid:  _intensity = 1.00f; _milliseconds = 30;  break;
             default:                          _intensity = 0.0f;  _milliseconds = 0;   break;
         }
     }

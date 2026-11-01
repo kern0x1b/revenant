@@ -10,16 +10,26 @@ local FAMILIES = {
     {fixture = "user_activity_members.swift", lowered = true},
     {fixture = "url_session.swift", lowered = true},
     {fixture = "app_delegate.swift", lowered = true},
+    {fixture = "haptics.swift", lowered = true},
+    {fixture = "photos_picker.swift", lowered = true},
+    {fixture = "symbol_effects.swift", lowered = true},
     {fixture = "dispatch.swift", lowered = false},
+    {fixture = "locale_language.swift", lowered = false, sources = {"Foundation/LocaleLanguage.swift"}},
 }
 
-local function typecheck_flags(sdk, runtime, module, vfs, modules, fixture)
+local OVERLAY = path.absolute(path.join(backports, "..", "..", "toolchain", "src", "swift-runtime", "overlay"))
+
+local function typecheck_flags(sdk, runtime, module, vfs, modules, fixture, sources)
     local flags = swift.runtime_flags({architecture = "armv7", deployment = "6.0", sdk = sdk,
                                        resources = path.join(runtime, "lib", "swift"), module = module, optimize = "none"})
     if vfs then
         table.join2(flags, {"-vfsoverlay", vfs})
     end
-    table.join2(flags, {"-module-cache-path", modules, "-typecheck", fixture})
+    table.join2(flags, {"-module-cache-path", modules, "-typecheck"})
+    for _, source in ipairs(sources or {}) do
+        table.insert(flags, path.join(OVERLAY, source))
+    end
+    table.insert(flags, fixture)
     return flags
 end
 
@@ -35,7 +45,7 @@ function main()
     for _, family in ipairs(FAMILIES) do
         local fixture = path.join(fixtures, family.fixture)
         local log = path.join(out, family.fixture .. ".log")
-        local overlay_status = os.execv(compiler, typecheck_flags(sdk, runtime, "Availability", vfs, path.join(out, "modules"), fixture),
+        local overlay_status = os.execv(compiler, typecheck_flags(sdk, runtime, "Availability", vfs, path.join(out, "modules"), fixture, family.sources),
                                         {try = true, stdout = log, stderr = log})
         if overlay_status ~= 0 then
             table.insert(failures, family.fixture .. " does not typecheck at iOS 6.0 with the lowered overlay:\n" .. (io.readfile(log) or ""))

@@ -78,6 +78,10 @@ static RevenantPhotosTransaction *revenant_transaction(void)
 
 - (void)revenant_addResourceOfType:(PHAssetResourceType)type
 {
+    if (type == PHAssetResourceTypePairedVideo) {
+        [revenant_transaction() refuseWithReason:@"iOS 6 has no Live Photos, so it cannot add a paired video resource"];
+        return;
+    }
     if (type != PHAssetResourceTypePhoto && type != PHAssetResourceTypeVideo) {
         [revenant_transaction() refuseWithReason:@"iOS 6 can only add a primary photo or video resource, not adjustment data, an alternate photo, or a live photo pairing"];
         return;

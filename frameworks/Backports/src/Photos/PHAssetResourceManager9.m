@@ -7,7 +7,8 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 @implementation PHAssetResourceRequestOptions
-@synthesize networkAccessAllowed, progressHandler;
+@synthesize networkAccessAllowed;
+@synthesize progressHandler;
 
 - (id)copyWithZone:(NSZone *)zone
 {

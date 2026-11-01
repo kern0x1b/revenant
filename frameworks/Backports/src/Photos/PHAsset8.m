@@ -114,6 +114,20 @@
     } options:options];
 }
 
++ (PHFetchResult<PHAsset *> *)fetchAssetsWithALAssetURLs:(NSArray<NSURL *> *)assetURLs options:(PHFetchOptions *)options
+{
+    NSArray *identifiers = [assetURLs valueForKey:@"absoluteString"];
+    return [self revenant_result:^{
+        NSMutableArray *assets = [NSMutableArray array];
+        for (NSString *identifier in identifiers) {
+            PHAsset *asset = [RevenantPhotosStore assetWithIdentifier:identifier];
+            if (asset)
+                [assets addObject:asset];
+        }
+        return (NSArray *)assets;
+    } options:options];
+}
+
 + (PHFetchResult<PHAsset *> *)fetchAssetsWithLocalIdentifiers:(NSArray<NSString *> *)identifiers options:(PHFetchOptions *)options
 {
     NSArray *kept = [identifiers copy];

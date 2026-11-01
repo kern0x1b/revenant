@@ -1,7 +1,7 @@
 import("fixtures")
 
 local SWIFT_FOUNDATION = {
-    "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
+    "NSDateInterval", "NSISO8601DateFormatter", "NSOrderedCollectionChange",
     "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLSessionWebSocketMessage",
     "NSUnitConverterLinear",
 }
