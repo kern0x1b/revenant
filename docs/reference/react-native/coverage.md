@@ -166,7 +166,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native-web | ~0.21.0 | no | n/a | none | Web only. |
 | react-native-gesture-handler | ~2.32.0 | no | real | phone | Built; the app's gestures run on it. |
 | react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| react-native-keyboard-controller | 1.21.12 | yes | stub | build | Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 (keyboard-probe, build ok): the one blocker in the old note, UICornerConfiguration.capsule(), is not reached, and the iOS 26 glass code is under @available(iOS 26.0). The app still runs plain-view stubs (ios6/KeyboardControllerStubs.mm); the real ObjC++ half and the Swift-generated header are not built yet. |
+| react-native-keyboard-controller | 1.21.12 | yes | stub | build | Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 with C++ interop off (keyboard-probe, build ok); the emitted header has no C++ section. The ObjC++ half does not compile yet: KeyboardControllerModule.mm uses RCTDirectEventBlock from the Swift header, which is not visible without clang modules (the probe is textual, the pod build uses modules). The app still runs plain-view stubs (ios6/KeyboardControllerStubs.mm). |
 | react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
 | react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | react-native-worklets | 0.10.1 | no | real | phone | Built. |
