@@ -32605,12 +32605,14 @@ member UIResolvedShape -shapeByApplyingInsets:
 member UIResponder +clearTextInputContextIdentifier:
 member UIResponder -activityItemsConfiguration
 member UIResponder -buildMenuWithBuilder:
+member UIResponder -canPasteItemProviders:
 member UIResponder -editingInteractionConfiguration
 member UIResponder -inputAccessoryViewController
 member UIResponder -inputAssistantItem
 member UIResponder -inputViewController
 member UIResponder -keyCommands
 member UIResponder -pasteConfiguration
+member UIResponder -pasteItemProviders:
 member UIResponder -pressesBegan:withEvent:
 member UIResponder -pressesCancelled:withEvent:
 member UIResponder -pressesChanged:withEvent:
@@ -36127,7 +36129,9 @@ protocol_member UIMutableTraits -valueForCGFloatTrait:
 protocol_member UIMutableTraits -valueForNSIntegerTrait:
 protocol_member UINSIntegerTraitDefinition +defaultValue
 protocol_member UIObjectTraitDefinition +defaultValue
+protocol_member UIPasteConfigurationSupporting -canPasteItemProviders:
 protocol_member UIPasteConfigurationSupporting -pasteConfiguration
+protocol_member UIPasteConfigurationSupporting -pasteItemProviders:
 protocol_member UIPopoverControllerDelegate -popoverController:willRepositionPopoverToRect:inView:
 protocol_member UIPopoverControllerDelegate -popoverControllerDidDismissPopover:
 protocol_member UIPopoverControllerDelegate -popoverControllerShouldDismissPopover:

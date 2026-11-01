@@ -1,4 +1,4 @@
-#import "RevenantMenus.h"
+#import "RevenantPasteMatching.h"
 #import <objc/runtime.h>
 
 static const char revenant_paste_configuration_key;
@@ -12,9 +12,17 @@ static const char revenant_paste_configuration_key;
 
 - (void)setPasteConfiguration:(UIPasteConfiguration *)pasteConfiguration
 {
-    if (pasteConfiguration)
-        revenant_menus_say_once(@"paste-configuration", @"UIResponder.pasteConfiguration is kept, and nothing on iOS 6 reads its acceptable types: UIPasteControl hands the pasteboard's item providers to the target, which decides with canPasteItemProviders:");
     objc_setAssociatedObject(self, &revenant_paste_configuration_key, [pasteConfiguration copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)canPasteItemProviders:(NSArray<NSItemProvider *> *)itemProviders
+{
+    NSArray<NSString *> *typeIdentifiers = self.pasteConfiguration.acceptableTypeIdentifiers;
+    return typeIdentifiers.count > 0 && revenant_paste_accepts(itemProviders, typeIdentifiers);
+}
+
+- (void)pasteItemProviders:(NSArray<NSItemProvider *> *)itemProviders
+{
 }
 
 @end
