@@ -14,7 +14,7 @@ void expect(bool ok, const char* what)
         ++failures;
 }
 
-}  // namespace
+}
 
 int main()
 {
