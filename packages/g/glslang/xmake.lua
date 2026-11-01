@@ -10,7 +10,8 @@ package("glslang")
 
     local patches = {
         {"0001-Print-the-shader-name-without-std-filesystem-on-iOS-6.patch", "d2a7e890d45758fe433bb5f8c58fec4ff854c3b8caefe67c213006def465db09"},
-        {"0002-Keep-the-default-pool-allocator-in-static-storage.patch", "07c6b0e9e2b20ec059b21a64ae47f2ad40ee158ede29214a92fa4a24b962ab89"}}
+        {"0002-Keep-the-default-pool-allocator-in-static-storage.patch", "07c6b0e9e2b20ec059b21a64ae47f2ad40ee158ede29214a92fa4a24b962ab89"},
+        {"0003-Refuse-allocation-requests-that-would-wrap-the-size.patch", "b8577f00efa5ef74ec69f580b54a6869abc5758e45a1af89abc25a7a7e8a8840"}}
 
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, patch in ipairs(patches) do

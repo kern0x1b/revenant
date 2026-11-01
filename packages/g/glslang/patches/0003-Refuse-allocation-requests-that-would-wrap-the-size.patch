@@ -1,0 +1,15 @@
+diff --git a/glslang/MachineIndependent/PoolAlloc.cpp b/glslang/MachineIndependent/PoolAlloc.cpp
+index 2731ede..74e9fce 100644
+--- a/glslang/MachineIndependent/PoolAlloc.cpp
++++ b/glslang/MachineIndependent/PoolAlloc.cpp
+@@ -223,6 +223,10 @@ void TPoolAllocator::popAll()
+ 
+ void* TPoolAllocator::allocate(size_t numBytes)
+ {
++    static const size_t maxRequestBytes = ~static_cast<size_t>(0) / 4;
++    if (numBytes > maxRequestBytes)
++        return nullptr;
++
+     // If we are using guard blocks, all allocations are bracketed by
+     // them: [guardblock][allocation][guardblock].  numBytes is how
+     // much memory the caller asked for.  allocationSize is the total

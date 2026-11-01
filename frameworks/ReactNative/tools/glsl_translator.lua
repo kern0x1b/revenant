@@ -13,6 +13,8 @@ local function run(program, args, log)
     return failed
 end
 
+local MAX_SOURCE_BYTES = 1024 * 1024
+
 local function translate(corpus, spirvcross, glslang, outdir)
     os.mkdir(outdir)
     local names = {"meshbasic", "meshstandard", "instanced-shadermaterial"}
@@ -21,6 +23,10 @@ local function translate(corpus, spirvcross, glslang, outdir)
         for stage in pairs(stages) do
             local base = path.join(outdir, name .. "." .. stage)
             local source = io.readfile(path.join(corpus, name .. "." .. stage))
+            if #source > MAX_SOURCE_BYTES then
+                print(string.format("%s.%s: REJECTED, %d bytes is over the %d-byte source limit", name, stage, #source, MAX_SOURCE_BYTES))
+                goto continue
+            end
             local renamed = (source:gsub("average%(", "revenant_average("))
             io.writefile(base .. ".renamed", renamed)
             local v310 = (renamed:gsub("^#version 300 es\n", "#version 310 es\n"))
@@ -44,10 +50,11 @@ local function translate(corpus, spirvcross, glslang, outdir)
                 frontend and ("FAILED " .. frontend) or "ok",
                 frontend and "not run" or (cross and ("FAILED " .. cross)) or (es100check and ("FAILED " .. es100check)) or "ok"))
         end
+        ::continue::
     end
 end
 
-function main(spirvcross, glslang, outdir)
-    local corpus = path.join(os.scriptdir(), "..", "tests", "glsl_translator", "corpus")
+function main(spirvcross, glslang, outdir, corpus)
+    corpus = corpus or path.join(os.scriptdir(), "..", "tests", "glsl_translator", "corpus")
     translate(corpus, spirvcross, glslang, outdir or path.join(os.tmpdir(), "glsl-translator"))
 end

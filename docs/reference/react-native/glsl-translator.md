@@ -90,9 +90,12 @@ An automated review of the commit flagged three upstream glslang paths. Their st
 
 - **`PoolAlloc.cpp`, dangling pointer in the no-thread path.** Real, and in upstream code: with `DISABLE_THREAD_SUPPORT`,
   the default allocator was a stack local. Patch 0002 makes it static, which the review's suggested fix matches.
-- **`PoolAlloc.cpp`, integer overflow in `allocationSize + headerSkip`.** Real, and upstream and unpatched here. A huge
-  request from a shader can overflow the size arithmetic. The translator must bound the source size before glslang sees
-  it, and this must be fixed upstream or in a patch 0003 before a shader from an app reaches the device.
+- **`PoolAlloc.cpp`, integer overflow in `allocationSize + headerSkip`.** Real, in upstream code. Patch 0003 makes a
+  request over `SIZE_MAX / 4` return nullptr, the allocator's own failure value, before any sum. The unpatched allocator
+  segfaults on a request of `SIZE_MAX - 8` (exit 139), and the patched one passes. The test is
+  `frameworks/ReactNative/tests/glsl_translator/poolalloc_overflow.cpp`, built with `clang++ -std=c++17` against the
+  glslang sources and `PoolAlloc.cpp` with patches 0002 and 0003. The translator also rejects a source over 1 MiB
+  (`MAX_SOURCE_BYTES` in `tools/glsl_translator.lua`); an oversized shader is reported, not compiled.
 - **`InfoSink.h`, `std::filesystem::absolute` can throw.** The calls are reached only with the `absolute` diagnostic
   set. Patch 0001 removes them, and the translator never sets that option. Its only effect is the text of error
   locations.
