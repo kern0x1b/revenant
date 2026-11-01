@@ -106,7 +106,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-file-system | ~57.0.7 | yes | partial | build | Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch. |
 | expo-font | ~57.0.4 | yes | real | phone | Built from its own sources. |
-| expo-gl | ~57.0.2 | yes | evaluate | none | OpenGL ES 2 exists on iOS 6. |
+| expo-gl | ~57.0.2 | yes | evaluate | none | Not built; package packages/e/expo-gl (57.0.2, unpatched). Its EAGL and CAEAGLLayer calls exist on iOS 6, but it includes the OpenGLES ES3 headers and calls ES3 entry points. The Backports ES3Functions.m entries refuse by setting a GL error, so they are not an implementation: the ES2 path needs real extension mappings, not a substitute. |
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-haptics | ~57.0.3 | yes | real | build | Built; iOS 6 has no haptic engine, so what it does there is undecided. |
@@ -124,7 +124,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-location | ~57.0.21 | yes | evaluate | none | CoreLocation exists on iOS 6. |
 | expo-mail-composer | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-manifests | ~57.0.2 | yes | missing | none | Not built; expo-constants runs without it. |
-| expo-maps | ~57.0.4 | yes | evaluate | none | MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps. |
+| expo-maps | ~57.0.4 | yes | evaluate | none | Not built; package packages/e/expo-maps (57.0.4, unpatched). Its MapKit classes (MKMapItem and the map view) are backported in frameworks/Backports/src/MapKit. Its Swift imports SwiftUI in six files, which is iOS 13 and later, so the SwiftUI component must cover those views. |
 | expo-mcp | ~0.2.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-media-library | ~57.0.5 | yes | evaluate | none | Uses Photos (iOS 8); AssetsLibrary exists on iOS 6. |
 | expo-mesh-gradient | ~57.0.2 | yes | impossible | none | MeshGradient is SwiftUI, iOS 18. |
@@ -132,7 +132,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-modules-core | ~57.0.23 | yes | partial | phone | Core builds and the app runs on it. Not yet carried as a package: the build is the spike's. SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package. |
 | expo-navigation-bar | ~57.0.3 | no | n/a | none | Android only. |
 | expo-network | ~57.0.2 | yes | evaluate | none | Uses NWPathMonitor (iOS 12); needs SCNetworkReachability. |
-| expo-notifications | ~57.0.23 | yes | stub | none | Name-only stubs of nine modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration). |
+| expo-notifications | ~57.0.23 | yes | stub | none | Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. |
 | expo-observe | ~57.0.25 | yes | missing | none | Has 25 files of iOS code and is not built. |
 | expo-print | ~57.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9. |
@@ -146,7 +146,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
 | expo-splash-screen | ~57.0.10 | yes | real | phone | Built from its own sources. |
-| expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
+| expo-sqlite | ~57.0.4 | yes | stub | none | Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |
 | expo-symbols | ~57.0.3 | yes | missing | none | SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons). |
@@ -154,8 +154,8 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-task-manager | ~57.0.21 | yes | evaluate | none | Depends on background modes available on iOS 6. |
 | expo-tracking-transparency | ~57.0.2 | yes | evaluate | none | ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module. |
 | expo-updates | ~57.0.26 | yes | evaluate | none | Needs the manifests module and a download path; no network scheme is decided. |
-| expo-video-thumbnails | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-video | ~57.0.5 | yes | evaluate | none | AVPlayer exists; the module uses newer AVKit and Swift API. |
+| expo-video-thumbnails | ~57.0.2 | yes | missing | none | Not built; package packages/e/expo-video-thumbnails (57.0.2, unpatched). It uses AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData, all iOS 4, so no patch is expected; the build is what decides. |
+| expo-video | ~57.0.5 | yes | evaluate | none | Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). |
 | expo-web-browser | ~57.0.3 | yes | evaluate | none | Uses SFSafariViewController (iOS 9); the fallback is the system browser. |
 | expo-widgets | ~57.0.26 | yes | impossible | none | WidgetKit, iOS 14. |
 | jest-expo | ~57.0.6 | yes | n/a | none | A test-runner preset; no native code. |
@@ -167,7 +167,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native-gesture-handler | ~2.32.0 | no | real | phone | Built; the app's gestures run on it. |
 | react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | react-native-keyboard-controller | 1.21.9 | yes | stub | phone | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. |
-| react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
+| react-native-maps | 1.27.2 | yes | missing | none | Not built; package packages/r/react-native-maps (1.27.2, unpatched). Its MapKit calls (MKMapView, MKMapCamera, MKMapSnapshotter, MKOverlayPathRenderer) are backported in frameworks/Backports/src/MapKit. It imports GoogleMaps in 19 places: the Google provider needs the GoogleMaps SDK, which this repository does not carry, so its guard must keep it out of the iOS 6 build. |
 | react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | react-native-worklets | 0.10.1 | no | real | phone | Built. |
 | react-native-reanimated | 4.5.1 | no | real | phone | Built; the bottom sheets animate on it. |
@@ -180,7 +180,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | sentry-expo | ~7.0.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | unimodules-app-loader | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | unimodules-image-loader-interface | ~6.1.0 | yes | missing | none | Has 2 files of iOS code and is not built. |
-| @shopify/react-native-skia | 2.6.2 | no | evaluate | none | Draws with Metal (iOS 8); would need a GL or software backend. |
+| @shopify/react-native-skia | 2.6.2 | no | evaluate | none | Not built; package packages/r/react-native-skia (2.6.2, unpatched). Its Apple renderer is Metal only (apple/MetalContext.mm: GrDirectContexts::MakeMetal over CAMetalLayer), and iOS 6 has no Metal: the Metal route is air2es, still in progress (docs/explanation/backports/metal-on-ios6.md). A GL route over EAGL (ES2) needs a renderer the package does not have. |
 | @shopify/flash-list | 2.0.2 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | @sentry/react-native | ~7.11.0 | yes | missing | none | Has 38 files of iOS code and is not built. |
 | react-native-bootsplash | ^6.3.10 | yes | missing | none | Has 5 files of iOS code and is not built. |

@@ -1,0 +1,20 @@
+package("react-native-maps")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/react-native-maps/react-native-maps")
+    set_description("react-native-maps 1.27.2, the map view of React Native on MapKit, from its npm tarball: the iOS sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/react-native-maps/-/react-native-maps-$(version).tgz")
+    add_versions("1.27.2", "5c118ad7813402e7763dd9b97c2068fdc1bfc46a45e698c0e8a3aa010b4591b0")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "react-native-maps" and manifest.version == "1.27.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isdir(path.join(package:installdir(), "ios")), "react-native-maps has no iOS sources")
+    end)

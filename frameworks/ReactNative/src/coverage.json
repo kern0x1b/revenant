@@ -416,7 +416,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "OpenGL ES 2 exists on iOS 6."
+   "note": "Not built; package packages/e/expo-gl (57.0.2, unpatched). Its EAGL and CAEAGLLayer calls exist on iOS 6, but it includes the OpenGLES ES3 headers and calls ES3 entry points. The Backports ES3Functions.m entries refuse by setting a GL error, so they are not an implementation: the ES2 path needs real extension mappings, not a substitute."
   },
   {
    "id": "expo-glass-effect",
@@ -578,7 +578,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps."
+   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Its MapKit classes (MKMapItem and the map view) are backported in frameworks/Backports/src/MapKit. Its Swift imports SwiftUI in six files, which is iOS 13 and later, so the SwiftUI component must cover those views."
   },
   {
    "id": "expo-mcp",
@@ -650,7 +650,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name-only stubs of nine modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration)."
+   "note": "Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m."
   },
   {
    "id": "expo-observe",
@@ -776,7 +776,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql."
+   "note": "Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql."
   },
   {
    "id": "expo-status-bar",
@@ -848,7 +848,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "note": "Not built; package packages/e/expo-video-thumbnails (57.0.2, unpatched). It uses AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData, all iOS 4, so no patch is expected; the build is what decides."
   },
   {
    "id": "expo-video",
@@ -857,7 +857,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "AVPlayer exists; the module uses newer AVKit and Swift API."
+   "note": "Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports)."
   },
   {
    "id": "expo-web-browser",
@@ -965,7 +965,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 175 files of iOS code and is not built."
+   "note": "Not built; package packages/r/react-native-maps (1.27.2, unpatched). Its MapKit calls (MKMapView, MKMapCamera, MKMapSnapshotter, MKOverlayPathRenderer) are backported in frameworks/Backports/src/MapKit. It imports GoogleMaps in 19 places: the Google provider needs the GoogleMaps SDK, which this repository does not carry, so its guard must keep it out of the iOS 6 build."
   },
   {
    "id": "react-native-pager-view",
@@ -1082,7 +1082,7 @@
    "native": false,
    "status": "evaluate",
    "verified": "none",
-   "note": "Draws with Metal (iOS 8); would need a GL or software backend."
+   "note": "Not built; package packages/r/react-native-skia (2.6.2, unpatched). Its Apple renderer is Metal only (apple/MetalContext.mm: GrDirectContexts::MakeMetal over CAMetalLayer), and iOS 6 has no Metal: the Metal route is air2es, still in progress (docs/explanation/backports/metal-on-ios6.md). A GL route over EAGL (ES2) needs a renderer the package does not have."
   },
   {
    "id": "@shopify/flash-list",

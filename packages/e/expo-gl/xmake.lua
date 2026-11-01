@@ -1,0 +1,21 @@
+package("expo-gl")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-gl")
+    set_description("expo-gl 57.0.2, the Expo SDK OpenGL ES context and view, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-gl/-/expo-gl-$(version).tgz")
+    add_versions("57.0.2", "e435a26d890bd9b665c4de6d3a88b28439755084c6ad88393a97c4bb77e27932")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-gl" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isdir(path.join(package:installdir(), "ios")), "expo-gl has no iOS sources")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-gl has no expo-module.config.json")
+    end)

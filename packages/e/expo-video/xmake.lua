@@ -1,0 +1,21 @@
+package("expo-video")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-video")
+    set_description("expo-video 57.0.5, the Expo SDK video player on AVPlayer, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-video/-/expo-video-$(version).tgz")
+    add_versions("57.0.5", "db9b60d195dacc6ce5a9df44ad69bbf941c7493a4b63339bf1222b8a97a6613d")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-video" and manifest.version == "57.0.5", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "VideoModule.swift")), "expo-video has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-video has no expo-module.config.json")
+    end)
