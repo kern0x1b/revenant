@@ -9,15 +9,6 @@ local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = 
 
 local SHARDS = 4
 
-function minimum()
-    local option = project.option("backports_min_ios")
-    assert(option, "frameworks/Backports/xmake.lua declares no backports_min_ios option")
-    local text = option:value() or option:get("default")
-    local value = ast.version_of(text)
-    assert(value, "backports_min_ios is not an iOS version: " .. tostring(text))
-    return value
-end
-
 local function extract(sdk, version, cache, logs, name)
     local rows = facts.objc_facts(sdk, name, version)
     if sdkfiles.has_swift_module(sdk, name) then
@@ -179,12 +170,6 @@ function key_of(row)
     return row.kind .. "|" .. row.container .. "|" .. row.name
 end
 
-function target_minimum()
-    local option = project.option("backports_min_ios")
-    assert(option, "frameworks/Backports/xmake.lua declares no backports_min_ios option")
-    return option:value() or option:get("default")
-end
-
 function prepare(only)
     local sdk = sdkfiles.sdk_folder()
     local version = sdkfiles.sdk_version(sdk)
@@ -205,7 +190,6 @@ function prepare(only)
         sdk = sdk,
         version = version,
         logs = logs,
-        minimum = minimum(),
         frameworks = frameworks_of(cache, names, sdk),
     }
 end
@@ -237,7 +221,6 @@ function declared_intros(state)
 end
 
 function in_scope_rows(state, framework)
-    local intro = sdkfiles.framework_introduced(framework.rows)
     local declared = declared_intros(state)
     local kept = {}
     for _, row in ipairs(framework.rows) do
@@ -245,9 +228,7 @@ function in_scope_rows(state, framework)
         if row.kind == "class" and row.intro == nil and declared[row.name] ~= nil then
             scoped = {intro = declared[row.name]}
         end
-        if sdkfiles.in_scope(scoped, state.minimum, intro) and not has_flag(row, "unavailable") then
-            table.insert(kept, row)
-        end
+        table.insert(kept, row)
     end
     return kept
 end

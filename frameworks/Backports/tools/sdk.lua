@@ -167,8 +167,5 @@ function framework_introduced(rows)
 end
 
 function in_scope(row, minimum, framework_intro)
-    if row.intro ~= nil then
-        return row.intro > minimum
-    end
-    return framework_intro ~= nil and framework_intro > minimum
+    return true
 end
