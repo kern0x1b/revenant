@@ -343,3 +343,20 @@ Open at compile time, CI only:
 - Fix direction, not done: lower delegate members that the backport calls, which is a change to the lowering rule in `toolchain/modules/apple/lowered.lua`, or a backport class that implements them with real behaviour.
 
 The task's cited lines `FilePickingHandler.swift:9` and `:12` are `private weak var module: FileSystemModule?` and `init(module: FileSystemModule)`. They reference `FileSystemModule` (declared at `FileSystemModule.swift:6`), not a picker API, so they are not evidence of a missing picker member. The picker-related lines are `FilePickingUtils.swift:25,36,62,66` and `FilePickingHandler.swift:49-51`.
+
+## Expo modules: PHPicker and Photos types (expo-image-picker 57.0.20)
+
+Source: `expo-image-picker` 57.0.20, `ios/ImagePickerHandler.swift`, `ImagePickerModule.swift`, `ImagePickerOptions.swift`, `MediaHandler.swift`, `ImageUtils.swift`.
+
+Already backed before this change: `PHPickerViewController`, `PHPickerConfiguration`, `PHPickerFilter`, `PHPickerResult`, `PHAsset`, `PHAssetResource`, `PHAssetResourceManager`, `PHPhotoLibrary`, `PHImageManager`.
+
+Added, with the iOS 6 behaviour stated:
+
+- `PHLivePhoto` (`src/Photos/PHLivePhoto9.m`). iOS 6 has no Live Photos, so no instance can exist: `readableTypeIdentifiersForItemProvider` is empty, so `NSItemProvider canLoadObjectOfClass:` answers NO for it, and `objectWithItemProviderData:` returns an `NSCocoaErrorDomain` `NSFeatureUnsupportedError`. `size` is backed by an ivar that no code path sets.
+- `PHAssetResourceTypePairedVideo`: `PHAssetCreationRequest` refuses it with a reason that names Live Photos (`src/Photos/PHAssetCreationRequest9.m`).
+- `PHAsset fetchAssetsWithALAssetURLs:options:` (`src/Photos/PHAsset8.m`): looks each URL up through `RevenantPhotosStore assetWithIdentifier:`, the same path as `fetchAssetsWithLocalIdentifiers:`.
+- `PHContentEditingInput`, `PHContentEditingInputRequestOptions` and `PHAsset requestContentEditingInputWithOptions:completionHandler:` (`src/Photos/PHContentEditingInput8.m`). The full-size image is the original bytes of the asset from `requestImageDataForAsset:`, written to a file under `NSTemporaryDirectory()`. Videos complete with a nil `fullSizeImageURL`. The info dictionary carries only `PHContentEditingInputErrorKey` and `PHContentEditingInputCancelledKey`; `PHContentEditingInputResultIsInCloudKey` is not set. A request for a video completes synchronously and returns request ID 0. `networkAccessAllowed` is accepted and passed on, but every AssetsLibrary asset is local, so there is nothing to download.
+- `PHPickerViewControllerDelegate` (`src/Photos/PHPickerViewControllerDelegate.h`): the backport calls `picker:didFinishPicking:` at `src/Photos/PHPickerViewController14.m:83`.
+- Fixed while doing this: `@synthesize a, b;` lowered only `a`, because the generator reads the first name (`toolchain/modules/apple/lowered.lua`, `implemented_in`). `PHAssetResourceRequestOptions.progressHandler` and `PHContentEditingInputRequestOptions` were affected; each property now has its own line.
+
+CI only: the armv7 typecheck of `tests/availability/photos_picker.swift` decides whether `NSItemProviderReading` conformance of `PHLivePhoto` and `PHAssetResourceType.pairedVideo` are visible at iOS 6.0. The host check is a syntax-only compile of the five touched sources against the lowered VFS with the iOS 26.2 SDK.

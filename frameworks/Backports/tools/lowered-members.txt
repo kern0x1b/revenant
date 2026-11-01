@@ -1571,11 +1571,14 @@ class PHChange
 class PHChangeRequest
 class PHCollection
 class PHCollectionList
+class PHContentEditingInput
+class PHContentEditingInputRequestOptions
 class PHFetchOptions
 class PHFetchResult
 class PHFetchResultChangeDetails
 class PHImageManager
 class PHImageRequestOptions
+class PHLivePhoto
 class PHObject
 class PHObjectChangeDetails
 class PHObjectPlaceholder
@@ -3714,6 +3717,7 @@ enum PHAssetMediaTypeVideo
 enum PHAssetPlaybackStyleImage
 enum PHAssetPlaybackStyleUnsupported
 enum PHAssetPlaybackStyleVideo
+enum PHAssetResourceTypePairedVideo
 enum PHAssetResourceTypePhoto
 enum PHAssetResourceTypeVideo
 enum PHAssetSourceTypeCloudShared
@@ -8969,6 +8973,8 @@ global PDFViewPrintPermissionNotification
 global PDFViewScaleChangedNotification
 global PDFViewSelectionChangedNotification
 global PDFViewVisiblePagesChangedNotification
+global PHContentEditingInputCancelledKey
+global PHContentEditingInputErrorKey
 global PHImageCancelledKey
 global PHImageErrorKey
 global PHImageManagerMaximumSize
@@ -25188,15 +25194,18 @@ member PHASEObject -setWorldTransform:
 member PHASEObject -transform
 member PHASEObject -worldTransform
 member PHAsset +fetchAssetsInAssetCollection:options:
+member PHAsset +fetchAssetsWithALAssetURLs:options:
 member PHAsset +fetchAssetsWithLocalIdentifiers:options:
 member PHAsset +fetchAssetsWithMediaType:options:
 member PHAsset +fetchAssetsWithOptions:
 member PHAsset +revenant_result:options:
 member PHAsset -canPerformEditOperation:
+member PHAsset -cancelContentEditingInputRequest:
 member PHAsset -hasAdjustments
 member PHAsset -initWithRevenantAsset:sourceType:
 member PHAsset -isLocallyAvailable
 member PHAsset -playbackStyle
+member PHAsset -requestContentEditingInputWithOptions:completionHandler:
 member PHAsset -revenant_asset
 member PHAsset -revenant_refetched
 member PHAsset -revenant_sameStateAs:
@@ -25278,6 +25287,7 @@ member PHAssetResourceManager -revenant_readResource:progress:deliver:error:
 member PHAssetResourceManager -writeDataForAssetResource:toFile:options:completionHandler:
 member PHAssetResourceRequestOptions -copyWithZone:
 member PHAssetResourceRequestOptions -networkAccessAllowed
+member PHAssetResourceRequestOptions -progressHandler
 member PHCachingImageManager -allowsCachingHighQualityImages
 member PHCachingImageManager -init
 member PHCachingImageManager -setAllowsCachingHighQualityImages:
@@ -25298,6 +25308,12 @@ member PHCollectionList +fetchCollectionListsContainingCollection:options:
 member PHCollectionList +fetchCollectionListsWithLocalIdentifiers:options:
 member PHCollectionList +fetchCollectionListsWithType:subtype:options:
 member PHCollectionList -localizedLocationNames
+member PHContentEditingInput -fullSizeImageURL
+member PHContentEditingInput -initWithRevenantFullSizeImageURL:mediaType:
+member PHContentEditingInput -mediaType
+member PHContentEditingInputRequestOptions -canHandleAdjustmentData
+member PHContentEditingInputRequestOptions -networkAccessAllowed
+member PHContentEditingInputRequestOptions -progressHandler
 member PHFetchOptions -copyWithZone:
 member PHFetchOptions -init
 member PHFetchOptions -revenant_apply:
@@ -25351,6 +25367,9 @@ member PHImageManager -revenant_requestVideo:options:result:
 member PHImageManager -revenant_videoURL:version:
 member PHImageRequestOptions -copyWithZone:
 member PHImageRequestOptions -init
+member PHLivePhoto +objectWithItemProviderData:typeIdentifier:error:
+member PHLivePhoto +readableTypeIdentifiersForItemProvider
+member PHLivePhoto -size
 member PHObject -copyWithZone:
 member PHObject -hash
 member PHObject -initWithRevenantLocalIdentifier:
@@ -35467,6 +35486,7 @@ protocol OS_sec_protocol_options
 protocol OS_sec_trust
 protocol PDFDocumentDelegate
 protocol PHPhotoLibraryChangeObserver
+protocol PHPickerViewControllerDelegate
 protocol PKPushRegistryDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
