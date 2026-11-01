@@ -1,0 +1,11 @@
+--- a/ios/Fabric/ExpoFabricViewObjC.h
++++ b/ios/Fabric/ExpoFabricViewObjC.h
+@@ -2,7 +2,7 @@
+ 
+ #import <ExpoModulesCore/Platform.h>
+ 
+-#ifdef __cplusplus
++#if defined(__cplusplus) && !defined(__swift__)
+ 
+ #import <React/RCTViewComponentView.h> // Allows non-umbrella since it's coming from React-RCTFabric
+ 
