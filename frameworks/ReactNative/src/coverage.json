@@ -378,9 +378,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "impossible",
+   "status": "missing",
    "verified": "none",
-   "note": "The picker is UIDocumentPickerViewController, which the iPhoneOS 26.2 SDK header marks available from iOS 8.0; iOS 6 has no document picker, and a substitute that picks from the media library would not be this module. Not built; no package is pinned."
+   "note": "Not built. Its picker is UIDocumentPickerViewController, which iOS 6 lacks (the SDK header marks it iOS 8.0), so the Backports library carries it: a file browser over the app's folders with copy, open and move modes and UTType acceptance, in frameworks/Backports/src/UIKit. It has no access to other apps' files on iOS 6, which is the part that stays partial once built. The package is not pinned yet."
   },
   {
    "id": "expo-eas-client",

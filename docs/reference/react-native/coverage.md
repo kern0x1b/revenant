@@ -10,9 +10,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 5 |
-| missing | native code that is not built yet | 44 |
+| missing | native code that is not built yet | 45 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
-| impossible | the system service does not exist before the iOS release the note names | 9 |
+| impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 158 |
 
@@ -102,7 +102,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-dev-client | ~57.0.20 | yes | impossible | none | A development tool; one file of iOS code, no meaning in a release host. |
 | expo-device | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-document-picker | ~57.0.3 | yes | impossible | none | The picker is UIDocumentPickerViewController, which the iPhoneOS 26.2 SDK header marks available from iOS 8.0; iOS 6 has no document picker, and a substitute that picks from the media library would not be this module. Not built; no package is pinned. |
+| expo-document-picker | ~57.0.3 | yes | missing | none | Not built. Its picker is UIDocumentPickerViewController, which iOS 6 lacks (the SDK header marks it iOS 8.0), so the Backports library carries it: a file browser over the app's folders with copy, open and move modes and UTType acceptance, in frameworks/Backports/src/UIKit. It has no access to other apps' files on iOS 6, which is the part that stays partial once built. The package is not pinned yet. |
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-file-system | ~57.0.7 | yes | partial | build | Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch. |
 | expo-font | ~57.0.4 | yes | real | phone | Built from its own sources. |
