@@ -22,8 +22,10 @@ three.js does not write its shaders as one text: `WebGLRenderer` adds a prefix (
 `varying` macros, the fragment output) and expands `#include` chunks. The corpus is what three hands to `gl.shaderSource`,
 so it is the real ES 3.00 text, not a copy of its shader files.
 
-`tools/glsl_translator/capture.mjs` renders a scene with three's `WebGLRenderer`, passed a recording WebGL2 stub as its
-context. The scene has three programs:
+The captured text is committed in `frameworks/ReactNative/tests/glsl_translator/corpus/` (six files, 133937 bytes). The
+capture itself was a Node script run with three's `WebGLRenderer`, passed a recording WebGL2 stub as its context. The
+script is not in the tree, because the repository's layout allows no scripts beside `./xmakew`; it is recorded here and
+can be rewritten in Lua if the capture must be repeated. The scene has three programs:
 
 - `meshbasic`: `MeshBasicMaterial`;
 - `meshstandard`: `MeshStandardMaterial` with one directional light;
@@ -34,7 +36,8 @@ source depends on the parameters the scene sets, not on a real device.
 
 ## Pipeline and results
 
-`tools/glsl_translator/translate.sh` runs each captured stage through:
+`./xmakew l -P . frameworks/ReactNative/tools/glsl_translator.lua <spirv-cross> <glslang> <outdir>` runs each committed
+stage through:
 
 1. a rename of the user function `average(` to `revenant_average(`, because glslang rejects the name (below);
 2. glslang's ES 3.00 validation (`glslangValidator -S <stage>`);
@@ -80,6 +83,19 @@ Syntax checks against the iPhoneOS 26.2 SDK with `-target armv7-apple-ios6.0` an
 - `PoolAlloc.cpp` with `-DDISABLE_THREAD_SUPPORT` (the package adds it for iOS) returns the address of a stack local
   in its no-thread path. Patch 0002 gives that local static storage, so the pointer outlives the call.
 - glslang needs `glslang/build_info.h` from `build_info.h.tmpl`, which CMake writes; the xmake build must generate it.
+
+## Risks the review raised, and what they are
+
+An automated review of the commit flagged three upstream glslang paths. Their status:
+
+- **`PoolAlloc.cpp`, dangling pointer in the no-thread path.** Real, and in upstream code: with `DISABLE_THREAD_SUPPORT`,
+  the default allocator was a stack local. Patch 0002 makes it static, which the review's suggested fix matches.
+- **`PoolAlloc.cpp`, integer overflow in `allocationSize + headerSkip`.** Real, and upstream and unpatched here. A huge
+  request from a shader can overflow the size arithmetic. The translator must bound the source size before glslang sees
+  it, and this must be fixed upstream or in a patch 0003 before a shader from an app reaches the device.
+- **`InfoSink.h`, `std::filesystem::absolute` can throw.** The calls are reached only with the `absolute` diagnostic
+  set. Patch 0001 removes them, and the translator never sets that option. Its only effect is the text of error
+  locations.
 
 ## Not measured yet
 
