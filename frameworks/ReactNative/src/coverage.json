@@ -182,7 +182,7 @@
    "native": true,
    "status": "impossible",
    "verified": "none",
-   "note": "Sign in with Apple needs AuthenticationServices (iOS 13)."
+   "note": "Sign in with Apple needs AuthenticationServices (iOS 13). The iOS 6.1.3 dyld cache has no AuthenticationServices framework and no ASAuthorizationController, and no iOS 6 sign-in service stands in for it. The backport answers the error of a platform without the service (backports-gaps T23)."
   },
   {
    "id": "expo-application",
@@ -225,9 +225,9 @@
    "group": "sdk",
    "version": "~57.0.21",
    "native": true,
-   "status": "evaluate",
+   "status": "impossible",
    "verified": "none",
-   "note": "Background fetch is iOS 7."
+   "note": "Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so no fetch wake-up exists on iOS 6."
   },
   {
    "id": "expo-background-task",
@@ -236,7 +236,7 @@
    "native": true,
    "status": "impossible",
    "verified": "none",
-   "note": "BackgroundTasks is iOS 13."
+   "note": "BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24)."
   },
   {
    "id": "expo-battery",
@@ -245,7 +245,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 2 files of iOS code and is not built."
+   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9 and needs a guard that answers not enabled. Not built."
   },
   {
    "id": "expo-blur",
@@ -263,7 +263,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 3 files of iOS code and is not built."
+   "note": "UIScreen brightness is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-brownfield",
@@ -290,7 +290,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 30 files of iOS code and is not built."
+   "note": "EventKit (EKEventStore) is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-camera",
@@ -308,7 +308,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 2 files of iOS code and is not built."
+   "note": "CoreTelephony (CTCarrier) is present in the iOS 6.1.3 cache, and the CoreTelephony backport covers the radio-access API. Not built."
   },
   {
    "id": "expo-checkbox",
@@ -342,9 +342,9 @@
    "group": "sdk",
    "version": "~57.0.8",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "Uses Contacts.framework (iOS 9); AddressBook exists on iOS 6."
+   "note": "Contacts.framework (iOS 9) is absent from the iOS 6.1.3 cache; AddressBook is present and is the analog, and the Contacts backport exists. Not built."
   },
   {
    "id": "expo-crypto",
@@ -371,7 +371,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "note": "UIDevice and the sysctl model data are present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-document-picker",
@@ -531,9 +531,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "evaluate",
+   "status": "impossible",
    "verified": "none",
-   "note": "LocalAuthentication is iOS 8; on iOS 6 'no hardware' is the honest answer."
+   "note": "LocalAuthentication (LAContext) is iOS 8 and absent from the iOS 6.1.3 cache. The LAContext backport answers no biometry, so 'no hardware' is the answer on iOS 6, not a crash (backports-gaps T24)."
   },
   {
    "id": "expo-localization",
@@ -549,9 +549,9 @@
    "group": "sdk",
    "version": "~57.0.21",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "CoreLocation exists on iOS 6."
+   "note": "CoreLocation (CLLocationManager) is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-mail-composer",
@@ -560,7 +560,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 6 files of iOS code and is not built."
+   "note": "MessageUI (MFMailComposeViewController) is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-manifests",
@@ -594,9 +594,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "Uses Photos (iOS 8); AssetsLibrary exists on iOS 6."
+   "note": "Photos is absent from the iOS 6.1.3 cache; AssetsLibrary (ALAssetsLibrary) is present and is the analog. Not built."
   },
   {
    "id": "expo-mesh-gradient",
@@ -639,9 +639,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "Uses NWPathMonitor (iOS 12); needs SCNetworkReachability."
+   "note": "NWPathMonitor is iOS 12; SCNetworkReachability is present in the iOS 6.1.3 cache and is the analog. The Network backport exists. Not built."
   },
   {
    "id": "expo-notifications",
@@ -668,7 +668,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 10 files of iOS code and is not built."
+   "note": "UIPrintInteractionController is present in the iOS 6.1.3 cache (iOS 4.2). Not built."
   },
   {
    "id": "expo-live-photo",
@@ -677,7 +677,7 @@
    "native": true,
    "status": "impossible",
    "verified": "none",
-   "note": "Live Photos exist from iOS 9."
+   "note": "Live Photos exist from iOS 9.1, and Photos is absent from the iOS 6.1.3 cache. The Photos backport makes no Live Photo, and a Live Photo request fails with PHPhotosErrorRequestNotSupportedForAsset."
   },
   {
    "id": "expo-router",
@@ -693,9 +693,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "missing",
+   "status": "impossible",
    "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "note": "UIApplicationUserDidTakeScreenshotNotification (iOS 7) is absent from the iOS 6.1.3 cache, so nothing reports a capture on iOS 6."
   },
   {
    "id": "expo-screen-orientation",
@@ -704,7 +704,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 11 files of iOS code and is not built."
+   "note": "setStatusBarOrientation and supportedInterfaceOrientations are present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-secure-store",
@@ -713,16 +713,16 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "note": "The Keychain (SecItem, kSecAttrAccessible) is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-sensors",
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "CoreMotion exists on iOS 6."
+   "note": "CoreMotion (CMMotionManager) is present in the iOS 6.1.3 cache. CMPedometer is absent (iOS 8); the CoreMotion backport supplies it. Not built."
   },
   {
    "id": "expo-server",
@@ -749,16 +749,16 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "note": "MessageUI (MFMessageComposeViewController) is present in the iOS 6.1.3 cache. Not built."
   },
   {
    "id": "expo-speech",
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "impossible",
+   "status": "missing",
    "verified": "none",
-   "note": "AVSpeechSynthesizer is iOS 7; a different speech route would be needed."
+   "note": "AVSpeechSynthesizer is iOS 7 and absent from the iOS 6.1.3 cache. The AVFoundation backport speaks through VoiceServices, whose VSSpeechSynthesizer is present in the cache. Not built."
   },
   {
    "id": "expo-splash-screen",
@@ -792,9 +792,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "impossible",
+   "status": "missing",
    "verified": "none",
-   "note": "SKStoreReviewController is iOS 10.3; the module could open the store page instead."
+   "note": "SKStoreReviewController (iOS 10.3) is absent from the iOS 6.1.3 cache. SKStoreProductViewController is present and is the analog: the store page, not the review prompt. Not built."
   },
   {
    "id": "expo-symbols",
@@ -821,16 +821,16 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Depends on background modes available on iOS 6."
+   "note": "Background execution on iOS 6 is the beginBackgroundTaskWithExpirationHandler window, present in the iOS 6.1.3 cache; background fetch and BGTask are absent, so tasks run only in the foreground or in that window."
   },
   {
    "id": "expo-tracking-transparency",
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "evaluate",
+   "status": "impossible",
    "verified": "none",
-   "note": "ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module."
+   "note": "ATTrackingManager (iOS 14) is absent from the iOS 6.1.3 cache. The AppTrackingTransparency backport answers NotDetermined and runs no prompt."
   },
   {
    "id": "expo-updates",
@@ -864,9 +864,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "Uses SFSafariViewController (iOS 9); the fallback is the system browser."
+   "note": "SFSafariViewController (iOS 9) is absent from the iOS 6.1.3 cache. The SafariServices backport is the analog: its page is a UIWebView. Not built."
   },
   {
    "id": "expo-widgets",

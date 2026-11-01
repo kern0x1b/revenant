@@ -10,9 +10,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 44 |
-| evaluate | not attempted; the note says what iOS 6 offers | 36 |
-| impossible | the system service does not exist before the iOS release the note names | 8 |
+| missing | native code that is not built yet | 51 |
+| evaluate | not attempted; the note says what iOS 6 offers | 27 |
+| impossible | the system service does not exist before the iOS release the note names | 10 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 158 |
 
@@ -80,28 +80,28 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-app-auth | ~11.1.0 | yes | missing | none | Has 9 files of iOS code and is not built. |
 | expo-app-loader-provider | ~8.0.0 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-app-metrics | ~57.0.22 | yes | missing | none | Has 94 files of iOS code and is not built. |
-| expo-apple-authentication | ~57.0.2 | yes | impossible | none | Sign in with Apple needs AuthenticationServices (iOS 13). |
+| expo-apple-authentication | ~57.0.2 | yes | impossible | none | Sign in with Apple needs AuthenticationServices (iOS 13). The iOS 6.1.3 dyld cache has no AuthenticationServices framework and no ASAuthorizationController, and no iOS 6 sign-in service stands in for it. The backport answers the error of a platform without the service (backports-gaps T23). |
 | expo-application | ~57.0.3 | yes | real | build | Compiled; not exercised. |
 | expo-asset | ~57.0.20 | yes | real | build | Compiled; its use is not exercised by a screen. |
 | expo-audio | ~57.0.5 | yes | stub | none | A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-background-fetch | ~57.0.21 | yes | evaluate | none | Background fetch is iOS 7. |
-| expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. |
-| expo-battery | ~57.0.3 | yes | missing | none | Has 2 files of iOS code and is not built. |
+| expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so no fetch wake-up exists on iOS 6. |
+| expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24). |
+| expo-battery | ~57.0.3 | yes | missing | none | Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9 and needs a guard that answers not enabled. Not built. |
 | expo-blur | ~57.0.3 | yes | missing | none | Has 5 files of iOS code and is not built. |
-| expo-brightness | ~57.0.2 | yes | missing | none | Has 3 files of iOS code and is not built. |
+| expo-brightness | ~57.0.2 | yes | missing | none | UIScreen brightness is present in the iOS 6.1.3 cache. Not built. |
 | expo-brownfield | ~57.0.24 | yes | missing | none | Has 7 files of iOS code and is not built. |
 | expo-build-properties | ~57.0.22 | no | n/a | none | Build-time config plugin. |
-| expo-calendar | ~57.0.5 | yes | missing | none | Has 30 files of iOS code and is not built. |
+| expo-calendar | ~57.0.5 | yes | missing | none | EventKit (EKEventStore) is present in the iOS 6.1.3 cache. Not built. |
 | expo-camera | ~57.0.6 | yes | real | build | Built; capture on iOS 6 is not exercised. |
-| expo-cellular | ~57.0.2 | yes | missing | none | Has 2 files of iOS code and is not built. |
+| expo-cellular | ~57.0.2 | yes | missing | none | CoreTelephony (CTCarrier) is present in the iOS 6.1.3 cache, and the CoreTelephony backport covers the radio-access API. Not built. |
 | expo-checkbox | ~57.0.0 | no | js | none | Uses the core view; no native code. |
 | expo-clipboard | ~57.0.2 | yes | real | phone | Built from its own sources. |
 | expo-constants | ~57.0.22 | yes | real | phone | EXConstants.bundle and app.config are staged by the spike script, not by the build. |
-| expo-contacts | ~57.0.8 | yes | evaluate | none | Uses Contacts.framework (iOS 9); AddressBook exists on iOS 6. |
+| expo-contacts | ~57.0.8 | yes | missing | none | Contacts.framework (iOS 9) is absent from the iOS 6.1.3 cache; AddressBook is present and is the analog, and the Contacts backport exists. Not built. |
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-dev-client | ~57.0.20 | yes | impossible | none | A development tool; one file of iOS code, no meaning in a release host. |
-| expo-device | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
+| expo-device | ~57.0.2 | yes | missing | none | UIDevice and the sysctl model data are present in the iOS 6.1.3 cache. Not built. |
 | expo-document-picker | ~57.0.3 | yes | stub | none | Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system. |
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-file-system | ~57.0.7 | yes | partial | build | Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch. |
@@ -119,44 +119,44 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |
 | expo-linear-gradient | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-linking | ~57.0.13 | yes | real | phone | The manifest lookup works after the staged config. |
-| expo-local-authentication | ~57.0.3 | yes | evaluate | none | LocalAuthentication is iOS 8; on iOS 6 'no hardware' is the honest answer. |
+| expo-local-authentication | ~57.0.3 | yes | impossible | none | LocalAuthentication (LAContext) is iOS 8 and absent from the iOS 6.1.3 cache. The LAContext backport answers no biometry, so 'no hardware' is the answer on iOS 6, not a crash (backports-gaps T24). |
 | expo-localization | ~57.0.2 | yes | real | build | Compiled; not exercised. |
-| expo-location | ~57.0.21 | yes | evaluate | none | CoreLocation exists on iOS 6. |
-| expo-mail-composer | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
+| expo-location | ~57.0.21 | yes | missing | none | CoreLocation (CLLocationManager) is present in the iOS 6.1.3 cache. Not built. |
+| expo-mail-composer | ~57.0.2 | yes | missing | none | MessageUI (MFMailComposeViewController) is present in the iOS 6.1.3 cache. Not built. |
 | expo-manifests | ~57.0.2 | yes | missing | none | Not built; expo-constants runs without it. |
 | expo-maps | ~57.0.4 | yes | evaluate | none | MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps. |
 | expo-mcp | ~0.2.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-media-library | ~57.0.5 | yes | evaluate | none | Uses Photos (iOS 8); AssetsLibrary exists on iOS 6. |
+| expo-media-library | ~57.0.5 | yes | missing | none | Photos is absent from the iOS 6.1.3 cache; AssetsLibrary (ALAssetsLibrary) is present and is the analog. Not built. |
 | expo-mesh-gradient | ~57.0.2 | yes | impossible | none | MeshGradient is SwiftUI, iOS 18. |
 | expo-module-template | ~57.0.15 | yes | n/a | none | A template for authors. |
 | expo-modules-core | ~57.0.23 | yes | partial | phone | Core builds and the app runs on it. Not yet carried as a package: the build is the spike's. SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package. |
 | expo-navigation-bar | ~57.0.3 | no | n/a | none | Android only. |
-| expo-network | ~57.0.2 | yes | evaluate | none | Uses NWPathMonitor (iOS 12); needs SCNetworkReachability. |
+| expo-network | ~57.0.2 | yes | missing | none | NWPathMonitor is iOS 12; SCNetworkReachability is present in the iOS 6.1.3 cache and is the analog. The Network backport exists. Not built. |
 | expo-notifications | ~57.0.23 | yes | stub | none | Name-only stubs of nine modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration). |
 | expo-observe | ~57.0.25 | yes | missing | none | Has 25 files of iOS code and is not built. |
-| expo-print | ~57.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
-| expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9. |
+| expo-print | ~57.0.2 | yes | missing | none | UIPrintInteractionController is present in the iOS 6.1.3 cache (iOS 4.2). Not built. |
+| expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9.1, and Photos is absent from the iOS 6.1.3 cache. The Photos backport makes no Live Photo, and a Live Photo request fails with PHPhotosErrorRequestNotSupportedForAsset. |
 | expo-router | ~57.0.28 | yes | js | phone | The router runs in the app; its small iOS part is not built. |
-| expo-screen-capture | ~57.0.4 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-screen-orientation | ~57.0.3 | yes | missing | none | Has 11 files of iOS code and is not built. |
-| expo-secure-store | ~57.0.4 | yes | missing | none | Has 5 files of iOS code and is not built. |
-| expo-sensors | ~57.0.3 | yes | evaluate | none | CoreMotion exists on iOS 6. |
+| expo-screen-capture | ~57.0.4 | yes | impossible | none | UIApplicationUserDidTakeScreenshotNotification (iOS 7) is absent from the iOS 6.1.3 cache, so nothing reports a capture on iOS 6. |
+| expo-screen-orientation | ~57.0.3 | yes | missing | none | setStatusBarOrientation and supportedInterfaceOrientations are present in the iOS 6.1.3 cache. Not built. |
+| expo-secure-store | ~57.0.4 | yes | missing | none | The Keychain (SecItem, kSecAttrAccessible) is present in the iOS 6.1.3 cache. Not built. |
+| expo-sensors | ~57.0.3 | yes | missing | none | CoreMotion (CMMotionManager) is present in the iOS 6.1.3 cache. CMPedometer is absent (iOS 8); the CoreMotion backport supplies it. Not built. |
 | expo-server | ~57.0.3 | no | n/a | none | Server runtime, not on the device. |
 | expo-sharing | ~57.0.23 | yes | real | build | Built; the share sheet is not exercised. |
-| expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
-| expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
+| expo-sms | ~57.0.2 | yes | missing | none | MessageUI (MFMessageComposeViewController) is present in the iOS 6.1.3 cache. Not built. |
+| expo-speech | ~57.0.3 | yes | missing | none | AVSpeechSynthesizer is iOS 7 and absent from the iOS 6.1.3 cache. The AVFoundation backport speaks through VoiceServices, whose VSSpeechSynthesizer is present in the cache. Not built. |
 | expo-splash-screen | ~57.0.10 | yes | real | phone | Built from its own sources. |
 | expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
-| expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |
+| expo-store-review | ~57.0.3 | yes | missing | none | SKStoreReviewController (iOS 10.3) is absent from the iOS 6.1.3 cache. SKStoreProductViewController is present and is the analog: the store page, not the review prompt. Not built. |
 | expo-symbols | ~57.0.3 | yes | missing | none | SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons). |
 | expo-system-ui | ~57.0.4 | yes | real | build | Compiled; not exercised. |
-| expo-task-manager | ~57.0.21 | yes | evaluate | none | Depends on background modes available on iOS 6. |
-| expo-tracking-transparency | ~57.0.2 | yes | evaluate | none | ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module. |
+| expo-task-manager | ~57.0.21 | yes | evaluate | none | Background execution on iOS 6 is the beginBackgroundTaskWithExpirationHandler window, present in the iOS 6.1.3 cache; background fetch and BGTask are absent, so tasks run only in the foreground or in that window. |
+| expo-tracking-transparency | ~57.0.2 | yes | impossible | none | ATTrackingManager (iOS 14) is absent from the iOS 6.1.3 cache. The AppTrackingTransparency backport answers NotDetermined and runs no prompt. |
 | expo-updates | ~57.0.26 | yes | evaluate | none | Needs the manifests module and a download path; no network scheme is decided. |
 | expo-video-thumbnails | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-video | ~57.0.5 | yes | evaluate | none | AVPlayer exists; the module uses newer AVKit and Swift API. |
-| expo-web-browser | ~57.0.3 | yes | evaluate | none | Uses SFSafariViewController (iOS 9); the fallback is the system browser. |
+| expo-web-browser | ~57.0.3 | yes | missing | none | SFSafariViewController (iOS 9) is absent from the iOS 6.1.3 cache. The SafariServices backport is the analog: its page is a UIWebView. Not built. |
 | expo-widgets | ~57.0.26 | yes | impossible | none | WidgetKit, iOS 14. |
 | jest-expo | ~57.0.6 | yes | n/a | none | A test-runner preset; no native code. |
 | lottie-react-native | ~7.3.8 | yes | missing | none | Has 16 files of iOS code and is not built. |
