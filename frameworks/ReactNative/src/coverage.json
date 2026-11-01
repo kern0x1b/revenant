@@ -1127,7 +1127,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not attempted. Hermes supports 32-bit ARM, but needs building against iOS 6 libc++ and a bytecode toolchain; the owner's note says JSC is the engine for now."
+   "note": "Measured, not built. Source: hermes-v250829098.0.17 (the hermes-compiler RN 0.86.3 pins), in .cache-private. Compiles for armv7 iOS 6 with generated config headers: the support layer (ADT, Support, Platform minus Android, Windows and Intl). The Intl layer needs ICU's unicode headers, which the iOS SDK may carry, not checked. The VM stops at llvh/IR/Attributes.inc, which needs the host llvh-tblgen. The bytecode generator (BCGen) and hermesc are source in the same tree; not yet built."
   },
   {
    "id": "bridgeless new architecture (RCTReactNativeFactory, RCTHost)",

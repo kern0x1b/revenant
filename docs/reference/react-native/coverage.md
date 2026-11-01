@@ -23,7 +23,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | Module | Version | Native | Status | Checked | Note |
 | --- | --- | --- | --- | --- | --- |
 | engine: JavaScriptCore (prefixed WebKit engine) | 0.86.3 | yes | real | phone | Runs the 24 MB bundle with the JIT; startup to the first render takes 7.8 s with inline requires. |
-| engine: Hermes | 0.86.3 | yes | evaluate | none | Not attempted. Hermes supports 32-bit ARM, but needs building against iOS 6 libc++ and a bytecode toolchain; the owner's note says JSC is the engine for now. |
+| engine: Hermes | 0.86.3 | yes | evaluate | none | Measured, not built. Source: hermes-v250829098.0.17 (the hermes-compiler RN 0.86.3 pins), in .cache-private. Compiles for armv7 iOS 6 with generated config headers: the support layer (ADT, Support, Platform minus Android, Windows and Intl). The Intl layer needs ICU's unicode headers, which the iOS SDK may carry, not checked. The VM stops at llvh/IR/Attributes.inc, which needs the host llvh-tblgen. The bytecode generator (BCGen) and hermesc are source in the same tree; not yet built. |
 | bridgeless new architecture (RCTReactNativeFactory, RCTHost) | 0.86.3 | yes | real | phone |  |
 | JSI and host functions | 0.86.3 | yes | real | phone |  |
 | Fabric: View, Text, Paragraph, Image, ScrollView, ActivityIndicator, SafeAreaView | 0.86.3 | yes | real | phone | Seen on screen; Image and ActivityIndicator by their use in the app. |
