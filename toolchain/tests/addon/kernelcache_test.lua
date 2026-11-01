@@ -81,12 +81,16 @@ function failures(opt)
         table.insert(found, "10000 bytes that wrap the 4096-byte window decode back to themselves")
     end
 
+    local function replace_byte(bytes, index, value)
+        return bytes:sub(1, index - 1) .. string.char(value) .. bytes:sub(index + 1)
+    end
+    local good = container(complzss, expected, stream)
     local refusals = {
         ["a container that is not complzss"] = "XXXXXXXX" .. string.rep("\0", 16) .. stream,
-        ["a container with a wrong Adler-32"] = container(complzss, expected, stream):gsub("^complzss.", "complzss\1"),
+        ["a container with a wrong Adler-32"] = replace_byte(good, 9, good:byte(9) ~ 0xFF),
         ["a stream that ends inside a match"] = container(complzss, expected, "\254\238"),
         ["a stream whose plain size is wrong"] = container(complzss, expected .. "!", stream),
-        ["padding that is not zero"] = (container(complzss, expected, stream):gsub("\0", "\1", 1)),
+        ["padding that is not zero"] = replace_byte(good, 25, 1),
     }
     for name, bytes in pairs(refusals) do
         if fixtures.refusal(function () complzss.unwrap(bytes) end) == nil then
