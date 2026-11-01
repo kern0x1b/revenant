@@ -44,3 +44,19 @@ function attach(target, project)
         end
     end
 end
+
+function link_orders(backport_links, links)
+    local backported = {}
+    for _, name in ipairs(backport_links) do
+        backported[name] = true
+    end
+    local orders = {}
+    for _, name in ipairs(backport_links) do
+        for _, other in ipairs(links) do
+            if not backported[other] then
+                table.insert(orders, {name, other})
+            end
+        end
+    end
+    return orders
+end

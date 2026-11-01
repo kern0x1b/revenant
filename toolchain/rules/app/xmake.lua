@@ -6,6 +6,21 @@ rule("app")
         target:add("packages", "ldid", "firmware-tools")
     end)
 
+    before_link(function (target)
+        local package = target:pkg("backports")
+        if not package then
+            return
+        end
+        local links = {}
+        for _, group in ipairs(target:get_from("links", "*") or {}) do
+            table.join2(links, group)
+        end
+        local backports = import("@self.apple.backports")
+        for _, order in ipairs(backports.link_orders(table.wrap(package:get("links")), links)) do
+            target:add("linkorders", order)
+        end
+    end)
+
     after_link(function (target)
         import("@self.apple.platform")
         platform.verify_packages(target)
