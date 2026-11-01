@@ -142,16 +142,20 @@ extension Locale {
 
         private static func likelyScript(language: String, region: String?) -> Script? {
             let input = region.map { language + "_" + $0 } ?? language
-            let maximal = likelySubtags(input)
+            guard let maximal = likelySubtags(input) else {
+                return nil
+            }
             return maximal.split(separator: "_").dropFirst().first(where: { $0.count == 4 }).map { Script(String($0)) }
         }
 
-        private static func likelySubtags(_ locale: String) -> String {
+        private static func likelySubtags(_ locale: String) -> String? {
             var output = [CChar](repeating: 0, count: 256)
             var status: Int32 = 0
-            _ = icuAddLikelySubtags(locale, &output, Int32(output.count), &status)
-            precondition(status <= 0, "uloc_addLikelySubtags failed for \(locale) with status \(status)")
-            return String(cString: output)
+            let length = Int(icuAddLikelySubtags(locale, &output, Int32(output.count), &status))
+            guard status <= 0, length > 0, length < output.count else {
+                return nil
+            }
+            return String(decoding: output[..<length].map { UInt8(bitPattern: $0) }, as: UTF8.self)
         }
 
         private static func components(of identifier: String) -> Components {
