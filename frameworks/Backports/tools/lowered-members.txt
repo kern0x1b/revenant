@@ -19516,6 +19516,7 @@ member MPRemoteCommand -enabled
 member MPRemoteCommand -initRevenant
 member MPRemoteCommand -removeTarget:
 member MPRemoteCommand -removeTarget:action:
+member MPRemoteCommand -revenantActive
 member MPRemoteCommand -revenantTargets
 member MPRemoteCommand -revenant_dispatch:
 member MPRemoteCommand -setEnabled:
