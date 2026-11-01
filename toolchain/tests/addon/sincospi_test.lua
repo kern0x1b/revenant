@@ -34,6 +34,32 @@ function failures(arguments)
     if after ~= 0 then
         table.insert(found, "the armv7 iOS 6 SIMD probe still fails with the lowered math header: " .. (io.readfile(after_log) or ""))
     end
+    local module_probe = path.join(output, "simd_module_probe.mm")
+    io.writefile(module_probe, table.concat({
+        "@import simd;",
+        "int main(int argc, char **argv) {",
+        "    simd_float4 x = {0.25f, 0.5f, 1.0f, (float)argc * 0.5f};",
+        "    simd_float4 s, c;",
+        "    simd::sincospi(x, &s, &c);",
+        "    double sd, cd;",
+        "    __sincospi(argc / 3.0, &sd, &cd);",
+        "    return (int)(sd + cd + s[0] + c[0]);",
+        "}", ""}, "\n"))
+    local module_before_log = path.join(output, "module_before.log")
+    local module_before = os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fsyntax-only", "-fmodules", "-fmodules-cache-path=" .. path.join(output, "module-before"),
+                                                                   "-x", "objective-c++", module_probe}),
+                                   {try = true, stdout = module_before_log, stderr = module_before_log})
+    local module_diagnostic = io.readfile(module_before_log) or ""
+    if module_before == 0 or not module_diagnostic:find("no member named '__sincospif' in the global namespace", 1, true) then
+        table.insert(found, "the armv7 iOS 6 simd module probe did not reproduce the __sincospif declaration failure: " .. module_diagnostic)
+    end
+    local module_after_log = path.join(output, "module_after.log")
+    local module_after = os.execv(arguments.clang, table.join(ios6(arguments.sdk), {"-fsyntax-only", "-fmodules", "-fmodules-cache-path=" .. path.join(output, "module-after"),
+                                                                  "-ivfsoverlay", vfs, "-x", "objective-c++", module_probe}),
+                                  {try = true, stdout = module_after_log, stderr = module_after_log})
+    if module_after ~= 0 then
+        table.insert(found, "the armv7 iOS 6 simd module probe still fails with the lowered header through the VFS alone: " .. (io.readfile(module_after_log) or ""))
+    end
     local objects = {}
     for _, symbol in ipairs(SYMBOLS) do
         local object = path.join(output, symbol .. ".o")
