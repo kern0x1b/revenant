@@ -13,7 +13,7 @@ it says otherwise.
 | glslang (front end) | `b5782e52`, 1.4.335+0 (glslang 16.1.0 by its own numbering) | `6c242598c332050bf3a3619d299594ca2909426935f2c86c69c7356b049347c7`; the emulator's pin |
 | SPIRV-Cross (back end) | `2de1265f`, 1.3.268+0 | `3dcd276a804ad4f32543ddd45a88f28ccdaab59c05b51b6a2965f7390ef2d673` |
 
-The packages are `packages/g/glslang` (two patches) and `packages/s/spirv-cross`. The host run also used the Homebrew
+The packages are `packages/g/glslang` (four patches) and `packages/s/spirv-cross`. The host run also used the Homebrew
 glslang 16.6.0 for the first round; its results match the pinned build (see below).
 
 ## The corpus
@@ -84,6 +84,50 @@ Syntax checks against the iPhoneOS 26.2 SDK with `-target armv7-apple-ios6.0` an
   in its no-thread path. Patch 0002 gives that local static storage, so the pointer outlives the call.
 - glslang needs `glslang/build_info.h` from `build_info.h.tmpl`, which CMake writes; the xmake build must generate it.
 
+### The xmake build
+
+Both packages build for armv7 with the iPhoneOS 26.2 SDK and a 6.0 deployment target, through the `iphoneos` CMake helper
+(`toolchain/modules/apple/cmake.lua`), and `frameworks/ReactNative/xmake.lua` links them with the translator:
+
+- `glslang` installs `libglslang`, `libMachineIndependent`, `libGenericCodeGen`, `libOSDependent` and
+  `libglslang-default-resource-limits`, with SPIR-V in `libglslang`. It builds with `DISABLE_THREAD_SUPPORT` and without
+  HLSL, the SPIRV-Tools optimizer, tests and the standalone binaries. CMake writes `build_info.h`.
+- `spirv-cross` installs `libspirv-cross-core` and `libspirv-cross-glsl`; its CLI and the other back ends are off.
+- `revenant-glsl-translator` (`frameworks/ReactNative/src/glsl_translator`) does the translation in process, with the
+  same steps as the CLI pipeline: OpenGL semantics, automatic locations, and SPIRV-Cross for ES 1.00. It links both
+  packages into `build/iphoneos/armv7/release/librevenant-glsl-translator.a`.
+
+```
+REVENANT_CACHE=<private cache> ./xmakew f -P . -p iphoneos -a armv7 --component=ReactNative -y
+REVENANT_CACHE=<private cache> ./xmakew build -P . revenant-glsl-translator
+```
+
+The private cache must lie outside the checkout (see the finding below). Both packages and the translator build, with
+no warnings from the patched files.
+
+**Finding, toolchain: patches do not apply inside a checkout.** With the default cache, which lies inside the checkout,
+xmake's patch step runs `git apply` and gets "Skipped patch" for every file, exits 0, and leaves the sources unpatched. The
+first armv7 build then compiled the unpatched glslang and failed on `std::filesystem` (iOS 13). The same `git apply` applies
+the patches cleanly from `/tmp`, and a clone of the cache outside the checkout applies them too. The cause was not
+isolated. It was checked for glslang only; any package with patches built from a checkout-local cache may be affected.
+The fix belongs to the toolchain, not to this prototype.
+
+**The import check.** `llvm-nm` lists 194 undefined symbols across the nine archives, after removing the ones they define:
+
+- 120 are C++ and 116 of them are exported by the revenant armv7 libc++ (`libc++.1.0.dylib` and `libc++abi.1.0.dylib`).
+  The four others are `__Unwind_SjLj_Register`, `__Unwind_SjLj_Resume` and `__Unwind_SjLj_Unregister`, which come from
+  `libgcc_s` and the SjLj unwinder armv7 iOS uses, and `___cxa_atexit`, from libSystem.
+- 74 are C library symbols (libSystem, libgcc helpers, stdio, math). These are not yet checked against the 6.1.3 dyld
+  shared cache: the repository has no export reader for it.
+- None is `std::filesystem`, a thread-local (`_tlv_*`), `clock_gettime`, `os_unfair_lock`, an Objective-C or a dispatch
+  symbol.
+
+**The host check.** `tests/glsl_translator/translate_corpus.cpp` translates the six corpus programs in process, built
+against the pinned host glslang and SPIRV-Cross. The outputs are byte-identical to the CLI pipeline's ES 1.00 outputs
+(`tests/glsl_translator/expected/`), and a source one byte over the 1 MiB limit is rejected. The test passes on the host;
+the device has not compiled these outputs. It is built with `clang++ -std=c++17 -fexceptions` against the glslang and
+SPIRV-Cross host libraries and the include paths of the pinned sources, then run with the test folder as its argument.
+
 ## Risks the review raised, and what they are
 
 An automated review of the commit flagged three upstream glslang paths. Their status:
@@ -111,6 +155,6 @@ An automated review of the commit flagged three upstream glslang paths. Their st
 - **The device compiler.** The phone is claimed by another worker, so the ES 1.00 outputs have not been compiled by the
   SGX543 driver. That is the acceptance test for this prototype: the six outputs compile on the phone.
 - **The rendered result.** The stub renders nothing, so no output image exists yet.
-- **The armv7 build.** The syntax checks pass, but no object files are linked, and the thread-free configuration has not
-  run on the device.
+- **The device run.** The armv7 static libraries build and link, and the C++ imports are checked (above), but the thread-free
+  configuration has not run on the device, and the 74 C library imports are not yet checked against iOS 6.1.3.
 - **Skia's output.** Not in the corpus (see `docs/explanation/backports/metal-on-ios6.md`, the run-time MSL gap).

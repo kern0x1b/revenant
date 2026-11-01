@@ -1,0 +1,267 @@
+#version 100
+#extension GL_OES_standard_derivatives : require
+precision mediump float;
+precision highp int;
+
+struct DirectionalLight
+{
+    highp vec3 direction;
+    highp vec3 color;
+};
+
+struct IncidentLight
+{
+    highp vec3 color;
+    highp vec3 direction;
+    bool visible;
+};
+
+struct PhysicalMaterial
+{
+    highp vec3 diffuseColor;
+    highp vec3 diffuseContribution;
+    highp vec3 specularColor;
+    highp vec3 specularColorBlended;
+    highp float roughness;
+    highp float metalness;
+    highp float specularF90;
+    highp float dispersion;
+    highp vec2 dfg;
+    highp vec3 multiScatteringCompensation;
+};
+
+struct ReflectedLight
+{
+    highp vec3 directDiffuse;
+    highp vec3 directSpecular;
+    highp vec3 indirectDiffuse;
+    highp vec3 indirectSpecular;
+};
+
+uniform highp vec3 diffuse;
+uniform highp float opacity;
+uniform highp vec3 emissive;
+uniform highp float roughness;
+uniform highp float metalness;
+uniform bool isOrthographic;
+uniform highp sampler2D dfgLUT;
+uniform DirectionalLight directionalLights[1];
+uniform highp vec3 ambientLightColor;
+uniform highp mat4 viewMatrix;
+uniform highp vec3 cameraPosition;
+uniform bool receiveShadow;
+
+varying highp vec3 vNormal;
+varying highp vec3 vViewPosition;
+highp vec3 clearcoatSpecularDirect;
+highp vec3 clearcoatSpecularIndirect;
+highp vec3 sheenSpecularDirect;
+highp vec3 sheenSpecularIndirect;
+
+void getDirectionalLightInfo(DirectionalLight directionalLight, inout IncidentLight light)
+{
+    light.color = directionalLight.color;
+    light.direction = directionalLight.direction;
+    light.visible = true;
+}
+
+highp float pow2(highp float x)
+{
+    return x * x;
+}
+
+highp vec3 F_Schlick(highp vec3 f0, highp float f90, highp float dotVH)
+{
+    highp float fresnel = exp2((((-5.554729938507080078125) * dotVH) - 6.9831600189208984375) * dotVH);
+    return (f0 * (1.0 - fresnel)) + vec3(f90 * fresnel);
+}
+
+highp float V_GGX_SmithCorrelated(highp float alpha, highp float dotNL, highp float dotNV)
+{
+    highp float a2 = pow2(alpha);
+    highp float gv = dotNL * sqrt(a2 + ((1.0 - a2) * pow2(dotNV)));
+    highp float gl = dotNV * sqrt(a2 + ((1.0 - a2) * pow2(dotNL)));
+    return 0.5 / max(gv + gl, 9.9999999747524270787835121154785e-07);
+}
+
+highp float D_GGX(highp float alpha, highp float dotNH)
+{
+    highp float a2 = pow2(alpha);
+    highp float denom = (pow2(dotNH) * (a2 - 1.0)) + 1.0;
+    return (0.3183098733425140380859375 * a2) / pow2(denom);
+}
+
+highp vec3 BRDF_GGX(highp vec3 lightDir, highp vec3 viewDir, highp vec3 normal, PhysicalMaterial material)
+{
+    highp vec3 f0 = material.specularColorBlended;
+    highp float f90 = material.specularF90;
+    highp float roughness_1 = max(material.roughness, 0.04500000178813934326171875);
+    highp float alpha = pow2(roughness_1);
+    highp vec3 halfDir = normalize(lightDir + viewDir);
+    highp float dotNL = clamp(dot(normal, lightDir), 0.0, 1.0);
+    highp float dotNV = clamp(dot(normal, viewDir), 0.0, 1.0);
+    highp float dotNH = clamp(dot(normal, halfDir), 0.0, 1.0);
+    highp float dotVH = clamp(dot(viewDir, halfDir), 0.0, 1.0);
+    highp vec3 F = F_Schlick(f0, f90, dotVH);
+    highp float V = V_GGX_SmithCorrelated(alpha, dotNL, dotNV);
+    highp float D = D_GGX(alpha, dotNH);
+    return F * (V * D);
+}
+
+highp vec3 BRDF_Lambert(highp vec3 diffuseColor)
+{
+    return diffuseColor * 0.3183098733425140380859375;
+}
+
+void RE_Direct_Physical(IncidentLight directLight, highp vec3 geometryPosition, highp vec3 geometryNormal, highp vec3 geometryViewDir, highp vec3 geometryClearcoatNormal, PhysicalMaterial material, inout ReflectedLight reflectedLight)
+{
+    highp float dotNL = clamp(dot(geometryNormal, directLight.direction), 0.0, 1.0);
+    highp vec3 irradiance = directLight.color * dotNL;
+    highp vec3 specularBRDF = BRDF_GGX(directLight.direction, geometryViewDir, geometryNormal, material);
+    reflectedLight.directSpecular += ((irradiance * specularBRDF) * material.multiScatteringCompensation);
+    highp vec3 halfDir = normalize(directLight.direction + geometryViewDir);
+    highp float dotVH = clamp(dot(geometryViewDir, halfDir), 0.0, 1.0);
+    highp vec3 F = F_Schlick(material.specularColor, material.specularF90, dotVH);
+    highp vec3 diffuseBRDF = BRDF_Lambert(material.diffuseContribution);
+    reflectedLight.directDiffuse += ((irradiance * diffuseBRDF) * (vec3(1.0) - F));
+}
+
+highp vec3 getAmbientLightIrradiance(highp vec3 ambientLightColor_1)
+{
+    highp vec3 irradiance = ambientLightColor_1;
+    return irradiance;
+}
+
+void computeMultiscattering(highp vec2 fab, highp vec3 specularColor, highp float specularF90, inout highp vec3 singleScatter, inout highp vec3 multiScatter)
+{
+    highp vec3 Fr = specularColor;
+    highp vec3 FssEss = (Fr * fab.x) + vec3(specularF90 * fab.y);
+    highp float Ess = fab.x + fab.y;
+    highp float Ems = 1.0 - Ess;
+    highp vec3 Favg = Fr + ((vec3(1.0) - Fr) * 0.04761900007724761962890625);
+    highp vec3 Fms = (FssEss * Favg) / (vec3(1.0) - (Favg * Ems));
+    singleScatter += FssEss;
+    multiScatter += (Fms * Ems);
+}
+
+void RE_IndirectDiffuse_Physical(highp vec3 irradiance, highp vec3 geometryPosition, highp vec3 geometryNormal, highp vec3 geometryViewDir, highp vec3 geometryClearcoatNormal, PhysicalMaterial material, inout ReflectedLight reflectedLight)
+{
+    highp vec3 singleScattering = vec3(0.0);
+    highp vec3 multiScattering = vec3(0.0);
+    highp vec3 param = singleScattering;
+    highp vec3 param_1 = multiScattering;
+    computeMultiscattering(material.dfg, material.specularColor, material.specularF90, param, param_1);
+    singleScattering = param;
+    multiScattering = param_1;
+    highp vec3 diffuse_1 = (irradiance * BRDF_Lambert(material.diffuseContribution)) * ((vec3(1.0) - singleScattering) - multiScattering);
+    reflectedLight.indirectDiffuse += diffuse_1;
+}
+
+void RE_IndirectSpecular_Physical(highp vec3 radiance, highp vec3 irradiance, highp vec3 clearcoatRadiance, highp vec3 geometryPosition, highp vec3 geometryNormal, highp vec3 geometryViewDir, highp vec3 geometryClearcoatNormal, PhysicalMaterial material, inout ReflectedLight reflectedLight)
+{
+    highp vec3 singleScatteringDielectric = vec3(0.0);
+    highp vec3 multiScatteringDielectric = vec3(0.0);
+    highp vec3 singleScatteringMetallic = vec3(0.0);
+    highp vec3 multiScatteringMetallic = vec3(0.0);
+    highp vec3 param = singleScatteringDielectric;
+    highp vec3 param_1 = multiScatteringDielectric;
+    computeMultiscattering(material.dfg, material.specularColor, material.specularF90, param, param_1);
+    singleScatteringDielectric = param;
+    multiScatteringDielectric = param_1;
+    highp vec3 param_2 = singleScatteringMetallic;
+    highp vec3 param_3 = multiScatteringMetallic;
+    computeMultiscattering(material.dfg, material.diffuseColor, material.specularF90, param_2, param_3);
+    singleScatteringMetallic = param_2;
+    multiScatteringMetallic = param_3;
+    highp vec3 singleScattering = mix(singleScatteringDielectric, singleScatteringMetallic, vec3(material.metalness));
+    highp vec3 multiScattering = mix(multiScatteringDielectric, multiScatteringMetallic, vec3(material.metalness));
+    highp vec3 totalScatteringDielectric = singleScatteringDielectric + multiScatteringDielectric;
+    highp vec3 diffuse_1 = material.diffuseContribution * (vec3(1.0) - totalScatteringDielectric);
+    highp vec3 cosineWeightedIrradiance = irradiance * 0.3183098733425140380859375;
+    highp vec3 indirectSpecular = radiance * singleScattering;
+    indirectSpecular += (multiScattering * cosineWeightedIrradiance);
+    highp vec3 indirectDiffuse = diffuse_1 * cosineWeightedIrradiance;
+    reflectedLight.indirectSpecular += indirectSpecular;
+    reflectedLight.indirectDiffuse += indirectDiffuse;
+}
+
+highp vec4 sRGBTransferOETF(highp vec4 value)
+{
+    return vec4(mix((pow(value.xyz, vec3(0.416660010814666748046875)) * 1.05499994754791259765625) - vec3(0.054999999701976776123046875), value.xyz * 12.9200000762939453125, vec3(lessThanEqual(value.xyz, vec3(0.003130800090730190277099609375)))), value.w);
+}
+
+highp vec4 linearToOutputTexel(highp vec4 value)
+{
+    highp vec4 param = vec4(mat3(vec3(1.0, 0.0, -0.0), vec3(-0.0, 1.0, -0.0), vec3(-0.0, 0.0, 1.0)) * value.xyz, value.w);
+    return sRGBTransferOETF(param);
+}
+
+void main()
+{
+    clearcoatSpecularDirect = vec3(0.0);
+    clearcoatSpecularIndirect = vec3(0.0);
+    sheenSpecularDirect = vec3(0.0);
+    sheenSpecularIndirect = vec3(0.0);
+    highp vec4 diffuseColor = vec4(diffuse, opacity);
+    ReflectedLight reflectedLight = ReflectedLight(vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+    highp vec3 totalEmissiveRadiance = emissive;
+    highp float roughnessFactor = roughness;
+    highp float metalnessFactor = metalness;
+    highp float faceDirection = gl_FrontFacing ? 1.0 : (-1.0);
+    highp vec3 normal = normalize(vNormal);
+    highp vec3 nonPerturbedNormal = normal;
+    PhysicalMaterial material;
+    material.diffuseColor = diffuseColor.xyz;
+    material.diffuseContribution = diffuseColor.xyz * (1.0 - metalnessFactor);
+    material.metalness = metalnessFactor;
+    highp vec3 dxy = max(abs(dFdx(nonPerturbedNormal)), abs(dFdy(nonPerturbedNormal)));
+    highp float geometryRoughness = max(max(dxy.x, dxy.y), dxy.z);
+    material.roughness = max(roughnessFactor, 0.04500000178813934326171875);
+    material.roughness += geometryRoughness;
+    material.roughness = min(material.roughness, 1.0);
+    material.specularColor = vec3(0.039999999105930328369140625);
+    material.specularColorBlended = mix(material.specularColor, diffuseColor.xyz, vec3(metalnessFactor));
+    material.specularF90 = 1.0;
+    highp vec3 geometryPosition = -vViewPosition;
+    highp vec3 geometryNormal = normal;
+    highp vec3 _592;
+    if (isOrthographic)
+    {
+        _592 = vec3(0.0, 0.0, 1.0);
+    }
+    else
+    {
+        _592 = normalize(vViewPosition);
+    }
+    highp vec3 geometryViewDir = _592;
+    highp vec3 geometryClearcoatNormal = vec3(0.0);
+    highp float dotNVms = clamp(dot(geometryNormal, geometryViewDir), 0.0, 1.0);
+    material.dfg = texture2D(dfgLUT, vec2(material.roughness, dotNVms)).xy;
+    highp float EssMs = material.dfg.x + material.dfg.y;
+    material.multiScatteringCompensation = vec3(1.0) + (material.specularColorBlended * ((1.0 / EssMs) - 1.0));
+    DirectionalLight directionalLight = directionalLights[0];
+    IncidentLight param;
+    getDirectionalLightInfo(directionalLight, param);
+    IncidentLight directLight = param;
+    ReflectedLight param_1 = reflectedLight;
+    RE_Direct_Physical(directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, param_1);
+    reflectedLight = param_1;
+    highp vec3 iblIrradiance = vec3(0.0);
+    highp vec3 irradiance = getAmbientLightIrradiance(ambientLightColor);
+    highp vec3 radiance = vec3(0.0);
+    highp vec3 clearcoatRadiance = vec3(0.0);
+    ReflectedLight param_2 = reflectedLight;
+    RE_IndirectDiffuse_Physical(irradiance, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, param_2);
+    reflectedLight = param_2;
+    ReflectedLight param_3 = reflectedLight;
+    RE_IndirectSpecular_Physical(radiance, iblIrradiance, clearcoatRadiance, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, param_3);
+    reflectedLight = param_3;
+    highp vec3 totalDiffuse = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse;
+    highp vec3 totalSpecular = reflectedLight.directSpecular + reflectedLight.indirectSpecular;
+    highp vec3 outgoingLight = (totalDiffuse + totalSpecular) + totalEmissiveRadiance;
+    diffuseColor.w = 1.0;
+    gl_FragData[0] = vec4(outgoingLight, diffuseColor.w);
+    highp vec4 param_4 = gl_FragData[0];
+    gl_FragData[0] = linearToOutputTexel(param_4);
+}
+

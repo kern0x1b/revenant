@@ -1,7 +1,7 @@
 package("glslang")
-    set_kind("library", {headeronly = true})
+    set_kind("library")
     set_homepage("https://github.com/KhronosGroup/glslang")
-    set_description("glslang at b5782e52 (the 1.4.335+0 release of the xmake-repo recipe, glslang 16.1.0 by its own numbering), its sources: the GLSL front end the shader translator compiles ES 3.00 with, unpatched so far")
+    set_description("glslang at b5782e52 (the 1.4.335+0 release of the xmake-repo recipe, glslang 16.1.0 by its own numbering) as static libraries for armv7 iOS 6: the GLSL front end the shader translator compiles ES 3.00 with, patched for the iOS 6 toolchain and the pool allocator")
     set_license("BSD-3-Clause")
     set_policy("package.strict_compatibility", true)
 
@@ -23,15 +23,26 @@ package("glslang")
 
     add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed recipe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
+    add_links("glslang", "MachineIndependent", "GenericCodeGen", "OSDependent", "glslang-default-resource-limits")
+
     on_load("iphoneos", function (package)
         package:add("defines", "DISABLE_THREAD_SUPPORT")
     end)
 
-    on_install(function (package)
-        os.cp("*", package:installdir() .. "/")
+    on_install("iphoneos", function (package)
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+        local configs = {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DBUILD_EXTERNAL=OFF", "-DENABLE_HLSL=OFF", "-DENABLE_OPT=OFF",
+                         "-DENABLE_PCH=OFF", "-DENABLE_SPIRV=ON", "-DENABLE_GLSLANG_BINARIES=OFF", "-DGLSLANG_TESTS=OFF",
+                         "-DENABLE_CTEST=OFF", "-DGLSLANG_ENABLE_INSTALL=ON"}
+        cmake.install(package, configs, {cflags = {"-DDISABLE_THREAD_SUPPORT"}, cxxflags = {"-DDISABLE_THREAD_SUPPORT"},
+                                         licenses = "LICENSE.txt", prune = {"lib/cmake", "lib/pkgconfig", "share", "bin"}})
     end)
 
     on_test(function (package)
-        assert(os.isfile(path.join(package:installdir(), "CMakeLists.txt")), "glslang has no CMake project")
-        assert(os.isfile(path.join(package:installdir(), "glslang", "Public", "ShaderLang.h")), "glslang has no ShaderLang.h")
+        assert(os.isfile(path.join(package:installdir("lib"), "libglslang.a")), "libglslang.a is not installed")
+        assert(os.isfile(path.join(package:installdir("lib"), "libMachineIndependent.a")), "libMachineIndependent.a is not installed")
+        assert(os.isfile(path.join(package:installdir("lib"), "libGenericCodeGen.a")), "libGenericCodeGen.a is not installed")
+        assert(os.isfile(path.join(package:installdir("lib"), "libOSDependent.a")), "libOSDependent.a is not installed")
+        assert(os.isfile(path.join(package:installdir("include"), "glslang", "Public", "ShaderLang.h")), "glslang has no ShaderLang.h")
+        assert(os.isfile(path.join(package:installdir("include"), "glslang", "build_info.h")), "glslang has no generated build_info.h")
     end)
