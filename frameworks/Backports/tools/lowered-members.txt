@@ -5005,6 +5005,7 @@ function glDeleteVertexArrays
 function glDrawArraysInstanced
 function glDrawBuffers
 function glDrawElementsInstanced
+function glDrawRangeElements
 function glEndQuery
 function glEndTransformFeedback
 function glFenceSync
