@@ -96,11 +96,12 @@ An automated review of the commit flagged three upstream glslang paths. Their st
   `frameworks/ReactNative/tests/glsl_translator/poolalloc_overflow.cpp`, built with `clang++ -std=c++17` against the
   glslang sources and `PoolAlloc.cpp` with patches 0002 and 0003. The translator also rejects a source over 1 MiB
   (`MAX_SOURCE_BYTES` in `tools/glsl_translator.lua`); an oversized shader is reported, not compiled.
-  Patch 0004 covers the typed wrapper `pool_allocator<T>`, which multiplies `n * sizeof(T)` before the allocator sees it:
-  a count over `max_size()` now returns nullptr, and the test checks it (the pristine tree segfaults on it, exit 139).
-  Caller behavior: glslang's pool `operator new` (`Common.h`) passes the nullptr through unchecked, as it already does on
-  out-of-memory. A refused request therefore crashes the caller with a null construction, not a heap overflow. A clean
-  error needs a throw or a check at each call site, which is not done here.
+  Patch 0004 covers the typed wrapper `pool_allocator<T>`, which multiplies `n * sizeof(T)` before the allocator sees it.
+  A count over `max_size()` now calls `std::abort()`: a standard container must not receive nullptr from `allocate()`.
+  The test forks and checks for SIGABRT; the pristine tree wraps the count and segfaults (exit 139) instead.
+  The review's two points, answered: `allocationSize` has one caller, `TPoolAllocator::allocate`, which patch 0003 guards
+  before the call, so `size + 2 * guardBlockSize + headerSize()` cannot wrap; and the `allocate` guard returns nullptr,
+  which is glslang's own allocation-failure value for the pool, not an STL contract.
 - **`InfoSink.h`, `std::filesystem::absolute` can throw.** The calls are reached only with the `absolute` diagnostic
   set. Patch 0001 removes them, and the translator never sets that option. Its only effect is the text of error
   locations.
