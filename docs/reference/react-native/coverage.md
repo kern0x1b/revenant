@@ -7,12 +7,12 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 35 |
-| partial | built and running, with a named part left out or rewritten | 6 |
+| partial | built and running, with a named part left out or rewritten | 9 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
 | missing | native code that is not built yet | 51 |
 | evaluate | not attempted; the note says what iOS 6 offers | 27 |
-| impossible | the system service does not exist before the iOS release the note names | 10 |
+| impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 158 |
 
@@ -85,7 +85,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-asset | ~57.0.20 | yes | real | build | Compiled; its use is not exercised by a screen. |
 | expo-audio | ~57.0.5 | yes | stub | none | A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so no fetch wake-up exists on iOS 6. |
+| expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so the system has no fetch wake-up. The backport UIApplication+BackgroundFetch7 keeps the interval and never calls performFetch. A wake would need a platform scheduler, which is not in the repository. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24). |
 | expo-battery | ~57.0.3 | yes | missing | none | Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9 and needs a guard that answers not enabled. Not built. |
 | expo-blur | ~57.0.3 | yes | missing | none | Has 5 files of iOS code and is not built. |
@@ -119,7 +119,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |
 | expo-linear-gradient | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-linking | ~57.0.13 | yes | real | phone | The manifest lookup works after the staged config. |
-| expo-local-authentication | ~57.0.3 | yes | impossible | none | LocalAuthentication (LAContext) is iOS 8 and absent from the iOS 6.1.3 cache. The LAContext backport answers no biometry, so 'no hardware' is the answer on iOS 6, not a crash (backports-gaps T24). |
+| expo-local-authentication | ~57.0.3 | yes | partial | none | Device passcode is backed: the LAContext backport (src/LocalAuthentication/LAContext.m) shows the passcode sheet (RevenantPasscode) and checks it with MKBUnlockDevice from MobileKeyBag. Biometry is impossible on iOS 6 (no Touch ID, LAContext is absent from the 6.1.3 cache), so hardware reports no biometry. Not built. |
 | expo-localization | ~57.0.2 | yes | real | build | Compiled; not exercised. |
 | expo-location | ~57.0.21 | yes | missing | none | CoreLocation (CLLocationManager) is present in the iOS 6.1.3 cache. Not built. |
 | expo-mail-composer | ~57.0.2 | yes | missing | none | MessageUI (MFMailComposeViewController) is present in the iOS 6.1.3 cache. Not built. |
@@ -137,7 +137,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-print | ~57.0.2 | yes | missing | none | UIPrintInteractionController is present in the iOS 6.1.3 cache (iOS 4.2). Not built. |
 | expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9.1, and Photos is absent from the iOS 6.1.3 cache. The Photos backport makes no Live Photo, and a Live Photo request fails with PHPhotosErrorRequestNotSupportedForAsset. |
 | expo-router | ~57.0.28 | yes | js | phone | The router runs in the app; its small iOS part is not built. |
-| expo-screen-capture | ~57.0.4 | yes | impossible | none | UIApplicationUserDidTakeScreenshotNotification (iOS 7) is absent from the iOS 6.1.3 cache, so nothing reports a capture on iOS 6. |
+| expo-screen-capture | ~57.0.4 | yes | partial | none | Detection is backed: the SpringBoard hook of the Backports (src/SpringBoard/RevenantScreenshot.m, on SBScreenShotter saveScreenshot:) posts UIApplicationUserDidTakeScreenshotNotification to the frontmost app, which the module can listen to. Prevention is not: iOS 6 has no API that blocks a capture, so preventScreenCaptureAsync has no effect. Not built. |
 | expo-screen-orientation | ~57.0.3 | yes | missing | none | setStatusBarOrientation and supportedInterfaceOrientations are present in the iOS 6.1.3 cache. Not built. |
 | expo-secure-store | ~57.0.4 | yes | missing | none | The Keychain (SecItem, kSecAttrAccessible) is present in the iOS 6.1.3 cache. Not built. |
 | expo-sensors | ~57.0.3 | yes | missing | none | CoreMotion (CMMotionManager) is present in the iOS 6.1.3 cache. CMPedometer is absent (iOS 8); the CoreMotion backport supplies it. Not built. |
@@ -152,7 +152,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-symbols | ~57.0.3 | yes | missing | none | SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons). |
 | expo-system-ui | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-task-manager | ~57.0.21 | yes | evaluate | none | Background execution on iOS 6 is the beginBackgroundTaskWithExpirationHandler window, present in the iOS 6.1.3 cache; background fetch and BGTask are absent, so tasks run only in the foreground or in that window. |
-| expo-tracking-transparency | ~57.0.2 | yes | impossible | none | ATTrackingManager (iOS 14) is absent from the iOS 6.1.3 cache. The AppTrackingTransparency backport answers NotDetermined and runs no prompt. |
+| expo-tracking-transparency | ~57.0.2 | yes | partial | none | ATTrackingManager (iOS 14) is absent from the iOS 6.1.3 cache, and no iOS 6 prompt exists. The analog is the Limit Ad Tracking setting, read by ASIdentifierManager.advertisingTrackingEnabled (AdSupport is in the cache). The AppTrackingTransparency backport answers NotDetermined and does not read it yet. Not built. |
 | expo-updates | ~57.0.26 | yes | evaluate | none | Needs the manifests module and a download path; no network scheme is decided. |
 | expo-video-thumbnails | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-video | ~57.0.5 | yes | evaluate | none | AVPlayer exists; the module uses newer AVKit and Swift API. |
