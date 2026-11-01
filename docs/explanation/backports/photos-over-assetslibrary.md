@@ -57,13 +57,13 @@ would not show here.
 
 ## Gaps against Telegram's use
 
-- G1, moves (T13 in `backports-gaps.md`): implemented in a191cfc96. `PHChange8.m:166–181` finds the longest increasing
+- G1, moves (T13 in `backports-gaps.md`): implemented. `PHChange8.m:166–181` finds the longest increasing
   subsequence of the surviving items' before indexes (`RevenantPhotoMoves.c`). Each surviving item outside it is a move,
   and `hasMoves` and `enumerateMovesWithBlock:` (`PHChange8.m:235–244`) report it as (from, to). The helper is host-tested
   by `frameworks/Backports/tests/Photos/photo_moves_test.m` (2005 checks, 0 failures). Telegram reads moves at
   `LegacyComponents/Sources/TGMediaAssetFetchResultChange.m:42–47`. The glue has not run against a library on a device.
 - G2, smart-album subtypes: decided, not derived. The backport returns the user library and Videos only (`PHCollection8.m`,
-  lines 75, 102–111, 144, 167–169). `TGMediaAssetGroup.m` switches on Favorites and Screenshots (lines 140, 155, 192, 249).
+  lines 75, 102–111, 144, 166–168). `TGMediaAssetGroup.m` switches on Favorites and Screenshots (lines 140, 155, 192, 249).
   AssetsLibrary cannot supply either: `ALAssetsGroupType` has six group types (Library, Album, Event, Faces, SavedPhotos,
   PhotoStream) and no favorite or screenshot member, `ALAssetsGroup` has no property for either, and the AssetsLibrary
   headers in the iPhoneOS 26.2 SDK contain neither word. A fetch for those subtypes returns an empty result, not a
@@ -80,6 +80,6 @@ would not show here.
 
 ## Status
 
-G1 is implemented in a191cfc96 and host-tested. G2 is decided: no collection for Favorites or Screenshots, because
+G1 is implemented and host-tested. G2 is decided: no collection for Favorites or Screenshots, because
 AssetsLibrary has neither. G3 is open until a Bazel pass compiles `MediaPickerUI`. G4 and G5 need a device run. This
-survey changes no Photos code except the G2 comment in `PHCollection8.m`.
+survey changes no Photos code.

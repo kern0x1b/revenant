@@ -9,11 +9,9 @@ check the backport against them. It proposes no change.
 
 The type is in the backport source, so the missing piece is the module. Reachability imports `Network`, and that module
 is built and installed by the package `revenant@network` (`packages/n/network/xmake.lua`: iphoneos only, depends on
-`revenant@swift-runtime`). On this machine the store has no installation of it: `.xmake/packages/n/` holds `ninja` and an empty `network` lock
-directory left by a failed install attempt, and no package.
-The overlay generator also refuses to run without it (`tools/bazel-overlay.lua:126`).
+`revenant@swift-runtime`), and it is the module that `import Network` resolves to.
 
-Verified: the type exists in the source, and the module is not installed. Not verified: that installing it makes
+Verified: the type exists in the source, and the package is the module's build. Not verified: that installing it makes
 `Reachability.swift` typecheck. The Network worker should confirm that first.
 
 The package description says TLS is not yet backported, but the tree has `NWProtocolTLS.swift` and `RevenantTLS/`. The
