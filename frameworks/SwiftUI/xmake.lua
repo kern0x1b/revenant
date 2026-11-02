@@ -52,7 +52,9 @@ if is_plat("iphoneos") then
         add_packages("combine", {public = true})
         set_optimize("fastest")
         add_files("src/*.swift")
-        add_deps("MapKitBackports")
+        if has_config("backports_min_ios") then
+            add_deps("MapKitBackports")
+        end
         add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings", "-module-link-name", "SwiftUI")
         add_frameworks("UIKit", "QuartzCore", "CoreGraphics", "CoreData", "Foundation", "CoreFoundation", "MapKit", "CoreLocation")
         before_build(function (target)
