@@ -197,4 +197,14 @@ static int revenant_file_descriptor(NSFileHandle *handle)
     return YES;
 }
 
++ (NSFileHandle *)fileHandleForWritingToURL:(NSURL *)url error:(NSError **)error
+{
+    int descriptor = open(url.path.UTF8String, O_WRONLY);
+    if (descriptor < 0) {
+        revenant_file_fail(error, errno, NO);
+        return nil;
+    }
+    return [[NSFileHandle alloc] initWithFileDescriptor:descriptor closeOnDealloc:YES];
+}
+
 @end
