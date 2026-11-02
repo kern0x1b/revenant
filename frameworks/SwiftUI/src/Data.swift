@@ -73,7 +73,8 @@ final class ChangeWatcher {
 struct ChangeModifier: NodeModifier {
     let value: () -> Any
     let equals: (Any?, Any) -> Bool
-    let action: (Any) -> Void
+    let initial: Bool
+    let action: (Any?, Any) -> Void
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { ChangeNode() }
 }
 
@@ -90,9 +91,13 @@ final class ChangeNode: Node {
         let value = modifier.value()
         if watcher.last == nil {
             watcher.last = value
+            if modifier.initial {
+                modifier.action(value, value)
+            }
         } else if !modifier.equals(watcher.last, value) {
+            let previous = watcher.last
             watcher.last = value
-            modifier.action(value)
+            modifier.action(previous, value)
         }
     }
     override func mountContents() { child?.mount() }
@@ -148,10 +153,18 @@ final class IdentityNode: Node {
 
 extension View {
     public func onChange<V: Equatable>(of value: V, perform action: @escaping (V) -> Void) -> some View {
+        onChange(of: value) { _, new in action(new) }
+    }
+
+    public func onChange<V: Equatable>(of value: V, initial: Bool = false, _ action: @escaping (V, V) -> Void) -> some View {
         _ModifiedView(content: self, modifier: ChangeModifier(
             value: { value },
             equals: { old, new in (old as? V) == (new as? V) },
-            action: { if let typed = $0 as? V { action(typed) } }))
+            initial: initial,
+            action: { old, new in
+                guard let typed = new as? V else { return }
+                action((old as? V) ?? typed, typed)
+            }))
     }
 
     public func onReceive<P: Publisher>(_ publisher: P, perform action: @escaping (P.Output) -> Void) -> some View where P.Failure == Never {
