@@ -17,8 +17,6 @@ package("hermes")
     end)
 
     add_includedirs("include")
-    -- hermesvm only: the JSI the engine calls is react-native's own (ReactCommon/jsi), which a host links already. The
-    -- libjsi.a of the package is the same code; a consumer that has no JSI of its own adds "jsi" to its target.
     add_links("hermesvm")
 
     local PUBLIC_HEADERS = {

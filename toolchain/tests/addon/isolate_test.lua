@@ -67,5 +67,34 @@ function failures(opt)
         table.insert(found, "the copy must report the files it rewrote")
     end
     os.vrunv("rm", {"-rf", base})
+
+    local rnbase = os.iorunv("mktemp", {"-d"}):trim()
+    local rncache = path.join(rnbase, "cache")
+    local install = path.join(rncache, "xmake-global", ".xmake", "packages", "r", "react-native", "0.86.3", "a0b6.g2", "src", "react-native")
+    io.writefile(path.join(install, "package.json"), "{}")
+    io.writefile(path.join(install, "ReactCommon", "jsi", "jsi", "jsi.h"), "// jsi\n")
+    io.writefile(path.join(install, "React", "Fabric", "Mounting", "ComponentViews", "TextInput", "RCTTextInputUtils.mm"), 'initWithString:attributedString.string ?: @""')
+    io.writefile(path.join(install, "Libraries", "Image", "RCTImageUtils.mm"), "CGSize s = {(CGFloat)width.doubleValue};")
+    local rncopy = path.join(rnbase, "copy")
+    os.mkdir(path.join(rncopy, "build"))
+    os.vrunv("ln", {"-s", path.join(rnbase, "a0b6.g1", "src", "react-native"), path.join(rncopy, "build", "rn-src")})
+    if isolate.link_react_native(rncopy, rncache) ~= install or os.iorunv("readlink", {path.join(rncopy, "build", "rn-src")}):trim() ~= install then
+        table.insert(found, "a dangling react-native link must be replaced by the install with all patches")
+    end
+    if not os.isfile(path.join(rncopy, "build", "rn-src", "ReactCommon", "jsi", "jsi", "jsi.h")) then
+        table.insert(found, "the replaced react-native link must reach the sources")
+    end
+    local refused = false
+    try {
+        function () isolate.link_react_native(rncopy, path.join(rnbase, "empty")) end,
+        catch { function () refused = true end }
+    }
+    if not refused then
+        table.insert(found, "a cache without an install with all patches must be refused")
+    end
+    if isolate.command_status({"-c", "exit 0"}, {}) ~= 0 or isolate.command_status({"-c", "exit 3"}, {}) ~= 1 then
+        table.insert(found, "a command's status is 0 when it succeeds and 1 when it fails, never nil")
+    end
+    os.vrunv("rm", {"-rf", rnbase})
     return found
 end
