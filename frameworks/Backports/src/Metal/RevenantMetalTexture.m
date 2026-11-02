@@ -663,6 +663,7 @@ void RevenantMetalSynchroniseSurfaceTextures(void)
     for (RevenantMetalTexture *texture in [RevenantMetalSurfaceTextures allObjects])
         [texture revenantSynchroniseSurface];
     [RevenantMetalSurfaceTextures removeAllObjects];
+    RevenantIOSurfaceLayersRefresh();
 }
 
 @implementation RevenantMetalSampler {

@@ -1744,6 +1744,7 @@ class RevenantHKStore
 class RevenantHandlerMediaItemArtwork
 class RevenantHomeKitStore
 class RevenantHostState
+class RevenantIOSurfaceContents
 class RevenantImageAnimation
 class RevenantImageModeKeeper
 class RevenantImageTemplate
@@ -4631,6 +4632,7 @@ function RevenantHomeKitUUID
 function RevenantHomeKitUUIDString
 function RevenantHomeKitUser
 function RevenantHomeKitZone
+function RevenantIOSurfaceLayersRefresh
 function RevenantInstallNSBundleAdditions
 function RevenantIsAppleProRAWPixelFormat
 function RevenantIsBayerRAWPixelFormat
@@ -12993,8 +12995,12 @@ member CADisplayLink -preferredFramesPerSecond
 member CADisplayLink -setPreferredFrameRateRange:
 member CADisplayLink -setPreferredFramesPerSecond:
 member CADisplayLink -targetTimestamp
+member CALayer +load
 member CALayer -cornerCurve
 member CALayer -maskedCorners
+member CALayer -revenantRefreshIOSurface
+member CALayer -revenantShowIOSurface:
+member CALayer -revenant_setContents:
 member CALayer -setCornerCurve:
 member CALayer -setMaskedCorners:
 member CAMetalLayer -EDRMetadata
@@ -26375,6 +26381,10 @@ member RevenantHomeKitStore -init
 member RevenantHomeKitStore -pathForTable:
 member RevenantHomeKitStore -root
 member RevenantHomeKitStore -tableNamed:
+member RevenantIOSurfaceContents -dealloc
+member RevenantIOSurfaceContents -initWithSurface:seed:
+member RevenantIOSurfaceContents -seed
+member RevenantIOSurfaceContents -surface
 member RevenantImageAnimation -armAfter:
 member RevenantImageAnimation -dealloc
 member RevenantImageAnimation -drawFrameAtIndex:

@@ -290,6 +290,7 @@ typedef struct {
 
 extern NSUInteger RevenantMetalBindEpoch;
 void RevenantMetalSynchroniseSurfaceTextures(void);
+void RevenantIOSurfaceLayersRefresh(void);
 
 extern NSString *const RevenantMetalErrorDomain;
 NSError *RevenantMetalError(NSInteger code, NSString *message);
