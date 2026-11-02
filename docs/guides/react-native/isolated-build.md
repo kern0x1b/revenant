@@ -39,3 +39,18 @@ expo-image-manipulator) fails at `no such module`: package the dependency first.
 A Swift error such as `cannot assign value of type 'UnsafeMutablePointer<facebook.jsi.IRuntime>'` or `'pointee' is a 'let'
 constant` means the shared clang module cache holds a `jsi` module built without the API notes. Delete the `jsi-*` and
 `ExpoModules*` entries under `$TMPDIR/../C/clang/ModuleCache` and rebuild.
+
+## 4. Installing next to other workers' builds
+
+The phone has one `/Applications` and one `/var/tmp`. A build installed under the same bundle id replaces the one a colleague is
+measuring, and a measurement made on a replaced app measures the wrong thing.
+
+`isolate.lua copy` therefore gives the copy its own bundle id: `--bundle-id`, or `org.revenant.rnhost.<the folder's name>` with
+anything but lower case letters, digits and dashes made a dash. It is printed when the copy is made, and it is the id the build
+puts into `CFBundleIdentifier`.
+
+* Install and launch your app by that id and by a folder of your own, `/var/stash/<claim holder>/<last part of the id>.app`; never
+  remove an app whose id is not yours.
+* Name your id in the claim note and in every window request, so others see whose app is on the phone.
+* Keep the files of a run under `/var/tmp/<last part of the id>/`: the log, the bundle and the configuration. The host of the
+  spike still reads `/var/tmp/rnhost.*` and `/var/tmp/real.js`, so two workers who share those paths must not run in the same window.
