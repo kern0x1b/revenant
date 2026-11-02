@@ -6,11 +6,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 35 |
-| partial | built and running, with a named part left out or rewritten | 7 |
+| real | built from the module's own sources, with no stub and no substitute | 28 |
+| partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 44 |
+| missing | native code that is not built yet | 52 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -94,10 +94,10 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-brownfield | ~57.0.24 | yes | missing | none | Has 7 files of iOS code and is not built. |
 | expo-build-properties | ~57.0.22 | no | n/a | none | Build-time config plugin. |
 | expo-calendar | ~57.0.5 | yes | missing | none | Has 30 files of iOS code and is not built. |
-| expo-camera | ~57.0.6 | yes | real | build | Built; capture on iOS 6 is not exercised. |
+| expo-camera | ~57.0.6 | yes | missing | none | Not built: its barcode scanning needs the ZXingObjC package, which is not packaged yet (the media worker 5a213326 packages it). |
 | expo-cellular | ~57.0.2 | yes | missing | none | Has 2 files of iOS code and is not built. |
 | expo-checkbox | ~57.0.0 | no | js | none | Uses the core view; no native code. |
-| expo-clipboard | ~57.0.2 | yes | real | phone | Built from its own sources. |
+| expo-clipboard | ~57.0.2 | yes | missing | none | Does not compile for iOS 6: ClipboardPasteButton uses loadObject(ofClass:completionHandler:), an iOS 11 API. |
 | expo-constants | ~57.0.22 | yes | real | phone | EXConstants.bundle and app.config are staged by the spike script, not by the build. |
 | expo-contacts | ~57.0.8 | yes | evaluate | none | Uses Contacts.framework (iOS 9); AddressBook exists on iOS 6. |
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
@@ -105,15 +105,15 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-device | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-document-picker | ~57.0.3 | yes | stub | none | Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system. |
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-file-system | ~57.0.7 | yes | partial | build | Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch. |
-| expo-font | ~57.0.4 | yes | real | phone | Built from its own sources. |
+| expo-file-system | ~57.0.7 | yes | missing | none | Does not compile for iOS 6: FileSystemFileHandle uses FileHandle.offset and seekToEnd (iOS 13). The iOS 14 gates are rewritten in staged copies, which do not cover this. |
+| expo-font | ~57.0.4 | yes | missing | none | Does not compile as the real module: FontLoaderModule calls queryCustomNativeFonts, which is in FontUtils, the file the spike skips. |
 | expo-gl | ~57.0.2 | yes | evaluate | none | OpenGL ES 2 exists on iOS 6. |
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-haptics | ~57.0.3 | yes | real | build | Built; iOS 6 has no haptic engine, so what it does there is undecided. |
+| expo-haptics | ~57.0.3 | yes | missing | none | Does not compile for iOS 6: HapticsModule uses an init() that is iOS 10. iOS 6 has no haptic engine, so what it does there is undecided. |
 | expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-image-manipulator | ~57.0.21 | yes | real | build | Built; not exercised. |
+| expo-image-manipulator | ~57.0.21 | yes | missing | none | Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it). |
 | expo-image-picker | ~57.0.20 | yes | stub | none | Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
@@ -143,10 +143,10 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-secure-store | ~57.0.4 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-sensors | ~57.0.3 | yes | evaluate | none | CoreMotion exists on iOS 6. |
 | expo-server | ~57.0.3 | no | n/a | none | Server runtime, not on the device. |
-| expo-sharing | ~57.0.23 | yes | real | build | Built; the share sheet is not exercised. |
+| expo-sharing | ~57.0.23 | yes | missing | none | Does not compile for iOS 6: ResolveUrlContentDetails uses URLSession.bytes, an iOS 15 API. |
 | expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
-| expo-splash-screen | ~57.0.10 | yes | real | phone | Built from its own sources. |
+| expo-splash-screen | ~57.0.10 | yes | missing | none | Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault). |
 | expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |
