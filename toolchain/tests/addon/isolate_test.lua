@@ -13,8 +13,9 @@ function failures(opt)
         table.insert(found, "a folder with test or Example in its path must be refused")
     end
 
-    if #isolate.pod_source_extensions("react-native-enriched-markdown") ~= 4 or isolate.pod_source_extensions("react-native-enriched-markdown")[4] ~= "**.c" or #isolate.pod_source_extensions("react-native-worklets") ~= 3 then
-        table.insert(found, "only enriched-markdown takes its C files from its pod, every other pod keeps the Objective-C and C++ globs")
+    local highlight = isolate.pod_c_sources("react-native-enriched-markdown")
+    if #highlight ~= 4 or highlight[2] ~= "cpp/highlight/vendor/tree-sitter/src/lib.c" or #isolate.pod_c_sources("react-native-worklets") ~= 0 then
+        table.insert(found, "enriched-markdown compiles md4c, the tree-sitter lib.c and each grammar's parser and scanner, and no other pod has C sources")
     end
     if not isolate.pod_source_allowed("ios/utils/ENRMTextHitTest.m") or not isolate.pod_source_allowed("cpp/md4c/md4c.c") or not isolate.pod_source_allowed("cpp/test-data/x.c") then
         table.insert(found, "a source whose name or folder merely contains test (ENRMTextHitTest.m, test-data) must stay a pod source")

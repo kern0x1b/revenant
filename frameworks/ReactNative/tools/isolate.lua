@@ -43,14 +43,13 @@ function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
 end
 
-local C_SOURCE_PODS = {["react-native-enriched-markdown"] = true}
+local C_SOURCE_GLOBS = {
+    ["react-native-enriched-markdown"] = {"cpp/md4c/*.c", "cpp/highlight/vendor/tree-sitter/src/lib.c",
+                                          "cpp/highlight/vendor/grammars/*/parser.c", "cpp/highlight/vendor/grammars/*/scanner.c"},
+}
 
-function pod_source_extensions(package)
-    local extensions = {"**.m", "**.mm", "**.cpp"}
-    if C_SOURCE_PODS[package] then
-        table.insert(extensions, "**.c")
-    end
-    return extensions
+function pod_c_sources(package)
+    return C_SOURCE_GLOBS[package] or {}
 end
 
 function pod_source_allowed(relative)
