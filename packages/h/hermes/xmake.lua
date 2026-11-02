@@ -6,6 +6,7 @@ package("hermes")
 
     add_urls("https://github.com/facebook/hermes.git")
     add_versions("250829098.0.17", "3477757eb2475555cf8d8df24bfb1deb0613880d")
+    add_patches("250829098.0.17", path.join(os.scriptdir(), "patches", "sysroot-from-toolchain.patch"), "05ad39c3cae3f864853c8da08c7a87bdf016f97012835c1e2cbdc852f3b5cc0b")
     add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
 
     on_load("iphoneos", function (package)
@@ -53,7 +54,8 @@ package("hermes")
         local build = cross.install(package, {
             "-DJSI_DIR=" .. jsi,
             "-DIMPORT_HOST_COMPILERS=" .. cmakefile,
-            "-DHERMES_APPLE_TARGET_PLATFORM=iphoneos",
+            "-DHERMES_IS_MOBILE_BUILD=ON",
+            "-DHERMES_ALLOW_BOOST_CONTEXT=0",
             "-DHERMES_ENABLE_INTL=ON",
             "-DHERMES_ENABLE_TEST_SUITE=OFF",
             "-DHERMES_ENABLE_DEBUGGER=OFF",
@@ -64,7 +66,7 @@ package("hermes")
         local installdir = package:installdir()
         os.mkdir(path.join(installdir, "lib"))
         os.cp(path.join(build, "lib", "libhermesvm_a.a"), path.join(installdir, "lib", "libhermesvm.a"))
-        os.cp(path.join(build, "lib", "libjsi.a"), path.join(installdir, "lib", "libjsi.a"))
+        os.cp(path.join(build, "jsi", "libjsi.a"), path.join(installdir, "lib", "libjsi.a"))
         for _, entry in ipairs(PUBLIC_HEADERS) do
             local folder, destination = entry[1], path.join(installdir, "include", entry[2])
             os.mkdir(destination)
