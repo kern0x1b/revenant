@@ -57,7 +57,7 @@ The memory numbers are one run per configuration; the first screen of the app wi
 
 ## Engine benchmark on the iPhone 4S
 
-`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE [WAIT]` runs one configuration on the claimed phone (five taps on the counter, one swipe on the list, the screenshot and the host log go to `.cache/scratch/rn-bench/runs/ENGINE-RUN`), and `... measure.lua summarize RUNFOLDER...` prints the metrics of the runs. The taps need `frameworks/ReactNative/tools/touch.lua`, see below.
+`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE [WAIT]` runs one configuration on the claimed phone (five taps on the counter, one swipe on the list, the screenshot and the host log go to `.cache/scratch/rn-bench/runs/ENGINE-RUN`), and `... measure.lua summarize RUNFOLDER...` prints the metrics of the runs. The taps go to the touch injector of the host (`RNHostTouch.m`); the tool needs no other script.
 
 Three runs per engine, on the same host build (the HV64 package with the ToInt32 patch, `RN_HERMES=1`) and the same bench bundle, each after a fresh launch:
 
@@ -72,4 +72,4 @@ A fourth Hermes run made with `measure.lua` after the table (`hermes-9`) gave 0.
 - The startup is read from the syslog timestamps of the two lines.
 - The lowest fps window of each run includes the swipe; the mean covers the whole run.
 - One Hermes launch, made right after `killall` of the previous instance, aborted in `startSurface` before the bench mounted (`Global was not installed`); the next launch of the same configuration ran cleanly, and none of the six measured runs had that abort. The cause is not identified.
-- `touch.lua` is in `origin/work/rn-touch` (0dcde627f), not in this branch yet.
+- `frameworks/ReactNative/tools/touch.lua`, the tool for a single manual touch, is in `origin/work/rn-touch` (0dcde627f) and is not in this branch.
