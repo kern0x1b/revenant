@@ -243,9 +243,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "build",
-   "note": "Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Built into RNHost for armv7 iOS 6.0 from the package (isolated build, RN_EXPO_REAL=expo-battery; the module's symbols are in the binary). Not probed on the phone: the probe harness does not install the expo JSI global yet."
+   "status": "real",
+   "verified": "phone",
+   "note": "Built from its package with the low-power guard (packages/e/expo-battery). On the iPhone 4S, the module is registered, isSupported is true, getBatteryLevelAsync and getBatteryStateAsync answer, and isLowPowerModeEnabledAsync answers false (iOS 6 has no such mode). The battery-level event subscription is not exercised."
   },
   {
    "id": "expo-blur",

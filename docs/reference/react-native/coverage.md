@@ -6,11 +6,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 35 |
+| real | built from the module's own sources, with no stub and no substitute | 36 |
 | partial | built and running, with a named part left out or rewritten | 9 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 51 |
+| missing | native code that is not built yet | 50 |
 | evaluate | not attempted; the note says what iOS 6 offers | 27 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -87,7 +87,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so the system has no fetch wake-up. The backport UIApplication+BackgroundFetch7 keeps the interval and never calls performFetch. A wake would need a platform scheduler, which is not in the repository. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24). |
-| expo-battery | ~57.0.3 | yes | missing | build | Battery level and state are UIDevice API, present in the iOS 6.1.3 cache. Low-power mode is iOS 9: packages/e/expo-battery guards it and answers not enabled. Built into RNHost for armv7 iOS 6.0 from the package (isolated build, RN_EXPO_REAL=expo-battery; the module's symbols are in the binary). Not probed on the phone: the probe harness does not install the expo JSI global yet. |
+| expo-battery | ~57.0.3 | yes | real | phone | Built from its package with the low-power guard (packages/e/expo-battery). On the iPhone 4S, the module is registered, isSupported is true, getBatteryLevelAsync and getBatteryStateAsync answer, and isLowPowerModeEnabledAsync answers false (iOS 6 has no such mode). The battery-level event subscription is not exercised. |
 | expo-blur | ~57.0.3 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-brightness | ~57.0.2 | yes | missing | none | UIScreen brightness is present in the iOS 6.1.3 cache. Not built. |
 | expo-brownfield | ~57.0.24 | yes | missing | none | Has 7 files of iOS code and is not built. |
