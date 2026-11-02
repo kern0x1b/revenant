@@ -108,6 +108,51 @@ function install_packages()
     return found
 end
 
+function swift_header(spec)
+    local dir = path.join(cache_root(), "react-native-inputs", "swift", spec.name)
+    os.tryrm(dir)
+    os.mkdir(dir)
+    local lines = {
+        string.format("set_project(%q)", "rninputs-" .. spec.name),
+        'set_xmakever("3.1.2")',
+        'add_rules("mode.release")',
+        string.format('add_repositories("revenant %s")', checkout()),
+        string.format('add_addons("revenant", {sourcedir = %q})', path.join(checkout(), "toolchain")),
+        'set_config("apple_minimum", "6.0")',
+        'includes("@addon/revenant/apple-ios")'
+    }
+    local names = {}
+    for _, package in ipairs(spec.packages) do
+        local requirement = package == "swift-runtime" and "revenant@swift-runtime" or "revenant@" .. package
+        table.insert(lines, string.format('add_requires("%s", {alias = "%s"})', requirement, package))
+        table.insert(names, string.format("%q", package))
+    end
+    table.insert(lines, string.format("target(%q)", "swift-header"))
+    table.insert(lines, '    set_kind("static")')
+    table.insert(lines, '    add_rules("@addon/revenant/apple-ios", "@addon/revenant/swift")')
+    table.insert(lines, '    set_default(false)')
+    table.insert(lines, string.format("    set_values(%q, %q)", "swift.module", spec.module))
+    table.insert(lines, string.format("    set_values(%q, %q)", "swift.cxx_interop", spec.cxx_interop))
+    table.insert(lines, string.format("    add_packages(%s)", table.concat(names, ", ")))
+    local sources = {}
+    for _, source in ipairs(spec.sources) do
+        table.insert(sources, string.format("%q", source))
+    end
+    table.insert(lines, string.format("    add_files(%s)", table.concat(sources, ", ")))
+    local flags = {}
+    for _, flag in ipairs(spec.flags) do
+        table.insert(flags, string.format("%q", flag))
+    end
+    table.insert(lines, string.format("    add_values(%q, %s)", "swift.flags", table.concat(flags, ", ")))
+    table.insert(lines, "")
+    io.writefile(path.join(dir, "xmake.lua"), table.concat(lines, "\n"))
+    os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", dir, "-p", "iphoneos", "-a", "armv7", "-y"})
+    os.vrunv(path.join(checkout(), "xmakew"), {"build", "-P", dir, "-y", "-r", "swift-header"})
+    if not os.isfile(spec.output) then
+        raise("%s: the Swift compile did not write %s", spec.name, spec.output)
+    end
+end
+
 function fresh_directory(dir)
     os.tryrm(dir)
     os.mkdir(dir)
@@ -449,7 +494,7 @@ function make_keyboard(ctx)
     local prefix = {"#ifdef __OBJC__", "#import <Foundation/Foundation.h>", "#import <UIKit/UIKit.h>", "#endif"}
     write_lines(path.join(out, "prefix.h"), prefix)
     write_lines(path.join(out, "prefix.pch"), prefix)
-    local dirs = {kc, path.join(ctx.build, "rn-headers"), path.join(rn_root(ctx), "ReactCommon", "yoga")}
+    local dirs = {kc, path.join(ctx.build, "rn-headers"), path.join(ctx.ref, "node_modules", "react-native", "ReactCommon", "yoga")}
     for _, dir in ipairs(os.dirs(path.join(kc, "*"))) do
         table.insert(dirs, dir)
     end
@@ -459,6 +504,20 @@ function make_keyboard(ctx)
         table.insert(flags, "-I" .. dir)
     end
     write_lines(path.join(out, "flags.rsp"), flags)
+    local header = path.join(out, "react_native_keyboard_controller-Swift.h")
+    swift_header({
+        name = "keyboard",
+        module = "react_native_keyboard_controller",
+        cxx_interop = "off",
+        packages = {"swift-runtime", "libcxx"},
+        sources = os.files(path.join(kc, "**.swift")),
+        flags = {"-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(out, "flags.rsp"), "-import-objc-header", path.join(out, "Bridge.h"), "-emit-objc-header-path", header},
+        output = header
+    })
+    local link = path.join(ctx.build, "rn-headers", "react_native_keyboard_controller", "react_native_keyboard_controller-Swift.h")
+    os.mkdir(path.directory(link))
+    os.tryrm(link)
+    os.ln(header, link)
 end
 
 function make_screens(ctx)
@@ -473,7 +532,7 @@ function make_screens(ctx)
         end
     end
     write_lines(path.join(out, "Bridge.h"), lines)
-    local rn = rn_root(ctx)
+    local rn = path.join(ctx.ref, "node_modules", "react-native")
     write_lines(path.join(out, "flags.rsp"), {"-Xcc", "-fmodule-map-file=" .. expo_core_react_map(ctx), "-Xcc", "-I" .. path.join(ctx.build, "rn-headers"),
         "-Xcc", "-I" .. path.join(rn, "ReactCommon", "yoga"), "-Xcc", "-I" .. path.join(rn, "React")})
 end
@@ -566,6 +625,65 @@ function expo_classes(ctx)
     return classes
 end
 
+function byte_less(a, b)
+    for index = 1, math.min(#a, #b) do
+        local x, y = a:byte(index), b:byte(index)
+        if x ~= y then
+            return x < y
+        end
+    end
+    return #a < #b
+end
+
+function make_expo_core_headers(ctx, out, ios, cpp)
+    local include = path.join(out, "include", "ExpoModulesCore")
+    os.mkdir(include)
+    local flat = {}
+    for _, root in ipairs({ios, cpp}) do
+        for _, header in ipairs(headers_in(root, "**.h")) do
+            local base = path.filename(header)
+            if flat[base] then
+                raise("%s is in two folders of ExpoModulesCore", base)
+            end
+            flat[base] = header
+            os.ln(header, path.join(include, base))
+        end
+    end
+    local public = {}
+    for _, header in ipairs(headers_in(ios, "**.h")) do
+        local rel = path.relative(header, ios)
+        if not rel:find("+Private.h", 1, true) and not rel:startswith("Worklets/") and not rel:startswith("WorkletsAdapter/") then
+            table.insert(public, path.filename(header))
+        end
+    end
+    table.sort(public, byte_less)
+    local ordered = {"ExpoModulesCore.h", "Foundation.h"}
+    for _, base in ipairs(public) do
+        if base ~= "ExpoModulesCore.h" then
+            table.insert(ordered, base)
+        end
+    end
+    io.writefile(path.join(out, "Foundation.h"), "#import <Foundation/Foundation.h>\n")
+    local map = {"module ExpoModulesCore {"}
+    for _, base in ipairs(ordered) do
+        local target = base == "Foundation.h" and path.join(out, "Foundation.h") or path.join(include, base)
+        table.insert(map, string.format('  header "%s"', target))
+    end
+    table.insert(map, "  export *")
+    table.insert(map, "}")
+    write_lines(path.join(out, "module.modulemap"), map)
+    local react = {"module React {"}
+    local rn_headers = path.join(ctx.build, "rn-headers", "React")
+    for _, base in ipairs(io.readfile(path.join(checkout(), "frameworks", "ReactNative", "tools", "data", "expo-core-react-headers.txt")):split("\n", {plain = true})) do
+        if base ~= "" then
+            table.insert(react, string.format('  header "%s"', path.join(rn_headers, base)))
+        end
+    end
+    table.insert(react, "  export *")
+    table.insert(react, "}")
+    write_lines(path.join(out, "react.modulemap"), react)
+end
+
 function make_expo_core(ctx)
     local out = path.join(ctx.build, "expo-core")
     fresh_directory(out)
@@ -594,7 +712,8 @@ function make_expo_core(ctx)
     local jsi = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
     local includes = {path.join(out, "include"), core, rc, path.join(rc, "jsi"), path.join(rc, "runtimeexecutor"), path.join(rc, "callinvoker"), jsi, path.join(jsi, "Public")}
     write_lines(path.join(out, "flags.rsp"), cxx_response(ctx, {"-fmodule-map-file=" .. expo_jsi_map(ctx), "-fmodule-map-file=" .. path.join(out, "module.modulemap"), "-fmodule-map-file=" .. path.join(out, "react.modulemap")}, includes))
-    raise("expo-core: the module maps (module.modulemap, react.modulemap), include/ExpoModulesCore and swift-header are not generated yet")
+    make_expo_core_headers(ctx, out, core, path.join(nm, "expo-modules-core", "common", "cpp"))
+    raise("expo-core: swift-header is not generated yet")
 end
 
 function rn_glob(root, pattern, excludes)
