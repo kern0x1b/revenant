@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantMetal.h"
 
 
-NSString *const MTLCommandBufferEncoderInfoErrorKey = @"MTLCommandBufferEncoderInfoErrorKey";
+NSString *const BACKPORT_IMPL(MTLCommandBufferEncoderInfoErrorKey) = @"MTLCommandBufferEncoderInfoErrorKey";
 
 @implementation MTLCommandBufferDescriptor
 

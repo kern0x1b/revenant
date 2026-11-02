@@ -86,7 +86,7 @@ Boolean BACKPORT_IMPL(VTDecompressionSessionCanAcceptFormatDescription)(VTDecomp
     return canAccept ? canAccept(session, newFormatDesc) : false;
 }
 
-OSStatus VTDecompressionSessionCopySupportedPropertyDictionary(VTDecompressionSessionRef session, CFDictionaryRef *supportedPropertiesOut)
+OSStatus BACKPORT_IMPL(VTDecompressionSessionCopySupportedPropertyDictionary)(VTDecompressionSessionRef session, CFDictionaryRef *supportedPropertiesOut)
 {
     if (!supportedPropertiesOut)
         return kVTParameterErr;

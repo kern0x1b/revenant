@@ -3,8 +3,8 @@
 #include <float.h>
 #include <math.h>
 
-const UIFloatRange UIFloatRangeZero = {0, 0};
-const UIFloatRange UIFloatRangeInfinite = {-INFINITY, INFINITY};
+const UIFloatRange BACKPORT_IMPL(UIFloatRangeZero) = {0, 0};
+const UIFloatRange BACKPORT_IMPL(UIFloatRangeInfinite) = {-INFINITY, INFINITY};
 
 BOOL BACKPORT_IMPL(UIFloatRangeIsInfinite)(UIFloatRange range)
 {

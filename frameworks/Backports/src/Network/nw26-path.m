@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Network/Network.h>
 #import <Availability.h>
 #import "RevenantNW.h"
@@ -13,7 +14,7 @@ typedef NS_ENUM(int, nw_link_quality_t) {
 };
 #endif
 
-REVENANT_IOS_26 nw_link_quality_t nw_path_get_link_quality(nw_path_t path)
+REVENANT_IOS_26 nw_link_quality_t BACKPORT_IMPL(nw_path_get_link_quality)(nw_path_t path)
 {
     (void)path;
     return nw_link_quality_unknown;

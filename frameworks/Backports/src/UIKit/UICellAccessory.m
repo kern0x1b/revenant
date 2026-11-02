@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-const CGFloat UICellAccessoryStandardDimension = -CGFLOAT_MAX;
+const CGFloat BACKPORT_IMPL(UICellAccessoryStandardDimension) = -CGFLOAT_MAX;
 
 static NSUInteger (^revenant_default_position(void))(NSArray *)
 {

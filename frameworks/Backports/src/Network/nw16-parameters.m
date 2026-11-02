@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_parameters_t nw_parameters_create_application_service(void)
+nw_parameters_t BACKPORT_IMPL(nw_parameters_create_application_service)(void)
 {
     RevenantNWParameters *parameters = [[RevenantNWParameters alloc] init];
     RevenantNWProtocolStack *stack = [[RevenantNWProtocolStack alloc] init];
@@ -26,13 +27,13 @@ nw_parameters_t nw_parameters_create_application_service(void)
     return parameters;
 }
 
-bool nw_parameters_requires_dnssec_validation(nw_parameters_t parameters)
+bool BACKPORT_IMPL(nw_parameters_requires_dnssec_validation)(nw_parameters_t parameters)
 {
     RevenantNWParameters *value = (RevenantNWParameters *)parameters;
     return value ? value->_requiresDNSSEC : false;
 }
 
-void nw_parameters_set_requires_dnssec_validation(nw_parameters_t parameters, bool requires_dnssec_validation)
+void BACKPORT_IMPL(nw_parameters_set_requires_dnssec_validation)(nw_parameters_t parameters, bool requires_dnssec_validation)
 {
     RevenantNWParameters *value = (RevenantNWParameters *)parameters;
     if (value)

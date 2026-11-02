@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantMetal.h"
 
 
-NSString *const MTLCaptureErrorDomain = @"MTLCaptureErrorDomain";
+NSString *const BACKPORT_IMPL(MTLCaptureErrorDomain) = @"MTLCaptureErrorDomain";
 
 @implementation MTLCaptureDescriptor
 

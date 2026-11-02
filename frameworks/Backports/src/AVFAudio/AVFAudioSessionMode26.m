@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioSessionModeShortFormVideo = @"AVAudioSessionModeShortFormVideo";
+NSString * const BACKPORT_IMPL(AVAudioSessionModeShortFormVideo) = @"AVAudioSessionModeShortFormVideo";

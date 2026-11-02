@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 200000
-const UIAccessibilityTraits UIAccessibilityTraitTabBar = 0x8000;
+const UIAccessibilityTraits BACKPORT_IMPL(UIAccessibilityTraitTabBar) = 0x8000;
 #else
-UIAccessibilityTraits UIAccessibilityTraitTabBar = 0x8000;
+UIAccessibilityTraits BACKPORT_IMPL(UIAccessibilityTraitTabBar) = 0x8000;
 #endif
-const CGSize UICollectionViewFlowLayoutAutomaticSize = {CGFLOAT_MAX, CGFLOAT_MAX};
+const CGSize BACKPORT_IMPL(UICollectionViewFlowLayoutAutomaticSize) = {CGFLOAT_MAX, CGFLOAT_MAX};

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSecProtocolOptions.h"
 #import "RevenantSecProtocolMetadata.h"
 
@@ -164,27 +165,27 @@ static NSData *RevenantDispatchDataBytes(dispatch_data_t data)
 
 @end
 
-tls_protocol_version_t sec_protocol_options_get_default_min_tls_protocol_version(void)
+tls_protocol_version_t BACKPORT_IMPL(sec_protocol_options_get_default_min_tls_protocol_version)(void)
 {
     return tls_protocol_version_TLSv12;
 }
 
-tls_protocol_version_t sec_protocol_options_get_default_min_dtls_protocol_version(void)
+tls_protocol_version_t BACKPORT_IMPL(sec_protocol_options_get_default_min_dtls_protocol_version)(void)
 {
     return tls_protocol_version_DTLSv10;
 }
 
-tls_protocol_version_t sec_protocol_options_get_default_max_tls_protocol_version(void)
+tls_protocol_version_t BACKPORT_IMPL(sec_protocol_options_get_default_max_tls_protocol_version)(void)
 {
     return tls_protocol_version_TLSv13;
 }
 
-tls_protocol_version_t sec_protocol_options_get_default_max_dtls_protocol_version(void)
+tls_protocol_version_t BACKPORT_IMPL(sec_protocol_options_get_default_max_dtls_protocol_version)(void)
 {
     return tls_protocol_version_DTLSv10;
 }
 
-bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protocol_options_t optionsB)
+bool BACKPORT_IMPL(sec_protocol_options_are_equal)(sec_protocol_options_t optionsA, sec_protocol_options_t optionsB)
 {
     RevenantSecProtocolOptions *a = RevenantOptions(optionsA);
     RevenantSecProtocolOptions *b = RevenantOptions(optionsB);
@@ -197,38 +198,38 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
         && [a.applicationProtocols isEqualToArray:b.applicationProtocols];
 }
 
-void sec_protocol_options_set_min_tls_protocol_version(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_min_tls_protocol_version)(sec_protocol_options_t options,
                                                        tls_protocol_version_t version)
 {
     RevenantOptions(options).minTLSVersion = version;
 }
 
-void sec_protocol_options_set_max_tls_protocol_version(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_max_tls_protocol_version)(sec_protocol_options_t options,
                                                        tls_protocol_version_t version)
 {
     RevenantOptions(options).maxTLSVersion = version;
 }
 
-void sec_protocol_options_set_tls_min_version(sec_protocol_options_t options, SSLProtocol version)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_min_version)(sec_protocol_options_t options, SSLProtocol version)
 {
     tls_protocol_version_t mapped;
     if (RevenantTLSVersionForSSLProtocol(version, &mapped))
         RevenantOptions(options).minTLSVersion = mapped;
 }
 
-void sec_protocol_options_set_tls_max_version(sec_protocol_options_t options, SSLProtocol version)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_max_version)(sec_protocol_options_t options, SSLProtocol version)
 {
     tls_protocol_version_t mapped;
     if (RevenantTLSVersionForSSLProtocol(version, &mapped))
         RevenantOptions(options).maxTLSVersion = mapped;
 }
 
-void sec_protocol_options_set_tls_server_name(sec_protocol_options_t options, const char *server_name)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_server_name)(sec_protocol_options_t options, const char *server_name)
 {
     RevenantOptions(options).serverName = server_name ? [NSString stringWithUTF8String:server_name] : nil;
 }
 
-void sec_protocol_options_add_tls_application_protocol(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_add_tls_application_protocol)(sec_protocol_options_t options,
                                                        const char *application_protocol)
 {
     if (!application_protocol)
@@ -236,81 +237,81 @@ void sec_protocol_options_add_tls_application_protocol(sec_protocol_options_t op
     [RevenantOptions(options).applicationProtocols addObject:[NSString stringWithUTF8String:application_protocol]];
 }
 
-void sec_protocol_options_set_local_identity(sec_protocol_options_t options, sec_identity_t identity)
+void BACKPORT_IMPL(sec_protocol_options_set_local_identity)(sec_protocol_options_t options, sec_identity_t identity)
 {
     RevenantOptions(options).localIdentity = identity;
 }
 
-void sec_protocol_options_set_peer_authentication_required(sec_protocol_options_t options, bool required)
+void BACKPORT_IMPL(sec_protocol_options_set_peer_authentication_required)(sec_protocol_options_t options, bool required)
 {
     RevenantOptions(options).peerAuthenticationRequired = required;
 }
 
-void sec_protocol_options_set_tls_tickets_enabled(sec_protocol_options_t options, bool ticketsEnabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_tickets_enabled)(sec_protocol_options_t options, bool ticketsEnabled)
 {
     RevenantOptions(options).ticketsEnabled = ticketsEnabled;
 }
 
-void sec_protocol_options_set_tls_is_fallback_attempt(sec_protocol_options_t options, bool isFallback)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_is_fallback_attempt)(sec_protocol_options_t options, bool isFallback)
 {
     RevenantOptions(options).fallbackAttempt = isFallback;
 }
 
-void sec_protocol_options_set_tls_resumption_enabled(sec_protocol_options_t options, bool enabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_resumption_enabled)(sec_protocol_options_t options, bool enabled)
 {
     RevenantOptions(options).resumptionEnabled = enabled;
 }
 
-void sec_protocol_options_set_tls_false_start_enabled(sec_protocol_options_t options, bool enabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_false_start_enabled)(sec_protocol_options_t options, bool enabled)
 {
     RevenantOptions(options).falseStartEnabled = enabled;
 }
 
-void sec_protocol_options_set_tls_ocsp_enabled(sec_protocol_options_t options, bool ocspEnabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_ocsp_enabled)(sec_protocol_options_t options, bool ocspEnabled)
 {
     RevenantOptions(options).ocspEnabled = ocspEnabled;
 }
 
-void sec_protocol_options_set_tls_sct_enabled(sec_protocol_options_t options, bool sctEnabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_sct_enabled)(sec_protocol_options_t options, bool sctEnabled)
 {
     RevenantOptions(options).sctEnabled = sctEnabled;
 }
 
-void sec_protocol_options_set_tls_renegotiation_enabled(sec_protocol_options_t options, bool enabled)
+void BACKPORT_IMPL(sec_protocol_options_set_tls_renegotiation_enabled)(sec_protocol_options_t options, bool enabled)
 {
     RevenantOptions(options).renegotiationEnabled = enabled;
 }
 
-void sec_protocol_options_add_tls_ciphersuite(sec_protocol_options_t options, SSLCipherSuite ciphersuite)
+void BACKPORT_IMPL(sec_protocol_options_add_tls_ciphersuite)(sec_protocol_options_t options, SSLCipherSuite ciphersuite)
 {
     [RevenantOptions(options).ciphersuites addObject:@(ciphersuite)];
 }
 
-void sec_protocol_options_append_tls_ciphersuite(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_append_tls_ciphersuite)(sec_protocol_options_t options,
                                                  tls_ciphersuite_t ciphersuite)
 {
     [RevenantOptions(options).ciphersuites addObject:@(ciphersuite)];
 }
 
-void sec_protocol_options_add_tls_ciphersuite_group(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_add_tls_ciphersuite_group)(sec_protocol_options_t options,
                                                     SSLCiphersuiteGroup group)
 {
     RevenantOptions(options).ciphersuiteGroup = @(group);
 }
 
-void sec_protocol_options_append_tls_ciphersuite_group(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_append_tls_ciphersuite_group)(sec_protocol_options_t options,
                                                        tls_ciphersuite_group_t group)
 {
     [RevenantOptions(options).ciphersuiteGroups addObject:@(group)];
 }
 
-void sec_protocol_options_set_tls_diffie_hellman_parameters(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_tls_diffie_hellman_parameters)(sec_protocol_options_t options,
                                                             dispatch_data_t dh_params)
 {
     RevenantOptions(options).diffieHellmanParameters = dh_params;
 }
 
-void sec_protocol_options_add_pre_shared_key(sec_protocol_options_t options, dispatch_data_t psk,
+void BACKPORT_IMPL(sec_protocol_options_add_pre_shared_key)(sec_protocol_options_t options, dispatch_data_t psk,
                                              dispatch_data_t psk_identity)
 {
     RevenantSecProtocolOptions *value = RevenantOptions(options);
@@ -320,13 +321,13 @@ void sec_protocol_options_add_pre_shared_key(sec_protocol_options_t options, dis
     [value.preSharedKeyIdentities addObject:(id)psk_identity];
 }
 
-void sec_protocol_options_set_tls_pre_shared_key_identity_hint(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_tls_pre_shared_key_identity_hint)(sec_protocol_options_t options,
                                                                dispatch_data_t hint)
 {
     RevenantOptions(options).preSharedKeyIdentityHint = hint;
 }
 
-void sec_protocol_options_set_pre_shared_key_selection_block(
+void BACKPORT_IMPL(sec_protocol_options_set_pre_shared_key_selection_block)(
     sec_protocol_options_t options, sec_protocol_pre_shared_key_selection_t block,
     dispatch_queue_t queue)
 {
@@ -335,7 +336,7 @@ void sec_protocol_options_set_pre_shared_key_selection_block(
     value.preSharedKeySelectionQueue = queue;
 }
 
-void sec_protocol_options_set_key_update_block(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_key_update_block)(sec_protocol_options_t options,
                                                sec_protocol_key_update_t key_update_block,
                                                dispatch_queue_t key_update_queue)
 {
@@ -344,7 +345,7 @@ void sec_protocol_options_set_key_update_block(sec_protocol_options_t options,
     value.keyUpdateQueue = key_update_queue;
 }
 
-void sec_protocol_options_set_challenge_block(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_challenge_block)(sec_protocol_options_t options,
                                               sec_protocol_challenge_t challenge_block,
                                               dispatch_queue_t challenge_queue)
 {
@@ -353,7 +354,7 @@ void sec_protocol_options_set_challenge_block(sec_protocol_options_t options,
     value.challengeQueue = challenge_queue;
 }
 
-void sec_protocol_options_set_verify_block(sec_protocol_options_t options,
+void BACKPORT_IMPL(sec_protocol_options_set_verify_block)(sec_protocol_options_t options,
                                            sec_protocol_verify_t verify_block,
                                            dispatch_queue_t verify_block_queue)
 {

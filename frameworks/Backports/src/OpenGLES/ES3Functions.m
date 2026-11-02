@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <OpenGLES/gltypes.h>
 #include <dlfcn.h>
@@ -110,67 +111,67 @@ extern void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat,
 extern void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) __attribute__((availability(ios, introduced=7.0)));
 extern void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params) __attribute__((availability(ios, introduced=7.0)));
 
-void glReadBuffer(GLenum mode)
+void BACKPORT_IMPL(glReadBuffer)(GLenum mode)
 {
     revenant_es3_error();
 }
 
-void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
+void BACKPORT_IMPL(glTexImage3D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 {
     revenant_es3_error();
 }
 
-void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels)
+void BACKPORT_IMPL(glTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels)
 {
     revenant_es3_error();
 }
 
-void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+void BACKPORT_IMPL(glCopyTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
     revenant_es3_error();
 }
 
-void glDrawBuffers(GLsizei n, const GLenum* bufs)
+void BACKPORT_IMPL(glDrawBuffers)(GLsizei n, const GLenum* bufs)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix2x3fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix3x2fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix2x4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix4x2fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix3x4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+void BACKPORT_IMPL(glUniformMatrix4x3fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
+void BACKPORT_IMPL(glBlitFramebuffer)(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
 {
     revenant_es3_error();
 }
 
-void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
+void BACKPORT_IMPL(glRenderbufferStorageMultisample)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
 {
     static void (*fn)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
     if (!fn)
@@ -180,12 +181,12 @@ void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum int
     revenant_es3_error();
 }
 
-void glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer)
+void BACKPORT_IMPL(glFramebufferTextureLayer)(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer)
 {
     revenant_es3_error();
 }
 
-GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+GLvoid* BACKPORT_IMPL(glMapBufferRange)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
 {
     static GLvoid* (*fn)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
     if (!fn)
@@ -196,7 +197,7 @@ GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbi
     return NULL;
 }
 
-void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
+void BACKPORT_IMPL(glFlushMappedBufferRange)(GLenum target, GLintptr offset, GLsizeiptr length)
 {
     static void (*fn)(GLenum target, GLintptr offset, GLsizeiptr length);
     if (!fn)
@@ -206,7 +207,7 @@ void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
     revenant_es3_error();
 }
 
-void glBindVertexArray(GLuint array)
+void BACKPORT_IMPL(glBindVertexArray)(GLuint array)
 {
     static void (*fn)(GLuint array);
     if (!fn)
@@ -216,7 +217,7 @@ void glBindVertexArray(GLuint array)
     revenant_es3_error();
 }
 
-void glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
+void BACKPORT_IMPL(glDeleteVertexArrays)(GLsizei n, const GLuint* arrays)
 {
     static void (*fn)(GLsizei n, const GLuint* arrays);
     if (!fn)
@@ -226,7 +227,7 @@ void glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
     revenant_es3_error();
 }
 
-void glGenVertexArrays(GLsizei n, GLuint* arrays)
+void BACKPORT_IMPL(glGenVertexArrays)(GLsizei n, GLuint* arrays)
 {
     static void (*fn)(GLsizei n, GLuint* arrays);
     if (!fn)
@@ -236,7 +237,7 @@ void glGenVertexArrays(GLsizei n, GLuint* arrays)
     revenant_es3_error();
 }
 
-GLboolean glIsVertexArray(GLuint array)
+GLboolean BACKPORT_IMPL(glIsVertexArray)(GLuint array)
 {
     static GLboolean (*fn)(GLuint array);
     if (!fn)
@@ -247,148 +248,148 @@ GLboolean glIsVertexArray(GLuint array)
     return (GLboolean)0;
 }
 
-void glGetIntegeri_v(GLenum target, GLuint index, GLint* data)
+void BACKPORT_IMPL(glGetIntegeri_v)(GLenum target, GLuint index, GLint* data)
 {
     revenant_es3_error();
 }
 
-void glBeginTransformFeedback(GLenum primitiveMode)
+void BACKPORT_IMPL(glBeginTransformFeedback)(GLenum primitiveMode)
 {
     revenant_es3_error();
 }
 
-void glEndTransformFeedback(void)
+void BACKPORT_IMPL(glEndTransformFeedback)(void)
 {
     revenant_es3_error();
 }
 
-void glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
+void BACKPORT_IMPL(glBindBufferRange)(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
 {
     revenant_es3_error();
 }
 
-void glBindBufferBase(GLenum target, GLuint index, GLuint buffer)
+void BACKPORT_IMPL(glBindBufferBase)(GLenum target, GLuint index, GLuint buffer)
 {
     revenant_es3_error();
 }
 
-void glTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar* const *varyings, GLenum bufferMode)
+void BACKPORT_IMPL(glTransformFeedbackVaryings)(GLuint program, GLsizei count, const GLchar* const *varyings, GLenum bufferMode)
 {
     revenant_es3_error();
 }
 
-void glGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name)
+void BACKPORT_IMPL(glGetTransformFeedbackVarying)(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name)
 {
     revenant_es3_error();
 }
 
-void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer)
+void BACKPORT_IMPL(glVertexAttribIPointer)(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer)
 {
     revenant_es3_error();
 }
 
-void glGetVertexAttribIiv(GLuint index, GLenum pname, GLint* params)
+void BACKPORT_IMPL(glGetVertexAttribIiv)(GLuint index, GLenum pname, GLint* params)
 {
     revenant_es3_error();
 }
 
-void glGetVertexAttribIuiv(GLuint index, GLenum pname, GLuint* params)
+void BACKPORT_IMPL(glGetVertexAttribIuiv)(GLuint index, GLenum pname, GLuint* params)
 {
     revenant_es3_error();
 }
 
-void glVertexAttribI4i(GLuint index, GLint x, GLint y, GLint z, GLint w)
+void BACKPORT_IMPL(glVertexAttribI4i)(GLuint index, GLint x, GLint y, GLint z, GLint w)
 {
     revenant_es3_error();
 }
 
-void glVertexAttribI4ui(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
+void BACKPORT_IMPL(glVertexAttribI4ui)(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
 {
     revenant_es3_error();
 }
 
-void glVertexAttribI4iv(GLuint index, const GLint* v)
+void BACKPORT_IMPL(glVertexAttribI4iv)(GLuint index, const GLint* v)
 {
     revenant_es3_error();
 }
 
-void glVertexAttribI4uiv(GLuint index, const GLuint* v)
+void BACKPORT_IMPL(glVertexAttribI4uiv)(GLuint index, const GLuint* v)
 {
     revenant_es3_error();
 }
 
-void glGetUniformuiv(GLuint program, GLint location, GLuint* params)
+void BACKPORT_IMPL(glGetUniformuiv)(GLuint program, GLint location, GLuint* params)
 {
     revenant_es3_error();
 }
 
-GLint glGetFragDataLocation(GLuint program, const GLchar *name)
+GLint BACKPORT_IMPL(glGetFragDataLocation)(GLuint program, const GLchar *name)
 {
     revenant_es3_error();
     return (GLint)0;
 }
 
-void glUniform1ui(GLint location, GLuint v0)
+void BACKPORT_IMPL(glUniform1ui)(GLint location, GLuint v0)
 {
     revenant_es3_error();
 }
 
-void glUniform2ui(GLint location, GLuint v0, GLuint v1)
+void BACKPORT_IMPL(glUniform2ui)(GLint location, GLuint v0, GLuint v1)
 {
     revenant_es3_error();
 }
 
-void glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2)
+void BACKPORT_IMPL(glUniform3ui)(GLint location, GLuint v0, GLuint v1, GLuint v2)
 {
     revenant_es3_error();
 }
 
-void glUniform4ui(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+void BACKPORT_IMPL(glUniform4ui)(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
 {
     revenant_es3_error();
 }
 
-void glUniform1uiv(GLint location, GLsizei count, const GLuint* value)
+void BACKPORT_IMPL(glUniform1uiv)(GLint location, GLsizei count, const GLuint* value)
 {
     revenant_es3_error();
 }
 
-void glUniform2uiv(GLint location, GLsizei count, const GLuint* value)
+void BACKPORT_IMPL(glUniform2uiv)(GLint location, GLsizei count, const GLuint* value)
 {
     revenant_es3_error();
 }
 
-void glUniform3uiv(GLint location, GLsizei count, const GLuint* value)
+void BACKPORT_IMPL(glUniform3uiv)(GLint location, GLsizei count, const GLuint* value)
 {
     revenant_es3_error();
 }
 
-void glUniform4uiv(GLint location, GLsizei count, const GLuint* value)
+void BACKPORT_IMPL(glUniform4uiv)(GLint location, GLsizei count, const GLuint* value)
 {
     revenant_es3_error();
 }
 
-void glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value)
+void BACKPORT_IMPL(glClearBufferiv)(GLenum buffer, GLint drawbuffer, const GLint* value)
 {
     revenant_es3_error();
 }
 
-void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value)
+void BACKPORT_IMPL(glClearBufferuiv)(GLenum buffer, GLint drawbuffer, const GLuint* value)
 {
     revenant_es3_error();
 }
 
-void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value)
+void BACKPORT_IMPL(glClearBufferfv)(GLenum buffer, GLint drawbuffer, const GLfloat* value)
 {
     revenant_es3_error();
 }
 
-void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil)
+void BACKPORT_IMPL(glClearBufferfi)(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil)
 {
     revenant_es3_error();
 }
 
-const GLubyte *glGetStringi(GLenum name, GLuint index)
+const GLubyte *BACKPORT_IMPL(glGetStringi)(GLenum name, GLuint index)
 {
     const GLubyte *(*get)(GLenum) = (const GLubyte *(*)(GLenum))dlsym(RTLD_DEFAULT, "glGetString");
     if (name != 0x1F03 || !get) {
@@ -415,53 +416,53 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
     return NULL;
 }
 
-void glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
+void BACKPORT_IMPL(glCopyBufferSubData)(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
 {
     revenant_es3_error();
 }
 
-void glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar* const *uniformNames, GLuint* uniformIndices)
+void BACKPORT_IMPL(glGetUniformIndices)(GLuint program, GLsizei uniformCount, const GLchar* const *uniformNames, GLuint* uniformIndices)
 {
     revenant_es3_error();
 }
 
-void glGetActiveUniformsiv(GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params)
+void BACKPORT_IMPL(glGetActiveUniformsiv)(GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params)
 {
     revenant_es3_error();
 }
 
-GLuint glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName)
+GLuint BACKPORT_IMPL(glGetUniformBlockIndex)(GLuint program, const GLchar* uniformBlockName)
 {
     revenant_es3_error();
     return (GLuint)0;
 }
 
-void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params)
+void BACKPORT_IMPL(glGetActiveUniformBlockiv)(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params)
 {
     revenant_es3_error();
 }
 
-void glGetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName)
+void BACKPORT_IMPL(glGetActiveUniformBlockName)(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName)
 {
     revenant_es3_error();
 }
 
-void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
+void BACKPORT_IMPL(glUniformBlockBinding)(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
 {
     revenant_es3_error();
 }
 
-void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount)
+void BACKPORT_IMPL(glDrawArraysInstanced)(GLenum mode, GLint first, GLsizei count, GLsizei instancecount)
 {
     revenant_es3_error();
 }
 
-void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount)
+void BACKPORT_IMPL(glDrawElementsInstanced)(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount)
 {
     revenant_es3_error();
 }
 
-GLsync glFenceSync(GLenum condition, GLbitfield flags)
+GLsync BACKPORT_IMPL(glFenceSync)(GLenum condition, GLbitfield flags)
 {
     static GLsync (*fn)(GLenum condition, GLbitfield flags);
     if (!fn)
@@ -472,7 +473,7 @@ GLsync glFenceSync(GLenum condition, GLbitfield flags)
     return (GLsync)0;
 }
 
-GLboolean glIsSync(GLsync sync)
+GLboolean BACKPORT_IMPL(glIsSync)(GLsync sync)
 {
     static GLboolean (*fn)(GLsync sync);
     if (!fn)
@@ -483,7 +484,7 @@ GLboolean glIsSync(GLsync sync)
     return (GLboolean)0;
 }
 
-void glDeleteSync(GLsync sync)
+void BACKPORT_IMPL(glDeleteSync)(GLsync sync)
 {
     static void (*fn)(GLsync sync);
     if (!fn)
@@ -493,7 +494,7 @@ void glDeleteSync(GLsync sync)
     revenant_es3_error();
 }
 
-GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
+GLenum BACKPORT_IMPL(glClientWaitSync)(GLsync sync, GLbitfield flags, GLuint64 timeout)
 {
     static GLenum (*fn)(GLsync sync, GLbitfield flags, GLuint64 timeout);
     if (!fn)
@@ -504,7 +505,7 @@ GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
     return (GLenum)0;
 }
 
-void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
+void BACKPORT_IMPL(glWaitSync)(GLsync sync, GLbitfield flags, GLuint64 timeout)
 {
     static void (*fn)(GLsync sync, GLbitfield flags, GLuint64 timeout);
     if (!fn)
@@ -514,7 +515,7 @@ void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
     revenant_es3_error();
 }
 
-void glGetInteger64v(GLenum pname, GLint64* params)
+void BACKPORT_IMPL(glGetInteger64v)(GLenum pname, GLint64* params)
 {
     static void (*fn)(GLenum pname, GLint64* params);
     if (!fn)
@@ -524,7 +525,7 @@ void glGetInteger64v(GLenum pname, GLint64* params)
     revenant_es3_error();
 }
 
-void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)
+void BACKPORT_IMPL(glGetSynciv)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)
 {
     static void (*fn)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values);
     if (!fn)
@@ -534,114 +535,114 @@ void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GL
     revenant_es3_error();
 }
 
-void glGetInteger64i_v(GLenum target, GLuint index, GLint64* data)
+void BACKPORT_IMPL(glGetInteger64i_v)(GLenum target, GLuint index, GLint64* data)
 {
     revenant_es3_error();
 }
 
-void glGetBufferParameteri64v(GLenum target, GLenum pname, GLint64* params)
+void BACKPORT_IMPL(glGetBufferParameteri64v)(GLenum target, GLenum pname, GLint64* params)
 {
     revenant_es3_error();
 }
 
-void glGenSamplers(GLsizei count, GLuint* samplers)
+void BACKPORT_IMPL(glGenSamplers)(GLsizei count, GLuint* samplers)
 {
     revenant_es3_error();
 }
 
-void glDeleteSamplers(GLsizei count, const GLuint* samplers)
+void BACKPORT_IMPL(glDeleteSamplers)(GLsizei count, const GLuint* samplers)
 {
     revenant_es3_error();
 }
 
-GLboolean glIsSampler(GLuint sampler)
-{
-    revenant_es3_error();
-    return (GLboolean)0;
-}
-
-void glBindSampler(GLuint unit, GLuint sampler)
-{
-    revenant_es3_error();
-}
-
-void glSamplerParameteri(GLuint sampler, GLenum pname, GLint param)
-{
-    revenant_es3_error();
-}
-
-void glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint* param)
-{
-    revenant_es3_error();
-}
-
-void glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
-{
-    revenant_es3_error();
-}
-
-void glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat* param)
-{
-    revenant_es3_error();
-}
-
-void glGetSamplerParameteriv(GLuint sampler, GLenum pname, GLint* params)
-{
-    revenant_es3_error();
-}
-
-void glGetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat* params)
-{
-    revenant_es3_error();
-}
-
-void glVertexAttribDivisor(GLuint index, GLuint divisor)
-{
-    revenant_es3_error();
-}
-
-void glBindTransformFeedback(GLenum target, GLuint id)
-{
-    revenant_es3_error();
-}
-
-void glDeleteTransformFeedbacks(GLsizei n, const GLuint* ids)
-{
-    revenant_es3_error();
-}
-
-void glGenTransformFeedbacks(GLsizei n, GLuint* ids)
-{
-    revenant_es3_error();
-}
-
-GLboolean glIsTransformFeedback(GLuint id)
+GLboolean BACKPORT_IMPL(glIsSampler)(GLuint sampler)
 {
     revenant_es3_error();
     return (GLboolean)0;
 }
 
-void glPauseTransformFeedback(void)
+void BACKPORT_IMPL(glBindSampler)(GLuint unit, GLuint sampler)
 {
     revenant_es3_error();
 }
 
-void glResumeTransformFeedback(void)
+void BACKPORT_IMPL(glSamplerParameteri)(GLuint sampler, GLenum pname, GLint param)
 {
     revenant_es3_error();
 }
 
-void glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary)
+void BACKPORT_IMPL(glSamplerParameteriv)(GLuint sampler, GLenum pname, const GLint* param)
 {
     revenant_es3_error();
 }
 
-void glProgramBinary(GLuint program, GLenum binaryFormat, const GLvoid* binary, GLsizei length)
+void BACKPORT_IMPL(glSamplerParameterf)(GLuint sampler, GLenum pname, GLfloat param)
 {
     revenant_es3_error();
 }
 
-void glProgramParameteri(GLuint program, GLenum pname, GLint value)
+void BACKPORT_IMPL(glSamplerParameterfv)(GLuint sampler, GLenum pname, const GLfloat* param)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glGetSamplerParameteriv)(GLuint sampler, GLenum pname, GLint* params)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glGetSamplerParameterfv)(GLuint sampler, GLenum pname, GLfloat* params)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glVertexAttribDivisor)(GLuint index, GLuint divisor)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glBindTransformFeedback)(GLenum target, GLuint id)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glDeleteTransformFeedbacks)(GLsizei n, const GLuint* ids)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glGenTransformFeedbacks)(GLsizei n, GLuint* ids)
+{
+    revenant_es3_error();
+}
+
+GLboolean BACKPORT_IMPL(glIsTransformFeedback)(GLuint id)
+{
+    revenant_es3_error();
+    return (GLboolean)0;
+}
+
+void BACKPORT_IMPL(glPauseTransformFeedback)(void)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glResumeTransformFeedback)(void)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glGetProgramBinary)(GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glProgramBinary)(GLuint program, GLenum binaryFormat, const GLvoid* binary, GLsizei length)
+{
+    revenant_es3_error();
+}
+
+void BACKPORT_IMPL(glProgramParameteri)(GLuint program, GLenum pname, GLint value)
 {
     static void (*fn)(GLuint program, GLenum pname, GLint value);
     if (!fn)
@@ -651,7 +652,7 @@ void glProgramParameteri(GLuint program, GLenum pname, GLint value)
     revenant_es3_error();
 }
 
-void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments)
+void BACKPORT_IMPL(glInvalidateFramebuffer)(GLenum target, GLsizei numAttachments, const GLenum* attachments)
 {
     static void (*fn)(GLenum target, GLsizei numAttachments, const GLenum* attachments);
     if (!fn)
@@ -661,12 +662,12 @@ void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum
     revenant_es3_error();
 }
 
-void glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+void BACKPORT_IMPL(glInvalidateSubFramebuffer)(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height)
 {
     revenant_es3_error();
 }
 
-void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
+void BACKPORT_IMPL(glTexStorage2D)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
 {
     static void (*fn)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
     if (!fn)
@@ -676,12 +677,12 @@ void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsize
     revenant_es3_error();
 }
 
-void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
+void BACKPORT_IMPL(glTexStorage3D)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
 {
     revenant_es3_error();
 }
 
-void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params)
+void BACKPORT_IMPL(glGetInternalformativ)(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params)
 {
     revenant_es3_error();
 }

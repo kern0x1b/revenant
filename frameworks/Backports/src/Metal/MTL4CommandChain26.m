@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
 #import "RevenantMetal26Types.h"
 
 
-NSString *const MTL4CommandQueueErrorDomain = @"MTL4CommandQueueErrorDomain";
+NSString *const BACKPORT_IMPL(MTL4CommandQueueErrorDomain) = @"MTL4CommandQueueErrorDomain";
 
 @implementation MTL4CommandQueueDescriptor {
     NSString *_label;

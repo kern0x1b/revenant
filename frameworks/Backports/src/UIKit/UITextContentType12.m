@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UITextContentType const UITextContentTypeNewPassword = @"new-password";
-UITextContentType const UITextContentTypeOneTimeCode = @"one-time-code";
+UITextContentType const BACKPORT_IMPL(UITextContentTypeNewPassword) = @"new-password";
+UITextContentType const BACKPORT_IMPL(UITextContentTypeOneTimeCode) = @"one-time-code";

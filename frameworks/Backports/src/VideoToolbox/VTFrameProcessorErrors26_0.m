@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 
-NSErrorDomain const VTFrameProcessorErrorDomain = @"VTFrameProcessorErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(VTFrameProcessorErrorDomain) = @"VTFrameProcessorErrorDomain";

@@ -56,8 +56,8 @@ MTLCommonCounterSet const BACKPORT_IMPL(MTLCommonCounterSetStageUtilization) = @
 MTL_EXTERN MTLCommonCounterSet const BACKPORT_IMPL(MTLCommonCounterSetStatistic);
 MTLCommonCounterSet const BACKPORT_IMPL(MTLCommonCounterSetStatistic) = @"statistic";
 
-MTL_EXTERN NSErrorDomain const MTLCounterErrorDomain;
-NSErrorDomain const MTLCounterErrorDomain = @"MTLCounterErrorDomain";
+MTL_EXTERN NSErrorDomain const BACKPORT_IMPL(MTLCounterErrorDomain);
+NSErrorDomain const BACKPORT_IMPL(MTLCounterErrorDomain) = @"MTLCounterErrorDomain";
 
 MTL_EXTERN NSErrorDomain const BACKPORT_IMPL(MTLBinaryArchiveDomain);
 NSErrorDomain const BACKPORT_IMPL(MTLBinaryArchiveDomain) = @"MTLBinaryArchiveDomain";

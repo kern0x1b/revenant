@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/SecCertificate.h>
 #import <Security/SecIdentity.h>
@@ -37,19 +38,19 @@
 }
 @end
 
-sec_identity_t sec_identity_create(SecIdentityRef identity)
+sec_identity_t BACKPORT_IMPL(sec_identity_create)(SecIdentityRef identity)
 {
     return (sec_identity_t)[[RevenantSecIdentity alloc] initWithIdentity:identity];
 }
 
-sec_identity_t sec_identity_create_with_certificates(SecIdentityRef identity, CFArrayRef certificates)
+sec_identity_t BACKPORT_IMPL(sec_identity_create_with_certificates)(SecIdentityRef identity, CFArrayRef certificates)
 {
     RevenantSecIdentity *wrapper = [[RevenantSecIdentity alloc] initWithIdentity:identity];
     [wrapper revenantSetCertificates:certificates];
     return (sec_identity_t)wrapper;
 }
 
-SecIdentityRef sec_identity_copy_ref(sec_identity_t identity)
+SecIdentityRef BACKPORT_IMPL(sec_identity_copy_ref)(sec_identity_t identity)
 {
     if (![identity isKindOfClass:RevenantSecIdentity.class])
         return NULL;
@@ -57,7 +58,7 @@ SecIdentityRef sec_identity_copy_ref(sec_identity_t identity)
     return held ? (SecIdentityRef)CFRetain(held) : NULL;
 }
 
-CFArrayRef sec_identity_copy_certificates_ref(sec_identity_t identity)
+CFArrayRef BACKPORT_IMPL(sec_identity_copy_certificates_ref)(sec_identity_t identity)
 {
     if (![identity isKindOfClass:RevenantSecIdentity.class])
         return NULL;

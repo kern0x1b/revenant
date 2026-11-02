@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
@@ -12,9 +13,9 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSString *const UISheetPresentationControllerDetentIdentifierMedium = @"com.apple.UIKit.medium";
-NSString *const UISheetPresentationControllerDetentIdentifierLarge = @"com.apple.UIKit.large";
-const CGFloat UISheetPresentationControllerAutomaticDimension = CGFLOAT_MAX;
+NSString *const BACKPORT_IMPL(UISheetPresentationControllerDetentIdentifierMedium) = @"com.apple.UIKit.medium";
+NSString *const BACKPORT_IMPL(UISheetPresentationControllerDetentIdentifierLarge) = @"com.apple.UIKit.large";
+const CGFloat BACKPORT_IMPL(UISheetPresentationControllerAutomaticDimension) = CGFLOAT_MAX;
 
 static const CGFloat revenant_sheet_corner_radius = 10;
 static const CGFloat revenant_sheet_top_offset = 10;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -375,7 +376,7 @@ static void revenant_group_read(RevenantNWConnectionGroup *group)
     }
 }
 
-nw_connection_group_t nw_connection_group_create(nw_group_descriptor_t group_descriptor,
+nw_connection_group_t BACKPORT_IMPL(nw_connection_group_create)(nw_group_descriptor_t group_descriptor,
                                                 nw_parameters_t parameters)
 {
     if (!group_descriptor || !parameters)
@@ -395,30 +396,30 @@ nw_connection_group_t nw_connection_group_create(nw_group_descriptor_t group_des
     return group;
 }
 
-nw_group_descriptor_t nw_connection_group_copy_descriptor(nw_connection_group_t group)
+nw_group_descriptor_t BACKPORT_IMPL(nw_connection_group_copy_descriptor)(nw_connection_group_t group)
 {
     return group ? (nw_group_descriptor_t)((RevenantNWConnectionGroup *)group)->_descriptor : NULL;
 }
 
-nw_parameters_t nw_connection_group_copy_parameters(nw_connection_group_t group)
+nw_parameters_t BACKPORT_IMPL(nw_connection_group_copy_parameters)(nw_connection_group_t group)
 {
     return group ? (nw_parameters_t)((RevenantNWConnectionGroup *)group)->_parameters : NULL;
 }
 
-void nw_connection_group_set_queue(nw_connection_group_t group, dispatch_queue_t queue)
+void BACKPORT_IMPL(nw_connection_group_set_queue)(nw_connection_group_t group, dispatch_queue_t queue)
 {
     if (group)
         ((RevenantNWConnectionGroup *)group)->_queue = queue;
 }
 
-void nw_connection_group_set_state_changed_handler(nw_connection_group_t group,
+void BACKPORT_IMPL(nw_connection_group_set_state_changed_handler)(nw_connection_group_t group,
                                                    nw_connection_group_state_changed_handler_t handler)
 {
     if (group)
         ((RevenantNWConnectionGroup *)group)->_state = [handler copy];
 }
 
-void nw_connection_group_set_receive_handler(nw_connection_group_t group, uint32_t maximum_message_size,
+void BACKPORT_IMPL(nw_connection_group_set_receive_handler)(nw_connection_group_t group, uint32_t maximum_message_size,
                                              bool reject_oversized_messages,
                                              nw_connection_group_receive_handler_t receive_handler)
 {
@@ -430,7 +431,7 @@ void nw_connection_group_set_receive_handler(nw_connection_group_t group, uint32
     value->_receive = [receive_handler copy];
 }
 
-void nw_connection_group_start(nw_connection_group_t group)
+void BACKPORT_IMPL(nw_connection_group_start)(nw_connection_group_t group)
 {
     if (!group)
         return;
@@ -475,7 +476,7 @@ void nw_connection_group_start(nw_connection_group_t group)
     });
 }
 
-void nw_connection_group_cancel(nw_connection_group_t group)
+void BACKPORT_IMPL(nw_connection_group_cancel)(nw_connection_group_t group)
 {
     if (!group)
         return;
@@ -513,27 +514,27 @@ static RevenantNWGroupMessage *revenant_group_message(nw_connection_group_t grou
     return ((RevenantNWConnectionGroup *)group)->_inbound[(id)context];
 }
 
-nw_endpoint_t nw_connection_group_copy_remote_endpoint_for_message(nw_connection_group_t group,
+nw_endpoint_t BACKPORT_IMPL(nw_connection_group_copy_remote_endpoint_for_message)(nw_connection_group_t group,
                                                                    nw_content_context_t context)
 {
     RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? (nw_endpoint_t)message->_remote : NULL;
 }
 
-nw_endpoint_t nw_connection_group_copy_local_endpoint_for_message(nw_connection_group_t group,
+nw_endpoint_t BACKPORT_IMPL(nw_connection_group_copy_local_endpoint_for_message)(nw_connection_group_t group,
                                                                   nw_content_context_t context)
 {
     RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? (nw_endpoint_t)message->_local : NULL;
 }
 
-nw_path_t nw_connection_group_copy_path_for_message(nw_connection_group_t group, nw_content_context_t context)
+nw_path_t BACKPORT_IMPL(nw_connection_group_copy_path_for_message)(nw_connection_group_t group, nw_content_context_t context)
 {
     RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? message->_path : NULL;
 }
 
-nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection_group_t group,
+nw_connection_t BACKPORT_IMPL(nw_connection_group_extract_connection_for_message)(nw_connection_group_t group,
                                                                   nw_content_context_t context)
 {
     RevenantNWGroupMessage *message = revenant_group_message(group, context);
@@ -548,7 +549,7 @@ nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection
     return connection;
 }
 
-void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t inbound_message,
+void BACKPORT_IMPL(nw_connection_group_reply)(nw_connection_group_t group, nw_content_context_t inbound_message,
                                nw_content_context_t outbound_message, dispatch_data_t content)
 {
     RevenantNWGroupMessage *message = revenant_group_message(group, inbound_message);
@@ -565,7 +566,7 @@ void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t
         [((RevenantNWConnectionGroup *)group)->_inbound removeObjectForKey:(id)inbound_message];
 }
 
-void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data_t content,
+void BACKPORT_IMPL(nw_connection_group_send_message)(nw_connection_group_t group, dispatch_data_t content,
                                       nw_endpoint_t endpoint, nw_content_context_t context,
                                       nw_connection_group_send_completion_t completion)
 {
@@ -597,7 +598,7 @@ void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data
         completion(NULL);
 }
 
-nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata(nw_connection_group_t group,
+nw_protocol_metadata_t BACKPORT_IMPL(nw_connection_group_copy_protocol_metadata)(nw_connection_group_t group,
                                                                   nw_protocol_definition_t definition)
 {
     RevenantNWConnectionGroup *value = (RevenantNWConnectionGroup *)group;
@@ -610,7 +611,7 @@ nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata(nw_connection_
     return NULL;
 }
 
-nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata_for_message(nw_connection_group_t group,
+nw_protocol_metadata_t BACKPORT_IMPL(nw_connection_group_copy_protocol_metadata_for_message)(nw_connection_group_t group,
                                                                              nw_content_context_t context,
                                                                              nw_protocol_definition_t definition)
 {

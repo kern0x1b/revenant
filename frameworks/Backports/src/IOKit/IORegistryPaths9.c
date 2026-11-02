@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
 #define REVENANT_IOKIT_EXPORT __attribute__((visibility("default")))
 
-REVENANT_IOKIT_EXPORT CFStringRef IORegistryEntryCopyPath(io_registry_entry_t entry, const io_name_t plane)
+REVENANT_IOKIT_EXPORT CFStringRef BACKPORT_IMPL(IORegistryEntryCopyPath)(io_registry_entry_t entry, const io_name_t plane)
 {
     io_string_t path;
 
@@ -13,7 +14,7 @@ REVENANT_IOKIT_EXPORT CFStringRef IORegistryEntryCopyPath(io_registry_entry_t en
     return CFStringCreateWithCString(0, path, kCFStringEncodingUTF8);
 }
 
-REVENANT_IOKIT_EXPORT io_registry_entry_t IORegistryEntryCopyFromPath(mach_port_t mainPort, CFStringRef path)
+REVENANT_IOKIT_EXPORT io_registry_entry_t BACKPORT_IMPL(IORegistryEntryCopyFromPath)(mach_port_t mainPort, CFStringRef path)
 {
     io_string_t buffer;
 

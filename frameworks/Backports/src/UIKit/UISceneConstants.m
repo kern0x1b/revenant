@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSNotificationName const UISceneWillConnectNotification = @"UISceneWillConnectNotification";
-NSNotificationName const UISceneDidDisconnectNotification = @"UISceneDidDisconnectNotification";
-NSNotificationName const UISceneDidActivateNotification = @"UISceneDidActivateNotification";
-NSNotificationName const UISceneWillDeactivateNotification = @"UISceneWillDeactivateNotification";
-NSNotificationName const UISceneWillEnterForegroundNotification = @"UISceneWillEnterForegroundNotification";
-NSNotificationName const UISceneDidEnterBackgroundNotification = @"UISceneDidEnterBackgroundNotification";
-UISceneSessionRole const UIWindowSceneSessionRoleApplication = @"UIWindowSceneSessionRoleApplication";
-UISceneSessionRole const UIWindowSceneSessionRoleExternalDisplay = @"UIWindowSceneSessionRoleExternalDisplayNonInteractive";
+NSNotificationName const BACKPORT_IMPL(UISceneWillConnectNotification) = @"UISceneWillConnectNotification";
+NSNotificationName const BACKPORT_IMPL(UISceneDidDisconnectNotification) = @"UISceneDidDisconnectNotification";
+NSNotificationName const BACKPORT_IMPL(UISceneDidActivateNotification) = @"UISceneDidActivateNotification";
+NSNotificationName const BACKPORT_IMPL(UISceneWillDeactivateNotification) = @"UISceneWillDeactivateNotification";
+NSNotificationName const BACKPORT_IMPL(UISceneWillEnterForegroundNotification) = @"UISceneWillEnterForegroundNotification";
+NSNotificationName const BACKPORT_IMPL(UISceneDidEnterBackgroundNotification) = @"UISceneDidEnterBackgroundNotification";
+UISceneSessionRole const BACKPORT_IMPL(UIWindowSceneSessionRoleApplication) = @"UIWindowSceneSessionRoleApplication";
+UISceneSessionRole const BACKPORT_IMPL(UIWindowSceneSessionRoleExternalDisplay) = @"UIWindowSceneSessionRoleExternalDisplayNonInteractive";

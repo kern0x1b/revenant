@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #define DNSServiceBrowse DNSServiceBrowseAsThisSDKDeclaresIt
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
@@ -444,7 +445,7 @@ void RevenantNWBrowserStart(nw_browser_t browser)
     revenant_browser_begin(browser);
 }
 
-nw_browser_t nw_browser_create(nw_browse_descriptor_t descriptor, nw_parameters_t parameters)
+nw_browser_t BACKPORT_IMPL(nw_browser_create)(nw_browse_descriptor_t descriptor, nw_parameters_t parameters)
 {
     if (!descriptor)
         return NULL;
@@ -459,7 +460,7 @@ nw_browser_t nw_browser_create(nw_browse_descriptor_t descriptor, nw_parameters_
     return browser;
 }
 
-void nw_browser_cancel(nw_browser_t browser)
+void BACKPORT_IMPL(nw_browser_cancel)(nw_browser_t browser)
 {
     if (!browser)
         return;

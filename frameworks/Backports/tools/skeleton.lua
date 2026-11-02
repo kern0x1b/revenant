@@ -36,10 +36,19 @@ struct revenant_backports_method {
     IMP implementation;
 };
 
+struct revenant_backports_tramp {
+    void **slot;
+    const char *image;
+    const char *name;
+    void *fallback;
+    void *fail;
+};
+
 void revenant_backports_fail(const char *name) __attribute__((noreturn, visibility("hidden")));
 void revenant_backports_register(const struct revenant_backports_method *methods, unsigned method_count) __attribute__((visibility("hidden")));
 void revenant_backports_global(void *storage, size_t size, const char *encoding, const char *name, const char *image, void *fallback) __attribute__((visibility("hidden")));
 void *revenant_backports_c_target(void **slot, const char *image, const char *name) __attribute__((visibility("hidden")));
+void *revenant_backports_lookup(const char *image, const char *name) __attribute__((visibility("hidden")));
 
 #endif
 ]==]
@@ -47,6 +56,7 @@ void *revenant_backports_c_target(void **slot, const char *image, const char *na
 local REGISTRAR = [==[
 #include "revenant_backports.h"
 #include <dlfcn.h>
+#include <pthread.h>
 #include <objc/NSObject.h>
 #include <objc/runtime.h>
 #include <stdio.h>
@@ -61,10 +71,43 @@ void revenant_backports_fail(const char *name)
     abort();
 }
 
+#define REVENANT_HANDLES 64
+static pthread_mutex_t revenant_backports_lock = PTHREAD_MUTEX_INITIALIZER;
+static const char *revenant_handle_image[REVENANT_HANDLES];
+static void *revenant_handle_value[REVENANT_HANDLES];
+static unsigned revenant_handle_count;
+
+static void *revenant_backports_handle(const char *image)
+{
+    void *handle = NULL;
+    pthread_mutex_lock(&revenant_backports_lock);
+    for (unsigned index = 0; index < revenant_handle_count; index++) {
+        if (strcmp(revenant_handle_image[index], image) == 0) {
+            handle = revenant_handle_value[index];
+            break;
+        }
+    }
+    if (handle == NULL) {
+        handle = dlopen(image, RTLD_LAZY);
+        if (handle != NULL && revenant_handle_count < REVENANT_HANDLES) {
+            revenant_handle_image[revenant_handle_count] = image;
+            revenant_handle_value[revenant_handle_count] = handle;
+            revenant_handle_count++;
+        }
+    }
+    pthread_mutex_unlock(&revenant_backports_lock);
+    return handle;
+}
+
 static void *revenant_backports_symbol(const char *image, const char *name)
 {
-    void *handle = dlopen(image, RTLD_LAZY);
+    void *handle = revenant_backports_handle(image);
     return handle != NULL ? dlsym(handle, name) : NULL;
+}
+
+void *revenant_backports_lookup(const char *image, const char *name)
+{
+    return revenant_backports_symbol(image, name);
 }
 
 void *revenant_backports_c_target(void **slot, const char *image, const char *name)
@@ -364,6 +407,140 @@ local function forwarder(index, entry)
     return lines
 end
 
+local function asm_text(text)
+    return '"' .. (string.gsub(text, "%%%%", "%%")) .. '\\n"'
+end
+
+local function trampoline_asm(prefix, entries)
+    local shared = "Lrevenant_" .. prefix .. "_shared"
+    local resolve = "_revenant_" .. prefix .. "_tramp_resolve"
+    local function labels(index, entry)
+        return "_" .. entry.symbol, "_revenant_" .. prefix .. "_tramp_slot_" .. index,
+            "Lrevenant_" .. prefix .. "_pool_" .. index, "Lrevenant_" .. prefix .. "_pc_" .. index,
+            "Lrevenant_" .. prefix .. "_slow_" .. index
+    end
+    local function block(guard, per_entry, shared_lines, width)
+        local lines = {guard, "__asm__(", asm_text(".pushsection __TEXT,__text,regular,pure_instructions")}
+        for index, entry in ipairs(entries) do
+            for _, text in ipairs(per_entry(index, entry)) do
+                table.insert(lines, asm_text(text))
+            end
+            local slot = "_revenant_" .. prefix .. "_tramp_slot_" .. index
+            for _, text in ipairs({".pushsection __DATA,__data", ".p2align " .. width, ".private_extern " .. slot, slot .. ":",
+                width == 3 and "    .quad 0" or "    .long 0", ".popsection"}) do
+                table.insert(lines, asm_text(text))
+            end
+        end
+        for _, text in ipairs(shared_lines) do
+            table.insert(lines, asm_text(text))
+        end
+        table.insert(lines, asm_text(".popsection"))
+        table.insert(lines, ");")
+        return lines
+    end
+    local function arm_entry(thumb)
+        return function (index, entry)
+            local public, slot, pool, here, slow = labels(index, entry)
+            local out = {".globl " .. public, ".weak_definition " .. public}
+            if thumb then
+                table.insert(out, ".thumb_func " .. public)
+            end
+            table.insert(out, public .. ":")
+            table.insert(out, "    ldr r12, " .. pool)
+            table.insert(out, here .. ":")
+            table.insert(out, thumb and "    add r12, pc" or "    add r12, pc, r12")
+            table.insert(out, "    ldr r12, [r12]")
+            table.insert(out, "    cmp r12, #0")
+            table.insert(out, "    beq " .. slow)
+            table.insert(out, "    bx r12")
+            table.insert(out, slow .. ":")
+            table.insert(out, "    movw r12, #" .. (index - 1))
+            table.insert(out, "    b " .. shared)
+            table.insert(out, ".p2align 2")
+            table.insert(out, pool .. ":")
+            table.insert(out, "    .long " .. slot .. "-(" .. here .. (thumb and "+4)" or "+8)"))
+            return out
+        end
+    end
+    local arm_shared = {shared .. ":", "    push {r0, r1, r2, r3, r4, lr}", "    vpush {d0, d1, d2, d3, d4, d5, d6, d7}", "    mov r0, r12",
+        "    bl " .. resolve, "    mov r12, r0", "    vpop {d0, d1, d2, d3, d4, d5, d6, d7}", "    pop {r0, r1, r2, r3, r4, lr}", "    bx r12"}
+    local function arm64_entry(index, entry)
+        local public, slot, _, _, slow = labels(index, entry)
+        return {".globl " .. public, ".weak_definition " .. public, ".p2align 2", public .. ":",
+            "    adrp x16, " .. slot .. "@PAGE", "    ldr x17, [x16, " .. slot .. "@PAGEOFF]", "    cbz x17, " .. slow,
+            "    br x17", slow .. ":", "    mov x17, #" .. (index - 1), "    b " .. shared}
+    end
+    local arm64_shared = {shared .. ":", "    sub sp, sp, #288", "    stp x0, x1, [sp, #0]", "    stp x2, x3, [sp, #16]",
+        "    stp x4, x5, [sp, #32]", "    stp x6, x7, [sp, #48]", "    stp x8, x30, [sp, #64]", "    stp q0, q1, [sp, #80]",
+        "    stp q2, q3, [sp, #112]", "    stp q4, q5, [sp, #144]", "    stp q6, q7, [sp, #176]", "    mov x0, x17",
+        "    bl " .. resolve, "    mov x16, x0", "    ldp x0, x1, [sp, #0]", "    ldp x2, x3, [sp, #16]", "    ldp x4, x5, [sp, #32]",
+        "    ldp x6, x7, [sp, #48]", "    ldp x8, x30, [sp, #64]", "    ldp q0, q1, [sp, #80]", "    ldp q2, q3, [sp, #112]",
+        "    ldp q4, q5, [sp, #144]", "    ldp q6, q7, [sp, #176]", "    add sp, sp, #288", "    br x16"}
+    local function x86_entry(index, entry)
+        local public, slot, _, _, slow = labels(index, entry)
+        return {".globl " .. public, ".weak_definition " .. public, public .. ":", "    cmpq $0, " .. slot .. "(%%rip)",
+            "    je " .. slow, "    jmpq *" .. slot .. "(%%rip)", slow .. ":", "    movl $" .. (index - 1) .. ", %%r11d", "    jmp " .. shared}
+    end
+    local x86_shared = {shared .. ":", "    pushq %%rbp", "    movq %%rsp, %%rbp", "    pushq %%rdi", "    pushq %%rsi",
+        "    pushq %%rdx", "    pushq %%rcx", "    pushq %%r8", "    pushq %%r9", "    pushq %%rax", "    subq $136, %%rsp"}
+    for register = 0, 7 do
+        table.insert(x86_shared, string.format("    movdqu %%%%xmm%d, %d(%%%%rsp)", register, 16 * register))
+    end
+    table.insert(x86_shared, "    movl %%r11d, %%edi")
+    table.insert(x86_shared, "    callq " .. resolve)
+    table.insert(x86_shared, "    movq %%rax, %%r11")
+    for register = 0, 7 do
+        table.insert(x86_shared, string.format("    movdqu %d(%%%%rsp), %%%%xmm%d", 16 * register, register))
+    end
+    for _, text in ipairs({"    addq $136, %%rsp", "    popq %%rax", "    popq %%r9", "    popq %%r8", "    popq %%rcx",
+        "    popq %%rdx", "    popq %%rsi", "    popq %%rdi", "    popq %%rbp", "    jmpq *%%r11"}) do
+        table.insert(x86_shared, text)
+    end
+    local lines = {}
+    table.join2(lines, block("#if defined(__arm__) && defined(__thumb__)", arm_entry(true), arm_shared, 2))
+    table.join2(lines, block("#elif defined(__arm__)", arm_entry(false), arm_shared, 2))
+    table.join2(lines, block("#elif defined(__arm64__) || defined(__aarch64__)", arm64_entry, arm64_shared, 3))
+    table.join2(lines, block("#elif defined(__x86_64__)", x86_entry, x86_shared, 3))
+    table.insert(lines, "#else")
+    table.insert(lines, '#error "backports: no trampoline for this architecture"')
+    table.insert(lines, "#endif")
+    return lines
+end
+
+local function trampoline_lines(prefix, entries)
+    if #entries == 0 then
+        return {}
+    end
+    local lines = {}
+    for index, entry in ipairs(entries) do
+        table.insert(lines, string.format('extern void *revenant_%s_tramp_slot_%d __asm__("_revenant_%s_tramp_slot_%d") __attribute__((visibility("hidden")));',
+            prefix, index, prefix, index))
+        table.insert(lines, string.format("static void revenant_%s_tramp_fail_%d(void)", prefix, index))
+        table.insert(lines, string.format("{ revenant_backports_fail(%s); }", quoted(entry.label)))
+        if entry.fallback then
+            table.insert(lines, string.format("extern char revenant_%s_tramp_fb_%d __asm__(%s);", prefix, index, quoted("___revenant_fb_" .. entry.name)))
+        end
+    end
+    table.join2(lines, trampoline_asm(prefix, entries))
+    table.insert(lines, string.format("static const struct revenant_backports_tramp revenant_%s_tramps[] = {", prefix))
+    for index, entry in ipairs(entries) do
+        local fallback = entry.fallback and string.format("(void *)&revenant_%s_tramp_fb_%d", prefix, index) or "NULL"
+        table.insert(lines, string.format("    {&revenant_%s_tramp_slot_%d, %s, %s, %s, (void *)revenant_%s_tramp_fail_%d},",
+            prefix, index, quoted(entry.image), quoted(entry.symbol), fallback, prefix, index))
+    end
+    table.insert(lines, "};")
+    table.insert(lines, string.format('__attribute__((visibility("hidden"), used)) void *revenant_%s_tramp_resolve(unsigned index)', prefix))
+    table.insert(lines, "{")
+    table.insert(lines, string.format("    const struct revenant_backports_tramp *entry = &revenant_%s_tramps[index];", prefix))
+    table.insert(lines, "    void *target = revenant_backports_lookup(entry->image, entry->name);")
+    table.insert(lines, "    if (target == NULL)")
+    table.insert(lines, "        target = entry->fallback != NULL ? entry->fallback : entry->fail;")
+    table.insert(lines, "    __atomic_store_n(entry->slot, target, __ATOMIC_RELAXED);")
+    table.insert(lines, "    return target;")
+    table.insert(lines, "}")
+    return lines
+end
+
 local function swift_lines(swift, data)
     local lines = {}
     for index, entry in ipairs(swift) do
@@ -408,6 +585,7 @@ local function objc_source(model, umbrella, alias)
     for index, entry in ipairs(model.functions) do
         table.join2(lines, forwarder(index, entry))
     end
+    table.join2(lines, trampoline_lines(model.prefix, model.trampolines))
     table.join2(lines, swift_lines(model.swift, model.data))
     table.insert(lines, "__attribute__((constructor)) static void revenant_backports_load(void)")
     table.insert(lines, "{")
@@ -431,16 +609,17 @@ local function emit(file, text)
     end
 end
 
-function write(skeleton, frameworks, implemented, images, markers)
+function write(skeleton, frameworks, implemented, images, markers, definitions)
+    definitions = definitions or {}
     os.mkdir(skeleton)
     emit(path.join(skeleton, "revenant_backports.h"), HEADER)
     emit(path.join(skeleton, "registrar.m"), REGISTRAR)
     local alias = path.join(sdkfiles.src_root(), "revenant_alias.h")
-    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, c = 0, c_unstubbed = 0, c_in_src = 0, swift = 0}
-    local outputs, seen_c, seen_global = {}, {}, {}
+    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, c = 0, trampolines = 0, c_in_src = 0, src_only = 0, swift = 0}
+    local outputs, seen_c, seen_global, imports_of = {}, {}, {}, {}
     local function output(name)
         if outputs[name] == nil then
-            outputs[name] = {classes = {}, methods = {}, protocols = {}, functions = {}, globals = {}, swift = {}, data = {},
+            outputs[name] = {classes = {}, methods = {}, protocols = {}, functions = {}, trampolines = {}, globals = {}, swift = {}, data = {},
                 imports = {}, import_seen = {}}
         end
         return outputs[name]
@@ -454,6 +633,7 @@ function write(skeleton, frameworks, implemented, images, markers)
     for _, framework in ipairs(frameworks) do
         local own = output(framework.name)
         import_of(own, framework.import or "")
+        imports_of[framework.name] = framework.import or ""
         local classes, methods = objc_model(framework.rows, implemented, framework.unavailable)
         table.join2(own.classes, classes)
         table.join2(own.methods, methods)
@@ -462,21 +642,22 @@ function write(skeleton, frameworks, implemented, images, markers)
         end
         for _, row in ipairs(framework.rows) do
             local marked = markers[row.name] ~= nil
-            if row.kind == "C function" then
+            if row.kind == "C function" and not seen_c[row.name] then
+                seen_c[row.name] = true
                 local signature = parse_function(row.signature)
+                local out = output(marked and markers[row.name] or framework.name)
+                import_of(out, framework.import or "")
                 if signature == nil then
-                    assert(not marked, row.name .. " is implemented in src but its signature cannot be forwarded")
-                    totals.c_unstubbed = totals.c_unstubbed + 1
-                elseif not seen_c[row.name] then
-                    seen_c[row.name] = true
-                    local out = output(marked and markers[row.name] or framework.name)
-                    import_of(out, framework.import or "")
+                    table.insert(out.trampolines, {name = row.name, symbol = row.symbol, label = framework.name .. "." .. row.name,
+                        image = image_of(row.name), fallback = marked})
+                    totals.trampolines = totals.trampolines + 1
+                else
                     table.insert(out.functions, {name = row.name, symbol = row.symbol, label = framework.name .. "." .. row.name,
                         image = image_of(row.name), ret = signature.ret, params = signature.params, fallback = marked})
                     totals.c = totals.c + 1
-                    if marked then
-                        totals.c_in_src = totals.c_in_src + 1
-                    end
+                end
+                if marked then
+                    totals.c_in_src = totals.c_in_src + 1
                 end
             elseif row.kind == "global variable" and not seen_global[row.name] then
                 seen_global[row.name] = true
@@ -505,6 +686,34 @@ function write(skeleton, frameworks, implemented, images, markers)
         totals.protocols = totals.protocols + #own.protocols
         totals.swift = totals.swift + #own.swift + #own.data
     end
+    local gap = {}
+    for name in pairs(markers) do
+        if not seen_c[name] and not seen_global[name] then
+            table.insert(gap, name)
+        end
+    end
+    table.sort(gap)
+    for _, name in ipairs(gap) do
+        local folder = markers[name]
+        local definition = definitions[name]
+        assert(definition ~= nil, name .. " is implemented in src, but no definition of it was found")
+        local image = images[name]
+        assert(image ~= nil, name .. " is implemented in src, but no SDK image exports it")
+        local out = output(folder)
+        import_of(out, imports_of[folder] or "")
+        if definition.kind == "function" then
+            table.insert(out.trampolines, {name = name, symbol = name, label = folder .. "." .. name, image = image, fallback = true})
+            totals.trampolines = totals.trampolines + 1
+        elseif definition.kind == "global" then
+            assert(definition.type ~= nil and definition.type ~= "", name .. " is implemented in src, but its declaration has no type")
+            assert(not definition.array, name .. " is implemented in src as an array, which has no copy")
+            table.insert(out.globals, {name = name, type = definition.type, image = image, array = false, fallback = true})
+            totals.globals = totals.globals + 1
+        else
+            raise("%s is implemented in src, but is neither a function nor a global", name)
+        end
+        totals.src_only = totals.src_only + 1
+    end
     local names = {}
     for name in pairs(outputs) do
         table.insert(names, name)
@@ -514,9 +723,10 @@ function write(skeleton, frameworks, implemented, images, markers)
         local out = outputs[name]
         local file = path.join(skeleton, name .. ".m")
         os.tryrm(path.join(skeleton, name .. ".c"))
-        if #out.classes > 0 or #out.methods > 0 or #out.protocols > 0 or #out.globals > 0 or #out.functions > 0 or #out.swift > 0 or #out.data > 0 then
+        if #out.classes > 0 or #out.methods > 0 or #out.protocols > 0 or #out.globals > 0 or #out.functions > 0 or #out.trampolines > 0 or #out.swift > 0 or #out.data > 0 then
             emit(file, objc_source({classes = out.classes, methods = out.methods, protocols = out.protocols, globals = out.globals,
-                functions = out.functions, swift = out.swift, data = out.data}, table.concat(out.imports, "\n"), alias))
+                functions = out.functions, trampolines = out.trampolines, prefix = (string.gsub(name, "[^%w_]", "_")),
+                swift = out.swift, data = out.data}, table.concat(out.imports, "\n"), alias))
         else
             os.tryrm(file)
         end

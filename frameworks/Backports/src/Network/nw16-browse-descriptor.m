@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_browse_descriptor_t nw_browse_descriptor_create_application_service(const char *application_service_name)
+nw_browse_descriptor_t BACKPORT_IMPL(nw_browse_descriptor_create_application_service)(const char *application_service_name)
 {
     if (!application_service_name || !*application_service_name)
         return NULL;
@@ -9,7 +10,7 @@ nw_browse_descriptor_t nw_browse_descriptor_create_application_service(const cha
     return descriptor;
 }
 
-const char *nw_browse_descriptor_get_application_service_name(nw_browse_descriptor_t descriptor)
+const char *BACKPORT_IMPL(nw_browse_descriptor_get_application_service_name)(nw_browse_descriptor_t descriptor)
 {
     RevenantNWBrowseDescriptor *value = (RevenantNWBrowseDescriptor *)descriptor;
     return value ? value->_applicationService.UTF8String : NULL;

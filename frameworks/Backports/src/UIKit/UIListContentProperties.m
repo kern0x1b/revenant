@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-const CGFloat UIListContentImageStandardDimension = -CGFLOAT_MAX;
+const CGFloat BACKPORT_IMPL(UIListContentImageStandardDimension) = -CGFLOAT_MAX;
 
 static UIFont *revenant_private_style_font(NSString *style, UIFontTextStyle fallback, CGFloat size)
 {

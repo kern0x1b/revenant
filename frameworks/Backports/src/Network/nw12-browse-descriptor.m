@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_browse_descriptor_t nw_browse_descriptor_create_bonjour_service(const char *type, const char *domain)
+nw_browse_descriptor_t BACKPORT_IMPL(nw_browse_descriptor_create_bonjour_service)(const char *type, const char *domain)
 {
     if (!type || !*type || !domain || !*domain)
         return NULL;

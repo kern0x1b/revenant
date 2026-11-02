@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_txt_record_t nw_endpoint_copy_txt_record(nw_endpoint_t endpoint)
+nw_txt_record_t BACKPORT_IMPL(nw_endpoint_copy_txt_record)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
@@ -8,7 +9,7 @@ nw_txt_record_t nw_endpoint_copy_txt_record(nw_endpoint_t endpoint)
     return value->_txtRecord;
 }
 
-const uint8_t *nw_endpoint_get_signature(nw_endpoint_t endpoint, size_t *out_signature_length)
+const uint8_t *BACKPORT_IMPL(nw_endpoint_get_signature)(nw_endpoint_t endpoint, size_t *out_signature_length)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service || !value->_signature)

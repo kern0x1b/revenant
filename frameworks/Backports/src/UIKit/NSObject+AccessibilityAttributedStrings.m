@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-NSAttributedStringKey const UIAccessibilitySpeechAttributeQueueAnnouncement = @"UIAccessibilitySpeechAttributeQueueAnnouncement";
-NSAttributedStringKey const UIAccessibilitySpeechAttributeIPANotation = @"UIAccessibilitySpeechAttributeIPANotation";
-NSAttributedStringKey const UIAccessibilityTextAttributeHeadingLevel = @"UIAccessibilityTextAttributeHeadingLevel";
-NSAttributedStringKey const UIAccessibilityTextAttributeCustom = @"UIAccessibilityTextAttributeCustom";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilitySpeechAttributeQueueAnnouncement) = @"UIAccessibilitySpeechAttributeQueueAnnouncement";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilitySpeechAttributeIPANotation) = @"UIAccessibilitySpeechAttributeIPANotation";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilityTextAttributeHeadingLevel) = @"UIAccessibilityTextAttributeHeadingLevel";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilityTextAttributeCustom) = @"UIAccessibilityTextAttributeCustom";
 
 static const char RevenantAttributedLabelKey, RevenantAttributedHintKey, RevenantAttributedValueKey;
 

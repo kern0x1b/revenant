@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <IOSurface/IOSurfaceRef.h>
 #import <dlfcn.h>
@@ -30,7 +31,7 @@ static void *RevenantIOSurfaceSymbol(const char *name)
     return symbol;
 }
 
-CFTypeID IOSurfaceGetTypeID(void)
+CFTypeID BACKPORT_IMPL(IOSurfaceGetTypeID)(void)
 {
     static CFTypeID (*function)(void);
     if (!function) {
@@ -39,7 +40,7 @@ CFTypeID IOSurfaceGetTypeID(void)
     return function();
 }
 
-IOSurfaceRef IOSurfaceCreate(CFDictionaryRef properties)
+IOSurfaceRef BACKPORT_IMPL(IOSurfaceCreate)(CFDictionaryRef properties)
 {
     static IOSurfaceRef (*function)(CFDictionaryRef);
     if (!function) {
@@ -48,7 +49,7 @@ IOSurfaceRef IOSurfaceCreate(CFDictionaryRef properties)
     return function(properties);
 }
 
-IOSurfaceRef IOSurfaceLookup(IOSurfaceID csid)
+IOSurfaceRef BACKPORT_IMPL(IOSurfaceLookup)(IOSurfaceID csid)
 {
     static IOSurfaceRef (*function)(IOSurfaceID);
     if (!function) {
@@ -57,7 +58,7 @@ IOSurfaceRef IOSurfaceLookup(IOSurfaceID csid)
     return function(csid);
 }
 
-IOSurfaceID IOSurfaceGetID(IOSurfaceRef buffer)
+IOSurfaceID BACKPORT_IMPL(IOSurfaceGetID)(IOSurfaceRef buffer)
 {
     static IOSurfaceID (*function)(IOSurfaceRef);
     if (!function) {
@@ -66,7 +67,7 @@ IOSurfaceID IOSurfaceGetID(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-kern_return_t IOSurfaceLock(IOSurfaceRef buffer, IOSurfaceLockOptions options, uint32_t *seed)
+kern_return_t BACKPORT_IMPL(IOSurfaceLock)(IOSurfaceRef buffer, IOSurfaceLockOptions options, uint32_t *seed)
 {
     static kern_return_t (*function)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t *);
     if (!function) {
@@ -75,7 +76,7 @@ kern_return_t IOSurfaceLock(IOSurfaceRef buffer, IOSurfaceLockOptions options, u
     return function(buffer, options, seed);
 }
 
-kern_return_t IOSurfaceUnlock(IOSurfaceRef buffer, IOSurfaceLockOptions options, uint32_t *seed)
+kern_return_t BACKPORT_IMPL(IOSurfaceUnlock)(IOSurfaceRef buffer, IOSurfaceLockOptions options, uint32_t *seed)
 {
     static kern_return_t (*function)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t *);
     if (!function) {
@@ -84,7 +85,7 @@ kern_return_t IOSurfaceUnlock(IOSurfaceRef buffer, IOSurfaceLockOptions options,
     return function(buffer, options, seed);
 }
 
-size_t IOSurfaceGetAllocSize(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetAllocSize)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -93,7 +94,7 @@ size_t IOSurfaceGetAllocSize(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetWidth(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetWidth)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -102,7 +103,7 @@ size_t IOSurfaceGetWidth(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetHeight(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetHeight)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -111,7 +112,7 @@ size_t IOSurfaceGetHeight(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetBytesPerElement(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetBytesPerElement)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -120,7 +121,7 @@ size_t IOSurfaceGetBytesPerElement(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetBytesPerRow(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetBytesPerRow)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -129,7 +130,7 @@ size_t IOSurfaceGetBytesPerRow(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-void *IOSurfaceGetBaseAddress(IOSurfaceRef buffer)
+void *BACKPORT_IMPL(IOSurfaceGetBaseAddress)(IOSurfaceRef buffer)
 {
     static void *(*function)(IOSurfaceRef);
     if (!function) {
@@ -138,7 +139,7 @@ void *IOSurfaceGetBaseAddress(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetElementWidth(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetElementWidth)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -147,7 +148,7 @@ size_t IOSurfaceGetElementWidth(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetElementHeight(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetElementHeight)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -156,7 +157,7 @@ size_t IOSurfaceGetElementHeight(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-OSType IOSurfaceGetPixelFormat(IOSurfaceRef buffer)
+OSType BACKPORT_IMPL(IOSurfaceGetPixelFormat)(IOSurfaceRef buffer)
 {
     static OSType (*function)(IOSurfaceRef);
     if (!function) {
@@ -165,7 +166,7 @@ OSType IOSurfaceGetPixelFormat(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-uint32_t IOSurfaceGetSeed(IOSurfaceRef buffer)
+uint32_t BACKPORT_IMPL(IOSurfaceGetSeed)(IOSurfaceRef buffer)
 {
     static uint32_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -174,7 +175,7 @@ uint32_t IOSurfaceGetSeed(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetPlaneCount(IOSurfaceRef buffer)
+size_t BACKPORT_IMPL(IOSurfaceGetPlaneCount)(IOSurfaceRef buffer)
 {
     static size_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -183,7 +184,7 @@ size_t IOSurfaceGetPlaneCount(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-size_t IOSurfaceGetWidthOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetWidthOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -192,7 +193,7 @@ size_t IOSurfaceGetWidthOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-size_t IOSurfaceGetHeightOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetHeightOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -201,7 +202,7 @@ size_t IOSurfaceGetHeightOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-size_t IOSurfaceGetBytesPerElementOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetBytesPerElementOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -210,7 +211,7 @@ size_t IOSurfaceGetBytesPerElementOfPlane(IOSurfaceRef buffer, size_t planeIndex
     return function(buffer, planeIndex);
 }
 
-size_t IOSurfaceGetBytesPerRowOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetBytesPerRowOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -219,7 +220,7 @@ size_t IOSurfaceGetBytesPerRowOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-void *IOSurfaceGetBaseAddressOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+void *BACKPORT_IMPL(IOSurfaceGetBaseAddressOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static void *(*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -228,7 +229,7 @@ void *IOSurfaceGetBaseAddressOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-size_t IOSurfaceGetElementWidthOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetElementWidthOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -237,7 +238,7 @@ size_t IOSurfaceGetElementWidthOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-size_t IOSurfaceGetElementHeightOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+size_t BACKPORT_IMPL(IOSurfaceGetElementHeightOfPlane)(IOSurfaceRef buffer, size_t planeIndex)
 {
     static size_t (*function)(IOSurfaceRef, size_t);
     if (!function) {
@@ -246,7 +247,7 @@ size_t IOSurfaceGetElementHeightOfPlane(IOSurfaceRef buffer, size_t planeIndex)
     return function(buffer, planeIndex);
 }
 
-void IOSurfaceSetValue(IOSurfaceRef buffer, CFStringRef key, CFTypeRef value)
+void BACKPORT_IMPL(IOSurfaceSetValue)(IOSurfaceRef buffer, CFStringRef key, CFTypeRef value)
 {
     static void (*function)(IOSurfaceRef, CFStringRef, CFTypeRef);
     if (!function) {
@@ -255,7 +256,7 @@ void IOSurfaceSetValue(IOSurfaceRef buffer, CFStringRef key, CFTypeRef value)
     function(buffer, key, value);
 }
 
-CFTypeRef IOSurfaceCopyValue(IOSurfaceRef buffer, CFStringRef key)
+CFTypeRef BACKPORT_IMPL(IOSurfaceCopyValue)(IOSurfaceRef buffer, CFStringRef key)
 {
     static CFTypeRef (*function)(IOSurfaceRef, CFStringRef);
     if (!function) {
@@ -264,7 +265,7 @@ CFTypeRef IOSurfaceCopyValue(IOSurfaceRef buffer, CFStringRef key)
     return function(buffer, key);
 }
 
-void IOSurfaceRemoveValue(IOSurfaceRef buffer, CFStringRef key)
+void BACKPORT_IMPL(IOSurfaceRemoveValue)(IOSurfaceRef buffer, CFStringRef key)
 {
     static void (*function)(IOSurfaceRef, CFStringRef);
     if (!function) {
@@ -273,7 +274,7 @@ void IOSurfaceRemoveValue(IOSurfaceRef buffer, CFStringRef key)
     function(buffer, key);
 }
 
-void IOSurfaceSetValues(IOSurfaceRef buffer, CFDictionaryRef keysAndValues)
+void BACKPORT_IMPL(IOSurfaceSetValues)(IOSurfaceRef buffer, CFDictionaryRef keysAndValues)
 {
     static void (*function)(IOSurfaceRef, CFDictionaryRef);
     if (!function) {
@@ -282,7 +283,7 @@ void IOSurfaceSetValues(IOSurfaceRef buffer, CFDictionaryRef keysAndValues)
     function(buffer, keysAndValues);
 }
 
-CFDictionaryRef IOSurfaceCopyAllValues(IOSurfaceRef buffer)
+CFDictionaryRef BACKPORT_IMPL(IOSurfaceCopyAllValues)(IOSurfaceRef buffer)
 {
     static CFDictionaryRef (*function)(IOSurfaceRef);
     if (!function) {
@@ -291,7 +292,7 @@ CFDictionaryRef IOSurfaceCopyAllValues(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-void IOSurfaceRemoveAllValues(IOSurfaceRef buffer)
+void BACKPORT_IMPL(IOSurfaceRemoveAllValues)(IOSurfaceRef buffer)
 {
     static void (*function)(IOSurfaceRef);
     if (!function) {
@@ -300,7 +301,7 @@ void IOSurfaceRemoveAllValues(IOSurfaceRef buffer)
     function(buffer);
 }
 
-mach_port_t IOSurfaceCreateMachPort(IOSurfaceRef buffer)
+mach_port_t BACKPORT_IMPL(IOSurfaceCreateMachPort)(IOSurfaceRef buffer)
 {
     static mach_port_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -309,7 +310,7 @@ mach_port_t IOSurfaceCreateMachPort(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-IOSurfaceRef IOSurfaceLookupFromMachPort(mach_port_t port)
+IOSurfaceRef BACKPORT_IMPL(IOSurfaceLookupFromMachPort)(mach_port_t port)
 {
     static IOSurfaceRef (*function)(mach_port_t);
     if (!function) {
@@ -318,7 +319,7 @@ IOSurfaceRef IOSurfaceLookupFromMachPort(mach_port_t port)
     return function(port);
 }
 
-size_t IOSurfaceGetPropertyMaximum(CFStringRef property)
+size_t BACKPORT_IMPL(IOSurfaceGetPropertyMaximum)(CFStringRef property)
 {
     static size_t (*function)(CFStringRef);
     if (!function) {
@@ -327,7 +328,7 @@ size_t IOSurfaceGetPropertyMaximum(CFStringRef property)
     return function(property);
 }
 
-size_t IOSurfaceGetPropertyAlignment(CFStringRef property)
+size_t BACKPORT_IMPL(IOSurfaceGetPropertyAlignment)(CFStringRef property)
 {
     static size_t (*function)(CFStringRef);
     if (!function) {
@@ -336,7 +337,7 @@ size_t IOSurfaceGetPropertyAlignment(CFStringRef property)
     return function(property);
 }
 
-size_t IOSurfaceAlignProperty(CFStringRef property, size_t value)
+size_t BACKPORT_IMPL(IOSurfaceAlignProperty)(CFStringRef property, size_t value)
 {
     static size_t (*function)(CFStringRef, size_t);
     if (!function) {
@@ -345,7 +346,7 @@ size_t IOSurfaceAlignProperty(CFStringRef property, size_t value)
     return function(property, value);
 }
 
-void IOSurfaceIncrementUseCount(IOSurfaceRef buffer)
+void BACKPORT_IMPL(IOSurfaceIncrementUseCount)(IOSurfaceRef buffer)
 {
     static void (*function)(IOSurfaceRef);
     if (!function) {
@@ -354,7 +355,7 @@ void IOSurfaceIncrementUseCount(IOSurfaceRef buffer)
     function(buffer);
 }
 
-void IOSurfaceDecrementUseCount(IOSurfaceRef buffer)
+void BACKPORT_IMPL(IOSurfaceDecrementUseCount)(IOSurfaceRef buffer)
 {
     static void (*function)(IOSurfaceRef);
     if (!function) {
@@ -363,7 +364,7 @@ void IOSurfaceDecrementUseCount(IOSurfaceRef buffer)
     function(buffer);
 }
 
-int32_t IOSurfaceGetUseCount(IOSurfaceRef buffer)
+int32_t BACKPORT_IMPL(IOSurfaceGetUseCount)(IOSurfaceRef buffer)
 {
     static int32_t (*function)(IOSurfaceRef);
     if (!function) {
@@ -372,7 +373,7 @@ int32_t IOSurfaceGetUseCount(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-Boolean IOSurfaceIsInUse(IOSurfaceRef buffer)
+Boolean BACKPORT_IMPL(IOSurfaceIsInUse)(IOSurfaceRef buffer)
 {
     static Boolean (*function)(IOSurfaceRef);
     if (!function) {
@@ -381,7 +382,7 @@ Boolean IOSurfaceIsInUse(IOSurfaceRef buffer)
     return function(buffer);
 }
 
-kern_return_t IOSurfaceSetPurgeable(IOSurfaceRef buffer, uint32_t newState, uint32_t *oldState)
+kern_return_t BACKPORT_IMPL(IOSurfaceSetPurgeable)(IOSurfaceRef buffer, uint32_t newState, uint32_t *oldState)
 {
     static kern_return_t (*function)(IOSurfaceRef, uint32_t, uint32_t *);
     if (!function) {
@@ -390,10 +391,10 @@ kern_return_t IOSurfaceSetPurgeable(IOSurfaceRef buffer, uint32_t newState, uint
     return function(buffer, newState, oldState);
 }
 
-const CFStringRef kIOSurfaceWidth = CFSTR("IOSurfaceWidth");
-const CFStringRef kIOSurfaceHeight = CFSTR("IOSurfaceHeight");
-const CFStringRef kIOSurfaceBytesPerElement = CFSTR("IOSurfaceBytesPerElement");
-const CFStringRef kIOSurfaceBytesPerRow = CFSTR("IOSurfaceBytesPerRow");
-const CFStringRef kIOSurfacePixelFormat = CFSTR("IOSurfacePixelFormat");
-const CFStringRef kIOSurfaceColorSpace = CFSTR("IOSurfaceColorSpace");
-const CFStringRef kIOSurfaceCacheMode = CFSTR("IOSurfaceCacheMode");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceWidth) = CFSTR("IOSurfaceWidth");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceHeight) = CFSTR("IOSurfaceHeight");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceBytesPerElement) = CFSTR("IOSurfaceBytesPerElement");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceBytesPerRow) = CFSTR("IOSurfaceBytesPerRow");
+const CFStringRef BACKPORT_IMPL(kIOSurfacePixelFormat) = CFSTR("IOSurfacePixelFormat");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceColorSpace) = CFSTR("IOSurfaceColorSpace");
+const CFStringRef BACKPORT_IMPL(kIOSurfaceCacheMode) = CFSTR("IOSurfaceCacheMode");

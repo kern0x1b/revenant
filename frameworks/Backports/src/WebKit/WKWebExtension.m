@@ -1,23 +1,24 @@
+#include "../revenant_impl.h"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #import "RevenantWebExtension.h"
 
-WKWebExtensionPermission const WKWebExtensionPermissionActiveTab = @"activeTab";
-WKWebExtensionPermission const WKWebExtensionPermissionAlarms = @"alarms";
-WKWebExtensionPermission const WKWebExtensionPermissionClipboardWrite = @"clipboardWrite";
-WKWebExtensionPermission const WKWebExtensionPermissionContextMenus = @"contextMenus";
-WKWebExtensionPermission const WKWebExtensionPermissionCookies = @"cookies";
-WKWebExtensionPermission const WKWebExtensionPermissionDeclarativeNetRequest = @"declarativeNetRequest";
-WKWebExtensionPermission const WKWebExtensionPermissionDeclarativeNetRequestFeedback = @"declarativeNetRequestFeedback";
-WKWebExtensionPermission const WKWebExtensionPermissionDeclarativeNetRequestWithHostAccess = @"declarativeNetRequestWithHostAccess";
-WKWebExtensionPermission const WKWebExtensionPermissionMenus = @"menus";
-WKWebExtensionPermission const WKWebExtensionPermissionNativeMessaging = @"nativeMessaging";
-WKWebExtensionPermission const WKWebExtensionPermissionScripting = @"scripting";
-WKWebExtensionPermission const WKWebExtensionPermissionStorage = @"storage";
-WKWebExtensionPermission const WKWebExtensionPermissionTabs = @"tabs";
-WKWebExtensionPermission const WKWebExtensionPermissionUnlimitedStorage = @"unlimitedStorage";
-WKWebExtensionPermission const WKWebExtensionPermissionWebNavigation = @"webNavigation";
-WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionActiveTab) = @"activeTab";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionAlarms) = @"alarms";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionClipboardWrite) = @"clipboardWrite";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionContextMenus) = @"contextMenus";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionCookies) = @"cookies";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionDeclarativeNetRequest) = @"declarativeNetRequest";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionDeclarativeNetRequestFeedback) = @"declarativeNetRequestFeedback";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionDeclarativeNetRequestWithHostAccess) = @"declarativeNetRequestWithHostAccess";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionMenus) = @"menus";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionNativeMessaging) = @"nativeMessaging";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionScripting) = @"scripting";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionStorage) = @"storage";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionTabs) = @"tabs";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionUnlimitedStorage) = @"unlimitedStorage";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebNavigation) = @"webNavigation";
+WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest) = @"webRequest";
 
 @implementation WKWebExtension {
     NSDictionary<NSString *, id> *_manifest;
@@ -313,4 +314,4 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 @end
 
-NSString *const WKWebExtensionErrorDomain = @"WKWebExtensionErrorDomain";
+NSString *const BACKPORT_IMPL(WKWebExtensionErrorDomain) = @"WKWebExtensionErrorDomain";

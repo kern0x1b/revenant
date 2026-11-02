@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-UIApplicationOpenExternalURLOptionsKey const UIApplicationOpenURLOptionUniversalLinksOnly = @"UIApplicationOpenURLOptionUniversalLinksOnly";
+UIApplicationOpenExternalURLOptionsKey const BACKPORT_IMPL(UIApplicationOpenURLOptionUniversalLinksOnly) = @"UIApplicationOpenURLOptionUniversalLinksOnly";
 
 @implementation UIApplication (RevenantOpenURLOptions)
 

@@ -156,12 +156,14 @@ function implemented_names()
 end
 
 local markers_cache = nil
+local definitions_cache = nil
 
 function markers_of_src()
     if markers_cache == nil then
         local src = sdkfiles.src_root()
         local folders = library_folders()
         local owner = {}
+        local definitions = {}
         local listing = os.iorunv("/usr/bin/grep", {"-rlF", "BACKPORT_IMPL(", src})
         for file in listing:gmatch("[^\n]+") do
             local relative = path.relative(file, src)
@@ -178,6 +180,9 @@ function markers_of_src()
                     end
                     owner[name] = folder
                 end
+                for name, definition in pairs(markers.marked_definitions(text)) do
+                    definitions[name] = definition
+                end
             end
         end
         for name, folder in pairs(owner) do
@@ -186,8 +191,9 @@ function markers_of_src()
             end
         end
         markers_cache = owner
+        definitions_cache = definitions
     end
-    return markers_cache
+    return markers_cache, definitions_cache
 end
 
 function key_of(row)
@@ -383,14 +389,15 @@ function main(...)
     local state = everything()
     local pending = pending_of(state)
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images, markers_of_src())
+    local owners, definitions = markers_of_src()
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images, owners, definitions)
     local skipped = 0
     for _, framework in ipairs(pending) do
         for _, count in pairs(framework.skipped) do
             skipped = skipped + count
         end
     end
-    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals (%d not copied), %d C functions (%d not stubbed, %d implemented in src), %d Swift symbols, %d unavailable on iOS (not stubbed) under %s",
-        totals.objc, totals.classes, totals.protocols, totals.globals, totals.globals_uncopied, totals.c, totals.c_unstubbed, totals.c_in_src, totals.swift, skipped,
+    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals (%d not copied), %d C functions, %d trampolines, %d implemented in src (%d of them absent from the facts), %d Swift symbols, %d unavailable on iOS (not stubbed) under %s",
+        totals.objc, totals.classes, totals.protocols, totals.globals, totals.globals_uncopied, totals.c, totals.trampolines, totals.c_in_src, totals.src_only, totals.swift, skipped,
         path.join(sdkfiles.build_root(), "skeleton")))
 end

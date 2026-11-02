@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/SecCertificate.h>
 #import <Security/SecTrust.h>
@@ -45,12 +46,12 @@
 - (void)dealloc { if (_trust) CFRelease(_trust); }
 @end
 
-sec_certificate_t sec_certificate_create(SecCertificateRef certificate)
+sec_certificate_t BACKPORT_IMPL(sec_certificate_create)(SecCertificateRef certificate)
 {
     return (sec_certificate_t)[[RevenantSecCertificate alloc] initWithCertificate:certificate];
 }
 
-SecCertificateRef sec_certificate_copy_ref(sec_certificate_t certificate)
+SecCertificateRef BACKPORT_IMPL(sec_certificate_copy_ref)(sec_certificate_t certificate)
 {
     if (![certificate isKindOfClass:RevenantSecCertificate.class])
         return NULL;
@@ -58,12 +59,12 @@ SecCertificateRef sec_certificate_copy_ref(sec_certificate_t certificate)
     return held ? (SecCertificateRef)CFRetain(held) : NULL;
 }
 
-sec_trust_t sec_trust_create(SecTrustRef trust)
+sec_trust_t BACKPORT_IMPL(sec_trust_create)(SecTrustRef trust)
 {
     return (sec_trust_t)[[RevenantSecTrust alloc] initWithTrust:trust];
 }
 
-SecTrustRef sec_trust_copy_ref(sec_trust_t trust)
+SecTrustRef BACKPORT_IMPL(sec_trust_copy_ref)(sec_trust_t trust)
 {
     if (![trust isKindOfClass:RevenantSecTrust.class])
         return NULL;

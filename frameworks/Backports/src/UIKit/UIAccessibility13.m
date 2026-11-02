@@ -2,18 +2,18 @@
 #import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-NSString *const UIAccessibilityOnOffSwitchLabelsDidChangeNotification = @"UIAccessibilityOnOffSwitchLabelsDidChangeNotification";
-NSString *const UIAccessibilityShouldDifferentiateWithoutColorDidChangeNotification = @"UIAccessibilityShouldDifferentiateWithoutColorDidChangeNotification";
-NSString *const UIAccessibilityVideoAutoplayStatusDidChangeNotification = @"UIAccessibilityVideoAutoplayStatusDidChangeNotification";
-NSAttributedStringKey const UIAccessibilitySpeechAttributeSpellOut = @"UIAccessibilitySpeechAttributeSpellOut";
-NSAttributedStringKey const UIAccessibilityTextAttributeContext = @"UIAccessibilityTextAttributeContext";
-NSString *const UIAccessibilityTextualContextConsole = @"UIAccessibilityTextualContextConsole";
-NSString *const UIAccessibilityTextualContextFileSystem = @"UIAccessibilityTextualContextFileSystem";
-NSString *const UIAccessibilityTextualContextMessaging = @"UIAccessibilityTextualContextMessaging";
-NSString *const UIAccessibilityTextualContextNarrative = @"UIAccessibilityTextualContextNarrative";
-NSString *const UIAccessibilityTextualContextSourceCode = @"UIAccessibilityTextualContextSourceCode";
-NSString *const UIAccessibilityTextualContextSpreadsheet = @"UIAccessibilityTextualContextSpreadsheet";
-NSString *const UIAccessibilityTextualContextWordProcessing = @"UIAccessibilityTextualContextWordProcessing";
+NSString *const BACKPORT_IMPL(UIAccessibilityOnOffSwitchLabelsDidChangeNotification) = @"UIAccessibilityOnOffSwitchLabelsDidChangeNotification";
+NSString *const BACKPORT_IMPL(UIAccessibilityShouldDifferentiateWithoutColorDidChangeNotification) = @"UIAccessibilityShouldDifferentiateWithoutColorDidChangeNotification";
+NSString *const BACKPORT_IMPL(UIAccessibilityVideoAutoplayStatusDidChangeNotification) = @"UIAccessibilityVideoAutoplayStatusDidChangeNotification";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilitySpeechAttributeSpellOut) = @"UIAccessibilitySpeechAttributeSpellOut";
+NSAttributedStringKey const BACKPORT_IMPL(UIAccessibilityTextAttributeContext) = @"UIAccessibilityTextAttributeContext";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextConsole) = @"UIAccessibilityTextualContextConsole";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextFileSystem) = @"UIAccessibilityTextualContextFileSystem";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextMessaging) = @"UIAccessibilityTextualContextMessaging";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextNarrative) = @"UIAccessibilityTextualContextNarrative";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextSourceCode) = @"UIAccessibilityTextualContextSourceCode";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextSpreadsheet) = @"UIAccessibilityTextualContextSpreadsheet";
+NSString *const BACKPORT_IMPL(UIAccessibilityTextualContextWordProcessing) = @"UIAccessibilityTextualContextWordProcessing";
 
 BOOL BACKPORT_IMPL(UIAccessibilityShouldDifferentiateWithoutColor)(void)
 {
