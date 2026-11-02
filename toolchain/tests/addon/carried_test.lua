@@ -53,6 +53,36 @@ local function bundled_step(bundle, found)
     end
 end
 
+local function framework_step(bundle, platform, folder, found)
+    local engine = path.join(folder, "engine")
+    local framework = path.join(engine, "bundle", "Frameworks", "Engine.framework")
+    os.mkdir(framework)
+    io.writefile(path.join(framework, "Engine"), "binary")
+    local function target(installdir)
+        local package = {installdir = function () return installdir end}
+        return {
+            name = function () return "app" end,
+            values = function (_, key) return key == "app.frameworks" and {"engine"} or nil end,
+            dep = function () return nil end,
+            pkg = function (_, name) return name == "engine" and package or nil end
+        }
+    end
+    local carried = bundle.carried_libraries(target(engine))
+    if #carried ~= 1 or carried[1].name ~= "Engine.framework/Engine" or carried[1].leaf ~= "Engine" or carried[1].package ~= "engine" then
+        table.insert(found, "a framework a package installs under bundle/Frameworks must be carried as Name.framework/Name, got " .. #carried .. " libraries")
+    end
+    local reached = platform.reached(carried, {})
+    if #reached ~= 0 then
+        table.insert(found, "a program that loads no framework carries none")
+    end
+    local empty = path.join(folder, "empty-engine")
+    os.mkdir(path.join(empty, "bundle", "Frameworks"))
+    local refused = fixtures.refusal(function () bundle.carried_libraries(target(empty)) end) or ""
+    if not refused:find("no framework under bundle/Frameworks", 1, true) then
+        table.insert(found, "a package that installs neither a library nor a framework must be refused: " .. refused)
+    end
+end
+
 local function waivers_step(platform, found)
     local declared = {["revenant.waive.pagezero"] = "a reason", ["revenant.waive.weak-imports"] = "guarded"}
     local target = {values = function (_, key) return declared[key] end}
@@ -102,6 +132,7 @@ function failures(opt)
     one_runtime_step(platform, fixtures.scratch(), found)
     waivers_step(platform, found)
     bundled_step(bundle, found)
+    framework_step(bundle, platform, fixtures.scratch(), found)
     local folder = fixtures.scratch()
     io.writefile(path.join(folder, "libSystem.tbd"), fixtures.system_stub())
     local runtime = path.join(folder, "runtime")

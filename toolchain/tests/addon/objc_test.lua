@@ -1,4 +1,3 @@
-import("core.base.process")
 import("fixtures")
 
 local MESSAGES = [[
@@ -42,18 +41,6 @@ local HELD = [[
 @implementation Held
 - (void)heldMethod {}
 @end
-]]
-
-local INVENTORY = [[
-function main(modules, cachefile, output)
-    local found = import("apple.objc", {rootdir = modules, anonymous = true}).inventory(cachefile)
-    local lines = {}
-    for name, class in pairs(found.classes) do
-        table.insert(lines, name .. " " .. table.concat(table.orderkeys(class.instance), ","))
-    end
-    table.sort(lines)
-    io.writefile(output, table.concat(lines, "\n"))
-end
 ]]
 
 local function armv7_cache(file, opt)
@@ -130,31 +117,57 @@ local function armv7_cache(file, opt)
     return file
 end
 
+local WORK_PER_BYTE = 100
+
+local function listing(found)
+    local lines = {}
+    for name, class in pairs(found.classes) do
+        table.insert(lines, name .. " " .. table.concat(table.orderkeys(class.instance), ","))
+    end
+    table.sort(lines)
+    return table.concat(lines, "\n")
+end
+
+local function inventory_within_work(objc, cachefile)
+    local limit = os.filesize(cachefile) * WORK_PER_BYTE
+    local done, exceeded = 0, false
+    local hook, mask, count = debug.gethook()
+    debug.sethook(function ()
+        done = done + 1000
+        if done > limit then
+            exceeded = true
+            raise("the inventory ran past %d instructions, %d for each byte of its cache", limit, WORK_PER_BYTE)
+        end
+    end, "", 1000)
+    local found, errors
+    try {
+        function () found = objc.inventory(cachefile) end,
+        catch {
+            function (raised) errors = tostring(raised) end
+        }
+    }
+    debug.sethook(hook, mask, count)
+    return found, errors, exceeded
+end
+
 local function inventory_failures(folder, opt)
     local found = {}
-    io.writefile(path.join(folder, "inventory.lua"), INVENTORY)
+    local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})
     for index, case in ipairs({{"a cache read from firmware", {}, "Probe -probe"},
                            {"a class whose method list address has its low bit set, as garbage from a device copy does", {methods = 0x30001901}, "Probe "},
                            {"an image carrying the category list a built library's link renames, which a release's image never does",
                             {revenant = true}, nil, "holds 1 image this repository built, whose category section is renamed to __port_catlist"},
                            {"a cache copied from a running device, its pages slid", {slide = 0x10000000}, nil, "copied from a running device: 1 of its pages hold pointers the device slid"}}) do
         local cachefile = armv7_cache(path.join(folder, "dyld_shared_cache_armv7_" .. index), case[2])
-        local output, log = cachefile .. ".txt", cachefile .. ".log"
-        local child = process.openv(os.programfile(), {"l", "inventory.lua", opt.modules, cachefile, output}, {curdir = folder, stdout = log, stderr = log})
-        local finished = child:wait(60000)
-        if finished == 0 then
-            child:kill()
-        end
-        child:close()
-        local said = os.isfile(log) and io.readfile(log) or ""
-        if finished == 0 then
-            table.insert(found, case[1] .. ": the inventory did not finish within a minute")
+        local inventory, errors, exceeded = inventory_within_work(objc, cachefile)
+        if exceeded then
+            table.insert(found, case[1] .. ": the inventory did not finish within its work bound: " .. errors)
         elseif case[4] then
-            if not said:find(case[4], 1, true) then
-                table.insert(found, case[1] .. ": the inventory must refuse it saying " .. case[4] .. ", and said: " .. said)
+            if not errors or not errors:find(case[4], 1, true) then
+                table.insert(found, case[1] .. ": the inventory must refuse it saying " .. case[4] .. ", and said: " .. (errors or listing(inventory)))
             end
-        elseif not os.isfile(output) or io.readfile(output) ~= case[3] then
-            table.insert(found, case[1] .. ": the inventory must list " .. case[3] .. ", and listed " .. (os.isfile(output) and io.readfile(output) or "nothing: " .. said))
+        elseif errors or listing(inventory) ~= case[3] then
+            table.insert(found, case[1] .. ": the inventory must list " .. case[3] .. ", and listed " .. (errors or listing(inventory)))
         end
     end
     return found

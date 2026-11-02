@@ -13,9 +13,16 @@ reference says what runs where.
 | `toolchain_device` | six suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `port_test`, `swift_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs | only with `./xmakew f -P . --tests=device` |
 | `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |
 | `recompiler_device` | `classpair` and `ordinal` | the prebuilt packages and a claimed device | only with `./xmakew f -P . --tests=device` |
+| `packages` | `sdwebimage`, `sdwebimage_webp`, `libwebp` and `zxingobjc`: each a binary of `toolchain/tests/packages/` that links its package for iphoneos armv7, and the test checks the architecture; `rnscreens`: a static library of react-native-screens' sources and its codegen output, compiled for armv7 iOS 6 against React Native 0.86.3, with `-Werror=unguarded-availability-new`, and the test checks the archive's architecture | the packages, for iphoneos | only with an iphoneos configure of the whole build or `--component=packages` |
+| `codegen` | `rnscreens_headers`: the codegen of react-native-screens writes the Fabric headers of its `rnscreens` component | `node`, `react-native-codegen` and `react-native-screens`, on the host | always |
 | `bench` | five workloads of `tests/bench/workloads/` (`msgsend`, `alloc`, `collections`, `strings` and the C `compute`, a package-style kernel of CRC-32, FNV-1a and a matrix product), run as the first process of an iPhone 4S boot of iOS 6.1.3 under the emulator; each one fails when its guest instructions, the calls to its own methods or its resident memory grow beyond the tolerance in `tests/data/bench/baselines.json` | the packages, the emulator built by `./xmakew build -P . emulator`, and the root filesystem from `./xmakew firmware -P . --device=iPhone4,1 rootfs 6.1.3` | only with `./xmakew f -P . --tests=device` |
 
 The `bench` tests measure what the emulator counts: guest instructions are its CPU ticks for the boot, and a call count is the number of runs of the entry block of a method, which the block profile reports for the top 30 blocks of a run. A count is never a time. `REVENANT_BENCH_RECORD=1` records the baselines of the workloads that run, and `REVENANT_BENCH_REPORT=1` prints the counts, the resident size and the size of each binary without comparing them, which is how a compiler setting is measured. `REVENANT_BENCH_FLAGS` replaces the compiler flags of the workloads (default `-Os`).
+
+The `rnscreens` build supplies two things a CocoaPods build gets from its environment rather than from the sources: a
+prefix include of `UIKit/UIKit.h`, which makes Foundation visible to `RNSEnums.h` in the translation units that import
+it first, and folly's mobile defines with `-faligned-allocation`, as folly's own package compiles. Both are set in
+`toolchain/tests/packages/rnscreens.lua`, and the sources are not changed for them.
 
 Each toolchain suite is a module of `tests/addon/` with `failures(options)`, which returns the failures it found. A test
 prints each failure and fails. Run one target with `./xmakew test -P . 'toolchain_light/*'`, or one suite with
@@ -44,7 +51,7 @@ yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emu
 its probe line), `baseline` (a UIKit string, and a CoreText line, run and frame, drawn with and without `NSBaselineOffsetAttributeName`
 lands at two heights, and their line metrics and frame origins are read with and without it; the run says whether the system
 honours the attribute and what the CoreText backport does with it), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
-that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
+that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), `classpair` (a Swift program makes five subclasses of a Swift class with `objc_allocateClassPair`, and each line says `OK` when the Swift metatype it gets is the class object, not its Objective-C wrapper; the run fails on a `WRONG`, an `ERROR` or a missing line), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
 limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
 are `.cache/scratch/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
 

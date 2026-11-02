@@ -1,6 +1,13 @@
-if get_config("component") ~= "" or is_plat("iphoneos") then
+if is_plat("iphoneos") then
+    includes("packages")
     return
 end
+
+if get_config("component") ~= "" then
+    return
+end
+
+includes("codegen")
 
 local addon = path.join(os.scriptdir(), "addon")
 local toolchain = path.directory(os.scriptdir())

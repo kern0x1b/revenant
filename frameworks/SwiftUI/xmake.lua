@@ -102,6 +102,8 @@ if is_plat("iphoneos") then
         add_tests("tabs-negative", {source = "tests/typechecks/tabs/negative.swift", rejected = "conform to specified type 'TabContent'"})
         add_tests("geometry-positive", {source = "tests/typechecks/geometry/positive.swift"})
         add_tests("hosting-positive", {source = "tests/typechecks/hosting/positive.swift"})
+        add_tests("combine-positive", {source = "tests/typechecks/combine/positive.swift"})
+        add_tests("combine-negative", {source = "tests/typechecks/combine/negative.swift", rejected = "cannot find type 'AnyCancellable' in scope"})
         on_test(function (target, opt)
             local swift = import("@addon.revenant.apple.swift")
             local module = target:dep("SwiftUI")

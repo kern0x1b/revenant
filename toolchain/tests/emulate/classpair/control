@@ -1,0 +1,5 @@
+Package: org.revenant.emulateclasspair
+Name: emulate class pair probe
+Architecture: iphoneos-arm
+Description: A Swift program that makes subclasses of a Swift class with objc_allocateClassPair and reads each one back as a
+ Swift class, to tell a cast that returns the class from one that returns its Objective-C wrapper.

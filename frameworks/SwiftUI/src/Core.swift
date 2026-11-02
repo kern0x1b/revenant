@@ -2,7 +2,10 @@ import UIKit
 @_exported import CoreGraphics
 @_exported import UIKit
 @_exported import Foundation
-@_exported import Combine
+import Combine
+
+public typealias ObservableObject = Combine.ObservableObject
+public typealias Published = Combine.Published
 
 @MainActor @preconcurrency public protocol View {
     associatedtype Body: View

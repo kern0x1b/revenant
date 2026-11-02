@@ -361,18 +361,24 @@ int main(int argc, char **argv)
         plainTone.positional = NO;
         const int pitchRounds = 3;
         double pitchTotal = 0;
+        NSMutableArray<NSString *> *pitchReport = [NSMutableArray array];
         for (int round = 0; round < pitchRounds; round++) {
             SCNAudioPlayer *streaming = [SCNAudioPlayer audioPlayerWithSource:streamTone];
             [streaming revenantStartOnNode:nil];
-            double streamedFrequency = revenant_frequency(revenant_capture(0.5));
+            NSData *streamedData = revenant_capture(0.5);
             [streaming revenantStop];
             SCNAudioPlayer *plainPlayer = [SCNAudioPlayer audioPlayerWithSource:plainTone];
             [plainPlayer revenantStartOnNode:nil];
-            double plainFrequency = revenant_frequency(revenant_capture(0.5));
+            NSData *plainData = revenant_capture(0.5);
             [plainPlayer revenantStop];
-            pitchTotal += streamedFrequency / plainFrequency;
+            double streamedFrequency = revenant_frequency(streamedData);
+            double plainFrequency = revenant_frequency(plainData);
+            double ratio = streamedFrequency / plainFrequency;
+            pitchTotal += ratio;
+            [pitchReport addObject:[NSString stringWithFormat:@"round %d: streamed %.3f Hz over %lu frames, loaded %.3f Hz over %lu frames, ratio %.5f", round + 1, streamedFrequency, (unsigned long)(streamedData.length / 4), plainFrequency, (unsigned long)(plainData.length / 4), ratio]];
         }
-        revenant_expect_number("a streamed tone keeps the pitch of the same tone loaded in memory", pitchTotal / pitchRounds, 1, 0.02);
+        double pitchRatio = pitchTotal / pitchRounds;
+        revenant_check(revenant_close(pitchRatio, 1, 0.02), "a streamed tone keeps the pitch of the same tone loaded in memory", [NSString stringWithFormat:@"%g is not 1 (mean of %d rounds); %@", pitchRatio, pitchRounds, [pitchReport componentsJoinedByString:@"; "]]);
 
         revenant_hold_listener(SCNVector3Make(0, 0, 0));
         SCNAudioSource *streamedPan = [[SCNAudioSource alloc] initWithURL:tone];

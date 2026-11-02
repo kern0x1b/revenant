@@ -1,5 +1,6 @@
 import UIKit
 import CoreGraphics
+import Combine
 
 @propertyWrapper
 public struct UIApplicationDelegateAdaptor<DelegateType: NSObject & UIApplicationDelegate>: DynamicProperty, DynamicPropertyInstaller {

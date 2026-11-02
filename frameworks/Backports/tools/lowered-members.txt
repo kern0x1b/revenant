@@ -1461,6 +1461,12 @@ class NSSecureUnarchiveFromDataTransformer
 class NSSortDescriptor
 class NSStream
 class NSString
+class NSSymbolBounceEffect
+class NSSymbolEffect
+class NSSymbolEffectOptions
+class NSSymbolPulseEffect
+class NSSymbolScaleEffect
+class NSSymbolVariableColorEffect
 class NSTermOfAddress
 class NSTextAttachment
 class NSTextCheckingResult
@@ -1571,11 +1577,14 @@ class PHChange
 class PHChangeRequest
 class PHCollection
 class PHCollectionList
+class PHContentEditingInput
+class PHContentEditingInputRequestOptions
 class PHFetchOptions
 class PHFetchResult
 class PHFetchResultChangeDetails
 class PHImageManager
 class PHImageRequestOptions
+class PHLivePhoto
 class PHObject
 class PHObjectChangeDetails
 class PHObjectPlaceholder
@@ -2007,6 +2016,7 @@ class RevenantSwipeContainer
 class RevenantSwipeController
 class RevenantSwipeInstaller
 class RevenantSwipeItem
+class RevenantSymbolEffectRun
 class RevenantSyncProtocol
 class RevenantTLSSession
 class RevenantTableDropCoordinator
@@ -3715,6 +3725,7 @@ enum PHAssetMediaTypeVideo
 enum PHAssetPlaybackStyleImage
 enum PHAssetPlaybackStyleUnsupported
 enum PHAssetPlaybackStyleVideo
+enum PHAssetResourceTypePairedVideo
 enum PHAssetResourceTypePhoto
 enum PHAssetResourceTypeVideo
 enum PHAssetSourceTypeCloudShared
@@ -3896,6 +3907,8 @@ enum UIImageSymbolWeightUnspecified
 enum UIImpactFeedbackStyleHeavy
 enum UIImpactFeedbackStyleLight
 enum UIImpactFeedbackStyleMedium
+enum UIImpactFeedbackStyleRigid
+enum UIImpactFeedbackStyleSoft
 enum UIInputViewStyleKeyboard
 enum UIKeyModifierAlphaShift
 enum UIKeyModifierAlternate
@@ -4251,6 +4264,7 @@ function CGColorSpaceUsesExtendedRange
 function CGColorSpaceUsesITUR_2100TF
 function CGImageGetByteOrderInfo
 function CGImageGetPixelFormatInfo
+function CGImageGetUTType
 function CGImageSourceRemoveCacheAtIndex
 function CGPDFArrayApplyBlock
 function CGPDFDictionaryApplyBlock
@@ -6436,6 +6450,8 @@ function vImageRotate90_ARGB16S
 function vImageRotate90_ARGB16U
 function vImageRotate90_CbCr16F
 function vImageRotate90_Planar16F
+function vImageScale_ARGB16U
+function vImageScale_Planar16U
 function vImageVerticalShearD_ARGB16F
 function vImageVerticalShearD_ARGB16S
 function vImageVerticalShearD_ARGB16U
@@ -8966,6 +8982,8 @@ global PDFViewPrintPermissionNotification
 global PDFViewScaleChangedNotification
 global PDFViewSelectionChangedNotification
 global PDFViewVisiblePagesChangedNotification
+global PHContentEditingInputCancelledKey
+global PHContentEditingInputErrorKey
 global PHImageCancelledKey
 global PHImageErrorKey
 global PHImageManagerMaximumSize
@@ -19512,8 +19530,10 @@ member MPRemoteCommand -enabled
 member MPRemoteCommand -initRevenant
 member MPRemoteCommand -removeTarget:
 member MPRemoteCommand -removeTarget:action:
+member MPRemoteCommand -revenantActive
 member MPRemoteCommand -revenantTargets
 member MPRemoteCommand -revenant_dispatch:
+member MPRemoteCommand -setEnabled:
 member MPRemoteCommandCenter +sharedCommandCenter
 member MPRemoteCommandCenter -bookmarkCommand
 member MPRemoteCommandCenter -changePlaybackPositionCommand
@@ -23983,6 +24003,51 @@ member NSString -stringByApplyingTransform:reverse:
 member NSString -stringByRemovingPercentEncoding
 member NSString -variantFittingPresentationWidth:
 member NSString -writableTypeIdentifiersForItemProvider
+member NSSymbolBounceEffect +bounceDownEffect
+member NSSymbolBounceEffect +bounceUpEffect
+member NSSymbolBounceEffect +effect
+member NSSymbolBounceEffect -effectWithByLayer
+member NSSymbolBounceEffect -effectWithWholeSymbol
+member NSSymbolBounceEffect -revenant_animationForView:options:
+member NSSymbolEffect -copyWithZone:
+member NSSymbolEffect -initRevenantWithWholeSymbol:direction:
+member NSSymbolEffect -revenant_animationForView:options:
+member NSSymbolEffect -revenant_direction
+member NSSymbolEffect -revenant_wholeSymbol
+member NSSymbolEffectOptions +options
+member NSSymbolEffectOptions +optionsWithNonRepeating
+member NSSymbolEffectOptions +optionsWithRepeatCount:
+member NSSymbolEffectOptions +optionsWithRepeating
+member NSSymbolEffectOptions +optionsWithSpeed:
+member NSSymbolEffectOptions -copyWithZone:
+member NSSymbolEffectOptions -initRevenantWithRepeating:repeatCount:speed:
+member NSSymbolEffectOptions -optionsWithNonRepeating
+member NSSymbolEffectOptions -optionsWithRepeatCount:
+member NSSymbolEffectOptions -optionsWithRepeating
+member NSSymbolEffectOptions -optionsWithSpeed:
+member NSSymbolEffectOptions -revenant_optionsWithRepeating:repeatCount:speed:
+member NSSymbolEffectOptions -revenant_repeatCount
+member NSSymbolEffectOptions -revenant_repeating
+member NSSymbolEffectOptions -revenant_speed
+member NSSymbolPulseEffect +effect
+member NSSymbolPulseEffect -effectWithByLayer
+member NSSymbolPulseEffect -effectWithWholeSymbol
+member NSSymbolPulseEffect -revenant_animationForView:options:
+member NSSymbolScaleEffect +effect
+member NSSymbolScaleEffect +scaleDownEffect
+member NSSymbolScaleEffect +scaleUpEffect
+member NSSymbolScaleEffect -effectWithByLayer
+member NSSymbolScaleEffect -effectWithWholeSymbol
+member NSSymbolScaleEffect -revenant_animationForView:options:
+member NSSymbolVariableColorEffect +effect
+member NSSymbolVariableColorEffect -effectWithCumulative
+member NSSymbolVariableColorEffect -effectWithDimInactiveLayers
+member NSSymbolVariableColorEffect -effectWithHideInactiveLayers
+member NSSymbolVariableColorEffect -effectWithIterative
+member NSSymbolVariableColorEffect -effectWithNonReversing
+member NSSymbolVariableColorEffect -effectWithReversing
+member NSSymbolVariableColorEffect -revenant_animationForView:options:
+member NSSymbolVariableColorEffect -revenant_effectWithFlags:
 member NSTermOfAddress +currentUser
 member NSTermOfAddress +feminine
 member NSTermOfAddress +localizedForLanguageIdentifier:withPronouns:
@@ -25198,15 +25263,18 @@ member PHASEObject -setWorldTransform:
 member PHASEObject -transform
 member PHASEObject -worldTransform
 member PHAsset +fetchAssetsInAssetCollection:options:
+member PHAsset +fetchAssetsWithALAssetURLs:options:
 member PHAsset +fetchAssetsWithLocalIdentifiers:options:
 member PHAsset +fetchAssetsWithMediaType:options:
 member PHAsset +fetchAssetsWithOptions:
 member PHAsset +revenant_result:options:
 member PHAsset -canPerformEditOperation:
+member PHAsset -cancelContentEditingInputRequest:
 member PHAsset -hasAdjustments
 member PHAsset -initWithRevenantAsset:sourceType:
 member PHAsset -isLocallyAvailable
 member PHAsset -playbackStyle
+member PHAsset -requestContentEditingInputWithOptions:completionHandler:
 member PHAsset -revenant_asset
 member PHAsset -revenant_refetched
 member PHAsset -revenant_sameStateAs:
@@ -25288,6 +25356,7 @@ member PHAssetResourceManager -revenant_readResource:progress:deliver:error:
 member PHAssetResourceManager -writeDataForAssetResource:toFile:options:completionHandler:
 member PHAssetResourceRequestOptions -copyWithZone:
 member PHAssetResourceRequestOptions -networkAccessAllowed
+member PHAssetResourceRequestOptions -progressHandler
 member PHCachingImageManager -allowsCachingHighQualityImages
 member PHCachingImageManager -init
 member PHCachingImageManager -setAllowsCachingHighQualityImages:
@@ -25308,6 +25377,12 @@ member PHCollectionList +fetchCollectionListsContainingCollection:options:
 member PHCollectionList +fetchCollectionListsWithLocalIdentifiers:options:
 member PHCollectionList +fetchCollectionListsWithType:subtype:options:
 member PHCollectionList -localizedLocationNames
+member PHContentEditingInput -fullSizeImageURL
+member PHContentEditingInput -initWithRevenantFullSizeImageURL:mediaType:
+member PHContentEditingInput -mediaType
+member PHContentEditingInputRequestOptions -canHandleAdjustmentData
+member PHContentEditingInputRequestOptions -networkAccessAllowed
+member PHContentEditingInputRequestOptions -progressHandler
 member PHFetchOptions -copyWithZone:
 member PHFetchOptions -init
 member PHFetchOptions -revenant_apply:
@@ -25361,6 +25436,9 @@ member PHImageManager -revenant_requestVideo:options:result:
 member PHImageManager -revenant_videoURL:version:
 member PHImageRequestOptions -copyWithZone:
 member PHImageRequestOptions -init
+member PHLivePhoto +objectWithItemProviderData:typeIdentifier:error:
+member PHLivePhoto +readableTypeIdentifiersForItemProvider
+member PHLivePhoto -size
 member PHObject -copyWithZone:
 member PHObject -hash
 member PHObject -initWithRevenantLocalIdentifier:
@@ -28106,6 +28184,9 @@ member RevenantSwipeItem -color
 member RevenantSwipeItem -image
 member RevenantSwipeItem -title
 member RevenantSwipeItem -width
+member RevenantSymbolEffectRun -animationDidStop:finished:
+member RevenantSymbolEffectRun -completion
+member RevenantSymbolEffectRun -view
 member RevenantSyncProtocol +answerForView:message:
 member RevenantSyncProtocol +canInitWithRequest:
 member RevenantSyncProtocol +canonicalRequestForRequest:
@@ -31652,7 +31733,14 @@ member UIImageSymbolConfiguration -revenant_symbolPointSize
 member UIImageSymbolConfiguration -revenant_symbolScale
 member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
+member UIImageView -addSymbolEffect:
+member UIImageView -addSymbolEffect:options:
+member UIImageView -addSymbolEffect:options:animated:
+member UIImageView -addSymbolEffect:options:animated:completion:
 member UIImageView -preferredSymbolConfiguration
+member UIImageView -removeAllSymbolEffects
+member UIImageView -removeAllSymbolEffectsWithOptions:
+member UIImageView -removeAllSymbolEffectsWithOptions:animated:
 member UIImageView -setPreferredSymbolConfiguration:
 member UIImageView -setTintColor:
 member UIImageView -tintColor
@@ -32628,11 +32716,14 @@ member UIResolvedShape -shapeByApplyingInsets:
 member UIResponder +clearTextInputContextIdentifier:
 member UIResponder -activityItemsConfiguration
 member UIResponder -buildMenuWithBuilder:
+member UIResponder -canPasteItemProviders:
 member UIResponder -editingInteractionConfiguration
 member UIResponder -inputAccessoryViewController
 member UIResponder -inputAssistantItem
 member UIResponder -inputViewController
 member UIResponder -keyCommands
+member UIResponder -pasteConfiguration
+member UIResponder -pasteItemProviders:
 member UIResponder -pressesBegan:withEvent:
 member UIResponder -pressesCancelled:withEvent:
 member UIResponder -pressesChanged:withEvent:
@@ -32641,6 +32732,7 @@ member UIResponder -providerForDeferredMenuElement:
 member UIResponder -restoreUserActivityState:
 member UIResponder -revenant_captureFirstResponder:
 member UIResponder -setActivityItemsConfiguration:
+member UIResponder -setPasteConfiguration:
 member UIResponder -setUserActivity:
 member UIResponder -targetForAction:withSender:
 member UIResponder -textInputContextIdentifier
@@ -35475,6 +35567,7 @@ protocol OS_sec_protocol_options
 protocol OS_sec_trust
 protocol PDFDocumentDelegate
 protocol PHPhotoLibraryChangeObserver
+protocol PHPickerViewControllerDelegate
 protocol PKPushRegistryDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
@@ -35536,6 +35629,7 @@ protocol UIMutableTraits
 protocol UINSIntegerTraitDefinition
 protocol UINavigationControllerDelegate
 protocol UIObjectTraitDefinition
+protocol UIPasteConfigurationSupporting
 protocol UIPopoverControllerDelegate
 protocol UIPreviewActionItem
 protocol UISearchBarDelegate
@@ -36139,6 +36233,9 @@ protocol_member UIMutableTraits -valueForCGFloatTrait:
 protocol_member UIMutableTraits -valueForNSIntegerTrait:
 protocol_member UINSIntegerTraitDefinition +defaultValue
 protocol_member UIObjectTraitDefinition +defaultValue
+protocol_member UIPasteConfigurationSupporting -canPasteItemProviders:
+protocol_member UIPasteConfigurationSupporting -pasteConfiguration
+protocol_member UIPasteConfigurationSupporting -pasteItemProviders:
 protocol_member UIPopoverControllerDelegate -popoverController:willRepositionPopoverToRect:inView:
 protocol_member UIPopoverControllerDelegate -popoverControllerDidDismissPopover:
 protocol_member UIPopoverControllerDelegate -popoverControllerShouldDismissPopover:

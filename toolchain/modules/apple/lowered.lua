@@ -2559,6 +2559,7 @@ local function swift_base(selector)
     head = head:gsub("^stringBy(%u)", "%1")
     head = head:gsub("With%u.*$", "")
     head = head:gsub("For%u.*$", "")
+    head = head:gsub("From%u.*$", "")
     if head == "" then
         return nil
     end
@@ -2667,6 +2668,28 @@ local function operator_extension(lines, at, names)
     return false
 end
 
+local function implemented_extension(lines, at, names, types)
+    local name = lines[at]:match("^extension%s+([%a_][%w_]*)%s*{")
+    if not name or not names["type " .. name] then
+        return false
+    end
+    local members = 0
+    for index = at + 1, #lines do
+        local line = lines[index]
+        if line:match("^}") then
+            return members > 0
+        end
+        if line:find("public", 1, true) then
+            local declared = line:match("^%s*public%s+[%a ]*func%s+[%a_]") or line:match("^%s*public%s+[%a ]*var%s+[%a_]")
+            if not declared or not lowered_by(line, names, types, name) then
+                return false
+            end
+            members = members + 1
+        end
+    end
+    return false
+end
+
 local function guarded_lines(file)
     local lines = {}
     local name = path.filename(file)
@@ -2695,7 +2718,7 @@ function lower_swift_text(text, names, types, keep)
         local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
         if major and tonumber(major) >= 7 and not keep[index] then
             pending = #kept + 1
-        elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names)) then
+        elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names) or implemented_extension(lines, index, names, types)) then
             kept[pending] = false
             pending = nil
         elseif not (line:match("^%s*@available%(") or line:match("^%s*///") or line:match("^%s*//") or line:match("^%s*@[%w_]+") or line:match("^%s*$")) then

@@ -7,7 +7,8 @@ package("libwebp")
     add_urls("https://chromium.googlesource.com/webm/libwebp.git")
     add_versions("v1.6.0", "4fa21912338357f89e4fd51cf2368325b59e9bd9")
     add_deps("cmake", "ninja", {kind = "binary"})
-    add_links("webpdemux", "webp", "sharpyuv")
+    add_links("webpmux", "webpdemux", "webp", "sharpyuv")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
 
     on_install("iphoneos", function (package)
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
@@ -19,7 +20,7 @@ package("libwebp")
     end)
 
     on_test(function (package)
-        for _, library in ipairs({"webp", "webpdemux", "sharpyuv"}) do
+        for _, library in ipairs({"webp", "webpdemux", "webpmux", "sharpyuv"}) do
             assert(os.isfile(path.join(package:installdir("lib"), "lib" .. library .. ".a")), library .. " is not installed")
         end
         assert(os.isfile(path.join(package:installdir("include"), "webp", "demux.h")))

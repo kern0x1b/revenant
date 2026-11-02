@@ -1,7 +1,7 @@
 import("fixtures")
 
 local SWIFT_FOUNDATION = {
-    "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
+    "NSDateInterval", "NSISO8601DateFormatter", "NSOrderedCollectionChange",
     "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLSessionWebSocketMessage",
     "NSUnitConverterLinear",
 }
@@ -59,6 +59,19 @@ function failures(opt)
     end) or ""
     if not unrequired:find("revenant@backports", 1, true) then
         table.insert(found, "a Swift target that imports Foundation in a project that does not require the package must be told to require it: " .. unrequired)
+    end
+
+    local orders = backports.link_orders({"CoreFoundationBackports", "CoreTextBackports"}, {"swiftFoundation", "CoreTextBackports", "swiftUIKit"})
+    local listed = {}
+    for _, order in ipairs(orders) do
+        table.insert(listed, order[1] .. "<" .. order[2])
+    end
+    local expected = "CoreFoundationBackports<swiftFoundation CoreFoundationBackports<swiftUIKit CoreTextBackports<swiftFoundation CoreTextBackports<swiftUIKit"
+    if table.concat(listed, " ") ~= expected then
+        table.insert(found, "every Backports library the program links must be ordered before every other library and never before itself, got: " .. table.concat(listed, " "))
+    end
+    if #backports.link_orders({}, {"swiftFoundation"}) ~= 0 then
+        table.insert(found, "a program that links no Backports library orders nothing")
     end
 
     local table_of = guards.guards()["libswiftFoundation.dylib"] or {}

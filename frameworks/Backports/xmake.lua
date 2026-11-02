@@ -215,6 +215,8 @@ if is_plat("iphoneos") then
     backports_tests("subset", {subset = "subset_test.lua"})
 end
 
+backports_tests("vimage_scale", {vimage_scale = "vimage_scale_test.lua"})
+
 if is_plat("iphoneos") and not SELECTED then
     target("BackportsLayoutProbe")
         set_kind("binary")
@@ -268,16 +270,23 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    local DEVICE_PROBE_SOURCES = {"tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m", "src/UIKit/UIView+iOS13.m",
+                                  "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
+                                  "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/UIKit/UILabel+Tightening9.m",
+                                  "src/UIKit/RevenantTightening.m", "src/UIKit/UITraitCollection.m", "src/UIKit/UITraitCollection+Appearance13.m",
+                                  "src/UIKit/UITraitCollection+ForceTouch.m", "src/UIKit/UITraitCollection+UserInterfaceStyle.m", "src/UIKit/RevenantTraitObservers.m",
+                                  "src/UIKit/UIImageConfiguration.m", "src/UIKit/UIView+TraitEnvironment.m", "src/UIKit/UIViewController+TraitEnvironment.m",
+                                  "src/UIKit/UIScreen+TraitEnvironment.m", "src/UIKit/UIColorDynamic.m", "src/UIKit/UIView+TintColor.m", "src/UIKit/UIContentSizeCategory.m", "src/Metal/*.m"}
+
     target("BackportsDeviceProbe")
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/app")
-        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m", "src/UIKit/UIView+iOS13.m",
-                  "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m", "src/UIKit/UITextField+ContentType.m",
-                  "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m", "src/UIKit/UILabel+Tightening9.m",
-                  "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+        add_files(table.unpack(DEVICE_PROBE_SOURCES))
+        add_deps("IOSurfaceBackports")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        add_ldflags("-Wl,-weak_framework,CoreVideo")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.deviceprobe", "CFBundleDisplayName=BackportsDeviceProbe")
         set_values("revenant.control", "tests/device_probe/control")
@@ -289,14 +298,12 @@ if is_plat("iphoneos") and not SELECTED then
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/app")
-        add_files("tests/device_probe/main.m", "src/UIKit/RevenantAnimationDuration.m", "src/UIKit/UIView+InheritedAnimationDuration9.m",
-                  "src/UIKit/UIView+iOS13.m", "src/UIKit/UIView+KeyframeAnimation7.m", "src/UIKit/UIResponder+TextInput7.m",
-                  "src/UIKit/UITextField+ContentType.m", "src/UIKit/RevenantTextContentType.m", "src/UIKit/NSParagraphStyle+Text9.m",
-                  "src/UIKit/UILabel+Tightening9.m", "src/UIKit/RevenantTightening.m", "src/Metal/*.m")
+        add_files(table.unpack(DEVICE_PROBE_SOURCES))
         add_defines("REVENANT_PROBE_SCENEKIT")
-        add_deps("SceneKitBackports")
+        add_deps("SceneKitBackports", "IOSurfaceBackports")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "SystemConfiguration", "OpenGLES")
+        add_ldflags("-Wl,-weak_framework,CoreVideo")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.scenekitprobe", "CFBundleDisplayName=BackportsSceneKitProbe")
         set_values("revenant.control", "tests/device_probe/control")
@@ -307,11 +314,11 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
-                                  presentation = "presentation_intent_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
+                                  presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", pastematching = "paste_matching_test.lua", exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
                                   webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",

@@ -140,6 +140,53 @@ clone (`emulator.clone` is `cp -c -R`), and the files the emulator copies into i
 firmware's root filesystem is copied once per release out of its disk image, with `ditto`, and no clone can be made
 from there; each emulator image after that is a clone of it.
 
+## A private cache
+
+A worker that builds from its own worktree must not write into the main checkout's `.cache`, and a CMake cache that names
+the shared folder would send a later build back into it. `tools/private_cache.lua` makes a private cache for a worktree: an
+APFS clone of the main checkout's `.cache`, in which every absolute link into the source and every absolute path in a
+`CMakeCache.txt` is rewritten to name the clone.
+
+```
+./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private
+```
+
+It prints the value to give `REVENANT_CACHE` for each run, which is the folder it just made:
+
+```
+REVENANT_CACHE=<worktree>/.cache-private ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y
+```
+
+A linked worktree's `./xmakew` refuses to run without `REVENANT_CACHE`, so the tool's own first run needs a throwaway folder
+that is removed once the private cache exists:
+
+```
+REVENANT_CACHE=<worktree>/.cache-boot ./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private
+rm -rf -- <worktree>/.cache-boot
+```
+
+The clone takes the whole of `.cache` except four folders that hold this machine's state: `devices` (which run holds which
+device), `emulator-slots` (the locks that bound how many emulators run at once), `scratch` (the scratch of the tasks running
+in the shared cache) and `sizes` (the measured sizes of the cache's paths, keyed by source path, which would be wrong for the
+clone). A private run therefore claims no device and no emulator slot of the shared cache.
+
+An absolute link into the source is pointed into the clone; a relative link, or a link to a path outside the cache, is kept.
+A link into one of the four left-out folders stays dangling in the clone, and the tool reports those apart from the links
+that were already dangling in the source. A `CMakeCache.txt` has every source path replaced with the clone's path. Other
+files that name the source are copied unchanged, since the tool does not look for them.
+
+The tool refuses a destination inside the source or holding it, a destination that exists and is not empty, and a
+destination on another volume, where a copy would take the full size of the cache. After the rewrite it checks that no link
+and no CMake cache still names the source; if one does, it removes the clone and fails.
+
+```
+./xmakew l -P . tools/private_cache.lua --remove <worktree>/.cache-private
+```
+
+removes a folder only when it holds the `.private-cache` marker that the tool wrote, and never the folder that holds the
+checkout. Apple's directories are copied read-only, so removal makes the clone's directories writable before it deletes them,
+and it does not follow links.
+
 ## Build each package once
 
 A package's key is its build hash: the platform, the architecture, its configs and the toolchain names.
