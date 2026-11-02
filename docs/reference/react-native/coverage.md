@@ -110,7 +110,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-gl | ~57.0.2 | yes | evaluate | none | OpenGL ES 2 exists on iOS 6. |
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-haptics | ~57.0.3 | yes | missing | none | Does not compile for iOS 6: HapticsModule uses an init() that is iOS 10. iOS 6 has no haptic engine, so what it does there is undecided. |
+| expo-haptics | ~57.0.3 | yes | missing | none | The package is the npm 57.0.3 sources, unpatched, and not built yet. Its three generators (impact, notification, selection) are the Backports shims: on iOS 6 impact and notification play a vibration through AudioServices on a phone with a motor (iPhone 4S), and selection does nothing; iPad 2 has no motor and stays silent. This is an emulation, not the haptic engine, and it is not exercised on the phone. |
 | expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | missing | none | Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it). |

@@ -452,7 +452,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Does not compile for iOS 6: HapticsModule uses an init() that is iOS 10. iOS 6 has no haptic engine, so what it does there is undecided."
+   "note": "The package is the npm 57.0.3 sources, unpatched, and not built yet. Its three generators (impact, notification, selection) are the Backports shims: on iOS 6 impact and notification play a vibration through AudioServices on a phone with a motor (iPhone 4S), and selection does nothing; iPad 2 has no motor and stays silent. This is an emulation, not the haptic engine, and it is not exercised on the phone."
   },
   {
    "id": "expo-image",
