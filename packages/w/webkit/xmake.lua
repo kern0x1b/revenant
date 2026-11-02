@@ -59,7 +59,7 @@ package("webkit")
     on_test(function (package)
         local src = package:installdir("src")
         for _, file in ipairs({"CMakeLists.txt", "PORTING-IOS6.md", "Source/cmake/OptionsIOS6.cmake",
-                               "Source/cmake/WebKitMacros.cmake", "Source/JavaScriptCore/llint/LowLevelInterpreter32_64.asm"}) do
+                               "Source/cmake/WebKitUnifiedSources.cmake", "Source/JavaScriptCore/llint/LowLevelInterpreter32_64.asm"}) do
             assert(os.isfile(path.join(src, file)), file .. " is not in the patched tree")
         end
     end)
