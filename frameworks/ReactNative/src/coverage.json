@@ -333,9 +333,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Does not compile for iOS 6: ClipboardPasteButton uses loadObject(ofClass:completionHandler:), an iOS 11 API."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built from the package on the isolated host: the clipboard functions (strings, URLs, images, HTML, content types, change events) are real. Not built: ClipboardPasteButton, the iOS 16 view on UIPasteControl (iOS 6 has no UIPasteControl), and so isPasteButtonAvailable is false there, as the module already reports below iOS 16. Not exercised on the phone."
   },
   {
    "id": "expo-constants",
