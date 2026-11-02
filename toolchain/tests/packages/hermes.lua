@@ -1,0 +1,12 @@
+add_requires("revenant@hermes 250829098.0.17", {alias = "hermes"})
+add_requires("revenant@react-native 0.86.3", {alias = "react-native"})
+
+target("hermes_probe")
+    add_rules("@addon/revenant/apple-ios")
+    set_kind("binary")
+    set_default(false)
+    add_files(path.join(os.scriptdir(), "hermes", "probe.cpp"))
+    add_packages("hermes", "react-native")
+    add_frameworks("Foundation")
+    add_cxxflags("-std=c++17", {force = true})
+target_end()
