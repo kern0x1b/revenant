@@ -10,6 +10,8 @@ the target's autogen folder, `<name>.log`.
 | --- | --- | --- |
 | `tables-positive` | `frameworks/SwiftUI/tests/typechecks/tables/positive.swift` | compiles: a table over a collection of rows, the row value reaching through `ForEach` and `Group` as the element's own type |
 | `tables-negative` | `frameworks/SwiftUI/tests/typechecks/tables/negative.swift` | `conform to 'TableRowContent'`: a `Text` is not table content |
+| `maps-positive` | `frameworks/SwiftUI/tests/typechecks/maps/positive.swift` | compiles: the `Map`, marker, annotation, overlay, control, camera, style and look-around calls that `expo-maps` makes |
+| `maps-negative` | `frameworks/SwiftUI/tests/typechecks/maps/negative.swift` | `conform to 'View'`: a `Marker` is map content, not a view |
 | `tables-negative-widget-bundle` | `frameworks/SwiftUI/tests/typechecks/tables/negative-widget-bundle.swift` | `could not be inferred`: a bare `if` in a widget bundle |
 | `tables-negative-widget-concrete` | `frameworks/SwiftUI/tests/typechecks/tables/negative-widget-concrete.swift` | `could not be inferred`: the same with a named widget type |
 | `tabs-positive` | `frameworks/SwiftUI/tests/typechecks/tabs/positive.swift` | compiles |

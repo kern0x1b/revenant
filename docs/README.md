@@ -103,6 +103,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Surface](reference/swiftui/surface.md) | the interface walker and the surface files the gaps are read from |
 | [Host probes](reference/swiftui/host.md) | values measured from Apple's framework on the host |
 | [Builder typechecks](reference/swiftui/typechecks.md) | the snippets the Table and TabContent builders must accept or refuse |
+| [Maps](reference/swiftui/maps.md) | the map types and modifiers `expo-maps` takes, and what each does on iOS 6 |
+| [Why MapKit](explanation/swiftui/maps.md) | why `Map` is an `MKMapView`, and how content, camera, style and selection reach it |
 | [`TextSelection`](reference/swiftui/text-selection.md) | the one range the release can carry |
 | [Third-party](reference/swiftui/third-party.md) | the code this module is derived from, and its terms, and the trademarks |
 
