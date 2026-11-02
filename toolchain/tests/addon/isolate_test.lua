@@ -13,6 +13,16 @@ function failures(opt)
         table.insert(found, "a folder with test or Example in its path must be refused")
     end
 
+    if #isolate.pod_source_extensions("react-native-enriched-markdown") ~= 4 or isolate.pod_source_extensions("react-native-enriched-markdown")[4] ~= "**.c" or #isolate.pod_source_extensions("react-native-worklets") ~= 3 then
+        table.insert(found, "only enriched-markdown takes its C files from its pod, every other pod keeps the Objective-C and C++ globs")
+    end
+    if not isolate.pod_source_allowed("ios/utils/ENRMTextHitTest.m") or not isolate.pod_source_allowed("cpp/md4c/md4c.c") or not isolate.pod_source_allowed("cpp/test-data/x.c") then
+        table.insert(found, "a source whose name or folder merely contains test (ENRMTextHitTest.m, test-data) must stay a pod source")
+    end
+    if isolate.pod_source_allowed("ios/tests/Foo.m") or isolate.pod_source_allowed("test/x.m") or isolate.pod_source_allowed("ios/FooTests.mm") or isolate.pod_source_allowed("ios/Example/x.m") then
+        table.insert(found, "a tests folder, a Tests file and an Example folder must not be pod sources")
+    end
+
     if isolate.host_bundle_id("/a/iso-Hermes_2", nil) ~= "org.revenant.rnhost.iso-hermes-2" or isolate.host_bundle_id("/a/x", "my.id") ~= "my.id" then
         table.insert(found, "a copy's bundle id must come from --bundle-id or from its folder's name")
     end

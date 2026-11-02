@@ -43,6 +43,28 @@ function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
 end
 
+local C_SOURCE_PODS = {["react-native-enriched-markdown"] = true}
+
+function pod_source_extensions(package)
+    local extensions = {"**.m", "**.mm", "**.cpp"}
+    if C_SOURCE_PODS[package] then
+        table.insert(extensions, "**.c")
+    end
+    return extensions
+end
+
+function pod_source_allowed(relative)
+    if relative:find("Example", 1, true) then
+        return false
+    end
+    for directory in relative:gmatch("([^/]+)/") do
+        if directory:lower():find("^_*tests?_*$") then
+            return false
+        end
+    end
+    return path.filename(relative):find("Tests%.%a+$") == nil
+end
+
 local HOST_BUNDLE_ID = "space.kern0x1b.paseo-ios6.rnhost"
 
 function host_bundle_id(folder, given)
