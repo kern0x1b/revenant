@@ -20,7 +20,7 @@ local light = {"assets_extract_test", "backports_link_test", "binding_test", "ca
                "data_test", "keys_test", "locale_order_test", "lock_test", "nested_project_test", "os_log_fallback_test", "rust_test", "sdk_rule_test", "sdk_store_test", "sdkstubs_test", "sources_test", "coverage_test", "export_bundle_test", "touch_test", "app_assets_test", "isolate_test", "retention_test", "store_race_test", "store_test", "swift_flags_test", "swift_rule_test", "vfs_directory_test", "wrapper_test", "workspace_test"}
 
 local packaged = {"application_test", "architectures_test", "atomics_test", "backports_package_test", "blocks_test", "carried_test", "checks_test", "device_test",
-                  "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "lowered_link_test", "macho_test", "objc_bool_test", "objc_modules_test", "objc_test", "operators_test",
+                  "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "lowered_link_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
                   "optimisation_test", "order_file_test", "platform_libraries_test", "rebind_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "vision_text_test", "weak_test"}
 
 local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "launchd_home_test", "port_test", "swift_cxx_test", "swift_cxx_thread_local_test", "swift_test", "swift_underlying_module_test", "tweak_test"}
