@@ -7,7 +7,7 @@ package("hermes")
     add_urls("https://github.com/facebook/hermes.git")
     add_versions("250829098.0.17", "3477757eb2475555cf8d8df24bfb1deb0613880d")
     add_patches("250829098.0.17", path.join(os.scriptdir(), "patches", "sysroot-from-toolchain.patch"), "05ad39c3cae3f864853c8da08c7a87bdf016f97012835c1e2cbdc852f3b5cc0b")
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "2", readonly = true})
+    add_configs("revision", {description = "Raised when the install script or the links the package records change, since the script is not part of the install path and the links are read from the installed metadata.", default = "3", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
@@ -16,7 +16,9 @@ package("hermes")
     end)
 
     add_includedirs("include")
-    add_links("hermesvm", "jsi")
+    -- hermesvm only: the JSI the engine calls is react-native's own (ReactCommon/jsi), which a host links already. The
+    -- libjsi.a of the package is the same code; a consumer that has no JSI of its own adds "jsi" to its target.
+    add_links("hermesvm")
 
     local PUBLIC_HEADERS = {
         {"API/hermes", "hermes"},
