@@ -22,7 +22,7 @@ function failures(opt)
     end
 
     local command = install.install_command("holder", "org.revenant.rnhost.iso")
-    if not command:find("rm -rf /var/stash/holder/iso/iso.app /Applications/iso.app", 1, true) or not command:find("tar xzf /var/tmp/iso.tgz", 1, true) or
+    if not command:find("rm -rf /var/stash/holder/iso/iso.app /Applications/iso.app", 1, true) or not command:find("tar xzf /var/tmp/iso.tgz -C unpack", 1, true) or not command:find("mv unpack/*.app iso.app", 1, true) or
        command:find("RNHost", 1, true) or command:find("rm -rf /Applications/RNHost", 1, true) then
         table.insert(found, "the install must remove only the app of its own id: " .. command)
     end

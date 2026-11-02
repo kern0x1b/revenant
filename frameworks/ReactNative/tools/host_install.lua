@@ -47,8 +47,12 @@ function install_command(holder, bundle_id)
         "mkdir -p " .. stash,
         "rm -rf " .. stash .. "/" .. app .. " /Applications/" .. app,
         "cd " .. stash,
-        "tar xzf /var/tmp/" .. name .. ".tgz",
+        "rm -rf unpack",
+        "mkdir unpack",
+        "tar xzf /var/tmp/" .. name .. ".tgz -C unpack 2>/dev/null",
         "rm /var/tmp/" .. name .. ".tgz",
+        "mv unpack/*.app " .. app,
+        "rmdir unpack",
         "chmod -R 755 " .. app,
         "ln -s " .. stash .. "/" .. app .. " /Applications/" .. app,
         "su mobile -c 'uicache -p /Applications/" .. app .. "'"
