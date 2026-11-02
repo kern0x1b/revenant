@@ -185,7 +185,7 @@ extension Tips {
             let entry: [String: Any] = ["invalidated": invalidated.reduce(into: [String: String]()) {
                 $0[$1.key] = $1.value.rawRevenantValue
             }]
-            guard let data = try? PropertyListSerialization.data(fromPropertyList: entry, format: .xml, options: []) else {
+            guard let data = try? PropertyListSerialization.data(fromPropertyList: entry, format: .xml, options: 0) else {
                 return
             }
             try? data.write(to: defaultURL)
