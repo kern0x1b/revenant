@@ -167,6 +167,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
 | [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
 | [Driving a host by touch](guides/react-native/touch.md) | the touch injector and its command line for a phone without XCUITest |
+| [The icon and launch image](guides/react-native/app-assets.md) | making them from the application's Expo configuration |
 
 ## WebKit
 
