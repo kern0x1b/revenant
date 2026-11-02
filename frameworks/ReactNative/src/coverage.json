@@ -218,7 +218,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+   "note": "A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
   },
   {
    "id": "expo-auth-session",
@@ -434,7 +434,7 @@
    "native": true,
    "status": "partial",
    "verified": "build",
-   "note": "Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided."
+   "note": "Built from a local copy of GlassView.swift in src/expo, which replaces the package's file. The effect is an iOS 26 one, so on iOS 6 it is never installed and the view draws no glass. Compiled; not exercised."
   },
   {
    "id": "expo-google-app-auth",
@@ -549,9 +549,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "real",
+   "status": "partial",
    "verified": "build",
-   "note": "Compiled; not exercised."
+   "note": "Built from a local copy of LocalizationModule.swift in src/expo, which replaces the package's file: the iOS 16 Locale branches are dropped and the temperature unit is taken from the region, since MeasurementFormatter is iOS 10. Compiled; not exercised."
   },
   {
    "id": "expo-location",
@@ -659,7 +659,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name-only stubs of nine modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration)."
+   "note": "Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json)."
   },
   {
    "id": "expo-observe",
@@ -964,8 +964,8 @@
    "version": "1.21.9",
    "native": true,
    "status": "stub",
-   "verified": "phone",
-   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications."
+   "verified": "none",
+   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. A phone check was made against this stub, not the library, so it is not counted as verified (stubs.json)."
   },
   {
    "id": "react-native-maps",
@@ -1434,6 +1434,24 @@
    "status": "partial",
    "verified": "phone",
    "note": "Built without the ImageEffects category (it needs @import with modules enabled)."
+  },
+  {
+   "id": "@getpaseo/expo-two-way-audio",
+   "group": "community",
+   "version": "",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "Paseo's own Expo module, not an Expo SDK package; the app uses it for two-way audio. Name-only stub StubTwoWayAudioModule in src/expo/StubModules.swift (stubs.json); nothing of it is built."
+  },
+  {
+   "id": "PaseoHardwareKeyboard",
+   "group": "community",
+   "version": "",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "A module of the spike app that no package provides and the paseo app does not use. Name-only stub StubHardwareKeyboardModule in src/expo/StubModules.swift (stubs.json)."
   }
  ]
 }
