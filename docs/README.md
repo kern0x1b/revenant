@@ -168,6 +168,10 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
 | [Driving a host by touch](guides/react-native/touch.md) | the touch injector and its command line for a phone without XCUITest |
 | [The icon and launch image](guides/react-native/app-assets.md) | making them from the application's Expo configuration |
+| [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
+| [Hermes](reference/react-native/hermes.md) | the Hermes 250829098.0.17 package for armv7 iOS 6.0: its pin, flags and measurements on the iPhone 4S |
+| [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
+| [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
 
 ## WebKit
 

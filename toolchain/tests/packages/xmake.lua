@@ -9,6 +9,7 @@ add_requires("revenant@libwebp 1.6.0", {alias = "libwebp"})
 add_requires("revenant@sdwebimage-webp 0.14.6", {alias = "sdwebimage-webp"})
 add_requires("revenant@zxingobjc 3.6.4", {alias = "zxingobjc"})
 includes("rnscreens.lua")
+includes("hermes.lua")
 
 local SUITES = {
     {name = "sdwebimage", source = "sdwebimage.m", packages = {"sdwebimage"}, mflags = {"-fobjc-arc"},
