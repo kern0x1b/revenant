@@ -88,12 +88,12 @@ static CFDataRef RevenantCertificateCopyName(SecCertificateRef certificate, bool
     return name;
 }
 
-CFDataRef SecCertificateCopyNormalizedIssuerSequence(SecCertificateRef certificate)
+CFDataRef BACKPORT_IMPL(SecCertificateCopyNormalizedIssuerSequence)(SecCertificateRef certificate)
 {
     return RevenantCertificateCopyName(certificate, false);
 }
 
-CFDataRef SecCertificateCopyNormalizedSubjectSequence(SecCertificateRef certificate)
+CFDataRef BACKPORT_IMPL(SecCertificateCopyNormalizedSubjectSequence)(SecCertificateRef certificate)
 {
     return RevenantCertificateCopyName(certificate, true);
 }

@@ -60,7 +60,7 @@ static void revenant_dft_release(struct vDSP_DFT_Interleaved_SetupStruct *setup)
     free(setup);
 }
 
-vDSP_DFT_Interleaved_Setup vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved_Setup Previous, vDSP_Length Length,
+vDSP_DFT_Interleaved_Setup BACKPORT_IMPL(vDSP_DFT_Interleaved_CreateSetup)(vDSP_DFT_Interleaved_Setup Previous, vDSP_Length Length,
                                                              vDSP_DFT_Direction Direction,
                                                              vDSP_DFT_RealtoComplex RealtoComplex)
 {

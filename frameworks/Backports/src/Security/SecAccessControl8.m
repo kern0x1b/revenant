@@ -103,7 +103,7 @@ static BOOL revenant_access_control_flags_are_valid(CFOptionFlags flags)
     return YES;
 }
 
-SecAccessControlRef SecAccessControlCreateWithFlags(CFAllocatorRef allocator, CFTypeRef protection, SecAccessControlCreateFlags flags, CFErrorRef *error)
+SecAccessControlRef BACKPORT_IMPL(SecAccessControlCreateWithFlags)(CFAllocatorRef allocator, CFTypeRef protection, SecAccessControlCreateFlags flags, CFErrorRef *error)
 {
     if (!revenant_access_control_protection_is_valid(protection) || !revenant_access_control_flags_are_valid(flags)) {
         if (error)

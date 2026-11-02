@@ -74,7 +74,7 @@ OSStatus BACKPORT_IMPL(SecTrustCopyCustomAnchorCertificates)(SecTrustRef trust, 
     return errSecSuccess;
 }
 
-CFDictionaryRef SecTrustCopyResult(SecTrustRef trust)
+CFDictionaryRef BACKPORT_IMPL(SecTrustCopyResult)(SecTrustRef trust)
 {
     if (!trust)
         return NULL;
@@ -99,7 +99,7 @@ CFDictionaryRef SecTrustCopyResult(SecTrustRef trust)
     return result;
 }
 
-CFDictionaryRef SecPolicyCopyProperties(SecPolicyRef policyRef)
+CFDictionaryRef BACKPORT_IMPL(SecPolicyCopyProperties)(SecPolicyRef policyRef)
 {
     if (!policyRef)
         return NULL;
@@ -135,7 +135,7 @@ CFDictionaryRef SecPolicyCopyProperties(SecPolicyRef policyRef)
     return result;
 }
 
-SecPolicyRef SecPolicyCreateWithProperties(CFTypeRef policyIdentifier, CFDictionaryRef properties)
+SecPolicyRef BACKPORT_IMPL(SecPolicyCreateWithProperties)(CFTypeRef policyIdentifier, CFDictionaryRef properties)
 {
     if (!policyIdentifier)
         return NULL;

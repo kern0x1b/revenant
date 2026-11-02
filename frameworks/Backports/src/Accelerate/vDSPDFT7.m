@@ -54,14 +54,14 @@ static vDSP_DFT_SetupD RevenantDFTCreateSetup(vDSP_Length length, vDSP_DFT_Direc
     return (vDSP_DFT_SetupD)setup;
 }
 
-vDSP_DFT_SetupD vDSP_DFT_zop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
+vDSP_DFT_SetupD BACKPORT_IMPL(vDSP_DFT_zop_CreateSetupD)(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
                                           vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;
     return RevenantDFTCreateSetup(__Length, __Direction, RevenantDFTComplex);
 }
 
-vDSP_DFT_SetupD vDSP_DFT_zrop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
+vDSP_DFT_SetupD BACKPORT_IMPL(vDSP_DFT_zrop_CreateSetupD)(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
                                            vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;

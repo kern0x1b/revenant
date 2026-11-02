@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CGPath.h>
 
@@ -21,7 +22,7 @@ static CGAffineTransform RevenantWindowToScreen(UIWindow *window)
                                  origin.x, origin.y);
 }
 
-UIBezierPath *UIAccessibilityConvertPathToScreenCoordinates(UIBezierPath *path, UIView *view)
+UIBezierPath *BACKPORT_IMPL(UIAccessibilityConvertPathToScreenCoordinates)(UIBezierPath *path, UIView *view)
 {
     if (!path || !view)
         return nil;
@@ -37,13 +38,13 @@ UIBezierPath *UIAccessibilityConvertPathToScreenCoordinates(UIBezierPath *path, 
     return result;
 }
 
-void UIAccessibilityRequestGuidedAccessSession(BOOL enable, void (^handler)(BOOL success))
+void BACKPORT_IMPL(UIAccessibilityRequestGuidedAccessSession)(BOOL enable, void (^handler)(BOOL success))
 {
     if (handler)
         handler(NO);
 }
 
-UIGuidedAccessRestrictionState UIGuidedAccessRestrictionStateForIdentifier(NSString *identifier)
+UIGuidedAccessRestrictionState BACKPORT_IMPL(UIGuidedAccessRestrictionStateForIdentifier)(NSString *identifier)
 {
     (void)identifier;
     return UIGuidedAccessRestrictionStateAllow;

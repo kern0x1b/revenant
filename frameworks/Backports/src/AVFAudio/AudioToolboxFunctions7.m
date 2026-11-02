@@ -143,7 +143,7 @@ static BOOL RevenantParseBank(NSData *data, NSString **name, NSMutableArray *ins
     return YES;
 }
 
-OSStatus CopyNameFromSoundBank(CFURLRef inURL, CFStringRef __nullable *outName)
+OSStatus BACKPORT_IMPL(CopyNameFromSoundBank)(CFURLRef inURL, CFStringRef __nullable *outName)
 {
     NSURL *url = (__bridge NSURL *)inURL;
     if (url == nil) {
@@ -162,7 +162,7 @@ OSStatus CopyNameFromSoundBank(CFURLRef inURL, CFStringRef __nullable *outName)
 
 #define RevenantFileNotFoundStatus ((OSStatus)-43)
 
-OSStatus CopyInstrumentInfoFromSoundBank(CFURLRef inURL, CFArrayRef __nullable *outInstrumentInfo)
+OSStatus BACKPORT_IMPL(CopyInstrumentInfoFromSoundBank)(CFURLRef inURL, CFArrayRef __nullable *outInstrumentInfo)
 {
     NSURL *url = (__bridge NSURL *)inURL;
     if (url == nil) {

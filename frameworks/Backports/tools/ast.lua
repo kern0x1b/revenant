@@ -38,6 +38,9 @@ end
 local function node_of(body, state)
     local node = {children = {}, file = first_path(body) or state}
     node.kind = string.match(body, "^(%S+)")
+    if node.kind == "FunctionDecl" or node.kind == "VarDecl" then
+        node.file = string.match(body, "> (/[^%s<>]+):%d+:%d+") or node.file
+    end
     node.type = string.match(body, "'([^']*)'")
     local quote = string.match(body, "^.*()'")
     node.tail = quote and string.sub(body, quote + 1) or ""

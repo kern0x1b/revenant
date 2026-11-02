@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 NSString *const UITransitionContextFromViewControllerKey = @"UITransitionContextFromViewController";
@@ -11,7 +12,7 @@ UIActivityType const UIActivityTypePostToVimeo = @"com.apple.UIKit.activity.Post
 UIActivityType const UIActivityTypePostToTencentWeibo = @"com.apple.UIKit.activity.TencentWeibo";
 UIActivityType const UIActivityTypeAddToReadingList = @"com.apple.UIKit.activity.AddToReadingList";
 
-CGRect UIAccessibilityConvertFrameToScreenCoordinates(CGRect rect, UIView *view)
+CGRect BACKPORT_IMPL(UIAccessibilityConvertFrameToScreenCoordinates)(CGRect rect, UIView *view)
 {
     UIWindow *window = view.window;
     if (!window)

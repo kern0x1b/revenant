@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 static NSArray *revenant_content_size_categories(void)
@@ -14,12 +15,12 @@ static NSArray *revenant_content_size_categories(void)
     return ordered;
 }
 
-BOOL UIContentSizeCategoryIsAccessibilityCategory(UIContentSizeCategory category)
+BOOL BACKPORT_IMPL(UIContentSizeCategoryIsAccessibilityCategory)(UIContentSizeCategory category)
 {
     return [category hasPrefix:@"UICTContentSizeCategoryAccessibility"];
 }
 
-NSComparisonResult UIContentSizeCategoryCompareToCategory(UIContentSizeCategory lhs, UIContentSizeCategory rhs)
+NSComparisonResult BACKPORT_IMPL(UIContentSizeCategoryCompareToCategory)(UIContentSizeCategory lhs, UIContentSizeCategory rhs)
 {
     NSArray *ordered = revenant_content_size_categories();
     NSUInteger left = lhs ? [ordered indexOfObject:lhs] : NSNotFound;

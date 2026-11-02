@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -6,7 +7,7 @@
 
 
 
-OSStatus VTCopySupportedPropertyDictionaryForEncoder(
+OSStatus BACKPORT_IMPL(VTCopySupportedPropertyDictionaryForEncoder)(
     int32_t width, int32_t height, CMVideoCodecType codecType, CFDictionaryRef encoderSpecification,
     CFStringRef *encoderIDOut, CFDictionaryRef *supportedPropertiesOut)
 {

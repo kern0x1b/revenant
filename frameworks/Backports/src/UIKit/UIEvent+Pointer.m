@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UIEventButtonMask UIEventButtonMaskForButtonNumber(NSInteger buttonNumber)
+UIEventButtonMask BACKPORT_IMPL(UIEventButtonMaskForButtonNumber)(NSInteger buttonNumber)
 {
     if (buttonNumber < 0 || buttonNumber - 1 > (NSInteger)(sizeof(NSInteger) * 8) - 3)
         return 0;

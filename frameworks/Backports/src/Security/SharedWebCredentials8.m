@@ -228,7 +228,7 @@ void BACKPORT_IMPL(SecRequestSharedWebCredential)(CFStringRef fqdn, CFStringRef 
     });
 }
 
-CFStringRef SecCreateSharedWebCredentialPassword(void)
+CFStringRef BACKPORT_IMPL(SecCreateSharedWebCredentialPassword)(void)
 {
     static const char digits[] = "23456789";
     static const char upper[] = "ABCDEFGHJKLMNPQRSTUVWXYZ";

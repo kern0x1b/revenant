@@ -231,8 +231,8 @@ end
 
 local function scan_masked(m)
     local defs = {}
-    local function add(name, first, last)
-        table.insert(defs, {name = name, first = first, last = last})
+    local function add(name, first, last, kind)
+        table.insert(defs, {name = name, first = first, last = last, kind = kind})
     end
     local paren, brace, transparent, init = 0, 0, 0, false
     local stmt, pos = 1, 1
@@ -263,7 +263,7 @@ local function scan_masked(m)
                 else
                     local name, first, last = function_name(m, stmt, s - 1)
                     if name then
-                        add(name, first, last)
+                        add(name, first, last, "function")
                     end
                     local close = match_brace(m, s)
                     stmt = close + 1
@@ -287,7 +287,7 @@ local function scan_masked(m)
         elseif c == ";" then
             if paren == 0 and brace == 0 then
                 for _, found in ipairs(global_names(m, stmt, s - 1)) do
-                    add(found.name, found.first, found.last)
+                    add(found.name, found.first, found.last, "global")
                 end
                 stmt = s + 1
             end
