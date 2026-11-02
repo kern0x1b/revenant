@@ -6,8 +6,9 @@ package("socketrocket")
 
     add_urls("https://github.com/facebook/SocketRocket.git")
     add_versions("0.7.1", "21ac000390781823dd4bd87fdc419976e05dd7a6")
+    add_patches("0.7.1", path.join(os.scriptdir(), "patches", "dispatch-data-bytes.patch"), "990a082821a8c4d8e151e595ad4d21afec80f98e01ea9571cab19d5897a657f0")
     add_links("SocketRocket")
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "2", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
