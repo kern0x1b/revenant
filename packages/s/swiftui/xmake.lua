@@ -36,6 +36,9 @@ package("swiftui")
             "add_requires(\"revenant@backports\", {alias = \"backports\"})",
             "includes(\"" .. path.join(root, "frameworks", "Backports") .. "\")",
             "includes(\"" .. path.join(root, "frameworks", "SwiftUI") .. "\")",
+            "target(\"SwiftUI\")",
+            "    add_values(\"swift.flags\", \"-module-cache-path\", \"" .. path.join(project, "build", "modulecache") .. "\")",
+            "target_end()",
             "set_defaultplat(\"iphoneos\")",
             "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")",
             ""}, "\n"))
