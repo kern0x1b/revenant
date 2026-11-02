@@ -16,15 +16,6 @@ target("react-native-inputs")
     end)
 target_end()
 
-if os.getenv("RN_DEPS_REPO") then
-    add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
-    add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
-end
-
-includes("src/core")
-includes("src/expo")
-includes("tests")
-
 target("react-native")
     set_kind("phony")
     set_default(false)
@@ -42,6 +33,15 @@ target_end()
 if not is_plat("iphoneos") then
     return
 end
+
+if os.getenv("RN_DEPS_REPO") then
+    add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
+    add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
+end
+
+includes("src/core")
+includes("src/expo")
+includes("tests")
 
 local SRC = path.absolute(path.join(os.scriptdir(), "src", "glsl_translator"))
 
