@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
@@ -56,21 +57,31 @@ class FileBuffer : public jsi::Buffer {
 
 }
 
-void onCrash(int signal) {
+void onCrash(int signal, siginfo_t *info, void *context) {
     void *frames[64];
     int count = backtrace(frames, 64);
-    fprintf(stderr, "PROBE signal %d slide %lx\n", signal, static_cast<unsigned long>(_dyld_get_image_vmaddr_slide(0)));
+    fprintf(stderr, "PROBE signal %d address %p code %d slide %lx\n", signal, info->si_addr, info->si_code,
+            static_cast<unsigned long>(_dyld_get_image_vmaddr_slide(0)));
     backtrace_symbols_fd(frames, count, 2);
     _exit(128 + signal);
+}
+
+void install(int signal) {
+    struct sigaction action;
+    memset(&action, 0, sizeof action);
+    action.sa_sigaction = onCrash;
+    action.sa_flags = SA_SIGINFO;
+    sigemptyset(&action.sa_mask);
+    sigaction(signal, &action, nullptr);
 }
 
 int main(int argc, char **argv) {
     if (argc < 2) {
         return 2;
     }
-    signal(SIGSEGV, onCrash);
-    signal(SIGBUS, onCrash);
-    signal(SIGILL, onCrash);
+    install(SIGSEGV);
+    install(SIGBUS);
+    install(SIGILL);
     double rss0 = residentMegabytes();
     double t0 = seconds();
     fprintf(stderr, "PROBE making runtime\n");
