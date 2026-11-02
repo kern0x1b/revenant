@@ -2,8 +2,9 @@ local SOURCES = path.absolute(path.join(os.scriptdir(), ".."))
 local EXPO_ONLY = {expo = "Fetch"}
 local EXPO_BUILT = {real = true, partial = true}
 
-local function coverage_rows()
-    local text = io.readfile(path.join(SOURCES, "coverage.json"))
+local COVERAGE = path.join(SOURCES, "coverage.json")
+
+local function coverage_rows(text)
     local rows = {}
     for object in text:gmatch("{([^{}]-)}") do
         local id = object:match('"id":%s*"([^"]*)"')
@@ -23,9 +24,9 @@ local function coverage_rows()
     return rows
 end
 
-local function modules()
+local function modules(text)
     local expo, real = {}, {}
-    for _, row in ipairs(coverage_rows()) do
+    for _, row in ipairs(coverage_rows(text)) do
         if row.native and (row.id == "expo" or row.id:startswith("expo-")) and EXPO_BUILT[row.status] and row.id ~= "expo-modules-core" then
             table.insert(expo, row.id)
             real[row.id] = true
@@ -242,7 +243,7 @@ target("expo-core-objc")
     local podinclude = path.join(proj, "build", "expo-pods")
     local POD_DIR_NAMES = {["expo-constants"] = "EXConstants"}
     on_load(function (target)
-        local expo = modules()
+        local expo = modules(io.readfile(COVERAGE))
         for _, package in ipairs(expo) do
             local only = EXPO_ONLY[package]
             local base = path.join(expo_dir(package), "ios", only or "")
@@ -252,7 +253,7 @@ target("expo-core-objc")
         end
     end)
     on_config(function (target)
-        local expo = modules()
+        local expo = modules(io.readfile(COVERAGE))
         os.mkdir(jsiinclude)
         os.tryrm(path.join(jsiinclude, "ExpoModulesJSI"))
         os.ln(path.join(jsisrc, "Public"), path.join(jsiinclude, "ExpoModulesJSI"))
@@ -311,7 +312,7 @@ target("expo-app-modules")
     local provider = path.join(ecore, "ExpoModulesProvider.swift")
     add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"))
     on_load(function (target)
-        local expo, real = modules()
+        local expo, real = modules(io.readfile(COVERAGE))
         local seen, duplicates = {}, {}
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do
