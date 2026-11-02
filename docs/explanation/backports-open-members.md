@@ -62,8 +62,8 @@ What exists, from `frameworks/Backports/src/Graphics/CIRenderDestination11.m` an
 
 - Every destination initialiser: bitmap data, pixel buffer (32BGRA and RGBA), IOSurface (8-bit BGRA and RGBA), OpenGL
   texture (`GL_TEXTURE_2D`, RGBA8), Metal texture and texture provider. The pixel buffer and IOSurface initialisers lock
-  the buffer only for the copy. The IOSurface initialiser calls the wrapper functions in `src/IOSurface/IOSurface11_0.m`,
-  whose symbols are in the iOS 6.1.3 export table (see the IOSurface paragraph above).
+  the buffer only for the copy. The IOSurface initialiser calls the functions in `src/IOSurface/IOSurfaceCPU.m`, a CPU
+  buffer on iOS 6 (see C49 in `docs/reference/backports/crutches.md`).
 - `startTaskToRender:toDestination:`, `startTaskToRender:fromRect:toDestination:atPoint:error:` and
   `prepareRender:fromRect:toDestination:atPoint:error:`. The host oracle `tests/CoreImage/render_destination_test.m` checks
   them against the macOS framework: the bitmap, pixel buffer, IOSurface and GL destinations over six region cases (flipped
