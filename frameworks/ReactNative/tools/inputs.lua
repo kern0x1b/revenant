@@ -10,7 +10,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
            of every file, after the absolute path of <built> is read as the path of <reference>. It prints every difference
            and exits 1 when there is one.]]
 
-local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-core", "expo-jsi", "expo-pods", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets"}
+local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets"}
 
 local AGGREGATORS = {"Package.swift", "ReactAppDependencyProvider", "ReactCodegen/ReactCodegen.podspec"}
 
@@ -119,7 +119,6 @@ function swift_header(spec)
     local lines = {
         string.format("set_project(%q)", "rninputs-" .. spec.name),
         'set_xmakever("3.1.2")',
-        'add_rules("mode.release")',
         string.format('add_repositories("revenant %s")', checkout()),
         string.format('add_addons("revenant", {sourcedir = %q})', path.join(checkout(), "toolchain")),
         'set_config("apple_minimum", "6.0")',
@@ -776,7 +775,7 @@ function make_expo_core(ctx)
     for _, file in ipairs(os.files(path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI", "**.swift"))) do
         table.insert(jsi_sources, file)
     end
-    local jsi_rn = path.join(nm, "react-native", "ReactCommon")
+    local jsi_rn = path.join(ctx.build, "rn-src", "ReactCommon")
     local jsi_cxx = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
     local jsi_includes = {jsi_rn, path.join(jsi_rn, "jsi"), path.join(jsi_rn, "runtimeexecutor"), path.join(jsi_rn, "callinvoker"),
         path.join(jsi_rn, "react", "renderer", "debug"), path.join(jsi_rn, "react", "timing"), path.join(jsi_rn, "react", "debug"),
