@@ -54,18 +54,18 @@
    "group": "sdk",
    "version": "2.2.0",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Five files of iOS code, not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (4 files, rn-lib-probe with the spike's codegen); not exercised on the phone."
   },
   {
    "id": "@react-native-community/datetimepicker",
    "group": "sdk",
    "version": "9.1.0",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 14 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (12 ObjC and Fabric files, rn-lib-probe with folly and glog); not exercised on the phone."
   },
   {
    "id": "@react-native-masked-view/masked-view",
@@ -81,45 +81,45 @@
    "group": "sdk",
    "version": "5.2.0",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources with patches/0001 (isSliding declared BOOL to match its 32-bit ivar); not exercised on the phone."
   },
   {
    "id": "@react-native-community/netinfo",
    "group": "sdk",
    "version": "12.0.1",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 8 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (6 files); network-state calls not exercised on the phone."
   },
   {
    "id": "@react-native-community/viewpager",
    "group": "sdk",
    "version": "5.0.11",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 22 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (8 files); not exercised on the phone."
   },
   {
    "id": "@react-native-picker/picker",
    "group": "sdk",
    "version": "2.11.4",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 10 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (10 files, Fabric); not exercised on the phone."
   },
   {
    "id": "@react-native-segmented-control/segmented-control",
    "group": "sdk",
    "version": "2.5.7",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (2 files); not exercised on the phone."
   },
   {
    "id": "@stripe/stripe-react-native",
@@ -263,7 +263,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "note": "Swift only (4 files plus the ExpoBlur podspec). Not compiled: needs expo-modules-core Swift for iOS 6, which is still open."
   },
   {
    "id": "expo-brightness",
@@ -461,7 +461,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it."
+   "note": "Swift only (25 files plus the SDWebImage coders). Not compiled: needs expo-modules-core Swift for iOS 6 and the SDWebImage package; SF Symbols loader in it is a separate question."
   },
   {
    "id": "expo-image-loader",
@@ -524,7 +524,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "note": "Swift only (3 files). Not compiled: needs expo-modules-core Swift for iOS 6."
   },
   {
    "id": "expo-linking",
@@ -812,7 +812,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons)."
+   "note": "Swift only (4 files); the symbol set is undecided: SF Symbols do not exist before iOS 13. Not compiled."
   },
   {
    "id": "expo-system-ui",
@@ -900,9 +900,9 @@
    "group": "sdk",
    "version": "~7.3.8",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 16 files of iOS code and is not built."
+   "status": "partial",
+   "verified": "build",
+   "note": "The ObjC and Fabric part (7 files plus the component view) compiles; the Swift part (3 files) and the lottie-ios pod are not built, so the animation view is not usable yet."
   },
   {
    "id": "react",
@@ -954,9 +954,9 @@
    "group": "sdk",
    "version": "~1.11.0",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (1 file); not exercised on the phone."
   },
   {
    "id": "react-native-keyboard-controller",
@@ -983,7 +983,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 10 files of iOS code and is not built."
+   "note": "Its component view imports react_native_pager_view-Swift.h, so the Swift part (5 files) has to compile first; not built."
   },
   {
    "id": "react-native-worklets",
@@ -1035,9 +1035,9 @@
    "group": "sdk",
    "version": "5.1.0",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (1 file, codegen spec rnviewshot); capture not exercised on the phone."
   },
   {
    "id": "react-native-webview",
@@ -1114,11 +1114,11 @@
   {
    "id": "react-native-bootsplash",
    "group": "sdk",
-   "version": "^6.3.10",
+   "version": "6.3.12",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Has 5 files of iOS code and is not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its own sources (1 file, with codegen spec RNBootSplashSpec); not exercised on the phone."
   },
   {
    "id": "engine: JavaScriptCore (prefixed WebKit engine)",
