@@ -13,7 +13,15 @@ function failures(opt)
         table.insert(found, "the configuration and the bundle live inside the app folder, not in /var/tmp")
     end
 
-    local listing = "RNHost:\n\t/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib (compatibility version 1.0.0)\n\t/usr/lib/revenant/org.revenant.backports/libSystemBackports.dylib (compatibility version 1.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"
+    if install.executable_name("org.revenant.rnhost.iso") ~= "RNHost-iso" or install.executable_name("org.revenant.rnhost.hermes") == install.executable_name("org.revenant.rnhost.iso") then
+        table.insert(found, "two hosts must not share an executable name")
+    end
+    local stop = install.stop_command("org.revenant.rnhost.iso")
+    if not stop:find("UIKitApplication:org.revenant.rnhost.iso\\[", 1, true) or not stop:find("kill $1", 1, true) or stop:find("killall", 1, true) then
+        table.insert(found, "stop must end the process of its own launchd label and never use killall: " .. stop)
+    end
+
+    local listing ="RNHost:\n\t/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib (compatibility version 1.0.0)\n\t/usr/lib/revenant/org.revenant.backports/libSystemBackports.dylib (compatibility version 1.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n"
     local arguments = install.change_arguments(listing, {"libUIKitBackports", "libWebKitBackports", "libSystemBackports"})
     local expected = {"-change", "/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib", "@executable_path/Frameworks/libUIKitBackports.dylib",
                       "-change", "/usr/lib/revenant/org.revenant.backports/libSystemBackports.dylib", "@executable_path/Frameworks/libSystemBackports.dylib"}

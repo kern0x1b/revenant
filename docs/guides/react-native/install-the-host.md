@@ -5,9 +5,10 @@ replaces the staging and deploy scripts of the spike.
 
 ```
 ./xmakew l -P . frameworks/ReactNative/tools/app_config.lua --output DIR APP_DIR
-./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR --manifest DIR --output OUT
+./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR --manifest DIR --output OUT [--bundle-id ID]
 ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive OUT/host.tgz --bundle-id ID [--bundle FILE] [--conf engine=hermes,...]
 ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
+./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
 ```
 
 ## stage
@@ -17,15 +18,24 @@ with the `lib*Backports.dylib` files. The tool adds the manifest folder and the 
 `/usr/lib/revenant/org.revenant.backports` to `@executable_path/Frameworks`, signs each Mach-O file with the `ldid` of the cache and
 packs `OUT/host.tgz`. The folder `OUT` is emptied first.
 
+With `--bundle-id` the executable is renamed to `RNHost-<last part of the id>` and `CFBundleExecutable` follows, so that two
+installed hosts do not share a process name. Give it whenever more than one host can be on the phone.
+
 ## deploy
 
 The phone must be claimed by your holder name. The app is installed by its bundle id, which `isolate.lua copy` gave your copy
 (see [the isolated build](isolated-build.md)): `/var/stash/<holder>/<last part of the id>/<last part of the id>.app`, linked from
-`/Applications`. Only the app of that id is removed, so a colleague's app stays. With `--bundle` the JavaScript bundle goes to
-`/var/tmp/<last part of the id>/bundle.js` and `/var/tmp/rnhost.conf` is written with `module=main`, that bundle and the `--conf`
-lines. The host reads that one configuration file, so two workers must not run in the same claim window.
+`/Applications`. Only the app of that id is removed, so a colleague's app stays. With `--bundle` the JavaScript bundle and the
+configuration (`module=main`, that bundle and the `--conf` lines) are written inside the app as root-owned files, which is where the
+host reads them. The host's output goes to `/var/tmp/<last part of the id>/`.
 
 ## launch
 
 Wakes the phone and has SpringBoard start the app of the id. It does not kill another process: stop what is running before you start
 your app if the phone is short of memory.
+
+## stop
+
+Ends the running process of the app of the id and of no other. The phone has no `ps` or `pkill`, so the tool reads the process id from
+the `launchctl` entry `UIKitApplication:<id>[...]` and kills that one process. It prints `stopped <pid>` or `not running`. Never use
+`killall RNHost`: it kills every host on the phone, those of other workers too.
