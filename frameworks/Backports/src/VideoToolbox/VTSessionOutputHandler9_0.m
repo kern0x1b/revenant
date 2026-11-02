@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -9,7 +10,7 @@
 #import "VTDecompressionSessionHEVC.h"
 #import "VTSystem.h"
 
-OSStatus VTCompressionSessionEncodeFrameWithOutputHandler(
+OSStatus BACKPORT_IMPL(VTCompressionSessionEncodeFrameWithOutputHandler)(
     VTCompressionSessionRef session, CVImageBufferRef imageBuffer, CMTime presentationTimeStamp,
     CMTime duration, CFDictionaryRef CM_NULLABLE frameProperties,
     VTEncodeInfoFlags * CM_NULLABLE infoFlagsOut, VTCompressionOutputHandler outputHandler)
@@ -21,7 +22,7 @@ OSStatus VTCompressionSessionEncodeFrameWithOutputHandler(
 
 typedef OSStatus (*RevenantVTDecodeWithHandlerFunction)(VTDecompressionSessionRef, CMSampleBufferRef, VTDecodeFrameFlags, VTDecodeInfoFlags *, VTDecompressionOutputHandler);
 
-OSStatus VTDecompressionSessionDecodeFrameWithOutputHandler(
+OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrameWithOutputHandler)(
     VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags,
     VTDecodeInfoFlags * CM_NULLABLE infoFlagsOut, VTDecompressionOutputHandler outputHandler)
 {

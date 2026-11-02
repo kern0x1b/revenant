@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -5,7 +6,7 @@
 #include <VideoToolbox/VTCompressionSession.h>
 #include <VideoToolbox/VTErrors.h>
 
-OSStatus VTDecompressionSessionSetMultiImageCallback(
+OSStatus BACKPORT_IMPL(VTDecompressionSessionSetMultiImageCallback)(
     VTDecompressionSessionRef CM_NONNULL decompressionSession,
     VTDecompressionOutputMultiImageCallback CM_NONNULL outputMultiImageCallback,
     void * CM_NULLABLE outputMultiImageRefcon)
@@ -16,7 +17,7 @@ OSStatus VTDecompressionSessionSetMultiImageCallback(
     return noErr;
 }
 
-OSStatus VTDecompressionSessionDecodeFrameWithMultiImageCapableOutputHandler(
+OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrameWithMultiImageCapableOutputHandler)(
     VTDecompressionSessionRef CM_NONNULL session,
     CMSampleBufferRef CM_NONNULL sampleBuffer,
     VTDecodeFrameFlags decodeFlags,
@@ -30,7 +31,7 @@ OSStatus VTDecompressionSessionDecodeFrameWithMultiImageCapableOutputHandler(
     return kVTParameterErr;
 }
 
-OSStatus VTCompressionSessionEncodeMultiImageFrame(
+OSStatus BACKPORT_IMPL(VTCompressionSessionEncodeMultiImageFrame)(
     VTCompressionSessionRef CM_NONNULL session,
     CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
     CMTime presentationTimeStamp,
@@ -50,7 +51,7 @@ OSStatus VTCompressionSessionEncodeMultiImageFrame(
     return noErr;
 }
 
-OSStatus VTCompressionSessionEncodeMultiImageFrameWithOutputHandler(
+OSStatus BACKPORT_IMPL(VTCompressionSessionEncodeMultiImageFrameWithOutputHandler)(
     VTCompressionSessionRef CM_NONNULL session,
     CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
     CMTime presentationTimeStamp,

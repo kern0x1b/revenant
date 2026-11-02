@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
 #define VTDecompressionSessionCreate RevenantVTDecompressionSessionCreate
 #define VTDecompressionSessionDecodeFrame RevenantVTDecompressionSessionDecodeFrame
@@ -22,7 +23,7 @@ typedef OSStatus (*RevenantVTStatusFunction)(VTDecompressionSessionRef);
 typedef Boolean (*RevenantVTCanAcceptFunction)(VTDecompressionSessionRef, CMFormatDescriptionRef);
 typedef OSStatus (*RevenantVTCopySupportedFunction)(VTDecompressionSessionRef, CFDictionaryRef *);
 
-OSStatus VTDecompressionSessionCreate(CFAllocatorRef allocator, CMVideoFormatDescriptionRef videoFormatDescription, CFDictionaryRef videoDecoderSpecification, CFDictionaryRef destinationImageBufferAttributes, const VTDecompressionOutputCallbackRecord *outputCallback, VTDecompressionSessionRef *decompressionSessionOut)
+OSStatus BACKPORT_IMPL(VTDecompressionSessionCreate)(CFAllocatorRef allocator, CMVideoFormatDescriptionRef videoFormatDescription, CFDictionaryRef videoDecoderSpecification, CFDictionaryRef destinationImageBufferAttributes, const VTDecompressionOutputCallbackRecord *outputCallback, VTDecompressionSessionRef *decompressionSessionOut)
 {
     RevenantVTCreateFunction create = (RevenantVTCreateFunction)RevenantVTSystemSymbol("VTDecompressionSessionCreate");
     OSStatus status = create ? create(allocator, videoFormatDescription, videoDecoderSpecification, destinationImageBufferAttributes, outputCallback, decompressionSessionOut) : kVTVideoDecoderNotAvailableNowErr;
@@ -42,7 +43,7 @@ OSStatus VTDecompressionSessionCreate(CFAllocatorRef allocator, CMVideoFormatDes
     return noErr;
 }
 
-OSStatus VTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut)
+OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrame)(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionDecode(session, sampleBuffer, decodeFlags, sourceFrameRefCon, infoFlagsOut, nil);
@@ -50,7 +51,7 @@ OSStatus VTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CM
     return decode ? decode(session, sampleBuffer, decodeFlags, sourceFrameRefCon, infoFlagsOut) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session)
+void BACKPORT_IMPL(VTDecompressionSessionInvalidate)(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session)) {
         RevenantVTSoftwareSessionInvalidate(session);
@@ -61,7 +62,7 @@ void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session)
         invalidate(session);
 }
 
-OSStatus VTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef session)
+OSStatus BACKPORT_IMPL(VTDecompressionSessionFinishDelayedFrames)(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionFinish(session);
@@ -69,7 +70,7 @@ OSStatus VTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef ses
     return finish ? finish(session) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session)
+OSStatus BACKPORT_IMPL(VTDecompressionSessionWaitForAsynchronousFrames)(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionWait(session);
@@ -77,7 +78,7 @@ OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionR
     return wait ? wait(session) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-Boolean VTDecompressionSessionCanAcceptFormatDescription(VTDecompressionSessionRef session, CMFormatDescriptionRef newFormatDesc)
+Boolean BACKPORT_IMPL(VTDecompressionSessionCanAcceptFormatDescription)(VTDecompressionSessionRef session, CMFormatDescriptionRef newFormatDesc)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionCanAccept(session, newFormatDesc);

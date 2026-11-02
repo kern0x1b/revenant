@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreFoundation/CoreFoundation.h>
 #import <Security/Security.h>
 
@@ -538,7 +539,7 @@ static const struct { int32_t status; const char *message; } revenant_messages[]
     {0, "No error."},
 };
 
-CFStringRef SecCopyErrorMessageString(OSStatus status, void *reserved)
+CFStringRef BACKPORT_IMPL(SecCopyErrorMessageString)(OSStatus status, void *reserved)
 {
     size_t low = 0, high = sizeof(revenant_messages) / sizeof(revenant_messages[0]);
     while (low < high) {

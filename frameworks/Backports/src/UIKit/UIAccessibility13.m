@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantMenus.h"
 #import <objc/runtime.h>
 
@@ -14,17 +15,17 @@ NSString *const UIAccessibilityTextualContextSourceCode = @"UIAccessibilityTextu
 NSString *const UIAccessibilityTextualContextSpreadsheet = @"UIAccessibilityTextualContextSpreadsheet";
 NSString *const UIAccessibilityTextualContextWordProcessing = @"UIAccessibilityTextualContextWordProcessing";
 
-BOOL UIAccessibilityShouldDifferentiateWithoutColor(void)
+BOOL BACKPORT_IMPL(UIAccessibilityShouldDifferentiateWithoutColor)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsOnOffSwitchLabelsEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsOnOffSwitchLabelsEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsVideoAutoplayEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsVideoAutoplayEnabled)(void)
 {
     return YES;
 }

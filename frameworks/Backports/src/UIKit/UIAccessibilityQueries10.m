@@ -1,11 +1,12 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UIAccessibilityHearingDeviceEar UIAccessibilityHearingDevicePairedEar(void)
+UIAccessibilityHearingDeviceEar BACKPORT_IMPL(UIAccessibilityHearingDevicePairedEar)(void)
 {
     return UIAccessibilityHearingDeviceEarNone;
 }
 
-BOOL UIAccessibilityIsAssistiveTouchRunning(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsAssistiveTouchRunning)(void)
 {
     return NO;
 }

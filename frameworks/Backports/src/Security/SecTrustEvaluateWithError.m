@@ -68,7 +68,7 @@ bool BACKPORT_IMPL(SecTrustEvaluateWithError)(SecTrustRef trust, CFErrorRef *err
     return false;
 }
 
-SecKeyRef SecCertificateCopyKey(SecCertificateRef certificate)
+SecKeyRef BACKPORT_IMPL(SecCertificateCopyKey)(SecCertificateRef certificate)
 {
     return SecCertificateCopyPublicKey(certificate);
 }

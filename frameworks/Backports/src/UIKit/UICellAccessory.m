@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -16,7 +17,7 @@ static NSUInteger (^revenant_default_position(void))(NSArray *)
     return block;
 }
 
-UICellAccessoryPosition UICellAccessoryPositionBeforeAccessoryOfClass(Class accessoryClass)
+UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionBeforeAccessoryOfClass)(Class accessoryClass)
 {
     return [^NSUInteger(NSArray *accessories) {
         for (NSUInteger index = 0; index < accessories.count; index++)
@@ -26,7 +27,7 @@ UICellAccessoryPosition UICellAccessoryPositionBeforeAccessoryOfClass(Class acce
     } copy];
 }
 
-UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class accessoryClass)
+UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfClass)(Class accessoryClass)
 {
     return [^NSUInteger(NSArray *accessories) {
         for (NSUInteger index = accessories.count; index > 0; index--)

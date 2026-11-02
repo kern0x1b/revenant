@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 NSString *const UIAccessibilityBoldTextStatusDidChangeNotification = @"UIAccessibilityBoldTextStatusDidChangeNotification";
@@ -17,42 +18,42 @@ UIAccessibilityNotifications UIAccessibilityPauseAssistiveTechnologyNotification
 UIAccessibilityNotifications UIAccessibilityResumeAssistiveTechnologyNotification = 1034;
 #endif
 
-BOOL UIAccessibilityIsBoldTextEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsBoldTextEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsGrayscaleEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsGrayscaleEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsReduceMotionEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsReduceMotionEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsReduceTransparencyEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsReduceTransparencyEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityDarkerSystemColorsEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityDarkerSystemColorsEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsSpeakScreenEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsSpeakScreenEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsSpeakSelectionEnabled(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsSpeakSelectionEnabled)(void)
 {
     return NO;
 }
 
-BOOL UIAccessibilityIsSwitchControlRunning(void)
+BOOL BACKPORT_IMPL(UIAccessibilityIsSwitchControlRunning)(void)
 {
     return NO;
 }

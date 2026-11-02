@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <VideoToolbox/VideoToolbox.h>
 
-OSStatus VTCompressionSessionPrepareToEncodeFrames(VTCompressionSessionRef session)
+OSStatus BACKPORT_IMPL(VTCompressionSessionPrepareToEncodeFrames)(VTCompressionSessionRef session)
 {
     return session ? noErr : kVTParameterErr;
 }

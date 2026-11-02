@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <ImageIO/ImageIO.h>
 
-NSData *UIImageHEICRepresentation(UIImage *image)
+NSData *BACKPORT_IMPL(UIImageHEICRepresentation)(UIImage *image)
 {
     CGImageRef core = image.CGImage;
     if (!core)
