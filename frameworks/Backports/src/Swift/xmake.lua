@@ -283,7 +283,9 @@ local function overlay(name, folder, opt)
             end
             add_flags(target, flags)
             if opt.cmodule then
-                add_flags(target, {"-I", path.join(SRC, folder, opt.cmodule)})
+                for _, cmodule in ipairs(table.wrap(opt.cmodule)) do
+                    add_flags(target, {"-I", path.join(SRC, folder, cmodule)})
+                end
                 for _, name in ipairs(table.wrap(opt.packages)) do
                     local pkg = target:pkg(name)
                     if pkg then
@@ -317,7 +319,7 @@ overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {
 
 overlay("swiftCryptoKit", "CryptoKit", {})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = "RevenantTLS", stub = "network_stub"})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = {"RevenantTLS", "RevenantNetworkC"}, stub = "network_stub"})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 
