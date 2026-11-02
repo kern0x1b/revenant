@@ -57,14 +57,16 @@ The memory numbers are one run per configuration; the first screen of the app wi
 
 ## Engine benchmark on the iPhone 4S
 
-`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `measure.sh ENGINE RUN BUNDLE` runs one configuration on the claimed phone (five taps on the counter, one swipe on the list) and `summarize.sh` prints the metrics of the runs.
+`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE [WAIT]` runs one configuration on the claimed phone (five taps on the counter, one swipe on the list, the screenshot and the host log go to `.cache/scratch/rn-bench/runs/ENGINE-RUN`), and `... measure.lua summarize RUNFOLDER...` prints the metrics of the runs. The taps need `frameworks/ReactNative/tools/touch.lua`, see below.
 
 Three runs per engine, on the same host build (the HV64 package with the ToInt32 patch, `RN_HERMES=1`) and the same bench bundle, each after a fresh launch:
 
 | Engine | Startup, react start to bench mounted | Tap to JS commit, median of 5 | fps, mean / lowest one-second window | RSS, highest heartbeat |
 |---|---|---|---|---|
-| Hermes, bytecode | 0.70, 0.80, 0.70 s | 163, 168, 168 ms | 59.2 / 20, 59.1 / 24, 59.2 / 21 | 59.2, 58.7, 58.7 MB |
-| JSC, source | 2.60, 2.50, 2.40 s | 176, 169, 171 ms | 58.4 / 8, 58.3 / 6, 58.1 / 3 | 75.2, 75.9, 75.0 MB |
+| Hermes, bytecode | 0.71, 0.74, 0.70 s | 163, 168, 168 ms | 59.2 / 20, 59.1 / 24, 59.2 / 21 | 59.2, 58.7, 58.7 MB |
+| JSC, source | 2.57, 2.52, 2.42 s | 176, 169, 171 ms | 58.4 / 8, 58.3 / 6, 58.1 / 3 | 75.2, 75.9, 75.0 MB |
+
+A fourth Hermes run made with `measure.lua` after the table (`hermes-9`) gave 0.73 s startup, a 164 ms median and 59.0 / 19 fps.
 
 - The tap latency runs from the injected touch (`rn-host: touch began`, epoch milliseconds) to the `bench commit` log, which is written in the effect after the count update commits. It does not include the paint.
 - The startup is read from the syslog timestamps of the two lines.
