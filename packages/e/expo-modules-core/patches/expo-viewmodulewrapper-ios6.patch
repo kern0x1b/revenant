@@ -1,0 +1,38 @@
+Cause: on iOS 6.1.3 armv7, ViewModuleWrapper.createViewModuleWrapperClass(module:appId:) (Swift, expo-modules-core) returns
+not the Class but a Swift ObjCClassWrapper metadata object (word 0 = 0x305, word 1 = the Class). The function does
+`objc_allocateClassPair(ViewModuleWrapper.self, ...)` and returns `wrapperClass as? ViewModuleWrapper.Type`. iOS 6's libobjc
+does not mark a subclass of a Swift class as a Swift class, so the Swift runtime sees an ordinary ObjC class and wraps it;
+the @objc thunk of a `ViewModuleWrapper.Type?` result then returns the wrapper. NSStringFromClass() on it crashes
+(SIGSEGV; iOS 6's NSStringFromClass also does not accept Nil). Probe: rn-spike/classpair-probe (ClassPair app).
+The same subclass is built here in Objective-C instead, where objc_allocateClassPair returns the Class itself.
+
+
+--- a/ios/Fabric/ExpoFabricViewObjC.mm
++++ b/ios/Fabric/ExpoFabricViewObjC.mm
+@@ -466,15 +466,17 @@
+     return;
+   }
+ 
+-  NSMethodSignature *sig =
+-      [viewModuleWrapperClass methodSignatureForSelector:createWrapperSelector];
+-  NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
+-  [invocation setTarget:viewModuleWrapperClass];
+-  [invocation setSelector:createWrapperSelector];
+-  [invocation setArgument:&viewModule atIndex:2];
+-  [invocation setArgument:&appId atIndex:3];
+-  [invocation invoke];
+-  [invocation getReturnValue:&wrappedViewModuleClass];
++  {
++    NSString *wrapperName = [viewModule performSelector:NSSelectorFromString(@"name")];
++    NSString *prefixed = appId ? [NSString stringWithFormat:@"ViewManagerAdapter_%@_%@", wrapperName, appId]
++                               : [NSString stringWithFormat:@"ViewManagerAdapter_%@", wrapperName];
++    wrappedViewModuleClass = objc_allocateClassPair(viewModuleWrapperClass, prefixed.UTF8String, 0);
++    if (wrappedViewModuleClass) {
++      id wrappedModule = viewModule;
++      class_addMethod(wrappedViewModuleClass, NSSelectorFromString(@"wrappedModule"),
++                      imp_implementationWithBlock(^id{ return wrappedModule; }), "@@:");
++    }
++  }
+ 
+   if (!wrappedViewModuleClass) {
+     NSLog(@"[ExpoFabricViewObjC] Error: Failed to create wrapped view module "

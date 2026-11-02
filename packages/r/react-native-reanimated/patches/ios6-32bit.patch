@@ -1,0 +1,11 @@
+--- a/apple/reanimated/apple/CSS/REACSSPlatformProps.mm
++++ b/apple/reanimated/apple/CSS/REACSSPlatformProps.mm
+@@ -33,7 +33,7 @@
+ #endif
+   }
+   const auto &color = std::get<std::array<double, 4>>(value);
+-  const CGFloat components[4] = {color[0], color[1], color[2], color[3]};
++  const CGFloat components[4] = {(CGFloat)color[0], (CGFloat)color[1], (CGFloat)color[2], (CGFloat)color[3]};
+   // CGColorCreate returns +1 retained; __bridge_transfer hands the retain to ARC.
+   return (__bridge_transfer id)CGColorCreate(sharedSRGBColorSpace(), components);
+ }
