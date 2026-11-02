@@ -4688,6 +4688,7 @@ function RevenantMetalDecodeVertex
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
+function RevenantMetalSynchroniseSurfaceTextures
 function RevenantMetalVertexFormat
 function RevenantMusicKitSignES256
 function RevenantNDEFRecordDecode
@@ -27074,10 +27075,14 @@ member RevenantMetalTexture -revenantCanFilter
 member RevenantMetalTexture -revenantChannels
 member RevenantMetalTexture -revenantGenerateMipmaps
 member RevenantMetalTexture -revenantIsColour
+member RevenantMetalTexture -revenantMarkSurfaceDirty
 member RevenantMetalTexture -revenantReadRegion:level:bytesPerRow:into:
+member RevenantMetalTexture -revenantRefreshSurface
 member RevenantMetalTexture -revenantRestoreAttachment:previous:
 member RevenantMetalTexture -revenantSetHeap:offset:
 member RevenantMetalTexture -revenantStorageSize
+member RevenantMetalTexture -revenantSynchroniseSurface
+member RevenantMetalTexture -revenantUploadSurface
 member RevenantMetalTexture -revenantWriteRegion:level:bytes:bytesPerRow:
 member RevenantMetalTexture -sampleCount
 member RevenantMetalTexture -screen
