@@ -31,7 +31,7 @@ target("apple-compat")
         local lines = {"// Written by revenant@apple-compat: the shims this release needs, as one module a Swift file can import."}
         for _, symbol in ipairs(target:data("apple-compat.symbols") or {}) do
             if os.isfile(path.join(SRC, "include", "revenant", symbol .. ".h")) then
-                table.insert(lines, "#include <toolchain/" .. symbol .. ".h>")
+                table.insert(lines, "#include <revenant/" .. symbol .. ".h>")
             end
         end
         io.writefile(path.join(module, "shims.h"), table.concat(lines, "\n") .. "\n")
