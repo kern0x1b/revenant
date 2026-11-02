@@ -27,6 +27,7 @@ local HEADER = [==[
 #define REVENANT_BACKPORTS_SKELETON_H
 
 #include <objc/objc.h>
+#include <stddef.h>
 
 struct revenant_backports_method {
     const char *cls;
@@ -37,22 +38,42 @@ struct revenant_backports_method {
 
 void revenant_backports_fail(const char *name) __attribute__((noreturn, visibility("hidden")));
 void revenant_backports_register(const struct revenant_backports_method *methods, unsigned method_count) __attribute__((visibility("hidden")));
-void revenant_backports_global(void *storage, const char *encoding, const char *name) __attribute__((visibility("hidden")));
+void revenant_backports_global(void *storage, size_t size, const char *encoding, const char *name, const char *image) __attribute__((visibility("hidden")));
+void *revenant_backports_c_target(void **slot, const char *image, const char *name) __attribute__((visibility("hidden")));
 
 #endif
 ]==]
 
 local REGISTRAR = [==[
 #include "revenant_backports.h"
+#include <dlfcn.h>
 #include <objc/NSObject.h>
 #include <objc/runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+static const char revenant_backports_absent = 0;
 
 void revenant_backports_fail(const char *name)
 {
     fprintf(stderr, "not implemented: %s\n", name);
     abort();
+}
+
+static void *revenant_backports_symbol(const char *image, const char *name)
+{
+    void *handle = dlopen(image, RTLD_LAZY);
+    return handle != NULL ? dlsym(handle, name) : NULL;
+}
+
+void *revenant_backports_c_target(void **slot, const char *image, const char *name)
+{
+    if (*slot == NULL) {
+        void *found = revenant_backports_symbol(image, name);
+        *slot = found != NULL ? found : (void *)&revenant_backports_absent;
+    }
+    return *slot == (void *)&revenant_backports_absent ? NULL : *slot;
 }
 
 static void revenant_missing_unrecognized(id self, SEL selector, SEL unrecognized)
@@ -76,8 +97,15 @@ static Class revenant_missing_class(void)
     return cls;
 }
 
-void revenant_backports_global(void *storage, const char *encoding, const char *name)
+void revenant_backports_global(void *storage, size_t size, const char *encoding, const char *name, const char *image)
 {
+    if (size > 0) {
+        void *system = revenant_backports_symbol(image, name);
+        if (system != NULL) {
+            memcpy(storage, system, size);
+            return;
+        }
+    }
     if (encoding[0] != '@' || *(void **)storage != NULL)
         return;
     id value = [[revenant_missing_class() alloc] init];
@@ -114,6 +142,148 @@ local function setter(name)
     return "set" .. string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2) .. ":"
 end
 
+local function trim(text)
+    return (string.gsub(string.gsub(text, "^%s+", ""), "%s+$", ""))
+end
+
+local MACRO_MARKS = {"_AVAILABLE", "AVAILABLE_", "_PROHIBITED", "_UNAVAILABLE", "_DEPRECATED", "_OBSOLETED",
+    "_REFINED_FOR_SWIFT", "_SWIFT_NAME", "_SWIFT_UI_ACTOR", "_RETURNS_RETAINED", "_APPEARANCE_SELECTOR",
+    "_NOESCAPE", "_RELEASES_ARGUMENT"}
+
+local function is_macro(word)
+    if not string.find(string.gsub(word, "^_+", ""), "^%u") then
+        return false
+    end
+    for _, mark in ipairs(MACRO_MARKS) do
+        if string.find(word, mark, 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function plain(text)
+    local out = string.gsub(text, "%f[%w_]API_%u+%s*%b()", "")
+    out = string.gsub(out, "%f[%w_]API_%u+%f[^%w_]", "")
+    out = string.gsub(out, "%f[%w_]__attribute__%s*%b()", "")
+    out = string.gsub(out, "%f[%w_]([%u%d_]+)%s*(%b())", function (word, args)
+        if is_macro(word) then
+            return ""
+        end
+        return nil
+    end)
+    out = string.gsub(out, "%f[%w_]([%u%d_]+)%f[^%w_]", function (word)
+        if is_macro(word) then
+            return ""
+        end
+        return nil
+    end)
+    return trim(string.gsub(out, "%s+", " "))
+end
+
+local function storage_type(text)
+    local last_star = 0
+    local position = string.find(text, "*", 1, true)
+    while position ~= nil do
+        last_star = position
+        position = string.find(text, "*", position + 1, true)
+    end
+    local out = string.gsub(text, "()%f[%w_]const%f[^%w_]", function (at)
+        if at > last_star then
+            return ""
+        end
+        return "const"
+    end)
+    return plain(out)
+end
+
+local function group_close(text, open)
+    local depth = 0
+    for index = open, #text do
+        local c = string.sub(text, index, index)
+        if c == "(" then
+            depth = depth + 1
+        elseif c == ")" then
+            depth = depth - 1
+            if depth == 0 then
+                return index
+            end
+        end
+    end
+    return nil
+end
+
+local function declarator(text, name)
+    local open = string.find(text, "(^", 1, true) or string.find(text, "(*", 1, true)
+    local close = open and group_close(text, open)
+    if close then
+        return string.sub(text, 1, close - 1) .. " " .. name .. string.sub(text, close)
+    end
+    local array = string.find(text, "[", 1, true)
+    if array then
+        return string.sub(text, 1, array - 1) .. " " .. name .. string.sub(text, array)
+    end
+    return text .. " " .. name
+end
+
+local function split_top(text)
+    local parts, depth, start = {}, 0, 1
+    for index = 1, #text do
+        local c = string.sub(text, index, index)
+        if c == "(" or c == "<" or c == "[" then
+            depth = depth + 1
+        elseif c == ")" or c == ">" or c == "]" then
+            depth = depth - 1
+        elseif c == "," and depth == 0 then
+            table.insert(parts, trim(string.sub(text, start, index - 1)))
+            start = index + 1
+        end
+    end
+    table.insert(parts, trim(string.sub(text, start)))
+    return parts
+end
+
+local function parse_function(signature)
+    local text = plain(signature)
+    if string.sub(text, -1) ~= ")" then
+        return nil, "signature"
+    end
+    local depth, open = 0, nil
+    for index = #text, 1, -1 do
+        local c = string.sub(text, index, index)
+        if c == ")" then
+            depth = depth + 1
+        elseif c == "(" then
+            depth = depth - 1
+            if depth == 0 then
+                open = index
+                break
+            end
+        end
+    end
+    if open == nil then
+        return nil, "signature"
+    end
+    local ret = trim(string.sub(text, 1, open - 1))
+    if ret == "" or string.find(ret, "(", 1, true) then
+        return nil, "signature"
+    end
+    local inner = trim(string.sub(text, open + 1, -2))
+    local params = {}
+    if inner ~= "" and inner ~= "void" then
+        for _, part in ipairs(split_top(inner)) do
+            if part == "..." or string.find(part, "...", 1, true) then
+                return nil, "variadic"
+            end
+            if part == "" then
+                return nil, "signature"
+            end
+            table.insert(params, part)
+        end
+    end
+    return {ret = ret, params = params}
+end
+
 local function objc_model(rows, implemented, unavailable)
     local classes, methods, seen = {}, {}, {}
     local function method(container, selector, class_method, label)
@@ -125,7 +295,7 @@ local function objc_model(rows, implemented, unavailable)
     end
     for _, row in ipairs(rows) do
         if row.kind == "class" then
-            if row.flags ~= "unavailable" and not implemented[row.name] then
+            if not implemented[row.name] then
                 local super = row.signature ~= "" and row.signature or "NSObject"
                 table.insert(classes, {name = row.name, super = unavailable[super] and "NSObject" or super})
             end
@@ -145,6 +315,49 @@ local function objc_model(rows, implemented, unavailable)
     return classes, methods
 end
 
+local function forwarder(index, entry)
+    local types, decls, args = {}, {}, {}
+    for position, ptype in ipairs(entry.params) do
+        table.insert(types, ptype)
+        table.insert(decls, declarator(ptype, "a" .. position))
+        table.insert(args, "a" .. position)
+    end
+    local list = #types > 0 and table.concat(types, ", ") or "void"
+    local params = #decls > 0 and table.concat(decls, ", ") or "void"
+    local call = string.format("((revenant_fn_%d *)target)(%s)", index, table.concat(args, ", "))
+    local lines = {
+        string.format("typedef %s revenant_fn_%d(%s);", entry.ret, index, list),
+        string.format("static void *revenant_slot_%d;", index),
+        string.format('__attribute__((weak, visibility("default"))) %s revenant_c_%d(%s) __asm__(%s);', entry.ret, index, params, quoted("_" .. entry.symbol)),
+        string.format("%s revenant_c_%d(%s)", entry.ret, index, params),
+        "{",
+        string.format("    void *target = revenant_backports_c_target(&revenant_slot_%d, %s, %s);", index, quoted(entry.image), quoted(entry.symbol)),
+        "    if (target != NULL) {",
+    }
+    if entry.ret == "void" then
+        table.insert(lines, "        " .. call .. ";")
+        table.insert(lines, "        return;")
+    else
+        table.insert(lines, "        return " .. call .. ";")
+    end
+    table.insert(lines, "    }")
+    table.insert(lines, string.format("    revenant_backports_fail(%s);", quoted(entry.label)))
+    table.insert(lines, "}")
+    return lines
+end
+
+local function swift_lines(swift, data)
+    local lines = {}
+    for index, entry in ipairs(swift) do
+        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) void revenant_swift_%d(void) __asm__(%s);', index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) void revenant_swift_%d(void) { revenant_backports_fail(%s); }', index, quoted(entry.label)))
+    end
+    for index, entry in ipairs(data) do
+        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) char revenant_swift_data_%d[16] __asm__(%s) = {0};', index, quoted("_" .. entry.symbol)))
+    end
+    return lines
+end
+
 local function objc_source(model, umbrella, alias)
     local lines = {'#include "revenant_backports.h"', string.format('#include "%s"', alias), umbrella, ""}
     for _, class in ipairs(model.classes) do
@@ -154,8 +367,9 @@ local function objc_source(model, umbrella, alias)
     if #model.protocols > 0 then
         table.insert(lines, string.format("static Protocol *revenant_protocols[%d] __attribute__((used));", #model.protocols))
     end
-    for _, name in ipairs(model.globals) do
-        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) __typeof_unqual__(%s) revenant_global_%s __asm__("_%s") = {0};', name, name, name))
+    for _, global in ipairs(model.globals) do
+        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) %s __asm__(%s) = {0};',
+            declarator(storage_type(global.type), "revenant_global_" .. global.name), quoted("_" .. global.name)))
     end
     for index, method in ipairs(model.methods) do
         table.insert(lines, string.format("static void revenant_stub_%d(void)", index))
@@ -170,32 +384,22 @@ local function objc_source(model, umbrella, alias)
         end
         table.insert(lines, "static const struct revenant_backports_method revenant_methods[] = {" .. table.concat(entries, ", ") .. "};")
     end
+    for index, entry in ipairs(model.functions) do
+        table.join2(lines, forwarder(index, entry))
+    end
+    table.join2(lines, swift_lines(model.swift, model.data))
     table.insert(lines, "__attribute__((constructor)) static void revenant_backports_load(void)")
     table.insert(lines, "{")
     for index, name in ipairs(model.protocols) do
         table.insert(lines, string.format("    revenant_protocols[%d] = @protocol(%s);", index - 1, name))
     end
-    for _, name in ipairs(model.globals) do
-        table.insert(lines, string.format("    revenant_backports_global(&revenant_global_%s, @encode(__typeof_unqual__(%s)), %s);", name, name, quoted(name)))
+    for _, global in ipairs(model.globals) do
+        local size = global.array and "0" or string.format("sizeof(revenant_global_%s)", global.name)
+        table.insert(lines, string.format("    revenant_backports_global(&revenant_global_%s, %s, @encode(__typeof__(revenant_global_%s)), %s, %s);",
+            global.name, size, global.name, quoted(global.name), quoted(global.image)))
     end
     table.insert(lines, string.format("    revenant_backports_register(%s, %d);", #model.methods > 0 and "revenant_methods" or "NULL", #model.methods))
     table.insert(lines, "}")
-    return table.concat(lines, "\n") .. "\n"
-end
-
-local function c_source(functions, swift, data)
-    local lines = {'#include "revenant_backports.h"', ""}
-    for index, entry in ipairs(functions) do
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
-    end
-    for index, entry in ipairs(swift) do
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
-    end
-    for index, entry in ipairs(data) do
-        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) char revenant_swift_data_%d[16] __asm__(%s) = {0};", index, quoted("_" .. entry.symbol)))
-    end
     return table.concat(lines, "\n") .. "\n"
 end
 
@@ -205,23 +409,35 @@ local function emit(file, text)
     end
 end
 
-function write(skeleton, frameworks, implemented)
+function write(skeleton, frameworks, implemented, images)
     os.mkdir(skeleton)
     emit(path.join(skeleton, "revenant_backports.h"), HEADER)
     emit(path.join(skeleton, "registrar.m"), REGISTRAR)
     local alias = path.join(sdkfiles.src_root(), "revenant_alias.h")
-    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, c = 0, swift = 0}
+    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, c = 0, c_unstubbed = 0, c_in_src = 0, swift = 0}
     for _, framework in ipairs(frameworks) do
         local functions, swift, data, protocols, globals = {}, {}, {}, {}, {}
         local classes, methods = objc_model(framework.rows, implemented, framework.unavailable)
+        local function image_of(name)
+            return images[name] or sdkfiles.framework_image(framework.name)
+        end
         for _, row in ipairs(framework.rows) do
             if row.kind == "C function" then
-                table.insert(functions, {symbol = row.symbol, label = framework.name .. "." .. row.name})
+                local signature = parse_function(row.signature)
+                if implemented[row.name] then
+                    totals.c_in_src = totals.c_in_src + 1
+                elseif signature then
+                    table.insert(functions, {symbol = row.symbol, label = framework.name .. "." .. row.name, image = image_of(row.name),
+                        ret = signature.ret, params = signature.params})
+                else
+                    totals.c_unstubbed = totals.c_unstubbed + 1
+                end
             elseif row.kind == "global variable" then
                 if not implemented[row.name] then
-                    table.insert(globals, row.name)
+                    table.insert(globals, {name = row.name, type = row.signature, image = image_of(row.name),
+                        array = string.find(row.signature, "[", 1, true) ~= nil})
                 end
-            elseif row.kind == "protocol" and row.flags ~= "nonruntime" then
+            elseif row.kind == "protocol" and not string.find(" " .. (row.flags or "") .. " ", " nonruntime ", 1, true) then
                 table.insert(protocols, row.name)
             elseif row.kind == "Swift declaration" then
                 local kind, symbol = swift_stub(row)
@@ -235,19 +451,21 @@ function write(skeleton, frameworks, implemented)
         totals.classes = totals.classes + #classes
         totals.protocols = totals.protocols + #protocols
         totals.globals = totals.globals + #globals
+        for _, global in ipairs(globals) do
+            if global.array then
+                totals.globals_uncopied = totals.globals_uncopied + 1
+            end
+        end
         totals.c = totals.c + #functions
         totals.swift = totals.swift + #swift + #data
         local objc_file = path.join(skeleton, framework.name .. ".m")
         local c_file = path.join(skeleton, framework.name .. ".c")
-        if #classes > 0 or #methods > 0 or #protocols > 0 or #globals > 0 then
-            emit(objc_file, objc_source({classes = classes, methods = methods, protocols = protocols, globals = globals}, framework.import or "", alias))
+        os.tryrm(c_file)
+        if #classes > 0 or #methods > 0 or #protocols > 0 or #globals > 0 or #functions > 0 or #swift > 0 or #data > 0 then
+            emit(objc_file, objc_source({classes = classes, methods = methods, protocols = protocols, globals = globals,
+                functions = functions, swift = swift, data = data}, framework.import or "", alias))
         else
             os.tryrm(objc_file)
-        end
-        if #functions > 0 or #swift > 0 or #data > 0 then
-            emit(c_file, c_source(functions, swift, data))
-        else
-            os.tryrm(c_file)
         end
     end
     return totals
