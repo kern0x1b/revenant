@@ -225,7 +225,7 @@ function build(folder, cache, options)
     if configured == 0 then
         built = status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
     end
-    return built, log
+    return built or 1, log
 end
 
 function main(...)
