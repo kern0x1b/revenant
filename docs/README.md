@@ -172,6 +172,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
 | [Hermes](reference/react-native/hermes.md) | the Hermes 250829098.0.17 package for armv7 iOS 6.0: its pin, flags and measurements on the iPhone 4S |
 | [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
+| [Using Hermes as the engine](guides/react-native/use-hermes.md) | selecting Hermes beside JSC, the bytecode bundle, the Promise check and the first-run numbers on the iPhone 4S |
 | [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
 | [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with the spike |
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
