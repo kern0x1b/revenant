@@ -166,6 +166,9 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [What runs](reference/react-native/coverage.md) | React Native and the Expo SDK on iOS 6.1.3, module by module |
 | [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
 | [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
+| [Hermes](reference/react-native/hermes.md) | the Hermes 250829098.0.17 package for armv7 iOS 6.0: its pin, flags and measurements on the iPhone 4S |
+| [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
+| [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
 
 ## WebKit
 
