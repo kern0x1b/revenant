@@ -8,6 +8,10 @@ option_end()
 
 local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
 
+if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
+    add_requireconfs("backports", {configs = {libraries = "FoundationBackports,MapKitBackports,WebKitBackports"}})
+end
+
 target("RNHost")
     add_rules("@addon/revenant/app")
     add_packages("libcxx")
