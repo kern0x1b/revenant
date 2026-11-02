@@ -10,6 +10,9 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
            of every file, after the absolute path of <built> is read as the path of <reference>. It prints every difference
            and exits 1 when there is one.]]
 
+local app_config = import("app_config", {rootdir = os.scriptdir(), anonymous = true})
+local json = import("core.base.json")
+
 local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets"}
 
 local AGGREGATORS = {"Package.swift", "ReactAppDependencyProvider", "ReactCodegen/ReactCodegen.podspec"}
@@ -585,6 +588,88 @@ function make_screens(ctx)
         "-Xcc", "-I" .. path.join(rn, "ReactCommon", "yoga"), "-Xcc", "-I" .. path.join(rn, "React")})
 end
 
+local APP_ICONS = {{name = "Icon.png", size = 57}, {name = "Icon@2x.png", size = 114}}
+
+local APP_SPLASHES = {{name = "Default.png", scale = 1, height = 480, width = 320}, {name = "Default@2x.png", scale = 2, height = 960, width = 640}}
+
+local APP_HOST = "RNHost"
+
+local EXPO_SPLASH_WIDTH = 200
+
+local EXPO_SPLASH_BACKGROUND = "#ffffff"
+
+function xml_text(text)
+    return plain_replace(plain_replace(plain_replace(text, "&", "&amp;"), "<", "&lt;"), ">", "&gt;")
+end
+
+function splash_options(config)
+    for _, plugin in ipairs(config.plugins or {}) do
+        if type(plugin) == "table" and plugin[1] == "expo-splash-screen" then
+            local options = plugin[2] or {}
+            if not options.image then
+                raise("expo-splash-screen names no image in the application configuration")
+            end
+            return options
+        end
+    end
+    raise("the application configuration has no expo-splash-screen plugin, so the launch images cannot be made")
+end
+
+function pixel_width(file)
+    return tonumber(os.iorunv("sips", {"-g", "pixelWidth", file}):match("pixelWidth:%s*(%d+)"))
+end
+
+function make_app_assets(ctx)
+    local out = path.join(ctx.build, "app-assets")
+    fresh_directory(out)
+    local config = json.decode(app_config.public_json(ctx.app))
+    if not config.name or not config.icon then
+        raise("the application configuration names no name or no icon")
+    end
+    local options = splash_options(config)
+    if (options.resizeMode or "contain") ~= "contain" then
+        raise("expo-splash-screen resizes its image with %s, and only contain is made", options.resizeMode)
+    end
+    local icon = path.join(ctx.app, config.icon)
+    local names = {}
+    for _, item in ipairs(APP_ICONS) do
+        local size = string.format("%d", item.size)
+        os.vrunv("sips", {"-s", "format", "png", "-z", size, size, icon, "--out", path.join(out, item.name)})
+        table.insert(names, item.name)
+    end
+    local logo = path.join(ctx.app, options.image)
+    local color = (options.backgroundColor or EXPO_SPLASH_BACKGROUND):gsub("^#", ""):upper()
+    for _, item in ipairs(APP_SPLASHES) do
+        local width = string.format("%d", (options.imageWidth or EXPO_SPLASH_WIDTH) * item.scale)
+        local source, scaled = logo, nil
+        if pixel_width(logo) ~= tonumber(width) then
+            scaled = os.tmpfile() .. ".png"
+            os.vrunv("sips", {"-s", "format", "png", "-Z", width, logo, "--out", scaled})
+            source = scaled
+        end
+        os.vrunv("sips", {"-s", "format", "png", "-p", string.format("%d", item.height), string.format("%d", item.width), "--padColor", color, source, "--out", path.join(out, item.name)})
+        if scaled then
+            os.rm(scaled)
+        end
+    end
+    local plist = os.tmpfile() .. ".json"
+    io.writefile(plist, json.encode({CFBundleDisplayName = config.name, CFBundleIconFiles = names, CFBundleName = APP_HOST, CFBundlePackageType = "APPL",
+        MinimumOSVersion = "6.0", UIDeviceFamily = {1}, UIPrerenderedIcon = true, UIRequiredDeviceCapabilities = {"armv7"}}))
+    os.vrunv("plutil", {"-convert", "xml1", "-o", path.join(out, "Info.plist"), plist})
+    os.rm(plist)
+    local icons = {}
+    for _, name in ipairs(names) do
+        table.insert(icons, "<string>" .. name .. "</string>")
+    end
+    write_lines(path.join(out, "Info.fragment.plist"), {'<?xml version="1.0" encoding="UTF-8"?>',
+        '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+        '<plist version="1.0"><dict>',
+        "<key>CFBundleDisplayName</key><string>" .. xml_text(config.name) .. "</string>",
+        "<key>CFBundleIconFiles</key><array>" .. table.concat(icons) .. "</array>",
+        "<key>UIPrerenderedIcon</key><true/>",
+        "</dict></plist>"})
+end
+
 local EXPO_SKIP_FILES = {"FontUtils"}
 
 local EXPO_SKIP_MODULES = {FontUtilsModule = true}
@@ -904,7 +989,8 @@ local MAKERS = {
     nitro = make_nitro,
     unistyles = make_unistyles,
     keyboard = make_keyboard,
-    screens = make_screens
+    screens = make_screens,
+    ["app-assets"] = make_app_assets
 }
 
 function selected(names)
