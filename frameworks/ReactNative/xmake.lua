@@ -22,4 +22,5 @@ if os.getenv("RN_DEPS_REPO") then
 end
 
 includes("src/core")
+includes("src/expo")
 includes("tests")

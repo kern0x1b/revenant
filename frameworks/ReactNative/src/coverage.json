@@ -131,6 +131,15 @@
    "note": "Has 84 files of iOS code and is not built."
   },
   {
+   "id": "expo",
+   "group": "sdk",
+   "version": "~57.0.30",
+   "native": true,
+   "status": "partial",
+   "verified": "build",
+   "note": "Only the Fetch module of the package is built; the rest of its iOS code is not."
+  },
+  {
    "id": "eslint-config-expo",
    "group": "sdk",
    "version": "~57.0.2",
@@ -297,9 +306,9 @@
    "group": "sdk",
    "version": "~57.0.6",
    "native": true,
-   "status": "real",
-   "verified": "build",
-   "note": "Built; capture on iOS 6 is not exercised."
+   "status": "missing",
+   "verified": "none",
+   "note": "Not built: its barcode scanning needs the ZXingObjC package, which is not packaged yet (the media worker 5a213326 packages it)."
   },
   {
    "id": "expo-cellular",
@@ -324,9 +333,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "real",
-   "verified": "phone",
-   "note": "Built from its own sources."
+   "status": "missing",
+   "verified": "none",
+   "note": "Does not compile for iOS 6: ClipboardPasteButton uses loadObject(ofClass:completionHandler:), an iOS 11 API."
   },
   {
    "id": "expo-constants",
@@ -396,18 +405,18 @@
    "group": "sdk",
    "version": "~57.0.7",
    "native": true,
-   "status": "partial",
-   "verified": "build",
-   "note": "Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch."
+   "status": "missing",
+   "verified": "none",
+   "note": "Does not compile for iOS 6: FileSystemFileHandle uses FileHandle.offset and seekToEnd (iOS 13). The iOS 14 gates are rewritten in staged copies, which do not cover this."
   },
   {
    "id": "expo-font",
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "real",
-   "verified": "phone",
-   "note": "Built from its own sources."
+   "status": "missing",
+   "verified": "none",
+   "note": "Does not compile as the real module: FontLoaderModule calls queryCustomNativeFonts, which is in FontUtils, the file the spike skips."
   },
   {
    "id": "expo-gl",
@@ -441,9 +450,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "real",
-   "verified": "build",
-   "note": "Built; iOS 6 has no haptic engine, so what it does there is undecided."
+   "status": "missing",
+   "verified": "none",
+   "note": "Does not compile for iOS 6: HapticsModule uses an init() that is iOS 10. iOS 6 has no haptic engine, so what it does there is undecided."
   },
   {
    "id": "expo-image",
@@ -468,9 +477,9 @@
    "group": "sdk",
    "version": "~57.0.21",
    "native": true,
-   "status": "real",
-   "verified": "build",
-   "note": "Built; not exercised."
+   "status": "missing",
+   "verified": "none",
+   "note": "Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it)."
   },
   {
    "id": "expo-image-picker",
@@ -738,9 +747,9 @@
    "group": "sdk",
    "version": "~57.0.23",
    "native": true,
-   "status": "real",
-   "verified": "build",
-   "note": "Built; the share sheet is not exercised."
+   "status": "missing",
+   "verified": "none",
+   "note": "Does not compile for iOS 6: ResolveUrlContentDetails uses URLSession.bytes, an iOS 15 API."
   },
   {
    "id": "expo-sms",
@@ -765,9 +774,9 @@
    "group": "sdk",
    "version": "~57.0.10",
    "native": true,
-   "status": "real",
-   "verified": "phone",
-   "note": "Built from its own sources."
+   "status": "missing",
+   "verified": "none",
+   "note": "Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault)."
   },
   {
    "id": "expo-sqlite",
@@ -935,7 +944,7 @@
    "id": "react-native-gesture-handler",
    "group": "sdk",
    "version": "~2.32.0",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the app's gestures run on it."
@@ -980,7 +989,7 @@
    "id": "react-native-worklets",
    "group": "sdk",
    "version": "0.10.1",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built."
@@ -989,7 +998,7 @@
    "id": "react-native-reanimated",
    "group": "sdk",
    "version": "4.5.1",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the bottom sheets animate on it."
@@ -1016,7 +1025,7 @@
    "id": "react-native-svg",
    "group": "sdk",
    "version": "15.15.4",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the logo and icons draw."
