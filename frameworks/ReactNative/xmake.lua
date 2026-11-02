@@ -5,3 +5,17 @@ end
 
 includes("src/core")
 includes("src/expo")
+
+target("react-native")
+    set_kind("phony")
+    set_default(false)
+    add_tests("coverage")
+    on_test(function (target, opt)
+        local root = os.projectdir()
+        local ok = os.execv(os.programfile(), {"l", "-P", root, path.join(root, "frameworks", "ReactNative", "tests", "coverage_test.lua")}, {try = true, curdir = root})
+        if ok ~= 0 then
+            opt.errors = "coverage failed"
+        end
+        return ok == 0
+    end)
+target_end()

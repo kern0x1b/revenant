@@ -124,8 +124,17 @@ local LOCAL_COPIES = {
     ["expo-glass-effect"] = "GlassView.swift",
     ["expo-localization"] = "LocalizationModule.swift",
 }
-local STUB_OWNERS = {StubFontLoaderModule = "expo-font", StubClipboardModule = "expo-clipboard", StubFileSystemModule = "expo-file-system", StubHapticsModule = "expo-haptics", StubAudioModule = "expo-audio", StubSplashScreenModule = "expo-splash-screen", StubSharingModule = "expo-sharing", StubDocumentPickerModule = "expo-document-picker", StubImagePickerModule = "expo-image-picker", StubCameraModule = "expo-camera", StubSQLiteModule = "expo-sqlite", StubImageManipulatorModule = "expo-image-manipulator"}
-local STUB_NAMES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubSplashScreenModule", "StubClipboardModule", "StubFileSystemModule", "StubFontLoaderModule", "StubFontUtilsModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubBackgroundNotificationTasksModule", "StubBadgeModule", "StubCameraModule", "StubImageManipulatorModule", "StubNotificationCategoriesModule", "StubNotificationPermissionsModule", "StubNotificationPresenterModule", "StubNotificationSchedulerModule", "StubNotificationsEmitterModule", "StubNotificationsHandlerModule", "StubPushTokenManagerModule", "StubSQLiteModule", "StubServerRegistrationModule"}
+local function stub_registry()
+    local names, owners = {}, {}
+    for object in io.readfile(path.join(SOURCES, "stubs.json")):gmatch("{([^{}]-)}") do
+        if object:match('"file":%s*"([^"]*)"') == "src/expo/StubModules.swift" then
+            local name = object:match('"name":%s*"([^"]*)"')
+            table.insert(names, name)
+            owners[name] = object:match('"owner":%s*"([^"]*)"')
+        end
+    end
+    return names, owners
+end
 
 if is_plat("iphoneos") then
 
@@ -313,6 +322,7 @@ target("expo-app-modules")
     add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"))
     on_load(function (target)
         local expo, real = modules(io.readfile(COVERAGE))
+        local STUB_NAMES, STUB_OWNERS = stub_registry()
         local seen, duplicates = {}, {}
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do
