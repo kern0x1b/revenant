@@ -1,8 +1,9 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache>
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
        ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--pkgdirs name=dir,...] [--log file]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
-         and linked as build/rn-src. The path of <folder> must not contain "test" or "Example".
+         and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
+         --bundle-id or org.revenant.rnhost.<folder name>, so that installs of different workers do not overwrite each other.
   build  builds the host (or another target, for example expo-jsi-probe) from that copy with this checkout's toolchain. Expo packages
          named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.
          --pkgdirs takes the sources of a named package from a directory (an installed revenant package) instead of the application's.]]
@@ -39,6 +40,16 @@ end
 
 function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
+end
+
+local HOST_BUNDLE_ID = "space.kern0x1b.paseo-ios6.rnhost"
+
+function host_bundle_id(folder, given)
+    if given then
+        return given
+    end
+    local name = path.filename(folder):lower():gsub("[^a-z0-9%-]", "-")
+    return "org.revenant.rnhost." .. name
 end
 
 function patched_sources(candidates, read)
@@ -94,7 +105,7 @@ local function lines(output)
     return found
 end
 
-function copy_project(project, folder)
+function copy_project(project, folder, bundle_id)
     project = path.absolute(project)
     folder = path.absolute(folder)
     if not folder_is_valid(folder) then
@@ -105,6 +116,11 @@ function copy_project(project, folder)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
+    local host = path.absolute(path.join(os.scriptdir(), "..", "src", "host"))
+    local target = path.join(folder, "rn-spike", "host-app")
+    if os.isdir(target) and os.isdir(host) then
+        os.vrunv("rsync", {"-a", host .. "/", target .. "/"})
+    end
     os.mkdir(path.join(folder, "build"))
     for _, item in ipairs(INPUTS) do
         if os.exists(path.join(project, "build", item)) then
@@ -144,7 +160,16 @@ function copy_project(project, folder)
             relinked = relinked + 1
         end
     end
-    return {rewritten = rewritten, relinked = relinked}
+    local id = host_bundle_id(folder, bundle_id)
+    local manifest = path.join(folder, "rn-spike", "host-app", "xmake.lua")
+    if os.isfile(manifest) then
+        local text = io.readfile(manifest)
+        local changed = replace(text, "CFBundleIdentifier=" .. HOST_BUNDLE_ID, "CFBundleIdentifier=" .. id)
+        if changed ~= text then
+            io.writefile(manifest, changed)
+        end
+    end
+    return {rewritten = rewritten, relinked = relinked, bundle_id = id}
 end
 
 local function checkout()
@@ -226,7 +251,7 @@ function build(folder, cache, options)
     if configured == 0 then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
     end
-    return built, log
+    return built or 1, log
 end
 
 function main(...)
@@ -245,9 +270,9 @@ function main(...)
         index = index + 1
     end
     if command == "copy" and #positional == 2 and options.cache then
-        local result = copy_project(positional[1], positional[2])
+        local result = copy_project(positional[1], positional[2], options["bundle-id"])
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
-        print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s", positional[2], result.rewritten, result.relinked, sources))
+        print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
     elseif command == "build" and #positional == 1 and options.cache then
         local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared})
         print(string.format("exit %d, log %s", code, log))

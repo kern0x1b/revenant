@@ -170,6 +170,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
 | [Using Hermes as the engine](guides/react-native/use-hermes.md) | selecting Hermes beside JSC, the bytecode bundle, the Promise check and the first-run numbers on the iPhone 4S |
 | [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
+| [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
 
 ## WebKit
 
