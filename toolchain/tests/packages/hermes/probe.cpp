@@ -3,15 +3,20 @@
 
 #include <execinfo.h>
 #include <mach-o/dyld.h>
+#include <mach/arm/thread_status.h>
 #include <mach/mach.h>
+#include <mach/thread_act.h>
+#include <pthread.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace jsi = facebook::jsi;
@@ -55,6 +60,59 @@ class FileBuffer : public jsi::Buffer {
     std::vector<uint8_t> data_;
 };
 
+constexpr size_t kProfileSamples = 1 << 17;
+uintptr_t profileSamples[kProfileSamples];
+size_t profileCount = 0;
+volatile bool profileRunning = false;
+thread_act_t profileTarget = 0;
+
+void *profileLoop(void *) {
+    while (profileRunning) {
+        if (thread_suspend(profileTarget) == KERN_SUCCESS) {
+            arm_thread_state_t state;
+            mach_msg_type_number_t count = ARM_THREAD_STATE_COUNT;
+            if (thread_get_state(profileTarget, ARM_THREAD_STATE, reinterpret_cast<thread_state_t>(&state), &count) == KERN_SUCCESS && profileCount < kProfileSamples) {
+                profileSamples[profileCount++] = state.__pc;
+            }
+            thread_resume(profileTarget);
+        }
+        usleep(1000);
+    }
+    return nullptr;
+}
+
+void startProfile() {
+    profileTarget = mach_thread_self();
+    profileRunning = true;
+    pthread_t thread;
+    pthread_create(&thread, nullptr, profileLoop, nullptr);
+    pthread_detach(thread);
+}
+
+void stopProfile() {
+    profileRunning = false;
+    usleep(20000);
+}
+
+void reportProfile() {
+    size_t count = profileCount;
+    std::sort(profileSamples, profileSamples + count);
+    std::vector<std::pair<size_t, uintptr_t>> runs;
+    for (size_t i = 0; i < count;) {
+        size_t j = i;
+        while (j < count && profileSamples[j] == profileSamples[i]) {
+            ++j;
+        }
+        runs.emplace_back(j - i, profileSamples[i]);
+        i = j;
+    }
+    std::sort(runs.rbegin(), runs.rend());
+    printf("PROFILE samples=%zu slide=%lx\n", count, static_cast<unsigned long>(_dyld_get_image_vmaddr_slide(0)));
+    for (size_t i = 0; i < runs.size() && i < 200; ++i) {
+        printf("PROFILE %zu %lx\n", runs[i].first, static_cast<unsigned long>(runs[i].second));
+    }
+}
+
 }
 
 void onCrash(int signal, siginfo_t *info, void *context) {
@@ -95,8 +153,16 @@ int main(int argc, char **argv) {
         return 1;
     }
     double rss1 = residentMegabytes();
+    bool profile = argc > 2 && strcmp(argv[2], "profile") == 0;
+    if (profile) {
+        startProfile();
+    }
     jsi::Value result = runtime->evaluateJavaScript(buffer, "bundle.hbc");
     double t3 = seconds();
+    if (profile) {
+        stopProfile();
+        reportProfile();
+    }
     double rss2 = residentMegabytes();
     std::string text = result.isString() ? result.getString(*runtime).utf8(*runtime) : std::string("(not a string)");
     printf("PROBE bytes=%zu makeRuntime=%.3f read=%.3f eval=%.3f rssStart=%.1f rssLoaded=%.1f rssAfterEval=%.1f\n",
