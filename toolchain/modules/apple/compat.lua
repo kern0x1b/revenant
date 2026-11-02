@@ -97,7 +97,12 @@ ARRIVED = {
     renamex_np = {iOS = "10.0"},
     fclonefileat = {iOS = "10.0"},
     sysdir_start_search_path_enumeration = {iOS = "10.0"},
-    sysdir_get_next_search_path_enumeration = {iOS = "10.0"}
+    sysdir_get_next_search_path_enumeration = {iOS = "10.0"},
+    dirstat_np = {iOS = "11.0", Macos = "10.13"}
+}
+
+REQUIRED = {
+    dirstat_np = {"openat", "fstatat"}
 }
 
 PROCESS_WIDE = {
@@ -190,6 +195,13 @@ function needed(deployment)
     for symbol, release in pairs(provided("iOS")) do
         if semver.compare(deployment, release) < 0 then
             table.insert(shared[symbol] and sharing or symbols, symbol)
+        end
+    end
+    for _, symbol in ipairs(table.copy(symbols)) do
+        for _, dependency in ipairs(REQUIRED[symbol] or {}) do
+            if not table.contains(symbols, dependency) then
+                table.insert(symbols, dependency)
+            end
         end
     end
     byteorder.sort(symbols)

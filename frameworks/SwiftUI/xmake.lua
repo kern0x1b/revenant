@@ -52,6 +52,7 @@ if is_plat("iphoneos") then
         add_packages("combine", {public = true})
         set_optimize("fastest")
         add_files("src/*.swift")
+        set_values("swift.cxx_interop", "off")
         add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings", "-module-link-name", "SwiftUI")
         add_frameworks("UIKit", "QuartzCore", "CoreGraphics", "CoreData", "Foundation", "CoreFoundation")
         before_build(function (target)

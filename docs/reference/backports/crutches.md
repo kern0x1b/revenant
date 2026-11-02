@@ -326,6 +326,20 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: the iOS 6.0 class inventory (`.cache/dyld/6.0/classes_armv7.json`, described in `docs/reference/backports/AVFoundation/README.md`) lists the owning classes of the six selectors and shows no QR path. `BackportsQRMetadataProbe` checks that a face request leaves the session with one output and a QR request adds one, and that the type reads back. Not run on a device.
 - Removed by: a system hook that makes QR available on iOS 6 `AVCaptureMetadataOutput`, which the 6.0 inventory shows does not exist; or an explicit backport class the app opts into instead of the transparent standard API.
 
+### C47. UIKeyboardAppearanceLight is the Default appearance on iOS 6
+
+- Stands in for: `UIKeyboardAppearanceLight`, which the SDK declares as value 2 for iOS 7. The lowered header in `toolchain/modules/apple/lowered.lua` declares it `UIKeyboardAppearanceLight API_AVAILABLE(ios(6.0)) = UIKeyboardAppearanceDefault`, so the value is 0. On iOS 6 the keyboard has one light appearance, Default, and one dark one, Alert (value 1, the same as Dark).
+- Gaps: the light and default appearances are one value on iOS 6, so an app cannot tell them apart there, and nothing else changes.
+- Measurement: the lowered header text was read from the generated overlay; not run on a device.
+- Removed by: none for iOS 6. The mapping is the iOS 6 behaviour, not a stand-in for a missing one.
+
+### C48. The download status is Current or NotDownloaded from NSURLUbiquitousItemIsDownloadedKey
+
+- Stands in for: `URLResourceValues.ubiquitousItemDownloadingStatus` and `NSURLUbiquitousItemDownloadingStatusKey`, which iOS 7 introduced. The Foundation overlay getter in `toolchain/modules/apple/lowered.lua` returns the status when the system supplies it, and otherwise reads `NSURLUbiquitousItemIsDownloadedKey` (iOS 5 to 7, deprecated in the SDK as equal to Current): `.current` when the item is downloaded, `.notDownloaded` when it is not, and nil when the key is absent.
+- Gaps: `.downloaded`, a local copy that is not the newest version, is never returned, because iOS 6 does not report it. Downloading, uploading and their errors are not mapped. The deprecated key "has never behaved as documented in earlier releases" (SDK note), so the answer is only as exact as iOS 6 is.
+- Measurement: the getter text was compiled against stand-in types at an iOS 7 target; not run on a device, and the Swift overlay itself was not typechecked for iOS 6.
+- Removed by: none for iOS 6. A device-level check of `.current` and `.notDownloaded` against a real iCloud file would replace the assumption that the deprecated key is accurate.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install

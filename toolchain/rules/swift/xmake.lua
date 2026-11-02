@@ -168,9 +168,12 @@ rule("swift")
                 for index = 2, #modules, 2 do
                     table.insert(searched, modules[index])
                 end
-                local cxx_headers = table.wrap(target:pkg("libcxx"):get("sysincludedirs"))[1]
-                if not cxx_headers then
-                    raise("target(%s) compiles Swift against libcxx, which declares no include directory", target:name())
+                local cxx_headers
+                if table.wrap(target:values("swift.cxx_interop"))[1] ~= "off" then
+                    cxx_headers = table.wrap(target:pkg("libcxx"):get("sysincludedirs"))[1]
+                    if not cxx_headers then
+                        raise("target(%s) compiles Swift against libcxx, which declares no include directory", target:name())
+                    end
                 end
                 local argv = table.join(swift.runtime_flags({
                     architecture = target:arch(),
