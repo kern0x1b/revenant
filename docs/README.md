@@ -116,6 +116,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
+| [UIKit feedback generators on iOS 6](reference/backports/UIKit/FeedbackGenerators.md) | the impact, notification and selection generators as vibration patterns through AudioServices, by motor presence, and what is not measured |
 | [ActivityKit](reference/backports/ActivityKit/README.md) | the package `revenant@activitykit` |
 | [ActivityKit: availability](reference/backports/ActivityKit/ActivityKit/Availability.md) | the availability of Live Activities, and what the module answers where there is none |
 | [ActivityKit: reuse](reference/backports/ActivityKit/ActivityKit/Reuse.md) | what ActivityKit was compared against, and why |
