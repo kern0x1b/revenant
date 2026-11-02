@@ -116,6 +116,11 @@ function copy_project(project, folder, bundle_id)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
+    local host = path.absolute(path.join(os.scriptdir(), "..", "src", "host"))
+    local target = path.join(folder, "rn-spike", "host-app")
+    if os.isdir(target) and os.isdir(host) then
+        os.vrunv("rsync", {"-a", host .. "/", target .. "/"})
+    end
     os.mkdir(path.join(folder, "build"))
     for _, item in ipairs(INPUTS) do
         if os.exists(path.join(project, "build", item)) then
