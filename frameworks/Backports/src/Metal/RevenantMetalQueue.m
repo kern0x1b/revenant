@@ -130,6 +130,7 @@
     if (_drawable)
         [_drawable present];
     glFlush();
+    RevenantMetalSynchroniseSurfaceTextures();
     [device relinquish];
     _endTime = CACurrentMediaTime();
     _status = MTLCommandBufferStatusScheduled;

@@ -93,10 +93,14 @@ static NSUInteger levelExtent(NSUInteger extent, NSUInteger level)
 
 NSUInteger RevenantMetalBindEpoch;
 
+static NSHashTable *RevenantMetalSurfaceTextures;
+
 @implementation RevenantMetalTexture {
     GLuint _name;
     GLuint _framebuffer;
-    CVOpenGLESTextureRef _surfaceTexture;
+    IOSurfaceRef _iosurface;
+    uint32_t _seenSeed;
+    BOOL _gpuDirty;
     BOOL _screen;
     MTLPixelFormat _pixelFormat;
     NSUInteger _width;
@@ -253,35 +257,80 @@ static int depthKind(MTLPixelFormat pixelFormat)
         NSLog(@"Metal: the IOSurface is %lux%lu in format %u, which does not match the texture descriptor", (unsigned long)IOSurfaceGetWidth(iosurface), (unsigned long)IOSurfaceGetHeight(iosurface), (unsigned)IOSurfaceGetPixelFormat(iosurface));
         return nil;
     }
-    RevenantMetalDevice *device = [RevenantMetalDevice shared];
-    [device acquire];
-    CVOpenGLESTextureCacheRef cache = [device textureCache];
-    CVPixelBufferRef pixelBuffer = NULL;
-    CVReturn status = cache ? CVPixelBufferCreateWithIOSurface(kCFAllocatorDefault, iosurface, NULL, &pixelBuffer) : kCVReturnError;
-    CVOpenGLESTextureRef texture = NULL;
-    if (status == kCVReturnSuccess)
-        status = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, pixelBuffer, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)descriptor.width, (GLsizei)descriptor.height, format.format, format.type, 0, &texture);
-    if (pixelBuffer)
-        CVPixelBufferRelease(pixelBuffer);
-    [device relinquish];
-    if (status != kCVReturnSuccess) {
-        NSLog(@"Metal: the IOSurface cannot be bound as an OpenGL ES texture: CoreVideo returned %d", (int)status);
-        return nil;
-    }
     if ((self = [super init])) {
-        _surfaceTexture = texture;
-        _name = CVOpenGLESTextureGetName(texture);
         _pixelFormat = descriptor.pixelFormat;
         _width = descriptor.width;
         _height = descriptor.height;
         _levels = 1;
         _usage = descriptor.usage;
         _attachedLevel = NSNotFound;
+        _iosurface = (IOSurfaceRef)CFRetain(iosurface);
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
+        [device acquire];
         RevenantMetalBindEpoch++;
-    } else {
-        CFRelease(texture);
+        glGenTextures(1, &_name);
+        glBindTexture(GL_TEXTURE_2D, _name);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, format.internal, (GLsizei)_width, (GLsizei)_height, 0, format.format, format.type, NULL);
+        [device relinquish];
+        [self revenantUploadSurface];
     }
     return self;
+}
+
+- (void)revenantUploadSurface
+{
+    uint32_t seed = 0;
+    IOSurfaceLock(_iosurface, kIOSurfaceLockReadOnly, &seed);
+    MTLRegion region = {{0, 0, 0}, {_width, _height, 1}};
+    BOOL ok = [self revenantWriteRegion:region level:0 bytes:IOSurfaceGetBaseAddress(_iosurface) bytesPerRow:IOSurfaceGetBytesPerRow(_iosurface)];
+    IOSurfaceUnlock(_iosurface, kIOSurfaceLockReadOnly, NULL);
+    _seenSeed = seed;
+    _gpuDirty = NO;
+    if (!ok)
+        NSLog(@"Metal: the IOSurface cannot be uploaded into its OpenGL ES texture");
+}
+
+- (void)revenantRefreshSurface
+{
+    uint32_t seed = IOSurfaceGetSeed(_iosurface);
+    if (seed == _seenSeed)
+        return;
+    if (_gpuDirty) {
+        NSLog(@"Metal: the IOSurface was written on the CPU while the GPU had rendered into it and not yet synchronised; the GPU result is kept");
+        _seenSeed = seed;
+        return;
+    }
+    [self revenantUploadSurface];
+}
+
+- (void)revenantMarkSurfaceDirty
+{
+    if (!_iosurface)
+        return;
+    _gpuDirty = YES;
+    if (!RevenantMetalSurfaceTextures)
+        RevenantMetalSurfaceTextures = [NSHashTable weakObjectsHashTable];
+    [RevenantMetalSurfaceTextures addObject:self];
+}
+
+- (void)revenantSynchroniseSurface
+{
+    if (!_iosurface || !_gpuDirty)
+        return;
+    IOSurfaceLock(_iosurface, 0, NULL);
+    MTLRegion region = {{0, 0, 0}, {_width, _height, 1}};
+    BOOL ok = [self revenantReadRegion:region level:0 bytesPerRow:IOSurfaceGetBytesPerRow(_iosurface) into:IOSurfaceGetBaseAddress(_iosurface)];
+    uint32_t seed = 0;
+    IOSurfaceUnlock(_iosurface, 0, &seed);
+    _seenSeed = seed;
+    _gpuDirty = NO;
+    if (!ok)
+        NSLog(@"Metal: the texture cannot be read back into its IOSurface");
 }
 
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format
@@ -301,14 +350,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (void)dealloc
 {
-    if (_surfaceTexture) {
-        RevenantMetalDevice *device = [RevenantMetalDevice shared];
-        [device acquire];
-        if (_framebuffer)
-            glDeleteFramebuffers(1, &_framebuffer);
-        CFRelease(_surfaceTexture);
-        [device relinquish];
-    } else if (!_screen && (_name || _renderbuffer)) {
+    if (_iosurface)
+        CFRelease(_iosurface);
+    if (!_screen && (_name || _renderbuffer)) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         if (_framebuffer)
@@ -333,6 +377,8 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (GLuint)name
 {
+    if (_iosurface)
+        [self revenantRefreshSurface];
     return _name;
 }
 
@@ -348,6 +394,10 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (GLuint)renderTarget
 {
+    if (_iosurface) {
+        [self revenantRefreshSurface];
+        [self revenantMarkSurfaceDirty];
+    }
     return [self framebufferAtLevel:0];
 }
 
@@ -579,6 +629,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
                             (GLsizei)region.size.width, 1, format.format, format.type,
                             (const uint8_t *)pointer + row * bytesPerRow);
     }
+    [self revenantMarkSurfaceDirty];
     [device relinquish];
     return YES;
 }
@@ -606,6 +657,13 @@ static int depthKind(MTLPixelFormat pixelFormat)
 }
 
 @end
+
+void RevenantMetalSynchroniseSurfaceTextures(void)
+{
+    for (RevenantMetalTexture *texture in [RevenantMetalSurfaceTextures allObjects])
+        [texture revenantSynchroniseSurface];
+    [RevenantMetalSurfaceTextures removeAllObjects];
+}
 
 @implementation RevenantMetalSampler {
     GLint _minFilter, _magFilter, _wrapS, _wrapT;

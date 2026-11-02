@@ -347,6 +347,13 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Measurement: `tests/IOSurface/main.c` prints the same output against the macOS framework and against this file. A probe covering half-float surfaces with a colour-space value, planar surfaces, seeds, purgeable state, lookup after use and missing keys matched the macOS framework except for the row stride and allocation size. Compiled with clang for armv7 and arm64 at `-target *-apple-ios6.0` against the iOS 26.2 SDK, with no warnings. Not run on a device.
 - Removed by: none for iOS 6. The Metal path (C50) and the layer path (C51) copy this buffer to and from the GPU and the screen; a device with shared IOSurface memory would make both copies unnecessary.
 
+### C50. An IOSurface texture is a GL texture copied from the surface and synchronised at commit
+
+- Stands in for: `-newTextureWithDescriptor:iosurface:plane:`, which binds the surface's memory to the GPU. The surface is a CPU buffer on iOS 6 (C49), which CoreVideo cannot bind, so the texture is an ordinary GL texture filled from the surface's bytes (`src/Metal/RevenantMetalTexture.m`).
+- Gaps: the texture is a copy. It is uploaded when it is created and again whenever the surface's seed changes, which happens on each write unlock. Rendering into it, or blitting into it, marks it dirty; a committed command buffer then reads each dirty texture back into the surface with `glReadPixels`, once per commit rather than per draw, and clears the mark. A CPU write without lock and unlock is not seen. A CPU write that lands while the GPU has unsynchronised rendering keeps the GPU result, and logs it. Only 8-bit RGBA and BGRA, 2D, one level and one plane are supported, as before.
+- Measurement: all 81 `src/Metal/*.m` files compile for armv7 and arm64 with iOS 6.0 and the target's flags; the existing Metal host test `binary_archive_test` passes (23 checks). The surface path has not run against GL ES: there is no device or emulator run of it yet, and the host has no GL ES context.
+- Removed by: none for iOS 6. The layer path (C51) reads the surface's bytes after the commit that rendered into it.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
