@@ -1,6 +1,7 @@
 import Foundation
 
 private let nwFramingInputLimit = 1 << 20
+private let nwMessageLengthLimit = 65_536
 
 public final class NWConnection: @unchecked Sendable {
     public enum State: Equatable, CustomDebugStringConvertible {
@@ -54,6 +55,7 @@ public final class NWConnection: @unchecked Sendable {
     private struct PendingReceive {
         let minimumIncompleteLength: Int
         let maximumLength: Int
+        let isMessage: Bool
         let completion: (Data?, ContentContext?, Bool, NWError?) -> Void
     }
 
@@ -78,7 +80,7 @@ public final class NWConnection: @unchecked Sendable {
     private var acceptedDescriptor: Int32 = -1
     private var framer: NWProtocolFramer.Instance?
     private var framerImplementation: (any NWProtocolFramerImplementation)?
-    private var framedInput: [Data] = []
+    private var framedInput: [(data: Data, isComplete: Bool)] = []
     private var framedHead = 0
     private var inboundHead = 0
     private var outboundPayload = Data()
@@ -172,7 +174,15 @@ public final class NWConnection: @unchecked Sendable {
 
     public func receive(minimumIncompleteLength: Int, maximumLength: Int, completion: @escaping (Data?, ContentContext?, Bool, NWError?) -> Void) {
         perform {
-            self.receives.append(PendingReceive(minimumIncompleteLength: minimumIncompleteLength, maximumLength: maximumLength, completion: completion))
+            self.receives.append(PendingReceive(minimumIncompleteLength: minimumIncompleteLength, maximumLength: maximumLength, isMessage: false, completion: completion))
+            self.updateSources()
+            self.deliverReceives()
+        }
+    }
+
+    public func receiveMessage(completion: @escaping (Data?, ContentContext?, Bool, NWError?) -> Void) {
+        perform {
+            self.receives.append(PendingReceive(minimumIncompleteLength: nwMessageLengthLimit, maximumLength: nwMessageLengthLimit, isMessage: true, completion: completion))
             self.updateSources()
             self.deliverReceives()
         }
@@ -528,7 +538,17 @@ public final class NWConnection: @unchecked Sendable {
 
     private func deliverReceive(_ data: Data?, complete: Bool, error: NWError?) {
         let pending = receives.removeFirst()
-        pending.completion(data, .defaultStream, complete, error)
+        pending.completion(data, context(for: pending), complete, error)
+    }
+
+    private func context(for pending: PendingReceive) -> ContentContext {
+        guard pending.isMessage else {
+            return .defaultStream
+        }
+        if let implementation = framerImplementation {
+            return ContentContext(identifier: type(of: implementation).label)
+        }
+        return ContentContext(identifier: "socket")
     }
 
     private func fail(_ error: NWError) {
@@ -622,10 +642,10 @@ public final class NWConnection: @unchecked Sendable {
                     framedHead = 0
                 }
                 let pending = receives.removeFirst()
-                pending.completion(message, .defaultStream, false, nil)
+                pending.completion(message.data, context(for: pending), message.isComplete, nil)
             } else if endOfStream {
                 let pending = receives.removeFirst()
-                pending.completion(nil, .defaultStream, true, nil)
+                pending.completion(nil, context(for: pending), true, nil)
             } else {
                 break
             }
@@ -682,7 +702,7 @@ extension NWConnection: NWFramingChannel {
     }
 
     func framingDeliver(_ data: Data, isComplete: Bool) {
-        framedInput.append(data)
+        framedInput.append((data: data, isComplete: isComplete))
     }
 
     func framingWrite(_ data: Data) {

@@ -21,7 +21,7 @@ public enum NWError: Error, Equatable, CustomDebugStringConvertible {
     }
 }
 
-public struct NWParameters: Sendable {
+public final class NWParameters: @unchecked Sendable {
     enum Transport: Sendable {
         case tcp
         case udp
@@ -40,7 +40,11 @@ public struct NWParameters: Sendable {
         self.tlsOptions = nil
     }
 
-    public init(tls: NWProtocolTLS.Options?, tcp: NWProtocolTCP.Options) {
+    public convenience init() {
+        self.init(transport: .tcp)
+    }
+
+    public init(tls: NWProtocolTLS.Options?, tcp: NWProtocolTCP.Options = NWProtocolTCP.Options()) {
         self.transport = .tcp
         self.tcpOptions = tcp
         self.tlsOptions = tls

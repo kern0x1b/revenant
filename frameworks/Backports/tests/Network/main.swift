@@ -173,8 +173,8 @@ func udpExchange() {
     connection.start(queue: queue)
     print(ready.wait(timeout: .now() + wait) == .success ? "udp reached ready" : "udp never ready")
     connection.send(content: Data("ping".utf8), completion: .contentProcessed { _ in })
-    connection.receive(minimumIncompleteLength: 1, maximumLength: 64) { data, _, complete, error in
-        print("udp received \(String(data: data ?? Data(), encoding: .utf8) ?? "nil") complete \(complete) error \(error == nil)")
+    connection.receiveMessage { data, context, complete, error in
+        print("udp received \(String(data: data ?? Data(), encoding: .utf8) ?? "nil") context \(contextName(context)) complete \(complete) error \(error == nil)")
         received.signal()
     }
     print(received.wait(timeout: .now() + wait) == .success ? "udp receive returned" : "udp receive timed out")
@@ -256,6 +256,7 @@ func tcpOptionDefaults() {
     options.keepaliveCount = 2
     options.keepaliveInterval = 5
     let parameters = NWParameters(tls: nil, tcp: options)
+    parameters.preferNoProxies = true
     print("tcp parameters preferNoProxies \(parameters.preferNoProxies)")
 }
 
@@ -366,7 +367,7 @@ func framedExchange() {
     let clientReceived = DispatchSemaphore(value: 0)
     var serverText = "none"
     var clientText = "none"
-    var parameters = NWParameters.tcp
+    let parameters = NWParameters.tcp
     parameters.defaultProtocolStack.applicationProtocols.insert(NWProtocolFramer.Options(definition: LengthPrefixFramer.definition), at: 0)
     guard let listener = try? NWListener(using: parameters, on: 0) else {
         print("framed listener could not start")
@@ -408,6 +409,72 @@ func framedExchange() {
     listener.cancel()
 }
 
+func contextName(_ context: NWConnection.ContentContext?) -> String {
+    context?.identifier ?? "nil"
+}
+
+func framedMessageExchange() {
+    let ready = DispatchSemaphore(value: 0)
+    let serverDone = DispatchSemaphore(value: 0)
+    let clientDone = DispatchSemaphore(value: 0)
+    var serverTexts: [String] = []
+    var serverContexts: [String] = []
+    var clientText = "none"
+    var clientContext = "none"
+    var clientComplete = false
+    let parameters = NWParameters.tcp
+    parameters.defaultProtocolStack.applicationProtocols.insert(NWProtocolFramer.Options(definition: LengthPrefixFramer.definition), at: 0)
+    guard let listener = try? NWListener(using: parameters, on: 0) else {
+        print("framed message listener could not start")
+        return
+    }
+    listener.stateUpdateHandler = { state in
+        if state == .ready {
+            ready.signal()
+        }
+    }
+    func receiveNext(_ connection: NWConnection) {
+        connection.receiveMessage { data, context, _, _ in
+            serverTexts.append(String(data: data ?? Data(), encoding: .utf8) ?? "nil")
+            serverContexts.append(contextName(context))
+            if serverTexts.count < 2 {
+                receiveNext(connection)
+                return
+            }
+            connection.send(content: Data("framed message ack".utf8), completion: .contentProcessed { _ in
+                serverDone.signal()
+            })
+        }
+    }
+    listener.newConnectionHandler = { connection in
+        connection.start(queue: queue)
+        receiveNext(connection)
+    }
+    listener.start(queue: queue)
+    _ = ready.wait(timeout: .now() + wait)
+    guard let port = listener.port else {
+        print("framed message listener has no port")
+        return
+    }
+    let client = NWConnection(host: "127.0.0.1", port: port, using: parameters)
+    client.start(queue: queue)
+    client.send(content: Data("first framed".utf8), completion: .contentProcessed { _ in })
+    client.send(content: Data("second framed".utf8), completion: .contentProcessed { _ in })
+    client.receiveMessage { data, context, complete, _ in
+        clientText = String(data: data ?? Data(), encoding: .utf8) ?? "nil"
+        clientContext = contextName(context)
+        clientComplete = complete
+        clientDone.signal()
+    }
+    print(clientDone.wait(timeout: .now() + wait) == .success ? "framed message client received a message" : "framed message reply timed out")
+    _ = serverDone.wait(timeout: .now() + wait)
+    queue.sync {
+        print("framed message server received \(serverTexts) contexts \(serverContexts) client received \(clientText) context \(clientContext) complete \(clientComplete)")
+    }
+    client.cancel()
+    listener.cancel()
+}
+
 tcpExchange()
 udpExchange()
 refusedConnection()
@@ -416,3 +483,4 @@ endpoints()
 tcpOptionDefaults()
 listenerExchange()
 framedExchange()
+framedMessageExchange()
