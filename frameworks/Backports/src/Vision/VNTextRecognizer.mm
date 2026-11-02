@@ -82,7 +82,7 @@ static BOOL revenant_text_installed(NSString *root, NSString *language, BOOL fas
 
 NSString *RevenantVisionTextModelRoot(void)
 {
-    return @"/usr/share/revenant/tessdata";
+    return @"/var/lib/revenant/tessdata";
 }
 
 NSArray *RevenantVisionTextLanguages(NSString *root, NSUInteger revision, BOOL fast)
