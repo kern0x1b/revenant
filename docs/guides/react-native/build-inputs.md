@@ -18,10 +18,15 @@ application's checkout, which is read only. Options:
   `expo-pods` come before `expo-core`, whose Swift header imports them.
 - `--build DIR` names the output folder, `--app DIR` the application (default `build/ref/paseo`), `--react-native DIR` a
   `react-native` source tree in place of the revenant package.
-- `--real p,q` lists the Expo packages built as real modules. The Expo inputs without it use the stubs.
+- `--real p,q` replaces the default Expo packages with the named ones, on top of the base the spike always builds: the parity
+  mode described below.
 
-The spike builds its Expo packages from one list, `RN_EXPO_REAL`. `expo-pods`, `expo-src` and `expo-core` take the same list
-through `--real`, so the full run is:
+The Expo inputs (`expo-pods`, `expo-src`, `expo-core`) take one list of packages, in two modes:
+
+- Without `--real`, the packages are `expo` and the Expo SDK packages that `frameworks/ReactNative/src/coverage.json` marks
+  `real` or `partial` and that have native code. `expo-modules-core` is left out, because `expo-core` builds it. Stubs, missing
+  packages and js-only packages are not in the list. This is the default: 18 packages at the time of writing.
+- With `--real`, the list is the spike's configuration (`RN_EXPO_REAL`) on top of its base. The parity comparison below uses it:
 
 ```sh
 ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua make <project> --real expo-audio,expo-camera,expo-clipboard,expo-document-picker,expo-file-system,expo-font,expo-haptics,expo-image,expo-image-manipulator,expo-image-picker,expo-router,expo-sharing,expo-splash-screen,expo-sqlite,expo-symbols
@@ -62,9 +67,9 @@ The comparison exits with an error when an input differs, and prints `same (N en
 | `rn-headers` | Made from the podspec rules. Identical to the spike: 761 entries, including the Swift header of keyboard. The curated `react.modulemap` list (109 names) is data in `tools/data/expo-core-react-headers.txt`, not derived from a rule. |
 | `lib-headers` | Made. Identical to the spike (64 entries). |
 | `expo-jsi` | Made. Identical to the spike (6 entries) once the private cache is rewritten to the shared cache: `libcxx.rsp` names the store the build used. |
-| `expo-pods` | Made with the real list above. Identical to the spike (43 entries). |
-| `expo-core` | Made. `swift-header`, the module maps, `include/ExpoModulesCore` and `react.modulemap` are identical to the spike. `flags.rsp` names the `react-native` root as the store package, where the spike names the application's copy in `node_modules`. `ExpoModulesProvider.swift` and `bridging.h` follow the `--real` list (the stubs and the real modules, as the spike's `on_load` writes them); the spike's copies on disk predate that list. Every other entry is identical. |
-| `expo-src` | Made from the same real list. The spike's folder on disk has three files and no copies of the `expo-file-system` sources, while the spike's `on_load` stages `FileSystemDownload.swift`, `FileSystemFileHandle.swift` and `FileSystemModule.swift` as copies whenever `expo-file-system` is real (`EXPO_REWRITE`). The tool makes them too: they are the only differences, and the other three entries are identical. |
+| `expo-pods` | Made. Identical to the spike (43 entries) in the parity mode (`--real`); the default mode makes the pods of the coverage list. |
+| `expo-core` | Made. `swift-header`, the module maps, `include/ExpoModulesCore` and `react.modulemap` are identical to the spike. `flags.rsp` names the `react-native` root as the store package, where the spike names the application's copy in `node_modules`. `ExpoModulesProvider.swift` and `bridging.h` follow the packages of the mode (the stubs and the real modules, as the spike's `on_load` writes them); the spike's copies on disk predate its list. Every other entry is identical. |
+| `expo-src` | Made in both modes; `expo-file-system` is `partial` in the coverage, so both lists include it. The spike's folder on disk has three files and no copies of the `expo-file-system` sources, while the spike's `on_load` stages `FileSystemDownload.swift`, `FileSystemFileHandle.swift` and `FileSystemModule.swift` as copies whenever `expo-file-system` is real (`EXPO_REWRITE`). The tool makes them too: in the parity comparison they are the only differences, and the other three entries are identical. The default mode leaves out the sources of the stubs (document picker, image picker, SQLite). |
 | `nitro` | Made. `flags.rsp` names the `react-native` root as the store package, where the spike names the application's copy in `node_modules`. Otherwise identical. |
 | `unistyles` | Made, including `swift-header`, which is identical to the spike. `flags.rsp` names the `react-native` root as the store package, where the spike names the application's copy in `node_modules`. The two copies differ (`ReactCommon/jsc/JSCRuntime.cpp`), so this stays a difference. |
 | `keyboard` | Made, including `react_native_keyboard_controller-Swift.h`. Identical to the spike (5 entries). `prefix.h` carries the React imports that the Swift header needs and the spike got from the React clang module. |

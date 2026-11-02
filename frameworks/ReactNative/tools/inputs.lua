@@ -4,8 +4,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
            the application's node_modules: codegen (the application's codegen), rn-codegen (its component specs), rn-src (the
            react-native package with all its patches). <project> is the folder of the host; it holds ref/paseo, the application,
            or a link to it. The inputs are: codegen, rn-codegen, rn-headers, lib-headers, expo-core, expo-jsi, expo-pods, expo-src,
-           nitro, unistyles, keyboard, screens, app-assets. --only makes the named ones; --real names the Expo packages that
-           are built from their own sources (RN_EXPO_REAL in the spike).
+           nitro, unistyles, keyboard, screens, app-assets. --only makes the named ones. The Expo inputs take the packages that
+           coverage.json marks real or partial; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
   compare  checks each input of <built> against <reference>: the same file names, the same link targets and the same SHA-256
            of every file, after the absolute path of <built> is read as the path of <reference>. It prints every difference
            and exits 1 when there is one.]]
@@ -279,14 +279,32 @@ function write_lines(file, lines)
     io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
 
-function expo_packages(options)
-    local packages = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
-    for _, package in ipairs(string.split(options.real or "", ",", {plain = true})) do
-        if package ~= "" then
-            table.insert(packages, package)
+local EXPO_CORE_PACKAGE = "expo-modules-core"
+
+local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
+
+function covered_packages()
+    local data = json.decode(io.readfile(path.join(checkout(), "frameworks", "ReactNative", "src", "coverage.json")))
+    local packages = {"expo"}
+    for _, row in ipairs(data.rows) do
+        if row.group == "sdk" and row.native and (row.status == "real" or row.status == "partial") and row.id:startswith("expo-") and row.id ~= EXPO_CORE_PACKAGE then
+            table.insert(packages, row.id)
         end
     end
     return packages
+end
+
+function expo_packages(options)
+    if options.real then
+        local packages = table.clone(EXPO_PARITY_BASE)
+        for _, package in ipairs(string.split(options.real, ",", {plain = true})) do
+            if package ~= "" then
+                table.insert(packages, package)
+            end
+        end
+        return packages
+    end
+    return covered_packages()
 end
 
 function expo_dir(ctx, package)
@@ -705,10 +723,8 @@ end
 
 function expo_real(ctx)
     local real = {}
-    for _, package in ipairs(string.split(ctx.options.real or "", ",", {plain = true})) do
-        if package ~= "" then
-            real[package] = true
-        end
+    for _, package in ipairs(expo_packages(ctx.options)) do
+        real[package] = true
     end
     return real
 end

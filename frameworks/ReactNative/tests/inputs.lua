@@ -3,6 +3,7 @@ local plain_replace, normalize, podspec_public_headers = tool.plain_replace, too
 local make_rn_codegen, selected, renderer_platform_dirs, compare = tool.make_rn_codegen, tool.selected, tool.renderer_platform_dirs, tool.compare
 local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
+local expo_packages, expo_real = tool.expo_packages, tool.expo_real
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -126,6 +127,20 @@ local splash = splash_options({plugins = {"expo-router", {"expo-splash-screen", 
 check("splash_options reads the expo-splash-screen plugin", splash.image == "./logo.png" and splash.imageWidth == 200)
 
 check("splash_options refuses an application without the plugin", fails(function () splash_options({plugins = {"expo-router"}}) end))
+
+local defaults = expo_packages({})
+check("the default Expo packages are the real and partial ones of coverage.json", table.contains(defaults, "expo")
+    and table.contains(defaults, "expo-camera") and table.contains(defaults, "expo-file-system") and table.contains(defaults, "expo-splash-screen"), table.concat(defaults, ","))
+
+check("the default Expo packages leave out stubs, missing and js-only packages, and the core", not table.contains(defaults, "expo-audio")
+    and not table.contains(defaults, "expo-image") and not table.contains(defaults, "expo-router") and not table.contains(defaults, "expo-modules-core"), table.concat(defaults, ","))
+
+local parity = expo_packages({real = "expo-audio,expo-image"})
+check("--real replaces the default with the parity list on top of the base", table.contains(parity, "expo-audio") and table.contains(parity, "expo-image")
+    and table.contains(parity, "expo-asset") and not table.contains(parity, "expo-camera"), table.concat(parity, ","))
+
+check("expo_real marks the packages that the mode builds as real", expo_real({options = {}})["expo-camera"] and not expo_real({options = {}})["expo-audio"]
+    and expo_real({options = {real = "expo-audio"}})["expo-audio"])
 
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
