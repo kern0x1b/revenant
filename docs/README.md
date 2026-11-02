@@ -165,6 +165,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [What runs](reference/react-native/coverage.md) | React Native and the Expo SDK on iOS 6.1.3, module by module |
 | [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
+| [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
 
 ## WebKit
 
