@@ -12,6 +12,7 @@ add_requires("revenant@libcxx", {alias = "libcxx"})
 add_requires("revenant@micro-ecc", {alias = "micro-ecc"})
 add_requires("revenant@swift 6.4.0", {alias = "swift", host = true, system = false})
 add_requires("revenant@swiftui", {alias = "swiftui"})
+add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
 
 local LOCALIZED_STRING = "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }"
 
@@ -320,7 +321,7 @@ overlay("swiftWeatherKit", "WeatherKit", {})
 
 overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {"MobileCoreServices"}})
 
-overlay("swiftCryptoKit", "CryptoKit", {})
+overlay("swiftCryptoKit", "CryptoKit", {packages = {"swift-crypto"}})
 
 overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = "RevenantTLS", stub = "network_stub"})
 

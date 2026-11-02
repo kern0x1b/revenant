@@ -1,6 +1,6 @@
 package("cryptokit")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
-    set_description("The CryptoKit framework of iOS 13 for SHA-2 digests, HMAC, symmetric keys and AES-GCM, as one Swift module and dylib a port writes `import CryptoKit` for, over CommonCrypto with AES-GCM composed in software, built against the revenant@swift-runtime a port carries")
+    set_description("The CryptoKit module of the iOS 26.2 SDK as one Swift module and dylib a port writes `import CryptoKit` for: swift-crypto's Crypto module re-exported, with the nested names the SDK declares and swift-crypto does not, built against the revenant@swift-runtime and revenant@swift-crypto a port carries. Secure Enclave types are not covered: the device class has no Secure Enclave")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
@@ -10,13 +10,14 @@ package("cryptokit")
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
+        package:add("deps", "revenant@swift-crypto", {alias = "swift-crypto"})
         package:add("links", "swiftCryptoKit")
     end)
 
     on_install("iphoneos", function (package)
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
         import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
-            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"swiftCryptoKit"}, modules = true})
+            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"swiftCryptoKit"}, modules = true, minimum = "6.1.3"})
     end)
 
     on_test(function (package)
