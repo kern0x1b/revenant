@@ -4,3 +4,4 @@ if os.getenv("RN_DEPS_REPO") then
 end
 
 includes("src/core")
+includes("tests")
