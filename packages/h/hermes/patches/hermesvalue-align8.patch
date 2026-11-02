@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@localhost>
+Subject: [PATCH] Align HermesValueBase to 8 bytes
+
+On armv7 iOS the clang datalayout gives 64-bit integers a 4-byte ABI alignment, so
+alignof(uint64_t) is 4 while sizeof(uint64_t) is 8. HermesValueBase, the 64-bit NaN-boxed
+HermesValue of HERMESVM_HEAP_HV_64, then has a 4-byte alignment, and JSObject::numOverlapSlots
+and JSObject::directPropsOffset, which count direct property slots from alignof(GCSmallHermesValue)
+and divide by sizeof, assume the two are equal. A field of a derived class (ArrayImpl::indexedStorage_)
+then lands inside a direct slot: the GC metadata reports the overlap, and in a release build a
+stored null pointer clears the low word of a property, leaving an object tag with a null payload.
+The first call through such a value dereferences address 0 in Interpreter::handleCallSlowPath.
+
+Aligning the value to 8 bytes makes the alignment the size, as it is on the 64-bit targets the
+layout was written for.
+---
+diff --git a/include/hermes/VM/sh_legacy_value.h b/include/hermes/VM/sh_legacy_value.h
+index 41796129..1db7ebb8 100644
+--- a/include/hermes/VM/sh_legacy_value.h
++++ b/include/hermes/VM/sh_legacy_value.h
+@@ -122,7 +122,7 @@ extern "C" {
+ /// Updated: Feb 21, 2025
+ #define HERMESVALUE_VERSION 2
+ 
+-struct HermesValueBase {
++struct __attribute__((aligned(8))) HermesValueBase {
+   union {
+     // 64 raw bits stored and reinterpreted as necessary.
+     uint64_t raw;

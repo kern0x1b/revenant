@@ -9,6 +9,7 @@
 #import <stdio.h>
 #import <unistd.h>
 #import "RNHostAppDelegate.h"
+#import "RNHostFiles.h"
 
 static void RNHostFatalSignal(int signal, siginfo_t *info, void *context)
 {
@@ -55,8 +56,8 @@ static void RNHostFatalSignal(int signal, siginfo_t *info, void *context)
 
 int main(int argc, char *argv[])
 {
-    if (access("/var/tmp/rnhost.log.on", F_OK) == 0) {
-        freopen("/var/tmp/rnhost.log", "w", stderr);
+    if (RNHostAppFileExists(@"rnhost.log.on")) {
+        freopen(RNHostRunPath(@"rnhost.log").fileSystemRepresentation, "w", stderr);
         setvbuf(stderr, NULL, _IONBF, 0);
         const int fatal[] = {SIGSEGV, SIGBUS, SIGILL, SIGABRT, SIGTRAP};
         for (unsigned index = 0; index < sizeof(fatal) / sizeof(fatal[0]); index++) {

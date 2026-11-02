@@ -103,6 +103,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Surface](reference/swiftui/surface.md) | the interface walker and the surface files the gaps are read from |
 | [Host probes](reference/swiftui/host.md) | values measured from Apple's framework on the host |
 | [Builder typechecks](reference/swiftui/typechecks.md) | the snippets the Table and TabContent builders must accept or refuse |
+| [Maps](reference/swiftui/maps.md) | the map types and modifiers `expo-maps` takes, and what each does on iOS 6 |
+| [Why MapKit](explanation/swiftui/maps.md) | why `Map` is an `MKMapView`, and how content, camera, style and selection reach it |
 | [`TextSelection`](reference/swiftui/text-selection.md) | the one range the release can carry |
 | [Third-party](reference/swiftui/third-party.md) | the code this module is derived from, and its terms, and the trademarks |
 
@@ -113,6 +115,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
+| [GLSL ES 3.00 to 1.00 translator](reference/react-native/glsl-translator.md) | the glslang and SPIRV-Cross prototype on three.js's ES 3.00 programs: what translates on the host, the armv7 build, and what is still unmeasured |
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
@@ -164,10 +167,20 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | Document | About |
 | --- | --- |
 | [What runs](reference/react-native/coverage.md) | React Native and the Expo SDK on iOS 6.1.3, module by module |
+| [Patches against the spike](reference/react-native/patches.md) | the spike's patch copies compared file by file with the packages' |
 | [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
+| [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
+| [Driving a host by touch](guides/react-native/touch.md) | the touch injector and its command line for a phone without XCUITest |
+| [The icon and launch image](guides/react-native/app-assets.md) | making them from the application's Expo configuration |
 | [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
+| [Hermes](reference/react-native/hermes.md) | the Hermes 250829098.0.17 package for armv7 iOS 6.0: its pin, flags and measurements on the iPhone 4S |
+| [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
+| [Using Hermes as the engine](guides/react-native/use-hermes.md) | selecting Hermes beside JSC, the bytecode bundle, the Promise check and the first-run numbers on the iPhone 4S |
+| [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
 | [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with the spike |
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
+| [Installing the host](guides/react-native/install-the-host.md) | staging a built host and putting it on the claimed phone under its own bundle id |
+| [Missing components and stubs](guides/react-native/loud-components.md) | the loud provider for Fabric components and the log line of a stub that is called |
 
 ## WebKit
 

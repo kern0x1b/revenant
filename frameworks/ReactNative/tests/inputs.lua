@@ -2,6 +2,7 @@ local tool = import("inputs", {rootdir = path.join(os.scriptdir(), "..", "tools"
 local plain_replace, normalize, podspec_public_headers = tool.plain_replace, tool.normalize, tool.podspec_public_headers
 local make_rn_codegen, selected, renderer_platform_dirs, compare = tool.make_rn_codegen, tool.selected, tool.renderer_platform_dirs, tool.compare
 local byte_less = tool.byte_less
+local xml_text, splash_options = tool.xml_text, tool.splash_options
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -118,6 +119,13 @@ check("compare refuses a changed file", fails(function () compare(left, right, {
 io.writefile(path.join(left, "rn-codegen", "Spec.h"), "path " .. left .. "\n")
 io.writefile(path.join(right, "rn-codegen", "Spec.h"), "path " .. right .. "\n")
 check("compare reads the built path as the reference path", not fails(function () compare(left, right, {only = "rn-codegen"}) end))
+
+check("xml_text escapes the characters that break a plist string", xml_text("A & <B> C") == "A &amp; &lt;B&gt; C")
+
+local splash = splash_options({plugins = {"expo-router", {"expo-splash-screen", {image = "./logo.png", imageWidth = 200}}}})
+check("splash_options reads the expo-splash-screen plugin", splash.image == "./logo.png" and splash.imageWidth == 200)
+
+check("splash_options refuses an application without the plugin", fails(function () splash_options({plugins = {"expo-router"}}) end))
 
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)

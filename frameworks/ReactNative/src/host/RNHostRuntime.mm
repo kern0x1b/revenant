@@ -1,5 +1,6 @@
 #import "RNHostRuntime.h"
 #import "RNHostHostFunctions.h"
+#import "RNHostRunFolder.h"
 
 #include <JSCRuntime.h>
 #include <jsi/jsi.h>
@@ -11,8 +12,6 @@
 #include <memory>
 
 NSString *const RNHostErrorDomain = @"RNHost";
-
-static NSString *const RNHostConfigPath = @"/var/tmp/rnhost.conf";
 
 namespace {
 
@@ -44,12 +43,18 @@ double RNHostResidentMegabytes()
 
 NSDictionary<NSString *, NSString *> *RNHostConfig()
 {
-    NSString *text = [NSString stringWithContentsOfFile:RNHostConfigPath encoding:NSUTF8StringEncoding error:nil];
+    NSString *text = RNHostReadAppText(@"rnhost.conf");
     NSMutableDictionary<NSString *, NSString *> *config = [NSMutableDictionary dictionary];
     for (NSString *line in [text componentsSeparatedByString:@"\n"]) {
         NSRange equals = [line rangeOfString:@"="];
         if (equals.location == NSNotFound) continue;
-        config[[line substringToIndex:equals.location]] = [line substringFromIndex:equals.location + 1];
+        NSString *key = [line substringToIndex:equals.location];
+        BOOL allowed = [@[@"module", @"bundle", @"engine"] containsObject:key] || [key hasPrefix:@"JSC_"];
+        if (!allowed) {
+            NSLog(@"rn-host: refusing config key %@: only module, bundle, engine and JSC_* are read", key);
+            continue;
+        }
+        config[key] = [line substringFromIndex:equals.location + 1];
     }
     return config;
 }
@@ -60,7 +65,11 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
 
 + (NSString *)configuredBundlePath
 {
-    return RNHostConfig()[@"bundle"];
+    NSString *bundle = RNHostConfig()[@"bundle"];
+    if (!bundle) return nil;
+    NSString *path = RNHostTrustedAppFile(bundle);
+    if (!path) NSLog(@"rn-host: configured bundle %@ is not loaded: it must be a root-owned file inside the application", bundle);
+    return path;
 }
 
 + (double)residentMegabytes
@@ -90,9 +99,9 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
 
     NSLog(@"rn-host: rss at start %.1f MB", RNHostResidentMegabytes());
     uint64_t t0 = mach_absolute_time();
-    NSData *data = [NSData dataWithContentsOfFile:path];
+    NSData *data = RNHostReadAppFile(path, NULL);
     if (!data) {
-        NSString *message = [NSString stringWithFormat:@"cannot read bundle at %@", path];
+        NSString *message = [NSString stringWithFormat:@"cannot read bundle at %@ (missing, or not a root-owned file inside the application)", path];
         NSLog(@"rn-host: %@", message);
         if (error) *error = RNHostError(message);
         return nil;

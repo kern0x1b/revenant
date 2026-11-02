@@ -91,8 +91,8 @@ end
 
 local function lua(script, arguments, output)
     local file = io.open(output, "w")
-    local status = os.execv(os.programfile(), table.join({"l", path.join(os.scriptdir(), script)}, arguments),
-                            {stdout = file, try = true})
+    local status = os.execv(os.programfile(), table.join({"l", "-P", os.projectdir(), path.join(os.scriptdir(), script)}, arguments),
+                            {stdout = file, curdir = os.projectdir(), try = true})
     file:close()
     return status
 end
@@ -149,7 +149,7 @@ local function surftool()
     local build = tree.run("surface", "build")
     local envs = {XMAKE_CONFIGDIR = tree.run("surface", "config")}
     for _, argv in ipairs({{"f", "-P", project, "-o", build, "-y"}, {"build", "-P", project}}) do
-        os.execv(os.programfile(), argv, {envs = envs})
+        os.execv(os.programfile(), argv, {envs = envs, curdir = os.projectdir()})
     end
     local tool = path.join(build, "macosx", "arm64", "release", "surftool")
     if not os.isfile(tool) then

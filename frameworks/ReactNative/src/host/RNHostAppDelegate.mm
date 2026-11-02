@@ -1,6 +1,7 @@
 #import "RNHostAppDelegate.h"
 #import <objc/runtime.h>
 #import "RNHostRuntime.h"
+#import "RNHostFiles.h"
 #import "RNHostViewController.h"
 
 #import <RCTDefaultReactNativeFactoryDelegate.h>
@@ -64,7 +65,7 @@ static bool RNHostSampleStack(RNHostJSContext ctx, void *)
             }
             if (++RNHostSampleCount % 100 == 0) {
                 NSDictionary *out = @{@"samples": @(RNHostSampleCount), @"stacks": RNHostSamples, @"self": RNHostSelfSamples};
-                [[NSJSONSerialization dataWithJSONObject:out options:0 error:NULL] writeToFile:@"/var/tmp/rnhost.jsprof.out" atomically:YES];
+                [[NSJSONSerialization dataWithJSONObject:out options:0 error:NULL] writeToFile:RNHostRunPath(@"rnhost.jsprof.out") atomically:YES];
             }
         }
         free(bytes);
@@ -75,7 +76,7 @@ static bool RNHostSampleStack(RNHostJSContext ctx, void *)
 
 static void RNHostInstallSampler(void)
 {
-    NSString *flag = [NSString stringWithContentsOfFile:@"/var/tmp/rnhost.jsprof" encoding:NSUTF8StringEncoding error:NULL];
+    NSString *flag = RNHostReadAppText(@"rnhost.jsprof");
     if (!flag) {
         return;
     }

@@ -30,8 +30,9 @@ package("swift-syntax")
     }
 
     on_load("@macosx", function (package)
-        package:add("envs", {REVENANT_SWIFT_SYNTAX = package:installdir("lib"),
-                             REVENANT_HOST_SWIFTC = os.getenv("SWIFT_EXEC") or "/usr/bin/swiftc"})
+        package:setenv("REVENANT_SWIFT_SYNTAX", package:installdir("lib"))
+        package:setenv("REVENANT_SWIFT_SYNTAX_SHIMS", package:installdir("share"))
+        package:setenv("REVENANT_HOST_SWIFTC", os.getenv("SWIFT_EXEC") or "/usr/bin/swiftc")
     end)
 
     on_install("@macosx", function (package)
@@ -77,9 +78,8 @@ package("swift-syntax")
             objects_copied = objects_copied + 1
         end
         local copied = modules_copied + objects_copied
-        for _, dir in ipairs({"SwiftSyntax", "_SwiftSyntaxCShims", "SwiftSyntaxPrivate"}) do
-            local resources = path.join(products, "..", dir)
-            if os.isdir(resources) then os.cp(resources, path.join(package:installdir("share"), dir)) end
+        for _, dir in ipairs({"_SwiftSyntaxCShims", "_SwiftLibraryPluginProviderCShims"}) do
+            os.cp(path.join(source, "Sources", dir, "include"), path.join(package:installdir("share"), dir))
         end
         if copied == 0 then
             raise("%s built, and %s holds no .swiftmodule and no object: the products moved", package:name(), products)

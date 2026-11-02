@@ -13,6 +13,17 @@ function failures(opt)
         table.insert(found, "a folder with test or Example in its path must be refused")
     end
 
+    local highlight = isolate.pod_c_sources("react-native-enriched-markdown")
+    if #highlight ~= 4 or highlight[2] ~= "cpp/highlight/vendor/tree-sitter/src/lib.c" or #isolate.pod_c_sources("react-native-worklets") ~= 0 then
+        table.insert(found, "enriched-markdown compiles md4c, the tree-sitter lib.c and each grammar's parser and scanner, and no other pod has C sources")
+    end
+    if not isolate.pod_source_allowed("ios/utils/ENRMTextHitTest.m") or not isolate.pod_source_allowed("cpp/md4c/md4c.c") or not isolate.pod_source_allowed("cpp/test-data/x.c") then
+        table.insert(found, "a source whose name or folder merely contains test (ENRMTextHitTest.m, test-data) must stay a pod source")
+    end
+    if isolate.pod_source_allowed("ios/tests/Foo.m") or isolate.pod_source_allowed("test/x.m") or isolate.pod_source_allowed("ios/FooTests.mm") or isolate.pod_source_allowed("ios/Example/x.m") then
+        table.insert(found, "a tests folder, a Tests file and an Example folder must not be pod sources")
+    end
+
     if isolate.host_bundle_id("/a/iso-Hermes_2", nil) ~= "org.revenant.rnhost.iso-hermes-2" or isolate.host_bundle_id("/a/x", "my.id") ~= "my.id" then
         table.insert(found, "a copy's bundle id must come from --bundle-id or from its folder's name")
     end
@@ -73,5 +84,35 @@ function failures(opt)
         table.insert(found, "the copy must report the files it rewrote")
     end
     os.vrunv("rm", {"-rf", base})
+
+    local rnbase = os.iorunv("mktemp", {"-d"}):trim()
+    local rncache = path.join(rnbase, "cache")
+    local install = path.join(rncache, "xmake-global", ".xmake", "packages", "r", "react-native", "0.86.3", "a0b6.g2", "src", "react-native")
+    io.writefile(path.join(install, "package.json"), "{}")
+    io.writefile(path.join(install, "ReactCommon", "jsi", "jsi", "jsi.h"), "// jsi\n")
+    io.writefile(path.join(install, "React", "Fabric", "Mounting", "ComponentViews", "TextInput", "RCTTextInputUtils.mm"), 'initWithString:attributedString.string ?: @""')
+    io.writefile(path.join(install, "Libraries", "Image", "RCTImageUtils.mm"), "CGSize s = {(CGFloat)width.doubleValue};")
+    io.writefile(path.join(install, "ReactCommon", "jsc", "JSCRuntime.cpp"), "extern \"C\" JSGlobalContextRef RNJscRuntimeContext(void);")
+    local rncopy = path.join(rnbase, "copy")
+    os.mkdir(path.join(rncopy, "build"))
+    os.vrunv("ln", {"-s", path.join(rnbase, "a0b6.g1", "src", "react-native"), path.join(rncopy, "build", "rn-src")})
+    if isolate.link_react_native(rncopy, rncache) ~= install or os.iorunv("readlink", {path.join(rncopy, "build", "rn-src")}):trim() ~= install then
+        table.insert(found, "a dangling react-native link must be replaced by the install with all patches")
+    end
+    if not os.isfile(path.join(rncopy, "build", "rn-src", "ReactCommon", "jsi", "jsi", "jsi.h")) then
+        table.insert(found, "the replaced react-native link must reach the sources")
+    end
+    local refused = false
+    try {
+        function () isolate.link_react_native(rncopy, path.join(rnbase, "empty")) end,
+        catch { function () refused = true end }
+    }
+    if not refused then
+        table.insert(found, "a cache without an install with all patches must be refused")
+    end
+    if isolate.command_status({"-c", "exit 0"}, {}) ~= 0 or isolate.command_status({"-c", "exit 3"}, {}) ~= 1 then
+        table.insert(found, "a command's status is 0 when it succeeds and 1 when it fails, never nil")
+    end
+    os.vrunv("rm", {"-rf", rnbase})
     return found
 end

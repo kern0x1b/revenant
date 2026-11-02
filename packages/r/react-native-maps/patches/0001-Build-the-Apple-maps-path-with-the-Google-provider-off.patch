@@ -1,0 +1,6 @@
+diff --git a/ios/AirMaps/RNMapsDefines.h b/ios/AirMaps/RNMapsDefines.h
+--- a/ios/AirMaps/RNMapsDefines.h
++++ b/ios/AirMaps/RNMapsDefines.h
+@@ -1 +1 @@
+-#define HAVE_GOOGLE_MAPS 1
++#define HAVE_GOOGLE_MAPS 0
