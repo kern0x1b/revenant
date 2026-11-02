@@ -13,6 +13,10 @@ function failures(opt)
         table.insert(found, "a folder with test or Example in its path must be refused")
     end
 
+    if isolate.host_bundle_id("/a/iso-Hermes_2", nil) ~= "org.revenant.rnhost.iso-hermes-2" or isolate.host_bundle_id("/a/x", "my.id") ~= "my.id" then
+        table.insert(found, "a copy's bundle id must come from --bundle-id or from its folder's name")
+    end
+
     local files = {
         ["/c/old/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm"] = "x",
         ["/c/old/Libraries/Image/RCTImageUtils.mm"] = "y",
