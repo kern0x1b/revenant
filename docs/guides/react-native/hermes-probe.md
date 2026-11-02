@@ -50,13 +50,13 @@ LDID_BINARY -S stage/lib/libc++abi.1.dylib
 The device is one shared resource. Claim it under your own name, copy, run, and release it.
 
 ```sh
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device --minutes=15 claim
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l frameworks/SwiftUI/tools/device.lua copy stage/hermes_probe /var/tmp/hermes-probe/hermes_probe
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l frameworks/SwiftUI/tools/device.lua copy stage/bench.hbc /var/tmp/hermes-probe/bench.hbc
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++.1.dylib /var/tmp/hermes-probe/lib/libc++.1.dylib
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++abi.1.dylib /var/tmp/hermes-probe/lib/libc++abi.1.dylib
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device run 'chmod 755 /var/tmp/hermes-probe/hermes_probe; cd /var/tmp/hermes-probe; ./hermes_probe bench.hbc; echo EXIT=$?'
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device release
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . --minutes=15 claim
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/hermes_probe /var/tmp/hermes-probe/hermes_probe
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/bench.hbc /var/tmp/hermes-probe/bench.hbc
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++.1.dylib /var/tmp/hermes-probe/lib/libc++.1.dylib
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++abi.1.dylib /var/tmp/hermes-probe/lib/libc++abi.1.dylib
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . run 'chmod 755 /var/tmp/hermes-probe/hermes_probe; cd /var/tmp/hermes-probe; ./hermes_probe bench.hbc; echo EXIT=$?'
+REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . release
 ```
 
 The output has one `PROBE` line with the sizes and the timings, and one with the benchmark result. A crash prints `PROBE signal`, the faulting address and the frames, which map to the probe's symbols through the image slide the line also prints.
