@@ -558,7 +558,7 @@ function make_keyboard(ctx)
                 module = "react_native_keyboard_controller",
                 packages = {"swift-runtime", "libcxx"},
                 sources = os.files(path.join(kc, "**.swift")),
-                flags = {"-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(out, "flags.rsp"), "-import-objc-header", path.join(out, "Bridge.h"), "-emit-objc-header-path", header}
+                flags = {"-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(out, "flags.rsp"), "-import-objc-header", path.join(out, "Bridge.h"), "-emit-clang-header-min-access", "public", "-emit-objc-header-path", header}
             }
         }
     })
