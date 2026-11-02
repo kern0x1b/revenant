@@ -3,4 +3,4 @@ if os.getenv("RN_DEPS_REPO") then
     add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
 end
 
-includes("targets/core.lua")
+includes("src/core")

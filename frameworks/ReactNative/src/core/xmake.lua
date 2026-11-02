@@ -1,5 +1,5 @@
 local inputs = os.getenv("RN_INPUTS") or path.join(os.projectdir(), "build")
-local src = path.normalize(path.join(os.scriptdir(), "..", "src"))
+local src = path.normalize(path.join(os.scriptdir(), ".."))
 local rn = os.getenv("RN_SRC") or path.join(inputs, "rn-src")
 local rc = path.join(rn, "ReactCommon")
 local generated = path.join(inputs, "codegen", "build", "generated", "ios")
