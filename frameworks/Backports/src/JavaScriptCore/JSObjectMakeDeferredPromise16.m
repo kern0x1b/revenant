@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "JSInternal.h"
 
-JSObjectRef JSObjectMakeDeferredPromise(JSContextRef context, JSObjectRef *resolve, JSObjectRef *reject, JSValueRef *exception)
+JSObjectRef BACKPORT_IMPL(JSObjectMakeDeferredPromise)(JSContextRef context, JSObjectRef *resolve, JSObjectRef *reject, JSValueRef *exception)
 {
     if (resolve)
         *resolve = NULL;

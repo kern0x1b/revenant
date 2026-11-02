@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
@@ -84,7 +85,7 @@ static CGColorSpaceRef revenant_space(const vImage_CGImageFormat *format)
     return CGColorSpaceCreateDeviceRGB();
 }
 
-vImage_Error vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageFormat *format, const CGFloat *backgroundColor, CGImageRef image, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageBuffer_InitWithCGImage)(vImage_Buffer *buf, vImage_CGImageFormat *format, const CGFloat *backgroundColor, CGImageRef image, vImage_Flags flags)
 {
     if (!format || !image)
         return kvImageNullPointerArgument;
@@ -175,7 +176,7 @@ static void revenant_release_data(void *info, const void *data, size_t size)
     free(release);
 }
 
-CGImageRef vImageCreateCGImageFromBuffer(const vImage_Buffer *buf, const vImage_CGImageFormat *format, void (*callback)(void *userData, void *buf_data), void *userData, vImage_Flags flags, vImage_Error *error)
+CGImageRef BACKPORT_IMPL(vImageCreateCGImageFromBuffer)(const vImage_Buffer *buf, const vImage_CGImageFormat *format, void (*callback)(void *userData, void *buf_data), void *userData, vImage_Flags flags, vImage_Error *error)
 {
     vImage_Error status = kvImageNoError;
     CGImageRef image = NULL;

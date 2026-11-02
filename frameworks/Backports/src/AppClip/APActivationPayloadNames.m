@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <AppClip/APActivationPayload.h>
 
-NSErrorDomain const APActivationPayloadErrorDomain = @"APActivationPayloadErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(APActivationPayloadErrorDomain) = @"APActivationPayloadErrorDomain";

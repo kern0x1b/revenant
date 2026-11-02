@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantSparseComplex26.h"
 #include "RevenantSparseBLAS.h"
 #include "RevenantSparseComplex.h"
 
 
-sparse_matrix_float_complex sparse_matrix_create_float_complex(sparse_dimension M, sparse_dimension N)
+sparse_matrix_float_complex BACKPORT_IMPL(sparse_matrix_create_float_complex)(sparse_dimension M, sparse_dimension N)
 {
     void *matrix = NULL;
     if (RevenantSparseMake(&matrix, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, sizeof(struct sparse_m_float_complex), M, N, 0, 0,
@@ -14,7 +15,7 @@ sparse_matrix_float_complex sparse_matrix_create_float_complex(sparse_dimension 
     return (sparse_matrix_float_complex)matrix;
 }
 
-sparse_matrix_double_complex sparse_matrix_create_double_complex(sparse_dimension M, sparse_dimension N)
+sparse_matrix_double_complex BACKPORT_IMPL(sparse_matrix_create_double_complex)(sparse_dimension M, sparse_dimension N)
 {
     void *matrix = NULL;
     if (RevenantSparseMake(&matrix, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, sizeof(struct sparse_m_double_complex), M, N, 0, 0,
@@ -24,7 +25,7 @@ sparse_matrix_double_complex sparse_matrix_create_double_complex(sparse_dimensio
     return (sparse_matrix_double_complex)matrix;
 }
 
-sparse_matrix_float_complex sparse_matrix_block_create_float_complex(sparse_dimension Mb, sparse_dimension Nb,
+sparse_matrix_float_complex BACKPORT_IMPL(sparse_matrix_block_create_float_complex)(sparse_dimension Mb, sparse_dimension Nb,
                                                                     sparse_dimension k, sparse_dimension l)
 {
     sparse_dimension *heights = RevenantSparseRepeated(k, (sparse_index)Mb);
@@ -38,7 +39,7 @@ sparse_matrix_float_complex sparse_matrix_block_create_float_complex(sparse_dime
     return made == SPARSE_SUCCESS ? (sparse_matrix_float_complex)matrix : NULL;
 }
 
-sparse_matrix_double_complex sparse_matrix_block_create_double_complex(sparse_dimension Mb, sparse_dimension Nb,
+sparse_matrix_double_complex BACKPORT_IMPL(sparse_matrix_block_create_double_complex)(sparse_dimension Mb, sparse_dimension Nb,
                                                                       sparse_dimension k, sparse_dimension l)
 {
     sparse_dimension *heights = RevenantSparseRepeated(k, (sparse_index)Mb);
@@ -52,7 +53,7 @@ sparse_matrix_double_complex sparse_matrix_block_create_double_complex(sparse_di
     return made == SPARSE_SUCCESS ? (sparse_matrix_double_complex)matrix : NULL;
 }
 
-sparse_matrix_float_complex sparse_matrix_variable_block_create_float_complex(sparse_dimension Mb, sparse_dimension Nb,
+sparse_matrix_float_complex BACKPORT_IMPL(sparse_matrix_variable_block_create_float_complex)(sparse_dimension Mb, sparse_dimension Nb,
                                                                              const sparse_dimension *K,
                                                                              const sparse_dimension *L)
 {
@@ -64,7 +65,7 @@ sparse_matrix_float_complex sparse_matrix_variable_block_create_float_complex(sp
     return (sparse_matrix_float_complex)matrix;
 }
 
-sparse_matrix_double_complex sparse_matrix_variable_block_create_double_complex(sparse_dimension Mb, sparse_dimension Nb,
+sparse_matrix_double_complex BACKPORT_IMPL(sparse_matrix_variable_block_create_double_complex)(sparse_dimension Mb, sparse_dimension Nb,
                                                                                const sparse_dimension *K,
                                                                                const sparse_dimension *L)
 {
@@ -76,21 +77,21 @@ sparse_matrix_double_complex sparse_matrix_variable_block_create_double_complex(
     return (sparse_matrix_double_complex)matrix;
 }
 
-sparse_status sparse_insert_entry_float_complex(sparse_matrix_float_complex A, float _Complex val, sparse_index i,
+sparse_status BACKPORT_IMPL(sparse_insert_entry_float_complex)(sparse_matrix_float_complex A, float _Complex val, sparse_index i,
                                                 sparse_index j)
 {
     return RevenantSparsePutEntryComplex(A, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, __real__ val, __imag__ val, i, j,
                                        sizeof(float _Complex));
 }
 
-sparse_status sparse_insert_entry_double_complex(sparse_matrix_double_complex A, double _Complex val, sparse_index i,
+sparse_status BACKPORT_IMPL(sparse_insert_entry_double_complex)(sparse_matrix_double_complex A, double _Complex val, sparse_index i,
                                                  sparse_index j)
 {
     return RevenantSparsePutEntryComplex(A, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, __real__ val, __imag__ val, i, j,
                                        sizeof(double _Complex));
 }
 
-sparse_status sparse_insert_entries_float_complex(sparse_matrix_float_complex A, sparse_dimension N,
+sparse_status BACKPORT_IMPL(sparse_insert_entries_float_complex)(sparse_matrix_float_complex A, sparse_dimension N,
                                                   const float _Complex *__restrict val,
                                                   const sparse_index *__restrict indx,
                                                   const sparse_index *__restrict jndx)
@@ -108,7 +109,7 @@ sparse_status sparse_insert_entries_float_complex(sparse_matrix_float_complex A,
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_entries_double_complex(sparse_matrix_double_complex A, sparse_dimension N,
+sparse_status BACKPORT_IMPL(sparse_insert_entries_double_complex)(sparse_matrix_double_complex A, sparse_dimension N,
                                                    const double _Complex *__restrict val,
                                                    const sparse_index *__restrict indx,
                                                    const sparse_index *__restrict jndx)
@@ -126,7 +127,7 @@ sparse_status sparse_insert_entries_double_complex(sparse_matrix_double_complex 
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_col_float_complex(sparse_matrix_float_complex A, sparse_index j, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_insert_col_float_complex)(sparse_matrix_float_complex A, sparse_index j, sparse_dimension nz,
                                               const float _Complex *__restrict val,
                                               const sparse_index *__restrict indx)
 {
@@ -143,7 +144,7 @@ sparse_status sparse_insert_col_float_complex(sparse_matrix_float_complex A, spa
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_col_double_complex(sparse_matrix_double_complex A, sparse_index j, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_insert_col_double_complex)(sparse_matrix_double_complex A, sparse_index j, sparse_dimension nz,
                                                 const double _Complex *__restrict val,
                                                 const sparse_index *__restrict indx)
 {
@@ -160,7 +161,7 @@ sparse_status sparse_insert_col_double_complex(sparse_matrix_double_complex A, s
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_row_float_complex(sparse_matrix_float_complex A, sparse_index i, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_insert_row_float_complex)(sparse_matrix_float_complex A, sparse_index i, sparse_dimension nz,
                                               const float _Complex *__restrict val,
                                               const sparse_index *__restrict jndx)
 {
@@ -177,7 +178,7 @@ sparse_status sparse_insert_row_float_complex(sparse_matrix_float_complex A, spa
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_row_double_complex(sparse_matrix_double_complex A, sparse_index i, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_insert_row_double_complex)(sparse_matrix_double_complex A, sparse_index i, sparse_dimension nz,
                                                 const double _Complex *__restrict val,
                                                 const sparse_index *__restrict jndx)
 {
@@ -231,7 +232,7 @@ static sparse_status RevenantSparsePutBlockComplex(void *matrix, uint32_t magic,
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_insert_block_float_complex(sparse_matrix_float_complex A, const float _Complex *__restrict val,
+sparse_status BACKPORT_IMPL(sparse_insert_block_float_complex)(sparse_matrix_float_complex A, const float _Complex *__restrict val,
                                                 sparse_dimension row_stride, sparse_dimension col_stride,
                                                 sparse_index bi, sparse_index bj)
 {
@@ -239,7 +240,7 @@ sparse_status sparse_insert_block_float_complex(sparse_matrix_float_complex A, c
                                        sizeof(float _Complex));
 }
 
-sparse_status sparse_insert_block_double_complex(sparse_matrix_double_complex A, const double _Complex *__restrict val,
+sparse_status BACKPORT_IMPL(sparse_insert_block_double_complex)(sparse_matrix_double_complex A, const double _Complex *__restrict val,
                                                  sparse_dimension row_stride, sparse_dimension col_stride,
                                                  sparse_index bi, sparse_index bj)
 {
@@ -279,7 +280,7 @@ static long RevenantSparseExtractRowComplex(void *matrix, uint32_t magic, sparse
     return (long)written;
 }
 
-sparse_status sparse_extract_sparse_row_float_complex(sparse_matrix_float_complex A, sparse_index row,
+sparse_status BACKPORT_IMPL(sparse_extract_sparse_row_float_complex)(sparse_matrix_float_complex A, sparse_index row,
                                                       sparse_index column_start, sparse_index *column_end,
                                                       sparse_dimension nz, float _Complex *__restrict val,
                                                       sparse_index *__restrict jndx)
@@ -288,7 +289,7 @@ sparse_status sparse_extract_sparse_row_float_complex(sparse_matrix_float_comple
                                                         column_end, nz, val, jndx, sizeof(float _Complex));
 }
 
-sparse_status sparse_extract_sparse_row_double_complex(sparse_matrix_double_complex A, sparse_index row,
+sparse_status BACKPORT_IMPL(sparse_extract_sparse_row_double_complex)(sparse_matrix_double_complex A, sparse_index row,
                                                        sparse_index column_start, sparse_index *column_end,
                                                        sparse_dimension nz, double _Complex *__restrict val,
                                                        sparse_index *__restrict jndx)
@@ -340,7 +341,7 @@ static long RevenantSparseExtractColumnComplex(void *matrix, uint32_t magic, spa
     return (long)written;
 }
 
-sparse_status sparse_extract_sparse_column_float_complex(sparse_matrix_float_complex A, sparse_index column,
+sparse_status BACKPORT_IMPL(sparse_extract_sparse_column_float_complex)(sparse_matrix_float_complex A, sparse_index column,
                                                          sparse_index row_start, sparse_index *row_end,
                                                          sparse_dimension nz, float _Complex *__restrict val,
                                                          sparse_index *__restrict indx)
@@ -349,7 +350,7 @@ sparse_status sparse_extract_sparse_column_float_complex(sparse_matrix_float_com
                                                           row_end, nz, val, indx, sizeof(float _Complex));
 }
 
-sparse_status sparse_extract_sparse_column_double_complex(sparse_matrix_double_complex A, sparse_index column,
+sparse_status BACKPORT_IMPL(sparse_extract_sparse_column_double_complex)(sparse_matrix_double_complex A, sparse_index column,
                                                           sparse_index row_start, sparse_index *row_end,
                                                           sparse_dimension nz, double _Complex *__restrict val,
                                                           sparse_index *__restrict indx)
@@ -389,7 +390,7 @@ static sparse_status RevenantSparseExtractBlockComplex(void *matrix, uint32_t ma
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_extract_block_float_complex(sparse_matrix_float_complex A, sparse_index bi, sparse_index bj,
+sparse_status BACKPORT_IMPL(sparse_extract_block_float_complex)(sparse_matrix_float_complex A, sparse_index bi, sparse_index bj,
                                                  sparse_dimension row_stride, sparse_dimension col_stride,
                                                  float _Complex *__restrict val)
 {
@@ -397,7 +398,7 @@ sparse_status sparse_extract_block_float_complex(sparse_matrix_float_complex A, 
                                            sizeof(float _Complex));
 }
 
-sparse_status sparse_extract_block_double_complex(sparse_matrix_double_complex A, sparse_index bi, sparse_index bj,
+sparse_status BACKPORT_IMPL(sparse_extract_block_double_complex)(sparse_matrix_double_complex A, sparse_index bi, sparse_index bj,
                                                   sparse_dimension row_stride, sparse_dimension col_stride,
                                                   double _Complex *__restrict val)
 {
@@ -421,7 +422,7 @@ static RevenantComplex RevenantSparseInnerDenseComplex(sparse_dimension nz, cons
     return sum;
 }
 
-float _Complex sparse_inner_product_dense_float_complex(sparse_dimension nz, const float _Complex *__restrict x,
+float _Complex BACKPORT_IMPL(sparse_inner_product_dense_float_complex)(sparse_dimension nz, const float _Complex *__restrict x,
                                                         const sparse_index *__restrict indx,
                                                         const float _Complex *__restrict y, sparse_stride incy)
 {
@@ -429,7 +430,7 @@ float _Complex sparse_inner_product_dense_float_complex(sparse_dimension nz, con
     return RevenantComplexAsFloat(sum);
 }
 
-double _Complex sparse_inner_product_dense_double_complex(sparse_dimension nz, const double _Complex *__restrict x,
+double _Complex BACKPORT_IMPL(sparse_inner_product_dense_double_complex)(sparse_dimension nz, const double _Complex *__restrict x,
                                                           const sparse_index *__restrict indx,
                                                           const double _Complex *__restrict y, sparse_stride incy)
 {
@@ -463,7 +464,7 @@ static RevenantComplex RevenantSparseInnerSparseComplex(sparse_dimension nzx, sp
     return sum;
 }
 
-float _Complex sparse_inner_product_sparse_float_complex(sparse_dimension nzx, sparse_dimension nzy,
+float _Complex BACKPORT_IMPL(sparse_inner_product_sparse_float_complex)(sparse_dimension nzx, sparse_dimension nzy,
                                                           const float _Complex *__restrict x,
                                                           const sparse_index *__restrict indx,
                                                           const float _Complex *__restrict y,
@@ -473,7 +474,7 @@ float _Complex sparse_inner_product_sparse_float_complex(sparse_dimension nzx, s
     return RevenantComplexAsFloat(sum);
 }
 
-double _Complex sparse_inner_product_sparse_double_complex(sparse_dimension nzx, sparse_dimension nzy,
+double _Complex BACKPORT_IMPL(sparse_inner_product_sparse_double_complex)(sparse_dimension nzx, sparse_dimension nzy,
                                                             const double _Complex *__restrict x,
                                                             const sparse_index *__restrict indx,
                                                             const double _Complex *__restrict y,
@@ -501,7 +502,7 @@ static void RevenantSparseAddScaleComplex(sparse_dimension nz, RevenantComplex a
     }
 }
 
-void sparse_vector_add_with_scale_dense_float_complex(sparse_dimension nz, float _Complex alpha,
+void BACKPORT_IMPL(sparse_vector_add_with_scale_dense_float_complex)(sparse_dimension nz, float _Complex alpha,
                                                       const float _Complex *__restrict x,
                                                       const sparse_index *__restrict indx,
                                                       float _Complex *__restrict y, sparse_stride incy)
@@ -510,7 +511,7 @@ void sparse_vector_add_with_scale_dense_float_complex(sparse_dimension nz, float
                                 sizeof(float _Complex));
 }
 
-void sparse_vector_add_with_scale_dense_double_complex(sparse_dimension nz, double _Complex alpha,
+void BACKPORT_IMPL(sparse_vector_add_with_scale_dense_double_complex)(sparse_dimension nz, double _Complex alpha,
                                                        const double _Complex *__restrict x,
                                                        const sparse_index *__restrict indx,
                                                        double _Complex *__restrict y, sparse_stride incy)
@@ -556,13 +557,13 @@ static double RevenantSparseVectorNormComplex(sparse_dimension nz, const void *x
     return largest;
 }
 
-float sparse_vector_norm_float_complex(sparse_dimension nz, const float _Complex *__restrict x,
+float BACKPORT_IMPL(sparse_vector_norm_float_complex)(sparse_dimension nz, const float _Complex *__restrict x,
                                        const sparse_index *__restrict indx, sparse_norm norm)
 {
     return (float)RevenantSparseVectorNormComplex(nz, x, indx, norm, sizeof(float _Complex));
 }
 
-double sparse_vector_norm_double_complex(sparse_dimension nz, const double _Complex *__restrict x,
+double BACKPORT_IMPL(sparse_vector_norm_double_complex)(sparse_dimension nz, const double _Complex *__restrict x,
                                          const sparse_index *__restrict indx, sparse_norm norm)
 {
     return RevenantSparseVectorNormComplex(nz, x, indx, norm, sizeof(double _Complex));
@@ -584,13 +585,13 @@ static long RevenantSparseVectorNonzeroComplex(sparse_dimension N, const void *x
     return count;
 }
 
-long sparse_get_vector_nonzero_count_float_complex(sparse_dimension N, const float _Complex *__restrict x,
+long BACKPORT_IMPL(sparse_get_vector_nonzero_count_float_complex)(sparse_dimension N, const float _Complex *__restrict x,
                                                    sparse_stride incx)
 {
     return RevenantSparseVectorNonzeroComplex(N, x, incx, sizeof(float _Complex));
 }
 
-long sparse_get_vector_nonzero_count_double_complex(sparse_dimension N, const double _Complex *__restrict x,
+long BACKPORT_IMPL(sparse_get_vector_nonzero_count_double_complex)(sparse_dimension N, const double _Complex *__restrict x,
                                                     sparse_stride incx)
 {
     return RevenantSparseVectorNonzeroComplex(N, x, incx, sizeof(double _Complex));
@@ -620,13 +621,13 @@ static long RevenantSparsePackComplex(sparse_dimension N, sparse_dimension nz, c
     return written;
 }
 
-long sparse_pack_vector_float_complex(sparse_dimension N, sparse_dimension nz, const float _Complex *__restrict x,
+long BACKPORT_IMPL(sparse_pack_vector_float_complex)(sparse_dimension N, sparse_dimension nz, const float _Complex *__restrict x,
                                       sparse_stride incx, float _Complex *__restrict y, sparse_index *__restrict indy)
 {
     return RevenantSparsePackComplex(N, nz, x, incx, y, indy, sizeof(float _Complex));
 }
 
-long sparse_pack_vector_double_complex(sparse_dimension N, sparse_dimension nz, const double _Complex *__restrict x,
+long BACKPORT_IMPL(sparse_pack_vector_double_complex)(sparse_dimension N, sparse_dimension nz, const double _Complex *__restrict x,
                                        sparse_stride incx, double _Complex *__restrict y, sparse_index *__restrict indy)
 {
     return RevenantSparsePackComplex(N, nz, x, incx, y, indy, sizeof(double _Complex));
@@ -650,14 +651,14 @@ static void RevenantSparseUnpackComplex(sparse_dimension N, sparse_dimension nz,
     }
 }
 
-void sparse_unpack_vector_float_complex(sparse_dimension N, sparse_dimension nz, bool zero,
+void BACKPORT_IMPL(sparse_unpack_vector_float_complex)(sparse_dimension N, sparse_dimension nz, bool zero,
                                         const float _Complex *__restrict x, const sparse_index *__restrict indx,
                                         float _Complex *__restrict y, sparse_stride incy)
 {
     RevenantSparseUnpackComplex(N, nz, zero, x, indx, y, incy, sizeof(float _Complex));
 }
 
-void sparse_unpack_vector_double_complex(sparse_dimension N, sparse_dimension nz, bool zero,
+void BACKPORT_IMPL(sparse_unpack_vector_double_complex)(sparse_dimension N, sparse_dimension nz, bool zero,
                                          const double _Complex *__restrict x, const sparse_index *__restrict indx,
                                          double _Complex *__restrict y, sparse_stride incy)
 {
@@ -713,7 +714,7 @@ static sparse_status RevenantSparseVectorProductComplex(void *matrix, uint32_t m
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_matrix_vector_product_dense_float_complex(enum CBLAS_TRANSPOSE transa, float _Complex alpha,
+sparse_status BACKPORT_IMPL(sparse_matrix_vector_product_dense_float_complex)(enum CBLAS_TRANSPOSE transa, float _Complex alpha,
                                                                sparse_matrix_float_complex A,
                                                                const float _Complex *__restrict x, sparse_stride incx,
                                                                float _Complex *__restrict y, sparse_stride incy)
@@ -726,7 +727,7 @@ sparse_status sparse_matrix_vector_product_dense_float_complex(enum CBLAS_TRANSP
                                            sizeof(float _Complex));
 }
 
-sparse_status sparse_matrix_vector_product_dense_double_complex(enum CBLAS_TRANSPOSE transa, double _Complex alpha,
+sparse_status BACKPORT_IMPL(sparse_matrix_vector_product_dense_double_complex)(enum CBLAS_TRANSPOSE transa, double _Complex alpha,
                                                                 sparse_matrix_double_complex A,
                                                                 const double _Complex *__restrict x, sparse_stride incx,
                                                                 double _Complex *__restrict y, sparse_stride incy)
@@ -825,7 +826,7 @@ static sparse_status RevenantSparseTriangularComplex(void *matrix, uint32_t magi
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_vector_triangular_solve_dense_float_complex(enum CBLAS_TRANSPOSE transt, float _Complex alpha,
+sparse_status BACKPORT_IMPL(sparse_vector_triangular_solve_dense_float_complex)(enum CBLAS_TRANSPOSE transt, float _Complex alpha,
                                                                  sparse_matrix_float_complex T,
                                                                  float _Complex *__restrict x, sparse_stride incx)
 {
@@ -837,7 +838,7 @@ sparse_status sparse_vector_triangular_solve_dense_float_complex(enum CBLAS_TRAN
                                         sizeof(float _Complex));
 }
 
-sparse_status sparse_vector_triangular_solve_dense_double_complex(enum CBLAS_TRANSPOSE transt, double _Complex alpha,
+sparse_status BACKPORT_IMPL(sparse_vector_triangular_solve_dense_double_complex)(enum CBLAS_TRANSPOSE transt, double _Complex alpha,
                                                                   sparse_matrix_double_complex T,
                                                                   double _Complex *__restrict x, sparse_stride incx)
 {
@@ -849,7 +850,7 @@ sparse_status sparse_vector_triangular_solve_dense_double_complex(enum CBLAS_TRA
                                         sizeof(double _Complex));
 }
 
-sparse_status sparse_matrix_triangular_solve_dense_float_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transt,
+sparse_status BACKPORT_IMPL(sparse_matrix_triangular_solve_dense_float_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transt,
                                                                  sparse_dimension nrhs, float _Complex alpha,
                                                                  sparse_matrix_float_complex T,
                                                                  float _Complex *__restrict B, sparse_dimension ldb)
@@ -874,7 +875,7 @@ sparse_status sparse_matrix_triangular_solve_dense_float_complex(enum CBLAS_ORDE
                                         nrhs, sizeof(float _Complex));
 }
 
-sparse_status sparse_matrix_triangular_solve_dense_double_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transt,
+sparse_status BACKPORT_IMPL(sparse_matrix_triangular_solve_dense_double_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transt,
                                                                   sparse_dimension nrhs, double _Complex alpha,
                                                                   sparse_matrix_double_complex T,
                                                                   double _Complex *__restrict B, sparse_dimension ldb)
@@ -949,7 +950,7 @@ static sparse_status RevenantSparseProductDenseComplex(void *matrix, uint32_t ma
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_matrix_product_dense_float_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_dense_float_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
                                                         sparse_dimension n, float _Complex alpha,
                                                         sparse_matrix_float_complex A,
                                                         const float _Complex *__restrict B, sparse_dimension ldb,
@@ -963,7 +964,7 @@ sparse_status sparse_matrix_product_dense_float_complex(enum CBLAS_ORDER order, 
                                            sizeof(float _Complex));
 }
 
-sparse_status sparse_matrix_product_dense_double_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_dense_double_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
                                                          sparse_dimension n, double _Complex alpha,
                                                          sparse_matrix_double_complex A,
                                                          const double _Complex *__restrict B, sparse_dimension ldb,
@@ -1013,7 +1014,7 @@ static sparse_status RevenantSparseOuterComplex(sparse_dimension M, sparse_dimen
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_outer_product_dense_float_complex(sparse_dimension M, sparse_dimension N, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_outer_product_dense_float_complex)(sparse_dimension M, sparse_dimension N, sparse_dimension nz,
                                                        float _Complex alpha, const float _Complex *__restrict x,
                                                        sparse_stride incx, const float _Complex *__restrict y,
                                                        const sparse_index *__restrict indy,
@@ -1024,7 +1025,7 @@ sparse_status sparse_outer_product_dense_float_complex(sparse_dimension M, spars
                                     sizeof(struct sparse_m_float_complex));
 }
 
-sparse_status sparse_outer_product_dense_double_complex(sparse_dimension M, sparse_dimension N, sparse_dimension nz,
+sparse_status BACKPORT_IMPL(sparse_outer_product_dense_double_complex)(sparse_dimension M, sparse_dimension N, sparse_dimension nz,
                                                         double _Complex alpha, const double _Complex *__restrict x,
                                                         sparse_stride incx, const double _Complex *__restrict y,
                                                         const sparse_index *__restrict indy,
@@ -1099,7 +1100,7 @@ static sparse_status RevenantSparseProductSparseComplex(void *A, uint32_t magicA
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_matrix_product_sparse_float_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_sparse_float_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
                                                          float _Complex alpha, sparse_matrix_float_complex A,
                                                          sparse_matrix_float_complex B, float _Complex *__restrict C,
                                                          sparse_dimension ldc)
@@ -1112,7 +1113,7 @@ sparse_status sparse_matrix_product_sparse_float_complex(enum CBLAS_ORDER order,
                                            REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, C, ldc, sizeof(float _Complex));
 }
 
-sparse_status sparse_matrix_product_sparse_double_complex(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_sparse_double_complex)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa,
                                                           double _Complex alpha, sparse_matrix_double_complex A,
                                                           sparse_matrix_double_complex B, double _Complex *__restrict C,
                                                           sparse_dimension ldc)
@@ -1125,7 +1126,7 @@ sparse_status sparse_matrix_product_sparse_double_complex(enum CBLAS_ORDER order
                                            REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, C, ldc, sizeof(double _Complex));
 }
 
-sparse_status sparse_permute_rows_float_complex(sparse_matrix_float_complex A, const sparse_index *__restrict perm)
+sparse_status BACKPORT_IMPL(sparse_permute_rows_float_complex)(sparse_matrix_float_complex A, const sparse_index *__restrict perm)
 {
     if (!RevenantSparseIsFloatComplex(A)) {
         return SPARSE_ILLEGAL_PARAMETER;
@@ -1134,7 +1135,7 @@ sparse_status sparse_permute_rows_float_complex(sparse_matrix_float_complex A, c
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_permute_rows_double_complex(sparse_matrix_double_complex A, const sparse_index *__restrict perm)
+sparse_status BACKPORT_IMPL(sparse_permute_rows_double_complex)(sparse_matrix_double_complex A, const sparse_index *__restrict perm)
 {
     if (!RevenantSparseIsDoubleComplex(A)) {
         return SPARSE_ILLEGAL_PARAMETER;
@@ -1143,7 +1144,7 @@ sparse_status sparse_permute_rows_double_complex(sparse_matrix_double_complex A,
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_permute_cols_float_complex(sparse_matrix_float_complex A, const sparse_index *__restrict perm)
+sparse_status BACKPORT_IMPL(sparse_permute_cols_float_complex)(sparse_matrix_float_complex A, const sparse_index *__restrict perm)
 {
     if (!RevenantSparseIsFloatComplex(A)) {
         return SPARSE_ILLEGAL_PARAMETER;
@@ -1152,7 +1153,7 @@ sparse_status sparse_permute_cols_float_complex(sparse_matrix_float_complex A, c
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_permute_cols_double_complex(sparse_matrix_double_complex A, const sparse_index *__restrict perm)
+sparse_status BACKPORT_IMPL(sparse_permute_cols_double_complex)(sparse_matrix_double_complex A, const sparse_index *__restrict perm)
 {
     if (!RevenantSparseIsDoubleComplex(A)) {
         return SPARSE_ILLEGAL_PARAMETER;
@@ -1218,12 +1219,12 @@ static double RevenantSparseElementwiseComplex(void *matrix, uint32_t magic, spa
     return largest;
 }
 
-float sparse_elementwise_norm_float_complex(sparse_matrix_float_complex A, sparse_norm norm)
+float BACKPORT_IMPL(sparse_elementwise_norm_float_complex)(sparse_matrix_float_complex A, sparse_norm norm)
 {
     return (float)RevenantSparseElementwiseComplex(A, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, norm, sizeof(float _Complex));
 }
 
-double sparse_elementwise_norm_double_complex(sparse_matrix_double_complex A, sparse_norm norm)
+double BACKPORT_IMPL(sparse_elementwise_norm_double_complex)(sparse_matrix_double_complex A, sparse_norm norm)
 {
     return RevenantSparseElementwiseComplex(A, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, sizeof(double _Complex));
 }
@@ -1355,12 +1356,12 @@ static double RevenantSparseOperatorComplex(void *matrix, uint32_t magic, sparse
     }
 }
 
-float sparse_operator_norm_float_complex(sparse_matrix_float_complex A, sparse_norm norm)
+float BACKPORT_IMPL(sparse_operator_norm_float_complex)(sparse_matrix_float_complex A, sparse_norm norm)
 {
     return (float)RevenantSparseOperatorComplex(A, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, norm, sizeof(float _Complex));
 }
 
-double sparse_operator_norm_double_complex(sparse_matrix_double_complex A, sparse_norm norm)
+double BACKPORT_IMPL(sparse_operator_norm_double_complex)(sparse_matrix_double_complex A, sparse_norm norm)
 {
     return RevenantSparseOperatorComplex(A, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, sizeof(double _Complex));
 }
@@ -1385,13 +1386,13 @@ static RevenantComplex RevenantSparseTraceComplex(void *matrix, uint32_t magic, 
     return sum;
 }
 
-float _Complex sparse_matrix_trace_float_complex(sparse_matrix_float_complex A, sparse_index offset)
+float _Complex BACKPORT_IMPL(sparse_matrix_trace_float_complex)(sparse_matrix_float_complex A, sparse_index offset)
 {
     RevenantComplex sum = RevenantSparseTraceComplex(A, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX, offset, sizeof(float _Complex));
     return RevenantComplexAsFloat(sum);
 }
 
-double _Complex sparse_matrix_trace_double_complex(sparse_matrix_double_complex A, sparse_index offset)
+double _Complex BACKPORT_IMPL(sparse_matrix_trace_double_complex)(sparse_matrix_double_complex A, sparse_index offset)
 {
     RevenantComplex sum = RevenantSparseTraceComplex(A, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX, offset, sizeof(double _Complex));
     return RevenantComplexAsDouble(sum);

@@ -1,15 +1,16 @@
+#include "../revenant_impl.h"
 #import "RevenantWebKit.h"
 
-NSString *const WKWebsiteDataTypeCookies = @"WKWebsiteDataTypeCookies";
-NSString *const WKWebsiteDataTypeDiskCache = @"WKWebsiteDataTypeDiskCache";
-NSString *const WKWebsiteDataTypeMemoryCache = @"WKWebsiteDataTypeMemoryCache";
-NSString *const WKWebsiteDataTypeOfflineWebApplicationCache = @"WKWebsiteDataTypeOfflineWebApplicationCache";
-NSString *const WKWebsiteDataTypeLocalStorage = @"WKWebsiteDataTypeLocalStorage";
-NSString *const WKWebsiteDataTypeSessionStorage = @"WKWebsiteDataTypeSessionStorage";
-NSString *const WKWebsiteDataTypeWebSQLDatabases = @"WKWebsiteDataTypeWebSQLDatabases";
-NSString *const WKWebsiteDataTypeIndexedDBDatabases = @"WKWebsiteDataTypeIndexedDBDatabases";
-NSString *const WKWebsiteDataTypeFetchCache = @"WKWebsiteDataTypeFetchCache";
-NSString *const WKWebsiteDataTypeServiceWorkerRegistrations = @"WKWebsiteDataTypeServiceWorkerRegistrations";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeCookies) = @"WKWebsiteDataTypeCookies";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeDiskCache) = @"WKWebsiteDataTypeDiskCache";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeMemoryCache) = @"WKWebsiteDataTypeMemoryCache";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeOfflineWebApplicationCache) = @"WKWebsiteDataTypeOfflineWebApplicationCache";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeLocalStorage) = @"WKWebsiteDataTypeLocalStorage";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeSessionStorage) = @"WKWebsiteDataTypeSessionStorage";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeWebSQLDatabases) = @"WKWebsiteDataTypeWebSQLDatabases";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeIndexedDBDatabases) = @"WKWebsiteDataTypeIndexedDBDatabases";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeFetchCache) = @"WKWebsiteDataTypeFetchCache";
+NSString *const BACKPORT_IMPL(WKWebsiteDataTypeServiceWorkerRegistrations) = @"WKWebsiteDataTypeServiceWorkerRegistrations";
 
 @implementation WKWebsiteDataStore {
     BOOL _persistent;

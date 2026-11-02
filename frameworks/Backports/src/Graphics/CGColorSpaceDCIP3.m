@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGColorSpaceDCIP3 = CFSTR("kCGColorSpaceDCIP3");
+const CFStringRef BACKPORT_IMPL(kCGColorSpaceDCIP3) = CFSTR("kCGColorSpaceDCIP3");

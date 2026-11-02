@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -44,7 +45,7 @@ static void revenant_packed12_put(uint8_t *row, vImagePixelCount column, uint16_
     triple[2] = (uint8_t)pair;
 }
 
-vImage_Error vImageConvert_12UTo16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_12UTo16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_packed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -61,7 +62,7 @@ vImage_Error vImageConvert_12UTo16U(const vImage_Buffer *src, const vImage_Buffe
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_16UTo12U(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16UTo12U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_packed_ready(src, dest, flags);
     if (ready != kvImageNoError)

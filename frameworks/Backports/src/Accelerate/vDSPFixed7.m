@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVDSPKernel.h"
 #include <math.h>
 
@@ -17,7 +18,7 @@ static unsigned long revenant_uint24(const vDSP_uint24 *value, vDSP_Stride strid
            ((unsigned long)value[at * stride].bytes[2] << 16);
 }
 
-void vDSP_vfltsm24(const vDSP_int24 *__A, vDSP_Stride __IA, const float *__B, float *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vfltsm24)(const vDSP_int24 *__A, vDSP_Stride __IA, const float *__B, float *__C, vDSP_Stride __IC,
                    vDSP_Length __N)
 {
     float scale = __B[0];
@@ -26,7 +27,7 @@ void vDSP_vfltsm24(const vDSP_int24 *__A, vDSP_Stride __IA, const float *__B, fl
     }
 }
 
-void vDSP_vfltsmu24(const vDSP_uint24 *__A, vDSP_Stride __IA, const float *__B, float *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vfltsmu24)(const vDSP_uint24 *__A, vDSP_Stride __IA, const float *__B, float *__C, vDSP_Stride __IC,
                     vDSP_Length __N)
 {
     float scale = __B[0];
@@ -35,21 +36,21 @@ void vDSP_vfltsmu24(const vDSP_uint24 *__A, vDSP_Stride __IA, const float *__B, 
     }
 }
 
-void vDSP_vflt24(const vDSP_int24 *__A, vDSP_Stride __IA, float *__C, vDSP_Stride __IC, vDSP_Length __N)
+void BACKPORT_IMPL(vDSP_vflt24)(const vDSP_int24 *__A, vDSP_Stride __IA, float *__C, vDSP_Stride __IC, vDSP_Length __N)
 {
     for (vDSP_Length n = 0; n < __N; n++) {
         __C[n * __IC] = (float)revenant_int24(__A, __IA, n);
     }
 }
 
-void vDSP_vfltu24(const vDSP_uint24 *__A, vDSP_Stride __IA, float *__C, vDSP_Stride __IC, vDSP_Length __N)
+void BACKPORT_IMPL(vDSP_vfltu24)(const vDSP_uint24 *__A, vDSP_Stride __IA, float *__C, vDSP_Stride __IC, vDSP_Length __N)
 {
     for (vDSP_Length n = 0; n < __N; n++) {
         __C[n * __IC] = (float)revenant_uint24(__A, __IA, n);
     }
 }
 
-void vDSP_vsmfix24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_int24 *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vsmfix24)(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_int24 *__C, vDSP_Stride __IC,
                    vDSP_Length __N)
 {
     float scale = __B[0];
@@ -70,7 +71,7 @@ void vDSP_vsmfix24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_in
     }
 }
 
-void vDSP_vsmfixu24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_uint24 *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vsmfixu24)(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_uint24 *__C, vDSP_Stride __IC,
                     vDSP_Length __N)
 {
     float scale = __B[0];
@@ -91,7 +92,7 @@ void vDSP_vsmfixu24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_u
     }
 }
 
-void vDSP_vaddi(const int *__A, vDSP_Stride __IA, const int *__B, vDSP_Stride __IB, int *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vaddi)(const int *__A, vDSP_Stride __IA, const int *__B, vDSP_Stride __IB, int *__C, vDSP_Stride __IC,
                 vDSP_Length __N)
 {
     for (vDSP_Length n = 0; n < __N; n++) {
@@ -99,14 +100,14 @@ void vDSP_vaddi(const int *__A, vDSP_Stride __IA, const int *__B, vDSP_Stride __
     }
 }
 
-void vDSP_zvma(const DSPSplitComplex *__A, vDSP_Stride __IA, const DSPSplitComplex *__B, vDSP_Stride __IB,
+void BACKPORT_IMPL(vDSP_zvma)(const DSPSplitComplex *__A, vDSP_Stride __IA, const DSPSplitComplex *__B, vDSP_Stride __IB,
                const DSPSplitComplex *__C, vDSP_Stride __IC, const DSPSplitComplex *__D, vDSP_Stride __ID,
                vDSP_Length __N)
 {
     revenant_vdsp_split_vma_f((DSPSplitComplex *)__D, __ID, __A, __IA, __B, __IB, __C, __IC, __N);
 }
 
-void vDSP_zvmmaa(const DSPSplitComplex *__A, vDSP_Stride __IA, const DSPSplitComplex *__B, vDSP_Stride __IB,
+void BACKPORT_IMPL(vDSP_zvmmaa)(const DSPSplitComplex *__A, vDSP_Stride __IA, const DSPSplitComplex *__B, vDSP_Stride __IB,
                  const DSPSplitComplex *__C, vDSP_Stride __IC, const DSPSplitComplex *__D, vDSP_Stride __ID,
                  const DSPSplitComplex *__E, vDSP_Stride __IE, const DSPSplitComplex *__F, vDSP_Stride __IF,
                  vDSP_Length __N)

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <MetalKit/MetalKit.h>
 #import <ModelIO/ModelIO.h>
 
@@ -53,7 +54,7 @@ MTLVertexFormat RevenantMetalFormatFromMDL(MDLVertexFormat format)
     }
 }
 
-MDLVertexDescriptor *MTKModelIOVertexDescriptorFromMetalWithError(MTLVertexDescriptor *metalDescriptor, NSError **error)
+MDLVertexDescriptor *BACKPORT_IMPL(MTKModelIOVertexDescriptorFromMetalWithError)(MTLVertexDescriptor *metalDescriptor, NSError **error)
 {
     MDLVertexDescriptor *descriptor = [[MDLVertexDescriptor alloc] init];
     for (NSUInteger index = 0; index < 31; index++) {
@@ -76,7 +77,7 @@ MDLVertexDescriptor *MTKModelIOVertexDescriptorFromMetalWithError(MTLVertexDescr
     return descriptor;
 }
 
-MTLVertexDescriptor *MTKMetalVertexDescriptorFromModelIOWithError(MDLVertexDescriptor *modelIODescriptor, NSError **error)
+MTLVertexDescriptor *BACKPORT_IMPL(MTKMetalVertexDescriptorFromModelIOWithError)(MDLVertexDescriptor *modelIODescriptor, NSError **error)
 {
     MTLVertexDescriptor *descriptor = [[MTLVertexDescriptor alloc] init];
     NSUInteger index = 0;

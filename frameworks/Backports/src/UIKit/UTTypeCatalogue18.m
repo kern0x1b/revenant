@@ -1,18 +1,19 @@
+#include "../revenant_impl.h"
 #import "RevenantUTType.h"
 
-UTType *UTTypeCSS;
+UTType *BACKPORT_IMPL(UTTypeCSS);
 
-UTType *UTTypeHEICS;
+UTType *BACKPORT_IMPL(UTTypeHEICS);
 
-UTType *UTTypeEXR;
+UTType *BACKPORT_IMPL(UTTypeEXR);
 
-UTType *UTTypeDNG;
+UTType *BACKPORT_IMPL(UTTypeDNG);
 
-UTType *UTTypeTarArchive;
+UTType *BACKPORT_IMPL(UTTypeTarArchive);
 
-UTType *UTTypeGeoJSON;
+UTType *BACKPORT_IMPL(UTTypeGeoJSON);
 
-UTType *UTTypeLinkPresentationMetadata;
+UTType *BACKPORT_IMPL(UTTypeLinkPresentationMetadata);
 
 __attribute__((constructor)) static void revenant_uttype_catalog_18(void)
 {

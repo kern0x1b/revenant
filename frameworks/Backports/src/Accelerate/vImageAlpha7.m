@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -93,30 +94,30 @@ static vImage_Error revenant_alpha16_narrow(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB16UtoARGB16U(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB16UtoARGB16U)(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
                                            const vImage_Buffer *argbDest, bool premultiply, vImage_Flags flags)
 {
     return revenant_alpha16_widen(rgbSrc, aSrc, alpha, argbDest, premultiply, revenant_alpha_rgb_to[0], 3, flags);
 }
 
-vImage_Error vImageConvert_RGB16UtoRGBA16U(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB16UtoRGBA16U)(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
                                            const vImage_Buffer *rgbaDest, bool premultiply, vImage_Flags flags)
 {
     return revenant_alpha16_widen(rgbSrc, aSrc, alpha, rgbaDest, premultiply, revenant_alpha_rgb_to[1], 3, flags);
 }
 
-vImage_Error vImageConvert_RGB16UtoBGRA16U(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB16UtoBGRA16U)(const vImage_Buffer *rgbSrc, const vImage_Buffer *aSrc, Pixel_16U alpha,
                                            const vImage_Buffer *bgraDest, bool premultiply, vImage_Flags flags)
 {
     return revenant_alpha16_widen(rgbSrc, aSrc, alpha, bgraDest, premultiply, revenant_alpha_rgb_to[2], 3, flags);
 }
 
-vImage_Error vImageConvert_RGBA16UtoRGB16U(const vImage_Buffer *rgbaSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGBA16UtoRGB16U)(const vImage_Buffer *rgbaSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
 {
     return revenant_alpha16_narrow(rgbaSrc, rgbDest, revenant_alpha_rgba_to_rgb, flags);
 }
 
-vImage_Error vImageConvert_BGRA16UtoRGB16U(const vImage_Buffer *bgraSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_BGRA16UtoRGB16U)(const vImage_Buffer *bgraSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
 {
     return revenant_alpha16_narrow(bgraSrc, rgbDest, revenant_alpha_bgra_to_rgb, flags);
 }

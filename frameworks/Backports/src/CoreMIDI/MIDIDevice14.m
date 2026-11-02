@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 
 #import "RevenantCoreMIDI.h"
 
-OSStatus MIDIDeviceNewEntity(MIDIDeviceRef device, CFStringRef name, MIDIProtocolID protocol, Boolean embedded,
+OSStatus BACKPORT_IMPL(MIDIDeviceNewEntity)(MIDIDeviceRef device, CFStringRef name, MIDIProtocolID protocol, Boolean embedded,
                              ItemCount numSourceEndpoints, ItemCount numDestinationEndpoints, MIDIEntityRef *newEntity)
 {
     *newEntity = 0;

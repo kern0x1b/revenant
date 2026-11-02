@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVAssetDownloadTaskMinimumRequiredPresentationSizeKey = @"AVAssetDownloadTaskMinimumRequiredPresentationSizeKey";
+NSString *const BACKPORT_IMPL(AVAssetDownloadTaskMinimumRequiredPresentationSizeKey) = @"AVAssetDownloadTaskMinimumRequiredPresentationSizeKey";

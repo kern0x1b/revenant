@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #include <Block.h>
 
@@ -16,7 +17,7 @@ static void revenant_call_block(CFRunLoopObserverRef observer, CFRunLoopActivity
     ((__bridge void (^)(CFRunLoopObserverRef, CFRunLoopActivity))info)(observer, activity);
 }
 
-CFRunLoopObserverRef CFRunLoopObserverCreateWithHandler(CFAllocatorRef allocator, CFOptionFlags activities, Boolean repeats, CFIndex order,
+CFRunLoopObserverRef BACKPORT_IMPL(CFRunLoopObserverCreateWithHandler)(CFAllocatorRef allocator, CFOptionFlags activities, Boolean repeats, CFIndex order,
                                                         void (^block)(CFRunLoopObserverRef observer, CFRunLoopActivity activity))
 {
     CFRunLoopObserverContext context = {0, (__bridge void *)block, revenant_retain_block, revenant_release_block, NULL};

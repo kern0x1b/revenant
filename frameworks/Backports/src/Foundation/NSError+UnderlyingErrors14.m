@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSErrorUserInfoKey const NSMultipleUnderlyingErrorsKey = @"NSMultipleUnderlyingErrorsKey";
+NSErrorUserInfoKey const BACKPORT_IMPL(NSMultipleUnderlyingErrorsKey) = @"NSMultipleUnderlyingErrorsKey";
 
 @implementation NSError (RevenantUnderlyingErrors14)
 

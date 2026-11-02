@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #define CMTIMEBASE_USE_SOURCE_TERMINOLOGY 1
 #include <CoreMedia/CoreMedia.h>
 #include <pthread.h>
@@ -24,7 +25,7 @@ static void ForgetUnowned(void)
     CFRelease(unowned);
 }
 
-__attribute__((visibility("default"))) OSStatus CMTimebaseCreateWithSourceClock(CFAllocatorRef allocator, CMClockRef sourceClock, CMTimebaseRef *timebaseOut)
+__attribute__((visibility("default"))) OSStatus BACKPORT_IMPL(CMTimebaseCreateWithSourceClock)(CFAllocatorRef allocator, CMClockRef sourceClock, CMTimebaseRef *timebaseOut)
 {
     OSStatus status = revenant_CMTimebaseCreateWithMasterClock(allocator, sourceClock, timebaseOut);
     if (status != noErr || !timebaseOut || !*timebaseOut || !sourceClock) {
@@ -40,7 +41,7 @@ __attribute__((visibility("default"))) OSStatus CMTimebaseCreateWithSourceClock(
     return status;
 }
 
-__attribute__((visibility("default"))) CMClockOrTimebaseRef CMTimebaseCopySource(CMTimebaseRef timebase)
+__attribute__((visibility("default"))) CMClockOrTimebaseRef BACKPORT_IMPL(CMTimebaseCopySource)(CMTimebaseRef timebase)
 {
     CMClockOrTimebaseRef source = NULL;
     pthread_mutex_lock(&sourcesLock);

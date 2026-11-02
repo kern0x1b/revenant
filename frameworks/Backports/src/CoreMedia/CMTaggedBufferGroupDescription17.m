@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import "RevenantCMTag26.h"
@@ -7,7 +8,7 @@
 
 #import "RevenantCMTaggedBufferGroupEntries.h"
 
-OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
+OSStatus BACKPORT_IMPL(CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup)(
     CFAllocatorRef CM_NULLABLE allocator, CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
     CMTaggedBufferGroupFormatDescriptionRef CM_NULLABLE * CM_NONNULL formatDescriptionOut)
 {
@@ -15,7 +16,7 @@ OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
         allocator, taggedBufferGroup, NULL, formatDescriptionOut);
 }
 
-Boolean CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(
+Boolean BACKPORT_IMPL(CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup)(
     CMTaggedBufferGroupFormatDescriptionRef CM_NONNULL desc,
     CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup)
 {
@@ -51,7 +52,7 @@ Boolean CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(
     return true;
 }
 
-OSStatus CMSampleBufferCreateForTaggedBufferGroup(
+OSStatus BACKPORT_IMPL(CMSampleBufferCreateForTaggedBufferGroup)(
     CFAllocatorRef CM_NULLABLE allocator, CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
     CMTime sbufPTS, CMTime sbufDuration,
     CMTaggedBufferGroupFormatDescriptionRef CM_NONNULL formatDescription,
@@ -80,7 +81,7 @@ OSStatus CMSampleBufferCreateForTaggedBufferGroup(
     return noErr;
 }
 
-CMTaggedBufferGroupRef CM_NULLABLE CMSampleBufferGetTaggedBufferGroup(CMSampleBufferRef CM_NONNULL sbuf)
+CMTaggedBufferGroupRef CM_NULLABLE BACKPORT_IMPL(CMSampleBufferGetTaggedBufferGroup)(CMSampleBufferRef CM_NONNULL sbuf)
 {
     if (!sbuf)
         return NULL;

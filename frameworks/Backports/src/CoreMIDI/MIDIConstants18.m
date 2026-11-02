@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 
-const CFStringRef kMIDIPropertyAssociatedEndpoint = CFSTR("associated endpoint");
+const CFStringRef BACKPORT_IMPL(kMIDIPropertyAssociatedEndpoint) = CFSTR("associated endpoint");
 
 NSString *const MIDICIDeviceObjectKey = @"MIDICIDeviceObjectKey";
 NSString *const MIDICIProfileObjectKey = @"MIDICIProfileObjectKey";

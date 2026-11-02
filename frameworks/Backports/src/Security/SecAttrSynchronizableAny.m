@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-const CFStringRef kSecAttrSynchronizableAny = CFSTR("syna");
+const CFStringRef BACKPORT_IMPL(kSecAttrSynchronizableAny) = CFSTR("syna");

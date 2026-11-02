@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "JSInternal.h"
 #import "../RevenantSayOnce.h"
 
@@ -7,14 +8,14 @@ static JSStringRef PropertyName(JSContextRef context, JSValueRef key, JSValueRef
     return JSValueToStringCopy(context, key, exception);
 }
 
-bool JSValueIsSymbol(JSContextRef context, JSValueRef value)
+bool BACKPORT_IMPL(JSValueIsSymbol)(JSContextRef context, JSValueRef value)
 {
     (void)context;
     (void)value;
     return false;
 }
 
-JSValueRef JSObjectGetPropertyForKey(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
+JSValueRef BACKPORT_IMPL(JSObjectGetPropertyForKey)(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
 {
     JSStringRef name = PropertyName(context, propertyKey, exception);
     if (!name)
@@ -24,7 +25,7 @@ JSValueRef JSObjectGetPropertyForKey(JSContextRef context, JSObjectRef object, J
     return value;
 }
 
-bool JSObjectHasPropertyForKey(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
+bool BACKPORT_IMPL(JSObjectHasPropertyForKey)(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
 {
     JSStringRef name = PropertyName(context, propertyKey, exception);
     if (!name)
@@ -34,7 +35,7 @@ bool JSObjectHasPropertyForKey(JSContextRef context, JSObjectRef object, JSValue
     return has;
 }
 
-void JSObjectSetPropertyForKey(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef value,
+void BACKPORT_IMPL(JSObjectSetPropertyForKey)(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef value,
                                JSPropertyAttributes attributes, JSValueRef *exception)
 {
     JSStringRef name = PropertyName(context, propertyKey, exception);
@@ -44,7 +45,7 @@ void JSObjectSetPropertyForKey(JSContextRef context, JSObjectRef object, JSValue
     JSStringRelease(name);
 }
 
-bool JSObjectDeletePropertyForKey(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
+bool BACKPORT_IMPL(JSObjectDeletePropertyForKey)(JSContextRef context, JSObjectRef object, JSValueRef propertyKey, JSValueRef *exception)
 {
     JSStringRef name = PropertyName(context, propertyKey, exception);
     if (!name)

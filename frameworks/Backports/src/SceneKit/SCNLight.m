@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNLightType const SCNLightTypeAmbient = @"ambient";
-SCNLightType const SCNLightTypeOmni = @"omni";
-SCNLightType const SCNLightTypeDirectional = @"directional";
-SCNLightType const SCNLightTypeSpot = @"spot";
+SCNLightType const BACKPORT_IMPL(SCNLightTypeAmbient) = @"ambient";
+SCNLightType const BACKPORT_IMPL(SCNLightTypeOmni) = @"omni";
+SCNLightType const BACKPORT_IMPL(SCNLightTypeDirectional) = @"directional";
+SCNLightType const BACKPORT_IMPL(SCNLightTypeSpot) = @"spot";
 
 @implementation SCNLight
 

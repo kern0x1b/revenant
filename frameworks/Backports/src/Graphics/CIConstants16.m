@@ -1,13 +1,14 @@
+#include "../revenant_impl.h"
 #import <CoreImage/CoreImage.h>
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-NSString *const kCIImageAuxiliaryHDRGainMap = @"kCIImageAuxiliaryHDRGainMap";
-NSString *const kCIImageAuxiliarySemanticSegmentationGlassesMatte = @"kCIImageAuxiliarySemanticSegmentationGlassesMatte";
-NSString *const kCIImageAuxiliarySemanticSegmentationSkyMatte = @"kCIImageAuxiliarySemanticSegmentationSkyMatte";
-NSString *const kCIImageRepresentationHDRGainMapImage = @"kCIImageRepresentationHDRGainMapImage";
-NSString *const kCIImageRepresentationSemanticSegmentationGlassesMatteImage = @"kCIImageRepresentationSemanticSegmentationGlassesMatteImage";
-NSString *const kCIImageRepresentationSemanticSegmentationSkyMatteImage = @"kCIImageRepresentationSemanticSegmentationSkyMatteImage";
-NSString *const kCIImageToneMapHDRtoSDR = @"kCIImageToneMapHDRtoSDR";
+NSString *const BACKPORT_IMPL(kCIImageAuxiliaryHDRGainMap) = @"kCIImageAuxiliaryHDRGainMap";
+NSString *const BACKPORT_IMPL(kCIImageAuxiliarySemanticSegmentationGlassesMatte) = @"kCIImageAuxiliarySemanticSegmentationGlassesMatte";
+NSString *const BACKPORT_IMPL(kCIImageAuxiliarySemanticSegmentationSkyMatte) = @"kCIImageAuxiliarySemanticSegmentationSkyMatte";
+NSString *const BACKPORT_IMPL(kCIImageRepresentationHDRGainMapImage) = @"kCIImageRepresentationHDRGainMapImage";
+NSString *const BACKPORT_IMPL(kCIImageRepresentationSemanticSegmentationGlassesMatteImage) = @"kCIImageRepresentationSemanticSegmentationGlassesMatteImage";
+NSString *const BACKPORT_IMPL(kCIImageRepresentationSemanticSegmentationSkyMatteImage) = @"kCIImageRepresentationSemanticSegmentationSkyMatteImage";
+NSString *const BACKPORT_IMPL(kCIImageToneMapHDRtoSDR) = @"kCIImageToneMapHDRtoSDR";
 NSString *const kCIInputLocalToneMapAmountKey = @"inputLocalToneMapAmount";
 NSString *const kCIPropertiesKey = @"properties";

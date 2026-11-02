@@ -1,23 +1,24 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImagePropertyDNGAsShotNeutral = CFSTR("AsShotNeutral");
-const CFStringRef kCGImagePropertyDNGAsShotWhiteXY = CFSTR("AsShotWhiteXY");
-const CFStringRef kCGImagePropertyDNGBaselineExposure = CFSTR("BaselineExposure");
-const CFStringRef kCGImagePropertyDNGBaselineNoise = CFSTR("BaselineNoise");
-const CFStringRef kCGImagePropertyDNGBaselineSharpness = CFSTR("BaselineSharpness");
-const CFStringRef kCGImagePropertyDNGBlackLevel = CFSTR("BlackLevel");
-const CFStringRef kCGImagePropertyDNGCalibrationIlluminant1 = CFSTR("CalibrationIlluminant1");
-const CFStringRef kCGImagePropertyDNGCalibrationIlluminant2 = CFSTR("CalibrationIlluminant2");
-const CFStringRef kCGImagePropertyDNGCameraCalibration1 = CFSTR("CameraCalibration1");
-const CFStringRef kCGImagePropertyDNGCameraCalibration2 = CFSTR("CameraCalibration2");
-const CFStringRef kCGImagePropertyDNGCameraCalibrationSignature = CFSTR("CameraCalibrationSignature");
-const CFStringRef kCGImagePropertyDNGColorMatrix1 = CFSTR("ColorMatrix1");
-const CFStringRef kCGImagePropertyDNGColorMatrix2 = CFSTR("ColorMatrix2");
-const CFStringRef kCGImagePropertyDNGFixVignetteRadial = CFSTR("FixVignetteRadial");
-const CFStringRef kCGImagePropertyDNGNoiseProfile = CFSTR("NoiseProfile");
-const CFStringRef kCGImagePropertyDNGPrivateData = CFSTR("DNGPrivateData");
-const CFStringRef kCGImagePropertyDNGProfileCalibrationSignature = CFSTR("ProfileCalibrationSignature");
-const CFStringRef kCGImagePropertyDNGWarpFisheye = CFSTR("WarpFisheye");
-const CFStringRef kCGImagePropertyDNGWarpRectilinear = CFSTR("WarpRectilinear");
-const CFStringRef kCGImagePropertyDNGWhiteLevel = CFSTR("WhiteLevel");
-const CFStringRef kCGImagePropertyExifSubsecTimeOriginal = CFSTR("SubsecTimeOriginal");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGAsShotNeutral) = CFSTR("AsShotNeutral");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGAsShotWhiteXY) = CFSTR("AsShotWhiteXY");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGBaselineExposure) = CFSTR("BaselineExposure");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGBaselineNoise) = CFSTR("BaselineNoise");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGBaselineSharpness) = CFSTR("BaselineSharpness");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGBlackLevel) = CFSTR("BlackLevel");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGCalibrationIlluminant1) = CFSTR("CalibrationIlluminant1");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGCalibrationIlluminant2) = CFSTR("CalibrationIlluminant2");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGCameraCalibration1) = CFSTR("CameraCalibration1");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGCameraCalibration2) = CFSTR("CameraCalibration2");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGCameraCalibrationSignature) = CFSTR("CameraCalibrationSignature");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGColorMatrix1) = CFSTR("ColorMatrix1");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGColorMatrix2) = CFSTR("ColorMatrix2");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGFixVignetteRadial) = CFSTR("FixVignetteRadial");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGNoiseProfile) = CFSTR("NoiseProfile");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGPrivateData) = CFSTR("DNGPrivateData");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGProfileCalibrationSignature) = CFSTR("ProfileCalibrationSignature");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGWarpFisheye) = CFSTR("WarpFisheye");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGWarpRectilinear) = CFSTR("WarpRectilinear");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyDNGWhiteLevel) = CFSTR("WhiteLevel");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyExifSubsecTimeOriginal) = CFSTR("SubsecTimeOriginal");

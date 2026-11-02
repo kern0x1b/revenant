@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGPDFOutlineChildren = CFSTR("Children");
-const CFStringRef kCGPDFOutlineDestination = CFSTR("Destination");
-const CFStringRef kCGPDFOutlineDestinationRect = CFSTR("DestinationRect");
-const CFStringRef kCGPDFOutlineTitle = CFSTR("Title");
-const CFStringRef kCGPDFContextAccessPermissions = CFSTR("kCGPDFContextAccessPermissions");
+const CFStringRef BACKPORT_IMPL(kCGPDFOutlineChildren) = CFSTR("Children");
+const CFStringRef BACKPORT_IMPL(kCGPDFOutlineDestination) = CFSTR("Destination");
+const CFStringRef BACKPORT_IMPL(kCGPDFOutlineDestinationRect) = CFSTR("DestinationRect");
+const CFStringRef BACKPORT_IMPL(kCGPDFOutlineTitle) = CFSTR("Title");
+const CFStringRef BACKPORT_IMPL(kCGPDFContextAccessPermissions) = CFSTR("kCGPDFContextAccessPermissions");

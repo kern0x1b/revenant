@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImageProperty8BIMVersion = CFSTR("Version");
+const CFStringRef BACKPORT_IMPL(kCGImageProperty8BIMVersion) = CFSTR("Version");

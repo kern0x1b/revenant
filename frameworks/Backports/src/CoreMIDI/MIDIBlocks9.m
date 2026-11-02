@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMIDI/CoreMIDI.h>
 
 #import "RevenantCoreMIDI.h"
@@ -27,7 +28,7 @@ static void revenant_release_block(void *refCon)
         (void)(__bridge_transfer id)refCon;
 }
 
-OSStatus MIDIClientCreateWithBlock(CFStringRef name, MIDIClientRef *outClient, MIDINotifyBlock notifyBlock)
+OSStatus BACKPORT_IMPL(MIDIClientCreateWithBlock)(CFStringRef name, MIDIClientRef *outClient, MIDINotifyBlock notifyBlock)
 {
     void *refCon = revenant_retain_block(notifyBlock);
     OSStatus status = MIDIClientCreate(name, revenant_notify, refCon, outClient);
@@ -38,7 +39,7 @@ OSStatus MIDIClientCreateWithBlock(CFStringRef name, MIDIClientRef *outClient, M
     return status;
 }
 
-OSStatus MIDIInputPortCreateWithBlock(MIDIClientRef client, CFStringRef portName, MIDIPortRef *outPort, MIDIReadBlock readBlock)
+OSStatus BACKPORT_IMPL(MIDIInputPortCreateWithBlock)(MIDIClientRef client, CFStringRef portName, MIDIPortRef *outPort, MIDIReadBlock readBlock)
 {
     void *refCon = revenant_retain_block(readBlock);
     OSStatus status = MIDIInputPortCreate(client, portName, revenant_read, refCon, outPort);
@@ -49,7 +50,7 @@ OSStatus MIDIInputPortCreateWithBlock(MIDIClientRef client, CFStringRef portName
     return status;
 }
 
-OSStatus MIDIDestinationCreateWithBlock(MIDIClientRef client, CFStringRef name, MIDIEndpointRef *outDest, MIDIReadBlock readBlock)
+OSStatus BACKPORT_IMPL(MIDIDestinationCreateWithBlock)(MIDIClientRef client, CFStringRef name, MIDIEndpointRef *outDest, MIDIReadBlock readBlock)
 {
     void *refCon = revenant_retain_block(readBlock);
     OSStatus status = MIDIDestinationCreate(client, name, revenant_read, refCon, outDest);

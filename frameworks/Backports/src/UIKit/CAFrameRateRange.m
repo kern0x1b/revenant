@@ -1,15 +1,16 @@
+#include "../revenant_impl.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <math.h>
 
-const CAFrameRateRange CAFrameRateRangeDefault = {-1, -1, -1};
+const CAFrameRateRange BACKPORT_IMPL(CAFrameRateRangeDefault) = {-1, -1, -1};
 
-CAFrameRateRange CAFrameRateRangeMake(float minimum, float maximum, float preferred)
+CAFrameRateRange BACKPORT_IMPL(CAFrameRateRangeMake)(float minimum, float maximum, float preferred)
 {
     return (CAFrameRateRange){minimum, maximum, preferred};
 }
 
-bool CAFrameRateRangeIsEqualToRange(CAFrameRateRange range, CAFrameRateRange other)
+bool BACKPORT_IMPL(CAFrameRateRangeIsEqualToRange)(CAFrameRateRange range, CAFrameRateRange other)
 {
     return range.minimum == other.minimum && range.maximum == other.maximum && range.preferred == other.preferred;
 }

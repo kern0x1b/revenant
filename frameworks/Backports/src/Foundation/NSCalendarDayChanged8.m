@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSNotificationName const NSCalendarDayChangedNotification = @"NSCalendarDayChangedNotification";
+NSNotificationName const BACKPORT_IMPL(NSCalendarDayChangedNotification) = @"NSCalendarDayChangedNotification";
 
 static const NSCalendarUnit RevenantDayUnits = NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay;
 

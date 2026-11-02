@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AUComponent.h>
 #import <Foundation/Foundation.h>
@@ -7,13 +8,13 @@
 #import <UIKit/UIKit.h>
 #endif
 
-CFAbsoluteTime AudioComponentGetLastActiveTime(AudioComponent comp)
+CFAbsoluteTime BACKPORT_IMPL(AudioComponentGetLastActiveTime)(AudioComponent comp)
 {
     return 0;
 }
 
 #if TARGET_OS_IPHONE
-UIImage *AudioOutputUnitGetHostIcon(AudioUnit au, float desiredPointSize)
+UIImage *BACKPORT_IMPL(AudioOutputUnitGetHostIcon)(AudioUnit au, float desiredPointSize)
 {
     return nil;
 }
@@ -26,7 +27,7 @@ static UIImage *RevenantBlankComponentIcon(void)
     return icon;
 }
 
-UIImage *AudioComponentGetIcon(AudioComponent comp, float desiredPointSize)
+UIImage *BACKPORT_IMPL(AudioComponentGetIcon)(AudioComponent comp, float desiredPointSize)
 {
     if (comp == NULL) {
         return nil;
@@ -35,7 +36,7 @@ UIImage *AudioComponentGetIcon(AudioComponent comp, float desiredPointSize)
 }
 #endif
 
-OSStatus AudioOutputUnitPublish(const AudioComponentDescription *inDesc, CFStringRef inName, UInt32 inVersion,
+OSStatus BACKPORT_IMPL(AudioOutputUnitPublish)(const AudioComponentDescription *inDesc, CFStringRef inName, UInt32 inVersion,
                                 AudioUnit inOutputUnit)
 {
     return noErr;

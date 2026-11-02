@@ -48,7 +48,7 @@ end
 local function generated(folder, image)
     local images = {FXAdd = image, FXMissing = image, FXSetValue = image, FXGetValue = image, FXVariadic = image, FXValue = image, FXTable = image}
     local framework = {name = "FXSkel", import = "", rows = rows(), unavailable = {}}
-    local totals = skeleton.write(folder, {framework}, {}, images)
+    local totals = skeleton.write(folder, {framework}, {}, images, {})
     return totals
 end
 

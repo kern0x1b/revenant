@@ -1,12 +1,13 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVCaptureDeviceTypeBuiltInDuoCamera = @"AVCaptureDeviceTypeBuiltInDualCamera";
-NSString *const AVMediaCharacteristicUsesWideGamutColorSpace = @"public.uses-wide-gamut-color-space";
-NSString *const AVMetadataISOUserDataKeyDate = @"date";
-NSString *const AVMetadataIdentifierISOUserDataDate = @"uiso/date";
-NSString *const AVPlayerWaitingToMinimizeStallsReason = @"AVPlayerWaitingToMinimizeStallsReason";
-NSString *const AVPlayerWaitingWhileEvaluatingBufferingRateReason = @"AVPlayerWaitingWhileEvaluatingBufferingRateReason";
-NSString *const AVPlayerWaitingWithNoItemToPlayReason = @"AVPlayerWaitingWithNoItemToPlayReason";
-NSString *const AVURLAssetAllowsCellularAccessKey = @"AVURLAssetAllowsCellularAccessKey";
-NSString *const AVVideoAllowWideColorKey = @"AVVideoAllowWideColorKey";
-NSString *const AVVideoColorPrimaries_P3_D65 = @"P3_D65";
+NSString *const BACKPORT_IMPL(AVCaptureDeviceTypeBuiltInDuoCamera) = @"AVCaptureDeviceTypeBuiltInDualCamera";
+NSString *const BACKPORT_IMPL(AVMediaCharacteristicUsesWideGamutColorSpace) = @"public.uses-wide-gamut-color-space";
+NSString *const BACKPORT_IMPL(AVMetadataISOUserDataKeyDate) = @"date";
+NSString *const BACKPORT_IMPL(AVMetadataIdentifierISOUserDataDate) = @"uiso/date";
+NSString *const BACKPORT_IMPL(AVPlayerWaitingToMinimizeStallsReason) = @"AVPlayerWaitingToMinimizeStallsReason";
+NSString *const BACKPORT_IMPL(AVPlayerWaitingWhileEvaluatingBufferingRateReason) = @"AVPlayerWaitingWhileEvaluatingBufferingRateReason";
+NSString *const BACKPORT_IMPL(AVPlayerWaitingWithNoItemToPlayReason) = @"AVPlayerWaitingWithNoItemToPlayReason";
+NSString *const BACKPORT_IMPL(AVURLAssetAllowsCellularAccessKey) = @"AVURLAssetAllowsCellularAccessKey";
+NSString *const BACKPORT_IMPL(AVVideoAllowWideColorKey) = @"AVVideoAllowWideColorKey";
+NSString *const BACKPORT_IMPL(AVVideoColorPrimaries_P3_D65) = @"P3_D65";

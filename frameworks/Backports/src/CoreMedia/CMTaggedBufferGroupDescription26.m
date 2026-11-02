@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantCMTaggedBufferGroupEntries.h"
 
-OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroupWithExtensions(
+OSStatus BACKPORT_IMPL(CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroupWithExtensions)(
     CFAllocatorRef CM_NULLABLE allocator, CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
     CFDictionaryRef CM_NULLABLE extensions,
     CMTaggedBufferGroupFormatDescriptionRef CM_NULLABLE * CM_NONNULL formatDescriptionOut)

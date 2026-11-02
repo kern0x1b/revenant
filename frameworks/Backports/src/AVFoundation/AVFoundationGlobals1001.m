@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVMediaTypeHaptic = @"hapt";
+NSString *const BACKPORT_IMPL(AVMediaTypeHaptic) = @"hapt";

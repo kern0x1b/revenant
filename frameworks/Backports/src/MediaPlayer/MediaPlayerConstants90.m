@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
 
@@ -14,15 +15,15 @@ extern NSString *const MPLanguageOptionCharacteristicVoiceOverTranslation;
 extern NSString *const MPNowPlayingInfoPropertyAvailableLanguageOptions;
 extern NSString *const MPNowPlayingInfoPropertyCurrentLanguageOptions;
 
-NSString *const MPLanguageOptionCharacteristicContainsOnlyForcedSubtitles = @"public.subtitles.forced-only";
-NSString *const MPLanguageOptionCharacteristicDescribesMusicAndSound = @"public.accessibility.describes-music-and-sound";
-NSString *const MPLanguageOptionCharacteristicDescribesVideo = @"public.accessibility.describes-video";
-NSString *const MPLanguageOptionCharacteristicDubbedTranslation = @"public.translation.dubbed";
-NSString *const MPLanguageOptionCharacteristicEasyToRead = @"public.easy-to-read";
-NSString *const MPLanguageOptionCharacteristicIsAuxiliaryContent = @"public.auxiliary-content";
-NSString *const MPLanguageOptionCharacteristicIsMainProgramContent = @"public.main-program-content";
-NSString *const MPLanguageOptionCharacteristicLanguageTranslation = @"public.translation";
-NSString *const MPLanguageOptionCharacteristicTranscribesSpokenDialog = @"public.accessibility.transcribes-spoken-dialog";
-NSString *const MPLanguageOptionCharacteristicVoiceOverTranslation = @"public.translation.voice-over";
-NSString *const MPNowPlayingInfoPropertyAvailableLanguageOptions = @"MPNowPlayingInfoPropertyAvailableLanguageOptions";
-NSString *const MPNowPlayingInfoPropertyCurrentLanguageOptions = @"MPNowPlayingInfoPropertyCurrentLanguageOption";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicContainsOnlyForcedSubtitles) = @"public.subtitles.forced-only";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicDescribesMusicAndSound) = @"public.accessibility.describes-music-and-sound";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicDescribesVideo) = @"public.accessibility.describes-video";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicDubbedTranslation) = @"public.translation.dubbed";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicEasyToRead) = @"public.easy-to-read";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicIsAuxiliaryContent) = @"public.auxiliary-content";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicIsMainProgramContent) = @"public.main-program-content";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicLanguageTranslation) = @"public.translation";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicTranscribesSpokenDialog) = @"public.accessibility.transcribes-spoken-dialog";
+NSString *const BACKPORT_IMPL(MPLanguageOptionCharacteristicVoiceOverTranslation) = @"public.translation.voice-over";
+NSString *const BACKPORT_IMPL(MPNowPlayingInfoPropertyAvailableLanguageOptions) = @"MPNowPlayingInfoPropertyAvailableLanguageOptions";
+NSString *const BACKPORT_IMPL(MPNowPlayingInfoPropertyCurrentLanguageOptions) = @"MPNowPlayingInfoPropertyCurrentLanguageOption";

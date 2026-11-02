@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantShear.h"
 
-vImage_Error vImageHorizontalShear_CbCr16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageHorizontalShear_CbCr16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float horizontalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16U16U backColor, vImage_Flags flags)
 {
@@ -16,7 +17,7 @@ vImage_Error vImageHorizontalShear_CbCr16U(const vImage_Buffer *src, const vImag
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageHorizontalShear_CbCr8(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageHorizontalShear_CbCr8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float horizontalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_88 backColor, vImage_Flags flags)
 {
@@ -31,7 +32,7 @@ vImage_Error vImageHorizontalShear_CbCr8(const vImage_Buffer *src, const vImage_
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageHorizontalShear_XRGB2101010W(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageHorizontalShear_XRGB2101010W)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float horizontalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_32U backColor, vImage_Flags flags)
 {
@@ -48,7 +49,7 @@ vImage_Error vImageHorizontalShear_XRGB2101010W(const vImage_Buffer *src, const 
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageVerticalShear_CbCr16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageVerticalShear_CbCr16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float verticalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16U16U backColor, vImage_Flags flags)
 {
@@ -63,7 +64,7 @@ vImage_Error vImageVerticalShear_CbCr16U(const vImage_Buffer *src, const vImage_
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageVerticalShear_CbCr8(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageVerticalShear_CbCr8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float verticalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_88 backColor, vImage_Flags flags)
 {
@@ -78,7 +79,7 @@ vImage_Error vImageVerticalShear_CbCr8(const vImage_Buffer *src, const vImage_Bu
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageVerticalShear_XRGB2101010W(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageVerticalShear_XRGB2101010W)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float verticalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_32U backColor, vImage_Flags flags)
 {

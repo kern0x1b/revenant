@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-NSString *const SCNErrorDomain = @"SCNErrorDomain";
+NSString *const BACKPORT_IMPL(SCNErrorDomain) = @"SCNErrorDomain";

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSUserActivityTypeBrowsingWeb = @"NSUserActivityTypeBrowsingWeb";
+NSString *const BACKPORT_IMPL(NSUserActivityTypeBrowsingWeb) = @"NSUserActivityTypeBrowsingWeb";
 
 @implementation NSUserActivity {
     NSString *_activityType;

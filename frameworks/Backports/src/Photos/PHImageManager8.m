@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantPhotos.h"
 #import "RevenantPhotosImageCache.h"
 #import "RevenantPhotosImageSource.h"
@@ -11,12 +12,12 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-const CGSize PHImageManagerMaximumSize = {-1, -1};
-NSString *const PHImageResultIsInCloudKey = @"PHImageResultIsInCloudKey";
-NSString *const PHImageResultIsDegradedKey = @"PHImageResultIsDegradedKey";
-NSString *const PHImageResultRequestIDKey = @"PHImageResultRequestIDKey";
-NSString *const PHImageCancelledKey = @"PHImageCancelledKey";
-NSString *const PHImageErrorKey = @"PHImageErrorKey";
+const CGSize BACKPORT_IMPL(PHImageManagerMaximumSize) = {-1, -1};
+NSString *const BACKPORT_IMPL(PHImageResultIsInCloudKey) = @"PHImageResultIsInCloudKey";
+NSString *const BACKPORT_IMPL(PHImageResultIsDegradedKey) = @"PHImageResultIsDegradedKey";
+NSString *const BACKPORT_IMPL(PHImageResultRequestIDKey) = @"PHImageResultRequestIDKey";
+NSString *const BACKPORT_IMPL(PHImageCancelledKey) = @"PHImageCancelledKey";
+NSString *const BACKPORT_IMPL(PHImageErrorKey) = @"PHImageErrorKey";
 
 @implementation PHImageRequestOptions
 

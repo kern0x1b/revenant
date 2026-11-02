@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-void CGPDFArrayApplyBlock(CGPDFArrayRef array, bool (^block)(size_t index, CGPDFObjectRef value, void *info), void *info)
+void BACKPORT_IMPL(CGPDFArrayApplyBlock)(CGPDFArrayRef array, bool (^block)(size_t index, CGPDFObjectRef value, void *info), void *info)
 {
     if (!array || !block)
         return;
@@ -26,7 +27,7 @@ static void revenant_dictionary_apply(const char *key, CGPDFObjectRef value, voi
         context->stopped = true;
 }
 
-void CGPDFDictionaryApplyBlock(CGPDFDictionaryRef dict, bool (^block)(const char *key, CGPDFObjectRef value, void *info), void *info)
+void BACKPORT_IMPL(CGPDFDictionaryApplyBlock)(CGPDFDictionaryRef dict, bool (^block)(const char *key, CGPDFObjectRef value, void *info), void *info)
 {
     if (!dict || !block)
         return;

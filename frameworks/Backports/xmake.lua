@@ -311,7 +311,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",

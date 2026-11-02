@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <CoreData/CoreData.h>
 
-NSString *const NSPersistentHistoryTrackingKey = @"NSPersistentHistoryTrackingKey";
-NSString *const NSBinaryStoreSecureDecodingClasses = @"NSBinaryStoreSecureDecodingClasses";
-NSString *const NSBinaryStoreInsecureDecodingCompatibilityOption = @"_NSBinaryStoreInsecureDecodingCompatibilityOption";
-NSString *const NSCoreDataCoreSpotlightExporter = @"NSCoreDataCoreSpotlightExporter";
+NSString *const BACKPORT_IMPL(NSPersistentHistoryTrackingKey) = @"NSPersistentHistoryTrackingKey";
+NSString *const BACKPORT_IMPL(NSBinaryStoreSecureDecodingClasses) = @"NSBinaryStoreSecureDecodingClasses";
+NSString *const BACKPORT_IMPL(NSBinaryStoreInsecureDecodingCompatibilityOption) = @"_NSBinaryStoreInsecureDecodingCompatibilityOption";
+NSString *const BACKPORT_IMPL(NSCoreDataCoreSpotlightExporter) = @"NSCoreDataCoreSpotlightExporter";

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
@@ -24,4 +25,4 @@ extern NSString * const MPMediaItemPropertyPlaybackStoreID;
 
 @end
 
-NSString * const MPMediaItemPropertyPlaybackStoreID = @"playbackStoreID";
+NSString * const BACKPORT_IMPL(MPMediaItemPropertyPlaybackStoreID) = @"playbackStoreID";

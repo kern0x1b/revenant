@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantMPS.h"
 
-NSUInteger MPSImageBatchIncrementReadCount(MPSImageBatch *batch, NSInteger amount)
+NSUInteger BACKPORT_IMPL(MPSImageBatchIncrementReadCount)(MPSImageBatch *batch, NSInteger amount)
 {
     NSHashTable *counted = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
     NSUInteger distinct = 0;
@@ -15,7 +16,7 @@ NSUInteger MPSImageBatchIncrementReadCount(MPSImageBatch *batch, NSInteger amoun
     return distinct;
 }
 
-void MPSImageBatchSynchronize(MPSImageBatch *batch, id<MTLCommandBuffer> cmdBuf)
+void BACKPORT_IMPL(MPSImageBatchSynchronize)(MPSImageBatch *batch, id<MTLCommandBuffer> cmdBuf)
 {
     NSUInteger index = 0;
     for (MPSImage *image in batch) {

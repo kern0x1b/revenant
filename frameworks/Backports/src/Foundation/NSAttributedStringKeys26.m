@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSListItemDelimiterAttributeName = @"NSListItemDelimiter";
+NSString * const BACKPORT_IMPL(NSListItemDelimiterAttributeName) = @"NSListItemDelimiter";

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
@@ -963,7 +964,7 @@ static quadrature_status revenant_status_of(int ier)
     }
 }
 
-double quadrature_integrate(const quadrature_integrate_function *__f, double __a, double __b,
+double BACKPORT_IMPL(quadrature_integrate)(const quadrature_integrate_function *__f, double __a, double __b,
                            const quadrature_integrate_options *__options, quadrature_status *__status,
                            double *__abs_error, size_t __workspace_size, void *__restrict __workspace)
 {

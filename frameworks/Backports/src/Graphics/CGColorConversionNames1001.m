@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGColorConversionBlackPointCompensation = CFSTR("kCGColorTransformBlackPointCompensation");
+const CFStringRef BACKPORT_IMPL(kCGColorConversionBlackPointCompensation) = CFSTR("kCGColorTransformBlackPointCompensation");

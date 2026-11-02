@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -54,7 +55,7 @@ static void RevenantSecurityRecordPolicy(SecPolicyRef policy, CFStringRef oid, C
     pthread_mutex_unlock(&RevenantSecurityHoldLock);
 }
 
-OSStatus SecTrustCopyPolicies(SecTrustRef trust, CFArrayRef *policies)
+OSStatus BACKPORT_IMPL(SecTrustCopyPolicies)(SecTrustRef trust, CFArrayRef *policies)
 {
     if (!trust || !policies)
         return errSecParam;
@@ -65,7 +66,7 @@ OSStatus SecTrustCopyPolicies(SecTrustRef trust, CFArrayRef *policies)
     return errSecSuccess;
 }
 
-OSStatus SecTrustCopyCustomAnchorCertificates(SecTrustRef trust, CFArrayRef *anchors)
+OSStatus BACKPORT_IMPL(SecTrustCopyCustomAnchorCertificates)(SecTrustRef trust, CFArrayRef *anchors)
 {
     if (!trust || !anchors)
         return errSecParam;

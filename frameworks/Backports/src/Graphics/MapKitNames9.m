@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <MapKit/MapKit.h>
 
-NSString *const MKLaunchOptionsDirectionsModeTransit = @"MKLaunchOptionsDirectionsModeTransit";
+NSString *const BACKPORT_IMPL(MKLaunchOptionsDirectionsModeTransit) = @"MKLaunchOptionsDirectionsModeTransit";

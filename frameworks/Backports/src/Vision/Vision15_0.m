@@ -1,20 +1,21 @@
+#include "../revenant_impl.h"
 #import "RevenantVision.h"
 
-VNBarcodeSymbology const VNBarcodeSymbologyCodabar = @"VNBarcodeSymbologyCodabar";
-VNBarcodeSymbology const VNBarcodeSymbologyGS1DataBar = @"VNBarcodeSymbologyGS1DataBar";
-VNBarcodeSymbology const VNBarcodeSymbologyGS1DataBarExpanded = @"VNBarcodeSymbologyGS1DataBarExpanded";
-VNBarcodeSymbology const VNBarcodeSymbologyGS1DataBarLimited = @"VNBarcodeSymbologyGS1DataBarLimited";
-VNBarcodeSymbology const VNBarcodeSymbologyMicroPDF417 = @"VNBarcodeSymbologyMicroPDF417";
-VNBarcodeSymbology const VNBarcodeSymbologyMicroQR = @"VNBarcodeSymbologyMicroQR";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyCodabar) = @"VNBarcodeSymbologyCodabar";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyGS1DataBar) = @"VNBarcodeSymbologyGS1DataBar";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyGS1DataBarExpanded) = @"VNBarcodeSymbologyGS1DataBarExpanded";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyGS1DataBarLimited) = @"VNBarcodeSymbologyGS1DataBarLimited";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyMicroPDF417) = @"VNBarcodeSymbologyMicroPDF417";
+VNBarcodeSymbology const BACKPORT_IMPL(VNBarcodeSymbologyMicroQR) = @"VNBarcodeSymbologyMicroQR";
 
-CGPoint VNImagePointForNormalizedPointUsingRegionOfInterest(CGPoint normalizedPoint, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
+CGPoint BACKPORT_IMPL(VNImagePointForNormalizedPointUsingRegionOfInterest)(CGPoint normalizedPoint, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
 {
     double width = (double)imageWidth, height = (double)imageHeight;
     return CGPointMake((regionOfInterest.origin.x + normalizedPoint.x * regionOfInterest.size.width) * width,
                        (regionOfInterest.origin.y + normalizedPoint.y * regionOfInterest.size.height) * height);
 }
 
-CGPoint VNNormalizedPointForImagePointUsingRegionOfInterest(CGPoint imagePoint, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
+CGPoint BACKPORT_IMPL(VNNormalizedPointForImagePointUsingRegionOfInterest)(CGPoint imagePoint, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
 {
     if (imageWidth == 0 || imageHeight == 0) {
         return CGPointZero;
@@ -24,7 +25,7 @@ CGPoint VNNormalizedPointForImagePointUsingRegionOfInterest(CGPoint imagePoint, 
                        (imagePoint.y - regionOfInterest.origin.y * height) / (regionOfInterest.size.height * height));
 }
 
-CGRect VNImageRectForNormalizedRectUsingRegionOfInterest(CGRect normalizedRect, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
+CGRect BACKPORT_IMPL(VNImageRectForNormalizedRectUsingRegionOfInterest)(CGRect normalizedRect, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
 {
     double width = (double)imageWidth, height = (double)imageHeight;
     return CGRectMake((regionOfInterest.origin.x + normalizedRect.origin.x * regionOfInterest.size.width) * width,
@@ -33,7 +34,7 @@ CGRect VNImageRectForNormalizedRectUsingRegionOfInterest(CGRect normalizedRect, 
                       normalizedRect.size.height * regionOfInterest.size.height * height);
 }
 
-CGRect VNNormalizedRectForImageRectUsingRegionOfInterest(CGRect imageRect, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
+CGRect BACKPORT_IMPL(VNNormalizedRectForImageRectUsingRegionOfInterest)(CGRect imageRect, size_t imageWidth, size_t imageHeight, CGRect regionOfInterest)
 {
     if (imageWidth == 0 || imageHeight == 0) {
         return CGRectZero;

@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
 #import "RevenantMorphology.h"
 
-NSAttributedStringKey const NSInflectionRuleAttributeName = @"NSInflect";
-NSAttributedStringKey const NSInflectionAlternativeAttributeName = @"NSInflectionAlternative";
+NSAttributedStringKey const BACKPORT_IMPL(NSInflectionRuleAttributeName) = @"NSInflect";
+NSAttributedStringKey const BACKPORT_IMPL(NSInflectionAlternativeAttributeName) = @"NSInflectionAlternative";
 
 @implementation NSMorphologyCustomPronoun
 {
