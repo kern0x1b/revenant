@@ -106,8 +106,8 @@ local function response_for_swift_cxx(lines, response)
     end
 end
 
-local EXPO_SKIP_FILES = {"FontUtils"}
-local EXPO_SKIP_MODULES = {FontUtilsModule = true}
+local EXPO_SKIP_FILES = {}
+local EXPO_SKIP_MODULES = {}
 local function expo_skip(f)
     for _, name in ipairs(EXPO_SKIP_FILES) do
         if f:find(name, 1, true) then return true end
@@ -310,7 +310,7 @@ target("expo-app-modules")
     add_files(path.join(SOURCES, "expo", "LocalizationModule.swift"))
     add_files(path.join(SOURCES, "expo", "StubModules.swift"))
     local provider = path.join(ecore, "ExpoModulesProvider.swift")
-    add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"))
+    add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"), path.join(SOURCES, "expo", "RevenantFontBackport.swift"))
     on_load(function (target)
         local expo, real = modules(io.readfile(COVERAGE))
         local seen, duplicates = {}, {}
