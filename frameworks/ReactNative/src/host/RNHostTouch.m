@@ -116,6 +116,7 @@ static UITouch *RNHostBeginTouch(CGPoint point, UIWindow *window)
     [touch setTapCount:1];
     [touch setIsTap:YES];
     [touch _setIsFirstTouchForView:YES];
+    NSLog(@"rn-host: touch began %.0f", [[NSDate date] timeIntervalSince1970] * 1000);
     RNHostSendTouch(touch, point, UITouchPhaseBegan, window);
     return touch;
 }

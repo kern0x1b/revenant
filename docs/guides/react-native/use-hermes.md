@@ -19,7 +19,7 @@ RN_HERMES=1 REVENANT_CACHE=$PWD/.cache-private ./xmakew l -P . frameworks/ReactN
 
 `isolate.lua build` links the copy's `build/rn-src` to the react-native install of the cache on every run. A link left to an install that xmake replaced dangles, and the build then fails on the React Native headers (the archive step reports `ar: no archive members specified`).
 
-The host sources that select the engine (`RCTHermesInstance` in the runtime factory, the `engine=` reader and the bytecode loader) are in the isolated host spike, not yet in this tree.
+The host sources that select the engine are in `frameworks/ReactNative/src/host`: `RNHostRuntime` reads `engine=` and loads the bytecode, `RNHostAppDelegate` returns `RCTHermesInstance` from the runtime factory when the engine is Hermes, and `RNHostTouch` logs the time each injected touch begins. The package is declared at file scope (`add_requires("revenant@hermes", {alias = "hermes"})`) and used by the target (`add_packages("hermes")`); xmake drops a package name that is only used by the target without that declaration.
 
 ## Bytecode
 
@@ -51,6 +51,23 @@ All runs use the 24 MB application bundle. The Hermes run uses the bytecode of 3
 | With the app manifest, first screen | Hermes HV64, bytecode | about 1 s | 109 MB, then 142 MB |
 | With the app manifest and the stored workspace state | Hermes HV64, bytecode | about 1 s | 113 MB, then 169 MB in 25 s |
 
-The JSC run with the manifest and the touch latency of both engines were not measured.
+The JSC run with the manifest was not measured; the touch latency of both engines is in the benchmark below.
 
 The memory numbers are one run per configuration; the first screen of the app with its workspace is the last row.
+
+## Engine benchmark on the iPhone 4S
+
+`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `measure.sh ENGINE RUN BUNDLE` runs one configuration on the claimed phone (five taps on the counter, one swipe on the list) and `summarize.sh` prints the metrics of the runs.
+
+Three runs per engine, on the same host build (the HV64 package with the ToInt32 patch, `RN_HERMES=1`) and the same bench bundle, each after a fresh launch:
+
+| Engine | Startup, react start to bench mounted | Tap to JS commit, median of 5 | fps, mean / lowest one-second window | RSS, highest heartbeat |
+|---|---|---|---|---|
+| Hermes, bytecode | 0.70, 0.80, 0.70 s | 163, 168, 168 ms | 59.2 / 20, 59.1 / 24, 59.2 / 21 | 59.2, 58.7, 58.7 MB |
+| JSC, source | 2.60, 2.50, 2.40 s | 176, 169, 171 ms | 58.4 / 8, 58.3 / 6, 58.1 / 3 | 75.2, 75.9, 75.0 MB |
+
+- The tap latency runs from the injected touch (`rn-host: touch began`, epoch milliseconds) to the `bench commit` log, which is written in the effect after the count update commits. It does not include the paint.
+- The startup is read from the syslog timestamps of the two lines.
+- The lowest fps window of each run includes the swipe; the mean covers the whole run.
+- One Hermes launch, made right after `killall` of the previous instance, aborted in `startSurface` before the bench mounted (`Global was not installed`); the next launch of the same configuration ran cleanly, and none of the six measured runs had that abort. The cause is not identified.
+- `touch.lua` is in `origin/work/rn-touch` (0dcde627f), not in this branch yet.
