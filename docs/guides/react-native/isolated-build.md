@@ -52,5 +52,17 @@ puts into `CFBundleIdentifier`.
 * Install and launch your app by that id and by a folder of your own, `/var/stash/<claim holder>/<last part of the id>.app`; never
   remove an app whose id is not yours.
 * Name your id in the claim note and in every window request, so others see whose app is on the phone.
-* Keep the files of a run under `/var/tmp/<last part of the id>/`: the log, the bundle and the configuration. The host of the
-  spike still reads `/var/tmp/rnhost.*` and `/var/tmp/real.js`, so two workers who share those paths must not run in the same window.
+* The host reads its configuration and bundle from its own `.app`, never from `/var/tmp`: `/var/tmp` takes files from any
+  process, and a configuration there names the code that runs. `./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy
+  --bundle FILE --conf KEY=VALUE,...` puts `bundle.js` and `rnhost.conf` inside `<app folder>/`, root-owned and not writable by
+  others. The host refuses a file that is a symlink, is not owned by root, can be written by others, or resolves outside the
+  `.app`, and logs the refusal. It reads only the keys `module`, `bundle`, `engine` and `JSC_*`.
+* Control flags and the command file are in the same `.app`, written as root (`./xmakew device run`): `rnhost.log.on` (log to
+  `/var/tmp/<last part of the id>/rnhost.log`), `rnhost.fi` (frame interval), `rnhost.prof`, `rnhost.prof.stacks`, `rnhost.jsprof`.
+  `rnhost.cmd` takes one command per line; the host runs each complete line once and only the lines appended after it, so append
+  with `>>` and end the line with a newline. A rewrite in place with the same lines runs nothing; a replaced file (another inode) or
+  one that no longer starts with the lines already run runs from its first line.
+* The host writes its output to `/var/tmp/<last part of the id>/` (the log, `rnhost.cmd.out`, `rnhost.stack`, `rnhost.prof.out`,
+  `rnhost.jsprof.out`). That folder belongs to the app's user, mode 700, and nothing the host writes there is read back.
+* The spike host still reads `/var/tmp/rnhost.*` and `/var/tmp/real.js`. It must move to this host before a window is shared with it:
+  two workers who share those paths must not run in the same window.

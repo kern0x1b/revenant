@@ -5,14 +5,18 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           the backports libraries in DIR of --backports, retargets the library references from /usr/lib/revenant/org.revenant.backports
           to @executable_path/Frameworks, and signs every Mach-O file with ldid.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
-          from /Applications, registers it and, with --bundle, puts the JavaScript bundle at /var/tmp/<last part of the id>/bundle.js
-          and writes /var/tmp/rnhost.conf with module=main and that bundle (--conf adds lines). It removes nothing of another bundle id.
+          from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
+          <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
+          Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
+          host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. It removes nothing of another bundle id.
   launch  wakes the phone and has SpringBoard start the app of the id.]]
 
 local LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
                    "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports"}
 local OLD_PREFIX = "/usr/lib/revenant/org.revenant.backports"
 local NEW_PREFIX = "@executable_path/Frameworks"
+local CONF_KEYS = {module = true, bundle = true, engine = true}
+local CONF_BUNDLE = "bundle.js"
 
 function app_name(bundle_id)
     return bundle_id:match("([^%.]+)$")
@@ -22,6 +26,11 @@ function stash_folder(holder, bundle_id)
     return "/var/stash/" .. holder .. "/" .. app_name(bundle_id)
 end
 
+function app_folder(holder, bundle_id)
+    return stash_folder(holder, bundle_id) .. "/" .. app_name(bundle_id) .. ".app"
+end
+
+-- The host writes its output here and nothing is read from it: /var/tmp takes files from any process.
 function run_folder(bundle_id)
     return "/var/tmp/" .. app_name(bundle_id)
 end
@@ -59,9 +68,15 @@ function install_command(holder, bundle_id)
     }, " && ")
 end
 
-function conf_text(bundle_path, extra)
-    local lines = {"module=main", "bundle=" .. bundle_path}
+-- The configuration the host reads from its own bundle. The bundle is named relative to the bundle; the host refuses any key but
+-- module, bundle, engine and JSC_* keys, so an unknown key is an error here too.
+function conf_text(bundle_name, extra)
+    local lines = {"module=main", "bundle=" .. bundle_name}
     for line in (extra or ""):gmatch("[^,]+") do
+        local key = line:match("^([^=]+)=")
+        if not key or not (CONF_KEYS[key] or key:sub(1, 4) == "JSC_") then
+            raise("--conf key %s is not read by the host: only module, bundle, engine and JSC_* keys", line)
+        end
         table.insert(lines, line)
     end
     return table.concat(lines, "\n") .. "\n"
@@ -132,17 +147,20 @@ function deploy(options)
     local device, settings, holder = phone()
     local id = options["bundle-id"]
     local name = app_name(id)
+    local app = app_folder(holder, id)
     device.copy(settings, path.absolute(options.archive), "/var/tmp/" .. name .. ".tgz")
     device.run(settings, install_command(holder, id))
+    local output = run_folder(id)
+    device.run(settings, "mkdir -p " .. output .. " && chown mobile " .. output .. " && chmod 700 " .. output)
     if options.bundle then
-        device.run(settings, "mkdir -p " .. run_folder(id))
-        device.copy(settings, path.absolute(options.bundle), run_folder(id) .. "/bundle.js")
         local conf = os.tmpfile()
-        io.writefile(conf, conf_text(run_folder(id) .. "/bundle.js", options.conf))
-        device.copy(settings, conf, "/var/tmp/rnhost.conf")
+        io.writefile(conf, conf_text(CONF_BUNDLE, options.conf))
+        device.copy(settings, path.absolute(options.bundle), app .. "/" .. CONF_BUNDLE)
+        device.copy(settings, conf, app .. "/rnhost.conf")
         os.rm(conf)
+        device.run(settings, "chown root:wheel " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf && chmod 644 " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf")
     end
-    print("installed " .. id .. " as " .. stash_folder(holder, id) .. "/" .. name .. ".app")
+    print("installed " .. id .. " as " .. app)
 end
 
 function launch(options)
