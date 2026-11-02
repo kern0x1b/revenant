@@ -14,7 +14,7 @@ local PACKAGES = {
     ["zxing-cpp"] = {"revenant@zxing-cpp v3.1.1"},
     ["tesseract"] = {"revenant@tesseract 5.5.3"},
     ["leptonica"] = {"revenant@leptonica 1.85.0"},
-    ["tessdata"] = {"revenant@tessdata", {languages = "eng,rus,ukr"}},
+    ["tessdata"] = {"revenant@tessdata", {languages = "all"}},
     ["libcxx"] = {"revenant@libcxx"},
     ["ffmpeg-hevc"] = {"revenant@ffmpeg-hevc"},
     ["apple-compat"] = {"revenant@apple-compat"},

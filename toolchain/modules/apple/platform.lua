@@ -154,7 +154,7 @@ function backport_libraries(target)
 end
 
 local SHARED = {"swift-runtime", "libcxx", "backports"}
-local LINKED = {"ffmpeg-hevc"}
+local LINKED = "ffmpeg-hevc"
 
 function shared_packages(target, aliases)
     local all, identities, libraries = {}, {}, {}
@@ -262,35 +262,28 @@ function backports_deb(signer)
     end
     local all, identities = shared_packages(signer)
     local targets = project_backports()
-    local linked, linked_identities = linked_packages(targets)
-    table.join2(all, linked)
-    for leaf, identity in pairs(linked_identities) do
-        identities[leaf] = identity
-    end
+    local linked, licenses = linked_packages(targets)
+    local models = vision_text_installed(targets)
     return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
-                                     runtime = backports_runtime(targets), depends = vision_text.depends(),
-                                     recommends = vision_text.recommended(),
+                                     carried = table.join(backports_runtime(targets), linked), models = models.models,
+                                     licenses = table.join(licenses, {{component = "tessdata", file = models.license}}),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
 end
 
-function vision_text_debs(outputdir)
-    for _, target in ipairs(project_backports()) do
+function vision_text_installed(targets)
+    for _, target in ipairs(targets) do
         local models = target:pkg("tessdata")
         if models then
-            return vision_text.write({root = models:installdir(), workdir = path.join(config.builddir(), ".revenant", "vision-text"), outputdir = outputdir})
+            return vision_text.installed(models:installdir())
         end
     end
     raise("the Backports libraries name no tessdata package, so the Vision text models cannot be packaged; the Vision target must require tessdata")
 end
 
 function linked_packages(targets)
-    local all, identities, seen = {}, {}, {}
+    local all, seen = {}, {}
     for _, target in ipairs(targets) do
-        local found, found_identities = shared_packages(target, LINKED)
-        for leaf, identity in pairs(found_identities) do
-            identities[leaf] = identity
-        end
-        for _, package in ipairs(found) do
+        for _, package in ipairs((shared_packages(target, {LINKED}))) do
             if not seen[package.name] then
                 seen[package.name] = true
                 table.insert(all, package)
@@ -300,7 +293,16 @@ function linked_packages(targets)
     if #all > 1 then
         raise("the Backports libraries link %d FFmpeg HEVC decoders, %s; the package set carries one", #all, table.concat(table.imap(all, function (_, package) return package.name end), " and "))
     end
-    return all, identities
+    local libraries, licenses = {}, {}
+    for _, package in ipairs(all) do
+        for _, file in ipairs(os.files(path.join(package.root, staged.folder_of(package.name), "*.dylib"))) do
+            table.insert(libraries, {leaf = path.filename(file), file = file})
+        end
+        for _, file in ipairs(os.files(path.join(package.root, "usr", "share", "doc", package.name, "*"))) do
+            table.insert(licenses, {component = LINKED, file = file})
+        end
+    end
+    return libraries, licenses
 end
 
 function backports_runtime(targets)

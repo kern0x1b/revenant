@@ -78,10 +78,12 @@ Inside the project a target depends on a library with `add_deps`. The configure 
 ### Packaging
 
 `./xmakew deb -P .` writes one package for them, `org.revenant.backports_<version>_iphoneos-arm.deb`: every Backports
-library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` and nothing
-else. It is signed with the `ldid` of an application of the project. Its version is the addon's release and a hash of
-the libraries and their dependencies, and its `Depends` names, at their exact versions, the shared packages (the Swift
-runtime, libc++) that its libraries name. A target that links a Backports library depends on the package in its own
+library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` with the
+FFmpeg HEVC decoder those libraries link, and the Vision text models under `/var/lib/revenant/tessdata/{fast,best}`.
+Its documents are the licences of the tessdata models and of the decoder, under `/usr/share/doc/org.revenant.backports/licenses/`.
+It is signed with the `ldid` of an application of the project. Its version is the addon's release and a hash of the
+libraries, the models and their dependencies, and its `Depends` names, at their exact versions, the shared packages (the
+Swift runtime, libc++) that its libraries name. A target that links a Backports library depends on the package in its own
 `Depends`, so an application built here or outside this repository requires that one package. The decision is
 [0012](../../explanation/decisions/0012-one-backports-package.md); what is measured on a device is in
 [the backports loading note](../../explanation/backports-loading.md).

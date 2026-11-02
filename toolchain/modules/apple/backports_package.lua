@@ -13,7 +13,7 @@ local FIELDS = {
     "Name: Revenant Backports",
     "Architecture: iphoneos-arm",
     "Section: System",
-    "Description: the Backports libraries of revenant, the iOS SDK's public APIs that the device's release lacks, in " .. FOLDER .. "; an application that links one of them depends on this package, and only an application that links a library loads it",
+    "Description: the Backports libraries of revenant, the iOS SDK's public APIs that the device's release lacks, in " .. FOLDER .. ", with the FFmpeg decoder they link and the Vision text models in /var/lib/revenant/tessdata; an application that links one of them depends on this package, and only an application that links a library loads it",
 }
 
 local written
@@ -45,7 +45,7 @@ function carried_runtime(package)
     return found
 end
 
-function libraries(targets, runtime)
+function libraries(targets, carried)
     local found, leaves = {}, {}
     for _, target in ipairs(targets) do
         if not os.isfile(target:targetfile()) then
@@ -55,9 +55,9 @@ function libraries(targets, runtime)
         found[leaf] = {leaf = leaf, file = target:targetfile()}
         table.insert(leaves, leaf)
     end
-    for _, library in ipairs(runtime or {}) do
+    for _, library in ipairs(carried or {}) do
         if found[library.leaf] then
-            raise("the C++ runtime the package carries names %s, which a Backports library already is", library.leaf)
+            raise("the libraries the package carries name %s, which a Backports library already is", library.leaf)
         end
         found[library.leaf] = library
         table.insert(leaves, library.leaf)
@@ -70,10 +70,13 @@ function libraries(targets, runtime)
     return ordered
 end
 
-function release(libs, depends)
+function release(libs, depends, models)
     local digests = {}
     for _, library in ipairs(libs) do
         table.insert(digests, library.leaf .. "=" .. hash.sha256(library.file))
+    end
+    for _, model in ipairs(models) do
+        table.insert(digests, model.destination .. "=" .. hash.sha256(model.source))
     end
     table.insert(digests, "depends=" .. table.concat(depends, ","))
     return staged.package_version(hash.strhash128(table.concat(digests, ";")))
@@ -125,20 +128,34 @@ function stage(libs, root, provided)
     return binaries
 end
 
+function place(root, models, licenses)
+    for _, model in ipairs(models) do
+        local destination = path.join(root, model.destination)
+        os.mkdir(path.directory(destination))
+        os.vcp(model.source, destination)
+    end
+    for _, license in ipairs(licenses) do
+        local folder = path.join(root, "usr", "share", "doc", NAME, "licenses", license.component)
+        os.mkdir(folder)
+        os.vcp(license.file, path.join(folder, path.filename(license.file)))
+    end
+end
+
 function write(opt)
-    local libs = libraries(opt.targets, opt.runtime)
+    local libs = libraries(opt.targets, opt.carried)
+    local models, licenses = opt.models or {}, opt.licenses or {}
     local root = path.join(opt.workdir, "root")
     os.tryrm(opt.workdir)
     local binaries = stage(libs, root, opt.provided)
     local depends, shared = needs(binaries, opt.packages)
-    table.join2(depends, opt.depends or {})
-    local version = release(libs, depends)
+    local version = release(libs, depends, models)
+    place(root, models, licenses)
     for _, binary in ipairs(binaries) do
         signing.sign(opt.ldid, binary)
     end
     local control = path.join(opt.workdir, NAME .. ".control")
     io.writefile(control, table.concat(FIELDS, "\n") .. "\n")
-    local deb = debian.write({control = control, version = version, root = root, depends = depends, recommends = opt.recommends, outputdir = opt.outputdir})
+    local deb = debian.write({control = control, version = version, root = root, depends = depends, outputdir = opt.outputdir})
     local leaves = {}
     for _, library in ipairs(libs) do
         table.insert(leaves, library.leaf)
@@ -156,7 +173,7 @@ function ensure(opt)
         task.run("build", {target = target:name()})
         table.insert(targets, target)
     end
-    written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided, runtime = opt.runtime,
-                     depends = opt.depends, recommends = opt.recommends, workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
+    written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided, carried = opt.carried,
+                     models = opt.models, licenses = opt.licenses, workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
     return written
 end

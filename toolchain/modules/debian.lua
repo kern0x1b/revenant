@@ -124,10 +124,9 @@ local function appended(fields, text, key, values)
     return table.concat(lines, "\n")
 end
 
-function control_text(control, version, root, depends, recommends)
+function control_text(control, version, root, depends)
     local fields, text = control_fields(control)
     text = appended(fields, text, "Depends", depends)
-    text = appended(fields, text, "Recommends", recommends)
     if text:find("\nVersion:") or text:startswith("Version:") or text:find("Installed%-Size:") then
         raise("%s must not carry Version or Installed-Size; the build writes them", control)
     end
@@ -140,7 +139,7 @@ function control_text(control, version, root, depends, recommends)
 end
 
 function write(opt)
-    local fields, control = control_text(opt.control, opt.version, opt.root, opt.depends, opt.recommends)
+    local fields, control = control_text(opt.control, opt.version, opt.root, opt.depends)
     local control_members = {{name = "./", directory = true}, {name = "./control", mode = 420, data = control}}
     if opt.scripts and os.isdir(opt.scripts) then
         local names = os.files(path.join(opt.scripts, "*"))

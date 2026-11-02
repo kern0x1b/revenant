@@ -6,7 +6,7 @@
 
 The request reads the languages from `recognitionLanguages`, at the level from `recognitionLevel` and the revision from `revision`. The revision is the one macOS Vision reports; the backport answers the same identifiers as macOS Vision revision 1, 2 and 3 for the accurate level, and the six languages of the fast level for revision 3.
 
-`supportedRecognitionLanguagesForTextRecognitionLevel:revision:error:` answers only the languages whose model is installed in `/usr/share/revenant/tessdata/{fast,best}`. Apple's list is the list of languages the framework supports; the backport's list is the list of languages this device can read. With no model installed the list is empty. Asking for a language that is not installed at its level fails with an error; it does not fall back to another language.
+`supportedRecognitionLanguagesForTextRecognitionLevel:revision:error:` answers only the languages whose model is installed in `/var/lib/revenant/tessdata/{fast,best}`. Apple's list is the list of languages the framework supports; the backport's list is the list of languages this device can read. With no model installed the list is empty. Asking for a language that is not installed at its level fails with an error; it does not fall back to another language.
 
 Tesseract's language code for each identifier is:
 
@@ -37,17 +37,13 @@ The fast level reads six languages, so only those six fast models are packaged. 
 
 ## Packaging
 
-The `tessdata` recipe takes a `languages` option: a list of Tesseract codes, or `all`. The default is `eng,rus,ukr`. Each code is installed at the fast level where the fast level answers it (the six languages of the table above), and at the accurate level where tessdata_best has its model. The packaging configuration installs the default set; the host tests install `all`.
+The `tessdata` recipe takes a `languages` option: a list of Tesseract codes, or `all`. The default is `eng,rus,ukr`. Each code is installed at the fast level where the fast level answers it (the six languages of the table above), and at the accurate level where tessdata_best has its model. The Backports package asks for `all`, on the device and on the host alike, so there is one configuration: 28 accurate models and 6 fast ones.
 
-Each installed model is one package, installed in `/usr/share/revenant/tessdata/{fast,best}`:
+The models are carried by the Backports package, `org.revenant.backports`, and not by packages of their own ([decision 0012](../decisions/0012-one-backports-package.md)). `toolchain/modules/apple/vision_text.lua` lists the models of the `tessdata` package that the Vision target requires, and `backports_package` writes each one under `/var/lib/revenant/tessdata/{fast,best}`, the folder the loader reads. The folder is on `/var` because `/usr` is the system volume, with about 25 MB free on the iPad, while `/var` has about 13 GB; the models are the bulk of the package. The package has no `Depends` or `Recommends` for them.
 
-- `org.revenant.vision-text-best-eng` and `org.revenant.vision-text-fast-eng` are the accurate and the fast English models. The Backports package depends on both.
-- `org.revenant.vision-text-best-rus` and `org.revenant.vision-text-best-ukr` are the accurate Russian and Ukrainian models. The Backports package recommends them.
-- `org.revenant.vision-text-fast-<code>` is the fast model of each of the other five fast-level languages, and `org.revenant.vision-text-best-<code>` is the accurate model for each code. An underscore in the code becomes a hyphen, so `chi_sim` is `best-chi-sim`. Nothing depends on these; an app that needs one of them installs its package.
+The FFmpeg decoder that the Backports libraries link is carried in the same package, in `/usr/lib/revenant/org.revenant.backports/` beside them, and the libraries name it there. The licences are in the package's documents: `/usr/share/doc/org.revenant.backports/licenses/tessdata/LICENSE` for the models (Apache-2.0) and `licenses/ffmpeg-hevc/LICENSE.md` for the decoder (LGPL-2.1-or-later).
 
-`toolchain/modules/apple/vision_text.lua` writes one package for each installed model. `platform.vision_text_debs` calls it with the install directory of the `tessdata` package that the Vision target requires, and `backports_package` writes the Depends and Recommends fields.
-
-The fast level answers only the six languages of macOS's fast list, so it has no Russian or Ukrainian model at all; `ru-RU` and `uk-UA` are read at the accurate level, as on macOS. For that reason the Backports package recommends `best-rus` and `best-ukr`, and the fast Russian and Ukrainian models are not packaged.
+The fast level answers only the six languages of macOS's fast list, so it has no Russian or Ukrainian model at all; `ru-RU` and `uk-UA` are read at the accurate level, as on macOS. The accurate Russian and Ukrainian models are therefore in the package with the English ones, and the fast Russian and Ukrainian models are not packaged.
 
 ## Where it differs from Apple's Vision
 
@@ -93,6 +89,6 @@ The text read matches the fixtures: `Hello, world` and `Vision text 2026` for En
 
 - Compiled for `armv7-apple-ios6.0`: the six Vision sources pass a syntax check against the iOS 6 SDK, and the probe runs on the iPhone 4S (above).
 - Host tests pass against the macOS Vision language lists and the fixture text: the default run and the negative control. The host tests were rerun after the `tessdata` recipe took the `languages` option.
-- Packaging modules are written, and their tests pass: `debian_test` (including the `Recommends` field) and `vision_text_test` (the per-model packages, the dependency and recommendation names, an unknown model, and a missing license). The `tessdata` recipe configures and installs for macOS.
-- Not yet run: a full iOS packaging run that writes the Backports package and the model packages together. The iOS default set (`eng,rus,ukr`) was not installed for iOS in this run.
+- Packaging: `backports_package_test` checks that the FFmpeg decoder and the models sit in their folders, that the decoder's install name is rewritten to the package's folder, and that the package adds no `Depends` for them; `vision_text_test` checks the model paths, an unknown model, and a missing licence. Both pass on the host.
+- Measured on a full iOS packaging run (`./xmakew deb -P .`, armv7, all 34 models): the package is 286,150,338 bytes (273 MiB) compressed and 349,733 KiB installed. The 28 accurate models are 313,768,723 bytes, the 6 fast models 13,747,392 bytes, the FFmpeg decoder 852,624 (`libavcodec`) and 543,296 (`libavutil`) bytes. The package has no `Depends` and no `Recommends`. It is not yet installed on a device.
 - Open: the speed of the accurate level on the device (C36). C36 stays open in `crutches.md` until a native fix of the recognition time lands as separate work; nothing in this branch closes it.

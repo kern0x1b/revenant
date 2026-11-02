@@ -164,7 +164,7 @@ function failures(opt)
 
     local vision = path.join(folder, "libVisionFixture.dylib")
     local withRuntime = backports.write({targets = {target("VisionBackports", vision)}, ldid = opt.ldid, packages = {}, provided = {},
-                                        runtime = carried, workdir = path.join(folder, "runtime-work"), outputdir = path.join(folder, "runtime-debs")})
+                                        carried = carried, workdir = path.join(folder, "runtime-work"), outputdir = path.join(folder, "runtime-debs")})
     local unpacked = path.join(folder, "runtime-unpacked")
     unpack(withRuntime.deb, unpacked)
     local dir = path.join(unpacked, "usr", "lib", "revenant", NAME)
@@ -198,10 +198,51 @@ function failures(opt)
     end
     local collision = fixtures.refusal(function ()
         backports.write({targets = {target("VisionBackports", vision)}, ldid = opt.ldid, packages = {}, provided = {},
-                         runtime = {{leaf = "libVisionFixture.dylib", file = carried[1].file}}, workdir = path.join(folder, "collision"), outputdir = outputs})
+                         carried = {{leaf = "libVisionFixture.dylib", file = carried[1].file}}, workdir = path.join(folder, "collision"), outputdir = outputs})
     end)
     if not collision or not collision:find("already is", 1, true) then
         table.insert(found, "a carried runtime that names a library of the package must be refused: " .. tostring(collision))
+    end
+
+    io.writefile(path.join(folder, "fake.c"), "int fake(void) { return 7; }\n")
+    fixtures.link(folder, opt.ld64, "libavcodec.1.dylib", "armv7-apple-ios6.0", "fake.c",
+                  {"-dynamiclib", "-install_name", "/usr/lib/revenant/org.example.ffmpeg-22222222/libavcodec.1.dylib"})
+    io.writefile(path.join(folder, "decoder.c"), "extern int fake(void);\nint decoder(void) { return fake() + 1; }\n")
+    fixtures.link(folder, opt.ld64, "libDecoderBackports.dylib", "armv7-apple-ios6.0", "decoder.c",
+                  {"-dynamiclib", "-install_name", "@rpath/libDecoderBackports.dylib", "-L.", "-lavcodec.1"})
+    local models = path.join(folder, "models")
+    os.mkdir(path.join(models, "best"))
+    io.writefile(path.join(models, "best", "eng.traineddata"), "eng model")
+    io.writefile(path.join(models, "LICENSE"), "tessdata license")
+    local decoded = backports.write({targets = {target("DecoderBackports", path.join(folder, "libDecoderBackports.dylib"))},
+                                     ldid = opt.ldid, packages = {}, provided = {},
+                                     carried = {{leaf = "libavcodec.1.dylib", file = path.join(folder, "libavcodec.1.dylib")}},
+                                     models = {{source = path.join(models, "best", "eng.traineddata"), destination = "var/lib/revenant/tessdata/best/eng.traineddata"}},
+                                     licenses = {{component = "tessdata", file = path.join(models, "LICENSE")}},
+                                     workdir = path.join(folder, "data-work"), outputdir = path.join(folder, "data-debs")})
+    local data = path.join(folder, "data-unpacked")
+    unpack(decoded.deb, data)
+    if decoded.depends[1] ~= nil then
+        table.insert(found, "the FFmpeg decoder and the Vision models add no Depends, got " .. table.concat(decoded.depends, ", "))
+    end
+    local listed = {}
+    for _, file in ipairs(table.join(os.files(path.join(data, "usr", "**")), os.files(path.join(data, "var", "**")))) do
+        table.insert(listed, path.relative(file, data))
+    end
+    table.sort(listed)
+    local wanted = {"usr/lib/revenant/" .. NAME .. "/libDecoderBackports.dylib", "usr/lib/revenant/" .. NAME .. "/libavcodec.1.dylib",
+                    "usr/share/doc/" .. NAME .. "/licenses/tessdata/LICENSE", "var/lib/revenant/tessdata/best/eng.traineddata"}
+    table.sort(wanted)
+    if table.concat(listed, ",") ~= table.concat(wanted, ",") then
+        table.insert(found, "the package carries the FFmpeg decoder, the Vision model and the tessdata license in its own folders: " .. table.concat(listed, ","))
+    end
+    local control_data = io.readfile(path.join(data, "control"))
+    if control_data:find("\nDepends:", 1, true) then
+        table.insert(found, "the package names no Depends for a library it carries: " .. control_data)
+    end
+    local decoder_names = fixtures.run(folder, "xcrun", {"otool", "-L", path.join(data, "usr", "lib", "revenant", NAME, "libDecoderBackports.dylib")})
+    if not decoder_names:find(FOLDER .. "/libavcodec.1.dylib", 1, true) or decoder_names:find("org.example.ffmpeg", 1, true) then
+        table.insert(found, "a Backports library names the FFmpeg decoder it carries in the package's folder: " .. decoder_names)
     end
 
     os.tryrm(folder)
