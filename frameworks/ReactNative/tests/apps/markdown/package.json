@@ -1,0 +1,16 @@
+{
+  "name": "revenant-rn-markdown-probe",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "expo": "~57.0.30",
+    "expo-constants": "~57.0.22",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-enriched-markdown": "1.2.0-nightly-20261014-766fc0e67"
+  },
+  "devDependencies": {
+    "babel-preset-expo": "~57.0.16"
+  }
+}
