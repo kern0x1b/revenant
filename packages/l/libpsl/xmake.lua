@@ -2,6 +2,9 @@ package("libpsl")
     set_homepage("https://rockdaboot.github.io/libpsl")
     set_description("libpsl with its built-in public suffix list as a static library and no IDNA library: WebKit's soup-free cookie and domain checks use it, and the release tarball carries the list already compiled to a DAFSA")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/rockdaboot/libpsl/releases/download/$(version)/libpsl-$(version).tar.gz")

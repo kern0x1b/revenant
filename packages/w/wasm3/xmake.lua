@@ -2,6 +2,9 @@ package("wasm3")
     set_homepage("https://github.com/wasm3/wasm3")
     set_description("wasm3, the WebAssembly interpreter, as a static library: the compat dylib runs WebAssembly through it, since JavaScriptCore's WebAssembly is 64-bit only")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/wasm3/wasm3.git")

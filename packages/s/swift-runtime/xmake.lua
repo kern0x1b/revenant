@@ -2,6 +2,9 @@ package("swift-runtime")
     set_homepage("https://www.swift.org")
     set_description("The Swift runtime an iOS older than Swift itself does not ship: the standard library, concurrency, synchronization, regular expressions and observation, built for the port's architecture and oldest release from the sources of the swift package")
     set_license("Apache-2.0 WITH Swift-exception")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/swiftlang/swift.git")

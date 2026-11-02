@@ -2,6 +2,9 @@ package("brotli")
     set_homepage("https://github.com/google/brotli")
     set_description("Brotli, its decoder, encoder and common libraries as static libraries: what WebKit decodes WOFF2 fonts and brotli content with")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/google/brotli.git")

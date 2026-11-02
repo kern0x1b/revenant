@@ -2,6 +2,9 @@ package("libcxx")
     set_homepage("https://libcxx.llvm.org")
     set_description("The C++ runtime an old iOS does not ship, as the shared libraries an application carries in its bundle")
     set_license("Apache-2.0 WITH LLVM-exception")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/llvm/llvm-project.git")

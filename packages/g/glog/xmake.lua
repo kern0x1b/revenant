@@ -2,6 +2,9 @@ package("glog")
     set_homepage("https://github.com/google/glog")
     set_description("glog 0.3.5, the logging library React Native's folly writes its diagnostics with, as a static libglog for armv7 iOS 6, its configuration probed against the iOS 6 SDK and built without gflags, as React Native builds it")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/google/glog.git")

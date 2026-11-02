@@ -3,6 +3,9 @@ package("opus")
     set_homepage("https://opus-codec.org")
     set_description("The Opus audio codec as a static library for armv7 iOS 6: Telegram encodes its voice messages and calls with it, and its own build uses the same release")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://downloads.xiph.org/releases/opus/opus-$(version).tar.gz")
     add_versions("1.5.1", "b84610959b8d417b611aa12a22565e0a3732097c6389d19098d844543e340f85")

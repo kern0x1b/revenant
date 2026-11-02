@@ -2,6 +2,9 @@ package("libxml2")
     set_homepage("https://gitlab.gnome.org/GNOME/libxml2")
     set_description("libxml2 as a static library over ICU and without iconv, linked into WebKit in place of the 2010 copy iOS 6 ships")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://gitlab.gnome.org/GNOME/libxml2.git")

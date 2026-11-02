@@ -2,6 +2,9 @@ package("woff2")
     set_homepage("https://github.com/google/woff2")
     set_description("WOFF2, its decoder and common libraries as static libraries against brotli, at the head of master: the one release is from 2017 and its build predates CMake 3.5")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/google/woff2.git")

@@ -3,6 +3,9 @@ package("mozjpeg")
     set_homepage("https://github.com/mozilla/mozjpeg")
     set_description("mozjpeg, the JPEG encoder Telegram writes its photos with, as static libjpeg and libturbojpeg for armv7 iOS 6, at master commit 61e03cc6, the snapshot Telegram vendors (4.1.4 plus 22 commits)")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/mozilla/mozjpeg.git")
     add_versions("4.1.4-22", "61e03cc6b25ea506085dce1ee93ddd1f4b6588e6")

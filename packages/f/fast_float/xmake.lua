@@ -2,6 +2,9 @@ package("fast_float")
     set_homepage("https://github.com/fastfloat/fast_float")
     set_description("fast_float 8.0.0, the header-only number parser folly's conversions use, installed as the fast_float headers for armv7 iOS 6")
     set_license("MIT OR Apache-2.0 OR BSL-1.0")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/fastfloat/fast_float.git")
     add_versions("8.0.0", "77cc847c842c49e7e3477c1e95da2b6540166d66")
