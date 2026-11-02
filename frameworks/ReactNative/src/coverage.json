@@ -131,6 +131,15 @@
    "note": "Has 84 files of iOS code and is not built."
   },
   {
+   "id": "expo",
+   "group": "sdk",
+   "version": "~57.0.30",
+   "native": true,
+   "status": "partial",
+   "verified": "build",
+   "note": "Only the Fetch module of the package is built; the rest of its iOS code is not."
+  },
+  {
    "id": "eslint-config-expo",
    "group": "sdk",
    "version": "~57.0.2",
@@ -935,7 +944,7 @@
    "id": "react-native-gesture-handler",
    "group": "sdk",
    "version": "~2.32.0",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the app's gestures run on it."
@@ -980,7 +989,7 @@
    "id": "react-native-worklets",
    "group": "sdk",
    "version": "0.10.1",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built."
@@ -989,7 +998,7 @@
    "id": "react-native-reanimated",
    "group": "sdk",
    "version": "4.5.1",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the bottom sheets animate on it."
@@ -1016,7 +1025,7 @@
    "id": "react-native-svg",
    "group": "sdk",
    "version": "15.15.4",
-   "native": false,
+   "native": true,
    "status": "real",
    "verified": "phone",
    "note": "Built; the logo and icons draw."

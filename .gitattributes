@@ -18,6 +18,10 @@ docs/** linguist-documentation
 
 frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
 frameworks/SwiftUI/src/TextSettings.swift comments=upstream
+frameworks/ReactNative/src/expo/GlassView.swift comments=upstream
+frameworks/ReactNative/src/expo/JSIUtils.cpp comments=upstream
+frameworks/ReactNative/src/expo/LocalizationModule.swift comments=upstream
+frameworks/ReactNative/src/ios6/include/React_RCTAppDelegate/RCTRootViewFactory.h comments=upstream
 frameworks/Backports/tests/data/demand/sample.m comments=fixture
 frameworks/Backports/tests/data/demand/sample.swift comments=fixture
 toolchain/tests/addon/toolchain_check/apple-ios-before-on-check.lua comments=fixture

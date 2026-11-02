@@ -7,14 +7,14 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 35 |
-| partial | built and running, with a named part left out or rewritten | 6 |
+| partial | built and running, with a named part left out or rewritten | 7 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
 | missing | native code that is not built yet | 44 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
-| total | | 158 |
+| total | | 159 |
 
 Checked: phone: seen working on the phone; build: compiles and links; not exercised; none: not checked.
 
@@ -75,6 +75,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | @react-native-picker/picker | 2.11.4 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | @react-native-segmented-control/segmented-control | 2.5.7 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | @stripe/stripe-react-native | 0.64.0 | yes | missing | none | Has 84 files of iOS code and is not built. |
+| expo | ~57.0.30 | yes | partial | build | Only the Fetch module of the package is built; the rest of its iOS code is not. |
 | eslint-config-expo | ~57.0.2 | no | n/a | none | Lint configuration. |
 | expo-analytics-amplitude | ~11.3.0 | yes | missing | none | Has 3 files of iOS code and is not built. |
 | expo-app-auth | ~11.1.0 | yes | missing | none | Has 9 files of iOS code and is not built. |
@@ -164,16 +165,16 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-dom | 19.2.3 | no | n/a | none | Web only. |
 | react-native | 0.86.3 | no | partial | phone | See the core table. |
 | react-native-web | ~0.21.0 | no | n/a | none | Web only. |
-| react-native-gesture-handler | ~2.32.0 | no | real | phone | Built; the app's gestures run on it. |
+| react-native-gesture-handler | ~2.32.0 | yes | real | phone | Built; the app's gestures run on it. |
 | react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | react-native-keyboard-controller | 1.21.9 | yes | stub | phone | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. |
 | react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
 | react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
-| react-native-worklets | 0.10.1 | no | real | phone | Built. |
-| react-native-reanimated | 4.5.1 | no | real | phone | Built; the bottom sheets animate on it. |
+| react-native-worklets | 0.10.1 | yes | real | phone | Built. |
+| react-native-reanimated | 4.5.1 | yes | real | phone | Built; the bottom sheets animate on it. |
 | react-native-screens | ~4.26.0 | yes | partial | phone | Built without the gamma folder (it needs Swift types from newer iOS); the stack and the sheets work. |
 | react-native-safe-area-context | ~5.7.0 | yes | real | phone | Built. |
-| react-native-svg | 15.15.4 | no | real | phone | Built; the logo and icons draw. |
+| react-native-svg | 15.15.4 | yes | real | phone | Built; the logo and icons draw. |
 | react-native-view-shot | 5.1.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | react-native-webview | 13.16.1 | yes | real | build | Built; a page load on iOS 6 is not exercised. |
 | react-server-dom-webpack | ~19.2.4 | no | n/a | none | Server components runtime. |
