@@ -1,170 +1,128 @@
-#if !REVENANT_BACKPORT
 import CryptoKit
-#endif
 import Foundation
+
+var failures = 0
 
 func hex(_ bytes: some Sequence<UInt8>) -> String {
     bytes.map { String(format: "%02x", $0) }.joined()
 }
 
-func pattern(_ count: Int, _ seed: UInt8) -> Data {
-    Data((0..<count).map { UInt8(truncatingIfNeeded: $0 &* 31 &+ Int(seed)) })
+func bytes(hex text: String) -> [UInt8] {
+    var result = [UInt8]()
+    var index = text.startIndex
+    while index < text.endIndex {
+        let next = text.index(index, offsetBy: 2)
+        result.append(UInt8(text[index..<next], radix: 16)!)
+        index = next
+    }
+    return result
 }
 
-let messages: [Data] = [Data(), Data("abc".utf8), pattern(55, 1), pattern(56, 2), pattern(64, 3), pattern(65, 4), pattern(128, 5), pattern(1000, 6), pattern(200_003, 7)]
-
-for message in messages {
-    print("sha256 \(message.count) \(SHA256.hash(data: message).description)")
-    print("sha384 \(message.count) \(SHA384.hash(data: message).description)")
-    print("sha512 \(message.count) \(SHA512.hash(data: message).description)")
-}
-
-var incremental = SHA256()
-incremental.update(data: pattern(70, 8))
-incremental.update(data: pattern(130, 9))
-var joined = pattern(70, 8)
-joined.append(pattern(130, 9))
-print("incremental \(incremental.finalize().description == SHA256.hash(data: joined).description)")
-
-print("digest sizes \(SHA256.byteCount) \(SHA256.blockByteCount) \(SHA384.byteCount) \(SHA384.blockByteCount) \(SHA512.byteCount) \(SHA512.blockByteCount)")
-let sha256Size: Int = SHA256Digest.byteCount
-let sha512Count: Int = Array(SHA512.hash(data: Data())).count
-print("digest sizes of values \(sha256Size) \(sha512Count)")
-print("digest equality \(SHA256.hash(data: Data("abc".utf8)) == SHA256.hash(data: Data("abc".utf8))) \(SHA256.hash(data: Data("abc".utf8)) == Data("abc".utf8))")
-
-let keys: [Data] = [Data(), pattern(16, 10), pattern(64, 11), pattern(200, 12)]
-for key in keys {
-    for message in [Data(), pattern(17, 13), pattern(300, 14)] {
-        let symmetric = SymmetricKey(data: key)
-        print("hmac256 \(key.count) \(message.count) \(HMAC<SHA256>.authenticationCode(for: message, using: symmetric).description)")
-        print("hmac384 \(key.count) \(message.count) \(HMAC<SHA384>.authenticationCode(for: message, using: symmetric).description)")
-        print("hmac512 \(key.count) \(message.count) \(HMAC<SHA512>.authenticationCode(for: message, using: symmetric).description)")
-        var streaming = HMAC<SHA256>(key: symmetric)
-        streaming.update(data: message.prefix(3))
-        streaming.update(data: message.dropFirst(3))
-        let code = streaming.finalize()
-        print("hmac stream \(key.count) \(message.count) \(code.description == HMAC<SHA256>.authenticationCode(for: message, using: symmetric).description)")
-        print("hmac valid \(HMAC<SHA256>.isValidAuthenticationCode(code, authenticating: message, using: symmetric)) \(HMAC<SHA256>.isValidAuthenticationCode(code, authenticating: message + Data([0]), using: symmetric))")
+func check(_ name: String, _ got: String, _ expected: String) {
+    if got == expected {
+        print("\(name) true")
+    } else {
+        failures += 1
+        print("\(name) false got=\(got) expected=\(expected)")
     }
 }
 
-for size in [SymmetricKeySize.bits128, SymmetricKeySize.bits192, SymmetricKeySize.bits256] {
-    let key = SymmetricKey(size: size)
-    print("size \(size.bitCount) \(key.bitCount) \(key.withUnsafeBytes { $0.count })")
-}
-print("symmetric equality \(SymmetricKey(data: Data([1, 2])) == SymmetricKey(data: Data([1, 2]))) \(SymmetricKey(data: Data([1, 2])) == SymmetricKey(data: Data([1, 3])))")
-print("symmetric bits \(SymmetricKey(data: pattern(24, 15)).bitCount)")
-
-let gcmKeys: [Data] = [pattern(16, 20), pattern(24, 21), pattern(32, 22)]
-let gcmNonce = try! AES.GCM.Nonce(data: pattern(12, 23))
-let plaintexts: [Data] = [Data(), Data([0x41]), pattern(15, 24), pattern(16, 25), pattern(17, 26), pattern(31, 27), pattern(32, 28), pattern(33, 29), pattern(100, 30)]
-let aads: [Data] = [Data(), Data([1]), pattern(16, 31), pattern(20, 32), pattern(33, 33)]
-for key in gcmKeys {
-    for plaintext in plaintexts {
-        for aad in aads {
-            let box = try! AES.GCM.seal(plaintext, using: SymmetricKey(data: key), nonce: gcmNonce, authenticating: aad)
-            print("gcm \(key.count) \(plaintext.count) \(aad.count) \(hex(box.combined!)) \(box.tag.count) \(box.ciphertext.count)")
-            let opened = try! AES.GCM.open(box, using: SymmetricKey(data: key), authenticating: aad)
-            print("gcm open \(opened == plaintext)")
-        }
+func check(_ name: String, _ condition: Bool) {
+    if condition {
+        print("\(name) true")
+    } else {
+        failures += 1
+        print("\(name) false")
     }
 }
 
-print("gcm without aad \(hex(try! AES.GCM.seal(pattern(40, 34), using: SymmetricKey(data: pattern(16, 35)), nonce: gcmNonce).combined!))")
-print("gcm open without aad \(try! AES.GCM.open(try! AES.GCM.seal(pattern(40, 34), using: SymmetricKey(data: pattern(16, 35)), nonce: gcmNonce), using: SymmetricKey(data: pattern(16, 35))) == pattern(40, 34))")
+let abc = Data("abc".utf8)
 
-let sealed = try! AES.GCM.seal(Data("secret".utf8), using: SymmetricKey(data: pattern(16, 36)), nonce: gcmNonce, authenticating: Data("aad".utf8))
-let tampered = try! AES.GCM.SealedBox(nonce: gcmNonce, ciphertext: sealed.ciphertext, tag: Data(repeating: 0, count: 16))
-do {
-    _ = try AES.GCM.open(tampered, using: SymmetricKey(data: pattern(16, 36)), authenticating: Data("aad".utf8))
-    print("open tampered tag accepted")
-} catch {
-    print("open tampered tag error \(error)")
-}
-do {
-    _ = try AES.GCM.open(sealed, using: SymmetricKey(data: pattern(16, 36)), authenticating: Data("aaX".utf8))
-    print("open wrong aad accepted")
-} catch {
-    print("open wrong aad error \(error)")
-}
-do {
-    _ = try AES.GCM.open(sealed, using: SymmetricKey(data: pattern(16, 37)))
-    print("open wrong key accepted")
-} catch {
-    print("open wrong key error \(error)")
-}
-do {
-    _ = try AES.GCM.seal(Data(), using: SymmetricKey(data: pattern(15, 38)))
-    print("seal bad key accepted")
-} catch {
-    print("seal bad key error \(error)")
-}
-do {
-    _ = try AES.GCM.Nonce(data: pattern(11, 39))
-    print("nonce accepted")
-} catch {
-    print("nonce error \(error)")
-}
-do {
-    _ = try AES.GCM.SealedBox(combined: pattern(27, 40))
-    print("combined accepted")
-} catch {
-    print("combined error \(error)")
-}
-let combined = try! AES.GCM.SealedBox(combined: sealed.combined!)
-let roundtrip: Bool = combined.combined! == sealed.combined!
-let parts: [Int] = [Array(combined.nonce).count, combined.ciphertext.count, combined.tag.count]
-print("combined roundtrip \(roundtrip) \(parts)")
-do {
-    _ = try AES.GCM.SealedBox(nonce: gcmNonce, ciphertext: Data(), tag: Data(repeating: 0, count: 15))
-    print("short tag accepted")
-} catch {
-    print("short tag error \(error)")
-}
-print("errors equal \(CryptoKitError.authenticationFailure == CryptoKitError.authenticationFailure) \(CryptoKitError.incorrectKeySize == CryptoKitError.incorrectParameterSize)")
+check("sha256 abc", hex(SHA256.hash(data: abc)), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+check("sha256 empty", hex(SHA256.hash(data: Data())), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+check("sha384 abc", hex(SHA384.hash(data: abc)), "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7")
+check("sha512 abc", hex(SHA512.hash(data: abc)), "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f")
+check("sha3-256 abc", hex(SHA3_256.hash(data: abc)), "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532")
+check("sha3-256 empty", hex(SHA3_256.hash(data: Data())), "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a")
+check("sha1 abc", hex(Insecure.SHA1.hash(data: abc)), "a9993e364706816aba3e25717850c26c9cd0d89d")
+check("md5 abc", hex(Insecure.MD5.hash(data: abc)), "900150983cd24fb0d6963f7d28e17f72")
 
-let hkdfKey = SymmetricKey(data: pattern(22, 41))
-let hkdfSalt = pattern(13, 42)
-let hkdfInfo = pattern(10, 43)
-print("hkdf extract \(hex(HKDF<SHA256>.extract(inputKeyMaterial: hkdfKey, salt: hkdfSalt)))")
-for length in [1, 31, 32, 33, 64, 100, 255] {
-    let derived = HKDF<SHA256>.deriveKey(inputKeyMaterial: hkdfKey, salt: hkdfSalt, info: hkdfInfo, outputByteCount: length)
-    print("hkdf \(length) \(hex(derived.withUnsafeBytes { Array($0) }))")
-}
-let rfcKey = SymmetricKey(data: Data(repeating: 0x0b, count: 22))
-let rfcSalt = Data((0...12).map { UInt8($0) })
-let rfcInfo = Data((0xf0...0xf9).map { UInt8($0) })
-let rfcOne = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, salt: rfcSalt, info: rfcInfo, outputByteCount: 42)
-print("hkdf rfc5869 1 \(hex(rfcOne.withUnsafeBytes { Array($0) }) == "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865")")
-let rfcThree = HKDF<SHA256>.deriveKey(inputKeyMaterial: rfcKey, outputByteCount: 42)
-print("hkdf rfc5869 3 \(hex(rfcThree.withUnsafeBytes { Array($0) }) == "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8")")
+let hmacKey1 = SymmetricKey(data: Data(repeating: 0x0b, count: 20))
+check("hmac-sha256 rfc4231 case 1", hex(HMAC<SHA256>.authenticationCode(for: Data("Hi There".utf8), using: hmacKey1)),
+      "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7")
+let hmacKey2 = SymmetricKey(data: Data("Jefe".utf8))
+check("hmac-sha256 rfc4231 case 2", hex(HMAC<SHA256>.authenticationCode(for: Data("what do ya want for nothing?".utf8), using: hmacKey2)),
+      "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843")
 
-let md5Vectors: [(Data, String)] = [
-    (Data(), "d41d8cd98f00b204e9800998ecf8427e"),
-    (Data("a".utf8), "0cc175b9c0f1b6a831c399e269772661"),
-    (Data("abc".utf8), "900150983cd24fb0d6963f7d28e17f72"),
-    (Data("message digest".utf8), "f96b697d7cb7938d525a2f31aaf161d0"),
-    (Data("abcdefghijklmnopqrstuvwxyz".utf8), "c3fcd3d76192e4007dfb496cca67e13b"),
-    (Data("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".utf8), "d174ab98d277d9f5a5611c2c9f419d9f"),
-    (Data(String(repeating: "1234567890", count: 8).utf8), "57edf4a22be3c955ac49da2e2107b67a"),
-    (Data("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".utf8), "8215ef0796a20bcaaae116d3876c664a"),
-    (Data(repeating: 0x61, count: 1_000_000), "7707d6ae4e027c70eea2a935c2296f21"),
-]
-let sha1Vectors: [(Data, String)] = [
-    (Data(), "da39a3ee5e6b4b0d3255bfef95601890afd80709"),
-    (Data("abc".utf8), "a9993e364706816aba3e25717850c26c9cd0d89d"),
-    (Data("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".utf8), "84983e441c3bd26ebaae4aa1f95129e5e54670f1"),
-    (Data(repeating: 0x61, count: 1_000_000), "34aa973cd4c4daa4f61eeb2bdbad27316534016f"),
-]
-print("md5 vectors \(md5Vectors.allSatisfy { Insecure.MD5.hash(data: $0.0).description == "MD5 digest: " + $0.1 })")
-print("sha1 vectors \(sha1Vectors.allSatisfy { Insecure.SHA1.hash(data: $0.0).description == "SHA1 digest: " + $0.1 })")
-print("insecure sizes \(Insecure.MD5Digest.byteCount) \(Insecure.MD5.byteCount) \(Insecure.MD5.blockByteCount) \(Insecure.SHA1Digest.byteCount) \(Insecure.SHA1.byteCount) \(Insecure.SHA1.blockByteCount)")
-print("insecure as data \(Data(Insecure.MD5.hash(data: Data("abc".utf8))).count) \(Array(Insecure.SHA1.hash(data: Data("abc".utf8))).count)")
-var md5Incremental = Insecure.MD5()
-md5Incremental.update(data: pattern(70, 8))
-md5Incremental.update(data: pattern(130, 9))
-print("md5 incremental \(md5Incremental.finalize().description == Insecure.MD5.hash(data: joined).description)")
-var sha1Incremental = Insecure.SHA1()
-sha1Incremental.update(data: pattern(70, 8))
-sha1Incremental.update(data: pattern(130, 9))
-print("sha1 incremental \(sha1Incremental.finalize().description == Insecure.SHA1.hash(data: joined).description)")
+func hkdf(ikm: [UInt8], salt: [UInt8], info: [UInt8], count: Int) -> String {
+    let key = HKDF<SHA256>.deriveKey(inputKeyMaterial: SymmetricKey(data: Data(ikm)), salt: Data(salt), info: Data(info), outputByteCount: count)
+    return key.withUnsafeBytes { hex($0) }
+}
+
+check("hkdf-sha256 rfc5869 case 1", hkdf(ikm: [UInt8](repeating: 0x0b, count: 22), salt: bytes(hex: "000102030405060708090a0b0c"),
+      info: bytes(hex: "f0f1f2f3f4f5f6f7f8f9"), count: 42),
+      "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865")
+check("hkdf-sha256 rfc5869 case 3", hkdf(ikm: [UInt8](repeating: 0x0b, count: 22), salt: [], info: [], count: 42),
+      "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8")
+
+let zeroKey128 = SymmetricKey(data: Data(repeating: 0, count: 16))
+let zeroKey256 = SymmetricKey(data: Data(repeating: 0, count: 32))
+let zeroNonce = try! AES.GCM.Nonce(data: Data(repeating: 0, count: 12))
+let zeroBlock = Data(repeating: 0, count: 16)
+
+let gcm128 = try! AES.GCM.seal(zeroBlock, using: zeroKey128, nonce: zeroNonce)
+check("aes-128-gcm gcm-spec case 2 ciphertext", hex(gcm128.ciphertext), "0388dace60b6a392f328c2b971b2fe78")
+check("aes-128-gcm gcm-spec case 2 tag", hex(gcm128.tag), "ab6e47d42cec13bdf53a67b21257bddf")
+
+let gcm256 = try! AES.GCM.seal(zeroBlock, using: zeroKey256, nonce: zeroNonce)
+check("aes-256-gcm gcm-spec case 14 ciphertext", hex(gcm256.ciphertext), "cea7403d4d606b6e074ec5d3baf39d18")
+check("aes-256-gcm gcm-spec case 14 tag", hex(gcm256.tag), "d0d1c8a799996bf0265b98b5d48ab919")
+
+let gcmOpened = try! AES.GCM.open(gcm256, using: zeroKey256)
+check("aes-256-gcm open round trip", gcmOpened == zeroBlock)
+
+var tampered = gcm256
+tampered = try! AES.GCM.SealedBox(nonce: zeroNonce, ciphertext: Data(repeating: 1, count: 16), tag: gcm256.tag)
+var rejected = false
+do {
+    _ = try AES.GCM.open(tampered, using: zeroKey256)
+} catch {
+    rejected = true
+}
+check("aes-256-gcm rejects a forged ciphertext", rejected)
+
+let chachaKey = SymmetricKey(data: bytes(hex: "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"))
+let chachaNonce = try! ChaChaPoly.Nonce(data: bytes(hex: "070000004041424344454647"))
+let chachaAAD = Data(bytes(hex: "50515253c0c1c2c3c4c5c6c7"))
+let chachaPlain = Data("Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.".utf8)
+let chachaBox = try! ChaChaPoly.seal(chachaPlain, using: chachaKey, nonce: chachaNonce, authenticating: chachaAAD)
+check("chacha20-poly1305 rfc8439 2.8.2 tag", hex(chachaBox.tag), "1ae10b594f09e26a7e902ecbd0600691")
+check("chacha20-poly1305 open round trip", (try? ChaChaPoly.open(chachaBox, using: chachaKey, authenticating: chachaAAD)) == chachaPlain)
+
+let alicePrivate = try! Curve25519.KeyAgreement.PrivateKey(rawRepresentation: bytes(hex: "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"))
+let bobPrivate = try! Curve25519.KeyAgreement.PrivateKey(rawRepresentation: bytes(hex: "5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"))
+check("x25519 rfc7748 6.1 alice public", hex(alicePrivate.publicKey.rawRepresentation), "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
+check("x25519 rfc7748 6.1 bob public", hex(bobPrivate.publicKey.rawRepresentation), "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
+let aliceShared = try! alicePrivate.sharedSecretFromKeyAgreement(with: bobPrivate.publicKey)
+check("x25519 rfc7748 6.1 shared secret", aliceShared.withUnsafeBytes { hex($0) },
+      "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742")
+
+let p256Alice = P256.KeyAgreement.PrivateKey()
+let p256Bob = P256.KeyAgreement.PrivateKey()
+let p256Secret = try! p256Alice.sharedSecretFromKeyAgreement(with: p256Bob.publicKey)
+let p256Other = try! p256Bob.sharedSecretFromKeyAgreement(with: p256Alice.publicKey)
+check("p256 ecdh agreement", p256Secret.withUnsafeBytes { hex($0) } == p256Other.withUnsafeBytes { hex($0) })
+
+let signing = P256.Signing.PrivateKey()
+let signature = try! signing.signature(for: abc)
+check("p256 ecdsa verifies its signature", signing.publicKey.isValidSignature(signature, for: abc))
+check("p256 ecdsa rejects another message", !signing.publicKey.isValidSignature(signature, for: Data("abd".utf8)))
+
+let generated = SymmetricKey(size: .bits256)
+check("symmetric key size", generated.bitCount == 256)
+
+if failures > 0 {
+    print("failures \(failures)")
+    exit(1)
+}
+print("all true")
