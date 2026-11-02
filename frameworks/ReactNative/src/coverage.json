@@ -961,11 +961,11 @@
   {
    "id": "react-native-keyboard-controller",
    "group": "sdk",
-   "version": "1.21.9",
+   "version": "1.21.12",
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. A phone check was made against this stub, not the library, so it is not counted as verified (stubs.json)."
+   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 with C++ interop off (keyboard-probe, build ok); the emitted header has no C++ section. The ObjC++ half does not compile yet: KeyboardControllerModule.mm uses RCTDirectEventBlock from the Swift header, which is not visible without clang modules (the probe is textual, the pod build uses modules). The app still runs plain-view stubs, so a phone check was made against this stub, not the library, and it is not counted as verified (stubs.json)."
   },
   {
    "id": "react-native-maps",
@@ -1010,7 +1010,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Built without the gamma folder (it needs Swift types from newer iOS); the stack and the sheets work."
+   "note": "Built without the gamma folder; the stack and the sheets work on the phone. gamma/ does not compile yet. Its 10 Swift files (all under gamma/) need the Fabric component views as Swift classes: RNSSplitScreenComponentView derives from RCTViewComponentView, whose header imports react/renderer C++ headers. With C++ interop off the Swift importer cannot parse them; with interop on the emitted header's C++ section fails under ObjC++ (see the keyboard-controller row). Its UIKit types of iOS 13 to 15 compile against the SDK 26.2 and are not yet checked at run time."
   },
   {
    "id": "react-native-safe-area-context",
@@ -1136,7 +1136,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "Not attempted. Hermes supports 32-bit ARM, but needs building against iOS 6 libc++ and a bytecode toolchain; the owner's note says JSC is the engine for now."
+   "note": "Measured, not built. Source: hermes-v250829098.0.17 (the hermes-compiler RN 0.86.3 pins), in .cache-private. Compiles for armv7 iOS 6 with generated config headers: the support layer (ADT, Support, Platform minus Android, Windows and Intl). The Intl layer needs ICU's unicode headers, which the iOS SDK may carry, not checked. The VM stops at llvh/IR/Attributes.inc, which needs the host llvh-tblgen. The bytecode generator (BCGen) and hermesc are source in the same tree; not yet built."
   },
   {
    "id": "bridgeless new architecture (RCTReactNativeFactory, RCTHost)",
@@ -1429,11 +1429,11 @@
   {
    "id": "react-native-paste-input",
    "group": "community",
-   "version": "",
+   "version": "2.0.1",
    "native": true,
    "status": "partial",
-   "verified": "phone",
-   "note": "Built without the ImageEffects category (it needs @import with modules enabled)."
+   "verified": "build",
+   "note": "Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error."
   },
   {
    "id": "@getpaseo/expo-two-way-audio",

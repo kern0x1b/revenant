@@ -1,0 +1,39 @@
+From 8bcf68266a6859288820a286b87f67847616c39d Mon Sep 17 00:00:00 2001
+From: revenant <revenant@localhost>
+Date: Sun, 1 Nov 2026 19:50:06 +0100
+Subject: [PATCH] Import UIKit and Accelerate as headers, not modules
+
+---
+ ios/UIImage+ImageEffects.h | 2 +-
+ ios/UIImage+ImageEffects.m | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ios/UIImage+ImageEffects.h b/ios/UIImage+ImageEffects.h
+index f689b15..b719b58 100644
+--- a/ios/UIImage+ImageEffects.h
++++ b/ios/UIImage+ImageEffects.h
+@@ -93,7 +93,7 @@
+  5/3/2013
+  */
+ 
+-@import UIKit;
++#import <UIKit/UIKit.h>
+ 
+ @interface UIImage (ImageEffects)
+ 
+diff --git a/ios/UIImage+ImageEffects.m b/ios/UIImage+ImageEffects.m
+index 4d19e3a..d6988f9 100644
+--- a/ios/UIImage+ImageEffects.m
++++ b/ios/UIImage+ImageEffects.m
+@@ -95,7 +95,7 @@ OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ 
+ #import "UIImage+ImageEffects.h"
+ 
+-@import Accelerate;
++#import <Accelerate/Accelerate.h>
+ #import <float.h>
+ 
+ 
+-- 
+2.54.0 (Apple Git-157)
+

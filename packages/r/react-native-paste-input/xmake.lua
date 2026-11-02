@@ -1,0 +1,23 @@
+package("react-native-paste-input")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/mattermost/react-native-paste-input")
+    set_description("@mattermost/react-native-paste-input 2.0.1, the paste-aware text input the paseo app uses, from its npm tarball: the Fabric component and its module, with our patch that imports UIKit and Accelerate as headers so the ImageEffects category builds without clang modules")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/@mattermost/react-native-paste-input/-/react-native-paste-input-$(version).tgz")
+    add_versions("2.0.1", "82bbee60752f13ebf0ca325418c96c208eb0381c48f4ba0874391d7791f46aee")
+    add_patches("2.0.1", path.join(os.scriptdir(), "patches", "0001-Import-UIKit-and-Accelerate-as-headers-not-modules.patch"), "411a5082d2d4525a2ccd741b21bd8d1ddebbe171ae754f6e61e9156336cadc09")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "@mattermost/react-native-paste-input" and manifest.version == "2.0.1", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "PasteTextInputComponentView.mm")), "the Fabric component of react-native-paste-input is not installed")
+        assert(not io.readfile(path.join(package:installdir(), "ios", "UIImage+ImageEffects.h")):find("@import", 1, true), "UIImage+ImageEffects.h still imports a module")
+    end)
