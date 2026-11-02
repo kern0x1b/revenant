@@ -57,7 +57,7 @@ puts into `CFBundleIdentifier`.
   --bundle FILE --conf KEY=VALUE,...` puts `bundle.js` and `rnhost.conf` inside `<app folder>/`, root-owned and not writable by
   others. The host refuses a file that is a symlink, is not owned by root, can be written by others, or resolves outside the
   `.app`, and logs the refusal. It reads only the keys `module`, `bundle`, `engine` and `JSC_*`.
-* Control flags and the command file are in the same `.app`, written as root (`./xmakew device run`): `rnhost.log.on` (log to
+* Control flags and the command file are in the same `.app`, written as root (`./xmakew device -P . run`): `rnhost.log.on` (log to
   `/var/tmp/<last part of the id>/rnhost.log`), `rnhost.fi` (frame interval), `rnhost.prof`, `rnhost.prof.stacks`, `rnhost.jsprof`.
   `rnhost.cmd` takes one command per line; the host runs each complete line once and only the lines appended after it, so append
   with `>>` and end the line with a newline. A rewrite in place with the same lines runs nothing; a replaced file (another inode) or

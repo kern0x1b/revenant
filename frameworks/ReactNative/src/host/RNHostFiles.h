@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-// Where the host writes its output: /var/tmp/<last part of the bundle id>/. Nothing is read or run from there, because
-// /var/tmp takes files from any process.
 static inline NSString *RNHostRunPath(NSString *file)
 {
     NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
@@ -17,15 +15,12 @@ static inline NSString *RNHostRunPath(NSString *file)
     return [[@"/var/tmp" stringByAppendingPathComponent:name] stringByAppendingPathComponent:file];
 }
 
-// The configuration (rnhost.conf), the bundle, the command file and the flags are read only from the application bundle.
-// deploy writes them there as root, so a process of the phone's user cannot change them.
 static inline BOOL RNHostTrustedDirectory(const char *path)
 {
     struct stat info;
     return stat(path, &info) == 0 && S_ISDIR(info.st_mode) && info.st_uid == 0 && !(info.st_mode & (S_IWGRP | S_IWOTH));
 }
 
-// The real path of the application bundle, nil when that folder is not owned by root or can be written by others.
 static inline NSString *RNHostAppRoot(void)
 {
     char root[PATH_MAX];
@@ -39,8 +34,6 @@ static inline NSString *RNHostAppRoot(void)
     return [NSString stringWithUTF8String:root];
 }
 
-// The real path of a file of the application, relative to the bundle or absolute. Nil when it is missing or when it resolves
-// outside the application bundle (symlinks included).
 static inline NSString *RNHostAppFilePath(NSString *file)
 {
     NSString *root = RNHostAppRoot();
@@ -60,7 +53,6 @@ static inline NSString *RNHostAppFilePath(NSString *file)
     return path;
 }
 
-// Opens a regular file owned by root that group and others cannot write. Refusals are logged, a missing file is not.
 static inline int RNHostOpenTrusted(const char *path, struct stat *identity)
 {
     int fd = open(path, O_RDONLY | O_NOFOLLOW);
@@ -79,7 +71,6 @@ static inline int RNHostOpenTrusted(const char *path, struct stat *identity)
     return fd;
 }
 
-// The path of a file of the application when it exists and is trusted, nil otherwise.
 static inline NSString *RNHostTrustedAppFile(NSString *file)
 {
     NSString *path = RNHostAppFilePath(file);
@@ -94,7 +85,6 @@ static inline NSString *RNHostTrustedAppFile(NSString *file)
     return path;
 }
 
-// The contents of a file of the application, nil when it is missing or not trusted. identity, when given, receives its status.
 static inline NSData *RNHostReadAppFile(NSString *file, struct stat *identity)
 {
     @autoreleasepool {
@@ -120,7 +110,6 @@ static inline NSString *RNHostReadAppText(NSString *file)
     return data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : nil;
 }
 
-// True when the flag file is present in the application bundle (its contents do not matter).
 static inline BOOL RNHostAppFileExists(NSString *file)
 {
     return RNHostAppFilePath(file) != nil;

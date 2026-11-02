@@ -45,8 +45,6 @@ function failures(opt)
         table.insert(found, "a configuration key the host does not read must be refused")
     end
 
-    -- The host reads its configuration, bundle, command file and flags only from its own bundle. The paths it writes to /var/tmp
-    -- must be outputs only, and no file of the spike's shared /var/tmp names may come back.
     local outputs = {["rnhost.cmd.out"] = true, ["rnhost.stack"] = true, ["rnhost.prof.out"] = true, ["rnhost.jsprof.out"] = true, ["rnhost.log"] = true}
     for _, file in ipairs(os.files(path.join(root, "frameworks", "ReactNative", "src", "host", "*"))) do
         local text = io.readfile(file)

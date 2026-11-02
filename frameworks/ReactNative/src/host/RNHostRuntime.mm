@@ -41,7 +41,6 @@ double RNHostResidentMegabytes()
     return info.resident_size / 1048576.0;
 }
 
-// rnhost.conf inside the application bundle. Only module, bundle, engine and JSC_* keys are taken; any other key is refused.
 NSDictionary<NSString *, NSString *> *RNHostConfig()
 {
     NSString *text = RNHostReadAppText(@"rnhost.conf");
@@ -64,8 +63,6 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
 
 @implementation RNHostRuntime
 
-// The bundle named by the configuration, relative to the application bundle or absolute inside it. nil when there is none,
-// or when it is not a root-owned regular file inside the application (then the refusal is logged).
 + (NSString *)configuredBundlePath
 {
     NSString *bundle = RNHostConfig()[@"bundle"];

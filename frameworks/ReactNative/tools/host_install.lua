@@ -30,7 +30,6 @@ function app_folder(holder, bundle_id)
     return stash_folder(holder, bundle_id) .. "/" .. app_name(bundle_id) .. ".app"
 end
 
--- The host writes its output here and nothing is read from it: /var/tmp takes files from any process.
 function run_folder(bundle_id)
     return "/var/tmp/" .. app_name(bundle_id)
 end
@@ -68,8 +67,6 @@ function install_command(holder, bundle_id)
     }, " && ")
 end
 
--- The configuration the host reads from its own bundle. The bundle is named relative to the bundle; the host refuses any key but
--- module, bundle, engine and JSC_* keys, so an unknown key is an error here too.
 function conf_text(bundle_name, extra)
     local lines = {"module=main", "bundle=" .. bundle_name}
     for line in (extra or ""):gmatch("[^,]+") do

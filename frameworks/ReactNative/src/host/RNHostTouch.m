@@ -345,10 +345,6 @@ static void *RNHostWatchdog(void *unused)
     }];
 }
 
-// The command file is read from the application bundle, which the host cannot write, so it is never cleared. Each complete
-// line runs once: the host remembers the complete lines it has run and runs only the lines added after them. A rewrite in
-// place with the same lines runs nothing; a replaced file (another inode) or one that no longer starts with the lines
-// already run runs from its first line.
 static dev_t RNHostCommandDevice;
 static ino_t RNHostCommandInode;
 static NSString *RNHostCommandDone = @"";
