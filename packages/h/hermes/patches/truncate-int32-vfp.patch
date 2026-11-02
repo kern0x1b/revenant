@@ -1,0 +1,98 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@localhost>
+Subject: [PATCH] Truncate in-range doubles to int32 in VFP registers on armv7
+
+The fast path of _sh_ljs_tryfast_truncate_to_int32, which ToInt32, the bitwise operators and the
+shifts use, converted with vcvt, moved the result from s0 to a core register and back, converted
+it to a double again and compared with vcmp and vmrs. On the Cortex-A9 of the iPhone 4S the moves
+between the core and VFP registers and the flags transfer of vmrs stall the pipeline, and every
+ToInt32 paid for them.
+
+The round trip is only there to reject the values that do not truncate to ToInt32. A number with
+|x| below 2^31 truncates to ToInt32(x) whether or not it is an integer, since vcvt truncates toward
+zero, so the fast path now accepts all of them and sends the rest to the slow path as before.
+
+The range is decided by the high word alone: |x| is below 2^31 when the masked high word is below
+0x41e00000. NaN, infinity and every tagged value fail that test. The new helper
+_sh_ljs_tryfast_truncate_to_int32_at reads the value from memory, converts it with vcvt.s32.f64 and
+vcvt.f64.s32 in VFP registers, and returns the truncated number as a double, which ToInt32 stores
+as it is. No operand passes through the core registers. Other platforms keep the previous helper,
+behind the same portable name.
+---
+diff --git a/include/hermes/VM/sh_legacy_value.h b/include/hermes/VM/sh_legacy_value.h
+--- a/include/hermes/VM/sh_legacy_value.h
++++ b/include/hermes/VM/sh_legacy_value.h
+@@ -340,6 +340,18 @@
+   return true;
+ #endif
+ 
++#if defined(__GNUC__) && defined(__ARM_ARCH_7A__) && defined(__VFP_FP__)
++  // The high word decides the range without a floating-point compare: |v| is
++  // below 2^31 exactly when its masked high word is below 0x41e00000. NaN and
++  // infinity are above it, and every tagged value has a high word from
++  // 0xf9000000 up, which is above it once the sign is cleared. Inside the range
++  // vcvt truncates toward zero, which is ToInt32 for integers and fractions
++  // alike, so no round trip is needed.
++  if ((((uint32_t)(v.raw >> 32)) & 0x7fffffffu) >= 0x41e00000u)
++    return false;
++  *res = _sh_tryfast_f64_to_i32_cvt(v.f64);
++  return true;
++#else
+   // Since we use NaN-boxing for non-number values, we know that any
+   // non-number values will fail the attempted conversion to int32. So we can
+   // simply attempt the conversion without checking for numbers.
+@@ -351,6 +363,34 @@
+     *res = _sh_tryfast_f64_to_i32_cvt(v.f64);
+     return (double)*res == v.f64;
+   }
++#endif
++}
++
++/// Like _sh_ljs_tryfast_truncate_to_int32, but reads the value from memory and
++/// stores the truncated number as a double, so that on armv7 the value never
++/// passes through the core registers.
++static inline bool _sh_ljs_tryfast_truncate_to_int32_at(
++    const void *value,
++    double *res) {
++#if defined(__GNUC__) && defined(__ARM_ARCH_7A__) && defined(__VFP_FP__) && \
++    !defined(__ARM_FEATURE_JCVT)
++  const uint32_t *words = (const uint32_t *)value;
++  if ((words[1] & 0x7fffffffu) >= 0x41e00000u)
++    return false;
++  float temp;
++  double truncated;
++  asm("vcvt.s32.f64 %0, %P1" : "=t"(temp) : "w"(*(const double *)value));
++  asm("vcvt.f64.s32 %P0, %1" : "=w"(truncated) : "t"(temp));
++  *res = truncated;
++  return true;
++#else
++  SHLegacyValue v = *(const SHLegacyValue *)value;
++  int32_t truncated;
++  if (!_sh_ljs_tryfast_truncate_to_int32(v, &truncated))
++    return false;
++  *res = (double)truncated;
++  return true;
++#endif
+ }
+ 
+ /// Test whether the given HermesValues are both non-NaN number values.
+diff --git a/lib/VM/Interpreter.cpp b/lib/VM/Interpreter.cpp
+index 86a07f19..21a89fb1 100644
+--- a/lib/VM/Interpreter.cpp
++++ b/lib/VM/Interpreter.cpp
+@@ -2342,11 +2342,11 @@ tailCall:
+       }
+ 
+       CASE(ToInt32) {
+-        int32_t argInt;
+-        if (LLVM_LIKELY(
+-                _sh_ljs_tryfast_truncate_to_int32(O2REG(ToInt32), &argInt))) {
++        double truncated;
++        if (LLVM_LIKELY(_sh_ljs_tryfast_truncate_to_int32_at(
++                &O2REG(ToInt32), &truncated))) {
+           /* Fast-path. */
+-          O1REG(ToInt32) = HermesValue::encodeTrustedNumberValue(argInt);
++          O1REG(ToInt32) = HermesValue::encodeTrustedNumberValue(truncated);
+         } else {
+           CAPTURE_IP(res = toInt32_RJS(runtime, Handle<>(&O2REG(ToInt32))));
+           if (LLVM_UNLIKELY(res == ExecutionStatus::EXCEPTION))
