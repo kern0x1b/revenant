@@ -7,7 +7,8 @@ package("hermes")
     add_urls("https://github.com/facebook/hermes.git")
     add_versions("250829098.0.17", "3477757eb2475555cf8d8df24bfb1deb0613880d")
     add_patches("250829098.0.17", path.join(os.scriptdir(), "patches", "sysroot-from-toolchain.patch"), "05ad39c3cae3f864853c8da08c7a87bdf016f97012835c1e2cbdc852f3b5cc0b")
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "2", readonly = true})
+    add_patches("250829098.0.17", path.join(os.scriptdir(), "patches", "hermesvalue-align8.patch"), "a51b4cea850c7a6eeba742aca1466dbf39ea1ba61bdfaaeb45434022ac268770")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "3", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
@@ -57,7 +58,7 @@ package("hermes")
             "-DIMPORT_HOST_COMPILERS=" .. cmakefile,
             "-DHERMES_IS_MOBILE_BUILD=ON",
             "-DHERMES_ALLOW_BOOST_CONTEXT=0",
-            "-DHERMESVM_HEAP_HV_MODE=HEAP_HV_PREFER32",
+            "-DHERMESVM_HEAP_HV_MODE=HEAP_HV_64",
             "-DHERMES_ENABLE_INTL=ON",
             "-DHERMES_ENABLE_TEST_SUITE=OFF",
             "-DHERMES_ENABLE_DEBUGGER=OFF",
