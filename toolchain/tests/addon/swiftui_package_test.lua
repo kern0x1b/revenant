@@ -1,3 +1,12 @@
+local function imports(file, module)
+    for line in io.readfile(file):gmatch("[^\n]+") do
+        if line:match("^%s*import%s+" .. module .. "%f[^%w_]") then
+            return true
+        end
+    end
+    return false
+end
+
 function failures(opt)
     local root = path.join(opt.modules, "..", "..")
     local found = {}
@@ -5,14 +14,17 @@ function failures(opt)
     local swiftui = io.readfile(path.join(root, "frameworks", "SwiftUI", "xmake.lua"))
     local libraries = io.readfile(path.join(root, "frameworks", "Backports", "tools", "library_list.lua"))
 
-    if not recipe:find("path.join(root, \"frameworks\", \"Backports\")", 1, true) then
-        table.insert(found, "the swiftui recipe's generated project does not include frameworks/Backports, so MapKitBackports cannot resolve")
+    local foundation = false
+    for _, file in ipairs(os.files(path.join(root, "frameworks", "SwiftUI", "src", "*.swift"))) do
+        foundation = foundation or imports(file, "Foundation")
+    end
+    local suppressed = recipe:find("REVENANT_BACKPORTS_LIBRARIES", 1, true) ~= nil
+    if suppressed and foundation and not recipe:find("revenant@backports", 1, true) then
+        table.insert(found, "the swiftui recipe's generated project sets REVENANT_BACKPORTS_LIBRARIES, which drops the revenant@backports requirement every project gets, while the SwiftUI target imports Foundation: attach() refuses the project")
     end
 
-    local _, direct = recipe:gsub("envs = backports", "")
-    local _, joined = recipe:gsub("table%.join%(backports", "")
-    if direct + joined < 3 then
-        table.insert(found, "the swiftui recipe sets REVENANT_BACKPORTS_LIBRARIES on " .. (direct + joined) .. " of 3 xmake calls (configure, build, install)")
+    if not swiftui:match("if has_config%(\"backports_min_ios\"%) then%s+add_deps%(\"MapKitBackports\"%)") then
+        table.insert(found, "frameworks/SwiftUI adds MapKitBackports without a check that frameworks/Backports is in the build graph, and the swiftui package's generated project does not include it: unknown target(MapKitBackports)")
     end
 
     for dependency in swiftui:gmatch("\"([%w_]+Backports)\"") do
