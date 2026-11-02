@@ -1,15 +1,18 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR --manifest DIR --output DIR
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR --manifest DIR --output DIR [--bundle-id ID]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
   stage   makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports, retargets the library references from /usr/lib/revenant/org.revenant.backports
-          to @executable_path/Frameworks, and signs every Mach-O file with ldid.
+          to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it renames the
+          executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
           host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. It removes nothing of another bundle id.
-  launch  wakes the phone and has SpringBoard start the app of the id.]]
+  launch  wakes the phone and has SpringBoard start the app of the id.
+  stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.]]
 
 local LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
                    "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports"}
@@ -32,6 +35,14 @@ end
 
 function run_folder(bundle_id)
     return "/var/tmp/" .. app_name(bundle_id)
+end
+
+function executable_name(bundle_id)
+    return "RNHost-" .. app_name(bundle_id)
+end
+
+function stop_command(bundle_id)
+    return "set -- $(launchctl list | grep 'UIKitApplication:" .. bundle_id .. "\\['); if [ -n \"$1\" ] && [ \"$1\" != - ]; then kill $1; echo stopped $1; else echo not running; fi"
 end
 
 function change_arguments(otool_text, library_names)
@@ -112,7 +123,13 @@ function stage(options)
         os.vrunv("chmod", {"755", library})
         os.vrunv("install_name_tool", {"-id", NEW_PREFIX .. "/" .. name .. ".dylib", library})
     end
-    local files = {path.join(target, path.basename(built))}
+    local executable = path.basename(built)
+    if options["bundle-id"] then
+        executable = executable_name(options["bundle-id"])
+        os.vrunv("mv", {path.join(target, path.basename(built)), path.join(target, executable)})
+        os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
+    end
+    local files = {path.join(target, executable)}
     for _, name in ipairs(LIBRARIES) do
         table.insert(files, path.join(frameworks, name .. ".dylib"))
     end
@@ -168,6 +185,14 @@ function launch(options)
     device.run(settings, "/usr/libexec/revenant-sblaunch " .. options["bundle-id"])
 end
 
+function stop(options)
+    if not options["bundle-id"] then
+        raise("stop needs \"--bundle-id\"")
+    end
+    local device, settings = phone()
+    device.run(settings, stop_command(options["bundle-id"]))
+end
+
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
     local options, words = shared.arguments({...}, {app = "value", backports = "value", manifest = "value", output = "value", archive = "value",
@@ -181,6 +206,8 @@ function main(...)
         deploy(options)
     elseif command == "launch" then
         launch(options)
+    elseif command == "stop" then
+        stop(options)
     else
         print(USAGE)
     end
