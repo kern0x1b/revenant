@@ -1,6 +1,6 @@
 #import "RNHostRuntime.h"
 #import "RNHostHostFunctions.h"
-#import "RNHostRunFolder.h"
+#import "RNHostFiles.h"
 
 #include <JSCRuntime.h>
 #include <jsi/jsi.h>
