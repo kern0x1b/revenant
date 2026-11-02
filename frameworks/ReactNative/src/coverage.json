@@ -1,0 +1,1430 @@
+{
+ "sdk": "57.0.30",
+ "reactNative": "0.86.3",
+ "device": "iPhone 4S, iOS 6.1.3, armv7",
+ "date": "2026-11-01",
+ "rows": [
+  {
+   "id": "@expo/dom-webview",
+   "group": "sdk",
+   "version": "~57.0.1",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Not built; needs the webview module and the DOM component runtime."
+  },
+  {
+   "id": "@expo/fingerprint",
+   "group": "sdk",
+   "version": "~0.20.14",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Build-time tool."
+  },
+  {
+   "id": "@expo/metro-runtime",
+   "group": "sdk",
+   "version": "~57.0.17",
+   "native": false,
+   "status": "js",
+   "verified": "phone",
+   "note": "Runs in the bundle."
+  },
+  {
+   "id": "@expo/vector-icons",
+   "group": "sdk",
+   "version": "^15.0.2",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "@expo/ui",
+   "group": "sdk",
+   "version": "~57.0.25",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "157 files of SwiftUI; needs the SwiftUI backport of this repository to cover the views it uses."
+  },
+  {
+   "id": "@react-native-async-storage/async-storage",
+   "group": "sdk",
+   "version": "2.2.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Five files of iOS code, not built."
+  },
+  {
+   "id": "@react-native-community/datetimepicker",
+   "group": "sdk",
+   "version": "9.1.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 14 files of iOS code and is not built."
+  },
+  {
+   "id": "@react-native-masked-view/masked-view",
+   "group": "sdk",
+   "version": "0.3.2",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built with the other community views; the mask is not exercised."
+  },
+  {
+   "id": "@react-native-community/slider",
+   "group": "sdk",
+   "version": "5.2.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "@react-native-community/netinfo",
+   "group": "sdk",
+   "version": "12.0.1",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 8 files of iOS code and is not built."
+  },
+  {
+   "id": "@react-native-community/viewpager",
+   "group": "sdk",
+   "version": "5.0.11",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 22 files of iOS code and is not built."
+  },
+  {
+   "id": "@react-native-picker/picker",
+   "group": "sdk",
+   "version": "2.11.4",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 10 files of iOS code and is not built."
+  },
+  {
+   "id": "@react-native-segmented-control/segmented-control",
+   "group": "sdk",
+   "version": "2.5.7",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "@stripe/stripe-react-native",
+   "group": "sdk",
+   "version": "0.64.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 84 files of iOS code and is not built."
+  },
+  {
+   "id": "eslint-config-expo",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Lint configuration."
+  },
+  {
+   "id": "expo-analytics-amplitude",
+   "group": "sdk",
+   "version": "~11.3.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 3 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-app-auth",
+   "group": "sdk",
+   "version": "~11.1.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 9 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-app-loader-provider",
+   "group": "sdk",
+   "version": "~8.0.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-app-metrics",
+   "group": "sdk",
+   "version": "~57.0.22",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 94 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-apple-authentication",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "Sign in with Apple needs AuthenticationServices (iOS 13)."
+  },
+  {
+   "id": "expo-application",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; not exercised."
+  },
+  {
+   "id": "expo-asset",
+   "group": "sdk",
+   "version": "~57.0.20",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; its use is not exercised by a screen."
+  },
+  {
+   "id": "expo-audio",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "A name-only stub with player and recorder class shells. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+  },
+  {
+   "id": "expo-auth-session",
+   "group": "sdk",
+   "version": "~57.0.16",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "expo-background-fetch",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Background fetch is iOS 7."
+  },
+  {
+   "id": "expo-background-task",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "BackgroundTasks is iOS 13."
+  },
+  {
+   "id": "expo-battery",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 2 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-blur",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-brightness",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 3 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-brownfield",
+   "group": "sdk",
+   "version": "~57.0.24",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 7 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-build-properties",
+   "group": "sdk",
+   "version": "~57.0.22",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Build-time config plugin."
+  },
+  {
+   "id": "expo-calendar",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 30 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-camera",
+   "group": "sdk",
+   "version": "~57.0.6",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built; capture on iOS 6 is not exercised."
+  },
+  {
+   "id": "expo-cellular",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 2 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-checkbox",
+   "group": "sdk",
+   "version": "~57.0.0",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "Uses the core view; no native code."
+  },
+  {
+   "id": "expo-clipboard",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built from its own sources."
+  },
+  {
+   "id": "expo-constants",
+   "group": "sdk",
+   "version": "~57.0.22",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "EXConstants.bundle and app.config are staged by the spike script, not by the build."
+  },
+  {
+   "id": "expo-contacts",
+   "group": "sdk",
+   "version": "~57.0.8",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Uses Contacts.framework (iOS 9); AddressBook exists on iOS 6."
+  },
+  {
+   "id": "expo-crypto",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; not exercised."
+  },
+  {
+   "id": "expo-dev-client",
+   "group": "sdk",
+   "version": "~57.0.20",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "A development tool; one file of iOS code, no meaning in a release host."
+  },
+  {
+   "id": "expo-device",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-document-picker",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system."
+  },
+  {
+   "id": "expo-eas-client",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-file-system",
+   "group": "sdk",
+   "version": "~57.0.7",
+   "native": true,
+   "status": "partial",
+   "verified": "build",
+   "note": "Built with the iOS 14 gates rewritten in staged copies of three Swift files; the gates are not yet a package patch."
+  },
+  {
+   "id": "expo-font",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built from its own sources."
+  },
+  {
+   "id": "expo-gl",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "OpenGL ES 2 exists on iOS 6."
+  },
+  {
+   "id": "expo-glass-effect",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "partial",
+   "verified": "build",
+   "note": "Compiled, but the effect is an iOS 26 one; what it should do on iOS 6 is undecided."
+  },
+  {
+   "id": "expo-google-app-auth",
+   "group": "sdk",
+   "version": "~8.3.0",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "expo-haptics",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built; iOS 6 has no haptic engine, so what it does there is undecided."
+  },
+  {
+   "id": "expo-image",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it."
+  },
+  {
+   "id": "expo-image-loader",
+   "group": "sdk",
+   "version": "~57.0.1",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "expo-image-manipulator",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "expo-image-picker",
+   "group": "sdk",
+   "version": "~57.0.20",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system."
+  },
+  {
+   "id": "expo-intent-launcher",
+   "group": "sdk",
+   "version": "~57.0.1",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Android only."
+  },
+  {
+   "id": "expo-insights",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 6 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-keep-awake",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; not exercised."
+  },
+  {
+   "id": "expo-linear-gradient",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-linking",
+   "group": "sdk",
+   "version": "~57.0.13",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "The manifest lookup works after the staged config."
+  },
+  {
+   "id": "expo-local-authentication",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "LocalAuthentication is iOS 8; on iOS 6 'no hardware' is the honest answer."
+  },
+  {
+   "id": "expo-localization",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; not exercised."
+  },
+  {
+   "id": "expo-location",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "CoreLocation exists on iOS 6."
+  },
+  {
+   "id": "expo-mail-composer",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 6 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-manifests",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Not built; expo-constants runs without it."
+  },
+  {
+   "id": "expo-maps",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps."
+  },
+  {
+   "id": "expo-mcp",
+   "group": "sdk",
+   "version": "~0.2.1",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "expo-media-library",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Uses Photos (iOS 8); AssetsLibrary exists on iOS 6."
+  },
+  {
+   "id": "expo-mesh-gradient",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "MeshGradient is SwiftUI, iOS 18."
+  },
+  {
+   "id": "expo-module-template",
+   "group": "sdk",
+   "version": "~57.0.15",
+   "native": true,
+   "status": "n/a",
+   "verified": "none",
+   "note": "A template for authors."
+  },
+  {
+   "id": "expo-modules-core",
+   "group": "sdk",
+   "version": "~57.0.23",
+   "native": true,
+   "status": "partial",
+   "verified": "phone",
+   "note": "Core builds and the app runs on it. Not yet carried as a package: the build is the spike's. SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package."
+  },
+  {
+   "id": "expo-navigation-bar",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Android only."
+  },
+  {
+   "id": "expo-network",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Uses NWPathMonitor (iOS 12); needs SCNetworkReachability."
+  },
+  {
+   "id": "expo-notifications",
+   "group": "sdk",
+   "version": "~57.0.23",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "Name-only stubs of nine modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration)."
+  },
+  {
+   "id": "expo-observe",
+   "group": "sdk",
+   "version": "~57.0.25",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 25 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-print",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 10 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-live-photo",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "Live Photos exist from iOS 9."
+  },
+  {
+   "id": "expo-router",
+   "group": "sdk",
+   "version": "~57.0.28",
+   "native": true,
+   "status": "js",
+   "verified": "phone",
+   "note": "The router runs in the app; its small iOS part is not built."
+  },
+  {
+   "id": "expo-screen-capture",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-screen-orientation",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 11 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-secure-store",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-sensors",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "CoreMotion exists on iOS 6."
+  },
+  {
+   "id": "expo-server",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Server runtime, not on the device."
+  },
+  {
+   "id": "expo-sharing",
+   "group": "sdk",
+   "version": "~57.0.23",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built; the share sheet is not exercised."
+  },
+  {
+   "id": "expo-sms",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-speech",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "AVSpeechSynthesizer is iOS 7; a different speech route would be needed."
+  },
+  {
+   "id": "expo-splash-screen",
+   "group": "sdk",
+   "version": "~57.0.10",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built from its own sources."
+  },
+  {
+   "id": "expo-sqlite",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "stub",
+   "verified": "none",
+   "note": "Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql."
+  },
+  {
+   "id": "expo-status-bar",
+   "group": "sdk",
+   "version": "~57.0.1",
+   "native": false,
+   "status": "js",
+   "verified": "phone",
+   "note": "Uses the core StatusBar."
+  },
+  {
+   "id": "expo-store-review",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "SKStoreReviewController is iOS 10.3; the module could open the store page instead."
+  },
+  {
+   "id": "expo-symbols",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons)."
+  },
+  {
+   "id": "expo-system-ui",
+   "group": "sdk",
+   "version": "~57.0.4",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Compiled; not exercised."
+  },
+  {
+   "id": "expo-task-manager",
+   "group": "sdk",
+   "version": "~57.0.21",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Depends on background modes available on iOS 6."
+  },
+  {
+   "id": "expo-tracking-transparency",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module."
+  },
+  {
+   "id": "expo-updates",
+   "group": "sdk",
+   "version": "~57.0.26",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Needs the manifests module and a download path; no network scheme is decided."
+  },
+  {
+   "id": "expo-video-thumbnails",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "expo-video",
+   "group": "sdk",
+   "version": "~57.0.5",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "AVPlayer exists; the module uses newer AVKit and Swift API."
+  },
+  {
+   "id": "expo-web-browser",
+   "group": "sdk",
+   "version": "~57.0.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Uses SFSafariViewController (iOS 9); the fallback is the system browser."
+  },
+  {
+   "id": "expo-widgets",
+   "group": "sdk",
+   "version": "~57.0.26",
+   "native": true,
+   "status": "impossible",
+   "verified": "none",
+   "note": "WidgetKit, iOS 14."
+  },
+  {
+   "id": "jest-expo",
+   "group": "sdk",
+   "version": "~57.0.6",
+   "native": true,
+   "status": "n/a",
+   "verified": "none",
+   "note": "A test-runner preset; no native code."
+  },
+  {
+   "id": "lottie-react-native",
+   "group": "sdk",
+   "version": "~7.3.8",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 16 files of iOS code and is not built."
+  },
+  {
+   "id": "react",
+   "group": "sdk",
+   "version": "19.2.3",
+   "native": false,
+   "status": "js",
+   "verified": "phone",
+   "note": "Runs in the bundle."
+  },
+  {
+   "id": "react-dom",
+   "group": "sdk",
+   "version": "19.2.3",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Web only."
+  },
+  {
+   "id": "react-native",
+   "group": "sdk",
+   "version": "0.86.3",
+   "native": false,
+   "status": "partial",
+   "verified": "phone",
+   "note": "See the core table."
+  },
+  {
+   "id": "react-native-web",
+   "group": "sdk",
+   "version": "~0.21.0",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Web only."
+  },
+  {
+   "id": "react-native-gesture-handler",
+   "group": "sdk",
+   "version": "~2.32.0",
+   "native": false,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built; the app's gestures run on it."
+  },
+  {
+   "id": "react-native-get-random-values",
+   "group": "sdk",
+   "version": "~1.11.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "react-native-keyboard-controller",
+   "group": "sdk",
+   "version": "1.21.9",
+   "native": true,
+   "status": "stub",
+   "verified": "phone",
+   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications."
+  },
+  {
+   "id": "react-native-maps",
+   "group": "sdk",
+   "version": "1.27.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 175 files of iOS code and is not built."
+  },
+  {
+   "id": "react-native-pager-view",
+   "group": "sdk",
+   "version": "8.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 10 files of iOS code and is not built."
+  },
+  {
+   "id": "react-native-worklets",
+   "group": "sdk",
+   "version": "0.10.1",
+   "native": false,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built."
+  },
+  {
+   "id": "react-native-reanimated",
+   "group": "sdk",
+   "version": "4.5.1",
+   "native": false,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built; the bottom sheets animate on it."
+  },
+  {
+   "id": "react-native-screens",
+   "group": "sdk",
+   "version": "~4.26.0",
+   "native": true,
+   "status": "partial",
+   "verified": "phone",
+   "note": "Built without the gamma folder (it needs Swift types from newer iOS); the stack and the sheets work."
+  },
+  {
+   "id": "react-native-safe-area-context",
+   "group": "sdk",
+   "version": "~5.7.0",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built."
+  },
+  {
+   "id": "react-native-svg",
+   "group": "sdk",
+   "version": "15.15.4",
+   "native": false,
+   "status": "real",
+   "verified": "phone",
+   "note": "Built; the logo and icons draw."
+  },
+  {
+   "id": "react-native-view-shot",
+   "group": "sdk",
+   "version": "5.1.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 4 files of iOS code and is not built."
+  },
+  {
+   "id": "react-native-webview",
+   "group": "sdk",
+   "version": "13.16.1",
+   "native": true,
+   "status": "real",
+   "verified": "build",
+   "note": "Built; a page load on iOS 6 is not exercised."
+  },
+  {
+   "id": "react-server-dom-webpack",
+   "group": "sdk",
+   "version": "~19.2.4",
+   "native": false,
+   "status": "n/a",
+   "verified": "none",
+   "note": "Server components runtime."
+  },
+  {
+   "id": "sentry-expo",
+   "group": "sdk",
+   "version": "~7.0.0",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "unimodules-app-loader",
+   "group": "sdk",
+   "version": "~57.0.2",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 6 files of iOS code and is not built."
+  },
+  {
+   "id": "unimodules-image-loader-interface",
+   "group": "sdk",
+   "version": "~6.1.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 2 files of iOS code and is not built."
+  },
+  {
+   "id": "@shopify/react-native-skia",
+   "group": "sdk",
+   "version": "2.6.2",
+   "native": false,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Draws with Metal (iOS 8); would need a GL or software backend."
+  },
+  {
+   "id": "@shopify/flash-list",
+   "group": "sdk",
+   "version": "2.0.2",
+   "native": false,
+   "status": "js",
+   "verified": "none",
+   "note": "No native iOS code; runs with the bundle, not yet exercised."
+  },
+  {
+   "id": "@sentry/react-native",
+   "group": "sdk",
+   "version": "~7.11.0",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 38 files of iOS code and is not built."
+  },
+  {
+   "id": "react-native-bootsplash",
+   "group": "sdk",
+   "version": "^6.3.10",
+   "native": true,
+   "status": "missing",
+   "verified": "none",
+   "note": "Has 5 files of iOS code and is not built."
+  },
+  {
+   "id": "engine: JavaScriptCore (prefixed WebKit engine)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Runs the 24 MB bundle with the JIT; startup to the first render takes 7.8 s with inline requires."
+  },
+  {
+   "id": "engine: Hermes",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Not attempted. Hermes supports 32-bit ARM, but needs building against iOS 6 libc++ and a bytecode toolchain; the owner's note says JSC is the engine for now."
+  },
+  {
+   "id": "bridgeless new architecture (RCTReactNativeFactory, RCTHost)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": ""
+  },
+  {
+   "id": "JSI and host functions",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": ""
+  },
+  {
+   "id": "Fabric: View, Text, Paragraph, Image, ScrollView, ActivityIndicator, SafeAreaView",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Seen on screen; Image and ActivityIndicator by their use in the app."
+  },
+  {
+   "id": "Fabric: TextInput (single and multi line)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Text typed through the touch injector reaches the field."
+  },
+  {
+   "id": "Fabric: Modal, Switch, RefreshControl, InputAccessoryView, DebuggingOverlay",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built with the pods; not exercised."
+  },
+  {
+   "id": "Pressable and touch handling",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Through the touch injector and the real handler; native UIScrollView panning is not reached by it."
+  },
+  {
+   "id": "ScrollView and FlatList scrolling by finger",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "The injector cannot make a native pan; needs a real touch or a better injector. setContentOffset changes the offset but a screenshot showed no change."
+  },
+  {
+   "id": "Animated (JS driver)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": ""
+  },
+  {
+   "id": "Animated (native driver, NativeAnimated)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "LayoutAnimation",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "WebSocket (SocketRocket 0.7.1, patched for dispatch_data)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "The relay handshake and the E2E session run over it."
+  },
+  {
+   "id": "fetch and XMLHttpRequest (RCTNetworking)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Requests are made and refusals reported."
+  },
+  {
+   "id": "Blob, File, FileReader (BlobModule)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "Image loading: PNG, JPEG, GIF, WebP, HEIC, SVG data",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "iOS 6 decodes PNG, JPEG and GIF; WebP and HEIC need a decoder."
+  },
+  {
+   "id": "Linking",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "RCTLinkingManager is built; opening a URL is not exercised."
+  },
+  {
+   "id": "Appearance and useColorScheme",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "iOS 6 has no dark mode; the module must answer light or the app's setting."
+  },
+  {
+   "id": "Dimensions, PixelRatio, useWindowDimensions",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "The 320 by 480 layout is correct."
+  },
+  {
+   "id": "StatusBar",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; iOS 6 status bar styles differ from the iOS 7 model; not exercised."
+  },
+  {
+   "id": "Keyboard (events, dismiss)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "iOS 6 keyboard notifications; the keyboard-controller replacement is a stub."
+  },
+  {
+   "id": "Alert",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; UIAlertView on iOS 6 versus UIAlertController of newer releases is not exercised."
+  },
+  {
+   "id": "ActionSheetIOS",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "Settings",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "Share",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; not exercised."
+  },
+  {
+   "id": "Vibration",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; the phone vibrates through AudioServices; not exercised."
+  },
+  {
+   "id": "AccessibilityInfo",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Parts need iOS 7 and later API; the weak-import audit lists them."
+  },
+  {
+   "id": "PushNotificationIOS",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; remote notifications on iOS 6 need the old registration calls; not exercised."
+  },
+  {
+   "id": "I18nManager and Intl",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Built; the Intl surface of JavaScriptCore on this build is not checked."
+  },
+  {
+   "id": "DevMenu, LogBox and dev settings",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "Release host: not meant to be on."
+  },
+  {
+   "id": "Permissions (iOS)",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "evaluate",
+   "verified": "none",
+   "note": "There is no PermissionsAndroid analogue on iOS; permissions come from the Expo modules."
+  },
+  {
+   "id": "TurboModule registry and codegen output",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Generated per app with the patched provider."
+  },
+  {
+   "id": "Timers, requestAnimationFrame, queueMicrotask, Promise",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "Promise is the global one with the default babel profile."
+  },
+  {
+   "id": "atob and btoa",
+   "group": "core",
+   "version": "0.86.3",
+   "native": true,
+   "status": "real",
+   "verified": "phone",
+   "note": "From the bundle prelude; Hermes has them natively."
+  },
+  {
+   "id": "react-native-paste-input",
+   "group": "community",
+   "version": "",
+   "native": true,
+   "status": "partial",
+   "verified": "phone",
+   "note": "Built without the ImageEffects category (it needs @import with modules enabled)."
+  }
+ ]
+}

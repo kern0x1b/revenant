@@ -159,6 +159,13 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [WidgetKit: providers](reference/backports/WidgetKit/WidgetKit/Providers.md) | the two intent providers, and the spellings they do not share with the timeline provider |
 | [WidgetKit: reuse](reference/backports/WidgetKit/WidgetKit/Reuse.md) | what WidgetKit was compared against, and why |
 
+## React Native
+
+| Document | About |
+| --- | --- |
+| [What runs](reference/react-native/coverage.md) | React Native and the Expo SDK on iOS 6.1.3, module by module |
+| [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
+
 ## WebKit
 
 | Document | About |
