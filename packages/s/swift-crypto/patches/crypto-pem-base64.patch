@@ -1,0 +1,93 @@
+diff --git a/Sources/Crypto/ASN1/PEMDocument.swift b/Sources/Crypto/ASN1/PEMDocument.swift
+index 16d6281..01157b1 100644
+--- a/Sources/Crypto/ASN1/PEMDocument.swift
++++ b/Sources/Crypto/ASN1/PEMDocument.swift
+@@ -22,6 +22,70 @@ import FoundationEssentials
+ import Foundation
+ #endif
+ 
++fileprivate enum PEMBase64 {
++    private static let alphabet = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".utf8)
++    private static let pad = UInt8(ascii: "=")
++
++    static func encode<Bytes: Collection>(_ bytes: Bytes) -> String where Bytes.Element == UInt8 {
++        let input = Array(bytes)
++        var output = [UInt8]()
++        output.reserveCapacity((input.count + 2) / 3 * 4)
++        for start in stride(from: 0, to: input.count, by: 3) {
++            let count = min(3, input.count - start)
++            var block: UInt32 = 0
++            for offset in 0..<3 {
++                block = block << 8 | UInt32(offset < count ? input[start + offset] : 0)
++            }
++            for index in 0..<4 {
++                output.append(index <= count ? alphabet[Int(block >> (18 - 6 * index) & 0x3F)] : pad)
++            }
++        }
++        return String(decoding: output, as: UTF8.self)
++    }
++
++    static func decode(_ text: String) -> [UInt8]? {
++        let input = Array(text.utf8)
++        guard input.count % 4 == 0 else {
++            return nil
++        }
++        var output = [UInt8]()
++        output.reserveCapacity(input.count / 4 * 3)
++        let quanta = input.count / 4
++        for quantum in 0..<quanta {
++            let base = quantum * 4
++            let padding: Int
++            if input[base + 2] == pad {
++                guard input[base + 3] == pad, quantum == quanta - 1 else {
++                    return nil
++                }
++                padding = 2
++            } else if input[base + 3] == pad {
++                guard quantum == quanta - 1 else {
++                    return nil
++                }
++                padding = 1
++            } else {
++                padding = 0
++            }
++            var block: UInt32 = 0
++            for index in 0..<(4 - padding) {
++                guard let value = alphabet.firstIndex(of: input[base + index]) else {
++                    return nil
++                }
++                block |= UInt32(value) << (18 - 6 * index)
++            }
++            output.append(UInt8(block >> 16 & 0xFF))
++            if padding < 2 {
++                output.append(UInt8(block >> 8 & 0xFF))
++            }
++            if padding < 1 {
++                output.append(UInt8(block & 0xFF))
++            }
++        }
++        return output
++    }
++}
++
+ extension ASN1 {
+     /// A PEM document is some data, and a discriminator type that is used to advertise the content.
+     struct PEMDocument {
+@@ -58,7 +122,7 @@ extension ASN1 {
+                 throw CryptoKitASN1Error.invalidPEMDocument
+             }
+ 
+-            guard let derBytes = Data(base64Encoded: lines.joined()) else {
++            guard let derBytes = PEMBase64.decode(lines.joined()).map({ Data($0) }) else {
+                 throw CryptoKitASN1Error.invalidPEMDocument
+             }
+ 
+@@ -72,7 +136,7 @@ extension ASN1 {
+         }
+ 
+         var pemString: String {
+-            var encoded = self.derBytes.base64EncodedString()[...]
++            var encoded = PEMBase64.encode(self.derBytes)[...]
+             let pemLineCount = (encoded.utf8.count + PEMDocument.lineLength) / PEMDocument.lineLength
+             var pemLines = [Substring]()
+             pemLines.reserveCapacity(pemLineCount + 2)

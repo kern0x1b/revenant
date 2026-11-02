@@ -13,6 +13,8 @@ package("swift-crypto")
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
 
+    local FLOOR = "6.1.3"
+
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
@@ -27,9 +29,8 @@ package("swift-crypto")
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against revenant@swift-runtime")
         local compat = package:dep("apple-compat")
-        raise("swift-crypto links the CommonCrypto Backports library, which is a project target a package cannot depend on yet; see docs/explanation/backports-loading.md")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
-        local minimum = toolchain:config("deployment")
+        local minimum = FLOOR
         local triple = package:arch() .. "-apple-ios" .. minimum
         local sdk = toolchain:config("sdkdir")
         local resources = path.join(runtime:installdir(), "lib", "swift")
@@ -37,6 +38,15 @@ package("swift-crypto")
         local objects = package:installdir("objects", "swift-crypto")
         os.mkdir(objects)
         io.writefile(path.join(package:installdir("objects"), "sdkdir"), sdk)
+        local shims = path.join(objects, "shims", "RevenantCompat")
+        os.mkdir(shims)
+        local headers = {}
+        for _, file in ipairs(os.files(path.join(compat:installdir("include"), "revenant", "*.h"))) do
+            table.insert(headers, "#include <revenant/" .. path.filename(file) .. ">")
+        end
+        table.sort(headers)
+        io.writefile(path.join(shims, "shims.h"), table.concat(headers, "\n") .. "\n")
+        io.writefile(path.join(shims, "module.modulemap"), "module RevenantCompat {\n    header \"shims.h\"\n    export *\n}\n")
 
         os.cp(path.join(os.curdir(), "*"), tree)
         for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
@@ -75,9 +85,10 @@ package("swift-crypto")
 
         local swiftflags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "SourceWarningControl",
                             "-enable-upcoming-feature", "MemberImportVisibility", "-D", "CRYPTO_IN_SWIFTPM", "-swift-version", "6",
-                            "-package-name", "swift-crypto", "-parse-as-library", "-Onone", "-wmo", "-c",
+                            "-package-name", "swift-crypto", "-parse-as-library", "-O", "-wmo", "-c",
                             "-I", path.join(bssl, "include"), "-I", path.join(kcp, "include"),
-                            "-I", path.join(sources, "CXKCPShims", "include"), "-I", compat:installdir("include")}
+                            "-I", path.join(sources, "CXKCPShims", "include"), "-I", path.join(objects, "shims"), "-I", compat:installdir("include"),
+                            "-module-cache-path", path.join(objects, "modulecache")}
         local swiftmods = path.join(objects, "swiftmodules")
         os.mkdir(swiftmods)
         local swiftargv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
@@ -119,7 +130,7 @@ package("swift-crypto")
             return files
         end
         local asn1flags = {"-enable-upcoming-feature", "MemberImportVisibility", "-enable-upcoming-feature", "ExistentialAny",
-                           "-package-name", "swift-asn1", "-swift-version", "6"}
+                           "-package-name", "swift-asn1", "-swift-version", "6", "-O", "-module-cache-path", path.join(objects, "modulecache")}
         local asn1argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                               module = "SwiftASN1"})
         table.join2(asn1argv, asn1flags, {"-c", "-module-name", "SwiftASN1", "-emit-module", "-emit-module-path",
@@ -144,10 +155,10 @@ package("swift-crypto")
 
         local lib = path.join(objects, "libswiftCrypto.dylib")
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-fuse-ld=" .. ld64, "-dynamiclib", "-install_name", "@rpath/libswiftCrypto.dylib",
-                 "-o", lib}, os.files(path.join(objects, "*.o")),
+                 "-Wl,-dead_strip_dylibs", "-o", lib}, os.files(path.join(objects, "*.o")),
                  {"-L", path.join(resources, "iphoneos"),
                   "-lswiftCore", "-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswift_Concurrency",
-                  "-lswiftFoundation", "-lFoundationBackports", "-lCommonCryptoBackports"}))
+                  "-lswiftFoundation", "-framework", "Security"}))
         os.cp(lib, package:installdir("lib"))
         local module = path.join(package:installdir("lib"), "swift", "iphoneos")
         os.mkdir(module)
