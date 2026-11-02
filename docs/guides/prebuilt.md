@@ -42,7 +42,11 @@ With `REVENANT_PREBUILT_ONLY` naming the package (a comma list, or `1` for all),
 nothing is built from source. The jobs of `check.yml` set it (the swift job also names `swift-runtime` and `libcxx`), so a
 build there can never fall back to LLVM, Swift or ld64. It changes no key.
 
-The `llvm`, `swift`, `ld64`, `swift-runtime` and `libcxx` recipes are wired. To wire another recipe, call
+The `llvm`, `swift`, `ld64`, `swift-runtime`, `libcxx` and `webkit-engine` recipes are wired. The `webkit-engine` recipe
+hashes its own file, so its key changed with the hook: the release of the earlier key does not serve it, and a configure that
+requires it under `REVENANT_PREBUILT_ONLY` stops at the fetch with the key, before anything is built. A release of the new key
+is made by a build of `webkit-engine` on a machine that has its SDK and the WebKit sources, which the prebuilt workflow does
+not do yet. To wire another recipe, call
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.
