@@ -533,9 +533,10 @@ function make_keyboard(ctx)
         table.insert(lines, string.format('#import "%s"', header))
     end
     write_lines(path.join(out, "Bridge.h"), lines)
-    local prefix = {"#ifdef __OBJC__", "#import <Foundation/Foundation.h>", "#import <UIKit/UIKit.h>", "#endif"}
-    write_lines(path.join(out, "prefix.h"), prefix)
-    write_lines(path.join(out, "prefix.pch"), prefix)
+    local prefix = {"#ifdef __OBJC__", "#import <Foundation/Foundation.h>", "#import <UIKit/UIKit.h>"}
+    write_lines(path.join(out, "prefix.pch"), table.join(prefix, {"#endif"}))
+    write_lines(path.join(out, "prefix.h"), table.join(prefix, {"// the React umbrella import that clang modules would supply (RCTDirectEventBlock for the Swift-generated header)",
+        "#import <React/RCTComponent.h>", "#import <React/RCTViewManager.h>", "#endif"}))
     local dirs = {kc, path.join(ctx.build, "rn-headers"), path.join(ctx.ref, "node_modules", "react-native", "ReactCommon", "yoga")}
     for _, dir in ipairs(os.dirs(path.join(kc, "*"))) do
         table.insert(dirs, dir)
