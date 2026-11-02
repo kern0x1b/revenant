@@ -12,7 +12,9 @@ target("surftool")
         local envs = target:pkg("swift-syntax"):envs() or {}
         local syntax = assert(table.wrap(envs.REVENANT_SWIFT_SYNTAX)[1], "revenant@swift-syntax names no build of itself; reinstall it")
         local swiftc = assert(table.wrap(envs.REVENANT_HOST_SWIFTC)[1], "revenant@swift-syntax names no host compiler")
+        local shims = assert(table.wrap(envs.REVENANT_SWIFT_SYNTAX_SHIMS)[1], "revenant@swift-syntax names no shim headers")
         os.mkdir(path.directory(target:targetfile()))
         os.vrunv(swiftc, table.join({"-O", "-module-name", "surftool", "-target", "arm64-apple-macosx13.0", "-I", path.join(syntax, "swift", "host"),
+                                     "-I", path.join(shims, "_SwiftSyntaxCShims"), "-I", path.join(shims, "_SwiftLibraryPluginProviderCShims"),
                                      "-emit-executable", "-o", target:targetfile()}, path.join(os.scriptdir(), "main.swift"), os.files(path.join(syntax, "*.o"))))
     end)
