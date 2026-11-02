@@ -14,8 +14,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
   launch  wakes the phone and has SpringBoard start the app of the id.
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.]]
 
-local LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
-                   "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports"}
+LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
+             "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports"}
 local OLD_PREFIX = "/usr/lib/revenant/org.revenant.backports"
 local NEW_PREFIX = "@executable_path/Frameworks"
 local CONF_KEYS = {module = true, bundle = true, engine = true}

@@ -31,6 +31,11 @@ function failures(opt)
     if #install.change_arguments("/usr/lib/libSystem.B.dylib (x)", {"libUIKitBackports"}) ~= 0 then
         table.insert(found, "a file that names no backports library must not change")
     end
+    local mapkit = "RNHost:\n\t/usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib (compatibility version 1.0.0)\n"
+    if not table.contains(install.LIBRARIES, "libMapKitBackports") or
+       table.concat(install.change_arguments(mapkit, install.LIBRARIES), " ") ~= "-change /usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib @executable_path/Frameworks/libMapKitBackports.dylib" then
+        table.insert(found, "the MapKit backports library is packed and retargeted with the host")
+    end
 
     local command = install.install_command("holder", "org.revenant.rnhost.iso")
     if not command:find("rm -rf /var/stash/holder/iso/iso.app /Applications/iso.app", 1, true) or not command:find("tar xzf /var/tmp/iso.tgz -C unpack", 1, true) or not command:find("mv unpack/*.app iso.app", 1, true) or
