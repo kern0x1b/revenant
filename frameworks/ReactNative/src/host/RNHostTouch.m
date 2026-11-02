@@ -4,6 +4,7 @@
 #import <pthread.h>
 #import <signal.h>
 #import <unistd.h>
+#import "RNHostRunFolder.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
@@ -34,7 +35,7 @@
 
 static void RNHostCommandResult(NSString *line)
 {
-    NSString *path = @"/var/tmp/rnhost.cmd.out";
+    NSString *path = RNHostRunPath(@"rnhost.cmd.out");
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
     if (!handle) {
         [[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil];
@@ -243,7 +244,7 @@ static void RNHostStackHandler(int signal)
 {
     void *frames[64];
     int count = backtrace(frames, 64);
-    int fd = open("/var/tmp/rnhost.stack", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = open(RNHostRunPath(@"rnhost.stack").fileSystemRepresentation, O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (fd >= 0) {
         char name[64] = "";
         pthread_getname_np(pthread_self(), name, sizeof(name));
@@ -261,7 +262,7 @@ static void *RNHostProfiler(void *unused)
 {
     for (;;) {
         usleep(100000);
-        if (access("/var/tmp/rnhost.prof", F_OK) != 0) {
+        if (!RNHostAppFileExists(@"rnhost.prof")) {
             continue;
         }
         thread_act_array_t threads;
@@ -269,14 +270,14 @@ static void *RNHostProfiler(void *unused)
         if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS) {
             continue;
         }
-        FILE *out = fopen("/var/tmp/rnhost.prof.out", "a");
+        FILE *out = fopen(RNHostRunPath(@"rnhost.prof.out").fileSystemRepresentation, "a");
         if (out) {
             fprintf(out, "t=%.1f", CFAbsoluteTimeGetCurrent() - 0);
             for (mach_msg_type_number_t i = 0; i < count; i++) {
                 thread_basic_info_data_t info;
                 mach_msg_type_number_t size = THREAD_BASIC_INFO_COUNT;
                 if (thread_info(threads[i], THREAD_BASIC_INFO, (thread_info_t)&info, &size) == KERN_SUCCESS && info.cpu_usage > 50) {
-                    if (access("/var/tmp/rnhost.prof.stacks", F_OK) == 0) {
+                    if (RNHostAppFileExists(@"rnhost.prof.stacks")) {
                         pthread_t target = pthread_from_mach_thread_np(threads[i]);
                         if (target) {
                             pthread_kill(target, SIGUSR1);
@@ -321,7 +322,7 @@ static void *RNHostWatchdog(void *unused)
 
 + (void)load
 {
-    NSString *interval = [NSString stringWithContentsOfFile:@"/var/tmp/rnhost.fi" encoding:NSUTF8StringEncoding error:NULL];
+    NSString *interval = RNHostReadAppText(@"rnhost.fi");
     if (interval.integerValue > 1) {
         static NSInteger forced;
         forced = interval.integerValue;
@@ -344,19 +345,35 @@ static void *RNHostWatchdog(void *unused)
     }];
 }
 
-+ (void)poll
+static dev_t RNHostCommandDevice;
+static ino_t RNHostCommandInode;
+static NSString *RNHostCommandDone = @"";
+
+static void RNHostRunNewCommands(NSData *data, struct stat info)
 {
-    RNHostTick = time(NULL);
-    NSString *path = @"/var/tmp/rnhost.cmd";
-    NSString *text = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL];
-    if (text.length == 0) {
-        return;
-    }
-    [@"" writeToFile:path atomically:NO encoding:NSUTF8StringEncoding error:NULL];
-    for (NSString *line in [text componentsSeparatedByString:@"\n"]) {
+    NSString *text = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if (!text) return;
+    NSRange newline = [text rangeOfString:@"\n" options:NSBackwardsSearch];
+    NSString *complete = newline.location == NSNotFound ? @"" : [text substringToIndex:newline.location + 1];
+    BOOL same = info.st_dev == RNHostCommandDevice && info.st_ino == RNHostCommandInode && [complete hasPrefix:RNHostCommandDone];
+    NSString *fresh = same ? [complete substringFromIndex:RNHostCommandDone.length] : complete;
+    RNHostCommandDevice = info.st_dev;
+    RNHostCommandInode = info.st_ino;
+    RNHostCommandDone = complete;
+    for (NSString *line in [fresh componentsSeparatedByString:@"\n"]) {
         if (line.length > 0) {
             RNHostRun(line);
         }
+    }
+}
+
++ (void)poll
+{
+    RNHostTick = time(NULL);
+    struct stat info;
+    NSData *data = RNHostReadAppFile(@"rnhost.cmd", &info);
+    if (data.length > 0) {
+        RNHostRunNewCommands(data, info);
     }
 }
 
