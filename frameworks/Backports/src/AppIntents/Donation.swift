@@ -161,7 +161,7 @@ final class IntentDonationStore {
             return ["identifier": donation.identifier.identifier, "intentType": donation.identifier.intentType,
                     "timestamp": donation.timestamp.timeIntervalSince1970, "value": donation.value ?? ""]
         }
-        guard let data = try? PropertyListSerialization.data(fromPropertyList: entries, format: .xml, options: []) else {
+        guard let data = try? PropertyListSerialization.data(fromPropertyList: entries, format: .xml, options: 0) else {
             return
         }
         try? data.write(to: URL(fileURLWithPath: path))
@@ -387,7 +387,7 @@ final class RelevantIntentStore {
             return ["relevance": intent.relevance, "widgetKind": String(describing: intent.widgetKind),
                     "displayName": (intent.intent as? _DisplayedPrediction)?.displayRepresentation.map { RevenantLocalized.string(of: $0.title) } ?? ""]
         }
-        guard let data = try? PropertyListSerialization.data(fromPropertyList: entries, format: .xml, options: []) else {
+        guard let data = try? PropertyListSerialization.data(fromPropertyList: entries, format: .xml, options: 0) else {
             return
         }
         try? data.write(to: URL(fileURLWithPath: path))
