@@ -1,7 +1,7 @@
 package("react-native-enriched-markdown")
     set_kind("library", {headeronly = true})
     set_homepage("https://www.npmjs.com/package/react-native-enriched-markdown")
-    set_description("react-native-enriched-markdown 1.2.0-nightly-20261014-766fc0e67, the markdown view of the chat, from its npm tarball: the published build with its own C++ parser and code highlighting, without the EnrichedMarkdownCore pod; patches for armv7 iOS 6 (BOOL to bool in brace initializers, block signatures, a type cast)")
+    set_description("react-native-enriched-markdown 1.2.0-nightly-20261014-766fc0e67, the markdown view of the chat, from its npm tarball: the published build with its own C++ parser and code highlighting, without the EnrichedMarkdownCore pod; patches for armv7 iOS 6 (BOOL to bool in brace initializers, a type cast)")
     set_license("MIT")
 
     add_urls("https://registry.npmjs.org/react-native-enriched-markdown/-/react-native-enriched-markdown-$(version).tgz")
@@ -32,8 +32,6 @@ package("react-native-enriched-markdown")
         "0001-Cast-the-custom-edit-menu-actions-to-UIMenuElement.patch",
         "0002-Convert-the-BOOL-fields-to-bool-in-the-input-event-emitter.patch",
         "0003-Convert-the-BOOL-checked-state-to-bool-in-the-task-list-events.patch",
-        "0004-Give-the-tap-handler-block-in-EnrichedMarkdown-the-two-parameters-of-its-type.patch",
-        "0005-Give-the-tap-handler-block-in-EnrichedMarkdownText-the-type-s-two-parameters.patch",
     }
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, name in ipairs(patches) do
