@@ -1,6 +1,7 @@
 local tool = import("inputs", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local plain_replace, normalize, podspec_public_headers = tool.plain_replace, tool.normalize, tool.podspec_public_headers
 local make_rn_codegen, selected, renderer_platform_dirs, compare = tool.make_rn_codegen, tool.selected, tool.renderer_platform_dirs, tool.compare
+local byte_less = tool.byte_less
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -89,6 +90,14 @@ for _ in pairs(everything) do
     count = count + 1
 end
 check("selected chooses every input when none is named", count == 14 and everything["rn-src"] and everything["app-assets"], count)
+
+local ordered = {"EXJSI", "EXJavaScript", "ExpoModulesCore", "_private", "a", "b", "é"}
+local order_ok = true
+for i = 1, #ordered - 1 do
+    order_ok = order_ok and byte_less(ordered[i], ordered[i + 1]) and not byte_less(ordered[i + 1], ordered[i])
+end
+check("byte_less orders by bytes, uppercase before lowercase and multibyte last", order_ok)
+check("byte_less puts a prefix first", byte_less("ExpoModules", "ExpoModulesCore") and not byte_less("ExpoModulesCore", "ExpoModules"))
 
 local platforms = renderer_platform_dirs({packages = {["react-native"] = path.join(DATA, "react-native-package")}})
 local renderer = path.join(DATA, "react-native-package", "src", "react-native", "ReactCommon", "react", "renderer", "components")
