@@ -28,7 +28,7 @@ function main()
         table.insert(options, object)
     end
     swiftc({fixture, "-o", host})
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),
                       {fixture, bridge},
                       options,

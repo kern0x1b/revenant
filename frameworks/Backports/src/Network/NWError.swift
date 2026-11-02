@@ -40,7 +40,11 @@ public final class NWParameters: @unchecked Sendable {
         self.tlsOptions = nil
     }
 
-    public init(tls: NWProtocolTLS.Options?, tcp: NWProtocolTCP.Options) {
+    public convenience init() {
+        self.init(transport: .tcp)
+    }
+
+    public init(tls: NWProtocolTLS.Options?, tcp: NWProtocolTCP.Options = NWProtocolTCP.Options()) {
         self.transport = .tcp
         self.tcpOptions = tcp
         self.tlsOptions = tls

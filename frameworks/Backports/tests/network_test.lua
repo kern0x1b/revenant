@@ -44,7 +44,7 @@ local function backport_program(source, files, output)
     local boringssl = workspace.package_of("boringssl", true)
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     local objects = native_objects(path.directory(output), boringssl)
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       files, objects, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
     return output
 end

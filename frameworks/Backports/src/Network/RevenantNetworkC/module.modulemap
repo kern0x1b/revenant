@@ -1,0 +1,4 @@
+module RevenantNetworkC {
+    header "RevenantNetworkC.h"
+    export *
+}

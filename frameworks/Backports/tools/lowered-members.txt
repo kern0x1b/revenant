@@ -1744,6 +1744,7 @@ class RevenantHKStore
 class RevenantHandlerMediaItemArtwork
 class RevenantHomeKitStore
 class RevenantHostState
+class RevenantIOSurfaceContents
 class RevenantImageAnimation
 class RevenantImageModeKeeper
 class RevenantImageTemplate
@@ -3720,6 +3721,7 @@ enum PHAssetSourceTypeCloudShared
 enum PHAssetSourceTypeUserLibrary
 enum PHAssetSourceTypeiTunesSynced
 enum PHImageContentModeAspectFill
+enum PHImageContentModeAspectFit
 enum PHImageRequestOptionsResizeModeExact
 enum PHImageRequestOptionsResizeModeFast
 enum PHImageRequestOptionsVersionCurrent
@@ -4375,11 +4377,9 @@ function GCMicroGamepadSnapshotDataFromNSData
 function IOMainPort
 function IORegistryEntryCopyFromPath
 function IORegistryEntryCopyPath
-function IOSurfaceAlignProperty
 function IOSurfaceCopyAllValues
 function IOSurfaceCopyValue
 function IOSurfaceCreate
-function IOSurfaceCreateMachPort
 function IOSurfaceDecrementUseCount
 function IOSurfaceGetAllocSize
 function IOSurfaceGetBaseAddress
@@ -4397,8 +4397,6 @@ function IOSurfaceGetHeightOfPlane
 function IOSurfaceGetID
 function IOSurfaceGetPixelFormat
 function IOSurfaceGetPlaneCount
-function IOSurfaceGetPropertyAlignment
-function IOSurfaceGetPropertyMaximum
 function IOSurfaceGetSeed
 function IOSurfaceGetTypeID
 function IOSurfaceGetUseCount
@@ -4408,7 +4406,6 @@ function IOSurfaceIncrementUseCount
 function IOSurfaceIsInUse
 function IOSurfaceLock
 function IOSurfaceLookup
-function IOSurfaceLookupFromMachPort
 function IOSurfaceRemoveAllValues
 function IOSurfaceRemoveValue
 function IOSurfaceSetPurgeable
@@ -4635,6 +4632,7 @@ function RevenantHomeKitUUID
 function RevenantHomeKitUUIDString
 function RevenantHomeKitUser
 function RevenantHomeKitZone
+function RevenantIOSurfaceLayersRefresh
 function RevenantInstallNSBundleAdditions
 function RevenantIsAppleProRAWPixelFormat
 function RevenantIsBayerRAWPixelFormat
@@ -4692,6 +4690,7 @@ function RevenantMetalDecodeVertex
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
+function RevenantMetalSynchroniseSurfaceTextures
 function RevenantMetalVertexFormat
 function RevenantMusicKitSignES256
 function RevenantNDEFRecordDecode
@@ -10443,8 +10442,19 @@ global kIOSurfaceBytesPerElement
 global kIOSurfaceBytesPerRow
 global kIOSurfaceCacheMode
 global kIOSurfaceColorSpace
+global kIOSurfaceElementHeight
+global kIOSurfaceElementWidth
 global kIOSurfaceHeight
 global kIOSurfacePixelFormat
+global kIOSurfacePlaneBytesPerElement
+global kIOSurfacePlaneBytesPerRow
+global kIOSurfacePlaneElementHeight
+global kIOSurfacePlaneElementWidth
+global kIOSurfacePlaneHeight
+global kIOSurfacePlaneInfo
+global kIOSurfacePlaneOffset
+global kIOSurfacePlaneSize
+global kIOSurfacePlaneWidth
 global kIOSurfaceWidth
 global kMIDIPropertyAssociatedEndpoint
 global kMIDIPropertyNameConfigurationDictionary
@@ -12985,8 +12995,12 @@ member CADisplayLink -preferredFramesPerSecond
 member CADisplayLink -setPreferredFrameRateRange:
 member CADisplayLink -setPreferredFramesPerSecond:
 member CADisplayLink -targetTimestamp
+member CALayer +load
 member CALayer -cornerCurve
 member CALayer -maskedCorners
+member CALayer -revenantRefreshIOSurface
+member CALayer -revenantShowIOSurface:
+member CALayer -revenant_setContents:
 member CALayer -setCornerCurve:
 member CALayer -setMaskedCorners:
 member CAMetalLayer -EDRMetadata
@@ -26367,6 +26381,10 @@ member RevenantHomeKitStore -init
 member RevenantHomeKitStore -pathForTable:
 member RevenantHomeKitStore -root
 member RevenantHomeKitStore -tableNamed:
+member RevenantIOSurfaceContents -dealloc
+member RevenantIOSurfaceContents -initWithSurface:seed:
+member RevenantIOSurfaceContents -seed
+member RevenantIOSurfaceContents -surface
 member RevenantImageAnimation -armAfter:
 member RevenantImageAnimation -dealloc
 member RevenantImageAnimation -drawFrameAtIndex:
@@ -27067,10 +27085,14 @@ member RevenantMetalTexture -revenantCanFilter
 member RevenantMetalTexture -revenantChannels
 member RevenantMetalTexture -revenantGenerateMipmaps
 member RevenantMetalTexture -revenantIsColour
+member RevenantMetalTexture -revenantMarkSurfaceDirty
 member RevenantMetalTexture -revenantReadRegion:level:bytesPerRow:into:
+member RevenantMetalTexture -revenantRefreshSurface
 member RevenantMetalTexture -revenantRestoreAttachment:previous:
 member RevenantMetalTexture -revenantSetHeap:offset:
 member RevenantMetalTexture -revenantStorageSize
+member RevenantMetalTexture -revenantSynchroniseSurface
+member RevenantMetalTexture -revenantUploadSurface
 member RevenantMetalTexture -revenantWriteRegion:level:bytes:bytesPerRow:
 member RevenantMetalTexture -sampleCount
 member RevenantMetalTexture -screen

@@ -80,8 +80,18 @@ static UIImage *revenant_image(ALAsset *asset, CGSize target, PHImageContentMode
     CGSize canvas = shown;
     CGSize drawn = shown;
     if (!maximum && shown.width > 0 && shown.height > 0) {
-        CGFloat scale = mode == PHImageContentModeAspectFill ? MAX(target.width / shown.width, target.height / shown.height)
-                                                             : MIN(target.width / shown.width, target.height / shown.height);
+        CGFloat fit = MIN(target.width / shown.width, target.height / shown.height);
+        CGFloat fill = MAX(target.width / shown.width, target.height / shown.height);
+        CGFloat scale;
+        switch (mode) {
+            case PHImageContentModeAspectFill:
+                scale = fill;
+                break;
+            case PHImageContentModeAspectFit:
+            default:
+                scale = fit;
+                break;
+        }
         if (scale > 1 && !exact)
             scale = 1;
         drawn = CGSizeMake(round(shown.width * scale), round(shown.height * scale));
