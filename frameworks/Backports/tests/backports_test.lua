@@ -26,29 +26,46 @@ end
 function main()
     local data = path.absolute(path.join(os.scriptdir(), "data"))
     local sdk = path.join(data, "sdk")
-    local minimum = ast.version_of("6.0")
-    assert(minimum, "ast.version_of cannot read 6.0")
-
     local rows = facts.objc_facts(sdk, "Fixture", VERSION)
     local class_seen = false
     local methods = {}
+    local unavailable = {}
+    local shared = nil
     for _, row in ipairs(rows) do
         if row.kind == "class" and row.name == "FXRoot" then
             class_seen = true
-        elseif row.kind == "instance method" then
+        elseif row.kind == "class" and generate.has_flag(row, "unavailable") then
+            unavailable[row.name] = true
+        elseif row.kind == "global variable" and row.name == "fx_shared" then
+            shared = row
+        elseif row.kind == "instance method" and row.container == "FXRoot" then
             table.insert(methods, row)
         end
     end
     assert(class_seen, "the class FXRoot was not extracted")
-    assert(#methods == 4, "expected 4 instance methods, got " .. #methods)
+    assert(unavailable.FXGone, "the class FXGone is not marked unavailable")
+    assert(shared and generate.has_flag(shared, "unavailable"), "fx_shared is not unavailable: the second declaration's attribute was lost")
+    assert(not generate.exists_on_ios(shared, unavailable), "fx_shared exists on iOS although one declaration marks it unavailable")
+    assert(#methods == 5, "expected 5 instance methods of FXRoot, got " .. #methods)
 
-    local scoped = {}
+    local scoped, withdrawn = {}, {}
     for _, row in ipairs(methods) do
-        if sdkfiles.in_scope(row, minimum, nil) then
+        if generate.exists_on_ios(row, unavailable) then
             table.insert(scoped, row)
+        else
+            table.insert(withdrawn, row.name)
         end
     end
-    assert(#scoped == 3, "expected 3 in-scope methods, got " .. #scoped)
+    table.sort(withdrawn)
+    assert(#scoped == 4, "expected 4 members that exist on iOS, got " .. #scoped)
+    assert(table.concat(withdrawn, ",") == "fx_gone", "expected only fx_gone unavailable among the methods, got " .. table.concat(withdrawn, ","))
+    assert(not generate.exists_on_ios({kind = "instance method", container = "FXGone", name = "fx_inside", flags = "", intro = nil}, unavailable),
+        "a method of an unavailable class exists on iOS")
+    assert(generate.exists_on_ios({kind = "instance method", container = "FXRoot", name = "fx_old", flags = "", intro = 5000}, unavailable),
+        "a member introduced in iOS 5.0 does not exist on iOS")
+
+    local names = generate.implemented_names()
+    assert(names.CFRunLoopObserverCreateWithHandler, "a C function that src/Foundation implements is not among the implemented names, so the skeleton would stub it again")
 
     local objects = path.join(workspace.scratch(), "backports-test-objects")
     os.tryrm(objects)
@@ -67,7 +84,7 @@ function main()
         end
     end
     assert(found == 2, "expected 2 implemented members, got " .. found)
-    assert(#missing == 1 and missing[1] == "fx_later", "expected fx_later to be the only missing member")
+    assert(#missing == 2 and missing[1] == "fx_later" and missing[2] == "fx_old", "expected fx_later and fx_old to be the missing members, got " .. table.concat(missing, ","))
 
     local cache = path.join(workspace.scratch(), "backports-test")
     os.tryrm(cache)

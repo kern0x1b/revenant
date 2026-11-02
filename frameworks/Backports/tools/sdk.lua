@@ -166,6 +166,6 @@ function framework_introduced(rows)
     return lowest
 end
 
-function in_scope(row, minimum, framework_intro)
-    return true
+function framework_image(name)
+    return "/System/Library/Frameworks/" .. name .. ".framework/" .. name
 end

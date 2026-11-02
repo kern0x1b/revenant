@@ -1,13 +1,13 @@
 import("async.runjobs")
-import("core.project.project")
 
-local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
+local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 
 local SHARDS = 4
+local FIRST_IPHONE_OS = 2000
 
 local function extract(sdk, version, cache, logs, name)
     local rows = facts.objc_facts(sdk, name, version)
@@ -162,6 +162,16 @@ function implemented_names()
             end
         end
     end
+    local functions = os.iorunv("/usr/bin/grep", {"-rhE", "--include=*.m", "--include=*.mm", "--include=*.c",
+        "^[A-Za-z_][A-Za-z0-9_ *]*[ *][A-Za-z_][A-Za-z0-9_]*\\(", sdkfiles.src_root()})
+    for line in functions:gmatch("[^\n]+") do
+        if not string.find(line, "^static") and not string.find(line, "^return") and not string.find(line, "[=;]") then
+            local name = string.match(line, "([%a_][%w_]*)%s*%(")
+            if name then
+                names[name] = true
+            end
+        end
+    end
     implemented_cache = names
     return names
 end
@@ -191,6 +201,7 @@ function prepare(only)
         version = version,
         logs = logs,
         frameworks = frameworks_of(cache, names, sdk),
+        images = publics.install_names(sdk),
     }
 end
 
@@ -201,36 +212,63 @@ function everything()
     return everything_state
 end
 
-function skeleton_for(name)
-    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending_of(everything(), {name}), implemented_names())
+function has_flag(row, flag)
+    return string.find(" " .. (row.flags or "") .. " ", " " .. flag .. " ", 1, true) ~= nil
 end
 
-function declared_intros(state)
-    if state.declared == nil then
-        local lowest = {}
+function unavailable_classes(rows)
+    local names = {}
+    for _, row in ipairs(rows) do
+        if row.kind == "class" and has_flag(row, "unavailable") then
+            names[row.name] = true
+        end
+    end
+    return names
+end
+
+function unavailable_classes_of(state)
+    if state.unavailable_classes == nil then
+        local names = {}
         for _, framework in ipairs(state.frameworks) do
-            for _, row in ipairs(framework.rows) do
-                if row.kind == "class" and row.intro ~= nil and (lowest[row.name] == nil or row.intro < lowest[row.name]) then
-                    lowest[row.name] = row.intro
-                end
+            for name in pairs(unavailable_classes(framework.rows)) do
+                names[name] = true
             end
         end
-        state.declared = lowest
+        state.unavailable_classes = names
     end
-    return state.declared
+    return state.unavailable_classes
 end
 
-function in_scope_rows(state, framework)
-    local declared = declared_intros(state)
+function exists_on_ios(row, unavailable)
+    if has_flag(row, "unavailable") then
+        return false
+    end
+    if (row.kind == "instance method" or row.kind == "class method" or row.kind == "property") and unavailable[row.container] then
+        return false
+    end
+    return row.intro == nil or row.intro >= FIRST_IPHONE_OS
+end
+
+function available_rows(state, framework)
+    local unavailable = unavailable_classes_of(state)
     local kept = {}
     for _, row in ipairs(framework.rows) do
-        local scoped = row
-        if row.kind == "class" and row.intro == nil and declared[row.name] ~= nil then
-            scoped = {intro = declared[row.name]}
+        if exists_on_ios(row, unavailable) then
+            table.insert(kept, row)
         end
-        table.insert(kept, row)
     end
     return kept
+end
+
+function unavailable_count(state, framework)
+    local unavailable = unavailable_classes_of(state)
+    local count = 0
+    for _, row in ipairs(framework.rows) do
+        if not exists_on_ios(row, unavailable) then
+            count = count + 1
+        end
+    end
+    return count
 end
 
 local function single_owned(row)
@@ -254,7 +292,7 @@ function owners_of(state)
         local folders = library_folders()
         local owners = {}
         for _, framework in ipairs(state.frameworks) do
-            for _, row in ipairs(in_scope_rows(state, framework)) do
+            for _, row in ipairs(available_rows(state, framework)) do
                 if single_owned(row) then
                     local key = row.kind .. "|" .. row.name
                     local score = (folders[framework.name] and 2 or 0) + (row.intro ~= nil and 1 or 0)
@@ -271,35 +309,26 @@ end
 
 function pending_of(state, only)
     local owners = owners_of(state)
+    local unavailable = unavailable_classes_of(state)
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
         if only == nil or table.contains(only, framework.name) then
-            local rows = {}
-            for _, row in ipairs(in_scope_rows(state, framework)) do
+            local rows, skipped = {}, {}
+            for _, row in ipairs(framework.rows) do
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
-                    table.insert(rows, row)
+                    if exists_on_ios(row, unavailable) then
+                        table.insert(rows, row)
+                    else
+                        skipped[row.kind] = (skipped[row.kind] or 0) + 1
+                    end
                 end
             end
-            table.insert(pending, {name = framework.name, import = framework.import, rows = rows,
-                unavailable = unavailable_classes(framework.rows)})
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped,
+                unavailable = unavailable, images = state.images})
         end
     end
     return pending
-end
-
-function unavailable_classes(rows)
-    local names = {}
-    for _, row in ipairs(rows) do
-        if row.kind == "class" and has_flag(row, "unavailable") then
-            names[row.name] = true
-        end
-    end
-    return names
-end
-
-function has_flag(row, flag)
-    return string.find(" " .. (row.flags or "") .. " ", " " .. flag .. " ", 1, true) ~= nil
 end
 
 function method_key(row)
@@ -337,9 +366,17 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local pending = pending_of(everything())
+    local state = everything()
+    local pending = pending_of(state)
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names())
-    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals, %d C functions, %d Swift symbols under %s",
-        totals.objc, totals.classes, totals.protocols, totals.globals, totals.c, totals.swift, path.join(sdkfiles.build_root(), "skeleton")))
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images)
+    local skipped = 0
+    for _, framework in ipairs(pending) do
+        for _, count in pairs(framework.skipped) do
+            skipped = skipped + count
+        end
+    end
+    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals (%d not copied), %d C functions (%d not stubbed, %d implemented in src), %d Swift symbols, %d unavailable on iOS (not stubbed) under %s",
+        totals.objc, totals.classes, totals.protocols, totals.globals, totals.globals_uncopied, totals.c, totals.c_unstubbed, totals.c_in_src, totals.swift, skipped,
+        path.join(sdkfiles.build_root(), "skeleton")))
 end
