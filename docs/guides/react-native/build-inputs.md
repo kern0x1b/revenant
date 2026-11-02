@@ -59,16 +59,20 @@ The comparison exits with an error when an input differs, and prints `same (N en
 | `rn-codegen` | Made. Identical to the spike. |
 | `rn-src` | A link to the `react-native` package sources. Same target as the spike once its store path is rewritten. |
 | `lib-headers` | Made. Identical to the spike. |
-| `expo-jsi` | Made. Identical to the spike. |
+| `expo-jsi` | Made. Identical to the spike once the private store path is rewritten (`--rewrite` of the private cache to the shared cache): `libcxx.rsp` names the store the build used. |
 | `expo-pods` | Made with the package list above. Identical to the spike. |
 | `expo-src` | Made with the package list above. Identical to the spike. |
 | `nitro` | Made. Identical to the spike once the `react-native` store path is rewritten. |
-| `unistyles` | Made except `swift-header`, which needs the Swift compiler (see below). The response files match the spike once the store path is rewritten. |
-| `keyboard` | Made except `react_native_keyboard_controller-Swift.h`, which needs the Swift compiler. `Bridge.h` matches the spike. `flags.rsp` differs in the `react-native` root for yoga (identical trees) and `React` (the application's copy has other files), because the tool reads the revenant package. |
+| `unistyles` | Made, including `swift-header`, which is identical to the spike. `flags.rsp` differs only in the `react-native` store instance: the spike's build used another worker's install (`rn-modules`), whose `ReactCommon/jsc/JSCRuntime.cpp` differs from the revenant package's; the headers are identical. Not rewritten, so it stays a difference. |
+| `keyboard` | Made, including `react_native_keyboard_controller-Swift.h`. Identical to the spike (5 entries) with the build root rewritten. `flags.rsp` differs in the `react-native` root for yoga (identical trees) and `React` (the application's copy has other files), because the tool reads the revenant package. |
 | `screens` | Made. `Bridge.h` matches the spike. `flags.rsp` differs in the same `react-native` root as `keyboard`. |
-| `rn-headers` | Not generated yet. The rules of the podspecs that make the flat header set are not written. |
-| `expo-core` | Not generated yet. The module maps, `include/ExpoModulesCore` and `swift-header` are missing; `bridging.h`, `ExpoModulesProvider.swift`, `implicit.rsp` and `flags.rsp` are written. |
+| `rn-headers` | Made from the podspec rules. Identical to the spike: 761 entries, including the Swift header of keyboard. The curated `react.modulemap` list (109 names) is data in `tools/data/expo-core-react-headers.txt`, not derived from a rule. |
+| `expo-core` | Partly made. The module maps, `include/ExpoModulesCore` and `react.modulemap` are identical to the spike (`flags.rsp` differs in the store path only). `swift-header` is not made: the `ExpoModulesJSI` Swift module fails to build in the SDK's `Dispatch`/`os`/`CoreFoundation` modules in the private cache, and the spike's build of the same module succeeds. Open. |
 | `app-assets` | Not generated yet. Its source is not known. |
 
-The headers that Swift generates (`react_native_keyboard_controller-Swift.h`, `unistyles/swift-header`, `expo-core/swift-header`)
-are not made by the tool; they need the Swift compiler run over the modules and are not part of this change.
+The Swift headers are made by the tool through `swift_header`, which compiles the Swift targets with the spike's flags in a probe
+project under the private cache. The probe links the checkout's `toolchain` folder, because the swift-runtime recipe reads its
+overlay from the project root.
+
+Ordering: every sort in the tool is byte order (`byte_less`), not the locale's. `compare --rewrite BUILT=REFERENCE` is repeatable,
+and each pair maps a path that differs only by where a build was made (the private cache, the parity build root).
