@@ -41,7 +41,13 @@ local PROBE_REQUIRES = {
     {"expo-modules-core", "revenant@expo-modules-core"},
     {"react-native-screens", "revenant@react-native-screens"},
     {"react-native-reanimated", "revenant@react-native-reanimated"},
-    {"react-native-worklets", "revenant@react-native-worklets"}
+    {"react-native-worklets", "revenant@react-native-worklets"},
+    {"folly", "revenant@folly 2024.11.18.00"},
+    {"boost", "revenant@boost 1.84.0"},
+    {"glog", "revenant@glog 0.3.5"},
+    {"fmt", "revenant@fmt 12.1.0"},
+    {"double-conversion", "revenant@double-conversion 1.1.6"},
+    {"fast_float", "revenant@fast_float 8.0.0"}
 }
 
 function checkout()
