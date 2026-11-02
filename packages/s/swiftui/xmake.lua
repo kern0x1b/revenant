@@ -33,16 +33,14 @@ package("swiftui")
             "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"})",
             "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})",
             "add_requires(\"revenant@combine\", {alias = \"combine\"})",
-            "includes(\"" .. path.join(root, "frameworks", "Backports") .. "\")",
             "includes(\"" .. path.join(root, "frameworks", "SwiftUI") .. "\")",
             "set_defaultplat(\"iphoneos\")",
             "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")",
             ""}, "\n"))
         io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
-        local backports = {REVENANT_BACKPORTS_LIBRARIES = "MapKitBackports"}
-        os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project, envs = backports})
-        os.vrunv(os.programfile(), {"build", "-P", project, "-y", "SwiftUI"}, {curdir = project, envs = table.join(backports, {REVENANT_RELEASE = "1"})})
-        os.vrunv(os.programfile(), {"install", "-P", project, "-y", "-o", package:installdir(), "SwiftUI"}, {curdir = project, envs = backports})
+        os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+        os.vrunv(os.programfile(), {"build", "-P", project, "-y", "SwiftUI"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+        os.vrunv(os.programfile(), {"install", "-P", project, "-y", "-o", package:installdir(), "SwiftUI"}, {curdir = project})
         package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"))
     end)
 
