@@ -6,11 +6,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 28 |
+| real | built from the module's own sources, with no stub and no substitute | 29 |
 | partial | built and running, with a named part left out or rewritten | 6 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 52 |
+| missing | native code that is not built yet | 51 |
 | evaluate | not attempted; the note says what iOS 6 offers | 36 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -146,7 +146,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-sharing | ~57.0.23 | yes | missing | none | Does not compile for iOS 6: ResolveUrlContentDetails uses URLSession.bytes, an iOS 15 API. |
 | expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
-| expo-splash-screen | ~57.0.10 | yes | missing | none | Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault). |
+| expo-splash-screen | ~57.0.10 | yes | real | build | Built from its package on the isolated host (the patch makes its React import match the module; the host's react.modulemap must list RCTSurfaceHostingProxyRootView.h). Not exercised on the phone. |
 | expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |

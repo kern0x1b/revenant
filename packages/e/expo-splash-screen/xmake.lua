@@ -1,0 +1,23 @@
+package("expo-splash-screen")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://docs.expo.dev/versions/latest/sdk/splash-screen/")
+    set_description("expo-splash-screen 57.0.10, the splash screen of the Expo SDK, from its npm tarball: the Swift and Objective-C sources of its iOS half, with the patch that makes its React import match the rest of the module")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-splash-screen/-/expo-splash-screen-$(version).tgz")
+    add_versions("57.0.10", "40669284c807a0cb5a736fe922e7041549e46fe5fcf7dda694b637303bfebe80")
+    add_patches("57.0.10", path.join(os.scriptdir(), "patches", "splash-manager-public-react-import.patch"), "ccc882ba1ce15e367967026a6abb3adfa4e8a595d421a07e26d6a6057446115c")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-splash-screen" and manifest.version == "57.0.10", "the package is " .. manifest.name .. " " .. manifest.version)
+        local manager = io.readfile(path.join(package:installdir(), "ios", "SplashScreenManager.swift"))
+        assert(not manager:find("internal import React", 1, true), "the patch is not in the installed sources")
+    end)
