@@ -597,8 +597,87 @@ function make_expo_core(ctx)
     raise("expo-core: the module maps (module.modulemap, react.modulemap), include/ExpoModulesCore and swift-header are not generated yet")
 end
 
+function rn_glob(root, pattern, excludes)
+    local found = {}
+    for _, file in ipairs(os.files(path.join(root, pattern))) do
+        local rel = path.relative(file, root)
+        local skip = false
+        for _, excluded in ipairs(excludes or {}) do
+            if rel:startswith(excluded) then
+                skip = true
+            end
+        end
+        if not skip then
+            table.insert(found, rel)
+        end
+    end
+    table.sort(found)
+    return found
+end
+
+function make_rn_headers(ctx)
+    local out = path.join(ctx.build, "rn-headers")
+    fresh_directory(out)
+    local src = path.join(ctx.build, "rn-src")
+    local app = path.join(ctx.ref, "node_modules", "react-native")
+    local links, order = {}, {}
+    local function put(dest, target)
+        if not links[dest] then
+            links[dest] = target
+            table.insert(order, dest)
+        end
+    end
+    local function place(rels, root, where, sub, sub_root)
+        for _, rel in ipairs(rels) do
+            local base = path.filename(rel)
+            if where.top then
+                put(base, path.join(root, rel))
+            end
+            if where.react then
+                put("React/" .. base, path.join(root, rel))
+            end
+            if sub then
+                put(sub .. "/" .. base, path.join(sub_root or root, rel))
+            end
+        end
+    end
+    local both = {top = true, react = true}
+    local react_core = rn_glob(src, "React/**.h", {"React/Fabric/", "React/FBReactNativeSpec/", "React/Runtime/", "React/Tests/"})
+    for _, pattern in ipairs({"Libraries/ActionSheetIOS/*.h", "Libraries/NativeAnimation/Drivers/*.h", "Libraries/NativeAnimation/Nodes/*.h", "Libraries/NativeAnimation/*.h", "Libraries/Blob/RCTBlobManager.h", "Libraries/Blob/RCTFileReaderModule.h", "Libraries/Image/*.h", "Libraries/LinkingIOS/*.h", "Libraries/Network/*.h", "Libraries/PushNotificationIOS/*.h", "Libraries/Settings/*.h", "Libraries/Text/**.h", "Libraries/Vibration/*.h", "Libraries/WebSocket/*.h"}) do
+        for _, rel in ipairs(rn_glob(src, pattern)) do
+            table.insert(react_core, rel)
+        end
+    end
+    place(react_core, src, both)
+    place(rn_glob(src, "React/FBReactNativeSpec/**.h"), src, both)
+    place(rn_glob(src, "React/Runtime/*.h"), src, both)
+    place(rn_glob(src, "Libraries/AppDelegate/*.h"), src, both, "React-RCTAppDelegate", app)
+    place(rn_glob(src, "Libraries/TypeSafety/*.h"), src, both, "RCTTypeSafety")
+    place(rn_glob(src, "Libraries/Required/*.h"), src, both, "RCTRequired")
+    place(rn_glob(src, "Libraries/Blob/*.h"), src, both)
+    place(rn_glob(src, "Libraries/Wrapper/**.h"), src, both)
+    place(rn_glob(src, "Libraries/FBLazyVector/**/*.h"), src, both)
+    place(rn_glob(src, "React/Fabric/**.h"), src, {react = true})
+    place(rn_glob(src, "ReactApple/RCTSwiftUIWrapper/*.h"), src, {react = true}, "RCTSwiftUIWrapper")
+    place(rn_glob(src, "ReactApple/RCTAnimatedModuleProvider/*.h"), src, {react = true})
+    place(rn_glob(src, "ReactApple/Libraries/RCTFoundation/RCTDeprecation/Exported/*.h"), src, {react = true}, "RCTDeprecation")
+    for _, pattern in ipairs({"react/nativemodule/core/ReactCommon/**.h", "callinvoker/ReactCommon/**.h", "runtimeexecutor/ReactCommon/**.h", "runtimeexecutor/platform/ios/ReactCommon/**.h"}) do
+        place(rn_glob(path.join(src, "ReactCommon"), pattern), path.join(src, "ReactCommon"), {}, "ReactCommon")
+    end
+    put("FBLazyVector", path.join(src, "Libraries", "FBLazyVector", "FBLazyVector"))
+    for _, dest in ipairs(order) do
+        local link = path.join(out, dest)
+        os.mkdir(path.directory(link))
+        os.ln(links[dest], link)
+    end
+    for _, dir in ipairs({"reactperflogger", "react_native_keyboard_controller"}) do
+        os.mkdir(path.join(out, dir))
+    end
+end
+
 local MAKERS = {
     codegen = make_codegen,
+    ["rn-headers"] = make_rn_headers,
     ["expo-src"] = make_expo_src,
     ["expo-core"] = make_expo_core,
     ["rn-codegen"] = make_rn_codegen,
