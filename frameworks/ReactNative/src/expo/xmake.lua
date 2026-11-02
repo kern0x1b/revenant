@@ -1,4 +1,4 @@
-local SOURCES = path.absolute(path.join(os.scriptdir(), "..", "src"))
+local SOURCES = path.absolute(path.join(os.scriptdir(), ".."))
 local EXPO_ONLY = {expo = "Fetch"}
 local EXPO_BUILT = {real = true, partial = true}
 
