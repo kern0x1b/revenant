@@ -32,7 +32,7 @@ package("react-native-enriched-markdown")
         "0001-Cast-the-custom-edit-menu-actions-to-UIMenuElement.patch",
         "0002-Convert-the-BOOL-fields-to-bool-in-the-input-event-emitter.patch",
         "0003-Convert-the-BOOL-checked-state-to-bool-in-the-task-list-events.patch",
-        "0004-Give-the-link-press-blocks-the-two-parameters-of-their-type.patch",
+        "0004-Give-the-tap-handler-block-in-EnrichedMarkdown-the-two-parameters-of-its-type.patch",
         "0005-Give-the-tap-handler-block-in-EnrichedMarkdownText-the-type-s-two-parameters.patch",
     }
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
