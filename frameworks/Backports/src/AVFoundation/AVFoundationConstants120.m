@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVAssetContainsFragmentsDidChangeNotification = @"AVAssetContainsFragmentsDidChangeNotification";
-NSString *const AVAssetWasDefragmentedNotification = @"AVAssetWasDefragmentedNotification";
-NSString *const AVSampleBufferRenderSynchronizerRateDidChangeNotification = @"AVSampleBufferRenderSynchronizerRateDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVAssetContainsFragmentsDidChangeNotification) = @"AVAssetContainsFragmentsDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVAssetWasDefragmentedNotification) = @"AVAssetWasDefragmentedNotification";
+NSString *const BACKPORT_IMPL(AVSampleBufferRenderSynchronizerRateDidChangeNotification) = @"AVSampleBufferRenderSynchronizerRateDidChangeNotification";

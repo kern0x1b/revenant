@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImageSourceShouldCacheImmediately = CFSTR("kCGImageSourceShouldCacheImmediately");
+const CFStringRef BACKPORT_IMPL(kCGImageSourceShouldCacheImmediately) = CFSTR("kCGImageSourceShouldCacheImmediately");

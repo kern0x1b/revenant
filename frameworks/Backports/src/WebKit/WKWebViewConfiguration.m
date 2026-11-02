@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantWebKit.h"
 
-NSString *const WKErrorDomain = @"WKErrorDomain";
+NSString *const BACKPORT_IMPL(WKErrorDomain) = @"WKErrorDomain";
 
 @implementation WKProcessPool
 

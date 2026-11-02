@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSProcessInfoPowerStateDidChangeNotification = @"NSProcessInfoPowerStateDidChangeNotification";
+NSString *const BACKPORT_IMPL(NSProcessInfoPowerStateDidChangeNotification) = @"NSProcessInfoPowerStateDidChangeNotification";
 
 @implementation NSProcessInfo (RevenantPowerState)
 

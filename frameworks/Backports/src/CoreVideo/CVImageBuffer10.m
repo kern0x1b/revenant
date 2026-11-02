@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-CGColorSpaceRef CVImageBufferCreateColorSpaceFromAttachments(CFDictionaryRef attachments)
+CGColorSpaceRef BACKPORT_IMPL(CVImageBufferCreateColorSpaceFromAttachments)(CFDictionaryRef attachments)
 {
     if (!attachments) return NULL;
     CFTypeRef profile = CFDictionaryGetValue(attachments, kCVImageBufferICCProfileKey);

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -16,7 +17,7 @@ Boolean RevenantSecurityNetworkFetchAllowedFor(SecTrustRef trust, bool fallback)
     return answer;
 }
 
-OSStatus SecTrustSetNetworkFetchAllowed(SecTrustRef trust, Boolean allowFetch)
+OSStatus BACKPORT_IMPL(SecTrustSetNetworkFetchAllowed)(SecTrustRef trust, Boolean allowFetch)
 {
     if (!trust)
         return errSecParam;
@@ -33,7 +34,7 @@ OSStatus SecTrustSetNetworkFetchAllowed(SecTrustRef trust, Boolean allowFetch)
     return errSecSuccess;
 }
 
-OSStatus SecTrustGetNetworkFetchAllowed(SecTrustRef trust, Boolean *allowFetch)
+OSStatus BACKPORT_IMPL(SecTrustGetNetworkFetchAllowed)(SecTrustRef trust, Boolean *allowFetch)
 {
     if (!trust || !allowFetch)
         return errSecParam;

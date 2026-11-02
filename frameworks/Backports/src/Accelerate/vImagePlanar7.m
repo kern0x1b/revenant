@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVImageFixed.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -67,7 +68,7 @@ static void revenant_gather_q12_to_8(const vImage_Buffer *const *srcs, const vIm
     }
 }
 
-vImage_Error vImageConvert_ARGB16UtoPlanar16U(const vImage_Buffer *argbSrc, const vImage_Buffer *aDest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16UtoPlanar16U)(const vImage_Buffer *argbSrc, const vImage_Buffer *aDest,
                                              const vImage_Buffer *rDest, const vImage_Buffer *gDest,
                                              const vImage_Buffer *bDest, vImage_Flags flags)
 {
@@ -81,7 +82,7 @@ vImage_Error vImageConvert_ARGB16UtoPlanar16U(const vImage_Buffer *argbSrc, cons
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB16UtoPlanar16U(const vImage_Buffer *rgbSrc, const vImage_Buffer *rDest,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB16UtoPlanar16U)(const vImage_Buffer *rgbSrc, const vImage_Buffer *rDest,
                                             const vImage_Buffer *gDest, const vImage_Buffer *bDest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(rgbSrc, rDest, flags);
@@ -94,7 +95,7 @@ vImage_Error vImageConvert_RGB16UtoPlanar16U(const vImage_Buffer *rgbSrc, const 
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Planar16UtoARGB16U(const vImage_Buffer *aSrc, const vImage_Buffer *rSrc,
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar16UtoARGB16U)(const vImage_Buffer *aSrc, const vImage_Buffer *rSrc,
                                               const vImage_Buffer *gSrc, const vImage_Buffer *bSrc,
                                               const vImage_Buffer *argbDest, vImage_Flags flags)
 {
@@ -108,7 +109,7 @@ vImage_Error vImageConvert_Planar16UtoARGB16U(const vImage_Buffer *aSrc, const v
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Planar16UtoRGB16U(const vImage_Buffer *rSrc, const vImage_Buffer *gSrc,
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar16UtoRGB16U)(const vImage_Buffer *rSrc, const vImage_Buffer *gSrc,
                                              const vImage_Buffer *bSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(rSrc, rgbDest, flags);
@@ -121,7 +122,7 @@ vImage_Error vImageConvert_Planar16UtoRGB16U(const vImage_Buffer *rSrc, const vI
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB8888toPlanar16Q12(const vImage_Buffer *src, const vImage_Buffer *alpha,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888toPlanar16Q12)(const vImage_Buffer *src, const vImage_Buffer *alpha,
                                                  const vImage_Buffer *red, const vImage_Buffer *green,
                                                  const vImage_Buffer *blue, vImage_Flags flags)
 {
@@ -135,7 +136,7 @@ vImage_Error vImageConvert_ARGB8888toPlanar16Q12(const vImage_Buffer *src, const
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB888toPlanar16Q12(const vImage_Buffer *src, const vImage_Buffer *red,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB888toPlanar16Q12)(const vImage_Buffer *src, const vImage_Buffer *red,
                                                 const vImage_Buffer *green, const vImage_Buffer *blue,
                                                 vImage_Flags flags)
 {
@@ -149,7 +150,7 @@ vImage_Error vImageConvert_RGB888toPlanar16Q12(const vImage_Buffer *src, const v
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Planar16Q12toARGB8888(const vImage_Buffer *alpha, const vImage_Buffer *red,
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar16Q12toARGB8888)(const vImage_Buffer *alpha, const vImage_Buffer *red,
                                                   const vImage_Buffer *green, const vImage_Buffer *blue,
                                                   const vImage_Buffer *dest, vImage_Flags flags)
 {
@@ -163,7 +164,7 @@ vImage_Error vImageConvert_Planar16Q12toARGB8888(const vImage_Buffer *alpha, con
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Planar16Q12toRGB888(const vImage_Buffer *red, const vImage_Buffer *green,
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar16Q12toRGB888)(const vImage_Buffer *red, const vImage_Buffer *green,
                                                 const vImage_Buffer *blue, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(red, dest, flags);

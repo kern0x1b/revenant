@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 
 #define RevenantRatioTimescaleLimit 0x7FFFFFFFu
@@ -196,7 +197,7 @@ static CMTime revenant_ratio_infinite(int negative)
     return result;
 }
 
-CMTime CMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor)
+CMTime BACKPORT_IMPL(CMTimeMultiplyByRatio)(CMTime time, int32_t multiplier, int32_t divisor)
 {
     if (!CMTIME_IS_VALID(time))
         return kCMTimeInvalid;

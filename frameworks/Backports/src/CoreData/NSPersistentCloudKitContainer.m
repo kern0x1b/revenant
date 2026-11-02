@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantCoreData.h"
 #import <objc/runtime.h>
 
-NSString * const NSPersistentStoreRemoteChangeNotificationPostOptionKey = @"NSPersistentStoreRemoteChangeNotificationOptionKey";
+NSString * const BACKPORT_IMPL(NSPersistentStoreRemoteChangeNotificationPostOptionKey) = @"NSPersistentStoreRemoteChangeNotificationOptionKey";
 
 static void revenant_cloudkit_say_once(void)
 {

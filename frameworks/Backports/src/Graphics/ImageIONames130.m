@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
 extern CFStringRef const kCGImageAnimationDelayTime;
@@ -23,25 +24,25 @@ extern CFStringRef const kCGImagePropertyHEICSFrameInfoArray;
 extern CFStringRef const kCGImagePropertyHEICSLoopCount;
 extern CFStringRef const kCGImagePropertyHEICSUnclampedDelayTime;
 
-CFStringRef const kCGImageAnimationDelayTime = CFSTR("DelayTime");
-CFStringRef const kCGImageAnimationLoopCount = CFSTR("LoopCount");
-CFStringRef const kCGImageAnimationStartIndex = CFSTR("StartIndex");
-CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte");
-CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte");
-CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte");
-CFStringRef const kCGImagePropertyAPNGCanvasPixelHeight = CFSTR("CanvasPixelHeight");
-CFStringRef const kCGImagePropertyAPNGCanvasPixelWidth = CFSTR("CanvasPixelWidth");
-CFStringRef const kCGImagePropertyAPNGFrameInfoArray = CFSTR("FrameInfo");
-CFStringRef const kCGImagePropertyExifOffsetTime = CFSTR("OffsetTime");
-CFStringRef const kCGImagePropertyExifOffsetTimeDigitized = CFSTR("OffsetTimeDigitized");
-CFStringRef const kCGImagePropertyExifOffsetTimeOriginal = CFSTR("OffsetTimeOriginal");
-CFStringRef const kCGImagePropertyGIFCanvasPixelHeight = CFSTR("CanvasPixelHeight");
-CFStringRef const kCGImagePropertyGIFCanvasPixelWidth = CFSTR("CanvasPixelWidth");
-CFStringRef const kCGImagePropertyGIFFrameInfoArray = CFSTR("FrameInfo");
-CFStringRef const kCGImagePropertyHEICSCanvasPixelHeight = CFSTR("CanvasPixelHeight");
-CFStringRef const kCGImagePropertyHEICSCanvasPixelWidth = CFSTR("CanvasPixelWidth");
-CFStringRef const kCGImagePropertyHEICSDelayTime = CFSTR("DelayTime");
-CFStringRef const kCGImagePropertyHEICSDictionary = CFSTR("{HEICS}");
-CFStringRef const kCGImagePropertyHEICSFrameInfoArray = CFSTR("FrameInfo");
-CFStringRef const kCGImagePropertyHEICSLoopCount = CFSTR("LoopCount");
-CFStringRef const kCGImagePropertyHEICSUnclampedDelayTime = CFSTR("UnclampedDelayTime");
+CFStringRef const BACKPORT_IMPL(kCGImageAnimationDelayTime) = CFSTR("DelayTime");
+CFStringRef const BACKPORT_IMPL(kCGImageAnimationLoopCount) = CFSTR("LoopCount");
+CFStringRef const BACKPORT_IMPL(kCGImageAnimationStartIndex) = CFSTR("StartIndex");
+CFStringRef const BACKPORT_IMPL(kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte) = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte");
+CFStringRef const BACKPORT_IMPL(kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte) = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte");
+CFStringRef const BACKPORT_IMPL(kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte) = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyAPNGCanvasPixelHeight) = CFSTR("CanvasPixelHeight");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyAPNGCanvasPixelWidth) = CFSTR("CanvasPixelWidth");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyAPNGFrameInfoArray) = CFSTR("FrameInfo");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyExifOffsetTime) = CFSTR("OffsetTime");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyExifOffsetTimeDigitized) = CFSTR("OffsetTimeDigitized");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyExifOffsetTimeOriginal) = CFSTR("OffsetTimeOriginal");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGIFCanvasPixelHeight) = CFSTR("CanvasPixelHeight");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGIFCanvasPixelWidth) = CFSTR("CanvasPixelWidth");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGIFFrameInfoArray) = CFSTR("FrameInfo");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSCanvasPixelHeight) = CFSTR("CanvasPixelHeight");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSCanvasPixelWidth) = CFSTR("CanvasPixelWidth");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSDelayTime) = CFSTR("DelayTime");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSDictionary) = CFSTR("{HEICS}");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSFrameInfoArray) = CFSTR("FrameInfo");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSLoopCount) = CFSTR("LoopCount");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyHEICSUnclampedDelayTime) = CFSTR("UnclampedDelayTime");

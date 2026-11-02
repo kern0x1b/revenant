@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGPDFContextCreateLinearizedPDF = CFSTR("CGPDFContextCreateLinearizedPDF");
-const CFStringRef kCGPDFContextCreatePDFA = CFSTR("CGPDFContextCreatePDFA");
+const CFStringRef BACKPORT_IMPL(kCGPDFContextCreateLinearizedPDF) = CFSTR("CGPDFContextCreateLinearizedPDF");
+const CFStringRef BACKPORT_IMPL(kCGPDFContextCreatePDFA) = CFSTR("CGPDFContextCreatePDFA");

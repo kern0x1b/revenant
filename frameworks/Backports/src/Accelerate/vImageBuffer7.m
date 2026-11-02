@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #import <CoreGraphics/CoreGraphics.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 
 static const vImage_Flags revenant_init_flags = kvImageNoAllocate | kvImagePrintDiagnosticsToConsole;
 
-vImage_Error vImageBuffer_Init(vImage_Buffer *buf, vImagePixelCount height, vImagePixelCount width, uint32_t pixelBits, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageBuffer_Init)(vImage_Buffer *buf, vImagePixelCount height, vImagePixelCount width, uint32_t pixelBits, vImage_Flags flags)
 {
     if (flags & ~revenant_init_flags)
         return kvImageUnknownFlagsBit;

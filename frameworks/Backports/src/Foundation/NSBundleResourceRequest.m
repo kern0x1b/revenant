@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import "RevenantMethodProem.h"
 #import <objc/runtime.h>
 
-double const NSBundleResourceRequestLoadingPriorityUrgent = 1.0;
-NSString *const NSBundleResourceRequestLowDiskSpaceNotification = @"NSBundleResourceRequestLowDiskSpaceNotification";
+double const BACKPORT_IMPL(NSBundleResourceRequestLoadingPriorityUrgent) = 1.0;
+NSString *const BACKPORT_IMPL(NSBundleResourceRequestLowDiskSpaceNotification) = @"NSBundleResourceRequestLowDiskSpaceNotification";
 
 static NSString *const revenant_manifest_resource = @"OnDemandResources";
 static NSString *const revenant_manifest_tags_key = @"NSBundleResourceRequestTags";

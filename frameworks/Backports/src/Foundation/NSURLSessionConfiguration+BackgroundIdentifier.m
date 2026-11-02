@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSURLErrorBackgroundTaskCancelledReasonKey = @"NSURLErrorBackgroundTaskCancelledReasonKey";
+NSString * const BACKPORT_IMPL(NSURLErrorBackgroundTaskCancelledReasonKey) = @"NSURLErrorBackgroundTaskCancelledReasonKey";
 
 @implementation NSURLSessionConfiguration (RevenantBackgroundIdentifier)
 

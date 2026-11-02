@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 
 struct vDSP_biquad_SetupStruct {
@@ -17,7 +18,7 @@ static inline void revenant_biquad15_set(void *setup, vDSP_Length section, const
     }
 }
 
-void vDSP_biquad_SetCoefficientsDouble(vDSP_biquad_Setup __setup, const double *__coeffs, vDSP_Length __start_sec,
+void BACKPORT_IMPL(vDSP_biquad_SetCoefficientsDouble)(vDSP_biquad_Setup __setup, const double *__coeffs, vDSP_Length __start_sec,
                                        vDSP_Length __nsec)
 {
     if (!__setup || !__coeffs) {
@@ -28,7 +29,7 @@ void vDSP_biquad_SetCoefficientsDouble(vDSP_biquad_Setup __setup, const double *
     }
 }
 
-void vDSP_biquad_SetCoefficientsSingle(vDSP_biquad_Setup __setup, const float *__coeffs, vDSP_Length __start_sec,
+void BACKPORT_IMPL(vDSP_biquad_SetCoefficientsSingle)(vDSP_biquad_Setup __setup, const float *__coeffs, vDSP_Length __start_sec,
                                        vDSP_Length __nsec)
 {
     if (!__setup || !__coeffs) {

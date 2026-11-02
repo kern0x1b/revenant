@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
@@ -10,7 +11,7 @@ static void revenant_path_apply(void *info, const CGPathElement *element)
     ((revenant_path_context *)info)->block(element);
 }
 
-void CGPathApplyWithBlock(CGPathRef path, CGPathApplyBlock block)
+void BACKPORT_IMPL(CGPathApplyWithBlock)(CGPathRef path, CGPathApplyBlock block)
 {
     if (!path || !block)
         return;

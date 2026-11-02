@@ -633,6 +633,7 @@ end
 local function scan_source(file, found)
     local container, pending = nil, nil
     for line in io.readfile(file):gmatch("[^\n]*") do
+        line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
         local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
         if class then
             container = class
@@ -2079,6 +2080,7 @@ function constants_defined_in(src)
         for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 for line in io.readfile(file):gmatch("[^\n]*") do
+                    line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
                     local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
                         or line:match("const%s+[%w_]+%s*%*%s*([%a_][%w_]*)%s*=")
                         or line:match("^[%a_][%w_]*%s*%*%s*([%a_][%w_]*)%s*[;=]")

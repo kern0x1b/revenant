@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantFoundationIdentifiers.h"
 
-NSString * const NSHTTPCookieSetByJavaScript = @"SetInJavaScript";
+NSString * const BACKPORT_IMPL(NSHTTPCookieSetByJavaScript) = @"SetInJavaScript";

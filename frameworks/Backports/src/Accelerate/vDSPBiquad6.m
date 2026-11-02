@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
@@ -37,26 +38,26 @@ static void revenant_biquad_create(void **setup, const double *coeffs, vDSP_Leng
     *setup = made;
 }
 
-vDSP_biquad_Setup vDSP_biquad_CreateSetup(const double *__Coefficients, vDSP_Length __M)
+vDSP_biquad_Setup BACKPORT_IMPL(vDSP_biquad_CreateSetup)(const double *__Coefficients, vDSP_Length __M)
 {
     void *setup = NULL;
     revenant_biquad_create(&setup, __Coefficients, __M);
     return (vDSP_biquad_Setup)setup;
 }
 
-vDSP_biquad_SetupD vDSP_biquad_CreateSetupD(const double *__Coefficients, vDSP_Length __M)
+vDSP_biquad_SetupD BACKPORT_IMPL(vDSP_biquad_CreateSetupD)(const double *__Coefficients, vDSP_Length __M)
 {
     void *setup = NULL;
     revenant_biquad_create(&setup, __Coefficients, __M);
     return (vDSP_biquad_SetupD)setup;
 }
 
-void vDSP_biquad_DestroySetup(vDSP_biquad_Setup __setup)
+void BACKPORT_IMPL(vDSP_biquad_DestroySetup)(vDSP_biquad_Setup __setup)
 {
     free(__setup);
 }
 
-void vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD __setup)
+void BACKPORT_IMPL(vDSP_biquad_DestroySetupD)(vDSP_biquad_SetupD __setup)
 {
     free(__setup);
 }
@@ -108,7 +109,7 @@ void vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD __setup)
         free(fresh_);                                                                                                 \
     } while (0)
 
-void vDSP_biquad(const struct vDSP_biquad_SetupStruct *__Setup, float *__Delay, const float *__X, vDSP_Stride __IX,
+void BACKPORT_IMPL(vDSP_biquad)(const struct vDSP_biquad_SetupStruct *__Setup, float *__Delay, const float *__X, vDSP_Stride __IX,
                  float *__Y, vDSP_Stride __IY, vDSP_Length __N)
 {
     if (!__Setup || !__Delay || !__X || !__Y || __N < 2)
@@ -116,7 +117,7 @@ void vDSP_biquad(const struct vDSP_biquad_SetupStruct *__Setup, float *__Delay, 
     REVENANT_BIQUAD_RUN(float, __Setup, __Delay, __X, __IX, __Y, __IY, __N);
 }
 
-void vDSP_biquadD(const struct vDSP_biquad_SetupStructD *__Setup, double *__Delay, const double *__X,
+void BACKPORT_IMPL(vDSP_biquadD)(const struct vDSP_biquad_SetupStructD *__Setup, double *__Delay, const double *__X,
                   vDSP_Stride __IX, double *__Y, vDSP_Stride __IY, vDSP_Length __N)
 {
     if (!__Setup || !__Delay || !__X || !__Y || __N < 2)

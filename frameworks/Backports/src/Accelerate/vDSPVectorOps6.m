@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-void vDSP_vsmsma(const float *__A, vDSP_Stride __IA, const float *__B, const float *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vsmsma)(const float *__A, vDSP_Stride __IA, const float *__B, const float *__C, vDSP_Stride __IC,
                  const float *__D, float *__E, vDSP_Stride __IE, vDSP_Length __N)
 {
     if (!__A || !__B || !__C || !__D || !__E)

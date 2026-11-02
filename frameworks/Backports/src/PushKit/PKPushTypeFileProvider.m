@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <PushKit/PushKit.h>
 
-PKPushType const PKPushTypeFileProvider = @"PKPushTypeFileProvider";
+PKPushType const BACKPORT_IMPL(PKPushTypeFileProvider) = @"PKPushTypeFileProvider";

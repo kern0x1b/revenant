@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const HMCharacteristicMetadataUnitsSeconds = @"seconds";
+NSString *const BACKPORT_IMPL(HMCharacteristicMetadataUnitsSeconds) = @"seconds";

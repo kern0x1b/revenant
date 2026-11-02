@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNGeometrySourceSemantic const SCNGeometrySourceSemanticTangent = @"kGeometrySourceSemanticTangent";
+SCNGeometrySourceSemantic const BACKPORT_IMPL(SCNGeometrySourceSemanticTangent) = @"kGeometrySourceSemanticTangent";

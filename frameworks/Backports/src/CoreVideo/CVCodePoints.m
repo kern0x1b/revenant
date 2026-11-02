@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
 #import <pthread.h>
@@ -90,32 +91,32 @@ static int revenant_code_for_string(revenant_code_table *table, CFStringRef stri
     return code;
 }
 
-CFStringRef CVColorPrimariesGetStringForIntegerCodePoint(int codePoint)
+CFStringRef BACKPORT_IMPL(CVColorPrimariesGetStringForIntegerCodePoint)(int codePoint)
 {
     return revenant_string_for_code(&revenant_primaries, codePoint);
 }
 
-int CVColorPrimariesGetIntegerCodePointForString(CFStringRef colorPrimariesString)
+int BACKPORT_IMPL(CVColorPrimariesGetIntegerCodePointForString)(CFStringRef colorPrimariesString)
 {
     return revenant_code_for_string(&revenant_primaries, colorPrimariesString);
 }
 
-CFStringRef CVTransferFunctionGetStringForIntegerCodePoint(int codePoint)
+CFStringRef BACKPORT_IMPL(CVTransferFunctionGetStringForIntegerCodePoint)(int codePoint)
 {
     return revenant_string_for_code(&revenant_transfer, codePoint);
 }
 
-int CVTransferFunctionGetIntegerCodePointForString(CFStringRef transferFunctionString)
+int BACKPORT_IMPL(CVTransferFunctionGetIntegerCodePointForString)(CFStringRef transferFunctionString)
 {
     return revenant_code_for_string(&revenant_transfer, transferFunctionString);
 }
 
-CFStringRef CVYCbCrMatrixGetStringForIntegerCodePoint(int codePoint)
+CFStringRef BACKPORT_IMPL(CVYCbCrMatrixGetStringForIntegerCodePoint)(int codePoint)
 {
     return revenant_string_for_code(&revenant_matrix, codePoint);
 }
 
-int CVYCbCrMatrixGetIntegerCodePointForString(CFStringRef yCbCrMatrixString)
+int BACKPORT_IMPL(CVYCbCrMatrixGetIntegerCodePointForString)(CFStringRef yCbCrMatrixString)
 {
     return revenant_code_for_string(&revenant_matrix, yCbCrMatrixString);
 }

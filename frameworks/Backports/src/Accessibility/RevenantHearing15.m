@@ -1,18 +1,19 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
 #import <objc/runtime.h>
 
-NSArray<NSUUID *> *AXMFiHearingDevicePairedUUIDs(void)
+NSArray<NSUUID *> *BACKPORT_IMPL(AXMFiHearingDevicePairedUUIDs)(void)
 {
     return @[];
 }
 
-AXHearingDeviceEar AXMFiHearingDeviceStreamingEar(void)
+AXHearingDeviceEar BACKPORT_IMPL(AXMFiHearingDeviceStreamingEar)(void)
 {
     return AXHearingDeviceEarNone;
 }
 
-BOOL AXSupportsBidirectionalAXMFiHearingDeviceStreaming(void)
+BOOL BACKPORT_IMPL(AXSupportsBidirectionalAXMFiHearingDeviceStreaming)(void)
 {
     return NO;
 }

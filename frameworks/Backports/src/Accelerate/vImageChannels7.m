@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantChannels.h"
 
@@ -29,7 +30,7 @@ static vImage_Error revenant_channels7_map(const uint8_t *map)
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannels_ARGB16U(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannels_ARGB16U)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                            const uint8_t permuteMap[4], vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels7_ready(src, dest, flags, revenant_channels7_permute_flags);
@@ -44,7 +45,7 @@ vImage_Error vImagePermuteChannels_ARGB16U(const vImage_Buffer *src, const vImag
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGB16U(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannelsWithMaskedInsert_ARGB16U)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                           const uint8_t permuteMap[4], uint8_t copyMask,
                                                           const Pixel_ARGB_16U backgroundColor, vImage_Flags flags)
 {
@@ -61,7 +62,7 @@ vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGB16U(const vImage_Buffer *
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGB8888(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannelsWithMaskedInsert_ARGB8888)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                            const uint8_t permuteMap[4], uint8_t copyMask,
                                                            const Pixel_8888 backgroundColor, vImage_Flags flags)
 {
@@ -78,7 +79,7 @@ vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGB8888(const vImage_Buffer 
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannelsWithMaskedInsert_ARGBFFFF)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                            const uint8_t permuteMap[4], uint8_t copyMask,
                                                            const Pixel_FFFF backgroundColor, vImage_Flags flags)
 {
@@ -95,7 +96,7 @@ vImage_Error vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(const vImage_Buffer 
     return kvImageNoError;
 }
 
-vImage_Error vImageOverwriteChannelsWithPixel_ARGB16U(const Pixel_ARGB_16U the_pixel, const vImage_Buffer *src,
+vImage_Error BACKPORT_IMPL(vImageOverwriteChannelsWithPixel_ARGB16U)(const Pixel_ARGB_16U the_pixel, const vImage_Buffer *src,
                                                       const vImage_Buffer *dest, uint8_t copyMask, vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels7_ready(src, dest, flags, revenant_channels7_pixel_flags);

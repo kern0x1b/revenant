@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <string.h>
 
 #define parameterIsInvalid kCMFormatDescriptionError_InvalidParameter
 #define malformedRecord ((OSStatus)-12712)
 
-OSStatus CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex,
+OSStatus BACKPORT_IMPL(CMVideoFormatDescriptionGetHEVCParameterSetAtIndex)(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex,
                                                             const uint8_t **parameterSetPointerOut, size_t *parameterSetSizeOut,
                                                             size_t *parameterSetCountOut, int *NALUnitHeaderLengthOut)
 {

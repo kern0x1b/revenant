@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #include <MobileCoreServices/MobileCoreServices.h>
 
-Boolean UTTypeIsDynamic(CFStringRef inUTI)
+Boolean BACKPORT_IMPL(UTTypeIsDynamic)(CFStringRef inUTI)
 {
     if (!inUTI || CFGetTypeID(inUTI) != CFStringGetTypeID())
         return false;
@@ -29,7 +30,7 @@ Boolean UTTypeIsDynamic(CFStringRef inUTI)
     return previous != '.' && previous != '-';
 }
 
-Boolean UTTypeIsDeclared(CFStringRef inUTI)
+Boolean BACKPORT_IMPL(UTTypeIsDeclared)(CFStringRef inUTI)
 {
     if (!inUTI || CFGetTypeID(inUTI) != CFStringGetTypeID())
         return false;

@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <CoreText/CoreText.h>
 
-const CFStringRef kCTFontOpenTypeFeatureTag = CFSTR("CTFeatureOpenTypeTag");
-const CFStringRef kCTFontOpenTypeFeatureValue = CFSTR("CTFeatureOpenTypeValue");
+const CFStringRef BACKPORT_IMPL(kCTFontOpenTypeFeatureTag) = CFSTR("CTFeatureOpenTypeTag");
+const CFStringRef BACKPORT_IMPL(kCTFontOpenTypeFeatureValue) = CFSTR("CTFeatureOpenTypeValue");

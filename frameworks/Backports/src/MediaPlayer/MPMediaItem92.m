@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
@@ -19,4 +20,4 @@ extern NSString * const MPMediaItemPropertyHasProtectedAsset;
 
 @end
 
-NSString * const MPMediaItemPropertyHasProtectedAsset = @"hasProtectedAsset";
+NSString * const BACKPORT_IMPL(MPMediaItemPropertyHasProtectedAsset) = @"hasProtectedAsset";

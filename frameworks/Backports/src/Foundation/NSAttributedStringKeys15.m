@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSAlternateDescriptionAttributeName = @"NSAlternateDescription";
-NSString * const NSImageURLAttributeName = @"NSImageURL";
-NSString * const NSInlinePresentationIntentAttributeName = @"NSInlinePresentationIntent";
-NSString * const NSLanguageIdentifierAttributeName = @"NSLanguage";
-NSString * const NSPresentationIntentAttributeName = @"NSPresentationIntent";
-NSString * const NSProgressFileOperationKindDuplicating = @"NSProgressFileOperationKindDuplicating";
-NSString * const NSReplacementIndexAttributeName = @"NSReplacementIndex";
-NSString * const NSMorphologyAttributeName = @"NSMorphology";
+NSString * const BACKPORT_IMPL(NSAlternateDescriptionAttributeName) = @"NSAlternateDescription";
+NSString * const BACKPORT_IMPL(NSImageURLAttributeName) = @"NSImageURL";
+NSString * const BACKPORT_IMPL(NSInlinePresentationIntentAttributeName) = @"NSInlinePresentationIntent";
+NSString * const BACKPORT_IMPL(NSLanguageIdentifierAttributeName) = @"NSLanguage";
+NSString * const BACKPORT_IMPL(NSPresentationIntentAttributeName) = @"NSPresentationIntent";
+NSString * const BACKPORT_IMPL(NSProgressFileOperationKindDuplicating) = @"NSProgressFileOperationKindDuplicating";
+NSString * const BACKPORT_IMPL(NSReplacementIndexAttributeName) = @"NSReplacementIndex";
+NSString * const BACKPORT_IMPL(NSMorphologyAttributeName) = @"NSMorphology";

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -25,7 +26,7 @@ static uint8_t revenant_up6(uint32_t value) { return (uint8_t)((value * 255 + 31
 static uint32_t revenant_down5(uint32_t value) { return (value * 31 + 127) / 255; }
 static uint32_t revenant_down6(uint32_t value) { return (value * 63 + 127) / 255; }
 
-vImage_Error vImageConvert_RGB565toRGB888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB565toRGB888)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixels8_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -44,7 +45,7 @@ vImage_Error vImageConvert_RGB565toRGB888(const vImage_Buffer *src, const vImage
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB565toARGB1555(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB565toARGB1555)(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
                                                vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixels8_ready(src, dest, flags);
@@ -66,7 +67,7 @@ vImage_Error vImageConvert_RGB565toARGB1555(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB1555toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB1555toRGB565)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixels8_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -86,7 +87,7 @@ vImage_Error vImageConvert_ARGB1555toRGB565(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB565toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB565toRGBA5551)(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
                                                 vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixels8_ready(src, dest, flags);
@@ -109,7 +110,7 @@ vImage_Error vImageConvert_RGB565toRGBA5551(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGBA5551toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGBA5551toRGB565)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixels8_ready(src, dest, flags);
     if (ready != kvImageNoError)

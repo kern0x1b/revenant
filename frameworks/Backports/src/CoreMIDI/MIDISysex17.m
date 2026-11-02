@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMIDI/CoreMIDI.h>
 
 #include <limits.h>
@@ -7,7 +8,7 @@
 
 #import "RevenantCoreMIDI.h"
 
-OSStatus MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData)
+OSStatus BACKPORT_IMPL(MIDIEventPacketSysexBytesForGroup)(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData)
 {
     *outData = NULL;
     if (groupIndex > 15 || pkt->wordCount < 2)
@@ -72,12 +73,12 @@ static OSStatus revenant_send_ump(MIDISysexSendRequestUMP *umpRequest)
     return noErr;
 }
 
-OSStatus MIDISendUMPSysex(MIDISysexSendRequestUMP *umpRequest)
+OSStatus BACKPORT_IMPL(MIDISendUMPSysex)(MIDISysexSendRequestUMP *umpRequest)
 {
     return revenant_send_ump(umpRequest);
 }
 
-OSStatus MIDISendUMPSysex8(MIDISysexSendRequestUMP *umpRequest)
+OSStatus BACKPORT_IMPL(MIDISendUMPSysex8)(MIDISysexSendRequestUMP *umpRequest)
 {
     return revenant_send_ump(umpRequest);
 }

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSURLCredentialStorageRemoveSynchronizableCredentials = @"NSURLCredentialStorageRemoveSynchronizableCredentials";
+NSString * const BACKPORT_IMPL(NSURLCredentialStorageRemoveSynchronizableCredentials) = @"NSURLCredentialStorageRemoveSynchronizableCredentials";

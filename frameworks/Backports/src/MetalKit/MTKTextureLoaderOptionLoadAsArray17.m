@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <MetalKit/MetalKit.h>
 
-NSString *const MTKTextureLoaderOptionLoadAsArray = @"MTKTextureLoaderOptionLoadAsArray";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderOptionLoadAsArray) = @"MTKTextureLoaderOptionLoadAsArray";

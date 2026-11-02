@@ -1,15 +1,16 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
 static char revenant_tolerance_key;
 
-CFTimeInterval CFRunLoopTimerGetTolerance(CFRunLoopTimerRef timer)
+CFTimeInterval BACKPORT_IMPL(CFRunLoopTimerGetTolerance)(CFRunLoopTimerRef timer)
 {
     NSNumber *tolerance = objc_getAssociatedObject((__bridge id)timer, &revenant_tolerance_key);
     return tolerance.doubleValue;
 }
 
-void CFRunLoopTimerSetTolerance(CFRunLoopTimerRef timer, CFTimeInterval tolerance)
+void BACKPORT_IMPL(CFRunLoopTimerSetTolerance)(CFRunLoopTimerRef timer, CFTimeInterval tolerance)
 {
     if (CFRunLoopTimerDoesRepeat(timer)) {
         CFTimeInterval half = CFRunLoopTimerGetInterval(timer) / 2;

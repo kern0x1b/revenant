@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -17,14 +18,14 @@
         *(SumOfSquares) = squares_;                                            \
     } while (0)
 
-void vDSP_sve_svesq(const float *__A, vDSP_Stride __IA, float *__Sum, float *__SumOfSquares, vDSP_Length __N)
+void BACKPORT_IMPL(vDSP_sve_svesq)(const float *__A, vDSP_Stride __IA, float *__Sum, float *__SumOfSquares, vDSP_Length __N)
 {
     if (!__A || !__Sum || !__SumOfSquares)
         return;
     REVENANT_SVE_RUN(float, __A, __IA, __Sum, __SumOfSquares, __N);
 }
 
-void vDSP_sve_svesqD(const double *__A, vDSP_Stride __IA, double *__Sum, double *__SumOfSquares, vDSP_Length __N)
+void BACKPORT_IMPL(vDSP_sve_svesqD)(const double *__A, vDSP_Stride __IA, double *__Sum, double *__SumOfSquares, vDSP_Length __N)
 {
     if (!__A || !__Sum || !__SumOfSquares)
         return;

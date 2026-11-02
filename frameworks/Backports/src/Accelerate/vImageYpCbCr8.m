@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include "RevenantYpCbCr.h"
@@ -11,10 +12,10 @@ static const vImage_YpCbCrToARGBMatrix revenant_ypcbcr_709_2 = {1.0f, 1.57480001
 static const vImage_ARGBToYpCbCrMatrix revenant_argb_601_4 = {0.298999995f, 0.587000012f, 0.114f, -0.168735892f, -0.331264108f, 0.5f, -0.418687582f, -0.0813124105f};
 static const vImage_ARGBToYpCbCrMatrix revenant_argb_709_2 = {0.212599993f, 0.715200007f, 0.0722000003f, -0.114572108f, -0.385427892f, 0.5f, -0.454152912f, -0.0458470918f};
 
-const vImage_YpCbCrToARGBMatrix *kvImage_YpCbCrToARGBMatrix_ITU_R_601_4 = &revenant_ypcbcr_601_4;
-const vImage_YpCbCrToARGBMatrix *kvImage_YpCbCrToARGBMatrix_ITU_R_709_2 = &revenant_ypcbcr_709_2;
-const vImage_ARGBToYpCbCrMatrix *kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4 = &revenant_argb_601_4;
-const vImage_ARGBToYpCbCrMatrix *kvImage_ARGBToYpCbCrMatrix_ITU_R_709_2 = &revenant_argb_709_2;
+const vImage_YpCbCrToARGBMatrix *BACKPORT_IMPL(kvImage_YpCbCrToARGBMatrix_ITU_R_601_4) = &revenant_ypcbcr_601_4;
+const vImage_YpCbCrToARGBMatrix *BACKPORT_IMPL(kvImage_YpCbCrToARGBMatrix_ITU_R_709_2) = &revenant_ypcbcr_709_2;
+const vImage_ARGBToYpCbCrMatrix *BACKPORT_IMPL(kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4) = &revenant_argb_601_4;
+const vImage_ARGBToYpCbCrMatrix *BACKPORT_IMPL(kvImage_ARGBToYpCbCrMatrix_ITU_R_709_2) = &revenant_argb_709_2;
 
 static const vImage_Flags revenant_vimage_conversion_flags = kvImageDoNotTile | kvImagePrintDiagnosticsToConsole;
 static const vImage_Flags revenant_vimage_generate_flags = kvImagePrintDiagnosticsToConsole;
@@ -41,7 +42,7 @@ static BOOL revenant_yuv_supports(vImageYpCbCrType yuv, vImageARGBType argb)
     }
 }
 
-vImage_Error vImageConvert_YpCbCrToARGB_GenerateConversion(const vImage_YpCbCrToARGBMatrix *matrix,
+vImage_Error BACKPORT_IMPL(vImageConvert_YpCbCrToARGB_GenerateConversion)(const vImage_YpCbCrToARGBMatrix *matrix,
                                                            const vImage_YpCbCrPixelRange *pixelRange,
                                                            vImage_YpCbCrToARGB *outInfo,
                                                            vImageYpCbCrType inYpCbCrType,
@@ -80,7 +81,7 @@ vImage_Error vImageConvert_YpCbCrToARGB_GenerateConversion(const vImage_YpCbCrTo
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGBToYpCbCr_GenerateConversion(const vImage_ARGBToYpCbCrMatrix *matrix,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGBToYpCbCr_GenerateConversion)(const vImage_ARGBToYpCbCrMatrix *matrix,
                                                            const vImage_YpCbCrPixelRange *pixelRange,
                                                            vImage_ARGBToYpCbCr *outInfo,
                                                            vImageARGBType inARGBType,
@@ -364,7 +365,7 @@ RevenantYUVToARGBNoAlpha(vImageConvert_444AYpCbCr16ToARGB8888, RevenantYUV444AYp
 #undef RevenantYUVToARGB
 #undef RevenantYUVToARGBNoAlpha
 
-vImage_Error vImageConvert_444AYpCbCr16ToARGB16U(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_444AYpCbCr16ToARGB16U)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                   const vImage_YpCbCrToARGB *info, const uint8_t permuteMap[4],
                                                   vImage_Flags flags)
 {
@@ -373,7 +374,7 @@ vImage_Error vImageConvert_444AYpCbCr16ToARGB16U(const vImage_Buffer *src, const
     return revenant_yuv_to_argb(RevenantYUV444AYpCbCr16, 65535.0f, src, dest, info, permuteMap, 0, NO, NULL);
 }
 
-vImage_Error vImageConvert_422CbYpCrYp16ToARGB16U(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_422CbYpCrYp16ToARGB16U)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                   const vImage_YpCbCrToARGB *info, const uint8_t permuteMap[4],
                                                   const uint16_t alpha, vImage_Flags flags)
 {
@@ -382,7 +383,7 @@ vImage_Error vImageConvert_422CbYpCrYp16ToARGB16U(const vImage_Buffer *src, cons
     return revenant_yuv_to_argb(RevenantYUV422CbYpCrYp16, 65535.0f, src, dest, info, permuteMap, alpha, YES, NULL);
 }
 
-vImage_Error vImageConvert_444CrYpCb10ToARGB16Q12(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_444CrYpCb10ToARGB16Q12)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                    const vImage_YpCbCrToARGB *info, const uint8_t permuteMap[4],
                                                    const Pixel_16Q12 alpha, vImage_Flags flags)
 {
@@ -391,7 +392,7 @@ vImage_Error vImageConvert_444CrYpCb10ToARGB16Q12(const vImage_Buffer *src, cons
     return revenant_yuv_to_argb(RevenantYUV444CrYpCb10, 4096.0f, src, dest, info, permuteMap, alpha, YES, NULL);
 }
 
-vImage_Error vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB8888(const vImage_Buffer *src,
+vImage_Error BACKPORT_IMPL(vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB8888)(const vImage_Buffer *src,
                                                                      const vImage_Buffer *dest,
                                                                      const vImage_YpCbCrToARGB *info,
                                                                      const uint8_t permuteMap[4],
@@ -402,7 +403,7 @@ vImage_Error vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB8888(const vImage_
     return revenant_yuv_to_argb(RevenantYUV422v210, 255.0f, src, dest, info, permuteMap, alpha, YES, NULL);
 }
 
-vImage_Error vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB16Q12(const vImage_Buffer *src,
+vImage_Error BACKPORT_IMPL(vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB16Q12)(const vImage_Buffer *src,
                                                                       const vImage_Buffer *dest,
                                                                       const vImage_YpCbCrToARGB *info,
                                                                       const uint8_t permuteMap[4],
@@ -413,7 +414,7 @@ vImage_Error vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB16Q12(const vImage
     return revenant_yuv_to_argb(RevenantYUV422v210, 4096.0f, src, dest, info, permuteMap, alpha, YES, NULL);
 }
 
-vImage_Error vImageConvert_422CbYpCrYp8_AA8ToARGB8888(const vImage_Buffer *src, const vImage_Buffer *srcA,
+vImage_Error BACKPORT_IMPL(vImageConvert_422CbYpCrYp8_AA8ToARGB8888)(const vImage_Buffer *src, const vImage_Buffer *srcA,
                                                       const vImage_Buffer *dest, const vImage_YpCbCrToARGB *info,
                                                       const uint8_t permuteMap[4], vImage_Flags flags)
 {
@@ -472,7 +473,7 @@ static vImage_Error revenant_420_to_argb(const vImage_Buffer *srcYp, const vImag
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_420Yp8_CbCr8ToARGB8888(const vImage_Buffer *srcYp, const vImage_Buffer *srcCbCr,
+vImage_Error BACKPORT_IMPL(vImageConvert_420Yp8_CbCr8ToARGB8888)(const vImage_Buffer *srcYp, const vImage_Buffer *srcCbCr,
                                                   const vImage_Buffer *dest, const vImage_YpCbCrToARGB *info,
                                                   const uint8_t permuteMap[4], const uint8_t alpha,
                                                   vImage_Flags flags)
@@ -480,7 +481,7 @@ vImage_Error vImageConvert_420Yp8_CbCr8ToARGB8888(const vImage_Buffer *srcYp, co
     return revenant_420_to_argb(srcYp, NULL, NULL, srcCbCr, dest, info, permuteMap, alpha, flags);
 }
 
-vImage_Error vImageConvert_420Yp8_Cb8_Cr8ToARGB8888(const vImage_Buffer *srcYp, const vImage_Buffer *srcCb,
+vImage_Error BACKPORT_IMPL(vImageConvert_420Yp8_Cb8_Cr8ToARGB8888)(const vImage_Buffer *srcYp, const vImage_Buffer *srcCb,
                                                     const vImage_Buffer *srcCr, const vImage_Buffer *dest,
                                                     const vImage_YpCbCrToARGB *info, const uint8_t permuteMap[4],
                                                     const uint8_t alpha, vImage_Flags flags)
@@ -666,7 +667,7 @@ RevenantARGBToYUV(vImageConvert_ARGB8888To422CbYpCrYp16, RevenantYUV422CbYpCrYp1
 
 #undef RevenantARGBToYUV
 
-vImage_Error vImageConvert_ARGB16UTo444AYpCbCr16(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16UTo444AYpCbCr16)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                   const vImage_ARGBToYpCbCr *info, const uint8_t permuteMap[4],
                                                   vImage_Flags flags)
 {
@@ -675,7 +676,7 @@ vImage_Error vImageConvert_ARGB16UTo444AYpCbCr16(const vImage_Buffer *src, const
     return revenant_argb_to_yuv(RevenantYUV444AYpCbCr16, 2, src, dest, info, permuteMap, NULL);
 }
 
-vImage_Error vImageConvert_ARGB16UTo422CbYpCrYp16(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16UTo422CbYpCrYp16)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                   const vImage_ARGBToYpCbCr *info, const uint8_t permuteMap[4],
                                                   vImage_Flags flags)
 {
@@ -684,7 +685,7 @@ vImage_Error vImageConvert_ARGB16UTo422CbYpCrYp16(const vImage_Buffer *src, cons
     return revenant_argb_to_yuv(RevenantYUV422CbYpCrYp16, 2, src, dest, info, permuteMap, NULL);
 }
 
-vImage_Error vImageConvert_ARGB8888To422CbYpCrYp8_AA8(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888To422CbYpCrYp8_AA8)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                       const vImage_Buffer *destA, const vImage_ARGBToYpCbCr *info,
                                                       const uint8_t permuteMap[4], vImage_Flags flags)
 {
@@ -725,7 +726,7 @@ static vImage_Error revenant_argb_to_v410(int words, const vImage_Buffer *src, c
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB8888To444CrYpCb10(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888To444CrYpCb10)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                  const vImage_ARGBToYpCbCr *info, const uint8_t permuteMap[4],
                                                  vImage_Flags flags)
 {
@@ -734,7 +735,7 @@ vImage_Error vImageConvert_ARGB8888To444CrYpCb10(const vImage_Buffer *src, const
     return revenant_argb_to_v410(1, src, dest, info, permuteMap);
 }
 
-vImage_Error vImageConvert_ARGB16Q12To444CrYpCb10(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16Q12To444CrYpCb10)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                                   const vImage_ARGBToYpCbCr *info, const uint8_t permuteMap[4],
                                                   vImage_Flags flags)
 {
@@ -781,7 +782,7 @@ static vImage_Error revenant_argb_to_v210(int words, const vImage_Buffer *src, c
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB8888To422CrYpCbYpCbYpCbYpCrYpCrYp10(const vImage_Buffer *src,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888To422CrYpCbYpCbYpCbYpCrYpCrYp10)(const vImage_Buffer *src,
                                                                      const vImage_Buffer *dest,
                                                                      const vImage_ARGBToYpCbCr *info,
                                                                      const uint8_t permuteMap[4], vImage_Flags flags)
@@ -791,7 +792,7 @@ vImage_Error vImageConvert_ARGB8888To422CrYpCbYpCbYpCbYpCrYpCrYp10(const vImage_
     return revenant_argb_to_v210(1, src, dest, info, permuteMap);
 }
 
-vImage_Error vImageConvert_ARGB16Q12To422CrYpCbYpCbYpCbYpCrYpCrYp10(const vImage_Buffer *src,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16Q12To422CrYpCbYpCbYpCbYpCrYpCrYp10)(const vImage_Buffer *src,
                                                                       const vImage_Buffer *dest,
                                                                       const vImage_ARGBToYpCbCr *info,
                                                                       const uint8_t permuteMap[4], vImage_Flags flags)
@@ -859,14 +860,14 @@ static vImage_Error revenant_argb_to_420(const vImage_Buffer *src, const vImage_
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB8888To420Yp8_CbCr8(const vImage_Buffer *src, const vImage_Buffer *destYp,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888To420Yp8_CbCr8)(const vImage_Buffer *src, const vImage_Buffer *destYp,
                                                   const vImage_Buffer *destCbCr, const vImage_ARGBToYpCbCr *info,
                                                   const uint8_t permuteMap[4], vImage_Flags flags)
 {
     return revenant_argb_to_420(src, destYp, NULL, NULL, destCbCr, info, permuteMap, flags);
 }
 
-vImage_Error vImageConvert_ARGB8888To420Yp8_Cb8_Cr8(const vImage_Buffer *src, const vImage_Buffer *destYp,
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB8888To420Yp8_Cb8_Cr8)(const vImage_Buffer *src, const vImage_Buffer *destYp,
                                                     const vImage_Buffer *destCb, const vImage_Buffer *destCr,
                                                     const vImage_ARGBToYpCbCr *info, const uint8_t permuteMap[4],
                                                     vImage_Flags flags)
@@ -874,7 +875,7 @@ vImage_Error vImageConvert_ARGB8888To420Yp8_Cb8_Cr8(const vImage_Buffer *src, co
     return revenant_argb_to_420(src, destYp, destCb, destCr, NULL, info, permuteMap, flags);
 }
 
-vImage_Error vImageExtractChannel_ARGB8888(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
+vImage_Error BACKPORT_IMPL(vImageExtractChannel_ARGB8888)(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
                                            vImage_Flags flags)
 {
     static const vImage_Flags revenant_channel_flags = kvImageDoNotTile | kvImageGetTempBufferSize

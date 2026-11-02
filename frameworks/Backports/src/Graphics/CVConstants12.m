@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
 
-const CFStringRef kCVPixelFormatContainsGrayscale = CFSTR("ContainsGrayscale");
+const CFStringRef BACKPORT_IMPL(kCVPixelFormatContainsGrayscale) = CFSTR("ContainsGrayscale");

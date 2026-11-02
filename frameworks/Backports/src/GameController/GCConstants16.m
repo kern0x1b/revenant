@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <GameController/GameController.h>
 
-NSString *const GCControllerUserCustomizationsDidChangeNotification = @"GCControllerUserCustomizationsDidChangeNotification";
-NSString *const GCProductCategoryHID = @"HID";
+NSString *const BACKPORT_IMPL(GCControllerUserCustomizationsDidChangeNotification) = @"GCControllerUserCustomizationsDidChangeNotification";
+NSString *const BACKPORT_IMPL(GCProductCategoryHID) = @"HID";

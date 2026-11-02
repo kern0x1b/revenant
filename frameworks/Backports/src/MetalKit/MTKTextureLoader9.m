@@ -1,15 +1,16 @@
+#include "../revenant_impl.h"
 #import <MetalKit/MetalKit.h>
 #import <Metal/Metal.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-NSString *const MTKTextureLoaderOptionSRGB = @"MTKTextureLoaderOptionSRGB";
-NSString *const MTKTextureLoaderErrorDomain = @"MTKTextureLoaderErrorDomain";
-NSString *const MTKTextureLoaderErrorKey = @"MTKTextureLoaderErrorKey";
-NSString *const MTKTextureLoaderOptionAllocateMipmaps = @"MTKTextureLoaderOptionAllocateMipmaps";
-NSString *const MTKTextureLoaderOptionTextureUsage = @"MTKTextureLoaderOptionTextureUsage";
-NSString *const MTKTextureLoaderOptionTextureCPUCacheMode = @"MTKTextureLoaderOptionTextureCPUCacheMode";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderOptionSRGB) = @"MTKTextureLoaderOptionSRGB";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderErrorDomain) = @"MTKTextureLoaderErrorDomain";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderErrorKey) = @"MTKTextureLoaderErrorKey";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderOptionAllocateMipmaps) = @"MTKTextureLoaderOptionAllocateMipmaps";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderOptionTextureUsage) = @"MTKTextureLoaderOptionTextureUsage";
+NSString *const BACKPORT_IMPL(MTKTextureLoaderOptionTextureCPUCacheMode) = @"MTKTextureLoaderOptionTextureCPUCacheMode";
 
 static void RevenantMTKFlipRows(NSMutableData *rgba, size_t width, size_t height)
 {

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -22,7 +23,7 @@ static vImage_Error revenant_pixel_ready(const vImage_Buffer *src, const vImage_
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGB565toBGRA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB565toBGRA8888)(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
                                             vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
@@ -49,7 +50,7 @@ static uint8_t revenant_expand6(uint32_t value) { return (uint8_t)((value * 255 
 static uint32_t revenant_narrow5(uint32_t value) { return (value * 31 + 127) / 255; }
 static uint32_t revenant_narrow6(uint32_t value) { return (value * 63 + 127) / 255; }
 
-vImage_Error vImageConvert_RGB565toRGBA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageConvert_RGB565toRGBA8888)(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
                                             vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
@@ -70,7 +71,7 @@ vImage_Error vImageConvert_RGB565toRGBA8888(Pixel_8 alpha, const vImage_Buffer *
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGBA5551toRGBA8888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGBA5551toRGBA8888)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)
@@ -90,7 +91,7 @@ vImage_Error vImageConvert_RGBA5551toRGBA8888(const vImage_Buffer *src, const vI
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGBA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGBA8888toRGB565)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)
@@ -107,7 +108,7 @@ vImage_Error vImageConvert_RGBA8888toRGB565(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_RGBA8888toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_RGBA8888toRGBA5551)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)
@@ -125,7 +126,7 @@ vImage_Error vImageConvert_RGBA8888toRGBA5551(const vImage_Buffer *src, const vI
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_BGRA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_BGRA8888toRGB565)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_pixel_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)
@@ -143,7 +144,7 @@ vImage_Error vImageConvert_BGRA8888toRGB565(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGB16UtoRGB16U(const vImage_Buffer *argbSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGB16UtoRGB16U)(const vImage_Buffer *argbSrc, const vImage_Buffer *rgbDest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(argbSrc, rgbDest, flags, revenant_drop_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)
@@ -157,7 +158,7 @@ vImage_Error vImageConvert_ARGB16UtoRGB16U(const vImage_Buffer *argbSrc, const v
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_ARGBFFFFtoRGBFFF(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_ARGBFFFFtoRGBFFF)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_pixel_ready(src, dest, flags, revenant_drop_flags, kvImageRoiLargerThanInputBuffer);
     if (ready != kvImageNoError)

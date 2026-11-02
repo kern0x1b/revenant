@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -128,7 +129,7 @@ static int RevenantGeaddCheck(int order, int trans_a, int trans_b, int m, int n,
     return 1;
 }
 
-void appleblas_sgeadd(const enum CBLAS_ORDER __order, const enum CBLAS_TRANSPOSE __transA,
+void BACKPORT_IMPL(appleblas_sgeadd)(const enum CBLAS_ORDER __order, const enum CBLAS_TRANSPOSE __transA,
                       const enum CBLAS_TRANSPOSE __transB, const int __m, const int __n, const float __alpha,
                       const float *__A, const int __lda, const float __beta, const float *__B, const int __ldb,
                       float *__C, const int __ldc)
@@ -142,7 +143,7 @@ void appleblas_sgeadd(const enum CBLAS_ORDER __order, const enum CBLAS_TRANSPOSE
                      __lda, __beta, __B, __ldb, __C, __ldc);
 }
 
-void appleblas_dgeadd(const enum CBLAS_ORDER __order, const enum CBLAS_TRANSPOSE __transA,
+void BACKPORT_IMPL(appleblas_dgeadd)(const enum CBLAS_ORDER __order, const enum CBLAS_TRANSPOSE __transA,
                       const enum CBLAS_TRANSPOSE __transB, const int __m, const int __n, const double __alpha,
                       const double *__A, const int __lda, const double __beta, const double *__B, const int __ldb,
                       double *__C, const int __ldc)

@@ -1,21 +1,22 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNParticleProperty const SCNParticlePropertyPosition = @"position";
-SCNParticleProperty const SCNParticlePropertyAngle = @"angle";
-SCNParticleProperty const SCNParticlePropertyRotationAxis = @"rotationAxis";
-SCNParticleProperty const SCNParticlePropertyVelocity = @"velocity";
-SCNParticleProperty const SCNParticlePropertyAngularVelocity = @"angularVelocity";
-SCNParticleProperty const SCNParticlePropertyLife = @"life";
-SCNParticleProperty const SCNParticlePropertyColor = @"color";
-SCNParticleProperty const SCNParticlePropertyOpacity = @"opacity";
-SCNParticleProperty const SCNParticlePropertySize = @"size";
-SCNParticleProperty const SCNParticlePropertyFrame = @"frame";
-SCNParticleProperty const SCNParticlePropertyFrameRate = @"frameRate";
-SCNParticleProperty const SCNParticlePropertyBounce = @"bounce";
-SCNParticleProperty const SCNParticlePropertyCharge = @"charge";
-SCNParticleProperty const SCNParticlePropertyFriction = @"friction";
-SCNParticleProperty const SCNParticlePropertyContactPoint = @"contactPoint";
-SCNParticleProperty const SCNParticlePropertyContactNormal = @"contactNormal";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyPosition) = @"position";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyAngle) = @"angle";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyRotationAxis) = @"rotationAxis";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyVelocity) = @"velocity";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyAngularVelocity) = @"angularVelocity";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyLife) = @"life";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyColor) = @"color";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyOpacity) = @"opacity";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertySize) = @"size";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyFrame) = @"frame";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyFrameRate) = @"frameRate";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyBounce) = @"bounce";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyCharge) = @"charge";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyFriction) = @"friction";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyContactPoint) = @"contactPoint";
+SCNParticleProperty const BACKPORT_IMPL(SCNParticlePropertyContactNormal) = @"contactNormal";
 
 @implementation SCNParticleSystem
 

@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-NSString *MLCActivationTypeDebugDescription(MLCActivationType activationType)
+NSString *BACKPORT_IMPL(MLCActivationTypeDebugDescription)(MLCActivationType activationType)
 {
     switch (activationType) {
         case MLCActivationTypeNone:
@@ -54,7 +55,7 @@ NSString *MLCActivationTypeDebugDescription(MLCActivationType activationType)
     }
 }
 
-NSString *MLCArithmeticOperationDebugDescription(MLCArithmeticOperation operation)
+NSString *BACKPORT_IMPL(MLCArithmeticOperationDebugDescription)(MLCArithmeticOperation operation)
 {
     switch (operation) {
         case MLCArithmeticOperationAdd:
@@ -122,7 +123,7 @@ NSString *MLCArithmeticOperationDebugDescription(MLCArithmeticOperation operatio
     }
 }
 
-NSString *MLCReductionTypeDebugDescription(MLCReductionType reductionType)
+NSString *BACKPORT_IMPL(MLCReductionTypeDebugDescription)(MLCReductionType reductionType)
 {
     switch (reductionType) {
         case MLCReductionTypeNone:
@@ -150,7 +151,7 @@ NSString *MLCReductionTypeDebugDescription(MLCReductionType reductionType)
     }
 }
 
-NSString *MLCLossTypeDebugDescription(MLCLossType lossType)
+NSString *BACKPORT_IMPL(MLCLossTypeDebugDescription)(MLCLossType lossType)
 {
     switch (lossType) {
         case MLCLossTypeMeanAbsoluteError:
@@ -176,7 +177,7 @@ NSString *MLCLossTypeDebugDescription(MLCLossType lossType)
     }
 }
 
-NSString *MLCPaddingTypeDebugDescription(MLCPaddingType paddingType)
+NSString *BACKPORT_IMPL(MLCPaddingTypeDebugDescription)(MLCPaddingType paddingType)
 {
     switch (paddingType) {
         case MLCPaddingTypeZero:
@@ -192,7 +193,7 @@ NSString *MLCPaddingTypeDebugDescription(MLCPaddingType paddingType)
     }
 }
 
-NSString *MLCConvolutionTypeDebugDescription(MLCConvolutionType convolutionType)
+NSString *BACKPORT_IMPL(MLCConvolutionTypeDebugDescription)(MLCConvolutionType convolutionType)
 {
     switch (convolutionType) {
         case MLCConvolutionTypeStandard:
@@ -206,7 +207,7 @@ NSString *MLCConvolutionTypeDebugDescription(MLCConvolutionType convolutionType)
     }
 }
 
-NSString *MLCPoolingTypeDebugDescription(MLCPoolingType poolingType)
+NSString *BACKPORT_IMPL(MLCPoolingTypeDebugDescription)(MLCPoolingType poolingType)
 {
     switch (poolingType) {
         case MLCPoolingTypeMax:
@@ -220,7 +221,7 @@ NSString *MLCPoolingTypeDebugDescription(MLCPoolingType poolingType)
     }
 }
 
-NSString *MLCSoftmaxOperationDebugDescription(MLCSoftmaxOperation operation)
+NSString *BACKPORT_IMPL(MLCSoftmaxOperationDebugDescription)(MLCSoftmaxOperation operation)
 {
     switch (operation) {
         case MLCSoftmaxOperationSoftmax:
@@ -232,7 +233,7 @@ NSString *MLCSoftmaxOperationDebugDescription(MLCSoftmaxOperation operation)
     }
 }
 
-NSString *MLCSampleModeDebugDescription(MLCSampleMode mode)
+NSString *BACKPORT_IMPL(MLCSampleModeDebugDescription)(MLCSampleMode mode)
 {
     switch (mode) {
         case MLCSampleModeNearest:
@@ -244,7 +245,7 @@ NSString *MLCSampleModeDebugDescription(MLCSampleMode mode)
     }
 }
 
-NSString *MLCLSTMResultModeDebugDescription(MLCLSTMResultMode mode)
+NSString *BACKPORT_IMPL(MLCLSTMResultModeDebugDescription)(MLCLSTMResultMode mode)
 {
     switch (mode) {
         case MLCLSTMResultModeOutput:
@@ -256,7 +257,7 @@ NSString *MLCLSTMResultModeDebugDescription(MLCLSTMResultMode mode)
     }
 }
 
-NSString *MLCPaddingPolicyDebugDescription(MLCPaddingPolicy paddingPolicy)
+NSString *BACKPORT_IMPL(MLCPaddingPolicyDebugDescription)(MLCPaddingPolicy paddingPolicy)
 {
     switch (paddingPolicy) {
         case MLCPaddingPolicySame:
@@ -270,7 +271,7 @@ NSString *MLCPaddingPolicyDebugDescription(MLCPaddingPolicy paddingPolicy)
     }
 }
 
-NSString *MLCComparisonOperationDebugDescription(MLCComparisonOperation operation)
+NSString *BACKPORT_IMPL(MLCComparisonOperationDebugDescription)(MLCComparisonOperation operation)
 {
     switch (operation) {
         case MLCComparisonOperationEqual:
@@ -302,7 +303,7 @@ NSString *MLCComparisonOperationDebugDescription(MLCComparisonOperation operatio
     }
 }
 
-NSString *MLCGradientClippingTypeDebugDescription(MLCGradientClippingType gradientClippingType)
+NSString *BACKPORT_IMPL(MLCGradientClippingTypeDebugDescription)(MLCGradientClippingType gradientClippingType)
 {
     switch (gradientClippingType) {
         case MLCGradientClippingTypeByValue:

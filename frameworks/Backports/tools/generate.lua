@@ -4,6 +4,7 @@ local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
+local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 
 local SHARDS = 4
@@ -150,30 +151,43 @@ function implemented_names()
             names[name] = true
         end
     end
-    local constants = os.iorunv("/usr/bin/grep", {"-rhE", "--include=*.m", "--include=*.mm", "--include=*.c",
-        "^[A-Za-z_].*=", sdkfiles.src_root()})
-    for line in constants:gmatch("[^\n]+") do
-        local left = string.match(line, "^([^=]*)=")
-        if left and string.find(left, "%f[%w_]const%f[^%w_]") and not string.find(left, "(", 1, true)
-            and not string.find(left, "^static") and not string.find(left, "^extern") then
-            local name = string.match(left, "([%a_][%w_]*)%s*$")
-            if name then
-                names[name] = true
-            end
-        end
-    end
-    local functions = os.iorunv("/usr/bin/grep", {"-rhE", "--include=*.m", "--include=*.mm", "--include=*.c",
-        "^[A-Za-z_][A-Za-z0-9_ *]*[ *][A-Za-z_][A-Za-z0-9_]*\\(", sdkfiles.src_root()})
-    for line in functions:gmatch("[^\n]+") do
-        if not string.find(line, "^static") and not string.find(line, "^return") and not string.find(line, "[=;]") then
-            local name = string.match(line, "([%a_][%w_]*)%s*%(")
-            if name then
-                names[name] = true
-            end
-        end
-    end
     implemented_cache = names
     return names
+end
+
+local markers_cache = nil
+
+function markers_of_src()
+    if markers_cache == nil then
+        local src = sdkfiles.src_root()
+        local folders = library_folders()
+        local owner = {}
+        local listing = os.iorunv("/usr/bin/grep", {"-rlF", "BACKPORT_IMPL(", src})
+        for file in listing:gmatch("[^\n]+") do
+            local relative = path.relative(file, src)
+            if relative ~= "revenant_impl.h" then
+                local folder = string.match(relative, "^([^/]+)")
+                local text = io.readfile(file)
+                local bad = markers.marker_arguments(text)
+                if #bad > 0 then
+                    raise("%s: BACKPORT_IMPL takes a literal name, not %s", relative, table.concat(bad, ", "))
+                end
+                for name in pairs(markers.marked(text)) do
+                    if owner[name] ~= nil and owner[name] ~= folder then
+                        raise("%s is implemented in both src/%s and src/%s", name, owner[name], folder)
+                    end
+                    owner[name] = folder
+                end
+            end
+        end
+        for name, folder in pairs(owner) do
+            if not folders[folder] then
+                raise("%s is implemented in src/%s, which no library builds", name, folder)
+            end
+        end
+        markers_cache = owner
+    end
+    return markers_cache
 end
 
 function key_of(row)
@@ -369,7 +383,7 @@ function main(...)
     local state = everything()
     local pending = pending_of(state)
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images)
+    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images, markers_of_src())
     local skipped = 0
     for _, framework in ipairs(pending) do
         for _, count in pairs(framework.skipped) do

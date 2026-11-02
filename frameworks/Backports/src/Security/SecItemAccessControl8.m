@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -305,7 +306,7 @@ static NSMutableDictionary *revenant_native_attributes(NSDictionary *attributes,
     return native;
 }
 
-OSStatus SecItemAdd(CFDictionaryRef attributes, CFTypeRef *result)
+OSStatus BACKPORT_IMPL(SecItemAdd)(CFDictionaryRef attributes, CFTypeRef *result)
 {
     NSDictionary *source = (__bridge NSDictionary *)attributes;
     CFTypeRef accessControl = attributes ? CFDictionaryGetValue(attributes, kSecAttrAccessControl) : NULL;
@@ -349,7 +350,7 @@ OSStatus SecItemAdd(CFDictionaryRef attributes, CFTypeRef *result)
     return errSecSuccess;
 }
 
-OSStatus SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result)
+OSStatus BACKPORT_IMPL(SecItemCopyMatching)(CFDictionaryRef query, CFTypeRef *result)
 {
     if (revenant_system_enforces_access_control() || !query)
         return revenant_native_copy()(query, result);
@@ -368,7 +369,7 @@ OSStatus SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result)
     return revenant_native_copy()(query, result);
 }
 
-OSStatus SecItemUpdate(CFDictionaryRef query, CFDictionaryRef attributesToUpdate)
+OSStatus BACKPORT_IMPL(SecItemUpdate)(CFDictionaryRef query, CFDictionaryRef attributesToUpdate)
 {
     if (revenant_system_enforces_access_control() || !query || !attributesToUpdate)
         return revenant_native_update()(query, attributesToUpdate);
@@ -398,7 +399,7 @@ OSStatus SecItemUpdate(CFDictionaryRef query, CFDictionaryRef attributesToUpdate
     return errSecSuccess;
 }
 
-OSStatus SecItemDelete(CFDictionaryRef query)
+OSStatus BACKPORT_IMPL(SecItemDelete)(CFDictionaryRef query)
 {
     if (revenant_system_enforces_access_control() || !query)
         return revenant_native_delete()(query);

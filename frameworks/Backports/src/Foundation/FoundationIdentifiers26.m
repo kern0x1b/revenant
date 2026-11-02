@@ -1,15 +1,16 @@
+#include "../revenant_impl.h"
 #import "RevenantFoundationIdentifiers.h"
 
-NSString * const NSCalendarIdentifierBangla = @"bangla";
-NSString * const NSCalendarIdentifierDangi = @"dangi";
-NSString * const NSCalendarIdentifierGujarati = @"gujarati";
-NSString * const NSCalendarIdentifierKannada = @"kannada";
-NSString * const NSCalendarIdentifierMalayalam = @"malayalam";
-NSString * const NSCalendarIdentifierMarathi = @"marathi";
-NSString * const NSCalendarIdentifierOdia = @"odia";
-NSString * const NSCalendarIdentifierTamil = @"tamil";
-NSString * const NSCalendarIdentifierTelugu = @"telugu";
-NSString * const NSCalendarIdentifierVietnamese = @"vietnamese";
-NSString * const NSCalendarIdentifierVikram = @"vikram";
-NSString * const NSURLUbiquitousItemIsSyncPausedKey = @"NSURLUbiquitousItemIsSyncPausedKey";
-NSString * const NSURLUbiquitousItemSupportedSyncControlsKey = @"NSURLUbiquitousItemSupportedSyncControlsKey";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierBangla) = @"bangla";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierDangi) = @"dangi";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierGujarati) = @"gujarati";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierKannada) = @"kannada";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierMalayalam) = @"malayalam";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierMarathi) = @"marathi";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierOdia) = @"odia";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierTamil) = @"tamil";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierTelugu) = @"telugu";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierVietnamese) = @"vietnamese";
+NSString * const BACKPORT_IMPL(NSCalendarIdentifierVikram) = @"vikram";
+NSString * const BACKPORT_IMPL(NSURLUbiquitousItemIsSyncPausedKey) = @"NSURLUbiquitousItemIsSyncPausedKey";
+NSString * const BACKPORT_IMPL(NSURLUbiquitousItemSupportedSyncControlsKey) = @"NSURLUbiquitousItemSupportedSyncControlsKey";

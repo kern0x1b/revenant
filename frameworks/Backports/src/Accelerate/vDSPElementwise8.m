@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVDSPKernel.h"
 #include <math.h>
 
@@ -85,7 +86,7 @@ REVENANT_VDSP_RAMP(double, D)
 REVENANT_VDSP_SLIDING_WINDOW_MAXIMUM(float, )
 REVENANT_VDSP_SLIDING_WINDOW_MAXIMUM(double, D)
 
-void vDSP_vsmsmaD(const double *__A, vDSP_Stride __IA, const double *__B, const double *__C, vDSP_Stride __IC,
+void BACKPORT_IMPL(vDSP_vsmsmaD)(const double *__A, vDSP_Stride __IA, const double *__B, const double *__C, vDSP_Stride __IC,
                   const double *__D, double *__E, vDSP_Stride __IE, vDSP_Length __N)
 {
     double scale = __B[0], weight = __D[0];
@@ -94,7 +95,7 @@ void vDSP_vsmsmaD(const double *__A, vDSP_Stride __IA, const double *__B, const 
     }
 }
 
-void vDSP_dotpr2D(const double *__A0, vDSP_Stride __IA0, const double *__A1, vDSP_Stride __IA1, const double *__B,
+void BACKPORT_IMPL(vDSP_dotpr2D)(const double *__A0, vDSP_Stride __IA0, const double *__A1, vDSP_Stride __IA1, const double *__B,
                   vDSP_Stride __IB, double *__C0, double *__C1, vDSP_Length __N)
 {
     double first = 0.0, second = 0.0;
@@ -107,7 +108,7 @@ void vDSP_dotpr2D(const double *__A0, vDSP_Stride __IA0, const double *__A1, vDS
     *__C1 = second;
 }
 
-void vDSP_distancesqD(const double *__A, vDSP_Stride __IA, const double *__B, vDSP_Stride __IB, double *__C,
+void BACKPORT_IMPL(vDSP_distancesqD)(const double *__A, vDSP_Stride __IA, const double *__B, vDSP_Stride __IB, double *__C,
                       vDSP_Length __N)
 {
     double sum = 0.0;
@@ -118,14 +119,14 @@ void vDSP_distancesqD(const double *__A, vDSP_Stride __IA, const double *__B, vD
     *__C = sum;
 }
 
-void vDSP_zvmaD(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDoubleSplitComplex *__B, vDSP_Stride __IB,
+void BACKPORT_IMPL(vDSP_zvmaD)(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDoubleSplitComplex *__B, vDSP_Stride __IB,
                 const DSPDoubleSplitComplex *__C, vDSP_Stride __IC, const DSPDoubleSplitComplex *__D, vDSP_Stride __ID,
                 vDSP_Length __N)
 {
     revenant_vdsp_split_vma_d((DSPDoubleSplitComplex *)__D, __ID, __A, __IA, __B, __IB, __C, __IC, __N);
 }
 
-void vDSP_zvmmaaD(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDoubleSplitComplex *__B,
+void BACKPORT_IMPL(vDSP_zvmmaaD)(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDoubleSplitComplex *__B,
                   vDSP_Stride __IB, const DSPDoubleSplitComplex *__C, vDSP_Stride __IC,
                   const DSPDoubleSplitComplex *__D, vDSP_Stride __ID, const DSPDoubleSplitComplex *__E, vDSP_Stride __IE,
                   const DSPDoubleSplitComplex *__F, vDSP_Stride __IF, vDSP_Length __N)

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantCMTaggedBufferGroup26.h"
 #import "RevenantCMTagSupport.h"
 #import <CoreMedia/CoreMedia.h>
@@ -145,12 +146,12 @@ static CMTag *revenant_copy_tags(CMTagCollectionRef collection, CMItemCount *cou
 
 #define revenant_param_err ((OSStatus)-15780)
 
-CFTypeID CMTaggedBufferGroupGetTypeID(void)
+CFTypeID BACKPORT_IMPL(CMTaggedBufferGroupGetTypeID)(void)
 {
     return (CFTypeID)objc_getClass("RevenantCMTaggedBufferGroup");
 }
 
-OSStatus CMTaggedBufferGroupCreate(CFAllocatorRef allocator, CFArrayRef tagCollections, CFArrayRef buffers, CMTaggedBufferGroupRef *out)
+OSStatus BACKPORT_IMPL(CMTaggedBufferGroupCreate)(CFAllocatorRef allocator, CFArrayRef tagCollections, CFArrayRef buffers, CMTaggedBufferGroupRef *out)
 {
     (void)allocator;
     if (!tagCollections || !buffers || !out)
@@ -173,7 +174,7 @@ OSStatus CMTaggedBufferGroupCreate(CFAllocatorRef allocator, CFArrayRef tagColle
     return *out ? 0 : -15782;
 }
 
-OSStatus CMTaggedBufferGroupCreateCombined(CFAllocatorRef allocator, CFArrayRef groups, CMTaggedBufferGroupRef *out)
+OSStatus BACKPORT_IMPL(CMTaggedBufferGroupCreateCombined)(CFAllocatorRef allocator, CFArrayRef groups, CMTaggedBufferGroupRef *out)
 {
     (void)allocator;
     if (!groups || !out)
@@ -191,29 +192,29 @@ OSStatus CMTaggedBufferGroupCreateCombined(CFAllocatorRef allocator, CFArrayRef 
     return *out ? 0 : -15782;
 }
 
-CMItemCount CMTaggedBufferGroupGetCount(CMTaggedBufferGroupRef group)
+CMItemCount BACKPORT_IMPL(CMTaggedBufferGroupGetCount)(CMTaggedBufferGroupRef group)
 {
     return (CMItemCount)[revenant_to(group) revenant_count];
 }
 
-CMTagCollectionRef CMTaggedBufferGroupGetTagCollectionAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
+CMTagCollectionRef BACKPORT_IMPL(CMTaggedBufferGroupGetTagCollectionAtIndex)(CMTaggedBufferGroupRef group, CFIndex index)
 {
     return [revenant_to(group) revenant_collectionAtIndex:index];
 }
 
-CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
+CVPixelBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCVPixelBufferAtIndex)(CMTaggedBufferGroupRef group, CFIndex index)
 {
     CVBufferRef buffer = [revenant_to(group) revenant_bufferAtIndex:index];
     return buffer && CFGetTypeID(buffer) == CVPixelBufferGetTypeID() ? (CVPixelBufferRef)buffer : NULL;
 }
 
-CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
+CMSampleBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCMSampleBufferAtIndex)(CMTaggedBufferGroupRef group, CFIndex index)
 {
     CVBufferRef buffer = [revenant_to(group) revenant_bufferAtIndex:index];
     return buffer && CFGetTypeID(buffer) == CMSampleBufferGetTypeID() ? (CMSampleBufferRef)buffer : NULL;
 }
 
-CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTag(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
+CVPixelBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCVPixelBufferForTag)(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
 {
     NSInteger index = 0;
     CVBufferRef found = [revenant_to(group) revenant_bufferForTags:&tag count:1 index:&index];
@@ -224,7 +225,7 @@ CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTag(CMTaggedBufferGroupRe
     return CFGetTypeID(found) == CVPixelBufferGetTypeID() ? (CVPixelBufferRef)found : NULL;
 }
 
-CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTag(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
+CMSampleBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCMSampleBufferForTag)(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
 {
     NSInteger index = 0;
     CVBufferRef found = [revenant_to(group) revenant_bufferForTags:&tag count:1 index:&index];
@@ -235,7 +236,7 @@ CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTag(CMTaggedBufferGroup
     return CFGetTypeID(found) == CMSampleBufferGetTypeID() ? (CMSampleBufferRef)found : NULL;
 }
 
-CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
+CVPixelBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCVPixelBufferForTagCollection)(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
 {
     CMItemCount count = 0;
     CMTag *tags = revenant_copy_tags(tagCollection, &count);
@@ -251,7 +252,7 @@ CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTagCollection(CMTaggedBuf
     return CFGetTypeID(found) == CVPixelBufferGetTypeID() ? (CVPixelBufferRef)found : NULL;
 }
 
-CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
+CMSampleBufferRef BACKPORT_IMPL(CMTaggedBufferGroupGetCMSampleBufferForTagCollection)(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
 {
     CMItemCount count = 0;
     CMTag *tags = revenant_copy_tags(tagCollection, &count);
@@ -267,7 +268,7 @@ CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTagCollection(CMTaggedB
     return CFGetTypeID(found) == CMSampleBufferGetTypeID() ? (CMSampleBufferRef)found : NULL;
 }
 
-CMItemCount CMTaggedBufferGroupGetNumberOfMatchesForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection)
+CMItemCount BACKPORT_IMPL(CMTaggedBufferGroupGetNumberOfMatchesForTagCollection)(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection)
 {
     CMItemCount count = 0;
     CMTag *tags = revenant_copy_tags(tagCollection, &count);

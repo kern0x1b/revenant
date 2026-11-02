@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImageDestinationOptimizeColorForSharing = CFSTR("kCGImageDestinationOptimizeColorForSharing");
+const CFStringRef BACKPORT_IMPL(kCGImageDestinationOptimizeColorForSharing) = CFSTR("kCGImageDestinationOptimizeColorForSharing");

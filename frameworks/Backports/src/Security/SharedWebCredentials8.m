@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <mach-o/dyld.h>
@@ -182,7 +183,7 @@ static CFArrayRef revenant_copy_shared_credentials(NSString *fqdn, NSString *acc
     return (CFArrayRef)CFBridgingRetain(credentials);
 }
 
-void SecAddSharedWebCredential(CFStringRef fqdn, CFStringRef username, CFStringRef password, void (^completionHandler)(CFErrorRef error))
+void BACKPORT_IMPL(SecAddSharedWebCredential)(CFStringRef fqdn, CFStringRef username, CFStringRef password, void (^completionHandler)(CFErrorRef error))
 {
     void (^handler)(CFErrorRef) = [completionHandler copy];
     if (!handler)
@@ -195,7 +196,7 @@ void SecAddSharedWebCredential(CFStringRef fqdn, CFStringRef username, CFStringR
     });
 }
 
-void SecRequestSharedWebCredential(CFStringRef fqdn, CFStringRef account, void (^completionHandler)(CFArrayRef credentials, CFErrorRef error))
+void BACKPORT_IMPL(SecRequestSharedWebCredential)(CFStringRef fqdn, CFStringRef account, void (^completionHandler)(CFArrayRef credentials, CFErrorRef error))
 {
     void (^handler)(CFArrayRef, CFErrorRef) = [completionHandler copy];
     if (!handler)

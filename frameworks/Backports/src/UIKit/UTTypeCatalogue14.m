@@ -1,242 +1,243 @@
+#include "../revenant_impl.h"
 #import "RevenantUTType.h"
 
-UTType *UTTypeCompositeContent;
+UTType *BACKPORT_IMPL(UTTypeCompositeContent);
 
-UTType *UTTypeDiskImage;
+UTType *BACKPORT_IMPL(UTTypeDiskImage);
 
-UTType *UTTypeResolvable;
+UTType *BACKPORT_IMPL(UTTypeResolvable);
 
-UTType *UTTypeSymbolicLink;
+UTType *BACKPORT_IMPL(UTTypeSymbolicLink);
 
-UTType *UTTypeExecutable;
+UTType *BACKPORT_IMPL(UTTypeExecutable);
 
-UTType *UTTypeMountPoint;
+UTType *BACKPORT_IMPL(UTTypeMountPoint);
 
-UTType *UTTypeAliasFile;
+UTType *BACKPORT_IMPL(UTTypeAliasFile);
 
-UTType *UTTypeURLBookmarkData;
+UTType *BACKPORT_IMPL(UTTypeURLBookmarkData);
 
-UTType *UTTypeUTF16ExternalPlainText;
+UTType *BACKPORT_IMPL(UTTypeUTF16ExternalPlainText);
 
-UTType *UTTypeUTF16PlainText;
+UTType *BACKPORT_IMPL(UTTypeUTF16PlainText);
 
-UTType *UTTypeDelimitedText;
+UTType *BACKPORT_IMPL(UTTypeDelimitedText);
 
-UTType *UTTypeCommaSeparatedText;
+UTType *BACKPORT_IMPL(UTTypeCommaSeparatedText);
 
-UTType *UTTypeTabSeparatedText;
+UTType *BACKPORT_IMPL(UTTypeTabSeparatedText);
 
-UTType *UTTypeUTF8TabSeparatedText;
+UTType *BACKPORT_IMPL(UTTypeUTF8TabSeparatedText);
 
-UTType *UTTypeRTF;
+UTType *BACKPORT_IMPL(UTTypeRTF);
 
-UTType *UTTypeHTML;
+UTType *BACKPORT_IMPL(UTTypeHTML);
 
-UTType *UTTypeXML;
+UTType *BACKPORT_IMPL(UTTypeXML);
 
-UTType *UTTypeYAML;
+UTType *BACKPORT_IMPL(UTTypeYAML);
 
-UTType *UTTypeSourceCode;
+UTType *BACKPORT_IMPL(UTTypeSourceCode);
 
-UTType *UTTypeAssemblyLanguageSource;
+UTType *BACKPORT_IMPL(UTTypeAssemblyLanguageSource);
 
-UTType *UTTypeCSource;
+UTType *BACKPORT_IMPL(UTTypeCSource);
 
-UTType *UTTypeObjectiveCSource;
+UTType *BACKPORT_IMPL(UTTypeObjectiveCSource);
 
-UTType *UTTypeSwiftSource;
+UTType *BACKPORT_IMPL(UTTypeSwiftSource);
 
-UTType *UTTypeCPlusPlusSource;
+UTType *BACKPORT_IMPL(UTTypeCPlusPlusSource);
 
-UTType *UTTypeObjectiveCPlusPlusSource;
+UTType *BACKPORT_IMPL(UTTypeObjectiveCPlusPlusSource);
 
-UTType *UTTypeCHeader;
+UTType *BACKPORT_IMPL(UTTypeCHeader);
 
-UTType *UTTypeCPlusPlusHeader;
+UTType *BACKPORT_IMPL(UTTypeCPlusPlusHeader);
 
-UTType *UTTypeScript;
+UTType *BACKPORT_IMPL(UTTypeScript);
 
-UTType *UTTypeAppleScript;
+UTType *BACKPORT_IMPL(UTTypeAppleScript);
 
-UTType *UTTypeOSAScript;
+UTType *BACKPORT_IMPL(UTTypeOSAScript);
 
-UTType *UTTypeOSAScriptBundle;
+UTType *BACKPORT_IMPL(UTTypeOSAScriptBundle);
 
-UTType *UTTypeJavaScript;
+UTType *BACKPORT_IMPL(UTTypeJavaScript);
 
-UTType *UTTypeShellScript;
+UTType *BACKPORT_IMPL(UTTypeShellScript);
 
-UTType *UTTypePerlScript;
+UTType *BACKPORT_IMPL(UTTypePerlScript);
 
-UTType *UTTypePythonScript;
+UTType *BACKPORT_IMPL(UTTypePythonScript);
 
-UTType *UTTypeRubyScript;
+UTType *BACKPORT_IMPL(UTTypeRubyScript);
 
-UTType *UTTypePHPScript;
+UTType *BACKPORT_IMPL(UTTypePHPScript);
 
-UTType *UTTypeJSON;
+UTType *BACKPORT_IMPL(UTTypeJSON);
 
-UTType *UTTypePropertyList;
+UTType *BACKPORT_IMPL(UTTypePropertyList);
 
-UTType *UTTypeXMLPropertyList;
+UTType *BACKPORT_IMPL(UTTypeXMLPropertyList);
 
-UTType *UTTypeBinaryPropertyList;
+UTType *BACKPORT_IMPL(UTTypeBinaryPropertyList);
 
-UTType *UTTypeRTFD;
+UTType *BACKPORT_IMPL(UTTypeRTFD);
 
-UTType *UTTypeFlatRTFD;
+UTType *BACKPORT_IMPL(UTTypeFlatRTFD);
 
-UTType *UTTypeWebArchive;
+UTType *BACKPORT_IMPL(UTTypeWebArchive);
 
-UTType *UTTypeJPEG;
+UTType *BACKPORT_IMPL(UTTypeJPEG);
 
-UTType *UTTypeTIFF;
+UTType *BACKPORT_IMPL(UTTypeTIFF);
 
-UTType *UTTypeGIF;
+UTType *BACKPORT_IMPL(UTTypeGIF);
 
-UTType *UTTypePNG;
+UTType *BACKPORT_IMPL(UTTypePNG);
 
-UTType *UTTypeICNS;
+UTType *BACKPORT_IMPL(UTTypeICNS);
 
-UTType *UTTypeBMP;
+UTType *BACKPORT_IMPL(UTTypeBMP);
 
-UTType *UTTypeICO;
+UTType *BACKPORT_IMPL(UTTypeICO);
 
-UTType *UTTypeRAWImage;
+UTType *BACKPORT_IMPL(UTTypeRAWImage);
 
-UTType *UTTypeSVG;
+UTType *BACKPORT_IMPL(UTTypeSVG);
 
-UTType *UTTypeLivePhoto;
+UTType *BACKPORT_IMPL(UTTypeLivePhoto);
 
-UTType *UTTypeHEIF;
+UTType *BACKPORT_IMPL(UTTypeHEIF);
 
-UTType *UTTypeHEIC;
+UTType *BACKPORT_IMPL(UTTypeHEIC);
 
-UTType *UTTypeWebP;
+UTType *BACKPORT_IMPL(UTTypeWebP);
 
-UTType *UTType3DContent;
+UTType *BACKPORT_IMPL(UTType3DContent);
 
-UTType *UTTypeUSD;
+UTType *BACKPORT_IMPL(UTTypeUSD);
 
-UTType *UTTypeUSDZ;
+UTType *BACKPORT_IMPL(UTTypeUSDZ);
 
-UTType *UTTypeRealityFile;
+UTType *BACKPORT_IMPL(UTTypeRealityFile);
 
-UTType *UTTypeSceneKitScene;
+UTType *BACKPORT_IMPL(UTTypeSceneKitScene);
 
-UTType *UTTypeARReferenceObject;
+UTType *BACKPORT_IMPL(UTTypeARReferenceObject);
 
-UTType *UTTypeAudiovisualContent;
+UTType *BACKPORT_IMPL(UTTypeAudiovisualContent);
 
-UTType *UTTypeMovie;
+UTType *BACKPORT_IMPL(UTTypeMovie);
 
-UTType *UTTypeVideo;
+UTType *BACKPORT_IMPL(UTTypeVideo);
 
-UTType *UTTypeAudio;
+UTType *BACKPORT_IMPL(UTTypeAudio);
 
-UTType *UTTypeQuickTimeMovie;
+UTType *BACKPORT_IMPL(UTTypeQuickTimeMovie);
 
-UTType *UTTypeMPEG;
+UTType *BACKPORT_IMPL(UTTypeMPEG);
 
-UTType *UTTypeMPEG2Video;
+UTType *BACKPORT_IMPL(UTTypeMPEG2Video);
 
-UTType *UTTypeMPEG2TransportStream;
+UTType *BACKPORT_IMPL(UTTypeMPEG2TransportStream);
 
-UTType *UTTypeMP3;
+UTType *BACKPORT_IMPL(UTTypeMP3);
 
-UTType *UTTypeMPEG4Movie;
+UTType *BACKPORT_IMPL(UTTypeMPEG4Movie);
 
-UTType *UTTypeMPEG4Audio;
+UTType *BACKPORT_IMPL(UTTypeMPEG4Audio);
 
-UTType *UTTypeAppleProtectedMPEG4Audio;
+UTType *BACKPORT_IMPL(UTTypeAppleProtectedMPEG4Audio);
 
-UTType *UTTypeAppleProtectedMPEG4Video;
+UTType *BACKPORT_IMPL(UTTypeAppleProtectedMPEG4Video);
 
-UTType *UTTypeAVI;
+UTType *BACKPORT_IMPL(UTTypeAVI);
 
-UTType *UTTypeAIFF;
+UTType *BACKPORT_IMPL(UTTypeAIFF);
 
-UTType *UTTypeWAV;
+UTType *BACKPORT_IMPL(UTTypeWAV);
 
-UTType *UTTypeMIDI;
+UTType *BACKPORT_IMPL(UTTypeMIDI);
 
-UTType *UTTypePlaylist;
+UTType *BACKPORT_IMPL(UTTypePlaylist);
 
-UTType *UTTypeM3UPlaylist;
+UTType *BACKPORT_IMPL(UTTypeM3UPlaylist);
 
-UTType *UTTypeFolder;
+UTType *BACKPORT_IMPL(UTTypeFolder);
 
-UTType *UTTypeVolume;
+UTType *BACKPORT_IMPL(UTTypeVolume);
 
-UTType *UTTypePackage;
+UTType *BACKPORT_IMPL(UTTypePackage);
 
-UTType *UTTypeBundle;
+UTType *BACKPORT_IMPL(UTTypeBundle);
 
-UTType *UTTypePluginBundle;
+UTType *BACKPORT_IMPL(UTTypePluginBundle);
 
-UTType *UTTypeSpotlightImporter;
+UTType *BACKPORT_IMPL(UTTypeSpotlightImporter);
 
-UTType *UTTypeQuickLookGenerator;
+UTType *BACKPORT_IMPL(UTTypeQuickLookGenerator);
 
-UTType *UTTypeXPCService;
+UTType *BACKPORT_IMPL(UTTypeXPCService);
 
-UTType *UTTypeFramework;
+UTType *BACKPORT_IMPL(UTTypeFramework);
 
-UTType *UTTypeApplication;
+UTType *BACKPORT_IMPL(UTTypeApplication);
 
-UTType *UTTypeApplicationBundle;
+UTType *BACKPORT_IMPL(UTTypeApplicationBundle);
 
-UTType *UTTypeApplicationExtension;
+UTType *BACKPORT_IMPL(UTTypeApplicationExtension);
 
-UTType *UTTypeUnixExecutable;
+UTType *BACKPORT_IMPL(UTTypeUnixExecutable);
 
-UTType *UTTypeEXE;
+UTType *BACKPORT_IMPL(UTTypeEXE);
 
-UTType *UTTypeSystemPreferencesPane;
+UTType *BACKPORT_IMPL(UTTypeSystemPreferencesPane);
 
-UTType *UTTypeArchive;
+UTType *BACKPORT_IMPL(UTTypeArchive);
 
-UTType *UTTypeGZIP;
+UTType *BACKPORT_IMPL(UTTypeGZIP);
 
-UTType *UTTypeBZ2;
+UTType *BACKPORT_IMPL(UTTypeBZ2);
 
-UTType *UTTypeZIP;
+UTType *BACKPORT_IMPL(UTTypeZIP);
 
-UTType *UTTypeAppleArchive;
+UTType *BACKPORT_IMPL(UTTypeAppleArchive);
 
-UTType *UTTypeSpreadsheet;
+UTType *BACKPORT_IMPL(UTTypeSpreadsheet);
 
-UTType *UTTypePresentation;
+UTType *BACKPORT_IMPL(UTTypePresentation);
 
-UTType *UTTypeDatabase;
+UTType *BACKPORT_IMPL(UTTypeDatabase);
 
-UTType *UTTypeMessage;
+UTType *BACKPORT_IMPL(UTTypeMessage);
 
-UTType *UTTypeContact;
+UTType *BACKPORT_IMPL(UTTypeContact);
 
-UTType *UTTypeVCard;
+UTType *BACKPORT_IMPL(UTTypeVCard);
 
-UTType *UTTypeToDoItem;
+UTType *BACKPORT_IMPL(UTTypeToDoItem);
 
-UTType *UTTypeCalendarEvent;
+UTType *BACKPORT_IMPL(UTTypeCalendarEvent);
 
-UTType *UTTypeEmailMessage;
+UTType *BACKPORT_IMPL(UTTypeEmailMessage);
 
-UTType *UTTypeInternetLocation;
+UTType *BACKPORT_IMPL(UTTypeInternetLocation);
 
-UTType *UTTypeInternetShortcut;
+UTType *BACKPORT_IMPL(UTTypeInternetShortcut);
 
-UTType *UTTypeFont;
+UTType *BACKPORT_IMPL(UTTypeFont);
 
-UTType *UTTypeBookmark;
+UTType *BACKPORT_IMPL(UTTypeBookmark);
 
-UTType *UTTypePKCS12;
+UTType *BACKPORT_IMPL(UTTypePKCS12);
 
-UTType *UTTypeX509Certificate;
+UTType *BACKPORT_IMPL(UTTypeX509Certificate);
 
-UTType *UTTypeEPUB;
+UTType *BACKPORT_IMPL(UTTypeEPUB);
 
-UTType *UTTypeLog;
+UTType *BACKPORT_IMPL(UTTypeLog);
 
 __attribute__((constructor)) static void revenant_uttype_catalog_14(void)
 {
@@ -363,5 +364,5 @@ __attribute__((constructor)) static void revenant_uttype_catalog_14(void)
     revenant_uttype_catalogue_add(@[UTTypeCompositeContent, UTTypeDiskImage, UTTypeResolvable, UTTypeSymbolicLink, UTTypeExecutable, UTTypeMountPoint, UTTypeAliasFile, UTTypeURLBookmarkData, UTTypeUTF16ExternalPlainText, UTTypeUTF16PlainText, UTTypeDelimitedText, UTTypeCommaSeparatedText, UTTypeTabSeparatedText, UTTypeUTF8TabSeparatedText, UTTypeRTF, UTTypeHTML, UTTypeXML, UTTypeYAML, UTTypeSourceCode, UTTypeAssemblyLanguageSource, UTTypeCSource, UTTypeObjectiveCSource, UTTypeSwiftSource, UTTypeCPlusPlusSource, UTTypeObjectiveCPlusPlusSource, UTTypeCHeader, UTTypeCPlusPlusHeader, UTTypeScript, UTTypeAppleScript, UTTypeOSAScript, UTTypeOSAScriptBundle, UTTypeJavaScript, UTTypeShellScript, UTTypePerlScript, UTTypePythonScript, UTTypeRubyScript, UTTypePHPScript, UTTypeJSON, UTTypePropertyList, UTTypeXMLPropertyList, UTTypeBinaryPropertyList, UTTypeRTFD, UTTypeFlatRTFD, UTTypeWebArchive, UTTypeJPEG, UTTypeTIFF, UTTypeGIF, UTTypePNG, UTTypeICNS, UTTypeBMP, UTTypeICO, UTTypeRAWImage, UTTypeSVG, UTTypeLivePhoto, UTTypeHEIF, UTTypeHEIC, UTTypeWebP, UTType3DContent, UTTypeUSD, UTTypeUSDZ, UTTypeRealityFile, UTTypeSceneKitScene, UTTypeARReferenceObject, UTTypeAudiovisualContent, UTTypeMovie, UTTypeVideo, UTTypeAudio, UTTypeQuickTimeMovie, UTTypeMPEG, UTTypeMPEG2Video, UTTypeMPEG2TransportStream, UTTypeMP3, UTTypeMPEG4Movie, UTTypeMPEG4Audio, UTTypeAppleProtectedMPEG4Audio, UTTypeAppleProtectedMPEG4Video, UTTypeAVI, UTTypeAIFF, UTTypeWAV, UTTypeMIDI, UTTypePlaylist, UTTypeM3UPlaylist, UTTypeFolder, UTTypeVolume, UTTypePackage, UTTypeBundle, UTTypePluginBundle, UTTypeSpotlightImporter, UTTypeQuickLookGenerator, UTTypeXPCService, UTTypeFramework, UTTypeApplication, UTTypeApplicationBundle, UTTypeApplicationExtension, UTTypeUnixExecutable, UTTypeEXE, UTTypeSystemPreferencesPane, UTTypeArchive, UTTypeGZIP, UTTypeBZ2, UTTypeZIP, UTTypeAppleArchive, UTTypeSpreadsheet, UTTypePresentation, UTTypeDatabase, UTTypeMessage, UTTypeContact, UTTypeVCard, UTTypeToDoItem, UTTypeCalendarEvent, UTTypeEmailMessage, UTTypeInternetLocation, UTTypeInternetShortcut, UTTypeFont, UTTypeBookmark, UTTypePKCS12, UTTypeX509Certificate, UTTypeEPUB, UTTypeLog]);
 }
 
-NSString *const UTTagClassFilenameExtension = @"public.filename-extension";
-NSString *const UTTagClassMIMEType = @"public.mime-type";
+NSString *const BACKPORT_IMPL(UTTagClassFilenameExtension) = @"public.filename-extension";
+NSString *const BACKPORT_IMPL(UTTagClassMIMEType) = @"public.mime-type";

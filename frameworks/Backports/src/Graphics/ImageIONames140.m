@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
 extern CFStringRef const kCGImagePropertyTGACompression;
@@ -10,12 +11,12 @@ extern CFStringRef const kCGImagePropertyWebPFrameInfoArray;
 extern CFStringRef const kCGImagePropertyWebPLoopCount;
 extern CFStringRef const kCGImagePropertyWebPUnclampedDelayTime;
 
-CFStringRef const kCGImagePropertyTGACompression = CFSTR("Compression");
-CFStringRef const kCGImagePropertyTGADictionary = CFSTR("{TGA}");
-CFStringRef const kCGImagePropertyWebPCanvasPixelHeight = CFSTR("CanvasPixelHeight");
-CFStringRef const kCGImagePropertyWebPCanvasPixelWidth = CFSTR("CanvasPixelWidth");
-CFStringRef const kCGImagePropertyWebPDelayTime = CFSTR("DelayTime");
-CFStringRef const kCGImagePropertyWebPDictionary = CFSTR("{WebP}");
-CFStringRef const kCGImagePropertyWebPFrameInfoArray = CFSTR("FrameInfo");
-CFStringRef const kCGImagePropertyWebPLoopCount = CFSTR("LoopCount");
-CFStringRef const kCGImagePropertyWebPUnclampedDelayTime = CFSTR("UnclampedDelayTime");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyTGACompression) = CFSTR("Compression");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyTGADictionary) = CFSTR("{TGA}");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPCanvasPixelHeight) = CFSTR("CanvasPixelHeight");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPCanvasPixelWidth) = CFSTR("CanvasPixelWidth");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPDelayTime) = CFSTR("DelayTime");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPDictionary) = CFSTR("{WebP}");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPFrameInfoArray) = CFSTR("FrameInfo");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPLoopCount) = CFSTR("LoopCount");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyWebPUnclampedDelayTime) = CFSTR("UnclampedDelayTime");

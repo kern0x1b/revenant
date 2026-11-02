@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVAudioEngineConfigurationChangeNotification = @"AVAudioEngineConfigurationChangeNotification";
+NSString *const BACKPORT_IMPL(AVAudioEngineConfigurationChangeNotification) = @"AVAudioEngineConfigurationChangeNotification";
 NSString *const AVAudioSessionSilenceSecondaryAudioHintNotification = @"AVAudioSessionSilenceSecondaryAudioHintNotification";
 NSString *const AVAudioSessionSilenceSecondaryAudioHintTypeKey = @"AVAudioSessionSilenceSecondaryAudioHintTypeKey";
-NSString *const AVMetadataObjectTypeDataMatrixCode = @"org.iso.DataMatrix";
-NSString *const AVMetadataObjectTypeITF14Code = @"org.gs1.ITF14";
-NSString *const AVMetadataObjectTypeInterleaved2of5Code = @"org.ansi.Interleaved2of5";
+NSString *const BACKPORT_IMPL(AVMetadataObjectTypeDataMatrixCode) = @"org.iso.DataMatrix";
+NSString *const BACKPORT_IMPL(AVMetadataObjectTypeITF14Code) = @"org.gs1.ITF14";
+NSString *const BACKPORT_IMPL(AVMetadataObjectTypeInterleaved2of5Code) = @"org.ansi.Interleaved2of5";

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSProcessInfoThermalStateDidChangeNotification = @"NSProcessInfoThermalStateDidChangeNotification";
+NSString *const BACKPORT_IMPL(NSProcessInfoThermalStateDidChangeNotification) = @"NSProcessInfoThermalStateDidChangeNotification";
 
 @implementation NSProcessInfo (RevenantThermalState)
 

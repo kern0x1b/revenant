@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNLightingModel const SCNLightingModelPhong = @"SCNLightingModelPhong";
-SCNLightingModel const SCNLightingModelBlinn = @"SCNLightingModelBlinn";
-SCNLightingModel const SCNLightingModelLambert = @"SCNLightingModelLambert";
-SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
+SCNLightingModel const BACKPORT_IMPL(SCNLightingModelPhong) = @"SCNLightingModelPhong";
+SCNLightingModel const BACKPORT_IMPL(SCNLightingModelBlinn) = @"SCNLightingModelBlinn";
+SCNLightingModel const BACKPORT_IMPL(SCNLightingModelLambert) = @"SCNLightingModelLambert";
+SCNLightingModel const BACKPORT_IMPL(SCNLightingModelConstant) = @"SCNLightingModelConstant";
 
 @implementation SCNMaterial
 

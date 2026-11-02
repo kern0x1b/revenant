@@ -82,7 +82,7 @@ function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
 
-local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "skeleton.lua", "sdk.lua"}
+local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "markers.lua", "skeleton.lua", "sdk.lua"}
 
 function generator_digest()
     local digests = {}

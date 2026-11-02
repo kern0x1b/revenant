@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-CFArrayRef SecTrustCopyCertificateChain(SecTrustRef trust)
+CFArrayRef BACKPORT_IMPL(SecTrustCopyCertificateChain)(SecTrustRef trust)
 {
     if (!trust)
         return NULL;

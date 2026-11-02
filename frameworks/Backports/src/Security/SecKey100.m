@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import "RevenantSecureEnclave.h"
@@ -99,7 +100,7 @@ static BOOL revenant_says_public(CFDictionaryRef attributes)
     return keyClass != NULL && CFEqual(keyClass, kSecAttrKeyClassPublic);
 }
 
-SecKeyRef SecKeyCreateRandomKey(CFDictionaryRef parameters, CFErrorRef *error)
+SecKeyRef BACKPORT_IMPL(SecKeyCreateRandomKey)(CFDictionaryRef parameters, CFErrorRef *error)
 {
     if (!parameters) {
         revenant_sec_fail(error, errSecParam, @"no parameters for key generation");
@@ -124,7 +125,7 @@ SecKeyRef SecKeyCreateRandomKey(CFDictionaryRef parameters, CFErrorRef *error)
     return privateKey;
 }
 
-SecKeyRef SecKeyCopyPublicKey(SecKeyRef key)
+SecKeyRef BACKPORT_IMPL(SecKeyCopyPublicKey)(SecKeyRef key)
 {
     if (!key)
         return NULL;
@@ -180,12 +181,12 @@ static CFDataRef revenant_sec_transform(SecKeyRef key, SecKeyAlgorithm algorithm
     return (CFDataRef)CFBridgingRetain(output);
 }
 
-CFDataRef SecKeyCreateEncryptedData(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef plaintext, CFErrorRef *error)
+CFDataRef BACKPORT_IMPL(SecKeyCreateEncryptedData)(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef plaintext, CFErrorRef *error)
 {
     return revenant_sec_transform(key, algorithm, plaintext, error, YES);
 }
 
-CFDataRef SecKeyCreateDecryptedData(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef ciphertext, CFErrorRef *error)
+CFDataRef BACKPORT_IMPL(SecKeyCreateDecryptedData)(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef ciphertext, CFErrorRef *error)
 {
     return revenant_sec_transform(key, algorithm, ciphertext, error, NO);
 }
@@ -216,7 +217,7 @@ static CFDataRef revenant_sec_stored_data(SecKeyRef key)
     return (CFDataRef)data;
 }
 
-CFDataRef SecKeyCopyExternalRepresentation(SecKeyRef key, CFErrorRef *error)
+CFDataRef BACKPORT_IMPL(SecKeyCopyExternalRepresentation)(SecKeyRef key, CFErrorRef *error)
 {
     if (!key) {
         revenant_sec_fail(error, errSecParam, @"no key to export");

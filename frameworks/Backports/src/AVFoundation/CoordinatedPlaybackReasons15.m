@@ -1,17 +1,18 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted = @"AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted";
-NSString *const AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible = @"AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible";
-NSString *const AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial = @"AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial";
-NSString *const AVCoordinatedPlaybackSuspensionReasonStallRecovery = @"AVCoordinatedPlaybackSuspensionReasonStallRecovery";
-NSString *const AVCoordinatedPlaybackSuspensionReasonUserActionRequired = @"AVCoordinatedPlaybackSuspensionReasonUserActionRequired";
-NSString *const AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime = @"AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime";
-NSString *const AVPlaybackCoordinatorOtherParticipantsDidChangeNotification = @"AVPlaybackCoordinatorOtherParticipantsDidChangeNotification";
-NSString *const AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification = @"AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification";
-NSString *const AVPlayerRateDidChangeOriginatingParticipantKey = @"AVPlayerRateDidChangeOriginatingParticipantKey";
-NSString *const AVPlayerRateDidChangeReasonAppBackgrounded = @"AVPlayerRateDidChangeReasonAppBackgrounded";
-NSString *const AVPlayerRateDidChangeReasonAudioSessionInterrupted = @"AVPlayerRateDidChangeReasonAudioSessionInterrupted";
-NSString *const AVPlayerRateDidChangeReasonSetRateCalled = @"AVPlayerRateDidChangeReasonSetRateCalled";
-NSString *const AVPlayerRateDidChangeReasonSetRateFailed = @"AVPlayerRateDidChangeReasonSetRateFailed";
-NSString *const AVPlayerWaitingDuringInterstitialEventReason = @"AVPlayerWaitingDuringInterstitialEventReason";
-NSString *const AVPlayerWaitingForCoordinatedPlaybackReason = @"AVPlayerWaitingForCoordinatedPlaybackReason";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted) = @"AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible) = @"AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial) = @"AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonStallRecovery) = @"AVCoordinatedPlaybackSuspensionReasonStallRecovery";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonUserActionRequired) = @"AVCoordinatedPlaybackSuspensionReasonUserActionRequired";
+NSString *const BACKPORT_IMPL(AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime) = @"AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime";
+NSString *const BACKPORT_IMPL(AVPlaybackCoordinatorOtherParticipantsDidChangeNotification) = @"AVPlaybackCoordinatorOtherParticipantsDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification) = @"AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVPlayerRateDidChangeOriginatingParticipantKey) = @"AVPlayerRateDidChangeOriginatingParticipantKey";
+NSString *const BACKPORT_IMPL(AVPlayerRateDidChangeReasonAppBackgrounded) = @"AVPlayerRateDidChangeReasonAppBackgrounded";
+NSString *const BACKPORT_IMPL(AVPlayerRateDidChangeReasonAudioSessionInterrupted) = @"AVPlayerRateDidChangeReasonAudioSessionInterrupted";
+NSString *const BACKPORT_IMPL(AVPlayerRateDidChangeReasonSetRateCalled) = @"AVPlayerRateDidChangeReasonSetRateCalled";
+NSString *const BACKPORT_IMPL(AVPlayerRateDidChangeReasonSetRateFailed) = @"AVPlayerRateDidChangeReasonSetRateFailed";
+NSString *const BACKPORT_IMPL(AVPlayerWaitingDuringInterstitialEventReason) = @"AVPlayerWaitingDuringInterstitialEventReason";
+NSString *const BACKPORT_IMPL(AVPlayerWaitingForCoordinatedPlaybackReason) = @"AVPlayerWaitingForCoordinatedPlaybackReason";

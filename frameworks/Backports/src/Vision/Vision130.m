@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVision.h"
 #import "VNTextRecognizer.h"
 
@@ -7,10 +8,10 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-VNAnimalIdentifier const VNAnimalIdentifierCat = @"Cat";
-VNAnimalIdentifier const VNAnimalIdentifierDog = @"Dog";
+VNAnimalIdentifier const BACKPORT_IMPL(VNAnimalIdentifierCat) = @"Cat";
+VNAnimalIdentifier const BACKPORT_IMPL(VNAnimalIdentifierDog) = @"Dog";
 
-NSUInteger VNElementTypeSize(VNElementType elementType)
+NSUInteger BACKPORT_IMPL(VNElementTypeSize)(VNElementType elementType)
 {
     switch (elementType) {
         case VNElementTypeFloat:
