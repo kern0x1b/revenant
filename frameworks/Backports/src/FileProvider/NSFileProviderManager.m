@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <FileProvider/FileProvider.h>
 #import "RevenantFileProvider.h"
 
-NSString *const NSFileProviderErrorDomain = @"NSFileProviderErrorDomain";
+NSString *const BACKPORT_IMPL(NSFileProviderErrorDomain) = @"NSFileProviderErrorDomain";
 
 static NSInteger const RevenantFileProviderUnavailable = -2001;
 

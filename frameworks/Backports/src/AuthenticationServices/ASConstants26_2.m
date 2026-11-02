@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const ASGeneratedPasswordKindAlphanumeric = @"ALPHANUMERIC";
-NSString *const ASGeneratedPasswordKindPassphrase = @"PASSPHRASE";
-NSString *const ASGeneratedPasswordKindStrong = @"STRONG";
+NSString *const BACKPORT_IMPL(ASGeneratedPasswordKindAlphanumeric) = @"ALPHANUMERIC";
+NSString *const BACKPORT_IMPL(ASGeneratedPasswordKindPassphrase) = @"PASSPHRASE";
+NSString *const BACKPORT_IMPL(ASGeneratedPasswordKindStrong) = @"STRONG";

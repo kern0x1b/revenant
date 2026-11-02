@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioSessionModeDualRoute = @"AVAudioSessionModeDualRoute";
+NSString * const BACKPORT_IMPL(AVAudioSessionModeDualRoute) = @"AVAudioSessionModeDualRoute";

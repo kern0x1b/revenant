@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-NSString *const UIPasteboardDetectionPatternProbableWebURL = @"com.apple.uikit.pasteboard-detection-pattern.probable-web-url";
-NSString *const UIPasteboardDetectionPatternProbableWebSearch = @"com.apple.uikit.pasteboard-detection-pattern.probable-web-search";
-NSString *const UIPasteboardDetectionPatternNumber = @"com.apple.uikit.pasteboard-detection-pattern.number";
+NSString *const BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebURL) = @"com.apple.uikit.pasteboard-detection-pattern.probable-web-url";
+NSString *const BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebSearch) = @"com.apple.uikit.pasteboard-detection-pattern.probable-web-search";
+NSString *const BACKPORT_IMPL(UIPasteboardDetectionPatternNumber) = @"com.apple.uikit.pasteboard-detection-pattern.number";
 
 static NSString *revenant_trimmed(NSString *text)
 {

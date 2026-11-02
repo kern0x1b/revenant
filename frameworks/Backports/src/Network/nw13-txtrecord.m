@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -45,12 +46,12 @@ static nw_txt_record_find_key_t revenant_find(RevenantNWTxtRecord *record, const
     return ((NSData *)value).length ? nw_txt_record_find_key_non_empty_value : nw_txt_record_find_key_empty_value;
 }
 
-nw_txt_record_t nw_txt_record_create_dictionary(void)
+nw_txt_record_t BACKPORT_IMPL(nw_txt_record_create_dictionary)(void)
 {
     return revenant_txt_record(YES);
 }
 
-nw_txt_record_t nw_txt_record_create_with_bytes(const uint8_t *txt_bytes, size_t txt_len)
+nw_txt_record_t BACKPORT_IMPL(nw_txt_record_create_with_bytes)(const uint8_t *txt_bytes, size_t txt_len)
 {
     if (!txt_len)
         return NULL;
@@ -93,7 +94,7 @@ nw_txt_record_t nw_txt_record_create_with_bytes(const uint8_t *txt_bytes, size_t
     return record;
 }
 
-nw_txt_record_t nw_txt_record_copy(nw_txt_record_t txt_record)
+nw_txt_record_t BACKPORT_IMPL(nw_txt_record_copy)(nw_txt_record_t txt_record)
 {
     RevenantNWTxtRecord *source = (RevenantNWTxtRecord *)txt_record;
     if (!source)
@@ -104,19 +105,19 @@ nw_txt_record_t nw_txt_record_copy(nw_txt_record_t txt_record)
     return copy;
 }
 
-size_t nw_txt_record_get_key_count(nw_txt_record_t txt_record)
+size_t BACKPORT_IMPL(nw_txt_record_get_key_count)(nw_txt_record_t txt_record)
 {
     RevenantNWTxtRecord *value = (RevenantNWTxtRecord *)txt_record;
     return value ? value->_keys.count : 0;
 }
 
-bool nw_txt_record_is_dictionary(nw_txt_record_t txt_record)
+bool BACKPORT_IMPL(nw_txt_record_is_dictionary)(nw_txt_record_t txt_record)
 {
     RevenantNWTxtRecord *value = (RevenantNWTxtRecord *)txt_record;
     return value ? value->_dictionary : false;
 }
 
-bool nw_txt_record_is_equal(nw_txt_record_t left, nw_txt_record_t right)
+bool BACKPORT_IMPL(nw_txt_record_is_equal)(nw_txt_record_t left, nw_txt_record_t right)
 {
     if (left == right)
         return true;
@@ -139,7 +140,7 @@ bool nw_txt_record_is_equal(nw_txt_record_t left, nw_txt_record_t right)
     return true;
 }
 
-nw_txt_record_find_key_t nw_txt_record_find_key(nw_txt_record_t txt_record, const char *key)
+nw_txt_record_find_key_t BACKPORT_IMPL(nw_txt_record_find_key)(nw_txt_record_t txt_record, const char *key)
 {
     RevenantNWTxtRecord *value = (RevenantNWTxtRecord *)txt_record;
     if (!value)
@@ -147,7 +148,7 @@ nw_txt_record_find_key_t nw_txt_record_find_key(nw_txt_record_t txt_record, cons
     return revenant_find(value, key);
 }
 
-bool nw_txt_record_set_key(nw_txt_record_t txt_record, const char *key, const uint8_t *value, size_t value_len)
+bool BACKPORT_IMPL(nw_txt_record_set_key)(nw_txt_record_t txt_record, const char *key, const uint8_t *value, size_t value_len)
 {
     RevenantNWTxtRecord *record = (RevenantNWTxtRecord *)txt_record;
     if (!record || !revenant_key_valid(key))
@@ -163,7 +164,7 @@ bool nw_txt_record_set_key(nw_txt_record_t txt_record, const char *key, const ui
     return true;
 }
 
-bool nw_txt_record_remove_key(nw_txt_record_t txt_record, const char *key)
+bool BACKPORT_IMPL(nw_txt_record_remove_key)(nw_txt_record_t txt_record, const char *key)
 {
     RevenantNWTxtRecord *record = (RevenantNWTxtRecord *)txt_record;
     if (!record || !revenant_key_valid(key))
@@ -176,7 +177,7 @@ bool nw_txt_record_remove_key(nw_txt_record_t txt_record, const char *key)
     return true;
 }
 
-bool nw_txt_record_access_key(nw_txt_record_t txt_record, const char *key, nw_txt_record_access_key_t access_value)
+bool BACKPORT_IMPL(nw_txt_record_access_key)(nw_txt_record_t txt_record, const char *key, nw_txt_record_access_key_t access_value)
 {
     RevenantNWTxtRecord *record = (RevenantNWTxtRecord *)txt_record;
     if (!record || !access_value)
@@ -191,7 +192,7 @@ bool nw_txt_record_access_key(nw_txt_record_t txt_record, const char *key, nw_tx
     return access_value(key, found, (const uint8_t *)((NSData *)value).bytes, ((NSData *)value).length);
 }
 
-bool nw_txt_record_apply(nw_txt_record_t txt_record, nw_txt_record_applier_t applier)
+bool BACKPORT_IMPL(nw_txt_record_apply)(nw_txt_record_t txt_record, nw_txt_record_applier_t applier)
 {
     RevenantNWTxtRecord *record = (RevenantNWTxtRecord *)txt_record;
     if (!record || !applier)
@@ -210,7 +211,7 @@ bool nw_txt_record_apply(nw_txt_record_t txt_record, nw_txt_record_applier_t app
     return true;
 }
 
-bool nw_txt_record_access_bytes(nw_txt_record_t txt_record, nw_txt_record_access_bytes_t access_bytes)
+bool BACKPORT_IMPL(nw_txt_record_access_bytes)(nw_txt_record_t txt_record, nw_txt_record_access_bytes_t access_bytes)
 {
     RevenantNWTxtRecord *record = (RevenantNWTxtRecord *)txt_record;
     if (!record || !access_bytes)

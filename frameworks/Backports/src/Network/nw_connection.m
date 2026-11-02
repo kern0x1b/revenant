@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 #import "RevenantTLS/RevenantTLSEngine.h"
@@ -905,7 +906,7 @@ static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_
 
 #pragma mark - the calls
 
-nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t parameters)
+nw_connection_t BACKPORT_IMPL(nw_connection_create)(nw_endpoint_t endpoint, nw_parameters_t parameters)
 {
     if (!endpoint || !parameters)
         return nil;
@@ -923,47 +924,47 @@ nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t par
     return connection;
 }
 
-nw_endpoint_t nw_connection_copy_endpoint(nw_connection_t connection)
+nw_endpoint_t BACKPORT_IMPL(nw_connection_copy_endpoint)(nw_connection_t connection)
 {
     return connection ? ((RevenantNWConnection *)connection)->_endpoint : NULL;
 }
 
-nw_parameters_t nw_connection_copy_parameters(nw_connection_t connection)
+nw_parameters_t BACKPORT_IMPL(nw_connection_copy_parameters)(nw_connection_t connection)
 {
     return connection ? ((RevenantNWConnection *)connection)->_parameters : NULL;
 }
 
-void nw_connection_set_queue(nw_connection_t connection, dispatch_queue_t queue)
+void BACKPORT_IMPL(nw_connection_set_queue)(nw_connection_t connection, dispatch_queue_t queue)
 {
     if (connection)
         ((RevenantNWConnection *)connection)->_queue = queue;
 }
 
-void nw_connection_set_path_changed_handler(nw_connection_t connection, nw_connection_path_event_handler_t handler)
+void BACKPORT_IMPL(nw_connection_set_path_changed_handler)(nw_connection_t connection, nw_connection_path_event_handler_t handler)
 {
     if (connection)
         ((RevenantNWConnection *)connection)->_path = [handler copy];
 }
 
-void nw_connection_set_viability_changed_handler(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
+void BACKPORT_IMPL(nw_connection_set_viability_changed_handler)(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
 {
     if (connection)
         ((RevenantNWConnection *)connection)->_viability = [handler copy];
 }
 
-void nw_connection_set_better_path_available_handler(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
+void BACKPORT_IMPL(nw_connection_set_better_path_available_handler)(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
 {
     if (connection)
         ((RevenantNWConnection *)connection)->_betterPath = [handler copy];
 }
 
-void nw_connection_set_state_changed_handler(nw_connection_t connection, nw_connection_state_changed_handler_t handler)
+void BACKPORT_IMPL(nw_connection_set_state_changed_handler)(nw_connection_t connection, nw_connection_state_changed_handler_t handler)
 {
     if (connection)
         ((RevenantNWConnection *)connection)->_state = [handler copy];
 }
 
-void nw_connection_start(nw_connection_t connection)
+void BACKPORT_IMPL(nw_connection_start)(nw_connection_t connection)
 {
     if (!connection)
         return;
@@ -992,7 +993,7 @@ void nw_connection_start(nw_connection_t connection)
     });
 }
 
-void nw_connection_cancel(nw_connection_t connection)
+void BACKPORT_IMPL(nw_connection_cancel)(nw_connection_t connection)
 {
     if (!connection)
         return;
@@ -1006,7 +1007,7 @@ void nw_connection_cancel(nw_connection_t connection)
         stop();
 }
 
-void nw_connection_force_cancel(nw_connection_t connection)
+void BACKPORT_IMPL(nw_connection_force_cancel)(nw_connection_t connection)
 {
     if (!connection)
         return;
@@ -1014,7 +1015,7 @@ void nw_connection_force_cancel(nw_connection_t connection)
     revenant_stop(self, nw_connection_state_cancelled, nil);
 }
 
-void nw_connection_restart(nw_connection_t connection)
+void BACKPORT_IMPL(nw_connection_restart)(nw_connection_t connection)
 {
     if (!connection)
         return;
@@ -1032,7 +1033,7 @@ void nw_connection_restart(nw_connection_t connection)
     });
 }
 
-void nw_connection_cancel_current_endpoint(nw_connection_t connection)
+void BACKPORT_IMPL(nw_connection_cancel_current_endpoint)(nw_connection_t connection)
 {
     if (!connection)
         return;
@@ -1051,7 +1052,7 @@ void nw_connection_cancel_current_endpoint(nw_connection_t connection)
     });
 }
 
-void nw_connection_batch(nw_connection_t connection, dispatch_block_t batch_block)
+void BACKPORT_IMPL(nw_connection_batch)(nw_connection_t connection, dispatch_block_t batch_block)
 {
     if (!connection)
         return;
@@ -1065,13 +1066,13 @@ void nw_connection_batch(nw_connection_t connection, dispatch_block_t batch_bloc
     });
 }
 
-nw_path_t nw_connection_copy_current_path(nw_connection_t connection)
+nw_path_t BACKPORT_IMPL(nw_connection_copy_current_path)(nw_connection_t connection)
 {
     RevenantNWConnection *value = (RevenantNWConnection *)connection;
     return value ? value->_currentPath : NULL;
 }
 
-uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
+uint32_t BACKPORT_IMPL(nw_connection_get_maximum_datagram_size)(nw_connection_t connection)
 {
     RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self || self->_socket < 0)
@@ -1114,7 +1115,7 @@ uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
     return mtu > overhead ? mtu - (uint32_t)overhead : 0;
 }
 
-char *nw_connection_copy_description(nw_connection_t connection)
+char *BACKPORT_IMPL(nw_connection_copy_description)(nw_connection_t connection)
 {
     RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self)
@@ -1147,7 +1148,7 @@ char *nw_connection_copy_description(nw_connection_t connection)
     return revenant_nw_copy_cstring(text.UTF8String);
 }
 
-void nw_connection_send(nw_connection_t connection, dispatch_data_t content, nw_content_context_t context,
+void BACKPORT_IMPL(nw_connection_send)(nw_connection_t connection, dispatch_data_t content, nw_content_context_t context,
                         bool is_complete, nw_connection_send_completion_t completion)
 {
     if (!connection)
@@ -1185,7 +1186,7 @@ void nw_connection_send(nw_connection_t connection, dispatch_data_t content, nw_
     });
 }
 
-void nw_connection_receive(nw_connection_t connection, uint32_t minimum_incomplete_length, uint32_t maximum_length,
+void BACKPORT_IMPL(nw_connection_receive)(nw_connection_t connection, uint32_t minimum_incomplete_length, uint32_t maximum_length,
                            nw_connection_receive_completion_t completion)
 {
     if (!connection)
@@ -1206,12 +1207,12 @@ void nw_connection_receive(nw_connection_t connection, uint32_t minimum_incomple
     });
 }
 
-void nw_connection_receive_message(nw_connection_t connection, nw_connection_receive_completion_t completion)
+void BACKPORT_IMPL(nw_connection_receive_message)(nw_connection_t connection, nw_connection_receive_completion_t completion)
 {
     nw_connection_receive(connection, 1, 0, completion);
 }
 
-nw_protocol_metadata_t nw_connection_copy_protocol_metadata(nw_connection_t connection, nw_protocol_definition_t definition)
+nw_protocol_metadata_t BACKPORT_IMPL(nw_connection_copy_protocol_metadata)(nw_connection_t connection, nw_protocol_definition_t definition)
 {
     RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self || !definition)

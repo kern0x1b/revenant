@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 static UIColor *RevenantGrayscaleColor(UIColor *color)
@@ -19,15 +20,15 @@ static UIColor *RevenantGrayscaleColor(UIColor *color)
     return converted;
 }
 
-const UIConfigurationColorTransformer UIConfigurationColorTransformerGrayscale = ^UIColor *(UIColor *color) {
+const UIConfigurationColorTransformer BACKPORT_IMPL(UIConfigurationColorTransformerGrayscale) = ^UIColor *(UIColor *color) {
     return RevenantGrayscaleColor(color);
 };
 
-const UIConfigurationColorTransformer UIConfigurationColorTransformerPreferredTint = ^UIColor *(UIColor *color) {
+const UIConfigurationColorTransformer BACKPORT_IMPL(UIConfigurationColorTransformerPreferredTint) = ^UIColor *(UIColor *color) {
     return color;
 };
 
-const UIConfigurationColorTransformer UIConfigurationColorTransformerMonochromeTint = ^UIColor *(UIColor *color) {
+const UIConfigurationColorTransformer BACKPORT_IMPL(UIConfigurationColorTransformerMonochromeTint) = ^UIColor *(UIColor *color) {
     (void)color;
     return [UIColor colorWithWhite:1.0 alpha:140.0 / 255.0];
 };

@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import "RevenantSheet.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-const CGFloat UISheetPresentationControllerDetentInactive = CGFLOAT_MAX;
+const CGFloat BACKPORT_IMPL(UISheetPresentationControllerDetentInactive) = CGFLOAT_MAX;
 
 @interface RevenantSheetDetentContext (RevenantResolution) <UISheetPresentationControllerDetentResolutionContext>
 @end

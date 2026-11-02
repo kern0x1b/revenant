@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantAVFAudio.h"
 #import <objc/message.h>
 
-NSString * const AVAudioApplicationMuteStateKey = @"AVAudioApplicationMuteStateKey";
-NSString * const AVAudioApplicationInputMuteStateChangeNotification = @"AVAudioApplicationInputMuteStateChangeNotification";
-NSString * const AVAudioSessionPortContinuityMicrophone = @"ContinuityMicrophone";
+NSString * const BACKPORT_IMPL(AVAudioApplicationMuteStateKey) = @"AVAudioApplicationMuteStateKey";
+NSString * const BACKPORT_IMPL(AVAudioApplicationInputMuteStateChangeNotification) = @"AVAudioApplicationInputMuteStateChangeNotification";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortContinuityMicrophone) = @"ContinuityMicrophone";
 
 @implementation AVAudioApplication {
     BOOL _revenant_inputMuted;

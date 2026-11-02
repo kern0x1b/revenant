@@ -11,4 +11,4 @@ NSString *const BACKPORT_IMPL(kCIImageRepresentationDepthImage) = @"kCIImageRepr
 NSString *const BACKPORT_IMPL(kCIImageRepresentationDisparityImage) = @"kCIImageRepresentationDisparityImage";
 NSString *const BACKPORT_IMPL(kCIInputDepthImageKey) = @"inputDepthImage";
 NSString *const BACKPORT_IMPL(kCIInputDisparityImageKey) = @"inputDisparityImage";
-NSString *const kCIInputMoireAmountKey = @"inputMoireAmount";
+NSString *const BACKPORT_IMPL(kCIInputMoireAmountKey) = @"inputMoireAmount";

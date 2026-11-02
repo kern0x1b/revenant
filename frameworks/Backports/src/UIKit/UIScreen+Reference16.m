@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSNotificationName const UIScreenReferenceDisplayModeStatusDidChangeNotification = @"UIScreenReferenceDisplayModeStatusDidChangeNotification";
+NSNotificationName const BACKPORT_IMPL(UIScreenReferenceDisplayModeStatusDidChangeNotification) = @"UIScreenReferenceDisplayModeStatusDidChangeNotification";
 
 @implementation UIScreen (RevenantReference16)
 

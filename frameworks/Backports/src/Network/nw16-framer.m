@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-void nw_framer_options_set_object_value(nw_protocol_options_t options, const char *key, id value)
+void BACKPORT_IMPL(nw_framer_options_set_object_value)(nw_protocol_options_t options, const char *key, id value)
 {
     RevenantNWProtocolOptions *held = (RevenantNWProtocolOptions *)options;
     if (!held || !key)
@@ -11,7 +12,7 @@ void nw_framer_options_set_object_value(nw_protocol_options_t options, const cha
         [held->_objects removeObjectForKey:@(key)];
 }
 
-id nw_framer_options_copy_object_value(nw_protocol_options_t options, const char *key)
+id BACKPORT_IMPL(nw_framer_options_copy_object_value)(nw_protocol_options_t options, const char *key)
 {
     RevenantNWProtocolOptions *held = (RevenantNWProtocolOptions *)options;
     if (!held || !key)

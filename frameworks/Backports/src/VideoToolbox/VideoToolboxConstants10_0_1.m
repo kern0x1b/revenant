@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-const CFStringRef kVTPixelTransferPropertyKey_DestinationColorPrimaries = CFSTR("DestinationColorPrimaries");
-const CFStringRef kVTPixelTransferPropertyKey_DestinationICCProfile = CFSTR("DestinationICCProfile");
-const CFStringRef kVTPixelTransferPropertyKey_DestinationTransferFunction = CFSTR("DestinationTransferFunction");
+const CFStringRef BACKPORT_IMPL(kVTPixelTransferPropertyKey_DestinationColorPrimaries) = CFSTR("DestinationColorPrimaries");
+const CFStringRef BACKPORT_IMPL(kVTPixelTransferPropertyKey_DestinationICCProfile) = CFSTR("DestinationICCProfile");
+const CFStringRef BACKPORT_IMPL(kVTPixelTransferPropertyKey_DestinationTransferFunction) = CFSTR("DestinationTransferFunction");

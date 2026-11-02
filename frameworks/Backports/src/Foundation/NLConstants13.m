@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NLTagSchemeSentimentScore = @"Sentiment";
+NSString *const BACKPORT_IMPL(NLTagSchemeSentimentScore) = @"Sentiment";

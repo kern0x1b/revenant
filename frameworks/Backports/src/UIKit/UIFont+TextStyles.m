@@ -1,13 +1,14 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-UIFontTextStyle const UIFontTextStyleHeadline = @"UICTFontTextStyleHeadline";
-UIFontTextStyle const UIFontTextStyleSubheadline = @"UICTFontTextStyleSubhead";
-UIFontTextStyle const UIFontTextStyleBody = @"UICTFontTextStyleBody";
-UIFontTextStyle const UIFontTextStyleFootnote = @"UICTFontTextStyleFootnote";
-UIFontTextStyle const UIFontTextStyleCaption1 = @"UICTFontTextStyleCaption1";
-UIFontTextStyle const UIFontTextStyleCaption2 = @"UICTFontTextStyleCaption2";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleHeadline) = @"UICTFontTextStyleHeadline";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleSubheadline) = @"UICTFontTextStyleSubhead";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleBody) = @"UICTFontTextStyleBody";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleFootnote) = @"UICTFontTextStyleFootnote";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleCaption1) = @"UICTFontTextStyleCaption1";
+UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleCaption2) = @"UICTFontTextStyleCaption2";
 
 @implementation UIFont (RevenantTextStyles)
 

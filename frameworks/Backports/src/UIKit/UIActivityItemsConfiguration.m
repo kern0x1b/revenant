@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import "RevenantMenus.h"
 
-NSString *const UIActivityItemsConfigurationInteractionShare = @"share";
-NSString *const UIActivityItemsConfigurationMetadataKeyTitle = @"title";
-NSString *const UIActivityItemsConfigurationMetadataKeyMessageBody = @"messageBody";
-NSString *const UIActivityItemsConfigurationPreviewIntentFullSize = @"fullSize";
-NSString *const UIActivityItemsConfigurationPreviewIntentThumbnail = @"thumbnail";
+NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationInteractionShare) = @"share";
+NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationMetadataKeyTitle) = @"title";
+NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationMetadataKeyMessageBody) = @"messageBody";
+NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationPreviewIntentFullSize) = @"fullSize";
+NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationPreviewIntentThumbnail) = @"thumbnail";
 
 @implementation UIActivityItemsConfiguration {
 @private

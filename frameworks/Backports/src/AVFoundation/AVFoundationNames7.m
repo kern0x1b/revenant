@@ -1,9 +1,9 @@
 #include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVAudioSessionMediaServicesWereLostNotification = @"AVAudioSessionMediaServicesWereLostNotification";
-NSString *const AVAudioSessionModeVideoChat = @"AVAudioSessionModeVideoChat";
-NSString *const AVAudioSessionPortBluetoothLE = @"BluetoothLE";
+NSString *const BACKPORT_IMPL(AVAudioSessionMediaServicesWereLostNotification) = @"AVAudioSessionMediaServicesWereLostNotification";
+NSString *const BACKPORT_IMPL(AVAudioSessionModeVideoChat) = @"AVAudioSessionModeVideoChat";
+NSString *const BACKPORT_IMPL(AVAudioSessionPortBluetoothLE) = @"BluetoothLE";
 NSString *const BACKPORT_IMPL(AVCaptureSessionPresetInputPriority) = @"AVCaptureSessionPresetInputPriority";
 NSString *const BACKPORT_IMPL(AVMetadataObjectTypeAztecCode) = @"org.iso.Aztec";
 NSString *const BACKPORT_IMPL(AVMetadataObjectTypeCode128Code) = @"org.iso.Code128";

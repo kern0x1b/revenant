@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -205,7 +206,7 @@ static RevenantNWPathValue *revenant_path(SCNetworkReachabilityRef reachability,
     return path;
 }
 
-nw_path_monitor_t nw_path_monitor_create(void)
+nw_path_monitor_t BACKPORT_IMPL(nw_path_monitor_create)(void)
 {
     RevenantNWPathMonitor *monitor = [[RevenantNWPathMonitor alloc] init];
     monitor->_required = nw_interface_type_other;
@@ -213,24 +214,24 @@ nw_path_monitor_t nw_path_monitor_create(void)
     return monitor;
 }
 
-nw_path_monitor_t nw_path_monitor_create_with_type(nw_interface_type_t required_interface_type)
+nw_path_monitor_t BACKPORT_IMPL(nw_path_monitor_create_with_type)(nw_interface_type_t required_interface_type)
 {
     RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)nw_path_monitor_create();
     monitor->_required = required_interface_type;
     return monitor;
 }
 
-void nw_path_monitor_set_cancel_handler(nw_path_monitor_t monitor, nw_path_monitor_cancel_handler_t cancel_handler)
+void BACKPORT_IMPL(nw_path_monitor_set_cancel_handler)(nw_path_monitor_t monitor, nw_path_monitor_cancel_handler_t cancel_handler)
 {
     ((RevenantNWPathMonitor *)monitor)->_cancel = [cancel_handler copy];
 }
 
-void nw_path_monitor_set_update_handler(nw_path_monitor_t monitor, nw_path_monitor_update_handler_t update_handler)
+void BACKPORT_IMPL(nw_path_monitor_set_update_handler)(nw_path_monitor_t monitor, nw_path_monitor_update_handler_t update_handler)
 {
     ((RevenantNWPathMonitor *)monitor)->_update = [update_handler copy];
 }
 
-void nw_path_monitor_set_queue(nw_path_monitor_t monitor, dispatch_queue_t queue)
+void BACKPORT_IMPL(nw_path_monitor_set_queue)(nw_path_monitor_t monitor, dispatch_queue_t queue)
 {
     ((RevenantNWPathMonitor *)monitor)->_queue = queue;
 }
@@ -253,7 +254,7 @@ static void revenant_reachability_callback(SCNetworkReachabilityRef target, SCNe
     revenant_deliver(monitor, monitor->_generation, NO);
 }
 
-void nw_path_monitor_start(nw_path_monitor_t handle)
+void BACKPORT_IMPL(nw_path_monitor_start)(nw_path_monitor_t handle)
 {
     RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)handle;
     @synchronized (monitor) {
@@ -282,7 +283,7 @@ void nw_path_monitor_start(nw_path_monitor_t handle)
     }
 }
 
-void nw_path_monitor_cancel(nw_path_monitor_t handle)
+void BACKPORT_IMPL(nw_path_monitor_cancel)(nw_path_monitor_t handle)
 {
     RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)handle;
     dispatch_queue_t queue;
@@ -304,12 +305,12 @@ void nw_path_monitor_cancel(nw_path_monitor_t handle)
         dispatch_async(queue, cancel);
 }
 
-nw_path_status_t nw_path_get_status(nw_path_t path)
+nw_path_status_t BACKPORT_IMPL(nw_path_get_status)(nw_path_t path)
 {
     return ((RevenantNWPathValue *)path)->_status;
 }
 
-void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_block_t enumerate_block)
+void BACKPORT_IMPL(nw_path_enumerate_interfaces)(nw_path_t path, nw_path_enumerate_interfaces_block_t enumerate_block)
 {
     for (RevenantNWInterface *interface in ((RevenantNWPathValue *)path)->_interfaces) {
         if (!enumerate_block(interface))
@@ -317,7 +318,7 @@ void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_b
     }
 }
 
-bool nw_path_is_equal(nw_path_t first, nw_path_t second)
+bool BACKPORT_IMPL(nw_path_is_equal)(nw_path_t first, nw_path_t second)
 {
     RevenantNWPathValue *a = (RevenantNWPathValue *)first, *b = (RevenantNWPathValue *)second;
     if (a == b)
@@ -331,27 +332,27 @@ bool nw_path_is_equal(nw_path_t first, nw_path_t second)
     return true;
 }
 
-bool nw_path_is_expensive(nw_path_t path)
+bool BACKPORT_IMPL(nw_path_is_expensive)(nw_path_t path)
 {
     return ((RevenantNWPathValue *)path)->_expensive;
 }
 
-bool nw_path_has_ipv4(nw_path_t path)
+bool BACKPORT_IMPL(nw_path_has_ipv4)(nw_path_t path)
 {
     return ((RevenantNWPathValue *)path)->_ipv4;
 }
 
-bool nw_path_has_ipv6(nw_path_t path)
+bool BACKPORT_IMPL(nw_path_has_ipv6)(nw_path_t path)
 {
     return ((RevenantNWPathValue *)path)->_ipv6;
 }
 
-bool nw_path_has_dns(nw_path_t path)
+bool BACKPORT_IMPL(nw_path_has_dns)(nw_path_t path)
 {
     return ((RevenantNWPathValue *)path)->_dns;
 }
 
-bool nw_path_uses_interface_type(nw_path_t path, nw_interface_type_t interface_type)
+bool BACKPORT_IMPL(nw_path_uses_interface_type)(nw_path_t path, nw_interface_type_t interface_type)
 {
     for (RevenantNWInterface *interface in ((RevenantNWPathValue *)path)->_interfaces) {
         if (interface->_type == interface_type)
@@ -360,27 +361,27 @@ bool nw_path_uses_interface_type(nw_path_t path, nw_interface_type_t interface_t
     return false;
 }
 
-nw_endpoint_t nw_path_copy_effective_local_endpoint(nw_path_t path)
+nw_endpoint_t BACKPORT_IMPL(nw_path_copy_effective_local_endpoint)(nw_path_t path)
 {
     return nil;
 }
 
-nw_endpoint_t nw_path_copy_effective_remote_endpoint(nw_path_t path)
+nw_endpoint_t BACKPORT_IMPL(nw_path_copy_effective_remote_endpoint)(nw_path_t path)
 {
     return nil;
 }
 
-nw_interface_type_t nw_interface_get_type(nw_interface_t interface)
+nw_interface_type_t BACKPORT_IMPL(nw_interface_get_type)(nw_interface_t interface)
 {
     return ((RevenantNWInterface *)interface)->_type;
 }
 
-const char *nw_interface_get_name(nw_interface_t interface)
+const char *BACKPORT_IMPL(nw_interface_get_name)(nw_interface_t interface)
 {
     return ((RevenantNWInterface *)interface)->_name.UTF8String;
 }
 
-uint32_t nw_interface_get_index(nw_interface_t interface)
+uint32_t BACKPORT_IMPL(nw_interface_get_index)(nw_interface_t interface)
 {
     return ((RevenantNWInterface *)interface)->_index;
 }

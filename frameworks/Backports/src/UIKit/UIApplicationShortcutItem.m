@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-NSString *const UIApplicationLaunchOptionsShortcutItemKey = @"UIApplicationLaunchOptionsShortcutItemKey";
+NSString *const BACKPORT_IMPL(UIApplicationLaunchOptionsShortcutItemKey) = @"UIApplicationLaunchOptionsShortcutItemKey";
 
 @implementation UIApplicationShortcutIcon {
     UIApplicationShortcutIconType _type;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -7,7 +8,7 @@
 
 #pragma mark - definition and options
 
-nw_protocol_definition_t nw_framer_create_definition(const char *identifier, uint32_t flags, nw_framer_start_handler_t start_handler)
+nw_protocol_definition_t BACKPORT_IMPL(nw_framer_create_definition)(const char *identifier, uint32_t flags, nw_framer_start_handler_t start_handler)
 {
     if (!identifier || !*identifier)
         return NULL;
@@ -19,7 +20,7 @@ nw_protocol_definition_t nw_framer_create_definition(const char *identifier, uin
     return definition;
 }
 
-nw_protocol_options_t nw_framer_create_options(nw_protocol_definition_t framer_definition)
+nw_protocol_options_t BACKPORT_IMPL(nw_framer_create_options)(nw_protocol_definition_t framer_definition)
 {
     if (!framer_definition)
         return NULL;
@@ -32,14 +33,14 @@ nw_protocol_options_t nw_framer_create_options(nw_protocol_definition_t framer_d
 
 #pragma mark - messages
 
-nw_framer_message_t nw_framer_message_create(nw_framer_t framer)
+nw_framer_message_t BACKPORT_IMPL(nw_framer_message_create)(nw_framer_t framer)
 {
     if (!framer)
         return NULL;
     return nw_framer_protocol_create_message(((RevenantNWFramer *)framer)->_definition);
 }
 
-nw_framer_message_t nw_framer_protocol_create_message(nw_protocol_definition_t definition)
+nw_framer_message_t BACKPORT_IMPL(nw_framer_protocol_create_message)(nw_protocol_definition_t definition)
 {
     if (!definition)
         return NULL;
@@ -50,7 +51,7 @@ nw_framer_message_t nw_framer_protocol_create_message(nw_protocol_definition_t d
     return message;
 }
 
-bool nw_protocol_metadata_is_framer_message(nw_protocol_metadata_t metadata)
+bool BACKPORT_IMPL(nw_protocol_metadata_is_framer_message)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     if (!value)
@@ -59,7 +60,7 @@ bool nw_protocol_metadata_is_framer_message(nw_protocol_metadata_t metadata)
     return definition->_payload != nil || [definition->_family isEqualToString:@"nw_ws"];
 }
 
-void nw_framer_message_set_value(nw_framer_message_t message, const char *key, void *value, nw_framer_message_dispose_value_t dispose_value)
+void BACKPORT_IMPL(nw_framer_message_set_value)(nw_framer_message_t message, const char *key, void *value, nw_framer_message_dispose_value_t dispose_value)
 {
     RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
@@ -70,7 +71,7 @@ void nw_framer_message_set_value(nw_framer_message_t message, const char *key, v
         held->_objects[[@"dispose:" stringByAppendingString:name]] = [dispose_value copy];
 }
 
-bool nw_framer_message_access_value(nw_framer_message_t message, const char *key, bool (^access_value)(const void *value))
+bool BACKPORT_IMPL(nw_framer_message_access_value)(nw_framer_message_t message, const char *key, bool (^access_value)(const void *value))
 {
     RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key || !access_value)
@@ -79,7 +80,7 @@ bool nw_framer_message_access_value(nw_framer_message_t message, const char *key
     return access_value(boxed ? (const void *)[boxed pointerValue] : NULL);
 }
 
-void nw_framer_message_set_object_value(nw_framer_message_t message, const char *key, id value)
+void BACKPORT_IMPL(nw_framer_message_set_object_value)(nw_framer_message_t message, const char *key, id value)
 {
     RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
@@ -90,7 +91,7 @@ void nw_framer_message_set_object_value(nw_framer_message_t message, const char 
         [held->_objects removeObjectForKey:@(key)];
 }
 
-id nw_framer_message_copy_object_value(nw_framer_message_t message, const char *key)
+id BACKPORT_IMPL(nw_framer_message_copy_object_value)(nw_framer_message_t message, const char *key)
 {
     RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
@@ -100,57 +101,57 @@ id nw_framer_message_copy_object_value(nw_framer_message_t message, const char *
 
 #pragma mark - the framer's own state
 
-nw_parameters_t nw_framer_copy_parameters(nw_framer_t framer)
+nw_parameters_t BACKPORT_IMPL(nw_framer_copy_parameters)(nw_framer_t framer)
 {
     return framer ? ((RevenantNWFramer *)framer)->_parameters : NULL;
 }
 
-nw_endpoint_t nw_framer_copy_local_endpoint(nw_framer_t framer)
+nw_endpoint_t BACKPORT_IMPL(nw_framer_copy_local_endpoint)(nw_framer_t framer)
 {
     return framer ? ((RevenantNWFramer *)framer)->_localEndpoint : NULL;
 }
 
-nw_endpoint_t nw_framer_copy_remote_endpoint(nw_framer_t framer)
+nw_endpoint_t BACKPORT_IMPL(nw_framer_copy_remote_endpoint)(nw_framer_t framer)
 {
     return framer ? ((RevenantNWFramer *)framer)->_remoteEndpoint : NULL;
 }
 
-void nw_framer_set_input_handler(nw_framer_t framer, nw_framer_input_handler_t input_handler)
+void BACKPORT_IMPL(nw_framer_set_input_handler)(nw_framer_t framer, nw_framer_input_handler_t input_handler)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_inputHandler = [input_handler copy];
 }
 
-void nw_framer_set_output_handler(nw_framer_t framer, nw_framer_output_handler_t output_handler)
+void BACKPORT_IMPL(nw_framer_set_output_handler)(nw_framer_t framer, nw_framer_output_handler_t output_handler)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_outputHandler = [output_handler copy];
 }
 
-void nw_framer_set_stop_handler(nw_framer_t framer, nw_framer_stop_handler_t stop_handler)
+void BACKPORT_IMPL(nw_framer_set_stop_handler)(nw_framer_t framer, nw_framer_stop_handler_t stop_handler)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_stopHandler = [stop_handler copy];
 }
 
-void nw_framer_set_cleanup_handler(nw_framer_t framer, nw_framer_cleanup_handler_t cleanup_handler)
+void BACKPORT_IMPL(nw_framer_set_cleanup_handler)(nw_framer_t framer, nw_framer_cleanup_handler_t cleanup_handler)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_cleanupHandler = [cleanup_handler copy];
 }
 
-void nw_framer_set_wakeup_handler(nw_framer_t framer, nw_framer_wakeup_handler_t wakeup_handler)
+void BACKPORT_IMPL(nw_framer_set_wakeup_handler)(nw_framer_t framer, nw_framer_wakeup_handler_t wakeup_handler)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_wakeupHandler = [wakeup_handler copy];
 }
 
-void nw_framer_async(nw_framer_t framer, nw_framer_block_t async_block)
+void BACKPORT_IMPL(nw_framer_async)(nw_framer_t framer, nw_framer_block_t async_block)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !async_block)
@@ -161,14 +162,14 @@ void nw_framer_async(nw_framer_t framer, nw_framer_block_t async_block)
         async_block();
 }
 
-void nw_framer_mark_ready(nw_framer_t framer)
+void BACKPORT_IMPL(nw_framer_mark_ready)(nw_framer_t framer)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_ready = YES;
 }
 
-void nw_framer_mark_failed_with_error(nw_framer_t framer, int error_code)
+void BACKPORT_IMPL(nw_framer_mark_failed_with_error)(nw_framer_t framer, int error_code)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value)
@@ -177,21 +178,21 @@ void nw_framer_mark_failed_with_error(nw_framer_t framer, int error_code)
     value->_errorCode = error_code;
 }
 
-void nw_framer_pass_through_input(nw_framer_t framer)
+void BACKPORT_IMPL(nw_framer_pass_through_input)(nw_framer_t framer)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_inputPassThrough = YES;
 }
 
-void nw_framer_pass_through_output(nw_framer_t framer)
+void BACKPORT_IMPL(nw_framer_pass_through_output)(nw_framer_t framer)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_outputPassThrough = YES;
 }
 
-bool nw_framer_prepend_application_protocol(nw_framer_t framer, nw_protocol_options_t protocol_options)
+bool BACKPORT_IMPL(nw_framer_prepend_application_protocol)(nw_framer_t framer, nw_protocol_options_t protocol_options)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     RevenantNWProtocolOptions *protocol = (RevenantNWProtocolOptions *)protocol_options;
@@ -206,7 +207,7 @@ bool nw_framer_prepend_application_protocol(nw_framer_t framer, nw_protocol_opti
     return true;
 }
 
-void nw_framer_schedule_wakeup(nw_framer_t framer, uint64_t milliseconds)
+void BACKPORT_IMPL(nw_framer_schedule_wakeup)(nw_framer_t framer, uint64_t milliseconds)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value)
@@ -230,7 +231,7 @@ void nw_framer_schedule_wakeup(nw_framer_t framer, uint64_t milliseconds)
 
 #pragma mark - the bytes
 
-bool nw_framer_parse_input(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
+bool BACKPORT_IMPL(nw_framer_parse_input)(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !parse)
@@ -253,7 +254,7 @@ bool nw_framer_parse_input(nw_framer_t framer, size_t minimum_incomplete_length,
     return true;
 }
 
-void nw_framer_deliver_input(nw_framer_t framer, const uint8_t *input_buffer, size_t input_length, nw_framer_message_t message, bool is_complete)
+void BACKPORT_IMPL(nw_framer_deliver_input)(nw_framer_t framer, const uint8_t *input_buffer, size_t input_length, nw_framer_message_t message, bool is_complete)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !input_buffer || !input_length)
@@ -262,7 +263,7 @@ void nw_framer_deliver_input(nw_framer_t framer, const uint8_t *input_buffer, si
                                               message ? (id)message : [NSNull null], @(is_complete)]];
 }
 
-bool nw_framer_deliver_input_no_copy(nw_framer_t framer, size_t input_length, nw_framer_message_t message, bool is_complete)
+bool BACKPORT_IMPL(nw_framer_deliver_input_no_copy)(nw_framer_t framer, size_t input_length, nw_framer_message_t message, bool is_complete)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !input_length || input_length > value->_input.length)
@@ -272,7 +273,7 @@ bool nw_framer_deliver_input_no_copy(nw_framer_t framer, size_t input_length, nw
     return true;
 }
 
-void nw_framer_write_output(nw_framer_t framer, const uint8_t *output_buffer, size_t output_length)
+void BACKPORT_IMPL(nw_framer_write_output)(nw_framer_t framer, const uint8_t *output_buffer, size_t output_length)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_length)
@@ -280,7 +281,7 @@ void nw_framer_write_output(nw_framer_t framer, const uint8_t *output_buffer, si
     [value->_output appendBytes:output_buffer length:output_length];
 }
 
-void nw_framer_write_output_data(nw_framer_t framer, dispatch_data_t output_data)
+void BACKPORT_IMPL(nw_framer_write_output_data)(nw_framer_t framer, dispatch_data_t output_data)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_data)
@@ -297,7 +298,7 @@ void nw_framer_write_output_data(nw_framer_t framer, dispatch_data_t output_data
     (void)written;
 }
 
-bool nw_framer_write_output_no_copy(nw_framer_t framer, size_t output_length)
+bool BACKPORT_IMPL(nw_framer_write_output_no_copy)(nw_framer_t framer, size_t output_length)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_length)
@@ -310,7 +311,7 @@ bool nw_framer_write_output_no_copy(nw_framer_t framer, size_t output_length)
 
 #pragma mark - output
 
-bool nw_framer_parse_output(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
+bool BACKPORT_IMPL(nw_framer_parse_output)(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !parse)

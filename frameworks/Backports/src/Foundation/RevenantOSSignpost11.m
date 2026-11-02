@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantOSSignpost.h"
 #import "RevenantOSLog.h"
 #import <objc/runtime.h>
@@ -149,18 +150,18 @@ static os_signpost_id_t revenant_next_id(void)
     return (os_signpost_id_t)value;
 }
 
-os_signpost_id_t os_signpost_id_generate(os_log_t log)
+os_signpost_id_t BACKPORT_IMPL(os_signpost_id_generate)(os_log_t log)
 {
     return revenant_next_id();
 }
 
-os_signpost_id_t os_signpost_id_make_with_pointer(os_log_t log, const void *ptr)
+os_signpost_id_t BACKPORT_IMPL(os_signpost_id_make_with_pointer)(os_log_t log, const void *ptr)
 {
     uintptr_t address = (uintptr_t)ptr;
     return (os_signpost_id_t)((address & ~(uintptr_t)7) | (1ull << 2));
 }
 
-bool os_signpost_enabled(os_log_t log)
+bool BACKPORT_IMPL(os_signpost_enabled)(os_log_t log)
 {
     return true;
 }

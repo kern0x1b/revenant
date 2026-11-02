@@ -1,12 +1,12 @@
 #include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSString *const UIAccessibilityShakeToUndoDidChangeNotification = @"UIAccessibilityShakeToUndoDidChangeNotification";
-NSString *const UIAccessibilityElementFocusedNotification = @"UIAccessibilityElementFocusedNotification";
-NSString *const UIAccessibilityFocusedElementKey = @"UIAccessibilityFocusedElementKey";
-NSString *const UIAccessibilityUnfocusedElementKey = @"UIAccessibilityUnfocusedElementKey";
-NSString *const UIAccessibilityAssistiveTechnologyKey = @"UIAccessibilityAssistiveTechnologyKey";
-NSString *const UIAccessibilityNotificationVoiceOverIdentifier = @"UIAccessibilityNotificationVoiceOverIdentifier";
+NSString *const BACKPORT_IMPL(UIAccessibilityShakeToUndoDidChangeNotification) = @"UIAccessibilityShakeToUndoDidChangeNotification";
+NSString *const BACKPORT_IMPL(UIAccessibilityElementFocusedNotification) = @"UIAccessibilityElementFocusedNotification";
+NSString *const BACKPORT_IMPL(UIAccessibilityFocusedElementKey) = @"UIAccessibilityFocusedElementKey";
+NSString *const BACKPORT_IMPL(UIAccessibilityUnfocusedElementKey) = @"UIAccessibilityUnfocusedElementKey";
+NSString *const BACKPORT_IMPL(UIAccessibilityAssistiveTechnologyKey) = @"UIAccessibilityAssistiveTechnologyKey";
+NSString *const BACKPORT_IMPL(UIAccessibilityNotificationVoiceOverIdentifier) = @"UIAccessibilityNotificationVoiceOverIdentifier";
 
 BOOL BACKPORT_IMPL(UIAccessibilityIsShakeToUndoEnabled)(void)
 {

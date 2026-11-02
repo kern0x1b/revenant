@@ -1,7 +1,7 @@
 #include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-const NSDirectionalEdgeInsets NSDirectionalEdgeInsetsZero = {0, 0, 0, 0};
+const NSDirectionalEdgeInsets BACKPORT_IMPL(NSDirectionalEdgeInsetsZero) = {0, 0, 0, 0};
 
 NSString *BACKPORT_IMPL(NSStringFromDirectionalEdgeInsets)(NSDirectionalEdgeInsets insets)
 {

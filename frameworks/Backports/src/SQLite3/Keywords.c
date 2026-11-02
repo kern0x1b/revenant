@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #include <string.h>
 #include <sqlite3.h>
 
@@ -155,12 +156,12 @@ static const char *const kKeywords[] = {
 
 enum { kKeywordCount = sizeof kKeywords / sizeof kKeywords[0] };
 
-SQLITE3_EXPORT int sqlite3_keyword_count(void)
+SQLITE3_EXPORT int BACKPORT_IMPL(sqlite3_keyword_count)(void)
 {
     return kKeywordCount;
 }
 
-SQLITE3_EXPORT int sqlite3_keyword_name(int i, const char **pz, int *pn)
+SQLITE3_EXPORT int BACKPORT_IMPL(sqlite3_keyword_name)(int i, const char **pz, int *pn)
 {
     if (i < 0 || i >= kKeywordCount) {
         *pz = NULL;
@@ -176,7 +177,7 @@ static int lower(int c)
     return c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
 }
 
-SQLITE3_EXPORT int sqlite3_keyword_check(const char *z, int n)
+SQLITE3_EXPORT int BACKPORT_IMPL(sqlite3_keyword_check)(const char *z, int n)
 {
     for (int i = 0; i < kKeywordCount; i++) {
         const char *k = kKeywords[i];

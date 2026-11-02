@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #include <mach/mach_time.h>
 #include <stdio.h>
@@ -256,7 +257,7 @@ static void revenant_listener_open(RevenantNWListener *listener)
     revenant_listener_report(listener, nw_listener_state_failed, revenant_listener_posix());
 }
 
-nw_listener_t nw_listener_create(nw_parameters_t parameters)
+nw_listener_t BACKPORT_IMPL(nw_listener_create)(nw_parameters_t parameters)
 {
     if (!parameters)
         return NULL;
@@ -269,7 +270,7 @@ nw_listener_t nw_listener_create(nw_parameters_t parameters)
     return listener;
 }
 
-nw_listener_t nw_listener_create_with_port(const char *port, nw_parameters_t parameters)
+nw_listener_t BACKPORT_IMPL(nw_listener_create_with_port)(const char *port, nw_parameters_t parameters)
 {
     if (!port || !parameters)
         return NULL;
@@ -284,7 +285,7 @@ nw_listener_t nw_listener_create_with_port(const char *port, nw_parameters_t par
     return listener;
 }
 
-nw_listener_t nw_listener_create_with_connection(nw_connection_t connection, nw_parameters_t parameters)
+nw_listener_t BACKPORT_IMPL(nw_listener_create_with_connection)(nw_connection_t connection, nw_parameters_t parameters)
 {
     if (!connection)
         return NULL;
@@ -307,38 +308,38 @@ nw_listener_t nw_listener_create_with_connection(nw_connection_t connection, nw_
     return listener;
 }
 
-void nw_listener_set_queue(nw_listener_t listener, dispatch_queue_t queue)
+void BACKPORT_IMPL(nw_listener_set_queue)(nw_listener_t listener, dispatch_queue_t queue)
 {
     if (listener)
         ((RevenantNWListener *)listener)->_queue = queue;
 }
 
-void nw_listener_set_state_changed_handler(nw_listener_t listener, nw_listener_state_changed_handler_t handler)
+void BACKPORT_IMPL(nw_listener_set_state_changed_handler)(nw_listener_t listener, nw_listener_state_changed_handler_t handler)
 {
     if (listener)
         ((RevenantNWListener *)listener)->_state = [handler copy];
 }
 
-void nw_listener_set_new_connection_handler(nw_listener_t listener, nw_listener_new_connection_handler_t handler)
+void BACKPORT_IMPL(nw_listener_set_new_connection_handler)(nw_listener_t listener, nw_listener_new_connection_handler_t handler)
 {
     if (listener)
         ((RevenantNWListener *)listener)->_newConnection = [handler copy];
 }
 
 
-void nw_listener_set_advertised_endpoint_changed_handler(nw_listener_t listener, nw_listener_advertised_endpoint_changed_handler_t handler)
+void BACKPORT_IMPL(nw_listener_set_advertised_endpoint_changed_handler)(nw_listener_t listener, nw_listener_advertised_endpoint_changed_handler_t handler)
 {
     if (listener)
         ((RevenantNWListener *)listener)->_advertisedChanged = [handler copy];
 }
 
-void nw_listener_set_advertise_descriptor(nw_listener_t listener, nw_advertise_descriptor_t advertise_descriptor)
+void BACKPORT_IMPL(nw_listener_set_advertise_descriptor)(nw_listener_t listener, nw_advertise_descriptor_t advertise_descriptor)
 {
     if (listener)
         ((RevenantNWListener *)listener)->_advertise = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
 }
 
-uint16_t nw_listener_get_port(nw_listener_t listener)
+uint16_t BACKPORT_IMPL(nw_listener_get_port)(nw_listener_t listener)
 {
     RevenantNWListener *value = (RevenantNWListener *)listener;
     if (!value || !value->_localEndpoint || !value->_localEndpoint->_port.length)
@@ -346,7 +347,7 @@ uint16_t nw_listener_get_port(nw_listener_t listener)
     return (uint16_t)atoi(value->_localEndpoint->_port.UTF8String);
 }
 
-void nw_listener_start(nw_listener_t listener)
+void BACKPORT_IMPL(nw_listener_start)(nw_listener_t listener)
 {
     if (!listener)
         return;
@@ -377,7 +378,7 @@ void nw_listener_start(nw_listener_t listener)
     });
 }
 
-void nw_listener_cancel(nw_listener_t listener)
+void BACKPORT_IMPL(nw_listener_cancel)(nw_listener_t listener)
 {
     if (!listener)
         return;

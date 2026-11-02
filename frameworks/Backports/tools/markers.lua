@@ -229,10 +229,16 @@ local function global_names(m, from, to)
     return names
 end
 
+local function tidy(text)
+    local out = string.gsub(text, "%s+", " ")
+    out = string.gsub(out, "^ ", "")
+    return (string.gsub(out, " $", ""))
+end
+
 local function scan_masked(m)
     local defs = {}
-    local function add(name, first, last, kind)
-        table.insert(defs, {name = name, first = first, last = last, kind = kind})
+    local function add(name, first, last, kind, type, array)
+        table.insert(defs, {name = name, first = first, last = last, kind = kind, type = type, array = array})
     end
     local paren, brace, transparent, init = 0, 0, 0, false
     local stmt, pos = 1, 1
@@ -287,7 +293,9 @@ local function scan_masked(m)
         elseif c == ";" then
             if paren == 0 and brace == 0 then
                 for _, found in ipairs(global_names(m, stmt, s - 1)) do
-                    add(found.name, found.first, found.last, "global")
+                    local decl = string.sub(m, stmt, found.first - 1)
+                    local after = string.match(m, "^%s*(.)", found.last + 1)
+                    add(found.name, found.first, found.last, "global", (not string.find(decl, ",", 1, true)) and tidy(decl) or nil, after == "[")
                 end
                 stmt = s + 1
             end
@@ -404,4 +412,22 @@ function rewrite(text, renamable, sdk)
     end
     table.sort(names)
     return out, names, kept, unhandled
+end
+
+function marked_definitions(text)
+    local names = marked(text)
+    local unmarked = (string.gsub(text, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1"))
+    local found = {}
+    local function take(defs)
+        for _, def in ipairs(defs) do
+            if names[def.name] and found[def.name] == nil then
+                found[def.name] = {kind = def.kind, type = def.type, array = def.array}
+            end
+        end
+    end
+    take(scan(unmarked))
+    for _, macro in ipairs(macros(unmarked)) do
+        take(macro.defs)
+    end
+    return found
 end

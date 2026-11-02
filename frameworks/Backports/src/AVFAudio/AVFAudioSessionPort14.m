@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioSessionPortAVB = @"AVB";
-NSString * const AVAudioSessionPortDisplayPort = @"DisplayPort";
-NSString * const AVAudioSessionPortFireWire = @"FireWire";
-NSString * const AVAudioSessionPortPCI = @"PCI";
-NSString * const AVAudioSessionPortThunderbolt = @"Thunderbolt";
-NSString * const AVAudioSessionPortVirtual = @"Virtual";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortAVB) = @"AVB";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortDisplayPort) = @"DisplayPort";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortFireWire) = @"FireWire";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortPCI) = @"PCI";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortThunderbolt) = @"Thunderbolt";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortVirtual) = @"Virtual";

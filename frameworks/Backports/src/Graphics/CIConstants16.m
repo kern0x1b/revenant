@@ -10,5 +10,5 @@ NSString *const BACKPORT_IMPL(kCIImageRepresentationHDRGainMapImage) = @"kCIImag
 NSString *const BACKPORT_IMPL(kCIImageRepresentationSemanticSegmentationGlassesMatteImage) = @"kCIImageRepresentationSemanticSegmentationGlassesMatteImage";
 NSString *const BACKPORT_IMPL(kCIImageRepresentationSemanticSegmentationSkyMatteImage) = @"kCIImageRepresentationSemanticSegmentationSkyMatteImage";
 NSString *const BACKPORT_IMPL(kCIImageToneMapHDRtoSDR) = @"kCIImageToneMapHDRtoSDR";
-NSString *const kCIInputLocalToneMapAmountKey = @"inputLocalToneMapAmount";
-NSString *const kCIPropertiesKey = @"properties";
+NSString *const BACKPORT_IMPL(kCIInputLocalToneMapAmountKey) = @"inputLocalToneMapAmount";
+NSString *const BACKPORT_IMPL(kCIPropertiesKey) = @"properties";

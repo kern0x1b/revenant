@@ -4,5 +4,5 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 NSString *const BACKPORT_IMPL(CIDetectorMaxFeatureCount) = @"CIDetectorMaxFeatureCount";
-NSString *const kCIInputBaselineExposureKey = @"inputBaselineExposure";
-NSString *const kCIInputDisableGamutMapKey = @"inputDisableGamutMap";
+NSString *const BACKPORT_IMPL(kCIInputBaselineExposureKey) = @"inputBaselineExposure";
+NSString *const BACKPORT_IMPL(kCIInputDisableGamutMapKey) = @"inputDisableGamutMap";

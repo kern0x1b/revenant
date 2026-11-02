@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const MLModelCollectionDidChangeNotification = @"MLModelCollectionDidChangeNotification";
+NSString *const BACKPORT_IMPL(MLModelCollectionDidChangeNotification) = @"MLModelCollectionDidChangeNotification";

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_protocol_options_t nw_framer_copy_options(nw_framer_t framer)
+nw_protocol_options_t BACKPORT_IMPL(nw_framer_copy_options)(nw_framer_t framer)
 {
     RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !value->_options)

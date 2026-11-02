@@ -6,7 +6,7 @@
 #include <VideoToolbox/VTErrors.h>
 
 const VTHDRPerFrameMetadataGenerationHDRFormatType
-    kVTHDRPerFrameMetadataGenerationHDRFormatType_DolbyVision = CFSTR("DolbyVision");
+    BACKPORT_IMPL(kVTHDRPerFrameMetadataGenerationHDRFormatType_DolbyVision) = CFSTR("DolbyVision");
 
 CFTypeID BACKPORT_IMPL(VTHDRPerFrameMetadataGenerationSessionGetTypeID)(void)
 {

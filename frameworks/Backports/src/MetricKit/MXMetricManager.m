@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantMetricValue.h"
 #import "RevenantMetricKit.h"
 #import "../Foundation/RevenantOSLog.h"
@@ -203,7 +204,7 @@ static NSArray<RevenantSignpostInterval *> *RevenantRecordedIntervals(void)
     return [store performSelector:@selector(intervals)] ?: @[];
 }
 
-void *_Nonnull _MXSignpostMetricsSnapshot(void)
+void *_Nonnull BACKPORT_IMPL(_MXSignpostMetricsSnapshot)(void)
 {
     RevenantMetricSnapshot *snapshot = [[RevenantMetricSnapshot alloc] init];
     snapshot.intervals = RevenantRecordedIntervals();
