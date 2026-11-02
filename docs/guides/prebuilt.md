@@ -46,7 +46,7 @@ The `llvm`, `swift`, `ld64`, `swift-runtime`, `libcxx` and `webkit-engine` recip
 hashes its own file, so its key changed with the hook: the release of the earlier key does not serve it, and a configure that
 requires it under `REVENANT_PREBUILT_ONLY` stops at the fetch with the key, before anything is built. A release of the new key
 is made by the prebuilt workflow with `package: webkit-engine`. That run configures the `webkit-engine` component, which requires
-only this package, and installs it; it is not run yet, so the release of the key `4e14b210a5a9baf6f026d58a5535eabf` does not exist. To wire another recipe, call
+only this package, and installs it; it is not run yet, so the release of the key `1a5028df2bf1f1142752c150ff1959e3` does not exist. To wire another recipe, call
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.

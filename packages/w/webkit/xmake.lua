@@ -38,7 +38,8 @@ package("webkit")
         {"0022-WebKitLegacy-reinstate-the-WebKit1-API-iOS-links.patch", "5218580156f076c57a54fa7db2593de84345cc116dae13b9779261be468f08e7"},
         {"0023-Describe-the-iOS-6-port-in-one-page.patch", "07240ceb7b8206cba93b0e972282534e7706686c6ea1d2d93fc011059a519961"},
         {"0024-Keep-the-webkitglib-2.54-state-these-files-had-in-th.patch", "8061a88fd3852a8693aec123336b2fb8895984aad4ffba334aed517d624e864d"},
-        {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"}}
+        {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"},
+        {"0026-Enable-Objective-C-before-the-compile-flags-are-mirrored.patch", "a8a9e4cbf9529a503270fa96427869236d3ed1a1d3065add4f98750710948444"}}
 
     local digests = {table.concat(tree, ",")}
     for _, patch in ipairs(patches) do
@@ -59,7 +60,7 @@ package("webkit")
     on_test(function (package)
         local src = package:installdir("src")
         for _, file in ipairs({"CMakeLists.txt", "PORTING-IOS6.md", "Source/cmake/OptionsIOS6.cmake",
-                               "Source/cmake/WebKitUnifiedSources.cmake", "Source/JavaScriptCore/llint/LowLevelInterpreter32_64.asm"}) do
+                               "Source/JavaScriptCore/llint/LowLevelInterpreter32_64.asm"}) do
             assert(os.isfile(path.join(src, file)), file .. " is not in the patched tree")
         end
     end)
