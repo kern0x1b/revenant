@@ -600,6 +600,7 @@ if not is_plat("iphoneos") then
     host_tests("Vision", {rectangle = {"VNRectangleDetector.c", "VNRectangleImage.m", "VNConstants.m"}}, nil, {"Foundation", "Vision", "CoreImage", "CoreGraphics", "CoreVideo"}, {extension = "mm"})
     host_tests("QuartzCore", QUARTZCORE_TESTS, "UIKit", {"Foundation", "QuartzCore", "CoreGraphics"},
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("QuartzCore", {iosurface_contents = {"CALayer+IOSurfaceContents.m"}}, "Metal", {"Foundation", "QuartzCore", "CoreGraphics", "IOSurface"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
     host_tests("SceneKit", SCENEKIT_TESTS, nil, {"SceneKit", "Foundation", "QuartzCore", "OpenAL", "AudioToolbox", "AVFoundation"})
