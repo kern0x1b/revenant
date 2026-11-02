@@ -21,7 +21,9 @@ function failures(opt)
         ["/c/old/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm"] = "x",
         ["/c/old/Libraries/Image/RCTImageUtils.mm"] = "y",
         ["/c/new/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm"] = 'initWithString:attributedString.string ?: @""',
-        ["/c/new/Libraries/Image/RCTImageUtils.mm"] = "CGSize s = {(CGFloat)width.doubleValue};"
+        ["/c/new/Libraries/Image/RCTImageUtils.mm"] = "CGSize s = {(CGFloat)width.doubleValue};",
+        ["/c/new/ReactCommon/jsc/JSCRuntime.cpp"] = "extern \"C\" JSGlobalContextRef RNJscRuntimeContext(void);",
+        ["/c/old/ReactCommon/jsc/JSCRuntime.cpp"] = "z"
     }
     local picked = isolate.patched_sources({"/c/old", "/c/new"}, function (file) return files[file] end)
     if picked ~= "/c/new" then

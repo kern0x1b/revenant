@@ -14,7 +14,8 @@ local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCW
 
 local PATCH_MARKERS = {
     {"React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm", 'attributedString.string ?: @""'},
-    {"Libraries/Image/RCTImageUtils.mm", "CGFloat)width.doubleValue"}
+    {"Libraries/Image/RCTImageUtils.mm", "CGFloat)width.doubleValue"},
+    {"ReactCommon/jsc/JSCRuntime.cpp", "RNJscRuntimeContext"}
 }
 
 function replace(text, old, new)
