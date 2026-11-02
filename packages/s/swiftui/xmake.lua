@@ -33,6 +33,7 @@ package("swiftui")
             "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"})",
             "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})",
             "add_requires(\"revenant@combine\", {alias = \"combine\"})",
+            "add_requires(\"revenant@backports\", {alias = \"backports\"})",
             "includes(\"" .. path.join(root, "frameworks", "Backports") .. "\")",
             "includes(\"" .. path.join(root, "frameworks", "SwiftUI") .. "\")",
             "set_defaultplat(\"iphoneos\")",
