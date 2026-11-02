@@ -1,6 +1,14 @@
 option("webkit_host_tests", {default = false, showmenu = true,
                              description = "Build ICU for this Mac and the WebKit port's host tests of its data, run with ./xmakew test -P . icu-sanity/* icu-locales/*."})
 
+if get_config("component") == "webkit-engine" then
+    includes("src/engine")
+    if is_plat("iphoneos") then
+        add_requires("webkit-engine", {alias = "webkit-engine"})
+    end
+    return
+end
+
 if get_config("component") ~= "" then
     return
 end

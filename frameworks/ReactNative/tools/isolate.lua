@@ -214,6 +214,10 @@ function install_react_native(folder, cache)
         '    set_kind("phony")',
         '    add_packages("react-native")', ""}, "\n"))
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
+    return link_react_native(folder, cache)
+end
+
+function link_react_native(folder, cache)
     local candidates = os.files(path.join(cache, "xmake-global", ".xmake", "packages", "r", "react-native", "0.86.3", "*", "src", "react-native", "package.json"))
     local roots = {}
     for _, file in ipairs(candidates) do
@@ -227,6 +231,16 @@ function install_react_native(folder, cache)
     end
     os.vrunv("ln", {"-sfn", sources, path.join(folder, "build", "rn-src")})
     return sources
+end
+
+function command_status(arguments, options)
+    local ok = try {
+        function ()
+            os.execv("sh", arguments, options)
+            return true
+        end
+    }
+    return ok and 0 or 1
 end
 
 function newest(pattern, marker)
@@ -250,27 +264,14 @@ function build(folder, cache, options)
         backports = options.backports or path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     })
     local log = options.log or path.join(folder, "build", "isolated.log")
+    link_react_native(folder, path.absolute(cache))
     os.cd(folder)
     os.vrunv("sh", {"rn-spike/tools/patch-provider.sh"})
     local xmakew = path.join(checkout(), "xmakew")
-    local function status(...)
-        local arguments = {...}
-        return try {
-            function ()
-                os.execv("sh", arguments[1], arguments[2])
-                return 0
-            end,
-            catch {
-                function ()
-                    return 1
-                end
-            }
-        }
-    end
-    local configured = status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+    local configured = command_status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
     if configured == 0 then
-        built = status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
+        built = command_status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
     end
     return built or 1, log
 end

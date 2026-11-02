@@ -1,0 +1,1 @@
+RCTSpec fixture

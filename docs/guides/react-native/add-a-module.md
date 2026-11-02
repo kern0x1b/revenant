@@ -63,8 +63,10 @@ service, and the host is still running afterwards. Add a screenshot of anything 
 ## 5. Record it
 
 Change the module's row in `frameworks/ReactNative/src/coverage.json` (status, checked, and a note that says what was done or what is
-left), then run `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` and commit both files. The test `coverage_test` fails when
-the document and the data differ.
+left), then run `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` and commit both files. The tool checks the data against
+`frameworks/ReactNative/src/stubs.json`: a stub the build stands in with is listed there with its owner row and its reason, a row
+that a stub stands in for cannot say `verified`, and a row whose file a local copy replaces cannot say `real`. `./xmakew test -P . 'react-native/*'`
+runs the checks on fixtures; the document and the data must match.
 
 ## 6. Land it
 

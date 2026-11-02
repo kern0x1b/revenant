@@ -1,0 +1,13 @@
+diff --git a/glslang/MachineIndependent/PoolAlloc.cpp b/glslang/MachineIndependent/PoolAlloc.cpp
+index 93a3b0d..2731ede 100644
+--- a/glslang/MachineIndependent/PoolAlloc.cpp
++++ b/glslang/MachineIndependent/PoolAlloc.cpp
+@@ -49,7 +49,7 @@ THREAD_LOCAL TPoolAllocator* threadPoolAllocator = nullptr;
+ 
+ TPoolAllocator* GetDefaultThreadPoolAllocator()
+ {
+-    THREAD_LOCAL TPoolAllocator defaultAllocator;
++    static THREAD_LOCAL TPoolAllocator defaultAllocator;
+     return &defaultAllocator;
+ }
+ } // anonymous namespace

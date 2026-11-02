@@ -1,6 +1,7 @@
 @_spi(Probe) import SwiftUI
 import CoreData
 import UIKit
+import MapKit
 import Foundation
 import Observation
 
@@ -3746,6 +3747,85 @@ equal(apiValueName(AttributeScopes.SwiftUIAttributes.UnderlineStyleAttribute.Val
 equal(apiValueName(AttributeScopes.SwiftUIAttributes.KerningAttribute.Value.self), "CGFloat", "and the kerning one a CGFloat")
 equal(apiValueName(AttributeScopes.SwiftUIAttributes.TrackingAttribute.Value.self), "CGFloat", "and the tracking one a CGFloat")
 equal(apiValueName(AttributeScopes.SwiftUIAttributes.BaselineOffsetAttribute.Value.self), "CGFloat", "and the baseline offset one a CGFloat")
+
+let mapTestCoordinate = CLLocationCoordinate2D(latitude: 55.75, longitude: 37.62)
+let mapTestLine = [CLLocationCoordinate2D(latitude: 55.7, longitude: 37.6), CLLocationCoordinate2D(latitude: 55.8, longitude: 37.7)]
+
+@MapContentBuilder
+func mapTestSample() -> some MapContent {
+    Marker("first", coordinate: mapTestCoordinate)
+    if mapTestLine.count > 5 {
+        Marker("never", coordinate: mapTestCoordinate)
+    }
+    if mapTestLine.count == 2 {
+        MapCircle(center: mapTestCoordinate, radius: 50)
+    }
+    ForEach([1, 2], id: \.self) { index in
+        Marker("row \(index)", coordinate: mapTestCoordinate)
+    }
+    UserAnnotation()
+}
+
+func mapTestElements<Content: MapContent>(_ content: Content) -> [_MapElement] {
+    content._mapElements(_MapElementStyle())
+}
+
+func mapTestMarkerTitles(_ elements: [_MapElement]) -> [String] {
+    elements.compactMap { element in
+        if case .marker(let marker) = element { return marker.title }
+        return nil
+    }
+}
+
+let mapTestSampleElements = mapTestElements(mapTestSample())
+equal(mapTestMarkerTitles(mapTestSampleElements), ["first", "row 1", "row 2"], "a map's builder keeps the markers, drops the false branch and expands a ForEach in order")
+equal(mapTestSampleElements.count, 5, "the three markers, the circle and the user location make five elements")
+check(mapTestSampleElements.contains { if case .circle = $0 { return true } else { return false } }, "an if branch that holds, holds its content")
+check(mapTestSampleElements.contains { if case .userLocation = $0 { return true } else { return false } }, "a user annotation is one element of its own")
+
+let mapTestTinted = mapTestElements(Marker("tinted", coordinate: mapTestCoordinate).tint(.green).tag(MapSelection("pin")))
+if case .marker(let marker)? = mapTestTinted.first {
+    check(marker.tint != nil, "a tint given to a marker reaches the marker")
+    equal(marker.tag, AnyHashable(MapSelection("pin")), "and so does the tag, as the selection value it is")
+} else {
+    check(false, "a tinted marker is a marker element")
+}
+
+@MapContentBuilder
+func mapTestPair() -> some MapContent {
+    Marker("a", coordinate: mapTestCoordinate)
+    Marker("b", coordinate: mapTestCoordinate)
+}
+
+let mapTestGroupTinted = mapTestElements(mapTestPair().tint(.red))
+equal(mapTestGroupTinted.count, 2, "a tint on a group of content reaches each of its children")
+check(mapTestGroupTinted.allSatisfy { if case .marker(let marker) = $0 { return marker.tint != nil } else { return false } }, "every child of the group is tinted")
+
+let mapTestRoute = mapTestElements(MapPolyline(coordinates: mapTestLine, contourStyle: .geodesic).stroke(.blue, lineWidth: 3))
+if case .polyline(let line)? = mapTestRoute.first {
+    check(line.geodesic, "a polyline with the geodesic contour is geodesic")
+    equal(line.lineWidth, 3, "and its stroke width is the one the modifier gave")
+    equal(line.coordinates.count, 2, "and it keeps its coordinates")
+} else {
+    check(false, "a stroked polyline is a polyline element")
+}
+
+let mapTestArea = mapTestElements(MapPolygon(coordinates: mapTestLine).foregroundStyle(.red))
+if case .polygon(let polygon)? = mapTestArea.first {
+    check(polygon.fill != nil, "a polygon's foreground style is its fill")
+    check(polygon.stroke == nil, "and a polygon with no stroke says so")
+} else {
+    check(false, "a filled polygon is a polygon element")
+}
+
+let mapTestRegion = MKCoordinateRegion(center: mapTestCoordinate, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.2))
+check(MapCameraPosition.region(mapTestRegion) == MapCameraPosition.region(mapTestRegion), "the same region is the same camera position")
+check(MapCameraPosition.automatic != MapCameraPosition.region(mapTestRegion), "automatic is not a region")
+check(MapCameraPosition.userLocation(fallback: .automatic) == MapCameraPosition.userLocation(fallback: .automatic), "a user location with the same fallback is the same position")
+check(MapCameraPosition.userLocation(fallback: .region(mapTestRegion)) != MapCameraPosition.userLocation(fallback: .automatic), "and a different fallback is a different position")
+check(MapCameraUpdateFrequency.onEnd != MapCameraUpdateFrequency.continuous, "the two update frequencies are different")
+let mapTestPanOnly: MapInteractionModes = [.pan]
+check(MapInteractionModes.all.contains(.pitch) && mapTestPanOnly.contains(.zoom) == false, "all interaction modes contain the pitch, and pan alone does not contain zoom")
 
 print("\(checks - failures)/\(checks) checks passed")
 exit(failures == 0 ? 0 : 1)

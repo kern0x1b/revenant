@@ -1,0 +1,62 @@
+--- a/ios/BatteryModule.swift
++++ b/ios/BatteryModule.swift
+@@ -4,6 +4,13 @@
+ let batteryStateDidChange: String = "Expo.batteryStateDidChange"
+ let powerModeDidChange: String = "Expo.powerModeDidChange"
+ 
++func isLowPowerModeEnabled() -> Bool {
++  if #available(iOS 9.0, *) {
++    return ProcessInfo.processInfo.isLowPowerModeEnabled
++  }
++  return false
++}
++
+ public class BatteryModule: Module {
+   public func definition() -> ModuleDefinition {
+     Name("ExpoBattery")
+@@ -23,7 +30,7 @@
+     }
+ 
+     AsyncFunction("isLowPowerModeEnabledAsync") { () -> Bool in
+-      return ProcessInfo.processInfo.isLowPowerModeEnabled
++      return isLowPowerModeEnabled()
+     }
+ 
+     AsyncFunction("getBatteryStateAsync") { () -> Int in
+@@ -68,16 +75,20 @@
+     }
+ 
+     OnStartObserving(powerModeDidChange) {
+-      NotificationCenter.default.addObserver(
+-        self,
+-        selector: #selector(self.powerModeListener),
+-        name: Notification.Name.NSProcessInfoPowerStateDidChange,
+-        object: nil
+-      )
++      if #available(iOS 9.0, *) {
++        NotificationCenter.default.addObserver(
++          self,
++          selector: #selector(self.powerModeListener),
++          name: Notification.Name.NSProcessInfoPowerStateDidChange,
++          object: nil
++        )
++      }
+     }
+ 
+     OnStopObserving(powerModeDidChange) {
+-      NotificationCenter.default.removeObserver(self, name: Notification.Name.NSProcessInfoPowerStateDidChange, object: nil)
++      if #available(iOS 9.0, *) {
++        NotificationCenter.default.removeObserver(self, name: Notification.Name.NSProcessInfoPowerStateDidChange, object: nil)
++      }
+     }
+   }
+ 
+@@ -98,7 +109,7 @@
+   @objc
+   func powerModeListener() {
+     sendEvent(powerModeDidChange, [
+-      "lowPowerMode": ProcessInfo.processInfo.isLowPowerModeEnabled
++      "lowPowerMode": isLowPowerModeEnabled()
+     ])
+   }
+ }
