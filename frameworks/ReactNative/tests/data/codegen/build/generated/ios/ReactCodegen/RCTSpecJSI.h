@@ -1,1 +1,1 @@
-// RCTSpecJSI fixture
+RCTSpecJSI fixture

@@ -1,1 +1,1 @@
-// RCTSpec fixture
+RCTSpec fixture

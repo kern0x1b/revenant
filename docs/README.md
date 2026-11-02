@@ -166,6 +166,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [What runs](reference/react-native/coverage.md) | React Native and the Expo SDK on iOS 6.1.3, module by module |
 | [Adding a module](guides/react-native/add-a-module.md) | the steps from a coverage row to a module checked on the phone |
 | [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
+| [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with the spike |
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
 
 ## WebKit
