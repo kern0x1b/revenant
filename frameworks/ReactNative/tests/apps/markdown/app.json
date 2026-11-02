@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "RN Markdown Probe",
+    "slug": "rn-markdown-probe",
+    "version": "1.0.0",
+    "platforms": ["ios"],
+    "ios": {
+      "bundleIdentifier": "org.revenant.rnmarkdownprobe"
+    }
+  }
+}
