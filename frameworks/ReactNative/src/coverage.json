@@ -407,7 +407,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Does not compile for iOS 6: FileSystemFileHandle uses FileHandle.offset and seekToEnd (iOS 13). The iOS 14 gates are rewritten in staged copies, which do not cover this."
+   "note": "Source patched, not built: packages/e/expo-file-system, expo-file-system 57.0.7 from its npm tarball, with patches/file-system-ios6.patch. The five iOS 14 class gates are removed by the patch (not staged copies). The six URL file-handle initialisers (iOS 13: three in FileSystemFileHandle, two in FileSystemFile, one in the legacy module) are replaced by the path initialisers FileHandle(forReadingAtPath:) and its siblings (iOS 2); FileSystemFileHandle's offset, seekToEnd, read, write and close go to NSFileHandle members that Backports lower. Open: Backports has no +fileHandleForWritingToURL:error: (NSURLSession.m calls it on the resume path); DispatchSource.makeFileSystemObjectSource (watcher) and the UIAdaptivePresentationControllerDelegate conformance (FilePickingUtils) are not checked. Not compiled, not run on the phone."
   },
   {
    "id": "expo-font",
