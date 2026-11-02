@@ -67,6 +67,10 @@ end
 function install_packages()
     local probe = path.join(cache_root(), "react-native-inputs", "probe")
     os.mkdir(probe)
+    local toolchain_link = path.join(probe, "toolchain")
+    if not os.isdir(toolchain_link) then
+        os.ln(path.join(checkout(), "toolchain"), toolchain_link)
+    end
     local lines = {
         'set_project("rninputs")',
         'set_xmakever("3.1.2")',
@@ -106,6 +110,61 @@ function install_packages()
         end
     end
     return found
+end
+
+function swift_header(spec)
+    local dir = path.join(cache_root(), "react-native-inputs", "swift", spec.name)
+    os.tryrm(dir)
+    os.mkdir(dir)
+    local lines = {
+        string.format("set_project(%q)", "rninputs-" .. spec.name),
+        'set_xmakever("3.1.2")',
+        'add_rules("mode.release")',
+        string.format('add_repositories("revenant %s")', checkout()),
+        string.format('add_addons("revenant", {sourcedir = %q})', path.join(checkout(), "toolchain")),
+        'set_config("apple_minimum", "6.0")',
+        'includes("@addon/revenant/apple-ios")'
+    }
+    local requires = {}
+    for _, target in ipairs(spec.targets) do
+        for _, package in ipairs(target.packages) do
+            if not requires[package] then
+                requires[package] = true
+                local requirement = package == "swift-runtime" and "revenant@swift-runtime" or "revenant@" .. package
+                table.insert(lines, string.format('add_requires("%s", {alias = "%s"})', requirement, package))
+            end
+        end
+    end
+    for _, target in ipairs(spec.targets) do
+        table.insert(lines, string.format("target(%q)", target.name))
+        table.insert(lines, '    set_kind("static")')
+        table.insert(lines, '    add_rules("@addon/revenant/apple-ios", "@addon/revenant/swift")')
+        table.insert(lines, '    set_default(false)')
+        table.insert(lines, string.format("    set_values(%q, %q)", "swift.module", target.module))
+        for _, dependency in ipairs(target.deps or {}) do
+            table.insert(lines, string.format("    add_deps(%q)", dependency))
+        end
+        local names, sources, flags = {}, {}, {}
+        for _, package in ipairs(target.packages) do
+            table.insert(names, string.format("%q", package))
+        end
+        for _, source in ipairs(target.sources) do
+            table.insert(sources, string.format("%q", source))
+        end
+        for _, flag in ipairs(target.flags) do
+            table.insert(flags, string.format("%q", flag))
+        end
+        table.insert(lines, string.format("    add_packages(%s)", table.concat(names, ", ")))
+        table.insert(lines, string.format("    add_files(%s)", table.concat(sources, ", ")))
+        table.insert(lines, string.format("    add_values(%q, %s)", "swift.flags", table.concat(flags, ", ")))
+        table.insert(lines, "")
+    end
+    io.writefile(path.join(dir, "xmake.lua"), table.concat(lines, "\n"))
+    os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", dir, "-p", "iphoneos", "-a", "armv7", "-y"})
+    os.vrunv(path.join(checkout(), "xmakew"), {"build", "-P", dir, "-y", "-r", spec.build})
+    if not os.isfile(spec.output) then
+        raise("%s: the Swift compile did not write %s", spec.name, spec.output)
+    end
 end
 
 function fresh_directory(dir)
@@ -166,7 +225,7 @@ function headers_in(root, pattern, keep_order)
         table.insert(found, file)
     end
     if not keep_order then
-        table.sort(found)
+        table.sort(found, byte_less)
     end
     return found
 end
@@ -421,6 +480,35 @@ function make_unistyles(ctx)
         rc, path.join(rc, "jsi"), path.join(rc, "runtimeexecutor"), path.join(rc, "callinvoker"), jsi, path.join(jsi, "Public")}
     write_lines(path.join(out, "flags.rsp"), cxx_response(ctx, {"-fmodule-map-file=" .. path.join(ctx.build, "nitro", "module.modulemap"), "-fmodule-map-file=" .. expo_core_react_map(ctx),
         "-I" .. path.join(ctx.build, "rn-headers"), "-fmodule-map-file=" .. expo_jsi_map(ctx), "-fmodule-map-file=" .. path.join(out, "module.modulemap")}, includes))
+    local header = path.join(out, "swift-header", "Unistyles-Swift.h")
+    local nitro = path.join(ctx.build, "nitro")
+    local libcxx = "@" .. path.join(ctx.build, "expo-jsi", "libcxx.rsp")
+    local swift_sources = os.files(path.join(root, "ios", "**.swift"))
+    for _, file in ipairs(os.files(path.join(ugen, "swift", "**.swift"))) do
+        table.insert(swift_sources, file)
+    end
+    swift_header({
+        name = "unistyles",
+        build = "unistyles",
+        output = header,
+        targets = {
+            {
+                name = "nitro",
+                module = "NitroModules",
+                packages = SWIFT_PACKAGES,
+                sources = os.files(path.join(nitro_root(ctx), "ios", "**.swift")),
+                flags = {"-swift-version", "5", libcxx, "@" .. path.join(nitro, "flags.rsp"), "@" .. path.join(nitro, "imports.rsp"), "-import-underlying-module"}
+            },
+            {
+                name = "unistyles",
+                module = "Unistyles",
+                deps = {"nitro"},
+                packages = SWIFT_PACKAGES,
+                sources = swift_sources,
+                flags = {"-swift-version", "5", libcxx, "@" .. path.join(out, "flags.rsp"), "-import-underlying-module", "-emit-clang-header-path", header}
+            }
+        }
+    })
 end
 
 function by_depth(list)
@@ -432,7 +520,7 @@ function by_depth(list)
         if depth(a) ~= depth(b) then
             return depth(a) < depth(b)
         end
-        return a < b
+        return byte_less(a, b)
     end)
     return list
 end
@@ -449,7 +537,7 @@ function make_keyboard(ctx)
     local prefix = {"#ifdef __OBJC__", "#import <Foundation/Foundation.h>", "#import <UIKit/UIKit.h>", "#endif"}
     write_lines(path.join(out, "prefix.h"), prefix)
     write_lines(path.join(out, "prefix.pch"), prefix)
-    local dirs = {kc, path.join(ctx.build, "rn-headers"), path.join(rn_root(ctx), "ReactCommon", "yoga")}
+    local dirs = {kc, path.join(ctx.build, "rn-headers"), path.join(ctx.ref, "node_modules", "react-native", "ReactCommon", "yoga")}
     for _, dir in ipairs(os.dirs(path.join(kc, "*"))) do
         table.insert(dirs, dir)
     end
@@ -459,6 +547,25 @@ function make_keyboard(ctx)
         table.insert(flags, "-I" .. dir)
     end
     write_lines(path.join(out, "flags.rsp"), flags)
+    local header = path.join(out, "react_native_keyboard_controller-Swift.h")
+    swift_header({
+        name = "keyboard",
+        build = "keyboard",
+        output = header,
+        targets = {
+            {
+                name = "keyboard",
+                module = "react_native_keyboard_controller",
+                packages = {"swift-runtime", "libcxx"},
+                sources = os.files(path.join(kc, "**.swift")),
+                flags = {"-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(out, "flags.rsp"), "-import-objc-header", path.join(out, "Bridge.h"), "-emit-objc-header-path", header}
+            }
+        }
+    })
+    local link = path.join(ctx.build, "rn-headers", "react_native_keyboard_controller", "react_native_keyboard_controller-Swift.h")
+    os.mkdir(path.directory(link))
+    os.tryrm(link)
+    os.ln(header, link)
 end
 
 function make_screens(ctx)
@@ -473,7 +580,7 @@ function make_screens(ctx)
         end
     end
     write_lines(path.join(out, "Bridge.h"), lines)
-    local rn = rn_root(ctx)
+    local rn = path.join(ctx.ref, "node_modules", "react-native")
     write_lines(path.join(out, "flags.rsp"), {"-Xcc", "-fmodule-map-file=" .. expo_core_react_map(ctx), "-Xcc", "-I" .. path.join(ctx.build, "rn-headers"),
         "-Xcc", "-I" .. path.join(rn, "ReactCommon", "yoga"), "-Xcc", "-I" .. path.join(rn, "React")})
 end
@@ -566,6 +673,67 @@ function expo_classes(ctx)
     return classes
 end
 
+SWIFT_PACKAGES = {"swift-runtime", "libcxx", "combine", "cryptokit", "swiftui"}
+
+function byte_less(a, b)
+    for index = 1, math.min(#a, #b) do
+        local x, y = a:byte(index), b:byte(index)
+        if x ~= y then
+            return x < y
+        end
+    end
+    return #a < #b
+end
+
+function make_expo_core_headers(ctx, out, ios, cpp)
+    local include = path.join(out, "include", "ExpoModulesCore")
+    os.mkdir(include)
+    local flat = {}
+    for _, root in ipairs({ios, cpp}) do
+        for _, header in ipairs(headers_in(root, "**.h")) do
+            local base = path.filename(header)
+            if flat[base] then
+                raise("%s is in two folders of ExpoModulesCore", base)
+            end
+            flat[base] = header
+            os.ln(header, path.join(include, base))
+        end
+    end
+    local public = {}
+    for _, header in ipairs(headers_in(ios, "**.h")) do
+        local rel = path.relative(header, ios)
+        if not rel:find("+Private.h", 1, true) and not rel:startswith("Worklets/") and not rel:startswith("WorkletsAdapter/") then
+            table.insert(public, path.filename(header))
+        end
+    end
+    table.sort(public, byte_less)
+    local ordered = {"ExpoModulesCore.h", "Foundation.h"}
+    for _, base in ipairs(public) do
+        if base ~= "ExpoModulesCore.h" then
+            table.insert(ordered, base)
+        end
+    end
+    io.writefile(path.join(out, "Foundation.h"), "#import <Foundation/Foundation.h>\n")
+    local map = {"module ExpoModulesCore {"}
+    for _, base in ipairs(ordered) do
+        local target = base == "Foundation.h" and path.join(out, "Foundation.h") or path.join(include, base)
+        table.insert(map, string.format('  header "%s"', target))
+    end
+    table.insert(map, "  export *")
+    table.insert(map, "}")
+    write_lines(path.join(out, "module.modulemap"), map)
+    local react = {"module React {"}
+    local rn_headers = path.join(ctx.build, "rn-headers", "React")
+    for _, base in ipairs(io.readfile(path.join(checkout(), "frameworks", "ReactNative", "tools", "data", "expo-core-react-headers.txt")):split("\n", {plain = true})) do
+        if base ~= "" then
+            table.insert(react, string.format('  header "%s"', path.join(rn_headers, base)))
+        end
+    end
+    table.insert(react, "  export *")
+    table.insert(react, "}")
+    write_lines(path.join(out, "react.modulemap"), react)
+end
+
 function make_expo_core(ctx)
     local out = path.join(ctx.build, "expo-core")
     fresh_directory(out)
@@ -594,11 +762,138 @@ function make_expo_core(ctx)
     local jsi = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
     local includes = {path.join(out, "include"), core, rc, path.join(rc, "jsi"), path.join(rc, "runtimeexecutor"), path.join(rc, "callinvoker"), jsi, path.join(jsi, "Public")}
     write_lines(path.join(out, "flags.rsp"), cxx_response(ctx, {"-fmodule-map-file=" .. expo_jsi_map(ctx), "-fmodule-map-file=" .. path.join(out, "module.modulemap"), "-fmodule-map-file=" .. path.join(out, "react.modulemap")}, includes))
-    raise("expo-core: the module maps (module.modulemap, react.modulemap), include/ExpoModulesCore and swift-header are not generated yet")
+    make_expo_core_headers(ctx, out, core, path.join(nm, "expo-modules-core", "common", "cpp"))
+    local header = path.join(out, "swift-header", "ExpoModulesCore", "ExpoModulesCore-Swift.h")
+    local sources = {}
+    for _, file in ipairs(os.files(path.join(core, "**.swift"))) do
+        local rel = path.relative(file, core)
+        if not (rel:startswith("Worklets/") or rel:startswith("WorkletsAdapter/") or rel:startswith("WorkletsTests/")) then
+            table.insert(sources, file)
+        end
+    end
+    local jsi_out = path.join(ctx.build, "expo-jsi")
+    local jsi_sources = {}
+    for _, file in ipairs(os.files(path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI", "**.swift"))) do
+        table.insert(jsi_sources, file)
+    end
+    local jsi_rn = path.join(nm, "react-native", "ReactCommon")
+    local jsi_cxx = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
+    local jsi_includes = {jsi_rn, path.join(jsi_rn, "jsi"), path.join(jsi_rn, "runtimeexecutor"), path.join(jsi_rn, "callinvoker"),
+        path.join(jsi_rn, "react", "renderer", "debug"), path.join(jsi_rn, "react", "timing"), path.join(jsi_rn, "react", "debug"),
+        path.join(jsi_rn, "react", "performance", "timeline"), jsi_cxx, path.join(jsi_cxx, "Public")}
+    local jsi_flags = {"-swift-version", "6", "-cxx-interoperability-mode=default", "@" .. path.join(jsi_out, "features.rsp"),
+        "-Xcc", "-fmodule-map-file=" .. expo_jsi_map(ctx)}
+    for _, dir in ipairs(jsi_includes) do
+        table.insert(jsi_flags, "-Xcc")
+        table.insert(jsi_flags, "-I" .. dir)
+    end
+    table.insert(jsi_flags, "@" .. path.join(jsi_out, "libcxx.rsp"))
+    swift_header({
+        name = "expo-core",
+        build = "ExpoModulesCore",
+        output = header,
+        targets = {
+            {
+                name = "ExpoModulesJSI",
+                module = "ExpoModulesJSI",
+                packages = {"swift-runtime", "libcxx"},
+                sources = jsi_sources,
+                flags = jsi_flags
+            },
+            {
+                name = "ExpoModulesCore",
+                module = "ExpoModulesCore",
+                deps = {"ExpoModulesJSI"},
+                packages = SWIFT_PACKAGES,
+                sources = sources,
+                flags = {"-swift-version", "6", "@" .. path.join(jsi_out, "features.rsp"), "@" .. path.join(jsi_out, "libcxx.rsp"), "@" .. path.join(out, "flags.rsp"),
+                    "-import-underlying-module", "-emit-objc-header", "-emit-objc-header-path", header}
+            }
+        }
+    })
+end
+
+function rn_glob(root, pattern, excludes)
+    local found = {}
+    for _, file in ipairs(os.files(path.join(root, pattern))) do
+        local rel = path.relative(file, root)
+        local skip = false
+        for _, excluded in ipairs(excludes or {}) do
+            if rel:startswith(excluded) then
+                skip = true
+            end
+        end
+        if not skip then
+            table.insert(found, rel)
+        end
+    end
+    table.sort(found, byte_less)
+    return found
+end
+
+function make_rn_headers(ctx)
+    local out = path.join(ctx.build, "rn-headers")
+    fresh_directory(out)
+    local src = path.join(ctx.build, "rn-src")
+    local app = path.join(ctx.ref, "node_modules", "react-native")
+    local links, order = {}, {}
+    local function put(dest, target)
+        if not links[dest] then
+            links[dest] = target
+            table.insert(order, dest)
+        end
+    end
+    local function place(rels, root, where, sub, sub_root)
+        for _, rel in ipairs(rels) do
+            local base = path.filename(rel)
+            if where.top then
+                put(base, path.join(root, rel))
+            end
+            if where.react then
+                put("React/" .. base, path.join(root, rel))
+            end
+            if sub then
+                put(sub .. "/" .. base, path.join(sub_root or root, rel))
+            end
+        end
+    end
+    local both = {top = true, react = true}
+    local react_core = rn_glob(src, "React/**.h", {"React/Fabric/", "React/FBReactNativeSpec/", "React/Runtime/", "React/Tests/"})
+    for _, pattern in ipairs({"Libraries/ActionSheetIOS/*.h", "Libraries/NativeAnimation/Drivers/*.h", "Libraries/NativeAnimation/Nodes/*.h", "Libraries/NativeAnimation/*.h", "Libraries/Blob/RCTBlobManager.h", "Libraries/Blob/RCTFileReaderModule.h", "Libraries/Image/*.h", "Libraries/LinkingIOS/*.h", "Libraries/Network/*.h", "Libraries/PushNotificationIOS/*.h", "Libraries/Settings/*.h", "Libraries/Text/**.h", "Libraries/Vibration/*.h", "Libraries/WebSocket/*.h"}) do
+        for _, rel in ipairs(rn_glob(src, pattern)) do
+            table.insert(react_core, rel)
+        end
+    end
+    place(react_core, src, both)
+    place(rn_glob(src, "React/FBReactNativeSpec/**.h"), src, both)
+    place(rn_glob(src, "React/Runtime/*.h"), src, both)
+    place(rn_glob(src, "Libraries/AppDelegate/*.h"), src, both, "React-RCTAppDelegate", app)
+    place(rn_glob(src, "Libraries/TypeSafety/*.h"), src, both, "RCTTypeSafety")
+    place(rn_glob(src, "Libraries/Required/*.h"), src, both, "RCTRequired")
+    place(rn_glob(src, "Libraries/Blob/*.h"), src, both)
+    place(rn_glob(src, "Libraries/Wrapper/**.h"), src, both)
+    place(rn_glob(src, "Libraries/FBLazyVector/**/*.h"), src, both)
+    place(rn_glob(src, "React/Fabric/**.h"), src, {react = true})
+    place(rn_glob(src, "ReactApple/RCTSwiftUIWrapper/*.h"), src, {react = true}, "RCTSwiftUIWrapper")
+    place(rn_glob(src, "ReactApple/RCTAnimatedModuleProvider/*.h"), src, {react = true})
+    place(rn_glob(src, "ReactApple/Libraries/RCTFoundation/RCTDeprecation/Exported/*.h"), src, {react = true}, "RCTDeprecation")
+    for _, pattern in ipairs({"react/nativemodule/core/ReactCommon/**.h", "callinvoker/ReactCommon/**.h", "runtimeexecutor/ReactCommon/**.h", "runtimeexecutor/platform/ios/ReactCommon/**.h"}) do
+        place(rn_glob(path.join(src, "ReactCommon"), pattern), path.join(src, "ReactCommon"), {}, "ReactCommon")
+    end
+    put("FBLazyVector", path.join(src, "Libraries", "FBLazyVector", "FBLazyVector"))
+    for _, dest in ipairs(order) do
+        local link = path.join(out, dest)
+        os.mkdir(path.directory(link))
+        os.ln(links[dest], link)
+    end
+    for _, dir in ipairs({"reactperflogger", "react_native_keyboard_controller"}) do
+        os.mkdir(path.join(out, dir))
+    end
 end
 
 local MAKERS = {
     codegen = make_codegen,
+    ["rn-headers"] = make_rn_headers,
     ["expo-src"] = make_expo_src,
     ["expo-core"] = make_expo_core,
     ["rn-codegen"] = make_rn_codegen,
@@ -704,10 +999,10 @@ function compare(reference, built, options)
     reference = path.absolute(reference)
     built = path.absolute(built)
     local pairs_list = {{built, reference}}
-    if options.rewrite then
-        local from, to = options.rewrite:match("^(.-)=(.*)$")
+    for _, text in ipairs(options.rewrites or {}) do
+        local from, to = text:match("^(.-)=(.*)$")
         if not from then
-            raise("--rewrite takes BUILT=REFERENCE, not %s", options.rewrite)
+            raise("--rewrite takes BUILT=REFERENCE, not %s", text)
         end
         table.insert(pairs_list, {from, to})
     end
@@ -735,7 +1030,7 @@ function compare(reference, built, options)
                 for key in pairs(b) do keys[key] = true end
                 local sorted = {}
                 for key in pairs(keys) do table.insert(sorted, key) end
-                table.sort(sorted)
+                table.sort(sorted, byte_less)
                 for _, key in ipairs(sorted) do
                     local x, y = a[key], b[key]
                     if not x then
@@ -781,7 +1076,11 @@ function main(...)
     local index = 2
     while index <= #args do
         local arg = args[index]
-        if arg:startswith("--") then
+        if arg == "--rewrite" then
+            options.rewrites = options.rewrites or {}
+            table.insert(options.rewrites, args[index + 1])
+            index = index + 2
+        elseif arg:startswith("--") then
             options[arg:sub(3)] = args[index + 1]
             index = index + 2
         else
