@@ -67,8 +67,6 @@ end
 function install_packages()
     local probe = path.join(cache_root(), "react-native-inputs", "probe")
     os.mkdir(probe)
-    -- the swift-runtime recipe reads its overlay sources from os.projectdir()/toolchain, and the probe is not the checkout root,
-    -- so the probe links the checkout's toolchain folder (in the private cache only; nothing in the repository changes)
     local toolchain_link = path.join(probe, "toolchain")
     if not os.isdir(toolchain_link) then
         os.ln(path.join(checkout(), "toolchain"), toolchain_link)
@@ -774,7 +772,6 @@ function make_expo_core(ctx)
         end
     end
     local jsi_out = path.join(ctx.build, "expo-jsi")
-    -- ExpoModulesCore imports ExpoModulesJSI, so its Swift module is compiled first (the spike's expo-jsi-probe, as a dependency)
     local jsi_sources = {}
     for _, file in ipairs(os.files(path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI", "**.swift"))) do
         table.insert(jsi_sources, file)
@@ -799,7 +796,6 @@ function make_expo_core(ctx)
             {
                 name = "ExpoModulesJSI",
                 module = "ExpoModulesJSI",
-                -- the spike's expo-jsi-probe links only these two packages; the UI and crypto packages add their own search paths
                 packages = {"swift-runtime", "libcxx"},
                 sources = jsi_sources,
                 flags = jsi_flags
@@ -1081,7 +1077,6 @@ function main(...)
     while index <= #args do
         local arg = args[index]
         if arg == "--rewrite" then
-            -- repeatable: one BUILT=REFERENCE pair per path that differs only by where the build was made
             options.rewrites = options.rewrites or {}
             table.insert(options.rewrites, args[index + 1])
             index = index + 2
