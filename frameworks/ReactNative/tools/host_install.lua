@@ -61,6 +61,7 @@ function install_command(holder, bundle_id)
         "rm /var/tmp/" .. name .. ".tgz",
         "mv unpack/*.app " .. app,
         "rmdir unpack",
+        "chown -R root:wheel " .. app,
         "chmod -R 755 " .. app,
         "ln -s " .. stash .. "/" .. app .. " /Applications/" .. app,
         "su mobile -c 'uicache -p /Applications/" .. app .. "'"

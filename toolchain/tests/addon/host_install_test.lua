@@ -30,6 +30,9 @@ function failures(opt)
         table.insert(found, "the install must remove only the app of its own id: " .. command)
     end
 
+    if not command:find("chown -R root:wheel iso.app", 1, true) then
+        table.insert(found, "the unpacked app must belong to root: the archive keeps the owner of the Mac")
+    end
     if install.conf_text("bundle.js", "engine=hermes,JSC_X=1") ~= "module=main\nbundle=bundle.js\nengine=hermes\nJSC_X=1\n" or
        install.conf_text("b.js") ~= "module=main\nbundle=b.js\n" then
         table.insert(found, "the configuration is module, bundle and the lines asked for")
