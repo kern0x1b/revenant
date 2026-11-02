@@ -1,0 +1,21 @@
+package("expo-sqlite")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-sqlite")
+    set_description("expo-sqlite 57.0.4, the Expo SDK SQLite database, from its npm tarball: the iOS module sources, and the SQLite amalgamation the default build vendors, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-sqlite/-/expo-sqlite-$(version).tgz")
+    add_versions("57.0.4", "da25d44a0d3e0ba70586a6a22ab61d2538924cb61d1569e99ffe142c859c249e")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-sqlite" and manifest.version == "57.0.4", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isdir(path.join(package:installdir(), "ios")), "expo-sqlite has no iOS sources")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-sqlite has no expo-module.config.json")
+    end)

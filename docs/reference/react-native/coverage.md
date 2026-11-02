@@ -9,9 +9,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | real | built from the module's own sources, with no stub and no substitute | 27 |
 | partial | built and running, with a named part left out or rewritten | 7 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 8 |
-| missing | native code that is not built yet | 52 |
-| evaluate | not attempted; the note says what iOS 6 offers | 36 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 7 |
+| missing | native code that is not built yet | 54 |
+| evaluate | not attempted; the note says what iOS 6 offers | 35 |
 | impossible | the system service does not exist before the iOS release the note names | 8 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 161 |
@@ -84,7 +84,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-apple-authentication | ~57.0.2 | yes | impossible | none | Sign in with Apple needs AuthenticationServices (iOS 13). |
 | expo-application | ~57.0.3 | yes | real | build | Compiled; not exercised. |
 | expo-asset | ~57.0.20 | yes | real | build | Compiled; its use is not exercised by a screen. |
-| expo-audio | ~57.0.5 | yes | stub | none | A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
+| expo-audio | ~57.0.5 | yes | stub | none | A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-background-fetch | ~57.0.21 | yes | evaluate | none | Background fetch is iOS 7. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. |
@@ -103,18 +103,18 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-dev-client | ~57.0.20 | yes | impossible | none | A development tool; one file of iOS code, no meaning in a release host. |
 | expo-device | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-document-picker | ~57.0.3 | yes | stub | none | Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system. |
+| expo-document-picker | ~57.0.3 | yes | missing | none | Not built. Its picker is UIDocumentPickerViewController, which iOS 6 lacks (the SDK header marks it iOS 8.0), so the Backports library carries it: a file browser over the app's folders with copy, open and move modes and UTType acceptance, in frameworks/Backports/src/UIKit. It has no access to other apps' files on iOS 6, which is the part that stays partial once built. The package is not pinned yet. |
 | expo-eas-client | ~57.0.5 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | expo-file-system | ~57.0.7 | yes | missing | none | Does not compile for iOS 6: FileSystemFileHandle uses FileHandle.offset and seekToEnd (iOS 13). The iOS 14 gates are rewritten in staged copies, which do not cover this. |
 | expo-font | ~57.0.4 | yes | missing | none | Does not compile as the real module: FontLoaderModule calls queryCustomNativeFonts, which is in FontUtils, the file the spike skips. |
-| expo-gl | ~57.0.2 | yes | evaluate | none | OpenGL ES 2 exists on iOS 6. |
+| expo-gl | ~57.0.2 | yes | evaluate | none | Not built; package packages/e/expo-gl (57.0.2, unpatched). Evaluate, not partial: partial means built and running. Done on work/rn-media-gles2 (commit 92f69f4b9, pushed): ES3Functions.m emulates the ES3 calls that ES2 expresses exactly and refuses the rest with a GL error; EAGL and CAEAGLLayer exist on iOS 6. Missing: the shader language. Shaders written as #version 300 es are not translated to GLSL ES 1.00 (no translator in revenant), so expo-gl keeps its ES2 fallback for EAGL (EXGLContext.mm) and no ES3 context is created. Reasons and the translator plan: docs/reference/backports/opengles-es3.md. |
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Built from a local copy of GlassView.swift in src/expo, which replaces the package's file. The effect is an iOS 26 one, so on iOS 6 it is never installed and the view draws no glass. Compiled; not exercised. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-haptics | ~57.0.3 | yes | missing | none | Does not compile for iOS 6: HapticsModule uses an init() that is iOS 10. iOS 6 has no haptic engine, so what it does there is undecided. |
 | expo-image | ~57.0.5 | yes | missing | none | Native image view not built; 26 files of iOS code, SDWebImage based. The app's JS calls it. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | missing | none | Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it). |
-| expo-image-picker | ~57.0.20 | yes | stub | none | Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system. |
+| expo-image-picker | ~57.0.20 | yes | stub | none | Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |
@@ -125,7 +125,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-location | ~57.0.21 | yes | evaluate | none | CoreLocation exists on iOS 6. |
 | expo-mail-composer | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-manifests | ~57.0.2 | yes | missing | none | Not built; expo-constants runs without it. |
-| expo-maps | ~57.0.4 | yes | evaluate | none | MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps. |
+| expo-maps | ~57.0.4 | yes | missing | none | Not built; package packages/e/expo-maps (57.0.4, unpatched). Missing: the map is SwiftUI MapKit, iOS 17/18 only (AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available), and frameworks/SwiftUI has none of the 29 Map types the package uses (Map, MapCameraPosition, MapSelection, MapProperties, MapUISettings, MapReader, MapContent, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle, MapPolyline, MapPolygon, MapCircle, MapMarker, MapAnnotation, Marker, Annotation, Polygon, Circle, MapColorScheme, MapCamera, MapStyle, MapStyleEmphasis, MapStyleElevation, MapContourStyle, MapPointOfInterestCategories, MapPointOfInterestCategory, MapType). Needed: a SwiftUI Map on MKMapView in frameworks/SwiftUI. Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch. |
 | expo-mcp | ~0.2.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-media-library | ~57.0.5 | yes | evaluate | none | Uses Photos (iOS 8); AssetsLibrary exists on iOS 6. |
 | expo-mesh-gradient | ~57.0.2 | yes | impossible | none | MeshGradient is SwiftUI, iOS 18. |
@@ -133,7 +133,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-modules-core | ~57.0.23 | yes | partial | phone | Core builds and the app runs on it. Not yet carried as a package: the build is the spike's. SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package. |
 | expo-navigation-bar | ~57.0.3 | no | n/a | none | Android only. |
 | expo-network | ~57.0.2 | yes | evaluate | none | Uses NWPathMonitor (iOS 12); needs SCNetworkReachability. |
-| expo-notifications | ~57.0.23 | yes | stub | none | Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). |
+| expo-notifications | ~57.0.23 | yes | stub | none | Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package. |
 | expo-observe | ~57.0.25 | yes | missing | none | Has 25 files of iOS code and is not built. |
 | expo-print | ~57.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9. |
@@ -147,7 +147,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
 | expo-splash-screen | ~57.0.10 | yes | missing | none | Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault). |
-| expo-sqlite | ~57.0.4 | yes | stub | none | Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql. |
+| expo-sqlite | ~57.0.4 | yes | stub | none | Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | impossible | none | SKStoreReviewController is iOS 10.3; the module could open the store page instead. |
 | expo-symbols | ~57.0.3 | yes | missing | none | SF Symbols do not exist before iOS 13; needs a decision (a bundled symbol set or a mapping to drawn icons). |
@@ -155,8 +155,8 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-task-manager | ~57.0.21 | yes | evaluate | none | Depends on background modes available on iOS 6. |
 | expo-tracking-transparency | ~57.0.2 | yes | evaluate | none | ATT is iOS 14; the answer on iOS 6 is 'not required', which is a trivial real module. |
 | expo-updates | ~57.0.26 | yes | evaluate | none | Needs the manifests module and a download path; no network scheme is decided. |
-| expo-video-thumbnails | ~57.0.2 | yes | missing | none | Has 4 files of iOS code and is not built. |
-| expo-video | ~57.0.5 | yes | evaluate | none | AVPlayer exists; the module uses newer AVKit and Swift API. |
+| expo-video-thumbnails | ~57.0.2 | yes | missing | none | Not built; package packages/e/expo-video-thumbnails (57.0.2, unpatched). It uses AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData, all iOS 4, so no patch is expected; the build is what decides. |
+| expo-video | ~57.0.5 | yes | evaluate | none | Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). Measured: 5961 Swift lines, no Objective-C; its availability checks are iOS 16 and iOS 26 (#available), which are false on iOS 6, so the fallback paths must compile. No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package. |
 | expo-web-browser | ~57.0.3 | yes | evaluate | none | Uses SFSafariViewController (iOS 9); the fallback is the system browser. |
 | expo-widgets | ~57.0.26 | yes | impossible | none | WidgetKit, iOS 14. |
 | jest-expo | ~57.0.6 | yes | n/a | none | A test-runner preset; no native code. |
@@ -168,7 +168,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native-gesture-handler | ~2.32.0 | yes | real | phone | Built; the app's gestures run on it. |
 | react-native-get-random-values | ~1.11.0 | yes | missing | none | Has 4 files of iOS code and is not built. |
 | react-native-keyboard-controller | 1.21.9 | yes | stub | none | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. A phone check was made against this stub, not the library, so it is not counted as verified (stubs.json). |
-| react-native-maps | 1.27.2 | yes | missing | none | Has 175 files of iOS code and is not built. |
+| react-native-maps | 1.27.2 | yes | missing | none | Not built; package packages/r/react-native-maps (1.27.2). The Google provider is switched off by patch 0001 (ios/AirMaps/RNMapsDefines.h: HAVE_GOOGLE_MAPS 0, so the placeholders compile), and the Google subspec (ios/AirGoogleMaps, GoogleMaps 9.4.0) is not built, because the GoogleMaps SDK is not carried for iOS 6. The Apple path (ios/AirMaps) is not yet clean on iOS 6: it uses MapKit symbols from iOS 7 to iOS 16 (MKMapCameraZoomRange and MKMapCameraZoomDefault from 13, MKPointOfInterestCategory from 13, MKStandardMapConfiguration, MKHybridMapConfiguration and MKMapConfiguration from 16, MKFeatureVisibility from 16, MKMapTypeMutedStandard and MKFeatureDisplayPriorityRequired from 11, MKAnnotationViewDragState from 11), and MKMarkerAnnotationView is deprecated from 16. The Backports cover the MKMapView, MKMapCamera, MKMapSnapshotter and MKOverlayPathRenderer core, not the newer symbols. Those need a guard or a Backport before it is built. |
 | react-native-pager-view | 8.0.2 | yes | missing | none | Has 10 files of iOS code and is not built. |
 | react-native-worklets | 0.10.1 | yes | real | phone | Built. |
 | react-native-reanimated | 4.5.1 | yes | real | phone | Built; the bottom sheets animate on it. |
@@ -181,7 +181,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | sentry-expo | ~7.0.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | unimodules-app-loader | ~57.0.2 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | unimodules-image-loader-interface | ~6.1.0 | yes | missing | none | Has 2 files of iOS code and is not built. |
-| @shopify/react-native-skia | 2.6.2 | no | evaluate | none | Draws with Metal (iOS 8); would need a GL or software backend. |
+| @shopify/react-native-skia | 2.6.2 | no | evaluate | none | Not built; package packages/r/react-native-skia (2.6.2, unpatched). ждёт Metal (air2es). apple/MetalContext.mm uses MTLCreateSystemDefaultDevice, MTLDevice, MTLCommandQueue, MTLCommandBuffer, MTLTexture, MTLTextureDescriptor, MTLBuffer, MTLPixelFormat, MTLStorageMode, MTLResourceOptions, MTLTextureUsage, MTLSharedEvent, MTLEvent and CAMetalLayer, plus GrDirectContexts::MakeMetal in libskia. The Backports cover all of these except MTLEvent (no class in frameworks/Backports/src). air2es does not reach Skia's shaders: it translates AIR from a precompiled metallib, while Skia builds MSL source at run time (Skia's Metal backend; not verified in this tree, since the libskia xcframework comes from npm install-skia), so a run-time MSL to GLSL ES route is needed as well. No GL renderer is written. Metal on iOS 6: docs/explanation/backports/metal-on-ios6.md. |
 | @shopify/flash-list | 2.0.2 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | @sentry/react-native | ~7.11.0 | yes | missing | none | Has 38 files of iOS code and is not built. |
 | react-native-bootsplash | ^6.3.10 | yes | missing | none | Has 5 files of iOS code and is not built. |

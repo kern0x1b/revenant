@@ -1,0 +1,21 @@
+package("expo-notifications")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-notifications")
+    set_description("expo-notifications 57.0.23, the Expo SDK local and push notifications over UserNotifications, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-notifications/-/expo-notifications-$(version).tgz")
+    add_versions("57.0.23", "9739be2b4c6844d8a782a4572c6d47f838215afb15e04485262a9dbe4a4b521a")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-notifications" and manifest.version == "57.0.23", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "ExpoNotifications", "Notifications", "NotificationCenterManager.swift")), "expo-notifications has no notification center manager")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-notifications has no expo-module.config.json")
+    end)

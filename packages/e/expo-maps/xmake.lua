@@ -1,0 +1,21 @@
+package("expo-maps")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-maps")
+    set_description("expo-maps 57.0.4, the Expo SDK map view, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-maps/-/expo-maps-$(version).tgz")
+    add_versions("57.0.4", "1a55c2fa3a3ad0e3fb11c40963de2d0cf1bc6878a38f5e82f17377b60ffb4200")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-maps" and manifest.version == "57.0.4", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isdir(path.join(package:installdir(), "ios")), "expo-maps has no iOS sources")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-maps has no expo-module.config.json")
+    end)

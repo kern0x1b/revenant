@@ -218,7 +218,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+   "note": "A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
   },
   {
    "id": "expo-auth-session",
@@ -387,9 +387,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "stub",
+   "status": "missing",
    "verified": "none",
-   "note": "Name only. The real module uses PHPicker and UTType (iOS 14), and declarations clash with expo-file-system."
+   "note": "Not built. Its picker is UIDocumentPickerViewController, which iOS 6 lacks (the SDK header marks it iOS 8.0), so the Backports library carries it: a file browser over the app's folders with copy, open and move modes and UTType acceptance, in frameworks/Backports/src/UIKit. It has no access to other apps' files on iOS 6, which is the part that stays partial once built. The package is not pinned yet."
   },
   {
    "id": "expo-eas-client",
@@ -425,7 +425,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "OpenGL ES 2 exists on iOS 6."
+   "note": "Not built; package packages/e/expo-gl (57.0.2, unpatched). Evaluate, not partial: partial means built and running. Done on work/rn-media-gles2 (commit 92f69f4b9, pushed): ES3Functions.m emulates the ES3 calls that ES2 expresses exactly and refuses the rest with a GL error; EAGL and CAEAGLLayer exist on iOS 6. Missing: the shader language. Shaders written as #version 300 es are not translated to GLSL ES 1.00 (no translator in revenant), so expo-gl keeps its ES2 fallback for EAGL (EXGLContext.mm) and no ES3 context is created. Reasons and the translator plan: docs/reference/backports/opengles-es3.md."
   },
   {
    "id": "expo-glass-effect",
@@ -488,7 +488,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name only. The real module uses PHPicker (iOS 14), and declarations clash with expo-file-system."
+   "note": "Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
   },
   {
    "id": "expo-intent-launcher",
@@ -585,9 +585,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "evaluate",
+   "status": "missing",
    "verified": "none",
-   "note": "MapKit exists on iOS 6; the module is written against newer MapKit and Google Maps."
+   "note": "Not built; package packages/e/expo-maps (57.0.4, unpatched). Missing: the map is SwiftUI MapKit, iOS 17/18 only (AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available), and frameworks/SwiftUI has none of the 29 Map types the package uses (Map, MapCameraPosition, MapSelection, MapProperties, MapUISettings, MapReader, MapContent, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle, MapPolyline, MapPolygon, MapCircle, MapMarker, MapAnnotation, Marker, Annotation, Polygon, Circle, MapColorScheme, MapCamera, MapStyle, MapStyleEmphasis, MapStyleElevation, MapContourStyle, MapPointOfInterestCategories, MapPointOfInterestCategory, MapType). Needed: a SwiftUI Map on MKMapView in frameworks/SwiftUI. Measured: the map view is SwiftUI MapKit (Map, MapCameraPosition, MapReader, MapStyle, MapContent, Marker, Annotation, MapPolyline, MapPolygon, MapCircle, MapCompass, MapScaleView, MapUserLocationButton, MapPitchToggle and their modifiers), used only in AppleMapsViewiOS17.swift and AppleMapsViewiOS18.swift behind #available(iOS 17) and (iOS 18). AppleMapsView.swift has no pre-17 map view, so an iOS 6 build has no map. frameworks/SwiftUI has none of these types (0 of 21 names), and its MapKit classes are backported in frameworks/Backports/src/MapKit. Needed: an MKMapView-backed view for iOS 6 in place of the SwiftUI views, which is a new module, not a patch."
   },
   {
    "id": "expo-mcp",
@@ -659,7 +659,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json)."
+   "note": "Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-observe",
@@ -785,7 +785,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Name only. The package vendors the SQLite amalgamation and has an optional libSQL mode (expo.sqlite.useLibSQL); both are to be built, branch work/libsql."
+   "note": "Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-status-bar",
@@ -857,7 +857,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 4 files of iOS code and is not built."
+   "note": "Not built; package packages/e/expo-video-thumbnails (57.0.2, unpatched). It uses AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData, all iOS 4, so no patch is expected; the build is what decides."
   },
   {
    "id": "expo-video",
@@ -866,7 +866,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "AVPlayer exists; the module uses newer AVKit and Swift API."
+   "note": "Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). Measured: 5961 Swift lines, no Objective-C; its availability checks are iOS 16 and iOS 26 (#available), which are false on iOS 6, so the fallback paths must compile. No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-web-browser",
@@ -974,7 +974,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Has 175 files of iOS code and is not built."
+   "note": "Not built; package packages/r/react-native-maps (1.27.2). The Google provider is switched off by patch 0001 (ios/AirMaps/RNMapsDefines.h: HAVE_GOOGLE_MAPS 0, so the placeholders compile), and the Google subspec (ios/AirGoogleMaps, GoogleMaps 9.4.0) is not built, because the GoogleMaps SDK is not carried for iOS 6. The Apple path (ios/AirMaps) is not yet clean on iOS 6: it uses MapKit symbols from iOS 7 to iOS 16 (MKMapCameraZoomRange and MKMapCameraZoomDefault from 13, MKPointOfInterestCategory from 13, MKStandardMapConfiguration, MKHybridMapConfiguration and MKMapConfiguration from 16, MKFeatureVisibility from 16, MKMapTypeMutedStandard and MKFeatureDisplayPriorityRequired from 11, MKAnnotationViewDragState from 11), and MKMarkerAnnotationView is deprecated from 16. The Backports cover the MKMapView, MKMapCamera, MKMapSnapshotter and MKOverlayPathRenderer core, not the newer symbols. Those need a guard or a Backport before it is built."
   },
   {
    "id": "react-native-pager-view",
@@ -1091,7 +1091,7 @@
    "native": false,
    "status": "evaluate",
    "verified": "none",
-   "note": "Draws with Metal (iOS 8); would need a GL or software backend."
+   "note": "Not built; package packages/r/react-native-skia (2.6.2, unpatched). ждёт Metal (air2es). apple/MetalContext.mm uses MTLCreateSystemDefaultDevice, MTLDevice, MTLCommandQueue, MTLCommandBuffer, MTLTexture, MTLTextureDescriptor, MTLBuffer, MTLPixelFormat, MTLStorageMode, MTLResourceOptions, MTLTextureUsage, MTLSharedEvent, MTLEvent and CAMetalLayer, plus GrDirectContexts::MakeMetal in libskia. The Backports cover all of these except MTLEvent (no class in frameworks/Backports/src). air2es does not reach Skia's shaders: it translates AIR from a precompiled metallib, while Skia builds MSL source at run time (Skia's Metal backend; not verified in this tree, since the libskia xcframework comes from npm install-skia), so a run-time MSL to GLSL ES route is needed as well. No GL renderer is written. Metal on iOS 6: docs/explanation/backports/metal-on-ios6.md."
   },
   {
    "id": "@shopify/flash-list",
