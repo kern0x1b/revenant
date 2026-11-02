@@ -143,7 +143,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-secure-store | ~57.0.4 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-sensors | ~57.0.3 | yes | evaluate | none | CoreMotion exists on iOS 6. |
 | expo-server | ~57.0.3 | no | n/a | none | Server runtime, not on the device. |
-| expo-sharing | ~57.0.23 | yes | missing | none | Does not compile for iOS 6: ResolveUrlContentDetails uses URLSession.bytes, an iOS 15 API. |
+| expo-sharing | ~57.0.23 | yes | missing | none | Package and iOS 6 patches written, not built yet: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler and the iPad popover are guarded for iOS 6 (completionHandler, UIPopoverController), and the share-into payloads are read without JSONDecoder (iOS 11). The first build and a probe are pending. |
 | expo-sms | ~57.0.2 | yes | missing | none | Has 5 files of iOS code and is not built. |
 | expo-speech | ~57.0.3 | yes | impossible | none | AVSpeechSynthesizer is iOS 7; a different speech route would be needed. |
 | expo-splash-screen | ~57.0.10 | yes | missing | none | Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault). |
