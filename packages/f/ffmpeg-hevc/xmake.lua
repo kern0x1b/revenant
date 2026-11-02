@@ -3,6 +3,9 @@ package("ffmpeg-hevc")
     set_homepage("https://ffmpeg.org")
     set_description("FFmpeg 8.1.2 for the iOS 6 Backports: libavcodec and libavutil as shared libraries for armv7 with NEON, with the hevc decoder and parser only, at upstream n8.1.2 commit 38b88335")
     set_license("LGPL-2.1-or-later")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/FFmpeg/FFmpeg.git")
     add_versions("8.1.2", "38b88335f99e76ed89ff3c93f877fdefce736c13")

@@ -2,6 +2,9 @@ package("fmt")
     set_homepage("https://fmt.dev")
     set_description("{fmt} 12.1.0, the formatting library React Native's folly and glog format with, as a static libfmt for armv7 iOS 6, with the format.cc and os.cc of the release")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/fmtlib/fmt.git")
