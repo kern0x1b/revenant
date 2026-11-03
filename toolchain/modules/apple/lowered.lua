@@ -125,11 +125,41 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSURLUbiquitousItemDownloadingStatusKey",
+        header = {
+            name = "Foundation",
+            directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
+            file = "NSURL.h",
+            find = "API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0));",
+            replace = "API_AVAILABLE(macos(10.9), ios(6.0), watchos(2.0), tvos(9.0));",
+        },
+    },
+    {
         member = "URLResourceValues.ubiquitousItemDownloadingStatus",
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "URL.swift"},
             find = "    @available(macOS 10.9, iOS 7.0, *)\n    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }",
             replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if #available(macOS 10.9, iOS 7.0, *) {\n            return _get(.ubiquitousItemDownloadingStatusKey)\n        }\n        let downloaded : Bool? = _get(.ubiquitousItemIsDownloadedKey)\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return URLUbiquitousItemDownloadingStatus(rawValue: isDownloaded ? \"NSURLUbiquitousItemDownloadingStatusCurrent\" : \"NSURLUbiquitousItemDownloadingStatusNotDownloaded\")\n    }",
+        },
+    },
+    {
+        member = "SKProduct.subscriptionPeriod",
+        header = {
+            name = "StoreKit",
+            directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
+            file = "SKProduct.h",
+            find = "API_DEPRECATED(\"Use Product.subscription.subscriptionPeriod.\", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+            replace = "API_DEPRECATED(\"Use Product.subscription.subscriptionPeriod.\", ios(6.0, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+        },
+    },
+    {
+        member = "SKProductDiscount.subscriptionPeriod",
+        header = {
+            name = "StoreKit",
+            directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
+            file = "SKProductDiscount.h",
+            find = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+            replace = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(6.0, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
         },
     },
     {
@@ -680,12 +710,28 @@ local function implemented_in(src)
         local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                local fname = path.filename(file)
+                if fname:match("%d%d+_") then
+                    local major = tonumber(fname:match("(%d%d+)_"))
+                    if major and major >= 26 then
+                        goto continue
+                    end
+                end
                 scan_source(file, found)
+                ::continue::
             end
         end
         for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                local fname = path.filename(file)
+                if fname:match("%d%d+_") then
+                    local major = tonumber(fname:match("(%d%d+)_"))
+                    if major and major >= 26 then
+                        goto continue2
+                    end
+                end
                 scan_adoption(file, found)
+                ::continue2::
             end
         end
         folders[path.filename(folder)] = found
