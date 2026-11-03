@@ -1,5 +1,5 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--pkgdirs name=dir,...] [--log file]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--pkgdirs name=dir,...] [--jobs N] [--log file]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
@@ -10,7 +10,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua 
 
 local INPUTS = {"app-assets", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "rn-spike-gen", "screens", "unistyles"}
 
-local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view"
+local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view,react-native-enriched-markdown"
 
 local PATCH_MARKERS = {
     {"React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm", 'attributedString.string ?: @""'},
@@ -41,27 +41,6 @@ end
 
 function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
-end
-
-local C_SOURCE_GLOBS = {
-    ["react-native-enriched-markdown"] = {"cpp/md4c/*.c", "cpp/highlight/vendor/tree-sitter/src/lib.c",
-                                          "cpp/highlight/vendor/grammars/*/parser.c", "cpp/highlight/vendor/grammars/*/scanner.c"},
-}
-
-function pod_c_sources(package)
-    return C_SOURCE_GLOBS[package] or {}
-end
-
-function pod_source_allowed(relative)
-    if relative:find("Example", 1, true) then
-        return false
-    end
-    for directory in relative:gmatch("([^/]+)/") do
-        if directory:lower():find("^_*tests?_*$") then
-            return false
-        end
-    end
-    return path.filename(relative):find("Tests%.%a+$") == nil
 end
 
 local HOST_BUNDLE_ID = "space.kern0x1b.paseo-ios6.rnhost"
@@ -272,7 +251,7 @@ function build(folder, cache, options)
     local configured = command_status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
     if configured == 0 then
-        built = command_status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
+        built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
     end
     return built or 1, log
 end
@@ -297,7 +276,7 @@ function main(...)
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()
