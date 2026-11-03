@@ -93,7 +93,7 @@ A flat-namespace import, an ordinal that names no library, or a library the cach
 hold is rejected too. Only a rejected import needs a decision: a device check that shows
 the device resolves it, then `tools/symbol_check.lua --pin` so the baseline records it.
 The judgement is `dyld.import_verdicts` in `toolchain/modules/apple/dyld.lua`, and
-`./xmakew l frameworks/WebKit/tests/gate/symbols_test.lua` tests it on fixtures
+`./xmakew l -P . frameworks/WebKit/tests/gate/symbols_test.lua` tests it on fixtures
 (it needs `REVENANT_LD64` set to the `bin/ld` of the `revenant@ld64` package).
 
 ### The C++ library

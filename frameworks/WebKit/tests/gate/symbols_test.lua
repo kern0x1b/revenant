@@ -1,7 +1,3 @@
--- The symbol gate judges each new import by the library its binary names. The fixtures are
--- armv7 Mach-O files linked here with the ld64 package, and a cache folder that stands in for
--- the iOS 6.0 libraries. Run it with the linker of the revenant@ld64 package:
---   REVENANT_LD64=<ld64>/bin/ld ./xmakew l frameworks/WebKit/tests/gate/symbols_test.lua
 local TESTS = path.absolute(os.scriptdir())
 local MODULES = path.absolute(path.join(TESTS, "..", "..", "src", "modules"))
 local SYSTEM_STUB = [[--- !tapi-tbd

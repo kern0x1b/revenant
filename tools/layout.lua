@@ -25,7 +25,7 @@ local UNCONVERTED = {"webkit-engine"}
 
 local ADDON_PATH = '"toolchain", "' .. "modules" .. '"'
 
-local REACHING = {}
+local REACHING = {"swift-runtime"}
 
 local function set_of(list)
     local set = {}

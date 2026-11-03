@@ -1073,10 +1073,6 @@ function missing_imports(cachefile, binaries, root)
     return missing, #found, cache, dangling, ordering
 end
 
--- The engine binds its C++ library by the @rpath name. On the device that name resolves to the
--- carried librev-c++ or to the system libc++.1, and both export the basic_string members the
--- engine imports (librev-c++ was checked against the same symbols), so the import is judged
--- against the cache's libc++.1.
 local LIBRARY_ALIASES = {["@rpath/libc++.1.dylib"] = "/usr/lib/libc++.1.dylib"}
 
 local function judge_import(cache, image, twolevel, symbol)
