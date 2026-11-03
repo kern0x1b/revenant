@@ -1,0 +1,114 @@
+diff -ruN package/ios/FileSystemDownload.swift patched/ios/FileSystemDownload.swift
+--- a/ios/FileSystemDownload.swift
++++ b/ios/FileSystemDownload.swift
+@@ -7,7 +7,6 @@
+ ///
+ /// All access to the internal dictionaries is serialized through a serial dispatch queue
+ /// so that concurrent calls from URLSession delegate callbacks and the main thread are safe.
+-@available(iOS 14, tvOS 14, *)
+ class DownloadTaskStore: NSObject, URLSessionDownloadDelegate {
+   private let queue = DispatchQueue(label: "expo.modules.filesystem.DownloadTaskStore")
+   private var tasks: [String: URLSessionDownloadTask] = [:]
+@@ -94,7 +93,6 @@
+ /// When `downloadUuid` is non-nil, uses a shared delegate-based `URLSession` that reports progress
+ /// and supports cancellation via the `downloadStore`. When nil, uses `URLSession.shared` with
+ /// a simple completion handler.
+-@available(iOS 14, tvOS 14, *)
+ func downloadFileWithStore(
+   url: URL,
+   to: FileSystemPath,
+@@ -178,7 +176,6 @@
+ ///
+ /// Progress events are throttled to at most one every 100 ms to avoid flooding the JS thread.
+ /// A final event is always sent when `totalBytesWritten == totalBytesExpectedToWrite`.
+-@available(iOS 14, tvOS 14, *)
+ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+   private let uuid: String
+   private let sourceUrl: URL
+diff -ruN package/ios/FileSystemFile.swift patched/ios/FileSystemFile.swift
+--- a/ios/FileSystemFile.swift
++++ b/ios/FileSystemFile.swift
+@@ -55,7 +55,9 @@
+       return try withCorrectTypeAndScopedAccess(permission: .read) {
+         let bufferSize = 65536
+ 
+-        let handle = try FileHandle(forReadingFrom: url)
++        guard let handle = FileHandle(forReadingAtPath: url.path) else {
++          throw UnableToReadHandleException(url.path)
++        }
+         defer { try? handle.close() }
+ 
+         var hasher = Insecure.MD5()
+@@ -121,7 +123,9 @@
+       try data.write(to: url)
+       return
+     }
+-    let fileHandle = try FileHandle(forWritingTo: url)
++    guard let fileHandle = FileHandle(forWritingAtPath: url.path) else {
++      throw UnableToWriteHandleException(url.path)
++    }
+     defer {
+       fileHandle.closeFile()
+     }
+diff -ruN package/ios/FileSystemFileHandle.swift patched/ios/FileSystemFileHandle.swift
+--- a/ios/FileSystemFileHandle.swift
++++ b/ios/FileSystemFileHandle.swift
+@@ -22,7 +22,6 @@
+   }
+ }
+ 
+-@available(iOS 14, tvOS 14, *)
+ internal final class FileSystemFileHandle: SharedRef<FileHandle> {
+   let file: FileSystemFile
+   let mode: FileMode
+@@ -31,13 +30,22 @@
+   init(file: FileSystemFile, mode: FileMode?) throws {
+     self.file = file
+     self.mode = mode ?? FileMode.readWrite
++    let path = file.url.path
++    let opened: FileHandle?
+     if self.mode.readOnly {
+-      handle = try FileHandle(forReadingFrom: file.url)
++      opened = FileHandle(forReadingAtPath: path)
+     } else if self.mode.writeOnly {
+-      handle = try FileHandle(forWritingTo: file.url)
++      opened = FileHandle(forWritingAtPath: path)
+     } else {
+-      handle = try FileHandle(forUpdating: file.url)
++      opened = FileHandle(forUpdatingAtPath: path)
+     }
++    guard let opened else {
++      if self.mode.readOnly {
++        throw UnableToReadHandleException(path)
++      }
++      throw UnableToWriteHandleException(path)
++    }
++    handle = opened
+ 
+     if self.mode == FileMode.append {
+       _ = try handle.seekToEnd()
+diff -ruN package/ios/FileSystemModule.swift patched/ios/FileSystemModule.swift
+--- a/ios/FileSystemModule.swift
++++ b/ios/FileSystemModule.swift
+@@ -2,7 +2,6 @@
+ 
+ import ExpoModulesCore
+ 
+-@available(iOS 14, tvOS 14, *)
+ public final class FileSystemModule: Module {
+   #if os(iOS)
+   private lazy var filePickingHandler = FilePickingHandler(module: self)
+diff -ruN package/ios/Legacy/FileSystemLegacyModule.swift patched/ios/Legacy/FileSystemLegacyModule.swift
+--- a/ios/Legacy/FileSystemLegacyModule.swift
++++ b/ios/Legacy/FileSystemLegacyModule.swift
+@@ -101,7 +101,9 @@
+           if !FileManager.default.fileExists(atPath: url.path) {
+             try data.write(to: url, options: .atomic)
+           } else {
+-            let fileHandle = try FileHandle(forWritingTo: url)
++            guard let fileHandle = FileHandle(forWritingAtPath: url.path) else {
++              throw FileNotWritableException(url.path)
++            }
+             defer {
+               fileHandle.closeFile()
+             }

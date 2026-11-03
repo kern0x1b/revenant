@@ -23092,6 +23092,7 @@ member NSFileAccessIntent -revenant_setURL:
 member NSFileAccessIntent -revenant_writingOptions
 member NSFileCoordinator -coordinateAccessWithIntents:queue:byAccessor:
 member NSFileCoordinator -revenant_coordinateIntents:index:queue:accessor:
+member NSFileHandle +fileHandleForWritingToURL:error:
 member NSFileHandle -closeAndReturnError:
 member NSFileHandle -getOffset:error:
 member NSFileHandle -readDataToEndOfFileAndReturnError:
