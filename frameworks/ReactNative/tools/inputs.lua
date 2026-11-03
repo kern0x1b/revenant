@@ -163,7 +163,7 @@ function swift_header(spec)
             table.insert(flags, string.format("%q", flag))
         end
         table.insert(flags, string.format("%q", "-module-cache-path"))
-        table.insert(flags, string.format("%q", path.join(dir, "build", "modulecache")))
+        table.insert(flags, string.format("%q", path.join(dir, "build", "modulecache", target.name)))
         table.insert(lines, string.format("    add_packages(%s)", table.concat(names, ", ")))
         table.insert(lines, string.format("    add_files(%s)", table.concat(sources, ", ")))
         table.insert(lines, string.format("    add_values(%q, %s)", "swift.flags", table.concat(flags, ", ")))
