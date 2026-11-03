@@ -129,7 +129,7 @@ local MEMBERS = {
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "URL.swift"},
             find = "    @available(macOS 10.9, iOS 7.0, *)\n    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }",
-            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if let status : URLUbiquitousItemDownloadingStatus = _get(.ubiquitousItemDownloadingStatusKey) {\n            return status\n        }\n        let downloaded : Bool? = _get(.ubiquitousItemIsDownloadedKey)\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return isDownloaded ? URLUbiquitousItemDownloadingStatus.current : URLUbiquitousItemDownloadingStatus.notDownloaded\n    }",
+            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if let status : URLUbiquitousItemDownloadingStatus = _get(.ubiquitousItemDownloadingStatusKey) {\n            return status\n        }\n        let downloaded : Bool? = _get(URLResourceKey(rawValue: \"NSURLUbiquitousItemIsDownloadedKey\"))\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return isDownloaded ? URLUbiquitousItemDownloadingStatus.current : URLUbiquitousItemDownloadingStatus.notDownloaded\n    }",
         },
     },
     {
