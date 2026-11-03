@@ -83,6 +83,11 @@ local function is_empty(folder)
     return os.iorunv("ls", {"-A", folder}):trim() == ""
 end
 
+local function rewrite(file, text)
+    os.vrunv("chmod", {"u+w", file})
+    io.writefile(file, text)
+end
+
 local function remove_tree(folder)
     if not (os.exists(folder) or os.islink(folder)) then
         return
@@ -159,7 +164,7 @@ function clone(source, folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            rewrite(file, changed)
             cmake = cmake + 1
         end
     end
@@ -206,7 +211,7 @@ function repair(folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            rewrite(file, changed)
             count = count + 1
         end
     end
