@@ -4,6 +4,12 @@ local PUBLISHED = {
     {name = "swift-runtime", version = "6.4.0", plat = "iphoneos", arch = "armv7", buildhash = "cb0eb1a2bbf2414f9193e30704c50c8e",
      deps = {{"apple-compat", "cc7825357884477d903106eb4ee640b5"}, {"libcxx", "28e31299d6324b3bba3ea1d2837f6291"}},
      key = "2e6596b55e5ff9390e825f45dbf73d55"},
+    {name = "libcxx", version = "23.1.1", plat = "iphoneos", arch = "armv7", buildhash = "f01b67fa07c14bd8ac68242228ff6996",
+     deps = {{"apple-compat", "d46eee4235b34e2e8ce1b5524c687019"}},
+     key = "adac91a71ff1a173a122c6f990721c63"},
+    {name = "swift-runtime", version = "6.4.0", plat = "iphoneos", arch = "armv7", buildhash = "e31234b2aea74924b9a7c75967c670c9",
+     deps = {{"apple-compat", "d46eee4235b34e2e8ce1b5524c687019"}, {"libcxx", "f01b67fa07c14bd8ac68242228ff6996"}},
+     key = "64ea5fea9aa742351453fec6ca6bd7af"},
 }
 
 local function package(row)

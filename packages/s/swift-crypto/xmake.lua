@@ -1,6 +1,6 @@
 package("swift-crypto")
     set_homepage("https://github.com/apple/swift-crypto")
-    set_description("swift-crypto 5.0.1, Apple's Crypto module (the CryptoKit API on BoringSSL, as upstream ships it for a platform without CryptoKit): the release sources pinned by sha256, patched for the port, built for armv7 iOS 6.1.3 in Lua the way swift-system is. Apache-2.0 upstream")
+    set_description("swift-crypto 5.0.1, Apple's Crypto module (the CryptoKit API on BoringSSL, as upstream ships it for a platform without CryptoKit): the release sources pinned by sha256, patched for the port, built for armv7 iOS 6.0 in Lua the way swift-system is. Apache-2.0 upstream")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
 
@@ -13,7 +13,7 @@ package("swift-crypto")
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
 
-    local FLOOR = "6.1.3"
+    local FLOOR = "6.0"
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})

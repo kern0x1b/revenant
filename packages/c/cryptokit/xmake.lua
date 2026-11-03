@@ -17,7 +17,7 @@ package("cryptokit")
     on_install("iphoneos", function (package)
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
         import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
-            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"swiftCryptoKit"}, modules = true, minimum = "6.1.3"})
+            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"swiftCryptoKit"}, modules = true})
     end)
 
     on_test(function (package)
