@@ -5,7 +5,7 @@ local MEMORY_GB = 14
 local KEEP_RUNS = 5
 local DEFAULT_JOBS = "6"
 local PREBUILT = "kern0x1b/revenant"
-local XCODE_CI = "/Applications/Xcode_26.6.app/Contents/Developer"
+local XCODE_DEFAULT = "/Applications/Xcode.app/Contents/Developer"
 local WORKFLOW = path.join(ROOT, ".github", "workflows", "check.yml")
 local ORDER = {"quick", "checks", "backports", "swift", "package", "repository"}
 local ALL = {"quick", "checks", "backports", "swift", "package"}
@@ -15,6 +15,7 @@ local function x(...)
     return table.join({"./xmakew"}, {...})
 end
 
+local FRESH = {name = "Start from a fresh configuration, as a new checkout does", argv = x("f", "-P", ".", "-c"), fresh = true}
 local HOST_CONFIGURE = x("f", "-P", ".", "-y", "--emulator_vulkan=n")
 local BACKPORTS_CONFIGURE = x("f", "-P", ".", "-p", "iphoneos", "-a", "armv7", "--component=Backports", "-y", "-v")
 local DYLD_FETCH = x("firmware", "-P", ".", "-y", "--arch=armv7", "fetch", "6.0")
@@ -65,6 +66,10 @@ local JOBS = {
         {name = "Run the repository checks", argv = x("test", "-P", ".", "repository/*", "--output-on-failure")},
     }},
 }
+
+for _, job in pairs(JOBS) do
+    table.insert(job.steps, 1, FRESH)
+end
 
 local function cache()
     return os.getenv("REVENANT_CACHE")
@@ -267,17 +272,41 @@ local function git(...)
     return os.iorunv("git", table.join({"-C", ROOT}, {...})):trim()
 end
 
-local function toolchain()
-    local developer = os.getenv("DEVELOPER_DIR")
-    if not developer and os.isdir(XCODE_CI) then
-        developer = XCODE_CI
+local function toolchain(requested)
+    local developer = requested or os.getenv("DEVELOPER_DIR")
+    if not developer and os.isdir(XCODE_DEFAULT) then
+        developer = XCODE_DEFAULT
+    end
+    if developer then
+        if not os.isdir(developer) then
+            raise("the developer dir %s is not a folder", developer)
+        end
         os.setenv("DEVELOPER_DIR", developer)
     end
-    local sdk = try { function () return os.iorunv("xcrun", {"--show-sdk-version"}):trim() end }
-    return developer or "Command Line Tools", sdk or "unknown"
+    local sdk = try { function () return os.iorunv("xcrun", {"--show-sdk-version"}):trim() end } or "unknown"
+    local version = try { function () return (os.iorunv("xcodebuild", {"-version"}):gsub("%s+", " "):trim()) end } or "no Xcode"
+    return developer or "Command Line Tools", sdk, version
 end
 
-local function preflight()
+local function options(args)
+    local rest, developer = {}, nil
+    local index = 1
+    while index <= #args do
+        local argument = args[index]
+        if argument == "--developer-dir" then
+            index = index + 1
+            developer = args[index]
+        elseif argument:startswith("--developer-dir=") then
+            developer = argument:sub(17)
+        else
+            table.insert(rest, argument)
+        end
+        index = index + 1
+    end
+    return rest, developer
+end
+
+local function preflight(requested)
     local common = path.directory(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
     local shared = path.join(common, ".cache")
     if not cache() then
@@ -289,8 +318,8 @@ local function preflight()
     local dirty = #lines(git("status", "--porcelain"))
     print("ci_local: commit %s %s", git("rev-parse", "--short=12", "HEAD"), git("log", "-1", "--format=%s"))
     print("ci_local: tree %s", dirty == 0 and "clean" or string.format("has %d changed or new paths; the result is for the working tree, not the commit", dirty))
-    local developer, sdk = toolchain()
-    print("ci_local: developer dir %s, SDK %s (CI selects %s)", developer, sdk, XCODE_CI)
+    local developer, sdk, version = toolchain(requested)
+    print("ci_local: developer dir %s, SDK %s, %s (check.yml selects Xcode_26.6.app)", developer, sdk, version)
     print("ci_local: cache %s", cache())
     print("ci_local: free %.1f GiB on the data volume", free_bytes() / GIB)
 end
@@ -302,7 +331,7 @@ local function test()
     for _, name in ipairs(ORDER) do
         assert(text:find("\n  " .. name .. ":\n", 1, true), "check.yml has no job " .. name)
         for _, step in ipairs(JOBS[name].steps) do
-            if step.argv then
+            if step.argv and not step.fresh then
                 local line = table.concat(step.argv, " ")
                 assert(compact:find(line, 1, true), string.format("%s: '%s' is not a command of check.yml", name, line))
                 count = count + 1
@@ -313,12 +342,12 @@ local function test()
 end
 
 function main(...)
-    local args = {...}
+    local args, requested = options({...})
     if args[1] == "test" then
         return test()
     end
     local selected = select_jobs(args)
-    preflight()
+    preflight(requested)
     os.setenv("XMAKE_MAX_JOBS", os.getenv("XMAKE_MAX_JOBS") or DEFAULT_JOBS)
     local limit_kb = (tonumber(os.getenv("REVENANT_CI_LOCAL_MEMORY_GB")) or MEMORY_GB) * GIB / 1024
     print("ci_local: jobs -j %s, memory limit %s per job (sum of resident sizes of its processes)", os.getenv("XMAKE_MAX_JOBS"), gigabytes(limit_kb))
