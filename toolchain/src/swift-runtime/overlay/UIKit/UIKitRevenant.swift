@@ -31,6 +31,7 @@ extension UITraitChangeObservable {
     }
 }
 
+@available(iOS 26.0, *)
 extension UIView {
     public var cornerConfiguration: UICornerConfiguration {
         get { __cornerConfiguration }
@@ -48,6 +49,7 @@ public struct UICornerRadius: Equatable, Hashable {
     }
 }
 
+@available(iOS 26.0, *)
 public typealias UICornerConfiguration = __UICornerConfiguration
 
 @available(iOS 26.0, *)
