@@ -37,6 +37,7 @@ Each folder falls in one of these classes. Only the package, generation, source,
 | `emulator-slots` | the lock files that bound how many emulators run at once; a held lock file must stay | kept |
 | `devices` | which run holds which device | kept |
 | `cache-index` | the index of `dyld`, which its readers find beside it | kept |
+| `budget` | the token pool of the machine and its queue of waiting commands (`tools/budget.lua`); a held lock file must stay | kept |
 | `corpus` | data read from applications and devices | kept |
 
 `REVENANT_EMULATOR_ROOT` and `REVENANT_CORPUS_ROOT` name folders elsewhere for the emulator and the corpus; those folders
@@ -165,7 +166,7 @@ REVENANT_CACHE=<worktree>/.cache-boot ./xmakew l -P . tools/private_cache.lua <w
 rm -rf -- <worktree>/.cache-boot
 ```
 
-The clone takes the whole of `.cache` except four folders that hold this machine's state: `devices` (which run holds which
+The clone takes the whole of `.cache` except five folders that hold this machine's state: `budget` (the token pool, which a private run takes its tokens from and does not copy), `devices` (which run holds which
 device), `emulator-slots` (the locks that bound how many emulators run at once), `scratch` (the scratch of the tasks running
 in the shared cache) and `sizes` (the measured sizes of the cache's paths, keyed by source path, which would be wrong for the
 clone). A private run therefore claims no device and no emulator slot of the shared cache.
@@ -282,3 +283,44 @@ package (patch `0017`). The store race test (`toolchain/tests/addon/store_race_t
 folders only, so the bindir, rpath and pkgconfig paths of a package have no test.
 LLVM and Swift cap their link jobs at one for each 10 GiB of memory (`toolchain/modules/parallel.lua`,
 `REVENANT_LINK_JOBS` overrides it).
+
+## The budget: one pool of tokens for the machine
+
+A token is one core and 1.5 GB (`TOKEN_MB` in `tools/budget.lua`). The heavy commands of every worktree take their tokens from
+one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE` names, so the pool is the same for all of them:
+
+    ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...]
+    ./xmakew l -P . tools/budget.lua status
+    ./xmakew l -P . tools/budget.lua test
+
+- Size. The pool holds at most the cores less two. A request is granted no more than the room the machine has: the free and
+  inactive memory (`vm_stat`) less 2 GB, in tokens, and the cores `top` reports idle plus the tokens already held. A command
+  starts with one token even on a saturated machine. After five minutes of waiting (`REVENANT_BUDGET_PATIENCE`, in seconds)
+  the idle cores no longer hold it back; the memory still does.
+- Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
+  takes two), and for up to `--jobs`. It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
+- Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
+  build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
+  A request waits behind a live request ahead of it; a request whose process died is removed from the queue.
+- Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
+- Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
+  is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
+- Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
+  so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
+- Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`).
+
+A command run straight with `xmake`, and not through `./xmakew` or a budget run, takes no tokens.
+
+## Checks that remember their result
+
+`./xmakew l -P . tools/prepush.lua` remembers each check that passed, in `.cache/prepush`, under the key of the check's inputs:
+the commit `HEAD`, every tracked file and every untracked file that git does not ignore (its blob id, or its content when it
+differs from the index), the environment except the shell's bookkeeping (`PWD`, `OLDPWD`, `SHLVL`, `_`, `COLUMNS`, `LINES`,
+`TERM_SESSION_ID`, `SECURITYSESSIONID`), the xmake that runs the check, the host, and the check's name. A check runs again
+when any of them changes; a check that failed is never remembered. None of the checks reads a file that git ignores, so an
+ignored file is not part of a key; a check that starts to read one must say so in `tools/prepush.lua`.
+
+`recipe digests` is never remembered: it regenerates the digests and compares them with the committed ones, so it runs on
+every prepush, and a second prepush on the same tree runs only that check. `./xmakew l -P . tools/prepush.lua test` checks the
+keys: an edit, an untracked file, a deleted file, an environment variable and a new commit each change a key, restoring them
+restores it, and a failing check runs again.
