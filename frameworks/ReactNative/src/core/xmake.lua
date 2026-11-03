@@ -27,6 +27,7 @@ end
 
 local RN_PODS = {
     {package = "@react-native-async-storage/async-storage", codegen = "rnasyncstorage"},
+    {package = "react-native-keyboard-controller", codegen = "RNKC"},
 }
 if os.getenv("RN_PODS_MORE") then
     for _, pod in ipairs(string.split(os.getenv("RN_PODS_MORE"), ",", {plain = true})) do
@@ -183,7 +184,7 @@ target("rn-pods-objc")
                     for _, f in ipairs(os.files(path.join(base, ext))) do
                         local key = f:lower()
                         local rel = path.relative(f, root)
-                        if not added[key] and not rel:find("[Tt]est") and not rel:find("Example") and not f:find("WorkletHermesRuntime") and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("react-native-keyboard-controller/ios/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
+                        if not added[key] and not rel:find("[Tt]est") and not rel:find("Example") and not f:find("WorkletHermesRuntime") and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
                             added[key] = true
                             add_files(f)
                         end
@@ -198,7 +199,7 @@ target("rn-pods-objc")
             for _, f in ipairs(os.files(path.join(gen, "ReactCodegen", "react", "renderer", "components", pod.codegen, "*.cpp"))) do add_files(f) end
         end
     end
-    add_files(path.join(src, "ios6", "KeyboardControllerStubs.mm"))
+    add_deps("rn-keyboard-swift")
     add_includedirs(path.join(src, "ios6", "include"), path.join(rn, "Libraries", "AppDelegate"))
     rn_headers_dir()
     add_includedirs(path.join(inputs, "lib-headers"), gen, path.join(gen, "ReactCodegen"), path.join(rc, "yoga"), rc, path.join(rc, "jsi"), path.join(rc, "callinvoker"), path.join(rc, "runtimeexecutor"), path.join(rc, "jsitooling"), path.join(rc, "reactperflogger"), path.join(rc, "cxxreact"), path.join(rn, "React"), path.join(rn, "React", "Fabric"), path.join(rn, "Libraries"), path.join(rn, "ReactApple"), rn)
@@ -214,3 +215,14 @@ target("rn-pods-objc")
     add_mxxflags("-fobjc-arc", "-include", podprefix, {force = true})
     add_mflags("-fobjc-arc", "-include", podprefix, {force = true})
     set_languages("gnu11", "c++20")
+
+target("rn-keyboard-swift")
+    set_kind("static")
+    add_rules("@addon/revenant/apple-ios", "@addon/revenant/swift")
+    set_default(false)
+    set_values("swift.module", "react_native_keyboard_controller")
+    add_packages("swift-runtime", "libcxx")
+    add_files(path.join(inputs, "ref", "paseo", "packages", "app", "node_modules", "react-native-keyboard-controller", "ios", "**.swift"))
+    local keyboard = path.join(inputs, "keyboard")
+    add_values("swift.flags", "-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(keyboard, "flags.rsp"), "-import-objc-header", path.join(keyboard, "Bridge.h"))
+    set_languages("c++20")
