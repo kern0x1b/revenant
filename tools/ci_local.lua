@@ -214,7 +214,7 @@ local function run_job(name, dir, limit_kb)
             local started = os.mclock()
             local result = execute(step.argv, log, limit_kb)
             peak = math.max(peak, result.peak)
-            local outcome = result.ok and "ok" or (result.killed and "KILLED at the memory limit" or string.format("exit %s", tostring(result.code)))
+            local outcome = result.ok and "ok" or (result.killed and "KILLED at the memory limit" or (result.code and string.format("exit %s", result.code) or "no exit status"))
             print("%s: %s, %s, peak %s", label, outcome, minutes(os.mclock() - started), gigabytes(result.peak))
             if not result.ok then
                 return {name = name, ok = false, step = step.name, log = log, reason = outcome, seconds = os.mclock() - began, peak = peak}
@@ -262,7 +262,13 @@ local function select_jobs(args)
 end
 
 local function prune_runs(root)
-    local runs = lines(os.iorunv("ls", {"-1r", root}))
+    local runs = {}
+    for _, name in ipairs(lines(os.iorunv("ls", {"-1", root}))) do
+        if name:match("^%d%d%d%d%d%d%d%d%-%d%d%d%d%d%d$") then
+            table.insert(runs, name)
+        end
+    end
+    table.sort(runs, function (a, b) return a > b end)
     for index = KEEP_RUNS + 1, #runs do
         os.execv("rm", {"-rf", path.join(root, runs[index])}, {try = true})
     end
