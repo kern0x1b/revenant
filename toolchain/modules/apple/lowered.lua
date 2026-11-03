@@ -2262,6 +2262,33 @@ function third_party_modules(text)
     return modules
 end
 
+local function built_into(sdk, folder, digest, set, mapped, modules)
+    os.mkdir(folder)
+    local stamp = path.join(folder, "input.digest")
+    local vfs = path.join(folder, "vfs.yaml")
+    local marked = digest .. "\n" .. folder
+    if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == marked) then
+        vfs = build_overlay(sdk, folder, set or read_all_members(), mapped, modules or {})
+        io.writefile(stamp, marked)
+    end
+    return vfs
+end
+
+local function shared_folder(digest)
+    return path.join(import("@addon.revenant.cache", {anonymous = true}).root(), "lowered", digest)
+end
+
+local function linked(out, shared)
+    if os.islink(out) then
+        if os.readlink(out) == shared then
+            return
+        end
+        os.rm(out)
+    end
+    os.mkdir(path.directory(out))
+    os.ln(shared, out)
+end
+
 function overlay(sdk, out, set, subtrees, modules)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
@@ -2270,14 +2297,24 @@ function overlay(sdk, out, set, subtrees, modules)
     if built[key] then
         return built[key]
     end
-    os.mkdir(out)
-    local stamp = path.join(out, "input.digest")
     local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed)
-    local vfs = path.join(out, "vfs.yaml")
-    if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {})
-        io.writefile(stamp, digest)
+    local shared = shared_folder(digest)
+    os.mkdir(path.directory(shared))
+    local lock = io.openlock(path.join(path.directory(shared), "overlay.lock"))
+    if not lock then
+        raise("cannot lock the shared overlay folder %s", shared)
     end
+    lock:lock()
+    local vfs
+    if os.isdir(out) and not os.islink(out) then
+        vfs = built_into(sdk, out, digest, set, mapped, modules)
+    else
+        built_into(sdk, shared, digest, set, mapped, modules)
+        linked(out, shared)
+        vfs = path.join(out, "vfs.yaml")
+    end
+    lock:unlock()
+    lock:close()
     built[key] = vfs
     return vfs
 end
