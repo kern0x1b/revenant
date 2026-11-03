@@ -1,7 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <OpenGLES/gltypes.h>
+#import <OpenGLES/ES2/gl.h>
 #include <dlfcn.h>
 #include <string.h>
+
+#define REVENANT_GL_COLOR 0x1800
+#define REVENANT_GL_DEPTH 0x1801
+#define REVENANT_GL_STENCIL 0x1802
+#define REVENANT_GL_DEPTH_STENCIL 0x84F9
 
 static void revenant_es3_error(void)
 {
@@ -15,6 +21,33 @@ static void revenant_es3_value_error(void)
     void (*generate)(GLsizei, GLuint *) = (void (*)(GLsizei, GLuint *))dlsym(RTLD_DEFAULT, "glGenTextures");
     if (generate)
         generate(-1, NULL);
+}
+
+static void revenant_es3_clear_color_buffer(const GLfloat *rgba)
+{
+    GLfloat saved[4];
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, saved);
+    glClearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(saved[0], saved[1], saved[2], saved[3]);
+}
+
+static void revenant_es3_clear_depth(GLfloat depth)
+{
+    GLfloat saved;
+    glGetFloatv(GL_DEPTH_CLEAR_VALUE, &saved);
+    glClearDepthf(depth);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearDepthf(saved);
+}
+
+static void revenant_es3_clear_stencil(GLint stencil)
+{
+    GLint saved;
+    glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &saved);
+    glClearStencil(stencil);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glClearStencil(saved);
 }
 
 extern void glReadBuffer(GLenum mode) __attribute__((availability(ios, introduced=7.0)));
@@ -75,6 +108,7 @@ extern void glGetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex
 extern void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) __attribute__((availability(ios, introduced=7.0)));
 extern void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount) __attribute__((availability(ios, introduced=7.0)));
 extern void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount) __attribute__((availability(ios, introduced=7.0)));
+extern void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid* indices) __attribute__((availability(ios, introduced=7.0)));
 extern GLsync glFenceSync(GLenum condition, GLbitfield flags) __attribute__((availability(ios, introduced=7.0)));
 extern GLboolean glIsSync(GLsync sync) __attribute__((availability(ios, introduced=7.0)));
 extern void glDeleteSync(GLsync sync) __attribute__((availability(ios, introduced=7.0)));
@@ -112,6 +146,10 @@ extern void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum p
 
 void glReadBuffer(GLenum mode)
 {
+    GLint framebuffer = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer);
+    if (mode == (framebuffer ? GL_COLOR_ATTACHMENT0 : GL_BACK))
+        return;
     revenant_es3_error();
 }
 
@@ -132,6 +170,10 @@ void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffse
 
 void glDrawBuffers(GLsizei n, const GLenum* bufs)
 {
+    GLint framebuffer = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer);
+    if (n == 1 && bufs[0] == (framebuffer ? GL_COLOR_ATTACHMENT0 : GL_BACK))
+        return;
     revenant_es3_error();
 }
 
@@ -370,6 +412,8 @@ void glUniform4uiv(GLint location, GLsizei count, const GLuint* value)
 
 void glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value)
 {
+    if (buffer == REVENANT_GL_STENCIL && drawbuffer == 0)
+        return revenant_es3_clear_stencil(value[0]);
     revenant_es3_error();
 }
 
@@ -380,12 +424,19 @@ void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value)
 
 void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value)
 {
+    if (drawbuffer == 0 && buffer == REVENANT_GL_COLOR)
+        return revenant_es3_clear_color_buffer(value);
+    if (drawbuffer == 0 && buffer == REVENANT_GL_DEPTH)
+        return revenant_es3_clear_depth(value[0]);
     revenant_es3_error();
 }
 
 void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil)
 {
-    revenant_es3_error();
+    if (buffer != REVENANT_GL_DEPTH_STENCIL || drawbuffer != 0)
+        return revenant_es3_error();
+    revenant_es3_clear_depth(depth);
+    revenant_es3_clear_stencil(stencil);
 }
 
 const GLubyte *glGetStringi(GLenum name, GLuint index)
@@ -432,8 +483,7 @@ void glGetActiveUniformsiv(GLuint program, GLsizei uniformCount, const GLuint* u
 
 GLuint glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName)
 {
-    revenant_es3_error();
-    return (GLuint)0;
+    return (GLuint)0xFFFFFFFFu;
 }
 
 void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params)
@@ -453,12 +503,23 @@ void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint unif
 
 void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount)
 {
-    revenant_es3_error();
+    if (instancecount != 1)
+        return revenant_es3_error();
+    glDrawArrays(mode, first, count);
 }
 
 void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount)
 {
-    revenant_es3_error();
+    if (instancecount != 1)
+        return revenant_es3_error();
+    glDrawElements(mode, count, type, indices);
+}
+
+void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid* indices)
+{
+    if (end < start)
+        return revenant_es3_value_error();
+    glDrawElements(mode, count, type, indices);
 }
 
 GLsync glFenceSync(GLenum condition, GLbitfield flags)
@@ -597,7 +658,8 @@ void glGetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat* params)
 
 void glVertexAttribDivisor(GLuint index, GLuint divisor)
 {
-    revenant_es3_error();
+    if (divisor != 0)
+        revenant_es3_error();
 }
 
 void glBindTransformFeedback(GLenum target, GLuint id)
@@ -663,7 +725,6 @@ void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum
 
 void glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    revenant_es3_error();
 }
 
 void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
