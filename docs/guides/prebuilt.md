@@ -43,10 +43,12 @@ nothing is built from source. The jobs of `check.yml` set it (the swift job also
 build there can never fall back to LLVM, Swift or ld64. It changes no key.
 
 The `llvm`, `swift`, `ld64`, `swift-runtime`, `libcxx` and `webkit-engine` recipes are wired. The `webkit-engine` recipe
-hashes its own file, so its key changed with the hook: the release of the earlier key does not serve it, and a configure that
-requires it under `REVENANT_PREBUILT_ONLY` stops at the fetch with the key, before anything is built. A release of the new key
-is made by the prebuilt workflow with `package: webkit-engine`. That run configures the `webkit-engine` component, which requires
-only this package, and installs it; it is not run yet, so the release of the key `4e14b210a5a9baf6f026d58a5535eabf` does not exist. To wire another recipe, call
+hashes its own file and the WebKit series it builds, so its key changes with every patch and with the recipe: the release of an
+earlier key does not serve it, and a configure that requires it under `REVENANT_PREBUILT_ONLY` stops at the fetch with the key,
+before anything is built. A release of the current key is made by the prebuilt workflow with `package: webkit-engine`. That run
+configures the Backports component, as the library packages do, and then requires `revenant@webkit-engine` with the `system`
+variant; the key it needs is the one its trace prints (`REVENANT_PREBUILT_TRACE=1`), so no key is written down here. Until that run
+has released the key, a build of `webkit-engine` compiles WebKit from source. To wire another recipe, call
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.
@@ -61,8 +63,8 @@ its recipe is wired. The prebuilt workflow configures the iOS Swift component be
 
 `.github/workflows/prebuilt.yml` runs only when someone starts it (`workflow_dispatch`): there is no push,
 schedule or pull request trigger. It runs on `macos-26`, which is arm64, and builds one package per run, chosen by its
-`package` input: `llvm`, `llvm-libraries` (`llvm` with its `libraries` config), `swift`, `swift-runtime`, `libcxx`, `ld64` or
-`webkit-engine`:
+`package` input: `llvm`, `llvm-libraries` (`llvm` with its `libraries` config), `swift`, `swift-runtime`, `libcxx`, `ld64`, `webkit-engine`, `webkit-engine-prefixed` or `webkit-engine-jsc` (the last two are the prefixed variant and
+the JavaScriptCore-only carried set of the same recipe):
 
 1. `./xmakew` builds the pinned xmake.
 2. `./xmakew require -P . -y revenant@<package>` runs with `REVENANT_PREBUILT` set to the repository, so a
