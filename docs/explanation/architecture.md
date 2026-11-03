@@ -88,4 +88,3 @@ A recipe that converts while still listed fails the check, and so does a listed 
 
 The swift rule installs the `.swiftmodule` of a static or a shared Swift target into `lib/swift/iphoneos`, so a wrapper of a Swift target hands its module to a consumer.
 
-CI's check workflow configures three things: the checks job configures the host, the backports job configures the `Backports` component, and the swift job configures the `Backports` component again, for the firmware tools, and then the `Swift` component, whose nine targets it builds and installs through their wrappers. The prebuilt workflow configures the `Swift` component too, for the libcxx and swift-runtime packages. Nothing configures the whole iOS graph in CI, so the `Combine` component's test targets are not built by CI yet. The whole graph would need the `swift-runtime` and `libcxx` releases for its own keys, which are the SDK 16.4 ones (`docs/guides/prebuilt.md`).

@@ -25,7 +25,7 @@ consume the toolchain as an xmake repository.
 
 ## Build and test
 
-On macOS arm64 with Xcode 26.6 selected, as CI selects it (`.github/workflows/check.yml`):
+On macOS arm64 with Xcode 26.6 selected:
 
 ```
 REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=llvm,swift,ld64 ./xmakew f -P . -y --emulator_vulkan=n

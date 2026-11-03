@@ -17,7 +17,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
-| [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
 | [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |

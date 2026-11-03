@@ -1,9 +1,7 @@
 # Prebuilt packages
 
-Status: on in CI. The `checks`, `backports` and `swift` jobs of `.github/workflows/check.yml` set
-`REVENANT_PREBUILT=kern0x1b/revenant`, and the recipes wired to the module (below) take the package of their key from its
-release. Releases exist for `llvm`, `swift`, `ld64`, `libcxx` and `swift-runtime`, including the ones the swift job
-requires by name.
+Status: with `REVENANT_PREBUILT=kern0x1b/revenant` set, the recipes wired to the module (below) take the package of their
+key from its release. Releases exist for `llvm`, `swift`, `ld64`, `libcxx` and `swift-runtime`.
 
 ## What it is for
 
@@ -39,14 +37,13 @@ With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module 
 Without `REVENANT_PREBUILT`, the module does nothing, and the recipes build exactly as before.
 
 With `REVENANT_PREBUILT_ONLY` naming the package (a comma list, or `1` for all), a missing release is an error instead: `fetch` raises and names the key, and
-nothing is built from source. The jobs of `check.yml` set it (the swift job also names `swift-runtime` and `libcxx`), so a
-build there can never fall back to LLVM, Swift or ld64. It changes no key.
+nothing is built from source. Set it to keep a build from falling back to LLVM, Swift or ld64. It changes no key.
 
 The `llvm`, `swift`, `ld64`, `swift-runtime`, `libcxx` and `webkit-engine` recipes are wired. The `webkit-engine` recipe
 hashes its own file, so its key changed with the hook: the release of the earlier key does not serve it, and a configure that
 requires it under `REVENANT_PREBUILT_ONLY` stops at the fetch with the key, before anything is built. A release of the new key
-is made by the prebuilt workflow with `package: webkit-engine`. That run configures the `webkit-engine` component, which requires
-only this package, and installs it; it is not run yet, so the release of the key `4e14b210a5a9baf6f026d58a5535eabf` does not exist. To wire another recipe, call
+is not made: there is no CI, so a package whose key moved is built locally.
+To wire another recipe, call
 `prebuilt.fetch(package)` at the top of its `on_download`, `prebuilt.install(package)` in its `on_install` and
 `prebuilt.pack(package)` at its end. `swift-runtime` sets its environment and data before the install call, since an
 early return would skip them. Doing that changes the recipe, and so the key, once.
@@ -54,43 +51,11 @@ The `shared` config of `swift-runtime` and the `packaged` config of `libcxx` are
 an early return would skip, so those builds come from source. The Backports targets are not packages, so they are not affected.
 
 A recipe is archived only when it calls `prebuilt.pack`, so a job that builds one has nothing to release unless
-its recipe is wired. The prebuilt workflow configures the iOS Swift component before it requires `swift-runtime` or
-`libcxx`, so the released key is the one the swift job looks up.
+its recipe is wired.
 
-## On CI
+## Releases
 
-`.github/workflows/prebuilt.yml` runs only when someone starts it (`workflow_dispatch`): there is no push,
-schedule or pull request trigger. It runs on `macos-26`, which is arm64, and builds one package per run, chosen by its
-`package` input: `llvm`, `llvm-libraries` (`llvm` with its `libraries` config), `swift`, `swift-runtime`, `libcxx`, `ld64` or
-`webkit-engine`:
-
-1. `./xmakew` builds the pinned xmake.
-2. `./xmakew require -P . -y revenant@<package>` runs with `REVENANT_PREBUILT` set to the repository, so a
-   key that is released already is downloaded and not built, and with `REVENANT_PREBUILT_OUT`, so
-   `prebuilt.pack` writes the archive, its checksum and its release tag.
-3. For each tag that has no release yet, `gh release create` makes a prerelease with the archive.
-
-`prebuilt.pack` refuses an install that names its own install folder in a file or a symbolic link, since
-that archive would not work under another one.
-
-## What CI cannot use, or uses differently
-
-| Input | On CI | Consequence |
-| --- | --- | --- |
-| The iPhoneOS SDK (`iphoneos-sdk`) | downloaded from the same GitHub releases as on a machine | works; the SDK itself is never put in an archive, since Apple's licence does not allow that |
-| Firmware and `.cache/dyld` (`frameworks/Backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | the Backports targets, and `swift-runtime` with `backports`, are not built on CI |
-| The host Xcode or Command Line Tools | the runner's Xcode, not this machine's | not part of the key: an archive built with another host clang is used under the same key. LLVM and Swift do not link against the host's C++ library in a way a newer macOS breaks, but that is not verified |
-| Time and disk | a GitHub-hosted job ends after 6 hours, and the runner has a fixed number of cores and a fixed disk | not measured on `macos-26`: Swift's ten source checkouts and its build may need more disk or time than a hosted runner has, and then need a larger runner or a self-hosted one; LLVM with two targets may fit |
-| `.cache` | empty on each run | the pinned xmake and the store are built again on each run; `actions/cache` could keep them |
-
-## Releasing a package
-
-The owner releases a package by starting the workflow for it from the Actions tab, with its `package` input. Each run
-builds one key and makes its release. Every later run and machine that sets `REVENANT_PREBUILT` and has the same key
-downloads that release, so the key is never built twice. Wiring another recipe changes its key once (see "On a machine").
-
-Verified: the workflow has run and released `llvm`, `swift`, `ld64`, `libcxx` and `swift-runtime`, and the checks job downloads them on each CI run.
-Not yet verified: which runner LLVM and Swift fit on.
+There is no CI, so nothing makes a new release. A release that exists is fetched when `REVENANT_PREBUILT` is set and the key matches; a package whose key moved is built locally. `prebuilt.pack` refuses an install that names its own install folder in a file or a symbolic link, since that archive would not work under another one.
 
 ## The official LLVM release instead of the `libraries` build
 
