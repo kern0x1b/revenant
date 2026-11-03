@@ -194,7 +194,7 @@ target("expo-core-probe")
     add_packages("folly")
     local proj = os.projectdir()
     local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
-    local core = path.join(nm, "expo-modules-core", "ios")
+    local core = path.join(expo_dir("expo-modules-core"), "ios")
     add_files(path.join(core, "**.swift"))
     remove_files(path.join(core, "WorkletsTests", "**.swift"))
     remove_files(path.join(core, "Worklets", "**.swift"), path.join(core, "WorkletsAdapter", "**.swift"))
@@ -228,7 +228,7 @@ target("expo-core-objc")
     add_packages("folly", "socketrocket")
     local proj = os.projectdir()
     local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
-    local core = path.join(nm, "expo-modules-core", "ios")
+    local core = path.join(expo_dir("expo-modules-core"), "ios")
     local ecore = path.join(proj, "build", "expo-core")
     local rn = react_native()
     local rc = path.join(rn, "ReactCommon")
@@ -242,7 +242,7 @@ target("expo-core-objc")
     for _, f in ipairs(os.files(path.join(core, "**.cpp"))) do
         if not f:find("Tests", 1, true) and not f:find("Worklets", 1, true) then add_files(f) end
     end
-    local common = path.join(nm, "expo-modules-core", "common", "cpp")
+    local common = path.join(expo_dir("expo-modules-core"), "common", "cpp")
     for _, f in ipairs(os.files(path.join(common, "**.cpp"))) do
         if path.filename(f) ~= "TypedArray.cpp" then add_files(f) end
     end

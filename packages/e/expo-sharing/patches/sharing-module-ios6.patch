@@ -10,18 +10,7 @@
    private var appGroupId: String {
      get throws {
        guard let groupId = Bundle.main.object(forInfoDictionaryKey: "ExpoShareIntoAppGroupId") as? String else {
-@@ -13,45 +16,23 @@
-   public func definition() -> ModuleDefinition {
-     Name("ExpoSharing")
- 
--    AsyncFunction("shareAsync") { (url: URL, options: SharingOptions, promise: Promise) in
-+    // The URL argument goes through the URL converter of ExpoModulesCore, which crashes the iOS 6 host
-+    // (fatal signal 11 in convert(from:appContext:)). The string is taken here and parsed the way that converter does.
-+    AsyncFunction("shareAsync") { (urlString: String, options: SharingOptions, promise: Promise) in
-+      let url = URL(string: urlString) ?? URL(fileURLWithPath: urlString)
-       guard FileSystemUtilities.isReadableFile(appContext, url) else {
-         throw FilePermissionException()
-       }
+@@ -20,38 +23,13 @@
  
        let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
        activityController.title = options.dialogTitle
@@ -62,7 +51,7 @@
      }
      .runOnQueue(.main)
  
-@@ -91,15 +72,98 @@
+@@ -91,15 +69,98 @@
      }
    }
  
