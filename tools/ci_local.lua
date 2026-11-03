@@ -154,9 +154,9 @@ local function watch(pidfile, statfile, limit_kb)
     return peak, killed
 end
 
-local function execute(argv, log, dir, limit_kb)
-    local pidfile = path.join(dir, "pid")
-    local statfile = path.join(dir, "status")
+local function execute(argv, log, limit_kb)
+    local pidfile = log .. ".pid"
+    local statfile = log .. ".status"
     os.execv("/bin/sh", table.join({"-c", SCRIPT, "ci-local"}, argv), {
         curdir = ROOT,
         detach = true,
@@ -207,7 +207,7 @@ local function run_job(name, dir, limit_kb)
         else
             local log = path.join(dir, string.format("%s-%02d.log", name, index))
             local started = os.mclock()
-            local result = execute(step.argv, log, dir, limit_kb)
+            local result = execute(step.argv, log, limit_kb)
             peak = math.max(peak, result.peak)
             local outcome = result.ok and "ok" or (result.killed and "KILLED at the memory limit" or string.format("exit %s", tostring(result.code)))
             print("%s: %s, %s, peak %s", label, outcome, minutes(os.mclock() - started), gigabytes(result.peak))
