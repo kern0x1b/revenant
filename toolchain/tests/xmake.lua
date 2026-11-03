@@ -21,7 +21,7 @@ local light = {"assets_extract_test", "backports_link_test", "binding_test", "ca
 
 local packaged = {"application_test", "architectures_test", "atomics_test", "backports_package_test", "blocks_test", "carried_test", "checks_test", "device_test",
                   "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "lowered_import_test", "lowered_link_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
-                  "optimisation_test", "order_file_test", "platform_libraries_test", "rebind_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "vision_text_test", "weak_test"}
+                  "optimisation_test", "order_file_test", "platform_libraries_test", "rebind_test", "shared_runtime_test", "tls_test", "toolchain_check_test", "vision_text_test", "weak_test", "webkit_engine_package_test"}
 
 local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "launchd_home_test", "port_test", "swift_cxx_test", "swift_cxx_thread_local_test", "swift_test", "swift_underlying_module_test", "tweak_test"}
 

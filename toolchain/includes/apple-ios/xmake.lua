@@ -11,7 +11,7 @@ local llvm = {name = "llvm", version = "23.1.3"}
 
 local compat_only = get_config("apple_compat_only")
 for _, tool in ipairs(compat_only and {sdk, ld64, llvm} or {sdk, ld64, ldid, llvm}) do
-    add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name})
+    add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name, host = tool == ldid})
 end
 
 add_requireconfs("**.iphoneos-sdk", {override = true, version = sdk.version})
@@ -46,5 +46,5 @@ if minimum then
         table.insert(digests, file .. "=" .. hash.sha256(path.join(root, file)))
     end
     local toolchain = string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s,optimize=packages,flags=%s]", minimum, sdk.version, ld64.version, llvm.version, hash.strhash128(table.concat(digests, ";")))
-    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader", {configs = {toolchains = toolchain}})
+    add_requireconfs("*|" .. sdk.name .. "|" .. ld64.name .. "|" .. ldid.name .. "|" .. llvm.name .. "|firmware-tools|emulator|swiftshader|libplist|openssl-host", {configs = {toolchains = toolchain}})
 end

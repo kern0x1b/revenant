@@ -218,7 +218,8 @@ Already present, with the same limits:
   iframe to `revenant-wkbridge://m/`. `shouldStartLoadWithRequest` reads that URL, never loads it, and delivers a
   `WKScriptMessage` (name, body as Foundation objects, web view, frame) to `userContentController:didReceiveScriptMessage:`
   on the main queue. A body that is not a string, or not JSON, is refused.
-- Document start on UIWebView: `WKWebView` tags the loads it starts itself (`loadRequest:`, and the replay of a navigation
+- Superseded, read first: the document-path bullets in this section (the response policy, the document start, the link and form replay, the history and cache record) describe the `NSURLProtocol` path, which was `RevenantDocumentProtocol`, `RevenantDocumentInjector` and `RevenantDocumentExpect`, and the oracle in `tests/webkit_document_start`. The WebKit1 host (`RevenantEngineHost`) does not use any of them. Its document start is the `webView:didClearWindowObject:forFrame:` hook in `src/WebKit/WKWebView.m`, which is not yet measured on a device. The bullets are kept as the record of what was measured on the removed path.
+- Document start on UIWebView (removed path): `WKWebView` tags the loads it starts itself (`loadRequest:`, and the replay of a navigation
   the delegate approved) with a property that `RevenantDocumentProtocol` claims. The protocol loads the resource with
   `NSURLConnection`, follows redirects through the client (each hop is tagged again), and forwards authentication
   challenges, cookies and cache policy. A 200 `text/html` document is buffered and rewritten in `RevenantDocumentInjector.m`:

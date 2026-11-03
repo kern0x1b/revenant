@@ -14,6 +14,8 @@ on:
           - libcxx
           - ld64
           - webkit-engine
+          - webkit-engine-prefixed
+          - webkit-engine-jsc
         default: llvm
 
 permissions:
@@ -94,11 +96,11 @@ jobs:
           exit "$rc"
 
       - name: Install the firmware tools through the Backports configuration
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || startsWith(inputs.package, 'webkit-engine')
         run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v
 
       - name: Restore the iOS 6.0 armv7 shared cache
-        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
+        if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || startsWith(inputs.package, 'webkit-engine')
         id: dyld
         uses: actions/cache/restore@v4
         with:
@@ -106,11 +108,11 @@ jobs:
           key: dyld-shared-cache-6.0-armv7-v3
 
       - name: Fetch the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || startsWith(inputs.package, 'webkit-engine')) && steps.dyld.outputs.cache-hit != 'true'
         run: ./xmakew firmware -P . -y --arch=armv7 fetch 6.0
 
       - name: Save the iOS 6.0 armv7 shared cache
-        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime') && steps.dyld.outputs.cache-hit != 'true'
+        if: (inputs.package == 'libcxx' || inputs.package == 'swift-runtime' || startsWith(inputs.package, 'webkit-engine')) && steps.dyld.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: .cache/dyld/6.0
@@ -127,7 +129,9 @@ jobs:
               swift) ./xmakew require -P . -y -v --extra="{system=false}" revenant@swift ;;
               libcxx|swift-runtime) ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v && ./xmakew require -P . -y -v --extra="{system=false}" revenant@$PACKAGE ;;
               ld64) ./xmakew require -P . -y -v --extra="{system=false}" revenant@ld64 ;;
-              webkit-engine) ./xmakew f -P . -p iphoneos -a armv7 --component=webkit-engine -y -v ;;
+              webkit-engine) ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v && ./xmakew require -P . -y -v --extra='{system=false,configs={variant="system"}}' revenant@webkit-engine ;;
+              webkit-engine-prefixed) ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v && ./xmakew require -P . -y -v --extra='{system=false,configs={variant="prefixed"}}' revenant@webkit-engine ;;
+              webkit-engine-jsc) ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v && ./xmakew require -P . -y -v --extra='{system=false,configs={variant="prefixed",carried="jsc"}}' revenant@webkit-engine ;;
               *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
             esac
           } 2>&1 | tee "$RUNNER_TEMP/build.log"
