@@ -11,6 +11,10 @@
 #import <react/runtime/JSRuntimeFactoryCAPI.h>
 #import <react/runtime/platform/ios/ReactCommon/RCTJscInstance.h>
 
+#ifdef RN_HERMES
+#import <react/runtime/platform/ios/ReactCommon/RCTHermesInstance.h>
+#endif
+
 #ifdef RN_EXPO
 #import <ExpoModulesCore/EXHostWrapper.h>
 #import <ExpoModulesCore/EXReactSchedulerDispatch.h>
@@ -22,7 +26,7 @@ typedef const struct OpaqueJSContext *RNHostJSContext;
 typedef const struct OpaqueJSContextGroup *RNHostJSGroup;
 typedef const struct OpaqueJSValue *RNHostJSValue;
 typedef struct OpaqueJSString *RNHostJSString;
-RNHostJSContext RNJscRuntimeContext(void) __attribute__((weak_import));
+RNHostJSContext RNJscRuntimeContext(void);
 RNHostJSGroup JSContextGetGroup(RNHostJSContext context);
 void JSContextGroupSetExecutionTimeLimit(RNHostJSGroup group, double limit, bool (*callback)(RNHostJSContext, void *), void *context);
 RNHostJSValue JSEvaluateScript(RNHostJSContext ctx, RNHostJSString script, void *thisObject, RNHostJSString sourceURL, int line, RNHostJSValue *exception);
@@ -74,6 +78,11 @@ static bool RNHostSampleStack(RNHostJSContext ctx, void *)
     return false;
 }
 
+extern "C" __attribute__((weak)) RNHostJSContext RNJscRuntimeContext(void)
+{
+    return NULL;
+}
+
 static void RNHostInstallSampler(void)
 {
     NSString *flag = RNHostReadAppText(@"rnhost.jsprof");
@@ -83,8 +92,8 @@ static void RNHostInstallSampler(void)
     double interval = flag.doubleValue > 0 ? flag.doubleValue : 10;
     RNHostSamples = [NSMutableDictionary dictionary];
     RNHostSelfSamples = [NSMutableDictionary dictionary];
-    if (!RNJscRuntimeContext || !RNJscRuntimeContext()) {
-        NSLog(@"rn-host: the JavaScript sampler needs RNJscRuntimeContext from the patched react-native");
+    if (!RNJscRuntimeContext()) {
+        NSLog(@"rn-host: JS sampler needs the JavaScriptCore runtime, off");
         return;
     }
     JSContextGroupSetExecutionTimeLimit(JSContextGetGroup(RNJscRuntimeContext()), interval / 1000.0, RNHostSampleStack, NULL);
@@ -151,6 +160,13 @@ static void RNHostInstallSampler(void)
 
 - (JSRuntimeFactoryRef)createJSRuntimeFactory
 {
+#ifdef RN_HERMES
+    if ([RNHostRuntime usesHermes]) {
+        NSLog(@"rn-host: engine hermes");
+        return reinterpret_cast<JSRuntimeFactoryRef>(new facebook::react::RCTHermesInstance());
+    }
+#endif
+    NSLog(@"rn-host: engine jsc");
     return reinterpret_cast<JSRuntimeFactoryRef>(new facebook::react::RCTJscInstance());
 }
 

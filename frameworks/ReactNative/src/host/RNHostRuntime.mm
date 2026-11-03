@@ -4,10 +4,14 @@
 
 #include <JSCRuntime.h>
 #include <jsi/jsi.h>
+#ifdef RN_HERMES
+#include <hermes/hermes.h>
+#endif
 
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 
+#include <cstring>
 #include <exception>
 #include <memory>
 
@@ -15,10 +19,42 @@ NSString *const RNHostErrorDomain = @"RNHost";
 
 namespace {
 
-std::shared_ptr<const facebook::jsi::Buffer> RNHostLoadBuffer(NSData *data)
+#ifdef RN_HERMES
+class RNHostDataBuffer : public facebook::jsi::Buffer {
+public:
+    explicit RNHostDataBuffer(NSData *data) : data_(data) {}
+    size_t size() const override { return data_.length; }
+    const uint8_t *data() const override { return static_cast<const uint8_t *>(data_.bytes); }
+private:
+    NSData *data_;
+};
+#endif
+
+bool RNHostIsHermesBytecode(NSData *data)
 {
+    static const uint8_t magic[8] = {0xC6, 0x1F, 0xBC, 0x03, 0xC1, 0x03, 0x19, 0x1F};
+    return data.length >= sizeof(magic) && memcmp(data.bytes, magic, sizeof(magic)) == 0;
+}
+
+std::shared_ptr<const facebook::jsi::Buffer> RNHostLoadBuffer(NSData *data, bool bytecode)
+{
+#ifdef RN_HERMES
+    if (bytecode) {
+        return std::make_shared<RNHostDataBuffer>(data);
+    }
+#endif
     std::string source(static_cast<const char *>(data.bytes), data.length);
     return std::make_shared<facebook::jsi::StringBuffer>(source);
+}
+
+std::unique_ptr<facebook::jsi::Runtime> RNHostMakeRuntime(bool hermes)
+{
+#ifdef RN_HERMES
+    if (hermes) {
+        return facebook::hermes::makeHermesRuntime();
+    }
+#endif
+    return facebook::jsc::makeJSCRuntime();
 }
 
 NSError *RNHostError(NSString *message)
@@ -82,6 +118,15 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     return RNHostConfig()[key];
 }
 
++ (BOOL)usesHermes
+{
+#ifdef RN_HERMES
+    return [[RNHostConfig()[@"engine"] lowercaseString] isEqualToString:@"hermes"];
+#else
+    return NO;
+#endif
+}
+
 + (void)applyEnvironment
 {
     NSDictionary<NSString *, NSString *> *config = RNHostConfig();
@@ -109,13 +154,20 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     uint64_t t1 = mach_absolute_time();
     NSLog(@"rn-host: read %lu bytes in %.0f ms, rss %.1f MB", (unsigned long)data.length, RNHostMilliseconds(t1 - t0), RNHostResidentMegabytes());
 
-    std::unique_ptr<facebook::jsi::Runtime> runtime = facebook::jsc::makeJSCRuntime();
+    bool hermes = [self usesHermes];
+    bool bytecode = hermes && RNHostIsHermesBytecode(data);
+    NSLog(@"rn-host: engine %@, bundle %@", hermes ? @"hermes" : @"jsc", bytecode ? @"bytecode" : @"source");
+    std::unique_ptr<facebook::jsi::Runtime> runtime = RNHostMakeRuntime(hermes);
     RNHostInstallHostFunctions(*runtime);
     uint64_t t2 = mach_absolute_time();
     NSLog(@"rn-host: runtime created in %.0f ms, rss %.1f MB", RNHostMilliseconds(t2 - t1), RNHostResidentMegabytes());
 
     try {
-        facebook::jsi::Value result = runtime->evaluateJavaScript(RNHostLoadBuffer(data), [[path lastPathComponent] UTF8String]);
+        facebook::jsi::Value owner = runtime->evaluateJavaScript(
+            std::make_shared<facebook::jsi::StringBuffer>("typeof HermesInternal === 'object' && HermesInternal.hasPromise && HermesInternal.hasPromise() ? 'engine' : 'polyfill'"),
+            "promise-owner.js");
+        NSLog(@"rn-host: Promise from %@", [NSString stringWithUTF8String:owner.toString(*runtime).utf8(*runtime).c_str()]);
+        facebook::jsi::Value result = runtime->evaluateJavaScript(RNHostLoadBuffer(data, bytecode), [[path lastPathComponent] UTF8String]);
         uint64_t t3 = mach_absolute_time();
         NSString *text = [NSString stringWithUTF8String:result.toString(*runtime).utf8(*runtime).c_str()];
         NSLog(@"rn-host: evaluated in %.0f ms, rss %.1f MB", RNHostMilliseconds(t3 - t2), RNHostResidentMegabytes());

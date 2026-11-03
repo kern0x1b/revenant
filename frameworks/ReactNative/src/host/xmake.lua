@@ -7,6 +7,10 @@ option("rn-bundle")
 option_end()
 
 local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
+local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native")
+if os.getenv("RN_HERMES") then
+    add_requires("revenant@hermes", {alias = "hermes"})
+end
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
     add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports"}})
@@ -16,6 +20,18 @@ target("RNHost")
     add_rules("@addon/revenant/app")
     add_packages("libcxx")
     add_deps("rn-jsc", "rn-yoga")
+    if os.getenv("RN_HERMES") then
+        add_packages("hermes")
+        local rc = path.join(RN_SOURCE, "ReactCommon")
+        add_includedirs(rc, path.join(rc, "react", "runtime", "platform", "ios", "ReactCommon"))
+        add_files(path.join(rc, "react", "runtime", "hermes", "HermesInstance.cpp"),
+            path.join(rc, "react", "runtime", "platform", "ios", "ReactCommon", "RCTHermesInstance.mm"))
+        for _, f in ipairs(os.files(path.join(rc, "hermes", "inspector-modern", "chrome", "*.cpp"))) do
+            if not f:find("/tests/", 1, true) then add_files(f) end
+        end
+        add_cxxflags("-DRN_HERMES=1", {force = true})
+        add_mxxflags("-DRN_HERMES=1", {force = true})
+    end
     if os.getenv("RN_WEBKIT") then
         add_packages("webkit-engine-prefixed")
         add_ldflags("-Wl,-rpath,@executable_path/Frameworks", {force = true})
@@ -71,7 +87,7 @@ target("RNHost")
             add_cxxflags("-DRN_EXPO=1", {force = true})
             add_mxxflags("-DRN_EXPO=1", {force = true})
         end
-        local rn = (os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native"))
+        local rn = RN_SOURCE
         local generated = path.join(os.projectdir(), "build", "codegen", "build", "generated", "ios")
         if os.getenv("RN_HEADERS") then
             add_includedirs(os.getenv("RN_HEADERS"))

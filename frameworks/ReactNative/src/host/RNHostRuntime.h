@@ -6,6 +6,7 @@ extern NSString *const RNHostErrorDomain;
 
 + (NSString *)configuredBundlePath;
 + (NSString *)configuredValueForKey:(NSString *)key;
++ (BOOL)usesHermes;
 + (void)applyEnvironment;
 + (double)residentMegabytes;
 + (NSString *)evaluateBundleAtPath:(NSString *)path error:(NSError **)error;
