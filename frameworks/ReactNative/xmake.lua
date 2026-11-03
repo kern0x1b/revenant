@@ -21,9 +21,12 @@ if os.getenv("RN_DEPS_REPO") then
     add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
 end
 
-includes("src/core")
-includes("src/expo")
-includes("tests")
+local inputs = os.getenv("RN_INPUTS") or path.join(os.projectdir(), "build")
+if get_config("component") == "ReactNative" or os.isdir(os.getenv("RN_SRC") or path.join(inputs, "rn-src")) then
+    includes("src/core")
+    includes("src/expo")
+    includes("tests")
+end
 
 target("react-native")
     set_kind("phony")
