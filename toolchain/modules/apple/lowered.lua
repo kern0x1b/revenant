@@ -710,28 +710,12 @@ local function implemented_in(src)
         local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
-                local fname = path.filename(file)
-                if fname:match("%d%d+_") then
-                    local major = tonumber(fname:match("(%d%d+)_"))
-                    if major and major >= 26 then
-                        goto continue
-                    end
-                end
                 scan_source(file, found)
-                ::continue::
             end
         end
         for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
-                local fname = path.filename(file)
-                if fname:match("%d%d+_") then
-                    local major = tonumber(fname:match("(%d%d+)_"))
-                    if major and major >= 26 then
-                        goto continue2
-                    end
-                end
                 scan_adoption(file, found)
-                ::continue2::
             end
         end
         folders[path.filename(folder)] = found
@@ -2308,20 +2292,20 @@ function third_party_modules(text)
     return modules
 end
 
-function overlay(sdk, out, set, subtrees, modules)
+function overlay(sdk, out, set, subtrees, modules, target)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
     local placed = module_digest(modules or {})
-    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed}, "|")
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed, target or ""}, "|")
     if built[key] then
         return built[key]
     end
     os.mkdir(out)
     local stamp = path.join(out, "input.digest")
-    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed)
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed .. (target or ""))
     local vfs = path.join(out, "vfs.yaml")
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {})
+        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {}, target)
         io.writefile(stamp, digest)
     end
     built[key] = vfs
@@ -2402,7 +2386,7 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
-local function photos_armv7_interface(text)
+local function photos_armv7_interface(text, target)
     local lines, pending, skipping = {}, {}, false
     for line in text:gmatch("([^\n]*)\n") do
         if skipping then
@@ -2423,7 +2407,7 @@ local function photos_armv7_interface(text)
             end
             pending = {}
             if line:match("^// swift%-module%-flags: ") then
-                line = line:gsub("arm64e%-apple%-ios26%.2", "armv7-apple-ios6.0"):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
+                line = line:gsub("%-target %S+", "-target " .. target, 1):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
             end
             table.insert(lines, line)
         end
@@ -2431,7 +2415,10 @@ local function photos_armv7_interface(text)
     return table.concat(lines, "\n") .. "\n"
 end
 
-local function armv7_overlays(sdk, out, roots)
+local function armv7_overlays(sdk, out, roots, target)
+    if not target or not target:match("^armv7%-") then
+        return
+    end
     for _, overlay in ipairs({{"Photos", photos_armv7_interface}}) do
         local name, lower = overlay[1], overlay[2]
         local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
@@ -2439,7 +2426,7 @@ local function armv7_overlays(sdk, out, roots)
         if os.isfile(source) then
             local copy = path.join(out, path.relative(dir, sdk), "armv7-apple-ios.swiftinterface")
             os.mkdir(path.directory(copy))
-            write_if_changed(copy, lower(io.readfile(source)))
+            write_if_changed(copy, lower(io.readfile(source), target))
             roots[dir] = roots[dir] or {}
             roots[dir]["armv7-apple-ios.swiftinterface"] = copy
         end
@@ -2514,7 +2501,7 @@ function nested_headers_of_changed(changed)
     return found
 end
 
-function build_overlay(sdk, out, set, subtrees, modules)
+function build_overlay(sdk, out, set, subtrees, modules, target)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(sdk, "usr", "include", "simd", "math.h")
@@ -2599,7 +2586,7 @@ function build_overlay(sdk, out, set, subtrees, modules)
         roots[entry.directory] = roots[entry.directory] or {}
         roots[entry.directory][entry.file] = copy
     end
-    armv7_overlays(sdk, out, roots)
+    armv7_overlays(sdk, out, roots, target)
     for dir in pairs(roots) do
         local relative = system_include_relative(dir, sdk)
         if (relative and not vfs_subtree(relative, subtrees)) or dir == path.join(sdk, "usr", "include") then
