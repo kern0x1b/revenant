@@ -39,25 +39,6 @@ public final class StubImagePickerModule: Module {
   public func definition() -> ModuleDefinition { Name("ExponentImagePicker") }
 }
 
-public final class StubSplashScreenModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("ExpoSplashScreen")
-    AsyncFunction("hide") { StubReport.called("ExpoSplashScreen", "hide") }
-    Function("preventAutoHide") { StubReport.called("ExpoSplashScreen", "preventAutoHide") }
-  }
-}
-
-public final class StubClipboardModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("ExpoClipboard")
-    AsyncFunction("getStringAsync") { (_: [String: Any]) -> String in UIPasteboard.general.string ?? "" }
-    AsyncFunction("setStringAsync") { (text: String, _: [String: Any]) -> Bool in
-      UIPasteboard.general.string = text
-      return true
-    }
-  }
-}
-
 public final class StubFileSystemModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FileSystem")
@@ -76,18 +57,6 @@ public final class StubFileSystemModule: Module {
     Class("FileSystemUploadTask") { Constructor { () in } }
     Class("FileSystemWatcher") { Constructor { () in } }
   }
-}
-
-public final class StubFontLoaderModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("ExpoFontLoader")
-    Function("getLoadedFonts") { () -> [String] in [] }
-    AsyncFunction("loadAsync") { (_: String, _: String) in StubReport.called("ExpoFontLoader", "loadAsync") }
-  }
-}
-
-public final class StubFontUtilsModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoFontUtils") }
 }
 
 public final class StubTwoWayAudioModule: Module {

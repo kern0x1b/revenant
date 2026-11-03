@@ -709,12 +709,12 @@ local EXPO_REWRITE = {
 }
 
 local STUB_OWNERS = {
-    StubFontLoaderModule = "expo-font", StubClipboardModule = "expo-clipboard", StubFileSystemModule = "expo-file-system", StubHapticsModule = "expo-haptics",
-    StubAudioModule = "expo-audio", StubSplashScreenModule = "expo-splash-screen", StubSharingModule = "expo-sharing", StubDocumentPickerModule = "expo-document-picker",
+    StubFileSystemModule = "expo-file-system", StubHapticsModule = "expo-haptics",
+    StubAudioModule = "expo-audio", StubSharingModule = "expo-sharing", StubDocumentPickerModule = "expo-document-picker",
     StubImagePickerModule = "expo-image-picker", StubCameraModule = "expo-camera", StubSQLiteModule = "expo-sqlite", StubImageManipulatorModule = "expo-image-manipulator"
 }
 
-local STUB_MODULES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubSplashScreenModule", "StubClipboardModule", "StubFileSystemModule", "StubFontLoaderModule", "StubFontUtilsModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubBackgroundNotificationTasksModule", "StubBadgeModule", "StubCameraModule", "StubImageManipulatorModule", "StubNotificationCategoriesModule", "StubNotificationPermissionsModule", "StubNotificationPresenterModule", "StubNotificationSchedulerModule", "StubNotificationsEmitterModule", "StubNotificationsHandlerModule", "StubPushTokenManagerModule", "StubSQLiteModule", "StubServerRegistrationModule"}
+local STUB_MODULES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubFileSystemModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubBackgroundNotificationTasksModule", "StubBadgeModule", "StubCameraModule", "StubImageManipulatorModule", "StubNotificationCategoriesModule", "StubNotificationPermissionsModule", "StubNotificationPresenterModule", "StubNotificationSchedulerModule", "StubNotificationsEmitterModule", "StubNotificationsHandlerModule", "StubPushTokenManagerModule", "StubSQLiteModule", "StubServerRegistrationModule"}
 
 function expo_skipped(file)
     for _, name in ipairs(EXPO_SKIP_FILES) do

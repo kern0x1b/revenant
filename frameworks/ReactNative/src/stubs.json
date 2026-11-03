@@ -22,39 +22,11 @@
       "reason": "Name only."
     },
     {
-      "name": "StubSplashScreenModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoSplashScreen",
-      "owner": "expo-splash-screen",
-      "reason": "hide and preventAutoHide report the call and do nothing."
-    },
-    {
-      "name": "StubClipboardModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoClipboard",
-      "owner": "expo-clipboard",
-      "reason": "getStringAsync and setStringAsync work on UIPasteboard; this is a substitute for the package's module, not the module."
-    },
-    {
       "name": "StubFileSystemModule",
       "file": "src/expo/StubModules.swift",
       "module": "FileSystem",
       "owner": "expo-file-system",
       "reason": "Constants for the directories and empty class shells; no file operation exists."
-    },
-    {
-      "name": "StubFontLoaderModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoFontLoader",
-      "owner": "expo-font",
-      "reason": "getLoadedFonts returns an empty list; loadAsync reports the call and does nothing."
-    },
-    {
-      "name": "StubFontUtilsModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoFontUtils",
-      "owner": "expo-font",
-      "reason": "Name only; the package's FontUtils files are skipped by the build (EXPO_SKIP_FILES in src/expo/xmake.lua)."
     },
     {
       "name": "StubTwoWayAudioModule",
