@@ -143,13 +143,16 @@ function objc_facts(sdk, name, version)
         return state.rows
     end
     local prefix = sdkfiles.framework_root(sdk, name)
+    local function inside(file)
+        return file ~= nil and string.sub(file, 1, #prefix) == prefix
+    end
     local text = os.iorunv(CLANG, {"-target", target_of(version), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
         "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella})
     ast.scan(lines_of(text), function (top)
-        if top.file ~= nil and string.sub(top.file, 1, #prefix) == prefix then
+        if inside(top.file) then
             objc_top(state, top)
         end
-    end)
+    end, inside)
     return state.rows
 end
 
