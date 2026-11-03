@@ -186,6 +186,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [JavaScriptCore startup on the Paseo bundle](explanation/react-native/jsc-startup.md) | where the nine seconds of `evaluateJavaScript` go on the iPhone 4S: parsing first, then lazy parsing, the collector and the compiler |
 | [JavaScriptCore startup sampler](reference/react-native/jsc-sampler.md) | the native sampler's method, output format, symbolication, the phase and thread numbers and their limits |
 | [SIGBUS from JIT code on the Paseo bundle](reference/react-native/jsc-dfg-fault.md) | the reproduction with lowered tier-up thresholds, the fault record at the JIT pool's end, the DFG-off controls and what is still open |
+| [JavaScriptCore bytecode cache for the host](reference/react-native/jsc-bytecode-cache.md) | the prebuilt engine's JSScript and bytecode-cache API, how the host reaches its context, the build that did not finish, and what is not measured |
 
 ## WebKit
 
