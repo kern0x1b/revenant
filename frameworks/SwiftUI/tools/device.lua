@@ -171,6 +171,20 @@ local function slide(device, settings)
             string.format("%.4f", measured.finish / width), string.format("%.4f", y)}
 end
 
+local slid = false
+
+local function lock(device, settings)
+    if not slid then
+        return
+    end
+    local state = (on_device(device, settings, UNLOCK .. " lock") or ""):match("%a+")
+    if state == "locked" then
+        slid = false
+    else
+        print("the phone did not lock again: revenant-unlock lock printed %s", state or "nothing")
+    end
+end
+
 local function unlock(device, settings)
     local state = (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+")
     if state == "unlocked" then
@@ -184,6 +198,7 @@ local function unlock(device, settings)
     if (on_device(device, settings, UNLOCK .. " status") or ""):match("%a+") ~= "unlocked" then
         raise("the screen is still locked after the slide to unlock")
     end
+    slid = true
 end
 
 local function await_launch(device, settings)
@@ -206,7 +221,7 @@ local function start(device, settings, setup)
     await_launch(device, settings)
 end
 
-local function shots(arguments)
+local function run_shots(arguments)
     local mode, accept, calibrate = "render", false, 0
     while arguments[1] and arguments[1]:sub(1, 2) == "--" do
         local option = table.remove(arguments, 1)
@@ -359,6 +374,15 @@ local function shots(arguments)
     end
     if #failed > 0 then
         raise("%d scenario(s) failed on the phone, their pictures are the *-failed*.png files: %s", #failed, table.concat(failed, ", "))
+    end
+end
+
+local function shots(arguments)
+    local ok, problem = pcall(run_shots, arguments)
+    local device, settings = phone()
+    lock(device, settings)
+    if not ok then
+        error(problem, 0)
     end
 end
 
