@@ -774,9 +774,9 @@
    "group": "sdk",
    "version": "~57.0.10",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault)."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from its package on the isolated host (the patch makes its React import match the module; the host's react.modulemap must list RCTSurfaceHostingProxyRootView.h). Not exercised on the phone."
   },
   {
    "id": "expo-sqlite",
