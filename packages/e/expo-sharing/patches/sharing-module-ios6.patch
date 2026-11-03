@@ -1,0 +1,120 @@
+--- a/ios/SharingModule.swift
++++ b/ios/SharingModule.swift
+@@ -1,6 +1,9 @@
+ import ExpoModulesCore
+ 
+ public final class SharingModule: Module {
++  private var popover: UIPopoverController?
++  private var popoverDismissal: PopoverDismissal?
++
+   private var appGroupId: String {
+     get throws {
+       guard let groupId = Bundle.main.object(forInfoDictionaryKey: "ExpoShareIntoAppGroupId") as? String else {
+@@ -21,14 +24,20 @@
+       let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+       activityController.title = options.dialogTitle
+ 
+-      activityController.completionWithItemsHandler = { _, _, _, _ in
+-        // Resolve unconditionally. UIActivityViewController invokes this once
+-        // on dismissal for every (activityType, completed) permutation. The
+-        // previous implementation only resolved two of four cases, leaking
+-        // the promise when the user picked an activity and then cancelled
+-        // its follow-up dialog (e.g. tapped Print, then cancelled the print
+-        // dialog: activityType != nil, completed == false).
+-        promise.resolve(nil)
++      if #available(iOS 8.0, *) {
++        activityController.completionWithItemsHandler = { _, _, _, _ in
++          // Resolve unconditionally. UIActivityViewController invokes this once
++          // on dismissal for every (activityType, completed) permutation. The
++          // previous implementation only resolved two of four cases, leaking
++          // the promise when the user picked an activity and then cancelled
++          // its follow-up dialog (e.g. tapped Print, then cancelled the print
++          // dialog: activityType != nil, completed == false).
++          promise.resolve(nil)
++        }
++      } else if UIDevice.current.userInterfaceIdiom != .pad {
++        activityController.completionHandler = { _, _ in
++          promise.resolve(nil)
++        }
+       }
+ 
+       guard let currentViewcontroller = appContext?.utilities?.currentViewController() else {
+@@ -40,15 +49,28 @@
+       if UIDevice.current.userInterfaceIdiom == .pad {
+         let rect = options.anchor
+         let viewFrame = currentViewcontroller.view.frame
+-
+-        activityController.popoverPresentationController?.sourceRect = CGRect(
++        let sourceRect = CGRect(
+           x: rect?.x ?? viewFrame.midX,
+           y: rect?.y ?? viewFrame.maxY,
+           width: rect?.width ?? 0,
+           height: rect?.height ?? 0
+         )
+-        activityController.popoverPresentationController?.sourceView = currentViewcontroller.view
+-        activityController.modalPresentationStyle = .pageSheet
++
++        if #available(iOS 8.0, *) {
++          activityController.popoverPresentationController?.sourceRect = sourceRect
++          activityController.popoverPresentationController?.sourceView = currentViewcontroller.view
++          activityController.modalPresentationStyle = .pageSheet
++        } else {
++          let dismissal = PopoverDismissal {
++            promise.resolve(nil)
++          }
++          let controller = UIPopoverController(contentViewController: activityController)
++          controller.delegate = dismissal
++          popoverDismissal = dismissal
++          popover = controller
++          controller.presentPopover(from: sourceRect, in: currentViewcontroller.view, permittedArrowDirections: .any, animated: true)
++          return
++        }
+       }
+ 
+       currentViewcontroller.present(activityController, animated: true)
+@@ -95,11 +117,44 @@
+     let userDefaults = UserDefaults(suiteName: appGroupId)
+ 
+     guard let data = userDefaults?.data(forKey: SHARE_INTO_DEFAULTS_KEY),
+-    let rawPayloads = try? JSONDecoder().decode([SharePayload].self, from: data)
++    let entries = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]]
+     else {
+       return []
+     }
+ 
++    let rawPayloads = entries.compactMap { sharePayload(from: $0) }
++    guard rawPayloads.count == entries.count else {
++      return []
++    }
++
+     return rawPayloads
+   }
++
++  private func sharePayload(from entry: [String: Any]) -> SharePayload? {
++    guard let type = (entry["type"] as? String).flatMap(ShareType.init(rawValue:)),
++    let value = entry["value"] as? String,
++    let mimeType = entry["mimeType"] as? String
++    else {
++      return nil
++    }
++
++    let metadata = (entry["metadata"] as? [String: Any]).map {
++      ShareMetadata(originalName: $0["originalName"] as? String, size: ($0["size"] as? NSNumber)?.intValue)
++    }
++
++    return SharePayload(type: type, value: value, mimeType: mimeType, metadata: metadata)
++  }
+ }
++
++private final class PopoverDismissal: NSObject, UIPopoverControllerDelegate {
++  private let onDismiss: () -> Void
++
++  init(onDismiss: @escaping () -> Void) {
++    self.onDismiss = onDismiss
++    super.init()
++  }
++
++  func popoverControllerDidDismissPopover(_ popoverController: UIPopoverController) {
++    onDismiss()
++  }
++}

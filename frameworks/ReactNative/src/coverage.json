@@ -749,7 +749,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Does not compile for iOS 6: ResolveUrlContentDetails uses URLSession.bytes, an iOS 15 API."
+   "note": "Package and iOS 6 patches written, not built yet: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler and the iPad popover are guarded for iOS 6 (completionHandler, UIPopoverController), and the share-into payloads are read without JSONDecoder (iOS 11). The first build and a probe are pending."
   },
   {
    "id": "expo-sms",
