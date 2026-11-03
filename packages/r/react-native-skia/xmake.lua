@@ -1,0 +1,20 @@
+package("react-native-skia")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/Shopify/react-native-skia")
+    set_description("@shopify/react-native-skia 2.6.2, the Skia drawing of React Native, from its npm tarball: the sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/@shopify/react-native-skia/-/react-native-skia-$(version).tgz")
+    add_versions("2.6.2", "5f87afdee733702e8f97fc5f39938a452f768a135018568612691e0a4ce7d439")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "@shopify/react-native-skia" and manifest.version == "2.6.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isdir(path.join(package:installdir(), "apple")), "react-native-skia has no Apple sources")
+    end)

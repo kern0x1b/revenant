@@ -1,0 +1,29 @@
+--- a/ReactCommon/jsc/JSCRuntime.cpp
++++ b/ReactCommon/jsc/JSCRuntime.cpp
+@@ -380,9 +380,25 @@
+     : JSCRuntime(JSGlobalContextCreateInGroup(nullptr, nullptr)) {
+   JSGlobalContextRelease(ctx_);
+ }
++
++static JSGlobalContextRef rnJscLastContext = nullptr;
+ 
++static JSGlobalContextRef rnJscRememberContext(JSGlobalContextRef ctx) {
++  rnJscLastContext = ctx;
++  return ctx;
++}
++
++} // namespace facebook::jsc
++
++extern "C" JSGlobalContextRef RNJscRuntimeContext(void);
++extern "C" JSGlobalContextRef RNJscRuntimeContext(void) {
++  return facebook::jsc::rnJscLastContext;
++}
++
++namespace facebook::jsc {
++
+ JSCRuntime::JSCRuntime(JSGlobalContextRef ctx)
+-    : ctx_(JSGlobalContextRetain(ctx)),
++    : ctx_(rnJscRememberContext(JSGlobalContextRetain(ctx))),
+       ctxInvalid_(false)
+ #ifndef NDEBUG
+       ,

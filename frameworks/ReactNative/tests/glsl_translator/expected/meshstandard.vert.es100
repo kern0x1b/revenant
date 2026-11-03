@@ -1,0 +1,29 @@
+#version 100
+
+uniform mat3 normalMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform vec3 cameraPosition;
+uniform bool isOrthographic;
+
+attribute vec3 normal;
+varying vec3 vNormal;
+attribute vec3 position;
+varying vec3 vViewPosition;
+attribute vec2 uv;
+
+void main()
+{
+    vec3 objectNormal = normal;
+    vec3 transformedNormal = objectNormal;
+    transformedNormal = normalMatrix * transformedNormal;
+    vNormal = normalize(transformedNormal);
+    vec3 transformed = position;
+    vec4 mvPosition = vec4(transformed, 1.0);
+    mvPosition = modelViewMatrix * mvPosition;
+    gl_Position = projectionMatrix * mvPosition;
+    vViewPosition = -mvPosition.xyz;
+}
+

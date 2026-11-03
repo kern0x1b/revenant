@@ -1,0 +1,31 @@
+--- a/SocketRocket/SRWebSocket.m
++++ b/SocketRocket/SRWebSocket.m
+@@ -63,5 +63,16 @@
+ static NSString *const SRWebSocketAppendToSecKeyString = @"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+ static inline int32_t validate_dispatch_data_partial_string(NSData *data);
+
++// A dispatch_data_t is an NSData only from iOS 7 on, so the release before it needs the bytes copied out.
++static NSData *SRDataFromDispatchData(dispatch_data_t data)
++{
++    const void *buffer = NULL;
++    size_t size = 0;
++    dispatch_data_t mapped = dispatch_data_create_map(data, &buffer, &size);
++    NSData *result = [NSData dataWithBytes:buffer length:size];
++    (void)mapped;
++    return result;
++}
++
+ static uint8_t const SRWebSocketProtocolVersion = 13;
+@@ -1243,4 +1254,4 @@
+     size_t foundSize = 0;
+     if (consumer.consumer) {
+-        NSData *subdata = (NSData *)dispatch_data_create_subrange(_readBuffer, _readBufferOffset, readBufferSize - _readBufferOffset);
++        NSData *subdata = SRDataFromDispatchData(dispatch_data_create_subrange(_readBuffer, _readBufferOffset, readBufferSize - _readBufferOffset));
+         foundSize = consumer.consumer(subdata);
+@@ -1322,4 +1333,4 @@
+         } else if (foundSize) {
+             [_consumers removeObjectAtIndex:0];
+-            consumer.handler(self, (NSData *)slice);
++            consumer.handler(self, SRDataFromDispatchData(slice));
+             [_consumerPool returnConsumer:consumer];

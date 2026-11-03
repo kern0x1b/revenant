@@ -15,8 +15,16 @@ package("uniformtypeidentifiers")
 
     on_install("iphoneos", function (package)
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
+        local modules = path.absolute(path.join(package:name(), "modulecache"))
+        local extra = path.absolute(path.join(package:name(), "extra"))
+        os.mkdir(extra)
+        io.writefile(path.join(extra, "xmake.lua"), table.concat({
+            "target(\"swiftUniformTypeIdentifiers\")",
+            "    add_values(\"swift.flags\", \"-module-cache-path\", \"" .. modules .. "\")",
+            "target_end()",
+            ""}, "\n"))
         import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
-            includes = {path.join(root, "frameworks", "Backports", "src", "Swift")}, targets = {"swiftUniformTypeIdentifiers"}, modules = true})
+            includes = {path.join(root, "frameworks", "Backports", "src", "Swift"), extra}, targets = {"swiftUniformTypeIdentifiers"}, modules = true})
     end)
 
     on_test(function (package)

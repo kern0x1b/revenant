@@ -7,7 +7,14 @@ package("react-native")
 
     add_urls("https://registry.npmjs.org/react-native/-/react-native-$(version).tgz")
     add_versions("0.86.3", "04e0ef4284ef9e2fb94075b0f98c6371d12ea1b31c2e42540a900a1e86ea46f5")
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "6", readonly = true})
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "ios6-32bit.patch"), "38929d3d807d3ca4b081958bd854e3f05973ac8290a278696b0b874fa0418d35")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "ios6-32bit-image-size.patch"), "c417be1e5f0977895cbc727891fa4f413e62f96135d3a32ed6d0c25c35b28795")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "ios6-weak-guards.patch"), "fa81d6b3adcc0b22ce389381d73a72b18c02d0f74d3c88c389c1397e872dfd52")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "ios6-nil-attributed-text.patch"), "5f344b7a79d6ddd49f778941be7dcd1f23c598f03faf93905b7172fbeca87045")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "jsi-public-destructors.patch"), "63f43c19a109afeb3bb342bff7c6d904f151e59d4a4b364d421ad20bafa3bd85")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "rn-0.86.3-websocket-socketid.patch"), "c1aa7bae07e3b55bfc2a2f7bdfcfbe094c4ad721dd20b730896768a2fc7ff5ce")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "jsc-runtime-context-accessor.patch"), "9f0bc2a456e67238c6b0fb4624e010e91b49c3e51079eb9520158fe3b1b12bc5")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "7", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@libcxx", {alias = "libcxx"})
@@ -71,6 +78,13 @@ package("react-native")
                 end
             end
         end
+        local sources = package:installdir("src", "react-native")
+        os.mkdir(sources)
+        for _, entry in ipairs({"React", "Libraries", "ReactApple", "ReactCommon", "Common", "LICENSE", "package.json", "scripts", "src"}) do
+            if os.exists(entry) then
+                os.cp(entry, sources)
+            end
+        end
         os.cp("LICENSE", package:installdir("licenses") .. "/")
     end)
 
@@ -81,6 +95,8 @@ package("react-native")
                                "include/React/renderer/components/view/platform/cxx/react/renderer/components/view/HostPlatformViewEventEmitter.h"}) do
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
+        local patched = io.readfile(path.join(package:installdir("src", "react-native"), "React", "Fabric", "Mounting", "ComponentViews", "TextInput", "RCTTextInputUtils.mm"))
+        assert(patched:find('attributedString.string ?: @""', 1, true), "the patches are not in the installed sources")
         assert(not os.isfile(path.join(package:installdir("include"), "yoga", "Yoga.h")), "yoga belongs to the yoga package")
         local probe = import("@addon.revenant.apple.probe", {anonymous = true})
         local ok, output = probe.check(package, {source = [[

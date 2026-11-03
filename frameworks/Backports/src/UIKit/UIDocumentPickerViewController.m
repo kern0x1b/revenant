@@ -2,6 +2,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "RevenantDocumentBrowser.h"
 #import "RevenantUTType.h"
+#import "RevenantDocumentPickerRules.h"
 
 @implementation UIDocumentPickerViewController {
     UIDocumentPickerMode _documentPickerMode;
@@ -159,24 +160,10 @@
     _browser = [[UINavigationController alloc] initWithRootViewController:root];
     NSString *start = [self revenant_startFolder];
     if (start) {
-        NSDictionary *base = nil;
-        for (NSDictionary *location in [self revenant_locations]) {
-            NSString *path = location[@"path"];
-            BOOL inside = [start isEqualToString:path] || [start hasPrefix:[path hasSuffix:@"/"] ? path : [path stringByAppendingString:@"/"]];
-            if (inside && [path length] > [base[@"path"] length])
-                base = location;
-        }
-        NSMutableArray *chain = [NSMutableArray array];
-        NSString *walk = start;
+        NSDictionary *base = revenant_picker_base_location(start, [self revenant_locations]);
         NSString *floor = base[@"path"];
-        while (walk.length > 1 && ![walk isEqualToString:floor]) {
-            [chain insertObject:walk atIndex:0];
-            walk = [walk stringByDeletingLastPathComponent];
-        }
-        if (base)
-            [chain insertObject:floor atIndex:0];
         NSMutableArray *stack = [NSMutableArray arrayWithObject:root];
-        for (NSString *path in chain)
+        for (NSString *path in revenant_picker_folder_chain(start, floor))
             [stack addObject:[[RevenantFileFolderController alloc] initWithPath:path title:[path isEqualToString:floor] ? base[@"title"] : nil picker:self]];
         _browser.viewControllers = stack;
     }
@@ -221,17 +208,7 @@
 
 - (BOOL)revenant_acceptsPath:(NSString *)path
 {
-    if (!_documentTypes.count)
-        return YES;
-    NSString *extension = path.pathExtension;
-    NSString *type = extension.length ? CFBridgingRelease(UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)extension, NULL)) : nil;
-    for (NSString *allowed in _documentTypes) {
-        if ([allowed isEqualToString:@"public.item"] || ([allowed isEqualToString:@"public.data"] && type == nil))
-            return YES;
-        if (type && UTTypeConformsTo((__bridge CFStringRef)type, (__bridge CFStringRef)allowed))
-            return YES;
-    }
-    return NO;
+    return revenant_picker_accepts_path(path, _documentTypes);
 }
 
 - (NSArray<NSDictionary *> *)revenant_locations
@@ -310,7 +287,7 @@
         NSString *target = [folder stringByAppendingPathComponent:name];
         NSUInteger n = 2;
         while ([manager fileExistsAtPath:target])
-            target = [folder stringByAppendingPathComponent:[NSString stringWithFormat:@"%@ %lu%@%@", name.stringByDeletingPathExtension, (unsigned long)n++, name.pathExtension.length ? @"." : @"", name.pathExtension]];
+            target = [folder stringByAppendingPathComponent:revenant_picker_unique_name(name, n++)];
         BOOL ok = _documentPickerMode == UIDocumentPickerModeMoveToService ? [manager moveItemAtPath:source.path toPath:target error:NULL] : [manager copyItemAtPath:source.path toPath:target error:NULL];
         if (ok)
             [urls addObject:[NSURL fileURLWithPath:target]];

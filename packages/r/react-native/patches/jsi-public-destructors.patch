@@ -1,0 +1,31 @@
+--- a/ReactCommon/jsi/jsi/jsi.h
++++ b/ReactCommon/jsi/jsi/jsi.h
+@@ -126,7 +126,9 @@
+   /// does not need to be released when not needed.
+   virtual ICast* castInterface(const UUID& interfaceUUID) = 0;
+ 
+- protected:
++ // iOS 6 port: public so Swift's C++ importer (which drops records without a
++ // public destructor) imports the interface
++ public:
+   /// Interfaces are not destructible, thus the destructor is intentionally
+   /// protected to prevent delete calls on the interface.
+   /// Additionally, the destructor is non-virtual to reduce the vtable
+@@ -323,7 +325,7 @@
+   virtual Array deserializeWithTransfer(
+       std::unique_ptr<Serialized>& serialized) = 0;
+ 
+- protected:
++ public:
+   ~ISerialization() = default;
+ };
+ 
+@@ -680,7 +682,7 @@
+   /// property of a JS string.
+   virtual size_t length(const String& str) = 0;
+ 
+- protected:
++ public:
+   virtual ~IRuntime() = default;
+ };
+ 

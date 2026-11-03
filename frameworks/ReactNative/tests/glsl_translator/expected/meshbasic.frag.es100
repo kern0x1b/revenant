@@ -1,0 +1,45 @@
+#version 100
+precision mediump float;
+precision highp int;
+
+struct ReflectedLight
+{
+    highp vec3 directDiffuse;
+    highp vec3 directSpecular;
+    highp vec3 indirectDiffuse;
+    highp vec3 indirectSpecular;
+};
+
+uniform highp vec3 diffuse;
+uniform highp float opacity;
+uniform highp mat4 viewMatrix;
+uniform highp vec3 cameraPosition;
+uniform bool isOrthographic;
+
+varying highp vec3 vNormal;
+
+highp vec4 sRGBTransferOETF(highp vec4 value)
+{
+    return vec4(mix((pow(value.xyz, vec3(0.416660010814666748046875)) * 1.05499994754791259765625) - vec3(0.054999999701976776123046875), value.xyz * 12.9200000762939453125, vec3(lessThanEqual(value.xyz, vec3(0.003130800090730190277099609375)))), value.w);
+}
+
+highp vec4 linearToOutputTexel(highp vec4 value)
+{
+    highp vec4 param = vec4(mat3(vec3(1.0, 0.0, -0.0), vec3(-0.0, 1.0, -0.0), vec3(-0.0, 0.0, 1.0)) * value.xyz, value.w);
+    return sRGBTransferOETF(param);
+}
+
+void main()
+{
+    highp vec4 diffuseColor = vec4(diffuse, opacity);
+    highp float specularStrength = 1.0;
+    ReflectedLight reflectedLight = ReflectedLight(vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+    reflectedLight.indirectDiffuse += vec3(1.0);
+    reflectedLight.indirectDiffuse *= diffuseColor.xyz;
+    highp vec3 outgoingLight = reflectedLight.indirectDiffuse;
+    diffuseColor.w = 1.0;
+    gl_FragData[0] = vec4(outgoingLight, diffuseColor.w);
+    highp vec4 param = gl_FragData[0];
+    gl_FragData[0] = linearToOutputTexel(param);
+}
+

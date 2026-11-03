@@ -10,6 +10,14 @@ local PUBLISHED = {
     {name = "swift-runtime", version = "6.4.0", plat = "iphoneos", arch = "armv7", buildhash = "e31234b2aea74924b9a7c75967c670c9",
      deps = {{"apple-compat", "d46eee4235b34e2e8ce1b5524c687019"}, {"libcxx", "f01b67fa07c14bd8ac68242228ff6996"}},
      key = "64ea5fea9aa742351453fec6ca6bd7af"},
+    {name = "webkit-engine", plat = "iphoneos", arch = "armv7", buildhash = "0ed3569201cd40248115b9ef92d84e46",
+     deps = {{"apple-compat", "5b3cb7bd5b53473880112aa7e0f64680"}, {"brotli", "7232db62ac374fca87b14dc73de4f9bc"},
+             {"icu", "afcda638ee6841afbc0a9fddcce9524c"}, {"libcxx", "d135008c0a4c466f9baf4825ca8437d9"},
+             {"libpsl", "79fde8ff5a0549cc90bf81a9b5340ec0"}, {"libwebp", "93f0ba67d7174ba289c056a741c7e187"},
+             {"libxml2", "8feda8a8932245fcafc195e757936aab"}, {"libxslt", "023054ef78144442b01b55da5cb5ef1c"},
+             {"openssl", "8efa8d7ace86468b9a4c70b4385d7b9b"}, {"webkit", "5aa6ad32df1e400ca5c39cdb9b870b58"},
+             {"woff2", "86cb725dc2bd4ae39d083a8a6e69de5d"}},
+     key = "4e14b210a5a9baf6f026d58a5535eabf"},
 }
 
 local function package(row)

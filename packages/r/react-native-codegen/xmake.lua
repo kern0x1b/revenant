@@ -7,8 +7,8 @@ package("react-native-codegen")
 
     add_urls("https://registry.npmjs.org/react-native/-/react-native-$(version).tgz")
     add_versions("0.86.3", "04e0ef4284ef9e2fb94075b0f98c6371d12ea1b31c2e42540a900a1e86ea46f5")
-    add_deps("revenant@node 26.13.0", {alias = "node", kind = "binary"})
-    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "2", readonly = true})
+    add_deps("revenant@node 26.13.0", {alias = "node", kind = "binary", system = false})
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "3", readonly = true})
 
     local DEPENDENCIES = {
         {"node_modules/@babel/code-frame", "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.29.0.tgz", "sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw=="},

@@ -1,0 +1,16 @@
+#version 100
+precision mediump float;
+precision highp int;
+
+uniform highp vec3 tint;
+uniform highp mat4 viewMatrix;
+uniform highp vec3 cameraPosition;
+uniform bool isOrthographic;
+
+varying highp vec2 vUv;
+
+void main()
+{
+    gl_FragData[0] = vec4(tint * vUv.x, 1.0);
+}
+

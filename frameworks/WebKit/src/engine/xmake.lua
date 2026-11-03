@@ -22,8 +22,17 @@ package("webkit-engine")
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
 
+    on_download(function (package)
+        import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package)
+    end)
+
     on_install("iphoneos", function (package)
+        local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
+        if prebuilt.install(package) then
+            return
+        end
         import("engine", {rootdir = modules, anonymous = true}).install(package)
+        prebuilt.pack(package)
     end)
 
     on_test(function (package)

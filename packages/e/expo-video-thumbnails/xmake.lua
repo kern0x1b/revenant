@@ -1,0 +1,21 @@
+package("expo-video-thumbnails")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-video-thumbnails")
+    set_description("expo-video-thumbnails 57.0.2, the Expo SDK frame grabber of a video, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-video-thumbnails/-/expo-video-thumbnails-$(version).tgz")
+    add_versions("57.0.2", "10523ecf075a1ed6605c85c8cf8cc29f5de819ae4d91c647d73416229d398caa")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-video-thumbnails" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "VideoThumbnailsModule.swift")), "expo-video-thumbnails has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-video-thumbnails has no expo-module.config.json")
+    end)

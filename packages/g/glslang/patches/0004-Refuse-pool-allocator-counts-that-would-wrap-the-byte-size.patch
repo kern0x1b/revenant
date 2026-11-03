@@ -1,0 +1,25 @@
+diff --git a/glslang/Include/PoolAlloc.h b/glslang/Include/PoolAlloc.h
+index 6b6dfd6..43b5670 100644
+--- a/glslang/Include/PoolAlloc.h
++++ b/glslang/Include/PoolAlloc.h
+@@ -64,6 +64,7 @@
+ #include "visibility.h"
+ 
+ #include <cstddef>
++#include <cstdlib>
+ #include <cstring>
+ #include <vector>
+ 
+@@ -294,8 +295,12 @@ public:
+         pool_allocator(const pool_allocator<Other>& p) : allocator(p.getAllocator()) { }
+     
+     pointer allocate(size_type n) {
++        if (n > max_size())
++            std::abort();
+         return reinterpret_cast<pointer>(getAllocator().allocate(n * sizeof(T))); }
+     pointer allocate(size_type n, const void*) {
++        if (n > max_size())
++            std::abort();
+         return reinterpret_cast<pointer>(getAllocator().allocate(n * sizeof(T))); }
+ 
+     void deallocate(void*, size_type) { }

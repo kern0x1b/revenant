@@ -27,6 +27,12 @@ from a shipped image. **static** = a string or plist check on a local image. **f
   loader runs them through the closed iOS GL ES 2.0 driver. 11 of the 14 render functions in Telegram's metallib
   already translate, pass the Appendix A checker and pass glslangValidator in ES mode [air2es]. v1 is ordinary backport
   work: finish the three refused shaders and prove the render path on a device. **Compute is not in v1.**
+- **Gap in v1, not in the air2es plan: run-time MSL to GLSL ES.** air2es reads AIR from a precompiled metallib only. Code
+  that builds Metal Shading Language source at run time has no route: `RevenantMetalLibrary` hands MSL text to
+  `glShaderSource` unchanged, and no translator is in the tree (`backports-open-members.md`). Skia's Metal backend, which
+  `@shopify/react-native-skia` uses, is such code (its MSL generation is not verified in this tree, since the libskia
+  xcframework comes from `npm install-skia`). A run-time MSL to GLSL ES route is therefore needed for Skia, separate from
+  air2es.
 - **v2, later, after the whole backport works: all Metal compute.** The cheapest start is fragment-GPGPU: compute
   written as ES 2.0 fragment shaders through the same GL driver. It needs no driver and no reverse engineering
   (section 4.1).

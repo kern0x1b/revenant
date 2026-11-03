@@ -1,0 +1,179 @@
+{
+  "stubs": [
+    {
+      "name": "StubAudioModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoAudio",
+      "owner": "expo-audio",
+      "reason": "Player, recorder and playlist class shells; the functions report the call and do nothing."
+    },
+    {
+      "name": "StubDocumentPickerModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoDocumentPicker",
+      "owner": "expo-document-picker",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubHapticsModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoHaptics",
+      "owner": "expo-haptics",
+      "reason": "Three functions report the call and do nothing; iOS 6 has no haptic engine."
+    },
+    {
+      "name": "StubImagePickerModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExponentImagePicker",
+      "owner": "expo-image-picker",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubSharingModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoSharing",
+      "owner": "expo-sharing",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubSplashScreenModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoSplashScreen",
+      "owner": "expo-splash-screen",
+      "reason": "hide and preventAutoHide report the call and do nothing."
+    },
+    {
+      "name": "StubClipboardModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoClipboard",
+      "owner": "expo-clipboard",
+      "reason": "getStringAsync and setStringAsync work on UIPasteboard; this is a substitute for the package's module, not the module."
+    },
+    {
+      "name": "StubFileSystemModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "FileSystem",
+      "owner": "expo-file-system",
+      "reason": "Constants for the directories and empty class shells; no file operation exists."
+    },
+    {
+      "name": "StubFontLoaderModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoFontLoader",
+      "owner": "expo-font",
+      "reason": "getLoadedFonts returns an empty list; loadAsync reports the call and does nothing."
+    },
+    {
+      "name": "StubFontUtilsModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoFontUtils",
+      "owner": "expo-font",
+      "reason": "Name only; the package's FontUtils files are skipped by the build (EXPO_SKIP_FILES in src/expo/xmake.lua)."
+    },
+    {
+      "name": "StubTwoWayAudioModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoTwoWayAudio",
+      "owner": "@getpaseo/expo-two-way-audio",
+      "reason": "Name only; the module belongs to the Paseo package @getpaseo/expo-two-way-audio, which is not built."
+    },
+    {
+      "name": "StubHardwareKeyboardModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "PaseoHardwareKeyboard",
+      "owner": "PaseoHardwareKeyboard",
+      "reason": "Name only; a module of the spike app that no package provides and the paseo app does not use."
+    },
+    {
+      "name": "StubBackgroundNotificationTasksModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoBackgroundNotificationTasksModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubBadgeModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoBadgeModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubCameraModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoCamera",
+      "owner": "expo-camera",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubImageManipulatorModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoImageManipulator",
+      "owner": "expo-image-manipulator",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationCategoriesModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationCategoriesModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationPermissionsModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationPermissionsModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationPresenterModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationPresenter",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationSchedulerModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationScheduler",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationsEmitterModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationsEmitter",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubNotificationsHandlerModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoNotificationsHandlerModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubPushTokenManagerModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoPushTokenManager",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubServerRegistrationModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "NotificationsServerRegistrationModule",
+      "owner": "expo-notifications",
+      "reason": "Name only."
+    },
+    {
+      "name": "StubSQLiteModule",
+      "file": "src/expo/StubModules.swift",
+      "module": "ExpoSQLite",
+      "owner": "expo-sqlite",
+      "reason": "Name only."
+    }
+  ]
+}

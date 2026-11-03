@@ -1,0 +1,11 @@
+--- a/Libraries/Image/RCTImageUtils.mm
++++ b/Libraries/Image/RCTImageUtils.mm
+@@ -294,7 +294,7 @@
+   NSNumber *width = (NSNumber *)CFDictionaryGetValue(imageProperties, kCGImagePropertyPixelWidth);
+   NSNumber *height = (NSNumber *)CFDictionaryGetValue(imageProperties, kCGImagePropertyPixelHeight);
+   NSNumber *orientationNum = (NSNumber *)CFDictionaryGetValue(imageProperties, kCGImagePropertyOrientation);
+-  CGSize sourceSize = {width.doubleValue, height.doubleValue};
++  CGSize sourceSize = {(CGFloat)width.doubleValue, (CGFloat)height.doubleValue};
+   CFRelease(imageProperties);
+ 
+   if (CGSizeEqualToSize(destSize, CGSizeZero)) {
