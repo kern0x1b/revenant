@@ -452,7 +452,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Built from the npm 57.0.3 sources with haptics-ios6.patch: each feedback call is guarded by #available(iOS 10.0), so on iOS 6 it returns without touching the UIKit feedback generators. No haptic hardware on iPhone 4S, call returns: no vibration is produced. On the iPhone 4S, impactAsync, notificationAsync and selectionAsync each resolve without an error (probe run org.revenant.rnhost.expo, rnhost.log lines rn-probe: haptics.* ok)."
+   "note": "Built from the npm 57.0.3 sources with haptics-ios6.patch: each feedback call is guarded by #available(iOS 10.0). On iOS 6 an iPhone, which has a vibration motor, plays one system vibration (AudioServicesPlaySystemSound kSystemSoundID_Vibrate) for impactAsync, notificationAsync and selectionAsync alike, so the impact style and notification type are not told apart. An iPad and the simulator have no motor and return without doing anything. On the iPhone 4S the three calls resolve without an error and the rnhost.log lines show the vibration branch taken (rn-host: haptics: iOS 6 iPhone); the buzz itself was not observed."
   },
   {
    "id": "expo-image",
@@ -749,7 +749,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Built from the npm 57.0.23 sources with sharing-module-ios6.patch and url-details-ios6.patch: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler is completionHandler and the iPad popover is UIPopoverController (iOS 8 pieces guarded), and the share-into payloads are read without JSONDecoder (iOS 11). On the iPhone 4S the module is registered and isAvailableAsync answers true. shareAsync is not exercised, so the share sheet has not been shown on the phone."
+   "note": "Built from the npm 57.0.23 sources with sharing-module-ios6.patch and url-details-ios6.patch: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler is completionHandler and the iPad popover is UIPopoverController (iOS 8 pieces guarded), and the share-into payloads are read without JSONDecoder (iOS 11), and shareAsync takes the URL as a string (the URL argument converter of ExpoModulesCore crashed the iOS 6 host with fatal signal 11). On the iPhone 4S isAvailableAsync answers true, and shareAsync shows the activity sheet (Mail, Cancel), resolves when the sheet is cancelled, and the probe logs done. The share targets other than Mail and the completed-share case were not exercised."
   },
   {
    "id": "expo-sms",

@@ -28,7 +28,9 @@ rule("swift")
 
     on_config(function (target)
         target:add("scarflags", "-cr", {force = true})
-        target:add("values", "swift.flags", "-module-cache-path", path.join(os.projectdir(), "build", "modulecache", target:name()))
+        if not table.contains(table.wrap(target:values("swift.flags")), "-module-cache-path") then
+            target:add("values", "swift.flags", "-module-cache-path", path.join(os.projectdir(), "build", "modulecache", target:name()))
+        end
         for _, flag in ipairs(table.wrap(target:values("swift.flags"))) do
             if flag == "-emit-objc-header" or flag == "-emit-objc-header-path" then
                 target:set("policy", "build.fence", true)
