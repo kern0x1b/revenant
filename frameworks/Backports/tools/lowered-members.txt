@@ -4202,6 +4202,7 @@ enum kvImageARGB8888
 enum kvImageNoAllocate
 enum kvImagePrintDiagnosticsToConsole
 enum kvImageUseFP16Accumulator
+enum nw_error_domain_wifi_aware
 enum tls_protocol_version_DTLSv10
 enum tls_protocol_version_TLSv10
 enum tls_protocol_version_TLSv11
