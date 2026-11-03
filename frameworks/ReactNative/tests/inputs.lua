@@ -130,7 +130,7 @@ check("splash_options refuses an application without the plugin", fails(function
 
 local defaults = expo_packages({})
 check("the default Expo packages are the real and partial ones of coverage.json", table.contains(defaults, "expo")
-    and table.contains(defaults, "expo-camera") and table.contains(defaults, "expo-file-system") and table.contains(defaults, "expo-splash-screen"), table.concat(defaults, ","))
+    and table.contains(defaults, "expo-font") and table.contains(defaults, "expo-clipboard") and table.contains(defaults, "expo-splash-screen"), table.concat(defaults, ","))
 
 check("the default Expo packages leave out stubs, missing and js-only packages, and the core", not table.contains(defaults, "expo-audio")
     and not table.contains(defaults, "expo-image") and not table.contains(defaults, "expo-router") and not table.contains(defaults, "expo-modules-core"), table.concat(defaults, ","))
@@ -139,7 +139,7 @@ local parity = expo_packages({real = "expo-audio,expo-image"})
 check("--real replaces the default with the parity list on top of the base", table.contains(parity, "expo-audio") and table.contains(parity, "expo-image")
     and table.contains(parity, "expo-asset") and not table.contains(parity, "expo-camera"), table.concat(parity, ","))
 
-check("expo_real marks the packages that the mode builds as real", expo_real({options = {}})["expo-camera"] and not expo_real({options = {}})["expo-audio"]
+check("expo_real marks the packages that the mode builds as real", expo_real({options = {}})["expo-font"] and not expo_real({options = {}})["expo-audio"]
     and expo_real({options = {real = "expo-audio"}})["expo-audio"])
 
 if failures > 0 then

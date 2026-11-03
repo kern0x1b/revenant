@@ -696,9 +696,9 @@ function make_app_assets(ctx)
         "</dict></plist>"})
 end
 
-local EXPO_SKIP_FILES = {"FontUtils"}
+local EXPO_SKIP_FILES = {}
 
-local EXPO_SKIP_MODULES = {FontUtilsModule = true}
+local EXPO_SKIP_MODULES = {}
 
 local EXPO_ONLY = {expo = "Fetch"}
 
