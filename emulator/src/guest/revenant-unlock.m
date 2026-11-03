@@ -41,7 +41,7 @@ static CGPoint fraction(const char *x, const char *y)
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "usage: revenant-unlock status | screen | wake | tap FX FY | drag FX0 FY0 FX1 FY1\n");
+        fprintf(stderr, "usage: revenant-unlock status | screen | wake | tap FX FY | drag FX0 FY0 FX1 FY1 | lock [PAGE USAGE]\n");
         return 2;
     }
     @autoreleasepool {
@@ -80,6 +80,18 @@ int main(int argc, char *argv[])
         if (strcmp(argv[1], "drag") == 0 && argc == 6) {
             drag(fraction(argv[2], argv[3]), fraction(argv[4], argv[5]), 12);
             return 0;
+        }
+        if (strcmp(argv[1], "lock") == 0 && (argc == 2 || argc == 4)) {
+            uint32_t page = argc == 4 ? (uint32_t)strtoul(argv[2], NULL, 0) : 0x0C;
+            uint32_t usage = argc == 4 ? (uint32_t)strtoul(argv[3], NULL, 0) : 0x30;
+            if (!hid_press(page, usage)) {
+                fprintf(stderr, "revenant-unlock: the key event could not be sent\n");
+                return 1;
+            }
+            sleep(2);
+            int state = locked();
+            printf("%s\n", state == 0 ? "unlocked" : state == 1 || state == 2 ? "locked" : "unknown");
+            return state == 1 || state == 2 ? 0 : 1;
         }
     }
     fprintf(stderr, "revenant-unlock: unknown command %s\n", argv[1]);

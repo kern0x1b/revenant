@@ -1,6 +1,7 @@
 #import "hid.h"
 #include <dlfcn.h>
 #include <mach/mach_time.h>
+#include <unistd.h>
 
 typedef void *HidRef;
 static HidRef (*hid_client_create)(CFAllocatorRef);
@@ -39,4 +40,23 @@ void hid_touch(int phase, CGPoint point)
     HidRef finger = hid_finger(kCFAllocatorDefault, now, 1, 2, mask, x, y, 0, 0, 0, down, down, 0);
     hid_append(hand, finger);
     hid_dispatch(hid_client, hand);
+}
+
+BOOL hid_press(uint32_t usage_page, uint32_t usage)
+{
+    if (!hid_client)
+        return NO;
+    void *handle = dlopen("/System/Library/Frameworks/IOKit.framework/IOKit", RTLD_NOW);
+    HidRef (*keyboard)(CFAllocatorRef, uint64_t, uint32_t, uint32_t, Boolean, uint32_t) = handle ? dlsym(handle, "IOHIDEventCreateKeyboardEvent") : NULL;
+    if (!keyboard)
+        return NO;
+    for (int down = 1; down >= 0; down--) {
+        HidRef event = keyboard(kCFAllocatorDefault, mach_absolute_time(), usage_page, usage, down, 0);
+        if (!event)
+            return NO;
+        hid_dispatch(hid_client, event);
+        CFRelease(event);
+        usleep(80000);
+    }
+    return YES;
 }
