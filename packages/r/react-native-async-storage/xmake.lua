@@ -1,0 +1,22 @@
+package("react-native-async-storage")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/react-native-async-storage/async-storage")
+    set_description("react-native-async-storage 2.2.0, the key-value store React Native applications keep their settings in, from its npm tarball: RNCAsyncStorage.mm and the TurboModule spec the codegen of the host turns into its native module")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/@react-native-async-storage/async-storage/-/async-storage-$(version).tgz")
+    add_versions("2.2.0", "8f708f4558256be3d7dcdfcc0aafdbd37bea517b48fcb7d1446f2c2c6e18afdf")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "@react-native-async-storage/async-storage" and manifest.version == "2.2.0", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(manifest.codegenConfig and manifest.codegenConfig.name == "rnasyncstorage", "react-native-async-storage has no codegenConfig for rnasyncstorage")
+        assert(os.isfile(path.join(package:installdir(), "ios", "RNCAsyncStorage.mm")), "RNCAsyncStorage.mm is not installed")
+    end)

@@ -1,0 +1,21 @@
+package("react-native-segmented-control")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/react-native-segmented-control/segmented-control")
+    set_description("react-native-segmented-control 2.5.7, the UISegmentedControl view of React Native applications, from its npm tarball: RNCSegmentedControl and its view manager, compiled by the host's view registry")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/@react-native-segmented-control/segmented-control/-/segmented-control-$(version).tgz")
+    add_versions("2.5.7", "285b4384f944e49cb2e25ef01b4203b528e102634d828aa80ce089442669c142")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "@react-native-segmented-control/segmented-control" and manifest.version == "2.5.7", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "RNCSegmentedControlManager.m")), "RNCSegmentedControlManager.m is not installed")
+    end)
