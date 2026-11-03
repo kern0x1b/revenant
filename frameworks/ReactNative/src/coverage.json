@@ -414,9 +414,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Does not compile as the real module: FontLoaderModule calls queryCustomNativeFonts, which is in FontUtils, the file the spike skips."
+   "status": "real",
+   "verified": "build",
+   "note": "Built from the package on the isolated host, FontUtils and renderToImageAsync included. The font descriptors come from the CoreText backport (CTFontManagerCreateFontDescriptorsFromURL is iOS 7; host test CoreTextBackports_font_descriptors_test), and the render color is a UIColor, since the SDK's Color is SwiftUI (iOS 14). Not exercised on the phone."
   },
   {
    "id": "expo-gl",

@@ -1,0 +1,37 @@
+--- a/ios/FontUtils.swift
++++ b/ios/FontUtils.swift
+@@ -14,7 +14,7 @@
+     guard let fontUrl = Bundle.main.url(forResource: fontFilePath, withExtension: nil) else {
+       return []
+     }
+-    guard let fontDescriptors = CTFontManagerCreateFontDescriptorsFromURL(fontUrl as CFURL) as? [CTFontDescriptor] else {
++    guard let fontDescriptors = revenantCTFontManagerCreateFontDescriptorsFromURL(fontUrl as CFURL) as? [CTFontDescriptor] else {
+       return []
+     }
+     return fontDescriptors.compactMap { descriptor in
+--- a/ios/FontUtilsRecords.swift
++++ b/ios/FontUtilsRecords.swift
+@@ -1,11 +1,10 @@
+ // Copyright 2025-present 650 Industries. All rights reserved.
+ 
+-import SwiftUI
+ import ExpoModulesCore
+ 
+ struct RenderToImageOptions: Record {
+   @Field var fontFamily: String = ""
+   @Field var lineHeight: CGFloat? = nil
+   @Field var size: CGFloat = 24
+-  @Field var color: Color = .black
++  @Field var color: UIColor = .black
+ }
+--- a/ios/FontUtilsModule.swift
++++ b/ios/FontUtilsModule.swift
+@@ -17,7 +17,7 @@
+ 
+       var attributes: [NSAttributedString.Key: Any] = [
+         .font: font,
+-        .foregroundColor: UIColor(options.color)
++        .foregroundColor: options.color
+       ]
+ 
+       if let lineHeight = options.lineHeight {

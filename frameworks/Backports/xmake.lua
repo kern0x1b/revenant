@@ -547,6 +547,7 @@ local QUARTZCORE_TESTS = {
 
 local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
+    font_descriptors = {"RevenantFontDescriptors.m"},
 }
 
 local SCENEKIT_TESTS = {
@@ -629,7 +630,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("QuartzCore", {iosurface_contents = {"CALayer+IOSurfaceContents.m"}}, "Metal", {"Foundation", "QuartzCore", "CoreGraphics", "IOSurface"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
-    host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "Foundation"})
+    host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "CoreGraphics", "Foundation"})
     local SCENEKIT_TESTS_NO_AUDIO = {}
     for name, sources in pairs(SCENEKIT_TESTS) do
         if name ~= "audio" then
