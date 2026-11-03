@@ -20,6 +20,10 @@ Every device action refuses a phone that another holder has claimed, so claim fi
 
 A claim held by another name fails until it is released or expires.
 
+## Lock the phone again
+
+A session that unlocked the phone locks it before it ends: `./xmakew device run '/usr/libexec/revenant-unlock lock'` (prints `locked`, exit 0; exit 1 with `unlocked` when the press did not lock). `revenant-unlock status` prints `locked`, `unlocked` or `passcode`. Rule: every session that unlocked the phone (`shots`, or `revenant-unlock wake` and `drag` by hand) runs `lock` and checks `status` in the same turn that releases the claim, even when the run failed. The phone stays unlocked for the next session only when that session asked for it.
+
 ## Run, log, install
 
 - `./xmakew device run "<command>"`: runs as root over ssh. `-s SECONDS` raises the limit.
