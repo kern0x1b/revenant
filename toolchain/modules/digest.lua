@@ -129,7 +129,7 @@ local RECIPES = {
      inputs = {"packages/w/weatherkit/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
                "frameworks/Backports/src/WeatherKit/*.swift"}},
     {folder = "packages/n/network", variable = "network_sources_digest",
-     inputs = {"packages/n/network/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",
+     inputs = {"packages/n/network/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/src/Swift/cmodule_flags.lua", "toolchain/modules/apple/wrapper.lua",
                "frameworks/Backports/src/Network/*.swift", "frameworks/Backports/src/Network/RevenantNetworkC/*"}},
     {folder = "packages/t/translation", variable = "translation_sources_digest",
      inputs = {"packages/t/translation/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua",

@@ -289,9 +289,7 @@ local function overlay(name, folder, opt)
             end
             add_flags(target, flags)
             if opt.cmodule then
-                for _, cmodule in ipairs(table.wrap(opt.cmodule)) do
-                    add_flags(target, {"-I", path.join(SRC, folder, cmodule)})
-                end
+                import("cmodule_flags", {rootdir = SWIFT_DIR, anonymous = true}).apply(target, SRC, folder, table.wrap(opt.cmodule))
                 for _, name in ipairs(table.wrap(opt.packages)) do
                     local pkg = target:pkg(name)
                     if pkg then
