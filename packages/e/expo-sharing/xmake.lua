@@ -7,7 +7,7 @@ package("expo-sharing")
 
     add_urls("https://registry.npmjs.org/expo-sharing/-/expo-sharing-$(version).tgz")
     add_versions("57.0.23", "d4459cd20f359284b3d2dcc3e1b564720bcc76ae5ead1d313c058b26b12cea9a")
-    add_patches("57.0.23", path.join(os.scriptdir(), "patches", "sharing-module-ios6.patch"), "b0063174bbdfff6dfa5fd0964eb6d0a6d98a5c5550fef9b289d7b975d4b479aa")
+    add_patches("57.0.23", path.join(os.scriptdir(), "patches", "sharing-module-ios6.patch"), "8d8a7666bfa5cd13f898529a75696ed2142108b770212bdeb1f406998f69265e")
     add_patches("57.0.23", path.join(os.scriptdir(), "patches", "url-details-ios6.patch"), "1a7b26763687afd569f802ca88b117252718a55096bf6a7cd25467bd0bcffeb4")
     add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
 

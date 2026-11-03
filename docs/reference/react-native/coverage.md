@@ -7,10 +7,10 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 39 |
-| partial | built and running, with a named part left out or rewritten | 11 |
+| partial | built and running, with a named part left out or rewritten | 13 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
-| missing | native code that is not built yet | 49 |
+| missing | native code that is not built yet | 47 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -110,7 +110,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-gl | ~57.0.2 | yes | evaluate | none | Not built; package packages/e/expo-gl (57.0.2, unpatched). Evaluate, not partial: partial means built and running. Done on work/rn-media-gles2 (commit 92f69f4b9, pushed): ES3Functions.m emulates the ES3 calls that ES2 expresses exactly and refuses the rest with a GL error; EAGL and CAEAGLLayer exist on iOS 6. Missing: the shader language. Shaders written as #version 300 es are not translated to GLSL ES 1.00 (no translator in revenant), so expo-gl keeps its ES2 fallback for EAGL (EXGLContext.mm) and no ES3 context is created. Reasons and the translator plan: docs/reference/backports/opengles-es3.md. |
 | expo-glass-effect | ~57.0.4 | yes | partial | build | Built from a local copy of GlassView.swift in src/expo, which replaces the package's file. The effect is an iOS 26 one, so on iOS 6 it is never installed and the view draws no glass. Compiled; not exercised. |
 | expo-google-app-auth | ~8.3.0 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
-| expo-haptics | ~57.0.3 | yes | missing | none | The package is the npm 57.0.3 sources, unpatched, and not built yet. Its three generators (impact, notification, selection) are the Backports shims: on iOS 6 impact and notification play a vibration through AudioServices on a phone with a motor (iPhone 4S), and selection does nothing; iPad 2 has no motor and stays silent. This is an emulation, not the haptic engine, and it is not exercised on the phone. |
+| expo-haptics | ~57.0.3 | yes | partial | phone | Built from the npm 57.0.3 sources with haptics-ios6.patch: each feedback call is guarded by #available(iOS 10.0), so on iOS 6 it returns without touching the UIKit feedback generators. No haptic hardware on iPhone 4S, call returns: no vibration is produced. On the iPhone 4S, impactAsync, notificationAsync and selectionAsync each resolve without an error (probe run org.revenant.rnhost.expo, rnhost.log lines rn-probe: haptics.* ok). |
 | expo-image | ~57.0.5 | yes | missing | none | Swift only (25 files plus the SDWebImage coders). Not compiled: needs expo-modules-core Swift for iOS 6 and the SDWebImage package; SF Symbols loader in it is a separate question. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | missing | none | Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it). |
@@ -143,7 +143,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-secure-store | ~57.0.4 | yes | missing | none | The Keychain (SecItem, kSecAttrAccessible) is present in the iOS 6.1.3 cache. Not built. |
 | expo-sensors | ~57.0.3 | yes | missing | none | CoreMotion (CMMotionManager) is present in the iOS 6.1.3 cache. CMPedometer is absent (iOS 8); the CoreMotion backport supplies it. Not built. |
 | expo-server | ~57.0.3 | no | n/a | none | Server runtime, not on the device. |
-| expo-sharing | ~57.0.23 | yes | missing | none | Package and iOS 6 patches written, not built yet: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler and the iPad popover are guarded for iOS 6 (completionHandler, UIPopoverController), and the share-into payloads are read without JSONDecoder (iOS 11). The first build and a probe are pending. |
+| expo-sharing | ~57.0.23 | yes | partial | phone | Built from the npm 57.0.23 sources with sharing-module-ios6.patch and url-details-ios6.patch: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler is completionHandler and the iPad popover is UIPopoverController (iOS 8 pieces guarded), and the share-into payloads are read without JSONDecoder (iOS 11). On the iPhone 4S the module is registered and isAvailableAsync answers true. shareAsync is not exercised, so the share sheet has not been shown on the phone. |
 | expo-sms | ~57.0.2 | yes | missing | none | MessageUI (MFMessageComposeViewController) is present in the iOS 6.1.3 cache. Not built. |
 | expo-speech | ~57.0.3 | yes | missing | none | AVSpeechSynthesizer is iOS 7 and absent from the iOS 6.1.3 cache. The AVFoundation backport speaks through VoiceServices, whose VSSpeechSynthesizer is present in the cache. Not built. |
 | expo-splash-screen | ~57.0.10 | yes | missing | none | Breaks the module it joins: SplashScreenManager imports React as internal while the other files import it publicly, which Swift rejects (InternalImportsByDefault). |
@@ -202,9 +202,7 @@ What the build stands in with for a module it does not build. Each is listed in 
 | --- | --- | --- | --- | --- |
 | StubAudioModule | ExpoAudio | src/expo/StubModules.swift | expo-audio | Player, recorder and playlist class shells; the functions report the call and do nothing. |
 | StubDocumentPickerModule | ExpoDocumentPicker | src/expo/StubModules.swift | expo-document-picker | Name only. |
-| StubHapticsModule | ExpoHaptics | src/expo/StubModules.swift | expo-haptics | Three functions report the call and do nothing; iOS 6 has no haptic engine. |
 | StubImagePickerModule | ExponentImagePicker | src/expo/StubModules.swift | expo-image-picker | Name only. |
-| StubSharingModule | ExpoSharing | src/expo/StubModules.swift | expo-sharing | Name only. |
 | StubSplashScreenModule | ExpoSplashScreen | src/expo/StubModules.swift | expo-splash-screen | hide and preventAutoHide report the call and do nothing. |
 | StubClipboardModule | ExpoClipboard | src/expo/StubModules.swift | expo-clipboard | getStringAsync and setStringAsync work on UIPasteboard; this is a substitute for the package's module, not the module. |
 | StubFileSystemModule | FileSystem | src/expo/StubModules.swift | expo-file-system | Constants for the directories and empty class shells; no file operation exists. |

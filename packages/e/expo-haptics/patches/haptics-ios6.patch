@@ -1,0 +1,26 @@
+--- a/ios/HapticsModule.swift
++++ b/ios/HapticsModule.swift
+@@ -5,6 +5,7 @@
+     Name("ExpoHaptics")
+ 
+     AsyncFunction("notificationAsync") { (notificationType: NotificationType) in
++      guard #available(iOS 10.0, *) else { return }
+       let generator = UINotificationFeedbackGenerator()
+       generator.prepare()
+       generator.notificationOccurred(notificationType.toFeedbackType())
+@@ -12,6 +13,7 @@
+     .runOnQueue(.main)
+ 
+     AsyncFunction("impactAsync") { (style: ImpactStyle) in
++      guard #available(iOS 10.0, *) else { return }
+       let generator = UIImpactFeedbackGenerator(style: style.toFeedbackStyle())
+       generator.prepare()
+       generator.impactOccurred()
+@@ -19,6 +21,7 @@
+     .runOnQueue(.main)
+ 
+     AsyncFunction("selectionAsync") {
++      guard #available(iOS 10.0, *) else { return }
+       let generator = UISelectionFeedbackGenerator()
+       generator.prepare()
+       generator.selectionChanged()

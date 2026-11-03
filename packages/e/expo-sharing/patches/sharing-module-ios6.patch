@@ -10,9 +10,11 @@
    private var appGroupId: String {
      get throws {
        guard let groupId = Bundle.main.object(forInfoDictionaryKey: "ExpoShareIntoAppGroupId") as? String else {
-@@ -21,14 +24,20 @@
+@@ -20,38 +23,13 @@
+ 
        let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
        activityController.title = options.dialogTitle
++      self.attachCompletion(to: activityController, promise: promise)
  
 -      activityController.completionWithItemsHandler = { _, _, _, _ in
 -        // Resolve unconditionally. UIActivityViewController invokes this once
@@ -22,57 +24,88 @@
 -        // its follow-up dialog (e.g. tapped Print, then cancelled the print
 -        // dialog: activityType != nil, completed == false).
 -        promise.resolve(nil)
-+      if #available(iOS 8.0, *) {
-+        activityController.completionWithItemsHandler = { _, _, _, _ in
-+          // Resolve unconditionally. UIActivityViewController invokes this once
-+          // on dismissal for every (activityType, completed) permutation. The
-+          // previous implementation only resolved two of four cases, leaking
-+          // the promise when the user picked an activity and then cancelled
-+          // its follow-up dialog (e.g. tapped Print, then cancelled the print
-+          // dialog: activityType != nil, completed == false).
-+          promise.resolve(nil)
-+        }
-+      } else if UIDevice.current.userInterfaceIdiom != .pad {
-+        activityController.completionHandler = { _, _ in
-+          promise.resolve(nil)
-+        }
+-      }
+-
+       guard let currentViewcontroller = appContext?.utilities?.currentViewController() else {
+         throw MissingCurrentViewControllerException()
        }
  
-       guard let currentViewcontroller = appContext?.utilities?.currentViewController() else {
-@@ -40,15 +49,28 @@
-       if UIDevice.current.userInterfaceIdiom == .pad {
-         let rect = options.anchor
-         let viewFrame = currentViewcontroller.view.frame
+-      // Apple docs state that `UIActivityViewController` must be presented in a
+-      // popover on iPad https://developer.apple.com/documentation/uikit/uiactivityviewcontroller
+-      if UIDevice.current.userInterfaceIdiom == .pad {
+-        let rect = options.anchor
+-        let viewFrame = currentViewcontroller.view.frame
 -
 -        activityController.popoverPresentationController?.sourceRect = CGRect(
-+        let sourceRect = CGRect(
-           x: rect?.x ?? viewFrame.midX,
-           y: rect?.y ?? viewFrame.maxY,
-           width: rect?.width ?? 0,
-           height: rect?.height ?? 0
-         )
+-          x: rect?.x ?? viewFrame.midX,
+-          y: rect?.y ?? viewFrame.maxY,
+-          width: rect?.width ?? 0,
+-          height: rect?.height ?? 0
+-        )
 -        activityController.popoverPresentationController?.sourceView = currentViewcontroller.view
 -        activityController.modalPresentationStyle = .pageSheet
-+
-+        if #available(iOS 8.0, *) {
-+          activityController.popoverPresentationController?.sourceRect = sourceRect
-+          activityController.popoverPresentationController?.sourceView = currentViewcontroller.view
-+          activityController.modalPresentationStyle = .pageSheet
-+        } else {
-+          let dismissal = PopoverDismissal {
-+            promise.resolve(nil)
-+          }
-+          let controller = UIPopoverController(contentViewController: activityController)
-+          controller.delegate = dismissal
-+          popoverDismissal = dismissal
-+          popover = controller
-+          controller.presentPopover(from: sourceRect, in: currentViewcontroller.view, permittedArrowDirections: .any, animated: true)
-+          return
-+        }
-       }
+-      }
+-
+-      currentViewcontroller.present(activityController, animated: true)
++      self.present(activityController, anchor: options.anchor, from: currentViewcontroller, promise: promise)
+     }
+     .runOnQueue(.main)
  
-       currentViewcontroller.present(activityController, animated: true)
-@@ -95,11 +117,44 @@
+@@ -91,15 +69,98 @@
+     }
+   }
+ 
++  private func attachCompletion(to controller: UIActivityViewController, promise: Promise) {
++    // Resolve unconditionally. UIActivityViewController invokes this once
++    // on dismissal for every (activityType, completed) permutation. The
++    // previous implementation only resolved two of four cases, leaking
++    // the promise when the user picked an activity and then cancelled
++    // its follow-up dialog (e.g. tapped Print, then cancelled the print
++    // dialog: activityType != nil, completed == false).
++    if #available(iOS 8.0, *) {
++      controller.completionWithItemsHandler = { _, _, _, _ in
++        promise.resolve(nil)
++      }
++    } else if UIDevice.current.userInterfaceIdiom != .pad {
++      controller.completionHandler = { _, _ in
++        promise.resolve(nil)
++      }
++    }
++  }
++
++  private func present(_ controller: UIActivityViewController, anchor: SharingOptions.Rect?, from viewController: UIViewController, promise: Promise) {
++    // Apple docs state that `UIActivityViewController` must be presented in a
++    // popover on iPad https://developer.apple.com/documentation/uikit/uiactivityviewcontroller
++    if UIDevice.current.userInterfaceIdiom == .pad {
++      let viewFrame = viewController.view.frame
++      let sourceRect = CGRect(
++        x: anchor?.x ?? viewFrame.midX,
++        y: anchor?.y ?? viewFrame.maxY,
++        width: anchor?.width ?? 0,
++        height: anchor?.height ?? 0
++      )
++
++      if #available(iOS 8.0, *) {
++        controller.popoverPresentationController?.sourceRect = sourceRect
++        controller.popoverPresentationController?.sourceView = viewController.view
++        controller.modalPresentationStyle = .pageSheet
++      } else {
++        let dismissal = PopoverDismissal {
++          promise.resolve(nil)
++        }
++        let popover = UIPopoverController(contentViewController: controller)
++        popover.delegate = dismissal
++        self.popoverDismissal = dismissal
++        self.popover = popover
++        popover.present(from: sourceRect, in: viewController.view, permittedArrowDirections: .any, animated: true)
++        return
++      }
++    }
++
++    viewController.present(controller, animated: true)
++  }
++
+   private func getSharePayloads(appGroupId: String) -> [SharePayload] {
      let userDefaults = UserDefaults(suiteName: appGroupId)
  
      guard let data = userDefaults?.data(forKey: SHARE_INTO_DEFAULTS_KEY),

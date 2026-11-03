@@ -450,9 +450,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "The package is the npm 57.0.3 sources, unpatched, and not built yet. Its three generators (impact, notification, selection) are the Backports shims: on iOS 6 impact and notification play a vibration through AudioServices on a phone with a motor (iPhone 4S), and selection does nothing; iPad 2 has no motor and stays silent. This is an emulation, not the haptic engine, and it is not exercised on the phone."
+   "status": "partial",
+   "verified": "phone",
+   "note": "Built from the npm 57.0.3 sources with haptics-ios6.patch: each feedback call is guarded by #available(iOS 10.0), so on iOS 6 it returns without touching the UIKit feedback generators. No haptic hardware on iPhone 4S, call returns: no vibration is produced. On the iPhone 4S, impactAsync, notificationAsync and selectionAsync each resolve without an error (probe run org.revenant.rnhost.expo, rnhost.log lines rn-probe: haptics.* ok)."
   },
   {
    "id": "expo-image",
@@ -747,9 +747,9 @@
    "group": "sdk",
    "version": "~57.0.23",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Package and iOS 6 patches written, not built yet: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler and the iPad popover are guarded for iOS 6 (completionHandler, UIPopoverController), and the share-into payloads are read without JSONDecoder (iOS 11). The first build and a probe are pending."
+   "status": "partial",
+   "verified": "phone",
+   "note": "Built from the npm 57.0.23 sources with sharing-module-ios6.patch and url-details-ios6.patch: the URL content details use NSURLConnection instead of URLSession.bytes (iOS 15), the activity completion handler is completionHandler and the iPad popover is UIPopoverController (iOS 8 pieces guarded), and the share-into payloads are read without JSONDecoder (iOS 11). On the iPhone 4S the module is registered and isAvailableAsync answers true. shareAsync is not exercised, so the share sheet has not been shown on the phone."
   },
   {
    "id": "expo-sms",

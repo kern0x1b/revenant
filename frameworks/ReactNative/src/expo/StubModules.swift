@@ -35,21 +35,8 @@ public final class StubDocumentPickerModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoDocumentPicker") }
 }
 
-public final class StubHapticsModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("ExpoHaptics")
-    AsyncFunction("notificationAsync") { (_: String) in StubReport.called("ExpoHaptics", "notificationAsync") }
-    AsyncFunction("impactAsync") { (_: String) in StubReport.called("ExpoHaptics", "impactAsync") }
-    AsyncFunction("selectionAsync") { StubReport.called("ExpoHaptics", "selectionAsync") }
-  }
-}
-
 public final class StubImagePickerModule: Module {
   public func definition() -> ModuleDefinition { Name("ExponentImagePicker") }
-}
-
-public final class StubSharingModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoSharing") }
 }
 
 public final class StubSplashScreenModule: Module {
