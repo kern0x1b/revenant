@@ -47,8 +47,8 @@ Available features from the libsql crate:
 The package uses the revenant Rust toolchain (nightly-2026-10-22) with `-Zbuild-std=core,alloc,std,panic_abort` to compile the standard library for the armv7-apple-ios6 target.
 
 ```bash
-./xmakew f -p iphoneos -a armv7
-./xmakew require libsql
+./xmakew f -P . -p iphoneos -a armv7
+./xmakew require -P . -y revenant@libsql
 ```
 
 ## Testing
