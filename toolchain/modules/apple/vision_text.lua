@@ -7,8 +7,20 @@ local CODES = {
     "tur", "ind", "ces", "dan", "nld", "nor", "msa", "pol", "ron", "swe", "fin", "hin", "mar",
 }
 
+local LEVELS = {"fast", "best"}
+
 local function known(code)
     return table.contains(CODES, code)
+end
+
+function destinations()
+    local found = {}
+    for _, level in ipairs(LEVELS) do
+        for _, code in ipairs(CODES) do
+            table.insert(found, path.join(FOLDER, level, code .. ".traineddata"))
+        end
+    end
+    return found
 end
 
 function installed(root)
@@ -17,7 +29,7 @@ function installed(root)
         raise("%s is not installed, so the Vision text models cannot be packaged; the tessdata package installs it", license)
     end
     local models = {}
-    for _, level in ipairs({"fast", "best"}) do
+    for _, level in ipairs(LEVELS) do
         local files = os.files(path.join(root, "share", "tessdata", level, "*.traineddata"))
         byteorder.sort(files)
         for _, file in ipairs(files) do

@@ -49,6 +49,10 @@ naming an unheld package or an unresolved `@rpath` is refused. It also builds a 
 decoder by another folder, with a model and a licence, and checks that the decoder is named in the package's folder,
 that the model and the licence sit in their folders, and that no `Depends` is written for them.
 `toolchain_packages/vision_text_test` checks the model paths of the tessdata package, an unknown model, and a missing licence.
+The CI check of the built package, `toolchain/tools/deb_check.lua`, is enforced by `toolchain_light/deb_check_test`
+(`toolchain/tests/addon/deb_check_test.lua`): a package with exactly the files of the list above passes, and a package
+that adds a model the vision text list does not name, a model at another level, another FFmpeg library, another licence
+or any other file is refused by name; so is one without the FFmpeg decoder.
 
 ## Not enforced
 

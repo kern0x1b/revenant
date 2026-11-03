@@ -1,6 +1,13 @@
+local vision_text = import("apple.vision_text", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
+
 local BACKPORTS = "./usr/lib/revenant/org.revenant.backports/"
 local LINKED = {"libUIKitBackports.dylib", "libCoreDataBackports.dylib"}
 local RUNTIME = {["libc++.1.dylib"] = true, ["libc++abi.1.dylib"] = true}
+local FFMPEG = {"libavcodec.62.dylib", "libavutil.60.dylib"}
+local LICENSES = {
+    "./usr/share/doc/org.revenant.backports/licenses/tessdata/LICENSE",
+    "./usr/share/doc/org.revenant.backports/licenses/ffmpeg-hevc/LICENSE.md",
+}
 local APPLICATION = {"./Applications/SwiftUIDemo.app/SwiftUIDemo", "./Applications/SwiftUIDemo.app/Info.plist"}
 
 local function single(dir, name)
@@ -39,6 +46,14 @@ local function members(listing)
     return found
 end
 
+local function models()
+    local found = {}
+    for _, destination in ipairs(vision_text.destinations()) do
+        found["./" .. destination] = true
+    end
+    return found
+end
+
 function main(dir, demo, platform)
     dir = path.absolute(dir or "build")
     local scratch = path.join(dir, ".deb-check")
@@ -63,12 +78,13 @@ function main(dir, demo, platform)
 
     local files = members(platform_listing)
     local count = 0
+    local vision = models()
     for entry in pairs(files) do
         local name = entry:startswith(BACKPORTS) and entry:sub(#BACKPORTS + 1)
         if name and name:match("^lib%w+Backports%.dylib$") then
             count = count + 1
-        elseif not (name and RUNTIME[name]) then
-            raise("%s carries %s, and it may carry only the Backports libraries and the C++ runtime they link under %s", platform, entry, BACKPORTS)
+        elseif not (name and (RUNTIME[name] or table.contains(FFMPEG, name))) and not vision[entry] and not table.contains(LICENSES, entry) then
+            raise("%s carries %s, and it may carry only the Backports libraries, the C++ runtime and the FFmpeg decoder they link under %s, the Vision text models of vision_text.lua under ./var/lib/revenant/tessdata/, and their two licences", platform, entry, BACKPORTS)
         end
     end
     if (files[BACKPORTS .. "libc++.1.dylib"] ~= nil) ~= (files[BACKPORTS .. "libc++abi.1.dylib"] ~= nil) then
@@ -77,6 +93,11 @@ function main(dir, demo, platform)
     for _, library in ipairs(LINKED) do
         if not files[BACKPORTS .. library] then
             raise("%s carries no %s, and the demo links it", platform, library)
+        end
+    end
+    for _, library in ipairs(FFMPEG) do
+        if not files[BACKPORTS .. library] then
+            raise("%s carries no %s, and the Backports libraries link it", platform, library)
         end
     end
 

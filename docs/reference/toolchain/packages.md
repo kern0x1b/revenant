@@ -81,6 +81,13 @@ Inside the project a target depends on a library with `add_deps`. The configure 
 library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` with the
 FFmpeg HEVC decoder those libraries link, and the Vision text models under `/var/lib/revenant/tessdata/{fast,best}`.
 Its documents are the licences of the tessdata models and of the decoder, under `/usr/share/doc/org.revenant.backports/licenses/`.
+The CI check of the package, `./xmakew l -P . toolchain/tools/deb_check.lua build <demo> org.revenant.backports`, accepts
+exactly these files and no others, and refuses any other by name: the Backports libraries under
+`/usr/lib/revenant/org.revenant.backports/`; the C++ runtime, `libc++.1.dylib` and `libc++abi.1.dylib`, both or neither;
+the FFmpeg decoder, `libavcodec.62.dylib` and `libavutil.60.dylib`, which the package must carry; the Vision text models
+that `toolchain/modules/apple/vision_text.lua` lists, 28 language codes at each of the `fast` and `best` levels, under
+`/var/lib/revenant/tessdata/{fast,best}`; and the two licences, `licenses/tessdata/LICENSE` and `licenses/ffmpeg-hevc/LICENSE.md`.
+The sonames of the decoder are the ones of FFmpeg 8.1.2 and change with it, so a new FFmpeg changes that list in `deb_check.lua`.
 It is signed with the `ldid` of an application of the project. Its version is the addon's release and a hash of the
 libraries, the models and their dependencies, and its `Depends` names, at their exact versions, the shared packages (the
 Swift runtime, libc++) that its libraries name. A target that links a Backports library depends on the package in its own
