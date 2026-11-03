@@ -11,6 +11,9 @@ local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "re
 if os.getenv("RN_HERMES") then
     add_requires("revenant@hermes", {alias = "hermes"})
 end
+if os.getenv("RN_EXPO") then
+    add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
+end
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
     add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports"}})
@@ -68,7 +71,7 @@ target("RNHost")
         end
         if os.getenv("RN_EXPO") then
             add_deps("expo-core-objc", "expo-app-modules", "nitro-objc", "nitro-probe", "unistyles-objc", "unistyles-probe", "rn-pods-objc")
-            add_packages("swift-runtime", "combine", "cryptokit", "swiftui", "uniformtypeidentifiers")
+            add_packages("swift-runtime", "combine", "cryptokit", "swift-crypto", "swiftui", "uniformtypeidentifiers")
             local ecore = path.join(os.projectdir(), "build", "expo-core")
             local nm = path.join(os.projectdir(), "build", "ref", "paseo", "node_modules")
             local jsisrc = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
@@ -131,7 +134,7 @@ target("RNHost")
     end
     if os.getenv("RN_EXPO") then
         add_rules("@addon/revenant/swift")
-        add_values("app.frameworks", "cryptokit", "uniformtypeidentifiers")
+        add_values("app.frameworks", "cryptokit", "swift-crypto", "uniformtypeidentifiers")
         set_values("revenant.waive.thumb-interworking", "libswiftDarwin.dylib is checked a second time after it was stripped, because the runtime libraries reach the app both through swift-runtime and through the cryptokit package; the unstripped copies pass the check")
     end
     set_values("revenant.control", path.join(os.projectdir(), "packaging", "control-rnhost"))
