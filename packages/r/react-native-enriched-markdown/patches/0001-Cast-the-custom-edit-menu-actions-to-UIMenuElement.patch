@@ -1,0 +1,11 @@
+--- a/ios/utils/EditMenuUtils.m
++++ b/ios/utils/EditMenuUtils.m
+@@ -134,7 +134,7 @@
+   }
+ 
+   if (customActions.count > 0) {
+-    return [UIMenu menuWithChildren:[customActions arrayByAddingObjectsFromArray:result]];
++    return [UIMenu menuWithChildren:[(NSArray<UIMenuElement *> *)customActions arrayByAddingObjectsFromArray:result]];
+   }
+ 
+   return [UIMenu menuWithChildren:result];

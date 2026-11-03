@@ -950,6 +950,15 @@
    "note": "Built; the app's gestures run on it."
   },
   {
+   "id": "react-native-enriched-markdown",
+   "group": "sdk",
+   "version": "1.2.0-nightly-20261014-766fc0e67",
+   "native": true,
+   "status": "partial",
+   "verified": "none",
+   "note": "Chat markdown. The 160 sources compiled for armv7 iOS 6.0 with five patches. The tree-sitter runtime and the 14 default grammars are vendored from their own packages and compile for armv7; the highlighter's tree-sitter symbols all resolve against them. Not linked into the host yet, the math (RaTeX) part is not vendored, and it is not on the phone."
+  },
+  {
    "id": "react-native-get-random-values",
    "group": "sdk",
    "version": "~1.11.0",
