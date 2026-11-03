@@ -15,7 +15,7 @@ local function x(...)
     return table.join({"./xmakew"}, {...})
 end
 
-local FRESH = {name = "Start from a fresh configuration, as a new checkout does", argv = x("f", "-P", ".", "-c"), fresh = true}
+local FRESH = {name = "Start from a fresh configuration, as a new checkout does", argv = x("f", "-P", ".", "-c", "-y", "--emulator_vulkan=n"), fresh = true}
 local HOST_CONFIGURE = x("f", "-P", ".", "-y", "--emulator_vulkan=n")
 local BACKPORTS_CONFIGURE = x("f", "-P", ".", "-p", "iphoneos", "-a", "armv7", "--component=Backports", "-y", "-v")
 local DYLD_FETCH = x("firmware", "-P", ".", "-y", "--arch=armv7", "fetch", "6.0")
