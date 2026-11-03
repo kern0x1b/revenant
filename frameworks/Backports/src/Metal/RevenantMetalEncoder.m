@@ -593,8 +593,6 @@ static GLenum primitive(MTLPrimitiveType type)
     [self drawPrimitives:primitiveType vertexStart:vertexStart vertexCount:vertexCount instanceCount:instanceCount baseInstance:0];
 }
 
-// Metal numbers the instances of the draw from baseInstance: instance_id and the per-instance vertex fetch both start
-// there, so the loop runs over the absolute instance number, not over 0 to instanceCount.
 - (void)drawPrimitives:(MTLPrimitiveType)primitiveType vertexStart:(NSUInteger)vertexStart vertexCount:(NSUInteger)vertexCount instanceCount:(NSUInteger)instanceCount baseInstance:(NSUInteger)baseInstance
 {
     NSUInteger end = baseInstance + instanceCount;

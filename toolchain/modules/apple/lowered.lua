@@ -2444,11 +2444,6 @@ function directory_roots(roots)
     return entries
 end
 
--- A framework nested in another (MPSCore.framework inside MetalPerformanceShaders.framework) is found by a
--- framework-style include of its parent's header: clang looks in the parent's Frameworks folder, next to the
--- including file. The copies in the overlay hold only the headers the lowering changed, so a copied parent
--- header reaches a nested framework only if every header of that framework is copied too. Returns the headers of
--- every framework nested under a framework whose Headers folder the overlay maps.
 local function nested_headers_in(framework, found)
     for _, nested in ipairs(os.dirs(path.join(framework, "Frameworks", "*.framework"))) do
         for _, file in ipairs(os.files(path.join(nested, "Headers", "*.h"))) do
