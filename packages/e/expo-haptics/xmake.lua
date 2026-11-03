@@ -1,0 +1,23 @@
+package("expo-haptics")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://docs.expo.dev/versions/latest/sdk/haptics/")
+    set_description("expo-haptics 57.0.3, the haptics of the Expo SDK, from its npm tarball: the Swift sources of its iOS half, unpatched; its UIKit feedback generators are the Backports shims on iOS 6, which vibrate for impact and notification and do nothing for selection")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-haptics/-/expo-haptics-$(version).tgz")
+    add_versions("57.0.3", "bc1bf9bb8024c72efced55f44948d7ebd22f5b312c02adaa2baa45da3516c77f")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-haptics" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "HapticsModule.swift")), "ios/HapticsModule.swift is not installed")
+        local module = io.readfile(path.join(package:installdir(), "ios", "HapticsModule.swift"))
+        assert(module:find("UIImpactFeedbackGenerator(style:", 1, true), "the impact generator is not in the installed module")
+    end)
