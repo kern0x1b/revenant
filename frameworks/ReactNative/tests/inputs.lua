@@ -128,19 +128,33 @@ check("splash_options reads the expo-splash-screen plugin", splash.image == "./l
 
 check("splash_options refuses an application without the plugin", fails(function () splash_options({plugins = {"expo-router"}}) end))
 
-local defaults = expo_packages({})
-check("the default Expo packages are the real and partial ones of coverage.json", table.contains(defaults, "expo")
-    and table.contains(defaults, "expo-font") and table.contains(defaults, "expo-clipboard") and table.contains(defaults, "expo-splash-screen"), table.concat(defaults, ","))
+local application = fresh("expo-application")
+for _, package in ipairs({"expo", "expo-font", "expo-clipboard", "expo-splash-screen", "expo-audio", "expo-image", "expo-router", "expo-modules-core"}) do
+    os.mkdir(path.join(application, "ref", "node_modules", package))
+end
+local function context(options)
+    return {options = options, app = path.join(application, "ref", "packages", "app"), ref = path.join(application, "ref")}
+end
 
-check("the default Expo packages leave out stubs, missing and js-only packages, and the core", not table.contains(defaults, "expo-audio")
+local defaults = expo_packages(context({}))
+check("the default Expo packages are the real and partial ones the application has", table.contains(defaults, "expo")
+    and table.contains(defaults, "expo-font") and table.contains(defaults, "expo-clipboard") and table.contains(defaults, "expo-splash-screen") and #defaults == 4, table.concat(defaults, ","))
+
+check("the default Expo packages leave out stubs, js-only packages and the core even when the application has them", not table.contains(defaults, "expo-audio")
     and not table.contains(defaults, "expo-image") and not table.contains(defaults, "expo-router") and not table.contains(defaults, "expo-modules-core"), table.concat(defaults, ","))
 
-local parity = expo_packages({real = "expo-audio,expo-image"})
+local absent = fresh("expo-absent")
+os.mkdir(path.join(absent, "ref", "node_modules", "expo"))
+local missing = expo_packages({options = {}, app = path.join(absent, "ref", "packages", "app"), ref = path.join(absent, "ref")})
+check("the default Expo packages leave out a real package that the application lacks", not table.contains(missing, "expo-font")
+    and not table.contains(missing, "expo-battery") and table.contains(missing, "expo"), table.concat(missing, ","))
+
+local parity = expo_packages(context({real = "expo-audio,expo-image"}))
 check("--real replaces the default with the parity list on top of the base", table.contains(parity, "expo-audio") and table.contains(parity, "expo-image")
     and table.contains(parity, "expo-asset") and not table.contains(parity, "expo-camera"), table.concat(parity, ","))
 
-check("expo_real marks the packages that the mode builds as real", expo_real({options = {}})["expo-font"] and not expo_real({options = {}})["expo-audio"]
-    and expo_real({options = {real = "expo-audio"}})["expo-audio"])
+check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and not expo_real(context({}))["expo-audio"]
+    and expo_real(context({real = "expo-audio"}))["expo-audio"])
 
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)

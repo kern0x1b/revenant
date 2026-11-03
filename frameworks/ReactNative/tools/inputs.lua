@@ -5,7 +5,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
            react-native package with all its patches). <project> is the folder of the host; it holds ref/paseo, the application,
            or a link to it. The inputs are: codegen, rn-codegen, rn-headers, lib-headers, expo-core, expo-jsi, expo-pods, expo-src,
            nitro, unistyles, keyboard, screens, app-assets. --only makes the named ones. The Expo inputs take the packages that
-           coverage.json marks real or partial; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
+           coverage.json marks real or partial and that the application's node_modules has; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
   compare  checks each input of <built> against <reference>: the same file names, the same link targets and the same SHA-256
            of every file, after the absolute path of <built> is read as the path of <reference>. It prints every difference
            and exits 1 when there is one.]]
@@ -291,28 +291,32 @@ local EXPO_CORE_PACKAGE = "expo-modules-core"
 
 local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
 
-function covered_packages()
+function installed_in_application(ctx, package)
+    return os.isdir(path.join(ctx.app, "node_modules", package)) or os.isdir(path.join(ctx.ref, "node_modules", package))
+end
+
+function covered_packages(ctx)
     local data = json.decode(io.readfile(path.join(checkout(), "frameworks", "ReactNative", "src", "coverage.json")))
     local packages = {"expo"}
     for _, row in ipairs(data.rows) do
-        if row.group == "sdk" and row.native and (row.status == "real" or row.status == "partial") and row.id:startswith("expo-") and row.id ~= EXPO_CORE_PACKAGE then
+        if row.group == "sdk" and row.native and (row.status == "real" or row.status == "partial") and row.id:startswith("expo-") and row.id ~= EXPO_CORE_PACKAGE and installed_in_application(ctx, row.id) then
             table.insert(packages, row.id)
         end
     end
     return packages
 end
 
-function expo_packages(options)
-    if options.real then
+function expo_packages(ctx)
+    if ctx.options.real then
         local packages = table.clone(EXPO_PARITY_BASE)
-        for _, package in ipairs(string.split(options.real, ",", {plain = true})) do
+        for _, package in ipairs(string.split(ctx.options.real, ",", {plain = true})) do
             if package ~= "" then
                 table.insert(packages, package)
             end
         end
         return packages
     end
-    return covered_packages()
+    return covered_packages(ctx)
 end
 
 function expo_dir(ctx, package)
@@ -340,7 +344,7 @@ end
 function make_expo_pods(ctx)
     local out = path.join(ctx.build, "expo-pods")
     fresh_directory(out)
-    for _, package in ipairs(expo_packages(ctx.options)) do
+    for _, package in ipairs(expo_packages(ctx)) do
         local pod = pod_name(ctx, package)
         if pod then
             local dir = path.join(out, pod)
@@ -731,7 +735,7 @@ end
 
 function expo_real(ctx)
     local real = {}
-    for _, package in ipairs(expo_packages(ctx.options)) do
+    for _, package in ipairs(expo_packages(ctx)) do
         real[package] = true
     end
     return real
@@ -741,7 +745,7 @@ function make_expo_src(ctx)
     local out = path.join(ctx.build, "expo-src")
     fresh_directory(out)
     local seen = {}
-    for _, package in ipairs(expo_packages(ctx.options)) do
+    for _, package in ipairs(expo_packages(ctx)) do
         for _, file in ipairs(expo_swift_files(ctx, package)) do
             local name = path.filename(file)
             if expo_skipped(file) then
@@ -764,7 +768,7 @@ end
 function expo_classes(ctx)
     local classes = {}
     local real = expo_real(ctx)
-    for _, package in ipairs(expo_packages(ctx.options)) do
+    for _, package in ipairs(expo_packages(ctx)) do
         local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
         local apple = config:match('"apple"%s*:%s*{.-"modules"%s*:%s*%[(.-)%]')
         for name in (apple or ""):gmatch('"([^"]+)"') do
@@ -848,7 +852,7 @@ function make_expo_core(ctx)
     fresh_directory(out)
     local nm = ctx.nm
     local bridge_lines = {}
-    for _, package in ipairs(expo_packages(ctx.options)) do
+    for _, package in ipairs(expo_packages(ctx)) do
         for _, header in ipairs(headers_in(path.join(expo_dir(ctx, package), "ios", EXPO_ONLY[package] or ""), "**.h")) do
             if os.isfile((header:gsub("%.h$", ".m"))) or os.isfile((header:gsub("%.h$", ".mm"))) then
                 table.insert(bridge_lines, string.format('#import "%s"', header))
