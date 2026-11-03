@@ -107,11 +107,14 @@ local function ready(sdk, version, logs, names)
             table.insert(missing, name)
         end
     end
-    for _, stale in ipairs(os.dirs(path.join(sdkfiles.build_root(), "cache", "*"))) do
-        if path.filename(stale) ~= sdkfiles.cache_key(sdk) then
-            os.tryrm(stale)
+    os.tryrm(path.join(sdkfiles.build_root(), "cache"))
+    local cutoff = os.time() - 14 * 24 * 3600
+    for _, other in ipairs(os.dirs(path.join(sdkfiles.shared_root(), "*"))) do
+        if path.filename(other) ~= sdkfiles.cache_key(sdk) and os.mtime(other) < cutoff then
+            os.tryrm(other)
         end
     end
+    os.vrunv("touch", {cache})
     if #missing > 0 then
         os.mkdir(logs)
         extract_all(sdk, version, cache, logs, missing)
