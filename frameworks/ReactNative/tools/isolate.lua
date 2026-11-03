@@ -257,11 +257,12 @@ end
 function build(folder, cache, options)
     folder = path.absolute(folder)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
+    local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     local env = build_environment({
         folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods, pkgdirs = options.pkgdirs,
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),
-        backports = options.backports or path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
+        backports = options.backports or (os.isfile(ci_backports) and ci_backports or nil)
     })
     local log = options.log or path.join(folder, "build", "isolated.log")
     link_react_native(folder, path.absolute(cache))

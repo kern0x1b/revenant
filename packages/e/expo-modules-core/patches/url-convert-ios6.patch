@@ -1,0 +1,11 @@
+--- a/ios/Utilities/Utilities.swift
++++ b/ios/Utilities/Utilities.swift
+@@ -73,7 +73,7 @@
+     // We have to fallback URL(fileURLWithPath:) first.
+     url = value.hasPrefix("/")
+       ? URL(fileURLWithPath: value)
+-      : URLComponents(string: value)?.url ?? URL(string: value)
++      : URL(string: value)
+   }
+ 
+   guard let url else {

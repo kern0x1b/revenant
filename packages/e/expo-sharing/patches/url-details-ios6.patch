@@ -1,0 +1,76 @@
+--- a/ios/ResolveUrlContentDetails.swift
++++ b/ios/ResolveUrlContentDetails.swift
+@@ -6,20 +6,61 @@
+   var originalName: String?
+ }
+ 
+-internal func resolveUrlContentDetails(url: URL) async throws -> ContentDetails {
+-  let request = URLRequest(url: url)
++private final class HeaderProbe: NSObject, NSURLConnectionDataDelegate {
++  private var completion: ((Result<URLResponse, any Error>) -> Void)?
++  private var connection: NSURLConnection?
++  private var keepAlive: HeaderProbe?
+ 
+-  // Allows us to get just the http response header without unnecessarily downloading data.
+-  // This may seem like a weird way of doing this, but:
+-  // 1. Doing:
+-  //   var request = URLRequest(url: url)
+-  //   request.httpMethod = "HEAD"
+-  // Does not work with some sources that require redirects. For example: lorem picsum urls - https://picsum.photos/id/237/200/300
+-  // 2. We could use "GET" http method with a URLSessionTaskDelegate, which cancels after receiving the response, but
+-  //    the delegate doesn't work with the async-await syntax https://forums.swift.org/t/how-to-call-urlsession-cache-handler-delegate-method-in-async-await/66473/6.
+-  //    Using the old completion-based API works, but would require a lot of boilerplate.
+-  let (_, response) = try await URLSession.shared.bytes(for: request)
++  private init(completion: @escaping (Result<URLResponse, any Error>) -> Void) {
++    self.completion = completion
++    super.init()
++  }
+ 
++  static func fetch(_ request: URLRequest, completion: @escaping (Result<URLResponse, any Error>) -> Void) {
++    let probe = HeaderProbe(completion: completion)
++    probe.keepAlive = probe
++    DispatchQueue.main.async {
++      guard let connection = NSURLConnection(request: request, delegate: probe, startImmediately: true) else {
++        probe.finish(.failure(NSError(domain: NSURLErrorDomain, code: NSURLErrorCannotConnectToHost, userInfo: nil)))
++        return
++      }
++      probe.connection = connection
++    }
++  }
++
++  func connection(_ connection: NSURLConnection, didReceive response: URLResponse) {
++    finish(.success(response))
++  }
++
++  func connection(_ connection: NSURLConnection, didFailWithError error: any Error) {
++    finish(.failure(error))
++  }
++
++  func connectionDidFinishLoading(_ connection: NSURLConnection) {
++    finish(.failure(NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse, userInfo: nil)))
++  }
++
++  private func finish(_ result: Result<URLResponse, any Error>) {
++    guard let completion else {
++      return
++    }
++    self.completion = nil
++    connection?.cancel()
++    connection = nil
++    DispatchQueue.main.async {
++      self.keepAlive = nil
++    }
++    completion(result)
++  }
++}
++
++internal func resolveUrlContentDetails(url: URL) async throws -> ContentDetails {
++  let response = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URLResponse, any Error>) in
++    HeaderProbe.fetch(URLRequest(url: url)) { result in
++      continuation.resume(with: result)
++    }
++  }
++
+   guard let httpResponse = response as? HTTPURLResponse else {
+     throw FailedToFetchURLContentDetailsException((url, "Invalid Response \(response)"))
+   }

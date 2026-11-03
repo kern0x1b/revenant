@@ -15,24 +15,10 @@
       "reason": "Name only."
     },
     {
-      "name": "StubHapticsModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoHaptics",
-      "owner": "expo-haptics",
-      "reason": "Three functions report the call and do nothing; iOS 6 has no haptic engine."
-    },
-    {
       "name": "StubImagePickerModule",
       "file": "src/expo/StubModules.swift",
       "module": "ExponentImagePicker",
       "owner": "expo-image-picker",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubSharingModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoSharing",
-      "owner": "expo-sharing",
       "reason": "Name only."
     },
     {

@@ -1,0 +1,54 @@
+--- a/ios/HapticsModule.swift
++++ b/ios/HapticsModule.swift
+@@ -1,3 +1,4 @@
++import AudioToolbox
+ import ExpoModulesCore
+ 
+ public class HapticsModule: Module {
+@@ -5,6 +6,7 @@
+     Name("ExpoHaptics")
+ 
+     AsyncFunction("notificationAsync") { (notificationType: NotificationType) in
++      guard #available(iOS 10.0, *) else { return HapticsModule.legacyVibrate() }
+       let generator = UINotificationFeedbackGenerator()
+       generator.prepare()
+       generator.notificationOccurred(notificationType.toFeedbackType())
+@@ -12,6 +14,7 @@
+     .runOnQueue(.main)
+ 
+     AsyncFunction("impactAsync") { (style: ImpactStyle) in
++      guard #available(iOS 10.0, *) else { return HapticsModule.legacyVibrate() }
+       let generator = UIImpactFeedbackGenerator(style: style.toFeedbackStyle())
+       generator.prepare()
+       generator.impactOccurred()
+@@ -19,6 +22,7 @@
+     .runOnQueue(.main)
+ 
+     AsyncFunction("selectionAsync") {
++      guard #available(iOS 10.0, *) else { return HapticsModule.legacyVibrate() }
+       let generator = UISelectionFeedbackGenerator()
+       generator.prepare()
+       generator.selectionChanged()
+@@ -26,6 +30,22 @@
+     .runOnQueue(.main)
+   }
+ 
++  // iOS 6 has no feedback generators. An iPhone has a vibration motor, so every call becomes one system vibration;
++  // the call does not tell the pattern (impact style, notification type) apart. An iPad has no motor and a simulator
++  // has no hardware, so there the call returns without doing anything.
++  static func legacyVibrate() {
++    #if targetEnvironment(simulator)
++    NSLog("rn-host: haptics: simulator has no vibration motor; the call returns")
++    #else
++    if UIDevice.current.userInterfaceIdiom == .phone {
++      NSLog("rn-host: haptics: iOS 6 iPhone, AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)")
++      AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
++    } else {
++      NSLog("rn-host: haptics: no vibration motor on this idiom; the call returns")
++    }
++    #endif
++  }
++
+   enum NotificationType: String, Enumerable {
+     case success
+     case warning

@@ -1,0 +1,153 @@
+--- a/ios/SharingModule.swift
++++ b/ios/SharingModule.swift
+@@ -1,6 +1,9 @@
+ import ExpoModulesCore
+ 
+ public final class SharingModule: Module {
++  private var popover: UIPopoverController?
++  private var popoverDismissal: PopoverDismissal?
++
+   private var appGroupId: String {
+     get throws {
+       guard let groupId = Bundle.main.object(forInfoDictionaryKey: "ExpoShareIntoAppGroupId") as? String else {
+@@ -20,38 +23,13 @@
+ 
+       let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+       activityController.title = options.dialogTitle
++      self.attachCompletion(to: activityController, promise: promise)
+ 
+-      activityController.completionWithItemsHandler = { _, _, _, _ in
+-        // Resolve unconditionally. UIActivityViewController invokes this once
+-        // on dismissal for every (activityType, completed) permutation. The
+-        // previous implementation only resolved two of four cases, leaking
+-        // the promise when the user picked an activity and then cancelled
+-        // its follow-up dialog (e.g. tapped Print, then cancelled the print
+-        // dialog: activityType != nil, completed == false).
+-        promise.resolve(nil)
+-      }
+-
+       guard let currentViewcontroller = appContext?.utilities?.currentViewController() else {
+         throw MissingCurrentViewControllerException()
+       }
+ 
+-      // Apple docs state that `UIActivityViewController` must be presented in a
+-      // popover on iPad https://developer.apple.com/documentation/uikit/uiactivityviewcontroller
+-      if UIDevice.current.userInterfaceIdiom == .pad {
+-        let rect = options.anchor
+-        let viewFrame = currentViewcontroller.view.frame
+-
+-        activityController.popoverPresentationController?.sourceRect = CGRect(
+-          x: rect?.x ?? viewFrame.midX,
+-          y: rect?.y ?? viewFrame.maxY,
+-          width: rect?.width ?? 0,
+-          height: rect?.height ?? 0
+-        )
+-        activityController.popoverPresentationController?.sourceView = currentViewcontroller.view
+-        activityController.modalPresentationStyle = .pageSheet
+-      }
+-
+-      currentViewcontroller.present(activityController, animated: true)
++      self.present(activityController, anchor: options.anchor, from: currentViewcontroller, promise: promise)
+     }
+     .runOnQueue(.main)
+ 
+@@ -91,15 +69,98 @@
+     }
+   }
+ 
++  private func attachCompletion(to controller: UIActivityViewController, promise: Promise) {
++    // Resolve unconditionally. UIActivityViewController invokes this once
++    // on dismissal for every (activityType, completed) permutation. The
++    // previous implementation only resolved two of four cases, leaking
++    // the promise when the user picked an activity and then cancelled
++    // its follow-up dialog (e.g. tapped Print, then cancelled the print
++    // dialog: activityType != nil, completed == false).
++    if #available(iOS 8.0, *) {
++      controller.completionWithItemsHandler = { _, _, _, _ in
++        promise.resolve(nil)
++      }
++    } else if UIDevice.current.userInterfaceIdiom != .pad {
++      controller.completionHandler = { _, _ in
++        promise.resolve(nil)
++      }
++    }
++  }
++
++  private func present(_ controller: UIActivityViewController, anchor: SharingOptions.Rect?, from viewController: UIViewController, promise: Promise) {
++    // Apple docs state that `UIActivityViewController` must be presented in a
++    // popover on iPad https://developer.apple.com/documentation/uikit/uiactivityviewcontroller
++    if UIDevice.current.userInterfaceIdiom == .pad {
++      let viewFrame = viewController.view.frame
++      let sourceRect = CGRect(
++        x: anchor?.x ?? viewFrame.midX,
++        y: anchor?.y ?? viewFrame.maxY,
++        width: anchor?.width ?? 0,
++        height: anchor?.height ?? 0
++      )
++
++      if #available(iOS 8.0, *) {
++        controller.popoverPresentationController?.sourceRect = sourceRect
++        controller.popoverPresentationController?.sourceView = viewController.view
++        controller.modalPresentationStyle = .pageSheet
++      } else {
++        let dismissal = PopoverDismissal {
++          promise.resolve(nil)
++        }
++        let popover = UIPopoverController(contentViewController: controller)
++        popover.delegate = dismissal
++        self.popoverDismissal = dismissal
++        self.popover = popover
++        popover.present(from: sourceRect, in: viewController.view, permittedArrowDirections: .any, animated: true)
++        return
++      }
++    }
++
++    viewController.present(controller, animated: true)
++  }
++
+   private func getSharePayloads(appGroupId: String) -> [SharePayload] {
+     let userDefaults = UserDefaults(suiteName: appGroupId)
+ 
+     guard let data = userDefaults?.data(forKey: SHARE_INTO_DEFAULTS_KEY),
+-    let rawPayloads = try? JSONDecoder().decode([SharePayload].self, from: data)
++    let entries = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]]
+     else {
+       return []
+     }
+ 
++    let rawPayloads = entries.compactMap { sharePayload(from: $0) }
++    guard rawPayloads.count == entries.count else {
++      return []
++    }
++
+     return rawPayloads
+   }
++
++  private func sharePayload(from entry: [String: Any]) -> SharePayload? {
++    guard let type = (entry["type"] as? String).flatMap(ShareType.init(rawValue:)),
++    let value = entry["value"] as? String,
++    let mimeType = entry["mimeType"] as? String
++    else {
++      return nil
++    }
++
++    let metadata = (entry["metadata"] as? [String: Any]).map {
++      ShareMetadata(originalName: $0["originalName"] as? String, size: ($0["size"] as? NSNumber)?.intValue)
++    }
++
++    return SharePayload(type: type, value: value, mimeType: mimeType, metadata: metadata)
++  }
+ }
++
++private final class PopoverDismissal: NSObject, UIPopoverControllerDelegate {
++  private let onDismiss: () -> Void
++
++  init(onDismiss: @escaping () -> Void) {
++    self.onDismiss = onDismiss
++    super.init()
++  }
++
++  func popoverControllerDidDismissPopover(_ popoverController: UIPopoverController) {
++    onDismiss()
++  }
++}
