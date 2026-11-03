@@ -115,13 +115,13 @@ local MEMBERS = {
         },
     },
     {
-        member = "NSURLUbiquitousItemDownloadingStatusKey",
+        member = "NSURLUbiquitousItemIsDownloadedKey",
         header = {
             name = "Foundation",
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
-            find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0));",
-            replace = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(6.0), watchos(2.0), tvos(9.0));",
+            find = "API_DEPRECATED(\"Use NSURLUbiquitousItemDownloadingStatusKey instead\", macos(10.7,10.9), ios(5.0,7.0), watchos(2.0,2.0), tvos(9.0,9.0));",
+            replace = "API_AVAILABLE(macos(10.7), ios(5.0), watchos(2.0), tvos(9.0));",
         },
     },
     {
@@ -129,7 +129,7 @@ local MEMBERS = {
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "URL.swift"},
             find = "    @available(macOS 10.9, iOS 7.0, *)\n    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }",
-            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if let status : URLUbiquitousItemDownloadingStatus = _get(.ubiquitousItemDownloadingStatusKey) {\n            return status\n        }\n        let downloaded : Bool? = _get(.ubiquitousItemIsDownloadedKey)\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return isDownloaded ? URLUbiquitousItemDownloadingStatus.current : URLUbiquitousItemDownloadingStatus.notDownloaded\n    }",
+            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if #available(macOS 10.9, iOS 7.0, *) {\n            return _get(.ubiquitousItemDownloadingStatusKey)\n        }\n        let downloaded : Bool? = _get(.ubiquitousItemIsDownloadedKey)\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return URLUbiquitousItemDownloadingStatus(rawValue: isDownloaded ? \"NSURLUbiquitousItemDownloadingStatusCurrent\" : \"NSURLUbiquitousItemDownloadingStatusNotDownloaded\")\n    }",
         },
     },
     {
