@@ -48,17 +48,37 @@ static double revenant_rms(NSData *data, int channel)
     return frames ? sqrt(sum / frames) : 0;
 }
 
+static int revenant_compare_periods(const void *a, const void *b)
+{
+    NSUInteger x = *(const NSUInteger *)a;
+    NSUInteger y = *(const NSUInteger *)b;
+    return x < y ? -1 : (x > y);
+}
+
 static double revenant_frequency(NSData *data)
 {
     const int16_t *samples = data.bytes;
     NSUInteger frames = data.length / 4;
-    NSUInteger crossings = 0;
+    NSUInteger *marks = malloc(sizeof(NSUInteger) * (frames + 1));
+    NSUInteger count = 0;
     for (NSUInteger index = 1; index < frames; index++) {
-        if ((samples[(index - 1) * 2] < 0) != (samples[index * 2] < 0)) {
-            crossings++;
+        if (samples[(index - 1) * 2] < 0 && samples[index * 2] >= 0) {
+            marks[count++] = index;
         }
     }
-    return frames ? crossings / 2.0 / (frames / 44100.0) : 0;
+    double result = 0;
+    if (count > 2) {
+        NSUInteger n = count - 1;
+        NSUInteger *periods = malloc(sizeof(NSUInteger) * n);
+        for (NSUInteger i = 0; i < n; i++) {
+            periods[i] = marks[i + 1] - marks[i];
+        }
+        qsort(periods, n, sizeof(NSUInteger), revenant_compare_periods);
+        result = 44100.0 / periods[n / 2];
+        free(periods);
+    }
+    free(marks);
+    return result;
 }
 
 static NSData *revenant_capture(NSTimeInterval seconds)
@@ -236,7 +256,7 @@ int main(int argc, char **argv)
         revenant_check(ratio > 0.9 && ratio < 1.1, "a non-positional source ignores the listener's position", @"moving the listener changed the volume");
 
         revenant_hold_listener(SCNVector3Make(0, 0, 0));
-        const int dopplerRounds = 3;
+        const int dopplerRounds = 12;
         double oursTotal = 0;
         double referenceTotal = 0;
         for (int round = 0; round < dopplerRounds; round++) {

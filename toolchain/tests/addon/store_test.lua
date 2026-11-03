@@ -35,20 +35,30 @@ local function read(file)
     return text, failure
 end
 
+local function describe(dir, target, generation)
+    local parts = {"at " .. tostring(os.time()), "link " .. dir, "target " .. tostring(target), "target folder " .. tostring(generation and os.isdir(generation))}
+    for _, folder in ipairs(os.dirs(dir .. ".g*")) do
+        local marker = path.join(folder, ".replaced")
+        local replaced = os.isfile(marker) and io.readfile(marker) or "none"
+        table.insert(parts, path.filename(folder) .. " replaced " .. replaced .. " payload files " .. #os.files(path.join(folder, "payload", "*")))
+    end
+    return table.concat(parts, "; ")
+end
+
 local function complete(dir)
-    if not os.isdir(dir) then
-        return false, "missing " .. dir .. " link " .. tostring(os.islink(dir))
+    if not os.islink(dir) then
+        return false, "not a link: " .. describe(dir)
     end
-    local target = os.islink(dir) and os.readlink(dir)
-    if not target then
-        return false, dir .. " is not a link to a generation"
-    end
+    local target = os.readlink(dir)
     local generation = path.join(path.directory(dir), target)
+    if not os.isdir(generation) then
+        return false, "dangling link: " .. describe(dir, target, generation)
+    end
     for index = 1, 40 do
         local file = path.join(generation, "payload", string.format("part-%02d", index))
         local text, failure = read(file)
         if not text or not (text:match("^old x+\n$") or text:match("^new x+\n$")) then
-            return false, file .. " text " .. (text and string.format("%q", text:sub(1, 40)) or "nil") .. " error " .. tostring(failure) .. " isfile " .. tostring(os.isfile(file)) .. " link " .. tostring(os.islink(dir) and os.readlink(dir)) .. " generation " .. generation .. " generation exists " .. tostring(os.isdir(generation))
+            return false, file .. " text " .. (text and string.format("%q", text:sub(1, 40)) or "nil") .. " error " .. tostring(failure) .. " state " .. describe(dir, target, generation)
         end
     end
     return true
