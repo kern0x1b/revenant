@@ -26977,6 +26977,7 @@ member RevenantMetalEncoder -drawIndexedPrimitives:indexCount:indexType:indexBuf
 member RevenantMetalEncoder -drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:
 member RevenantMetalEncoder -drawPrimitives:vertexStart:vertexCount:
 member RevenantMetalEncoder -drawPrimitives:vertexStart:vertexCount:instanceCount:
+member RevenantMetalEncoder -drawPrimitives:vertexStart:vertexCount:instanceCount:baseInstance:
 member RevenantMetalEncoder -endEncoding
 member RevenantMetalEncoder -initWithDescriptor:
 member RevenantMetalEncoder -insertDebugSignpost:
@@ -35985,6 +35986,7 @@ protocol_member MTLRenderCommandEncoder -drawIndexedPrimitives:indexCount:indexT
 protocol_member MTLRenderCommandEncoder -drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:
 protocol_member MTLRenderCommandEncoder -drawPrimitives:vertexStart:vertexCount:
 protocol_member MTLRenderCommandEncoder -drawPrimitives:vertexStart:vertexCount:instanceCount:
+protocol_member MTLRenderCommandEncoder -drawPrimitives:vertexStart:vertexCount:instanceCount:baseInstance:
 protocol_member MTLRenderCommandEncoder -setBlendColorRed:green:blue:alpha:
 protocol_member MTLRenderCommandEncoder -setCullMode:
 protocol_member MTLRenderCommandEncoder -setDepthBias:slopeScale:clamp:

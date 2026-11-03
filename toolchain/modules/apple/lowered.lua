@@ -2490,6 +2490,30 @@ function directory_roots(roots)
     return entries
 end
 
+local function nested_headers_in(framework, found)
+    for _, nested in ipairs(os.dirs(path.join(framework, "Frameworks", "*.framework"))) do
+        for _, file in ipairs(os.files(path.join(nested, "Headers", "*.h"))) do
+            table.insert(found, file)
+        end
+        nested_headers_in(nested, found)
+    end
+    return found
+end
+
+function nested_headers_of_changed(changed)
+    local found, seen = {}, {}
+    for file in pairs(changed) do
+        local headers = path.directory(file)
+        local framework = path.directory(headers)
+        if path.filename(headers) == "Headers" and framework:endswith(".framework") and not seen[framework] then
+            seen[framework] = true
+            nested_headers_in(framework, found)
+        end
+    end
+    byteorder.sort(found)
+    return found
+end
+
 function build_overlay(sdk, out, set, subtrees, modules)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
@@ -2540,6 +2564,9 @@ function build_overlay(sdk, out, set, subtrees, modules)
     local uikit_notes = path.join(sdk, "System", "Library", "Frameworks", "UIKit.framework", "Headers", "UIKit.apinotes")
     if os.isfile(uikit_notes) then
         changed[uikit_notes] = lowered_trait_apinotes(io.readfile(uikit_notes), set)
+    end
+    for _, file in ipairs(nested_headers_of_changed(changed)) do
+        changed[file] = changed[file] or io.readfile(file)
     end
     local roots = {}
     local file_roots = {}

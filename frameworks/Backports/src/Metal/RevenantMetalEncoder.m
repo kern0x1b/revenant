@@ -590,7 +590,13 @@ static GLenum primitive(MTLPrimitiveType type)
 
 - (void)drawPrimitives:(MTLPrimitiveType)primitiveType vertexStart:(NSUInteger)vertexStart vertexCount:(NSUInteger)vertexCount instanceCount:(NSUInteger)instanceCount
 {
-    for (_instance = 0; _instance < instanceCount; _instance++) {
+    [self drawPrimitives:primitiveType vertexStart:vertexStart vertexCount:vertexCount instanceCount:instanceCount baseInstance:0];
+}
+
+- (void)drawPrimitives:(MTLPrimitiveType)primitiveType vertexStart:(NSUInteger)vertexStart vertexCount:(NSUInteger)vertexCount instanceCount:(NSUInteger)instanceCount baseInstance:(NSUInteger)baseInstance
+{
+    NSUInteger end = baseInstance + instanceCount;
+    for (_instance = baseInstance; _instance < end; _instance++) {
         if (_applied && _applied->instance >= 0)
             glUniform1f(_applied->instance, (GLfloat)_instance);
         _uniformsDirty = _attributesDirty = YES;
