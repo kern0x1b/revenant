@@ -1,14 +1,17 @@
 # Driving a React Native host by touch
 
 A phone on iOS 6 has no XCUITest, and a synthesized `UIEvent` sent through `-[UIApplication sendEvent:]` faults inside UIKit
-because the event has no `GSEvent` behind it. `frameworks/ReactNative/src/RNHostTouch.m` is the injector that gets around
+because the event has no `GSEvent` behind it. `frameworks/ReactNative/src/host/RNHostTouch.m` is the injector that gets around
 that, and `frameworks/ReactNative/tools/touch.lua` is the command line for it.
 
 ## How it works
 
-Link `RNHostTouch.m` into the host application. Its `+load` waits for `UIApplicationDidFinishLaunchingNotification` and then
-polls `/var/tmp/rnhost.cmd` every 0.3 seconds. It reads one command, empties the file (the folder is sticky and owned by
-root, so the file cannot be removed) and appends the answer to `/var/tmp/rnhost.cmd.out`.
+`RNHostTouch.m` is linked into every host. Its `+load` waits for `UIApplicationDidFinishLaunchingNotification` and then polls
+the file `rnhost.cmd` inside the host's own application folder every 0.3 seconds. Each complete line appended since the last
+run is run once; the answer goes to `rnhost.cmd.out` in the host's run folder, `/var/tmp/<last part of the bundle id>/`.
+The command file lives in the `.app`, root-owned, so a process that is not root cannot send a command, and `/var/tmp` is never
+read for commands. The poll reads the file through the same checks as the configuration: a symlink, a file not owned by root
+or a path outside the `.app` is refused and logged.
 
 The injector does not go through `sendEvent:`. It builds a `UITouch` with the private setters of iOS 6
 (`_setLocationInWindow:resetPrevious:`, `setView:`, `setWindow:`, `setTapCount:`, `setIsTap:`, `_setIsFirstTouchForView:`)
@@ -30,15 +33,17 @@ native `UIScrollView` pan or a `UIControl`.
 
 ## Running it
 
-With the phone claimed:
+With the phone claimed under your holder name (`REVENANT_DEVICE_HOLDER`), and the host with bundle id ID installed by
+`host_install.lua deploy`:
 
 ```
-./xmakew l -P . frameworks/ReactNative/tools/touch.lua --before before.png --after after.png taptext "Direct connection"
+./xmakew l -P . frameworks/ReactNative/tools/touch.lua --bundle-id ID --before before.png --after after.png taptext "Direct connection"
 ```
 
-`--before` and `--after` take a screenshot of the phone before the command and after `--wait` seconds (4 by default). The
-tool prints what the injector answered. A command with a wrong verb, a wrong number of arguments, a non-number coordinate or
-a quote in the text is refused before anything is sent.
+`--bundle-id` is required: it names the host whose folder receives the command. `--before` and `--after` take a screenshot
+of the phone before the command and after `--wait` seconds (4 by default). The tool prints what the injector answered. A
+command with a wrong verb, a wrong number of arguments, a non-number coordinate or a quote in the text is refused before
+anything is sent. The tool deletes the previous answer before it sends, so the printed answer is the one to this command.
 
 ## Limits
 

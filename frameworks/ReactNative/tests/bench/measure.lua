@@ -1,24 +1,60 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE [WAIT]
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua prepare BUNDLE_ID JS_BUNDLE HERMES_BUNDLE
+       ./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE_ID [WAIT]
        ./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua summarize RUNFOLDER...
-  run relaunches the React Native bench on the claimed phone with ENGINE (hermes or jsc) and BUNDLE (a path on the phone), makes
-  five taps on the counter and one swipe on the list, and writes the screenshot, the host log and the answers of the touch
-  injector to .cache/scratch/rn-bench/runs/ENGINE-RUN. WAIT is the seconds the bench gets to mount (default 40, use 60 for jsc).
+  prepare copies the two bench bundles into the application folder of the host BUNDLE_ID on the claimed phone, root-owned: the
+  JavaScript bundle for JavaScriptCore (bundle.js) and the Hermes bytecode (bundle.hbc).
+  run stops that host by its bundle id, selects ENGINE (hermes or jsc) in its rnhost.conf, relaunches it, makes five taps on the
+  counter and one swipe on the list, and writes the screenshot, the host log and the answers of the touch injector to
+  .cache/scratch/rn-bench/runs/ENGINE-RUN. WAIT is the seconds the bench gets to mount (default 40, use 60 for jsc).
   summarize prints the startup, the tap-to-commit latency, the fps and the RSS of each run folder.]]
 
-local BUNDLE_ID = "org.revenant.rnhost.hermes"
-local SHOT = "/usr/libexec/revenant-shot"
 local COUNTER = {120, 110}
 local SWIPE = {160, 420, 160, 150, 600}
+local SHOT = "/usr/libexec/revenant-shot"
+local BUNDLES = {jsc = "bundle.js", hermes = "bundle.hbc"}
 
-local function injected(command)
-    return "rm -f /var/tmp/rnhost.cmd.out; touch /var/tmp/rnhost.cmd; chmod 666 /var/tmp/rnhost.cmd; echo '" .. command .. "' > /var/tmp/rnhost.cmd"
+local function application(bundle_id)
+    return bundle_id:match("([^%.]+)$")
 end
 
-local function sent(device, settings, command, answers)
-    device.run(settings, injected(command))
+local function phone()
+    local device = import("@addon.revenant.device", {anonymous = true})
+    local settings = device.bind(os.curdir())
+    local holder = device.holder_name()
+    local lease = settings.udid ~= "" and device.lease(settings.udid)
+    if not holder or not lease or lease.holder ~= holder then
+        raise("the phone is not claimed by %s: claim it first and export REVENANT_DEVICE_HOLDER", holder or "anyone (REVENANT_DEVICE_HOLDER is unset)")
+    end
+    return device, settings, holder
+end
+
+local function app_folder(holder, bundle_id)
+    local name = application(bundle_id)
+    return "/var/stash/" .. holder .. "/" .. name .. "/" .. name .. ".app"
+end
+
+local function run_folder(bundle_id)
+    return "/var/tmp/" .. application(bundle_id)
+end
+
+local function host_install(...)
+    os.vrunv("./xmakew", table.join({"l", "-P", ".", "frameworks/ReactNative/tools/host_install.lua"}, {...}))
+end
+
+local function prepare(bundle_id, javascript, bytecode)
+    local device, settings, holder = phone()
+    local app = app_folder(holder, bundle_id)
+    device.copy(settings, path.absolute(javascript), app .. "/" .. BUNDLES.jsc)
+    device.copy(settings, path.absolute(bytecode), app .. "/" .. BUNDLES.hermes)
+    device.run(settings, "chown root:wheel " .. app .. "/" .. BUNDLES.jsc .. " " .. app .. "/" .. BUNDLES.hermes .. " && chmod 644 " .. app .. "/" .. BUNDLES.jsc .. " " .. app .. "/" .. BUNDLES.hermes)
+    print("prepared " .. app)
+end
+
+local function sent(device, settings, app, run, command, answers)
+    device.run(settings, "rm -f " .. run .. "/rnhost.cmd.out && printf '%s\\n' '" .. command .. "' >> " .. app .. "/rnhost.cmd")
     os.sleep(1000)
     local answer = os.tmpfile()
-    if device.fetch(settings, "/var/tmp/rnhost.cmd.out", answer) then
+    if device.fetch(settings, run .. "/rnhost.cmd.out", answer) then
         table.insert(answers, (io.readfile(answer):trim()))
         os.tryrm(answer)
     else
@@ -27,22 +63,34 @@ local function sent(device, settings, command, answers)
     os.sleep(1000)
 end
 
-local function measure(engine, number, bundle, wait)
-    local device = import("@addon.revenant.device", {anonymous = true})
-    local settings = device.bind(os.curdir())
+local function measure(engine, number, bundle_id, wait)
+    local bundle = BUNDLES[engine]
+    if not bundle then
+        raise("the engine is hermes or jsc, not %s", engine)
+    end
+    local device, settings, holder = phone()
+    local app = app_folder(holder, bundle_id)
+    local run = run_folder(bundle_id)
     local folder = path.join(os.curdir(), ".cache", "scratch", "rn-bench", "runs", engine .. "-" .. number)
     os.mkdir(folder)
-    device.run(settings, string.format("printf 'engine=%s\\nbundle=%s\\nmodule=bench\\n' > /var/tmp/rnhost.conf; killall RNHost 2>/dev/null; sleep 3; rm -f /var/tmp/rnhost.log; /usr/libexec/revenant-sblaunch %s; sleep %d", engine, bundle, BUNDLE_ID, wait))
+    host_install("stop", "--bundle-id", bundle_id)
+    device.run(settings, table.concat({
+        "printf 'module=bench\\nengine=" .. engine .. "\\nbundle=" .. bundle .. "\\n' > " .. app .. "/rnhost.conf",
+        "chown root:wheel " .. app .. "/rnhost.conf && chmod 644 " .. app .. "/rnhost.conf",
+        "rm -f " .. app .. "/rnhost.cmd " .. run .. "/rnhost.log " .. run .. "/rnhost.cmd.out",
+        ": > " .. app .. "/rnhost.log.on",
+        "/usr/libexec/revenant-sblaunch " .. bundle_id,
+        "sleep " .. wait}, " && "))
     local answers = {}
     for _ = 1, 5 do
-        sent(device, settings, string.format("tap %d %d", COUNTER[1], COUNTER[2]), answers)
+        sent(device, settings, app, run, string.format("tap %d %d", COUNTER[1], COUNTER[2]), answers)
         os.sleep(1000)
     end
-    sent(device, settings, string.format("swipe %d %d %d %d %d", SWIPE[1], SWIPE[2], SWIPE[3], SWIPE[4], SWIPE[5]), answers)
+    sent(device, settings, app, run, string.format("swipe %d %d %d %d %d", SWIPE[1], SWIPE[2], SWIPE[3], SWIPE[4], SWIPE[5]), answers)
     os.sleep(6000)
     device.run(settings, SHOT .. " /tmp/screenshot.png")
     device.fetch(settings, "/tmp/screenshot.png", path.join(folder, "screen.png"))
-    device.fetch(settings, "/var/tmp/rnhost.log", path.join(folder, "host.log"))
+    device.fetch(settings, run .. "/rnhost.log", path.join(folder, "host.log"))
     io.writefile(path.join(folder, "touch.txt"), table.concat(answers, "\n") .. "\n")
     print(folder)
 end
@@ -118,7 +166,9 @@ end
 
 function main(...)
     local arguments = {...}
-    if arguments[1] == "run" and #arguments >= 4 then
+    if arguments[1] == "prepare" and #arguments == 4 then
+        prepare(arguments[2], arguments[3], arguments[4])
+    elseif arguments[1] == "run" and #arguments >= 4 then
         measure(arguments[2], arguments[3], arguments[4], tonumber(arguments[5] or "40"))
     elseif arguments[1] == "summarize" and #arguments >= 2 then
         for index = 2, #arguments do
