@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 2 Nov 2026 12:00:00 +0200
+Subject: [PATCH] Enable Objective-C before the compile flags are mirrored
+
+The compiler flag macros write CMAKE_OBJCXX_FLAGS as they run, and
+OptionsCommon runs them before Options${PORT} enables OBJC and OBJCXX. The
+variable then exists before CMake initializes it from the toolchain and the
+environment, so those flags never reach the Objective-C++ compile rules:
+the WTF precompiled header was built without -DWEBKIT_IOS6=1, the -include
+prefix headers, -nostdinc++ and the target, so ENABLE(COCOA_WEBM_PLAYER)
+was on and the build stopped on its MEDIA_SOURCE check. C++ sources already
+had the full set.
+
+Enable the two languages before the first flag macro runs.
+---
+diff --git a/Source/cmake/WebKitCommon.cmake b/Source/cmake/WebKitCommon.cmake
+--- a/Source/cmake/WebKitCommon.cmake
++++ b/Source/cmake/WebKitCommon.cmake
+@@ -335,6 +335,7 @@
+         include(WebKitAdditions)
+     endif ()
+ 
++    enable_language(OBJC OBJCXX)
+     include(OptionsCommon)
+     include(Options${PORT})
+ 

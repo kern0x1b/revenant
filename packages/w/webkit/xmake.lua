@@ -46,7 +46,8 @@ package("webkit")
         {"0030-Leave-ARKit-to-the-iOS-releases-that-have-it.patch", "80f9115f81a20b3b739a7866f6f6f5991b672161183b3445b6beef13aeb94528"},
         {"0031-Set-the-accessibility-importance-only-where-iOS-has-it.patch", "48ad029ea6f481c96983bff53afb225aa2da2084e6524aee77d37abf31bab31a"},
         {"0032-Archive-the-engine-with-the-libtool-it-names.patch", "f4fdfbe2793069b53345bcb20a933e3436144f8cc3a2430989ddd49300a38bc9"},
-        {"0033-Cast-the-CoreLocation-authorization-status-the-SDK-types-as-AV.patch", "8889f0e87814fc95efbeb5e23c044aac76172ac75f58db85cb839bbe54a67b91"}}
+        {"0033-Cast-the-CoreLocation-authorization-status-the-SDK-types-as-AV.patch", "8889f0e87814fc95efbeb5e23c044aac76172ac75f58db85cb839bbe54a67b91"},
+        {"0034-Enable-Objective-C-before-the-compile-flags-are-mirrored.patch", "a8a9e4cbf9529a503270fa96427869236d3ed1a1d3065add4f98750710948444"}}
 
     local digests = {table.concat(tree, ",")}
     for _, patch in ipairs(patches) do
