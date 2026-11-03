@@ -91,6 +91,11 @@ local function remove_tree(folder)
     os.vrunv("rm", {"-rf", "--", folder})
 end
 
+local function write_text(file, text)
+    os.vrunv("chmod", {"u+w", file})
+    io.writefile(file, text)
+end
+
 function clone(source, folder)
     source = absolute(source)
     folder = absolute(folder)
@@ -159,7 +164,7 @@ function clone(source, folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            write_text(file, changed)
             cmake = cmake + 1
         end
     end
@@ -206,7 +211,7 @@ function repair(folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            write_text(file, changed)
             count = count + 1
         end
     end
