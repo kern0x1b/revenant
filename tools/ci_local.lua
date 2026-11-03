@@ -278,15 +278,24 @@ local function git(...)
     return os.iorunv("git", table.join({"-C", ROOT}, {...})):trim()
 end
 
+local function works(developer)
+    return try { function () os.iorunv("env", {"DEVELOPER_DIR=" .. developer, "xcrun", "--find", "clang"}) return true end } or false
+end
+
 local function toolchain(requested)
     local developer = requested or os.getenv("DEVELOPER_DIR")
-    if not developer and os.isdir(XCODE_DEFAULT) then
-        developer = XCODE_DEFAULT
+    if developer then
+        if not os.isdir(developer) or not works(developer) then
+            raise("the developer dir %s has no working xcrun", developer)
+        end
+    elseif os.isdir(XCODE_DEFAULT) then
+        if works(XCODE_DEFAULT) then
+            developer = XCODE_DEFAULT
+        else
+            print("ci_local: %s has no working xcrun yet, so the Command Line Tools are used", XCODE_DEFAULT)
+        end
     end
     if developer then
-        if not os.isdir(developer) then
-            raise("the developer dir %s is not a folder", developer)
-        end
         os.setenv("DEVELOPER_DIR", developer)
     end
     local sdk = try { function () return os.iorunv("xcrun", {"--show-sdk-version"}):trim() end } or "unknown"
