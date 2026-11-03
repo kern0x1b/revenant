@@ -1,4 +1,4 @@
-local EXCLUDED = {"devices", "emulator-slots", "scratch", "sizes"}
+local EXCLUDED = {"budget", "devices", "emulator-slots", "scratch", "sizes"}
 local MARKER = ".private-cache"
 
 local function cache()
