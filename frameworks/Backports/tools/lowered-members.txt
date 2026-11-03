@@ -35633,7 +35633,6 @@ protocol NSURLProtocolClient
 protocol NSURLSessionDataDelegate
 protocol NSURLSessionDelegate
 protocol NSURLSessionDownloadDelegate
-protocol NSURLSessionStreamDelegate
 protocol NSURLSessionTaskDelegate
 protocol OS_nw_browser
 protocol OS_nw_connection
