@@ -7,7 +7,6 @@ local FILES = {
     "frameworks/ReactNative/src/stubs.json",
     "frameworks/ReactNative/src/expo/xmake.lua",
     "frameworks/ReactNative/src/expo/StubModules.swift",
-    "frameworks/ReactNative/src/ios6/KeyboardControllerStubs.mm",
     "docs/reference/react-native/coverage.md"
 }
 

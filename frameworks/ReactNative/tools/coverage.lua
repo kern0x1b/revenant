@@ -39,16 +39,6 @@ local DECLARED = {
             names[name] = true
         end
         return names
-    end,
-    ["src/ios6/KeyboardControllerStubs.mm"] = function (text)
-        local names = {}
-        for name in text:gmatch("\n@interface (%w+) : NSObject") do
-            names[name] = true
-        end
-        for name in text:gmatch("\nRNHOST_KEYBOARD_VIEW%((%w+)%)") do
-            names[name] = true
-        end
-        return names
     end
 }
 

@@ -174,62 +174,6 @@
       "module": "ExpoSQLite",
       "owner": "expo-sqlite",
       "reason": "Name only."
-    },
-    {
-      "name": "KeyboardController",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardController",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Every method is a no-op except viewPositionInWindow, which resolves zeros; the TurboModule spec is implemented, the behaviour is not."
-    },
-    {
-      "name": "KeyboardControllerView",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardControllerView",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView with the library's component descriptor; draws and handles nothing of the library."
-    },
-    {
-      "name": "KeyboardGestureArea",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardGestureArea",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no gesture."
-    },
-    {
-      "name": "OverKeyboardView",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "OverKeyboardView",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no keyboard tracking."
-    },
-    {
-      "name": "KeyboardBackgroundView",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardBackgroundView",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no keyboard tracking."
-    },
-    {
-      "name": "KeyboardExtender",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardExtender",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no keyboard tracking."
-    },
-    {
-      "name": "ClippingScrollViewDecoratorView",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "ClippingScrollViewDecoratorView",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no scroll decoration."
-    },
-    {
-      "name": "KeyboardToolbarGroupView",
-      "file": "src/ios6/KeyboardControllerStubs.mm",
-      "module": "KeyboardToolbarGroupView",
-      "owner": "react-native-keyboard-controller",
-      "reason": "Plain RCTViewComponentView; no toolbar."
     }
   ]
 }

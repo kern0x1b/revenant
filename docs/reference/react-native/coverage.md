@@ -6,10 +6,10 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 38 |
+| real | built from the module's own sources, with no stub and no substitute | 39 |
 | partial | built and running, with a named part left out or rewritten | 11 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 7 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
 | missing | native code that is not built yet | 49 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
@@ -42,7 +42,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | Appearance and useColorScheme | 0.86.3 | yes | evaluate | none | iOS 6 has no dark mode; the module must answer light or the app's setting. |
 | Dimensions, PixelRatio, useWindowDimensions | 0.86.3 | yes | real | phone | The 320 by 480 layout is correct. |
 | StatusBar | 0.86.3 | yes | evaluate | none | Built; iOS 6 status bar styles differ from the iOS 7 model; not exercised. |
-| Keyboard (events, dismiss) | 0.86.3 | yes | evaluate | none | iOS 6 keyboard notifications; the keyboard-controller replacement is a stub. |
+| Keyboard (events, dismiss) | 0.86.3 | yes | evaluate | none | iOS 6 keyboard notifications; the keyboard-controller library it works with is built from its own sources (react-native-keyboard-controller row). |
 | Alert | 0.86.3 | yes | evaluate | none | Built; UIAlertView on iOS 6 versus UIAlertController of newer releases is not exercised. |
 | ActionSheetIOS | 0.86.3 | yes | evaluate | none | Built; not exercised. |
 | Settings | 0.86.3 | yes | evaluate | none | Built; not exercised. |
@@ -167,7 +167,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | react-native-web | ~0.21.0 | no | n/a | none | Web only. |
 | react-native-gesture-handler | ~2.32.0 | yes | real | phone | Built; the app's gestures run on it. |
 | react-native-get-random-values | ~1.11.0 | yes | real | build | Built from its own sources (1 file); not exercised on the phone. |
-| react-native-keyboard-controller | 1.21.12 | yes | stub | none | Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 with C++ interop off (keyboard-probe, build ok); the emitted header has no C++ section. The ObjC++ half does not compile yet: KeyboardControllerModule.mm uses RCTDirectEventBlock from the Swift header, which is not visible without clang modules (the probe is textual, the pod build uses modules). The app still runs plain-view stubs, so a phone check was made against this stub, not the library, and it is not counted as verified (stubs.json). |
+| react-native-keyboard-controller | 1.21.12 | yes | real | phone | The library's own sources build and link for armv7 iOS 6: its 39 Swift files (C++ interop off) and its ObjC and ObjC++ files, with the codegen of the RNKC specs. No stub remains. Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Seen on an iPhone 4S, iOS 6.1.3, with the host built from the isolated copy: the host's own probe (kc-probe.on, not committed) created a KeyboardController instance of the library and called preload and dismiss:animated:, both returned; the host log has no MISSING COMPONENT and no STUB CALLED lines (2026-11-03). The views are linked but no JavaScript bundle rendered them: the host has no React Native bridge, so the module's JavaScript-facing calls are not exercised. |
 | react-native-maps | 1.27.2 | yes | missing | none | Not built; package packages/r/react-native-maps (1.27.2). The Google provider is switched off by patch 0001 (ios/AirMaps/RNMapsDefines.h: HAVE_GOOGLE_MAPS 0, so the placeholders compile), and the Google subspec (ios/AirGoogleMaps, GoogleMaps 9.4.0) is not built, because the GoogleMaps SDK is not carried for iOS 6. The Apple path (ios/AirMaps) is not yet clean on iOS 6: it uses MapKit symbols from iOS 7 to iOS 16 (MKMapCameraZoomRange and MKMapCameraZoomDefault from 13, MKPointOfInterestCategory from 13, MKStandardMapConfiguration, MKHybridMapConfiguration and MKMapConfiguration from 16, MKFeatureVisibility from 16, MKMapTypeMutedStandard and MKFeatureDisplayPriorityRequired from 11, MKAnnotationViewDragState from 11), and MKMarkerAnnotationView is deprecated from 16. The Backports cover the MKMapView, MKMapCamera, MKMapSnapshotter and MKOverlayPathRenderer core, not the newer symbols. Those need a guard or a Backport before it is built. |
 | react-native-pager-view | 8.0.2 | yes | missing | none | Its component view imports react_native_pager_view-Swift.h, so the Swift part (5 files) has to compile first; not built. |
 | react-native-worklets | 0.10.1 | yes | real | phone | Built. |
@@ -225,11 +225,3 @@ What the build stands in with for a module it does not build. Each is listed in 
 | StubPushTokenManagerModule | ExpoPushTokenManager | src/expo/StubModules.swift | expo-notifications | Name only. |
 | StubServerRegistrationModule | NotificationsServerRegistrationModule | src/expo/StubModules.swift | expo-notifications | Name only. |
 | StubSQLiteModule | ExpoSQLite | src/expo/StubModules.swift | expo-sqlite | Name only. |
-| KeyboardController | KeyboardController | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Every method is a no-op except viewPositionInWindow, which resolves zeros; the TurboModule spec is implemented, the behaviour is not. |
-| KeyboardControllerView | KeyboardControllerView | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView with the library's component descriptor; draws and handles nothing of the library. |
-| KeyboardGestureArea | KeyboardGestureArea | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no gesture. |
-| OverKeyboardView | OverKeyboardView | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no keyboard tracking. |
-| KeyboardBackgroundView | KeyboardBackgroundView | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no keyboard tracking. |
-| KeyboardExtender | KeyboardExtender | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no keyboard tracking. |
-| ClippingScrollViewDecoratorView | ClippingScrollViewDecoratorView | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no scroll decoration. |
-| KeyboardToolbarGroupView | KeyboardToolbarGroupView | src/ios6/KeyboardControllerStubs.mm | react-native-keyboard-controller | Plain RCTViewComponentView; no toolbar. |

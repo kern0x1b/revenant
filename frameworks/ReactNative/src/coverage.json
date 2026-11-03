@@ -963,9 +963,9 @@
    "group": "sdk",
    "version": "1.21.12",
    "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Seven view components and the module are replaced by plain views in ios6/KeyboardControllerStubs.mm; the real library needs Swift sources and iOS 14 keyboard notifications. Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Its 39 Swift files compile for armv7 iOS 6 with C++ interop off (keyboard-probe, build ok); the emitted header has no C++ section. The ObjC++ half does not compile yet: KeyboardControllerModule.mm uses RCTDirectEventBlock from the Swift header, which is not visible without clang modules (the probe is textual, the pod build uses modules). The app still runs plain-view stubs, so a phone check was made against this stub, not the library, and it is not counted as verified (stubs.json)."
+   "status": "real",
+   "verified": "phone",
+   "note": "The library's own sources build and link for armv7 iOS 6: its 39 Swift files (C++ interop off) and its ObjC and ObjC++ files, with the codegen of the RNKC specs. No stub remains. Package packages/r/react-native-keyboard-controller (npm 1.21.12, no patches). Seen on an iPhone 4S, iOS 6.1.3, with the host built from the isolated copy: the host's own probe (kc-probe.on, not committed) created a KeyboardController instance of the library and called preload and dismiss:animated:, both returned; the host log has no MISSING COMPONENT and no STUB CALLED lines (2026-11-03). The views are linked but no JavaScript bundle rendered them: the host has no React Native bridge, so the module's JavaScript-facing calls are not exercised."
   },
   {
    "id": "react-native-maps",
@@ -1307,7 +1307,7 @@
    "native": true,
    "status": "evaluate",
    "verified": "none",
-   "note": "iOS 6 keyboard notifications; the keyboard-controller replacement is a stub."
+   "note": "iOS 6 keyboard notifications; the keyboard-controller library it works with is built from its own sources (react-native-keyboard-controller row)."
   },
   {
    "id": "Alert",
