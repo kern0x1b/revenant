@@ -91,6 +91,11 @@ local function remove_tree(folder)
     os.vrunv("rm", {"-rf", "--", folder})
 end
 
+local function rewrite(file, text)
+    os.vrunv("chmod", {"u+w", file})
+    io.writefile(file, text)
+end
+
 function clone(source, folder)
     source = absolute(source)
     folder = absolute(folder)
@@ -159,7 +164,7 @@ function clone(source, folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            rewrite(file, changed)
             cmake = cmake + 1
         end
     end
@@ -206,7 +211,7 @@ function repair(folder)
             changed = replace(changed, root, folder)
         end
         if changed ~= text then
-            io.writefile(file, changed)
+            rewrite(file, changed)
             count = count + 1
         end
     end
@@ -264,6 +269,7 @@ local function test_suite()
     io.writefile(path.join(store, "manifest.txt"), "installdir = \"" .. install .. "\"\n")
     os.mkdir(path.join(install, "lib", "pkgconfig"))
     io.writefile(path.join(install, "lib", "pkgconfig", "alpha.pc"), "Libs: -L" .. path.join(install, "lib") .. "\n")
+    os.vrunv("chmod", {"444", path.join(install, "lib", "pkgconfig", "alpha.pc")})
     io.writefile(path.join(source, "note.txt"), "kept " .. source .. "\n")
     local sealed = path.join(store, "sealed")
     os.mkdir(sealed)
