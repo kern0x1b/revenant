@@ -14,6 +14,7 @@ on:
           - libcxx
           - ld64
           - webkit-engine
+          - tessdata
         default: llvm
 
 permissions:
@@ -128,6 +129,7 @@ jobs:
               libcxx|swift-runtime) ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v && ./xmakew require -P . -y -v --extra="{system=false}" revenant@$PACKAGE ;;
               ld64) ./xmakew require -P . -y -v --extra="{system=false}" revenant@ld64 ;;
               webkit-engine) ./xmakew f -P . -p iphoneos -a armv7 --component=webkit-engine -y -v ;;
+              tessdata) ./xmakew f -P . -p iphoneos -a armv7 --component=prebuilt -y -v && ./xmakew require -P . -y -v --extra="{system=false,configs={languages=\"all\"}}" revenant@tessdata ;;
               *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
             esac
           } 2>&1 | tee "$RUNNER_TEMP/build.log"
