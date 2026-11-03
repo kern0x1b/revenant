@@ -36,6 +36,7 @@ typedef enum {
     nw_error_domain_posix = 1,
     nw_error_domain_dns = 2,
     nw_error_domain_tls = 3,
+    nw_error_domain_wifi_aware = 4,
 } nw_error_domain_t;
 
 typedef void (^nw_parameters_configure_protocol_block_t)(nw_protocol_options_t options);

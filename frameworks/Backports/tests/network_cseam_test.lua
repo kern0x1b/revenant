@@ -27,4 +27,9 @@ function main()
     swiftc(table.join({"-emit-ir"}, consumer, {"-o", ir}))
     assert(not io.readfile(ir):find('!"Network"', 1, true),
            "the backport's consumer of import Network carries -framework Network in llvm.linker.options: " .. ir)
+
+    local probe = path.join(out, "sdk_network_probe.swift")
+    io.writefile(probe, "import Network\nimport RevenantNetworkC\nlet domain = nw_error_domain_posix\n_ = domain\n")
+    os.vrunv("xcrun", {"swiftc", "-typecheck", "-sdk", workspace.sdk(), "-target", "arm64-apple-ios12.0",
+                       "-I", path.join(src, "RevenantNetworkC"), probe})
 end
