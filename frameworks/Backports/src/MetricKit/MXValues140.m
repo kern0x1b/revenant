@@ -57,7 +57,7 @@ REVENANT_VALUE_PROPERTY(NSMeasurement *, totalSampledTime)
 @implementation MXCallStackTree
 @end
 @implementation MXCrashDiagnostic
-@dynamic callStackTree, terminationReason, virtualMemoryRegionInfo, exceptionType, exceptionCode, BACKPORT_IMPL(signal);
+@dynamic callStackTree, terminationReason, virtualMemoryRegionInfo, exceptionType, exceptionCode, signal;
 
 REVENANT_VALUE_PROPERTY(MXCallStackTree *, callStackTree)
 REVENANT_VALUE_PROPERTY(NSString *, terminationReason)

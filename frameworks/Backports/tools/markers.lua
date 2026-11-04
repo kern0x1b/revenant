@@ -292,7 +292,9 @@ local function scan_masked(m)
             end
         elseif c == ";" then
             if paren == 0 and brace == 0 then
-                for _, found in ipairs(global_names(m, stmt, s - 1)) do
+                local head = string.sub(m, stmt, s - 1)
+                local property = string.find(head, "@dynamic%f[^%w_]") ~= nil or string.find(head, "@synthesize%f[^%w_]") ~= nil
+                for _, found in ipairs(not property and global_names(m, stmt, s - 1) or {}) do
                     local decl = string.sub(m, stmt, found.first - 1)
                     local after = string.match(m, "^%s*(.)", found.last + 1)
                     add(found.name, found.first, found.last, "global", (not string.find(decl, ",", 1, true)) and tidy(decl) or nil, after == "[")

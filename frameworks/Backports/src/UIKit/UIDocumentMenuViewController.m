@@ -14,7 +14,7 @@
 @end
 
 @implementation RevenantDocumentMenuOption
-@synthesize title, handler, BACKPORT_IMPL(order);
+@synthesize title, handler, order;
 @end
 
 @implementation UIDocumentMenuViewController {

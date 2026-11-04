@@ -73,5 +73,21 @@ function main()
     local again, renamed_again = markers.rewrite(out, renamable, sdk)
     assert(#renamed_again == 0 and again == out, "a second rewrite must change nothing")
 
-    print("markers tests passed: 9 definitions renamed, a prototype, a string, a comment, an extern and a variadic left alone")
+    local PROPERTIES = [==[
+@implementation Bar
+@dynamic width, height;
+@synthesize order, title;
+@end
+]==]
+    local properties = set_of({"width", "height", "order", "title"})
+    local same, renamed_properties = markers.rewrite(PROPERTIES, properties, properties)
+    assert(#renamed_properties == 0 and same == PROPERTIES, "@dynamic and @synthesize names are properties, not globals")
+    local marked_properties = markers.marked_definitions("@implementation Bar\n@dynamic BACKPORT_IMPL(width), BACKPORT_IMPL(height);\n@end\n")
+    local defined = 0
+    for _ in pairs(marked_properties) do
+        defined = defined + 1
+    end
+    assert(defined == 0, "a marked @dynamic name must define no global")
+
+    print("markers tests passed: 9 definitions renamed, a prototype, a string, a comment, an extern and a variadic left alone; @dynamic and @synthesize names left alone")
 end
