@@ -91,6 +91,10 @@ package("swift-crypto")
                             "-module-cache-path", path.join(objects, "modulecache")}
         local swiftmods = path.join(objects, "swiftmodules")
         os.mkdir(swiftmods)
+        local function swiftmodule_path(name)
+            os.mkdir(path.join(swiftmods, name .. ".swiftmodule"))
+            return path.join(swiftmods, name .. ".swiftmodule", package:arch() .. "-apple-ios.swiftmodule")
+        end
         local swiftargv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                                module = "CryptoBoringWrapper"})
         table.join2(swiftargv, swiftflags)
@@ -100,7 +104,7 @@ package("swift-crypto")
         end
         table.sort(wrapper)
         table.join2(swiftargv, {"-module-name", "CryptoBoringWrapper", "-I", swiftmods, "-emit-module", "-emit-module-path",
-                                path.join(swiftmods, "CryptoBoringWrapper.swiftmodule")}, wrapper, {"-o", path.join(objects, "CryptoBoringWrapper.o")})
+                                swiftmodule_path("CryptoBoringWrapper")}, wrapper, {"-o", path.join(objects, "CryptoBoringWrapper.o")})
         os.vrunv(swiftc, swiftargv)
 
         local crypto = {}
@@ -112,7 +116,7 @@ package("swift-crypto")
                                            module = "Crypto"})
         table.join2(cargv, swiftflags)
         table.join2(cargv, {"-module-name", "Crypto", "-I", swiftmods, "-emit-module", "-emit-module-path",
-                            path.join(swiftmods, "Crypto.swiftmodule")}, crypto, {"-o", path.join(objects, "Crypto.o")})
+                            swiftmodule_path("Crypto")}, crypto, {"-o", path.join(objects, "Crypto.o")})
         os.vrunv(swiftc, cargv)
 
         local asn1 = assert(os.dirs(path.join(package:resourcedir("swift-asn1"), "swift-asn1-*"))[1], "swift-asn1 is not fetched")
@@ -134,7 +138,7 @@ package("swift-crypto")
         local asn1argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                               module = "SwiftASN1"})
         table.join2(asn1argv, asn1flags, {"-c", "-module-name", "SwiftASN1", "-emit-module", "-emit-module-path",
-                    path.join(swiftmods, "SwiftASN1.swiftmodule")}, swiftfiles(path.join(asn1tree, "Sources", "SwiftASN1")),
+                    swiftmodule_path("SwiftASN1")}, swiftfiles(path.join(asn1tree, "Sources", "SwiftASN1")),
                     {"-o", path.join(swiftmods, "SwiftASN1.raw.o")})
         os.vrunv(swiftc, asn1argv)
         local ld64 = path.join(package:dep("ld64"):installdir("bin"), "ld")
@@ -148,7 +152,7 @@ package("swift-crypto")
                                               module = module})
             table.join2(argv, swiftflags)
             table.join2(argv, {"-module-name", module, "-I", swiftmods, "-emit-module", "-emit-module-path",
-                               path.join(swiftmods, module .. ".swiftmodule")},
+                               swiftmodule_path(module)},
                         swiftfiles(path.join(sources, module)), {"-o", path.join(objects, module .. ".o")})
             os.vrunv(swiftc, argv)
         end

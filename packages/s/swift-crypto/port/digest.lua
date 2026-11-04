@@ -1,1 +1,1 @@
-swift_crypto_sources_digest = "dfeee9f3037c545d06a710459db3da6d"
+swift_crypto_sources_digest = "16370d89c97e90f659371308eddfad78"
