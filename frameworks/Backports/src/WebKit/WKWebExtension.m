@@ -32,7 +32,7 @@ WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest)
     NSURL *base = [appExtensionBundle bundleURL];
     if (base == nil) {
         [self revenant_report:completionHandler extension:nil
-                    error:[NSError errorWithDomain:WKWebExtensionErrorDomain
+                    error:[NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionErrorDomain)
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
         return;
@@ -45,7 +45,7 @@ WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest)
 {
     if (resourceBaseURL == nil || !resourceBaseURL.isFileURL) {
         [self revenant_report:completionHandler extension:nil
-                    error:[NSError errorWithDomain:WKWebExtensionErrorDomain
+                    error:[NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionErrorDomain)
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
         return;
@@ -54,7 +54,7 @@ WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest)
     NSData *data = [NSData dataWithContentsOfFile:path];
     if (data == nil) {
         [self revenant_report:completionHandler extension:nil
-                    error:[NSError errorWithDomain:WKWebExtensionErrorDomain
+                    error:[NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionErrorDomain)
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
         return;
@@ -63,7 +63,7 @@ WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest)
     id parsed = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
     if (![parsed isKindOfClass:[NSDictionary class]]) {
         [self revenant_report:completionHandler extension:nil
-                    error:[NSError errorWithDomain:WKWebExtensionErrorDomain
+                    error:[NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionErrorDomain)
                                              code:WKWebExtensionErrorInvalidManifest
                                          userInfo:@{NSUnderlyingErrorKey: jsonError ?: [NSNull null]}]];
         return;

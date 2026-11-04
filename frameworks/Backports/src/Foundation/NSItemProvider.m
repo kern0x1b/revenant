@@ -39,7 +39,7 @@ static BOOL revenant_conforms(NSString *type, NSString *parent)
 
 static NSError *revenant_error(NSInteger code)
 {
-    return [NSError errorWithDomain:NSItemProviderErrorDomain code:code userInfo:nil];
+    return [NSError errorWithDomain:BACKPORT_IMPL(NSItemProviderErrorDomain) code:code userInfo:nil];
 }
 
 static Class revenant_expected_class(id block)

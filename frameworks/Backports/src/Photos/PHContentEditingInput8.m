@@ -66,10 +66,10 @@ NSString *const BACKPORT_IMPL(PHContentEditingInputErrorKey) = @"PHContentEditin
         if (!data) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if ([info[PHImageCancelledKey] boolValue])
-                    reply(nil, @{PHContentEditingInputCancelledKey: @YES});
+                    reply(nil, @{BACKPORT_IMPL(PHContentEditingInputCancelledKey): @YES});
                 else {
                     NSError *error = info[PHImageErrorKey] ?: [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the asset has no full-size image data"];
-                    reply(nil, @{PHContentEditingInputErrorKey: error});
+                    reply(nil, @{BACKPORT_IMPL(PHContentEditingInputErrorKey): error});
                 }
             });
             return;
@@ -85,7 +85,7 @@ NSString *const BACKPORT_IMPL(PHContentEditingInputErrorKey) = @"PHContentEditin
             if ([data writeToURL:url options:NSDataWritingAtomic error:&writeError])
                 input = [[PHContentEditingInput alloc] initWithRevenantFullSizeImageURL:url mediaType:PHAssetMediaTypeImage];
             else
-                result = @{PHContentEditingInputErrorKey: writeError};
+                result = @{BACKPORT_IMPL(PHContentEditingInputErrorKey): writeError};
             dispatch_async(dispatch_get_main_queue(), ^{
                 reply(input, result);
             });

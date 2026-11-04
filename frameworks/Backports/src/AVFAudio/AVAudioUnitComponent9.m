@@ -17,16 +17,16 @@ NSString * const BACKPORT_IMPL(AVAudioUnitComponentTagsDidChangeNotification) = 
 static NSString *RevenantTypeNameForType(OSType type)
 {
     switch (type) {
-        case kAudioUnitType_Output: return AVAudioUnitTypeOutput;
-        case kAudioUnitType_MusicDevice: return AVAudioUnitTypeMusicDevice;
-        case kAudioUnitType_MusicEffect: return AVAudioUnitTypeMusicEffect;
-        case kAudioUnitType_Effect: return AVAudioUnitTypeEffect;
-        case kAudioUnitType_Mixer: return AVAudioUnitTypeMixer;
-        case kAudioUnitType_Panner: return AVAudioUnitTypePanner;
-        case kAudioUnitType_FormatConverter: return AVAudioUnitTypeFormatConverter;
-        case kAudioUnitType_Generator: return AVAudioUnitTypeGenerator;
-        case kAudioUnitType_OfflineEffect: return AVAudioUnitTypeOfflineEffect;
-        case kAudioUnitType_MIDIProcessor: return AVAudioUnitTypeMIDIProcessor;
+        case kAudioUnitType_Output: return BACKPORT_IMPL(AVAudioUnitTypeOutput);
+        case kAudioUnitType_MusicDevice: return BACKPORT_IMPL(AVAudioUnitTypeMusicDevice);
+        case kAudioUnitType_MusicEffect: return BACKPORT_IMPL(AVAudioUnitTypeMusicEffect);
+        case kAudioUnitType_Effect: return BACKPORT_IMPL(AVAudioUnitTypeEffect);
+        case kAudioUnitType_Mixer: return BACKPORT_IMPL(AVAudioUnitTypeMixer);
+        case kAudioUnitType_Panner: return BACKPORT_IMPL(AVAudioUnitTypePanner);
+        case kAudioUnitType_FormatConverter: return BACKPORT_IMPL(AVAudioUnitTypeFormatConverter);
+        case kAudioUnitType_Generator: return BACKPORT_IMPL(AVAudioUnitTypeGenerator);
+        case kAudioUnitType_OfflineEffect: return BACKPORT_IMPL(AVAudioUnitTypeOfflineEffect);
+        case kAudioUnitType_MIDIProcessor: return BACKPORT_IMPL(AVAudioUnitTypeMIDIProcessor);
         default: return nil;
     }
 }
@@ -53,7 +53,7 @@ static NSString *RevenantTypeNameForType(OSType type)
         _revenant_typeName = RevenantTypeNameForType(_revenant_description.componentType);
         OSType manufacturer = CFSwapInt32HostToBig(_revenant_description.componentManufacturer);
         if (manufacturer == CFSwapInt32HostToBig(kAudioUnitManufacturer_Apple)) {
-            _revenant_manufacturerName = AVAudioUnitManufacturerNameApple;
+            _revenant_manufacturerName = BACKPORT_IMPL(AVAudioUnitManufacturerNameApple);
         } else {
             char code[5] = {0};
             memcpy(code, &manufacturer, 4);

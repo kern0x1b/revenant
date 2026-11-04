@@ -6,7 +6,7 @@ const GCMicroGamepadSnapshotDataVersion BACKPORT_IMPL(GCCurrentMicroGamepadSnaps
 
 NSData *BACKPORT_IMPL(NSDataFromGCExtendedGamepadSnapshotData)(GCExtendedGamepadSnapshotData *snapshotData)
 {
-    return revenant_gc_snapshot_data(snapshotData, sizeof(GCExtendedGamepadSnapshotData), GCCurrentExtendedGamepadSnapshotDataVersion);
+    return revenant_gc_snapshot_data(snapshotData, sizeof(GCExtendedGamepadSnapshotData), BACKPORT_IMPL(GCCurrentExtendedGamepadSnapshotDataVersion));
 }
 
 BOOL BACKPORT_IMPL(GCExtendedGamepadSnapshotDataFromNSData)(GCExtendedGamepadSnapshotData *snapshotData, NSData *data)
@@ -16,7 +16,7 @@ BOOL BACKPORT_IMPL(GCExtendedGamepadSnapshotDataFromNSData)(GCExtendedGamepadSna
 
 NSData *BACKPORT_IMPL(NSDataFromGCMicroGamepadSnapshotData)(GCMicroGamepadSnapshotData *snapshotData)
 {
-    return revenant_gc_snapshot_data(snapshotData, sizeof(GCMicroGamepadSnapshotData), GCCurrentMicroGamepadSnapshotDataVersion);
+    return revenant_gc_snapshot_data(snapshotData, sizeof(GCMicroGamepadSnapshotData), BACKPORT_IMPL(GCCurrentMicroGamepadSnapshotDataVersion));
 }
 
 BOOL BACKPORT_IMPL(GCMicroGamepadSnapshotDataFromNSData)(GCMicroGamepadSnapshotData *snapshotData, NSData *data)

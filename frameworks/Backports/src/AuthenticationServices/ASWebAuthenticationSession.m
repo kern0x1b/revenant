@@ -95,7 +95,7 @@ __attribute__((constructor)) static void revenant_aswebauth_recover_journal(void
             [weakSelf revenant_restoreEphemeralJournal];
             if (!handler)
                 return;
-            NSError *mapped = error ? [NSError errorWithDomain:ASWebAuthenticationSessionErrorDomain code:ASWebAuthenticationSessionErrorCodeCanceledLogin userInfo:nil] : nil;
+            NSError *mapped = error ? [NSError errorWithDomain:BACKPORT_IMPL(ASWebAuthenticationSessionErrorDomain) code:ASWebAuthenticationSessionErrorCodeCanceledLogin userInfo:nil] : nil;
             handler(callbackURL, mapped);
         }];
     }

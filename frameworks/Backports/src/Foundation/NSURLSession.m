@@ -378,7 +378,7 @@ static int64_t revenant_expected_body_length(NSURLSessionTask *task, NSURLReques
         return MAX(revenant_file_size(task->_bodyFile), 0);
     case RevenantTaskBodyStream: {
         NSString *length = [request valueForHTTPHeaderField:@"Content-Length"];
-        return length ? length.longLongValue : NSURLSessionTransferSizeUnknown;
+        return length ? length.longLongValue : BACKPORT_IMPL(NSURLSessionTransferSizeUnknown);
     }
     case RevenantTaskBodyNone:
         if (request.HTTPBody)
@@ -766,7 +766,7 @@ static void revenant_task_finish(NSURLSessionTask *task, NSError *error)
                 resumeData = revenant_download_resume_data(task);
             if (resumeData) {
                 NSMutableDictionary *userInfo = [error.userInfo mutableCopy] ?: [NSMutableDictionary dictionary];
-                userInfo[NSURLSessionDownloadTaskResumeData] = resumeData;
+                userInfo[BACKPORT_IMPL(NSURLSessionDownloadTaskResumeData)] = resumeData;
                 error = [NSError errorWithDomain:error.domain code:error.code userInfo:userInfo];
             } else if (task->_fileURL) {
                 [[NSFileManager defaultManager] removeItemAtURL:task->_fileURL error:NULL];
@@ -937,7 +937,7 @@ static void revenant_download_response(NSURLSessionTask *task, NSURLResponse *re
             return;
         }
         task->_resumeOffset = offset;
-        int64_t total = expected >= 0 ? offset + expected : NSURLSessionTransferSizeUnknown;
+        int64_t total = expected >= 0 ? offset + expected : BACKPORT_IMPL(NSURLSessionTransferSizeUnknown);
         @synchronized (task) {
             task->_countOfBytesReceived = offset;
             task->_countOfBytesExpectedToReceive = total;
@@ -2165,8 +2165,8 @@ NSURLSessionConfiguration *revenant_task_configuration(NSURLSessionTask *task)
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _clientExpectsToSend = NSURLSessionTransferSizeUnknown;
-        _clientExpectsToReceive = NSURLSessionTransferSizeUnknown;
+        _clientExpectsToSend = BACKPORT_IMPL(NSURLSessionTransferSizeUnknown);
+        _clientExpectsToReceive = BACKPORT_IMPL(NSURLSessionTransferSizeUnknown);
         _prefersIncrementalDelivery = YES;
     }
     return self;

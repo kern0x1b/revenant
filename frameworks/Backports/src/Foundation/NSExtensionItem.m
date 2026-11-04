@@ -45,32 +45,32 @@ NSString *const BACKPORT_IMPL(NSExtensionItemAttachmentsKey) = @"NSExtensionItem
 
 - (NSAttributedString *)attributedTitle
 {
-    return [self revenant_attributedStringForKey:NSExtensionItemAttributedTitleKey];
+    return [self revenant_attributedStringForKey:BACKPORT_IMPL(NSExtensionItemAttributedTitleKey)];
 }
 
 - (void)setAttributedTitle:(NSAttributedString *)title
 {
-    [self revenant_setValue:title ? [NSKeyedArchiver archivedDataWithRootObject:title] : nil forKey:NSExtensionItemAttributedTitleKey];
+    [self revenant_setValue:title ? [NSKeyedArchiver archivedDataWithRootObject:title] : nil forKey:BACKPORT_IMPL(NSExtensionItemAttributedTitleKey)];
 }
 
 - (NSAttributedString *)attributedContentText
 {
-    return [self revenant_attributedStringForKey:NSExtensionItemAttributedContentTextKey];
+    return [self revenant_attributedStringForKey:BACKPORT_IMPL(NSExtensionItemAttributedContentTextKey)];
 }
 
 - (void)setAttributedContentText:(NSAttributedString *)text
 {
-    [self revenant_setValue:text ? [NSKeyedArchiver archivedDataWithRootObject:text] : nil forKey:NSExtensionItemAttributedContentTextKey];
+    [self revenant_setValue:text ? [NSKeyedArchiver archivedDataWithRootObject:text] : nil forKey:BACKPORT_IMPL(NSExtensionItemAttributedContentTextKey)];
 }
 
 - (NSArray<NSItemProvider *> *)attachments
 {
-    return [self revenant_valueForKey:NSExtensionItemAttachmentsKey];
+    return [self revenant_valueForKey:BACKPORT_IMPL(NSExtensionItemAttachmentsKey)];
 }
 
 - (void)setAttachments:(NSArray<NSItemProvider *> *)attachments
 {
-    [self revenant_setValue:[attachments copy] forKey:NSExtensionItemAttachmentsKey];
+    [self revenant_setValue:[attachments copy] forKey:BACKPORT_IMPL(NSExtensionItemAttachmentsKey)];
 }
 
 - (NSDictionary *)userInfo

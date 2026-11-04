@@ -20,18 +20,18 @@ static NSDictionary *revenant_detected(NSString *text, NSSet *patterns)
         return values;
     NSNumber *number = [[[NSNumberFormatter alloc] init] numberFromString:trimmed];
     if (number) {
-        if ([patterns containsObject:UIPasteboardDetectionPatternNumber])
-            values[UIPasteboardDetectionPatternNumber] = number;
+        if ([patterns containsObject:BACKPORT_IMPL(UIPasteboardDetectionPatternNumber)])
+            values[BACKPORT_IMPL(UIPasteboardDetectionPatternNumber)] = number;
         return values;
     }
-    if ([patterns containsObject:UIPasteboardDetectionPatternProbableWebURL]) {
+    if ([patterns containsObject:BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebURL)]) {
         NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:NULL];
         NSTextCheckingResult *match = [detector firstMatchInString:trimmed options:0 range:NSMakeRange(0, trimmed.length)];
         if (match && match.range.location == 0 && match.range.length == trimmed.length)
-            values[UIPasteboardDetectionPatternProbableWebURL] = trimmed;
+            values[BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebURL)] = trimmed;
     }
-    if ([patterns containsObject:UIPasteboardDetectionPatternProbableWebSearch] && !values[UIPasteboardDetectionPatternProbableWebURL])
-        values[UIPasteboardDetectionPatternProbableWebSearch] = trimmed;
+    if ([patterns containsObject:BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebSearch)] && !values[BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebURL)])
+        values[BACKPORT_IMPL(UIPasteboardDetectionPatternProbableWebSearch)] = trimmed;
     return values;
 }
 

@@ -16,17 +16,17 @@ UIFontTextStyle const BACKPORT_IMPL(UIFontTextStyleCaption2) = @"UICTFontTextSty
 {
     if (!style)
         return nil;
-    if ([style isEqualToString:UIFontTextStyleHeadline])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleHeadline)])
         return [UIFont boldSystemFontOfSize:17];
-    if ([style isEqualToString:UIFontTextStyleBody])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleBody)])
         return [UIFont systemFontOfSize:17];
-    if ([style isEqualToString:UIFontTextStyleSubheadline])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleSubheadline)])
         return [UIFont systemFontOfSize:15];
-    if ([style isEqualToString:UIFontTextStyleFootnote])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleFootnote)])
         return [UIFont systemFontOfSize:13];
-    if ([style isEqualToString:UIFontTextStyleCaption1])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleCaption1)])
         return [UIFont systemFontOfSize:12];
-    if ([style isEqualToString:UIFontTextStyleCaption2])
+    if ([style isEqualToString:BACKPORT_IMPL(UIFontTextStyleCaption2)])
         return [UIFont systemFontOfSize:11];
     if ([style isEqualToString:@"UICTFontTextStyleTitle0"])
         return [UIFont systemFontOfSize:34];

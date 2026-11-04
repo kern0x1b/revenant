@@ -51,13 +51,13 @@ static RevenantNWProtocolStack *revenant_stack(nw_protocol_definition_t transpor
 
 static bool revenant_disabled(nw_parameters_configure_protocol_block_t configure)
 {
-    return configure == (nw_parameters_configure_protocol_block_t)_nw_parameters_configure_protocol_disable;
+    return configure == (nw_parameters_configure_protocol_block_t)BACKPORT_IMPL(_nw_parameters_configure_protocol_disable);
 }
 
 static bool revenant_defaulted(nw_parameters_configure_protocol_block_t configure)
 {
     return !configure ||
-           configure == (nw_parameters_configure_protocol_block_t)_nw_parameters_configure_protocol_default_configuration;
+           configure == (nw_parameters_configure_protocol_block_t)BACKPORT_IMPL(_nw_parameters_configure_protocol_default_configuration);
 }
 
 nw_parameters_t BACKPORT_IMPL(nw_parameters_create)(void)

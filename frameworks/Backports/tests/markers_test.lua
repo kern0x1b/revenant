@@ -73,6 +73,23 @@ function main()
     local again, renamed_again = markers.rewrite(out, renamable, sdk)
     assert(#renamed_again == 0 and again == out, "a second rewrite must change nothing")
 
+    local USES = [==[
+int kUse = 1;
+int read_use(void) { return kUse; }
+int kUse2 = 0;
+const char *tag(void) { return "kUse"; }
+]==]
+    local uses = set_of({"kUse"})
+    local uses_out, uses_renamed = markers.rewrite(USES, uses, uses)
+    assert(list_of(set_of(uses_renamed)) == "kUse", "kUse must be renamed once")
+    assert(string.find(uses_out, "int BACKPORT_IMPL(kUse) = 1;", 1, true), "the definition of kUse was not renamed")
+    assert(string.find(uses_out, "return BACKPORT_IMPL(kUse);", 1, true), "a use of kUse in a body was not renamed")
+    assert(string.find(uses_out, "int kUse2 = 0;", 1, true), "kUse2 is another name and must stay")
+    assert(string.find(uses_out, "return \"kUse\";", 1, true), "a string literal must not be renamed")
+    assert(markers.rename_uses(uses_out, uses) == uses_out, "a renamed use must not be renamed again")
+    local extern_out = markers.rename_uses("extern int kE;\nint f(void) { return kE; }\n", set_of({"kE"}))
+    assert(extern_out == "extern int kE;\nint f(void) { return BACKPORT_IMPL(kE); }\n", "an extern declaration stays and a body use is renamed, got " .. extern_out)
+
     local PROPERTIES = [==[
 @implementation Bar
 @dynamic width, height;

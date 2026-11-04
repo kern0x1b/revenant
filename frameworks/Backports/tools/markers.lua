@@ -375,20 +375,66 @@ local function already_marked(text, first)
     return first > #MARKER and string.sub(text, first - #MARKER, first - 1) == MARKER
 end
 
+local function in_extern(code, first)
+    local start = first
+    while start > 1 and not string.find(string.sub(code, start - 1, start - 1), "[;{}]") do
+        start = start - 1
+    end
+    return string.find(string.sub(code, start, first - 1), "extern%f[^%w_]") ~= nil
+end
+
+local function code_uses(text, names)
+    local code = mask(text, true)
+    local found = {}
+    for name in pairs(names) do
+        local pos = 1
+        while true do
+            local first, last = string.find(code, name, pos, true)
+            if first == nil then
+                break
+            end
+            local before = string.sub(code, first - 1, first - 1)
+            local member = before == "." or string.sub(code, first - 2, first - 1) == "->"
+            local after = string.sub(code, last + 1, last + 1)
+            if not member and not string.find(before, "[%w_]") and not string.find(after, "[%w_]") and not already_marked(text, first) and not in_extern(code, first) then
+                table.insert(found, {first = first, last = last, name = name})
+            end
+            pos = last + 1
+        end
+    end
+    return found
+end
+
+local function apply_edits(text, edits)
+    table.sort(edits, function (a, b) return a.first > b.first end)
+    local out = text
+    for _, edit in ipairs(edits) do
+        out = string.sub(out, 1, edit.first - 1) .. MARKER .. edit.name .. ")" .. string.sub(out, edit.last + 1)
+    end
+    return out
+end
+
+function rename_uses(text, names)
+    return apply_edits(text, code_uses(text, names))
+end
+
 function rewrite(text, renamable, sdk)
-    local edits, renamed, kept, unhandled = {}, {}, {}, {}
-    local function classify(name, first, last)
+    local edits, renamed, kept, unhandled, globals = {}, {}, {}, {}, {}
+    local function classify(name, kind, first, last)
         if renamable[name] then
             if not already_marked(text, first) then
                 table.insert(edits, {first = first, last = last, name = name})
             end
             renamed[name] = true
+            if kind == "global" then
+                globals[name] = true
+            end
         elseif sdk[name] then
             table.insert(kept, {name = name, line = line_of(text, first)})
         end
     end
     for _, def in ipairs(scan(text)) do
-        classify(def.name, def.first, def.last)
+        classify(def.name, def.kind, def.first, def.last)
     end
     for _, macro in ipairs(macros(text)) do
         for _, def in ipairs(macro.defs) do
@@ -399,15 +445,21 @@ function rewrite(text, renamable, sdk)
             if parameter then
                 table.insert(unhandled, {name = def.name, macro = macro.name, line = line_of(text, macro.first + def.first - 1)})
             else
-                classify(def.name, macro.first + def.first - 1, macro.first + def.last - 1)
+                classify(def.name, def.kind, macro.first + def.first - 1, macro.first + def.last - 1)
             end
         end
     end
-    table.sort(edits, function (a, b) return a.first > b.first end)
-    local out = text
+    local seen = {}
     for _, edit in ipairs(edits) do
-        out = string.sub(out, 1, edit.first - 1) .. MARKER .. edit.name .. ")" .. string.sub(out, edit.last + 1)
+        seen[edit.first] = true
     end
+    for _, use in ipairs(code_uses(text, globals)) do
+        if not seen[use.first] then
+            seen[use.first] = true
+            table.insert(edits, use)
+        end
+    end
+    local out = apply_edits(text, edits)
     local names = {}
     for name in pairs(renamed) do
         table.insert(names, name)

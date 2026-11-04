@@ -51,12 +51,12 @@ static void revenant_progress_set(NSProgress *progress, NSString *key, id value)
 
 - (NSNumber *)estimatedTimeRemaining
 {
-    return revenant_progress_value(self, NSProgressEstimatedTimeRemainingKey);
+    return revenant_progress_value(self, BACKPORT_IMPL(NSProgressEstimatedTimeRemainingKey));
 }
 
 - (void)setEstimatedTimeRemaining:(NSNumber *)value
 {
-    revenant_progress_set(self, NSProgressEstimatedTimeRemainingKey, [value copy]);
+    revenant_progress_set(self, BACKPORT_IMPL(NSProgressEstimatedTimeRemainingKey), [value copy]);
 }
 
 - (NSNumber *)throughput

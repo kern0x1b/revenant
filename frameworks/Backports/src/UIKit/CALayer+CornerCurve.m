@@ -102,13 +102,13 @@ static void revenant_install_squircle_hooks(void)
 
 - (CALayerCornerCurve)cornerCurve
 {
-    return objc_getAssociatedObject(self, &RevenantCornerCurveKey) ?: kCACornerCurveCircular;
+    return objc_getAssociatedObject(self, &RevenantCornerCurveKey) ?: BACKPORT_IMPL(kCACornerCurveCircular);
 }
 
 - (void)setCornerCurve:(CALayerCornerCurve)cornerCurve
 {
-    BOOL continuous = [cornerCurve isEqual:kCACornerCurveContinuous];
-    objc_setAssociatedObject(self, &RevenantCornerCurveKey, continuous ? kCACornerCurveContinuous : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    BOOL continuous = [cornerCurve isEqual:BACKPORT_IMPL(kCACornerCurveContinuous)];
+    objc_setAssociatedObject(self, &RevenantCornerCurveKey, continuous ? BACKPORT_IMPL(kCACornerCurveContinuous) : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (continuous)
         revenant_install_squircle_hooks();
     revenant_layer_refresh_corner_curve(self);

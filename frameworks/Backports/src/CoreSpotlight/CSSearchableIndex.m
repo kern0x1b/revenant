@@ -11,7 +11,7 @@ static NSError *RevenantIndexErrorBecause(CSIndexErrorCode code, NSString *reaso
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey];
     if (cause)
         info[NSUnderlyingErrorKey] = cause;
-    return [NSError errorWithDomain:CSIndexErrorDomain code:code userInfo:info];
+    return [NSError errorWithDomain:BACKPORT_IMPL(CSIndexErrorDomain) code:code userInfo:info];
 }
 
 static NSError *RevenantIndexError(CSIndexErrorCode code, NSString *reason)
@@ -414,7 +414,7 @@ NSArray<CSSearchableItem *> *RevenantSpotlightDefaultItems(void)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (completionHandler)
-            completionHandler(nil, [NSError errorWithDomain:CSIndexErrorDomain code:CSIndexErrorCodeRemoteConnectionError userInfo:nil]);
+            completionHandler(nil, [NSError errorWithDomain:BACKPORT_IMPL(CSIndexErrorDomain) code:CSIndexErrorCodeRemoteConnectionError userInfo:nil]);
     });
 }
 

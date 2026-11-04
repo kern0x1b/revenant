@@ -60,11 +60,11 @@ static BOOL revenant_all_ascii(NSData *data)
             *string = @"";
         return NSUTF8StringEncoding;
     }
-    NSArray *suggested = opts[NSStringEncodingDetectionSuggestedEncodingsKey];
-    NSArray *disallowed = opts[NSStringEncodingDetectionDisallowedEncodingsKey];
-    BOOL onlySuggested = [opts[NSStringEncodingDetectionUseOnlySuggestedEncodingsKey] boolValue];
-    BOOL allowLossy = opts[NSStringEncodingDetectionAllowLossyKey] ? [opts[NSStringEncodingDetectionAllowLossyKey] boolValue] : YES;
-    NSString *substitution = opts[NSStringEncodingDetectionLossySubstitutionKey] ?: @"�";
+    NSArray *suggested = opts[BACKPORT_IMPL(NSStringEncodingDetectionSuggestedEncodingsKey)];
+    NSArray *disallowed = opts[BACKPORT_IMPL(NSStringEncodingDetectionDisallowedEncodingsKey)];
+    BOOL onlySuggested = [opts[BACKPORT_IMPL(NSStringEncodingDetectionUseOnlySuggestedEncodingsKey)] boolValue];
+    BOOL allowLossy = opts[BACKPORT_IMPL(NSStringEncodingDetectionAllowLossyKey)] ? [opts[BACKPORT_IMPL(NSStringEncodingDetectionAllowLossyKey)] boolValue] : YES;
+    NSString *substitution = opts[BACKPORT_IMPL(NSStringEncodingDetectionLossySubstitutionKey)] ?: @"�";
     NSMutableArray *candidates = [NSMutableArray array];
     for (NSNumber *encoding in suggested)
         [candidates addObject:encoding];

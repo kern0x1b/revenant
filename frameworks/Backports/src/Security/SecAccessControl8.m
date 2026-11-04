@@ -80,7 +80,7 @@ static BOOL revenant_access_control_protection_is_valid(CFTypeRef protection)
         kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         kSecAttrAccessibleAlwaysThisDeviceOnly,
-        kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+        BACKPORT_IMPL(kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly),
     };
     for (size_t index = 0; index < sizeof accepted / sizeof accepted[0]; index++) {
         if (CFEqual(protection, accepted[index]))

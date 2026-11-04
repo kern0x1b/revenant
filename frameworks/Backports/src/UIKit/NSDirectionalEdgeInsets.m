@@ -23,7 +23,7 @@ NSDirectionalEdgeInsets BACKPORT_IMPL(NSDirectionalEdgeInsetsFromString)(NSStrin
 
 - (NSDirectionalEdgeInsets)directionalEdgeInsetsValue
 {
-    NSDirectionalEdgeInsets insets = NSDirectionalEdgeInsetsZero;
+    NSDirectionalEdgeInsets insets = BACKPORT_IMPL(NSDirectionalEdgeInsetsZero);
     if ([self respondsToSelector:@selector(getValue:size:)]) {
         [self getValue:&insets size:sizeof(insets)];
         return insets;

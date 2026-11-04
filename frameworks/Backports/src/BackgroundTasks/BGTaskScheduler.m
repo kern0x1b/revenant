@@ -71,7 +71,7 @@ static BOOL revenant_background_mode(NSString *mode)
     if ([taskRequest isKindOfClass:[BGContinuedProcessingTaskRequest class]])
         code = BGTaskSchedulerErrorCodeUnavailable;
     if (error)
-        *error = [NSError errorWithDomain:BGTaskSchedulerErrorDomain code:code userInfo:nil];
+        *error = [NSError errorWithDomain:BACKPORT_IMPL(BGTaskSchedulerErrorDomain) code:code userInfo:nil];
     return NO;
 }
 

@@ -40,7 +40,7 @@ NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationPreviewIntentThumbnail
         [NSException raise:NSInternalInconsistencyException format:@"-[UIActivityItemsConfiguration initWithObjects:]: objects parameter cannot be nil."];
     if ((self = [super init])) {
         _objects = [objects copy];
-        _supportedInteractions = @[UIActivityItemsConfigurationInteractionShare];
+        _supportedInteractions = @[BACKPORT_IMPL(UIActivityItemsConfigurationInteractionShare)];
         [self itemProvidersForActivityItemsConfiguration];
     }
     return self;
@@ -50,7 +50,7 @@ NSString *const BACKPORT_IMPL(UIActivityItemsConfigurationPreviewIntentThumbnail
 {
     if ((self = [super init])) {
         _itemProviders = [itemProviders copy];
-        _supportedInteractions = @[UIActivityItemsConfigurationInteractionShare];
+        _supportedInteractions = @[BACKPORT_IMPL(UIActivityItemsConfigurationInteractionShare)];
     }
     return self;
 }

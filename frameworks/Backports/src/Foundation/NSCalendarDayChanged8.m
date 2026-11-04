@@ -57,7 +57,7 @@ __attribute__((visibility("hidden")))
         }
     }
     if (changed)
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSCalendarDayChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BACKPORT_IMPL(NSCalendarDayChangedNotification) object:nil];
     [self schedule:date];
 }
 

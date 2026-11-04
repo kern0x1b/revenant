@@ -13,7 +13,7 @@ static char RevenantPriorityKey;
 - (float)priority
 {
     NSNumber *priority = objc_getAssociatedObject(self, &RevenantPriorityKey);
-    return priority ? priority.floatValue : NSURLSessionTaskPriorityDefault;
+    return priority ? priority.floatValue : BACKPORT_IMPL(NSURLSessionTaskPriorityDefault);
 }
 
 - (void)setPriority:(float)priority

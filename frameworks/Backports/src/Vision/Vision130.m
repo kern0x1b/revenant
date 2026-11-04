@@ -66,7 +66,7 @@ NSUInteger BACKPORT_IMPL(VNElementTypeSize)(VNElementType elementType)
                                                                            NSStringFromClass(self), (unsigned long)requestRevision]);
         return nil;
     }
-    return @[VNAnimalIdentifierCat, VNAnimalIdentifierDog];
+    return @[BACKPORT_IMPL(VNAnimalIdentifierCat), BACKPORT_IMPL(VNAnimalIdentifierDog)];
 }
 
 @end

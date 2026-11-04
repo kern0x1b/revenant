@@ -178,19 +178,19 @@ UTType *BACKPORT_IMPL(UTTypePDF);
 
 __attribute__((constructor)) static void revenant_uttype_constants(void)
 {
-    UTTypeItem = [UTType typeWithIdentifier:@"public.item"];
-    UTTypeContent = [UTType typeWithIdentifier:@"public.content"];
-    UTTypeData = [UTType typeWithIdentifier:@"public.data"];
-    UTTypeDirectory = [UTType typeWithIdentifier:@"public.directory"];
-    UTTypeURL = [UTType typeWithIdentifier:@"public.url"];
-    UTTypeFileURL = [UTType typeWithIdentifier:@"public.file-url"];
-    UTTypeText = [UTType typeWithIdentifier:@"public.text"];
-    UTTypePlainText = [UTType typeWithIdentifier:@"public.plain-text"];
-    UTTypeUTF8PlainText = [UTType typeWithIdentifier:@"public.utf8-plain-text"];
-    UTTypeImage = [UTType typeWithIdentifier:@"public.image"];
-    UTTypePDF = [UTType typeWithIdentifier:@"com.adobe.pdf"];
+    BACKPORT_IMPL(UTTypeItem) = [UTType typeWithIdentifier:@"public.item"];
+    BACKPORT_IMPL(UTTypeContent) = [UTType typeWithIdentifier:@"public.content"];
+    BACKPORT_IMPL(UTTypeData) = [UTType typeWithIdentifier:@"public.data"];
+    BACKPORT_IMPL(UTTypeDirectory) = [UTType typeWithIdentifier:@"public.directory"];
+    BACKPORT_IMPL(UTTypeURL) = [UTType typeWithIdentifier:@"public.url"];
+    BACKPORT_IMPL(UTTypeFileURL) = [UTType typeWithIdentifier:@"public.file-url"];
+    BACKPORT_IMPL(UTTypeText) = [UTType typeWithIdentifier:@"public.text"];
+    BACKPORT_IMPL(UTTypePlainText) = [UTType typeWithIdentifier:@"public.plain-text"];
+    BACKPORT_IMPL(UTTypeUTF8PlainText) = [UTType typeWithIdentifier:@"public.utf8-plain-text"];
+    BACKPORT_IMPL(UTTypeImage) = [UTType typeWithIdentifier:@"public.image"];
+    BACKPORT_IMPL(UTTypePDF) = [UTType typeWithIdentifier:@"com.adobe.pdf"];
 
-    revenant_uttype_catalogue_add(@[UTTypeItem, UTTypeContent, UTTypeData, UTTypeDirectory, UTTypeURL,
-                                  UTTypeFileURL, UTTypeText, UTTypePlainText, UTTypeUTF8PlainText,
-                                  UTTypeImage, UTTypePDF]);
+    revenant_uttype_catalogue_add(@[BACKPORT_IMPL(UTTypeItem), BACKPORT_IMPL(UTTypeContent), BACKPORT_IMPL(UTTypeData), BACKPORT_IMPL(UTTypeDirectory), BACKPORT_IMPL(UTTypeURL),
+                                  BACKPORT_IMPL(UTTypeFileURL), BACKPORT_IMPL(UTTypeText), BACKPORT_IMPL(UTTypePlainText), BACKPORT_IMPL(UTTypeUTF8PlainText),
+                                  BACKPORT_IMPL(UTTypeImage), BACKPORT_IMPL(UTTypePDF)]);
 }
