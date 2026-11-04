@@ -296,11 +296,31 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     }
 }
 
+// The superview chain of view up to root, one entry per view: class, alpha, layer opacity, hidden and frame in root.
+static NSString *RNHostViewChain(UIView *view, UIView *root)
+{
+    NSMutableArray<NSString *> *parts = [NSMutableArray array];
+    UIView *current = view;
+    while (current != nil && parts.count < 12) {
+        [parts addObject:[NSString stringWithFormat:@"%@ alpha %.2f opacity %.2f hidden %d frame %@",
+                          NSStringFromClass([current class]), current.alpha, current.layer.opacity, (int)current.hidden,
+                          NSStringFromCGRect([current convertRect:current.bounds toView:root])]];
+        if (current == root) {
+            break;
+        }
+        current = current.superview;
+    }
+    return [parts componentsJoinedByString:@" < "];
+}
+
 // Diagnostics: audits the views under root for what hides them (hidden, transparent, empty or singular, on the view and
-// on its layer), the animations on the layers, the scroll views with their offsets, and the text views on screen.
+// on its layer), the animations on the layers, the scroll views with their offsets, and the text views on screen. The
+// superview chains of the first transparent views and of the tall scroll views show which ancestor hides them.
 + (void)logViewAudit:(UIView *)root
 {
     CGRect screen = root.bounds;
+    NSMutableArray<UIView *> *transparentViews = [NSMutableArray array];
+    NSMutableArray<UIView *> *tallScrollViews = [NSMutableArray array];
     NSMutableArray<UIView *> *stack = [NSMutableArray arrayWithObject:root];
     NSUInteger views = 0;
     NSUInteger hidden = 0;
@@ -345,11 +365,17 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
                                   cls, NSStringFromCGRect(frame), NSStringFromCGRect(view.bounds), (int)isHidden, view.alpha,
                                   layer.opacity, lt.m11, lt.m22]];
         }
+        if (isTransparent && transparentViews.count < 3) {
+            [transparentViews addObject:view];
+        }
         if ([view isKindOfClass:[UIScrollView class]] && scrolls.count < 8) {
             UIScrollView *scroll = (UIScrollView *)view;
             [scrolls addObject:[NSString stringWithFormat:@"%@ frame %@ offset %@ content %@ scrollEnabled %d hidden %d",
                                 cls, NSStringFromCGRect(frame), NSStringFromCGPoint(scroll.contentOffset),
                                 NSStringFromCGSize(scroll.contentSize), (int)scroll.scrollEnabled, (int)isHidden]];
+            if (scroll.contentSize.height > 1000 && tallScrollViews.count < 3) {
+                [tallScrollViews addObject:view];
+            }
         }
         if ([cls rangeOfString:@"Text"].location != NSNotFound || [cls rangeOfString:@"Label"].location != NSNotFound) {
             texts++;
@@ -376,6 +402,12 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     }
     for (NSString *line in visibleTexts) {
         NSLog(@"rn-host: audit text on screen %@", line);
+    }
+    for (UIView *view in transparentViews) {
+        NSLog(@"rn-host: audit transparent chain %@", RNHostViewChain(view, root));
+    }
+    for (UIView *view in tallScrollViews) {
+        NSLog(@"rn-host: audit tall scroll chain %@", RNHostViewChain(view, root));
     }
 }
 
