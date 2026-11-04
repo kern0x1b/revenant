@@ -1,4 +1,5 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
+local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
 local tools = path.absolute(path.join(os.scriptdir(), "..", "tools"))
 local implemented = import("implemented", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
@@ -33,7 +34,7 @@ local function check_payment_members()
     os.tryrm(root)
     local object = path.join(root, "StoreKit", "src", "StoreKit", "SKPayment+ApplicationUsername.o")
     os.mkdir(path.directory(object))
-    os.vrunv("clang", {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc", "-Os", "-w", "-c", "-o", object,
+    os.vrunv("clang", {"-target", "armv7-apple-ios" .. lowered.device_release(), "-isysroot", sdk, "-fobjc-arc", "-Os", "-w", "-c", "-o", object,
         path.join(backports, "src", "StoreKit", "SKPayment+ApplicationUsername.m")})
     local keys = implemented.from_objects(root).StoreKit or {}
     local missing = {}

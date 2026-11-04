@@ -3,6 +3,13 @@ local json = import("core.base.json")
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
+local semver = import("core.base.semver")
+
+local DEVICE_RELEASE = "6.0"
+
+function device_release()
+    return DEVICE_RELEASE
+end
 
 local TRAIT_REGISTRATION = {
     {"- (id<UITraitChangeRegistration>)registerForTraitChanges:(NSArray<UITrait> *)traits withHandler:(UITraitChangeHandler)handler", "registerForTraitChanges(_:handler:)"},
@@ -60,7 +67,7 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIPointerStyle.h",
-            find = "+ (instancetype)systemPointerStyle API_AVAILABLE(ios(15.0));",
+            find = "+ (instancetype)systemPointerStyle API_AVAILABLE(...);",
             replace = "+ (instancetype)systemPointerStyle;",
         },
     },
@@ -70,8 +77,8 @@ local MEMBERS = {
             name = "CoreGraphics",
             directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
             file = "CGColorSpace.h",
-            find = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(9.0));",
-            replace = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(macos(10.5), ios(6.0)) __attribute__((weak_import));",
+            find = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  API_AVAILABLE(...);",
+            replace = "CG_EXTERN const CFStringRef kCGColorSpaceSRGB\n  __attribute__((weak_import));",
         },
     },
     {
@@ -90,8 +97,8 @@ local MEMBERS = {
             name = "CoreFoundation",
             directory = {"System", "Library", "Frameworks", "CoreFoundation.framework", "Headers"},
             file = "CFDateFormatter.h",
-            find = "kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(macosx(10.13), ios(11.0), watchos(4.0), tvos(11.0))",
-            replace = "kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(macosx(10.13), ios(6.0), watchos(4.0), tvos(11.0))",
+            find = "kCFISO8601DateFormatWithFractionalSeconds API_AVAILABLE(...)",
+            replace = "kCFISO8601DateFormatWithFractionalSeconds",
         },
     },
     {
@@ -100,8 +107,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UITextInputTraits.h",
-            find = "UIKeyboardAppearanceDark API_AVAILABLE(ios(7.0)),",
-            replace = "UIKeyboardAppearanceDark API_AVAILABLE(ios(6.0)),",
+            find = "UIKeyboardAppearanceDark API_AVAILABLE(...),",
+            replace = "UIKeyboardAppearanceDark,",
         },
     },
     {
@@ -110,8 +117,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UITextInputTraits.h",
-            find = "UIKeyboardAppearanceLight API_AVAILABLE(ios(7.0)),",
-            replace = "UIKeyboardAppearanceLight API_AVAILABLE(ios(6.0)) = UIKeyboardAppearanceDefault,",
+            find = "UIKeyboardAppearanceLight API_AVAILABLE(...),",
+            replace = "UIKeyboardAppearanceLight = UIKeyboardAppearanceDefault,",
         },
     },
     {
@@ -120,8 +127,8 @@ local MEMBERS = {
             name = "Foundation",
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
-            find = "API_DEPRECATED(\"Use NSURLUbiquitousItemDownloadingStatusKey instead\", macos(10.7,10.9), ios(5.0,7.0), watchos(2.0,2.0), tvos(9.0,9.0));",
-            replace = "API_AVAILABLE(macos(10.7), ios(5.0), watchos(2.0), tvos(9.0));",
+            find = "NSURLUbiquitousItemIsDownloadedKey           API_DEPRECATED(...);",
+            replace = "NSURLUbiquitousItemIsDownloadedKey;",
         },
     },
     {
@@ -130,16 +137,16 @@ local MEMBERS = {
             name = "Foundation",
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
-            find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0));",
-            replace = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(6.0), watchos(2.0), tvos(9.0));",
+            find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(...);",
+            replace = "NSURLUbiquitousItemDownloadingStatusKey     ;",
         },
     },
     {
         member = "URLResourceValues.ubiquitousItemDownloadingStatus",
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "URL.swift"},
-            find = "    @available(macOS 10.9, iOS 7.0, *)\n    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }",
-            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        if #available(macOS 10.9, iOS 7.0, *) {\n            return _get(URLResourceKey(rawValue: \"NSURLUbiquitousItemDownloadingStatusKey\"))\n        }\n        let downloaded : Bool? = _get(.ubiquitousItemIsDownloadedKey)\n        guard let isDownloaded = downloaded else {\n            return nil\n        }\n        return URLUbiquitousItemDownloadingStatus(rawValue: isDownloaded ? \"NSURLUbiquitousItemDownloadingStatusCurrent\" : \"NSURLUbiquitousItemDownloadingStatusNotDownloaded\")\n    }",
+            find = "    @available(...)\n    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }",
+            replace = "    public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? {\n        return _get(URLResourceKey(rawValue: \"NSURLUbiquitousItemDownloadingStatusKey\"))\n    }",
         },
     },
     {
@@ -148,8 +155,8 @@ local MEMBERS = {
             name = "StoreKit",
             directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
             file = "SKProduct.h",
-            find = "API_DEPRECATED(\"Use Product.subscription.subscriptionPeriod.\", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
-            replace = "API_DEPRECATED(\"Use Product.subscription.subscriptionPeriod.\", ios(6.0, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+            find = "*subscriptionPeriod API_DEPRECATED(...)",
+            replace = "*subscriptionPeriod",
         },
     },
     {
@@ -158,8 +165,8 @@ local MEMBERS = {
             name = "StoreKit",
             directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
             file = "SKProductDiscount.h",
-            find = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
-            replace = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(6.0, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+            find = "*subscriptionPeriod API_DEPRECATED(...)",
+            replace = "*subscriptionPeriod",
         },
     },
     {
@@ -168,8 +175,8 @@ local MEMBERS = {
             name = "StoreKit",
             directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
             file = "SKPaymentTransaction.h",
-            find = "SKPaymentTransactionStateDeferred API_DEPRECATED(\"Use PurchaseResult.pending from Product.purchase(confirmIn:options:).\", ios(8.0, 18.0), macos(10.10, 15.0), watchos(6.2, 11.0)),",
-            replace = "SKPaymentTransactionStateDeferred API_DEPRECATED(\"Use PurchaseResult.pending from Product.purchase(confirmIn:options:).\", ios(6.0, 18.0), macos(10.10, 15.0), watchos(6.2, 11.0)),",
+            find = "SKPaymentTransactionStateDeferred API_DEPRECATED(...),",
+            replace = "SKPaymentTransactionStateDeferred,",
         },
     },
     {
@@ -178,8 +185,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UITextInputTraits.h",
-            find = "UIKeyboardTypeWebSearch API_AVAILABLE(ios(7.0)),",
-            replace = "UIKeyboardTypeWebSearch API_AVAILABLE(ios(6.0)),",
+            find = "UIKeyboardTypeWebSearch API_AVAILABLE(...),",
+            replace = "UIKeyboardTypeWebSearch,",
         },
     },
     {
@@ -188,8 +195,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UITextInputTraits.h",
-            find = "UIKeyboardTypeASCIICapableNumberPad API_AVAILABLE(ios(10.0)) API_UNAVAILABLE(watchos),",
-            replace = "UIKeyboardTypeASCIICapableNumberPad API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos),",
+            find = "UIKeyboardTypeASCIICapableNumberPad API_AVAILABLE(...) API_UNAVAILABLE(watchos),",
+            replace = "UIKeyboardTypeASCIICapableNumberPad API_UNAVAILABLE(watchos),",
         },
     },
     {
@@ -198,8 +205,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "    UIBackgroundFetchResultFailed\n} API_AVAILABLE(ios(7.0)) API_UNAVAILABLE(watchos);",
-            replace = "    UIBackgroundFetchResultFailed\n} API_AVAILABLE(ios(6.0)) API_UNAVAILABLE(watchos);",
+            find = "    UIBackgroundFetchResultFailed\n} API_AVAILABLE(...) API_UNAVAILABLE(watchos);",
+            replace = "    UIBackgroundFetchResultFailed\n} API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -208,8 +215,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_DEPRECATED(\"Use UIScene lifecycle and scene(_:continue:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
-            replace = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_DEPRECATED(\"Use UIScene lifecycle and scene(_:continue:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            find = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_DEPRECATED(...) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void(^)(NSArray<id<UIUserActivityRestoring>> * __nullable restorableObjects))restorationHandler API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -218,8 +225,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didFailToContinueUserActivityWithType:error:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
-            replace = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didFailToContinueUserActivityWithType:error:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            find = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_DEPRECATED(...) API_UNAVAILABLE(watchos);",
+            replace = "- (void)application:(UIApplication *)application didFailToContinueUserActivityWithType:(NSString *)userActivityType error:(NSError *)error API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -228,8 +235,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didUpdate) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
-            replace = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED(\"Use UIScene lifecycle and scene(_:didUpdate) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            find = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_DEPRECATED(...) API_UNAVAILABLE(watchos);",
+            replace = "- (void)application:(UIApplication *)application didUpdateUserActivity:(NSUserActivity *)userActivity API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -238,8 +245,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED(\"Use UIScene lifecycle and scene(_:willContinueUserActivityWithType:) from UISceneDelegate instead.\", ios(8.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
-            replace = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED(\"Use UIScene lifecycle and scene(_:willContinueUserActivityWithType:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            find = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_DEPRECATED(...) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)application willContinueUserActivityWithType:(NSString *)userActivityType API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -248,8 +255,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler API_AVAILABLE(ios(7.0));",
-            replace = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler API_AVAILABLE(ios(6.0));",
+            find = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler API_AVAILABLE(...);",
+            replace = "- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;",
         },
     },
     {
@@ -258,8 +265,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(7.0));",
-            replace = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(6.0));",
+            find = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler API_AVAILABLE(...);",
+            replace = "- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler;",
         },
     },
     {
@@ -268,8 +275,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_DEPRECATED(\"Use a BGAppRefreshTask in the BackgroundTasks framework instead\", ios(7.0, 13.0), tvos(11.0, 13.0)) API_UNAVAILABLE(visionos, watchos);",
-            replace = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_DEPRECATED(\"Use a BGAppRefreshTask in the BackgroundTasks framework instead\", ios(6.0, 13.0), tvos(11.0, 13.0)) API_UNAVAILABLE(visionos, watchos);",
+            find = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_DEPRECATED(...) API_UNAVAILABLE(visionos, watchos);",
+            replace = "- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_DISABLE_ASYNC API_UNAVAILABLE(visionos, watchos);",
         },
     },
     {
@@ -278,8 +285,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_DEPRECATED(\"Use UIScene lifecycle and scene(_:openURLContexts:) from UISceneDelegate instead.\", ios(9.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
-            replace = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_DEPRECATED(\"Use UIScene lifecycle and scene(_:openURLContexts:) from UISceneDelegate instead.\", ios(6.0, 26.0), tvos(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(watchos);",
+            find = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_DEPRECATED(...) API_UNAVAILABLE(watchos);",
+            replace = "- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options API_UNAVAILABLE(watchos);",
         },
     },
     {
@@ -288,8 +295,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIApplication.h",
-            find = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_DEPRECATED(\"Use UIScene lifecycle and windowScene(_:performActionFor:completionHandler:) from UIWindowSceneDelegate instead.\", ios(9.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(tvos, watchos);",
-            replace = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_DEPRECATED(\"Use UIScene lifecycle and windowScene(_:performActionFor:completionHandler:) from UIWindowSceneDelegate instead.\", ios(6.0, 26.0), visionos(1.0, 26.0)) API_UNAVAILABLE(tvos, watchos);",
+            find = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_DEPRECATED(...) API_UNAVAILABLE(tvos, watchos);",
+            replace = "- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void(^)(BOOL succeeded))completionHandler API_UNAVAILABLE(tvos, watchos);",
         },
     },
     {
@@ -333,7 +340,7 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "UIPointerStyle.h",
-            find = "} API_AVAILABLE(ios(13.4)) API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
+            find = "} API_AVAILABLE(...) API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
             replace = table.concat({
                 "} API_UNAVAILABLE(watchos, tvos) NS_REFINED_FOR_SWIFT;",
                 "",
@@ -349,7 +356,7 @@ local MEMBERS = {
             name = "CoreGraphics",
             directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
             file = "CGPath.h",
-            find = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform)\n    API_AVAILABLE(macos(10.9), ios(7.0));",
+            find = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform)\n    API_AVAILABLE(...);",
             replace = "CGFloat cornerWidth, CGFloat cornerHeight,\n    const CGAffineTransform * __nullable transform);",
         },
     },
@@ -359,7 +366,7 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "NSAttributedString.h",
-            find = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0));",
+            find = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName API_AVAILABLE(...);",
             replace = "UIKIT_EXTERN NSAttributedStringKey const NSBaselineOffsetAttributeName;",
         },
     },
@@ -369,8 +376,8 @@ local MEMBERS = {
             name = "UIKit",
             directory = {"System", "Library", "Frameworks", "UIKit.framework", "Headers"},
             file = "NSAttributedString.h",
-            find = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), ios(7.0), tvos(9.0), watchos(2.0), visionos(1.0))",
-            replace = "NSUnderlineStylePatternDot API_AVAILABLE(macos(10.0), tvos(9.0), watchos(2.0), visionos(1.0))",
+            find = "NSUnderlineStylePatternDot API_AVAILABLE(...)",
+            replace = "NSUnderlineStylePatternDot",
         },
     },
     {
@@ -379,7 +386,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LABiometryType.h",
-            find = "LABiometryTypeNone API_AVAILABLE(macos(10.13.2), ios(11.2)) = kLABiometryTypeNone,",
+            find = "LABiometryTypeNone API_AVAILABLE(...) = kLABiometryTypeNone,",
             replace = "LABiometryTypeNone = kLABiometryTypeNone,",
         },
     },
@@ -389,7 +396,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LABiometryType.h",
-            find = "LABiometryNone API_DEPRECATED_WITH_REPLACEMENT(\"LABiometryTypeNone\", macos(10.13, 10.13.2), ios(11.0, 11.2)) = LABiometryTypeNone,",
+            find = "LABiometryNone API_DEPRECATED_WITH_REPLACEMENT(...) = LABiometryTypeNone,",
             replace = "",
         },
     },
@@ -399,7 +406,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LABiometryType.h",
-            find = "LABiometryTypeFaceID API_AVAILABLE(macos(10.15)) = kLABiometryTypeFaceID,",
+            find = "LABiometryTypeFaceID API_AVAILABLE(...) = kLABiometryTypeFaceID,",
             replace = "LABiometryTypeFaceID = kLABiometryTypeFaceID,",
         },
     },
@@ -409,7 +416,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LABiometryType.h",
-            find = "LABiometryTypeOpticID API_AVAILABLE(visionos(1.0), ios(17.0), macos(14.0)) = kLABiometryTypeOpticID,",
+            find = "LABiometryTypeOpticID API_AVAILABLE(...) = kLABiometryTypeOpticID,",
             replace = "LABiometryTypeOpticID = kLABiometryTypeOpticID,",
         },
     },
@@ -419,7 +426,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LABiometryType.h",
-            find = "} API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            find = "} API_AVAILABLE(...);",
             replace = "};",
         },
     },
@@ -429,7 +436,7 @@ local MEMBERS = {
             name = "LocalAuthentication",
             directory = {"System", "Library", "Frameworks", "LocalAuthentication.framework", "Headers"},
             file = "LAContext.h",
-            find = "@property (nonatomic, readonly) LABiometryType biometryType API_AVAILABLE(macos(10.13.2), ios(11.0), watchos(11.0), tvos(18.0), visionos(1.0));",
+            find = "@property (nonatomic, readonly) LABiometryType biometryType API_AVAILABLE(...);",
             replace = "@property (nonatomic, readonly) LABiometryType biometryType;",
         },
     },
@@ -439,7 +446,7 @@ local MEMBERS = {
             name = "os",
             directory = {"usr", "include", "os"},
             file = "lock.h",
-            find = "#define OS_UNFAIR_LOCK_AVAILABILITY \\\n\t\t__API_AVAILABLE(macos(10.12), ios(10.0), tvos(10.0), watchos(3.0))",
+            find = "#define OS_UNFAIR_LOCK_AVAILABILITY \\\n\t\t__API_AVAILABLE(...)",
             replace = "#define OS_UNFAIR_LOCK_AVAILABILITY",
         },
     },
@@ -496,7 +503,7 @@ local MEMBERS = {
             name = "QuartzCore",
             directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
             file = "CAFrameRateRange.h",
-            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
+            find = "API_AVAILABLE(...) API_UNAVAILABLE(watchos)",
             replace = "",
             every = true,
         },
@@ -507,7 +514,7 @@ local MEMBERS = {
             name = "CoreTelephony",
             directory = {"System", "Library", "Frameworks", "CoreTelephony.framework", "Headers"},
             file = "CTTelephonyNetworkInfo.h",
-            find = "serviceCurrentRadioAccessTechnology API_AVAILABLE(ios(12.0), watchos(5.0)) API_UNAVAILABLE(macos, tvos);",
+            find = "serviceCurrentRadioAccessTechnology API_AVAILABLE(...) API_UNAVAILABLE(macos, tvos);",
             replace = "serviceCurrentRadioAccessTechnology API_UNAVAILABLE(macos, tvos);",
         },
     },
@@ -515,7 +522,7 @@ local MEMBERS = {
         member = "Scanner",
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "Scanner.swift"},
-            find = "@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)\nextension Scanner {",
+            find = "@available(...)\nextension Scanner {",
             replace = "extension Scanner {",
         },
     },
@@ -525,12 +532,12 @@ local MEMBERS = {
             name = "Foundation",
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSJSONSerialization.h",
-            find = "NSJSONWritingSortedKeys API_AVAILABLE(macos(10.13), ios(11.0), watchos(4.0), tvos(11.0)) = (1UL << 1),",
+            find = "NSJSONWritingSortedKeys API_AVAILABLE(...) = (1UL << 1),",
             replace = "NSJSONWritingSortedKeys = (1UL << 1),",
         },
         overlay = {
             file = {"stdlib", "public", "Darwin", "Foundation", "JSONEncoder.swift"},
-            find = "        @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)\n        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
+            find = "        @available(...)\n        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
             replace = "        public static let sortedKeys    = OutputFormatting(rawValue: 1 << 1)",
         },
     },
@@ -540,7 +547,7 @@ local MEMBERS = {
             name = "Security",
             directory = {"System", "Library", "Frameworks", "Security.framework", "Headers"},
             file = "SecAccessControl.h",
-            find = "kSecAccessControlPrivateKeyUsage        API_AVAILABLE(macos(10.12.1), ios(9.0)) = 1u << 30,",
+            find = "kSecAccessControlPrivateKeyUsage        API_AVAILABLE(...) = 1u << 30,",
             replace = "kSecAccessControlPrivateKeyUsage        = 1u << 30,",
         },
     },
@@ -550,8 +557,8 @@ local MEMBERS = {
             name = "WebKit",
             directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
             file = "WKNavigationDelegate.h",
-            find = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
-            replace = "    WKNavigationActionPolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+            find = "    WKNavigationActionPolicyDownload API_AVAILABLE(...),\n} API_AVAILABLE(...);",
+            replace = "    WKNavigationActionPolicyDownload,\n};",
         },
     },
     {
@@ -560,8 +567,8 @@ local MEMBERS = {
             name = "WebKit",
             directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
             file = "WKNavigationDelegate.h",
-            find = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n} API_AVAILABLE(macos(10.10), ios(8.0));",
-            replace = "    WKNavigationResponsePolicyDownload API_AVAILABLE(macos(11.3), ios(14.5)),\n};",
+            find = "    WKNavigationResponsePolicyDownload API_AVAILABLE(...),\n} API_AVAILABLE(...);",
+            replace = "    WKNavigationResponsePolicyDownload,\n};",
         },
     },
     {
@@ -570,7 +577,7 @@ local MEMBERS = {
             name = "WebKit",
             directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
             file = "WKUIDelegate.h",
-            find = "    WKPermissionDecisionDeny,\n} API_AVAILABLE(macos(12.0), ios(15.0));",
+            find = "    WKPermissionDecisionDeny,\n} API_AVAILABLE(...);",
             replace = "    WKPermissionDecisionDeny,\n};",
         },
     },
@@ -580,7 +587,7 @@ local MEMBERS = {
             name = "WebKit",
             directory = {"System", "Library", "Frameworks", "WebKit.framework", "Headers"},
             file = "WKUIDelegate.h",
-            find = "    WKMediaCaptureTypeCameraAndMicrophone,\n} API_AVAILABLE(macos(12.0), ios(15.0));",
+            find = "    WKMediaCaptureTypeCameraAndMicrophone,\n} API_AVAILABLE(...);",
             replace = "    WKMediaCaptureTypeCameraAndMicrophone,\n};",
         },
     },
@@ -597,10 +604,25 @@ local function directory_of(sdk, header)
     return path.join(table.unpack(parts))
 end
 
+local function matched_pattern(find)
+    local parts, position = {}, 1
+    while true do
+        local start, stop = find:find("(...)", position, true)
+        if not start then
+            table.insert(parts, (find:sub(position):gsub("%p", "%%%0")))
+            return table.concat(parts)
+        end
+        table.insert(parts, (find:sub(position, start - 1):gsub("%p", "%%%0")))
+        table.insert(parts, "%b()")
+        position = stop + 1
+    end
+end
+
 local function replaced(text, lowering, where, member)
+    local pattern = matched_pattern(lowering.find)
     local parts, position = {}, 1
     repeat
-        local start, stop = text:find(lowering.find, position, true)
+        local start, stop = text:find(pattern, position)
         if not start then
             break
         end
@@ -611,7 +633,7 @@ local function replaced(text, lowering, where, member)
     if #parts == 0 then
         raise("%s declares %s without the availability the backports lower", where, member)
     end
-    if not lowering.every and text:find(lowering.find, position, true) then
+    if not lowering.every and text:find(pattern, position) then
         raise("%s declares the availability the backports lower for %s more than once, so the lowering cannot tell which declaration it is", where, member)
     end
     table.insert(parts, text:sub(position))
@@ -707,13 +729,12 @@ local function implemented_in(src)
     return folders
 end
 
-local function introduced_after_six(text)
+local function introduced_after_device_release(text)
     local major, minor = text:match("%f[%w_]ios%(%s*(%d+)%.?(%d*)")
     if not major then
         return false
     end
-    major, minor = tonumber(major), tonumber(minor)
-    return major > 6 or (major == 6 and minor ~= nil and minor > 0)
+    return semver.compare(major .. "." .. (minor ~= "" and minor or "0"), DEVICE_RELEASE) > 0
 end
 
 local function availability(text)
@@ -725,7 +746,7 @@ local function availability(text)
         end
         local open, close = text:find("%b()", stop)
         local available = name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true)
-        local since = name:find("DEPRECATED", 1, true) and close and introduced_after_six(text:sub(stop, close))
+        local since = name:find("DEPRECATED", 1, true) and close and introduced_after_device_release(text:sub(stop, close))
         if (available or since) and open == stop then
             table.insert(found, {start = start, stop = close})
             position = close + 1
@@ -1947,10 +1968,8 @@ function members_of(src, sdk, intros)
     return set
 end
 
-local DEVICE_RELEASE = "6.0"
-
 local DEVICE_HEADER = table.concat({
-    "# The members the iOS 6.0 release implements and the SDK annotates later, from that release's dyld cache inventory.",
+    "# The members the iOS " .. DEVICE_RELEASE .. " release implements and the SDK annotates later, from that release's dyld cache inventory.",
     "# Generated by frameworks/Backports/tools/device_members.lua; do not edit. The test",
     "# frameworks/Backports/tests/device_members_test.lua checks this file against the inventory where the inventory is present.",
 }, "\n") .. "\n"
