@@ -35,3 +35,7 @@ NSError *revenant_unsupported(NSString *reason);
 - (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
                     textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder;
 @end
+
+@interface UNNotificationAttachment (RevenantUserNotifications)
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier URL:(NSURL *)URL type:(NSString *)type;
+@end

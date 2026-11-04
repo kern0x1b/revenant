@@ -2593,6 +2593,7 @@ class UNLocationNotificationTrigger
 class UNMutableNotificationContent
 class UNNotification
 class UNNotificationAction
+class UNNotificationAttachment
 class UNNotificationCategory
 class UNNotificationContent
 class UNNotificationRequest
@@ -4076,6 +4077,8 @@ enum UNAuthorizationOptionBadge
 enum UNAuthorizationOptionSound
 enum UNAuthorizationStatusAuthorized
 enum UNAuthorizationStatusNotDetermined
+enum UNErrorCodeAttachmentInvalidURL
+enum UNErrorCodeAttachmentUnrecognizedType
 enum UNErrorCodeNotificationInvalidNoContent
 enum UNErrorCodeNotificationInvalidNoDate
 enum UNNotificationActionOptionAuthenticationRequired
@@ -9396,6 +9399,10 @@ global UIWindowSceneSessionRoleApplication
 global UIWindowSceneSessionRoleExternalDisplay
 global UIWindowSceneSessionRoleExternalDisplayNonInteractive
 global UNErrorDomain
+global UNNotificationAttachmentOptionsThumbnailClippingRectKey
+global UNNotificationAttachmentOptionsThumbnailHiddenKey
+global UNNotificationAttachmentOptionsThumbnailTimeKey
+global UNNotificationAttachmentOptionsTypeHintKey
 global UNNotificationDefaultActionIdentifier
 global UNNotificationDismissActionIdentifier
 global UTTagClassFilenameExtension
@@ -34494,6 +34501,18 @@ member UNNotificationAction -isEqual:
 member UNNotificationAction -options
 member UNNotificationAction -revenant_description
 member UNNotificationAction -title
+member UNNotificationAttachment +attachmentWithIdentifier:URL:options:error:
+member UNNotificationAttachment +supportsSecureCoding
+member UNNotificationAttachment -URL
+member UNNotificationAttachment -copyWithZone:
+member UNNotificationAttachment -description
+member UNNotificationAttachment -encodeWithCoder:
+member UNNotificationAttachment -hash
+member UNNotificationAttachment -identifier
+member UNNotificationAttachment -initRevenantWithIdentifier:URL:type:
+member UNNotificationAttachment -initWithCoder:
+member UNNotificationAttachment -isEqual:
+member UNNotificationAttachment -type
 member UNNotificationCategory +categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:categorySummaryFormat:options:
 member UNNotificationCategory +categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:options:
 member UNNotificationCategory +categoryWithIdentifier:actions:intentIdentifiers:options:
