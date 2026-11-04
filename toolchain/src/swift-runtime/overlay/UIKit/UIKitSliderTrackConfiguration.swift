@@ -1,5 +1,6 @@
 import UIKit
 
+@available(iOS 26.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 extension UISlider {
