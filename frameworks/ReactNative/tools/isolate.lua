@@ -123,6 +123,11 @@ function copy_project(project, folder, bundle_id)
     if os.isdir(target) and os.isdir(host) then
         os.vrunv("rsync", {"-a", host .. "/", target .. "/"})
     end
+    local expo = path.absolute(path.join(os.scriptdir(), "..", "src", "expo"))
+    local expo_target = path.join(folder, "rn-spike", "expo")
+    if os.isdir(expo_target) and os.isdir(expo) then
+        os.vrunv("rsync", {"-a", "--exclude", "xmake.lua", expo .. "/", expo_target .. "/"})
+    end
     os.mkdir(path.join(folder, "build"))
     for _, item in ipairs(INPUTS) do
         if os.exists(path.join(project, "build", item)) then
