@@ -4,7 +4,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
   stage   makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports, retargets the library references from /usr/lib/revenant/org.revenant.backports
-          to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it renames the
+          to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it refuses a built app whose
+          CFBundleIdentifier is another id (rebuild it from a copy made with isolate.lua copy --bundle-id), and it renames the
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
@@ -16,6 +17,11 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports"}
+
+function backports_libraries()
+    return LIBRARIES
+end
+
 local OLD_PREFIX = "/usr/lib/revenant/org.revenant.backports"
 local NEW_PREFIX = "@executable_path/Frameworks"
 local CONF_KEYS = {module = true, bundle = true, engine = true}
@@ -39,6 +45,13 @@ end
 
 function executable_name(bundle_id)
     return "RNHost-" .. app_name(bundle_id)
+end
+
+function bundle_identifier_error(built_id, bundle_id)
+    if built_id == bundle_id then
+        return nil
+    end
+    return string.format("the built app's CFBundleIdentifier is %s, not %s: rebuild it from a copy made with isolate.lua copy --bundle-id %s", built_id, bundle_id, bundle_id)
 end
 
 function stop_command(bundle_id)
@@ -109,6 +122,13 @@ function stage(options)
         end
     end
     local built = path.absolute(options.app)
+    if options["bundle-id"] then
+        local identifier = os.iorunv("plutil", {"-extract", "CFBundleIdentifier", "raw", "-o", "-", path.join(built, "Info.plist")}):trim()
+        local problem = bundle_identifier_error(identifier, options["bundle-id"])
+        if problem then
+            raise(problem)
+        end
+    end
     local output = path.absolute(options.output)
     local target = path.join(output, path.filename(built))
     os.tryrm(output)

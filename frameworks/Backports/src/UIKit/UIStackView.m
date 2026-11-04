@@ -591,7 +591,7 @@ static UILayoutGuide *revenant_guide(UIStackView *self, UILayoutGuide *guide, NS
             revenant_add(stack, [revenant_size(self, axis) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
         }
 
-        UIView *first = all[0];
+        UIView *first = all.count ? all[0] : nil;
         UIStackViewAlignment alignment = _alignment;
         BOOL baseline = alignment == UIStackViewAlignmentFirstBaseline || alignment == UIStackViewAlignmentLastBaseline;
         BOOL ignored = baseline && axis == UILayoutConstraintAxisVertical;

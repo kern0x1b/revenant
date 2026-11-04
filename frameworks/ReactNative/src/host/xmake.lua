@@ -7,6 +7,13 @@ option("rn-bundle")
 option_end()
 
 local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
+local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native")
+if os.getenv("RN_HERMES") then
+    add_requires("revenant@hermes", {alias = "hermes"})
+end
+if os.getenv("RN_EXPO") then
+    add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
+end
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
     add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports"}})
@@ -16,6 +23,18 @@ target("RNHost")
     add_rules("@addon/revenant/app")
     add_packages("libcxx")
     add_deps("rn-jsc", "rn-yoga")
+    if os.getenv("RN_HERMES") then
+        add_packages("hermes")
+        local rc = path.join(RN_SOURCE, "ReactCommon")
+        add_includedirs(rc, path.join(rc, "react", "runtime", "platform", "ios", "ReactCommon"))
+        add_files(path.join(rc, "react", "runtime", "hermes", "HermesInstance.cpp"),
+            path.join(rc, "react", "runtime", "platform", "ios", "ReactCommon", "RCTHermesInstance.mm"))
+        for _, f in ipairs(os.files(path.join(rc, "hermes", "inspector-modern", "chrome", "*.cpp"))) do
+            if not f:find("/tests/", 1, true) then add_files(f) end
+        end
+        add_cxxflags("-DRN_HERMES=1", {force = true})
+        add_mxxflags("-DRN_HERMES=1", {force = true})
+    end
     if os.getenv("RN_WEBKIT") then
         add_packages("webkit-engine-prefixed")
         add_ldflags("-Wl,-rpath,@executable_path/Frameworks", {force = true})
@@ -52,7 +71,7 @@ target("RNHost")
         end
         if os.getenv("RN_EXPO") then
             add_deps("expo-core-objc", "expo-app-modules", "nitro-objc", "nitro-probe", "unistyles-objc", "unistyles-probe", "rn-pods-objc")
-            add_packages("swift-runtime", "combine", "cryptokit", "swiftui", "uniformtypeidentifiers")
+            add_packages("swift-runtime", "combine", "cryptokit", "swift-crypto", "swiftui", "uniformtypeidentifiers")
             local ecore = path.join(os.projectdir(), "build", "expo-core")
             local nm = path.join(os.projectdir(), "build", "ref", "paseo", "node_modules")
             local jsisrc = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
@@ -71,7 +90,7 @@ target("RNHost")
             add_cxxflags("-DRN_EXPO=1", {force = true})
             add_mxxflags("-DRN_EXPO=1", {force = true})
         end
-        local rn = (os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native"))
+        local rn = RN_SOURCE
         local generated = path.join(os.projectdir(), "build", "codegen", "build", "generated", "ios")
         if os.getenv("RN_HEADERS") then
             add_includedirs(os.getenv("RN_HEADERS"))
@@ -115,7 +134,7 @@ target("RNHost")
     end
     if os.getenv("RN_EXPO") then
         add_rules("@addon/revenant/swift")
-        add_values("app.frameworks", "cryptokit", "uniformtypeidentifiers")
+        add_values("app.frameworks", "cryptokit", "swift-crypto", "uniformtypeidentifiers")
         set_values("revenant.waive.thumb-interworking", "libswiftDarwin.dylib is checked a second time after it was stripped, because the runtime libraries reach the app both through swift-runtime and through the cryptokit package; the unstripped copies pass the check")
     end
     set_values("revenant.control", path.join(os.projectdir(), "packaging", "control-rnhost"))

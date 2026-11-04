@@ -186,6 +186,9 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
 | [Installing the host](guides/react-native/install-the-host.md) | staging a built host and putting it on the claimed phone under its own bundle id |
 | [Missing components and stubs](guides/react-native/loud-components.md) | the loud provider for Fabric components and the log line of a stub that is called |
+| [JavaScriptCore startup on the Paseo bundle](explanation/react-native/jsc-startup.md) | where the nine seconds of `evaluateJavaScript` go on the iPhone 4S: parsing first, then lazy parsing, the collector and the compiler |
+| [JavaScriptCore startup sampler](reference/react-native/jsc-sampler.md) | the native sampler's method, output format, symbolication, the phase and thread numbers and their limits |
+| [SIGBUS from JIT code on the Paseo bundle](reference/react-native/jsc-dfg-fault.md) | the reproduction with lowered tier-up thresholds, the fault record at the JIT pool's end, the DFG-off controls and what is still open |
 
 ## WebKit
 

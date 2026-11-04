@@ -14,7 +14,8 @@ The folder is new, and its path must not contain `test` or `Example` (the pod so
 script copies the hand-made inputs of `build/` with their absolute paths rewritten to the folder, links `build/ref` (the
 application's `node_modules`, read only) and installs the `react-native` package with all its patches into the private cache.
 `build/rn-src` links to those patched sources and `build/rn-headers` is relinked to them, so nothing is read from another
-worker's tree.
+worker's tree. The sources are the install the recipe reports for this build, not another recipe's install that happens to
+carry the same patches.
 
 The private cache is made with `./xmakew l -P . tools/private_cache.lua <folder>`. A cache made before the manifests were
 rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <folder>`; without it the Swift compile does not

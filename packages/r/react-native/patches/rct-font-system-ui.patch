@@ -1,0 +1,13 @@
+--- a/React/Views/RCTFont.mm
++++ b/React/Views/RCTFont.mm
+@@ -430,8 +430,9 @@
+ 
+   // Handle system font as special case. This ensures that we preserve
+   // the specific metrics of the standard system font as closely as possible.
++  // The CSS generic "system-ui" is the same system font.
+   if ([familyName isEqual:defaultFontFamily] || [familyName isEqualToString:@"System"] ||
+-      [familyName isEqualToString:@"SystemCondensed"]) {
++      [familyName isEqualToString:@"SystemCondensed"] || [familyName isEqualToString:@"system-ui"]) {
+     font = cachedSystemFont(fontSize, fontWeight);
+     if (font) {
+       didFindFont = YES;

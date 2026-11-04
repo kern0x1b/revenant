@@ -19,7 +19,7 @@ RN_HERMES=1 REVENANT_CACHE=$PWD/.cache-private ./xmakew l -P . frameworks/ReactN
 
 `isolate.lua build` links the copy's `build/rn-src` to the react-native install of the cache on every run. A link left to an install that xmake replaced dangles, and the build then fails on the React Native headers (the archive step reports `ar: no archive members specified`).
 
-The host sources that select the engine (`RCTHermesInstance` in the runtime factory, the `engine=` reader and the bytecode loader) are in the isolated host spike, not yet in this tree.
+The host sources that select the engine are in `frameworks/ReactNative/src/host`: `RNHostRuntime` reads `engine=` and loads the bytecode, `RNHostAppDelegate` returns `RCTHermesInstance` from the runtime factory when the engine is Hermes, and `RNHostTouch` logs the time each injected touch begins. The package is declared at file scope (`add_requires("revenant@hermes", {alias = "hermes"})`) and used by the target (`add_packages("hermes")`); xmake drops a package name that is only used by the target without that declaration.
 
 ## Bytecode
 
@@ -28,6 +28,8 @@ hermesc -O -emit-binary -out bundle.hbc bundle.js
 ```
 
 The magic of a Hermes bytecode file is `c6 1f bc 03 c1 03 19 1f`. The host reads the bytecode in place, without a copy.
+
+An Expo application is exported as Hermes bytecode with `frameworks/ReactNative/tools/export_bundle.lua --hermes --hermesc <hermesc> APP_DIR`: the babel profile is `hermes-stable`, no JavaScriptCore prelude is added, and `bundle.js` and `bundle.hbc` are both written to the output folder. The Paseo application's bytecode is 31.3 MB.
 
 ## Promise and HermesInternal
 
@@ -51,6 +53,39 @@ All runs use the 24 MB application bundle. The Hermes run uses the bytecode of 3
 | With the app manifest, first screen | Hermes HV64, bytecode | about 1 s | 109 MB, then 142 MB |
 | With the app manifest and the stored workspace state | Hermes HV64, bytecode | about 1 s | 113 MB, then 169 MB in 25 s |
 
-The JSC run with the manifest and the touch latency of both engines were not measured.
+The JSC run with the manifest was not measured; the touch latency of both engines is in the benchmark below.
 
 The memory numbers are one run per configuration; the first screen of the app with its workspace is the last row.
+
+## Engine benchmark on the iPhone 4S
+
+`frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua prepare BUNDLE_ID bundle.js bundle.hbc` copies the two bundles into the application folder of the host BUNDLE_ID, root-owned: the JavaScript bundle for JavaScriptCore and the Hermes bytecode of `hermesc`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE_ID [WAIT]` then runs one configuration on the claimed phone: it stops the host by its bundle id, selects the engine in the host's `rnhost.conf`, relaunches it, makes five taps on the counter and one swipe on the list, and writes the screenshot, the host log and the injector's answers to `.cache/scratch/rn-bench/runs/ENGINE-RUN`. `... measure.lua summarize RUNFOLDER...` prints the metrics of the runs. The taps go to the touch injector of the host (`RNHostTouch.m`, see [driving a host by touch](touch.md)); no `killall` is used, so other hosts on the phone keep running.
+
+Three runs per engine, on the same host build (the HV64 package with the ToInt32 patch, `RN_HERMES=1`) and the same bench bundle, each after a fresh launch:
+
+| Engine | Startup, react start to bench mounted | Tap to JS commit, median of 5 | fps, mean / lowest one-second window | RSS, highest heartbeat |
+|---|---|---|---|---|
+| Hermes, bytecode | 0.71, 0.74, 0.70 s | 163, 168, 168 ms | 59.2 / 20, 59.1 / 24, 59.2 / 21 | 59.2, 58.7, 58.7 MB |
+| JSC, source | 2.57, 2.52, 2.42 s | 176, 169, 171 ms | 58.4 / 8, 58.3 / 6, 58.1 / 3 | 75.2, 75.9, 75.0 MB |
+
+A fourth Hermes run made with `measure.lua` after the table (`hermes-9`) gave 0.73 s startup, a 164 ms median and 59.0 / 19 fps.
+
+- The tap latency runs from the injected touch (`rn-host: touch began`, epoch milliseconds) to the `bench commit` log, which is written in the effect after the count update commits. It does not include the paint.
+- The startup is read from the syslog timestamps of the two lines.
+- The lowest fps window of each run includes the swipe; the mean covers the whole run.
+- One Hermes launch, made right after `killall` of the previous instance, aborted in `startSurface` before the bench mounted (`Global was not installed`); the next launch of the same configuration ran cleanly, and none of the six measured runs had that abort. The cause is not identified.
+- `frameworks/ReactNative/tools/touch.lua`, the tool for a single manual touch, is in this branch; its contract is in [driving a host by touch](touch.md).
+
+### Measured again on 2026-11-03
+
+The same bench bundles (`build.js` with `default` for JavaScriptCore and `hermes-stable` plus `hermesc -O` for Hermes) were run on the iPhone 4S with `measure.lua run`, three runs per engine, from a host built with `RN_HERMES=1` and the Hermes 250829098.0.17 package. JavaScriptCore runs waited 60 s for the mount, Hermes 40 s.
+
+| Engine | Startup, react start to bench mounted, per run | Tap to JS commit, median of 5, per run | Mean of the three medians | fps, mean / lowest one-second window, per run | RSS, highest heartbeat, per run |
+|---|---|---|---|---|---|
+| Hermes, bytecode | 0.78, 0.74, 0.73 s | 177, 166, 169 ms | 171 ms | 59.5 / 28, 59.1 / 19, 59.3 / 25 | 60.0, 59.9, 60.3 MB |
+| JSC, source | 2.64, 2.62, 2.60 s | 156, 218, 161 ms | 178 ms | 58.3 / 3, 58.4 / 6, 58.4 / 4 | 77.5, 77.4, 76.5 MB |
+
+- Startup is about 3.5 times shorter on Hermes, and its memory is about 17 MB lower.
+- The lowest fps window is 19 to 28 on Hermes and 3 to 6 on JavaScriptCore; the mean is close for both.
+- The tap latency does not separate the engines: the JavaScriptCore runs spread from 156 to 218 ms, the Hermes runs from 166 to 177 ms. The earlier table above agrees.
+- The Paseo application on the same Hermes host (`module=main`, `engine=hermes`, the 31.3 MB bytecode) started on the phone and showed its workspace list with the daemon's data, through a reverse tunnel of port 6767 to the Mac. It was not measured with the touch injector; the first-screen figures above come from the bench app only.

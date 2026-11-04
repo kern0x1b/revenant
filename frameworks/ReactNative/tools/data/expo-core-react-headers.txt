@@ -43,6 +43,8 @@ RCTRootContentView.h
 RCTRootView.h
 RCTRootViewDelegate.h
 RCTRootViewInternal.h
+RCTSurfaceHostingProxyRootView.h
+RCTSurfaceHostingView.h
 RCTTouchEvent.h
 RCTTouchHandler.h
 RCTURLRequestDelegate.h

@@ -11,6 +11,70 @@
 #import <react/runtime/JSRuntimeFactoryCAPI.h>
 #import <react/runtime/platform/ios/ReactCommon/RCTJscInstance.h>
 
+#ifdef RN_HERMES
+#import <react/runtime/platform/ios/ReactCommon/RCTHermesInstance.h>
+#import <cxxreact/MessageQueueThread.h>
+#import <malloc/malloc.h>
+#include <algorithm>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <jsi/instrumentation.h>
+#endif
+
+#ifdef RN_HERMES
+namespace {
+
+std::mutex RNHostProbeMutex;
+std::shared_ptr<facebook::react::MessageQueueThread> RNHostProbeQueue;
+facebook::jsi::Runtime *RNHostProbeRuntime = nullptr;
+
+void RNHostProbeAttach(facebook::jsi::Runtime &runtime, std::shared_ptr<facebook::react::MessageQueueThread> queue)
+{
+    std::lock_guard<std::mutex> lock(RNHostProbeMutex);
+    RNHostProbeRuntime = &runtime;
+    RNHostProbeQueue = std::move(queue);
+}
+
+void RNHostLogHeapStats()
+{
+    std::shared_ptr<facebook::react::MessageQueueThread> queue;
+    facebook::jsi::Runtime *runtime = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(RNHostProbeMutex);
+        queue = RNHostProbeQueue;
+        runtime = RNHostProbeRuntime;
+    }
+    if (!queue || !runtime) {
+        return;
+    }
+    queue->runOnQueue([runtime] {
+        std::unordered_map<std::string, int64_t> info = runtime->instrumentation().getHeapInfo(false);
+        std::vector<std::pair<std::string, int64_t>> entries(info.begin(), info.end());
+        std::sort(entries.begin(), entries.end());
+        std::string line;
+        for (const auto &entry : entries) {
+            line += entry.first + "=" + std::to_string(entry.second) + " ";
+        }
+        NSLog(@"rn-host: js heap %s", line.c_str());
+    });
+}
+
+class RNHostHermesFactory : public facebook::react::RCTHermesInstance {
+public:
+    std::unique_ptr<facebook::react::JSRuntime> createJSRuntime(std::shared_ptr<facebook::react::MessageQueueThread> queue) noexcept override
+    {
+        std::unique_ptr<facebook::react::JSRuntime> runtime = RCTHermesInstance::createJSRuntime(queue);
+        RNHostProbeAttach(runtime->getRuntime(), queue);
+        return runtime;
+    }
+};
+
+}
+#endif
+
 #ifdef RN_EXPO
 #import <ExpoModulesCore/EXHostWrapper.h>
 #import <ExpoModulesCore/EXReactSchedulerDispatch.h>
@@ -22,7 +86,7 @@ typedef const struct OpaqueJSContext *RNHostJSContext;
 typedef const struct OpaqueJSContextGroup *RNHostJSGroup;
 typedef const struct OpaqueJSValue *RNHostJSValue;
 typedef struct OpaqueJSString *RNHostJSString;
-RNHostJSContext RNJscRuntimeContext(void) __attribute__((weak_import));
+RNHostJSContext RNJscRuntimeContext(void);
 RNHostJSGroup JSContextGetGroup(RNHostJSContext context);
 void JSContextGroupSetExecutionTimeLimit(RNHostJSGroup group, double limit, bool (*callback)(RNHostJSContext, void *), void *context);
 RNHostJSValue JSEvaluateScript(RNHostJSContext ctx, RNHostJSString script, void *thisObject, RNHostJSString sourceURL, int line, RNHostJSValue *exception);
@@ -74,6 +138,11 @@ static bool RNHostSampleStack(RNHostJSContext ctx, void *)
     return false;
 }
 
+extern "C" __attribute__((weak)) RNHostJSContext RNJscRuntimeContext(void)
+{
+    return NULL;
+}
+
 static void RNHostInstallSampler(void)
 {
     NSString *flag = RNHostReadAppText(@"rnhost.jsprof");
@@ -83,8 +152,8 @@ static void RNHostInstallSampler(void)
     double interval = flag.doubleValue > 0 ? flag.doubleValue : 10;
     RNHostSamples = [NSMutableDictionary dictionary];
     RNHostSelfSamples = [NSMutableDictionary dictionary];
-    if (!RNJscRuntimeContext || !RNJscRuntimeContext()) {
-        NSLog(@"rn-host: the JavaScript sampler needs RNJscRuntimeContext from the patched react-native");
+    if (!RNJscRuntimeContext()) {
+        NSLog(@"rn-host: JS sampler needs the JavaScriptCore runtime, off");
         return;
     }
     JSContextGroupSetExecutionTimeLimit(JSContextGetGroup(RNJscRuntimeContext()), interval / 1000.0, RNHostSampleStack, NULL);
@@ -121,6 +190,29 @@ static void RNHostInstallSampler(void)
 }
 
 @end
+
+@protocol RNHostExpoSubscriberRepository <NSObject>
++ (NSArray *)subscribers;
++ (void)registerSubscribersFromModulesProvider:(id)modulesProvider;
+@end
+
+static NSArray *RNHostExpoSubscribers(void)
+{
+    Class<RNHostExpoSubscriberRepository> repository = NSClassFromString(@"EXExpoAppDelegateSubscriberRepository");
+    return [repository subscribers];
+}
+
+static void RNHostRegisterExpoSubscribers(void)
+{
+    Class<RNHostExpoSubscriberRepository> repository = NSClassFromString(@"EXExpoAppDelegateSubscriberRepository");
+    Class providerClass = NSClassFromString(@"ExpoModulesProvider");
+    if (!repository || !providerClass) {
+        NSLog(@"rn-host: expo app delegate subscribers not linked");
+        return;
+    }
+    [repository registerSubscribersFromModulesProvider:[[providerClass alloc] init]];
+    NSLog(@"rn-host: expo app delegate subscribers %lu", (unsigned long)RNHostExpoSubscribers().count);
+}
 #endif
 
 @interface RNHostReactDelegate : RCTDefaultReactNativeFactoryDelegate
@@ -151,6 +243,13 @@ static void RNHostInstallSampler(void)
 
 - (JSRuntimeFactoryRef)createJSRuntimeFactory
 {
+#ifdef RN_HERMES
+    if ([RNHostRuntime usesHermes]) {
+        NSLog(@"rn-host: engine hermes");
+        return reinterpret_cast<JSRuntimeFactoryRef>(new RNHostHermesFactory());
+    }
+#endif
+    NSLog(@"rn-host: engine jsc");
     return reinterpret_cast<JSRuntimeFactoryRef>(new facebook::react::RCTJscInstance());
 }
 
@@ -165,10 +264,127 @@ static void RNHostInstallSampler(void)
 #endif
 }
 
+static NSUInteger RNHostCountViews(UIView *view)
+{
+    NSUInteger count = 1;
+    for (UIView *subview in view.subviews) {
+        count += RNHostCountViews(subview);
+    }
+    return count;
+}
+
+static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
+{
+    static NSUInteger stage = 0;
+    static NSUInteger heartbeatsInChat = 0;
+    BOOL dump = NO;
+    if (stage == 0) {
+        stage = 1;
+        dump = YES;
+    } else if (stage == 1 && views >= 100) {
+        stage = 2;
+        dump = YES;
+    } else if (stage == 2 && ++heartbeatsInChat == 36) {
+        stage = 3;
+        dump = YES;
+    }
+    if (dump) {
+        [RNHostRuntime logMemoryMap];
+        [RNHostRuntime logLayerCensus:root];
+        [RNHostRuntime logViewAudit:root];
+    }
+}
+
 - (void)logHeartbeat
 {
-    NSLog(@"rn-host: heartbeat rss %.1f MB, subviews %lu", [RNHostRuntime residentMegabytes], (unsigned long)self.window.rootViewController.view.subviews.count);
+    malloc_statistics_t malloced;
+    malloc_zone_statistics(malloc_default_zone(), &malloced);
+    NSUInteger views = RNHostCountViews(self.window);
+    NSLog(@"rn-host: heartbeat rss %.1f MB, subviews %lu, views %lu, malloc in use %.1f MB of %.1f MB",
+          [RNHostRuntime residentMegabytes], (unsigned long)self.window.rootViewController.view.subviews.count,
+          (unsigned long)views, malloced.size_in_use / 1048576.0, malloced.size_allocated / 1048576.0);
+#ifdef RN_HERMES
+    RNHostLogHeapStats();
+#endif
+    if (RNHostAppFileExists(@"rnhost.log.on")) {
+        RNHostMemoryMapMilestone(self.window, views);
+    }
 }
+
+#ifdef RN_EXPO
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)]) {
+            [subscriber application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)]) {
+            [subscriber application:application didFailToRegisterForRemoteNotificationsWithError:error];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:^(UIBackgroundFetchResult result) {}];
+        } else if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    NSMutableArray *fetchers = [NSMutableArray array];
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+            [fetchers addObject:subscriber];
+        } else if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo];
+        }
+    }
+    if (fetchers.count == 0) {
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    __block NSUInteger left = fetchers.count;
+    __block UIBackgroundFetchResult merged = UIBackgroundFetchResultNoData;
+    for (id<UIApplicationDelegate> subscriber in fetchers) {
+        [subscriber application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:^(UIBackgroundFetchResult result) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (result == UIBackgroundFetchResultNewData || (result == UIBackgroundFetchResultFailed && merged == UIBackgroundFetchResultNoData)) {
+                    merged = result;
+                }
+                if (--left == 0) {
+                    completionHandler(merged);
+                }
+            });
+        }];
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveLocalNotification:)]) {
+            [subscriber application:application didReceiveLocalNotification:notification];
+        }
+    }
+}
+
+#pragma clang diagnostic pop
+#endif
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -179,6 +395,9 @@ static void RNHostInstallSampler(void)
         [self.window makeKeyAndVisible];
         return YES;
     }
+#ifdef RN_EXPO
+    RNHostRegisterExpoSubscribers();
+#endif
     [RNHostRuntime applyEnvironment];
     NSLog(@"rn-host: react start module %@, rss %.1f MB", module, [RNHostRuntime residentMegabytes]);
     RCTSetLogThreshold(RCTLogLevelInfo);

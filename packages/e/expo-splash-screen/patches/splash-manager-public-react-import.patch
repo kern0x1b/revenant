@@ -1,7 +1,0 @@
---- a/ios/SplashScreenManager.swift
-+++ b/ios/SplashScreenManager.swift
-@@ -1,3 +1,3 @@
- import ExpoModulesCore
--internal import React
-+import React
- import UIKit

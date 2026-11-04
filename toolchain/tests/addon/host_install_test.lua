@@ -32,8 +32,8 @@ function failures(opt)
         table.insert(found, "a file that names no backports library must not change")
     end
     local mapkit = "RNHost:\n\t/usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib (compatibility version 1.0.0)\n"
-    if not table.contains(install.LIBRARIES, "libMapKitBackports") or
-       table.concat(install.change_arguments(mapkit, install.LIBRARIES), " ") ~= "-change /usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib @executable_path/Frameworks/libMapKitBackports.dylib" then
+    if not table.contains(install.backports_libraries(), "libMapKitBackports") or
+       table.concat(install.change_arguments(mapkit, install.backports_libraries()), " ") ~= "-change /usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib @executable_path/Frameworks/libMapKitBackports.dylib" then
         table.insert(found, "the MapKit backports library is packed and retargeted with the host")
     end
 
@@ -61,7 +61,13 @@ function failures(opt)
         table.insert(found, "a configuration key the host does not read must be refused")
     end
 
-    local outputs = {["rnhost.cmd.out"] = true, ["rnhost.stack"] = true, ["rnhost.prof.out"] = true, ["rnhost.jsprof.out"] = true, ["rnhost.log"] = true}
+    local same = install.bundle_identifier_error("org.revenant.rnhost.iso", "org.revenant.rnhost.iso")
+    local other = install.bundle_identifier_error("space.kern0x1b.paseo-ios6.rnhost", "org.revenant.rnhost.iso")
+    if same ~= nil or other == nil or not other:find("space.kern0x1b.paseo-ios6.rnhost", 1, true) or not other:find("org.revenant.rnhost.iso", 1, true) then
+        table.insert(found, "stage must refuse a built app whose bundle id is not the id it is given, and name both ids")
+    end
+
+    local outputs ={["rnhost.cmd.out"] = true, ["rnhost.stack"] = true, ["rnhost.prof.out"] = true, ["rnhost.jsprof.out"] = true, ["rnhost.log"] = true}
     for _, file in ipairs(os.files(path.join(root, "frameworks", "ReactNative", "src", "host", "*"))) do
         local text = io.readfile(file)
         if text:find("/var/tmp/rnhost", 1, true) or text:find("real.js", 1, true) then

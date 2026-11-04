@@ -43,20 +43,6 @@
       "reason": "Name only; a module of the spike app that no package provides and the paseo app does not use."
     },
     {
-      "name": "StubBackgroundNotificationTasksModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoBackgroundNotificationTasksModule",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubBadgeModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoBadgeModule",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
       "name": "StubCameraModule",
       "file": "src/expo/StubModules.swift",
       "module": "ExpoCamera",
@@ -68,62 +54,6 @@
       "file": "src/expo/StubModules.swift",
       "module": "ExpoImageManipulator",
       "owner": "expo-image-manipulator",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationCategoriesModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationCategoriesModule",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationPermissionsModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationPermissionsModule",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationPresenterModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationPresenter",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationSchedulerModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationScheduler",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationsEmitterModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationsEmitter",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubNotificationsHandlerModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoNotificationsHandlerModule",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubPushTokenManagerModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoPushTokenManager",
-      "owner": "expo-notifications",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubServerRegistrationModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "NotificationsServerRegistrationModule",
-      "owner": "expo-notifications",
       "reason": "Name only."
     },
     {

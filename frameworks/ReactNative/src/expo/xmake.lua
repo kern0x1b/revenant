@@ -375,6 +375,15 @@ target("expo-app-modules")
                 table.insert(classes, string.format("      (module: %s.self, name: nil),", name))
             end
         end
+        local subscribers = {}
+        for _, package in ipairs(expo) do
+            local config = io.readfile(path.join(expo_dir(package), "expo-module.config.json"))
+            local apple = config:match('"apple"%s*:%s*(%b{})') or ""
+            local names = apple:match('"appDelegateSubscribers"%s*:%s*%[(.-)%]') or ""
+            for name in names:gmatch('"([^"]+)"') do
+                table.insert(subscribers, string.format("      %s.self,", name))
+            end
+        end
         io.writefile(provider, table.concat({
             "import ExpoModulesCore",
             "",
@@ -387,7 +396,9 @@ target("expo-app-modules")
             "  }",
             "",
             "  public override func getAppDelegateSubscribers() -> [ExpoAppDelegateSubscriber.Type] {",
-            "    return []",
+            "    return [",
+            table.concat(subscribers, "\n"),
+            "    ]",
             "  }",
             "",
             "  public override func getReactDelegateHandlers() -> [ExpoReactDelegateHandlerTupleType] {",

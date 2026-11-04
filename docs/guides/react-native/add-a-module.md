@@ -57,7 +57,7 @@ module.setStringAsync("probe").then(() => module.getStringAsync()).then((value) 
 
 A check passes when each call returns the value the module's documentation promises, or the error it documents for a missing
 service, and the host is still running afterwards. Add a screenshot of anything the module draws or shows
-(`frameworks/ReactNative/tools/touch.lua --before ... --after ...` drives the screen). A module that only compiles is
+(`frameworks/ReactNative/tools/touch.lua --bundle-id ID --before ... --after ...` drives the screen). A module that only compiles is
 `verified: build`, not `phone`.
 
 ## 5. Record it

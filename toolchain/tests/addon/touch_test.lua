@@ -35,9 +35,12 @@ function failures(opt)
     expect({"text"}, nil)
     expect({"text", "it's"}, nil)
     expect({"fling", "1"}, nil)
-    local line = touch.script("tap 1 2")
-    if not line:find("echo 'tap 1 2' > /var/tmp/rnhost.cmd", 1, true) then
-        table.insert(found, "the device script must write the command into /var/tmp/rnhost.cmd")
+    local line = touch.send("tap 1 2", "rn-hermes-real", "org.revenant.rnhost.rn-hermes-real")
+    if not line:find("printf '%s\\n' 'tap 1 2' >> /var/stash/rn-hermes-real/rn-hermes-real/rn-hermes-real.app/rnhost.cmd", 1, true) then
+        table.insert(found, "the device script must append the command to rnhost.cmd in the application folder")
+    end
+    if not line:find("rm -f /var/tmp/rn-hermes-real/rnhost.cmd.out", 1, true) then
+        table.insert(found, "the device script must remove the previous answer in the run folder")
     end
     return found
 end

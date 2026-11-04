@@ -1,0 +1,141 @@
+diff -ruN orig/ios/ExpoNotifications/Notifications/DateComponentsSerializer.swift work/ios/ExpoNotifications/Notifications/DateComponentsSerializer.swift
+--- a/ios/ExpoNotifications/Notifications/DateComponentsSerializer.swift
++++ b/ios/ExpoNotifications/Notifications/DateComponentsSerializer.swift
+@@ -5,9 +5,8 @@
+     serializedComponents["calendar"] = dateComponents.calendar?.identifier ?? NSNull()
+     serializedComponents["timeZone"] = dateComponents.timeZone?.identifier ?? NSNull()
+     serializedComponents["isLeapMonth"] = dateComponents.isLeapMonth ?? false
+-    if #available(iOS 26.0, *) {
+-      serializedComponents["isRepeatedDay"] = dateComponents.isRepeatedDay ?? false
+-    }
++    // revenant: DateComponents.isRepeatedDay is not in the SDK this port builds against, so the key is
++    // left out, the same as on iOS before 26.
+ 
+ 
+     let map = calendarUnitsConversionMap()
+diff -ruN orig/ios/ExpoNotifications/Notifications/NotificationRecords.swift work/ios/ExpoNotifications/Notifications/NotificationRecords.swift
+--- a/ios/ExpoNotifications/Notifications/NotificationRecords.swift
++++ b/ios/ExpoNotifications/Notifications/NotificationRecords.swift
+@@ -55,19 +55,27 @@
+       }
+       #endif
+     } else {
+-      self = switch sound {
+-      case .defaultCritical: .defaultCritical
+-      case .default: .default
+-      default: .custom
++      // revenant: UNNotificationSound.defaultCritical is iOS 12 and later; before it no notification carries it.
++      self = .custom
++      if #available(iOS 12.0, *), sound == UNNotificationSound.defaultCritical {
++        self = .defaultCritical
++      } else if sound == UNNotificationSound.default {
++        self = .default
+       }
+     }
+   }
+ 
+-  func toUNNotificationSound(customSoundName: String?) -> UNNotificationSound {
++  func toUNNotificationSound(customSoundName: String?) throws -> UNNotificationSound {
+     switch self {
+     case .default:
+       return .default
+     case .defaultCritical:
++      guard #available(iOS 12.0, *) else {
++        throw Exception(
++          name: "ERR_NOTIFICATIONS_SOUND_UNSUPPORTED",
++          description: "the defaultCritical notification sound needs iOS 12 or newer"
++        )
++      }
+       return .defaultCritical
+     case .defaultRingtone:
+       #if targetEnvironment(macCatalyst)
+@@ -205,20 +213,18 @@
+       self.notifyEntryStateOnDisplay = beaconRegion.notifyEntryStateOnDisplay
+       self.major = beaconRegion.major?.intValue
+       self.minor = beaconRegion.minor?.intValue
+-      self.uuid = beaconRegion.uuid.uuidString
+-
+-      #if targetEnvironment(macCatalyst)
+-      // On Mac Catalyst, CLBeaconIdentityConstraint does not expose major/minor accessors.
+-      self.beaconIdentityConstraint = [
+-        "uuid": beaconRegion.beaconIdentityConstraint.uuid.uuidString
+-      ]
+-      #else
+-      self.beaconIdentityConstraint = [
+-        "uuid": beaconRegion.beaconIdentityConstraint.uuid.uuidString,
+-        "major": beaconRegion.beaconIdentityConstraint.major as Any,
+-        "minor": beaconRegion.beaconIdentityConstraint.minor as Any
+-      ]
+-      #endif
++      if #available(iOS 13.0, *) {
++        self.uuid = beaconRegion.uuid.uuidString
++        // revenant: CLBeaconIdentityConstraint has no major/minor accessors in the SDK this port builds against
++        // (Mac Catalyst never had them), so the constraint carries its uuid; the region's own major and minor
++        // are in the record above.
++        self.beaconIdentityConstraint = [
++          "uuid": beaconRegion.beaconIdentityConstraint.uuid.uuidString
++        ]
++      } else {
++        // revenant: before iOS 13 the region's UUID is proximityUUID, and there is no identity constraint.
++        self.uuid = beaconRegion.proximityUUID.uuidString
++      }
+     } else {
+       self.type = "unknown"
+     }
+@@ -333,7 +339,7 @@
+     return request.content.userInfo
+   }
+ 
+-  func toUNMutableNotificationContent() -> UNMutableNotificationContent {
++  func toUNMutableNotificationContent() throws -> UNMutableNotificationContent {
+     let content = UNMutableNotificationContent()
+ 
+     if let title = title {
+@@ -370,7 +376,7 @@
+         content.sound = soundBool ? .default : .none
+       } else if let soundName = try? sound.as(String.self) {
+         let soundEnum = NotificationSoundEnum(rawValue: soundName) ?? .custom
+-        content.sound = soundEnum.toUNNotificationSound(customSoundName: soundName)
++        content.sound = try soundEnum.toUNNotificationSound(customSoundName: soundName)
+       }
+     } else {
+       // to behave the same as android, otherwise there'd be no sound
+diff -ruN orig/ios/ExpoNotifications/Notifications/TriggerRecords.swift work/ios/ExpoNotifications/Notifications/TriggerRecords.swift
+--- a/ios/ExpoNotifications/Notifications/TriggerRecords.swift
++++ b/ios/ExpoNotifications/Notifications/TriggerRecords.swift
+@@ -49,6 +49,7 @@
+ 
+   public init() {}
+ 
++  @available(iOS 8.0, *)
+   func dateComponentsFrom(_ calendarTrigger: CalendarTriggerRecord) -> DateComponents {
+     var dateComponents = DateComponents()
+     // TODO: Verify that DoW matches JS getDay()
+@@ -66,6 +67,13 @@
+   }
+ 
+   public func toUNNotificationTrigger() throws -> UNNotificationTrigger? {
++    // revenant: the calendar components are a Swift DateComponents, an API of iOS 8; before it the trigger is refused.
++    guard #available(iOS 8.0, *) else {
++      throw Exception(
++        name: "ERR_NOTIFICATIONS_CALENDAR_TRIGGER_UNSUPPORTED",
++        description: "calendar notification triggers need DateComponents, iOS 8 or newer"
++      )
++    }
+     var trigger: UNNotificationTrigger?
+     try EXUtilities.catchException {
+       let dateComponents: DateComponents = dateComponentsFrom(self)
+diff -ruN orig/ios/ExpoNotifications/Permissions/ExpoNotificationsPermissionsRequester.swift work/ios/ExpoNotifications/Permissions/ExpoNotificationsPermissionsRequester.swift
+--- a/ios/ExpoNotifications/Permissions/ExpoNotificationsPermissionsRequester.swift
++++ b/ios/ExpoNotifications/Permissions/ExpoNotificationsPermissionsRequester.swift
+@@ -16,7 +16,9 @@
+ 
+   public func getPermissions() -> [AnyHashable: Any] {
+     // semaphore.wait() blocks the current thread, we want to be sure not to block main
+-    dispatchPrecondition(condition: .notOnQueue(.main))
++    if #available(iOS 10.0, *) {
++      dispatchPrecondition(condition: .notOnQueue(.main))
++    }
+     let semaphore = DispatchSemaphore(value: 0)
+     var result: [AnyHashable: Any] = [:]
+ 
