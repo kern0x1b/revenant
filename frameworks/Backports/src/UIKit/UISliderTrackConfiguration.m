@@ -10,6 +10,8 @@ static char RevenantSliderTrackConfigurationKey;
 
 @implementation UISliderTick
 
+@synthesize position = _position;
+
 + (instancetype)tickWithPosition:(float)position title:(NSString *)title image:(UIImage *)image
 {
     return [[self alloc] initRevenantWithPosition:position title:title image:image];
@@ -61,6 +63,8 @@ static char RevenantSliderTrackConfigurationKey;
 @end
 
 @implementation UISliderTrackConfiguration
+
+@synthesize ticks = _ticks;
 
 + (instancetype)configurationWithTicks:(NSArray<UISliderTick *> *)ticks
 {

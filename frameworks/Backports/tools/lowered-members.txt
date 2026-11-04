@@ -33176,6 +33176,7 @@ member UISliderTick -copyWithZone:
 member UISliderTick -encodeWithCoder:
 member UISliderTick -initRevenantWithPosition:title:image:
 member UISliderTick -initWithCoder:
+member UISliderTick -position
 member UISliderTrackConfiguration +configurationWithNumberOfTicks:
 member UISliderTrackConfiguration +configurationWithTicks:
 member UISliderTrackConfiguration -copyWithZone:
@@ -33184,6 +33185,7 @@ member UISliderTrackConfiguration -initRevenantWithTicks:
 member UISliderTrackConfiguration -initWithCoder:
 member UISliderTrackConfiguration -setMaximumEnabledValue:
 member UISliderTrackConfiguration -setMinimumEnabledValue:
+member UISliderTrackConfiguration -ticks
 member UISnapBehavior -damping
 member UISnapBehavior -description
 member UISnapBehavior -init
