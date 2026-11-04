@@ -2,33 +2,14 @@
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
-
-#define REVENANT_LOOPER_STATUS_UNKNOWN 0
-#define REVENANT_LOOPER_STATUS_READY 1
-#define REVENANT_LOOPER_STATUS_FAILED 2
-#define REVENANT_LOOPER_STATUS_CANCELLED 3
+#import "../revenant_alias.h"
 
 static const double revenantLooperQueuedSeconds = 10.0;
 static const NSInteger revenantLooperUnknownLengthCopies = 3;
 
 static void *revenantLooperFirstStatusContext = &revenantLooperFirstStatusContext;
 
-__attribute__((objc_runtime_name("AVPlayerLooper")))
-@interface RevenantPlayerLooper : NSObject
-
-+ (instancetype)playerLooperWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop;
-+ (instancetype)playerLooperWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop timeRange:(CMTimeRange)loopRange;
-- (instancetype)initWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop timeRange:(CMTimeRange)loopRange;
-- (void)disableLooping;
-
-@property (nonatomic, readonly) NSInteger status;
-@property (nonatomic, readonly, copy) NSError *error;
-@property (nonatomic, readonly) NSInteger loopCount;
-@property (nonatomic, readonly, copy) NSArray<AVPlayerItem *> *loopingPlayerItems;
-
-@end
-
-@implementation RevenantPlayerLooper {
+REVENANT_ALIAS_STATE(AVPlayerLooper, NSObject,
     AVQueuePlayer *_player;
     AVPlayerItem *_template;
     CMTimeRange _loopRange;
@@ -36,12 +17,14 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
     NSMutableArray<AVPlayerItem *> *_copies;
     AVPlayerItem *_first;
     NSInteger _copyTarget;
-    NSInteger _status;
+    AVPlayerLooperStatus _status;
     NSError *_error;
     NSInteger _loopCount;
     BOOL _observingFirst;
     BOOL _observingEnds;
-}
+)
+
+@implementation REVENANT_ALIAS_CLASS(AVPlayerLooper) (RevenantBackport)
 
 + (instancetype)playerLooperWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop
 {
@@ -62,7 +45,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
     _template = itemToLoop;
     _loopRange = loopRange;
     _copies = [NSMutableArray array];
-    _status = REVENANT_LOOPER_STATUS_UNKNOWN;
+    _status = AVPlayerLooperStatusUnknown;
 
     if (CMTIMERANGE_IS_VALID(loopRange))
         _loopLength = loopRange.duration;
@@ -86,7 +69,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
         [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (NSInteger)status
+- (AVPlayerLooperStatus)status
 {
     return _status;
 }
@@ -117,7 +100,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
 
 - (void)revenantBeginLooping
 {
-    if (_status != REVENANT_LOOPER_STATUS_UNKNOWN)
+    if (_status != AVPlayerLooperStatusUnknown)
         return;
     double seconds = CMTIME_IS_VALID(_loopLength) ? CMTimeGetSeconds(_loopLength) : 0.0;
     if (seconds > 0.0)
@@ -134,18 +117,18 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
 
 - (void)revenantFirstChanged
 {
-    if (_status != REVENANT_LOOPER_STATUS_UNKNOWN)
+    if (_status != AVPlayerLooperStatusUnknown)
         return;
     AVPlayerItemStatus firstStatus = _first.status;
     if (firstStatus == AVPlayerItemStatusReadyToPlay) {
         [self revenantStopObservingFirst];
-        _status = REVENANT_LOOPER_STATUS_READY;
+        _status = AVPlayerLooperStatusReady;
         while (_copies.count < (NSUInteger)_copyTarget)
             [self revenantQueueCopy:[self revenantMakeCopy]];
     } else if (firstStatus == AVPlayerItemStatusFailed) {
         [self revenantStopObservingFirst];
         _error = _first.error;
-        _status = REVENANT_LOOPER_STATUS_FAILED;
+        _status = AVPlayerLooperStatusFailed;
         [_player removeItem:_first];
         [_copies removeAllObjects];
     }
@@ -183,7 +166,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
             return;
         [_copies removeObject:item];
         _loopCount++;
-        if (_status == REVENANT_LOOPER_STATUS_READY)
+        if (_status == AVPlayerLooperStatusReady)
             [self revenantQueueCopy:[self revenantMakeCopy]];
     });
 }
@@ -191,7 +174,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
 - (void)disableLooping
 {
     [self revenantStopObservingFirst];
-    _status = REVENANT_LOOPER_STATUS_CANCELLED;
+    _status = AVPlayerLooperStatusCancelled;
     AVPlayerItem *playing = _player.currentItem;
     NSMutableArray<AVPlayerItem *> *kept = [NSMutableArray array];
     for (AVPlayerItem *copy in _copies) {

@@ -130,8 +130,8 @@ local MEMBERS = {
             name = "Foundation",
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
-            find = "API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0));",
-            replace = "API_AVAILABLE(macos(10.9), ios(6.0), watchos(2.0), tvos(9.0));",
+            find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(7.0), watchos(2.0), tvos(9.0));",
+            replace = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(macos(10.9), ios(6.0), watchos(2.0), tvos(9.0));",
         },
     },
     {
@@ -160,6 +160,16 @@ local MEMBERS = {
             file = "SKProductDiscount.h",
             find = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
             replace = "API_DEPRECATED(\"Use Product.SubscriptionOffer.period.\", ios(6.0, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))",
+        },
+    },
+    {
+        member = "SKPaymentTransactionStateDeferred",
+        header = {
+            name = "StoreKit",
+            directory = {"System", "Library", "Frameworks", "StoreKit.framework", "Headers"},
+            file = "SKPaymentTransaction.h",
+            find = "SKPaymentTransactionStateDeferred API_DEPRECATED(\"Use PurchaseResult.pending from Product.purchase(confirmIn:options:).\", ios(8.0, 18.0), macos(10.10, 15.0), watchos(6.2, 11.0)),",
+            replace = "SKPaymentTransactionStateDeferred API_DEPRECATED(\"Use PurchaseResult.pending from Product.purchase(confirmIn:options:).\", ios(6.0, 18.0), macos(10.10, 15.0), watchos(6.2, 11.0)),",
         },
     },
     {
@@ -488,46 +498,7 @@ local MEMBERS = {
             file = "CAFrameRateRange.h",
             find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
             replace = "",
-        },
-    },
-    {
-        member = "CAFrameRateRange",
-        header = {
-            name = "QuartzCore",
-            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
-            file = "CAFrameRateRange.h",
-            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
-            replace = "",
-        },
-    },
-    {
-        member = "CAFrameRateRange",
-        header = {
-            name = "QuartzCore",
-            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
-            file = "CAFrameRateRange.h",
-            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
-            replace = "",
-        },
-    },
-    {
-        member = "CAFrameRateRange",
-        header = {
-            name = "QuartzCore",
-            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
-            file = "CAFrameRateRange.h",
-            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
-            replace = "",
-        },
-    },
-    {
-        member = "CAFrameRateRange",
-        header = {
-            name = "QuartzCore",
-            directory = {"System", "Library", "Frameworks", "QuartzCore.framework", "Headers"},
-            file = "CAFrameRateRange.h",
-            find = "API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0)) API_UNAVAILABLE(watchos)",
-            replace = "",
+            every = true,
         },
     },
     {
@@ -627,11 +598,24 @@ local function directory_of(sdk, header)
 end
 
 local function replaced(text, lowering, where, member)
-    local start, stop = text:find(lowering.find, 1, true)
-    if not start then
+    local parts, position = {}, 1
+    repeat
+        local start, stop = text:find(lowering.find, position, true)
+        if not start then
+            break
+        end
+        table.insert(parts, text:sub(position, start - 1))
+        table.insert(parts, lowering.replace)
+        position = stop + 1
+    until not lowering.every
+    if #parts == 0 then
         raise("%s declares %s without the availability the backports lower", where, member)
     end
-    return text:sub(1, start - 1) .. lowering.replace .. text:sub(stop + 1)
+    if not lowering.every and text:find(lowering.find, position, true) then
+        raise("%s declares the availability the backports lower for %s more than once, so the lowering cannot tell which declaration it is", where, member)
+    end
+    table.insert(parts, text:sub(position))
+    return table.concat(parts)
 end
 
 local function write_if_changed(file, text)

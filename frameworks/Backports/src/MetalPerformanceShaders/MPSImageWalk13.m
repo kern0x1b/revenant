@@ -94,25 +94,7 @@ void RevenantMPSImageStore(void *buffer, const RevenantMPSImageLayout *layout, N
 
 MTLRegion RevenantMPSImageResolvedRegion(MPSImage *image, MTLRegion clip)
 {
-    NSUInteger width = image.width, height = image.height;
-    NSInteger ox = (NSInteger)clip.origin.x, oy = (NSInteger)clip.origin.y;
-    NSInteger sw = (NSInteger)clip.size.width, sh = (NSInteger)clip.size.height;
-    if (ox < 0) ox = 0;
-    if (oy < 0) oy = 0;
-    if ((NSUInteger)ox > width) ox = (NSInteger)width;
-    if ((NSUInteger)oy > height) oy = (NSInteger)height;
-    NSUInteger right = width, bottom = height;
-    if (sw > 0) {
-        NSInteger end = ox + sw;
-        if (end < (NSInteger)right) right = (NSUInteger)end;
-    }
-    if (sh > 0) {
-        NSInteger end = oy + sh;
-        if (end < (NSInteger)bottom) bottom = (NSUInteger)end;
-    }
-    if (right < (NSUInteger)ox) right = (NSUInteger)ox;
-    if (bottom < (NSUInteger)oy) bottom = (NSUInteger)oy;
-    return MTLRegionMake2D((NSUInteger)ox, (NSUInteger)oy, right - (NSUInteger)ox, bottom - (NSUInteger)oy);
+    return RevenantMPSResolvedRegion(image.width, image.height, clip);
 }
 
 BOOL RevenantMPSImageRegionIsEmpty(MTLRegion region)

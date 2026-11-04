@@ -63,8 +63,8 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
     }
     NSUInteger channels = 0, destinationChannels = 0;
     size_t elementSize = 0, destinationElementSize = 0;
-    if (!RevenantMPSPyramidPixelShape(sourceTexture.pixelFormat, &channels, &elementSize) ||
-        !RevenantMPSPyramidPixelShape(destinationTexture.pixelFormat, &destinationChannels, &destinationElementSize) ||
+    if (!RevenantMPSTexturePixelShape(sourceTexture.pixelFormat, &channels, &elementSize) ||
+        !RevenantMPSTexturePixelShape(destinationTexture.pixelFormat, &destinationChannels, &destinationElementSize) ||
         channels != destinationChannels || elementSize != destinationElementSize) {
         RevenantMPSRefuse(@"%@: the source is pixel format %d and the destination %d; their channels, bit depth"
                         @" and resolution have to match, so no level was written",
@@ -103,8 +103,8 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
             RevenantMPSRefuse(@"%@: no memory for level %lu, so no level was written", what, (unsigned long)level);
             return;
         }
-        BOOL read = RevenantMPSPyramidRead(sourceTexture, level, width, height, channels, elementSize, here) &&
-                    RevenantMPSPyramidRead(sourceTexture, level + 1, aboveWidth, aboveHeight, channels, elementSize, above);
+        BOOL read = RevenantMPSTextureRead(sourceTexture, level, width, height, channels, elementSize, here) &&
+                    RevenantMPSTextureRead(sourceTexture, level + 1, aboveWidth, aboveHeight, channels, elementSize, above);
         if (!read) {
             free(here);
             free(above);
@@ -123,7 +123,7 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
                 }
             }
         }
-        RevenantMPSPyramidWrite(destinationTexture, level, width, height, channels, elementSize, here);
+        RevenantMPSTextureWrite(destinationTexture, level, width, height, channels, elementSize, here);
         free(here);
         free(above);
     }
@@ -153,8 +153,8 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
     }
     NSUInteger channels = 0, destinationChannels = 0;
     size_t elementSize = 0, destinationElementSize = 0;
-    if (!RevenantMPSPyramidPixelShape(sourceTexture.pixelFormat, &channels, &elementSize) ||
-        !RevenantMPSPyramidPixelShape(destinationTexture.pixelFormat, &destinationChannels, &destinationElementSize) ||
+    if (!RevenantMPSTexturePixelShape(sourceTexture.pixelFormat, &channels, &elementSize) ||
+        !RevenantMPSTexturePixelShape(destinationTexture.pixelFormat, &destinationChannels, &destinationElementSize) ||
         channels != destinationChannels || elementSize != destinationElementSize) {
         RevenantMPSRefuse(@"%@: the source is pixel format %d and the destination %d; their channels, bit depth"
                         @" and resolution have to match, so no level was written",
@@ -186,7 +186,7 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
         RevenantMPSRefuse(@"%@: no memory for the top level, so no level was written", what);
         return;
     }
-    if (!RevenantMPSPyramidRead(sourceTexture, levels - 1, topWidth, topHeight, channels, elementSize, top)) {
+    if (!RevenantMPSTextureRead(sourceTexture, levels - 1, topWidth, topHeight, channels, elementSize, top)) {
         free(top);
         RevenantMPSRefuse(@"%@: the top level of the source could not be read, so no level was written", what);
         return;
@@ -202,7 +202,7 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
             RevenantMPSRefuse(@"%@: no memory for level %lu, so no level was written", what, (unsigned long)level);
             return;
         }
-        if (!RevenantMPSPyramidRead(sourceTexture, level, width, height, channels, elementSize, here)) {
+        if (!RevenantMPSTextureRead(sourceTexture, level, width, height, channels, elementSize, here)) {
             free(here);
             free(top);
             RevenantMPSRefuse(@"%@: level %lu of the source could not be read, so no level was written", what,
@@ -217,7 +217,7 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
         if (!above || !(level + 1 == levels - 1
                         ? YES
                         : (destinationHasAbove
-                           ? RevenantMPSPyramidRead(destinationTexture, level + 1, aboveWidth, aboveHeight,
+                           ? RevenantMPSTextureRead(destinationTexture, level + 1, aboveWidth, aboveHeight,
                                                     channels, elementSize, above)
                            : NO))) {
             free(here);
@@ -240,7 +240,7 @@ static double RevenantMPSPyramidInterpolated(const float *source, NSUInteger wid
                 }
             }
         }
-        RevenantMPSPyramidWrite(destinationTexture, level, width, height, channels, elementSize, here);
+        RevenantMPSTextureWrite(destinationTexture, level, width, height, channels, elementSize, here);
         free(here);
         free(above);
     }

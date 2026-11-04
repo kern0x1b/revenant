@@ -21,6 +21,16 @@ local AREAS = {
             "-[AVMetadataMachineReadableCodeObject time]",
         },
     },
+    {
+        name = "looping of a template item through a queue player",
+        sources = {"AVPlayerLooper10.m"},
+        members = {
+            "+[RevenantAVPlayerLooper playerLooperWithPlayer:templateItem:]",
+            "+[RevenantAVPlayerLooper playerLooperWithPlayer:templateItem:timeRange:]",
+            "-[RevenantAVPlayerLooper status]", "-[RevenantAVPlayerLooper error]", "-[RevenantAVPlayerLooper loopCount]",
+            "-[RevenantAVPlayerLooper loopingPlayerItems]", "-[RevenantAVPlayerLooper disableLooping]",
+        },
+    },
 }
 
 local function key_of(member)
