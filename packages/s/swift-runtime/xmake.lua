@@ -425,6 +425,7 @@ package("swift-runtime")
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
             local presentation_intent = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
             local locale_language = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "LocaleLanguage.swift")
+            local url_session_web_socket_task = path.join(os.projectdir(), "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLSessionWebSocketTask.swift")
             local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
             local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple)
             local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
@@ -454,7 +455,7 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"}), {presentation_intent, locale_language}),
+                "UUID.swift"}), {presentation_intent, locale_language, url_session_web_socket_task}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,
