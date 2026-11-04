@@ -2,6 +2,9 @@ package("hermes")
     set_homepage("https://hermesengine.dev")
     set_description("Hermes 250829098.0.17, the JavaScript engine React Native 0.86.3 runs by default (its V1 line, the one the hermes-compiler it ships is built from), as libhermesvm and libjsi for armv7 iOS 6.0: JSI is compiled from the react-native package's own sources, the host hermesc is built from the same commit so the bytecode it writes is the bytecode the engine reads, and Intl uses the Foundation backend, so no ICU is needed.")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/facebook/hermes.git")
