@@ -4,8 +4,9 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..")
 local runtime_guards = import("runtime_guards", {rootdir = os.scriptdir(), anonymous = true})
 local flat_classes = import("flat_classes", {rootdir = os.scriptdir(), anonymous = true})
 local semver = import("core.base.semver")
+local architectures = import("architectures", {rootdir = os.scriptdir(), anonymous = true})
 
-local DEVICE_RELEASE = "6.0"
+local DEVICE_RELEASE = architectures.device_release("armv7")
 
 function device_release()
     return DEVICE_RELEASE

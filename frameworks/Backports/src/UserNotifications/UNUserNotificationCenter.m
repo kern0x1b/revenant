@@ -1,5 +1,6 @@
 #import "RevenantUserNotificationCenter.h"
 #import "../RevenantSayOnce.h"
+#import <AudioToolbox/AudioToolbox.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -41,7 +42,7 @@ static const BOOL RevenantReleaseShowsTitles = NO;
             return self;
         }
         UNAuthorizationOptions granted = options.unsignedIntegerValue;
-        _authorizationStatus = UNAuthorizationStatusAuthorized;
+        _authorizationStatus = granted ? UNAuthorizationStatusAuthorized : UNAuthorizationStatusDenied;
         _badgeSetting = granted & UNAuthorizationOptionBadge ? UNNotificationSettingEnabled : UNNotificationSettingDisabled;
         _soundSetting = granted & UNAuthorizationOptionSound ? UNNotificationSettingEnabled : UNNotificationSettingDisabled;
         _alertSetting = granted & UNAuthorizationOptionAlert ? UNNotificationSettingEnabled : UNNotificationSettingDisabled;
@@ -387,6 +388,159 @@ static void revenant_hook_delegate(void)
         method_setImplementation(existing_push, replacement_push);
 }
 
+static UNAuthorizationOptions revenant_authorization_of(UIRemoteNotificationType types)
+{
+    UNAuthorizationOptions granted = 0;
+    if (types & UIRemoteNotificationTypeAlert)
+        granted |= UNAuthorizationOptionAlert;
+    if (types & UIRemoteNotificationTypeBadge)
+        granted |= UNAuthorizationOptionBadge;
+    if (types & UIRemoteNotificationTypeSound)
+        granted |= UNAuthorizationOptionSound;
+    return granted;
+}
+
+static UIRemoteNotificationType revenant_remote_types(UNAuthorizationOptions granted)
+{
+    UIRemoteNotificationType types = UIRemoteNotificationTypeNone;
+    if (granted & UNAuthorizationOptionAlert)
+        types |= UIRemoteNotificationTypeAlert;
+    if (granted & UNAuthorizationOptionBadge)
+        types |= UIRemoteNotificationTypeBadge;
+    if (granted & UNAuthorizationOptionSound)
+        types |= UIRemoteNotificationTypeSound;
+    return types;
+}
+
+static NSNumber *revenant_authorization_options(void)
+{
+    UNAuthorizationOptions granted = revenant_authorization_of([UIApplication sharedApplication].enabledRemoteNotificationTypes);
+    if (granted)
+        return @(granted);
+    return [[NSUserDefaults standardUserDefaults] objectForKey:RevenantAuthorizedKey] ? @0 : nil;
+}
+
+static void revenant_report_authorization(void (^done)(BOOL granted, NSError *error))
+{
+    BOOL granted = [UIApplication sharedApplication].enabledRemoteNotificationTypes != UIRemoteNotificationTypeNone;
+    if (done)
+        done(granted, nil);
+}
+
+static void revenant_await_prompt(void (^finish)(void))
+{
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    __block BOOL shown = NO;
+    __block BOOL finished = NO;
+    __block id resigned = nil;
+    __block id active = nil;
+    void (^end)(void) = ^{
+        if (finished)
+            return;
+        finished = YES;
+        [center removeObserver:resigned];
+        [center removeObserver:active];
+        finish();
+    };
+    resigned = [center addObserverForName:UIApplicationWillResignActiveNotification object:nil queue:[NSOperationQueue mainQueue]
+                               usingBlock:^(NSNotification *note) {
+        shown = YES;
+    }];
+    active = [center addObserverForName:UIApplicationDidBecomeActiveNotification object:nil queue:[NSOperationQueue mainQueue]
+                             usingBlock:^(NSNotification *note) {
+        if (shown)
+            end();
+    }];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (!shown)
+            end();
+    });
+}
+
+static NSURL *revenant_sound_file(NSString *name)
+{
+    if (name.length)
+        return [[NSBundle mainBundle] URLForResource:name.stringByDeletingPathExtension withExtension:name.pathExtension];
+    NSString *system = @"/System/Library/Audio/UISounds/sms-received1.caf";
+    return [[NSFileManager defaultManager] fileExistsAtPath:system] ? [NSURL fileURLWithPath:system] : nil;
+}
+
+static void revenant_play_sound(NSString *name)
+{
+    static NSMutableDictionary *sounds;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        sounds = [[NSMutableDictionary alloc] init];
+    });
+    NSURL *file = revenant_sound_file(name);
+    SystemSoundID sound = 0;
+    if (file) {
+        NSNumber *cached = sounds[file.absoluteString];
+        if (cached)
+            sound = (SystemSoundID)cached.unsignedIntValue;
+        else if (AudioServicesCreateSystemSoundID((__bridge CFURLRef)file, &sound) == kAudioServicesNoError)
+            sounds[file.absoluteString] = @(sound);
+        else
+            sound = 0;
+    }
+    if (sound)
+        AudioServicesPlaySystemSound(sound);
+    else
+        AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
+}
+
+static void revenant_present(UNNotificationRequest *request, UNNotificationPresentationOptions options)
+{
+    UNNotificationContent *content = request.content;
+    if ((options & UNNotificationPresentationOptionBadge) && content.badge)
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIApplication sharedApplication].applicationIconBadgeNumber = content.badge.integerValue;
+        });
+    if ((options & UNNotificationPresentationOptionSound) && content.sound) {
+        NSString *name = [content.sound revenant_fileName];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            revenant_play_sound(name);
+        });
+    }
+    if (options & UNNotificationPresentationOptionAlert)
+        revenant_say_once(@"alert", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ draws no banner for a notification that arrives while the application is in front, so the alert option is accepted and nothing is drawn", [UIDevice currentDevice].systemVersion]);
+}
+
+@interface RevenantUserNotificationDefaultDelegate : NSObject <UNUserNotificationCenterDelegate>
++ (instancetype)revenant_shared;
+@end
+
+@implementation RevenantUserNotificationDefaultDelegate
+
++ (instancetype)revenant_shared
+{
+    static RevenantUserNotificationDefaultDelegate *shared;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        shared = [[self alloc] init];
+    });
+    return shared;
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler
+{
+    completionHandler(0);
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler
+{
+    completionHandler();
+}
+
+@end
+
+static id <UNUserNotificationCenterDelegate> revenant_responder(id <UNUserNotificationCenterDelegate> delegate, SEL selector)
+{
+    return [delegate respondsToSelector:selector] ? delegate : [RevenantUserNotificationDefaultDelegate revenant_shared];
+}
+
 @implementation UNUserNotificationCenter {
 @private
     __weak id <UNUserNotificationCenterDelegate> _delegate;
@@ -446,23 +600,32 @@ static void revenant_hook_delegate(void)
                       completionHandler:(void (^)(BOOL granted, NSError *error))completionHandler
 {
     UNAuthorizationOptions kept = options & (UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert);
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:@(kept) forKey:RevenantAuthorizedKey];
-    [defaults synchronize];
     void (^done)(BOOL, NSError *) = [completionHandler copy];
-    dispatch_async(revenant_center_queue(), ^{
-        if (done)
-            done(YES, nil);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIRemoteNotificationType types = revenant_remote_types(kept);
+        if (types == UIRemoteNotificationTypeNone) {
+            revenant_report_authorization(done);
+            return;
+        }
+        BOOL undecided = revenant_authorization_options() == nil;
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setObject:@(kept) forKey:RevenantAuthorizedKey];
+        [defaults synchronize];
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:types];
+        if (undecided)
+            revenant_await_prompt(^{
+                revenant_report_authorization(done);
+            });
+        else
+            revenant_report_authorization(done);
     });
 }
 
 - (void)getNotificationSettingsWithCompletionHandler:(void (^)(UNNotificationSettings *settings))completionHandler
 {
-    UNNotificationSettings *settings =
-        [[UNNotificationSettings alloc] initRevenantWithOptions:[[NSUserDefaults standardUserDefaults] objectForKey:RevenantAuthorizedKey]];
     void (^done)(UNNotificationSettings *) = [completionHandler copy];
-    dispatch_async(revenant_center_queue(), ^{
-        done(settings);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        done([[UNNotificationSettings alloc] initRevenantWithOptions:revenant_authorization_options()]);
     });
 }
 
@@ -587,26 +750,20 @@ static void revenant_hook_delegate(void)
     if (!request)
         return;
     UNNotification *notification = [UNNotification notificationWithRequest:request date:[NSDate date]];
-    id <UNUserNotificationCenterDelegate> delegate = _delegate;
     if (state == UIApplicationStateActive) {
-        if (![delegate respondsToSelector:@selector(userNotificationCenter:willPresentNotification:withCompletionHandler:)])
-            return;
-        [delegate userNotificationCenter:self willPresentNotification:notification
-                   withCompletionHandler:^(UNNotificationPresentationOptions options) {
-            if ((options & UNNotificationPresentationOptionBadge) && request.content.badge)
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [UIApplication sharedApplication].applicationIconBadgeNumber = request.content.badge.integerValue;
-                });
-            if (options & ~UNNotificationPresentationOptionBadge)
-                revenant_say_once(@"present", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ shows nothing and plays nothing for a notification that arrives while the application is in front, so only the badge of the presentation options is applied", [UIDevice currentDevice].systemVersion]);
+        id <UNUserNotificationCenterDelegate> responder =
+            revenant_responder(_delegate, @selector(userNotificationCenter:willPresentNotification:withCompletionHandler:));
+        [responder userNotificationCenter:self willPresentNotification:notification
+                    withCompletionHandler:^(UNNotificationPresentationOptions options) {
+            revenant_present(request, options);
         }];
         return;
     }
-    if (![delegate respondsToSelector:@selector(userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:)])
-        return;
+    id <UNUserNotificationCenterDelegate> responder =
+        revenant_responder(_delegate, @selector(userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:));
     UNNotificationResponse *response = [UNNotificationResponse responseWithNotification:notification
                                                                        actionIdentifier:UNNotificationDefaultActionIdentifier];
-    [delegate userNotificationCenter:self didReceiveNotificationResponse:response withCompletionHandler:^{
+    [responder userNotificationCenter:self didReceiveNotificationResponse:response withCompletionHandler:^{
     }];
 }
 

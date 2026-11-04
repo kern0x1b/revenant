@@ -3,7 +3,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
 ARCHITECTURES = {
     armv6 = {first = "2.0", last = "4.2.1"},
-    armv7 = {first = "3.0"},
+    armv7 = {first = "3.0", device = "6.0"},
     armv7s = {first = "6.0"},
     arm64 = {first = "7.0"}
 }
@@ -15,6 +15,14 @@ end
 local function runs(architecture, release)
     local bounds = ARCHITECTURES[architecture]
     return semver.compare(release, bounds.first) >= 0 and (not bounds.last or semver.compare(release, bounds.last) <= 0)
+end
+
+function device_release(architecture)
+    local device = ARCHITECTURES[architecture] and ARCHITECTURES[architecture].device
+    if not device or not runs(architecture, device) then
+        raise("toolchain(apple-ios) names no device release of %s to lower the SDK against", architecture)
+    end
+    return device
 end
 
 function emulated_tls(architecture, minimum)

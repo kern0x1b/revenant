@@ -2064,6 +2064,7 @@ class RevenantUndoRecord
 class RevenantUnitConverterReciprocal
 class RevenantUnwindInstaller
 class RevenantUpdateTracking11
+class RevenantUserNotificationDefaultDelegate
 class RevenantVTMultiPassStorage
 class RevenantVTPendingFrame
 class RevenantVTSoftwareSession
@@ -4076,6 +4077,7 @@ enum UNAuthorizationOptionAlert
 enum UNAuthorizationOptionBadge
 enum UNAuthorizationOptionSound
 enum UNAuthorizationStatusAuthorized
+enum UNAuthorizationStatusDenied
 enum UNAuthorizationStatusNotDetermined
 enum UNErrorCodeAttachmentInvalidURL
 enum UNErrorCodeAttachmentUnrecognizedType
@@ -4087,7 +4089,9 @@ enum UNNotificationActionOptionForeground
 enum UNNotificationCategoryOptionAllowInCarPlay
 enum UNNotificationCategoryOptionCustomDismissAction
 enum UNNotificationInterruptionLevelActive
+enum UNNotificationPresentationOptionAlert
 enum UNNotificationPresentationOptionBadge
+enum UNNotificationPresentationOptionSound
 enum UNNotificationSettingDisabled
 enum UNNotificationSettingEnabled
 enum UNNotificationSettingNotSupported
@@ -28457,6 +28461,9 @@ member RevenantUnitConverterReciprocal -reciprocalValue
 member RevenantUnitConverterReciprocal -valueFromBaseUnitValue:
 member RevenantUnwindInstaller +load
 member RevenantUpdateTracking11 +load
+member RevenantUserNotificationDefaultDelegate +revenant_shared
+member RevenantUserNotificationDefaultDelegate -userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:
+member RevenantUserNotificationDefaultDelegate -userNotificationCenter:willPresentNotification:withCompletionHandler:
 member RevenantVTMultiPassStorage -dealloc
 member RevenantVTMultiPassStorage -revenant_initWithPath:isURL:createdFile:doNotDelete:timeRange:
 member RevenantVTPendingFrame -dealloc
@@ -36416,6 +36423,8 @@ protocol_member UIWebViewDelegate -webView:didFailLoadWithError:
 protocol_member UIWebViewDelegate -webView:shouldStartLoadWithRequest:navigationType:
 protocol_member UIWebViewDelegate -webViewDidFinishLoad:
 protocol_member UIWebViewDelegate -webViewDidStartLoad:
+protocol_member UNUserNotificationCenterDelegate -userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:
+protocol_member UNUserNotificationCenterDelegate -userNotificationCenter:willPresentNotification:withCompletionHandler:
 protocol_member VTFrameProcessorConfiguration +isSupported
 protocol_member VTFrameProcessorConfiguration +maximumDimensions
 protocol_member VTFrameProcessorConfiguration +minimumDimensions
@@ -37272,6 +37281,7 @@ type UNAuthorizationStatus
 type UNNotificationActionOptions
 type UNNotificationCategoryOptions
 type UNNotificationInterruptionLevel
+type UNNotificationPresentationOptions
 type UNNotificationSetting
 type UNShowPreviewsSetting
 type VNElementType
