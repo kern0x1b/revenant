@@ -142,6 +142,17 @@ target("WidgetKit")
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
 
+target("IOSurface")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_values("swift.flags", "-module-link-name", "IOSurface")
+    set_values("swift.cxx_interop", "off")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "IOSurface", "*.swift"))
+    end)
+
 local function createml(name, folder, deps, flags, gap)
     target(name)
         set_kind("static")
@@ -314,8 +325,6 @@ overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, m
 overlay("swiftSpatial", "Spatial", {generate = generate_spatial})
 
 overlay("swiftCloudKit", "CloudKit", {})
-
-overlay("swiftIOSurface", "IOSurface", {})
 
 overlay("swiftWeatherKit", "WeatherKit", {})
 

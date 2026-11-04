@@ -2,6 +2,8 @@
 #include <CoreMedia/CoreMedia.h>
 #include <pthread.h>
 
+#define REVENANT_COREMEDIA_EXPORT __attribute__((visibility("default")))
+
 extern OSStatus revenant_CMTimebaseCreateWithMasterClock(CFAllocatorRef allocator, CMClockRef masterClock, CMTimebaseRef *timebaseOut) __asm("_CMTimebaseCreateWithMasterClock");
 
 static pthread_mutex_t sourcesLock = PTHREAD_MUTEX_INITIALIZER;
@@ -24,7 +26,7 @@ static void ForgetUnowned(void)
     CFRelease(unowned);
 }
 
-__attribute__((visibility("default"))) OSStatus CMTimebaseCreateWithSourceClock(CFAllocatorRef allocator, CMClockRef sourceClock, CMTimebaseRef *timebaseOut)
+REVENANT_COREMEDIA_EXPORT OSStatus CMTimebaseCreateWithSourceClock(CFAllocatorRef allocator, CMClockRef sourceClock, CMTimebaseRef *timebaseOut)
 {
     OSStatus status = revenant_CMTimebaseCreateWithMasterClock(allocator, sourceClock, timebaseOut);
     if (status != noErr || !timebaseOut || !*timebaseOut || !sourceClock) {
@@ -40,7 +42,7 @@ __attribute__((visibility("default"))) OSStatus CMTimebaseCreateWithSourceClock(
     return status;
 }
 
-__attribute__((visibility("default"))) CMClockOrTimebaseRef CMTimebaseCopySource(CMTimebaseRef timebase)
+REVENANT_COREMEDIA_EXPORT CMClockOrTimebaseRef CMTimebaseCopySource(CMTimebaseRef timebase)
 {
     CMClockOrTimebaseRef source = NULL;
     pthread_mutex_lock(&sourcesLock);
