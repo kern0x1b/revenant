@@ -1,1 +1,1 @@
-translation_sources_digest = "d6793b97e10c20c7a6e921d82ba230ea"
+translation_sources_digest = "47d625291e564cd01ca244164708e1f5"
