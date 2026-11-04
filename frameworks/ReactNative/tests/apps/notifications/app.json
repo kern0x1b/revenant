@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "RN Notifications Probe",
+    "slug": "rn-notifications-probe",
+    "version": "1.0.0",
+    "platforms": ["ios"],
+    "ios": {
+      "bundleIdentifier": "org.revenant.rnnotificationsprobe"
+    }
+  }
+}
