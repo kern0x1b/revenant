@@ -1,8 +1,8 @@
 #include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
-#import "RevenantTLS/RevenantTLSEngine.h"
-#import "../Security/RevenantSecProtocolMetadata.h"
+#import "../TLS/RevenantTLS/RevenantTLSEngine.h"
+#import "../TLS/RevenantSecProtocolMetadata.h"
 
 #include <assert.h>
 #include <errno.h>

@@ -2,7 +2,7 @@ local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local swift = path.join(backports, "src", "Swift")
 local src = path.join(backports, "src")
-local cmodules = {"RevenantTLS", "RevenantNetworkC"}
+local cmodules = {"../TLS/RevenantTLS", "RevenantNetworkC"}
 
 function main()
     local out = workspace.fresh("swift-flags")

@@ -4798,6 +4798,7 @@ function RevenantSyncRegister
 function RevenantTLSEngineClose
 function RevenantTLSEngineCopyPeerTrust
 function RevenantTLSEngineCreate
+function RevenantTLSEngineCreateWithCallbacks
 function RevenantTLSEngineFree
 function RevenantTLSEngineHandshake
 function RevenantTLSEngineIsEstablished
@@ -4863,23 +4864,75 @@ function SRAbsoluteTimeFromCFAbsoluteTime
 function SRAbsoluteTimeFromContinuousTime
 function SRAbsoluteTimeGetCurrent
 function SRAbsoluteTimeToCFAbsoluteTime
+function SSLAddDistinguishedName
 function SSLClose
+function SSLCopyALPNProtocols
+function SSLCopyCertificateAuthorities
+function SSLCopyDistinguishedNames
+function SSLCopyPeerCertificates
 function SSLCopyPeerTrust
+function SSLCopyRequestedPeerName
+function SSLCopyRequestedPeerNameLength
+function SSLCopyTrustedRoots
 function SSLCreateContext
 function SSLDisposeContext
+function SSLGetAllowsAnyRoot
+function SSLGetAllowsExpiredCerts
+function SSLGetAllowsExpiredRoots
+function SSLGetBufferedReadSize
+function SSLGetClientCertificateState
 function SSLGetConnection
+function SSLGetDatagramWriteSize
+function SSLGetDiffieHellmanParams
+function SSLGetEnableCertVerify
+function SSLGetEnabledCiphers
+function SSLGetMaxDatagramRecordSize
 function SSLGetNegotiatedCipher
 function SSLGetNegotiatedProtocolVersion
+function SSLGetNumberEnabledCiphers
+function SSLGetNumberSupportedCiphers
 function SSLGetPeerDomainName
 function SSLGetPeerDomainNameLength
+function SSLGetPeerID
+function SSLGetProtocolVersion
+function SSLGetProtocolVersionEnabled
+function SSLGetProtocolVersionMax
+function SSLGetProtocolVersionMin
+function SSLGetRsaBlinding
+function SSLGetSessionOption
+function SSLGetSessionState
+function SSLGetSupportedCiphers
 function SSLHandshake
+function SSLReHandshake
 function SSLRead
+function SSLSetALPNProtocols
+function SSLSetAllowsAnyRoot
+function SSLSetAllowsExpiredCerts
+function SSLSetAllowsExpiredRoots
+function SSLSetCertificate
+function SSLSetCertificateAuthorities
+function SSLSetClientSideAuthenticate
 function SSLSetConnection
+function SSLSetDatagramHelloCookie
+function SSLSetDiffieHellmanParams
+function SSLSetEnableCertVerify
 function SSLSetEnabledCiphers
+function SSLSetEncryptionCertificate
+function SSLSetError
+function SSLSetIOFuncs
+function SSLSetMaxDatagramRecordSize
+function SSLSetOCSPResponse
 function SSLSetPeerDomainName
+function SSLSetPeerID
+function SSLSetProtocolVersion
+function SSLSetProtocolVersionEnabled
 function SSLSetProtocolVersionMax
 function SSLSetProtocolVersionMin
+function SSLSetRsaBlinding
+function SSLSetSessionConfig
 function SSLSetSessionOption
+function SSLSetSessionTicketsEnabled
+function SSLSetTrustedRoots
 function SSLWrite
 function SecAccessControlCreateWithFlags
 function SecAccessControlGetTypeID
@@ -27972,6 +28025,7 @@ member RevenantSecProtocolOptions -ciphersuites
 member RevenantSecProtocolOptions -diffieHellmanParameters
 member RevenantSecProtocolOptions -init
 member RevenantSecProtocolOptions -keyUpdateBlock
+member RevenantSecProtocolOptions -localIdentity
 member RevenantSecProtocolOptions -minTLSVersion
 member RevenantSecProtocolOptions -ocspEnabled
 member RevenantSecProtocolOptions -peerAuthenticationRequired
@@ -28249,7 +28303,7 @@ member RevenantTLSSession -close
 member RevenantTLSSession -dataArray:kind:
 member RevenantTLSSession -dealloc
 member RevenantTLSSession -handshake
-member RevenantTLSSession -initWithOptions:descriptor:defaultServerName:serverSide:reason:status:
+member RevenantTLSSession -initWithOptions:descriptor:callbacks:defaultServerName:serverSide:reason:status:
 member RevenantTLSSession -installClientIdentity
 member RevenantTLSSession -readInto:capacity:count:
 member RevenantTLSSession -serverPreSharedKeyIdentity:key:maximumKey:

@@ -28,8 +28,11 @@ Under `.cache` (or `$REVENANT_CACHE` if the user set it):
 | the firmware catalog | `.cache/firmware/catalog.json` | small |
 
 Downloads: the catalog comes from api.ipsw.me and theapplewiki.com; the firmware itself from
-Apple's servers. Only the system image inside the IPSW is downloaded, by byte ranges; for an
-armv7 iOS 6 firmware the whole IPSW is 0.8–0.9 GB, so plan for up to that per release. The
+the IPSW URL the catalog gives, on updates.cdn-apple.com (Apple's firmware host). Only the system
+image inside the IPSW is downloaded, by byte ranges; for an armv7 iOS 6 firmware the whole IPSW is
+0.8–0.9 GB, so plan for up to that per release. For an iOS 12 arm64 device the system image is
+downloaded whole, in ranges, because its shared cache lives inside it. Only 6.0 and 6.1.3 are kept
+releases: another release's cache, such as iOS 12's, can be evicted when the cache cap needs room. The
 system images of iOS 2 to 9 are decrypted with the keys theapplewiki publishes, then mounted with
 `hdiutil` to copy the files out. Temporary work goes to `.cache/firmware/work/` and is removed.
 

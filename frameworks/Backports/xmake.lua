@@ -112,13 +112,19 @@ if is_plat("iphoneos") then
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
-            if library.name == "NetworkBackports" then
+            if library.name == "SecurityBackports" then
+                add_files(os.files(path.join(SRC, "Security", "SecureTransport", "*.m")))
+            end
+            if library.name == "TLSBackports" then
                 after_build(function (target)
-                    local stub = import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
-                    for _, symbol in ipairs(stub.symbols) do
-                        if not exported:find(" " .. symbol .. "\n", 1, true) then
-                            raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                    for _, stub in ipairs(import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()) do
+                        if stub.library == library.name then
+                            for _, symbol in ipairs(stub.symbols) do
+                                if not exported:find(" " .. symbol .. "\n", 1, true) then
+                                    raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                                end
+                            end
                         end
                     end
                 end)
@@ -167,7 +173,7 @@ if is_plat("iphoneos") then
                     target:add("files", table.unpack(files))
                 end
             end)
-            if library.name == "NetworkBackports" then
+            if library.name == "TLSBackports" then
                 before_build(function (target)
                     local boringssl = target:pkg("boringssl")
                     if not boringssl then
@@ -175,7 +181,7 @@ if is_plat("iphoneos") then
                         for _, pkg in pairs(target:pkgs() or {}) do
                             table.insert(names, tostring(pkg:name()))
                         end
-                        raise("NetworkBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
+                        raise("TLSBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
                               table.concat(table.wrap(target:get("packages")), ","))
                     end
                     target:add("cflags", "-I" .. boringssl:installdir() .. "/include")
