@@ -26,7 +26,6 @@
 #import <WebKitLegacy/DOMElement.h>
 #import "ModernTLSURLProtocol.h"
 #import "WebKitUIKitDelegate.h"
-#import "RevWebViewHostEmbedding.h"
 
 static void hostLog(const char *format, ...)
 {
@@ -172,7 +171,7 @@ static void withWebLock(void (^work)(void))
 - (UITextAutocorrectionType)autocorrectionType { return UITextAutocorrectionTypeNo; }
 @end
 
-@interface RevWebViewHostViewController : UIViewController <UIScrollViewDelegate, WebFrameLoadDelegate, WebKitRootLayerHandler, RevWebViewHostControlling, WebFormDelegate, RevKeyInputConsumer> {
+@interface RevWebViewHostViewController : UIViewController <UIScrollViewDelegate, WebFrameLoadDelegate, WebKitRootLayerHandler, WebFormDelegate, RevKeyInputConsumer> {
     RevKeyInputView *_keyInput;
     WebView *_webView;
     WAKWindow *_wakWindow;
@@ -187,11 +186,6 @@ static void withWebLock(void (^work)(void))
     BOOL _documentGrewBeyondViewport;
     CGFloat _tallestDocumentHeight;
     WebKitUIKitDelegate *_uiKitDelegate;
-    id<RevWebViewHostDelegate> _hostDelegate;
-    CGRect _embeddedFrame;
-    BOOL _useEmbeddedFrame;
-    NSTimer *_progressTimer;
-    NSString *_startURLString;
     DOMHTMLInputElement *_focusedInput;
     UIPanGestureRecognizer *_dragPan;
 }
@@ -201,13 +195,6 @@ static void withWebLock(void (^work)(void))
 
 - (void)loadView
 {
-    if (_useEmbeddedFrame) {
-        UIView *root = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _embeddedFrame.size.width, _embeddedFrame.size.height)];
-        [root setBackgroundColor:[UIColor whiteColor]];
-        [self setView:root];
-        [root release];
-        return;
-    }
     CGRect screen = [[UIScreen mainScreen] bounds];
     CGFloat statusBar = CGRectGetHeight([[UIApplication sharedApplication] statusBarFrame]);
     UIView *root = [[UIView alloc] initWithFrame:
@@ -297,7 +284,7 @@ static void withWebLock(void (^work)(void))
     _viewportSize = bounds.size;
     _documentSize = bounds.size;
     _start = [[NSDate date] retain];
-    NSString *page = [_startURLString length] ? _startURLString : startPage();
+    NSString *page = startPage();
     LOG_STEP("loading %s", [page UTF8String]);
     WebThreadLock();
     [[_webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:page]]];
@@ -329,9 +316,6 @@ static void withWebLock(void (^work)(void))
         return;
     LOG_STEP("committed %.2f s -> %s", -[_start timeIntervalSinceNow],
         [[[[frame dataSource] request] URL] absoluteString].UTF8String ?: "?");
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didUpdateURLString:canGoBack:canGoForward:)])
-        [_hostDelegate webViewHost:self didUpdateURLString:[sender mainFrameURL]
-            canGoBack:[sender canGoBack] canGoForward:[sender canGoForward]];
 
     DOMDocument *doc = [frame DOMDocument];
     DOMElement *root = [doc documentElement];
@@ -353,26 +337,12 @@ static void withWebLock(void (^work)(void))
 {
     if (frame != [sender mainFrame])
         return;
-    [self stopProgressTimer];
-    _progressTimer = [[NSTimer scheduledTimerWithTimeInterval:0.1 target:self
-        selector:@selector(pollLoadProgress) userInfo:nil repeats:YES] retain];
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didStartLoadWithURLString:)])
-        [_hostDelegate webViewHost:self didStartLoadWithURLString:
-            [[[[frame provisionalDataSource] request] URL] absoluteString]];
 }
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
     if (frame != [sender mainFrame])
         return;
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didUpdateTitle:)])
-        [_hostDelegate webViewHost:self didUpdateTitle:title];
-}
-
-- (void)pollLoadProgress
-{
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didUpdateProgress:)])
-        [_hostDelegate webViewHost:self didUpdateProgress:[_webView estimatedProgress]];
 }
 
 - (void)pollCaptchaErrors
@@ -391,13 +361,6 @@ static void withWebLock(void (^work)(void))
     [self performSelector:@selector(pollCaptchaErrors) withObject:nil afterDelay:3.0];
 }
 
-- (void)stopProgressTimer
-{
-    [_progressTimer invalidate];
-    [_progressTimer release];
-    _progressTimer = nil;
-}
-
 - (void)webView:(WebView *)sender didFirstVisuallyNonEmptyLayoutInFrame:(WebFrame *)frame
 {
     if (frame != [sender mainFrame])
@@ -412,14 +375,6 @@ static void withWebLock(void (^work)(void))
         return;
     LOG_STEP("finished %.2f s -> %s", -[_start timeIntervalSinceNow],
         [[sender mainFrameURL] UTF8String] ?: "?");
-    [self stopProgressTimer];
-    if (_hostDelegate) {
-        if ([_hostDelegate respondsToSelector:@selector(webViewHost:didUpdateProgress:)])
-            [_hostDelegate webViewHost:self didUpdateProgress:1.0];
-        if ([_hostDelegate respondsToSelector:@selector(webViewHost:didFinishLoadWithURLString:canGoBack:canGoForward:)])
-            [_hostDelegate webViewHost:self didFinishLoadWithURLString:[sender mainFrameURL]
-                canGoBack:[sender canGoBack] canGoForward:[sender canGoForward]];
-    }
     [self settle];
     if ([[sender mainFrameURL] rangeOfString:@"captcha"].location != NSNotFound)
         [self performSelector:@selector(pollCaptchaErrors) withObject:nil afterDelay:2.0];
@@ -469,17 +424,11 @@ static void withWebLock(void (^work)(void))
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     LOG_STEP("provisional load failed: %s", [[error localizedDescription] UTF8String]);
-    [self stopProgressTimer];
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didFailLoadWithError:)])
-        [_hostDelegate webViewHost:self didFailLoadWithError:error];
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     LOG_STEP("load failed: %s", [[error localizedDescription] UTF8String]);
-    [self stopProgressTimer];
-    if (_hostDelegate && [_hostDelegate respondsToSelector:@selector(webViewHost:didFailLoadWithError:)])
-        [_hostDelegate webViewHost:self didFailLoadWithError:error];
 }
 
 - (void)webView:(WebView *)sender addMessageToConsole:(NSDictionary *)message withSource:(NSString *)source
@@ -694,9 +643,6 @@ static WebEvent *mouseEvent(WebEventType type, CGPoint point)
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     CGPoint offset = [scrollView contentOffset];
-    if ([_hostDelegate respondsToSelector:@selector(webViewHost:didScrollToOffsetY:tracking:)])
-        [_hostDelegate webViewHost:self didScrollToOffsetY:offset.y
-            tracking:([scrollView isTracking] || [scrollView isDragging] || [scrollView isDecelerating])];
     WAKWindow *window = [_wakWindow retain];
     CGRect exposed = CGRectMake(offset.x, offset.y,
         CGRectGetWidth([scrollView bounds]), CGRectGetHeight([scrollView bounds]));
@@ -926,29 +872,6 @@ static WebEvent *mouseEvent(WebEventType type, CGPoint point)
     return _webView;
 }
 
-- (void)setHostDelegate:(id<RevWebViewHostDelegate>)delegate
-{
-    _hostDelegate = delegate;
-}
-
-- (id<RevWebViewHostDelegate>)hostDelegate
-{
-    return _hostDelegate;
-}
-
-- (void)setEmbeddedContentFrame:(CGRect)frame
-{
-    _embeddedFrame = frame;
-    _useEmbeddedFrame = YES;
-}
-
-- (void)setStartURLString:(NSString *)urlString
-{
-    [urlString retain];
-    [_startURLString release];
-    _startURLString = urlString;
-}
-
 - (void)loadURLString:(NSString *)urlString
 {
     NSURL *url = [NSURL URLWithString:urlString];
@@ -995,14 +918,12 @@ static WebEvent *mouseEvent(WebEventType type, CGPoint point)
 
 - (void)dealloc
 {
-    [self stopProgressTimer];
     WebThreadLock();
     [_webView _setUIKitDelegate:nil];
     WebThreadUnlock();
     [_uiKitDelegate setHandler:nil];
     [_uiKitDelegate release];
     [_start release];
-    [_startURLString release];
     [_keyInput resignFirstResponder];
     [_keyInput removeFromSuperview];
     [_keyInput release];

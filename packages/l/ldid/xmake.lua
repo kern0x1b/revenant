@@ -9,11 +9,12 @@ package("ldid")
     end})
     add_versions("2.1.5-procursus7+23.gaf86971", "26be4e97a9c0bf608e1b7b301bf1e51cdb77e6069bf20981f615923cc080b1b1")
     add_patches("2.1.5-procursus7+23.gaf86971", "patches/openssl-4-const-and-opaque-strings.patch")
-    add_deps("revenant@libplist 2.7.0", "revenant@openssl 4.0.2")
+    add_deps("revenant@libplist 2.7.0", {host = true})
+    add_deps("revenant@openssl-host 4.0.2", {host = true})
 
     on_install("@macosx", function (package)
         local cflags, ldflags = {}, {}
-        for _, name in ipairs({"libplist", "openssl"}) do
+        for _, name in ipairs({"libplist", "openssl-host"}) do
             local fetched = package:dep(name):fetch()
             for _, folder in ipairs(fetched.includedirs or fetched.sysincludedirs or {}) do
                 table.insert(cflags, "-I" .. folder)

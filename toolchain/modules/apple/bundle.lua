@@ -64,6 +64,18 @@ function info(target, deployment)
     return content
 end
 
+local function package_frameworks(package, name)
+    local carried = {}
+    for _, folder in ipairs(os.dirs(path.join(package:installdir("bundle"), "Frameworks", "*.framework"))) do
+        local stem = path.basename(folder)
+        local file = path.join(folder, stem)
+        if os.isfile(file) and not os.islink(file) then
+            table.insert(carried, {source = file, name = path.filename(folder) .. "/" .. stem, leaf = stem, folder = folder, package = name})
+        end
+    end
+    return carried
+end
+
 local function package_libraries(target, package, name)
     local libraries = {}
     for _, file in ipairs(os.files(path.join(package:installdir(), "lib", "**.dylib"))) do
@@ -71,14 +83,7 @@ local function package_libraries(target, package, name)
             table.insert(libraries, file)
         end
     end
-    local frameworks = {}
-    for _, directory in ipairs(os.dirs(path.join(package:installdir(), "bundle", "Frameworks", "*.framework"))) do
-        local stem = path.basename(directory)
-        local file = path.join(directory, stem)
-        if os.isfile(file) and not os.islink(file) then
-            table.insert(frameworks, {file = file, name = path.filename(directory) .. "/" .. stem, leaf = stem})
-        end
-    end
+    local frameworks = package_frameworks(package, name)
     if #libraries == 0 and #frameworks == 0 then
         raise("target(%s) bundles the libraries of %s, and it installs no shared library and no framework under bundle/Frameworks", target:name(), name)
     end
@@ -90,7 +95,7 @@ local function package_libraries(target, package, name)
     end
     table.sort(frameworks, function (a, b) return byteorder.less(a.name, b.name) end)
     for _, framework in ipairs(frameworks) do
-        table.insert(carried, {source = framework.file, name = framework.name, leaf = framework.leaf, package = name})
+        table.insert(carried, framework)
     end
     return carried
 end
