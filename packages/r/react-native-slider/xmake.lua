@@ -1,0 +1,22 @@
+package("react-native-slider")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/callstack/react-native-slider")
+    set_description("react-native-slider 5.2.0, the slider view of React Native applications, from its npm tarball: the UISlider-based RNCSlider with the Fabric component view and the shadow node the codegen of the host compiles")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/@react-native-community/slider/-/slider-$(version).tgz")
+    add_versions("5.2.0", "ed4bd124b24f0605d180f73d495823e1562b378c2e6ebaadba0e9be316f74c24")
+    add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "@react-native-community/slider" and manifest.version == "5.2.0", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(manifest.codegenConfig and manifest.codegenConfig.name == "RNCSliderSpec", "react-native-slider has no codegenConfig for RNCSliderSpec")
+        assert(os.isfile(path.join(package:installdir(), "ios", "RNCSliderComponentView.mm")), "RNCSliderComponentView.mm is not installed")
+    end)
