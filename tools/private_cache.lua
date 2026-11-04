@@ -79,6 +79,20 @@ local function target_of(link)
     return os.iorunv("readlink", {link}):trim()
 end
 
+local function rewrite_file(file, roots, folder)
+    local text = io.readfile(file)
+    local changed = text
+    for _, root in ipairs(roots) do
+        changed = replace(changed, root, folder)
+    end
+    if changed == text then
+        return false
+    end
+    os.vrunv("chmod", {"u+w", file})
+    io.writefile(file, changed)
+    return true
+end
+
 local function is_empty(folder)
     return os.iorunv("ls", {"-A", folder}):trim() == ""
 end
@@ -153,13 +167,7 @@ function clone(source, folder)
 
     local cmake = 0
     for _, file in ipairs(cmake_caches(folder)) do
-        local text = io.readfile(file)
-        local changed = text
-        for _, root in ipairs(roots) do
-            changed = replace(changed, root, folder)
-        end
-        if changed ~= text then
-            io.writefile(file, changed)
+        if rewrite_file(file, roots, folder) then
             cmake = cmake + 1
         end
     end
@@ -200,13 +208,7 @@ function repair(folder)
     local roots = roots_of(source)
     local count = 0
     for _, file in ipairs(cmake_caches(folder)) do
-        local text = io.readfile(file)
-        local changed = text
-        for _, root in ipairs(roots) do
-            changed = replace(changed, root, folder)
-        end
-        if changed ~= text then
-            io.writefile(file, changed)
+        if rewrite_file(file, roots, folder) then
             count = count + 1
         end
     end
