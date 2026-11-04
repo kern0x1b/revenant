@@ -106,5 +106,28 @@ const char *tag(void) { return "kUse"; }
     end
     assert(defined == 0, "a marked @dynamic name must define no global")
 
+    local LATE = [==[
+int late_user(void) { return kLate; }
+int kLate = 2;
+int kTwice(void) { return kLate; }
+]==]
+    local late_out, late_renamed = markers.rewrite(LATE, set_of({"kLate"}), set_of({"kLate"}))
+    assert(list_of(set_of(late_renamed)) == "kLate", "kLate must be renamed once")
+    assert(late_out == "\nextern int __revenant_fb_kLate;\nint late_user(void) { return BACKPORT_IMPL(kLate); }\nint BACKPORT_IMPL(kLate) = 2;\nint kTwice(void) { return BACKPORT_IMPL(kLate); }\n",
+        "a use before the definition needs a declaration of the renamed name, got " .. late_out)
+    assert(markers.rewrite(late_out, set_of({"kLate"}), set_of({"kLate"})) == late_out, "the declaration must not be added twice")
+
+    local LATE_ARRAY = "int late_arr(void) { return kArr[0]; }\nint kArr[2] = {1, 2};\n"
+    local array_out = markers.rewrite(LATE_ARRAY, set_of({"kArr"}), set_of({"kArr"}))
+    assert(string.find(array_out, "\nextern int __revenant_fb_kArr[];\nint late_arr", 1, true), "an array needs an array declaration, got " .. array_out)
+
+    local LATE_CLASS = "@implementation Baz\n- (int)m { return kImpl; }\n@end\nint kImpl = 1;\n"
+    local class_out = markers.rewrite(LATE_CLASS, set_of({"kImpl"}), set_of({"kImpl"}))
+    assert(string.find(class_out, "\nextern int __revenant_fb_kImpl;\n@implementation Baz", 1, true), "the declaration goes before the class, got " .. class_out)
+
+    local ordered = "int kDone = 1;\nint use_done(void) { return kDone; }\n"
+    local ordered_out = markers.rewrite(ordered, set_of({"kDone"}), set_of({"kDone"}))
+    assert(not string.find(ordered_out, "extern", 1, true), "a use after the definition needs no declaration, got " .. ordered_out)
+
     print("markers tests passed: 9 definitions renamed, a prototype, a string, a comment, an extern and a variadic left alone; @dynamic and @synthesize names left alone")
 end
