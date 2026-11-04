@@ -3,6 +3,9 @@ package("glslang")
     set_homepage("https://github.com/KhronosGroup/glslang")
     set_description("glslang at b5782e52 (the 1.4.335+0 release of the xmake-repo recipe, glslang 16.1.0 by its own numbering) as static libraries for armv7 iOS 6: the GLSL front end the shader translator compiles ES 3.00 with, patched for the iOS 6 toolchain and the pool allocator")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/KhronosGroup/glslang/archive/b5782e52ee2f7b3e40bb9c80d15b47016e008bc9.tar.gz")
