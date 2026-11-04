@@ -2444,10 +2444,6 @@ function include_directory(out)
     return path.join(out, "include")
 end
 
-local function retargeted_flags(line, target)
-    return (line:gsub("%-target %S+", "-target " .. target, 1):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", ""))
-end
-
 local function photos_armv7_interface(text, target)
     local minimum = target:match("%-apple%-ios(%S+)$") or raise("%s is not an apple-ios target", target)
     local lines, pending, skipping = {}, {}, false
@@ -2470,7 +2466,7 @@ local function photos_armv7_interface(text, target)
             end
             pending = {}
             if line:match("^// swift%-module%-flags: ") then
-                line = retargeted_flags(line, target)
+                line = line:gsub("%-target %S+", "-target " .. target, 1):gsub(" %-enable%-library%-evolution", ""):gsub(" %-library%-level api", "")
             end
             table.insert(lines, line)
         end
@@ -2478,25 +2474,11 @@ local function photos_armv7_interface(text, target)
     return table.concat(lines, "\n") .. "\n"
 end
 
-function foundation_armv7_interface(text, target)
-    local minimum = target:match("%-apple%-ios(%S+)$") or raise("%s is not an apple-ios target", target)
-    local retargeted = text:gsub("(// swift%-module%-flags: [^\n]*)", function (flags)
-        return retargeted_flags(flags, target)
-    end)
-    local result, count = retargeted:gsub("@available%([^\n]*%)\nextension Foundation%.URLSessionWebSocketTask {", function ()
-        return "@available(iOS " .. minimum .. ", *)\nextension Foundation.URLSessionWebSocketTask {"
-    end)
-    if count ~= 1 then
-        raise("the SDK's Foundation interface has %d availability lines before the extension of URLSessionWebSocketTask, not one", count)
-    end
-    return result
-end
-
 local function armv7_overlays(sdk, out, roots, target)
     if not target or not target:match("^armv7%-") then
         return
     end
-    for _, overlay in ipairs({{"Photos", photos_armv7_interface}, {"Foundation", foundation_armv7_interface}}) do
+    for _, overlay in ipairs({{"Photos", photos_armv7_interface}}) do
         local name, lower = overlay[1], overlay[2]
         local dir = path.join(sdk, "System", "Library", "Frameworks", name .. ".framework", "Modules", name .. ".swiftmodule")
         local source = path.join(dir, "arm64e-apple-ios.swiftinterface")
