@@ -14,6 +14,7 @@ package("react-native")
     add_patches("0.86.3", path.join(os.scriptdir(), "patches", "jsi-public-destructors.patch"), "63f43c19a109afeb3bb342bff7c6d904f151e59d4a4b364d421ad20bafa3bd85")
     add_patches("0.86.3", path.join(os.scriptdir(), "patches", "rn-0.86.3-websocket-socketid.patch"), "c1aa7bae07e3b55bfc2a2f7bdfcfbe094c4ad721dd20b730896768a2fc7ff5ce")
     add_patches("0.86.3", path.join(os.scriptdir(), "patches", "jsc-runtime-context-accessor.patch"), "9f0bc2a456e67238c6b0fb4624e010e91b49c3e51079eb9520158fe3b1b12bc5")
+    add_patches("0.86.3", path.join(os.scriptdir(), "patches", "rct-font-system-ui.patch"), "fb9ec0d3704ea589814b23187d05bc684a7286f8a40134694ad6f30107ab3d86")
     add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "7", readonly = true})
 
     on_load("iphoneos", function (package)
