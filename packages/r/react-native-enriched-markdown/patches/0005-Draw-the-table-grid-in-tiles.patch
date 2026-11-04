@@ -1,0 +1,53 @@
+--- a/ios/segments/ENRMTableIOSGridView.m
++++ b/ios/segments/ENRMTableIOSGridView.m
+@@ -1,5 +1,6 @@
+ #import "ENRMTableIOSGridView.h"
+ #import "LinkTapUtils.h"
++#import <QuartzCore/QuartzCore.h>
+ 
+ #if !TARGET_OS_OSX
+ 
+@@ -42,6 +43,13 @@
+   return self;
+ }
+ 
++// A tiled layer draws the grid tile by tile and keeps only the tiles on screen. One backing store for the whole grid
++// took 50 MB at 2x for a table 1232 points wide and 2652 points tall.
+++ (Class)layerClass
++{
++  return [CATiledLayer class];
++}
++
+ #pragma mark - Data
+ 
+ - (void)updateWithRows:(NSArray<ENRMTableIOSRowData *> *)rows
+@@ -91,7 +99,12 @@
+     NSUInteger colCount = MIN(rowData.cellTexts.count, _columnWidths.count);
+     for (NSUInteger c = 0; c < colCount; c++) {
+       CGFloat columnWidth = [_columnWidths[c] doubleValue];
+-      CGRect cellRect = CGRectMake(xOffset, yOffset, columnWidth + _borderWidth, rowHeight + _borderWidth);
++      CGFloat cellX = xOffset;
++      xOffset += columnWidth;
++      CGRect cellRect = CGRectMake(cellX, yOffset, columnWidth + _borderWidth, rowHeight + _borderWidth);
++      // The grid is drawn tile by tile: a cell outside the tile being drawn is drawn by the tile it lies in.
++      if (!CGRectIntersectsRect(cellRect, dirtyRect))
++        continue;
+ 
+       [rowData.backgroundColor setFill];
+       UIRectFill(cellRect);
+@@ -103,14 +116,12 @@
+ 
+       NSAttributedString *text = rowData.cellTexts[c];
+       if (text.length > 0) {
+-        CGRect textRect = CGRectMake(xOffset + _horizontalCellPadding, yOffset + _verticalCellPadding,
++        CGRect textRect = CGRectMake(cellX + _horizontalCellPadding, yOffset + _verticalCellPadding,
+                                      columnWidth - _horizontalCellPadding * 2, rowHeight - _verticalCellPadding * 2);
+         [text drawWithRect:textRect
+                    options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                    context:nil];
+       }
+-
+-      xOffset += columnWidth;
+     }
+     yOffset += rowHeight;
+   }

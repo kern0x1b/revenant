@@ -29,6 +29,31 @@ local RN_PODS = {
     {package = "@react-native-async-storage/async-storage", codegen = "rnasyncstorage"},
     {package = "react-native-keyboard-controller", codegen = "RNKC"},
 }
+
+local C_POD_SOURCES = {
+    ["react-native-enriched-markdown"] = {"cpp/md4c/*.c", "cpp/highlight/vendor/tree-sitter/src/lib.c",
+                                          "cpp/highlight/vendor/grammars/*/parser.c", "cpp/highlight/vendor/grammars/*/scanner.c"},
+}
+
+local POD_MODULES = {
+    ["react-native-enriched-markdown"] = "ReactNativeEnrichedMarkdown",
+}
+
+local flattened = {}
+local function public_headers(root, module)
+    table.insert(flattened, {root = root, module = module})
+    return path.join(inputs, "pod-headers")
+end
+
+local function test_path(relative)
+    for directory in relative:gmatch("([^/]+)/") do
+        if directory:lower():find("^_*tests?_*$") then
+            return true
+        end
+    end
+    return path.filename(relative):find("Tests%.%a+$") ~= nil
+end
+
 if os.getenv("RN_PODS_MORE") then
     for _, pod in ipairs(string.split(os.getenv("RN_PODS_MORE"), ",", {plain = true})) do
         local package, codegen = pod:match("^([^:]+):?(.*)$")
@@ -174,9 +199,34 @@ target("rn-pods-objc")
     end
     local gen = generated
     local added = {}
+    before_build(function ()
+        for _, item in ipairs(flattened) do
+            local out = path.join(inputs, "pod-headers", item.module)
+            os.mkdir(out)
+            local seen = {}
+            for _, file in ipairs(os.files(path.join(item.root, "ios", "**.h"))) do
+                local name = path.filename(file)
+                if seen[name] then
+                    raise("%s has two headers named %s", item.module, name)
+                end
+                seen[name] = true
+                local link = path.join(out, name)
+                os.tryrm(link)
+                os.ln(file, link)
+            end
+        end
+    end)
     for _, pod in ipairs(RN_PODS) do
         local root = expo_dir(pod.package)
         add_includedirs(root)
+        if POD_MODULES[pod.package] then
+            add_includedirs(public_headers(root, POD_MODULES[pod.package]))
+        end
+        for _, glob in ipairs(C_POD_SOURCES[pod.package] or {}) do
+            for _, f in ipairs(os.files(path.join(root, glob))) do
+                add_files(f)
+            end
+        end
         for _, sub in ipairs({"ios", "apple", "common/cpp", "Common/cpp", "Common/NativeView", "cpp"}) do
             local base = path.join(root, sub)
             if os.isdir(base) then
@@ -184,7 +234,7 @@ target("rn-pods-objc")
                     for _, f in ipairs(os.files(path.join(base, ext))) do
                         local key = f:lower()
                         local rel = path.relative(f, root)
-                        if not added[key] and not rel:find("[Tt]est") and not rel:find("Example") and not f:find("WorkletHermesRuntime") and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
+                        if not added[key] and not test_path(rel) and not rel:find("Example") and not f:find("WorkletHermesRuntime") and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
                             added[key] = true
                             add_files(f)
                         end

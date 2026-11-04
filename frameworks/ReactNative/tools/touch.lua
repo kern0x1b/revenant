@@ -1,6 +1,7 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/touch.lua [--before FILE] [--after FILE] [--wait SECONDS] VERB ARGUMENT...
-  sends one command to the touch injector of a running React Native host on the claimed phone and prints its result.
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/touch.lua --bundle-id ID [--before FILE] [--after FILE] [--wait SECONDS] VERB ARGUMENT...
+  sends one command to the touch injector of the React Native host with bundle id ID on the claimed phone and prints its answer.
   VERB is tap X Y | swipe X1 Y1 X2 Y2 [MS] | text STRING | key delete | scroll X Y DY | taptext LABEL | methods CLASS.
+  The command is appended to rnhost.cmd in the host's application folder, and the answer is read from rnhost.cmd.out in its run folder.
   --before and --after take a screenshot of the phone to FILE before the command and after the wait (default 4 seconds).]]
 
 local SPECS = {
@@ -43,15 +44,24 @@ function command(words)
     return table.concat(words, " ")
 end
 
-function script(line)
-    return table.concat({
-        "rm -f /var/tmp/rnhost.cmd.out",
-        "touch /var/tmp/rnhost.cmd",
-        "chmod 666 /var/tmp/rnhost.cmd",
-        "echo '" .. line .. "' > /var/tmp/rnhost.cmd"}, "; ")
+local SHOT = "/usr/libexec/revenant-shot"
+
+function application_name(bundle_id)
+    return bundle_id:match("([^%.]+)$")
 end
 
-local SHOT = "/usr/libexec/revenant-shot"
+function command_file(holder, bundle_id)
+    local name = application_name(bundle_id)
+    return "/var/stash/" .. holder .. "/" .. name .. "/" .. name .. ".app/rnhost.cmd"
+end
+
+function answer_file(bundle_id)
+    return "/var/tmp/" .. application_name(bundle_id) .. "/rnhost.cmd.out"
+end
+
+function send(line, holder, bundle_id)
+    return "rm -f " .. answer_file(bundle_id) .. " && printf '%s\\n' '" .. line .. "' >> " .. command_file(holder, bundle_id)
+end
 
 local function shot(device, settings, file)
     device.run(settings, SHOT .. " /tmp/screenshot.png")
@@ -62,24 +72,31 @@ end
 
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
-    local given, words = shared.arguments({...}, {before = "value", after = "value", wait = "value", help = "switch"})
+    local given, words = shared.arguments({...}, {["bundle-id"] = "value", before = "value", after = "value", wait = "value", help = "switch"})
     if given.help or #words == 0 then
         print(USAGE)
         return
     end
+    if not given["bundle-id"] then
+        raise("touch needs --bundle-id: %s", USAGE)
+    end
     local line = command(words)
     local device = import("@addon.revenant.device", {anonymous = true})
+    local holder = device.holder_name()
+    if not holder then
+        raise("export REVENANT_DEVICE_HOLDER, the name the phone is claimed under")
+    end
     local settings = device.bind(os.curdir())
     if given.before then
         shot(device, settings, path.absolute(given.before))
     end
-    device.run(settings, script(line))
+    device.run(settings, send(line, holder, given["bundle-id"]))
     os.sleep(tonumber(given.wait or "4") * 1000)
     if given.after then
         shot(device, settings, path.absolute(given.after))
     end
     local answer = os.tmpfile()
-    if device.fetch(settings, "/var/tmp/rnhost.cmd.out", answer) then
+    if device.fetch(settings, answer_file(given["bundle-id"]), answer) then
         io.write(io.readfile(answer))
         os.tryrm(answer)
     else

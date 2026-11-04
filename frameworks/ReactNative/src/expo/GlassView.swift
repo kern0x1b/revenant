@@ -1,7 +1,7 @@
 // Copyright 2022-present 650 Industries. All rights reserved.
 
 import ExpoModulesCore
-import React
+internal import React
 
 public final class GlassView: ExpoView {
   private var glassEffect: Any?

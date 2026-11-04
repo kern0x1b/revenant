@@ -67,14 +67,6 @@ public final class StubHardwareKeyboardModule: Module {
   public func definition() -> ModuleDefinition { Name("PaseoHardwareKeyboard") }
 }
 
-public final class StubBackgroundNotificationTasksModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoBackgroundNotificationTasksModule") }
-}
-
-public final class StubBadgeModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoBadgeModule") }
-}
-
 public final class StubCameraModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoCamera") }
 }
@@ -83,38 +75,6 @@ public final class StubImageManipulatorModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoImageManipulator") }
 }
 
-public final class StubNotificationCategoriesModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationCategoriesModule") }
-}
-
-public final class StubNotificationPermissionsModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationPermissionsModule") }
-}
-
-public final class StubNotificationPresenterModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationPresenter") }
-}
-
-public final class StubNotificationSchedulerModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationScheduler") }
-}
-
-public final class StubNotificationsEmitterModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationsEmitter") }
-}
-
-public final class StubNotificationsHandlerModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoNotificationsHandlerModule") }
-}
-
-public final class StubPushTokenManagerModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoPushTokenManager") }
-}
-
 public final class StubSQLiteModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoSQLite") }
-}
-
-public final class StubServerRegistrationModule: Module {
-  public func definition() -> ModuleDefinition { Name("NotificationsServerRegistrationModule") }
 }

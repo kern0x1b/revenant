@@ -2,7 +2,7 @@
 
 import Foundation
 import ExpoModulesCore
-import React
+internal import React
 
 let LOCALE_SETTINGS_CHANGED = "onLocaleSettingsChanged"
 let CALENDAR_SETTINGS_CHANGED = "onCalendarSettingsChanged"

@@ -657,9 +657,9 @@
    "group": "sdk",
    "version": "~57.0.23",
    "native": true,
-   "status": "stub",
+   "status": "partial",
    "verified": "none",
-   "note": "Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
+   "note": "The ten name-only stubs of its modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) were removed from src/expo/StubModules.swift and stubs.json; its real modules are listed in its expo-module.config.json, so the provider now lists them. Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-observe",
@@ -955,8 +955,8 @@
    "version": "1.2.0-nightly-20261014-766fc0e67",
    "native": true,
    "status": "partial",
-   "verified": "none",
-   "note": "Chat markdown. The 160 sources compiled for armv7 iOS 6.0 with five patches. The tree-sitter runtime and the 14 default grammars are vendored from their own packages and compile for armv7; the highlighter's tree-sitter symbols all resolve against them. Not linked into the host yet, the math (RaTeX) part is not vendored, and it is not on the phone."
+   "verified": "phone",
+   "note": "Chat markdown. The 160 sources compiled for armv7 iOS 6.0 with five patches; the tree-sitter runtime and the 14 default grammars are vendored from their own packages and compile for armv7, and the highlighter's tree-sitter symbols all resolve against them. Seen on an iPhone 4S, iOS 6.1.3: the agent's text draws in the Paseo chat, and the markdown probe (frameworks/ReactNative/tests/apps/markdown) draws a heading, a paragraph with bold, italic and a link, a list, a code block and a table grid. Math is the part left out: $$ shows its LaTeX source as text, not a formula, because RaTeX is not vendored in the package and its prebuilt XCFramework has no armv7 slice. A large table (12 columns, 40 rows) is not yet checked on the phone: its tile drawing is patch 0005, not committed."
   },
   {
    "id": "react-native-get-random-values",
@@ -997,20 +997,20 @@
   {
    "id": "react-native-worklets",
    "group": "sdk",
-   "version": "0.10.1",
+   "version": "0.10.4",
    "native": true,
    "status": "real",
    "verified": "phone",
-   "note": "Built."
+   "note": "Built from the 0.10.4 recipe; the Reanimated probe runs its worklets on the UI runtime (see react-native-reanimated)."
   },
   {
    "id": "react-native-reanimated",
    "group": "sdk",
-   "version": "4.5.1",
+   "version": "4.5.5",
    "native": true,
    "status": "real",
    "verified": "phone",
-   "note": "Built; the bottom sheets animate on it."
+   "note": "Built from the 4.5.5 recipe; the bottom sheets animate on it. The Reanimated probe (frameworks/ReactNative/tests/apps/reanimated, commit 626a8680d) ran on an iPhone 4S, iOS 6.1.3, with the stage20 host: a worklet ran on the UI runtime and called back on JS, a withTiming opacity finished in about 295 ms, and a useAnimatedStyle box moved 42 pt."
   },
   {
    "id": "react-native-screens",

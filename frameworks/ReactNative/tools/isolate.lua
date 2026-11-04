@@ -1,16 +1,16 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--pkgdirs name=dir,...] [--log file]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
          --bundle-id or org.revenant.rnhost.<folder name>, so that installs of different workers do not overwrite each other.
   build  builds the host (or another target, for example expo-jsi-probe) from that copy with this checkout's toolchain. Expo packages
          named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.
-         --pkgdirs takes the sources of a named package from a directory (an installed revenant package) instead of the application's.]]
+         The react-native-enriched-markdown sources are the installed package of its recipe (packages/r, patches included), not the application's node_modules copy.]]
 
 local INPUTS = {"app-assets", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "rn-spike-gen", "screens", "unistyles"}
 
-local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view"
+local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view,react-native-enriched-markdown"
 
 local PATCH_MARKERS = {
     {"React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm", 'attributedString.string ?: @""'},
@@ -43,28 +43,9 @@ function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
 end
 
-local C_SOURCE_GLOBS = {
-    ["react-native-enriched-markdown"] = {"cpp/md4c/*.c", "cpp/highlight/vendor/tree-sitter/src/lib.c",
-                                          "cpp/highlight/vendor/grammars/*/parser.c", "cpp/highlight/vendor/grammars/*/scanner.c"},
-}
-
-function pod_c_sources(package)
-    return C_SOURCE_GLOBS[package] or {}
-end
-
-function pod_source_allowed(relative)
-    if relative:find("Example", 1, true) then
-        return false
-    end
-    for directory in relative:gmatch("([^/]+)/") do
-        if directory:lower():find("^_*tests?_*$") then
-            return false
-        end
-    end
-    return path.filename(relative):find("Tests%.%a+$") == nil
-end
-
 local HOST_BUNDLE_ID = "space.kern0x1b.paseo-ios6.rnhost"
+
+local ENRICHED_MARKDOWN = {name = "react-native-enriched-markdown", version = "1.2.0-nightly-20261014-766fc0e67"}
 
 function host_bundle_id(folder, given)
     if given then
@@ -74,10 +55,9 @@ function host_bundle_id(folder, given)
     return "org.revenant.rnhost." .. name
 end
 
-function patched_sources(candidates, read)
-    local found
+function patched_sources(candidates, read, key)
     for _, candidate in ipairs(candidates) do
-        local complete = true
+        local complete = candidate == key
         for _, marker in ipairs(PATCH_MARKERS) do
             local text = read(path.join(candidate, marker[1]))
             if not (text and text:find(marker[2], 1, true)) then
@@ -85,10 +65,10 @@ function patched_sources(candidates, read)
             end
         end
         if complete then
-            found = candidate
+            return candidate
         end
     end
-    return found
+    return nil
 end
 
 function build_environment(options)
@@ -212,25 +192,56 @@ function install_react_native(folder, cache)
         'add_requires("revenant@react-native 0.86.3", {alias = "react-native"})',
         'target("t")',
         '    set_kind("phony")',
-        '    add_packages("react-native")', ""}, "\n"))
+        '    add_packages("react-native")',
+        '    on_config(function (target)',
+        '        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("react-native"):installdir())',
+        '    end)', ""}, "\n"))
+    local installed = path.join(probe, "installdir.txt")
+    os.tryrm(installed)
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
-    return link_react_native(folder, cache)
+    if not os.isfile(installed) then
+        raise("react-native 0.86.3 is not installed from its recipe")
+    end
+    return link_react_native(folder, io.readfile(installed):trim())
 end
 
-function link_react_native(folder, cache)
-    local candidates = os.files(path.join(cache, "xmake-global", ".xmake", "packages", "r", "react-native", "0.86.3", "*", "src", "react-native", "package.json"))
-    local roots = {}
-    for _, file in ipairs(candidates) do
-        table.insert(roots, path.directory(file))
+function install_recipe(folder, cache, name, version)
+    local probe = path.join(folder, "build", "pkg-probe-" .. name)
+    os.mkdir(probe)
+    local installed = path.join(probe, "installdir.txt")
+    os.tryrm(installed)
+    io.writefile(path.join(probe, "xmake.lua"), table.concat({
+        'set_project("pkgprobe")',
+        'set_xmakever("3.1.2")',
+        'add_rules("mode.release")',
+        string.format('add_repositories("revenant %s")', checkout()),
+        string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(checkout(), "toolchain")),
+        'set_config("apple_minimum", "6.0")',
+        'includes("@addon/revenant/apple-ios")',
+        string.format('add_requires("revenant@%s %s", {alias = "%s"})', name, version, name),
+        'target("t")',
+        '    set_kind("phony")',
+        string.format('    add_packages("%s")', name),
+        '    on_config(function (target)',
+        string.format('        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("%s"):installdir())', name),
+        '    end)', ""}, "\n"))
+    os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
+    if not os.isfile(installed) then
+        raise("%s %s is not installed from its recipe", name, version)
     end
-    local sources = patched_sources(roots, function (file)
+    return io.readfile(installed):trim()
+end
+
+function link_react_native(folder, installdir)
+    local sources = path.join(installdir, "src", "react-native")
+    local found = patched_sources({sources}, function (file)
         return os.isfile(file) and io.readfile(file) or nil
-    end)
-    if not sources then
-        raise("the react-native sources with all patches are not installed in %s", cache)
+    end, sources)
+    if not found then
+        raise("the react-native sources of %s do not carry every patch", installdir)
     end
-    os.vrunv("ln", {"-sfn", sources, path.join(folder, "build", "rn-src")})
-    return sources
+    os.vrunv("ln", {"-sfn", found, path.join(folder, "build", "rn-src")})
+    return found
 end
 
 function command_status(arguments, options)
@@ -258,21 +269,23 @@ function build(folder, cache, options)
     folder = path.absolute(folder)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
+    local enriched = install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)
     local env = build_environment({
-        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods, pkgdirs = options.pkgdirs,
+        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods,
+        pkgdirs = ENRICHED_MARKDOWN.name .. "=" .. enriched,
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),
         backports = options.backports or (os.isfile(ci_backports) and ci_backports or nil)
     })
     local log = options.log or path.join(folder, "build", "isolated.log")
-    link_react_native(folder, path.absolute(cache))
+    install_react_native(folder, path.absolute(cache))
     os.cd(folder)
     os.vrunv("sh", {"rn-spike/tools/patch-provider.sh"})
     local xmakew = path.join(checkout(), "xmakew")
     local configured = command_status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
     if configured == 0 then
-        built = command_status({"-c", "\"$1\" build -P \"$2\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log}, {envs = env})
+        built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
     end
     return built or 1, log
 end
@@ -297,7 +310,7 @@ function main(...)
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, pkgdirs = options.pkgdirs, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()
