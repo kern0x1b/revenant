@@ -204,6 +204,7 @@ class AVPlaybackSpeed
 class AVPlayer
 class AVPlayerItem
 class AVPlayerItemVideoOutput
+class AVPlayerLooper
 class AVPlayerMediaSelectionCriteria
 class AVPlayerViewController
 class AVSampleBufferAudioRenderer
@@ -1005,6 +1006,7 @@ class MPSImageAdd
 class MPSImageAreaMax
 class MPSImageAreaMin
 class MPSImageArithmetic
+class MPSImageBilinearScale
 class MPSImageBox
 class MPSImageConversion
 class MPSImageConvolution
@@ -1026,6 +1028,7 @@ class MPSImageMultiply
 class MPSImageNormalizedHistogram
 class MPSImagePyramid
 class MPSImageReduceUnary
+class MPSImageScale
 class MPSImageSobel
 class MPSImageStatisticsMean
 class MPSImageStatisticsMeanAndVariance
@@ -1909,7 +1912,6 @@ class RevenantPhotosStore
 class RevenantPhotosThread
 class RevenantPhotosTransaction
 class RevenantPictureInPictureWindow
-class RevenantPlayerLooper
 class RevenantPopoverState
 class RevenantPostOrderEnumerator
 class RevenantPostOrderInstaller
@@ -2118,7 +2120,9 @@ class SFTranscriptionSegment
 class SKCropNode
 class SKEffectNode
 class SKLabelNode
+class SKMutablePayment
 class SKNode
+class SKPayment
 class SKProduct
 class SKScene
 class SKShapeNode
@@ -4678,6 +4682,7 @@ function RevenantMLCNextLayerID
 function RevenantMLCNextTensorID
 function RevenantMLCStrideOfShape
 function RevenantMLCWidthOfDataType
+function RevenantMPSBilinearResample
 function RevenantMPSImageConcatRows
 function RevenantMPSImageDataTypeOf
 function RevenantMPSImageElementSize
@@ -12610,6 +12615,22 @@ member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -nowPlayingInfo
 member AVPlayerItem -setNowPlayingInfo:
 member AVPlayerItemVideoOutput -initWithOutputSettings:
+member AVPlayerLooper +playerLooperWithPlayer:templateItem:
+member AVPlayerLooper +playerLooperWithPlayer:templateItem:timeRange:
+member AVPlayerLooper -dealloc
+member AVPlayerLooper -disableLooping
+member AVPlayerLooper -error
+member AVPlayerLooper -initWithPlayer:templateItem:timeRange:
+member AVPlayerLooper -loopCount
+member AVPlayerLooper -loopingPlayerItems
+member AVPlayerLooper -observeValueForKeyPath:ofObject:change:context:
+member AVPlayerLooper -revenantBeginLooping
+member AVPlayerLooper -revenantFirstChanged
+member AVPlayerLooper -revenantItemDidPlayToEnd:
+member AVPlayerLooper -revenantMakeCopy
+member AVPlayerLooper -revenantQueueCopy:
+member AVPlayerLooper -revenantStopObservingFirst
+member AVPlayerLooper -status
 member AVPlayerMediaSelectionCriteria +preferredMediaSelectionCriteriaWithPreferredLanguages:preferredMediaCharacteristics:
 member AVPlayerMediaSelectionCriteria +preferredMediaSelectionCriteriaWithPreferredLanguages:preferredMediaCharacteristics:preferredMediaSubTypes:precludedMediaSubTypes:
 member AVPlayerMediaSelectionCriteria -description
@@ -20211,6 +20232,8 @@ member MPSImageArithmetic -RevenantMPSApplyOperation:secondary:
 member MPSImageArithmetic -RevenantMPSCombine:with:
 member MPSImageArithmetic -encodeToCommandBuffer:primaryImage:secondaryImage:destinationImage:
 member MPSImageArithmetic -initWithDevice:
+member MPSImageBilinearScale -encodeToCommandBuffer:sourceImage:destinationImage:
+member MPSImageBilinearScale -encodeToCommandBuffer:sourceTexture:destinationTexture:
 member MPSImageBox -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageBox -initWithDevice:
 member MPSImageBox -initWithDevice:kernelHeight:kernelWidth:
@@ -20315,6 +20338,8 @@ member MPSImageReduceUnary -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageReduceUnary -initWithCoder:device:
 member MPSImageReduceUnary -initWithDevice:
 member MPSImageReduceUnary -revenant_initWithDevice:byColumn:operation:
+member MPSImageScale -scaleTransform
+member MPSImageScale -setScaleTransform:
 member MPSImageSobel -colorTransform
 member MPSImageSobel -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageSobel -initWithDevice:
@@ -27539,22 +27564,6 @@ member RevenantPhotosTransaction -refuseWithReason:
 member RevenantPictureInPictureWindow -revenantController
 member RevenantPictureInPictureWindow -revenant_close:
 member RevenantPictureInPictureWindow -revenant_pan:
-member RevenantPlayerLooper +playerLooperWithPlayer:templateItem:
-member RevenantPlayerLooper +playerLooperWithPlayer:templateItem:timeRange:
-member RevenantPlayerLooper -dealloc
-member RevenantPlayerLooper -disableLooping
-member RevenantPlayerLooper -error
-member RevenantPlayerLooper -initWithPlayer:templateItem:timeRange:
-member RevenantPlayerLooper -loopCount
-member RevenantPlayerLooper -loopingPlayerItems
-member RevenantPlayerLooper -observeValueForKeyPath:ofObject:change:context:
-member RevenantPlayerLooper -revenantBeginLooping
-member RevenantPlayerLooper -revenantFirstChanged
-member RevenantPlayerLooper -revenantItemDidPlayToEnd:
-member RevenantPlayerLooper -revenantMakeCopy
-member RevenantPlayerLooper -revenantQueueCopy:
-member RevenantPlayerLooper -revenantStopObservingFirst
-member RevenantPlayerLooper -status
 member RevenantPopoverState -popover
 member RevenantPopoverState -popoverController:willRepositionPopoverToRect:inView:
 member RevenantPopoverState -popoverControllerDidDismissPopover:
@@ -29169,6 +29178,7 @@ member SKLabelNode -preferredMaxLayoutWidth
 member SKLabelNode -setFontColor:
 member SKLabelNode -text
 member SKLabelNode -verticalAlignmentMode
+member SKMutablePayment -setApplicationUsername:
 member SKNode +node
 member SKNode -addChild:
 member SKNode -alpha
@@ -29220,6 +29230,7 @@ member SKNode -xScale
 member SKNode -yScale
 member SKNode -zPosition
 member SKNode -zRotation
+member SKPayment -applicationUsername
 member SKProduct -subscriptionPeriod
 member SKScene +sceneWithSize:
 member SKScene -anchorPoint
