@@ -1,6 +1,3 @@
-// Builds the Reanimated probe app into one JavaScript bundle for the iOS 6 host, the way tests/bench/build.js builds
-// the benchmark: the app's files are copied into a work folder, its dependencies are installed there, and Metro writes
-// the bundle. Usage: node build.js <work folder> <bundle.js> [default|hermes-stable]
 const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');

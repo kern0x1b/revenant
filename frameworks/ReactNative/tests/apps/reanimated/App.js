@@ -9,16 +9,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-// Every line this screen proves is logged here; the host writes console output to rnhost.log.
 function report(line) {
   console.log('reanimated probe: ' + line);
 }
 
 export default function App() {
-  // (1) A worklet run on the UI runtime, calling back to JS.
-  // (4) useAnimatedStyle: a shared value set on the UI runtime moves a view.
   const offset = useSharedValue(0);
-  // (2) withTiming from 0 to 1 in 300 ms; its callback runs on the UI runtime and reports to JS.
   const opacity = useSharedValue(0);
 
   useEffect(() => {
