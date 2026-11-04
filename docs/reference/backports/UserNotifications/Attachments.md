@@ -4,8 +4,7 @@
 API. Swift code (expo-notifications among them) sees them lowered for an iOS 6 target: they are in
 `frameworks/Backports/tools/lowered-members.txt`, and their Objective-C implementations are in
 `frameworks/Backports/src/UserNotifications/UNNotificationAttachment.m`. The lowering is generated from the source tree
-and the SDK by `frameworks/Backports/tools/lowered_members.lua`. The presentation options typedef is the exception, see
-below.
+and the SDK by `frameworks/Backports/tools/lowered_members.lua`. How a notification is presented is in `Delegate.md`.
 
 ## What the class does
 
@@ -28,17 +27,6 @@ below.
 
 iOS 6 has no notification attachments. A notification scheduled with an attachment is delivered without it: the
 attachment is validated when it is made, and nothing shows it. The thumbnail and clipping options have no effect.
-
-## Open: the presentation options typedef
-
-`UNNotificationPresentationOptions` is not lowered yet, so Swift still sees the SDK's iOS 10 typedef. The generator
-lowers a typedef only when a lowered declaration uses it. Its one user is the delegate method
-`userNotificationCenter:willPresentNotification:withCompletionHandler:`, and a protocol member is lowered only when a
-backport class adopts the protocol and implements that member (`toolchain/modules/apple/lowered.lua`, `protocol_status`,
-`docs/explanation/backports-gaps.md`, the open row about `UIDocumentPickerDelegate`). Nothing in the backport does, so
-the typedef stays out of `lowered-members.txt`. Two ways to close it: lower the delegate members the backport calls
-(a rule change in `toolchain/modules/apple/lowered.lua`, which touches every protocol), or give the backport a class that
-adopts `UNUserNotificationCenterDelegate` with real behaviour. Neither is done here.
 
 ## Checks
 
