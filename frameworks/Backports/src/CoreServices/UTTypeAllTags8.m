@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #include <MobileCoreServices/MobileCoreServices.h>
 #include <stdlib.h>
 
@@ -169,7 +170,7 @@ static CFArrayRef DeclaredTags(CFStringRef inUTI, CFStringRef inTagClass)
     return result;
 }
 
-CFArrayRef UTTypeCopyAllTagsWithClass(CFStringRef inUTI, CFStringRef inTagClass)
+CFArrayRef BACKPORT_IMPL(UTTypeCopyAllTagsWithClass)(CFStringRef inUTI, CFStringRef inTagClass)
 {
     if (!inUTI || !inTagClass || CFGetTypeID(inUTI) != CFStringGetTypeID() || CFGetTypeID(inTagClass) != CFStringGetTypeID())
         return NULL;

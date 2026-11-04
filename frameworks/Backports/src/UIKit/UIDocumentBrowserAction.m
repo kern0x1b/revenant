@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSString *const UIDocumentBrowserErrorDomain = @"UIDocumentBrowserErrorDomain";
+NSString *const BACKPORT_IMPL(UIDocumentBrowserErrorDomain) = @"UIDocumentBrowserErrorDomain";
 
 @interface UIDocumentBrowserAction (RevenantHandler)
 - (void (^)(NSArray<NSURL *> *))revenant_handler;

@@ -2,12 +2,16 @@ package("icu")
     set_homepage("https://icu.unicode.org")
     set_description("ICU as static libraries for armv7 and iOS 6, and for the Mac that tests its data: the prebuilt data archive of the release, cut down with ICU's own icupkg, genrb and derb to the languages its install script lists and without the RBNF and transliteration trees")
     set_license("Unicode-3.0")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/unicode-org/icu/releases/download/release-$(version)/icu4c-$(version)-sources.tgz")
     add_versions("78.3", "3a2e7a47604ba702f345878308e6fefeca612ee895cf4a5f222e7955fabfe0c0")
     add_links("icui18n", "icuuc", "icudata")
     add_defines("U_STATIC_IMPLEMENTATION", "U_DISABLE_RENAMING=1")
+    add_configs("recipe", {description = "The digest of this recipe, so a changed build flag is a different ICU.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     on_load(function (package)
         if package:is_plat("iphoneos") then
@@ -36,7 +40,7 @@ package("icu")
             local flags = "-arch " .. package:arch()
             hostenvs = table.join(hostenvs, {CFLAGS = flags, CXXFLAGS = flags, LDFLAGS = flags})
         end
-        os.vrunv("sh", table.join({configure}, options, package:is_plat("macosx") and {"--prefix=" .. package:installdir()} or {}),
+        os.vrunv("sh", table.join({configure}, options, package:is_plat("macosx") and {"--disable-renaming", "--prefix=" .. package:installdir()} or {}),
                  {curdir = host, envs = hostenvs})
         make(host)
         icu_data.trim(path.join(host, "bin"), archive)

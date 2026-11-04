@@ -51,7 +51,7 @@ Sizes: S is under a day; M is a few days, including a device test; L is a week o
 4. T12 `inheritedAnimationDuration` is always 0 (C, M).
 5. T11 `textInputMode` is nil (C, M).
 6. T18 `usesInterfaceType` is an approximation, and Telegram's cellular decision reads it (C, M).
-7. T13 `PHChange.hasMoves` is NO, and the moves are never enumerated (C, M).
+7. T13 `PHChange.hasMoves` was NO, and the moves were never enumerated (C, M); fixed in a191cfc96, see the T13 row.
 8. T02 `addPresentedHandler:` never calls the block (E, S).
 9. T21 alternate icon: refused with `NSFeatureUnsupportedError` (F, L).
 10. T23 Sign in with Apple: completes with an error (F, L).
@@ -195,12 +195,18 @@ The refusals in `B/Security` (SecAccessControl, SecKey, SharedWebCredentials) ar
 - `B/BackgroundTasks/BGTaskScheduler.m:77-83`: the cancel methods are empty, which is consistent with nothing being stored.
 - `B/AVFoundation/AVAudioUnit.m:53-54`: the base `revenant_applyPendingParameters` is empty; the effect class at `:83-85` overrides it.
 - `B/Metal/RevenantMetalDevice.m:68-86`: `isLowPower`, `isHeadless`, `isRemovable` and `hasUnifiedMemory` are fixed per hardware. `supportsTextureSampleCount:` is computed.
-- `B/Photos/PHChange8.m`: insertions, removals and changes are implemented. Only the moves are not (T13).
+- `B/Photos/PHChange8.m`: insertions, removals, changes and moves are implemented (T13, a191cfc96).
 - `B/Contacts/CNChangeHistory*`: the visitor dispatch is implemented.
 - The `willMoveToView:` and `traitCollectionDidChange:` hooks, and the `UIPresentationController` hooks, are empty defaults.
 - Metal debug markers and optimisation hints are no-ops with no observable effect.
 - Telegram's own gates: `VNRecognizeTextRequest` sits behind `#available(iOS 13.0)` (`ImageContentAnalysis.swift:307`), and `VNDetectRectanglesRequest` behind `@available(iOS 11.0)` (`PGRectangleDetector.m:306-310`). The rectangle request is implemented (`B/Vision/VNHandlers.m:170, 280`), so it is not a finding.
 - `accessibilityIgnoresInvertColors` (24 Telegram files): iOS 6 has no Smart Invert, so no effect is the true answer. Its body was not read.
+
+## Open gaps
+
+Found while linking the engine. Not blocking the engine.
+
+- **IOSurface constants.** `frameworks/Backports/src/IOSurface/IOSurface11_0.m` defines 7 of the 15 `IOSurface` constants that WebCore imports, and all 22 functions. The 8 it lacks are `kIOSurfaceAllocSize`, `kIOSurfaceElementHeight`, `kIOSurfacePlaneBytesPerRow`, `kIOSurfacePlaneHeight`, `kIOSurfacePlaneInfo`, `kIOSurfacePlaneOffset`, `kIOSurfacePlaneSize` and `kIOSurfacePlaneWidth`. Their string values are `IOSurface` plus the suffix, as the 6.1.3 image holds them (`strings` of the extracted image). The engine does not need them from the backport: WebCore links the private IOSurface image directly (`IOSURFACE_LIBRARY` in `frameworks/WebKit/src/compat/stubs/IOSurfacePrivate.tbd`), and that image exports all of them on 6.0 and 6.1.3. The gap matters only to a native app that imports one of the 8 through the backport. The fix is a constant per name in `IOSurface11_0.m`, when a native app needs it.
 
 ## Not verified
 

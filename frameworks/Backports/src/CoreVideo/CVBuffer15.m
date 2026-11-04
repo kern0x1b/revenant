@@ -1,13 +1,14 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-CFDictionaryRef CVBufferCopyAttachments(CVBufferRef buffer, CVAttachmentMode attachmentMode)
+CFDictionaryRef BACKPORT_IMPL(CVBufferCopyAttachments)(CVBufferRef buffer, CVAttachmentMode attachmentMode)
 {
     CFDictionaryRef found = CVBufferGetAttachments(buffer, attachmentMode);
     return found ? CFDictionaryCreateCopy(kCFAllocatorDefault, found) : NULL;
 }
 
-CFTypeRef CVBufferCopyAttachment(CVBufferRef buffer, CFStringRef key, CVAttachmentMode *attachmentMode)
+CFTypeRef BACKPORT_IMPL(CVBufferCopyAttachment)(CVBufferRef buffer, CFStringRef key, CVAttachmentMode *attachmentMode)
 {
     CVAttachmentMode foundMode = kCVAttachmentMode_ShouldNotPropagate;
     CFTypeRef found = CVBufferGetAttachment(buffer, key, &foundMode);
@@ -21,7 +22,7 @@ CFTypeRef CVBufferCopyAttachment(CVBufferRef buffer, CFStringRef key, CVAttachme
     return CFRetain(found);
 }
 
-Boolean CVBufferHasAttachment(CVBufferRef buffer, CFStringRef key)
+Boolean BACKPORT_IMPL(CVBufferHasAttachment)(CVBufferRef buffer, CFStringRef key)
 {
     return CVBufferGetAttachment(buffer, key, NULL) != NULL ? true : false;
 }

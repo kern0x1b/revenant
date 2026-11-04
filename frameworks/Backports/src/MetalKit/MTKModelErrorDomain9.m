@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <MetalKit/MetalKit.h>
 
-NSString *const MTKModelErrorDomain = @"MTKModelErrorDomain";
-NSString *const MTKModelErrorKey = @"MTKModelErrorKey";
+NSString *const BACKPORT_IMPL(MTKModelErrorDomain) = @"MTKModelErrorDomain";
+NSString *const BACKPORT_IMPL(MTKModelErrorKey) = @"MTKModelErrorKey";

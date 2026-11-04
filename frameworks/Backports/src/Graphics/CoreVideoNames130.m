@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 
-const CFStringRef kCVImageBufferAlphaChannelModeKey = CFSTR("AlphaChannelMode");
-const CFStringRef kCVImageBufferAlphaChannelMode_PremultipliedAlpha = CFSTR("PremultipliedAlpha");
-const CFStringRef kCVImageBufferAlphaChannelMode_StraightAlpha = CFSTR("StraightAlpha");
-const CFStringRef kCVMetalTextureStorageMode = CFSTR("MetalTextureStorageMode");
+const CFStringRef BACKPORT_IMPL(kCVImageBufferAlphaChannelModeKey) = CFSTR("AlphaChannelMode");
+const CFStringRef BACKPORT_IMPL(kCVImageBufferAlphaChannelMode_PremultipliedAlpha) = CFSTR("PremultipliedAlpha");
+const CFStringRef BACKPORT_IMPL(kCVImageBufferAlphaChannelMode_StraightAlpha) = CFSTR("StraightAlpha");
+const CFStringRef BACKPORT_IMPL(kCVMetalTextureStorageMode) = CFSTR("MetalTextureStorageMode");

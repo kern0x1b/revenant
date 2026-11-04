@@ -1,6 +1,3 @@
-option("backports_min_ios", {default = "6.0", showmenu = true,
-    description = "The oldest iOS a build supports: the backports hold every member introduced after it, and every member of a framework absent at it."})
-
 if get_config("component") == "Swift" then
     includes("src/Swift")
     return
@@ -26,7 +23,7 @@ if is_plat("iphoneos") then
 end
 
 if is_plat("iphoneos") then
-    local generator
+    local skeleton_generated = false
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
@@ -115,13 +112,19 @@ if is_plat("iphoneos") then
             end
             add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
                                  os.files(path.join(SRC, library.folder, "*.cpp")), os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
-            if library.name == "NetworkBackports" then
+            if library.name == "SecurityBackports" then
+                add_files(os.files(path.join(SRC, "Security", "SecureTransport", "*.m")))
+            end
+            if library.name == "TLSBackports" then
                 after_build(function (target)
-                    local stub = import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
-                    for _, symbol in ipairs(stub.symbols) do
-                        if not exported:find(" " .. symbol .. "\n", 1, true) then
-                            raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                    for _, stub in ipairs(import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()) do
+                        if stub.library == library.name then
+                            for _, symbol in ipairs(stub.symbols) do
+                                if not exported:find(" " .. symbol .. "\n", 1, true) then
+                                    raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                                end
+                            end
                         end
                     end
                 end)
@@ -154,13 +157,13 @@ if is_plat("iphoneos") then
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
             end
-            on_load(function (target)
-                generator = import("generate", {rootdir = TOOLS, anonymous = true})
-            end)
             on_config(function (target)
-                generator.skeleton_for(library.folder)
+                if not skeleton_generated then
+                    os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TOOLS, "generate.lua")})
+                    skeleton_generated = true
+                end
                 local files = {}
-                for _, file in ipairs({path.join(SKELETON, library.folder .. ".m"), path.join(SKELETON, library.folder .. ".c")}) do
+                for _, file in ipairs({path.join(SKELETON, library.folder .. ".m")}) do
                     if os.isfile(file) then
                         table.insert(files, file)
                     end
@@ -170,7 +173,7 @@ if is_plat("iphoneos") then
                     target:add("files", table.unpack(files))
                 end
             end)
-            if library.name == "NetworkBackports" then
+            if library.name == "TLSBackports" then
                 before_build(function (target)
                     local boringssl = target:pkg("boringssl")
                     if not boringssl then
@@ -178,7 +181,7 @@ if is_plat("iphoneos") then
                         for _, pkg in pairs(target:pkgs() or {}) do
                             table.insert(names, tostring(pkg:name()))
                         end
-                        raise("NetworkBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
+                        raise("TLSBackports has no boringssl package attached (pkgs: %s, requires: %s)", table.concat(names, ","),
                               table.concat(table.wrap(target:get("packages")), ","))
                     end
                     target:add("cflags", "-I" .. boringssl:installdir() .. "/include")
@@ -314,13 +317,13 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", usernotifications = "user_notifications_test.lua",
-                                  network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
+                                  network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", constants = "constants_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
-                                  webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkitdocument = "webkit_document_start_test.lua",
+                                  webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkittiling = "webkit_tiling_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",
                                   clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua"})
 end

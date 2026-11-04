@@ -1,14 +1,15 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <dispatch/dispatch.h>
 #import "../RevenantCFRuntime.h"
 #import "RevenantSecAccessControl.h"
 
-const CFStringRef kSecAttrAccessControl = CFSTR("accc");
-const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR("aku");
-const CFStringRef kSecUseOperationPrompt = CFSTR("u_OpPrompt");
-const CFStringRef kSecUseNoAuthenticationUI = CFSTR("u_NoAuthUI");
-const CFStringRef kSecSharedPassword = CFSTR("spwd");
+const CFStringRef BACKPORT_IMPL(kSecAttrAccessControl) = CFSTR("accc");
+const CFStringRef BACKPORT_IMPL(kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly) = CFSTR("aku");
+const CFStringRef BACKPORT_IMPL(kSecUseOperationPrompt) = CFSTR("u_OpPrompt");
+const CFStringRef BACKPORT_IMPL(kSecUseNoAuthenticationUI) = CFSTR("u_NoAuthUI");
+const CFStringRef BACKPORT_IMPL(kSecSharedPassword) = CFSTR("spwd");
 
 struct RevenantAccessControlState {
     CFStringRef protection;
@@ -102,7 +103,7 @@ static BOOL revenant_access_control_flags_are_valid(CFOptionFlags flags)
     return YES;
 }
 
-SecAccessControlRef SecAccessControlCreateWithFlags(CFAllocatorRef allocator, CFTypeRef protection, SecAccessControlCreateFlags flags, CFErrorRef *error)
+SecAccessControlRef BACKPORT_IMPL(SecAccessControlCreateWithFlags)(CFAllocatorRef allocator, CFTypeRef protection, SecAccessControlCreateFlags flags, CFErrorRef *error)
 {
     if (!revenant_access_control_protection_is_valid(protection) || !revenant_access_control_flags_are_valid(flags)) {
         if (error)
@@ -118,7 +119,7 @@ SecAccessControlRef SecAccessControlCreateWithFlags(CFAllocatorRef allocator, CF
     return (SecAccessControlRef)object;
 }
 
-CFTypeID SecAccessControlGetTypeID(void)
+CFTypeID BACKPORT_IMPL(SecAccessControlGetTypeID)(void)
 {
     return revenant_access_control_type();
 }

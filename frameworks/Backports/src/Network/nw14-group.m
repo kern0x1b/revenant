@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_group_descriptor_t nw_group_descriptor_create_multicast(nw_endpoint_t multicast_group)
+nw_group_descriptor_t BACKPORT_IMPL(nw_group_descriptor_create_multicast)(nw_endpoint_t multicast_group)
 {
     RevenantNWEndpointValue *group = (RevenantNWEndpointValue *)multicast_group;
     if (!group)
@@ -12,7 +13,7 @@ nw_group_descriptor_t nw_group_descriptor_create_multicast(nw_endpoint_t multica
     return descriptor;
 }
 
-bool nw_group_descriptor_add_endpoint(nw_group_descriptor_t descriptor, nw_endpoint_t endpoint)
+bool BACKPORT_IMPL(nw_group_descriptor_add_endpoint)(nw_group_descriptor_t descriptor, nw_endpoint_t endpoint)
 {
     RevenantNWGroupDescriptor *value = (RevenantNWGroupDescriptor *)descriptor;
     if (!value || !endpoint)
@@ -24,7 +25,7 @@ bool nw_group_descriptor_add_endpoint(nw_group_descriptor_t descriptor, nw_endpo
     return true;
 }
 
-void nw_group_descriptor_enumerate_endpoints(nw_group_descriptor_t descriptor, nw_group_descriptor_enumerate_endpoints_block_t enumerate_block)
+void BACKPORT_IMPL(nw_group_descriptor_enumerate_endpoints)(nw_group_descriptor_t descriptor, nw_group_descriptor_enumerate_endpoints_block_t enumerate_block)
 {
     RevenantNWGroupDescriptor *value = (RevenantNWGroupDescriptor *)descriptor;
     if (!value || !enumerate_block)
@@ -35,21 +36,21 @@ void nw_group_descriptor_enumerate_endpoints(nw_group_descriptor_t descriptor, n
     }
 }
 
-void nw_multicast_group_descriptor_set_specific_source(nw_group_descriptor_t multicast_descriptor, nw_endpoint_t source)
+void BACKPORT_IMPL(nw_multicast_group_descriptor_set_specific_source)(nw_group_descriptor_t multicast_descriptor, nw_endpoint_t source)
 {
     RevenantNWGroupDescriptor *value = (RevenantNWGroupDescriptor *)multicast_descriptor;
     if (value)
         value->_specificSource = (RevenantNWEndpointValue *)source;
 }
 
-void nw_multicast_group_descriptor_set_disable_unicast_traffic(nw_group_descriptor_t multicast_descriptor, bool disable_unicast_traffic)
+void BACKPORT_IMPL(nw_multicast_group_descriptor_set_disable_unicast_traffic)(nw_group_descriptor_t multicast_descriptor, bool disable_unicast_traffic)
 {
     RevenantNWGroupDescriptor *value = (RevenantNWGroupDescriptor *)multicast_descriptor;
     if (value)
         value->_disableUnicastTraffic = disable_unicast_traffic;
 }
 
-bool nw_multicast_group_descriptor_get_disable_unicast_traffic(nw_group_descriptor_t multicast_descriptor)
+bool BACKPORT_IMPL(nw_multicast_group_descriptor_get_disable_unicast_traffic)(nw_group_descriptor_t multicast_descriptor)
 {
     RevenantNWGroupDescriptor *value = (RevenantNWGroupDescriptor *)multicast_descriptor;
     return value ? value->_disableUnicastTraffic : false;

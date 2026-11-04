@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #include <dlfcn.h>
 #include <pthread.h>
 #include <sys/select.h>
@@ -24,7 +25,7 @@ int revenant_fd_set_in_range(int fd)
     return fd >= 0 && fd < FD_SETSIZE;
 }
 
-REVENANT_LIBSYSTEM_EXPORT int __darwin_check_fd_set_overflow(int fd, const void *set, int strict)
+REVENANT_LIBSYSTEM_EXPORT int BACKPORT_IMPL(__darwin_check_fd_set_overflow)(int fd, const void *set, int strict)
 {
     pthread_once(&system_once, resolve_system_check);
     if (system_check != NULL) {

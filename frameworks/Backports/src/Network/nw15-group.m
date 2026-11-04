@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_group_descriptor_t nw_group_descriptor_create_multiplex(nw_endpoint_t remote_endpoint)
+nw_group_descriptor_t BACKPORT_IMPL(nw_group_descriptor_create_multiplex)(nw_endpoint_t remote_endpoint)
 {
     RevenantNWEndpointValue *remote = (RevenantNWEndpointValue *)remote_endpoint;
     if (!remote)

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantMenus.h"
 #import <objc/runtime.h>
 
@@ -6,11 +7,11 @@
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSString *const UIKeyInputUpArrow = @"UIKeyInputUpArrow";
-NSString *const UIKeyInputDownArrow = @"UIKeyInputDownArrow";
-NSString *const UIKeyInputLeftArrow = @"UIKeyInputLeftArrow";
-NSString *const UIKeyInputRightArrow = @"UIKeyInputRightArrow";
-NSString *const UIKeyInputEscape = @"UIKeyInputEscape";
+NSString *const BACKPORT_IMPL(UIKeyInputUpArrow) = @"UIKeyInputUpArrow";
+NSString *const BACKPORT_IMPL(UIKeyInputDownArrow) = @"UIKeyInputDownArrow";
+NSString *const BACKPORT_IMPL(UIKeyInputLeftArrow) = @"UIKeyInputLeftArrow";
+NSString *const BACKPORT_IMPL(UIKeyInputRightArrow) = @"UIKeyInputRightArrow";
+NSString *const BACKPORT_IMPL(UIKeyInputEscape) = @"UIKeyInputEscape";
 
 static NSString *revenant_modifier_text(NSInteger flags)
 {

@@ -17,8 +17,9 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
+| [The Network framework surface Telegram uses](explanation/backports/network-framework-surface.md) | the Network framework members Telegram 13.0.0 calls and where the backport stands |
+| [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram's use of Photos and where the backport stands |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
-| [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
 | [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |
@@ -33,6 +34,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Carry a framework and order the Backports](guides/toolchain/frameworks-and-link-order.md) | a framework from a package in the bundle, and the Backports libraries before the Swift runtime in an application's link line |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
 | [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
+| [Build libsql for iOS 6](guides/toolchain/libsql.md) | the libsql package for armv7 iOS 6.0: its Rust build with the pinned nightly, the link checks and the test |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
 | [Swift C++ interoperability on iOS 6](guides/toolchain/swift-cxx-interop.md) | the armv7 iOS 6.0 interop mode against the bundled libc++, and the thread-local and std checks |
 | [Working on the toolchain](guides/toolchain/contributing.md) | the contributor guide |
@@ -50,6 +52,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [The os_log fallback](explanation/toolchain/os-log.md) | how a message prints without the Backports runtime: the buffer layout, the privacy rules, and what is still provisional |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
+| [libsql on iOS 6](explanation/toolchain/libsql.md) | why libsql builds the way it does for armv7 iOS 6.0: its shims, its imports and its limits |
 | [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
 ## Emulator
@@ -190,6 +193,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [JavaScriptCore startup on the Paseo bundle](explanation/react-native/jsc-startup.md) | where the nine seconds of `evaluateJavaScript` go on the iPhone 4S: parsing first, then lazy parsing, the collector and the compiler |
 | [JavaScriptCore startup sampler](reference/react-native/jsc-sampler.md) | the native sampler's method, output format, symbolication, the phase and thread numbers and their limits |
 | [SIGBUS from JIT code on the Paseo bundle](reference/react-native/jsc-dfg-fault.md) | the reproduction with lowered tier-up thresholds, the fault record at the JIT pool's end, the DFG-off controls and what is still open |
+| [JavaScriptCore bytecode cache for the host](reference/react-native/jsc-bytecode-cache.md) | the prebuilt engine's JSScript and bytecode-cache API, how the host reaches its context, the build that did not finish, and what is not measured |
 
 ## WebKit
 

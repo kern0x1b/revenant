@@ -35,6 +35,7 @@ local common = {
     {"ENABLE_WEBGPU", "OFF"},
     {"ENABLE_WEBDRIVER", "OFF"},
     {"ENABLE_WEBINSPECTORUI", "OFF"},
+    {"ENABLE_REMOTE_INSPECTOR", "OFF"},
     {"ENABLE_API_TESTS", "OFF"},
     {"ENABLE_TOOLS", "OFF"},
     {"ENABLE_MINIBROWSER", "OFF"},
@@ -106,6 +107,20 @@ local function quoted(text)
     return "\"" .. text:gsub("\\", "/") .. "\""
 end
 
+local function llvm_libtool(package)
+    local tool = path.join(package:dep("llvm"):installdir("bin"), "llvm-libtool-darwin")
+    assert(os.isfile(tool), "the llvm package has no llvm-libtool-darwin, which the engine's LTO bitcode archives are made with")
+    return tool
+end
+
+local function llvm_nm(package)
+    local tool = path.join(package:dep("llvm"):installdir("bin"), "llvm-nm")
+    assert(os.isfile(tool), "the llvm package has no llvm-nm, which the compat audit reads the engine's bitcode with: the libraries config installs it")
+    local major = os.iorunv(tool, {"--version"}):match("LLVM version (%d+)")
+    assert(tonumber(major or 0) >= 23, "the compat audit reads the engine's bitcode with llvm-nm of LLVM 23 or later, and the llvm package's llvm-nm is older")
+    return tool
+end
+
 function options(ctx)
     local chosen = variant(ctx.variant)
     local found = {
@@ -126,9 +141,11 @@ function options(ctx)
         table.insert(found, {option[1], chosen.options[option[1]] or option[2]})
     end
     table.join2(found, {
+        {"CMAKE_LIBTOOL", ctx.libtool},
         {"WEBKIT_IOS6_CRYPTO_LIB", library(ctx.openssl, "crypto")},
         {"WEBKIT_IOS6_COMPAT_LIB", ctx.compat},
         {"WEBKIT_IOS6_EXPORTS", ctx.exports},
+        {"IOSURFACE_LIBRARY", ctx.iosurface},
         {"WEBKIT_IOS6_LIBCXX_DIR", ctx.libcxx},
         {"WebP_INCLUDE_DIR", path.join(ctx.libwebp, "include")},
         {"WebP_LIBRARY", library(ctx.libwebp, "webp")},
@@ -147,9 +164,14 @@ function options(ctx)
     return found
 end
 
+local IOS6_DEFINES = {"WEBKIT_IOS6=1", "ENABLE_UNFAIR_LOCK=0", "ENABLE_OPUS=0", "WEBKIT_IOS6_NO_READLINE", "U_STATIC_IMPLEMENTATION", "U_DISABLE_RENAMING=1"}
+
 function flags(ctx)
     local chosen = variant(ctx.variant)
-    local defines = {"-DWEBKIT_IOS6=1", "-DENABLE_UNFAIR_LOCK=0", "-DWEBKIT_IOS6_NO_READLINE", "-DU_STATIC_IMPLEMENTATION"}
+    local defines = {}
+    for _, define in ipairs(IOS6_DEFINES) do
+        table.insert(defines, "-D" .. define)
+    end
     local cflags = table.join({"-flto=thin", "-mllvm", "-hot-cold-split=false"}, tuning,
                               {"-isystem", ctx.stubs, "-include", path.join(ctx.stubs, chosen.prefix)}, defines)
     local cxxflags = {"-nostdinc++", "-isystem", path.join(ctx.libcxx, "include", "c++", "v1"),
@@ -205,7 +227,11 @@ function write_packages(ctx)
     local include = {
         "find_package(LibXml2 CONFIG REQUIRED)",
         "find_package(LibXslt CONFIG REQUIRED)",
-        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")"
+        "string(APPEND CMAKE_EXE_LINKER_FLAGS \" -Wl,-rpath,@executable_path/Frameworks\")",
+        "add_compile_definitions(" .. table.concat(IOS6_DEFINES, " ") .. ")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-isystem " .. ctx.stubs .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, variant(ctx.variant).prefix) .. ">\")",
+        "add_compile_options(\"$<$<COMPILE_LANGUAGE:OBJC,OBJCXX>:SHELL:-include " .. path.join(ctx.stubs, "ios6_dispatch_compat.h") .. ">\")"
     }
     io.writefile(path.join(dir, "project-include.cmake"), table.concat(include, "\n") .. "\n")
     return dir
@@ -267,14 +293,18 @@ function context(package, build)
     local source = path.join(dir("webkit"), "src")
     local ctx = {
         variant = package:config("variant"),
+        carried = package:config("carried"),
         sdk = chosen:config("sdkdir"),
         arch = package:arch(),
         deployment = chosen:config("deployment"),
         cc = chosen:tool("cc"),
         cxx = chosen:tool("cxx"),
+        libtool = llvm_libtool(package),
+        nm = llvm_nm(package),
         source = source,
         build = build,
         stubs = path.join(member, "compat", "stubs"),
+        iosurface = path.join(member, "compat", "stubs", "IOSurfacePrivate.tbd"),
         libcxx = dir("libcxx"),
         icu = dir("icu"),
         icu_version = package:dep("icu"):version_str(),
@@ -385,6 +415,19 @@ function verify_configured(ctx)
             end
         end
     end
+    local prefix = path.join(ctx.stubs, variant(ctx.variant).prefix)
+    for _, name in ipairs({"CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_OBJC_FLAGS", "CMAKE_OBJCXX_FLAGS"}) do
+        if not (values[name] and values[name].value:find(prefix, 1, true)) then
+            table.insert(problems, string.format("%s does not include %s, so the build directory was configured for another variant", name, prefix))
+        end
+    end
+    if not values.WEBKIT_IOS6_EXPORTS or values.WEBKIT_IOS6_EXPORTS.value ~= ctx.exports then
+        table.insert(problems, string.format("WEBKIT_IOS6_EXPORTS is not %s", ctx.exports))
+    end
+    local iosurface = values.IOSURFACE_LIBRARY and values.IOSURFACE_LIBRARY.value or "unset"
+    if not iosurface:endswith(path.join("compat", "stubs", "IOSurfacePrivate.tbd")) or not os.isfile(iosurface) then
+        table.insert(problems, string.format("IOSURFACE_LIBRARY is %s, not the private compat stub, so WebCore would name the public IOSurface.framework", iosurface))
+    end
     local include = values.CMAKE_PROJECT_WebKit_INCLUDE
     if not include or not os.isfile(include.value) then
         table.insert(problems, "CMAKE_PROJECT_WebKit_INCLUDE is not a file, so find_package was never told to prefer the packages' own configurations")
@@ -450,17 +493,22 @@ function verify_exports(ctx)
     end
 end
 
-local function defined_symbols(files)
+local function defined_symbols(nm, files)
     local found = {}
     for first = 1, #files, 400 do
-        for line in nm({}, table.slice(files, first, first + 399)):gmatch("[^\n]+") do
-            local kind, symbol = line:match("^%x+ ([TDBSC]) (%S+)$")
+        local listing = os.iorunv(nm, table.join({"--defined-only", "-g"}, table.slice(files, first, first + 399)))
+        for line in listing:gmatch("[^\n]+") do
+            local kind, symbol = line:match("^%S+ ([TDBSCWV]) (%S+)$")
             if kind then
                 found[symbol] = true
             end
         end
     end
     return found
+end
+
+local function compiler_block_helper(symbol)
+    return symbol:startswith("___block_descriptor_") or symbol:startswith("___copy_helper_block_") or symbol:startswith("___destroy_helper_block_")
 end
 
 function verify_compat(ctx)
@@ -474,12 +522,12 @@ function verify_compat(ctx)
         raise("no object files under %s to audit the compat library against", ctx.build)
     end
     table.join2(objects, os.files(path.join(ctx.icu, "lib", "*.a")))
-    local stubs = defined_symbols({ctx.compat})
-    local engine = defined_symbols(objects)
+    local stubs = defined_symbols(ctx.nm, {ctx.compat})
+    local engine = defined_symbols(ctx.nm, objects)
     local clash, count, total = {}, 0, 0
     for symbol in pairs(stubs) do
         count = count + 1
-        if engine[symbol] and not symbol:startswith("__OBJC_") then
+        if engine[symbol] and not symbol:startswith("__OBJC_") and not compiler_block_helper(symbol) then
             table.insert(clash, symbol)
         end
     end
@@ -495,9 +543,12 @@ end
 
 function install(package)
     local cmake = toolchain_module("apple.cmake")
-    local build = path.absolute("build")
+    local build = path.absolute("build-" .. package:config("variant"))
     os.mkdir(build)
     local ctx = context(package, build)
+    if ctx.carried == "jsc" and not variant(ctx.variant).prefixed then
+        raise("carried=jsc is the prefixed variant's JavaScriptCore alone: the system variant replaces all three frameworks")
+    end
     import("carry", {rootdir = os.scriptdir(), anonymous = true}).verify(ctx.source)
     compat(package, ctx)
     if variant(ctx.variant).prefixed then
@@ -517,8 +568,11 @@ function install(package)
     table.join2(argv, arguments(ctx))
     os.vrunv(cmake_program(), argv, {envs = environment})
     verify_configured(ctx)
-    build_with(package, build, nil, environment)
-    verify_exports(ctx)
+    local targets = ctx.carried == "jsc" and {"JavaScriptCore"} or nil
+    build_with(package, build, targets, environment)
+    if ctx.carried == "all" then
+        verify_exports(ctx)
+    end
     verify_compat(ctx)
     local stage = import("stage", {rootdir = os.scriptdir(), anonymous = true})
     if variant(ctx.variant).prefixed then

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNWPathMonitor.h"
 
-void nw_path_monitor_prohibit_interface_type(nw_path_monitor_t monitor, nw_interface_type_t interface_type)
+void BACKPORT_IMPL(nw_path_monitor_prohibit_interface_type)(nw_path_monitor_t monitor, nw_interface_type_t interface_type)
 {
     RevenantNWPathMonitor *value = (RevenantNWPathMonitor *)monitor;
     if (!value)

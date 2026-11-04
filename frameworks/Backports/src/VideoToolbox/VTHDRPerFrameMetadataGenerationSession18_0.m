@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -5,9 +6,9 @@
 #include <VideoToolbox/VTErrors.h>
 
 const VTHDRPerFrameMetadataGenerationHDRFormatType
-    kVTHDRPerFrameMetadataGenerationHDRFormatType_DolbyVision = CFSTR("DolbyVision");
+    BACKPORT_IMPL(kVTHDRPerFrameMetadataGenerationHDRFormatType_DolbyVision) = CFSTR("DolbyVision");
 
-CFTypeID VTHDRPerFrameMetadataGenerationSessionGetTypeID(void)
+CFTypeID BACKPORT_IMPL(VTHDRPerFrameMetadataGenerationSessionGetTypeID)(void)
 {
     static CFTypeID type;
     if (!type)
@@ -15,7 +16,7 @@ CFTypeID VTHDRPerFrameMetadataGenerationSessionGetTypeID(void)
     return type;
 }
 
-OSStatus VTHDRPerFrameMetadataGenerationSessionCreate(
+OSStatus BACKPORT_IMPL(VTHDRPerFrameMetadataGenerationSessionCreate)(
     CFAllocatorRef CM_NULLABLE allocator,
     float framesPerSecond,
     CFDictionaryRef CM_NULLABLE options,
@@ -30,7 +31,7 @@ OSStatus VTHDRPerFrameMetadataGenerationSessionCreate(
     return kVTVideoEncoderNotAvailableNowErr;
 }
 
-OSStatus VTHDRPerFrameMetadataGenerationSessionAttachMetadata(
+OSStatus BACKPORT_IMPL(VTHDRPerFrameMetadataGenerationSessionAttachMetadata)(
     VTHDRPerFrameMetadataGenerationSessionRef hdrPerFrameMetadataGenerationSession,
     CVPixelBufferRef pixelBuffer,
     Boolean sceneChange)

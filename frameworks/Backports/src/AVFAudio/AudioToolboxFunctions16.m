@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioComponent.h>
 #import <Foundation/Foundation.h>
 #import <dispatch/dispatch.h>
@@ -12,7 +13,7 @@ static AudioComponentValidationResult RevenantValidateComponent(AudioComponent c
     return kAudioComponentValidationResult_Passed;
 }
 
-OSStatus AudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+OSStatus BACKPORT_IMPL(AudioComponentValidate)(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
                                 AudioComponentValidationResult *outValidationResult)
 {
     if (inComponent == NULL || outValidationResult == NULL) {
@@ -22,7 +23,7 @@ OSStatus AudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inVa
     return noErr;
 }
 
-OSStatus AudioComponentValidateWithResults(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+OSStatus BACKPORT_IMPL(AudioComponentValidateWithResults)(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
                                            void (^inCompletionBlock)(AudioComponentValidationResult, CFDictionaryRef _Nonnull))
 {
     if (inComponent == NULL || inCompletionBlock == nil) {

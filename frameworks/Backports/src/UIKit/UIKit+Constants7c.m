@@ -1,17 +1,18 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSString *const UITransitionContextFromViewControllerKey = @"UITransitionContextFromViewController";
-NSString *const UITransitionContextToViewControllerKey = @"UITransitionContextToViewController";
-NSString *const UIApplicationUserDidTakeScreenshotNotification = @"UIApplicationUserDidTakeScreenshotNotification";
-NSString *const UIApplicationBackgroundRefreshStatusDidChangeNotification = @"UIApplicationBackgroundRefreshStatusDidChangeNotification";
-const NSTimeInterval UIApplicationBackgroundFetchIntervalMinimum = 0;
-const NSTimeInterval UIApplicationBackgroundFetchIntervalNever = DBL_MAX;
-UIActivityType const UIActivityTypePostToFlickr = @"com.apple.UIKit.activity.PostToFlickr";
-UIActivityType const UIActivityTypePostToVimeo = @"com.apple.UIKit.activity.PostToVimeo";
-UIActivityType const UIActivityTypePostToTencentWeibo = @"com.apple.UIKit.activity.TencentWeibo";
-UIActivityType const UIActivityTypeAddToReadingList = @"com.apple.UIKit.activity.AddToReadingList";
+NSString *const BACKPORT_IMPL(UITransitionContextFromViewControllerKey) = @"UITransitionContextFromViewController";
+NSString *const BACKPORT_IMPL(UITransitionContextToViewControllerKey) = @"UITransitionContextToViewController";
+NSString *const BACKPORT_IMPL(UIApplicationUserDidTakeScreenshotNotification) = @"UIApplicationUserDidTakeScreenshotNotification";
+NSString *const BACKPORT_IMPL(UIApplicationBackgroundRefreshStatusDidChangeNotification) = @"UIApplicationBackgroundRefreshStatusDidChangeNotification";
+const NSTimeInterval BACKPORT_IMPL(UIApplicationBackgroundFetchIntervalMinimum) = 0;
+const NSTimeInterval BACKPORT_IMPL(UIApplicationBackgroundFetchIntervalNever) = DBL_MAX;
+UIActivityType const BACKPORT_IMPL(UIActivityTypePostToFlickr) = @"com.apple.UIKit.activity.PostToFlickr";
+UIActivityType const BACKPORT_IMPL(UIActivityTypePostToVimeo) = @"com.apple.UIKit.activity.PostToVimeo";
+UIActivityType const BACKPORT_IMPL(UIActivityTypePostToTencentWeibo) = @"com.apple.UIKit.activity.TencentWeibo";
+UIActivityType const BACKPORT_IMPL(UIActivityTypeAddToReadingList) = @"com.apple.UIKit.activity.AddToReadingList";
 
-CGRect UIAccessibilityConvertFrameToScreenCoordinates(CGRect rect, UIView *view)
+CGRect BACKPORT_IMPL(UIAccessibilityConvertFrameToScreenCoordinates)(CGRect rect, UIView *view)
 {
     UIWindow *window = view.window;
     if (!window)

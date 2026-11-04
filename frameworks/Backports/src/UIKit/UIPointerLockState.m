@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-NSString *const UIPointerLockStateDidChangeNotification = @"UIPointerLockStateDidChangeNotification";
-NSString *const UIPointerLockStateSceneUserInfoKey = @"scene";
+NSString *const BACKPORT_IMPL(UIPointerLockStateDidChangeNotification) = @"UIPointerLockStateDidChangeNotification";
+NSString *const BACKPORT_IMPL(UIPointerLockStateSceneUserInfoKey) = @"scene";
 
 static const char revenant_lock_key;
 

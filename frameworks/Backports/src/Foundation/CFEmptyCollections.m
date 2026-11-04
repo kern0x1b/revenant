@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-__attribute__((visibility("default"))) void *__NSArray0__;
-__attribute__((visibility("default"))) void *__NSDictionary0__;
+__attribute__((visibility("default"))) void *BACKPORT_IMPL(__NSArray0__);
+__attribute__((visibility("default"))) void *BACKPORT_IMPL(__NSDictionary0__);
 
 __attribute__((constructor)) static void revenant_empty_collections(void)
 {

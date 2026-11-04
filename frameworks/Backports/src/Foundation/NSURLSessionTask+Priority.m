@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-const float NSURLSessionTaskPriorityDefault = 0.5f;
-const float NSURLSessionTaskPriorityLow = 0.25f;
-const float NSURLSessionTaskPriorityHigh = 0.75f;
+const float BACKPORT_IMPL(NSURLSessionTaskPriorityDefault) = 0.5f;
+const float BACKPORT_IMPL(NSURLSessionTaskPriorityLow) = 0.25f;
+const float BACKPORT_IMPL(NSURLSessionTaskPriorityHigh) = 0.75f;
 
 static char RevenantPriorityKey;
 

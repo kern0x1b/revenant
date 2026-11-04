@@ -142,9 +142,9 @@ function verify_plists(root, location)
                 checked = checked + 1
                 local missing = {}
                 for _, key in ipairs(table.join(plist_keys, {"CFBundleName"})) do
-                    local value = try { function () return os.iorunv("plutil", {"-extract", key, "json", "-o", "-", plist}) end }
+                    local value = try { function () return os.iorunv("plutil", {"-extract", key, "raw", "-o", "-", plist}) end }
                     local text = value and value:trim() or ""
-                    if text == "" or text == "\"\"" or text == "[]" then
+                    if text == "" or text == "0" then
                         table.insert(missing, key)
                     end
                 end
@@ -223,12 +223,32 @@ function batteries(package, ctx)
     finish(package, signed)
 end
 
+local function carried(ctx)
+    local found = {}
+    for _, framework in ipairs(frameworks) do
+        if ctx.carried == "all" or framework.built == "JavaScriptCore" then
+            table.insert(found, framework)
+        end
+    end
+    return found
+end
+
 function bundle(package, ctx)
+    local deb = path.join(package:installdir(), "deb")
+    os.tryrm(deb)
+    os.mkdir(deb)
+    for _, framework in ipairs(carried(ctx)) do
+        local copied = path.join(deb, framework.built .. ".framework")
+        os.vcp(path.join(ctx.build, framework.built .. ".framework"), deb .. "/")
+        for _, name in ipairs({"Headers", "PrivateHeaders", "Modules", "_CodeSignature"}) do
+            os.tryrm(path.join(copied, name))
+        end
+    end
     local root = path.join(package:installdir(), "bundle")
     os.tryrm(root)
     local folder = path.join(root, "Frameworks")
     local identities, binaries = {}, {}
-    for _, framework in ipairs(frameworks) do
+    for _, framework in ipairs(carried(ctx)) do
         local source = path.join(ctx.build, framework.built .. ".framework")
         local destination = path.join(folder, framework.built .. ".framework")
         os.vcp(source, folder .. "/", {symlink = true})
@@ -249,8 +269,10 @@ function bundle(package, ctx)
     finish(package, binaries)
     local frameworks_dir = path.join(package:installdir(), "frameworks")
     os.tryrm(frameworks_dir)
-    for _, framework in ipairs(frameworks) do
+    for _, framework in ipairs(carried(ctx)) do
         os.vcp(path.join(ctx.build, framework.built .. ".framework"), frameworks_dir .. "/", {symlink = true})
+        local binary = framework.built
+        os.cp(path.join(root, "Frameworks", framework.built .. ".framework", binary), path.join(frameworks_dir, framework.built .. ".framework", binary))
     end
     local headers = package:installdir("include")
     for _, folder_name in ipairs({{"WebKitLegacy", "Headers"}, {"WTF", "Headers"}}) do

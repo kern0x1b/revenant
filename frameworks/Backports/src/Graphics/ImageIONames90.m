@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImagePropertyTIFFTileLength = CFSTR("TileLength");
-const CFStringRef kCGImagePropertyTIFFTileWidth = CFSTR("TileWidth");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyTIFFTileLength) = CFSTR("TileLength");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyTIFFTileWidth) = CFSTR("TileWidth");

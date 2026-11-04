@@ -1,16 +1,17 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/xattr.h>
 
-NSURLResourceKey const NSURLContentTypeKey = @"NSURLContentTypeKey";
-NSURLResourceKey const NSURLFileContentIdentifierKey = @"NSURLFileContentIdentifierKey";
-NSURLResourceKey const NSURLMayShareFileContentKey = @"NSURLMayShareFileContentKey";
-NSURLResourceKey const NSURLMayHaveExtendedAttributesKey = @"NSURLMayHaveExtendedAttributesKey";
-NSURLResourceKey const NSURLIsPurgeableKey = @"NSURLIsPurgeableKey";
-NSURLResourceKey const NSURLIsSparseKey = @"NSURLIsSparseKey";
-NSURLResourceKey const NSURLVolumeSupportsFileProtectionKey = @"NSURLVolumeSupportsFileProtectionKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLContentTypeKey) = @"NSURLContentTypeKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLFileContentIdentifierKey) = @"NSURLFileContentIdentifierKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLMayShareFileContentKey) = @"NSURLMayShareFileContentKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLMayHaveExtendedAttributesKey) = @"NSURLMayHaveExtendedAttributesKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLIsPurgeableKey) = @"NSURLIsPurgeableKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLIsSparseKey) = @"NSURLIsSparseKey";
+NSURLResourceKey const BACKPORT_IMPL(NSURLVolumeSupportsFileProtectionKey) = @"NSURLVolumeSupportsFileProtectionKey";
 
 static NSArray *revenant_resource_keys(void)
 {

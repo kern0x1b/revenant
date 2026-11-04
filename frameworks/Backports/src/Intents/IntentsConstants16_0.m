@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Intents/Intents.h>
 
 
-NSString *const INStartCallIntentIdentifier = @"INStartCallIntent";
+NSString *const BACKPORT_IMPL(INStartCallIntentIdentifier) = @"INStartCallIntent";

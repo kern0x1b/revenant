@@ -1,28 +1,29 @@
+#include "../revenant_impl.h"
 #import "RevenantCMTag26.h"
 #import "RevenantCMTagSupport.h"
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 
-CMTag CMTagMakeWithOSTypeValue( CMTagCategory category, FourCharCode value )
+CMTag BACKPORT_IMPL(CMTagMakeWithOSTypeValue)( CMTagCategory category, FourCharCode value )
 {
     CMTag tag = {category, kCMTagDataType_OSType, (uint32_t)value};
     return tag;
 }
 
-CMTag CMTagMakeWithSInt64Value( CMTagCategory category, int64_t value )
+CMTag BACKPORT_IMPL(CMTagMakeWithSInt64Value)( CMTagCategory category, int64_t value )
 {
     CMTag tag = {category, kCMTagDataType_SInt64, (uint64_t)value};
     return tag;
 }
 
-CMTag CMTagMakeWithFlagsValue( CMTagCategory category, uint64_t value )
+CMTag BACKPORT_IMPL(CMTagMakeWithFlagsValue)( CMTagCategory category, uint64_t value )
 {
     CMTag tag = {category, kCMTagDataType_Flags, value};
     return tag;
 }
 
-CMTag CMTagMakeWithFloat64Value( CMTagCategory category, double value )
+CMTag BACKPORT_IMPL(CMTagMakeWithFloat64Value)( CMTagCategory category, double value )
 {
     uint64_t bits;
     memcpy(&bits, &value, sizeof bits);
@@ -30,27 +31,27 @@ CMTag CMTagMakeWithFloat64Value( CMTagCategory category, double value )
     return tag;
 }
 
-CMTagDataType CMTagGetValueDataType( CMTag tag )
+CMTagDataType BACKPORT_IMPL(CMTagGetValueDataType)( CMTag tag )
 {
     return tag.dataType;
 }
 
-FourCharCode CMTagGetOSTypeValue( CMTag tag )
+FourCharCode BACKPORT_IMPL(CMTagGetOSTypeValue)( CMTag tag )
 {
     return (FourCharCode)(uint32_t)tag.value;
 }
 
-int64_t CMTagGetSInt64Value( CMTag tag )
+int64_t BACKPORT_IMPL(CMTagGetSInt64Value)( CMTag tag )
 {
     return (int64_t)tag.value;
 }
 
-uint64_t CMTagGetFlagsValue( CMTag tag )
+uint64_t BACKPORT_IMPL(CMTagGetFlagsValue)( CMTag tag )
 {
     return tag.value;
 }
 
-double CMTagGetFloat64Value( CMTag tag )
+double BACKPORT_IMPL(CMTagGetFloat64Value)( CMTag tag )
 {
     double value;
     uint64_t bits = tag.value;
@@ -58,27 +59,27 @@ double CMTagGetFloat64Value( CMTag tag )
     return value;
 }
 
-Boolean CMTagEqualToTag( CMTag tag1, CMTag tag2 )
+Boolean BACKPORT_IMPL(CMTagEqualToTag)( CMTag tag1, CMTag tag2 )
 {
     return revenant_tag_equal(tag1, tag2);
 }
 
-Boolean CMTagHasOSTypeValue( CMTag tag )
+Boolean BACKPORT_IMPL(CMTagHasOSTypeValue)( CMTag tag )
 {
     return tag.dataType == kCMTagDataType_OSType;
 }
 
-Boolean CMTagHasSInt64Value( CMTag tag )
+Boolean BACKPORT_IMPL(CMTagHasSInt64Value)( CMTag tag )
 {
     return tag.dataType == kCMTagDataType_SInt64;
 }
 
-Boolean CMTagHasFlagsValue( CMTag tag )
+Boolean BACKPORT_IMPL(CMTagHasFlagsValue)( CMTag tag )
 {
     return tag.dataType == kCMTagDataType_Flags;
 }
 
-Boolean CMTagHasFloat64Value( CMTag tag )
+Boolean BACKPORT_IMPL(CMTagHasFloat64Value)( CMTag tag )
 {
     return tag.dataType == kCMTagDataType_Float64;
 }
@@ -93,7 +94,7 @@ static BOOL revenant_tag_is_nan( CMTag tag )
     return number != number;
 }
 
-CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
+CFComparisonResult BACKPORT_IMPL(CMTagCompare)( CMTag tag1, CMTag tag2 )
 {
     int32_t left = (int32_t)tag1.category, right = (int32_t)tag2.category;
     if ( left != right )
@@ -120,7 +121,7 @@ CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
     return kCFCompareEqualTo;
 }
 
-CFHashCode CMTagHash( CMTag tag )
+CFHashCode BACKPORT_IMPL(CMTagHash)( CMTag tag )
 {
     CFMutableStringRef text = CFStringCreateMutable(NULL, 0);
     char buffer[32];
@@ -131,7 +132,7 @@ CFHashCode CMTagHash( CMTag tag )
     return hash;
 }
 
-CFDictionaryRef CMTagCopyAsDictionary( CMTag tag, CFAllocatorRef allocator )
+CFDictionaryRef BACKPORT_IMPL(CMTagCopyAsDictionary)( CMTag tag, CFAllocatorRef allocator )
 {
     unsigned category = (unsigned)tag.category;
     unsigned dataType = (unsigned)tag.dataType;
@@ -150,7 +151,7 @@ CFDictionaryRef CMTagCopyAsDictionary( CMTag tag, CFAllocatorRef allocator )
     return out;
 }
 
-CMTag CMTagMakeFromDictionary( CFDictionaryRef dict )
+CMTag BACKPORT_IMPL(CMTagMakeFromDictionary)( CFDictionaryRef dict )
 {
     if (!dict || CFGetTypeID(dict) != CFDictionaryGetTypeID())
         return kCMTagInvalid;
@@ -213,7 +214,7 @@ static NSString *revenant_type_text(CMTagDataType type)
     }
 }
 
-CFStringRef CMTagCopyDescription( CFAllocatorRef allocator, CMTag tag )
+CFStringRef BACKPORT_IMPL(CMTagCopyDescription)( CFAllocatorRef allocator, CMTag tag )
 {
     (void)allocator;
     NSString *text;

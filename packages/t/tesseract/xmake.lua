@@ -3,6 +3,9 @@ package("tesseract")
     set_homepage("https://github.com/tesseract-ocr/tesseract")
     set_description("Tesseract 5.5.3, the LSTM text recognizer behind Vision's VNRecognizeTextRequest: the static library without training tools, graphics or the legacy engine")
     set_license("Apache-2.0")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/tesseract-ocr/tesseract.git")

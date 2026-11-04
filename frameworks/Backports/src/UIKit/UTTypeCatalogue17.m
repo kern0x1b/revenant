@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantUTType.h"
 
-UTType *UTTypeAHAP;
+UTType *BACKPORT_IMPL(UTTypeAHAP);
 
 __attribute__((constructor)) static void revenant_uttype_catalog_17(void)
 {

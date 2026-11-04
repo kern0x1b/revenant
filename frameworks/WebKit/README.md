@@ -16,7 +16,10 @@ The port is a member of revenant, built from the top of the checkout:
 ./xmakew f -P . -p iphoneos -a armv7
 ./xmakew -P .
 ./xmakew deb -P .
+./xmakew deb -P frameworks/WebKit/src/platform/safari
 ```
+
+The root writes the compat dylib, TLS and the Settings pane; the loader project writes the loader and the engine, in a package that depends on the first.
 
 The requirements, the whole sequence and the install on the phone are in [build and test](../../docs/guides/webkit/build-and-test.md). The engine is upstream WebKit at a commit of `main` plus the port's patch series, `packages/w/webkit/patches`. Every document is in [the index](../../docs/README.md).
 

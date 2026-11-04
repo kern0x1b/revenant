@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
 
-OSStatus SecTrustEvaluateAsyncWithError(SecTrustRef trust, dispatch_queue_t queue,
+OSStatus BACKPORT_IMPL(SecTrustEvaluateAsyncWithError)(SecTrustRef trust, dispatch_queue_t queue,
                                         SecTrustWithErrorCallback result)
 {
     if (!trust || !result)
@@ -26,4 +27,4 @@ OSStatus SecTrustEvaluateAsyncWithError(SecTrustRef trust, dispatch_queue_t queu
     return errSecSuccess;
 }
 
-const CFStringRef kSecUseDataProtectionKeychain = CFSTR("nleg");
+const CFStringRef BACKPORT_IMPL(kSecUseDataProtectionKeychain) = CFSTR("nleg");

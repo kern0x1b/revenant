@@ -1,27 +1,28 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-const CFStringRef kVTCompressionPropertyKey_CalculateMeanSquaredError = CFSTR("CalculateMeanSquaredError");
-const CFStringRef kVTCompressionPropertyKey_HasLeftStereoEyeView = CFSTR("HasLeftStereoEyeView");
-const CFStringRef kVTCompressionPropertyKey_HasRightStereoEyeView = CFSTR("HasRightStereoEyeView");
-const CFStringRef kVTCompressionPropertyKey_HeroEye = CFSTR("HeroEye");
-const CFStringRef kVTCompressionPropertyKey_HorizontalDisparityAdjustment = CFSTR("HorizontalDisparityAdjustment");
-const CFStringRef kVTCompressionPropertyKey_MVHEVCLeftAndRightViewIDs = CFSTR("MVHEVCLeftAndRightViewIDs");
-const CFStringRef kVTCompressionPropertyKey_MVHEVCVideoLayerIDs = CFSTR("MVHEVCVideoLayerIDs");
-const CFStringRef kVTCompressionPropertyKey_MVHEVCViewIDs = CFSTR("MVHEVCViewIDs");
-const CFStringRef kVTCompressionPropertyKey_MaximumRealTimeFrameRate = CFSTR("MaximumRealTimeFrameRate");
-const CFStringRef kVTCompressionPropertyKey_ProjectionKind = CFSTR("ProjectionKind");
-const CFStringRef kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumDuration = CFSTR("RecommendedParallelizedSubdivisionMinimumDuration");
-const CFStringRef kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumFrameCount = CFSTR("RecommendedParallelizedSubdivisionMinimumFrameCount");
-const CFStringRef kVTCompressionPropertyKey_StereoCameraBaseline = CFSTR("StereoCameraBaseline");
-const CFStringRef kVTCompressionPropertyKey_ViewPackingKind = CFSTR("ViewPackingKind");
-const CFStringRef kVTDecompressionPropertyKey_AllowBitstreamToChangeFrameDimensions = CFSTR("AllowBitstreamToChangeFrameDimensions");
-const CFStringRef kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata = CFSTR("GeneratePerFrameHDRDisplayMetadata");
-const CFStringRef kVTDecompressionPropertyKey_RequestedMVHEVCVideoLayerIDs = CFSTR("RequestedMVHEVCVideoLayerIDs");
-const CFStringRef kVTHDRPerFrameMetadataGenerationOptionsKey_HDRFormats = CFSTR("HDRFormats");
-const CFStringRef kVTMotionEstimationSessionCreationOption_Label = CFSTR("Label");
-const CFStringRef kVTMotionEstimationSessionCreationOption_MotionVectorSize = CFSTR("MotionVectorSize");
-const CFStringRef kVTSampleAttachmentQualityMetricsKey_ChromaBlueMeanSquaredError = CFSTR("ChromaBlueMeanSquaredError");
-const CFStringRef kVTSampleAttachmentQualityMetricsKey_ChromaRedMeanSquaredError = CFSTR("ChromaRedMeanSquaredError");
-const CFStringRef kVTSampleAttachmentQualityMetricsKey_LumaMeanSquaredError = CFSTR("LumaMeanSquaredError");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_CalculateMeanSquaredError) = CFSTR("CalculateMeanSquaredError");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_HasLeftStereoEyeView) = CFSTR("HasLeftStereoEyeView");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_HasRightStereoEyeView) = CFSTR("HasRightStereoEyeView");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_HeroEye) = CFSTR("HeroEye");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_HorizontalDisparityAdjustment) = CFSTR("HorizontalDisparityAdjustment");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_MVHEVCLeftAndRightViewIDs) = CFSTR("MVHEVCLeftAndRightViewIDs");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_MVHEVCVideoLayerIDs) = CFSTR("MVHEVCVideoLayerIDs");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_MVHEVCViewIDs) = CFSTR("MVHEVCViewIDs");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_MaximumRealTimeFrameRate) = CFSTR("MaximumRealTimeFrameRate");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_ProjectionKind) = CFSTR("ProjectionKind");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumDuration) = CFSTR("RecommendedParallelizedSubdivisionMinimumDuration");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumFrameCount) = CFSTR("RecommendedParallelizedSubdivisionMinimumFrameCount");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_StereoCameraBaseline) = CFSTR("StereoCameraBaseline");
+const CFStringRef BACKPORT_IMPL(kVTCompressionPropertyKey_ViewPackingKind) = CFSTR("ViewPackingKind");
+const CFStringRef BACKPORT_IMPL(kVTDecompressionPropertyKey_AllowBitstreamToChangeFrameDimensions) = CFSTR("AllowBitstreamToChangeFrameDimensions");
+const CFStringRef BACKPORT_IMPL(kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata) = CFSTR("GeneratePerFrameHDRDisplayMetadata");
+const CFStringRef BACKPORT_IMPL(kVTDecompressionPropertyKey_RequestedMVHEVCVideoLayerIDs) = CFSTR("RequestedMVHEVCVideoLayerIDs");
+const CFStringRef BACKPORT_IMPL(kVTHDRPerFrameMetadataGenerationOptionsKey_HDRFormats) = CFSTR("HDRFormats");
+const CFStringRef BACKPORT_IMPL(kVTMotionEstimationSessionCreationOption_Label) = CFSTR("Label");
+const CFStringRef BACKPORT_IMPL(kVTMotionEstimationSessionCreationOption_MotionVectorSize) = CFSTR("MotionVectorSize");
+const CFStringRef BACKPORT_IMPL(kVTSampleAttachmentQualityMetricsKey_ChromaBlueMeanSquaredError) = CFSTR("ChromaBlueMeanSquaredError");
+const CFStringRef BACKPORT_IMPL(kVTSampleAttachmentQualityMetricsKey_ChromaRedMeanSquaredError) = CFSTR("ChromaRedMeanSquaredError");
+const CFStringRef BACKPORT_IMPL(kVTSampleAttachmentQualityMetricsKey_LumaMeanSquaredError) = CFSTR("LumaMeanSquaredError");

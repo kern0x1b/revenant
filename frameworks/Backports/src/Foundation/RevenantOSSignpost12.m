@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantOSSignpost.h"
 
-void _os_signpost_emit_with_name_impl(void *dso, os_log_t log, os_signpost_type_t type, os_signpost_id_t spid,
+void BACKPORT_IMPL(_os_signpost_emit_with_name_impl)(void *dso, os_log_t log, os_signpost_type_t type, os_signpost_id_t spid,
                                      const char *name, const char *format, uint8_t *buf, uint32_t size)
 {
     if (spid == OS_SIGNPOST_ID_NULL)

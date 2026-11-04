@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -7,7 +8,7 @@
 nw_establishment_report_t RevenantNWConnectionEstablishmentReport(nw_connection_t connection);
 nw_data_transfer_report_t RevenantNWConnectionDataTransferReport(nw_connection_t connection);
 
-void nw_connection_access_establishment_report(nw_connection_t connection, dispatch_queue_t queue,
+void BACKPORT_IMPL(nw_connection_access_establishment_report)(nw_connection_t connection, dispatch_queue_t queue,
                                                nw_establishment_report_access_block_t access_block)
 {
     if (!connection)
@@ -20,7 +21,7 @@ void nw_connection_access_establishment_report(nw_connection_t connection, dispa
     });
 }
 
-nw_data_transfer_report_t nw_connection_create_new_data_transfer_report(nw_connection_t connection)
+nw_data_transfer_report_t BACKPORT_IMPL(nw_connection_create_new_data_transfer_report)(nw_connection_t connection)
 {
     return connection ? RevenantNWConnectionDataTransferReport(connection) : NULL;
 }

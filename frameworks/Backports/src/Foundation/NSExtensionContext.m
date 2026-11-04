@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSExtensionItemsAndErrorsKey = @"NSExtensionItemsAndErrorsKey";
+NSString *const BACKPORT_IMPL(NSExtensionItemsAndErrorsKey) = @"NSExtensionItemsAndErrorsKey";
 
 @implementation NSExtensionContext
 

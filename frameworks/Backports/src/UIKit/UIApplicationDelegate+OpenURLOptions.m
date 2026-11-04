@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-NSString *const UIApplicationOpenURLOptionsAnnotationKey = @"UIApplicationOpenURLOptionsAnnotationKey";
+NSString *const BACKPORT_IMPL(UIApplicationOpenURLOptionsAnnotationKey) = @"UIApplicationOpenURLOptionsAnnotationKey";
 
 static NSDictionary *revenant_open_options(NSString *source, id annotation)
 {

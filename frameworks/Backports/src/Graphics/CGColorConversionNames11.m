@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGColorConversionTRCSize = CFSTR("kCGColorConversionTRCSize");
+const CFStringRef BACKPORT_IMPL(kCGColorConversionTRCSize) = CFSTR("kCGColorConversionTRCSize");

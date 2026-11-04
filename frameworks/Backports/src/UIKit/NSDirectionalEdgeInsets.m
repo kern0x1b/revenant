@@ -1,13 +1,14 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-const NSDirectionalEdgeInsets NSDirectionalEdgeInsetsZero = {0, 0, 0, 0};
+const NSDirectionalEdgeInsets BACKPORT_IMPL(NSDirectionalEdgeInsetsZero) = {0, 0, 0, 0};
 
-NSString *NSStringFromDirectionalEdgeInsets(NSDirectionalEdgeInsets insets)
+NSString *BACKPORT_IMPL(NSStringFromDirectionalEdgeInsets)(NSDirectionalEdgeInsets insets)
 {
     return NSStringFromUIEdgeInsets(UIEdgeInsetsMake(insets.top, insets.leading, insets.bottom, insets.trailing));
 }
 
-NSDirectionalEdgeInsets NSDirectionalEdgeInsetsFromString(NSString *string)
+NSDirectionalEdgeInsets BACKPORT_IMPL(NSDirectionalEdgeInsetsFromString)(NSString *string)
 {
     UIEdgeInsets edges = UIEdgeInsetsFromString(string);
     return NSDirectionalEdgeInsetsMake(edges.top, edges.left, edges.bottom, edges.right);

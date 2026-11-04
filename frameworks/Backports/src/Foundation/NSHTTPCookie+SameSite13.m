@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSHTTPCookiePropertyKey const NSHTTPCookieSameSitePolicy = @"SameSite";
-NSHTTPCookieStringPolicy const NSHTTPCookieSameSiteLax = @"lax";
-NSHTTPCookieStringPolicy const NSHTTPCookieSameSiteStrict = @"strict";
+NSHTTPCookiePropertyKey const BACKPORT_IMPL(NSHTTPCookieSameSitePolicy) = @"SameSite";
+NSHTTPCookieStringPolicy const BACKPORT_IMPL(NSHTTPCookieSameSiteLax) = @"lax";
+NSHTTPCookieStringPolicy const BACKPORT_IMPL(NSHTTPCookieSameSiteStrict) = @"strict";
 
 static char RevenantCookiePolicyKey;
 

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantLinkPresentation.h"
 
-NSString *const LPErrorDomain = @"LPErrorDomain";
+NSString *const BACKPORT_IMPL(LPErrorDomain) = @"LPErrorDomain";
 
 @implementation LPMetadataProvider {
     RevenantLinkFetch *_fetch;

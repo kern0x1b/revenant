@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSURLFileProtectionComplete = @"NSURLFileProtectionComplete";
-NSString * const NSURLFileProtectionCompleteUnlessOpen = @"NSURLFileProtectionCompleteUnlessOpen";
-NSString * const NSURLFileProtectionCompleteUntilFirstUserAuthentication = @"NSURLFileProtectionCompleteUntilFirstUserAuthentication";
-NSString * const NSURLFileProtectionKey = @"NSURLFileProtectionKey";
-NSString * const NSURLFileProtectionNone = @"NSURLFileProtectionNone";
-NSString * const NSURLIsApplicationKey = @"_NSURLIsApplicationKey";
-NSString * const NSURLUbiquitousSharedItemOwnerNameComponentsKey = @"NSURLUbiquitousSharedItemOwnerNameComponentsKey";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionComplete) = @"NSURLFileProtectionComplete";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionCompleteUnlessOpen) = @"NSURLFileProtectionCompleteUnlessOpen";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionCompleteUntilFirstUserAuthentication) = @"NSURLFileProtectionCompleteUntilFirstUserAuthentication";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionKey) = @"NSURLFileProtectionKey";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionNone) = @"NSURLFileProtectionNone";
+NSString * const BACKPORT_IMPL(NSURLIsApplicationKey) = @"_NSURLIsApplicationKey";
+NSString * const BACKPORT_IMPL(NSURLUbiquitousSharedItemOwnerNameComponentsKey) = @"NSURLUbiquitousSharedItemOwnerNameComponentsKey";

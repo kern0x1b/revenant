@@ -58,3 +58,7 @@ the Hermes path does that with bytecode compiled on the Mac, see [Hermes for the
 The sampler measures the shape, not the exact times. It slows the host by about a quarter while it runs, it takes one
 sample per thread every two milliseconds in turn, and the phase boundaries are only as exact as the moment the sampler
 starts. Read the shares as the proportions of one run, not as a benchmark.
+
+A bytecode cache would remove most of that parsing, but its cold and warm times on this bundle are not measured yet. The
+engine exports the API for it, and the reference page [JavaScriptCore bytecode cache](../../reference/react-native/jsc-bytecode-cache.md)
+records what is known, the build that did not finish, and the risk of loading a cache from a file that another app can write.

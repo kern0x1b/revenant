@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-CALayerCornerCurve const kCACornerCurveCircular = @"circular";
-CALayerCornerCurve const kCACornerCurveContinuous = @"continuous";
+CALayerCornerCurve const BACKPORT_IMPL(kCACornerCurveCircular) = @"circular";
+CALayerCornerCurve const BACKPORT_IMPL(kCACornerCurveContinuous) = @"continuous";
 
 static const char RevenantCornerCurveKey;
 static const char RevenantSquircleMaskKey;

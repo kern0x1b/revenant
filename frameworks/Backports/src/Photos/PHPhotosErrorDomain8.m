@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Photos/Photos.h>
 
-NSErrorDomain const PHPhotosErrorDomain = @"PHPhotosErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(PHPhotosErrorDomain) = @"PHPhotosErrorDomain";

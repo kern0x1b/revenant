@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSString * const NSLocalizedNumberFormatAttributeName = @"NSLocalizedNumberFormat";
+NSString * const BACKPORT_IMPL(NSLocalizedNumberFormatAttributeName) = @"NSLocalizedNumberFormat";
 
 @implementation NSLocalizedNumberFormatRule
 

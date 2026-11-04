@@ -148,6 +148,7 @@ function write(opt)
     os.tryrm(opt.workdir)
     local binaries = stage(libs, root, opt.provided)
     local depends, shared = needs(binaries, opt.packages)
+    table.join2(depends, opt.depends or {})
     local version = release(libs, depends, models)
     place(root, models, licenses)
     for _, binary in ipairs(binaries) do
@@ -174,6 +175,7 @@ function ensure(opt)
         table.insert(targets, target)
     end
     written = write({targets = targets, ldid = opt.ldid, packages = opt.packages, provided = opt.provided, carried = opt.carried,
-                     models = opt.models, licenses = opt.licenses, workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
+                     models = opt.models, licenses = opt.licenses, depends = opt.depends,
+                     workdir = path.join(opt.builddir, "work"), outputdir = opt.builddir})
     return written
 end

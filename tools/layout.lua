@@ -3,7 +3,7 @@ local root = path.absolute(path.directory(os.scriptdir()))
 local layout = {
     top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSES", "REUSE.toml",
            "xmake.lua", "xmakew", "tools", "docs", "toolchain", "packages", "addons", "emulator", "neon", "recompiler",
-           "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
+           "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin",".editorconfig", ".gitattributes",
            ".gitignore"},
     component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "tests", "examples", "tools"},
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
@@ -21,11 +21,11 @@ local addon = {
 
 local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-skills"}
 
-local UNCONVERTED = {}
+local UNCONVERTED = {"webkit-engine"}
 
 local ADDON_PATH = '"toolchain", "' .. "modules" .. '"'
 
-local REACHING = {}
+local REACHING = {"swift-runtime"}
 
 local function set_of(list)
     local set = {}

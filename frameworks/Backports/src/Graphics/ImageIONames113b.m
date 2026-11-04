@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImagePropertyOpenEXRAspectRatio = CFSTR("AspectRatio");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyOpenEXRAspectRatio) = CFSTR("AspectRatio");

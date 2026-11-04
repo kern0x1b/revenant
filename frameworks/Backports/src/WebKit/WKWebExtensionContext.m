@@ -1,16 +1,17 @@
+#include "../revenant_impl.h"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #import "RevenantWebExtension.h"
 
-NSString *const WKWebExtensionContextErrorDomain = @"WKWebExtensionContextErrorDomain";
-NSString *const WKWebExtensionContextPermissionsWereGrantedNotification = @"WKWebExtensionContextPermissionsWereGranted";
-NSString *const WKWebExtensionContextPermissionMatchPatternsWereGrantedNotification = @"WKWebExtensionContextPermissionMatchPatternsWereGranted";
-NSString *const WKWebExtensionContextGrantedPermissionsWereRemovedNotification = @"WKWebExtensionContextGrantedPermissionsWereRemoved";
-NSString *const WKWebExtensionContextDeniedPermissionsWereRemovedNotification = @"WKWebExtensionContextDeniedPermissionsWereRemoved";
-NSString *const WKWebExtensionContextPermissionMatchPatternsWereDeniedNotification = @"WKWebExtensionContextPermissionMatchPatternsWereDenied";
-NSString *const WKWebExtensionContextDeniedPermissionMatchPatternsWereRemovedNotification = @"WKWebExtensionContextDeniedPermissionMatchPatternsWereRemoved";
-NSString *const WKWebExtensionContextErrorsDidUpdateNotification = @"WKWebExtensionContextErrorsDidUpdate";
-NSString *const WKWebExtensionContextNotificationUserInfoKeyPermissions = @"permissions";
-NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"matchPatterns";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextErrorDomain) = @"WKWebExtensionContextErrorDomain";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextPermissionsWereGrantedNotification) = @"WKWebExtensionContextPermissionsWereGranted";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextPermissionMatchPatternsWereGrantedNotification) = @"WKWebExtensionContextPermissionMatchPatternsWereGranted";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextGrantedPermissionsWereRemovedNotification) = @"WKWebExtensionContextGrantedPermissionsWereRemoved";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextDeniedPermissionsWereRemovedNotification) = @"WKWebExtensionContextDeniedPermissionsWereRemoved";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextPermissionMatchPatternsWereDeniedNotification) = @"WKWebExtensionContextPermissionMatchPatternsWereDenied";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextDeniedPermissionMatchPatternsWereRemovedNotification) = @"WKWebExtensionContextDeniedPermissionMatchPatternsWereRemoved";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextErrorsDidUpdateNotification) = @"WKWebExtensionContextErrorsDidUpdate";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextNotificationUserInfoKeyPermissions) = @"permissions";
+NSString *const BACKPORT_IMPL(WKWebExtensionContextNotificationUserInfoKeyMatchPatterns) = @"matchPatterns";
 
 @implementation WKWebExtensionContext {
     __weak WKWebExtension *_webExtension;

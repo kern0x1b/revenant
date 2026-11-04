@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <CoreVideo/CoreVideo.h>
 #include <CoreAudioTypes/CoreAudioTypes.h>
@@ -5,11 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-const CFStringRef kCMSampleBufferAttachmentKey_ForceKeyFrame = CFSTR("ForceKeyFrame");
-const CFStringRef kCMSampleBufferNotificationParameter_OSStatus = CFSTR("OSStatus");
-const CFStringRef kCMSampleBufferNotification_DataFailed = CFSTR("CMSampleBufferDataFailed");
+const CFStringRef BACKPORT_IMPL(kCMSampleBufferAttachmentKey_ForceKeyFrame) = CFSTR("ForceKeyFrame");
+const CFStringRef BACKPORT_IMPL(kCMSampleBufferNotificationParameter_OSStatus) = CFSTR("OSStatus");
+const CFStringRef BACKPORT_IMPL(kCMSampleBufferNotification_DataFailed) = CFSTR("CMSampleBufferDataFailed");
 
-OSStatus CMSampleBufferCreateReady(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
+OSStatus BACKPORT_IMPL(CMSampleBufferCreateReady)(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
                                    CMItemCount numSamples, CMItemCount numSampleTimingEntries, const CMSampleTimingInfo *sampleTimingArray,
                                    CMItemCount numSampleSizeEntries, const size_t *sampleSizeArray, CMSampleBufferRef *sampleBufferOut)
 {
@@ -17,13 +18,13 @@ OSStatus CMSampleBufferCreateReady(CFAllocatorRef allocator, CMBlockBufferRef da
                                 sampleTimingArray, numSampleSizeEntries, sampleSizeArray, sampleBufferOut);
 }
 
-OSStatus CMSampleBufferCreateReadyWithImageBuffer(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, CMVideoFormatDescriptionRef formatDescription,
+OSStatus BACKPORT_IMPL(CMSampleBufferCreateReadyWithImageBuffer)(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, CMVideoFormatDescriptionRef formatDescription,
                                                   const CMSampleTimingInfo *sampleTiming, CMSampleBufferRef *sampleBufferOut)
 {
     return CMSampleBufferCreateForImageBuffer(allocator, imageBuffer, true, NULL, NULL, formatDescription, sampleTiming, sampleBufferOut);
 }
 
-OSStatus CMSampleBufferCallBlockForEachSample(CMSampleBufferRef sbuf, OSStatus (^handler)(CMSampleBufferRef sampleBuffer, CMItemCount index))
+OSStatus BACKPORT_IMPL(CMSampleBufferCallBlockForEachSample)(CMSampleBufferRef sbuf, OSStatus (^handler)(CMSampleBufferRef sampleBuffer, CMItemCount index))
 {
     if (!sbuf || !handler)
         return kCMSampleBufferError_RequiredParameterMissing;
@@ -60,7 +61,7 @@ OSStatus CMSampleBufferCallBlockForEachSample(CMSampleBufferRef sbuf, OSStatus (
     return status;
 }
 
-OSStatus CMAudioSampleBufferCreateReadyWithPacketDescriptions(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
+OSStatus BACKPORT_IMPL(CMAudioSampleBufferCreateReadyWithPacketDescriptions)(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
                                                              CMItemCount numSamples, CMTime presentationTimeStamp,
                                                              const AudioStreamPacketDescription *packetDescriptions, CMSampleBufferRef *sampleBufferOut)
 {

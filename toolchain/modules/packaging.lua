@@ -167,6 +167,13 @@ function write(opt)
         for _, owned in ipairs(described.shared) do
             carry(owned, signer)
         end
+        if platform.project_links_webkit() then
+            local engine = platform.webkit_engine_deb(signer)
+            carry(engine, signer)
+            for _, owned in ipairs(engine.shared) do
+                carry(owned, signer)
+            end
+        end
     end
     if #written == 0 then
         raise("no target names a control file with set_values(\"revenant.control\", ...), so there is no package to write")

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 #include <math.h>
 
@@ -15,7 +16,7 @@ static void revenant_sincos(CGFloat angle, CGFloat *sine, CGFloat *cosine)
     *cosine = pair.cosine;
 }
 
-CGAffineTransformComponents CGAffineTransformDecompose(CGAffineTransform transform)
+CGAffineTransformComponents BACKPORT_IMPL(CGAffineTransformDecompose)(CGAffineTransform transform)
 {
     CGFloat a = transform.a, b = transform.b, c = transform.c, d = transform.d;
     CGFloat length = hypot(a, b);
@@ -51,7 +52,7 @@ CGAffineTransformComponents CGAffineTransformDecompose(CGAffineTransform transfo
     return components;
 }
 
-CGAffineTransform CGAffineTransformMakeWithComponents(CGAffineTransformComponents components)
+CGAffineTransform BACKPORT_IMPL(CGAffineTransformMakeWithComponents)(CGAffineTransformComponents components)
 {
     CGFloat sx = components.scale.width, sy = components.scale.height, shear = components.horizontalShear;
     CGFloat cosine = cos(components.rotation), sine = sin(components.rotation);

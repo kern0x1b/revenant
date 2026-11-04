@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantShear.h"
 
-vImage_Error vImageHorizontalShear_Planar16S(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageHorizontalShear_Planar16S)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float horizontalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16S backColor, vImage_Flags flags)
 {
@@ -16,7 +17,7 @@ vImage_Error vImageHorizontalShear_Planar16S(const vImage_Buffer *src, const vIm
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageHorizontalShear_Planar16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageHorizontalShear_Planar16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float horizontalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16U backColor, vImage_Flags flags)
 {
@@ -31,7 +32,7 @@ vImage_Error vImageHorizontalShear_Planar16U(const vImage_Buffer *src, const vIm
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageVerticalShear_Planar16S(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageVerticalShear_Planar16S)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float verticalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16S backColor, vImage_Flags flags)
 {
@@ -46,7 +47,7 @@ vImage_Error vImageVerticalShear_Planar16S(const vImage_Buffer *src, const vImag
                           srcOffsetToROI_Y, back, flags);
 }
 
-vImage_Error vImageVerticalShear_Planar16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
+vImage_Error BACKPORT_IMPL(vImageVerticalShear_Planar16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImagePixelCount srcOffsetToROI_X,
                    vImagePixelCount srcOffsetToROI_Y, float verticalTranslate, float shearSlope,
                    ResamplingFilter filter, const Pixel_16U backColor, vImage_Flags flags)
 {

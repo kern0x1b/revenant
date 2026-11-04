@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
 #define VTIsHardwareDecodeSupported RevenantVTIsHardwareDecodeSupported
 #endif
@@ -14,7 +15,7 @@ static void RevenantVTIgnoreFrame(void *refcon, void *frameRefcon, OSStatus stat
 {
 }
 
-Boolean VTIsHardwareDecodeSupported(CMVideoCodecType codecType)
+Boolean BACKPORT_IMPL(VTIsHardwareDecodeSupported)(CMVideoCodecType codecType)
 {
     if (codecType != kCMVideoCodecType_H264)
         return false;

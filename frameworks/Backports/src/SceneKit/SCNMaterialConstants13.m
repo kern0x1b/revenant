@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNLightingModel const SCNLightingModelShadowOnly = @"SCNLightingModelShadowOnly";
+SCNLightingModel const BACKPORT_IMPL(SCNLightingModelShadowOnly) = @"SCNLightingModelShadowOnly";

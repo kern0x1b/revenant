@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-bool CGColorSpaceUsesITUR_2100TF(CGColorSpaceRef space)
+bool BACKPORT_IMPL(CGColorSpaceUsesITUR_2100TF)(CGColorSpaceRef space)
 {
     if (!space)
         return false;

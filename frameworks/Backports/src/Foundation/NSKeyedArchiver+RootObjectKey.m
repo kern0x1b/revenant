@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSKeyedArchiveRootObjectKey = @"root";
+NSString * const BACKPORT_IMPL(NSKeyedArchiveRootObjectKey) = @"root";

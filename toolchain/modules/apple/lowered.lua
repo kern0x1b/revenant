@@ -670,6 +670,7 @@ end
 local function scan_source(file, found)
     local container, pending = nil, nil
     for line in io.readfile(file):gmatch("[^\n]*") do
+        line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
         local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
         if class then
             container = class
@@ -775,30 +776,21 @@ local function directive_end(text, at)
     return stop
 end
 
+local function last_plain(window, plain)
+    return window:match("^.*()" .. plain:gsub("%p", "%%%0"))
+end
+
 local function statement_start(text, at, quiet, past_directives)
     local low = math.max(1, at - WINDOW)
     local window = text:sub(low, at - 1)
     local best = nil
     for _, boundary in ipairs(BOUNDARIES) do
-        local i = 1
-        while true do
-            local _, stop = window:find(boundary, i, true)
-            if not stop then
-                break
-            end
-            best = math.max(best or 0, low + stop)
-            i = stop + 1
+        local start = last_plain(window, boundary)
+        if start then
+            best = math.max(best or 0, low + start + #boundary - 1)
         end
     end
-    local directive, i = nil, 1
-    while true do
-        local found = window:find("\n#", i, true)
-        if not found then
-            break
-        end
-        directive = found
-        i = found + 1
-    end
+    local directive = last_plain(window, "\n#")
     if directive and not past_directives then
         best = math.max(best or 0, directive_end(text, low + directive) + 1)
     end
@@ -1229,6 +1221,22 @@ local function find_outside_comments(text, pattern, position, spans)
     end
 end
 
+local function inline_definition(text, start, hit, stop, spans)
+    local _, specifier_stop = text:find("^%s*static%s+inline", start)
+    if not specifier_stop or text:find("^%s*%(%(", hit.position + #hit.word) then
+        return nil
+    end
+    local open = find_outside_comments(text, "{", hit.position, spans)
+    if not open or open > stop then
+        return nil
+    end
+    local _, close = text:find("%b{}", open)
+    if not close then
+        return nil
+    end
+    return text:find("static", start, true), specifier_stop, open, close
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local spans = comment_spans(text)
@@ -1380,8 +1388,16 @@ local function lowering_of(text, implemented, declarations)
             local start = statement_start(text, hit.position, true)
             local stop = statement_end(text, hit.position)
             local segment = start and text:sub(start, stop) or ""
-            if start and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
-                lower(start, stop)
+            if start and not segment:find("\n%s*#") then
+                local specifier_start, specifier_stop, open, close = inline_definition(text, start, hit, stop, spans)
+                if specifier_start then
+                    table.insert(ranges, {start = specifier_start, stop = specifier_stop, remove = true})
+                    lower(specifier_stop + 1, open - 1)
+                    table.insert(ranges, {start = open, stop = open - 1, before = ";"})
+                    table.insert(ranges, {start = open, stop = close, remove = true})
+                elseif not segment:find("{", 1, true) then
+                    lower(start, stop)
+                end
             end
         end
     end
@@ -2113,6 +2129,7 @@ function constants_defined_in(src)
         for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
                 for line in io.readfile(file):gmatch("[^\n]*") do
+                    line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
                     local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
                         or line:match("const%s+[%w_]+%s*%*%s*([%a_][%w_]*)%s*=")
                         or line:match("^[%a_][%w_]*%s*%*%s*([%a_][%w_]*)%s*[;=]")
@@ -2296,6 +2313,33 @@ function third_party_modules(text)
     return modules
 end
 
+local function built_into(sdk, folder, digest, set, mapped, modules, target)
+    os.mkdir(folder)
+    local stamp = path.join(folder, "input.digest")
+    local vfs = path.join(folder, "vfs.yaml")
+    local marked = digest .. "\n" .. folder
+    if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == marked) then
+        vfs = build_overlay(sdk, folder, set or read_all_members(), mapped, modules or {}, target)
+        io.writefile(stamp, marked)
+    end
+    return vfs
+end
+
+local function shared_folder(digest)
+    return path.join(import("@addon.revenant.cache", {anonymous = true}).root(), "lowered", digest)
+end
+
+local function linked(out, shared)
+    if os.islink(out) then
+        if os.readlink(out) == shared then
+            return
+        end
+        os.rm(out)
+    end
+    os.mkdir(path.directory(out))
+    os.ln(shared, out)
+end
+
 function overlay(sdk, out, set, subtrees, modules, target)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
@@ -2304,14 +2348,24 @@ function overlay(sdk, out, set, subtrees, modules, target)
     if built[key] then
         return built[key]
     end
-    os.mkdir(out)
-    local stamp = path.join(out, "input.digest")
     local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed .. (target or ""))
-    local vfs = path.join(out, "vfs.yaml")
-    if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == digest) then
-        vfs = build_overlay(sdk, out, set or read_all_members(), mapped, modules or {}, target)
-        io.writefile(stamp, digest)
+    local shared = shared_folder(digest)
+    os.mkdir(path.directory(shared))
+    local lock = io.openlock(path.join(path.directory(shared), "overlay.lock"))
+    if not lock then
+        raise("cannot lock the shared overlay folder %s", shared)
     end
+    lock:lock()
+    local vfs
+    if os.isdir(out) and not os.islink(out) then
+        vfs = built_into(sdk, out, digest, set, mapped, modules, target)
+    else
+        built_into(sdk, shared, digest, set, mapped, modules, target)
+        linked(out, shared)
+        vfs = path.join(out, "vfs.yaml")
+    end
+    lock:unlock()
+    lock:close()
     built[key] = vfs
     return vfs
 end

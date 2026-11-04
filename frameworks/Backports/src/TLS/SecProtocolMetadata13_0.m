@@ -1,0 +1,34 @@
+#include "../revenant_impl.h"
+#import <Foundation/Foundation.h>
+#import <Security/SecProtocolTypes.h>
+#import <Security/SecProtocolMetadata.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <dispatch/dispatch.h>
+#import "RevenantSecProtocolMetadata.h"
+
+@implementation RevenantSecProtocolMetadata
+@synthesize negotiatedVersion = _negotiatedVersion;
+@synthesize negotiatedCipherSuite = _negotiatedCipherSuite;
+@synthesize negotiatedProtocol = _negotiatedProtocol;
+@synthesize ocspResponse = _ocspResponse;
+@end
+
+tls_protocol_version_t BACKPORT_IMPL(sec_protocol_metadata_get_negotiated_tls_protocol_version)(
+    sec_protocol_metadata_t metadata)
+{
+    return ((RevenantSecProtocolMetadata *)metadata).negotiatedVersion;
+}
+
+tls_ciphersuite_t BACKPORT_IMPL(sec_protocol_metadata_get_negotiated_tls_ciphersuite)(sec_protocol_metadata_t metadata)
+{
+    return ((RevenantSecProtocolMetadata *)metadata).negotiatedCipherSuite;
+}
+
+bool BACKPORT_IMPL(sec_protocol_metadata_access_pre_shared_keys)(sec_protocol_metadata_t metadata,
+                                                  void (^handler)(dispatch_data_t psk,
+                                                                  dispatch_data_t psk_identity))
+{
+    (void)metadata;
+    (void)handler;
+    return false;
+}

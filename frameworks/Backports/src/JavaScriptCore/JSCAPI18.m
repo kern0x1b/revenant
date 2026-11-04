@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import "JSInternal.h"
 #import "../RevenantSayOnce.h"
 
 
-void JSGlobalContextSetInspectable(JSGlobalContextRef context, bool inspectable)
+void BACKPORT_IMPL(JSGlobalContextSetInspectable)(JSGlobalContextRef context, bool inspectable)
 {
     (void)context;
     (void)inspectable;
@@ -11,7 +12,7 @@ void JSGlobalContextSetInspectable(JSGlobalContextRef context, bool inspectable)
                        @"Inspector deciding whether it may attach, and this port carries none.");
 }
 
-bool JSGlobalContextIsInspectable(JSGlobalContextRef context)
+bool BACKPORT_IMPL(JSGlobalContextIsInspectable)(JSGlobalContextRef context)
 {
     (void)context;
     return false;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-const NSTimeInterval LATouchIDAuthenticationMaximumAllowableReuseDuration = 300;
+const NSTimeInterval BACKPORT_IMPL(LATouchIDAuthenticationMaximumAllowableReuseDuration) = 300;

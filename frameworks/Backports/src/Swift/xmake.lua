@@ -121,6 +121,30 @@ target("TipKit")
         end
     end)
 
+target("UniformTypeIdentifiers")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_values("swift.flags", "-module-link-name", "UniformTypeIdentifiers")
+    set_values("swift.cxx_interop", "off")
+    add_frameworks("Foundation", "CoreFoundation", "MobileCoreServices")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "UniformTypeIdentifiers", "*.swift"))
+    end)
+
+target("Translation")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_packages("swiftui")
+    add_values("swift.flags", "-module-link-name", "Translation")
+    set_values("swift.cxx_interop", "off")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "Translation", "*.swift"))
+    end)
+
 local function open_gap(name, cause)
     before_build(function (target)
         local toolchain = target:toolchain("apple-ios")
@@ -140,6 +164,17 @@ target("WidgetKit")
     set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
+    end)
+
+target("IOSurface")
+    set_kind("static")
+    set_default(false)
+    add_rules("@addon/revenant/swift")
+    add_values("swift.flags", "-module-link-name", "IOSurface")
+    set_values("swift.cxx_interop", "off")
+    set_optimize("fastest")
+    on_load(function (target)
+        target:add("files", path.join(SRC, "IOSurface", "*.swift"))
     end)
 
 local function createml(name, folder, deps, flags, gap)
@@ -265,12 +300,21 @@ local function overlay(name, folder, opt)
         end)
         on_config(function (target)
             if opt.stub then
-                local stub = import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
-                io.writefile(path.join(folder, "lib" .. stub.library .. ".tbd"), stub_text(stub))
+                local tbds = {}
+                for _, entry in ipairs(import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()) do
+                    local file = path.join(folder, "lib" .. entry.library .. ".tbd")
+                    local text = stub_text(entry)
+                    if not os.isfile(file) or io.readfile(file) ~= text then
+                        io.writefile(file, text)
+                    end
+                    table.insert(tbds, file)
+                    target:add("links", entry.library)
+                end
                 target:add("linkdirs", folder)
-                target:add("links", stub.library)
+                target:data_set("linkdepfiles", tbds)
+                target:add("values", "swift.inputs", path.join(SWIFT_DIR, opt.stub .. ".lua"))
             end
             if opt.generate then
                 local folder = path.join(target:autogendir(), "spatial")
@@ -315,15 +359,13 @@ overlay("swiftSpatial", "Spatial", {generate = generate_spatial})
 
 overlay("swiftCloudKit", "CloudKit", {})
 
-overlay("swiftIOSurface", "IOSurface", {})
-
 overlay("swiftWeatherKit", "WeatherKit", {})
 
 overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {"MobileCoreServices"}})
 
 overlay("swiftCryptoKit", "CryptoKit", {packages = {"swift-crypto"}})
 
-overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = {"RevenantTLS", "RevenantNetworkC"}, stub = "network_stub"})
+overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = {"../TLS/RevenantTLS", "RevenantNetworkC"}, stub = "network_stub"})
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 

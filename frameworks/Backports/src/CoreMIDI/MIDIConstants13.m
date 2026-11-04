@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMIDI/CoreMIDI.h>
 
-const CFStringRef kMIDIPropertyNameConfigurationDictionary = CFSTR("nameConfigurationDictionary");
+const CFStringRef BACKPORT_IMPL(kMIDIPropertyNameConfigurationDictionary) = CFSTR("nameConfigurationDictionary");

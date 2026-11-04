@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -18,7 +19,7 @@ static Boolean session_has_multi_pass_storage(VTCompressionSessionRef session)
     return enabled;
 }
 
-OSStatus VTCompressionSessionBeginPass(VTCompressionSessionRef session,
+OSStatus BACKPORT_IMPL(VTCompressionSessionBeginPass)(VTCompressionSessionRef session,
                                        VTCompressionSessionOptionFlags beginPassFlags,
                                        uint32_t * CM_NULLABLE reserved)
 {
@@ -27,7 +28,7 @@ OSStatus VTCompressionSessionBeginPass(VTCompressionSessionRef session,
     return kVTVideoEncoderNotAvailableNowErr;
 }
 
-OSStatus VTCompressionSessionEndPass(VTCompressionSessionRef session,
+OSStatus BACKPORT_IMPL(VTCompressionSessionEndPass)(VTCompressionSessionRef session,
                                      Boolean * CM_NULLABLE furtherPassesRequestedOut,
                                      uint32_t * CM_NULLABLE reserved)
 {
@@ -36,7 +37,7 @@ OSStatus VTCompressionSessionEndPass(VTCompressionSessionRef session,
     return kVTVideoEncoderNotAvailableNowErr;
 }
 
-OSStatus VTCompressionSessionGetTimeRangesForNextPass(VTCompressionSessionRef session,
+OSStatus BACKPORT_IMPL(VTCompressionSessionGetTimeRangesForNextPass)(VTCompressionSessionRef session,
                                                      CMItemCount * CM_NONNULL timeRangeCountOut,
                                                      const CMTimeRange * CM_NULLABLE * CM_NONNULL timeRangeArrayOut)
 {

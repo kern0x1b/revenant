@@ -55,6 +55,6 @@ local function translate(corpus, spirvcross, glslang, outdir)
 end
 
 function main(spirvcross, glslang, outdir, corpus)
-    corpus = corpus or path.join(os.scriptdir(), "..", "tests", "glsl_translator", "corpus")
+    corpus = corpus or path.join(os.scriptdir(), "..", "..", "Backports", "tests", "OpenGLES", "glsl_translator", "corpus")
     translate(corpus, spirvcross, glslang, outdir or path.join(os.tmpdir(), "glsl-translator"))
 end

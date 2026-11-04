@@ -3,6 +3,9 @@ package("zxing-cpp")
     set_homepage("https://github.com/zxing-cpp/zxing-cpp")
     set_description("ZXing-C++ 3.1.1 QR and PDF417 readers for Vision barcode detection")
     set_license("Apache-2.0")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/zxing-cpp/zxing-cpp.git")

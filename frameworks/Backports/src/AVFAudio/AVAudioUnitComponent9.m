@@ -1,17 +1,18 @@
+#include "../revenant_impl.h"
 #import "RevenantAVFAudio.h"
 
-NSString * const AVAudioUnitTypeOutput = @"Output";
-NSString * const AVAudioUnitTypeMusicDevice = @"Music Device";
-NSString * const AVAudioUnitTypeMusicEffect = @"Music Effect";
-NSString * const AVAudioUnitTypeFormatConverter = @"Format Converter";
-NSString * const AVAudioUnitTypeEffect = @"Effect";
-NSString * const AVAudioUnitTypeMixer = @"Mixer";
-NSString * const AVAudioUnitTypePanner = @"Panner";
-NSString * const AVAudioUnitTypeGenerator = @"Generator";
-NSString * const AVAudioUnitTypeOfflineEffect = @"Offline Effect";
-NSString * const AVAudioUnitTypeMIDIProcessor = @"MIDI Processor";
-NSString * const AVAudioUnitManufacturerNameApple = @"Apple";
-NSString * const AVAudioUnitComponentTagsDidChangeNotification = @"AVAudioUnitComponentTagsDidChangeNotification";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeOutput) = @"Output";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeMusicDevice) = @"Music Device";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeMusicEffect) = @"Music Effect";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeFormatConverter) = @"Format Converter";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeEffect) = @"Effect";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeMixer) = @"Mixer";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypePanner) = @"Panner";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeGenerator) = @"Generator";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeOfflineEffect) = @"Offline Effect";
+NSString * const BACKPORT_IMPL(AVAudioUnitTypeMIDIProcessor) = @"MIDI Processor";
+NSString * const BACKPORT_IMPL(AVAudioUnitManufacturerNameApple) = @"Apple";
+NSString * const BACKPORT_IMPL(AVAudioUnitComponentTagsDidChangeNotification) = @"AVAudioUnitComponentTagsDidChangeNotification";
 
 static NSString *RevenantTypeNameForType(OSType type)
 {

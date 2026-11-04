@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -87,12 +88,12 @@ static CFDataRef RevenantCertificateCopyName(SecCertificateRef certificate, bool
     return name;
 }
 
-CFDataRef SecCertificateCopyNormalizedIssuerSequence(SecCertificateRef certificate)
+CFDataRef BACKPORT_IMPL(SecCertificateCopyNormalizedIssuerSequence)(SecCertificateRef certificate)
 {
     return RevenantCertificateCopyName(certificate, false);
 }
 
-CFDataRef SecCertificateCopyNormalizedSubjectSequence(SecCertificateRef certificate)
+CFDataRef BACKPORT_IMPL(SecCertificateCopyNormalizedSubjectSequence)(SecCertificateRef certificate)
 {
     return RevenantCertificateCopyName(certificate, true);
 }
@@ -190,7 +191,7 @@ static void RevenantKeepAll(CFStringRef value, void *context)
     CFArrayAppendValue(((RevenantAllMatches *)context)->addresses, value);
 }
 
-OSStatus SecCertificateCopyCommonName(SecCertificateRef certificate, CFStringRef *name)
+OSStatus BACKPORT_IMPL(SecCertificateCopyCommonName)(SecCertificateRef certificate, CFStringRef *name)
 {
     if (!certificate || !name)
         return errSecParam;
@@ -281,7 +282,7 @@ static bool RevenantCertificateSANs(const uint8_t *bytes, size_t length, Revenan
     return false;
 }
 
-OSStatus SecCertificateCopyEmailAddresses(SecCertificateRef certificate, CFArrayRef *addresses)
+OSStatus BACKPORT_IMPL(SecCertificateCopyEmailAddresses)(SecCertificateRef certificate, CFArrayRef *addresses)
 {
     if (!certificate || !addresses)
         return errSecParam;

@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 static const float RevenantFontWeights[10] = {0, -0.8f, -0.6f, -0.4f, 0, 0.23f, 0.3f, 0.4f, 0.56f, 0.62f};
 
-UIImageSymbolWeight UIImageSymbolWeightForFontWeight(UIFontWeight fontWeight)
+UIImageSymbolWeight BACKPORT_IMPL(UIImageSymbolWeightForFontWeight)(UIFontWeight fontWeight)
 {
     if (fontWeight < RevenantFontWeights[1])
         return UIImageSymbolWeightUnspecified;
@@ -13,7 +14,7 @@ UIImageSymbolWeight UIImageSymbolWeightForFontWeight(UIFontWeight fontWeight)
     return UIImageSymbolWeightBlack;
 }
 
-UIFontWeight UIFontWeightForImageSymbolWeight(UIImageSymbolWeight symbolWeight)
+UIFontWeight BACKPORT_IMPL(UIFontWeightForImageSymbolWeight)(UIImageSymbolWeight symbolWeight)
 {
     return symbolWeight >= 0 && symbolWeight <= 9 ? RevenantFontWeights[symbolWeight] : 0;
 }

@@ -2,6 +2,9 @@ package("libxslt")
     set_homepage("https://gitlab.gnome.org/GNOME/libxslt")
     set_description("libxslt and libexslt as static libraries over this tree's libxml2, which WebKit's XSLT processor runs on")
     set_license("MIT")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://gitlab.gnome.org/GNOME/libxslt.git")

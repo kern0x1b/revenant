@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CloudKit/CloudKit.h>
 
-NSString *const CKAccountChangedNotification = @"CKAccountChangedNotification";
+NSString *const BACKPORT_IMPL(CKAccountChangedNotification) = @"CKAccountChangedNotification";

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #include <pthread.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -32,7 +33,7 @@ static enum BLAS_THREADING RevenantBLASThreading(void)
     return stored ? (enum BLAS_THREADING)(long)stored : BLAS_THREADING_MULTI_THREADED;
 }
 
-int BLASSetThreading(const enum BLAS_THREADING threading)
+int BACKPORT_IMPL(BLASSetThreading)(const enum BLAS_THREADING threading)
 {
     if (threading < BLAS_THREADING_MULTI_THREADED || threading >= BLAS_THREADING_MAX_OPTIONS) {
         return -1;
@@ -45,7 +46,7 @@ int BLASSetThreading(const enum BLAS_THREADING threading)
     return 0;
 }
 
-enum BLAS_THREADING BLASGetThreading(void)
+enum BLAS_THREADING BACKPORT_IMPL(BLASGetThreading)(void)
 {
     return RevenantBLASThreading();
 }

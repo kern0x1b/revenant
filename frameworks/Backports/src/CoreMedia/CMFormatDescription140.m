@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <CoreVideo/CoreVideo.h>
 
-const CFStringRef kCMFormatDescriptionExtension_ProtectedContentOriginalFormat = CFSTR("CommonEncryptionOriginalFormat");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionExtension_ProtectedContentOriginalFormat) = CFSTR("CommonEncryptionOriginalFormat");

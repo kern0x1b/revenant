@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
 #define VTCreateCGImageFromCVPixelBuffer RevenantVTCreateCGImageFromCVPixelBuffer
 #endif
@@ -14,7 +15,7 @@ static BOOL RevenantVTIsBT709(CVPixelBufferRef pixelBuffer)
     return matrix && CFEqual(matrix, kCVImageBufferYCbCrMatrix_ITU_R_709_2);
 }
 
-OSStatus VTCreateCGImageFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, CFDictionaryRef options, CGImageRef *imageOut)
+OSStatus BACKPORT_IMPL(VTCreateCGImageFromCVPixelBuffer)(CVPixelBufferRef pixelBuffer, CFDictionaryRef options, CGImageRef *imageOut)
 {
     if (imageOut)
         *imageOut = NULL;

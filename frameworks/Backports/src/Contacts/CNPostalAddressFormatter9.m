@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSString * const CNPostalAddressPropertyAttribute = @"CNPostalAddressProperty";
-NSString * const CNPostalAddressLocalizedPropertyNameAttribute = @"CNPostalAddressLocalizedPropertyName";
+NSString * const BACKPORT_IMPL(CNPostalAddressPropertyAttribute) = @"CNPostalAddressProperty";
+NSString * const BACKPORT_IMPL(CNPostalAddressLocalizedPropertyNameAttribute) = @"CNPostalAddressLocalizedPropertyName";
 
 @implementation CNPostalAddressFormatter {
     CNPostalAddressFormatterStyle _revenantStyle;

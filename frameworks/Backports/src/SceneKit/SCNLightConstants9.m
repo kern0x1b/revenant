@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNLightType const SCNLightTypeProbe = @"probe";
+SCNLightType const BACKPORT_IMPL(SCNLightTypeProbe) = @"probe";

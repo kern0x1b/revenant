@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const LAErrorDomain = @"com.apple.LocalAuthentication";
+NSString *const BACKPORT_IMPL(LAErrorDomain) = @"com.apple.LocalAuthentication";

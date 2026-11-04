@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AUComponent.h>
 #import <TargetConditionals.h>
@@ -14,7 +15,7 @@ static UIImage *RevenantBlankComponentIcon(void)
     return icon;
 }
 
-UIImage *AudioComponentCopyIcon(AudioComponent comp)
+UIImage *BACKPORT_IMPL(AudioComponentCopyIcon)(AudioComponent comp)
 {
     if (comp == NULL) {
         return nil;

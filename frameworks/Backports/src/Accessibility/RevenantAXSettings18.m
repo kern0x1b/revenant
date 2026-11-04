@@ -1,22 +1,23 @@
+#include "../revenant_impl.h"
 #import "RevenantAXSettings.h"
 #import "RevenantAXSettingsCommon.h"
 
 NSErrorDomain const RevenantAXSettingsErrorDomain = @"org.revenant.Accessibility.Settings";
 
-BOOL AXPrefersNonBlinkingTextInsertionIndicator(void)
+BOOL BACKPORT_IMPL(AXPrefersNonBlinkingTextInsertionIndicator)(void)
 {
     return RevenantAXSettingIsOffOnThisRelease();
 }
 
-NSNotificationName const AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNotification =
+NSNotificationName const BACKPORT_IMPL(AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNotification) =
     @"AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNotification";
 
-BOOL AXAssistiveAccessEnabled(void)
+BOOL BACKPORT_IMPL(AXAssistiveAccessEnabled)(void)
 {
     return RevenantAXSettingIsOffOnThisRelease();
 }
 
-void AXOpenSettingsFeature(AXSettingsFeature feature, void (^completionHandler)(NSError *_Nullable error))
+void BACKPORT_IMPL(AXOpenSettingsFeature)(AXSettingsFeature feature, void (^completionHandler)(NSError *_Nullable error))
 {
     if (!completionHandler) {
         return;

@@ -82,7 +82,7 @@ function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
 
-local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "skeleton.lua", "sdk.lua"}
+local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "markers.lua", "skeleton.lua", "sdk.lua"}
 
 function generator_digest()
     local digests = {}
@@ -121,8 +121,12 @@ function cache_key(sdk)
     return sdk_version(sdk) .. "-" .. string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16)
 end
 
+function shared_root()
+    return path.join(workspace().home(), "backports")
+end
+
 function cache_folder(sdk)
-    return path.join(build_root(), "cache", cache_key(sdk))
+    return path.join(shared_root(), cache_key(sdk))
 end
 
 function clean_field(value)
@@ -136,7 +140,7 @@ function write_rows(file, module, rows)
             clean_field(row.name), clean_field(row.symbol), clean_field(row.signature), row.intro and tostring(row.intro) or "",
             clean_field(row.flags)}, "\t"))
     end
-    local temp = file .. ".part"
+    local temp = file .. "." .. hash.strhash128(tostring({}) .. file) .. ".part"
     io.writefile(temp, table.concat(lines, "\n") .. (#lines > 0 and "\n" or ""))
     os.mv(temp, file)
 end
@@ -166,9 +170,6 @@ function framework_introduced(rows)
     return lowest
 end
 
-function in_scope(row, minimum, framework_intro)
-    if row.intro ~= nil then
-        return row.intro > minimum
-    end
-    return framework_intro ~= nil and framework_intro > minimum
+function framework_image(name)
+    return "/System/Library/Frameworks/" .. name .. ".framework/" .. name
 end

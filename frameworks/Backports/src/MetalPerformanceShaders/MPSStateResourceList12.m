@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantMPS.h"
 
 
-NSUInteger MPSStateBatchIncrementReadCount(NSArray<MPSState *> *batch, NSInteger amount)
+NSUInteger BACKPORT_IMPL(MPSStateBatchIncrementReadCount)(NSArray<MPSState *> *batch, NSInteger amount)
 {
     for (MPSState *state in batch) {
         uint64_t wanted = (uint64_t)state.readCount + (uint64_t)(int64_t)amount;
@@ -14,13 +15,13 @@ NSUInteger MPSStateBatchIncrementReadCount(NSArray<MPSState *> *batch, NSInteger
     return batch.count;
 }
 
-void MPSStateBatchSynchronize(NSArray<MPSState *> *batch, id<MTLCommandBuffer>cmdBuf)
+void BACKPORT_IMPL(MPSStateBatchSynchronize)(NSArray<MPSState *> *batch, id<MTLCommandBuffer>cmdBuf)
 {
     for (MPSState *state in batch)
         [state synchronizeOnCommandBuffer:cmdBuf];
 }
 
-NSUInteger MPSStateBatchResourceSize(NSArray<MPSState *> *batch)
+NSUInteger BACKPORT_IMPL(MPSStateBatchResourceSize)(NSArray<MPSState *> *batch)
 {
     NSUInteger total = 0;
     for (MPSState *state in batch)

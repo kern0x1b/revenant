@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CloudKit/CloudKit.h>
 
-NSString *const CKRecordNameZoneWideShare = @"cloudkit.zoneshare";
+NSString *const BACKPORT_IMPL(CKRecordNameZoneWideShare) = @"cloudkit.zoneshare";

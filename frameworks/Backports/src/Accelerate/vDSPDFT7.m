@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
@@ -53,21 +54,21 @@ static vDSP_DFT_SetupD RevenantDFTCreateSetup(vDSP_Length length, vDSP_DFT_Direc
     return (vDSP_DFT_SetupD)setup;
 }
 
-vDSP_DFT_SetupD vDSP_DFT_zop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
+vDSP_DFT_SetupD BACKPORT_IMPL(vDSP_DFT_zop_CreateSetupD)(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
                                           vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;
     return RevenantDFTCreateSetup(__Length, __Direction, RevenantDFTComplex);
 }
 
-vDSP_DFT_SetupD vDSP_DFT_zrop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
+vDSP_DFT_SetupD BACKPORT_IMPL(vDSP_DFT_zrop_CreateSetupD)(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
                                            vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;
     return RevenantDFTCreateSetup(__Length, __Direction, RevenantDFTReal);
 }
 
-void vDSP_DFT_DestroySetupD(vDSP_DFT_SetupD __Setup)
+void BACKPORT_IMPL(vDSP_DFT_DestroySetupD)(vDSP_DFT_SetupD __Setup)
 {
     free(__Setup);
 }
@@ -85,7 +86,7 @@ static void RevenantDFTBin(const double *real, const double *imaginary, vDSP_Len
     *out_imaginary = sum_imaginary;
 }
 
-void vDSP_DFT_ExecuteD(const struct vDSP_DFT_SetupStructD *__Setup, const double *__Ir, const double *__Ii, double *__Or,
+void BACKPORT_IMPL(vDSP_DFT_ExecuteD)(const struct vDSP_DFT_SetupStructD *__Setup, const double *__Ir, const double *__Ii, double *__Or,
                        double *__Oi)
 {
     const struct vDSP_DFT_SetupStructD *setup = __Setup;

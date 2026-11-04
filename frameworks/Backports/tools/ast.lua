@@ -38,6 +38,9 @@ end
 local function node_of(body, state)
     local node = {children = {}, file = first_path(body) or state}
     node.kind = string.match(body, "^(%S+)")
+    if node.kind == "FunctionDecl" or node.kind == "VarDecl" then
+        node.file = string.match(body, "> (/[^%s<>]+):%d+:%d+") or node.file
+    end
     node.type = string.match(body, "'([^']*)'")
     local quote = string.match(body, "^.*()'")
     node.tail = quote and string.sub(body, quote + 1) or ""
@@ -91,29 +94,35 @@ local function version(text)
     return value
 end
 
-function scan(handle, on_block)
+function scan(handle, on_block, wanted)
     local state = nil
     local top = nil
     local stack = {}
+    local skipping = false
     for line in handle:lines() do
         local depth, body = depth_of(line)
         if depth ~= nil then
-            local node = node_of(body, state)
-            state = last_path(body) or state
-            if depth == 0 then
-                if top ~= nil then
-                    on_block(top)
+            if skipping and depth > 0 then
+                state = last_path(body) or state
+            else
+                local node = node_of(body, state)
+                state = last_path(body) or state
+                if depth == 0 then
+                    if top ~= nil and not skipping then
+                        on_block(top)
+                    end
+                    skipping = wanted ~= nil and not wanted(node.file)
+                    top = node
+                    top.body = body
+                    stack = {[0] = node}
+                elseif stack[depth - 1] ~= nil then
+                    table.insert(stack[depth - 1].children, node)
+                    stack[depth] = node
                 end
-                top = node
-                top.body = body
-                stack = {[0] = node}
-            elseif stack[depth - 1] ~= nil then
-                table.insert(stack[depth - 1].children, node)
-                stack[depth] = node
             end
         end
     end
-    if top ~= nil then
+    if top ~= nil and not skipping then
         on_block(top)
     end
 end

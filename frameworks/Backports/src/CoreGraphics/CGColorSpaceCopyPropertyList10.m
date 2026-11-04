@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
@@ -6,7 +7,7 @@
 #define REVENANT_CORE_GRAPHICS_LIBRARY "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics"
 #endif
 
-CFPropertyListRef CGColorSpaceCopyPropertyList(CGColorSpaceRef space)
+CFPropertyListRef BACKPORT_IMPL(CGColorSpaceCopyPropertyList)(CGColorSpaceRef space)
 {
     static CFPropertyListRef (*function)(CGColorSpaceRef);
     if (!function) {

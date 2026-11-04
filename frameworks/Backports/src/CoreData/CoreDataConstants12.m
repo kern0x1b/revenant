@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <CoreData/CoreData.h>
 
-NSString *const NSPersistentHistoryTokenKey = @"historyToken";
-NSString *const NSPersistentStoreRemoteChangeNotification = @"NSPersistentStoreRemoteChangeNotification";
-NSString *const NSPersistentStoreURLKey = @"storeURL";
+NSString *const BACKPORT_IMPL(NSPersistentHistoryTokenKey) = @"historyToken";
+NSString *const BACKPORT_IMPL(NSPersistentStoreRemoteChangeNotification) = @"NSPersistentStoreRemoteChangeNotification";
+NSString *const BACKPORT_IMPL(NSPersistentStoreURLKey) = @"storeURL";

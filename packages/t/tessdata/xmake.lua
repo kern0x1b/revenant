@@ -87,7 +87,29 @@ package("tessdata")
         return codes
     end
 
+    local function sparse_of(models)
+        local patterns = {}
+        for _, model in ipairs(models) do
+            table.insert(patterns, "/" .. model[1] .. ".traineddata")
+        end
+        return patterns
+    end
+
+    on_download(function (package, opt)
+        if import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
+            return
+        end
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
+        checkout.pinned(opt.sourcedir, {{url = "https://github.com/tesseract-ocr/tessdata_best.git", commit = BEST_COMMIT,
+                                         sparse = sparse_of(BEST)}})
+        checkout.pinned(package:resourcedir("tessdata_fast"), {{url = "https://github.com/tesseract-ocr/tessdata_fast.git", commit = FAST_COMMIT,
+                                                                sparse = table.join(sparse_of(FAST), {"/LICENSE"})}})
+    end)
+
     on_install(function (package)
+        if import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
+            return
+        end
         local function copy(source, file, sha256)
             if hash.sha256(source) ~= sha256 then
                 raise("%s does not match its pinned sha256", source)
@@ -112,6 +134,7 @@ package("tessdata")
         end
         os.mkdir(package:installdir("licenses"))
         copy(path.join(fast, "LICENSE"), path.join(package:installdir("licenses"), "LICENSE"), LICENSE_SHA256)
+        import("@addon.revenant.prebuilt", {anonymous = true}).pack(package)
     end)
 
     on_test(function (package)

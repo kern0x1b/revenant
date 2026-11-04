@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioSessionModeVoicePrompt = @"AVAudioSessionModeVoicePrompt";
+NSString * const BACKPORT_IMPL(AVAudioSessionModeVoicePrompt) = @"AVAudioSessionModeVoicePrompt";

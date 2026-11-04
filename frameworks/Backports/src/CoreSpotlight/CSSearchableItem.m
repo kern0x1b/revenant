@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <CoreSpotlight/CoreSpotlight.h>
 
-NSString * const CSSearchableItemActionType = @"com.apple.corespotlightitem";
-NSString * const CSSearchableItemActivityIdentifier = @"kCSSearchableItemActivityIdentifier";
+NSString * const BACKPORT_IMPL(CSSearchableItemActionType) = @"com.apple.corespotlightitem";
+NSString * const BACKPORT_IMPL(CSSearchableItemActivityIdentifier) = @"kCSSearchableItemActivityIdentifier";
 
 @interface CSSearchableItem ()
 {

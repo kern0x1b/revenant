@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSMetadataUbiquitousSharedItemCurrentUserRoleKey = @"NSMetadataUbiquitousSharedItemCurrentUserRoleKey";
-NSString *const NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey = @"NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey";
-NSString *const NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey = @"NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey";
-NSString *const NSMetadataUbiquitousSharedItemPermissionsReadOnly = @"NSMetadataUbiquitousSharedItemPermissionsReadOnly";
-NSString *const NSMetadataUbiquitousSharedItemPermissionsReadWrite = @"NSMetadataUbiquitousSharedItemPermissionsReadWrite";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemCurrentUserRoleKey) = @"NSMetadataUbiquitousSharedItemCurrentUserRoleKey";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey) = @"NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey) = @"NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemPermissionsReadOnly) = @"NSMetadataUbiquitousSharedItemPermissionsReadOnly";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemPermissionsReadWrite) = @"NSMetadataUbiquitousSharedItemPermissionsReadWrite";

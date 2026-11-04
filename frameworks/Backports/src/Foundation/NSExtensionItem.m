@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSExtensionItemAttributedTitleKey = @"NSExtensionItemAttributedTitleKey";
-NSString *const NSExtensionItemAttributedContentTextKey = @"NSExtensionItemAttributedContentTextKey";
-NSString *const NSExtensionItemAttachmentsKey = @"NSExtensionItemAttachmentsKey";
+NSString *const BACKPORT_IMPL(NSExtensionItemAttributedTitleKey) = @"NSExtensionItemAttributedTitleKey";
+NSString *const BACKPORT_IMPL(NSExtensionItemAttributedContentTextKey) = @"NSExtensionItemAttributedContentTextKey";
+NSString *const BACKPORT_IMPL(NSExtensionItemAttachmentsKey) = @"NSExtensionItemAttachmentsKey";
 
 @implementation NSExtensionItem {
     NSDictionary *_userInfo;

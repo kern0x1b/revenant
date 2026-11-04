@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <QuartzCore/QuartzCore.h>
@@ -37,7 +38,7 @@
 
 @end
 
-NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
+NSString * const BACKPORT_IMPL(AVKitErrorDomain) = @"AVKitErrorDomain";
 
 @implementation AVPictureInPictureController
 {

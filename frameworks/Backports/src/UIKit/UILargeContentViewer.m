@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 
-NSString *const UILargeContentViewerInteractionEnabledStatusDidChangeNotification = @"UILargeContentViewerInteractionEnabledStatusDidChangeNotification";
+NSString *const BACKPORT_IMPL(UILargeContentViewerInteractionEnabledStatusDidChangeNotification) = @"UILargeContentViewerInteractionEnabledStatusDidChangeNotification";
 
 static const char revenant_shows_key, revenant_title_key, revenant_image_key, revenant_scales_key, revenant_insets_key;
 

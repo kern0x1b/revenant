@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <AuthenticationServices/AuthenticationServices.h>
 #import <SafariServices/SafariServices.h>
 #import "../SafariServices/RevenantSafari.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-NSErrorDomain const ASWebAuthenticationSessionErrorDomain = @"com.apple.AuthenticationServices.WebAuthenticationSession";
+NSErrorDomain const BACKPORT_IMPL(ASWebAuthenticationSessionErrorDomain) = @"com.apple.AuthenticationServices.WebAuthenticationSession";
 
 static NSString *RevenantWebAuthJournalPath(void)
 {

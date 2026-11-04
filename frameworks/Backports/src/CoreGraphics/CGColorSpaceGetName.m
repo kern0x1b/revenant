@@ -1,13 +1,14 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <pthread.h>
 
-const CFStringRef kCGColorSpaceGenericLab = CFSTR("kCGColorSpaceGenericLab");
+const CFStringRef BACKPORT_IMPL(kCGColorSpaceGenericLab) = CFSTR("kCGColorSpaceGenericLab");
 
 static pthread_mutex_t revenant_names_lock = PTHREAD_MUTEX_INITIALIZER;
 static CFMutableSetRef revenant_names;
 
-CFStringRef CGColorSpaceGetName(CGColorSpaceRef space)
+CFStringRef BACKPORT_IMPL(CGColorSpaceGetName)(CGColorSpaceRef space)
 {
     CFStringRef copy = space ? CGColorSpaceCopyName(space) : NULL;
     if (!copy)

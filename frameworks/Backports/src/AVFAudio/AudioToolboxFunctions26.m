@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioConverter.h>
 #import <AudioToolbox/AudioFile.h>
 #import "RevenantAudioToolboxDeclarations.h"
@@ -15,7 +16,7 @@ static BOOL RevenantIsPCMConverter(AudioConverterRef converter)
         && format.mFormatID == kAudioFormatLinearPCM;
 }
 
-OSStatus AudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioConverter,
+OSStatus BACKPORT_IMPL(AudioConverterFillComplexBufferRealtimeSafe)(AudioConverterRef inAudioConverter,
                                                      AudioConverterComplexInputDataProcRealtimeSafe inInputDataProc,
                                                      void *inInputDataProcUserData,
                                                      UInt32 *ioOutputDataPacketSize,
@@ -29,7 +30,7 @@ OSStatus AudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioCo
                                            inInputDataProcUserData, ioOutputDataPacketSize, outOutputData, outPacketDescription);
 }
 
-OSStatus AudioConverterFillComplexBufferWithPacketDependencies(AudioConverterRef inAudioConverter,
+OSStatus BACKPORT_IMPL(AudioConverterFillComplexBufferWithPacketDependencies)(AudioConverterRef inAudioConverter,
                                                                AudioConverterComplexInputDataProc inInputDataProc,
                                                                void *inInputDataProcUserData,
                                                                UInt32 *ioOutputDataPacketSize,
@@ -44,7 +45,7 @@ OSStatus AudioConverterFillComplexBufferWithPacketDependencies(AudioConverterRef
                                            ioOutputDataPacketSize, outOutputData, outPacketDescriptions);
 }
 
-OSStatus AudioFileWritePacketsWithDependencies(AudioFileID inAudioFile,
+OSStatus BACKPORT_IMPL(AudioFileWritePacketsWithDependencies)(AudioFileID inAudioFile,
                                                Boolean inUseCache,
                                                UInt32 inNumBytes,
                                                const AudioStreamPacketDescription *inPacketDescriptions,

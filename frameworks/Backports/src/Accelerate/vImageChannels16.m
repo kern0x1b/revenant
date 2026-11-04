@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantChannels.h"
 
@@ -30,7 +31,7 @@ static vImage_Error revenant_channels16_ready_dest(const vImage_Buffer *dest, vI
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannels_ARGB16F(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannels_ARGB16F)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                            const uint8_t permuteMap[4], vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels16_ready(src, dest, flags, revenant_channels16_permute_flags);
@@ -47,7 +48,7 @@ vImage_Error vImagePermuteChannels_ARGB16F(const vImage_Buffer *src, const vImag
     return kvImageNoError;
 }
 
-vImage_Error vImageOverwriteChannelsWithScalar_Planar16F(Pixel_16F scalar, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageOverwriteChannelsWithScalar_Planar16F)(Pixel_16F scalar, const vImage_Buffer *dest,
                                                          vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels16_ready_dest(dest, flags);

@@ -1,12 +1,13 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <AudioToolbox/AudioToolbox.h>
 #include <stdlib.h>
 #include <string.h>
 
-const CFStringRef kCMSampleBufferAttachmentKey_DroppedFrameReasonInfo = CFSTR("DroppedFrameReasonInfo");
-const CFStringRef kCMSampleBufferDroppedFrameReasonInfo_CameraModeSwitch = CFSTR("CameraModeSwitch");
+const CFStringRef BACKPORT_IMPL(kCMSampleBufferAttachmentKey_DroppedFrameReasonInfo) = CFSTR("DroppedFrameReasonInfo");
+const CFStringRef BACKPORT_IMPL(kCMSampleBufferDroppedFrameReasonInfo_CameraModeSwitch) = CFSTR("CameraModeSwitch");
 
-OSStatus CMSampleBufferCopyPCMDataIntoAudioBufferList(CMSampleBufferRef sbuf, int32_t frameOffset, int32_t numFrames, AudioBufferList *bufferList)
+OSStatus BACKPORT_IMPL(CMSampleBufferCopyPCMDataIntoAudioBufferList)(CMSampleBufferRef sbuf, int32_t frameOffset, int32_t numFrames, AudioBufferList *bufferList)
 {
     if (!sbuf || !bufferList)
         return kCMSampleBufferError_RequiredParameterMissing;

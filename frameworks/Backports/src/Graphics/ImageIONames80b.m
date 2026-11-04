@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
-const CFStringRef kCGImagePropertyAPNGDelayTime = CFSTR("DelayTime");
-const CFStringRef kCGImagePropertyAPNGLoopCount = CFSTR("LoopCount");
-const CFStringRef kCGImagePropertyAPNGUnclampedDelayTime = CFSTR("UnclampedDelayTime");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyAPNGDelayTime) = CFSTR("DelayTime");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyAPNGLoopCount) = CFSTR("LoopCount");
+const CFStringRef BACKPORT_IMPL(kCGImagePropertyAPNGUnclampedDelayTime) = CFSTR("UnclampedDelayTime");

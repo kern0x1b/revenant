@@ -1,12 +1,13 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSStringEncodingDetectionSuggestedEncodingsKey = @"NSStringEncodingDetectionSuggestedEncodingsKey";
-NSString * const NSStringEncodingDetectionDisallowedEncodingsKey = @"NSStringEncodingDetectionDisallowedEncodingsKey";
-NSString * const NSStringEncodingDetectionUseOnlySuggestedEncodingsKey = @"NSStringEncodingDetectionUseOnlySuggestedEncodingsKey";
-NSString * const NSStringEncodingDetectionAllowLossyKey = @"NSStringEncodingDetectionAllowLossyKey";
-NSString * const NSStringEncodingDetectionFromWindowsKey = @"NSStringEncodingDetectionFromWindowsKey";
-NSString * const NSStringEncodingDetectionLossySubstitutionKey = @"NSStringEncodingDetectionLossySubstitutionKey";
-NSString * const NSStringEncodingDetectionLikelyLanguageKey = @"NSStringEncodingDetectionLikelyLanguageKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionSuggestedEncodingsKey) = @"NSStringEncodingDetectionSuggestedEncodingsKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionDisallowedEncodingsKey) = @"NSStringEncodingDetectionDisallowedEncodingsKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionUseOnlySuggestedEncodingsKey) = @"NSStringEncodingDetectionUseOnlySuggestedEncodingsKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionAllowLossyKey) = @"NSStringEncodingDetectionAllowLossyKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionFromWindowsKey) = @"NSStringEncodingDetectionFromWindowsKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionLossySubstitutionKey) = @"NSStringEncodingDetectionLossySubstitutionKey";
+NSString * const BACKPORT_IMPL(NSStringEncodingDetectionLikelyLanguageKey) = @"NSStringEncodingDetectionLikelyLanguageKey";
 
 static BOOL revenant_bom(NSData *data, const uint8_t *mark, NSUInteger length)
 {

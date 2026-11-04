@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVPlayerAvailableHDRModesDidChangeNotification = @"AVPlayerAvailableHDRModesDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVPlayerAvailableHDRModesDidChangeNotification) = @"AVPlayerAvailableHDRModesDidChangeNotification";

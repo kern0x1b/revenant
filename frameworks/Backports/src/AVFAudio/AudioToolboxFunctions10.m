@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioQueue.h>
 #import <dispatch/dispatch.h>
 #import <stdlib.h>
@@ -46,7 +47,7 @@ static void RevenantAudioQueueInputCallback(void *inUserData, AudioQueueRef inAQ
     });
 }
 
-OSStatus AudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
+OSStatus BACKPORT_IMPL(AudioQueueNewOutputWithDispatchQueue)(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
                                               dispatch_queue_t inCallbackDispatchQueue, AudioQueueOutputCallbackBlock inCallbackBlock)
 {
     if (inCallbackDispatchQueue == NULL || inCallbackBlock == nil) {
@@ -63,7 +64,7 @@ OSStatus AudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioS
     return status;
 }
 
-OSStatus AudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
+OSStatus BACKPORT_IMPL(AudioQueueNewInputWithDispatchQueue)(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
                                              dispatch_queue_t inCallbackDispatchQueue, AudioQueueInputCallbackBlock inCallbackBlock)
 {
     if (inCallbackDispatchQueue == NULL || inCallbackBlock == nil) {

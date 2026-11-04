@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <SensorKit/SRAbsoluteTime.h>
 #import <mach/mach_time.h>
@@ -41,27 +42,27 @@ double RevenantSensorKitMonotonicSeconds(void)
     return (double)seconds;
 }
 
-SRAbsoluteTime SRAbsoluteTimeGetCurrent(void)
+SRAbsoluteTime BACKPORT_IMPL(SRAbsoluteTimeGetCurrent)(void)
 {
     const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     NSTimeInterval elapsed = RevenantSensorKitSecondsFromTicks(mach_absolute_time() - anchor->continuous);
     return (SRAbsoluteTime)(anchor->absolute + elapsed);
 }
 
-SRAbsoluteTime SRAbsoluteTimeFromContinuousTime(uint64_t cont)
+SRAbsoluteTime BACKPORT_IMPL(SRAbsoluteTimeFromContinuousTime)(uint64_t cont)
 {
     const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     uint64_t sinceBoot = cont > anchor->continuous ? cont - anchor->continuous : 0;
     return (SRAbsoluteTime)(anchor->absolute + RevenantSensorKitSecondsFromTicks(sinceBoot));
 }
 
-CFAbsoluteTime SRAbsoluteTimeToCFAbsoluteTime(SRAbsoluteTime sr)
+CFAbsoluteTime BACKPORT_IMPL(SRAbsoluteTimeToCFAbsoluteTime)(SRAbsoluteTime sr)
 {
     const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     return anchor->absolute + ((CFAbsoluteTime)sr - anchor->absolute);
 }
 
-SRAbsoluteTime SRAbsoluteTimeFromCFAbsoluteTime(CFAbsoluteTime cf)
+SRAbsoluteTime BACKPORT_IMPL(SRAbsoluteTimeFromCFAbsoluteTime)(CFAbsoluteTime cf)
 {
     const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     return (SRAbsoluteTime)(anchor->absolute + (cf - anchor->absolute));

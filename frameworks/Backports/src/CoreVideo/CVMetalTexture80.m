@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 #import <Metal/Metal.h>
 
-CVReturn CVMetalTextureCacheCreate(CFAllocatorRef allocator, CFDictionaryRef cacheAttributes,
+CVReturn BACKPORT_IMPL(CVMetalTextureCacheCreate)(CFAllocatorRef allocator, CFDictionaryRef cacheAttributes,
                                     id <MTLDevice> metalDevice, CFDictionaryRef textureAttributes,
                                     CVMetalTextureCacheRef *cacheOut)
 {
@@ -10,7 +11,7 @@ CVReturn CVMetalTextureCacheCreate(CFAllocatorRef allocator, CFDictionaryRef cac
     return kCVReturnInvalidArgument;
 }
 
-CVReturn CVMetalTextureCacheCreateTextureFromImage(CFAllocatorRef allocator,
+CVReturn BACKPORT_IMPL(CVMetalTextureCacheCreateTextureFromImage)(CFAllocatorRef allocator,
                                                     CVMetalTextureCacheRef textureCache,
                                                     CVImageBufferRef sourceImage,
                                                     CFDictionaryRef textureAttributes,
@@ -23,31 +24,31 @@ CVReturn CVMetalTextureCacheCreateTextureFromImage(CFAllocatorRef allocator,
     return kCVReturnInvalidArgument;
 }
 
-void CVMetalTextureCacheFlush(CVMetalTextureCacheRef textureCache, CVOptionFlags options)
+void BACKPORT_IMPL(CVMetalTextureCacheFlush)(CVMetalTextureCacheRef textureCache, CVOptionFlags options)
 {
 }
 
-id <MTLTexture> CVMetalTextureGetTexture(CVMetalTextureRef image)
+id <MTLTexture> BACKPORT_IMPL(CVMetalTextureGetTexture)(CVMetalTextureRef image)
 {
     return nil;
 }
 
-CFTypeID CVMetalTextureCacheGetTypeID(void)
+CFTypeID BACKPORT_IMPL(CVMetalTextureCacheGetTypeID)(void)
 {
     return 0;
 }
 
-CFTypeID CVMetalTextureGetTypeID(void)
+CFTypeID BACKPORT_IMPL(CVMetalTextureGetTypeID)(void)
 {
     return 0;
 }
 
-Boolean CVMetalTextureIsFlipped(CVMetalTextureRef image)
+Boolean BACKPORT_IMPL(CVMetalTextureIsFlipped)(CVMetalTextureRef image)
 {
     return false;
 }
 
-void CVMetalTextureGetCleanTexCoords(CVMetalTextureRef image,
+void BACKPORT_IMPL(CVMetalTextureGetCleanTexCoords)(CVMetalTextureRef image,
                                      float lowerLeft[2], float lowerRight[2],
                                      float upperRight[2], float upperLeft[2])
 {

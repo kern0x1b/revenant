@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
 typedef struct CGColorTransform *CGColorTransformRef;
@@ -5,7 +6,7 @@ CGColorTransformRef CGColorTransformCreate(CGColorSpaceRef space, CFDictionaryRe
 CGColorRef CGColorTransformConvertColor(CGColorTransformRef transform, CGColorRef color, CGColorRenderingIntent intent);
 void CGColorTransformRelease(CGColorTransformRef transform);
 
-CGColorRef CGColorCreateCopyByMatchingToColorSpace(CGColorSpaceRef space, CGColorRenderingIntent intent, CGColorRef color, CFDictionaryRef options)
+CGColorRef BACKPORT_IMPL(CGColorCreateCopyByMatchingToColorSpace)(CGColorSpaceRef space, CGColorRenderingIntent intent, CGColorRef color, CFDictionaryRef options)
 {
     if (!space || !color || CGColorSpaceGetModel(space) == kCGColorSpaceModelPattern
         || CGColorSpaceGetModel(CGColorGetColorSpace(color)) == kCGColorSpaceModelPattern)

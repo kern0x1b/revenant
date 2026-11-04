@@ -1,0 +1,81 @@
+From 2dfdf835630dbdfa300301dcd9821fbfd63e8540 Mon Sep 17 00:00:00 2001
+From: revenant worker <worker@revenant.local>
+Date: Sun, 1 Nov 2026 19:45:20 +0100
+Subject: [PATCH] Capture through the CoreGraphics context and the layer path
+ on iOS 6
+
+UIGraphicsImageRenderer is iOS 10 and drawViewHierarchyInRect:afterScreenUpdates: is iOS 7, so on iOS 6 the
+module's own useRenderInContext path on UIGraphicsBeginImageContextWithOptions is the capture the release can
+make. The renderer stays the path from iOS 10, and drawViewHierarchyInRect is used wherever it exists.
+---
+ ios/RNViewShot.mm | 51 ++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 37 insertions(+), 14 deletions(-)
+
+diff --git a/ios/RNViewShot.mm b/ios/RNViewShot.mm
+index 11540df..03a2548 100644
+--- a/ios/RNViewShot.mm
++++ b/ios/RNViewShot.mm
+@@ -134,23 +134,46 @@ - (dispatch_queue_t)methodQueue
+       scrollView.frame = CGRectMake(0, 0, scrollView.contentSize.width, scrollView.contentSize.height);
+     }
+ 
+-    UIGraphicsImageRendererFormat *rendererFormat = [UIGraphicsImageRendererFormat preferredFormat];
+-    rendererFormat.opaque = NO;
+-    rendererFormat.scale = 0; // 0 means "use device scale" (matches old UIGraphicsBeginImageContextWithOptions behaviour)
+-
+-    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size format:rendererFormat];
+-
+-    UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull rendererContext) {
++    UIImage *image = nil;
++    if (@available(iOS 10.0, *)) {
++      UIGraphicsImageRendererFormat *rendererFormat = [UIGraphicsImageRendererFormat preferredFormat];
++      rendererFormat.opaque = NO;
++      rendererFormat.scale = 0; // 0 means "use device scale" (matches old UIGraphicsBeginImageContextWithOptions behaviour)
++
++      UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size format:rendererFormat];
++
++      image = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull rendererContext) {
++        if (renderInContext) {
++          // this comes with some trade-offs such as inability to capture gradients or scrollview's content in full but it works for large views
++          [rendered.layer renderInContext:rendererContext.CGContext];
++          success = YES;
++        }
++        else {
++          // this doesn't work for large views and reports incorrect success even though the image is blank
++          success = [rendered drawViewHierarchyInRect:(CGRect){CGPointZero, size} afterScreenUpdates:YES];
++        }
++      }];
++    }
++    else {
++      // drawViewHierarchyInRect arrives on iOS 7 and UIGraphicsImageRenderer on iOS 10: before them the
++      // context is the one the module's useRenderInContext option already draws into
++      UIGraphicsBeginImageContextWithOptions(size, NO, 0);
++      CGContextRef context = UIGraphicsGetCurrentContext();
++      if (!renderInContext) {
++        if ([rendered respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]) {
++          success = [rendered drawViewHierarchyInRect:(CGRect){CGPointZero, size} afterScreenUpdates:YES];
++        }
++        else {
++          renderInContext = YES;
++        }
++      }
+       if (renderInContext) {
+-        // this comes with some trade-offs such as inability to capture gradients or scrollview's content in full but it works for large views
+-        [rendered.layer renderInContext:rendererContext.CGContext];
++        [rendered.layer renderInContext:context];
+         success = YES;
+       }
+-      else {
+-        // this doesn't work for large views and reports incorrect success even though the image is blank
+-        success = [rendered drawViewHierarchyInRect:(CGRect){CGPointZero, size} afterScreenUpdates:YES];
+-      }
+-    }];
++      image = UIGraphicsGetImageFromCurrentImageContext();
++      UIGraphicsEndImageContext();
++    }
+ 
+     if (snapshotContentContainer) {
+       // Restore scroll & frame
+-- 
+2.54.0 (Apple Git-157)
+

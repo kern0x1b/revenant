@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantSplit.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
@@ -5,7 +6,7 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-CGFloat const UISplitViewControllerAutomaticDimension = -1;
+CGFloat const BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) = -1;
 
 static const char RevenantSplitStateKey;
 static const CGFloat RevenantSplitDefaultFraction = 0.38f;

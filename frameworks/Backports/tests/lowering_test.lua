@@ -444,4 +444,22 @@ function main()
     }, "\n"))
     local webview_ok, webview_compiling = compiles(sdk, vfs, webview_probe, path.join(probes, "webview.log"))
     assert(webview_ok, "the lowered UIKit headers do not declare UIWebViewNavigationType for iOS 6.0:\n" .. webview_compiling)
+
+    local sync_source = path.join(sdk, "System", "Library", "Frameworks", "CoreMedia.framework", "Headers", "CMSync.h")
+    local sync_lowered = lowered.lower_header(io.readfile(sync_source), {classes = {}, functions = {CMTimebaseCopySource = true}, globals = {}, protocols = {}})
+    local sync_flat = sync_lowered:gsub("%s+", " ")
+    assert(count(sync_flat, "CMTimebaseCopySource%( CMTimebaseRef CM_NONNULL timebase %) ;") == 2 and not sync_flat:find("CMTimebaseCopySource( CMTimebaseRef CM_NONNULL timebase ) API_AVAILABLE", 1, true),
+           "CMTimebaseCopySource is a static inline wrapper with its availability in the #else branch the iOS 6.0 build takes; the backport exports it, so both branches must declare it without availability:\n" .. sync_flat)
+    local clock_probe = path.join(probes, "timebase.m")
+    io.writefile(clock_probe, table.concat({
+        "#import <CoreMedia/CoreMedia.h>",
+        "",
+        "CMClockOrTimebaseRef revenantTimebaseProbe(CMTimebaseRef timebase)",
+        "{",
+        "    return CMTimebaseCopySource(timebase);",
+        "}",
+        "",
+    }, "\n"))
+    local clock_ok, clock_compiling = compiles(sdk, vfs, clock_probe, path.join(probes, "timebase.log"))
+    assert(clock_ok, "the lowered CoreMedia headers do not declare CMTimebaseCopySource for iOS 6.0:\n" .. clock_compiling)
 end

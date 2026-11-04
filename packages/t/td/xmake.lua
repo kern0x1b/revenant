@@ -3,6 +3,9 @@ package("td")
     set_homepage("https://core.telegram.org/tdlib")
     set_description("TDLib's tde2e and tdutils, the end-to-end encryption and utility libraries of Telegram's secret chats, as static libraries for armv7 iOS 6, at master commit e894536b (v1.8.0 plus 7675 commits) that Telegram vendors")
     set_license("BSL-1.0")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/tdlib/td.git")
     add_versions("1.8.0-7675", "e894536b2f46caad93f997448d2daff9431b19dd")

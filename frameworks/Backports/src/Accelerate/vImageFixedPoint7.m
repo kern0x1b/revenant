@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import "RevenantVImageFixed.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-vImage_Error vImageConvert_16Q12to16U(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16Q12to16U)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -23,7 +24,7 @@ vImage_Error vImageConvert_16Q12to16U(const vImage_Buffer *src, const vImage_Buf
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_16Q12to8(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16Q12to8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -40,7 +41,7 @@ vImage_Error vImageConvert_16Q12to8(const vImage_Buffer *src, const vImage_Buffe
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_16Q12toF(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16Q12toF)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -59,7 +60,7 @@ vImage_Error vImageConvert_16Q12toF(const vImage_Buffer *src, const vImage_Buffe
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Fto16Q12(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_Fto16Q12)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -78,7 +79,7 @@ vImage_Error vImageConvert_Fto16Q12(const vImage_Buffer *src, const vImage_Buffe
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_8to16Q12(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_8to16Q12)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -94,7 +95,7 @@ vImage_Error vImageConvert_8to16Q12(const vImage_Buffer *src, const vImage_Buffe
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_16Uto16Q12(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16Uto16Q12)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -113,7 +114,7 @@ vImage_Error vImageConvert_16Uto16Q12(const vImage_Buffer *src, const vImage_Buf
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_16Uto16F(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_16Uto16F)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)

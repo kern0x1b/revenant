@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-const UIMenuIdentifier UIMenuSidebar = @"com.apple.menu.sidebar";
+const UIMenuIdentifier BACKPORT_IMPL(UIMenuSidebar) = @"com.apple.menu.sidebar";

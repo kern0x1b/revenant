@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Contacts/Contacts.h>
 
-NSString * const CNContactPhoneticOrganizationNameKey = @"phoneticOrganizationName";
+NSString * const BACKPORT_IMPL(CNContactPhoneticOrganizationNameKey) = @"phoneticOrganizationName";

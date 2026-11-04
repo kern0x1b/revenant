@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <CommonCrypto/CommonRandom.h>
 #import <Security/SecRandom.h>
 
-CCRNGStatus CCRandomGenerateBytes(void *bytes, size_t count)
+CCRNGStatus BACKPORT_IMPL(CCRandomGenerateBytes)(void *bytes, size_t count)
 {
     if (count == 0)
         return kCCSuccess;

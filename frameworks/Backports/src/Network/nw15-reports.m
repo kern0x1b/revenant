@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_interface_radio_type_t nw_data_transfer_report_get_path_radio_type(nw_data_transfer_report_t report, uint32_t path_index)
+nw_interface_radio_type_t BACKPORT_IMPL(nw_data_transfer_report_get_path_radio_type)(nw_data_transfer_report_t report, uint32_t path_index)
 {
     RevenantNWDataTransferReport *value = (RevenantNWDataTransferReport *)report;
     if (!value || value->_state != nw_data_transfer_report_state_collected)

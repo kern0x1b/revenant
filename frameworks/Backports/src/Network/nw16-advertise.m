@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-nw_advertise_descriptor_t nw_advertise_descriptor_create_application_service(const char *application_service_name)
+nw_advertise_descriptor_t BACKPORT_IMPL(nw_advertise_descriptor_create_application_service)(const char *application_service_name)
 {
     if (!application_service_name || !*application_service_name)
         return NULL;
@@ -9,7 +10,7 @@ nw_advertise_descriptor_t nw_advertise_descriptor_create_application_service(con
     return descriptor;
 }
 
-const char *nw_advertise_descriptor_get_application_service_name(nw_advertise_descriptor_t advertise_descriptor)
+const char *BACKPORT_IMPL(nw_advertise_descriptor_get_application_service_name)(nw_advertise_descriptor_t advertise_descriptor)
 {
     RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     return value ? value->_applicationService.UTF8String : NULL;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 
-const CFStringRef kCVMetalTextureUsage = CFSTR("MetalTextureUsage");
+const CFStringRef BACKPORT_IMPL(kCVMetalTextureUsage) = CFSTR("MetalTextureUsage");

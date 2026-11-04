@@ -85,11 +85,29 @@ merge quietly take away from us".
 
 ### When the symbol gate fires
 
-It is a question, not a verdict. Each new undefined symbol is looked up against
-what iOS 6 has, and there are only two outcomes: either the system has it - the
-engine loads, the suite passes, and the pin is regenerated with
-`tools/symbol_check.lua --pin` so the new baseline is one the device has
-verified - or it does not, and something has to provide it.
+It is a question, not a verdict. The gate prints every new undefined import, and
+judges each one against the iOS 6.0 armv7 cache (`xmake firmware --arch=armv7 fetch 6.0`
+fetches it): an import is accepted when the library its binary names for it, by the
+two-level ordinal, exports the symbol in that cache, and rejected with the reason otherwise.
+A flat-namespace import, an ordinal that names no library, or a library the cache does not
+hold is rejected too. Only a rejected import needs a decision: a device check that shows
+the device resolves it, then `tools/symbol_check.lua --pin` so the baseline records it.
+The judgement is `dyld.import_verdicts` in `toolchain/modules/apple/dyld.lua`, and
+`./xmakew l -P . frameworks/WebKit/tests/gate/symbols_test.lua` tests it on fixtures
+(it needs `REVENANT_LD64` set to the `bin/ld` of the `revenant@ld64` package).
+
+### The C++ library
+
+The engine binds its C++ library as `@rpath/libc++.1.dylib`, while the iOS 6.0 cache holds
+that library as `/usr/lib/libc++.1.dylib`. The gate therefore judges an import bound to the
+`@rpath` name against the cache's `libc++.1` (`LIBRARY_ALIASES` in `dyld.lua`). No other
+`@rpath` name is remapped, and an `@rpath` library the cache does not hold is still rejected.
+This is a judgment rule, not a device check. On the phone the name resolves to the carried
+`librev-c++` or to the system `libc++.1`; the cache's library and the `librev-c++` the port
+builds both export the `basic_string` members the engine imports, and the fixture test
+covers an exported, a missing and an unheld `@rpath` import. The rule holds while
+`librev-c++` exports what the cache's `libc++.1` does for the engine's imports. For a new
+C++ import, check it with `nm -gU` on the `librev-c++` build as well before pinning it.
 
 The first time this ran in anger, on 2026-09-11, it was the second case: an
 ANGLE roll had started calling `crc32_z`, which zlib gained in 1.2.9 and this

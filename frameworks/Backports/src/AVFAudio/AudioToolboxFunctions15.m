@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/MusicDevice.h>
 #import "RevenantMIDIEventList.h"
 
-OSStatus MusicDeviceMIDIEventList(MusicDeviceComponent inUnit, UInt32 inOffsetSampleFrame, const MIDIEventList *evtList)
+OSStatus BACKPORT_IMPL(MusicDeviceMIDIEventList)(MusicDeviceComponent inUnit, UInt32 inOffsetSampleFrame, const MIDIEventList *evtList)
 {
     __block OSStatus status = noErr;
     RevenantForEachMIDIMessage(evtList, ^(const uint8_t *bytes, UInt32 length) {

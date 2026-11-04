@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 
@@ -149,14 +150,14 @@ static OSStatus revenant_animate(CGImageSourceRef source, CFDictionaryRef option
     return [animation runWithOptions:options];
 }
 
-OSStatus CGAnimateImageAtURLWithBlock(CFURLRef url, CFDictionaryRef options, CGImageSourceAnimationBlock block)
+OSStatus BACKPORT_IMPL(CGAnimateImageAtURLWithBlock)(CFURLRef url, CFDictionaryRef options, CGImageSourceAnimationBlock block)
 {
     if (!url)
         return REVENANT_ANIMATION_PARAM_ERR;
     return revenant_animate(CGImageSourceCreateWithURL(url, NULL), options, block);
 }
 
-OSStatus CGAnimateImageDataWithBlock(CFDataRef data, CFDictionaryRef options, CGImageSourceAnimationBlock block)
+OSStatus BACKPORT_IMPL(CGAnimateImageDataWithBlock)(CFDataRef data, CFDictionaryRef options, CGImageSourceAnimationBlock block)
 {
     if (!data)
         return REVENANT_ANIMATION_PARAM_ERR;

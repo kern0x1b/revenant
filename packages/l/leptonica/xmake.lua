@@ -3,6 +3,9 @@ package("leptonica")
     set_homepage("http://leptonica.org/")
     set_description("Leptonica 1.85.0, the image library Tesseract is built on: the static library without its image codecs, since the OCR takes its pixels from the caller")
     set_license("BSD-2-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/DanBloomberg/leptonica.git")

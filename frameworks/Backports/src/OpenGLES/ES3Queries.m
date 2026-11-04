@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <OpenGLES/gltypes.h>
 #include <dlfcn.h>
@@ -18,7 +19,7 @@ extern void glEndQuery(GLenum target) __attribute__((availability(ios, introduce
 extern void glGetQueryiv(GLenum target, GLenum pname, GLint* params) __attribute__((availability(ios, introduced=7.0)));
 extern void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params) __attribute__((availability(ios, introduced=7.0)));
 
-void glGenQueries(GLsizei n, GLuint* ids)
+void BACKPORT_IMPL(glGenQueries)(GLsizei n, GLuint* ids)
 {
     static void (*fn)(GLsizei n, GLuint* ids);
     if (!fn)
@@ -28,7 +29,7 @@ void glGenQueries(GLsizei n, GLuint* ids)
     revenant_es3_error();
 }
 
-void glDeleteQueries(GLsizei n, const GLuint* ids)
+void BACKPORT_IMPL(glDeleteQueries)(GLsizei n, const GLuint* ids)
 {
     static void (*fn)(GLsizei n, const GLuint* ids);
     if (!fn)
@@ -38,7 +39,7 @@ void glDeleteQueries(GLsizei n, const GLuint* ids)
     revenant_es3_error();
 }
 
-GLboolean glIsQuery(GLuint id)
+GLboolean BACKPORT_IMPL(glIsQuery)(GLuint id)
 {
     static GLboolean (*fn)(GLuint id);
     if (!fn)
@@ -49,7 +50,7 @@ GLboolean glIsQuery(GLuint id)
     return (GLboolean)0;
 }
 
-void glBeginQuery(GLenum target, GLuint id)
+void BACKPORT_IMPL(glBeginQuery)(GLenum target, GLuint id)
 {
     static void (*fn)(GLenum target, GLuint id);
     if (!fn)
@@ -59,7 +60,7 @@ void glBeginQuery(GLenum target, GLuint id)
     revenant_es3_error();
 }
 
-void glEndQuery(GLenum target)
+void BACKPORT_IMPL(glEndQuery)(GLenum target)
 {
     static void (*fn)(GLenum target);
     if (!fn)
@@ -69,7 +70,7 @@ void glEndQuery(GLenum target)
     revenant_es3_error();
 }
 
-void glGetQueryiv(GLenum target, GLenum pname, GLint* params)
+void BACKPORT_IMPL(glGetQueryiv)(GLenum target, GLenum pname, GLint* params)
 {
     static void (*fn)(GLenum target, GLenum pname, GLint* params);
     if (!fn)
@@ -79,7 +80,7 @@ void glGetQueryiv(GLenum target, GLenum pname, GLint* params)
     revenant_es3_error();
 }
 
-void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params)
+void BACKPORT_IMPL(glGetQueryObjectuiv)(GLuint id, GLenum pname, GLuint* params)
 {
     static void (*fn)(GLuint id, GLenum pname, GLuint* params);
     if (!fn)

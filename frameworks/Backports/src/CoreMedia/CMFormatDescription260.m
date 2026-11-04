@@ -1,26 +1,27 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <CoreVideo/CoreVideo.h>
 
-const CFStringRef kCMFormatDescriptionCameraCalibrationExtrinsicOriginSource_StereoCameraSystemBaseline = CFSTR("StereoCameraSystemBaseline");
-const CFStringRef kCMFormatDescriptionCameraCalibrationLensAlgorithmKind_ParametricLens = CFSTR("ParametricLens");
-const CFStringRef kCMFormatDescriptionCameraCalibrationLensDomain_Color = CFSTR("Color");
-const CFStringRef kCMFormatDescriptionCameraCalibrationLensRole_Left = CFSTR("Left");
-const CFStringRef kCMFormatDescriptionCameraCalibrationLensRole_Mono = CFSTR("Mono");
-const CFStringRef kCMFormatDescriptionCameraCalibrationLensRole_Right = CFSTR("Right");
-const CFStringRef kCMFormatDescriptionCameraCalibration_ExtrinsicOrientationQuaternion = CFSTR("ExtrinsicOrientationQuaternion");
-const CFStringRef kCMFormatDescriptionCameraCalibration_ExtrinsicOriginSource = CFSTR("ExtrinsicOriginSource");
-const CFStringRef kCMFormatDescriptionCameraCalibration_IntrinsicMatrix = CFSTR("IntrinsicMatrix");
-const CFStringRef kCMFormatDescriptionCameraCalibration_IntrinsicMatrixProjectionOffset = CFSTR("IntrinsicMatrixProjectionOffset");
-const CFStringRef kCMFormatDescriptionCameraCalibration_IntrinsicMatrixReferenceDimensions = CFSTR("IntrinsicMatrixReferenceDimensions");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensAlgorithmKind = CFSTR("LensAlgorithmKind");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensDistortions = CFSTR("LensDistortions");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensDomain = CFSTR("LensDomain");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensFrameAdjustmentsPolynomialX = CFSTR("LensFrameAdjustmentsPolynomialX");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensFrameAdjustmentsPolynomialY = CFSTR("LensFrameAdjustmentsPolynomialY");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensIdentifier = CFSTR("LensIdentifier");
-const CFStringRef kCMFormatDescriptionCameraCalibration_LensRole = CFSTR("LensRole");
-const CFStringRef kCMFormatDescriptionCameraCalibration_RadialAngleLimit = CFSTR("RadialAngleLimit");
-const CFStringRef kCMFormatDescriptionExtension_CameraCalibrationDataLensCollection = CFSTR("CameraCalibrationDataLensCollection");
-const CFStringRef kCMFormatDescriptionExtension_ConvertedFromExternalSphericalTags = CFSTR("ConvertedFromExternalSphericalTags");
-const CFStringRef kCMFormatDescriptionProjectionKind_AppleImmersiveVideo = CFSTR("AppleImmersiveVideo");
-const CFStringRef kCMFormatDescriptionProjectionKind_ParametricImmersive = CFSTR("ParametricImmersive");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationExtrinsicOriginSource_StereoCameraSystemBaseline) = CFSTR("StereoCameraSystemBaseline");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationLensAlgorithmKind_ParametricLens) = CFSTR("ParametricLens");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationLensDomain_Color) = CFSTR("Color");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationLensRole_Left) = CFSTR("Left");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationLensRole_Mono) = CFSTR("Mono");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibrationLensRole_Right) = CFSTR("Right");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_ExtrinsicOrientationQuaternion) = CFSTR("ExtrinsicOrientationQuaternion");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_ExtrinsicOriginSource) = CFSTR("ExtrinsicOriginSource");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_IntrinsicMatrix) = CFSTR("IntrinsicMatrix");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_IntrinsicMatrixProjectionOffset) = CFSTR("IntrinsicMatrixProjectionOffset");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_IntrinsicMatrixReferenceDimensions) = CFSTR("IntrinsicMatrixReferenceDimensions");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensAlgorithmKind) = CFSTR("LensAlgorithmKind");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensDistortions) = CFSTR("LensDistortions");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensDomain) = CFSTR("LensDomain");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensFrameAdjustmentsPolynomialX) = CFSTR("LensFrameAdjustmentsPolynomialX");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensFrameAdjustmentsPolynomialY) = CFSTR("LensFrameAdjustmentsPolynomialY");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensIdentifier) = CFSTR("LensIdentifier");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_LensRole) = CFSTR("LensRole");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionCameraCalibration_RadialAngleLimit) = CFSTR("RadialAngleLimit");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionExtension_CameraCalibrationDataLensCollection) = CFSTR("CameraCalibrationDataLensCollection");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionExtension_ConvertedFromExternalSphericalTags) = CFSTR("ConvertedFromExternalSphericalTags");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionProjectionKind_AppleImmersiveVideo) = CFSTR("AppleImmersiveVideo");
+const CFStringRef BACKPORT_IMPL(kCMFormatDescriptionProjectionKind_ParametricImmersive) = CFSTR("ParametricImmersive");

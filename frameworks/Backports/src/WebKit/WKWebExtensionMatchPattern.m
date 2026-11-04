@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #import "RevenantWebExtension.h"
 
@@ -6,7 +7,7 @@
                       options:(WKWebExtensionMatchPatternOptions)options;
 @end
 
-NSString *const WKWebExtensionMatchPatternErrorDomain = @"WKWebExtensionMatchPatternErrorDomain";
+NSString *const BACKPORT_IMPL(WKWebExtensionMatchPatternErrorDomain) = @"WKWebExtensionMatchPatternErrorDomain";
 
 static BOOL revenant_glob(NSString *pattern, NSString *text)
 {

@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <dlfcn.h>
 #import <objc/message.h>
 #import "RevenantSpotlightStore.h"
 
-NSString * const CSIndexErrorDomain = @"CSIndexErrorDomain";
+NSString * const BACKPORT_IMPL(CSIndexErrorDomain) = @"CSIndexErrorDomain";
 
 static NSError *RevenantIndexErrorBecause(CSIndexErrorCode code, NSString *reason, NSError *cause)
 {
