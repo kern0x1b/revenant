@@ -1,22 +1,23 @@
+#include "../revenant_impl.h"
 #import "RevenantGCSnapshot.h"
 #import "RevenantGC.h"
 
-NSData *NSDataFromGCGamepadSnapShotDataV100(GCGamepadSnapShotDataV100 *snapshotData)
+NSData *BACKPORT_IMPL(NSDataFromGCGamepadSnapShotDataV100)(GCGamepadSnapShotDataV100 *snapshotData)
 {
     return revenant_gc_snapshot_data(snapshotData, sizeof(GCGamepadSnapShotDataV100), REVENANT_GCGAMEPAD_SNAPSHOT_VERSION_V100);
 }
 
-BOOL GCGamepadSnapShotDataV100FromNSData(GCGamepadSnapShotDataV100 *snapshotData, NSData *data)
+BOOL BACKPORT_IMPL(GCGamepadSnapShotDataV100FromNSData)(GCGamepadSnapShotDataV100 *snapshotData, NSData *data)
 {
     return revenant_gc_snapshot_read(snapshotData, data, sizeof(GCGamepadSnapShotDataV100), revenant_gc_accept_whole_structure);
 }
 
-NSData *NSDataFromGCExtendedGamepadSnapShotDataV100(GCExtendedGamepadSnapShotDataV100 *snapshotData)
+NSData *BACKPORT_IMPL(NSDataFromGCExtendedGamepadSnapShotDataV100)(GCExtendedGamepadSnapShotDataV100 *snapshotData)
 {
     return revenant_gc_snapshot_data(snapshotData, sizeof(GCExtendedGamepadSnapShotDataV100), GCExtendedGamepadSnapshotDataVersion1);
 }
 
-BOOL GCExtendedGamepadSnapShotDataV100FromNSData(GCExtendedGamepadSnapShotDataV100 *snapshotData, NSData *data)
+BOOL BACKPORT_IMPL(GCExtendedGamepadSnapShotDataV100FromNSData)(GCExtendedGamepadSnapShotDataV100 *snapshotData, NSData *data)
 {
     return revenant_gc_snapshot_read(snapshotData, data, sizeof(GCExtendedGamepadSnapShotDataV100), revenant_gc_accept_declared_size);
 }

@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-bool CGColorSpaceIsHDR(CGColorSpaceRef space)
+bool BACKPORT_IMPL(CGColorSpaceIsHDR)(CGColorSpaceRef space)
 {
     return false;
 }

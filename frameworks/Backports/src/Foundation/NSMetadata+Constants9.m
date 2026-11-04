@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSMetadataUbiquitousSharedItemOwnerNameComponentsKey = @"NSMetadataUbiquitousSharedItemOwnerNameComponentsKey";
+NSString *const BACKPORT_IMPL(NSMetadataUbiquitousSharedItemOwnerNameComponentsKey) = @"NSMetadataUbiquitousSharedItemOwnerNameComponentsKey";

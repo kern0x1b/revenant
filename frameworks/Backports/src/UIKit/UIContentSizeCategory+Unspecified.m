@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UIContentSizeCategory const UIContentSizeCategoryUnspecified = @"_UICTContentSizeCategoryUnspecified";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryUnspecified) = @"_UICTContentSizeCategoryUnspecified";

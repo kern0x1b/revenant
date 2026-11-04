@@ -15,14 +15,25 @@ local function lines_of(text)
     end}
 end
 
+local function has_word(text, word)
+    return string.find(" " .. (text or "") .. " ", " " .. word .. " ", 1, true) ~= nil
+end
+
 local function add(state, row)
     local key = row.kind .. "\0" .. row.container .. "\0" .. row.name .. "\0" .. row.symbol
     local index = state.seen[key]
     if index == nil then
         table.insert(state.rows, row)
         state.seen[key] = #state.rows
-    elseif state.rows[index].intro == nil then
-        state.rows[index].intro = row.intro
+        return
+    end
+    local kept = state.rows[index]
+    if kept.intro == nil then
+        kept.intro = row.intro
+    end
+    if has_word(row.flags, "unavailable") and not has_word(kept.flags, "unavailable") then
+        local words = kept.flags or ""
+        kept.flags = words == "" and "unavailable" or words .. " unavailable"
     end
 end
 
@@ -95,8 +106,15 @@ local function objc_top(state, top)
         end
     elseif top.kind == "ObjCProtocolDecl" and top.name and defined(top) then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a protocol whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)
+        local words = {}
+        if #ast.children_of(top, "ObjCNonRuntimeProtocolAttr") > 0 then
+            table.insert(words, "nonruntime")
+        end
+        if ast.has_unavailable(top) then
+            table.insert(words, "unavailable")
+        end
         add(state, {kind = "protocol", container = "", name = top.name, symbol = "_OBJC_PROTOCOL_$_" .. top.name,
-            signature = "", intro = intro, flags = #ast.children_of(top, "ObjCNonRuntimeProtocolAttr") > 0 and "nonruntime" or ""})
+            signature = "", intro = intro, flags = table.concat(words, " ")})
     elseif top.kind == "FunctionDecl" and top.name and not top.flags.static and not top.flags.inline and not top.implicit
         and not string.find(top.name, "^__builtin") then
         assert(string.find(top.name, "^[%a_][%w_]*$"), "a C function whose name is not an identifier, '" .. top.name .. "', in: " .. top.body)

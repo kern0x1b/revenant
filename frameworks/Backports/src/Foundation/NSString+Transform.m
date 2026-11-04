@@ -1,21 +1,22 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSStringTransformLatinToKatakana = @")kCFStringTransformLatinKatakana";
-NSString * const NSStringTransformLatinToHiragana = @")kCFStringTransformLatinHiragana";
-NSString * const NSStringTransformLatinToHangul = @")kCFStringTransformLatinHangul";
-NSString * const NSStringTransformLatinToArabic = @")kCFStringTransformLatinArabic";
-NSString * const NSStringTransformLatinToHebrew = @")kCFStringTransformLatinHebrew";
-NSString * const NSStringTransformLatinToThai = @")kCFStringTransformLatinThai";
-NSString * const NSStringTransformLatinToCyrillic = @")kCFStringTransformLatinCyrillic";
-NSString * const NSStringTransformLatinToGreek = @")kCFStringTransformLatinGreek";
-NSString * const NSStringTransformToLatin = @")kCFStringTransformToLatin";
-NSString * const NSStringTransformMandarinToLatin = @")kCFStringTransformMandarinLatin";
-NSString * const NSStringTransformHiraganaToKatakana = @")kCFStringTransformHiraganaKatakana";
-NSString * const NSStringTransformFullwidthToHalfwidth = @")kCFStringTransformFullwidthHalfwidth";
-NSString * const NSStringTransformToXMLHex = @")kCFStringTransformToXMLHex";
-NSString * const NSStringTransformToUnicodeName = @")kCFStringTransformToUnicodeName";
-NSString * const NSStringTransformStripCombiningMarks = @")kCFStringTransformStripCombiningMarks";
-NSString * const NSStringTransformStripDiacritics = @")kCFStringTransformStripDiacritics";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToKatakana) = @")kCFStringTransformLatinKatakana";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToHiragana) = @")kCFStringTransformLatinHiragana";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToHangul) = @")kCFStringTransformLatinHangul";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToArabic) = @")kCFStringTransformLatinArabic";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToHebrew) = @")kCFStringTransformLatinHebrew";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToThai) = @")kCFStringTransformLatinThai";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToCyrillic) = @")kCFStringTransformLatinCyrillic";
+NSString * const BACKPORT_IMPL(NSStringTransformLatinToGreek) = @")kCFStringTransformLatinGreek";
+NSString * const BACKPORT_IMPL(NSStringTransformToLatin) = @")kCFStringTransformToLatin";
+NSString * const BACKPORT_IMPL(NSStringTransformMandarinToLatin) = @")kCFStringTransformMandarinLatin";
+NSString * const BACKPORT_IMPL(NSStringTransformHiraganaToKatakana) = @")kCFStringTransformHiraganaKatakana";
+NSString * const BACKPORT_IMPL(NSStringTransformFullwidthToHalfwidth) = @")kCFStringTransformFullwidthHalfwidth";
+NSString * const BACKPORT_IMPL(NSStringTransformToXMLHex) = @")kCFStringTransformToXMLHex";
+NSString * const BACKPORT_IMPL(NSStringTransformToUnicodeName) = @")kCFStringTransformToUnicodeName";
+NSString * const BACKPORT_IMPL(NSStringTransformStripCombiningMarks) = @")kCFStringTransformStripCombiningMarks";
+NSString * const BACKPORT_IMPL(NSStringTransformStripDiacritics) = @")kCFStringTransformStripDiacritics";
 
 static const struct {
     const CFStringRef *identifier;

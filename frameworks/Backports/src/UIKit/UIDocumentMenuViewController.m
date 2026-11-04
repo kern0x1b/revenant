@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "RevenantCustomTransition.h"
@@ -13,7 +14,7 @@
 @end
 
 @implementation RevenantDocumentMenuOption
-@synthesize title, handler, order;
+@synthesize title, handler, BACKPORT_IMPL(order);
 @end
 
 @implementation UIDocumentMenuViewController {

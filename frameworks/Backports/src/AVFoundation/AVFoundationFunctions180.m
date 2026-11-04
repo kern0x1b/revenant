@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantAVFoundationCaption18.h"
 #import <AVFoundation/AVFoundation.h>
 
-AVCaptionDimension AVCaptionDimensionMake(CGFloat value, AVCaptionUnitsType units)
+AVCaptionDimension BACKPORT_IMPL(AVCaptionDimensionMake)(CGFloat value, AVCaptionUnitsType units)
 {
     AVCaptionDimension dimension;
     dimension.value = value;
@@ -9,7 +10,7 @@ AVCaptionDimension AVCaptionDimensionMake(CGFloat value, AVCaptionUnitsType unit
     return dimension;
 }
 
-AVCaptionPoint AVCaptionPointMake(AVCaptionDimension x, AVCaptionDimension y)
+AVCaptionPoint BACKPORT_IMPL(AVCaptionPointMake)(AVCaptionDimension x, AVCaptionDimension y)
 {
     AVCaptionPoint point;
     point.x = x;
@@ -17,7 +18,7 @@ AVCaptionPoint AVCaptionPointMake(AVCaptionDimension x, AVCaptionDimension y)
     return point;
 }
 
-AVCaptionSize AVCaptionSizeMake(AVCaptionDimension width, AVCaptionDimension height)
+AVCaptionSize BACKPORT_IMPL(AVCaptionSizeMake)(AVCaptionDimension width, AVCaptionDimension height)
 {
     AVCaptionSize size;
     size.width = width;
@@ -25,7 +26,7 @@ AVCaptionSize AVCaptionSizeMake(AVCaptionDimension width, AVCaptionDimension hei
     return size;
 }
 
-NSString *AVCaptureReactionSystemImageNameForType(AVCaptureReactionType reactionType)
+NSString *BACKPORT_IMPL(AVCaptureReactionSystemImageNameForType)(AVCaptureReactionType reactionType)
 {
     if ([reactionType isEqualToString:AVCaptureReactionTypeBalloons]) {
         return @"balloon.2.fill";

@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
-NSErrorUserInfoKey const NSLocalizedFailureErrorKey = @"NSLocalizedFailure";
+NSErrorUserInfoKey const BACKPORT_IMPL(NSLocalizedFailureErrorKey) = @"NSLocalizedFailure";
 
 static NSString *revenant_failure_sentence(NSError *error, NSString *failure)
 {

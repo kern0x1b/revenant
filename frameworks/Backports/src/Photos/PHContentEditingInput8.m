@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "RevenantPhotos.h"
 
-NSString *const PHContentEditingInputCancelledKey = @"PHContentEditingInputCancelledKey";
-NSString *const PHContentEditingInputErrorKey = @"PHContentEditingInputErrorKey";
+NSString *const BACKPORT_IMPL(PHContentEditingInputCancelledKey) = @"PHContentEditingInputCancelledKey";
+NSString *const BACKPORT_IMPL(PHContentEditingInputErrorKey) = @"PHContentEditingInputErrorKey";
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 

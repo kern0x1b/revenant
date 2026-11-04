@@ -82,7 +82,7 @@ function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
 
-local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "skeleton.lua", "sdk.lua"}
+local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "markers.lua", "skeleton.lua", "sdk.lua"}
 
 function generator_digest()
     local digests = {}
@@ -170,9 +170,6 @@ function framework_introduced(rows)
     return lowest
 end
 
-function in_scope(row, minimum, framework_intro)
-    if row.intro ~= nil then
-        return row.intro > minimum
-    end
-    return framework_intro ~= nil and framework_intro > minimum
+function framework_image(name)
+    return "/System/Library/Frameworks/" .. name .. ".framework/" .. name
 end

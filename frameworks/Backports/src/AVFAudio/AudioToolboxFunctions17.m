@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import <stdlib.h>
 #import <string.h>
 #import "RevenantAudioToolboxDeclarations.h"
 
-OSStatus AudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize)
+OSStatus BACKPORT_IMPL(AudioFileGetUserDataSize64)(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize)
 {
     UInt32 size = 0;
     OSStatus status = AudioFileGetUserDataSize(inAudioFile, inUserDataID, inIndex, &size);
@@ -13,7 +14,7 @@ OSStatus AudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID
     return status;
 }
 
-OSStatus AudioFileGetUserDataAtOffset(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, SInt64 inOffset,
+OSStatus BACKPORT_IMPL(AudioFileGetUserDataAtOffset)(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, SInt64 inOffset,
                                       UInt32 *ioUserDataSize, void *outUserData)
 {
     UInt32 size = 0;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMIDI/CoreMIDI.h>
 
 #import "RevenantCoreMIDI.h"
@@ -150,7 +151,7 @@ static void revenant_parse(const UInt32 *words, int size, MIDIUniversalMessage *
     }
 }
 
-void MIDIEventListForEachEvent(const MIDIEventList *evtlist, MIDIEventVisitor visitor, void *visitorContext)
+void BACKPORT_IMPL(MIDIEventListForEachEvent)(const MIDIEventList *evtlist, MIDIEventVisitor visitor, void *visitorContext)
 {
     const MIDIEventPacket *packet = &evtlist->packet[0];
     for (UInt32 i = 0; i < evtlist->numPackets; i++) {

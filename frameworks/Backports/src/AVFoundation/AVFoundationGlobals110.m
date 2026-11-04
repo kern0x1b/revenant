@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVVideoDecompressionPropertiesKey = @"AVVideoDecompressionPropertiesKey";
+NSString *const BACKPORT_IMPL(AVVideoDecompressionPropertiesKey) = @"AVVideoDecompressionPropertiesKey";

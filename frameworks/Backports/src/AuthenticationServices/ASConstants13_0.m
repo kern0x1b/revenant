@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const ASAuthorizationAppleIDProviderCredentialRevokedNotification = @"ASAuthorizationAppleIDCredentialRevokedNotification";
-NSString *const ASAuthorizationErrorDomain = @"com.apple.AuthenticationServices.AuthorizationError";
-NSString *const ASAuthorizationOperationImplicit = @"implicit";
-NSString *const ASAuthorizationOperationLogin = @"login";
-NSString *const ASAuthorizationOperationLogout = @"logout";
-NSString *const ASAuthorizationOperationRefresh = @"refresh";
-NSString *const ASAuthorizationScopeEmail = @"email";
-NSString *const ASAuthorizationScopeFullName = @"full_name";
+NSString *const BACKPORT_IMPL(ASAuthorizationAppleIDProviderCredentialRevokedNotification) = @"ASAuthorizationAppleIDCredentialRevokedNotification";
+NSString *const BACKPORT_IMPL(ASAuthorizationErrorDomain) = @"com.apple.AuthenticationServices.AuthorizationError";
+NSString *const BACKPORT_IMPL(ASAuthorizationOperationImplicit) = @"implicit";
+NSString *const BACKPORT_IMPL(ASAuthorizationOperationLogin) = @"login";
+NSString *const BACKPORT_IMPL(ASAuthorizationOperationLogout) = @"logout";
+NSString *const BACKPORT_IMPL(ASAuthorizationOperationRefresh) = @"refresh";
+NSString *const BACKPORT_IMPL(ASAuthorizationScopeEmail) = @"email";
+NSString *const BACKPORT_IMPL(ASAuthorizationScopeFullName) = @"full_name";

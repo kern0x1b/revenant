@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioConverter.h>
 #import <dispatch/dispatch.h>
 #import "RevenantAudioToolboxDeclarations.h"
 
-OSStatus AudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourceFormat,
+OSStatus BACKPORT_IMPL(AudioConverterNewWithOptions)(const AudioStreamBasicDescription *inSourceFormat,
                                       const AudioStreamBasicDescription *inDestinationFormat,
                                       AudioConverterOptions inOptions,
                                       AudioConverterRef *outAudioConverter)
@@ -10,7 +11,7 @@ OSStatus AudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourc
     return AudioConverterNew(inSourceFormat, inDestinationFormat, outAudioConverter);
 }
 
-void AudioConverterPrepare(UInt32 inFlags, void *ioReserved, void (^inCompletionBlock)(OSStatus))
+void BACKPORT_IMPL(AudioConverterPrepare)(UInt32 inFlags, void *ioReserved, void (^inCompletionBlock)(OSStatus))
 {
     if (inCompletionBlock == nil) {
         return;

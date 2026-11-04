@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -54,7 +55,7 @@ static void RevenantSecurityRecordPolicy(SecPolicyRef policy, CFStringRef oid, C
     pthread_mutex_unlock(&RevenantSecurityHoldLock);
 }
 
-OSStatus SecTrustCopyPolicies(SecTrustRef trust, CFArrayRef *policies)
+OSStatus BACKPORT_IMPL(SecTrustCopyPolicies)(SecTrustRef trust, CFArrayRef *policies)
 {
     if (!trust || !policies)
         return errSecParam;
@@ -65,7 +66,7 @@ OSStatus SecTrustCopyPolicies(SecTrustRef trust, CFArrayRef *policies)
     return errSecSuccess;
 }
 
-OSStatus SecTrustCopyCustomAnchorCertificates(SecTrustRef trust, CFArrayRef *anchors)
+OSStatus BACKPORT_IMPL(SecTrustCopyCustomAnchorCertificates)(SecTrustRef trust, CFArrayRef *anchors)
 {
     if (!trust || !anchors)
         return errSecParam;
@@ -73,7 +74,7 @@ OSStatus SecTrustCopyCustomAnchorCertificates(SecTrustRef trust, CFArrayRef *anc
     return errSecSuccess;
 }
 
-CFDictionaryRef SecTrustCopyResult(SecTrustRef trust)
+CFDictionaryRef BACKPORT_IMPL(SecTrustCopyResult)(SecTrustRef trust)
 {
     if (!trust)
         return NULL;
@@ -98,7 +99,7 @@ CFDictionaryRef SecTrustCopyResult(SecTrustRef trust)
     return result;
 }
 
-CFDictionaryRef SecPolicyCopyProperties(SecPolicyRef policyRef)
+CFDictionaryRef BACKPORT_IMPL(SecPolicyCopyProperties)(SecPolicyRef policyRef)
 {
     if (!policyRef)
         return NULL;
@@ -134,7 +135,7 @@ CFDictionaryRef SecPolicyCopyProperties(SecPolicyRef policyRef)
     return result;
 }
 
-SecPolicyRef SecPolicyCreateWithProperties(CFTypeRef policyIdentifier, CFDictionaryRef properties)
+SecPolicyRef BACKPORT_IMPL(SecPolicyCreateWithProperties)(CFTypeRef policyIdentifier, CFDictionaryRef properties)
 {
     if (!policyIdentifier)
         return NULL;

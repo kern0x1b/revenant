@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #include <compression.h>
 #include <lz4/lz4.h>
 #include <lzfse/lzfse.h>
@@ -272,7 +273,7 @@ static enum decode_status decode_codec(uint8_t *dst, size_t dst_size, const uint
     }
 }
 
-COMPRESSION_EXPORT size_t compression_encode_scratch_buffer_size(compression_algorithm algorithm)
+COMPRESSION_EXPORT size_t BACKPORT_IMPL(compression_encode_scratch_buffer_size)(compression_algorithm algorithm)
 {
     switch (algorithm) {
     case COMPRESSION_LZFSE: return lzfse_encode_scratch_size();
@@ -280,7 +281,7 @@ COMPRESSION_EXPORT size_t compression_encode_scratch_buffer_size(compression_alg
     }
 }
 
-COMPRESSION_EXPORT size_t compression_decode_scratch_buffer_size(compression_algorithm algorithm)
+COMPRESSION_EXPORT size_t BACKPORT_IMPL(compression_decode_scratch_buffer_size)(compression_algorithm algorithm)
 {
     switch (algorithm) {
     case COMPRESSION_LZFSE: return lzfse_decode_scratch_size();
@@ -288,7 +289,7 @@ COMPRESSION_EXPORT size_t compression_decode_scratch_buffer_size(compression_alg
     }
 }
 
-COMPRESSION_EXPORT size_t compression_encode_buffer(uint8_t *__restrict dst_buffer, size_t dst_size, const uint8_t *__restrict src_buffer,
+COMPRESSION_EXPORT size_t BACKPORT_IMPL(compression_encode_buffer)(uint8_t *__restrict dst_buffer, size_t dst_size, const uint8_t *__restrict src_buffer,
                                  size_t src_size, void *__nullable scratch_buffer, compression_algorithm algorithm)
 {
     if (!dst_buffer || (!src_buffer && src_size)) return 0;
@@ -338,7 +339,7 @@ COMPRESSION_EXPORT size_t compression_encode_buffer(uint8_t *__restrict dst_buff
     }
 }
 
-COMPRESSION_EXPORT size_t compression_decode_buffer(uint8_t *__restrict dst_buffer, size_t dst_size, const uint8_t *__restrict src_buffer,
+COMPRESSION_EXPORT size_t BACKPORT_IMPL(compression_decode_buffer)(uint8_t *__restrict dst_buffer, size_t dst_size, const uint8_t *__restrict src_buffer,
                                  size_t src_size, void *__nullable scratch_buffer, compression_algorithm algorithm)
 {
     if (!dst_buffer || !src_buffer) return 0;
@@ -788,7 +789,7 @@ static int stream_append_input(struct layer_stream *st, const uint8_t *src, size
     return 1;
 }
 
-COMPRESSION_EXPORT compression_status compression_stream_init(compression_stream *stream, compression_stream_operation operation,
+COMPRESSION_EXPORT compression_status BACKPORT_IMPL(compression_stream_init)(compression_stream *stream, compression_stream_operation operation,
                                                              compression_algorithm algorithm)
 {
     if (!stream) return COMPRESSION_STATUS_ERROR;
@@ -841,7 +842,7 @@ COMPRESSION_EXPORT compression_status compression_stream_init(compression_stream
     return COMPRESSION_STATUS_OK;
 }
 
-COMPRESSION_EXPORT compression_status compression_stream_process(compression_stream *stream, int flags)
+COMPRESSION_EXPORT compression_status BACKPORT_IMPL(compression_stream_process)(compression_stream *stream, int flags)
 {
     struct layer_stream *st = stream ? stream->state : NULL;
     if (!st || st->failed || (stream->src_size && !stream->src_ptr) || (stream->dst_size && !stream->dst_ptr)) {
@@ -870,7 +871,7 @@ COMPRESSION_EXPORT compression_status compression_stream_process(compression_str
     }
 }
 
-COMPRESSION_EXPORT compression_status compression_stream_destroy(compression_stream *stream)
+COMPRESSION_EXPORT compression_status BACKPORT_IMPL(compression_stream_destroy)(compression_stream *stream)
 {
     struct layer_stream *st = stream ? stream->state : NULL;
     if (!st) return COMPRESSION_STATUS_ERROR;

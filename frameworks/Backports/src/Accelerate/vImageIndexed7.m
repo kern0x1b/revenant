@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -39,7 +40,7 @@ static void revenant_subbyte_expand_row(const uint8_t *in, uint8_t *out, vImageP
 }
 
 
-vImage_Error vImageConvert_Planar1toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar1toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -55,7 +56,7 @@ vImage_Error vImageConvert_Planar1toPlanar8(const vImage_Buffer *src, const vIma
 
 
 
-vImage_Error vImageConvert_Planar2toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar2toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -67,7 +68,7 @@ vImage_Error vImageConvert_Planar2toPlanar8(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Planar4toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+vImage_Error BACKPORT_IMPL(vImageConvert_Planar4toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);
     if (ready != kvImageNoError)
@@ -79,7 +80,7 @@ vImage_Error vImageConvert_Planar4toPlanar8(const vImage_Buffer *src, const vIma
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Indexed1toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[2],
+vImage_Error BACKPORT_IMPL(vImageConvert_Indexed1toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[2],
                                             vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);
@@ -96,7 +97,7 @@ vImage_Error vImageConvert_Indexed1toPlanar8(const vImage_Buffer *src, const vIm
     }
     return kvImageNoError;
 }
-vImage_Error vImageConvert_Indexed2toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[4],
+vImage_Error BACKPORT_IMPL(vImageConvert_Indexed2toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[4],
                                             vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);
@@ -114,7 +115,7 @@ vImage_Error vImageConvert_Indexed2toPlanar8(const vImage_Buffer *src, const vIm
     return kvImageNoError;
 }
 
-vImage_Error vImageConvert_Indexed4toPlanar8(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[16],
+vImage_Error BACKPORT_IMPL(vImageConvert_Indexed4toPlanar8)(const vImage_Buffer *src, const vImage_Buffer *dest, const Pixel_8 colors[16],
                                             vImage_Flags flags)
 {
     vImage_Error ready = revenant_subbyte_ready(src, dest, flags);

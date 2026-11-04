@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSProgressUserInfoKey const NSProgressEstimatedTimeRemainingKey = @"NSProgressEstimatedTimeRemainingKey";
-NSProgressFileOperationKind const NSProgressFileOperationKindReceiving = @"NSProgressFileOperationKindReceiving";
+NSProgressUserInfoKey const BACKPORT_IMPL(NSProgressEstimatedTimeRemainingKey) = @"NSProgressEstimatedTimeRemainingKey";
+NSProgressFileOperationKind const BACKPORT_IMPL(NSProgressFileOperationKindReceiving) = @"NSProgressFileOperationKindReceiving";
 
 static id revenant_progress_value(NSProgress *progress, NSString *key)
 {

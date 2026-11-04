@@ -1,10 +1,11 @@
+#include "../revenant_impl.h"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #import "RevenantWebExtensionController.h"
 
-NSString *const WKWebExtensionDataRecordErrorDomain = @"WKWebExtensionDataRecordErrorDomain";
-NSString *const WKWebExtensionDataTypeLocal = @"local";
-NSString *const WKWebExtensionDataTypeSession = @"session";
-NSString *const WKWebExtensionDataTypeSynchronized = @"synchronized";
+NSString *const BACKPORT_IMPL(WKWebExtensionDataRecordErrorDomain) = @"WKWebExtensionDataRecordErrorDomain";
+NSString *const BACKPORT_IMPL(WKWebExtensionDataTypeLocal) = @"local";
+NSString *const BACKPORT_IMPL(WKWebExtensionDataTypeSession) = @"session";
+NSString *const BACKPORT_IMPL(WKWebExtensionDataTypeSynchronized) = @"synchronized";
 
 @implementation WKWebExtensionControllerConfiguration {
     NSUUID *_identifier;
@@ -351,7 +352,7 @@ NSString *const WKWebExtensionDataTypeSynchronized = @"synchronized";
 
 @end
 
-NSString *const WKWebExtensionMessagePortErrorDomain = @"WKWebExtensionMessagePortErrorDomain";
+NSString *const BACKPORT_IMPL(WKWebExtensionMessagePortErrorDomain) = @"WKWebExtensionMessagePortErrorDomain";
 
 @implementation WKWebExtensionMessagePort {
     NSString *_applicationIdentifier;

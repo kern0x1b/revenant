@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
 #include <stdlib.h>
@@ -11,7 +12,7 @@ CFStringRef CVColorPrimariesGetStringForIntegerCodePoint(int codePoint);
 CFStringRef CVTransferFunctionGetStringForIntegerCodePoint(int codePoint);
 CFStringRef CVYCbCrMatrixGetStringForIntegerCodePoint(int codePoint);
 
-OSStatus CMVideoFormatDescriptionGetH264ParameterSetAtIndex(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex, const uint8_t **parameterSetPointerOut,
+OSStatus BACKPORT_IMPL(CMVideoFormatDescriptionGetH264ParameterSetAtIndex)(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex, const uint8_t **parameterSetPointerOut,
                                                             size_t *parameterSetSizeOut, size_t *parameterSetCountOut, int *NALUnitHeaderLengthOut)
 {
     if (!videoDesc || CMFormatDescriptionGetMediaType(videoDesc) != kCMMediaType_Video || CMFormatDescriptionGetMediaSubType(videoDesc) != kCMVideoCodecType_H264)
@@ -394,7 +395,7 @@ static void revenant_append_sets(CFMutableDataRef record, const uint8_t *const *
     }
 }
 
-OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allocator, size_t parameterSetCount, const uint8_t *const *parameterSetPointers,
+OSStatus BACKPORT_IMPL(CMVideoFormatDescriptionCreateFromH264ParameterSets)(CFAllocatorRef allocator, size_t parameterSetCount, const uint8_t *const *parameterSetPointers,
                                                              const size_t *parameterSetSizes, int NALUnitHeaderLength, CMFormatDescriptionRef *formatDescriptionOut)
 {
     if (!formatDescriptionOut)

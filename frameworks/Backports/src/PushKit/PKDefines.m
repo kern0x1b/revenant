@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <PushKit/PushKit.h>
 
-PKPushType const PKPushTypeVoIP = @"PKPushTypeVoIP";
+PKPushType const BACKPORT_IMPL(PKPushTypeVoIP) = @"PKPushTypeVoIP";

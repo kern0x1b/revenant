@@ -174,10 +174,10 @@ end
 
 local function status_of(state, keys, symbol_owners, method_owners, defined)
     local status = {}
-    local total_implemented, total_members, total_reachable, total_linkable = 0, 0, 0, 0
+    local total_implemented, total_members, total_reachable, total_linkable, total_unavailable = 0, 0, 0, 0, 0
     for _, framework in ipairs(state.frameworks) do
         local implemented, members, linkable, found = 0, 0, 0, 0
-        for _, row in ipairs(generate.in_scope_rows(state, framework)) do
+        for _, row in ipairs(generate.available_rows(state, framework)) do
             if row.kind ~= "enum constant" then
                 members = members + 1
                 if implemented_row(row, framework, keys, defined) then
@@ -191,13 +191,17 @@ local function status_of(state, keys, symbol_owners, method_owners, defined)
                 end
             end
         end
+        local unavailable = generate.unavailable_count(state, framework)
         total_implemented = total_implemented + implemented
         total_members = total_members + members
         total_reachable = total_reachable + found
         total_linkable = total_linkable + linkable
-        table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d", framework.name, implemented, members, found, linkable))
+        total_unavailable = total_unavailable + unavailable
+        table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d, unavailable on iOS %d",
+            framework.name, implemented, members, found, linkable, unavailable))
     end
-    table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d", "total", total_implemented, total_members, total_reachable, total_linkable))
+    table.insert(status, string.format("%-28s implemented %d of %d, reachable %d of %d, unavailable on iOS %d",
+        "total", total_implemented, total_members, total_reachable, total_linkable, total_unavailable))
     return status
 end
 

@@ -1,11 +1,12 @@
+#include "../revenant_impl.h"
 #import <CoreNFC/CoreNFC.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSErrorDomain const NFCErrorDomain = @"NFCError";
+NSErrorDomain const BACKPORT_IMPL(NFCErrorDomain) = @"NFCError";
 
-NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode";
+NSString * const BACKPORT_IMPL(NFCISO15693TagResponseErrorKey) = @"ISO15693TagResponseErrorCode";
 
 @interface NFCReaderSession (RevenantReaderSession)
 - (instancetype)initReaderWithDelegate:(id)delegate queue:(dispatch_queue_t)queue;

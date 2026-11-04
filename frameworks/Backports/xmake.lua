@@ -1,6 +1,3 @@
-option("backports_min_ios", {default = "6.0", showmenu = true,
-    description = "The oldest iOS a build supports: the backports hold every member introduced after it, and every member of a framework absent at it."})
-
 if get_config("component") == "Swift" then
     includes("src/Swift")
     return
@@ -26,7 +23,7 @@ if is_plat("iphoneos") then
 end
 
 if is_plat("iphoneos") then
-    local generator
+    local skeleton_generated = false
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
@@ -154,13 +151,13 @@ if is_plat("iphoneos") then
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
             end
-            on_load(function (target)
-                generator = import("generate", {rootdir = TOOLS, anonymous = true})
-            end)
             on_config(function (target)
-                generator.skeleton_for(library.folder)
+                if not skeleton_generated then
+                    os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TOOLS, "generate.lua")})
+                    skeleton_generated = true
+                end
                 local files = {}
-                for _, file in ipairs({path.join(SKELETON, library.folder .. ".m"), path.join(SKELETON, library.folder .. ".c")}) do
+                for _, file in ipairs({path.join(SKELETON, library.folder .. ".m")}) do
                     if os.isfile(file) then
                         table.insert(files, file)
                     end
@@ -314,7 +311,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",

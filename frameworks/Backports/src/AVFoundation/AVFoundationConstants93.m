@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVMetadataKeySpaceHLSDateRange = @"lsdr";
+NSString *const BACKPORT_IMPL(AVMetadataKeySpaceHLSDateRange) = @"lsdr";

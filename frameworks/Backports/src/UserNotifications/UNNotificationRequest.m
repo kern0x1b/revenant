@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantUserNotifications.h"
 
 @implementation UNNotificationRequest {
@@ -238,9 +239,9 @@
 
 @end
 
-NSString *const UNNotificationDefaultActionIdentifier = @"com.apple.UNNotificationDefaultActionIdentifier";
-NSString *const UNNotificationDismissActionIdentifier = @"com.apple.UNNotificationDismissActionIdentifier";
-NSString *const UNErrorDomain = @"UNErrorDomain";
+NSString *const BACKPORT_IMPL(UNNotificationDefaultActionIdentifier) = @"com.apple.UNNotificationDefaultActionIdentifier";
+NSString *const BACKPORT_IMPL(UNNotificationDismissActionIdentifier) = @"com.apple.UNNotificationDismissActionIdentifier";
+NSString *const BACKPORT_IMPL(UNErrorDomain) = @"UNErrorDomain";
 
 @implementation UNTextInputNotificationResponse {
 @private

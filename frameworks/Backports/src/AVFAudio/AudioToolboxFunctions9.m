@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AudioComponent.h>
 #import <dispatch/dispatch.h>
@@ -59,19 +60,19 @@ static void RevenantPlaySoundWithCompletion(SystemSoundID sound, void (^completi
     }
 }
 
-void AudioServicesPlaySystemSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void))
+void BACKPORT_IMPL(AudioServicesPlaySystemSoundWithCompletion)(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void))
 {
     RevenantPlaySoundWithCompletion(inSystemSoundID, inCompletionBlock, AudioServicesPlaySystemSound);
 }
 
-void AudioServicesPlayAlertSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void))
+void BACKPORT_IMPL(AudioServicesPlayAlertSoundWithCompletion)(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void))
 {
     RevenantPlaySoundWithCompletion(inSystemSoundID, inCompletionBlock, AudioServicesPlayAlertSound);
 }
 
 #define RevenantAudioComponentNoComponentStatus ((OSStatus)-3000)
 
-void AudioComponentInstantiate(AudioComponent inComponent, AudioComponentInstantiationOptions inOptions,
+void BACKPORT_IMPL(AudioComponentInstantiate)(AudioComponent inComponent, AudioComponentInstantiationOptions inOptions,
                                void (^inCompletionHandler)(AudioComponentInstance _Nullable, OSStatus))
 {
     AudioComponentInstance instance = NULL;

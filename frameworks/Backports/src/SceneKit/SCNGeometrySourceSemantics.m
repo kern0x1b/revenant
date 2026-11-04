@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-SCNGeometrySourceSemantic const SCNGeometrySourceSemanticVertex = @"kGeometrySourceSemanticVertex";
-SCNGeometrySourceSemantic const SCNGeometrySourceSemanticNormal = @"kGeometrySourceSemanticNormal";
-SCNGeometrySourceSemantic const SCNGeometrySourceSemanticColor = @"kGeometrySourceSemanticColor";
-SCNGeometrySourceSemantic const SCNGeometrySourceSemanticTexcoord = @"kGeometrySourceSemanticTexcoord";
+SCNGeometrySourceSemantic const BACKPORT_IMPL(SCNGeometrySourceSemanticVertex) = @"kGeometrySourceSemanticVertex";
+SCNGeometrySourceSemantic const BACKPORT_IMPL(SCNGeometrySourceSemanticNormal) = @"kGeometrySourceSemanticNormal";
+SCNGeometrySourceSemantic const BACKPORT_IMPL(SCNGeometrySourceSemanticColor) = @"kGeometrySourceSemanticColor";
+SCNGeometrySourceSemantic const BACKPORT_IMPL(SCNGeometrySourceSemanticTexcoord) = @"kGeometrySourceSemanticTexcoord";

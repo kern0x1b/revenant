@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -15,7 +16,7 @@ static BOOL RevenantVTHasFrameOptions(CFDictionaryRef frameOptions)
     return frameOptions && CFDictionaryGetCount(frameOptions) > 0;
 }
 
-OSStatus VTDecompressionSessionDecodeFrameWithOptions(
+OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrameWithOptions)(
     VTDecompressionSessionRef CM_NONNULL session,
     CMSampleBufferRef CM_NONNULL sampleBuffer,
     VTDecodeFrameFlags decodeFlags,
@@ -36,7 +37,7 @@ OSStatus VTDecompressionSessionDecodeFrameWithOptions(
     return VTDecompressionSessionDecodeFrame(session, sampleBuffer, decodeFlags, sourceFrameRefCon, infoFlagsOut);
 }
 
-OSStatus VTDecompressionSessionDecodeFrameWithOptionsAndOutputHandler(
+OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrameWithOptionsAndOutputHandler)(
     VTDecompressionSessionRef CM_NONNULL session,
     CMSampleBufferRef CM_NONNULL sampleBuffer,
     VTDecodeFrameFlags decodeFlags,

@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <ExposureNotification/ExposureNotification.h>
 
-NSErrorDomain const ENErrorDomain = @"ENErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(ENErrorDomain) = @"ENErrorDomain";

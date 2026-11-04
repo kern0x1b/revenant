@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
@@ -21,7 +22,7 @@ static BOOL revenant_der_read(const uint8_t *bytes, size_t length, size_t *offse
     return YES;
 }
 
-CFDataRef SecCertificateCopySerialNumberData(SecCertificateRef certificate, CFErrorRef *error)
+CFDataRef BACKPORT_IMPL(SecCertificateCopySerialNumberData)(SecCertificateRef certificate, CFErrorRef *error)
 {
     CFDataRef data = certificate ? SecCertificateCopyData(certificate) : NULL;
     const uint8_t *bytes = data ? CFDataGetBytePtr(data) : NULL;

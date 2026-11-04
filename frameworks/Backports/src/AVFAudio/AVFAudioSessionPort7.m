@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioSessionPortCarAudio = @"CarAudio";
+NSString * const BACKPORT_IMPL(AVAudioSessionPortCarAudio) = @"CarAudio";

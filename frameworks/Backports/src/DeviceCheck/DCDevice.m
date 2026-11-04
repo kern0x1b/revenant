@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantDeviceCheck.h"
 
-NSErrorDomain const DCErrorDomain = @"com.apple.devicecheck.error";
+NSErrorDomain const BACKPORT_IMPL(DCErrorDomain) = @"com.apple.devicecheck.error";
 
 NSError *revenant_device_check_unsupported(void)
 {

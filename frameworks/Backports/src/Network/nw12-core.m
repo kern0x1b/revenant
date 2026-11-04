@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -10,29 +11,29 @@
 #undef nw_retain
 #undef nw_release
 
-void *nw_retain(void *object)
+void *BACKPORT_IMPL(nw_retain)(void *object)
 {
     return (void *)CFBridgingRetain((__bridge id)object);
 }
 
-void nw_release(void *object)
+void BACKPORT_IMPL(nw_release)(void *object)
 {
     CFBridgingRelease((void *)object);
 }
 
 #pragma mark - nw_error
 
-nw_error_domain_t nw_error_get_error_domain(nw_error_t error)
+nw_error_domain_t BACKPORT_IMPL(nw_error_get_error_domain)(nw_error_t error)
 {
     return error ? ((RevenantNWError *)error)->_domain : nw_error_domain_invalid;
 }
 
-int nw_error_get_error_code(nw_error_t error)
+int BACKPORT_IMPL(nw_error_get_error_code)(nw_error_t error)
 {
     return error ? ((RevenantNWError *)error)->_code : 0;
 }
 
-CFErrorRef nw_error_copy_cf_error(nw_error_t error)
+CFErrorRef BACKPORT_IMPL(nw_error_copy_cf_error)(nw_error_t error)
 {
     if (!error)
         return NULL;
@@ -58,7 +59,7 @@ CFErrorRef nw_error_copy_cf_error(nw_error_t error)
 
 #pragma mark - nw_endpoint
 
-nw_endpoint_t nw_endpoint_create_host(const char *hostname, const char *port)
+nw_endpoint_t BACKPORT_IMPL(nw_endpoint_create_host)(const char *hostname, const char *port)
 {
     if (!hostname)
         return NULL;
@@ -78,7 +79,7 @@ nw_endpoint_t nw_endpoint_create_host(const char *hostname, const char *port)
     return endpoint;
 }
 
-nw_endpoint_t nw_endpoint_create_address(const struct sockaddr *address)
+nw_endpoint_t BACKPORT_IMPL(nw_endpoint_create_address)(const struct sockaddr *address)
 {
     if (!address)
         return NULL;
@@ -96,7 +97,7 @@ nw_endpoint_t nw_endpoint_create_address(const struct sockaddr *address)
     return endpoint;
 }
 
-nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *type, const char *domain)
+nw_endpoint_t BACKPORT_IMPL(nw_endpoint_create_bonjour_service)(const char *name, const char *type, const char *domain)
 {
     if (!name || !*name || !type || !*type || !domain || !*domain)
         return NULL;
@@ -109,12 +110,12 @@ nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *t
     return endpoint;
 }
 
-nw_endpoint_type_t nw_endpoint_get_type(nw_endpoint_t endpoint)
+nw_endpoint_type_t BACKPORT_IMPL(nw_endpoint_get_type)(nw_endpoint_t endpoint)
 {
     return endpoint ? ((RevenantNWEndpointValue *)endpoint)->_type : nw_endpoint_type_invalid;
 }
 
-const char *nw_endpoint_get_hostname(nw_endpoint_t endpoint)
+const char *BACKPORT_IMPL(nw_endpoint_get_hostname)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || (value->_type != nw_endpoint_type_host && value->_type != nw_endpoint_type_address &&
@@ -123,7 +124,7 @@ const char *nw_endpoint_get_hostname(nw_endpoint_t endpoint)
     return value->_hostname.UTF8String;
 }
 
-uint16_t nw_endpoint_get_port(nw_endpoint_t endpoint)
+uint16_t BACKPORT_IMPL(nw_endpoint_get_port)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_port.length)
@@ -134,7 +135,7 @@ uint16_t nw_endpoint_get_port(nw_endpoint_t endpoint)
     return (uint16_t)number;
 }
 
-const struct sockaddr *nw_endpoint_get_address(nw_endpoint_t endpoint)
+const struct sockaddr *BACKPORT_IMPL(nw_endpoint_get_address)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_address)
@@ -142,7 +143,7 @@ const struct sockaddr *nw_endpoint_get_address(nw_endpoint_t endpoint)
     return (const struct sockaddr *)value->_address.bytes;
 }
 
-const char *nw_endpoint_get_bonjour_service_name(nw_endpoint_t endpoint)
+const char *BACKPORT_IMPL(nw_endpoint_get_bonjour_service_name)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
@@ -150,7 +151,7 @@ const char *nw_endpoint_get_bonjour_service_name(nw_endpoint_t endpoint)
     return value->_bonjourName.UTF8String;
 }
 
-const char *nw_endpoint_get_bonjour_service_type(nw_endpoint_t endpoint)
+const char *BACKPORT_IMPL(nw_endpoint_get_bonjour_service_type)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
@@ -158,7 +159,7 @@ const char *nw_endpoint_get_bonjour_service_type(nw_endpoint_t endpoint)
     return value->_bonjourType.UTF8String;
 }
 
-const char *nw_endpoint_get_bonjour_service_domain(nw_endpoint_t endpoint)
+const char *BACKPORT_IMPL(nw_endpoint_get_bonjour_service_domain)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_bonjour_service)
@@ -166,7 +167,7 @@ const char *nw_endpoint_get_bonjour_service_domain(nw_endpoint_t endpoint)
     return value->_bonjourDomain.UTF8String;
 }
 
-char *nw_endpoint_copy_address_string(nw_endpoint_t endpoint)
+char *BACKPORT_IMPL(nw_endpoint_copy_address_string)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value)
@@ -180,7 +181,7 @@ char *nw_endpoint_copy_address_string(nw_endpoint_t endpoint)
     return NULL;
 }
 
-char *nw_endpoint_copy_port_string(nw_endpoint_t endpoint)
+char *BACKPORT_IMPL(nw_endpoint_copy_port_string)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || !value->_port.length)
@@ -216,7 +217,7 @@ static nw_protocol_definition_t revenant_builtin_definition(NSString *family)
     }
 }
 
-bool nw_protocol_definition_is_equal(nw_protocol_definition_t first, nw_protocol_definition_t second)
+bool BACKPORT_IMPL(nw_protocol_definition_is_equal)(nw_protocol_definition_t first, nw_protocol_definition_t second)
 {
     if (first == second)
         return true;
@@ -229,32 +230,32 @@ bool nw_protocol_definition_is_equal(nw_protocol_definition_t first, nw_protocol
            [a->_identifier isEqualToString:b->_identifier];
 }
 
-nw_protocol_definition_t nw_protocol_options_copy_definition(nw_protocol_options_t options)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_options_copy_definition)(nw_protocol_options_t options)
 {
     return options ? ((RevenantNWProtocolOptions *)options)->_definition : NULL;
 }
 
-nw_protocol_definition_t nw_protocol_metadata_copy_definition(nw_protocol_metadata_t metadata)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_metadata_copy_definition)(nw_protocol_metadata_t metadata)
 {
     return metadata ? ((RevenantNWProtocolMetadata *)metadata)->_definition : NULL;
 }
 
-nw_protocol_definition_t nw_protocol_copy_tcp_definition(void)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_copy_tcp_definition)(void)
 {
     return revenant_builtin_definition(@"nw_tcp");
 }
 
-nw_protocol_definition_t nw_protocol_copy_udp_definition(void)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_copy_udp_definition)(void)
 {
     return revenant_builtin_definition(@"nw_udp");
 }
 
-nw_protocol_definition_t nw_protocol_copy_ip_definition(void)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_copy_ip_definition)(void)
 {
     return revenant_builtin_definition(@"nw_ip");
 }
 
-nw_protocol_definition_t nw_protocol_copy_tls_definition(void)
+nw_protocol_definition_t BACKPORT_IMPL(nw_protocol_copy_tls_definition)(void)
 {
     return revenant_builtin_definition(@"nw_tls");
 }
@@ -268,17 +269,17 @@ static RevenantNWProtocolOptions *revenant_options(nw_protocol_definition_t defi
     return options;
 }
 
-nw_protocol_options_t nw_tcp_create_options(void)
+nw_protocol_options_t BACKPORT_IMPL(nw_tcp_create_options)(void)
 {
     return revenant_options(revenant_builtin_definition(@"nw_tcp"));
 }
 
-nw_protocol_options_t nw_udp_create_options(void)
+nw_protocol_options_t BACKPORT_IMPL(nw_udp_create_options)(void)
 {
     return revenant_options(revenant_builtin_definition(@"nw_udp"));
 }
 
-nw_protocol_options_t nw_tls_create_options(void)
+nw_protocol_options_t BACKPORT_IMPL(nw_tls_create_options)(void)
 {
     return revenant_options(revenant_builtin_definition(@"nw_tls"));
 }
@@ -291,27 +292,27 @@ static bool revenant_metadata_is(nw_protocol_metadata_t metadata, NSString *fami
     return [value->_definition->_family isEqualToString:family];
 }
 
-bool nw_protocol_metadata_is_tcp(nw_protocol_metadata_t metadata)
+bool BACKPORT_IMPL(nw_protocol_metadata_is_tcp)(nw_protocol_metadata_t metadata)
 {
     return revenant_metadata_is(metadata, @"nw_tcp");
 }
 
-bool nw_protocol_metadata_is_udp(nw_protocol_metadata_t metadata)
+bool BACKPORT_IMPL(nw_protocol_metadata_is_udp)(nw_protocol_metadata_t metadata)
 {
     return revenant_metadata_is(metadata, @"nw_udp");
 }
 
-bool nw_protocol_metadata_is_ip(nw_protocol_metadata_t metadata)
+bool BACKPORT_IMPL(nw_protocol_metadata_is_ip)(nw_protocol_metadata_t metadata)
 {
     return revenant_metadata_is(metadata, @"nw_ip");
 }
 
-bool nw_protocol_metadata_is_tls(nw_protocol_metadata_t metadata)
+bool BACKPORT_IMPL(nw_protocol_metadata_is_tls)(nw_protocol_metadata_t metadata)
 {
     return revenant_metadata_is(metadata, @"nw_tls");
 }
 
-nw_protocol_metadata_t nw_ip_create_metadata(void)
+nw_protocol_metadata_t BACKPORT_IMPL(nw_ip_create_metadata)(void)
 {
     RevenantNWProtocolMetadata *metadata = [[RevenantNWProtocolMetadata alloc] init];
     metadata->_definition = (RevenantNWProtocolDefinition *)revenant_builtin_definition(@"nw_ip");
@@ -320,7 +321,7 @@ nw_protocol_metadata_t nw_ip_create_metadata(void)
     return metadata;
 }
 
-nw_protocol_metadata_t nw_udp_create_metadata(void)
+nw_protocol_metadata_t BACKPORT_IMPL(nw_udp_create_metadata)(void)
 {
     RevenantNWProtocolMetadata *metadata = [[RevenantNWProtocolMetadata alloc] init];
     metadata->_definition = (RevenantNWProtocolDefinition *)revenant_builtin_definition(@"nw_udp");
@@ -329,7 +330,7 @@ nw_protocol_metadata_t nw_udp_create_metadata(void)
     return metadata;
 }
 
-sec_protocol_options_t nw_tls_copy_sec_protocol_options(nw_protocol_options_t options)
+sec_protocol_options_t BACKPORT_IMPL(nw_tls_copy_sec_protocol_options)(nw_protocol_options_t options)
 {
     if (![options isKindOfClass:[RevenantNWProtocolOptions class]])
         return NULL;
@@ -342,7 +343,7 @@ sec_protocol_options_t nw_tls_copy_sec_protocol_options(nw_protocol_options_t op
     return (sec_protocol_options_t)sec;
 }
 
-sec_protocol_metadata_t nw_tls_copy_sec_protocol_metadata(nw_protocol_metadata_t metadata)
+sec_protocol_metadata_t BACKPORT_IMPL(nw_tls_copy_sec_protocol_metadata)(nw_protocol_metadata_t metadata)
 {
     if (![metadata isKindOfClass:[RevenantNWProtocolMetadata class]])
         return NULL;
@@ -357,24 +358,24 @@ sec_protocol_metadata_t nw_tls_copy_sec_protocol_metadata(nw_protocol_metadata_t
 
 #pragma mark - nw_protocol_stack
 
-nw_protocol_options_t nw_protocol_stack_copy_internet_protocol(nw_protocol_stack_t stack)
+nw_protocol_options_t BACKPORT_IMPL(nw_protocol_stack_copy_internet_protocol)(nw_protocol_stack_t stack)
 {
     return stack ? ((RevenantNWProtocolStack *)stack)->_internet : NULL;
 }
 
-nw_protocol_options_t nw_protocol_stack_copy_transport_protocol(nw_protocol_stack_t stack)
+nw_protocol_options_t BACKPORT_IMPL(nw_protocol_stack_copy_transport_protocol)(nw_protocol_stack_t stack)
 {
     return stack ? ((RevenantNWProtocolStack *)stack)->_transport : NULL;
 }
 
-void nw_protocol_stack_set_transport_protocol(nw_protocol_stack_t stack, nw_protocol_options_t protocol)
+void BACKPORT_IMPL(nw_protocol_stack_set_transport_protocol)(nw_protocol_stack_t stack, nw_protocol_options_t protocol)
 {
     if (!stack)
         return;
     ((RevenantNWProtocolStack *)stack)->_transport = (RevenantNWProtocolOptions *)protocol;
 }
 
-void nw_protocol_stack_prepend_application_protocol(nw_protocol_stack_t stack, nw_protocol_options_t protocol)
+void BACKPORT_IMPL(nw_protocol_stack_prepend_application_protocol)(nw_protocol_stack_t stack, nw_protocol_options_t protocol)
 {
     RevenantNWProtocolStack *value = (RevenantNWProtocolStack *)stack;
     if (!value || !protocol)
@@ -382,7 +383,7 @@ void nw_protocol_stack_prepend_application_protocol(nw_protocol_stack_t stack, n
     [value->_application insertObject:(RevenantNWProtocolOptions *)protocol atIndex:0];
 }
 
-void nw_protocol_stack_clear_application_protocols(nw_protocol_stack_t stack)
+void BACKPORT_IMPL(nw_protocol_stack_clear_application_protocols)(nw_protocol_stack_t stack)
 {
     RevenantNWProtocolStack *value = (RevenantNWProtocolStack *)stack;
     if (!value)
@@ -390,7 +391,7 @@ void nw_protocol_stack_clear_application_protocols(nw_protocol_stack_t stack)
     [value->_application removeAllObjects];
 }
 
-void nw_protocol_stack_iterate_application_protocols(nw_protocol_stack_t stack, nw_protocol_stack_iterate_protocols_block_t iterate_block)
+void BACKPORT_IMPL(nw_protocol_stack_iterate_application_protocols)(nw_protocol_stack_t stack, nw_protocol_stack_iterate_protocols_block_t iterate_block)
 {
     RevenantNWProtocolStack *value = (RevenantNWProtocolStack *)stack;
     if (!value || !iterate_block)
@@ -401,7 +402,7 @@ void nw_protocol_stack_iterate_application_protocols(nw_protocol_stack_t stack, 
 
 #pragma mark - nw_content_context
 
-nw_content_context_t nw_content_context_create(const char *context_identifier)
+nw_content_context_t BACKPORT_IMPL(nw_content_context_create)(const char *context_identifier)
 {
     if (!context_identifier)
         return NULL;
@@ -414,12 +415,12 @@ nw_content_context_t nw_content_context_create(const char *context_identifier)
     return context;
 }
 
-const char *nw_content_context_get_identifier(nw_content_context_t context)
+const char *BACKPORT_IMPL(nw_content_context_get_identifier)(nw_content_context_t context)
 {
     return context ? ((RevenantNWContentContext *)context)->_identifier.UTF8String : NULL;
 }
 
-double nw_content_context_get_relative_priority(nw_content_context_t context)
+double BACKPORT_IMPL(nw_content_context_get_relative_priority)(nw_content_context_t context)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (!value)
@@ -427,14 +428,14 @@ double nw_content_context_get_relative_priority(nw_content_context_t context)
     return value->_isFinal ? 0.5 : value->_relativePriority;
 }
 
-void nw_content_context_set_relative_priority(nw_content_context_t context, double relative_priority)
+void BACKPORT_IMPL(nw_content_context_set_relative_priority)(nw_content_context_t context, double relative_priority)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (value && !value->_isFinal)
         value->_relativePriority = relative_priority;
 }
 
-uint64_t nw_content_context_get_expiration_milliseconds(nw_content_context_t context)
+uint64_t BACKPORT_IMPL(nw_content_context_get_expiration_milliseconds)(nw_content_context_t context)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (!value)
@@ -442,38 +443,38 @@ uint64_t nw_content_context_get_expiration_milliseconds(nw_content_context_t con
     return value->_isFinal ? 0 : value->_expirationMilliseconds;
 }
 
-void nw_content_context_set_expiration_milliseconds(nw_content_context_t context, uint64_t expiration_milliseconds)
+void BACKPORT_IMPL(nw_content_context_set_expiration_milliseconds)(nw_content_context_t context, uint64_t expiration_milliseconds)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (value && !value->_isFinal)
         value->_expirationMilliseconds = expiration_milliseconds;
 }
 
-bool nw_content_context_get_is_final(nw_content_context_t context)
+bool BACKPORT_IMPL(nw_content_context_get_is_final)(nw_content_context_t context)
 {
     return context ? ((RevenantNWContentContext *)context)->_isFinal : false;
 }
 
-void nw_content_context_set_is_final(nw_content_context_t context, bool is_final)
+void BACKPORT_IMPL(nw_content_context_set_is_final)(nw_content_context_t context, bool is_final)
 {
     if (context)
         ((RevenantNWContentContext *)context)->_isFinal = is_final;
 }
 
-nw_content_context_t nw_content_context_copy_antecedent(nw_content_context_t context)
+nw_content_context_t BACKPORT_IMPL(nw_content_context_copy_antecedent)(nw_content_context_t context)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     return value ? value->_antecedent : NULL;
 }
 
-void nw_content_context_set_antecedent(nw_content_context_t context, nw_content_context_t antecedent_context)
+void BACKPORT_IMPL(nw_content_context_set_antecedent)(nw_content_context_t context, nw_content_context_t antecedent_context)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (value && !value->_isFinal)
         value->_antecedent = (RevenantNWContentContext *)antecedent_context;
 }
 
-void nw_content_context_set_metadata_for_protocol(nw_content_context_t context, nw_protocol_metadata_t protocol_metadata)
+void BACKPORT_IMPL(nw_content_context_set_metadata_for_protocol)(nw_content_context_t context, nw_protocol_metadata_t protocol_metadata)
 {
     RevenantNWProtocolMetadata *metadata = (RevenantNWProtocolMetadata *)protocol_metadata;
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
@@ -482,7 +483,7 @@ void nw_content_context_set_metadata_for_protocol(nw_content_context_t context, 
     value->_metadata[metadata->_definition->_family] = metadata;
 }
 
-nw_protocol_metadata_t nw_content_context_copy_protocol_metadata(nw_content_context_t context, nw_protocol_definition_t protocol)
+nw_protocol_metadata_t BACKPORT_IMPL(nw_content_context_copy_protocol_metadata)(nw_content_context_t context, nw_protocol_definition_t protocol)
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     RevenantNWProtocolDefinition *definition = (RevenantNWProtocolDefinition *)protocol;
@@ -491,7 +492,7 @@ nw_protocol_metadata_t nw_content_context_copy_protocol_metadata(nw_content_cont
     return value->_metadata[definition->_family];
 }
 
-void nw_content_context_foreach_protocol_metadata(nw_content_context_t context, void (^foreach_block)(nw_protocol_definition_t definition, nw_protocol_metadata_t metadata))
+void BACKPORT_IMPL(nw_content_context_foreach_protocol_metadata)(nw_content_context_t context, void (^foreach_block)(nw_protocol_definition_t definition, nw_protocol_metadata_t metadata))
 {
     RevenantNWContentContext *value = (RevenantNWContentContext *)context;
     if (!value || !foreach_block)
@@ -504,88 +505,88 @@ void nw_content_context_foreach_protocol_metadata(nw_content_context_t context, 
 
 #pragma mark - nw_tcp_options
 
-void nw_tcp_options_set_no_delay(nw_protocol_options_t options, bool no_delay)
+void BACKPORT_IMPL(nw_tcp_options_set_no_delay)(nw_protocol_options_t options, bool no_delay)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "no_delay", no_delay);
 }
 
-void nw_tcp_options_set_no_options(nw_protocol_options_t options, bool no_options)
+void BACKPORT_IMPL(nw_tcp_options_set_no_options)(nw_protocol_options_t options, bool no_options)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "no_options", no_options);
 }
 
-void nw_tcp_options_set_no_push(nw_protocol_options_t options, bool no_push)
+void BACKPORT_IMPL(nw_tcp_options_set_no_push)(nw_protocol_options_t options, bool no_push)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "no_push", no_push);
 }
 
-void nw_tcp_options_set_retransmit_fin_drop(nw_protocol_options_t options, bool retransmit_fin_drop)
+void BACKPORT_IMPL(nw_tcp_options_set_retransmit_fin_drop)(nw_protocol_options_t options, bool retransmit_fin_drop)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "retransmit_fin_drop", retransmit_fin_drop);
 }
 
-void nw_tcp_options_set_disable_ack_stretching(nw_protocol_options_t options, bool disable_ack_stretching)
+void BACKPORT_IMPL(nw_tcp_options_set_disable_ack_stretching)(nw_protocol_options_t options, bool disable_ack_stretching)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "disable_ack_stretching", disable_ack_stretching);
 }
 
-void nw_tcp_options_set_disable_ecn(nw_protocol_options_t options, bool disable_ecn)
+void BACKPORT_IMPL(nw_tcp_options_set_disable_ecn)(nw_protocol_options_t options, bool disable_ecn)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "disable_ecn", disable_ecn);
 }
 
-void nw_tcp_options_set_enable_fast_open(nw_protocol_options_t options, bool enable_fast_open)
+void BACKPORT_IMPL(nw_tcp_options_set_enable_fast_open)(nw_protocol_options_t options, bool enable_fast_open)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "enable_fast_open", enable_fast_open);
 }
 
-void nw_tcp_options_set_enable_keepalive(nw_protocol_options_t options, bool enable_keepalive)
+void BACKPORT_IMPL(nw_tcp_options_set_enable_keepalive)(nw_protocol_options_t options, bool enable_keepalive)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "enable_keepalive", enable_keepalive);
 }
 
-void nw_tcp_options_set_connection_timeout(nw_protocol_options_t options, uint32_t connection_timeout)
+void BACKPORT_IMPL(nw_tcp_options_set_connection_timeout)(nw_protocol_options_t options, uint32_t connection_timeout)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "connection_timeout", connection_timeout);
 }
 
-void nw_tcp_options_set_keepalive_count(nw_protocol_options_t options, uint32_t keepalive_count)
+void BACKPORT_IMPL(nw_tcp_options_set_keepalive_count)(nw_protocol_options_t options, uint32_t keepalive_count)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "keepalive_count", keepalive_count);
 }
 
-void nw_tcp_options_set_keepalive_idle_time(nw_protocol_options_t options, uint32_t keepalive_idle_time)
+void BACKPORT_IMPL(nw_tcp_options_set_keepalive_idle_time)(nw_protocol_options_t options, uint32_t keepalive_idle_time)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "keepalive_idle_time", keepalive_idle_time);
 }
 
-void nw_tcp_options_set_keepalive_interval(nw_protocol_options_t options, uint32_t keepalive_interval)
+void BACKPORT_IMPL(nw_tcp_options_set_keepalive_interval)(nw_protocol_options_t options, uint32_t keepalive_interval)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "keepalive_interval", keepalive_interval);
 }
 
-void nw_tcp_options_set_maximum_segment_size(nw_protocol_options_t options, uint32_t maximum_segment_size)
+void BACKPORT_IMPL(nw_tcp_options_set_maximum_segment_size)(nw_protocol_options_t options, uint32_t maximum_segment_size)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "maximum_segment_size", maximum_segment_size);
 }
 
-void nw_tcp_options_set_persist_timeout(nw_protocol_options_t options, uint32_t persist_timeout)
+void BACKPORT_IMPL(nw_tcp_options_set_persist_timeout)(nw_protocol_options_t options, uint32_t persist_timeout)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "persist_timeout", persist_timeout);
 }
 
-void nw_tcp_options_set_retransmit_connection_drop_time(nw_protocol_options_t options, uint32_t retransmit_connection_drop_time)
+void BACKPORT_IMPL(nw_tcp_options_set_retransmit_connection_drop_time)(nw_protocol_options_t options, uint32_t retransmit_connection_drop_time)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "retransmit_connection_drop_time", retransmit_connection_drop_time);
 }
 
-uint32_t nw_tcp_get_available_send_buffer(nw_protocol_metadata_t metadata)
+uint32_t BACKPORT_IMPL(nw_tcp_get_available_send_buffer)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (uint32_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "available_send_buffer", 0);
 }
 
-uint32_t nw_tcp_get_available_receive_buffer(nw_protocol_metadata_t metadata)
+uint32_t BACKPORT_IMPL(nw_tcp_get_available_receive_buffer)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (uint32_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "available_receive_buffer", 0);
@@ -593,61 +594,61 @@ uint32_t nw_tcp_get_available_receive_buffer(nw_protocol_metadata_t metadata)
 
 #pragma mark - nw_udp_options
 
-void nw_udp_options_set_prefer_no_checksum(nw_protocol_options_t options, bool prefer_no_checksum)
+void BACKPORT_IMPL(nw_udp_options_set_prefer_no_checksum)(nw_protocol_options_t options, bool prefer_no_checksum)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "prefer_no_checksum", prefer_no_checksum);
 }
 
 #pragma mark - nw_ip_options
 
-void nw_ip_options_set_version(nw_protocol_options_t options, nw_ip_version_t version)
+void BACKPORT_IMPL(nw_ip_options_set_version)(nw_protocol_options_t options, nw_ip_version_t version)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "version", version);
 }
 
-void nw_ip_options_set_hop_limit(nw_protocol_options_t options, uint8_t hop_limit)
+void BACKPORT_IMPL(nw_ip_options_set_hop_limit)(nw_protocol_options_t options, uint8_t hop_limit)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "hop_limit", hop_limit);
 }
 
-void nw_ip_options_set_calculate_receive_time(nw_protocol_options_t options, bool calculate_receive_time)
+void BACKPORT_IMPL(nw_ip_options_set_calculate_receive_time)(nw_protocol_options_t options, bool calculate_receive_time)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "calculate_receive_time", calculate_receive_time);
 }
 
-void nw_ip_options_set_disable_fragmentation(nw_protocol_options_t options, bool disable_fragmentation)
+void BACKPORT_IMPL(nw_ip_options_set_disable_fragmentation)(nw_protocol_options_t options, bool disable_fragmentation)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "disable_fragmentation", disable_fragmentation);
 }
 
-void nw_ip_options_set_use_minimum_mtu(nw_protocol_options_t options, bool use_minimum_mtu)
+void BACKPORT_IMPL(nw_ip_options_set_use_minimum_mtu)(nw_protocol_options_t options, bool use_minimum_mtu)
 {
     revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "use_minimum_mtu", use_minimum_mtu);
 }
 
-nw_service_class_t nw_ip_metadata_get_service_class(nw_protocol_metadata_t metadata)
+nw_service_class_t BACKPORT_IMPL(nw_ip_metadata_get_service_class)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (nw_service_class_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "service_class", nw_service_class_best_effort);
 }
 
-void nw_ip_metadata_set_service_class(nw_protocol_metadata_t metadata, nw_service_class_t service_class)
+void BACKPORT_IMPL(nw_ip_metadata_set_service_class)(nw_protocol_metadata_t metadata, nw_service_class_t service_class)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolMetadata *)metadata)->_values, "service_class", service_class);
 }
 
-nw_ip_ecn_flag_t nw_ip_metadata_get_ecn_flag(nw_protocol_metadata_t metadata)
+nw_ip_ecn_flag_t BACKPORT_IMPL(nw_ip_metadata_get_ecn_flag)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (nw_ip_ecn_flag_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "ecn_flag", nw_ip_ecn_flag_non_ect);
 }
 
-void nw_ip_metadata_set_ecn_flag(nw_protocol_metadata_t metadata, nw_ip_ecn_flag_t ecn_flag)
+void BACKPORT_IMPL(nw_ip_metadata_set_ecn_flag)(nw_protocol_metadata_t metadata, nw_ip_ecn_flag_t ecn_flag)
 {
     revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolMetadata *)metadata)->_values, "ecn_flag", ecn_flag);
 }
 
-uint64_t nw_ip_metadata_get_receive_time(nw_protocol_metadata_t metadata)
+uint64_t BACKPORT_IMPL(nw_ip_metadata_get_receive_time)(nw_protocol_metadata_t metadata)
 {
     RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (uint64_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "receive_time", 0);

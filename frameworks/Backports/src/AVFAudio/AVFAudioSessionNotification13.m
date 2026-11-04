@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFAudio/AVFAudio.h>
 
-NSString * const AVAudioUnitComponentManagerRegistrationsChangedNotification = @"AVAudioUnitComponentManagerRegistrationsChangedNotification";
+NSString * const BACKPORT_IMPL(AVAudioUnitComponentManagerRegistrationsChangedNotification) = @"AVAudioUnitComponentManagerRegistrationsChangedNotification";

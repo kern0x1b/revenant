@@ -1,4 +1,5 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-NSErrorDomain const MTLIOErrorDomain = @"MTLIOError";
+NSErrorDomain const BACKPORT_IMPL(MTLIOErrorDomain) = @"MTLIOError";

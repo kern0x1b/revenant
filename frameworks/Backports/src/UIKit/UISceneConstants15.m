@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSErrorDomain const UISceneErrorDomain = @"UISceneErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(UISceneErrorDomain) = @"UISceneErrorDomain";

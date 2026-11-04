@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreText/CoreText.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
@@ -258,12 +259,12 @@ static void revenant_draw_frame_lines(CTFrameRef drawn, CTFrameRef attributed, C
     free(origins);
 }
 
-void CTRunDraw(CTRunRef run, CGContextRef context, CFRange range)
+void BACKPORT_IMPL(CTRunDraw)(CTRunRef run, CGContextRef context, CFRange range)
 {
     revenant_draw_run(run, revenant_needs_model() ? revenant_run_offset(run) : 0, context, range);
 }
 
-void CTLineDraw(CTLineRef line, CGContextRef context)
+void BACKPORT_IMPL(CTLineDraw)(CTLineRef line, CGContextRef context)
 {
     if (!revenant_needs_model() || !revenant_line_has_offset(line)) {
         system_line_draw(line, context);
@@ -272,7 +273,7 @@ void CTLineDraw(CTLineRef line, CGContextRef context)
     revenant_draw_line_runs(line, line, context);
 }
 
-void CTFrameDraw(CTFrameRef frame, CGContextRef context)
+void BACKPORT_IMPL(CTFrameDraw)(CTFrameRef frame, CGContextRef context)
 {
     if (!revenant_needs_model() || !revenant_frame_has_offset(frame)) {
         system_frame_draw(frame, context);
@@ -281,7 +282,7 @@ void CTFrameDraw(CTFrameRef frame, CGContextRef context)
     revenant_draw_frame_lines(frame, frame, context);
 }
 
-double CTLineGetTypographicBounds(CTLineRef line, CGFloat *ascent, CGFloat *descent, CGFloat *leading)
+double BACKPORT_IMPL(CTLineGetTypographicBounds)(CTLineRef line, CGFloat *ascent, CGFloat *descent, CGFloat *leading)
 {
     if (!revenant_needs_model() || !revenant_line_has_offset(line))
         return system_line_bounds(line, ascent, descent, leading);
@@ -293,21 +294,21 @@ double CTLineGetTypographicBounds(CTLineRef line, CGFloat *ascent, CGFloat *desc
     return width;
 }
 
-CGRect CTLineGetBoundsWithOptions(CTLineRef line, CTLineBoundsOptions options)
+CGRect BACKPORT_IMPL(CTLineGetBoundsWithOptions)(CTLineRef line, CTLineBoundsOptions options)
 {
     if (!revenant_needs_model())
         return system_line_bounds_with_options(line, options);
     return revenant_line_bounds(line, line, options);
 }
 
-CGRect CTLineGetImageBounds(CTLineRef line, CGContextRef context)
+CGRect BACKPORT_IMPL(CTLineGetImageBounds)(CTLineRef line, CGContextRef context)
 {
     if (!revenant_needs_model() || !revenant_line_has_offset(line))
         return system_line_image_bounds(line, context);
     return revenant_line_image(line, line, context);
 }
 
-void CTFrameGetLineOrigins(CTFrameRef frame, CFRange range, CGPoint origins[])
+void BACKPORT_IMPL(CTFrameGetLineOrigins)(CTFrameRef frame, CFRange range, CGPoint origins[])
 {
     if (!revenant_needs_model() || !revenant_frame_has_offset(frame)) {
         system_frame_origins(frame, range, origins);
@@ -323,7 +324,7 @@ void CTFrameGetLineOrigins(CTFrameRef frame, CFRange range, CGPoint origins[])
     free(all);
 }
 
-CGSize CTFramesetterSuggestFrameSizeWithConstraints(CTFramesetterRef framesetter, CFRange stringRange, CFDictionaryRef frameAttributes,
+CGSize BACKPORT_IMPL(CTFramesetterSuggestFrameSizeWithConstraints)(CTFramesetterRef framesetter, CFRange stringRange, CFDictionaryRef frameAttributes,
                                                     CGSize constraints, CFRange *fitRange)
 {
     CGSize size = system_suggest_size(framesetter, stringRange, frameAttributes, constraints, fitRange);

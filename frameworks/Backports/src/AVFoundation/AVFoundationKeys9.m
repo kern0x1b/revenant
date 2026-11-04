@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <AVFoundation/AVFoundation.h>
 
-NSString *const AVPlayerItemMediaSelectionDidChangeNotification = @"AVPlayerItemMediaSelectionDidChangeNotification";
+NSString *const BACKPORT_IMPL(AVPlayerItemMediaSelectionDidChangeNotification) = @"AVPlayerItemMediaSelectionDidChangeNotification";

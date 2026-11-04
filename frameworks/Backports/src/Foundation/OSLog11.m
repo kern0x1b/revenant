@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantOSLog.h"
 #include <errno.h>
 
@@ -10,13 +11,13 @@ __attribute__((constructor)) static void revenant_os_log_disabled(void)
     _os_log_disabled.category = "";
 }
 
-void _os_log_error_impl(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buffer, uint32_t size)
+void BACKPORT_IMPL(_os_log_error_impl)(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buffer, uint32_t size)
 {
     int error = errno;
     revenant_os_log_buffer(log, type, format, buffer, size, error);
 }
 
-void _os_log_fault_impl(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buffer, uint32_t size)
+void BACKPORT_IMPL(_os_log_fault_impl)(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buffer, uint32_t size)
 {
     int error = errno;
     revenant_os_log_buffer(log, type, format, buffer, size, error);

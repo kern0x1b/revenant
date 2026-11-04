@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString * const NSURLDirectoryEntryCountKey = @"NSURLDirectoryEntryCountKey";
-NSString * const NSURLFileIdentifierKey = @"NSURLFileIdentifierKey";
-NSString * const NSURLFileProtectionCompleteWhenUserInactive = @"NSURLFileProtectionCompleteWhenUserInactive";
-NSString * const NSURLVolumeMountFromLocationKey = @"NSURLVolumeMountFromLocationKey";
-NSString * const NSURLVolumeSubtypeKey = @"NSURLVolumeSubtypeKey";
-NSString * const NSURLVolumeTypeNameKey = @"NSURLVolumeTypeNameKey";
+NSString * const BACKPORT_IMPL(NSURLDirectoryEntryCountKey) = @"NSURLDirectoryEntryCountKey";
+NSString * const BACKPORT_IMPL(NSURLFileIdentifierKey) = @"NSURLFileIdentifierKey";
+NSString * const BACKPORT_IMPL(NSURLFileProtectionCompleteWhenUserInactive) = @"NSURLFileProtectionCompleteWhenUserInactive";
+NSString * const BACKPORT_IMPL(NSURLVolumeMountFromLocationKey) = @"NSURLVolumeMountFromLocationKey";
+NSString * const BACKPORT_IMPL(NSURLVolumeSubtypeKey) = @"NSURLVolumeSubtypeKey";
+NSString * const BACKPORT_IMPL(NSURLVolumeTypeNameKey) = @"NSURLVolumeTypeNameKey";

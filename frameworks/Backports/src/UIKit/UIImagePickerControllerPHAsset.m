@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UIImagePickerControllerInfoKey const UIImagePickerControllerPHAsset = @"UIImagePickerControllerPHAsset";
+UIImagePickerControllerInfoKey const BACKPORT_IMPL(UIImagePickerControllerPHAsset) = @"UIImagePickerControllerPHAsset";

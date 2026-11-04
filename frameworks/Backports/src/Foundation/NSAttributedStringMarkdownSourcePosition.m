@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NSMarkdownSourcePositionAttributeName = @"NSMarkdownSourcePosition";
+NSString *const BACKPORT_IMPL(NSMarkdownSourcePositionAttributeName) = @"NSMarkdownSourcePosition";
 
 static NSString *const revenant_cached_offset_keys[] = {
     @"NSStartUTF8Offset", @"NSEndUTF8Offset", @"NSStartUTF16Offset", @"NSEndUTF16Offset",

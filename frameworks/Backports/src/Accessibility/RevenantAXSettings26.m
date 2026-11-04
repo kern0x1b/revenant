@@ -1,18 +1,19 @@
+#include "../revenant_impl.h"
 #import "RevenantAXSettings.h"
 #import "RevenantAXSettingsCommon.h"
 
-BOOL AXPrefersActionSliderAlternative(void)
+BOOL BACKPORT_IMPL(AXPrefersActionSliderAlternative)(void)
 {
     return RevenantAXSettingIsOffOnThisRelease();
 }
 
-NSNotificationName const AXPrefersActionSliderAlternativeDidChangeNotification =
+NSNotificationName const BACKPORT_IMPL(AXPrefersActionSliderAlternativeDidChangeNotification) =
     @"AXPrefersActionSliderAlternativeDidChangeNotification";
 
-BOOL AXShowBordersEnabled(void)
+BOOL BACKPORT_IMPL(AXShowBordersEnabled)(void)
 {
     return RevenantAXSettingIsOffOnThisRelease();
 }
 
-NSNotificationName const AXShowBordersEnabledStatusDidChangeNotification =
+NSNotificationName const BACKPORT_IMPL(AXShowBordersEnabledStatusDidChangeNotification) =
     @"AXShowBordersEnabledStatusDidChangeNotification";

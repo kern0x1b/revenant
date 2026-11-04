@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
@@ -64,12 +65,12 @@ static RevenantVTMultiPassStorage *revenant_to(VTMultiPassStorageRef storage)
     return (RevenantVTMultiPassStorage *)(__bridge id)storage;
 }
 
-CFTypeID VTMultiPassStorageGetTypeID(void)
+CFTypeID BACKPORT_IMPL(VTMultiPassStorageGetTypeID)(void)
 {
     return (CFTypeID)objc_getClass("RevenantVTMultiPassStorage");
 }
 
-OSStatus VTMultiPassStorageCreate(
+OSStatus BACKPORT_IMPL(VTMultiPassStorageCreate)(
     CFAllocatorRef CM_NULLABLE allocator,
     CFURLRef CM_NULLABLE fileURL,
     CMTimeRange timeRange,
@@ -145,7 +146,7 @@ OSStatus VTMultiPassStorageCreate(
     return noErr;
 }
 
-OSStatus VTMultiPassStorageClose(VTMultiPassStorageRef multiPassStorage)
+OSStatus BACKPORT_IMPL(VTMultiPassStorageClose)(VTMultiPassStorageRef multiPassStorage)
 {
     RevenantVTMultiPassStorage *storage = revenant_to(multiPassStorage);
     if (!storage)

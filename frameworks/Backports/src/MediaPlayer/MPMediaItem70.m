@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
@@ -24,4 +25,4 @@ extern NSString * const MPMediaItemPropertyIsExplicit;
 
 @end
 
-NSString * const MPMediaItemPropertyIsExplicit = @"isExplicit";
+NSString * const BACKPORT_IMPL(MPMediaItemPropertyIsExplicit) = @"isExplicit";

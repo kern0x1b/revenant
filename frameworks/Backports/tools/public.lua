@@ -27,7 +27,7 @@ local function from_facts(frameworks)
     return declared
 end
 
-local function read_exports(text, declared, exported)
+local function each_export(text, visit)
     local section, key
     for line in text:gmatch("[^\n]+") do
         local top = line:match("^([%w%-]+):")
@@ -46,21 +46,7 @@ local function read_exports(text, declared, exported)
                 local close = body:find("]", 1, true)
                 local items = close and body:sub(1, close - 1) or body
                 for token in items:gmatch("[^%s,]+") do
-                    token = (token:gsub("['\"]", ""))
-                    if key == "objc-classes" then
-                        if declared.classes[token] then
-                            exported.classes[token] = true
-                        end
-                    elseif token:sub(1, 1) == "_" then
-                        local class = token:match("^_OBJC_CLASS_%$_(.+)$")
-                        if class then
-                            if declared.classes[class] then
-                                exported.classes[class] = true
-                            end
-                        elseif not token:find("^_OBJC_") and declared.symbols[token:sub(2)] then
-                            exported.symbols[token:sub(2)] = true
-                        end
-                    end
+                    visit(key, (token:gsub("['\"]", "")))
                 end
                 if close then
                     key = nil
@@ -68,6 +54,25 @@ local function read_exports(text, declared, exported)
             end
         end
     end
+end
+
+local function read_exports(text, declared, exported)
+    each_export(text, function (key, token)
+        if key == "objc-classes" then
+            if declared.classes[token] then
+                exported.classes[token] = true
+            end
+        elseif token:sub(1, 1) == "_" then
+            local class = token:match("^_OBJC_CLASS_%$_(.+)$")
+            if class then
+                if declared.classes[class] then
+                    exported.classes[class] = true
+                end
+            elseif not token:find("^_OBJC_") and declared.symbols[token:sub(2)] then
+                exported.symbols[token:sub(2)] = true
+            end
+        end
+    end)
 end
 
 local function from_tbd(sdk, declared)
@@ -96,4 +101,63 @@ function build(frameworks, sdk)
         found = found + 1
     end
     return public, found, read
+end
+
+local function tbd_files(sdk)
+    local files = {}
+    for _, name in ipairs(sdkfiles.framework_names(sdk)) do
+        table.insert(files, path.join(sdkfiles.framework_root(sdk, name), name .. ".tbd"))
+    end
+    for _, file in ipairs(os.files(path.join(sdk, "usr", "lib", "*.tbd"))) do
+        table.insert(files, file)
+    end
+    return files
+end
+
+local function scan_images(sdk)
+    local images = {}
+    for _, file in ipairs(tbd_files(sdk)) do
+        if os.isfile(file) then
+            local text = io.readfile(file)
+            local install = string.match(text, "install%-name:%s*['\"]?([^'\"\n]+)")
+            if install then
+                each_export(text, function (key, token)
+                    if (key == "symbols" or key == "weak-symbols") and token:sub(1, 1) == "_" and not token:find("^_OBJC_") then
+                        local name = token:sub(2)
+                        if images[name] == nil then
+                            images[name] = install:gsub("%s+$", "")
+                        end
+                    end
+                end)
+            end
+        end
+    end
+    return images
+end
+
+function install_names(sdk)
+    local file = path.join(sdkfiles.cache_folder(sdk), "install_names.tsv")
+    local images = {}
+    if os.isfile(file) then
+        for line in io.lines(file) do
+            local name, install = string.match(line, "^([^\t]+)\t(.+)$")
+            assert(name, "a malformed install-name row in " .. file .. ": " .. line)
+            images[name] = install
+        end
+        return images
+    end
+    images = scan_images(sdk)
+    local names = {}
+    for name in pairs(images) do
+        table.insert(names, name)
+    end
+    table.sort(names)
+    local rows = {}
+    for _, name in ipairs(names) do
+        table.insert(rows, name .. "\t" .. images[name])
+    end
+    os.mkdir(path.directory(file))
+    io.writefile(file .. ".part", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
+    os.mv(file .. ".part", file)
+    return images
 end

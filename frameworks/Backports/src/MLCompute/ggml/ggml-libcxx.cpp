@@ -1,3 +1,4 @@
+#include "../../revenant_impl.h"
 #include <mutex>
 #include <string>
 #include <pthread.h>
@@ -83,7 +84,7 @@ string to_string(long long value)
 
 extern "C" {
 
-float __extendhfsf2(uint16_t half)
+float BACKPORT_IMPL(__extendhfsf2)(uint16_t half)
 {
     uint32_t sign = (uint32_t)(half & 0x8000u) << 16;
     uint32_t exponent = (half >> 10) & 0x1f;
@@ -111,7 +112,7 @@ float __extendhfsf2(uint16_t half)
     return value;
 }
 
-uint16_t __truncsfhf2(float value)
+uint16_t BACKPORT_IMPL(__truncsfhf2)(float value)
 {
     uint32_t bits;
     memcpy(&bits, &value, sizeof bits);

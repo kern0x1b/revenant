@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSProgressFileOperationKind const NSProgressFileOperationKindUploading = @"NSProgressFileOperationKindUploading";
+NSProgressFileOperationKind const BACKPORT_IMPL(NSProgressFileOperationKindUploading) = @"NSProgressFileOperationKindUploading";

@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 
-void CGImageSourceRemoveCacheAtIndex(CGImageSourceRef source, size_t index)
+void BACKPORT_IMPL(CGImageSourceRemoveCacheAtIndex)(CGImageSourceRef source, size_t index)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{

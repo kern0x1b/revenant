@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 static NSString *RevenantAnimationDescription(NSInteger animationType)
@@ -11,12 +12,12 @@ static NSString *RevenantAnimationDescription(NSInteger animationType)
 }
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 180200
-NSString *UIWritingToolsCoordinatorTextAnimationDebugDescription(UIWritingToolsCoordinatorTextAnimation animationType)
+NSString *BACKPORT_IMPL(UIWritingToolsCoordinatorTextAnimationDebugDescription)(UIWritingToolsCoordinatorTextAnimation animationType)
 {
     return RevenantAnimationDescription(animationType);
 }
 #else
-NSString *UIWritingToolsCoordinatorTextAnimationDebugDescription(NSInteger animationType)
+NSString *BACKPORT_IMPL(UIWritingToolsCoordinatorTextAnimationDebugDescription)(NSInteger animationType)
 {
     return RevenantAnimationDescription(animationType);
 }

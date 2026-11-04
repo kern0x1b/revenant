@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantLinearAlgebra.h"
 #include <math.h>
 #include <objc/message.h>
@@ -93,20 +94,20 @@ static la_object_t RevenantLANewSplat(la_scalar_type_t scalar_type, double eleme
 
 static SEL RevenantLASelectorNamed(const char *name) { return sel_registerName(name); }
 
-la_object_t la_retain(la_object_t object)
+la_object_t BACKPORT_IMPL(la_retain)(la_object_t object)
 {
     id kept = ((id (*)(id, SEL))objc_msgSend)((id)object, RevenantLASelectorNamed("retain"));
     return kept;
 }
 
-void la_release(la_object_t object)
+void BACKPORT_IMPL(la_release)(la_object_t object)
 {
     ((void (*)(id, SEL))objc_msgSend)((id)object, RevenantLASelectorNamed("release"));
 }
 
 #else
 
-la_object_t la_retain(la_object_t object)
+la_object_t BACKPORT_IMPL(la_retain)(la_object_t object)
 {
     if (object) {
         object->retain_count++;
@@ -114,7 +115,7 @@ la_object_t la_retain(la_object_t object)
     return object;
 }
 
-void la_release(la_object_t object)
+void BACKPORT_IMPL(la_release)(la_object_t object)
 {
     if (object && --object->retain_count == 0) {
         RevenantLAFreeValue(&object->value);
@@ -124,12 +125,12 @@ void la_release(la_object_t object)
 
 #endif
 
-la_status_t la_status(la_object_t object)
+la_status_t BACKPORT_IMPL(la_status)(la_object_t object)
 {
     return RevenantLAStatusOf(object);
 }
 
-void la_add_attributes(la_object_t object, la_attribute_t attributes)
+void BACKPORT_IMPL(la_add_attributes)(la_object_t object, la_attribute_t attributes)
 {
     RevenantLAValue *value = REVENANT_LA_VALUE(object);
     if (value) {
@@ -137,7 +138,7 @@ void la_add_attributes(la_object_t object, la_attribute_t attributes)
     }
 }
 
-void la_remove_attributes(la_object_t object, la_attribute_t attributes)
+void BACKPORT_IMPL(la_remove_attributes)(la_object_t object, la_attribute_t attributes)
 {
     RevenantLAValue *value = REVENANT_LA_VALUE(object);
     if (value) {
@@ -145,19 +146,19 @@ void la_remove_attributes(la_object_t object, la_attribute_t attributes)
     }
 }
 
-la_count_t la_matrix_rows(la_object_t matrix)
+la_count_t BACKPORT_IMPL(la_matrix_rows)(la_object_t matrix)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     return value && value->kind == RevenantLAArray ? value->rows : 0;
 }
 
-la_count_t la_matrix_cols(la_object_t matrix)
+la_count_t BACKPORT_IMPL(la_matrix_cols)(la_object_t matrix)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     return value && value->kind == RevenantLAArray ? value->cols : 0;
 }
 
-la_count_t la_vector_length(la_object_t vector)
+la_count_t BACKPORT_IMPL(la_vector_length)(la_object_t vector)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     return value ? RevenantLALength(value) : 0;
@@ -187,13 +188,13 @@ static la_object_t RevenantLAFromBuffer(const void *buffer, la_scalar_type_t sca
     return result;
 }
 
-la_object_t la_matrix_from_float_buffer(const float *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
+la_object_t BACKPORT_IMPL(la_matrix_from_float_buffer)(const float *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
                                         la_count_t matrix_row_stride, la_hint_t matrix_hint, la_attribute_t attributes)
 {
     return RevenantLAFromBuffer(buffer, LA_SCALAR_TYPE_FLOAT, matrix_rows, matrix_cols, matrix_row_stride, matrix_hint, attributes);
 }
 
-la_object_t la_matrix_from_double_buffer(const double *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
+la_object_t BACKPORT_IMPL(la_matrix_from_double_buffer)(const double *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
                                           la_count_t matrix_row_stride, la_hint_t matrix_hint, la_attribute_t attributes)
 {
     return RevenantLAFromBuffer(buffer, LA_SCALAR_TYPE_DOUBLE, matrix_rows, matrix_cols, matrix_row_stride, matrix_hint, attributes);
@@ -223,7 +224,7 @@ static la_object_t RevenantLAFromBufferNoCopy(void *buffer, la_scalar_type_t sca
     return result;
 }
 
-la_object_t la_matrix_from_float_buffer_nocopy(float *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
+la_object_t BACKPORT_IMPL(la_matrix_from_float_buffer_nocopy)(float *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
                                                la_count_t matrix_row_stride, la_hint_t matrix_hint,
                                                la_deallocator_t deallocator, la_attribute_t attributes)
 {
@@ -231,7 +232,7 @@ la_object_t la_matrix_from_float_buffer_nocopy(float *buffer, la_count_t matrix_
                                     matrix_hint, deallocator, attributes);
 }
 
-la_object_t la_matrix_from_double_buffer_nocopy(double *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
+la_object_t BACKPORT_IMPL(la_matrix_from_double_buffer_nocopy)(double *buffer, la_count_t matrix_rows, la_count_t matrix_cols,
                                                  la_count_t matrix_row_stride, la_hint_t matrix_hint,
                                                  la_deallocator_t deallocator, la_attribute_t attributes)
 {
@@ -271,7 +272,7 @@ static la_status_t RevenantLAStore(la_scalar_type_t scalar_type, la_count_t stri
     return LA_SUCCESS;
 }
 
-la_status_t la_vector_to_float_buffer(float *buffer, la_index_t buffer_stride, la_object_t vector)
+la_status_t BACKPORT_IMPL(la_vector_to_float_buffer)(float *buffer, la_index_t buffer_stride, la_object_t vector)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     la_status_t refused = RevenantLAStoreRefused(value, LA_SCALAR_TYPE_FLOAT);
@@ -284,7 +285,7 @@ la_status_t la_vector_to_float_buffer(float *buffer, la_index_t buffer_stride, l
     return RevenantLAStore(LA_SCALAR_TYPE_FLOAT, (la_count_t)buffer_stride, vector, buffer);
 }
 
-la_status_t la_vector_to_double_buffer(double *buffer, la_index_t buffer_stride, la_object_t vector)
+la_status_t BACKPORT_IMPL(la_vector_to_double_buffer)(double *buffer, la_index_t buffer_stride, la_object_t vector)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     la_status_t refused = RevenantLAStoreRefused(value, LA_SCALAR_TYPE_DOUBLE);
@@ -297,7 +298,7 @@ la_status_t la_vector_to_double_buffer(double *buffer, la_index_t buffer_stride,
     return RevenantLAStore(LA_SCALAR_TYPE_DOUBLE, (la_count_t)buffer_stride, vector, buffer);
 }
 
-la_status_t la_matrix_to_float_buffer(float *buffer, la_count_t buffer_row_stride, la_object_t matrix)
+la_status_t BACKPORT_IMPL(la_matrix_to_float_buffer)(float *buffer, la_count_t buffer_row_stride, la_object_t matrix)
 {
     la_status_t refused = RevenantLAStoreRefused(REVENANT_LA_VALUE(matrix), LA_SCALAR_TYPE_FLOAT);
     if (refused != LA_SUCCESS) {
@@ -306,7 +307,7 @@ la_status_t la_matrix_to_float_buffer(float *buffer, la_count_t buffer_row_strid
     return RevenantLAStore(LA_SCALAR_TYPE_FLOAT, buffer_row_stride, matrix, buffer);
 }
 
-la_status_t la_matrix_to_double_buffer(double *buffer, la_count_t buffer_row_stride, la_object_t matrix)
+la_status_t BACKPORT_IMPL(la_matrix_to_double_buffer)(double *buffer, la_count_t buffer_row_stride, la_object_t matrix)
 {
     la_status_t refused = RevenantLAStoreRefused(REVENANT_LA_VALUE(matrix), LA_SCALAR_TYPE_DOUBLE);
     if (refused != LA_SUCCESS) {
@@ -323,7 +324,7 @@ static int RevenantLAInRange(la_index_t first, la_index_t stride, la_count_t cou
     return low >= 0 && high < (la_index_t)limit;
 }
 
-la_object_t la_vector_slice(la_object_t vector, la_index_t vector_first, la_index_t vector_stride, la_count_t slice_length)
+la_object_t BACKPORT_IMPL(la_vector_slice)(la_object_t vector, la_index_t vector_first, la_index_t vector_stride, la_count_t slice_length)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     la_count_t length;
@@ -356,7 +357,7 @@ la_object_t la_vector_slice(la_object_t vector, la_index_t vector_first, la_inde
     return result;
 }
 
-la_object_t la_matrix_slice(la_object_t matrix, la_index_t matrix_first_row, la_index_t matrix_first_col,
+la_object_t BACKPORT_IMPL(la_matrix_slice)(la_object_t matrix, la_index_t matrix_first_row, la_index_t matrix_first_col,
                             la_index_t matrix_row_stride, la_index_t matrix_col_stride,
                             la_count_t slice_rows, la_count_t slice_cols)
 {
@@ -386,7 +387,7 @@ la_object_t la_matrix_slice(la_object_t matrix, la_index_t matrix_first_row, la_
     return result;
 }
 
-la_object_t la_identity_matrix(la_count_t matrix_size, la_scalar_type_t scalar_type, la_attribute_t attributes)
+la_object_t BACKPORT_IMPL(la_identity_matrix)(la_count_t matrix_size, la_scalar_type_t scalar_type, la_attribute_t attributes)
 {
     la_object_t result;
     RevenantLAValue *value;
@@ -405,17 +406,17 @@ la_object_t la_identity_matrix(la_count_t matrix_size, la_scalar_type_t scalar_t
     return result;
 }
 
-la_object_t la_splat_from_float(float scalar_value, la_attribute_t attributes)
+la_object_t BACKPORT_IMPL(la_splat_from_float)(float scalar_value, la_attribute_t attributes)
 {
     return RevenantLANewSplat(LA_SCALAR_TYPE_FLOAT, scalar_value, attributes);
 }
 
-la_object_t la_splat_from_double(double scalar_value, la_attribute_t attributes)
+la_object_t BACKPORT_IMPL(la_splat_from_double)(double scalar_value, la_attribute_t attributes)
 {
     return RevenantLANewSplat(LA_SCALAR_TYPE_DOUBLE, scalar_value, attributes);
 }
 
-la_object_t la_splat_from_vector_element(la_object_t vector, la_index_t vector_index)
+la_object_t BACKPORT_IMPL(la_splat_from_vector_element)(la_object_t vector, la_index_t vector_index)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     la_count_t length;
@@ -432,7 +433,7 @@ la_object_t la_splat_from_vector_element(la_object_t vector, la_index_t vector_i
                             value->attributes);
 }
 
-la_object_t la_splat_from_matrix_element(la_object_t matrix, la_index_t matrix_row, la_index_t matrix_col)
+la_object_t BACKPORT_IMPL(la_splat_from_matrix_element)(la_object_t matrix, la_index_t matrix_row, la_index_t matrix_col)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     if (!value || value->kind != RevenantLAArray) {
@@ -445,7 +446,7 @@ la_object_t la_splat_from_matrix_element(la_object_t matrix, la_index_t matrix_r
                             value->attributes);
 }
 
-la_object_t la_vector_from_splat(la_object_t splat, la_count_t vector_length)
+la_object_t BACKPORT_IMPL(la_vector_from_splat)(la_object_t splat, la_count_t vector_length)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(splat);
     la_object_t result;
@@ -464,7 +465,7 @@ la_object_t la_vector_from_splat(la_object_t splat, la_count_t vector_length)
     return result;
 }
 
-la_object_t la_matrix_from_splat(la_object_t splat, la_count_t matrix_rows, la_count_t matrix_cols)
+la_object_t BACKPORT_IMPL(la_matrix_from_splat)(la_object_t splat, la_count_t matrix_rows, la_count_t matrix_cols)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(splat);
     la_object_t result;
@@ -485,7 +486,7 @@ la_object_t la_matrix_from_splat(la_object_t splat, la_count_t matrix_rows, la_c
     return result;
 }
 
-la_object_t la_vector_from_matrix_row(la_object_t matrix, la_count_t matrix_row)
+la_object_t BACKPORT_IMPL(la_vector_from_matrix_row)(la_object_t matrix, la_count_t matrix_row)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     la_object_t result;
@@ -507,7 +508,7 @@ la_object_t la_vector_from_matrix_row(la_object_t matrix, la_count_t matrix_row)
     return result;
 }
 
-la_object_t la_vector_from_matrix_col(la_object_t matrix, la_count_t matrix_col)
+la_object_t BACKPORT_IMPL(la_vector_from_matrix_col)(la_object_t matrix, la_count_t matrix_col)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     la_object_t result;
@@ -529,7 +530,7 @@ la_object_t la_vector_from_matrix_col(la_object_t matrix, la_count_t matrix_col)
     return result;
 }
 
-la_object_t la_vector_from_matrix_diagonal(la_object_t matrix, la_index_t matrix_diagonal)
+la_object_t BACKPORT_IMPL(la_vector_from_matrix_diagonal)(la_object_t matrix, la_index_t matrix_diagonal)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     la_index_t offset = matrix_diagonal < 0 ? -matrix_diagonal : matrix_diagonal;
@@ -555,7 +556,7 @@ la_object_t la_vector_from_matrix_diagonal(la_object_t matrix, la_index_t matrix
     return result;
 }
 
-la_object_t la_diagonal_matrix_from_vector(la_object_t vector, la_index_t matrix_diagonal)
+la_object_t BACKPORT_IMPL(la_diagonal_matrix_from_vector)(la_object_t vector, la_index_t matrix_diagonal)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     la_count_t length, size, offset = matrix_diagonal < 0 ? (la_count_t)-matrix_diagonal : (la_count_t)matrix_diagonal;
@@ -580,7 +581,7 @@ la_object_t la_diagonal_matrix_from_vector(la_object_t vector, la_index_t matrix
     return result;
 }
 
-la_object_t la_transpose(la_object_t matrix)
+la_object_t BACKPORT_IMPL(la_transpose)(la_object_t matrix)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(matrix);
     la_object_t result;
@@ -627,12 +628,12 @@ static la_object_t RevenantLAScale(la_object_t object, double scalar, la_scalar_
     return result;
 }
 
-la_object_t la_scale_with_float(la_object_t matrix, float scalar)
+la_object_t BACKPORT_IMPL(la_scale_with_float)(la_object_t matrix, float scalar)
 {
     return RevenantLAScale(matrix, scalar, LA_SCALAR_TYPE_FLOAT);
 }
 
-la_object_t la_scale_with_double(la_object_t matrix, double scalar)
+la_object_t BACKPORT_IMPL(la_scale_with_double)(la_object_t matrix, double scalar)
 {
     return RevenantLAScale(matrix, scalar, LA_SCALAR_TYPE_DOUBLE);
 }
@@ -749,17 +750,17 @@ static la_object_t RevenantLAElementwiseOp(RevenantLAElementwise which, la_objec
     return result;
 }
 
-la_object_t la_sum(la_object_t obj_left, la_object_t obj_right)
+la_object_t BACKPORT_IMPL(la_sum)(la_object_t obj_left, la_object_t obj_right)
 {
     return RevenantLAElementwiseOp(RevenantLAAdd, obj_left, obj_right);
 }
 
-la_object_t la_difference(la_object_t obj_left, la_object_t obj_right)
+la_object_t BACKPORT_IMPL(la_difference)(la_object_t obj_left, la_object_t obj_right)
 {
     return RevenantLAElementwiseOp(RevenantLASubtract, obj_left, obj_right);
 }
 
-la_object_t la_elementwise_product(la_object_t obj_left, la_object_t obj_right)
+la_object_t BACKPORT_IMPL(la_elementwise_product)(la_object_t obj_left, la_object_t obj_right)
 {
     return RevenantLAElementwiseOp(RevenantLAMultiply, obj_left, obj_right);
 }
@@ -841,7 +842,7 @@ static la_object_t RevenantLAGemm(la_object_t left, la_object_t right, la_count_
     return result;
 }
 
-la_object_t la_matrix_product(la_object_t matrix_left, la_object_t matrix_right)
+la_object_t BACKPORT_IMPL(la_matrix_product)(la_object_t matrix_left, la_object_t matrix_right)
 {
     RevenantLAOperand a, b;
     RevenantLAOperandOf(matrix_left, &a);
@@ -858,7 +859,7 @@ la_object_t la_matrix_product(la_object_t matrix_left, la_object_t matrix_right)
     return RevenantLAGemm(matrix_left, matrix_right, a.rows, a.cols, b.cols, 0, 0);
 }
 
-la_object_t la_outer_product(la_object_t vector_left, la_object_t vector_right)
+la_object_t BACKPORT_IMPL(la_outer_product)(la_object_t vector_left, la_object_t vector_right)
 {
     RevenantLAOperand a, b;
     la_attribute_t attributes;
@@ -889,7 +890,7 @@ la_object_t la_outer_product(la_object_t vector_left, la_object_t vector_right)
     return result;
 }
 
-la_object_t la_inner_product(la_object_t vector_left, la_object_t vector_right)
+la_object_t BACKPORT_IMPL(la_inner_product)(la_object_t vector_left, la_object_t vector_right)
 {
     RevenantLAOperand a, b;
     la_attribute_t attributes;
@@ -937,20 +938,20 @@ static double RevenantLANorm(la_object_t object, la_norm_t norm, la_scalar_type_
     return norm == LA_L1_NORM ? sum : largest;
 }
 
-float la_norm_as_float(la_object_t vector, la_norm_t vector_norm)
+float BACKPORT_IMPL(la_norm_as_float)(la_object_t vector, la_norm_t vector_norm)
 {
     int valid;
     double norm = RevenantLANorm(vector, vector_norm, LA_SCALAR_TYPE_FLOAT, &valid);
     return valid ? (float)norm : NAN;
 }
 
-double la_norm_as_double(la_object_t vector, la_norm_t vector_norm)
+double BACKPORT_IMPL(la_norm_as_double)(la_object_t vector, la_norm_t vector_norm)
 {
     int valid;
     return RevenantLANorm(vector, vector_norm, LA_SCALAR_TYPE_DOUBLE, &valid);
 }
 
-la_object_t la_normalized_vector(la_object_t vector, la_norm_t vector_norm)
+la_object_t BACKPORT_IMPL(la_normalized_vector)(la_object_t vector, la_norm_t vector_norm)
 {
     const RevenantLAValue *value = REVENANT_LA_VALUE(vector);
     int valid;
@@ -1048,7 +1049,7 @@ static int RevenantLALapackDouble(const RevenantLAValue *system, const RevenantL
     return 0;
 }
 
-la_object_t la_solve(la_object_t matrix_system, la_object_t obj_rhs)
+la_object_t BACKPORT_IMPL(la_solve)(la_object_t matrix_system, la_object_t obj_rhs)
 {
     RevenantLAOperand a, b;
     const RevenantLAValue *system = REVENANT_LA_VALUE(matrix_system);

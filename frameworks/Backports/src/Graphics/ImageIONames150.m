@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
 extern CFStringRef const kCGImagePropertyGroupImageIndexLeft;
@@ -13,15 +14,15 @@ extern CFStringRef const kCGImagePropertyGroupTypeStereoPair;
 extern CFStringRef const kCGImagePropertyGroups;
 extern CFStringRef const kCGImagePropertyImageIndex;
 
-CFStringRef const kCGImagePropertyGroupImageIndexLeft = CFSTR("GroupImageIndexLeft");
-CFStringRef const kCGImagePropertyGroupImageIndexRight = CFSTR("GroupImageIndexRight");
-CFStringRef const kCGImagePropertyGroupImageIsAlternateImage = CFSTR("GroupImageIsAlternateImage");
-CFStringRef const kCGImagePropertyGroupImageIsLeftImage = CFSTR("GroupImageIsLeftImage");
-CFStringRef const kCGImagePropertyGroupImageIsRightImage = CFSTR("GroupImageIsRightImage");
-CFStringRef const kCGImagePropertyGroupImagesAlternate = CFSTR("GroupImages");
-CFStringRef const kCGImagePropertyGroupIndex = CFSTR("GroupIndex");
-CFStringRef const kCGImagePropertyGroupType = CFSTR("GroupType");
-CFStringRef const kCGImagePropertyGroupTypeAlternate = CFSTR("Alternate");
-CFStringRef const kCGImagePropertyGroupTypeStereoPair = CFSTR("StereoPair");
-CFStringRef const kCGImagePropertyGroups = CFSTR("{Groups}");
-CFStringRef const kCGImagePropertyImageIndex = CFSTR("ImageIndex");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImageIndexLeft) = CFSTR("GroupImageIndexLeft");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImageIndexRight) = CFSTR("GroupImageIndexRight");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImageIsAlternateImage) = CFSTR("GroupImageIsAlternateImage");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImageIsLeftImage) = CFSTR("GroupImageIsLeftImage");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImageIsRightImage) = CFSTR("GroupImageIsRightImage");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupImagesAlternate) = CFSTR("GroupImages");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupIndex) = CFSTR("GroupIndex");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupType) = CFSTR("GroupType");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupTypeAlternate) = CFSTR("Alternate");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroupTypeStereoPair) = CFSTR("StereoPair");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyGroups) = CFSTR("{Groups}");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyImageIndex) = CFSTR("ImageIndex");

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "RevenantUTType.h"
 
@@ -163,17 +164,17 @@
 
 @end
 
-UTType *UTTypeItem;
-UTType *UTTypeContent;
-UTType *UTTypeData;
-UTType *UTTypeDirectory;
-UTType *UTTypeURL;
-UTType *UTTypeFileURL;
-UTType *UTTypeText;
-UTType *UTTypePlainText;
-UTType *UTTypeUTF8PlainText;
-UTType *UTTypeImage;
-UTType *UTTypePDF;
+UTType *BACKPORT_IMPL(UTTypeItem);
+UTType *BACKPORT_IMPL(UTTypeContent);
+UTType *BACKPORT_IMPL(UTTypeData);
+UTType *BACKPORT_IMPL(UTTypeDirectory);
+UTType *BACKPORT_IMPL(UTTypeURL);
+UTType *BACKPORT_IMPL(UTTypeFileURL);
+UTType *BACKPORT_IMPL(UTTypeText);
+UTType *BACKPORT_IMPL(UTTypePlainText);
+UTType *BACKPORT_IMPL(UTTypeUTF8PlainText);
+UTType *BACKPORT_IMPL(UTTypeImage);
+UTType *BACKPORT_IMPL(UTTypePDF);
 
 __attribute__((constructor)) static void revenant_uttype_constants(void)
 {

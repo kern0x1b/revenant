@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantURLSessionMetrics.h"
 #import "RevenantTaskDelegate15.h"
 #import "RevenantTaskProgress.h"
@@ -10,8 +11,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-const int64_t NSURLSessionTransferSizeUnknown = -1LL;
-NSString * const NSURLSessionDownloadTaskResumeData = @"NSURLSessionDownloadTaskResumeData";
+const int64_t BACKPORT_IMPL(NSURLSessionTransferSizeUnknown) = -1LL;
+NSString * const BACKPORT_IMPL(NSURLSessionDownloadTaskResumeData) = @"NSURLSessionDownloadTaskResumeData";
 
 static NSString * const RevenantResumeInfoVersion = @"NSURLSessionResumeInfoVersion";
 static NSString * const RevenantResumeDownloadURL = @"NSURLSessionDownloadURL";

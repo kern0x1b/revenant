@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantSCN.h"
 
-NSString *const SCNSceneStartTimeAttributeKey = @"SCNSceneStartTimeAttributeKey";
-NSString *const SCNSceneEndTimeAttributeKey = @"SCNSceneEndTimeAttributeKey";
-NSString *const SCNSceneFrameRateAttributeKey = @"SCNSceneFrameRateAttributeKey";
-NSString *const SCNSceneUpAxisAttributeKey = @"SCNSceneUpAxisAttributeKey";
+NSString *const BACKPORT_IMPL(SCNSceneStartTimeAttributeKey) = @"SCNSceneStartTimeAttributeKey";
+NSString *const BACKPORT_IMPL(SCNSceneEndTimeAttributeKey) = @"SCNSceneEndTimeAttributeKey";
+NSString *const BACKPORT_IMPL(SCNSceneFrameRateAttributeKey) = @"SCNSceneFrameRateAttributeKey";
+NSString *const BACKPORT_IMPL(SCNSceneUpAxisAttributeKey) = @"SCNSceneUpAxisAttributeKey";
 
 @implementation SCNScene
 {

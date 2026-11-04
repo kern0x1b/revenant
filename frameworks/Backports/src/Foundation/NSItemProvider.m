@@ -1,12 +1,13 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-NSString *const NSItemProviderErrorDomain = @"NSItemProviderErrorDomain";
-NSString *const NSItemProviderPreferredImageSizeKey = @"NSItemProviderPreferredImageSize";
-NSString *const NSExtensionJavaScriptPreprocessingResultsKey = @"NSExtensionJavaScriptPreprocessingResultsKey";
-NSString *const NSExtensionJavaScriptFinalizeArgumentKey = @"NSExtensionJavaScriptFinalizeArgumentKey";
+NSString *const BACKPORT_IMPL(NSItemProviderErrorDomain) = @"NSItemProviderErrorDomain";
+NSString *const BACKPORT_IMPL(NSItemProviderPreferredImageSizeKey) = @"NSItemProviderPreferredImageSize";
+NSString *const BACKPORT_IMPL(NSExtensionJavaScriptPreprocessingResultsKey) = @"NSExtensionJavaScriptPreprocessingResultsKey";
+NSString *const BACKPORT_IMPL(NSExtensionJavaScriptFinalizeArgumentKey) = @"NSExtensionJavaScriptFinalizeArgumentKey";
 
 typedef Boolean (*RevenantConformsFunction)(CFStringRef, CFStringRef);
 typedef CFStringRef (*RevenantIdentifierFunction)(CFStringRef, CFStringRef, CFStringRef);

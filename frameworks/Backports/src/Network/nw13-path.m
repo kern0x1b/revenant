@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
@@ -8,13 +9,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-bool nw_path_is_constrained(nw_path_t path)
+bool BACKPORT_IMPL(nw_path_is_constrained)(nw_path_t path)
 {
     (void)path;
     return false;
 }
 
-void nw_path_enumerate_gateways(nw_path_t path, nw_path_enumerate_gateways_block_t enumerate_block)
+void BACKPORT_IMPL(nw_path_enumerate_gateways)(nw_path_t path, nw_path_enumerate_gateways_block_t enumerate_block)
 {
     if (!path || !enumerate_block)
         return;

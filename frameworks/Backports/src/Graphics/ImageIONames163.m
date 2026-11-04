@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <ImageIO/ImageIO.h>
 
 extern CFStringRef const kCGImagePropertyOpenEXRCompression;
 
-CFStringRef const kCGImagePropertyOpenEXRCompression = CFSTR("Compression");
+CFStringRef const BACKPORT_IMPL(kCGImagePropertyOpenEXRCompression) = CFSTR("Compression");

@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-id<MTLDevice> MPSGetPreferredDevice(MPSDeviceOptions options)
+id<MTLDevice> BACKPORT_IMPL(MPSGetPreferredDevice)(MPSDeviceOptions options)
 {
     (void)options;
     return MTLCreateSystemDefaultDevice();

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const NLLanguageKazakh = @"kk";
+NSString *const BACKPORT_IMPL(NLLanguageKazakh) = @"kk";

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantCoreMLComputeDevices.h"
 
 @interface MLCPUComputeDevice (RevenantFactory)
@@ -43,7 +44,7 @@ static MLCPUComputeDevice *RevenantMLComputeCPUDevice(void)
 
 @end
 
-NSArray<id<MLComputeDeviceProtocol>> *MLAllComputeDevices(void)
+NSArray<id<MLComputeDeviceProtocol>> *BACKPORT_IMPL(MLAllComputeDevices)(void)
 {
     return @[RevenantMLComputeCPUDevice()];
 }

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -19,7 +20,7 @@ CFDictionaryRef RevenantSecurityAttributesFromItemResult(CFTypeRef result)
     return (CFDictionaryRef)result;
 }
 
-CFDictionaryRef SecKeyCopyAttributes(SecKeyRef key)
+CFDictionaryRef BACKPORT_IMPL(SecKeyCopyAttributes)(SecKeyRef key)
 {
     if (!key)
         return NULL;
@@ -40,7 +41,7 @@ CFDictionaryRef SecKeyCopyAttributes(SecKeyRef key)
 
 bool RevenantSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
 
-Boolean SecKeyIsAlgorithmSupported(SecKeyRef key, SecKeyOperationType operation, SecKeyAlgorithm algorithm)
+Boolean BACKPORT_IMPL(SecKeyIsAlgorithmSupported)(SecKeyRef key, SecKeyOperationType operation, SecKeyAlgorithm algorithm)
 {
     if (!key || !algorithm)
         return false;
@@ -123,7 +124,7 @@ SecPadding RevenantSecurityPaddingFor(SecKeyAlgorithm algorithm)
     return kSecPaddingNone;
 }
 
-CFDataRef SecKeyCreateSignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef dataToSign,
+CFDataRef BACKPORT_IMPL(SecKeyCreateSignature)(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef dataToSign,
                                 CFErrorRef *error)
 {
     if (!key || !algorithm || !dataToSign)
@@ -171,7 +172,7 @@ CFDataRef SecKeyCreateSignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFData
     return signature;
 }
 
-Boolean SecKeyVerifySignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef signedData,
+Boolean BACKPORT_IMPL(SecKeyVerifySignature)(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef signedData,
                               CFDataRef signature, CFErrorRef *error)
 {
     if (!key || !algorithm || !signedData || !signature)
@@ -206,7 +207,7 @@ Boolean SecKeyVerifySignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRe
     return status == errSecSuccess;
 }
 
-CFDataRef SecKeyCopyKeyExchangeResult(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey,
+CFDataRef BACKPORT_IMPL(SecKeyCopyKeyExchangeResult)(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey,
                                       CFDictionaryRef parameters, CFErrorRef *error)
 {
     if (privateKey && RevenantSecurityKeyIsPortEC(privateKey))

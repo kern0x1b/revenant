@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantMenus.h"
 #import <objc/runtime.h>
 
@@ -6,7 +7,7 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-NSString *const UICommandTagShare = @"com.apple.command-tag.share";
+NSString *const BACKPORT_IMPL(UICommandTagShare) = @"com.apple.command-tag.share";
 
 static void revenant_require(BOOL condition, NSString *what)
 {

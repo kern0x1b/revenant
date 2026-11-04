@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import "JSInternal.h"
 #import "../RevenantSayOnce.h"
 
 
-void JSGlobalContextSetName(JSGlobalContextRef context, JSStringRef name)
+void BACKPORT_IMPL(JSGlobalContextSetName)(JSGlobalContextRef context, JSStringRef name)
 {
     (void)context;
     (void)name;
@@ -12,7 +13,7 @@ void JSGlobalContextSetName(JSGlobalContextRef context, JSStringRef name)
                        @"wrapper, which the two do not share.");
 }
 
-JSStringRef JSGlobalContextCopyName(JSGlobalContextRef context)
+JSStringRef BACKPORT_IMPL(JSGlobalContextCopyName)(JSGlobalContextRef context)
 {
     (void)context;
     revenant_say_once_for(@"JavaScriptCore.JSGlobalContextCopyName",

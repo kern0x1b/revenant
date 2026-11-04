@@ -1,9 +1,10 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 #import "RevenantNWSupport.h"
 
 #include <string.h>
 
-nw_endpoint_t nw_endpoint_create_url(const char *url)
+nw_endpoint_t BACKPORT_IMPL(nw_endpoint_create_url)(const char *url)
 {
     if (!url || !*url)
         return NULL;
@@ -24,7 +25,7 @@ nw_endpoint_t nw_endpoint_create_url(const char *url)
     return endpoint;
 }
 
-const char *nw_endpoint_get_url(nw_endpoint_t endpoint)
+const char *BACKPORT_IMPL(nw_endpoint_get_url)(nw_endpoint_t endpoint)
 {
     RevenantNWEndpointValue *value = (RevenantNWEndpointValue *)endpoint;
     if (!value || value->_type != nw_endpoint_type_url)

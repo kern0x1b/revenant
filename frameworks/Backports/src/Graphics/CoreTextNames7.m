@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreText/CoreText.h>
 
-const CFStringRef kCTLanguageAttributeName = CFSTR("NSLanguage");
+const CFStringRef BACKPORT_IMPL(kCTLanguageAttributeName) = CFSTR("NSLanguage");

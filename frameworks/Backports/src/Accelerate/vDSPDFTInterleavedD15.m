@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
@@ -67,7 +68,7 @@ static double *revenant_dftD_twiddles(vDSP_Length length, int forward)
     return twiddles;
 }
 
-vDSP_DFT_Interleaved_SetupD vDSP_DFT_Interleaved_CreateSetupD(vDSP_DFT_Interleaved_SetupD Previous, vDSP_Length Length,
+vDSP_DFT_Interleaved_SetupD BACKPORT_IMPL(vDSP_DFT_Interleaved_CreateSetupD)(vDSP_DFT_Interleaved_SetupD Previous, vDSP_Length Length,
                                                              vDSP_DFT_Direction Direction,
                                                              vDSP_DFT_RealtoComplex RealtoComplex)
 {
@@ -93,7 +94,7 @@ vDSP_DFT_Interleaved_SetupD vDSP_DFT_Interleaved_CreateSetupD(vDSP_DFT_Interleav
     return (vDSP_DFT_Interleaved_SetupD)setup;
 }
 
-void vDSP_DFT_Interleaved_ExecuteD(const vDSP_DFT_Interleaved_SetupD Setup, const DSPDoubleComplex *Iri, DSPDoubleComplex *Ori)
+void BACKPORT_IMPL(vDSP_DFT_Interleaved_ExecuteD)(const vDSP_DFT_Interleaved_SetupD Setup, const DSPDoubleComplex *Iri, DSPDoubleComplex *Ori)
 {
     const struct vDSP_DFT_Interleaved_SetupStructD *setup = (const struct vDSP_DFT_Interleaved_SetupStructD *)Setup;
     const vDSP_Length n = setup->length;
@@ -168,7 +169,7 @@ void vDSP_DFT_Interleaved_ExecuteD(const vDSP_DFT_Interleaved_SetupD Setup, cons
     }
 }
 
-void vDSP_DFT_Interleaved_DestroySetupD(vDSP_DFT_Interleaved_SetupD Setup)
+void BACKPORT_IMPL(vDSP_DFT_Interleaved_DestroySetupD)(vDSP_DFT_Interleaved_SetupD Setup)
 {
     revenant_dftD_release((struct vDSP_DFT_Interleaved_SetupStructD *)Setup);
 }

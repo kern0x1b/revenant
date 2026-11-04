@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import "../RevenantCFRuntime.h"
 
-__attribute__((visibility("default"))) const void *__kCFBooleanTrue;
-__attribute__((visibility("default"))) const void *__kCFBooleanFalse;
+__attribute__((visibility("default"))) const void *BACKPORT_IMPL(__kCFBooleanTrue);
+__attribute__((visibility("default"))) const void *BACKPORT_IMPL(__kCFBooleanFalse);
 
 __attribute__((constructor)) static void revenant_cfboolean_constants(void)
 {

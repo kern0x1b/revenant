@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <Intents/Intents.h>
 
 
-NSString *const INCarChargingConnectorTypeNACSAC = @"com.apple.intents.CarChargingConnectorType.NACSAC";
-NSString *const INCarChargingConnectorTypeNACSDC = @"com.apple.intents.CarChargingConnectorType.NACSDC";
+NSString *const BACKPORT_IMPL(INCarChargingConnectorTypeNACSAC) = @"com.apple.intents.CarChargingConnectorType.NACSAC";
+NSString *const BACKPORT_IMPL(INCarChargingConnectorTypeNACSDC) = @"com.apple.intents.CarChargingConnectorType.NACSDC";

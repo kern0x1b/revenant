@@ -1,11 +1,12 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-const CFStringRef kCGPDFTagPropertyActualText = CFSTR("CGPDFTagPropertyActualText");
-const CFStringRef kCGPDFTagPropertyAlternativeText = CFSTR("CGPDFTagPropertyAlternativeText");
-const CFStringRef kCGPDFTagPropertyLanguageText = CFSTR("CGPDFTagPropertyLanguageText");
-const CFStringRef kCGPDFTagPropertyTitleText = CFSTR("CGPDFTagPropertyTitleText");
+const CFStringRef BACKPORT_IMPL(kCGPDFTagPropertyActualText) = CFSTR("CGPDFTagPropertyActualText");
+const CFStringRef BACKPORT_IMPL(kCGPDFTagPropertyAlternativeText) = CFSTR("CGPDFTagPropertyAlternativeText");
+const CFStringRef BACKPORT_IMPL(kCGPDFTagPropertyLanguageText) = CFSTR("CGPDFTagPropertyLanguageText");
+const CFStringRef BACKPORT_IMPL(kCGPDFTagPropertyTitleText) = CFSTR("CGPDFTagPropertyTitleText");
 
-const char *CGPDFTagTypeGetName(CGPDFTagType tagType)
+const char *BACKPORT_IMPL(CGPDFTagTypeGetName)(CGPDFTagType tagType)
 {
     switch (tagType) {
     case 100: return "/Document";

@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-NSString *const UIApplicationOpenURLOptionsOpenInPlaceKey = @"UIApplicationOpenURLOptionsOpenInPlaceKey";
-NSString *const UIApplicationOpenURLOptionsSourceApplicationKey = @"UIApplicationOpenURLOptionsSourceApplicationKey";
-UIActivityType const UIActivityTypeOpenInIBooks = @"com.apple.UIKit.activity.OpenInIBooks";
+NSString *const BACKPORT_IMPL(UIApplicationOpenURLOptionsOpenInPlaceKey) = @"UIApplicationOpenURLOptionsOpenInPlaceKey";
+NSString *const BACKPORT_IMPL(UIApplicationOpenURLOptionsSourceApplicationKey) = @"UIApplicationOpenURLOptionsSourceApplicationKey";
+UIActivityType const BACKPORT_IMPL(UIActivityTypeOpenInIBooks) = @"com.apple.UIKit.activity.OpenInIBooks";

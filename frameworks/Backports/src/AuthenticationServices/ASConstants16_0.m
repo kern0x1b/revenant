@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 
-NSString *const ASAuthorizationProviderAuthorizationOperationDirectRequest = @"direct_request";
+NSString *const BACKPORT_IMPL(ASAuthorizationProviderAuthorizationOperationDirectRequest) = @"direct_request";

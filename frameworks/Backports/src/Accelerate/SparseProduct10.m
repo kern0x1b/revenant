@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantSparseBLAS.h"
 
@@ -68,7 +69,7 @@ static sparse_status RevenantSparseProductSparse(void *A, uint32_t magicA, int o
     return SPARSE_SUCCESS;
 }
 
-sparse_status sparse_matrix_product_sparse_float(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa, float alpha,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_sparse_float)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa, float alpha,
                                                  sparse_matrix_float A, sparse_matrix_float B, float *__restrict C,
                                                  sparse_dimension ldc)
 {
@@ -79,7 +80,7 @@ sparse_status sparse_matrix_product_sparse_float(enum CBLAS_ORDER order, enum CB
                                      REVENANT_SPARSE_MAGIC_FLOAT, C, ldc, sizeof(float));
 }
 
-sparse_status sparse_matrix_product_sparse_double(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa, double alpha,
+sparse_status BACKPORT_IMPL(sparse_matrix_product_sparse_double)(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa, double alpha,
                                                   sparse_matrix_double A, sparse_matrix_double B, double *__restrict C,
                                                   sparse_dimension ldc)
 {

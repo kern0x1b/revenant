@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantCMTagSupport.h"
 #import "RevenantCMTag26.h"
 #import <objc/runtime.h>
@@ -6,13 +7,13 @@
 
 static void revenant_insert_all(RevenantCMTagCollection *into, RevenantCMTagCollection *from);
 
-const CMTag kCMTagInvalid = {kCMTagCategory_Undefined, kCMTagDataType_Invalid, 0};
+const CMTag BACKPORT_IMPL(kCMTagInvalid) = {kCMTagCategory_Undefined, kCMTagDataType_Invalid, 0};
 
-const CFStringRef kCMTagCategoryKey = CFSTR("category");
-const CFStringRef kCMTagValueKey = CFSTR("value");
-const CFStringRef kCMTagDataTypeKey = CFSTR("flags");
+const CFStringRef BACKPORT_IMPL(kCMTagCategoryKey) = CFSTR("category");
+const CFStringRef BACKPORT_IMPL(kCMTagValueKey) = CFSTR("value");
+const CFStringRef BACKPORT_IMPL(kCMTagDataTypeKey) = CFSTR("flags");
 
-CFTypeID CMTagCollectionGetTypeID(void)
+CFTypeID BACKPORT_IMPL(CMTagCollectionGetTypeID)(void)
 {
     return (CFTypeID)objc_getClass("RevenantCMTagCollection");
 }
@@ -32,7 +33,7 @@ static RevenantCMTagCollection *revenant_to(CMTagCollectionRef collection)
     return (__bridge RevenantCMTagCollection *)collection;
 }
 
-OSStatus CMTagCollectionCreate(CFAllocatorRef allocator, const CMTag *tags, CMItemCount tagCount, CMTagCollectionRef *newCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreate)(CFAllocatorRef allocator, const CMTag *tags, CMItemCount tagCount, CMTagCollectionRef *newCollectionOut)
 {
     (void)allocator;
     if (!newCollectionOut || (!tags && tagCount))
@@ -45,7 +46,7 @@ OSStatus CMTagCollectionCreate(CFAllocatorRef allocator, const CMTag *tags, CMIt
     return noErr;
 }
 
-OSStatus CMTagCollectionCreateMutable(CFAllocatorRef allocator, CFIndex capacity, CMMutableTagCollectionRef *newMutableCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateMutable)(CFAllocatorRef allocator, CFIndex capacity, CMMutableTagCollectionRef *newMutableCollectionOut)
 {
     (void)allocator;
     (void)capacity;
@@ -55,13 +56,13 @@ OSStatus CMTagCollectionCreateMutable(CFAllocatorRef allocator, CFIndex capacity
     return *newMutableCollectionOut ? noErr : kCMTagCollectionError_AllocationFailed;
 }
 
-OSStatus CMTagCollectionCreateCopy(CMTagCollectionRef tagCollection, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionCopyOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateCopy)(CMTagCollectionRef tagCollection, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionCopyOut)
 {
     RevenantCMTagCollection *source = revenant_to(tagCollection);
     return CMTagCollectionCreate(allocator, source ? source.revenant_tags : NULL, (CMItemCount)(source ? source.revenant_count : 0), newCollectionCopyOut);
 }
 
-OSStatus CMTagCollectionCreateMutableCopy(CMTagCollectionRef tagCollection, CFAllocatorRef allocator, CMMutableTagCollectionRef *newMutableCollectionCopyOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateMutableCopy)(CMTagCollectionRef tagCollection, CFAllocatorRef allocator, CMMutableTagCollectionRef *newMutableCollectionCopyOut)
 {
     RevenantCMTagCollection *source = revenant_to(tagCollection);
     if (!newMutableCollectionCopyOut)
@@ -107,7 +108,7 @@ static NSString *revenant_tag_type(CMTagDataType type)
     }
 }
 
-CFStringRef CMTagCollectionCopyDescription(CFAllocatorRef allocator, CMTagCollectionRef tagCollection)
+CFStringRef BACKPORT_IMPL(CMTagCollectionCopyDescription)(CFAllocatorRef allocator, CMTagCollectionRef tagCollection)
 {
     (void)allocator;
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -122,37 +123,37 @@ CFStringRef CMTagCollectionCopyDescription(CFAllocatorRef allocator, CMTagCollec
     return (__bridge_retained CFStringRef)built;
 }
 
-CMItemCount CMTagCollectionGetCount(CMTagCollectionRef tagCollection)
+CMItemCount BACKPORT_IMPL(CMTagCollectionGetCount)(CMTagCollectionRef tagCollection)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     return (CMItemCount)(collection ? collection.revenant_count : 0);
 }
 
-Boolean CMTagCollectionIsEmpty(CMTagCollectionRef tagCollection)
+Boolean BACKPORT_IMPL(CMTagCollectionIsEmpty)(CMTagCollectionRef tagCollection)
 {
     return CMTagCollectionGetCount(tagCollection) == 0;
 }
 
-Boolean CMTagCollectionContainsTag(CMTagCollectionRef tagCollection, CMTag tag)
+Boolean BACKPORT_IMPL(CMTagCollectionContainsTag)(CMTagCollectionRef tagCollection, CMTag tag)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     return collection ? [collection revenant_contains:tag] : false;
 }
 
-CMItemCount CMTagCollectionGetCountOfCategory(CMTagCollectionRef tagCollection, CMTagCategory category)
+CMItemCount BACKPORT_IMPL(CMTagCollectionGetCountOfCategory)(CMTagCollectionRef tagCollection, CMTagCategory category)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     return (CMItemCount)(collection ? [collection revenant_countOfCategory:category] : 0);
 }
 
-Boolean CMTagCollectionContainsCategory(CMTagCollectionRef tagCollection, CMTagCategory category)
+Boolean BACKPORT_IMPL(CMTagCollectionContainsCategory)(CMTagCollectionRef tagCollection, CMTagCategory category)
 {
     if (category == kCMTagCategory_Undefined)
         return true;
     return CMTagCollectionGetCountOfCategory(tagCollection, category) != 0;
 }
 
-Boolean CMTagCollectionContainsTagsOfCollection(CMTagCollectionRef tagCollection, CMTagCollectionRef inputCollection)
+Boolean BACKPORT_IMPL(CMTagCollectionContainsTagsOfCollection)(CMTagCollectionRef tagCollection, CMTagCollectionRef inputCollection)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection), *input = revenant_to(inputCollection);
     if (!collection || !input)
@@ -164,7 +165,7 @@ Boolean CMTagCollectionContainsTagsOfCollection(CMTagCollectionRef tagCollection
     return true;
 }
 
-Boolean CMTagCollectionContainsSpecifiedTags(CMTagCollectionRef tagCollection, const CMTag *containedTags, CMItemCount containedTagCount)
+Boolean BACKPORT_IMPL(CMTagCollectionContainsSpecifiedTags)(CMTagCollectionRef tagCollection, const CMTag *containedTags, CMItemCount containedTagCount)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     if (!collection || (!containedTags && containedTagCount))
@@ -175,7 +176,7 @@ Boolean CMTagCollectionContainsSpecifiedTags(CMTagCollectionRef tagCollection, c
     return true;
 }
 
-OSStatus CMTagCollectionGetTags(CMTagCollectionRef tagCollection, CMTag *tagBuffer, CMItemCount tagBufferCount,
+OSStatus BACKPORT_IMPL(CMTagCollectionGetTags)(CMTagCollectionRef tagCollection, CMTag *tagBuffer, CMItemCount tagBufferCount,
                                 CMItemCount *numberOfTagsCopied)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -190,7 +191,7 @@ OSStatus CMTagCollectionGetTags(CMTagCollectionRef tagCollection, CMTag *tagBuff
     return written == collection.revenant_count ? noErr : kCMTagCollectionError_ExhaustedBufferSize;
 }
 
-OSStatus CMTagCollectionGetTagsWithCategory(CMTagCollectionRef tagCollection, CMTagCategory category, CMTag *tagBuffer,
+OSStatus BACKPORT_IMPL(CMTagCollectionGetTagsWithCategory)(CMTagCollectionRef tagCollection, CMTagCategory category, CMTag *tagBuffer,
                                            CMItemCount tagBufferCount, CMItemCount *numberOfTagsCopied)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -210,7 +211,7 @@ OSStatus CMTagCollectionGetTagsWithCategory(CMTagCollectionRef tagCollection, CM
     return written == matched ? noErr : kCMTagCollectionError_ExhaustedBufferSize;
 }
 
-CMItemCount CMTagCollectionCountTagsWithFilterFunction(CMTagCollectionRef tagCollection,
+CMItemCount BACKPORT_IMPL(CMTagCollectionCountTagsWithFilterFunction)(CMTagCollectionRef tagCollection,
                                                        CMTagCollectionTagFilterFunction filterApplier, void *context)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -224,7 +225,7 @@ CMItemCount CMTagCollectionCountTagsWithFilterFunction(CMTagCollectionRef tagCol
     return count;
 }
 
-OSStatus CMTagCollectionGetTagsWithFilterFunction(CMTagCollectionRef tagCollection, CMTag *tagBuffer, CMItemCount tagBufferCount,
+OSStatus BACKPORT_IMPL(CMTagCollectionGetTagsWithFilterFunction)(CMTagCollectionRef tagCollection, CMTag *tagBuffer, CMItemCount tagBufferCount,
                                                  CMItemCount *numberOfTagsCopied, CMTagCollectionTagFilterFunction filter, void *context)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -244,7 +245,7 @@ OSStatus CMTagCollectionGetTagsWithFilterFunction(CMTagCollectionRef tagCollecti
     return written == matched ? noErr : kCMTagCollectionError_ExhaustedBufferSize;
 }
 
-OSStatus CMTagCollectionAddTag(CMMutableTagCollectionRef tagCollection, CMTag tag)
+OSStatus BACKPORT_IMPL(CMTagCollectionAddTag)(CMMutableTagCollectionRef tagCollection, CMTag tag)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection);
     if (!collection)
@@ -252,7 +253,7 @@ OSStatus CMTagCollectionAddTag(CMMutableTagCollectionRef tagCollection, CMTag ta
     return [collection revenant_insert:tag] ? noErr : kCMTagCollectionError_AllocationFailed;
 }
 
-OSStatus CMTagCollectionRemoveTag(CMMutableTagCollectionRef tagCollection, CMTag tag)
+OSStatus BACKPORT_IMPL(CMTagCollectionRemoveTag)(CMMutableTagCollectionRef tagCollection, CMTag tag)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection);
     if (!collection)
@@ -260,7 +261,7 @@ OSStatus CMTagCollectionRemoveTag(CMMutableTagCollectionRef tagCollection, CMTag
     return [collection revenant_remove:tag] ? noErr : kCMTagCollectionError_TagNotFound;
 }
 
-OSStatus CMTagCollectionRemoveAllTagsOfCategory(CMMutableTagCollectionRef tagCollection, CMTagCategory category)
+OSStatus BACKPORT_IMPL(CMTagCollectionRemoveAllTagsOfCategory)(CMMutableTagCollectionRef tagCollection, CMTagCategory category)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection);
     if (!collection)
@@ -269,7 +270,7 @@ OSStatus CMTagCollectionRemoveAllTagsOfCategory(CMMutableTagCollectionRef tagCol
     return noErr;
 }
 
-OSStatus CMTagCollectionRemoveAllTags(CMMutableTagCollectionRef tagCollection)
+OSStatus BACKPORT_IMPL(CMTagCollectionRemoveAllTags)(CMMutableTagCollectionRef tagCollection)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection);
     if (!collection)
@@ -278,7 +279,7 @@ OSStatus CMTagCollectionRemoveAllTags(CMMutableTagCollectionRef tagCollection)
     return noErr;
 }
 
-OSStatus CMTagCollectionAddTagsFromCollection(CMMutableTagCollectionRef tagCollection, CMTagCollectionRef inputCollection)
+OSStatus BACKPORT_IMPL(CMTagCollectionAddTagsFromCollection)(CMMutableTagCollectionRef tagCollection, CMTagCollectionRef inputCollection)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection), *input = revenant_to(inputCollection);
     if (!collection || !input)
@@ -290,7 +291,7 @@ OSStatus CMTagCollectionAddTagsFromCollection(CMMutableTagCollectionRef tagColle
     return noErr;
 }
 
-OSStatus CMTagCollectionAddTagsFromArray(CMMutableTagCollectionRef tagCollection, CMTag *tags, CMItemCount tagCount)
+OSStatus BACKPORT_IMPL(CMTagCollectionAddTagsFromArray)(CMMutableTagCollectionRef tagCollection, CMTag *tags, CMItemCount tagCount)
 {
     RevenantCMTagCollection *collection = revenant_to((CMTagCollectionRef)tagCollection);
     if (!collection || (!tags && tagCount))
@@ -310,7 +311,7 @@ static void revenant_insert_all(RevenantCMTagCollection *into, RevenantCMTagColl
         [into revenant_insert:tags[index]];
 }
 
-OSStatus CMTagCollectionCreateDifference(CMTagCollectionRef tagCollectionMinuend, CMTagCollectionRef tagCollectionSubtrahend, CMTagCollectionRef *tagCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateDifference)(CMTagCollectionRef tagCollectionMinuend, CMTagCollectionRef tagCollectionSubtrahend, CMTagCollectionRef *tagCollectionOut)
 {
     RevenantCMTagCollection *minuend = revenant_to(tagCollectionMinuend), *subtrahend = revenant_to(tagCollectionSubtrahend);
     if (!tagCollectionOut)
@@ -328,7 +329,7 @@ OSStatus CMTagCollectionCreateDifference(CMTagCollectionRef tagCollectionMinuend
     return noErr;
 }
 
-OSStatus CMTagCollectionCreateExclusiveOr(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateExclusiveOr)(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
 {
     RevenantCMTagCollection *first = revenant_to(tagCollection1), *second = revenant_to(tagCollection2);
     if (!tagCollectionOut)
@@ -351,7 +352,7 @@ OSStatus CMTagCollectionCreateExclusiveOr(CMTagCollectionRef tagCollection1, CMT
 }
 
 
-OSStatus CMTagCollectionCreateUnion(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateUnion)(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
 {
     CMTagCollectionRef out = NULL;
     OSStatus status = CMTagCollectionCreateMutableCopy(tagCollection1, NULL, (CMMutableTagCollectionRef *)&out);
@@ -362,7 +363,7 @@ OSStatus CMTagCollectionCreateUnion(CMTagCollectionRef tagCollection1, CMTagColl
     return noErr;
 }
 
-OSStatus CMTagCollectionCreateIntersection(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateIntersection)(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
 {
     RevenantCMTagCollection *first = revenant_to(tagCollection1), *second = revenant_to(tagCollection2);
     if (!tagCollectionOut)
@@ -380,7 +381,7 @@ OSStatus CMTagCollectionCreateIntersection(CMTagCollectionRef tagCollection1, CM
     return noErr;
 }
 
-OSStatus CMTagCollectionCopyTagsOfCategories(CFAllocatorRef allocator, CMTagCollectionRef tagCollection, const CMTagCategory *categories,
+OSStatus BACKPORT_IMPL(CMTagCollectionCopyTagsOfCategories)(CFAllocatorRef allocator, CMTagCollectionRef tagCollection, const CMTagCategory *categories,
                                              CMItemCount categoriesCount, CMTagCollectionRef *newCollectionOut)
 {
     (void)allocator;
@@ -400,7 +401,7 @@ OSStatus CMTagCollectionCopyTagsOfCategories(CFAllocatorRef allocator, CMTagColl
     return noErr;
 }
 
-void CMTagCollectionApply(CMTagCollectionRef tagCollection, CMTagCollectionApplierFunction applier, void *context)
+void BACKPORT_IMPL(CMTagCollectionApply)(CMTagCollectionRef tagCollection, CMTagCollectionApplierFunction applier, void *context)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     if (!collection || !applier)
@@ -410,7 +411,7 @@ void CMTagCollectionApply(CMTagCollectionRef tagCollection, CMTagCollectionAppli
         applier(tags[index], context);
 }
 
-CMTag CMTagCollectionApplyUntil(CMTagCollectionRef tagCollection, CMTagCollectionTagFilterFunction filter, void *context)
+CMTag BACKPORT_IMPL(CMTagCollectionApplyUntil)(CMTagCollectionRef tagCollection, CMTagCollectionTagFilterFunction filter, void *context)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     if (!collection || !filter)
@@ -422,7 +423,7 @@ CMTag CMTagCollectionApplyUntil(CMTagCollectionRef tagCollection, CMTagCollectio
     return kCMTagInvalid;
 }
 
-CFDictionaryRef CMTagCollectionCopyAsDictionary(CMTagCollectionRef tagCollection, CFAllocatorRef allocator)
+CFDictionaryRef BACKPORT_IMPL(CMTagCollectionCopyAsDictionary)(CMTagCollectionRef tagCollection, CFAllocatorRef allocator)
 {
     (void)allocator;
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
@@ -450,7 +451,7 @@ CFDictionaryRef CMTagCollectionCopyAsDictionary(CMTagCollectionRef tagCollection
     return out;
 }
 
-OSStatus CMTagCollectionCreateFromDictionary(CFDictionaryRef dict, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateFromDictionary)(CFDictionaryRef dict, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionOut)
 {
     if (!dict || !newCollectionOut)
         return kCMTagCollectionError_ParamErr;
@@ -502,7 +503,7 @@ static void revenant_data_category(uint8_t *at, CMTagCategory category)
     at[3] = (uint8_t)category;
 }
 
-CFDataRef CMTagCollectionCopyAsData(CMTagCollectionRef tagCollection, CFAllocatorRef allocator)
+CFDataRef BACKPORT_IMPL(CMTagCollectionCopyAsData)(CMTagCollectionRef tagCollection, CFAllocatorRef allocator)
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     if (!collection)
@@ -534,7 +535,7 @@ CFDataRef CMTagCollectionCopyAsData(CMTagCollectionRef tagCollection, CFAllocato
     return data;
 }
 
-OSStatus CMTagCollectionCreateFromData(CFDataRef data, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionOut)
+OSStatus BACKPORT_IMPL(CMTagCollectionCreateFromData)(CFDataRef data, CFAllocatorRef allocator, CMTagCollectionRef *newCollectionOut)
 {
     (void)allocator;
     if (!data || !newCollectionOut)

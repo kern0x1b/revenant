@@ -1,11 +1,12 @@
+#include "../revenant_impl.h"
 #import <CoreGraphics/CoreGraphics.h>
 
-bool CGColorSpaceIsHLGBased(CGColorSpaceRef space)
+bool BACKPORT_IMPL(CGColorSpaceIsHLGBased)(CGColorSpaceRef space)
 {
     return false;
 }
 
-bool CGColorSpaceIsPQBased(CGColorSpaceRef space)
+bool BACKPORT_IMPL(CGColorSpaceIsPQBased)(CGColorSpaceRef space)
 {
     return false;
 }

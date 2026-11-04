@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import "RevenantVision.h"
 #import "RevenantVisionContours.h"
 #import <simd/simd.h>
@@ -688,7 +689,7 @@ static RevenantVisionCircle revenant_vision_bounding_circle(RevenantVisionXY *po
 
 @end
 
-CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, size_t imageHeight)
+CGPoint BACKPORT_IMPL(VNNormalizedPointForImagePoint)(CGPoint imagePoint, size_t imageWidth, size_t imageHeight)
 {
     if (imageWidth == 0 || imageHeight == 0) {
         return CGPointZero;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreMedia/CoreMedia.h>
 #include <CoreVideo/CoreVideo.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -11,7 +12,7 @@ static OSStatus revenant_ready(CMSampleBufferMakeDataReadyHandler handler, CMSam
     return handler(buffer);
 }
 
-OSStatus CMSampleBufferCreateWithMakeDataReadyHandler(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, Boolean dataReady,
+OSStatus BACKPORT_IMPL(CMSampleBufferCreateWithMakeDataReadyHandler)(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, Boolean dataReady,
                                                       CMFormatDescriptionRef formatDescription, CMItemCount numSamples,
                                                       CMItemCount numSampleTimingEntries, const CMSampleTimingInfo *sampleTimingArray,
                                                       CMItemCount numSampleSizeEntries, const size_t *sampleSizeArray,
@@ -32,7 +33,7 @@ OSStatus CMSampleBufferCreateWithMakeDataReadyHandler(CFAllocatorRef allocator, 
     return status;
 }
 
-OSStatus CMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, Boolean dataReady,
+OSStatus BACKPORT_IMPL(CMSampleBufferCreateForImageBufferWithMakeDataReadyHandler)(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, Boolean dataReady,
                                                                     CMVideoFormatDescriptionRef formatDescription, const CMSampleTimingInfo *sampleTiming,
                                                                     CMSampleBufferRef *sampleBufferOut, CMSampleBufferMakeDataReadyHandler makeDataReadyHandler)
 {

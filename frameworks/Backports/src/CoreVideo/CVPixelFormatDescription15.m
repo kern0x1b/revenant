@@ -1,7 +1,8 @@
+#include "../revenant_impl.h"
 #import <CoreVideo/CoreVideo.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-Boolean CVIsCompressedPixelFormatAvailable(OSType pixelFormatType)
+Boolean BACKPORT_IMPL(CVIsCompressedPixelFormatAvailable)(OSType pixelFormatType)
 {
     (void)pixelFormatType;
     return false;

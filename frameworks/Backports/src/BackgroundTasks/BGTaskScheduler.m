@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 #import <BackgroundTasks/BackgroundTasks.h>
 
@@ -5,7 +6,7 @@
 - (instancetype)initRevenant;
 @end
 
-NSErrorDomain const BGTaskSchedulerErrorDomain = @"BGTaskSchedulerErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(BGTaskSchedulerErrorDomain) = @"BGTaskSchedulerErrorDomain";
 
 static BOOL revenant_launched;
 static BGTaskScheduler *revenant_scheduler;

@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/SecCertificate.h>
 #import <Security/SecIdentity.h>
@@ -11,7 +12,7 @@
 @interface RevenantSecProtocolCertificateMaker : NSObject
 + (SecCertificateRef)revenantRefForCertificate:(SecCertificateRef)certificate;
 @end
-bool sec_identity_access_certificates(sec_identity_t identity, void (^handler)(sec_certificate_t))
+bool BACKPORT_IMPL(sec_identity_access_certificates)(sec_identity_t identity, void (^handler)(sec_certificate_t))
 {
     if (![identity isKindOfClass:RevenantSecIdentity.class] || !handler)
         return false;

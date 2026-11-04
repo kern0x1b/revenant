@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
 NSString *const UIFontDescriptorNameAttribute = @"NSFontNameAttribute";
@@ -18,5 +19,5 @@ NSString *const UIFontWidthTrait = @"NSCTFontProportionTrait";
 NSString *const UIFontSlantTrait = @"NSCTFontSlantTrait";
 NSString *const UIFontFeatureTypeIdentifierKey = @"CTFeatureTypeIdentifier";
 NSString *const UIFontFeatureSelectorIdentifierKey = @"CTFeatureSelectorIdentifier";
-NSString *const UIFontFeatureTypeIdentifierKey_ForNewSwiftAPI = @"CTFeatureTypeIdentifier";
-NSString *const UIFontFeatureSelectorIdentifierKey_ForNewSwiftAPI = @"CTFeatureSelectorIdentifier";
+NSString *const BACKPORT_IMPL(UIFontFeatureTypeIdentifierKey_ForNewSwiftAPI) = @"CTFeatureTypeIdentifier";
+NSString *const BACKPORT_IMPL(UIFontFeatureSelectorIdentifierKey_ForNewSwiftAPI) = @"CTFeatureSelectorIdentifier";

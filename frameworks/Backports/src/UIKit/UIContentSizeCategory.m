@@ -1,14 +1,15 @@
+#include "../revenant_impl.h"
 #import <UIKit/UIKit.h>
 
-UIContentSizeCategory const UIContentSizeCategoryExtraSmall = @"UICTContentSizeCategoryXS";
-UIContentSizeCategory const UIContentSizeCategorySmall = @"UICTContentSizeCategoryS";
-UIContentSizeCategory const UIContentSizeCategoryMedium = @"UICTContentSizeCategoryM";
-UIContentSizeCategory const UIContentSizeCategoryLarge = @"UICTContentSizeCategoryL";
-UIContentSizeCategory const UIContentSizeCategoryExtraLarge = @"UICTContentSizeCategoryXL";
-UIContentSizeCategory const UIContentSizeCategoryExtraExtraLarge = @"UICTContentSizeCategoryXXL";
-UIContentSizeCategory const UIContentSizeCategoryExtraExtraExtraLarge = @"UICTContentSizeCategoryXXXL";
-UIContentSizeCategory const UIContentSizeCategoryAccessibilityMedium = @"UICTContentSizeCategoryAccessibilityM";
-UIContentSizeCategory const UIContentSizeCategoryAccessibilityLarge = @"UICTContentSizeCategoryAccessibilityL";
-UIContentSizeCategory const UIContentSizeCategoryAccessibilityExtraLarge = @"UICTContentSizeCategoryAccessibilityXL";
-UIContentSizeCategory const UIContentSizeCategoryAccessibilityExtraExtraLarge = @"UICTContentSizeCategoryAccessibilityXXL";
-UIContentSizeCategory const UIContentSizeCategoryAccessibilityExtraExtraExtraLarge = @"UICTContentSizeCategoryAccessibilityXXXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryExtraSmall) = @"UICTContentSizeCategoryXS";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategorySmall) = @"UICTContentSizeCategoryS";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryMedium) = @"UICTContentSizeCategoryM";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryLarge) = @"UICTContentSizeCategoryL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryExtraLarge) = @"UICTContentSizeCategoryXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryExtraExtraLarge) = @"UICTContentSizeCategoryXXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryExtraExtraExtraLarge) = @"UICTContentSizeCategoryXXXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryAccessibilityMedium) = @"UICTContentSizeCategoryAccessibilityM";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryAccessibilityLarge) = @"UICTContentSizeCategoryAccessibilityL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryAccessibilityExtraLarge) = @"UICTContentSizeCategoryAccessibilityXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryAccessibilityExtraExtraLarge) = @"UICTContentSizeCategoryAccessibilityXXL";
+UIContentSizeCategory const BACKPORT_IMPL(UIContentSizeCategoryAccessibilityExtraExtraExtraLarge) = @"UICTContentSizeCategoryAccessibilityXXXL";

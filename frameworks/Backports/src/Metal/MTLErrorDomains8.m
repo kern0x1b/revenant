@@ -1,5 +1,6 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-NSErrorDomain const MTLCommandBufferErrorDomain = @"MTLCommandBufferErrorDomain";
-NSErrorDomain const MTLLibraryErrorDomain = @"MTLLibraryErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(MTLCommandBufferErrorDomain) = @"MTLCommandBufferErrorDomain";
+NSErrorDomain const BACKPORT_IMPL(MTLLibraryErrorDomain) = @"MTLLibraryErrorDomain";

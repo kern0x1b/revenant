@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Accelerate/Accelerate.h>
 #include "RevenantChannels.h"
 
@@ -37,7 +38,7 @@ static vImage_Error revenant_channels8_channel(long channelIndex)
     return (channelIndex < 0 || channelIndex > 3) ? kvImageInvalidParameter : kvImageNoError;
 }
 
-vImage_Error vImageExtractChannel_ARGB16U(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
+vImage_Error BACKPORT_IMPL(vImageExtractChannel_ARGB16U)(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
                                           vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels8_ready(src, dest, flags, revenant_channels8_extract_flags);
@@ -52,7 +53,7 @@ vImage_Error vImageExtractChannel_ARGB16U(const vImage_Buffer *src, const vImage
     return kvImageNoError;
 }
 
-vImage_Error vImageExtractChannel_ARGBFFFF(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
+vImage_Error BACKPORT_IMPL(vImageExtractChannel_ARGBFFFF)(const vImage_Buffer *src, const vImage_Buffer *dest, long channelIndex,
                                            vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels8_ready(src, dest, flags, revenant_channels8_extract_flags);
@@ -67,7 +68,7 @@ vImage_Error vImageExtractChannel_ARGBFFFF(const vImage_Buffer *src, const vImag
     return kvImageNoError;
 }
 
-vImage_Error vImageOverwriteChannelsWithScalar_Planar16U(Pixel_16U scalar, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageOverwriteChannelsWithScalar_Planar16U)(Pixel_16U scalar, const vImage_Buffer *dest,
                                                          vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels8_ready_dest(dest, flags);
@@ -78,7 +79,7 @@ vImage_Error vImageOverwriteChannelsWithScalar_Planar16U(Pixel_16U scalar, const
     return kvImageNoError;
 }
 
-vImage_Error vImageOverwriteChannelsWithScalar_Planar16S(Pixel_16S scalar, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImageOverwriteChannelsWithScalar_Planar16S)(Pixel_16S scalar, const vImage_Buffer *dest,
                                                          vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels8_ready_dest(dest, flags);
@@ -89,7 +90,7 @@ vImage_Error vImageOverwriteChannelsWithScalar_Planar16S(Pixel_16S scalar, const
     return kvImageNoError;
 }
 
-vImage_Error vImagePermuteChannels_RGB888(const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error BACKPORT_IMPL(vImagePermuteChannels_RGB888)(const vImage_Buffer *src, const vImage_Buffer *dest,
                                           const uint8_t permuteMap[3], vImage_Flags flags)
 {
     vImage_Error ready = revenant_channels8_ready(src, dest, flags, revenant_channels8_rgb888_flags);

@@ -1,8 +1,9 @@
+#include "../revenant_impl.h"
 #import "RevenantMPS.h"
 
 
-const MTLRegion MPSRectNoClip = {{0, 0, 0}, {-1, -1, -1}};
-BOOL MPSSupportsMTLDevice(id<MTLDevice> device)
+const MTLRegion BACKPORT_IMPL(MPSRectNoClip) = {{0, 0, 0}, {-1, -1, -1}};
+BOOL BACKPORT_IMPL(MPSSupportsMTLDevice)(id<MTLDevice> device)
 {
     return device != nil;
 }

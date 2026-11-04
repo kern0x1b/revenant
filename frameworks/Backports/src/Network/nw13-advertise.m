@@ -1,6 +1,7 @@
+#include "../revenant_impl.h"
 #import "RevenantNW.h"
 
-void nw_advertise_descriptor_set_txt_record_object(nw_advertise_descriptor_t advertise_descriptor, nw_txt_record_t txt_record)
+void BACKPORT_IMPL(nw_advertise_descriptor_set_txt_record_object)(nw_advertise_descriptor_t advertise_descriptor, nw_txt_record_t txt_record)
 {
     RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (!value)
@@ -9,7 +10,7 @@ void nw_advertise_descriptor_set_txt_record_object(nw_advertise_descriptor_t adv
     value->_txtRecord = nil;
 }
 
-nw_txt_record_t nw_advertise_descriptor_copy_txt_record_object(nw_advertise_descriptor_t advertise_descriptor)
+nw_txt_record_t BACKPORT_IMPL(nw_advertise_descriptor_copy_txt_record_object)(nw_advertise_descriptor_t advertise_descriptor)
 {
     RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (!value)

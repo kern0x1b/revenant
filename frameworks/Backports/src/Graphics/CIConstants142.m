@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <CoreImage/CoreImage.h>
 
-const CIFormat kCIFormatRGBX16 = 1804;
+const CIFormat BACKPORT_IMPL(kCIFormatRGBX16) = 1804;

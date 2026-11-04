@@ -1,3 +1,4 @@
+#include "../revenant_impl.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
@@ -53,7 +54,7 @@ static NSError *revenant_trust_error(SecTrustRef trust, OSStatus status)
                            userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"“%@” certificate %@", summary, reason], NSUnderlyingErrorKey: underlying}];
 }
 
-bool SecTrustEvaluateWithError(SecTrustRef trust, CFErrorRef *error)
+bool BACKPORT_IMPL(SecTrustEvaluateWithError)(SecTrustRef trust, CFErrorRef *error)
 {
     SecTrustResultType result = kSecTrustResultInvalid;
     OSStatus status = SecTrustEvaluate(trust, &result);
@@ -67,7 +68,7 @@ bool SecTrustEvaluateWithError(SecTrustRef trust, CFErrorRef *error)
     return false;
 }
 
-SecKeyRef SecCertificateCopyKey(SecCertificateRef certificate)
+SecKeyRef BACKPORT_IMPL(SecCertificateCopyKey)(SecCertificateRef certificate)
 {
     return SecCertificateCopyPublicKey(certificate);
 }
