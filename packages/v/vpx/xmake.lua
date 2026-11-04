@@ -3,6 +3,9 @@ package("vpx")
     set_homepage("https://www.webmproject.org")
     set_description("libvpx, the VP8 and VP9 codec as a static libvpx for armv7 iOS 6, at master commit e7bfd8b6 (1.13.0 plus 435 commits) that Telegram vendors")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/webmproject/libvpx.git")
     add_versions("1.13.0-435", "e7bfd8b6c230a6824e7fd1efa2378a7322986128")

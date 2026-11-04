@@ -2,6 +2,9 @@ package("libwebp")
     set_homepage("https://chromium.googlesource.com/webm/libwebp")
     set_description("libwebp, its decoder and demuxer as static libraries: WebKit decodes WebP itself, since the ImageIO of iOS 6 cannot")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://chromium.googlesource.com/webm/libwebp.git")

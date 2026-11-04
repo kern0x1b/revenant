@@ -3,6 +3,9 @@ package("boringssl")
     set_homepage("https://boringssl.googlesource.com/boringssl")
     set_description("BoringSSL at master-with-bazel commit cf686573 (2024-03-06), the snapshot Telegram vendors, as libcrypto and libssl for armv7 iOS 6 with its 32-bit ARM assembly: target.h keeps the assembly on Apple, the ios32 perlasm output is generated into apple-arm/ and listed by CMake, and the system random source reads /dev/urandom where CCRandomGenerateBytes is absent")
     set_license("OpenSSL")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
 
     add_urls("https://github.com/google/boringssl.git")
     add_versions("2024.03.06", "cf6865731655cf49f473732aa87e0804f6011a25")

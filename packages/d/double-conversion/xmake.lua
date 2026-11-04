@@ -2,6 +2,9 @@ package("double-conversion")
     set_homepage("https://github.com/google/double-conversion")
     set_description("double-conversion 1.1.6, the binary-decimal conversions React Native's folly parses and prints doubles with, as a static libdouble-conversion for armv7 iOS 6")
     set_license("BSD-3-Clause")
+    if is_mode("debug") then
+        add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
+    end
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/google/double-conversion.git")
