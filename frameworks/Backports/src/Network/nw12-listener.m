@@ -14,7 +14,6 @@
 #include <unistd.h>
 
 #import <Security/Security.h>
-#import <Security/SecureTransport.h>
 
 @interface RevenantNWListener : NSObject <OS_nw_listener> {
 @public

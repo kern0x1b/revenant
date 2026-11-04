@@ -16,6 +16,7 @@ __attribute__((visibility("default")))
 @property (nonatomic, nullable) NSString *serverName;
 @property (nonatomic) NSMutableArray<NSString *> *applicationProtocols;
 @property (nonatomic) BOOL peerAuthenticationRequired;
+@property (nonatomic) BOOL breaksOnServerAuth;
 @property (nonatomic, nullable) sec_identity_t localIdentity;
 - (nullable SecIdentityRef)revenantCopyIdentityRef CF_RETURNS_RETAINED;
 - (NSArray<NSNumber *> *)revenantCiphersuiteGroups;
