@@ -25,7 +25,7 @@ package("swift-runtime")
          url = "https://github.com/swiftlang/swift.git",
          sparse = {"/stdlib/public/Darwin/UIKit/", "/stdlib/public/Darwin/QuartzCore/", "/stdlib/public/Darwin/CoreData/",
                    "/stdlib/public/Darwin/CoreMedia/", "/stdlib/public/Darwin/Photos/", "/stdlib/public/Darwin/AVFoundation/",
-                   "/stdlib/public/Darwin/MediaPlayer/",
+                   "/stdlib/public/Darwin/MediaPlayer/", "/stdlib/public/Darwin/CoreAudio/",
                    "/stdlib/public/SwiftShims/UIKitOverlayShims.h",
                    "/LICENSE.txt"}}
     }
@@ -480,7 +480,11 @@ package("swift-runtime")
             local photos_cache = path.join(generated, "module-cache-photos")
             os.mkdir(photos_cache)
             local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
-            build_overlay("Photos", {path.join(photos, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
+            local gated_phchange, gated = io.readfile(path.join(photos, "PHChange.swift")):gsub(
+                "@available%(iOS 8%.0, tvOS 10%.0, %*%)\nextension PHChange {", "@available(iOS 6.0, *)\nextension PHChange {")
+            assert(gated == 1, "PHChange.swift no longer declares its extension at iOS 8.0 as the backport gate expects")
+            io.writefile(path.join(generated, "PHChange.swift"), gated_phchange)
+            build_overlay("Photos", {path.join(generated, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
                           table.join(foundation_links, {"-lswiftCoreMedia", "-Xlinker", "-weak_framework", "-Xlinker", "Photos"}), nil,
                           {module_cache = photos_cache, extra_flags = lowered_cc})
             local avfoundation_cache = path.join(generated, "module-cache-avfoundation")
@@ -499,6 +503,11 @@ package("swift-runtime")
             build_overlay("MediaPlayer", {path.join(mediaplayer, "MPMusicPlayerPlayParameters.swift")},
                           table.join(foundation_links, {"-framework", "MediaPlayer"}), nil,
                           {module_cache = mediaplayer_cache, extra_flags = lowered_cc})
+            local coreaudio_cache = path.join(generated, "module-cache-coreaudio")
+            os.mkdir(coreaudio_cache)
+            local coreaudio = path.join(uikit, "stdlib", "public", "Darwin", "CoreAudio")
+            build_overlay("CoreAudio", {path.join(coreaudio, "CoreAudio.swift")}, {"-framework", "CoreAudio"}, nil,
+                          {module_cache = coreaudio_cache, extra_flags = lowered_cc})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
