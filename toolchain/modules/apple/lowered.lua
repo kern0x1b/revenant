@@ -775,30 +775,21 @@ local function directive_end(text, at)
     return stop
 end
 
+local function last_plain(window, plain)
+    return window:match("^.*()" .. plain:gsub("%p", "%%%0"))
+end
+
 local function statement_start(text, at, quiet, past_directives)
     local low = math.max(1, at - WINDOW)
     local window = text:sub(low, at - 1)
     local best = nil
     for _, boundary in ipairs(BOUNDARIES) do
-        local i = 1
-        while true do
-            local _, stop = window:find(boundary, i, true)
-            if not stop then
-                break
-            end
-            best = math.max(best or 0, low + stop)
-            i = stop + 1
+        local start = last_plain(window, boundary)
+        if start then
+            best = math.max(best or 0, low + start + #boundary - 1)
         end
     end
-    local directive, i = nil, 1
-    while true do
-        local found = window:find("\n#", i, true)
-        if not found then
-            break
-        end
-        directive = found
-        i = found + 1
-    end
+    local directive = last_plain(window, "\n#")
     if directive and not past_directives then
         best = math.max(best or 0, directive_end(text, low + directive) + 1)
     end
