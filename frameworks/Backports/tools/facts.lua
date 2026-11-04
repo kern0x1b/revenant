@@ -195,8 +195,9 @@ function constant_intros(sdk)
     end
     table.sort(rows)
     os.mkdir(path.directory(file))
-    io.writefile(file .. ".part", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
-    os.mv(file .. ".part", file)
+    local temp = file .. "." .. hash.strhash128(tostring({}) .. file) .. ".part"
+    io.writefile(temp, table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
+    os.mv(temp, file)
     return intros
 end
 

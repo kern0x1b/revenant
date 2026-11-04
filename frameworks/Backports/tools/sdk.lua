@@ -121,8 +121,12 @@ function cache_key(sdk)
     return sdk_version(sdk) .. "-" .. string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16)
 end
 
+function shared_root()
+    return path.join(workspace().home(), "backports")
+end
+
 function cache_folder(sdk)
-    return path.join(build_root(), "cache", cache_key(sdk))
+    return path.join(shared_root(), cache_key(sdk))
 end
 
 function clean_field(value)
@@ -136,7 +140,7 @@ function write_rows(file, module, rows)
             clean_field(row.name), clean_field(row.symbol), clean_field(row.signature), row.intro and tostring(row.intro) or "",
             clean_field(row.flags)}, "\t"))
     end
-    local temp = file .. ".part"
+    local temp = file .. "." .. hash.strhash128(tostring({}) .. file) .. ".part"
     io.writefile(temp, table.concat(lines, "\n") .. (#lines > 0 and "\n" or ""))
     os.mv(temp, file)
 end
