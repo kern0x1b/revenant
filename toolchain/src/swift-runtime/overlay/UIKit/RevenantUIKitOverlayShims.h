@@ -35,4 +35,35 @@ static inline UIPointerShape *_Nullable revenant_pointer_shape_beam(CGFloat leng
     return shape ? (UIPointerShape *)[shape beamWithPreferredLength:length axis:axis] : nil;
 }
 
+extern char OBJC_CLASS_$_UISliderTick __attribute__((weak_import));
+extern char OBJC_CLASS_$_UISliderTrackConfiguration __attribute__((weak_import));
+
+static inline Class _Nullable revenant_slider_tick_class(void)
+{
+    return &OBJC_CLASS_$_UISliderTick ? (__bridge Class)(void *)&OBJC_CLASS_$_UISliderTick : Nil;
+}
+
+static inline Class _Nullable revenant_slider_track_configuration_class(void)
+{
+    return &OBJC_CLASS_$_UISliderTrackConfiguration ? (__bridge Class)(void *)&OBJC_CLASS_$_UISliderTrackConfiguration : Nil;
+}
+
+static inline id _Nullable revenant_slider_tick_with_position(float position, NSString *_Nullable title, UIImage *_Nullable image) NS_SWIFT_NAME(revenantSliderTick(position:title:image:))
+{
+    Class tick = revenant_slider_tick_class();
+    return tick ? [tick tickWithPosition:position title:title image:image] : nil;
+}
+
+static inline id _Nullable revenant_slider_track_configuration_with_number_of_ticks(NSInteger count) NS_SWIFT_NAME(revenantSliderTrackConfiguration(numberOfTicks:))
+{
+    Class configuration = revenant_slider_track_configuration_class();
+    return configuration ? [configuration configurationWithNumberOfTicks:count] : nil;
+}
+
+static inline id _Nullable revenant_slider_track_configuration_with_ticks(NSArray *ticks) NS_SWIFT_NAME(revenantSliderTrackConfiguration(ticks:))
+{
+    Class configuration = revenant_slider_track_configuration_class();
+    return configuration ? [configuration configurationWithTicks:ticks] : nil;
+}
+
 NS_ASSUME_NONNULL_END

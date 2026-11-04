@@ -1,4 +1,5 @@
 import UIKit
+import _SwiftRevenantUIKitOverlayShims
 
 @available(iOS 26.0, *)
 @available(tvOS, unavailable)
@@ -21,7 +22,7 @@ extension UISlider {
             }
 
             fileprivate var objectiveC: __UISliderTick {
-                __UISliderTick.tick(position: position, title: title, image: image)
+                sliderTrackObject(revenantSliderTick(position: position, title: title, image: image))
             }
         }
 
@@ -38,7 +39,7 @@ extension UISlider {
         }
 
         public init(allowsTickValuesOnly: Bool = true, neutralValue: Float = 0, enabledRange: ClosedRange<Float> = 0...1, numberOfTicks: Int) {
-            let configuration = __UISliderTrackConfiguration.configuration(numberOfTicks: numberOfTicks)
+            let configuration: __UISliderTrackConfiguration = sliderTrackObject(revenantSliderTrackConfiguration(numberOfTicks: numberOfTicks))
             self.init(allowsTickValuesOnly: allowsTickValuesOnly, neutralValue: neutralValue, enabledRange: enabledRange,
                       ticks: configuration.ticks.map { Tick($0) })
         }
@@ -50,7 +51,7 @@ extension UISlider {
         }
 
         fileprivate var objectiveC: __UISliderTrackConfiguration {
-            let configuration = __UISliderTrackConfiguration.configuration(ticks: ticks.map { $0.objectiveC })
+            let configuration: __UISliderTrackConfiguration = sliderTrackObject(revenantSliderTrackConfiguration(ticks: ticks.map { $0.objectiveC }))
             configuration.allowsTickValuesOnly = allowsTickValuesOnly
             configuration.neutralValue = neutralValue
             if enabledRange.lowerBound > configuration.maximumEnabledValue {
@@ -68,4 +69,11 @@ extension UISlider {
         get { __trackConfiguration.map { TrackConfiguration($0) } }
         set { __trackConfiguration = newValue?.objectiveC }
     }
+}
+
+fileprivate func sliderTrackObject<Object: AnyObject>(_ object: Any?) -> Object {
+    guard let object = object as? Object else {
+        preconditionFailure("UISlider.TrackConfiguration is not on this iOS, and the Backports that provide it are not linked")
+    }
+    return object
 }
