@@ -9,7 +9,7 @@ end
 
 local function backport_files()
     local files = {}
-    for _, name in ipairs({"UNNotificationAction.m", "UNNotificationCategory.m", "UNNotificationCategory+HiddenPreviews.m",
+    for _, name in ipairs({"UNNotificationAction.m", "UNNotificationAttachment.m", "UNNotificationCategory.m", "UNNotificationCategory+HiddenPreviews.m",
                            "UNNotificationContent.m", "UNNotificationRequest.m", "UNNotificationTrigger.m", "RevenantUserNotificationSupport.m"}) do
         table.insert(files, path.join(sources, name))
     end
@@ -25,11 +25,15 @@ function main()
     clang({"-o", host, values, "-framework", "Foundation", "-framework", "UserNotifications"})
     clang(table.join({"-o", backport, values}, backport_files(), {"-framework", "Foundation"}))
     clang(table.join({"-I" .. sources, "-o", schedule, path.join(fixtures, "schedule.m")}, backport_files(), {"-framework", "Foundation"}))
+    local attachment = path.join(out, "attachment")
+    clang(table.join({"-I" .. sources, "-o", attachment, path.join(fixtures, "attachment.m")}, backport_files(), {"-framework", "Foundation"}))
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     os.execv(schedule, {}, {stdout = schedule .. ".out"})
+    os.execv(attachment, {}, {stdout = attachment .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")
     assert(#expected > 0, "the host UserNotifications program printed nothing")
     assert(expected == got, "the backport UserNotifications differs from the host in " .. out)
     assert(io.readfile(schedule .. ".out") == "schedule ok\n", "the trigger-to-date conversion does not match in " .. out)
+    assert(io.readfile(attachment .. ".out") == "attachment ok\n", "the attachment checks do not pass in " .. out)
 end
