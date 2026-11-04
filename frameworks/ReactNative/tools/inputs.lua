@@ -718,7 +718,7 @@ local STUB_OWNERS = {
     StubImagePickerModule = "expo-image-picker", StubCameraModule = "expo-camera", StubSQLiteModule = "expo-sqlite", StubImageManipulatorModule = "expo-image-manipulator"
 }
 
-local STUB_MODULES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubFileSystemModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubBackgroundNotificationTasksModule", "StubBadgeModule", "StubCameraModule", "StubImageManipulatorModule", "StubNotificationCategoriesModule", "StubNotificationPermissionsModule", "StubNotificationPresenterModule", "StubNotificationSchedulerModule", "StubNotificationsEmitterModule", "StubNotificationsHandlerModule", "StubPushTokenManagerModule", "StubSQLiteModule", "StubServerRegistrationModule"}
+local STUB_MODULES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubFileSystemModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubCameraModule", "StubImageManipulatorModule", "StubSQLiteModule"}
 
 function expo_skipped(file)
     for _, name in ipairs(EXPO_SKIP_FILES) do

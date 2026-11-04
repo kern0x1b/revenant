@@ -657,9 +657,9 @@
    "group": "sdk",
    "version": "~57.0.23",
    "native": true,
-   "status": "stub",
+   "status": "partial",
    "verified": "none",
-   "note": "Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
+   "note": "The ten name-only stubs of its modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) were removed from src/expo/StubModules.swift and stubs.json; its real modules are listed in its expo-module.config.json, so the provider now lists them. Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-observe",

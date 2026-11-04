@@ -7,9 +7,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 41 |
-| partial | built and running, with a named part left out or rewritten | 15 |
+| partial | built and running, with a named part left out or rewritten | 16 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 6 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 5 |
 | missing | native code that is not built yet | 44 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
@@ -133,7 +133,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-modules-core | ~57.0.23 | yes | partial | phone | Core builds and the app runs on it. Its URL argument conversion is patched in the package (url-convert-ios6.patch: iOS 15 and lower parse with URL(string:), not URLComponents), verified on the phone through expo-sharing. Not yet carried as a package: the host build is the spike's, and its expo-core targets read this package through RN_PKG_DIRS only with the path fix that the paseo-app spike still lacks (its rn-spike/xmake.lua has the reference path). SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package. |
 | expo-navigation-bar | ~57.0.3 | no | n/a | none | Android only. |
 | expo-network | ~57.0.2 | yes | missing | none | NWPathMonitor is iOS 12; SCNetworkReachability is present in the iOS 6.1.3 cache and is the analog. The Network backport exists. Not built. |
-| expo-notifications | ~57.0.23 | yes | stub | none | Name-only stubs of ten modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) in src/expo/StubModules.swift (stubs.json). Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package. |
+| expo-notifications | ~57.0.23 | yes | partial | none | The ten name-only stubs of its modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) were removed from src/expo/StubModules.swift and stubs.json; its real modules are listed in its expo-module.config.json, so the provider now lists them. Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package. |
 | expo-observe | ~57.0.25 | yes | missing | none | Has 25 files of iOS code and is not built. |
 | expo-print | ~57.0.2 | yes | missing | none | UIPrintInteractionController is present in the iOS 6.1.3 cache (iOS 4.2). Not built. |
 | expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9.1, and Photos is absent from the iOS 6.1.3 cache. The Photos backport makes no Live Photo, and a Live Photo request fails with PHPhotosErrorRequestNotSupportedForAsset. |
@@ -207,16 +207,6 @@ What the build stands in with for a module it does not build. Each is listed in 
 | StubFileSystemModule | FileSystem | src/expo/StubModules.swift | expo-file-system | Constants for the directories and empty class shells; no file operation exists. |
 | StubTwoWayAudioModule | ExpoTwoWayAudio | src/expo/StubModules.swift | @getpaseo/expo-two-way-audio | Name only; the module belongs to the Paseo package @getpaseo/expo-two-way-audio, which is not built. |
 | StubHardwareKeyboardModule | PaseoHardwareKeyboard | src/expo/StubModules.swift | PaseoHardwareKeyboard | Name only; a module of the spike app that no package provides and the paseo app does not use. |
-| StubBackgroundNotificationTasksModule | ExpoBackgroundNotificationTasksModule | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubBadgeModule | ExpoBadgeModule | src/expo/StubModules.swift | expo-notifications | Name only. |
 | StubCameraModule | ExpoCamera | src/expo/StubModules.swift | expo-camera | Name only. |
 | StubImageManipulatorModule | ExpoImageManipulator | src/expo/StubModules.swift | expo-image-manipulator | Name only. |
-| StubNotificationCategoriesModule | ExpoNotificationCategoriesModule | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubNotificationPermissionsModule | ExpoNotificationPermissionsModule | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubNotificationPresenterModule | ExpoNotificationPresenter | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubNotificationSchedulerModule | ExpoNotificationScheduler | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubNotificationsEmitterModule | ExpoNotificationsEmitter | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubNotificationsHandlerModule | ExpoNotificationsHandlerModule | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubPushTokenManagerModule | ExpoPushTokenManager | src/expo/StubModules.swift | expo-notifications | Name only. |
-| StubServerRegistrationModule | NotificationsServerRegistrationModule | src/expo/StubModules.swift | expo-notifications | Name only. |
 | StubSQLiteModule | ExpoSQLite | src/expo/StubModules.swift | expo-sqlite | Name only. |
