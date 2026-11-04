@@ -18,7 +18,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
-| [Continuous checks](guides/ci.md) | what CI runs, and the emulator workflow on a runner |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
 | [Proving code unused](guides/unused-code.md) | the ways code is reached besides its name, and how to check a removal for them |

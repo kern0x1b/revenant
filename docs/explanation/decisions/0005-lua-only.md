@@ -19,7 +19,6 @@ shell script beside `./xmakew` (see 0003). A script that needs a system tool cal
 - A tool gets the xmake modules (`core.base.json`, `lib.detect.find_tool`, `async.runjobs`) without a second
   language's parser.
 - A tool that was Python is rewritten in Lua. Documents describe the Lua tool and its `--help`, not the old script.
-- Workflow files (`.github/workflows/*.yml`) keep their shell `run:` steps; they are CI configuration, not tools.
 
 ## Enforced by
 

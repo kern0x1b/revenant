@@ -8,9 +8,7 @@ Swift component, which CI's `swift` job builds, is not part of these steps.
 
 ## What you need
 
-- An Apple silicon Mac with the Command Line Tools: `xcode-select --install`. CI selects Xcode 26.6
-  (`.github/workflows/check.yml`); the run this guide was checked on used the Command Line Tools.
-- Network access to github.com, for the clone, the package sources and the prebuilt releases.
+- An Apple silicon Mac with the Command Line Tools: `xcode-select --install`.- Network access to github.com, for the clone, the package sources and the prebuilt releases.
 - Disk space: the verification run's package store and build folders took between 4 and 6 GB across two runs of the steps below.
 
 ## 1. Clone
