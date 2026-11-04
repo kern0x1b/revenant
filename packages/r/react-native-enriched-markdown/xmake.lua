@@ -33,6 +33,7 @@ package("react-native-enriched-markdown")
         "0002-Convert-the-BOOL-fields-to-bool-in-the-input-event-emitter.patch",
         "0003-Convert-the-BOOL-checked-state-to-bool-in-the-task-list-events.patch",
         "0004-Guard-the-Dynamic-Type-observer-to-iOS-7-and-later.patch",
+        "0006-Keep-the-live-text-container-width-while-measuring.patch",
     }
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, name in ipairs(patches) do

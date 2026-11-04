@@ -1,0 +1,22 @@
+--- a/ios/utils/ENRMUIKit.h
++++ b/ios/utils/ENRMUIKit.h
+@@ -298,13 +298,15 @@
+ } ENRMTextLayoutResult;
+ 
+ /// Measures text layout in a text view for a given width.
+-/// On macOS, temporarily disables widthTracksTextView so the container width
+-/// can be set directly without being overridden by the view's frame.
++/// Disables widthTracksTextView so the container width can be set directly
++/// without being overridden by the view's frame. On iOS 6 the TextKit backport
++/// re-syncs a tracking container to the view's frame on every access to
++/// textContainer or layoutManager; a view measured before its first layout has
++/// a zero frame, so the container was reset to zero width and the text measured
++/// as zero height.
+ static inline ENRMTextLayoutResult ENRMMeasureTextLayout(ENRMPlatformTextView *textView, CGFloat maxWidth)
+ {
+-#if TARGET_OS_OSX
+   textView.textContainer.widthTracksTextView = NO;
+-#endif
+   textView.textContainer.size = CGSizeMake(maxWidth, CGFLOAT_MAX);
+   [textView.layoutManager ensureLayoutForTextContainer:textView.textContainer];
+   ENRMTextLayoutResult result;
