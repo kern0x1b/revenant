@@ -416,7 +416,7 @@
    "native": true,
    "status": "real",
    "verified": "build",
-   "note": "Built from the package on the isolated host, FontUtils and renderToImageAsync included. The font descriptors come from the CoreText backport (CTFontManagerCreateFontDescriptorsFromURL is iOS 7; host test CoreTextBackports_font_descriptors_test), and the render color is a UIColor, since the SDK's Color is SwiftUI (iOS 14). Not exercised on the phone."
+   "note": "Built from its recipe install (packages/e/expo-font, 57.0.4, with fontutils-ios6.patch) on the isolated host, FontUtils and renderToImageAsync included: the spike skipped FontUtils until 2026-11-04, so the earlier build did not carry the font loader's queryCustomNativeFonts. The font descriptors come from the CoreText backport (CTFontManagerCreateFontDescriptorsFromURL is iOS 7; host test CoreTextBackports_font_descriptors_test), and the render color is a UIColor, since the SDK's Color is SwiftUI (iOS 14). Not exercised on the phone."
   },
   {
    "id": "expo-gl",
@@ -658,8 +658,8 @@
    "version": "~57.0.23",
    "native": true,
    "status": "partial",
-   "verified": "none",
-   "note": "The ten name-only stubs of its modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) were removed from src/expo/StubModules.swift and stubs.json; its real modules are listed in its expo-module.config.json, so the provider now lists them. Not built; package packages/e/expo-notifications (57.0.23, unpatched). Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
+   "verified": "build",
+   "note": "The ten name-only stubs of its modules (permissions, scheduler, presenter, categories, emitter, handler, badge, push token, server registration, background notification tasks) were removed from src/expo/StubModules.swift and stubs.json; its real modules are listed in its expo-module.config.json, so the provider now lists them. Built from its recipe install (packages/e/expo-notifications, 57.0.23) with notifications-ios6.patch, which keeps what iOS 6 has and refuses the rest with an error: the beacon UUID is proximityUUID before iOS 13, the critical sound needs iOS 12, a calendar trigger needs DateComponents (iOS 8), the iOS 26 repeated-day key is left out, dispatchPrecondition runs from iOS 10. Uses UNUserNotificationCenter, its triggers and categories: the UserNotifications backport delivers through UILocalNotification with the limits in backports-gaps. Remote registration is backported in frameworks/Backports/src/UIKit/UIApplication+UserNotificationSettings.m. Measured: 2218 Swift lines, no Objective-C; availability checks iOS 15.2, 16 and 26 (#available). Phone, 2026-11-04: the host aborts with SIGILL (fatal signal 4) while the notifications probe bundle is evaluated, in the metadata initialisation of ExpoModulesCore's AsyncFunctionDefinition and Promise (log: .cache/scratch/rn-device-checks/notif-probe-full.log). The Paseo bundle and the markdown probe run on the same host without it. Not run: the getPermissionsAsync and getDevicePushTokenAsync answers, and local notifications (willPresent, didReceive)."
   },
   {
    "id": "expo-observe",
@@ -776,7 +776,7 @@
    "native": true,
    "status": "real",
    "verified": "build",
-   "note": "Built from its package on the isolated host (the patch makes its React import match the module; the host's react.modulemap must list RCTSurfaceHostingProxyRootView.h). Not exercised on the phone."
+   "note": "Built from its recipe install on the isolated host, unpatched (packages/e/expo-splash-screen, 57.0.10; the patch that changed its React import was removed because upstream's internal import agrees with the module since 29b13755f). The host's react.modulemap lists RCTSurfaceHostingProxyRootView.h and RCTSurfaceHostingView.h. Not exercised on the phone."
   },
   {
    "id": "expo-sqlite",
