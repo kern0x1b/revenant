@@ -252,16 +252,38 @@ static NSUInteger RNHostCountViews(UIView *view)
     return count;
 }
 
+// Diagnostics, only with rnhost.log.on: the memory map at the first heartbeat (before the chat), when the chat first
+// has 100 views, and 36 heartbeats (3 minutes) after that.
+static void RNHostMemoryMapMilestone(NSUInteger views)
+{
+    static NSUInteger stage = 0;
+    static NSUInteger heartbeatsInChat = 0;
+    if (stage == 0) {
+        stage = 1;
+        [RNHostRuntime logMemoryMap];
+    } else if (stage == 1 && views >= 100) {
+        stage = 2;
+        [RNHostRuntime logMemoryMap];
+    } else if (stage == 2 && ++heartbeatsInChat == 36) {
+        stage = 3;
+        [RNHostRuntime logMemoryMap];
+    }
+}
+
 - (void)logHeartbeat
 {
     malloc_statistics_t malloced;
     malloc_zone_statistics(malloc_default_zone(), &malloced);
+    NSUInteger views = RNHostCountViews(self.window);
     NSLog(@"rn-host: heartbeat rss %.1f MB, subviews %lu, views %lu, malloc in use %.1f MB of %.1f MB",
           [RNHostRuntime residentMegabytes], (unsigned long)self.window.rootViewController.view.subviews.count,
-          (unsigned long)RNHostCountViews(self.window), malloced.size_in_use / 1048576.0, malloced.size_allocated / 1048576.0);
+          (unsigned long)views, malloced.size_in_use / 1048576.0, malloced.size_allocated / 1048576.0);
 #ifdef RN_HERMES
     RNHostLogHeapStats();
 #endif
+    if (RNHostAppFileExists(@"rnhost.log.on")) {
+        RNHostMemoryMapMilestone(views);
+    }
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

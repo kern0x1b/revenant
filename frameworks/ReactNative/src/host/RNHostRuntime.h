@@ -11,5 +11,6 @@ extern NSString *const RNHostErrorDomain;
 + (double)residentMegabytes;
 + (NSString *)evaluateBundleAtPath:(NSString *)path error:(NSError **)error;
 + (void)logClassProbes;
++ (void)logMemoryMap;
 
 @end

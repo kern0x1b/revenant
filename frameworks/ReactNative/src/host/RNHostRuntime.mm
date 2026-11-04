@@ -10,10 +10,22 @@
 
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+#include <mach/vm_region.h>
+#include <mach/vm_statistics.h>
+#include <mach-o/dyld.h>
+#include <mach-o/loader.h>
 
+#include <unistd.h>
+
+#include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <exception>
+#include <map>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 NSString *const RNHostErrorDomain = @"RNHost";
 
@@ -77,6 +89,121 @@ double RNHostResidentMegabytes()
     return info.resident_size / 1048576.0;
 }
 
+namespace {
+
+struct RNHostImageRange {
+    uintptr_t start;
+    uintptr_t end;
+    std::string name;
+};
+
+struct RNHostMemoryBucket {
+    uint64_t resident = 0;
+    uint64_t dirtied = 0;
+};
+
+std::string RNHostTagName(unsigned int tag)
+{
+    switch (tag) {
+    case 0:
+        return "untagged (mapped file or unclassified)";
+    case VM_MEMORY_MALLOC:
+    case VM_MEMORY_MALLOC_SMALL:
+    case VM_MEMORY_MALLOC_LARGE:
+    case VM_MEMORY_MALLOC_HUGE:
+    case VM_MEMORY_MALLOC_TINY:
+    case VM_MEMORY_MALLOC_LARGE_REUSABLE:
+    case VM_MEMORY_MALLOC_LARGE_REUSED:
+    case VM_MEMORY_MALLOC_NANO:
+    case VM_MEMORY_MALLOC_MEDIUM:
+    case VM_MEMORY_MALLOC_PROB_GUARD:
+        return "malloc zones";
+    case VM_MEMORY_STACK:
+        return "stacks";
+    case VM_MEMORY_SHARED_PMAP:
+        return "shared pmap";
+    case VM_MEMORY_UNSHARED_PMAP:
+        return "unshared pmap";
+    case VM_MEMORY_FOUNDATION:
+        return "Foundation";
+    case VM_MEMORY_COREGRAPHICS:
+    case VM_MEMORY_COREGRAPHICS_DATA:
+    case VM_MEMORY_COREGRAPHICS_SHARED:
+    case VM_MEMORY_COREGRAPHICS_FRAMEBUFFERS:
+    case VM_MEMORY_COREGRAPHICS_BACKINGSTORES:
+    case VM_MEMORY_COREGRAPHICS_XALLOC:
+        return "CoreGraphics";
+    case VM_MEMORY_CGIMAGE:
+        return "CG images";
+    case VM_MEMORY_LAYERKIT:
+        return "CoreAnimation layers";
+    case VM_MEMORY_IOSURFACE:
+        return "IOSurface";
+    case VM_MEMORY_IMAGEIO:
+        return "ImageIO";
+    case VM_MEMORY_COREIMAGE:
+        return "CoreImage";
+    case VM_MEMORY_COREUI_CACHED_IMAGE_DATA:
+        return "CoreUI image cache";
+    case VM_MEMORY_JAVASCRIPT_CORE:
+        return "JavaScriptCore";
+    case VM_MEMORY_JAVASCRIPT_JIT_EXECUTABLE_ALLOCATOR:
+        return "JavaScript JIT";
+    case VM_MEMORY_DYLD:
+    case VM_MEMORY_DYLD_MALLOC:
+        return "dyld";
+    case VM_MEMORY_SQLITE:
+        return "SQLite";
+    case VM_MEMORY_LIBDISPATCH:
+        return "libdispatch";
+    case VM_MEMORY_IOKIT:
+        return "IOKit";
+    default:
+        break;
+    }
+    return "tag " + std::to_string(tag);
+}
+
+// The address range of every loaded image, from its segments. The app is built for armv7 only, so the headers are 32-bit.
+std::vector<RNHostImageRange> RNHostImageRanges()
+{
+    std::vector<RNHostImageRange> ranges;
+    uint32_t count = _dyld_image_count();
+    for (uint32_t i = 0; i < count; i++) {
+        const struct mach_header *header = _dyld_get_image_header(i);
+        if (!header || header->magic != MH_MAGIC) {
+            continue;
+        }
+        uintptr_t slide = (uintptr_t)_dyld_get_image_vmaddr_slide(i);
+        std::string path = _dyld_get_image_name(i) ? _dyld_get_image_name(i) : "?";
+        size_t slash = path.find_last_of('/');
+        RNHostImageRange range = {UINTPTR_MAX, 0, slash == std::string::npos ? path : path.substr(slash + 1)};
+        const struct load_command *command = (const struct load_command *)((const char *)header + sizeof(struct mach_header));
+        for (uint32_t c = 0; c < header->ncmds && command->cmdsize > 0; c++) {
+            if (command->cmd == LC_SEGMENT) {
+                const struct segment_command *segment = (const struct segment_command *)command;
+                // __PAGEZERO has no protection and maps nothing.
+                if (segment->initprot != 0 && segment->vmsize > 0) {
+                    uintptr_t start = (uintptr_t)segment->vmaddr + slide;
+                    if (start < range.start) {
+                        range.start = start;
+                    }
+                    if (start + segment->vmsize > range.end) {
+                        range.end = start + segment->vmsize;
+                    }
+                }
+            }
+            command = (const struct load_command *)((const char *)command + command->cmdsize);
+        }
+        if (range.end > range.start) {
+            ranges.push_back(range);
+        }
+    }
+    return ranges;
+}
+
+} // namespace
+
 NSDictionary<NSString *, NSString *> *RNHostConfig()
 {
     NSString *text = RNHostReadAppText(@"rnhost.conf");
@@ -111,6 +238,69 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
 + (double)residentMegabytes
 {
     return RNHostResidentMegabytes();
+}
+
+// Diagnostics: walks the task's address space and logs the resident and dirty bytes of the top 15 regions, grouped by
+// the image that maps them (image name) or else by their VM tag. Called only behind rnhost.log.on.
++ (void)logMemoryMap
+{
+    std::vector<RNHostImageRange> images = RNHostImageRanges();
+    std::map<std::string, RNHostMemoryBucket> buckets;
+    vm_size_t page = getpagesize();
+    uint64_t resident = 0;
+    uint64_t dirtied = 0;
+    uint64_t regions = 0;
+    vm_address_t address = 0;
+    natural_t depth = 0;
+    for (;;) {
+        vm_size_t size = 0;
+        vm_region_submap_info_data_64_t info;
+        mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
+        if (vm_region_recurse_64(mach_task_self(), &address, &size, &depth, (vm_region_recurse_info_t)&info, &count) != KERN_SUCCESS || size == 0) {
+            break;
+        }
+        if (info.is_submap) {
+            depth++;
+            continue;
+        }
+        regions++;
+        std::string name;
+        for (const RNHostImageRange &image : images) {
+            if (address >= image.start && address < image.end) {
+                name = "image " + image.name;
+                break;
+            }
+        }
+        if (name.empty()) {
+            name = RNHostTagName(info.user_tag);
+        }
+        uint64_t regionResident = (uint64_t)info.pages_resident * page;
+        uint64_t regionDirtied = (uint64_t)info.pages_dirtied * page;
+        RNHostMemoryBucket &bucket = buckets[name];
+        bucket.resident += regionResident;
+        bucket.dirtied += regionDirtied;
+        resident += regionResident;
+        dirtied += regionDirtied;
+        address += size;
+    }
+    NSLog(@"rn-host: memory map: %llu regions, resident %.1f MB (task rss %.1f MB), dirtied %.1f MB",
+          (unsigned long long)regions, resident / 1048576.0, RNHostResidentMegabytes(), dirtied / 1048576.0);
+    std::vector<std::pair<std::string, RNHostMemoryBucket>> ordered(buckets.begin(), buckets.end());
+    uint64_t imagesResident = 0;
+    for (const auto &entry : ordered) {
+        if (entry.first.compare(0, 6, "image ") == 0) {
+            imagesResident += entry.second.resident;
+        }
+    }
+    NSLog(@"rn-host: memory map: images %.1f MB, everything else %.1f MB",
+          imagesResident / 1048576.0, (resident - imagesResident) / 1048576.0);
+    std::sort(ordered.begin(), ordered.end(), [](const std::pair<std::string, RNHostMemoryBucket> &a, const std::pair<std::string, RNHostMemoryBucket> &b) {
+        return a.second.resident > b.second.resident;
+    });
+    for (size_t i = 0; i < ordered.size() && i < 15; i++) {
+        NSLog(@"rn-host: memory map %2zu: %s resident %.1f MB, dirtied %.1f MB", i + 1, ordered[i].first.c_str(),
+              ordered[i].second.resident / 1048576.0, ordered[i].second.dirtied / 1048576.0);
+    }
 }
 
 + (NSString *)configuredValueForKey:(NSString *)key
