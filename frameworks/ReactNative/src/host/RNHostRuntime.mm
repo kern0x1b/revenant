@@ -17,6 +17,8 @@
 
 #include <unistd.h>
 
+#import <QuartzCore/QuartzCore.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -242,6 +244,58 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
 
 // Diagnostics: walks the task's address space and logs the resident and dirty bytes of the top 15 regions, grouped by
 // the image that maps them (image name) or else by their VM tag. Called only behind rnhost.log.on.
+// Diagnostics: walks the layer tree under root and logs how many layers have contents, the bytes their contents take
+// (estimated as bounds x scale^2 x 4), the classes that own the most, and the largest layers.
++ (void)logLayerCensus:(UIView *)root
+{
+    NSMutableArray<CALayer *> *stack = [NSMutableArray arrayWithObject:root.layer];
+    NSUInteger layers = 0;
+    NSUInteger withContents = 0;
+    NSUInteger offscreen = 0;
+    double contentBytes = 0;
+    std::map<std::string, std::pair<NSUInteger, double>> byClass;
+    std::vector<std::pair<double, std::string>> largest;
+    while (stack.count > 0) {
+        CALayer *layer = stack.lastObject;
+        [stack removeLastObject];
+        [stack addObjectsFromArray:layer.sublayers];
+        layers++;
+        if (layer.shouldRasterize || layer.mask || layer.shadowOpacity > 0) {
+            offscreen++;
+        }
+        if (!layer.contents) {
+            continue;
+        }
+        withContents++;
+        CGFloat scale = layer.contentsScale;
+        double bytes = layer.bounds.size.width * scale * layer.bounds.size.height * scale * 4;
+        contentBytes += bytes;
+        id owner = layer.delegate;
+        NSString *name = [owner isKindOfClass:[UIView class]] ? NSStringFromClass([owner class]) : NSStringFromClass([layer class]);
+        std::pair<NSUInteger, double> &entry = byClass[name.UTF8String];
+        entry.first++;
+        entry.second += bytes;
+        NSString *described = [NSString stringWithFormat:@"%@ %.0fx%.0f at %.0fx", name, layer.bounds.size.width, layer.bounds.size.height, scale];
+        largest.push_back(std::make_pair(bytes, std::string(described.UTF8String)));
+    }
+    NSLog(@"rn-host: layers %lu, with contents %lu, offscreen %lu, contents estimate %.1f MB",
+          (unsigned long)layers, (unsigned long)withContents, (unsigned long)offscreen, contentBytes / 1048576.0);
+    std::vector<std::pair<std::string, std::pair<NSUInteger, double>>> classes(byClass.begin(), byClass.end());
+    std::sort(classes.begin(), classes.end(), [](const std::pair<std::string, std::pair<NSUInteger, double>> &a, const std::pair<std::string, std::pair<NSUInteger, double>> &b) {
+        return a.second.second > b.second.second;
+    });
+    for (size_t i = 0; i < classes.size() && i < 8; i++) {
+        NSLog(@"rn-host: layer class %s: %lu with contents, %.1f MB", classes[i].first.c_str(),
+              (unsigned long)classes[i].second.first, classes[i].second.second / 1048576.0);
+    }
+    std::sort(largest.begin(), largest.end(), [](const std::pair<double, std::string> &a, const std::pair<double, std::string> &b) {
+        return a.first > b.first;
+    });
+    for (size_t i = 0; i < largest.size() && i < 8; i++) {
+        NSLog(@"rn-host: layer largest %zu: %s, %.2f MB", i + 1, largest[i].second.c_str(), largest[i].first / 1048576.0);
+    }
+}
+
 + (void)logMemoryMap
 {
     std::vector<RNHostImageRange> images = RNHostImageRanges();

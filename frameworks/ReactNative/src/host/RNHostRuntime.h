@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 extern NSString *const RNHostErrorDomain;
 
@@ -12,5 +13,6 @@ extern NSString *const RNHostErrorDomain;
 + (NSString *)evaluateBundleAtPath:(NSString *)path error:(NSError **)error;
 + (void)logClassProbes;
 + (void)logMemoryMap;
++ (void)logLayerCensus:(UIView *)root;
 
 @end
