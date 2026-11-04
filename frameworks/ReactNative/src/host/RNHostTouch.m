@@ -259,46 +259,55 @@ static void RNHostStackHandler(int signal)
 
 #import <mach/mach.h>
 
+// One sample. Runs on the profiler thread, which has no autorelease pool of its own: every Foundation
+// object made by the file checks below is released here, not once per process.
+static void RNHostProfileOnce(void)
+{
+    if (!RNHostAppFileExists(@"rnhost.prof")) {
+        return;
+    }
+    thread_act_array_t threads;
+    mach_msg_type_number_t count = 0;
+    if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS) {
+        return;
+    }
+    FILE *out = fopen(RNHostRunPath(@"rnhost.prof.out").fileSystemRepresentation, "a");
+    if (out) {
+        fprintf(out, "t=%.1f", CFAbsoluteTimeGetCurrent() - 0);
+        for (mach_msg_type_number_t i = 0; i < count; i++) {
+            thread_basic_info_data_t info;
+            mach_msg_type_number_t size = THREAD_BASIC_INFO_COUNT;
+            if (thread_info(threads[i], THREAD_BASIC_INFO, (thread_info_t)&info, &size) == KERN_SUCCESS && info.cpu_usage > 50) {
+                if (RNHostAppFileExists(@"rnhost.prof.stacks")) {
+                    pthread_t target = pthread_from_mach_thread_np(threads[i]);
+                    if (target) {
+                        pthread_kill(target, SIGUSR1);
+                    }
+                }
+                char name[64] = "";
+                pthread_t thread = pthread_from_mach_thread_np(threads[i]);
+                if (thread) {
+                    pthread_getname_np(thread, name, sizeof(name));
+                }
+                fprintf(out, " [%u %s %d%%]", threads[i], name, info.cpu_usage / 10);
+            }
+        }
+        fprintf(out, "\n");
+        fclose(out);
+    }
+    for (mach_msg_type_number_t i = 0; i < count; i++) {
+        mach_port_deallocate(mach_task_self(), threads[i]);
+    }
+    vm_deallocate(mach_task_self(), (vm_address_t)threads, count * sizeof(thread_t));
+}
+
 static void *RNHostProfiler(void *unused)
 {
     for (;;) {
         usleep(100000);
-        if (!RNHostAppFileExists(@"rnhost.prof")) {
-            continue;
+        @autoreleasepool {
+            RNHostProfileOnce();
         }
-        thread_act_array_t threads;
-        mach_msg_type_number_t count = 0;
-        if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS) {
-            continue;
-        }
-        FILE *out = fopen(RNHostRunPath(@"rnhost.prof.out").fileSystemRepresentation, "a");
-        if (out) {
-            fprintf(out, "t=%.1f", CFAbsoluteTimeGetCurrent() - 0);
-            for (mach_msg_type_number_t i = 0; i < count; i++) {
-                thread_basic_info_data_t info;
-                mach_msg_type_number_t size = THREAD_BASIC_INFO_COUNT;
-                if (thread_info(threads[i], THREAD_BASIC_INFO, (thread_info_t)&info, &size) == KERN_SUCCESS && info.cpu_usage > 50) {
-                    if (RNHostAppFileExists(@"rnhost.prof.stacks")) {
-                        pthread_t target = pthread_from_mach_thread_np(threads[i]);
-                        if (target) {
-                            pthread_kill(target, SIGUSR1);
-                        }
-                    }
-                    char name[64] = "";
-                    pthread_t thread = pthread_from_mach_thread_np(threads[i]);
-                    if (thread) {
-                        pthread_getname_np(thread, name, sizeof(name));
-                    }
-                    fprintf(out, " [%u %s %d%%]", threads[i], name, info.cpu_usage / 10);
-                }
-            }
-            fprintf(out, "\n");
-            fclose(out);
-        }
-        for (mach_msg_type_number_t i = 0; i < count; i++) {
-            mach_port_deallocate(mach_task_self(), threads[i]);
-        }
-        vm_deallocate(mach_task_self(), (vm_address_t)threads, count * sizeof(thread_t));
     }
     return NULL;
 }
