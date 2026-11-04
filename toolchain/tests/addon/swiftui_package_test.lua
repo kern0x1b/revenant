@@ -9,6 +9,10 @@ function failures(opt)
         table.insert(found, "the swiftui recipe's generated project does not include frameworks/Backports, so MapKitBackports cannot resolve")
     end
 
+    if not recipe:find("add_requires(\\\"revenant@backports\\\"", 1, true) then
+        table.insert(found, "the swiftui recipe's generated project does not require revenant@backports, which SwiftUI's Foundation imports need")
+    end
+
     local _, direct = recipe:gsub("envs = backports", "")
     local _, joined = recipe:gsub("table%.join%(backports", "")
     if direct + joined < 3 then
