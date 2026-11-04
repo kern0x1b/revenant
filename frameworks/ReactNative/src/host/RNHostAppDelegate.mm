@@ -190,6 +190,29 @@ static void RNHostInstallSampler(void)
 }
 
 @end
+
+@protocol RNHostExpoSubscriberRepository <NSObject>
++ (NSArray *)subscribers;
++ (void)registerSubscribersFromModulesProvider:(id)modulesProvider;
+@end
+
+static NSArray *RNHostExpoSubscribers(void)
+{
+    Class<RNHostExpoSubscriberRepository> repository = NSClassFromString(@"EXExpoAppDelegateSubscriberRepository");
+    return [repository subscribers];
+}
+
+static void RNHostRegisterExpoSubscribers(void)
+{
+    Class<RNHostExpoSubscriberRepository> repository = NSClassFromString(@"EXExpoAppDelegateSubscriberRepository");
+    Class providerClass = NSClassFromString(@"ExpoModulesProvider");
+    if (!repository || !providerClass) {
+        NSLog(@"rn-host: expo app delegate subscribers not linked");
+        return;
+    }
+    [repository registerSubscribersFromModulesProvider:[[providerClass alloc] init]];
+    NSLog(@"rn-host: expo app delegate subscribers %lu", (unsigned long)RNHostExpoSubscribers().count);
+}
 #endif
 
 @interface RNHostReactDelegate : RCTDefaultReactNativeFactoryDelegate
@@ -288,6 +311,81 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
     }
 }
 
+#ifdef RN_EXPO
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)]) {
+            [subscriber application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)]) {
+            [subscriber application:application didFailToRegisterForRemoteNotificationsWithError:error];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:^(UIBackgroundFetchResult result) {}];
+        } else if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo];
+        }
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    NSMutableArray *fetchers = [NSMutableArray array];
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+            [fetchers addObject:subscriber];
+        } else if ([subscriber respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+            [subscriber application:application didReceiveRemoteNotification:userInfo];
+        }
+    }
+    if (fetchers.count == 0) {
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    __block NSUInteger left = fetchers.count;
+    __block UIBackgroundFetchResult merged = UIBackgroundFetchResultNoData;
+    for (id<UIApplicationDelegate> subscriber in fetchers) {
+        [subscriber application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:^(UIBackgroundFetchResult result) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (result == UIBackgroundFetchResultNewData || (result == UIBackgroundFetchResultFailed && merged == UIBackgroundFetchResultNoData)) {
+                    merged = result;
+                }
+                if (--left == 0) {
+                    completionHandler(merged);
+                }
+            });
+        }];
+    }
+}
+
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didReceiveLocalNotification:)]) {
+            [subscriber application:application didReceiveLocalNotification:notification];
+        }
+    }
+}
+
+#pragma clang diagnostic pop
+#endif
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -297,6 +395,9 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
         [self.window makeKeyAndVisible];
         return YES;
     }
+#ifdef RN_EXPO
+    RNHostRegisterExpoSubscribers();
+#endif
     [RNHostRuntime applyEnvironment];
     NSLog(@"rn-host: react start module %@, rss %.1f MB", module, [RNHostRuntime residentMegabytes]);
     RCTSetLogThreshold(RCTLogLevelInfo);

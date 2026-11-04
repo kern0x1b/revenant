@@ -786,6 +786,19 @@ function expo_classes(ctx)
     return classes
 end
 
+function expo_subscribers(ctx)
+    local subscribers = {}
+    for _, package in ipairs(expo_packages(ctx)) do
+        local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
+        local apple = config:match('"apple"%s*:%s*(%b{})') or ""
+        local names = apple:match('"appDelegateSubscribers"%s*:%s*%[(.-)%]') or ""
+        for name in names:gmatch('"([^"]+)"') do
+            table.insert(subscribers, string.format("      %s.self,", name))
+        end
+    end
+    return subscribers
+end
+
 SWIFT_PACKAGES = {"swift-runtime", "libcxx", "combine", "cryptokit", "swiftui"}
 
 function byte_less(a, b)
@@ -865,7 +878,7 @@ function make_expo_core(ctx)
     io.writefile(path.join(out, "implicit.rsp"), "-Xfrontend\n-import-module\n-Xfrontend\nFoundation\n-Xfrontend\n-import-module\n-Xfrontend\nUIKit\n-Xfrontend\n-import-module\n-Xfrontend\nCoreText\n-Xcc\n-I" .. path.join(ctx.build, "expo-pods") .. "\n-import-objc-header\n" .. bridging .. "\n-load-plugin-executable\n" .. macros .. "#ExpoModulesMacros\n")
     local provider = {"import ExpoModulesCore", "", "@objc(ExpoModulesProvider)", "public final class ExpoModulesProvider: ModulesProvider {",
         "  public override func getModuleClasses() -> [ExpoModuleTupleType] {", "    return [", table.concat(expo_classes(ctx), "\n"), "    ]", "  }", "",
-        "  public override func getAppDelegateSubscribers() -> [ExpoAppDelegateSubscriber.Type] {", "    return []", "  }", "",
+        "  public override func getAppDelegateSubscribers() -> [ExpoAppDelegateSubscriber.Type] {", "    return [", table.concat(expo_subscribers(ctx), "\n"), "    ]", "  }", "",
         "  public override func getReactDelegateHandlers() -> [ExpoReactDelegateHandlerTupleType] {", "    return []", "  }", "",
         "  public override func getAppCodeSignEntitlements() -> AppCodeSignEntitlements {", '    return AppCodeSignEntitlements.from(json: "{}")', "  }", "}"}
     write_lines(path.join(out, "ExpoModulesProvider.swift"), provider)

@@ -3,7 +3,7 @@ local plain_replace, normalize, podspec_public_headers = tool.plain_replace, too
 local make_rn_codegen, selected, renderer_platform_dirs, compare = tool.make_rn_codegen, tool.selected, tool.renderer_platform_dirs, tool.compare
 local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
-local expo_packages, expo_real = tool.expo_packages, tool.expo_real
+local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -155,6 +155,22 @@ check("--real replaces the default with the parity list on top of the base", tab
 
 check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and not expo_real(context({}))["expo-audio"]
     and expo_real(context({real = "expo-audio"}))["expo-audio"])
+
+local subscribers_app = fresh("expo-subscribers")
+local subscriber_ctx = {options = {real = "expo-notifications"}, app = path.join(subscribers_app, "ref", "packages", "app"), ref = path.join(subscribers_app, "ref")}
+for _, package in ipairs(expo_packages(subscriber_ctx)) do
+    local dir = path.join(subscribers_app, "ref", "node_modules", package)
+    if not os.isdir(dir) then
+        os.mkdir(dir)
+    end
+    local config = package == "expo-notifications"
+        and '{"apple": {"modules": ["PermissionsModule"], "appDelegateSubscribers": ["NotificationsAppDelegateSubscriber"]}, "android": {"appDelegateSubscribers": ["AndroidOnly"]}}'
+        or '{"apple": {"modules": []}}'
+    io.writefile(path.join(dir, "expo-module.config.json"), config)
+end
+local subscribers = expo_subscribers(subscriber_ctx)
+check("the app delegate subscribers come from the apple section of the packages that are built", #subscribers == 1
+    and subscribers[1] == "      NotificationsAppDelegateSubscriber.self,", table.concat(subscribers, "|"))
 
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
