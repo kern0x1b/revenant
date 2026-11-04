@@ -49,7 +49,7 @@ static double RevenantMPSPyramidFiltered(const float *source, NSUInteger width, 
     }
     NSUInteger channels = 0;
     size_t elementSize = 0;
-    if (!RevenantMPSPyramidPixelShape(texture.pixelFormat, &channels, &elementSize) || !channels || !elementSize) {
+    if (!RevenantMPSTexturePixelShape(texture.pixelFormat, &channels, &elementSize) || !channels || !elementSize) {
         RevenantMPSRefuse(@"%@: a texture of pixel format %d names no element width this port carries, so no"
                         @" level was written", what, (int)texture.pixelFormat);
         return NO;
@@ -79,7 +79,7 @@ static double RevenantMPSPyramidFiltered(const float *source, NSUInteger width, 
             RevenantMPSRefuse(@"%@: no memory for level %lu, so no level was written", what, (unsigned long)level);
             return NO;
         }
-        if (!RevenantMPSPyramidRead(texture, level - 1, sourceWidth, sourceHeight, channels, elementSize, source)) {
+        if (!RevenantMPSTextureRead(texture, level - 1, sourceWidth, sourceHeight, channels, elementSize, source)) {
             free(source);
             free(answer);
             RevenantMPSRefuse(@"%@: level %lu could not be read, so the pyramid stopped there", what,
@@ -100,7 +100,7 @@ static double RevenantMPSPyramidFiltered(const float *source, NSUInteger width, 
                 }
             }
         }
-        BOOL written = RevenantMPSPyramidWrite(texture, level, width, height, channels, elementSize, answer);
+        BOOL written = RevenantMPSTextureWrite(texture, level, width, height, channels, elementSize, answer);
         free(source);
         free(answer);
         if (!written) {
