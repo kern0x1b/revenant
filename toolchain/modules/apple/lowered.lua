@@ -2371,6 +2371,7 @@ function include_directory(out)
 end
 
 local function photos_armv7_interface(text, target)
+    local minimum = target:match("%-apple%-ios(%S+)$") or raise("%s is not an apple-ios target", target)
     local lines, pending, skipping = {}, {}, false
     for line in text:gmatch("([^\n]*)\n") do
         if skipping then
@@ -2384,8 +2385,8 @@ local function photos_armv7_interface(text, target)
             skipping = true
         else
             for _, attribute in ipairs(pending) do
-                if line == "extension Photos.PHChange {" and attribute:find("iOS 8.0", 1, true) then
-                    attribute = "@available(iOS 6.0, *)"
+                if line == "extension Photos.PHChange {" and attribute:match("^@available%(iOS [%d%.]+, ") then
+                    attribute = "@available(iOS " .. minimum .. ", *)"
                 end
                 table.insert(lines, attribute)
             end

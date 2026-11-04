@@ -481,8 +481,8 @@ package("swift-runtime")
             os.mkdir(photos_cache)
             local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
             local gated_phchange, gated = io.readfile(path.join(photos, "PHChange.swift")):gsub(
-                "@available%(iOS 8%.0, tvOS 10%.0, %*%)\nextension PHChange {", "@available(iOS 6.0, *)\nextension PHChange {")
-            assert(gated == 1, "PHChange.swift no longer declares its extension at iOS 8.0 as the backport gate expects")
+                "@available%(iOS [%d%.]+, [^%)]*%)\nextension PHChange {", "@available(iOS " .. minimum .. ", *)\nextension PHChange {")
+            assert(gated == 1, "PHChange.swift no longer declares its extension with an iOS availability the backport gate expects")
             io.writefile(path.join(generated, "PHChange.swift"), gated_phchange)
             build_overlay("Photos", {path.join(generated, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
                           table.join(foundation_links, {"-lswiftCoreMedia", "-Xlinker", "-weak_framework", "-Xlinker", "Photos"}), nil,
