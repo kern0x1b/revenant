@@ -591,7 +591,9 @@ static UILayoutGuide *revenant_guide(UIStackView *self, UILayoutGuide *guide, NS
             revenant_add(stack, [revenant_size(self, axis) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
         }
 
-        UIView *first = all[0];
+        // A stack with no arranged subviews has no first view: the alignment and canvas constraints below need one only
+        // when there are visible views, and reading all[0] of the empty _arrangedSubviews raised NSRangeException.
+        UIView *first = all.count ? all[0] : nil;
         UIStackViewAlignment alignment = _alignment;
         BOOL baseline = alignment == UIStackViewAlignmentFirstBaseline || alignment == UIStackViewAlignmentLastBaseline;
         BOOL ignored = baseline && axis == UILayoutConstraintAxisVertical;
