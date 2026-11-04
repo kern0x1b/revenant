@@ -259,8 +259,6 @@ static void RNHostStackHandler(int signal)
 
 #import <mach/mach.h>
 
-// One sample. Runs on the profiler thread, which has no autorelease pool of its own: every Foundation
-// object made by the file checks below is released here, not once per process.
 static void RNHostProfileOnce(void)
 {
     if (!RNHostAppFileExists(@"rnhost.prof")) {

@@ -166,7 +166,6 @@ std::string RNHostTagName(unsigned int tag)
     return "tag " + std::to_string(tag);
 }
 
-// The address range of every loaded image, from its segments. The app is built for armv7 only, so the headers are 32-bit.
 std::vector<RNHostImageRange> RNHostImageRanges()
 {
     std::vector<RNHostImageRange> ranges;
@@ -184,7 +183,6 @@ std::vector<RNHostImageRange> RNHostImageRanges()
         for (uint32_t c = 0; c < header->ncmds && command->cmdsize > 0; c++) {
             if (command->cmd == LC_SEGMENT) {
                 const struct segment_command *segment = (const struct segment_command *)command;
-                // __PAGEZERO has no protection and maps nothing.
                 if (segment->initprot != 0 && segment->vmsize > 0) {
                     uintptr_t start = (uintptr_t)segment->vmaddr + slide;
                     if (start < range.start) {
@@ -204,7 +202,7 @@ std::vector<RNHostImageRange> RNHostImageRanges()
     return ranges;
 }
 
-} // namespace
+}
 
 NSDictionary<NSString *, NSString *> *RNHostConfig()
 {
@@ -242,10 +240,6 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     return RNHostResidentMegabytes();
 }
 
-// Diagnostics: walks the task's address space and logs the resident and dirty bytes of the top 15 regions, grouped by
-// the image that maps them (image name) or else by their VM tag. Called only behind rnhost.log.on.
-// Diagnostics: walks the layer tree under root and logs how many layers have contents, the bytes their contents take
-// (estimated as bounds x scale^2 x 4), the classes that own the most, and the largest layers.
 + (void)logLayerCensus:(UIView *)root
 {
     NSMutableArray<CALayer *> *stack = [NSMutableArray arrayWithObject:root.layer];
@@ -296,7 +290,6 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     }
 }
 
-// The superview chain of view up to root, one entry per view: class, alpha, layer opacity, hidden and frame in root.
 static NSString *RNHostViewChain(UIView *view, UIView *root)
 {
     NSMutableArray<NSString *> *parts = [NSMutableArray array];
@@ -313,9 +306,6 @@ static NSString *RNHostViewChain(UIView *view, UIView *root)
     return [parts componentsJoinedByString:@" < "];
 }
 
-// Diagnostics: audits the views under root for what hides them (hidden, transparent, empty or singular, on the view and
-// on its layer), the animations on the layers, the scroll views with their offsets, and the text views on screen. The
-// superview chains of the first transparent views and of the tall scroll views show which ancestor hides them.
 + (void)logViewAudit:(UIView *)root
 {
     CGRect screen = root.bounds;

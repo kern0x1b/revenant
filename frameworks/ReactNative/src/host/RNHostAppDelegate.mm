@@ -25,8 +25,6 @@
 #endif
 
 #ifdef RN_HERMES
-// The Hermes runtime is created by RCTHermesInstance; this subclass keeps the runtime and the queue it runs on
-// so that the heartbeat can read the JS heap on the JS thread, where the runtime may be used.
 namespace {
 
 std::mutex RNHostProbeMutex;
@@ -74,7 +72,7 @@ public:
     }
 };
 
-} // namespace
+}
 #endif
 
 #ifdef RN_EXPO
@@ -252,8 +250,6 @@ static NSUInteger RNHostCountViews(UIView *view)
     return count;
 }
 
-// Diagnostics, only with rnhost.log.on: the memory map at the first heartbeat (before the chat), when the chat first
-// has 100 views, and 36 heartbeats (3 minutes) after that.
 static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
 {
     static NSUInteger stage = 0;

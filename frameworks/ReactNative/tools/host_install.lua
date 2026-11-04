@@ -18,7 +18,6 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports"}
 
--- Imported modules export functions, not globals: the list is read through this function.
 function backports_libraries()
     return LIBRARIES
 end
@@ -48,8 +47,6 @@ function executable_name(bundle_id)
     return "RNHost-" .. app_name(bundle_id)
 end
 
--- A built app keeps the bundle id its copy was made with; staging it under another id would install it silently
--- under an id nobody asked for, so the mismatch is an error that names both ids.
 function bundle_identifier_error(built_id, bundle_id)
     if built_id == bundle_id then
         return nil

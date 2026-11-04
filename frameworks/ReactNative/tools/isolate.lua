@@ -55,9 +55,6 @@ function host_bundle_id(folder, given)
     return "org.revenant.rnhost." .. name
 end
 
--- Returns the candidate that is the install xmake reports for the recipe (key) if it carries every patch marker. The
--- cache keeps the installs of earlier recipes too, and one of those may carry the markers as well: only the key's own
--- install is the one the recipe builds, so another complete candidate is never picked.
 function patched_sources(candidates, read, key)
     for _, candidate in ipairs(candidates) do
         local complete = candidate == key
@@ -208,8 +205,6 @@ function install_react_native(folder, cache)
     return link_react_native(folder, io.readfile(installed):trim())
 end
 
--- Installs a revenant recipe into the private cache and returns its install directory: the on_config of the probe
--- reports the directory xmake installed the package into, so the recipe's own patches are the sources that build.
 function install_recipe(folder, cache, name, version)
     local probe = path.join(folder, "build", "pkg-probe-" .. name)
     os.mkdir(probe)
@@ -237,8 +232,6 @@ function install_recipe(folder, cache, name, version)
     return io.readfile(installed):trim()
 end
 
--- Links the react-native sources of the install the recipe resolved to (installdir, from the probe), which must carry
--- every patch marker.
 function link_react_native(folder, installdir)
     local sources = path.join(installdir, "src", "react-native")
     local found = patched_sources({sources}, function (file)
