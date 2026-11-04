@@ -24,6 +24,8 @@ package("swift-runtime")
         {name = "uikit", tag = "swift-5.2.5-RELEASE", commit = "71d85a7c28eed8f46241649a723ddf23989139c6",
          url = "https://github.com/swiftlang/swift.git",
          sparse = {"/stdlib/public/Darwin/UIKit/", "/stdlib/public/Darwin/QuartzCore/", "/stdlib/public/Darwin/CoreData/",
+                   "/stdlib/public/Darwin/CoreMedia/", "/stdlib/public/Darwin/Photos/", "/stdlib/public/Darwin/AVFoundation/",
+                   "/stdlib/public/Darwin/MediaPlayer/",
                    "/stdlib/public/SwiftShims/UIKitOverlayShims.h",
                    "/LICENSE.txt"}}
     }
@@ -470,8 +472,34 @@ package("swift-runtime")
                           {module_cache = quartzcore_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             local coremedia_cache = path.join(generated, "module-cache-coremedia")
             os.mkdir(coremedia_cache)
-            build_overlay("CoreMedia", {path.join(revenant_overlay, "CoreMedia", "CMTime.swift")}, {"-framework", "CoreMedia"}, nil,
-                          {module_cache = coremedia_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+            local lowered_cc = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}
+            local coremedia = path.join(uikit, "stdlib", "public", "Darwin", "CoreMedia")
+            build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
+                                        path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift")},
+                          {"-framework", "CoreMedia"}, nil, {module_cache = coremedia_cache, extra_flags = lowered_cc})
+            local photos_cache = path.join(generated, "module-cache-photos")
+            os.mkdir(photos_cache)
+            local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
+            build_overlay("Photos", {path.join(photos, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
+                          table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "Photos"}), nil,
+                          {module_cache = photos_cache, extra_flags = lowered_cc})
+            local avfoundation_cache = path.join(generated, "module-cache-avfoundation")
+            os.mkdir(avfoundation_cache)
+            local avfoundation = path.join(uikit, "stdlib", "public", "Darwin", "AVFoundation")
+            local avfoundation_nsvalue = expand(path.join(avfoundation, "NSValue.swift.gyb"), path.join(generated, "AVFoundation-NSValue.swift"))
+            build_overlay("AVFoundation", {avfoundation_nsvalue, path.join(avfoundation, "AVCaptureDevice.swift"),
+                                           path.join(avfoundation, "AVCapturePhotoOutput.swift"),
+                                           path.join(avfoundation, "AVCaptureSynchronizedDataCollection.swift"),
+                                           path.join(avfoundation, "AVCaptureVideoDataOutput.swift"),
+                                           path.join(avfoundation, "AVError.swift"), path.join(avfoundation, "AVMetadataObject.swift")},
+                          table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "AVFoundation"}), nil,
+                          {module_cache = avfoundation_cache, extra_flags = lowered_cc})
+            local mediaplayer_cache = path.join(generated, "module-cache-mediaplayer")
+            os.mkdir(mediaplayer_cache)
+            local mediaplayer = path.join(uikit, "stdlib", "public", "Darwin", "MediaPlayer")
+            build_overlay("MediaPlayer", {path.join(mediaplayer, "MPMusicPlayerPlayParameters.swift")},
+                          table.join(foundation_links, {"-framework", "MediaPlayer"}), nil,
+                          {module_cache = mediaplayer_cache, extra_flags = lowered_cc})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),

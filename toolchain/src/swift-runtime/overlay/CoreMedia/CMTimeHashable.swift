@@ -1,20 +1,6 @@
 @_exported import CoreMedia
 
-extension CMTime {
-    public init(seconds: Float64, preferredTimescale: CMTimeScale) {
-        self = CMTimeMakeWithSeconds(seconds, preferredTimescale: preferredTimescale)
-    }
-}
-
-extension CMTime: Equatable, Comparable, Hashable {
-    public static func == (time1: CMTime, time2: CMTime) -> Bool {
-        CMTimeCompare(time1, time2) == 0
-    }
-
-    public static func < (time1: CMTime, time2: CMTime) -> Bool {
-        CMTimeCompare(time1, time2) < 0
-    }
-
+extension CMTime: Hashable {
     public func hash(into hasher: inout Hasher) {
         guard flags.contains(.valid), flags.intersection(.impliedValueFlagsMask).isEmpty, timescale != 0 else {
             hasher.combine(0)
@@ -34,11 +20,7 @@ extension CMTime: Equatable, Comparable, Hashable {
     }
 }
 
-extension CMTimeRange: Equatable, Hashable {
-    public static func == (range1: CMTimeRange, range2: CMTimeRange) -> Bool {
-        CMTimeRangeEqual(range1, range2)
-    }
-
+extension CMTimeRange: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(start)
         hasher.combine(duration)
