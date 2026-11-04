@@ -1229,6 +1229,22 @@ local function find_outside_comments(text, pattern, position, spans)
     end
 end
 
+local function inline_definition(text, start, hit, stop, spans)
+    local _, specifier_stop = text:find("^%s*static%s+inline", start)
+    if not specifier_stop or text:find("^%s*%(%(", hit.position + #hit.word) then
+        return nil
+    end
+    local open = find_outside_comments(text, "{", hit.position, spans)
+    if not open or open > stop then
+        return nil
+    end
+    local _, close = text:find("%b{}", open)
+    if not close then
+        return nil
+    end
+    return text:find("static", start, true), specifier_stop, open, close
+end
+
 local function lowering_of(text, implemented, declarations)
     local words, hits = {}, {}
     local spans = comment_spans(text)
@@ -1380,8 +1396,16 @@ local function lowering_of(text, implemented, declarations)
             local start = statement_start(text, hit.position, true)
             local stop = statement_end(text, hit.position)
             local segment = start and text:sub(start, stop) or ""
-            if start and not segment:find("\n%s*#") and not segment:find("{", 1, true) then
-                lower(start, stop)
+            if start and not segment:find("\n%s*#") then
+                local specifier_start, specifier_stop, open, close = inline_definition(text, start, hit, stop, spans)
+                if specifier_start then
+                    table.insert(ranges, {start = specifier_start, stop = specifier_stop, remove = true})
+                    lower(specifier_stop + 1, open - 1)
+                    table.insert(ranges, {start = open, stop = open - 1, before = ";"})
+                    table.insert(ranges, {start = open, stop = close, remove = true})
+                elseif not segment:find("{", 1, true) then
+                    lower(start, stop)
+                end
             end
         end
     end
