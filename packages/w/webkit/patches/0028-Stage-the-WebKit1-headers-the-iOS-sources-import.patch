@@ -1,0 +1,100 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 30 Oct 2026 11:22:45 +0100
+Subject: [PATCH] Stage the WebKit1 headers the iOS sources import
+
+The iOS WebKitLegacy list left out the mac and iOS headers that compiled sources import as <WebKitLegacy/X.h>: seventeen were excluded to match the Xcode PrivateHeaders set, and six iOS headers were in no list. The units that import them are compiled for iOS, so the framework layout has to stage them. config.h lives in WebCore, so WebCore is on the include path, and the flat WebCore private directory is too, because WebCore's WAK headers include PlatformExportMacros.h by its quoted name.
+---
+--- a/Source/WebKitLegacy/PlatformCocoa.cmake
++++ b/Source/WebKitLegacy/PlatformCocoa.cmake
+@@ -40,6 +40,8 @@
+     "${CMAKE_SOURCE_DIR}/Source/ThirdParty/libwebrtc/Source"
+     "${CMAKE_SOURCE_DIR}/Source/ThirdParty/libwebrtc/Source/third_party/abseil-cpp"
+     "${CMAKE_SOURCE_DIR}/Source/ThirdParty/libwebrtc/Source/webrtc"
++    "${WEBCORE_DIR}"
++    "${WebCore_PRIVATE_HEADERS_DIR}"
+ )
+ 
+ list(APPEND WebKitLegacy_UNIFIED_SOURCE_LIST_FILES
+@@ -698,6 +700,12 @@
+     mac/WebView/WebViewInternal.h
+     mac/WebView/WebViewPrivate.h
+     mac/WebView/WebWindowAnimation.h
++    ios/Misc/WebNSStringExtrasIOS.h
++    ios/Misc/WebUIKitSupport.h
++    ios/WebCoreSupport/WebFrameIOS.h
++    ios/WebCoreSupport/WebVisiblePosition.h
++    ios/WebView/WebPDFViewIOS.h
++    ios/WebView/WebUIKitDelegate.h
+ )
+ 
+ # Add these to the project header map.
+@@ -973,9 +981,7 @@
+     WebApplicationCacheInternal.h
+     WebApplicationCacheQuotaManager.h
+     WebArchiveInternal.h
+-    WebAuthenticationPanel.h
+     WebBackForwardListInternal.h
+-    WebBasePluginPackage.h
+     WebChromeClient.h
+     WebClipView.h
+     WebContextMenuClient.h
+@@ -984,12 +990,9 @@
+     WebDatabaseManagerClient.h
+     WebDatabaseManagerInternal.h
+     WebDefaultContextMenuDelegate.h
+-    WebDefaultEditingDelegate.h
+-    WebDefaultUIDelegate.h
+     WebDelegateImplementationCaching.h
+     WebDeviceOrientationInternal.h
+     WebDeviceOrientationProviderMockInternal.h
+-    WebDocumentInternal.h
+     WebDocumentLoaderMac.h
+     WebDragClient.h
+     WebDynamicScrollBarsView.h
+@@ -999,7 +1002,6 @@
+     WebFrameInternal.h
+     WebFrameLoaderClient.h
+     WebFrameNetworkingContext.h
+-    WebFrameViewInternal.h
+     WebFullScreenController.h
+     WebGeolocationClient.h
+     WebGeolocationPositionInternal.h
+@@ -1014,37 +1016,26 @@
+     WebInspectorFrontend.h
+     WebJavaScriptTextInputPanel.h
+     WebKitFullScreenListener.h
+-    WebKitLogging.h
+     WebKitStatisticsPrivate.h
+     WebKitVersionChecks.h
+     WebLocalizableStringsInternal.h
+     WebMediaPlaybackTargetPicker.h
+-    WebNSControlExtras.h
+-    WebNSDataExtras.h
+     WebNSDictionaryExtras.h
+-    WebNSEventExtras.h
+-    WebNSImageExtras.h
+     WebNSObjectExtras.h
+-    WebNSPasteboardExtras.h
+     WebNSPrintOperationExtras.h
+     WebNSURLRequestExtras.h
+-    WebNSWindowExtras.h
+     WebNodeHighlight.h
+     WebNodeHighlightView.h
+     WebNodeHighlighter.h
+     WebNotificationClient.h
+     WebNotificationInternal.h
+     WebOpenPanelResultListener.h
+-    WebPDFDocumentExtras.h
+     WebPDFRepresentation.h
+     WebPDFView.h
+-    WebPanelAuthenticationHandler.h
+     WebPaymentCoordinatorClient.h
+     WebPlatformStrategies.h
+-    WebPluginContainerCheck.h
+     WebPluginController.h
+     WebPluginInfoProvider.h
+-    WebPluginPackage.h
+     WebProgressTrackerClient.h
+     WebResourceInternal.h
+     WebScriptDebugger.h

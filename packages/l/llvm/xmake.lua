@@ -10,6 +10,7 @@ package("llvm")
     add_deps("cmake", "ninja", {kind = "binary"})
 
     add_configs("libraries", {description = "Also install what a program built on LLVM and clang needs: libLLVM and libclang-cpp as shared libraries, their headers, llvm-config, and the llvm-extract, llvm-split and llvm-dis tools.", default = false, type = "boolean"})
+    add_configs("recipe", {description = "The digest of this recipe, so a changed install is a different llvm.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     local patches = {"clang-emulated-tls-without-dyld.patch", "builtins-leave-emutls-to-the-runtime.patch", "clang-atomic-libcalls-from-the-runtime.patch",
                      "configure-and-build-without-python.patch"}
@@ -61,10 +62,10 @@ package("llvm")
                            "-DLLVM_ENABLE_LIBXML2=OFF", "-DLLVM_ENABLE_TERMINFO=OFF",
                            "-DCLANG_ENABLE_STATIC_ANALYZER=OFF", "-DCLANG_ENABLE_OBJC_REWRITER=OFF",
                            "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", "-DLLVM_PARALLEL_LINK_JOBS=" .. parallel.link_jobs()}
-        local targets = {"install-clang", "install-clang-resource-headers", "install-LTO"}
+        local targets = {"install-clang", "install-clang-resource-headers", "install-LTO", "install-llvm-libtool-darwin"}
         if package:config("libraries") then
             table.join2(configure, {"-DLLVM_BUILD_LLVM_DYLIB=ON", "-DLLVM_LINK_LLVM_DYLIB=ON",
-                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis;llvm-nm;llvm-objdump;LTO"})
+                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis;llvm-nm;llvm-objdump;LTO;llvm-libtool-darwin"})
             targets = {"install-distribution"}
         end
         os.vrunv("cmake", configure)
@@ -110,6 +111,7 @@ package("llvm")
         assert(not os.iorunv("xcrun", {"nm", "-g", archive}):find("___emutls_get_address", 1, true),
                "the iOS builtins carry emutls, which hands every image its own copy")
         assert(os.isfile(path.join(package:installdir("lib"), "libLTO.dylib")), "the llvm install has no libLTO.dylib, which an -flto link loads for its bitcode objects")
+        assert(os.isfile(path.join(package:installdir("bin"), "llvm-libtool-darwin")), "the llvm install has no llvm-libtool-darwin, which the webkit-engine archives are made with")
         local probe = os.tmpfile() .. ".c"
         io.writefile(probe, "_Thread_local int probe;\n")
         local clang = path.join(package:installdir("bin"), "clang")

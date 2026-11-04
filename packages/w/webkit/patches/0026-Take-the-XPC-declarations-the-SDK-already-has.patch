@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 29 Oct 2026 13:00:00 +0100
+Subject: [PATCH] Take the XPC declarations the SDK already has
+
+The iOS 26.2 SDK declares XPC in <xpc/xpc.h>, and <os/trace.h> includes it whenever the
+SDK has it. USE(OS_LOG) is on for every Cocoa port and makes WTF/Assertions.h include
+<os/log.h>, so the SDK's XPC declarations are in the translation unit of every WTF file. The
+fallback typedefs and enumerators in XPCSPI.h then redeclare them with different types and
+fail the build: Threading.cpp reported xpc_connection_t, xpc_endpoint_t and xpc_activity_t, and
+the activity states.
+
+The header now includes the SDK's <xpc/xpc.h> when the SDK has it, and keeps its fallback for
+an SDK without it. HAVE_XPC_API is unchanged: the fallback still stands in for XPC on a build that
+does not use the XPC API, so no XPC function is referenced by this change. A binary built for iOS 6
+still must not import any xpc_* symbol; the import check on the stage proves it.
+---
+ Source/WTF/wtf/spi/darwin/XPCSPI.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Source/WTF/wtf/spi/darwin/XPCSPI.h b/Source/WTF/wtf/spi/darwin/XPCSPI.h
+index 4bb236e..4070bcc 100644
+--- a/Source/WTF/wtf/spi/darwin/XPCSPI.h
++++ b/Source/WTF/wtf/spi/darwin/XPCSPI.h
+@@ -33,7 +33,9 @@
+ #include <os/object.h>
+ #include <wtf/Platform.h>
+ 
+-#if HAVE(XPC_API) || USE(APPLE_INTERNAL_SDK)
++// The SDK's own <xpc/xpc.h> is in the translation unit whenever a later SDK's <os/trace.h> is (USE(OS_LOG) pulls it
++// in through <os/log.h>), and then its declarations must stand in place of these.
++#if HAVE(XPC_API) || USE(APPLE_INTERNAL_SDK) || __has_include(<xpc/xpc.h>)
+ #include <xpc/xpc.h>
+ #else
+ 

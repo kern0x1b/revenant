@@ -15,7 +15,7 @@ package("webkit-device-tools")
     end
     add_configs("sources", {description = "The digest of this recipe and the tools' sources and entitlements, so a changed probe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
-    add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
+    add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid", host = true})
 
     local TOOLS = {"revmem", "revpid", "revtouch", "raise-memory-limit"}
 
