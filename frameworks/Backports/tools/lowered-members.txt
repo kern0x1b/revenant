@@ -1965,6 +1965,7 @@ class RevenantSCNSoundEngine
 class RevenantSCNStream
 class RevenantSCNTexture
 class RevenantSKWeakReference
+class RevenantSSLContext
 class RevenantSafariPage
 class RevenantSafeAreaChanges11
 class RevenantSameSiteInstaller
@@ -4361,8 +4362,6 @@ function CMTaggedBufferGroupGetNumberOfMatchesForTagCollection
 function CMTaggedBufferGroupGetTagCollectionAtIndex
 function CMTaggedBufferGroupGetTypeID
 function CMTimeMultiplyByRatio
-function CMTimebaseCopySource
-function CMTimebaseCreateWithSourceClock
 function CMVideoFormatDescriptionCreateFromH264ParameterSets
 function CMVideoFormatDescriptionGetH264ParameterSetAtIndex
 function CMVideoFormatDescriptionGetHEVCParameterSetAtIndex
@@ -4797,6 +4796,7 @@ function RevenantSignpostMetrics
 function RevenantSpotlightDefaultItems
 function RevenantSyncRegister
 function RevenantTLSEngineClose
+function RevenantTLSEngineCopyPeerTrust
 function RevenantTLSEngineCreate
 function RevenantTLSEngineFree
 function RevenantTLSEngineHandshake
@@ -4863,6 +4863,24 @@ function SRAbsoluteTimeFromCFAbsoluteTime
 function SRAbsoluteTimeFromContinuousTime
 function SRAbsoluteTimeGetCurrent
 function SRAbsoluteTimeToCFAbsoluteTime
+function SSLClose
+function SSLCopyPeerTrust
+function SSLCreateContext
+function SSLDisposeContext
+function SSLGetConnection
+function SSLGetNegotiatedCipher
+function SSLGetNegotiatedProtocolVersion
+function SSLGetPeerDomainName
+function SSLGetPeerDomainNameLength
+function SSLHandshake
+function SSLRead
+function SSLSetConnection
+function SSLSetEnabledCiphers
+function SSLSetPeerDomainName
+function SSLSetProtocolVersionMax
+function SSLSetProtocolVersionMin
+function SSLSetSessionOption
+function SSLWrite
 function SecAccessControlCreateWithFlags
 function SecAccessControlGetTypeID
 function SecAddSharedWebCredential
@@ -27861,6 +27879,7 @@ member RevenantSCNTexture -hasAlpha
 member RevenantSCNTexture -lastFrame
 member RevenantSCNTexture -name
 member RevenantSKWeakReference -object
+member RevenantSSLContext -dealloc
 member RevenantSafariPage -callback
 member RevenantSafariPage -callbackMatcher
 member RevenantSafariPage -dealloc

@@ -27,8 +27,7 @@ The emulator is a member of revenant and builds from the top of revenant:
 
 `--component=emulator` configures the emulator and its host packages alone, about two seconds on a warm store, and
 the repository checks; a configure without it also configures every other component, which a host build of the
-emulator does not need. The first line is what CI runs ([the emulator workflow](../ci.md)).
-
+emulator does not need.
 The options are `--emulator_vulkan` (on), `--emulator_sdl`, `--emulator_ffmpeg`, `--emulator_lto` (on, release only)
 and `--emulator_dynarmic_test_emit_failure`, given to `./xmakew f -P .`; `./xmakew f -P . --menu` lists them. The guest probe
 in `tests/guest/dns-probe` is built when `--emulator_guest_rootfs` and `--emulator_armv6_ld` name a root filesystem and an

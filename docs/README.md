@@ -17,6 +17,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
+| [The Network framework surface Telegram uses](explanation/backports/network-framework-surface.md) | the Network framework members Telegram 13.0.0 calls and where the backport stands |
+| [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram's use of Photos and where the backport stands |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
