@@ -481,7 +481,7 @@ package("swift-runtime")
             os.mkdir(photos_cache)
             local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
             build_overlay("Photos", {path.join(photos, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
-                          table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "Photos"}), nil,
+                          table.join(foundation_links, {"-lswiftCoreMedia", "-Xlinker", "-weak_framework", "-Xlinker", "Photos"}), nil,
                           {module_cache = photos_cache, extra_flags = lowered_cc})
             local avfoundation_cache = path.join(generated, "module-cache-avfoundation")
             os.mkdir(avfoundation_cache)
@@ -489,9 +489,8 @@ package("swift-runtime")
             local avfoundation_nsvalue = expand(path.join(avfoundation, "NSValue.swift.gyb"), path.join(generated, "AVFoundation-NSValue.swift"))
             build_overlay("AVFoundation", {avfoundation_nsvalue, path.join(avfoundation, "AVCaptureDevice.swift"),
                                            path.join(avfoundation, "AVCapturePhotoOutput.swift"),
-                                           path.join(avfoundation, "AVCaptureSynchronizedDataCollection.swift"),
                                            path.join(avfoundation, "AVCaptureVideoDataOutput.swift"),
-                                           path.join(avfoundation, "AVError.swift"), path.join(avfoundation, "AVMetadataObject.swift")},
+                                           path.join(avfoundation, "AVMetadataObject.swift")},
                           table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "AVFoundation"}), nil,
                           {module_cache = avfoundation_cache, extra_flags = lowered_cc})
             local mediaplayer_cache = path.join(generated, "module-cache-mediaplayer")

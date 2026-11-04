@@ -52,7 +52,6 @@ GUARDS = {
         ["_NSURLUbiquitousItemContainerDisplayNameKey"] = "stdlib/public/Darwin/Foundation/URL.swift:464 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_NSURLUbiquitousItemDownloadRequestedKey"] = "stdlib/public/Darwin/Foundation/URL.swift:460 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_NSURLUbiquitousItemDownloadingErrorKey"] = "patch packages/s/swift-runtime/patches/overlays/the-overlay-of-foundation-asks-for-ios-7-where-it-reaches-ios-7.patch:275",
-        ["_NSURLUbiquitousItemDownloadingStatusKey"] = "toolchain/modules/apple/lowered.lua, URLResourceValues.ubiquitousItemDownloadingStatus (its reference sits in the #available(iOS 7.0) branch; NSURL.h keeps the symbol at iOS 7.0, so it binds weakly)",
         ["_NSURLUbiquitousItemIsSharedKey"] = "stdlib/public/Darwin/Foundation/URL.swift:469 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_NSURLUbiquitousItemUploadingErrorKey"] = "patch packages/s/swift-runtime/patches/overlays/the-overlay-of-foundation-asks-for-ios-7-where-it-reaches-ios-7.patch:279",
         ["_NSURLUbiquitousSharedItemCurrentUserPermissionsKey"] = "stdlib/public/Darwin/Foundation/URL.swift:477 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
@@ -76,6 +75,14 @@ GUARDS = {
         ["__CFURLComponentsGetURLQueryAllowedCharacterSet"] = "stdlib/public/Darwin/Foundation/CharacterSet.swift:559 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["__CFURLComponentsGetURLUserAllowedCharacterSet"] = "stdlib/public/Darwin/Foundation/CharacterSet.swift:523 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_OBJC_CLASS_$_NSUnitConverterLinear"] = "stdlib/public/Darwin/Foundation/Measurement.swift:302,327-352 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE; the Codable extension of Measurement is iOS 10.0 and newer at :302; absent from the iOS 6.0 and 6.1.3 dyld caches)",
+    },
+    ["libswiftMediaPlayer.dylib"] = {
+        ["_OBJC_CLASS_$_MPMusicPlayerPlayParameters"] = "stdlib/public/Darwin/MediaPlayer/MPMusicPlayerPlayParameters.swift:16 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE; the Codable extension is gated by the availability attribute at :16 and reaches the class only through an instance of it, and the class is declared with a newer availability than the deployment target, so its reference is weak and no instance exists where the class is absent)",
+    },
+    ["libswiftPhotos.dylib"] = {
+        ["_OBJC_CLASS_$_PHFetchResult"] = "stdlib/public/Darwin/Photos/PHChange.swift:18-31 and PHProjectChangeRequest.swift:25 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE; the change-details methods are gated by the availability attribute at PHChange.swift:18 and the removal method is reached only through a PHProjectChangeRequest, both of which exist only where the Photos framework does; that framework is weak-linked in packages/s/swift-runtime/xmake.lua)",
+        ["_OBJC_CLASS_$_PHFetchResultChangeDetails"] = "stdlib/public/Darwin/Photos/PHChange.swift:18-31 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE; the change-details method is gated by the availability attribute at :18 and reached only through a PHChange, which exists only where the Photos framework does; that framework is weak-linked in packages/s/swift-runtime/xmake.lua)",
+        ["_OBJC_CLASS_$_PHObjectChangeDetails"] = "stdlib/public/Darwin/Photos/PHChange.swift:18-23 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE; the object change-details method is gated by the availability attribute at :18 and reached only through a PHChange, which exists only where the Photos framework does; that framework is weak-linked in packages/s/swift-runtime/xmake.lua)",
     },
     ["libswiftUIKit.dylib"] = {
         ["_NSURLThumbnailDictionaryKey"] = "stdlib/public/Darwin/UIKit/UIKit_FoundationExtensions.swift.gyb:82 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
