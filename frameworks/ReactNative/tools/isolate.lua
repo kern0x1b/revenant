@@ -55,10 +55,12 @@ function host_bundle_id(folder, given)
     return "org.revenant.rnhost." .. name
 end
 
-function patched_sources(candidates, read)
-    local found
+-- Returns the candidate that is the install xmake reports for the recipe (key) if it carries every patch marker. The
+-- cache keeps the installs of earlier recipes too, and one of those may carry the markers as well: only the key's own
+-- install is the one the recipe builds, so another complete candidate is never picked.
+function patched_sources(candidates, read, key)
     for _, candidate in ipairs(candidates) do
-        local complete = true
+        local complete = candidate == key
         for _, marker in ipairs(PATCH_MARKERS) do
             local text = read(path.join(candidate, marker[1]))
             if not (text and text:find(marker[2], 1, true)) then
@@ -66,10 +68,10 @@ function patched_sources(candidates, read)
             end
         end
         if complete then
-            found = candidate
+            return candidate
         end
     end
-    return found
+    return nil
 end
 
 function build_environment(options)
@@ -193,9 +195,17 @@ function install_react_native(folder, cache)
         'add_requires("revenant@react-native 0.86.3", {alias = "react-native"})',
         'target("t")',
         '    set_kind("phony")',
-        '    add_packages("react-native")', ""}, "\n"))
+        '    add_packages("react-native")',
+        '    on_config(function (target)',
+        '        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("react-native"):installdir())',
+        '    end)', ""}, "\n"))
+    local installed = path.join(probe, "installdir.txt")
+    os.tryrm(installed)
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
-    return link_react_native(folder, cache)
+    if not os.isfile(installed) then
+        raise("react-native 0.86.3 is not installed from its recipe")
+    end
+    return link_react_native(folder, io.readfile(installed):trim())
 end
 
 -- Installs a revenant recipe into the private cache and returns its install directory: the on_config of the probe
@@ -227,20 +237,18 @@ function install_recipe(folder, cache, name, version)
     return io.readfile(installed):trim()
 end
 
-function link_react_native(folder, cache)
-    local candidates = os.files(path.join(cache, "xmake-global", ".xmake", "packages", "r", "react-native", "0.86.3", "*", "src", "react-native", "package.json"))
-    local roots = {}
-    for _, file in ipairs(candidates) do
-        table.insert(roots, path.directory(file))
-    end
-    local sources = patched_sources(roots, function (file)
+-- Links the react-native sources of the install the recipe resolved to (installdir, from the probe), which must carry
+-- every patch marker.
+function link_react_native(folder, installdir)
+    local sources = path.join(installdir, "src", "react-native")
+    local found = patched_sources({sources}, function (file)
         return os.isfile(file) and io.readfile(file) or nil
-    end)
-    if not sources then
-        raise("the react-native sources with all patches are not installed in %s", cache)
+    end, sources)
+    if not found then
+        raise("the react-native sources of %s do not carry every patch", installdir)
     end
-    os.vrunv("ln", {"-sfn", sources, path.join(folder, "build", "rn-src")})
-    return sources
+    os.vrunv("ln", {"-sfn", found, path.join(folder, "build", "rn-src")})
+    return found
 end
 
 function command_status(arguments, options)
@@ -277,7 +285,7 @@ function build(folder, cache, options)
         backports = options.backports or (os.isfile(ci_backports) and ci_backports or nil)
     })
     local log = options.log or path.join(folder, "build", "isolated.log")
-    link_react_native(folder, path.absolute(cache))
+    install_react_native(folder, path.absolute(cache))
     os.cd(folder)
     os.vrunv("sh", {"rn-spike/tools/patch-provider.sh"})
     local xmakew = path.join(checkout(), "xmakew")
