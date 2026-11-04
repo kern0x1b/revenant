@@ -296,6 +296,89 @@ NSDictionary<NSString *, NSString *> *RNHostConfig()
     }
 }
 
+// Diagnostics: audits the views under root for what hides them (hidden, transparent, empty or singular, on the view and
+// on its layer), the animations on the layers, the scroll views with their offsets, and the text views on screen.
++ (void)logViewAudit:(UIView *)root
+{
+    CGRect screen = root.bounds;
+    NSMutableArray<UIView *> *stack = [NSMutableArray arrayWithObject:root];
+    NSUInteger views = 0;
+    NSUInteger hidden = 0;
+    NSUInteger transparent = 0;
+    NSUInteger empty = 0;
+    NSUInteger singular = 0;
+    NSUInteger animated = 0;
+    NSUInteger texts = 0;
+    NSUInteger textsOnScreen = 0;
+    NSMutableArray<NSString *> *offenders = [NSMutableArray array];
+    NSMutableArray<NSString *> *scrolls = [NSMutableArray array];
+    NSMutableArray<NSString *> *animations = [NSMutableArray array];
+    NSMutableArray<NSString *> *visibleTexts = [NSMutableArray array];
+    while (stack.count > 0) {
+        UIView *view = stack.lastObject;
+        [stack removeLastObject];
+        [stack addObjectsFromArray:view.subviews];
+        views++;
+        CALayer *layer = view.layer;
+        CGRect frame = [view convertRect:view.bounds toView:root];
+        CGAffineTransform t = view.transform;
+        CATransform3D lt = layer.transform;
+        double determinant = t.a * t.d - t.b * t.c;
+        BOOL isHidden = view.hidden;
+        BOOL isTransparent = view.alpha <= 0 || layer.opacity <= 0;
+        BOOL isEmpty = view.bounds.size.width <= 0 || view.bounds.size.height <= 0;
+        BOOL isSingular = determinant == 0 || lt.m11 == 0 || lt.m22 == 0;
+        NSString *cls = NSStringFromClass([view class]);
+        if (isHidden) hidden++;
+        if (isTransparent) transparent++;
+        if (isEmpty) empty++;
+        if (isSingular) singular++;
+        if (layer.animationKeys.count > 0) {
+            animated++;
+            if (animations.count < 8) {
+                [animations addObject:[NSString stringWithFormat:@"%@ keys %@ layer opacity %.2f", cls,
+                                       [layer.animationKeys componentsJoinedByString:@","], layer.opacity]];
+            }
+        }
+        if ((isHidden || isTransparent || isEmpty || isSingular) && offenders.count < 15) {
+            [offenders addObject:[NSString stringWithFormat:@"%@ frame %@ bounds %@ hidden %d alpha %.2f layer opacity %.2f layer m11 %.3f m22 %.3f",
+                                  cls, NSStringFromCGRect(frame), NSStringFromCGRect(view.bounds), (int)isHidden, view.alpha,
+                                  layer.opacity, lt.m11, lt.m22]];
+        }
+        if ([view isKindOfClass:[UIScrollView class]] && scrolls.count < 8) {
+            UIScrollView *scroll = (UIScrollView *)view;
+            [scrolls addObject:[NSString stringWithFormat:@"%@ frame %@ offset %@ content %@ scrollEnabled %d hidden %d",
+                                cls, NSStringFromCGRect(frame), NSStringFromCGPoint(scroll.contentOffset),
+                                NSStringFromCGSize(scroll.contentSize), (int)scroll.scrollEnabled, (int)isHidden]];
+        }
+        if ([cls rangeOfString:@"Text"].location != NSNotFound || [cls rangeOfString:@"Label"].location != NSNotFound) {
+            texts++;
+            if (CGRectIntersectsRect(frame, screen)) {
+                textsOnScreen++;
+                if (visibleTexts.count < 8) {
+                    [visibleTexts addObject:[NSString stringWithFormat:@"%@ frame %@ alpha %.2f hidden %d", cls,
+                                             NSStringFromCGRect(frame), view.alpha, (int)isHidden]];
+                }
+            }
+        }
+    }
+    NSLog(@"rn-host: audit views %lu, hidden %lu, transparent %lu, empty %lu, singular %lu, animated %lu, text views %lu, on screen %lu, screen %@",
+          (unsigned long)views, (unsigned long)hidden, (unsigned long)transparent, (unsigned long)empty, (unsigned long)singular,
+          (unsigned long)animated, (unsigned long)texts, (unsigned long)textsOnScreen, NSStringFromCGRect(screen));
+    for (NSUInteger i = 0; i < offenders.count; i++) {
+        NSLog(@"rn-host: audit hidden %lu: %@", (unsigned long)(i + 1), offenders[i]);
+    }
+    for (NSString *line in scrolls) {
+        NSLog(@"rn-host: audit scroll %@", line);
+    }
+    for (NSString *line in animations) {
+        NSLog(@"rn-host: audit animation %@", line);
+    }
+    for (NSString *line in visibleTexts) {
+        NSLog(@"rn-host: audit text on screen %@", line);
+    }
+}
+
 + (void)logMemoryMap
 {
     std::vector<RNHostImageRange> images = RNHostImageRanges();

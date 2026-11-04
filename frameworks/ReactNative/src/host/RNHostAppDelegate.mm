@@ -272,6 +272,7 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
     if (dump) {
         [RNHostRuntime logMemoryMap];
         [RNHostRuntime logLayerCensus:root];
+        [RNHostRuntime logViewAudit:root];
     }
 }
 

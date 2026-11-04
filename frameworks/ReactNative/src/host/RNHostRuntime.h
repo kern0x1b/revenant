@@ -14,5 +14,6 @@ extern NSString *const RNHostErrorDomain;
 + (void)logClassProbes;
 + (void)logMemoryMap;
 + (void)logLayerCensus:(UIView *)root;
++ (void)logViewAudit:(UIView *)root;
 
 @end
