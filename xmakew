@@ -151,6 +151,11 @@ run_xmake() {
 
 case ${1:-} in
     f | build | rebuild | test | install | run | package | deb)
+        if [ -z "${REVENANT_BUDGET_HELD:-}" ]; then
+            status=0
+            "$prefix/bin/xmake" l -P "$root" "$root/tools/budget.lua" run --class normal --jobs 6 --min 2 -- "$root/xmakew" "$@" || status=$?
+            exit $status
+        fi
         "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" guard "$root" || exit 1
         status=0
         run_xmake "$@" || status=$?
