@@ -32,6 +32,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Carry a framework and order the Backports](guides/toolchain/frameworks-and-link-order.md) | a framework from a package in the bundle, and the Backports libraries before the Swift runtime in an application's link line |
 | [Run a port on an emulated device](guides/toolchain/emulate.md) | the emulator, for a port |
 | [Build a Rust crate for iOS 6](guides/toolchain/rust.md) | a Rust staticlib for armv7 on iOS 6.0, built by the `rust` rule |
+| [Build libsql for iOS 6](guides/toolchain/libsql.md) | the libsql package for armv7 iOS 6.0: its Rust build with the pinned nightly, the link checks and the test |
 | [Write a package](guides/toolchain/packages.md) | a package in the repository's package store |
 | [Swift C++ interoperability on iOS 6](guides/toolchain/swift-cxx-interop.md) | the armv7 iOS 6.0 interop mode against the bundled libc++, and the thread-local and std checks |
 | [Working on the toolchain](guides/toolchain/contributing.md) | the contributor guide |
@@ -49,6 +50,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Runtimes and backports](explanation/toolchain/runtimes.md) | why the runtimes and backports are built as they are |
 | [The os_log fallback](explanation/toolchain/os-log.md) | how a message prints without the Backports runtime: the buffer layout, the privacy rules, and what is still provisional |
 | [Rust on iOS 6](explanation/toolchain/rust.md) | the armv7 target, the pinned nightly, what iOS 6 lacks for std, and the 10.0 minimum in the objects |
+| [libsql on iOS 6](explanation/toolchain/libsql.md) | why libsql builds the way it does for armv7 iOS 6.0: its shims, its imports and its limits |
 | [Optimisation beyond flags](explanation/toolchain/optimisation.md) | the ranked candidates for the A5 that the flags do not reach: PGO, order files, LLVM codegen, launch cost |
 
 ## Emulator
